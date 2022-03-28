@@ -1,9 +1,9 @@
 struct A {
-  a : i32;
+  a : i32,
 };
 
 struct B {
-  b : i32;
+  b : i32,
 };
 
 fn f(a : A) -> B {

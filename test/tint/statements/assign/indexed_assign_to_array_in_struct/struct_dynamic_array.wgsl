@@ -1,13 +1,13 @@
 struct Uniforms {
-  i : u32;
+  i : u32,
 };
 
 struct InnerS {
-  v : i32;
+  v : i32,
 };
 
 struct OuterS {
-  a1 : array<InnerS>;
+  a1 : array<InnerS>,
 };
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;

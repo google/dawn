@@ -472,7 +472,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  gl_Position : vec4<f32>;
+  gl_Position : vec4<f32>,
 }
 
 @stage(vertex)
@@ -532,7 +532,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  gl_Position : vec4<f32>;
+  gl_Position : vec4<f32>,
 }
 
 @stage(vertex)
@@ -591,7 +591,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  gl_Position : vec4<f32>;
+  gl_Position : vec4<f32>,
 }
 
 @stage(vertex)
@@ -650,7 +650,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_2_1 : vec4<f32>;
+  x_2_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -708,7 +708,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_2_1 : vec4<f32>;
+  x_2_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -766,7 +766,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_2_1 : vec4<f32>;
+  x_2_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -802,7 +802,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_2_1 : vec4<f32>;
+  x_2_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -1402,9 +1402,9 @@ TEST_F(SpvModuleScopeVarParserTest,
   EXPECT_THAT(module_str, HasSubstr(R"(type Arr = @stride(4) array<u32, 2u>;
 
 struct S {
-  field0 : u32;
-  field1 : f32;
-  field2 : Arr;
+  field0 : u32,
+  field1 : f32,
+  field2 : Arr,
 }
 
 @group(0) @binding(0) var<storage, read_write> x_1 : S;
@@ -1434,7 +1434,7 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(module_str, HasSubstr(R"(struct S {
-  field0 : mat3x2<f32>;
+  field0 : mat3x2<f32>,
 }
 
 @group(0) @binding(0) var<storage, read_write> myvar : S;
@@ -1463,7 +1463,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Natural_Dropped) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(module_str, HasSubstr(R"(struct S {
-  field0 : mat3x2<f32>;
+  field0 : mat3x2<f32>,
 }
 
 @group(0) @binding(0) var<storage, read_write> myvar : S;
@@ -1493,7 +1493,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration) {
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   @stride(64) @internal(disable_validation__ignore_stride)
-  field0 : mat3x2<f32>;
+  field0 : mat3x2<f32>,
 }
 
 @group(0) @binding(0) var<storage, read_write> myvar : S;
@@ -1545,8 +1545,8 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(module_str, HasSubstr(R"(struct S {
-  field0 : f32;
-  field1 : f32;
+  field0 : f32,
+  field1 : f32,
 }
 
 @group(0) @binding(0) var<storage, read> x_1 : S;
@@ -1574,8 +1574,8 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_NotAllMembers) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(module_str, HasSubstr(R"(struct S {
-  field0 : f32;
-  field1 : f32;
+  field0 : f32,
+  field1 : f32,
 }
 
 @group(0) @binding(0) var<storage, read_write> x_1 : S;
@@ -1606,8 +1606,8 @@ TEST_F(
   EXPECT_TRUE(p->error().empty());
   const auto module_str = test::ToString(p->program());
   EXPECT_THAT(module_str, HasSubstr(R"(struct S {
-  field0 : f32;
-  field1 : f32;
+  field0 : f32,
+  field1 : f32,
 }
 
 @group(0) @binding(0) var<storage, read_write> x_1 : S;
@@ -2360,7 +2360,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(sample_mask)
-  x_1_1 : u32;
+  x_1_1 : u32,
 }
 
 @stage(fragment)
@@ -2397,7 +2397,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(sample_mask)
-  x_1_1 : u32;
+  x_1_1 : u32,
 }
 
 @stage(fragment)
@@ -2434,7 +2434,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(sample_mask)
-  x_1_1 : u32;
+  x_1_1 : u32,
 }
 
 @stage(fragment)
@@ -2470,7 +2470,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(sample_mask)
-  x_1_1 : u32;
+  x_1_1 : u32,
 }
 
 @stage(fragment)
@@ -2507,7 +2507,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(sample_mask)
-  x_1_1 : u32;
+  x_1_1 : u32,
 }
 
 @stage(fragment)
@@ -2544,7 +2544,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(sample_mask)
-  x_1_1 : u32;
+  x_1_1 : u32,
 }
 
 @stage(fragment)
@@ -2627,7 +2627,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(sample_mask)
-  x_1_1 : u32;
+  x_1_1 : u32,
 }
 
 @stage(fragment)
@@ -2685,7 +2685,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_4_1 : vec4<f32>;
+  x_4_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -2723,7 +2723,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_4_1 : vec4<f32>;
+  x_4_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -2760,7 +2760,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_4_1 : vec4<f32>;
+  x_4_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -2796,7 +2796,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_4_1 : vec4<f32>;
+  x_4_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -2834,7 +2834,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_4_1 : vec4<f32>;
+  x_4_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -2871,7 +2871,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_4_1 : vec4<f32>;
+  x_4_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -2956,7 +2956,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  position_1 : vec4<f32>;
+  position_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -2994,7 +2994,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  position_1 : vec4<f32>;
+  position_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -3031,7 +3031,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  position_1 : vec4<f32>;
+  position_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -3091,7 +3091,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  position_1 : vec4<f32>;
+  position_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -3129,7 +3129,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  position_1 : vec4<f32>;
+  position_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -3166,7 +3166,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  position_1 : vec4<f32>;
+  position_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -3728,9 +3728,9 @@ fn main_1() {
 
 struct main_out {
   @location(0) @interpolate(flat)
-  x_2_1 : u32;
+  x_2_1 : u32,
   @location(6) @interpolate(flat)
-  x_4_1 : u32;
+  x_4_1 : u32,
 }
 
 @stage(fragment)
@@ -3782,7 +3782,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_4_1 : vec4<f32>;
+  x_4_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -3832,7 +3832,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_4_1 : vec4<f32>;
+  x_4_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -3958,7 +3958,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(sample_mask)
-  x_1_1 : u32;
+  x_1_1 : u32,
 }
 
 @stage(fragment)
@@ -4004,7 +4004,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(sample_mask)
-  x_1_1 : u32;
+  x_1_1 : u32,
 }
 
 @stage(fragment)
@@ -4048,7 +4048,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(frag_depth)
-  x_1_1 : f32;
+  x_1_1 : f32,
 }
 
 @stage(fragment)
@@ -4082,7 +4082,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  gl_Position : vec4<f32>;
+  gl_Position : vec4<f32>,
 }
 
 @stage(vertex)
@@ -4152,7 +4152,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  gl_Position : vec4<f32>;
+  gl_Position : vec4<f32>,
 }
 
 @stage(vertex)
@@ -4209,7 +4209,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_2_1 : vec4<f32>;
+  x_2_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -4267,7 +4267,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_2_1 : vec4<f32>;
+  x_2_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -4320,8 +4320,8 @@ TEST_F(SpvModuleScopeVarParserTest, Input_FlattenStruct_LocOnVariable) {
 
   const auto got = test::ToString(p->program());
   const std::string expected = R"(struct Communicators {
-  alice : f32;
-  bob : vec4<f32>;
+  alice : f32,
+  bob : vec4<f32>,
 }
 
 var<private> x_1 : Communicators;
@@ -4334,7 +4334,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_2_1 : vec4<f32>;
+  x_2_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -4393,7 +4393,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_2_1 : vec4<f32>;
+  x_2_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -4454,13 +4454,13 @@ fn main_1() {
 
 struct main_out {
   @location(4)
-  x_1_1 : f32;
+  x_1_1 : f32,
   @location(5)
-  x_1_2 : f32;
+  x_1_2 : f32,
   @location(6)
-  x_1_3 : f32;
+  x_1_3 : f32,
   @builtin(position)
-  x_2_1 : vec4<f32>;
+  x_2_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -4515,11 +4515,11 @@ fn main_1() {
 
 struct main_out {
   @location(9)
-  x_1_1 : vec4<f32>;
+  x_1_1 : vec4<f32>,
   @location(10)
-  x_1_2 : vec4<f32>;
+  x_1_2 : vec4<f32>,
   @builtin(position)
-  x_2_1 : vec4<f32>;
+  x_2_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -4570,8 +4570,8 @@ TEST_F(SpvModuleScopeVarParserTest, Output_FlattenStruct_LocOnVariable) {
 
   const auto got = test::ToString(p->program());
   const std::string expected = R"(struct Communicators {
-  alice : f32;
-  bob : vec4<f32>;
+  alice : f32,
+  bob : vec4<f32>,
 }
 
 var<private> x_1 : Communicators;
@@ -4584,11 +4584,11 @@ fn main_1() {
 
 struct main_out {
   @location(9)
-  x_1_1 : f32;
+  x_1_1 : f32,
   @location(10)
-  x_1_2 : vec4<f32>;
+  x_1_2 : vec4<f32>,
   @builtin(position)
-  x_2_1 : vec4<f32>;
+  x_2_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -4643,8 +4643,8 @@ TEST_F(SpvModuleScopeVarParserTest, FlattenStruct_LocOnMembers) {
 
   const auto got = test::ToString(p->program());
   const std::string expected = R"(struct Communicators {
-  alice : f32;
-  bob : vec4<f32>;
+  alice : f32,
+  bob : vec4<f32>,
 }
 
 var<private> x_1 : Communicators;
@@ -4659,11 +4659,11 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_2_1 : vec4<f32>;
+  x_2_1 : vec4<f32>,
   @location(9)
-  x_3_1 : f32;
+  x_3_1 : f32,
   @location(11)
-  x_3_2 : vec4<f32>;
+  x_3_2 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -4743,7 +4743,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  x_10_1 : vec4<f32>;
+  x_10_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -4827,19 +4827,19 @@ fn main_1() {
 
 struct main_out {
   @location(1) @interpolate(flat)
-  x_1_1 : u32;
+  x_1_1 : u32,
   @location(2) @interpolate(flat)
-  x_2_1 : vec2<u32>;
+  x_2_1 : vec2<u32>,
   @location(3) @interpolate(flat)
-  x_3_1 : i32;
+  x_3_1 : i32,
   @location(4) @interpolate(flat)
-  x_4_1 : vec2<i32>;
+  x_4_1 : vec2<i32>,
   @location(5) @interpolate(flat)
-  x_5_1 : f32;
+  x_5_1 : f32,
   @location(6) @interpolate(flat)
-  x_6_1 : vec2<f32>;
+  x_6_1 : vec2<f32>,
   @builtin(position)
-  x_10_1 : vec4<f32>;
+  x_10_1 : vec4<f32>,
 }
 
 @stage(vertex)
@@ -4881,8 +4881,8 @@ TEST_F(SpvModuleScopeVarParserTest,
   const auto got = test::ToString(p->program());
   const std::string expected =
       R"(struct S {
-  field0 : f32;
-  field1 : f32;
+  field0 : f32,
+  field1 : f32,
 }
 
 var<private> x_1 : array<f32, 2u>;
@@ -5022,12 +5022,12 @@ TEST_F(SpvModuleScopeVarParserTest,
   const auto got = test::ToString(p->program());
   const std::string expected =
       R"(struct S {
-  field0 : f32;
-  field1 : f32;
-  field2 : f32;
-  field3 : f32;
-  field4 : f32;
-  field5 : f32;
+  field0 : f32,
+  field1 : f32,
+  field2 : f32,
+  field3 : f32,
+  field4 : f32,
+  field5 : f32,
 }
 
 var<private> x_1 : S;
@@ -5115,17 +5115,17 @@ fn main_1() {
 
 struct main_out {
   @location(1)
-  x_1_1 : f32;
+  x_1_1 : f32,
   @location(2) @interpolate(perspective, centroid)
-  x_2_1 : f32;
+  x_2_1 : f32,
   @location(3) @interpolate(perspective, sample)
-  x_3_1 : f32;
+  x_3_1 : f32,
   @location(4) @interpolate(linear)
-  x_4_1 : f32;
+  x_4_1 : f32,
   @location(5) @interpolate(linear, centroid)
-  x_5_1 : f32;
+  x_5_1 : f32,
   @location(6) @interpolate(linear, sample)
-  x_6_1 : f32;
+  x_6_1 : f32,
 }
 
 @stage(fragment)
@@ -5178,12 +5178,12 @@ TEST_F(SpvModuleScopeVarParserTest,
   const auto got = test::ToString(p->program());
   const std::string expected =
       R"(struct S {
-  field0 : f32;
-  field1 : f32;
-  field2 : f32;
-  field3 : f32;
-  field4 : f32;
-  field5 : f32;
+  field0 : f32,
+  field1 : f32,
+  field2 : f32,
+  field3 : f32,
+  field4 : f32,
+  field5 : f32,
 }
 
 var<private> x_1 : S;
@@ -5194,17 +5194,17 @@ fn main_1() {
 
 struct main_out {
   @location(1)
-  x_1_1 : f32;
+  x_1_1 : f32,
   @location(2) @interpolate(perspective, centroid)
-  x_1_2 : f32;
+  x_1_2 : f32,
   @location(3) @interpolate(perspective, sample)
-  x_1_3 : f32;
+  x_1_3 : f32,
   @location(4) @interpolate(linear)
-  x_1_4 : f32;
+  x_1_4 : f32,
   @location(5) @interpolate(linear, centroid)
-  x_1_5 : f32;
+  x_1_5 : f32,
   @location(6) @interpolate(linear, sample)
-  x_1_6 : f32;
+  x_1_6 : f32,
 }
 
 @stage(fragment)
@@ -5279,19 +5279,19 @@ fn main_1() {
 
 struct main_out {
   @location(1) @interpolate(flat)
-  x_1_1 : u32;
+  x_1_1 : u32,
   @location(2) @interpolate(flat)
-  x_2_1 : vec2<u32>;
+  x_2_1 : vec2<u32>,
   @location(3) @interpolate(flat)
-  x_3_1 : i32;
+  x_3_1 : i32,
   @location(4) @interpolate(flat)
-  x_4_1 : vec2<i32>;
+  x_4_1 : vec2<i32>,
   @location(5)
-  x_5_1 : f32;
+  x_5_1 : f32,
   @location(6)
-  x_6_1 : vec2<f32>;
+  x_6_1 : vec2<f32>,
   @builtin(position)
-  x_10_1 : vec4<f32>;
+  x_10_1 : vec4<f32>,
 }
 
 @stage(vertex)

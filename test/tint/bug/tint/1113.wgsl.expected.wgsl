@@ -1,45 +1,45 @@
 struct Uniforms {
-  numTriangles : u32;
-  gridSize : u32;
-  pad1 : u32;
-  pad2 : u32;
-  bbMin : vec3<f32>;
-  bbMax : vec3<f32>;
+  numTriangles : u32,
+  gridSize : u32,
+  pad1 : u32,
+  pad2 : u32,
+  bbMin : vec3<f32>,
+  bbMax : vec3<f32>,
 }
 
 struct Dbg {
-  offsetCounter : atomic<u32>;
-  pad0 : u32;
-  pad1 : u32;
-  pad2 : u32;
-  value0 : u32;
-  value1 : u32;
-  value2 : u32;
-  value3 : u32;
-  value_f32_0 : f32;
-  value_f32_1 : f32;
-  value_f32_2 : f32;
-  value_f32_3 : f32;
+  offsetCounter : atomic<u32>,
+  pad0 : u32,
+  pad1 : u32,
+  pad2 : u32,
+  value0 : u32,
+  value1 : u32,
+  value2 : u32,
+  value3 : u32,
+  value_f32_0 : f32,
+  value_f32_1 : f32,
+  value_f32_2 : f32,
+  value_f32_3 : f32,
 }
 
 struct F32s {
-  values : array<f32>;
+  values : array<f32>,
 }
 
 struct U32s {
-  values : array<u32>;
+  values : array<u32>,
 }
 
 struct I32s {
-  values : array<i32>;
+  values : array<i32>,
 }
 
 struct AU32s {
-  values : array<atomic<u32>>;
+  values : array<atomic<u32>>,
 }
 
 struct AI32s {
-  values : array<atomic<i32>>;
+  values : array<atomic<i32>>,
 }
 
 @binding(0) @group(0) var<uniform> uniforms : Uniforms;

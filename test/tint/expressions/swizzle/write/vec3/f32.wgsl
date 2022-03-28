@@ -1,5 +1,5 @@
 struct S {
-    v: vec3<f32>;
+    v: vec3<f32>,
 };
 
 var<private> P : S;

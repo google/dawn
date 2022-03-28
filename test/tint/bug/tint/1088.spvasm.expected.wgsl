@@ -2,18 +2,18 @@ type Arr = array<mat4x4<f32>, 2u>;
 
 struct strided_arr {
   @size(16)
-  el : f32;
+  el : f32,
 }
 
 type Arr_1 = array<strided_arr, 4u>;
 
 struct LeftOver {
-  worldViewProjection : mat4x4<f32>;
-  time : f32;
+  worldViewProjection : mat4x4<f32>,
+  time : f32,
   @size(12)
-  padding : u32;
-  test2 : Arr;
-  test : Arr_1;
+  padding : u32,
+  test2 : Arr,
+  test : Arr_1,
 }
 
 var<private> position : vec3<f32>;
@@ -55,9 +55,9 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  gl_Position : vec4<f32>;
+  gl_Position : vec4<f32>,
   @location(0)
-  vUV_1 : vec2<f32>;
+  vUV_1 : vec2<f32>,
 }
 
 @stage(vertex)

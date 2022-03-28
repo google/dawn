@@ -1,5 +1,5 @@
 struct S {
-  i : i32;
+  i : i32,
 }
 
 @binding(0) @group(0) var<storage, read_write> s : S;

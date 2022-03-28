@@ -1,60 +1,60 @@
 struct VertexInput {
   @location(0)
-  position : vec4<f32>;
+  position : vec4<f32>,
   @location(1)
-  normal : vec3<f32>;
+  normal : vec3<f32>,
   @location(2)
-  tangent : vec4<f32>;
+  tangent : vec4<f32>,
   @location(3)
-  texcoord : vec2<f32>;
+  texcoord : vec2<f32>,
   @location(6)
-  joints : vec4<u32>;
+  joints : vec4<u32>,
   @location(7)
-  weights : vec4<f32>;
+  weights : vec4<f32>,
   @location(8)
-  instance0 : vec4<f32>;
+  instance0 : vec4<f32>,
   @location(9)
-  instance1 : vec4<f32>;
+  instance1 : vec4<f32>,
   @location(10)
-  instance2 : vec4<f32>;
+  instance2 : vec4<f32>,
   @location(11)
-  instance3 : vec4<f32>;
+  instance3 : vec4<f32>,
   @location(12)
-  instanceColor : vec4<f32>;
+  instanceColor : vec4<f32>,
 }
 
 struct VertexOutput {
   @builtin(position)
-  position : vec4<f32>;
+  position : vec4<f32>,
   @location(0)
-  worldPos : vec3<f32>;
+  worldPos : vec3<f32>,
   @location(1)
-  view : vec3<f32>;
+  view : vec3<f32>,
   @location(2)
-  texcoord : vec2<f32>;
+  texcoord : vec2<f32>,
   @location(3)
-  texcoord2 : vec2<f32>;
+  texcoord2 : vec2<f32>,
   @location(4)
-  color : vec4<f32>;
+  color : vec4<f32>,
   @location(5)
-  instanceColor : vec4<f32>;
+  instanceColor : vec4<f32>,
   @location(6)
-  normal : vec3<f32>;
+  normal : vec3<f32>,
   @location(7)
-  tangent : vec3<f32>;
+  tangent : vec3<f32>,
   @location(8)
-  bitangent : vec3<f32>;
+  bitangent : vec3<f32>,
 }
 
 struct Camera {
-  projection : mat4x4<f32>;
-  inverseProjection : mat4x4<f32>;
-  view : mat4x4<f32>;
-  position : vec3<f32>;
-  time : f32;
-  outputSize : vec2<f32>;
-  zNear : f32;
-  zFar : f32;
+  projection : mat4x4<f32>,
+  inverseProjection : mat4x4<f32>,
+  view : mat4x4<f32>,
+  position : vec3<f32>,
+  time : f32,
+  outputSize : vec2<f32>,
+  zNear : f32,
+  zFar : f32,
 }
 
 @binding(0) @group(0) var<uniform> camera : Camera;
@@ -64,7 +64,7 @@ fn getInstanceMatrix(input : VertexInput) -> mat4x4<f32> {
 }
 
 struct Joints {
-  matrices : array<mat4x4<f32>>;
+  matrices : array<mat4x4<f32>>,
 }
 
 @binding(1) @group(0) var<storage, read> joint : Joints;

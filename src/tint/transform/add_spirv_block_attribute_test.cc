@@ -37,7 +37,7 @@ TEST_F(AddSpirvBlockAttributeTest, EmptyModule) {
 TEST_F(AddSpirvBlockAttributeTest, Noop_UsedForPrivateVar) {
   auto* src = R"(
 struct S {
-  f : f32;
+  f : f32,
 }
 
 var<private> p : S;
@@ -58,7 +58,7 @@ TEST_F(AddSpirvBlockAttributeTest, Noop_UsedForShaderIO) {
   auto* src = R"(
 struct S {
   @location(0)
-  f : f32;
+  f : f32,
 }
 
 @stage(fragment)
@@ -86,7 +86,7 @@ fn main() {
   auto* expect = R"(
 @internal(spirv_block)
 struct u_block {
-  inner : f32;
+  inner : f32,
 }
 
 @group(0) @binding(0) var<uniform> u : u_block;
@@ -115,7 +115,7 @@ fn main() {
   auto* expect = R"(
 @internal(spirv_block)
 struct u_block {
-  inner : array<vec4<f32>, 4u>;
+  inner : array<vec4<f32>, 4u>,
 }
 
 @group(0) @binding(0) var<uniform> u : u_block;
@@ -148,7 +148,7 @@ type Numbers = array<vec4<f32>, 4u>;
 
 @internal(spirv_block)
 struct u_block {
-  inner : array<vec4<f32>, 4u>;
+  inner : array<vec4<f32>, 4u>,
 }
 
 @group(0) @binding(0) var<uniform> u : u_block;
@@ -167,7 +167,7 @@ fn main() {
 TEST_F(AddSpirvBlockAttributeTest, BasicStruct) {
   auto* src = R"(
 struct S {
-  f : f32;
+  f : f32,
 };
 
 @group(0) @binding(0)
@@ -181,7 +181,7 @@ fn main() {
   auto* expect = R"(
 @internal(spirv_block)
 struct S {
-  f : f32;
+  f : f32,
 }
 
 @group(0) @binding(0) var<uniform> u : S;
@@ -200,11 +200,11 @@ fn main() {
 TEST_F(AddSpirvBlockAttributeTest, Nested_OuterBuffer_InnerNotBuffer) {
   auto* src = R"(
 struct Inner {
-  f : f32;
+  f : f32,
 };
 
 struct Outer {
-  i : Inner;
+  i : Inner,
 };
 
 @group(0) @binding(0)
@@ -217,12 +217,12 @@ fn main() {
 )";
   auto* expect = R"(
 struct Inner {
-  f : f32;
+  f : f32,
 }
 
 @internal(spirv_block)
 struct Outer {
-  i : Inner;
+  i : Inner,
 }
 
 @group(0) @binding(0) var<uniform> u : Outer;
@@ -241,11 +241,11 @@ fn main() {
 TEST_F(AddSpirvBlockAttributeTest, Nested_OuterBuffer_InnerBuffer) {
   auto* src = R"(
 struct Inner {
-  f : f32;
+  f : f32,
 };
 
 struct Outer {
-  i : Inner;
+  i : Inner,
 };
 
 @group(0) @binding(0)
@@ -262,19 +262,19 @@ fn main() {
 )";
   auto* expect = R"(
 struct Inner {
-  f : f32;
+  f : f32,
 }
 
 @internal(spirv_block)
 struct Outer {
-  i : Inner;
+  i : Inner,
 }
 
 @group(0) @binding(0) var<uniform> u0 : Outer;
 
 @internal(spirv_block)
 struct u1_block {
-  inner : Inner;
+  inner : Inner,
 }
 
 @group(0) @binding(1) var<uniform> u1 : u1_block;
@@ -294,11 +294,11 @@ fn main() {
 TEST_F(AddSpirvBlockAttributeTest, Nested_OuterNotBuffer_InnerBuffer) {
   auto* src = R"(
 struct Inner {
-  f : f32;
+  f : f32,
 };
 
 struct Outer {
-  i : Inner;
+  i : Inner,
 };
 
 var<private> p : Outer;
@@ -314,18 +314,18 @@ fn main() {
 )";
   auto* expect = R"(
 struct Inner {
-  f : f32;
+  f : f32,
 }
 
 struct Outer {
-  i : Inner;
+  i : Inner,
 }
 
 var<private> p : Outer;
 
 @internal(spirv_block)
 struct u_block {
-  inner : Inner;
+  inner : Inner,
 }
 
 @group(0) @binding(1) var<uniform> u : u_block;
@@ -345,11 +345,11 @@ fn main() {
 TEST_F(AddSpirvBlockAttributeTest, Nested_InnerUsedForMultipleBuffers) {
   auto* src = R"(
 struct Inner {
-  f : f32;
+  f : f32,
 };
 
 struct S {
-  i : Inner;
+  i : Inner,
 };
 
 @group(0) @binding(0)
@@ -370,19 +370,19 @@ fn main() {
 )";
   auto* expect = R"(
 struct Inner {
-  f : f32;
+  f : f32,
 }
 
 @internal(spirv_block)
 struct S {
-  i : Inner;
+  i : Inner,
 }
 
 @group(0) @binding(0) var<uniform> u0 : S;
 
 @internal(spirv_block)
 struct u1_block {
-  inner : Inner;
+  inner : Inner,
 }
 
 @group(0) @binding(1) var<uniform> u1 : u1_block;
@@ -405,7 +405,7 @@ fn main() {
 TEST_F(AddSpirvBlockAttributeTest, StructInArray) {
   auto* src = R"(
 struct S {
-  f : f32;
+  f : f32,
 };
 
 @group(0) @binding(0)
@@ -419,12 +419,12 @@ fn main() {
 )";
   auto* expect = R"(
 struct S {
-  f : f32;
+  f : f32,
 }
 
 @internal(spirv_block)
 struct u_block {
-  inner : S;
+  inner : S,
 }
 
 @group(0) @binding(0) var<uniform> u : u_block;
@@ -444,7 +444,7 @@ fn main() {
 TEST_F(AddSpirvBlockAttributeTest, StructInArray_MultipleBuffers) {
   auto* src = R"(
 struct S {
-  f : f32;
+  f : f32,
 };
 
 @group(0) @binding(0)
@@ -462,12 +462,12 @@ fn main() {
 )";
   auto* expect = R"(
 struct S {
-  f : f32;
+  f : f32,
 }
 
 @internal(spirv_block)
 struct u0_block {
-  inner : S;
+  inner : S,
 }
 
 @group(0) @binding(0) var<uniform> u0 : u0_block;
@@ -490,13 +490,13 @@ fn main() {
 TEST_F(AddSpirvBlockAttributeTest, Aliases_Nested_OuterBuffer_InnerBuffer) {
   auto* src = R"(
 struct Inner {
-  f : f32;
+  f : f32,
 };
 
 type MyInner = Inner;
 
 struct Outer {
-  i : MyInner;
+  i : MyInner,
 };
 
 type MyOuter = Outer;
@@ -515,14 +515,14 @@ fn main() {
 )";
   auto* expect = R"(
 struct Inner {
-  f : f32;
+  f : f32,
 }
 
 type MyInner = Inner;
 
 @internal(spirv_block)
 struct Outer {
-  i : MyInner;
+  i : MyInner,
 }
 
 type MyOuter = Outer;
@@ -531,7 +531,7 @@ type MyOuter = Outer;
 
 @internal(spirv_block)
 struct u1_block {
-  inner : Inner;
+  inner : Inner,
 }
 
 @group(0) @binding(1) var<uniform> u1 : u1_block;
@@ -568,11 +568,11 @@ var<uniform> u0 : MyOuter;
 type MyOuter = Outer;
 
 struct Outer {
-  i : MyInner;
+  i : MyInner,
 };
 
 struct Inner {
-  f : f32;
+  f : f32,
 };
 )";
   auto* expect = R"(
@@ -584,7 +584,7 @@ fn main() {
 
 @internal(spirv_block)
 struct u1_block {
-  inner : Inner;
+  inner : Inner,
 }
 
 @group(0) @binding(1) var<uniform> u1 : u1_block;
@@ -597,11 +597,11 @@ type MyOuter = Outer;
 
 @internal(spirv_block)
 struct Outer {
-  i : MyInner;
+  i : MyInner,
 }
 
 struct Inner {
-  f : f32;
+  f : f32,
 }
 )";
 

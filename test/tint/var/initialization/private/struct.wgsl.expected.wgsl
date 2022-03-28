@@ -1,6 +1,6 @@
 struct S {
-  a : i32;
-  b : f32;
+  a : i32,
+  b : f32,
 }
 
 var<private> v : S;

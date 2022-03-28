@@ -1,54 +1,54 @@
 struct Camera {
-  projection : mat4x4<f32>;
-  inverseProjection : mat4x4<f32>;
-  view : mat4x4<f32>;
-  position : vec3<f32>;
-  time : f32;
-  outputSize : vec2<f32>;
-  zNear : f32;
-  zFar : f32;
+  projection : mat4x4<f32>,
+  inverseProjection : mat4x4<f32>,
+  view : mat4x4<f32>,
+  position : vec3<f32>,
+  time : f32,
+  outputSize : vec2<f32>,
+  zNear : f32,
+  zFar : f32,
 }
 
 @group(0) @binding(0) var<uniform> camera : Camera;
 
 struct ClusterBounds {
-  minAABB : vec3<f32>;
-  maxAABB : vec3<f32>;
+  minAABB : vec3<f32>,
+  maxAABB : vec3<f32>,
 }
 
 struct Clusters {
-  bounds : array<ClusterBounds, 27648>;
+  bounds : array<ClusterBounds, 27648>,
 }
 
 @group(0) @binding(1) var<storage, read> clusters : Clusters;
 
 struct ClusterLights {
-  offset : u32;
-  count : u32;
+  offset : u32,
+  count : u32,
 }
 
 struct ClusterLightGroup {
-  offset : atomic<u32>;
-  lights : array<ClusterLights, 27648>;
-  indices : array<u32, 1769472>;
+  offset : atomic<u32>,
+  lights : array<ClusterLights, 27648>,
+  indices : array<u32, 1769472>,
 }
 
 @group(0) @binding(2) var<storage, read_write> clusterLights : ClusterLightGroup;
 
 struct Light {
-  position : vec3<f32>;
-  range : f32;
-  color : vec3<f32>;
-  intensity : f32;
+  position : vec3<f32>,
+  range : f32,
+  color : vec3<f32>,
+  intensity : f32,
 }
 
 struct GlobalLights {
-  ambient : vec3<f32>;
-  dirColor : vec3<f32>;
-  dirIntensity : f32;
-  dirDirection : vec3<f32>;
-  lightCount : u32;
-  lights : array<Light>;
+  ambient : vec3<f32>,
+  dirColor : vec3<f32>,
+  dirIntensity : f32,
+  dirDirection : vec3<f32>,
+  lightCount : u32,
+  lights : array<Light>,
 }
 
 @group(0) @binding(3) var<storage, read> globalLights : GlobalLights;

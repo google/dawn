@@ -387,7 +387,7 @@ fn bar(p : ptr<private, f32>) {
 TEST_F(ModuleScopeVarToEntryPointParamTest, Buffers_Basic) {
   auto* src = R"(
 struct S {
-  a : f32;
+  a : f32,
 };
 
 @group(0) @binding(0)
@@ -404,7 +404,7 @@ fn main() {
 
   auto* expect = R"(
 struct S {
-  a : f32;
+  a : f32,
 }
 
 @stage(compute) @workgroup_size(1)
@@ -431,7 +431,7 @@ fn main() {
 @group(0) @binding(1) var<storage> s : S;
 
 struct S {
-  a : f32;
+  a : f32,
 };
 
 )";
@@ -444,7 +444,7 @@ fn main(@group(0) @binding(0) @internal(disable_validation__entry_point_paramete
 }
 
 struct S {
-  a : f32;
+  a : f32,
 }
 )";
 
@@ -466,7 +466,7 @@ fn main() {
 
   auto* expect = R"(
 struct tint_symbol_1 {
-  arr : array<f32>;
+  arr : array<f32>,
 }
 
 @stage(compute) @workgroup_size(1)
@@ -493,7 +493,7 @@ var<storage> buffer : array<f32>;
 
   auto* expect = R"(
 struct tint_symbol_1 {
-  arr : array<f32>;
+  arr : array<f32>,
 }
 
 @stage(compute) @workgroup_size(1)
@@ -524,7 +524,7 @@ fn main() {
 
   auto* expect = R"(
 struct tint_symbol_2 {
-  arr : array<f32>;
+  arr : array<f32>,
 }
 
 fn foo(@internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol : ptr<storage, array<f32>>) {
@@ -559,7 +559,7 @@ fn foo() {
 
   auto* expect = R"(
 struct tint_symbol_1 {
-  arr : array<f32>;
+  arr : array<f32>,
 }
 
 @stage(compute) @workgroup_size(1)
@@ -592,7 +592,7 @@ fn main() {
 
   auto* expect = R"(
 struct tint_symbol_1 {
-  arr : array<f32>;
+  arr : array<f32>,
 }
 
 type myarray = array<f32>;
@@ -623,7 +623,7 @@ type myarray = array<f32>;
 
   auto* expect = R"(
 struct tint_symbol_1 {
-  arr : array<f32>;
+  arr : array<f32>,
 }
 
 @stage(compute) @workgroup_size(1)
@@ -642,7 +642,7 @@ type myarray = array<f32>;
 TEST_F(ModuleScopeVarToEntryPointParamTest, Buffer_ArrayOfStruct) {
   auto* src = R"(
 struct S {
-  f : f32;
+  f : f32,
 };
 
 @group(0) @binding(0)
@@ -656,11 +656,11 @@ fn main() {
 
   auto* expect = R"(
 struct S {
-  f : f32;
+  f : f32,
 }
 
 struct tint_symbol_1 {
-  arr : array<S>;
+  arr : array<S>,
 }
 
 @stage(compute) @workgroup_size(1)
@@ -684,17 +684,17 @@ fn main() {
 @group(0) @binding(0) var<storage> buffer : array<S>;
 
 struct S {
-  f : f32;
+  f : f32,
 };
 )";
 
   auto* expect = R"(
 struct S {
-  f : f32;
+  f : f32,
 }
 
 struct tint_symbol_1 {
-  arr : array<S>;
+  arr : array<S>,
 }
 
 @stage(compute) @workgroup_size(1)
@@ -711,7 +711,7 @@ fn main(@group(0) @binding(0) @internal(disable_validation__entry_point_paramete
 TEST_F(ModuleScopeVarToEntryPointParamTest, Buffers_FunctionCalls) {
   auto* src = R"(
 struct S {
-  a : f32;
+  a : f32,
 };
 
 @group(0) @binding(0)
@@ -742,7 +742,7 @@ fn main() {
 
   auto* expect = R"(
 struct S {
-  a : f32;
+  a : f32,
 }
 
 fn no_uses() {
@@ -794,7 +794,7 @@ fn bar(a : f32, b : f32) {
 }
 
 struct S {
-  a : f32;
+  a : f32,
 };
 
 @group(0) @binding(0)
@@ -825,7 +825,7 @@ fn bar(a : f32, b : f32, @internal(disable_validation__ignore_storage_class) @in
 }
 
 struct S {
-  a : f32;
+  a : f32,
 }
 )";
 
@@ -978,7 +978,7 @@ fn main() {
 
   auto* expect = R"(
 struct tint_symbol_2 {
-  m : mat2x2<f32>;
+  m : mat2x2<f32>,
 }
 
 @stage(compute) @workgroup_size(1)
@@ -996,10 +996,10 @@ fn main(@internal(disable_validation__entry_point_parameter) tint_symbol_1 : ptr
 TEST_F(ModuleScopeVarToEntryPointParamTest, NestedMatrix) {
   auto* src = R"(
 struct S1 {
-  m : mat2x2<f32>;
+  m : mat2x2<f32>,
 };
 struct S2 {
-  s : S1;
+  s : S1,
 };
 var<workgroup> m : array<S2, 4>;
 
@@ -1011,15 +1011,15 @@ fn main() {
 
   auto* expect = R"(
 struct S1 {
-  m : mat2x2<f32>;
+  m : mat2x2<f32>,
 }
 
 struct S2 {
-  s : S1;
+  s : S1,
 }
 
 struct tint_symbol_2 {
-  m : array<S2, 4u>;
+  m : array<S2, 4u>,
 }
 
 @stage(compute) @workgroup_size(1)
@@ -1039,7 +1039,7 @@ fn main(@internal(disable_validation__entry_point_parameter) tint_symbol_1 : ptr
 TEST_F(ModuleScopeVarToEntryPointParamTest, DuplicateThreadgroupArgumentTypes) {
   auto* src = R"(
 struct S {
-  m : mat2x2<f32>;
+  m : mat2x2<f32>,
 };
 
 var<workgroup> a : S;
@@ -1055,12 +1055,12 @@ fn main() {
 
   auto* expect = R"(
 struct S {
-  m : mat2x2<f32>;
+  m : mat2x2<f32>,
 }
 
 struct tint_symbol_3 {
-  a : S;
-  b : S;
+  a : S,
+  b : S,
 }
 
 @stage(compute) @workgroup_size(1)
@@ -1092,18 +1092,18 @@ var<workgroup> a : S;
 var<workgroup> b : S;
 
 struct S {
-  m : mat2x2<f32>;
+  m : mat2x2<f32>,
 };
 )";
 
   auto* expect = R"(
 struct S {
-  m : mat2x2<f32>;
+  m : mat2x2<f32>,
 }
 
 struct tint_symbol_3 {
-  a : S;
-  b : S;
+  a : S,
+  b : S,
 }
 
 @stage(compute) @workgroup_size(1)
@@ -1123,7 +1123,7 @@ fn main(@internal(disable_validation__entry_point_parameter) tint_symbol_1 : ptr
 TEST_F(ModuleScopeVarToEntryPointParamTest, UnusedVariables) {
   auto* src = R"(
 struct S {
-  a : f32;
+  a : f32,
 };
 
 var<private> p : f32;
@@ -1144,7 +1144,7 @@ fn main() {
 
   auto* expect = R"(
 struct S {
-  a : f32;
+  a : f32,
 }
 
 @stage(compute) @workgroup_size(1)

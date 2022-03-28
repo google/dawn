@@ -444,7 +444,7 @@ fn main() {
 TEST_F(PromoteSideEffectsToDeclTest, Binary_Arith_Builtins_WithSE) {
   auto* src = R"(
 struct SB {
-  a : atomic<i32>;
+  a : atomic<i32>,
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -457,7 +457,7 @@ fn f() {
 
   auto* expect = R"(
 struct SB {
-  a : atomic<i32>;
+  a : atomic<i32>,
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -478,7 +478,7 @@ fn f() {
 TEST_F(PromoteSideEffectsToDeclTest, Binary_Arith_Builtins_NoSEAndVar) {
   auto* src = R"(
 struct SB {
-  a : atomic<i32>;
+  a : atomic<i32>,
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -500,7 +500,7 @@ fn f() {
 TEST_F(PromoteSideEffectsToDeclTest, Binary_Arith_Builtins_NoSEAndSE) {
   auto* src = R"(
 struct SB {
-  a : atomic<i32>;
+  a : atomic<i32>,
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -517,7 +517,7 @@ fn f() {
 
   auto* expect = R"(
 struct SB {
-  a : atomic<i32>;
+  a : atomic<i32>,
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -728,7 +728,7 @@ TEST_F(PromoteSideEffectsToDeclTest, Binary_Arith_InMemberAccessor) {
   auto* src = R"(
 
 struct S {
-  v : i32;
+  v : i32,
 }
 
 fn a(i : i32) -> S {
@@ -743,7 +743,7 @@ fn f() {
 
   auto* expect = R"(
 struct S {
-  v : i32;
+  v : i32,
 }
 
 fn a(i : i32) -> S {
@@ -2002,7 +2002,7 @@ TEST_F(PromoteSideEffectsToDeclTest, Binary_Logical_InMemberAccessor) {
   auto* src = R"(
 
 struct S {
-  v : bool;
+  v : bool,
 }
 
 fn a(i : i32) -> S {
@@ -2017,7 +2017,7 @@ fn f() {
 
   auto* expect = R"(
 struct S {
-  v : bool;
+  v : bool,
 }
 
 fn a(i : i32) -> S {
@@ -2961,9 +2961,9 @@ fn a(i : i32) -> i32 {
 }
 
 struct S {
-  x : i32;
-  y : i32;
-  z : i32;
+  x : i32,
+  y : i32,
+  z : i32,
 }
 
 fn f() {
@@ -2977,9 +2977,9 @@ fn a(i : i32) -> i32 {
 }
 
 struct S {
-  x : i32;
-  y : i32;
-  z : i32;
+  x : i32,
+  y : i32,
+  z : i32,
 }
 
 fn f() {
@@ -3091,8 +3091,8 @@ fn f() {
 TEST_F(PromoteSideEffectsToDeclTest, MemberAccessor_Struct) {
   auto* src = R"(
 struct S {
-  x : i32;
-  y : i32;
+  x : i32,
+  y : i32,
 }
 
 fn a(i : i32) -> S {
@@ -3106,8 +3106,8 @@ fn f() {
 
   auto* expect = R"(
 struct S {
-  x : i32;
-  y : i32;
+  x : i32,
+  y : i32,
 }
 
 fn a(i : i32) -> S {
@@ -3130,9 +3130,9 @@ fn f() {
 TEST_F(PromoteSideEffectsToDeclTest, MemberAccessor_Struct_Mixed) {
   auto* src = R"(
 struct S {
-  x : i32;
-  y : i32;
-  arr : array<i32, 10>;
+  x : i32,
+  y : i32,
+  arr : array<i32, 10>,
 }
 
 fn a(i : i32) -> S {
@@ -3155,9 +3155,9 @@ fn f() {
 
   auto* expect = R"(
 struct S {
-  x : i32;
-  y : i32;
-  arr : array<i32, 10>;
+  x : i32,
+  y : i32,
+  arr : array<i32, 10>,
 }
 
 fn a(i : i32) -> S {

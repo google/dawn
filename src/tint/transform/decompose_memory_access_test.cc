@@ -31,7 +31,7 @@ TEST_F(DecomposeMemoryAccessTest, ShouldRunEmptyModule) {
 TEST_F(DecomposeMemoryAccessTest, ShouldRunStorageBuffer) {
   auto* src = R"(
 struct Buffer {
-  i : i32;
+  i : i32,
 };
 @group(0) @binding(0) var<storage, read_write> sb : Buffer;
 )";
@@ -42,7 +42,7 @@ struct Buffer {
 TEST_F(DecomposeMemoryAccessTest, ShouldRunUniformBuffer) {
   auto* src = R"(
 struct Buffer {
-  i : i32;
+  i : i32,
 };
 @group(0) @binding(0) var<uniform> ub : Buffer;
 )";
@@ -53,28 +53,28 @@ struct Buffer {
 TEST_F(DecomposeMemoryAccessTest, SB_BasicLoad) {
   auto* src = R"(
 struct SB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 };
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -108,28 +108,28 @@ fn main() {
 
   auto* expect = R"(
 struct SB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -277,28 +277,28 @@ fn main() {
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
 struct SB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 };
 )";
 
@@ -412,28 +412,28 @@ fn main() {
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
 struct SB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 }
 )";
 
@@ -445,28 +445,28 @@ struct SB {
 TEST_F(DecomposeMemoryAccessTest, UB_BasicLoad) {
   auto* src = R"(
 struct UB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 };
 
 @group(0) @binding(0) var<uniform> ub : UB;
@@ -500,28 +500,28 @@ fn main() {
 
   auto* expect = R"(
 struct UB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 }
 
 @group(0) @binding(0) var<uniform> ub : UB;
@@ -669,28 +669,28 @@ fn main() {
 @group(0) @binding(0) var<uniform> ub : UB;
 
 struct UB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 };
 )";
 
@@ -804,28 +804,28 @@ fn main() {
 @group(0) @binding(0) var<uniform> ub : UB;
 
 struct UB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 }
 )";
 
@@ -837,28 +837,28 @@ struct UB {
 TEST_F(DecomposeMemoryAccessTest, SB_BasicStore) {
   auto* src = R"(
 struct SB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 };
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -892,28 +892,28 @@ fn main() {
 
   auto* expect = R"(
 struct SB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -1078,28 +1078,28 @@ fn main() {
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
 struct SB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 };
 )";
 
@@ -1230,28 +1230,28 @@ fn main() {
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
 struct SB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 }
 )";
 
@@ -1263,28 +1263,28 @@ struct SB {
 TEST_F(DecomposeMemoryAccessTest, LoadStructure) {
   auto* src = R"(
 struct SB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 };
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -1297,28 +1297,28 @@ fn main() {
 
   auto* expect = R"(
 struct SB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -1428,28 +1428,28 @@ fn main() {
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
 struct SB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 };
 )";
 
@@ -1546,28 +1546,28 @@ fn main() {
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
 struct SB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 }
 )";
 
@@ -1579,28 +1579,28 @@ struct SB {
 TEST_F(DecomposeMemoryAccessTest, StoreStructure) {
   auto* src = R"(
 struct SB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 };
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -1613,28 +1613,28 @@ fn main() {
 
   auto* expect = R"(
 struct SB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -1782,28 +1782,28 @@ fn main() {
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
 struct SB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 };
 )";
 
@@ -1938,28 +1938,28 @@ fn main() {
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
 struct SB {
-  a : i32;
-  b : u32;
-  c : f32;
-  d : vec2<i32>;
-  e : vec2<u32>;
-  f : vec2<f32>;
-  g : vec3<i32>;
-  h : vec3<u32>;
-  i : vec3<f32>;
-  j : vec4<i32>;
-  k : vec4<u32>;
-  l : vec4<f32>;
-  m : mat2x2<f32>;
-  n : mat2x3<f32>;
-  o : mat2x4<f32>;
-  p : mat3x2<f32>;
-  q : mat3x3<f32>;
-  r : mat3x4<f32>;
-  s : mat4x2<f32>;
-  t : mat4x3<f32>;
-  u : mat4x4<f32>;
-  v : array<vec3<f32>, 2>;
+  a : i32,
+  b : u32,
+  c : f32,
+  d : vec2<i32>,
+  e : vec2<u32>,
+  f : vec2<f32>,
+  g : vec3<i32>,
+  h : vec3<u32>,
+  i : vec3<f32>,
+  j : vec4<i32>,
+  k : vec4<u32>,
+  l : vec4<f32>,
+  m : mat2x2<f32>,
+  n : mat2x3<f32>,
+  o : mat2x4<f32>,
+  p : mat3x2<f32>,
+  q : mat3x3<f32>,
+  r : mat3x4<f32>,
+  s : mat4x2<f32>,
+  t : mat4x3<f32>,
+  u : mat4x4<f32>,
+  v : array<vec3<f32>, 2>,
 }
 )";
 
@@ -1973,23 +1973,23 @@ TEST_F(DecomposeMemoryAccessTest, ComplexStaticAccessChain) {
 // sizeof(S1) == 32
 // alignof(S1) == 16
 struct S1 {
-  a : i32;
-  b : vec3<f32>;
-  c : i32;
+  a : i32,
+  b : vec3<f32>,
+  c : i32,
 };
 
 // sizeof(S2) == 116
 // alignof(S2) == 16
 struct S2 {
-  a : i32;
-  b : array<S1, 3>;
-  c : i32;
+  a : i32,
+  b : array<S1, 3>,
+  c : i32,
 };
 
 struct SB {
   @size(128)
-  a : i32;
-  b : array<S2>;
+  a : i32,
+  b : array<S2>,
 };
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -2009,21 +2009,21 @@ fn main() {
 
   auto* expect = R"(
 struct S1 {
-  a : i32;
-  b : vec3<f32>;
-  c : i32;
+  a : i32,
+  b : vec3<f32>,
+  c : i32,
 }
 
 struct S2 {
-  a : i32;
-  b : array<S1, 3>;
-  c : i32;
+  a : i32,
+  b : array<S1, 3>,
+  c : i32,
 }
 
 struct SB {
   @size(128)
-  a : i32;
-  b : array<S2>;
+  a : i32,
+  b : array<S2>,
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -2053,20 +2053,20 @@ fn main() {
 
 struct SB {
   @size(128)
-  a : i32;
-  b : array<S2>;
+  a : i32,
+  b : array<S2>,
 };
 
 struct S2 {
-  a : i32;
-  b : array<S1, 3>;
-  c : i32;
+  a : i32,
+  b : array<S1, 3>,
+  c : i32,
 };
 
 struct S1 {
-  a : i32;
-  b : vec3<f32>;
-  c : i32;
+  a : i32,
+  b : vec3<f32>,
+  c : i32,
 };
 )";
 
@@ -2090,20 +2090,20 @@ fn main() {
 
 struct SB {
   @size(128)
-  a : i32;
-  b : array<S2>;
+  a : i32,
+  b : array<S2>,
 }
 
 struct S2 {
-  a : i32;
-  b : array<S1, 3>;
-  c : i32;
+  a : i32,
+  b : array<S1, 3>,
+  c : i32,
 }
 
 struct S1 {
-  a : i32;
-  b : vec3<f32>;
-  c : i32;
+  a : i32,
+  b : vec3<f32>,
+  c : i32,
 }
 )";
 
@@ -2115,21 +2115,21 @@ struct S1 {
 TEST_F(DecomposeMemoryAccessTest, ComplexDynamicAccessChain) {
   auto* src = R"(
 struct S1 {
-  a : i32;
-  b : vec3<f32>;
-  c : i32;
+  a : i32,
+  b : vec3<f32>,
+  c : i32,
 };
 
 struct S2 {
-  a : i32;
-  b : array<S1, 3>;
-  c : i32;
+  a : i32,
+  b : array<S1, 3>,
+  c : i32,
 };
 
 struct SB {
   @size(128)
-  a : i32;
-  b : array<S2>;
+  a : i32,
+  b : array<S2>,
 };
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -2145,21 +2145,21 @@ fn main() {
 
   auto* expect = R"(
 struct S1 {
-  a : i32;
-  b : vec3<f32>;
-  c : i32;
+  a : i32,
+  b : vec3<f32>,
+  c : i32,
 }
 
 struct S2 {
-  a : i32;
-  b : array<S1, 3>;
-  c : i32;
+  a : i32,
+  b : array<S1, 3>,
+  c : i32,
 }
 
 struct SB {
   @size(128)
-  a : i32;
-  b : array<S2>;
+  a : i32,
+  b : array<S2>,
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -2195,20 +2195,20 @@ fn main() {
 
 struct SB {
   @size(128)
-  a : i32;
-  b :array<S2>;
+  a : i32,
+  b : array<S2>
 };
 
 struct S2 {
-  a : i32;
-  b : array<S1, 3>;
-  c : i32;
+  a : i32,
+  b : array<S1, 3>,
+  c : i32,
 };
 
 struct S1 {
-  a : i32;
-  b : vec3<f32>;
-  c : i32;
+  a : i32,
+  b : vec3<f32>,
+  c : i32,
 };
 )";
 
@@ -2228,20 +2228,20 @@ fn main() {
 
 struct SB {
   @size(128)
-  a : i32;
-  b : array<S2>;
+  a : i32,
+  b : array<S2>,
 }
 
 struct S2 {
-  a : i32;
-  b : array<S1, 3>;
-  c : i32;
+  a : i32,
+  b : array<S1, 3>,
+  c : i32,
 }
 
 struct S1 {
-  a : i32;
-  b : vec3<f32>;
-  c : i32;
+  a : i32,
+  b : vec3<f32>,
+  c : i32,
 }
 )";
 
@@ -2253,9 +2253,9 @@ struct S1 {
 TEST_F(DecomposeMemoryAccessTest, ComplexDynamicAccessChainWithAliases) {
   auto* src = R"(
 struct S1 {
-  a : i32;
-  b : vec3<f32>;
-  c : i32;
+  a : i32,
+  b : vec3<f32>,
+  c : i32,
 };
 
 type A1 = S1;
@@ -2263,9 +2263,9 @@ type A1 = S1;
 type A1_Array = array<S1, 3>;
 
 struct S2 {
-  a : i32;
-  b : A1_Array;
-  c : i32;
+  a : i32,
+  b : A1_Array,
+  c : i32,
 };
 
 type A2 = S2;
@@ -2274,8 +2274,8 @@ type A2_Array = array<S2>;
 
 struct SB {
   @size(128)
-  a : i32;
-  b : A2_Array;
+  a : i32,
+  b : A2_Array,
 };
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -2291,9 +2291,9 @@ fn main() {
 
   auto* expect = R"(
 struct S1 {
-  a : i32;
-  b : vec3<f32>;
-  c : i32;
+  a : i32,
+  b : vec3<f32>,
+  c : i32,
 }
 
 type A1 = S1;
@@ -2301,9 +2301,9 @@ type A1 = S1;
 type A1_Array = array<S1, 3>;
 
 struct S2 {
-  a : i32;
-  b : A1_Array;
-  c : i32;
+  a : i32,
+  b : A1_Array,
+  c : i32,
 }
 
 type A2 = S2;
@@ -2312,8 +2312,8 @@ type A2_Array = array<S2>;
 
 struct SB {
   @size(128)
-  a : i32;
-  b : A2_Array;
+  a : i32,
+  b : A2_Array,
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -2350,8 +2350,8 @@ fn main() {
 
 struct SB {
   @size(128)
-  a : i32;
-  b : A2_Array;
+  a : i32,
+  b : A2_Array,
 };
 
 type A2_Array = array<S2>;
@@ -2359,9 +2359,9 @@ type A2_Array = array<S2>;
 type A2 = S2;
 
 struct S2 {
-  a : i32;
-  b : A1_Array;
-  c : i32;
+  a : i32,
+  b : A1_Array,
+  c : i32,
 };
 
 type A1 = S1;
@@ -2369,9 +2369,9 @@ type A1 = S1;
 type A1_Array = array<S1, 3>;
 
 struct S1 {
-  a : i32;
-  b : vec3<f32>;
-  c : i32;
+  a : i32,
+  b : vec3<f32>,
+  c : i32,
 };
 )";
 
@@ -2391,8 +2391,8 @@ fn main() {
 
 struct SB {
   @size(128)
-  a : i32;
-  b : A2_Array;
+  a : i32,
+  b : A2_Array,
 }
 
 type A2_Array = array<S2>;
@@ -2400,9 +2400,9 @@ type A2_Array = array<S2>;
 type A2 = S2;
 
 struct S2 {
-  a : i32;
-  b : A1_Array;
-  c : i32;
+  a : i32,
+  b : A1_Array,
+  c : i32,
 }
 
 type A1 = S1;
@@ -2410,9 +2410,9 @@ type A1 = S1;
 type A1_Array = array<S1, 3>;
 
 struct S1 {
-  a : i32;
-  b : vec3<f32>;
-  c : i32;
+  a : i32,
+  b : vec3<f32>,
+  c : i32,
 }
 )";
 
@@ -2424,9 +2424,9 @@ struct S1 {
 TEST_F(DecomposeMemoryAccessTest, StorageBufferAtomics) {
   auto* src = R"(
 struct SB {
-  padding : vec4<f32>;
-  a : atomic<i32>;
-  b : atomic<u32>;
+  padding : vec4<f32>,
+  a : atomic<i32>,
+  b : atomic<u32>,
 };
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -2461,9 +2461,9 @@ fn main() {
 
   auto* expect = R"(
 struct SB {
-  padding : vec4<f32>;
-  a : atomic<i32>;
-  b : atomic<u32>;
+  padding : vec4<f32>,
+  a : atomic<i32>,
+  b : atomic<u32>,
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
@@ -2598,9 +2598,9 @@ fn main() {
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
 struct SB {
-  padding : vec4<f32>;
-  a : atomic<i32>;
-  b : atomic<u32>;
+  padding : vec4<f32>,
+  a : atomic<i32>,
+  b : atomic<u32>,
 };
 )";
 
@@ -2700,9 +2700,9 @@ fn main() {
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
 struct SB {
-  padding : vec4<f32>;
-  a : atomic<i32>;
-  b : atomic<u32>;
+  padding : vec4<f32>,
+  a : atomic<i32>,
+  b : atomic<u32>,
 }
 )";
 
@@ -2714,9 +2714,9 @@ struct SB {
 TEST_F(DecomposeMemoryAccessTest, WorkgroupBufferAtomics) {
   auto* src = R"(
 struct S {
-  padding : vec4<f32>;
-  a : atomic<i32>;
-  b : atomic<u32>;
+  padding : vec4<f32>,
+  a : atomic<i32>,
+  b : atomic<u32>,
 }
 
 var<workgroup> w : S;
@@ -2786,9 +2786,9 @@ fn main() {
 var<workgroup> w : S;
 
 struct S {
-  padding : vec4<f32>;
-  a : atomic<i32>;
-  b : atomic<u32>;
+  padding : vec4<f32>,
+  a : atomic<i32>,
+  b : atomic<u32>,
 }
 )";
 

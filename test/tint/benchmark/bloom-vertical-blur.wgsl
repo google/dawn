@@ -5,8 +5,8 @@ var<private> offsets : array<f32, 3> = array<f32, 3>(0.0, 1.384615421, 3.2307691
 var<private> weights : array<f32, 3> = array<f32, 3>(0.227027029, 0.31621623, 0.07027027);
 
 struct BloomUniforms {
-  radius : f32;
-  dim : f32;
+  radius : f32,
+  dim : f32,
 }
 
 @group(0) @binding(0) var<uniform> bloom : BloomUniforms;
@@ -17,7 +17,7 @@ struct BloomUniforms {
 
 struct FragmentInput {
   @location(0)
-  texCoord : vec2<f32>;
+  texCoord : vec2<f32>,
 }
 
 fn getGaussianBlur(texCoord : vec2<f32>) -> vec4<f32> {

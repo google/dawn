@@ -1,6 +1,6 @@
 struct strided_arr {
   @size(8)
-  el : f32;
+  el : f32,
 }
 
 type Arr = array<strided_arr, 2u>;
@@ -9,13 +9,13 @@ type Arr_1 = array<Arr, 3u>;
 
 struct strided_arr_1 {
   @size(128)
-  el : Arr_1;
+  el : Arr_1,
 }
 
 type Arr_2 = array<strided_arr_1, 4u>;
 
 struct S {
-  a : Arr_2;
+  a : Arr_2,
 }
 
 @group(0) @binding(0) var<storage, read_write> s : S;

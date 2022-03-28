@@ -10,45 +10,45 @@ fn sRGBToLinear(srgb : vec3<f32>) -> vec3<f32> {
 }
 
 struct Camera {
-  projection : mat4x4<f32>;
-  inverseProjection : mat4x4<f32>;
-  view : mat4x4<f32>;
-  position : vec3<f32>;
-  time : f32;
-  outputSize : vec2<f32>;
-  zNear : f32;
-  zFar : f32;
+  projection : mat4x4<f32>,
+  inverseProjection : mat4x4<f32>,
+  view : mat4x4<f32>,
+  position : vec3<f32>,
+  time : f32,
+  outputSize : vec2<f32>,
+  zNear : f32,
+  zFar : f32,
 }
 
 @binding(0) @group(0) var<uniform> camera : Camera;
 
 struct ClusterLights {
-  offset : u32;
-  count : u32;
+  offset : u32,
+  count : u32,
 }
 
 struct ClusterLightGroup {
-  offset : u32;
-  lights : array<ClusterLights, 27648>;
-  indices : array<u32, 1769472>;
+  offset : u32,
+  lights : array<ClusterLights, 27648>,
+  indices : array<u32, 1769472>,
 }
 
 @binding(1) @group(0) var<storage, read> clusterLights : ClusterLightGroup;
 
 struct Light {
-  position : vec3<f32>;
-  range : f32;
-  color : vec3<f32>;
-  intensity : f32;
+  position : vec3<f32>,
+  range : f32,
+  color : vec3<f32>,
+  intensity : f32,
 }
 
 struct GlobalLights {
-  ambient : vec3<f32>;
-  dirColor : vec3<f32>;
-  dirIntensity : f32;
-  dirDirection : vec3<f32>;
-  lightCount : u32;
-  lights : array<Light>;
+  ambient : vec3<f32>,
+  dirColor : vec3<f32>,
+  dirIntensity : f32,
+  dirDirection : vec3<f32>,
+  lightCount : u32,
+  lights : array<Light>,
 }
 
 @binding(2) @group(0) var<storage, read> globalLights : GlobalLights;
@@ -78,7 +78,7 @@ fn getClusterIndex(fragCoord : vec4<f32>) -> u32 {
 @binding(5) @group(0) var shadowSampler : sampler_comparison;
 
 struct LightShadowTable {
-  light : array<i32>;
+  light : array<i32>,
 }
 
 @binding(6) @group(0) var<storage, read> lightShadowTable : LightShadowTable;
@@ -88,12 +88,12 @@ var<private> shadowSampleOffsets : array<vec2<f32>, 16> = array<vec2<f32>, 16>(v
 let shadowSampleCount = 16u;
 
 struct ShadowProperties {
-  viewport : vec4<f32>;
-  viewProj : mat4x4<f32>;
+  viewport : vec4<f32>,
+  viewProj : mat4x4<f32>,
 }
 
 struct LightShadows {
-  properties : array<ShadowProperties>;
+  properties : array<ShadowProperties>,
 }
 
 @binding(7) @group(0) var<storage, read> shadow : LightShadows;
@@ -157,33 +157,33 @@ fn pointLightVisibility(lightIndex : u32, worldPos : vec3<f32>, pointToLight : v
 
 struct VertexOutput {
   @builtin(position)
-  position : vec4<f32>;
+  position : vec4<f32>,
   @location(0)
-  worldPos : vec3<f32>;
+  worldPos : vec3<f32>,
   @location(1)
-  view : vec3<f32>;
+  view : vec3<f32>,
   @location(2)
-  texcoord : vec2<f32>;
+  texcoord : vec2<f32>,
   @location(3)
-  texcoord2 : vec2<f32>;
+  texcoord2 : vec2<f32>,
   @location(4)
-  color : vec4<f32>;
+  color : vec4<f32>,
   @location(5)
-  instanceColor : vec4<f32>;
+  instanceColor : vec4<f32>,
   @location(6)
-  normal : vec3<f32>;
+  normal : vec3<f32>,
   @location(7)
-  tangent : vec3<f32>;
+  tangent : vec3<f32>,
   @location(8)
-  bitangent : vec3<f32>;
+  bitangent : vec3<f32>,
 }
 
 struct Material {
-  baseColorFactor : vec4<f32>;
-  emissiveFactor : vec3<f32>;
-  occlusionStrength : f32;
-  metallicRoughnessFactor : vec2<f32>;
-  alphaCutoff : f32;
+  baseColorFactor : vec4<f32>,
+  emissiveFactor : vec3<f32>,
+  occlusionStrength : f32,
+  metallicRoughnessFactor : vec2<f32>,
+  alphaCutoff : f32,
 }
 
 @binding(8) @group(0) var<uniform> material : Material;
@@ -209,15 +209,15 @@ struct Material {
 @binding(18) @group(0) var emissiveSampler : sampler;
 
 struct SurfaceInfo {
-  baseColor : vec4<f32>;
-  albedo : vec3<f32>;
-  metallic : f32;
-  roughness : f32;
-  normal : vec3<f32>;
-  f0 : vec3<f32>;
-  ao : f32;
-  emissive : vec3<f32>;
-  v : vec3<f32>;
+  baseColor : vec4<f32>,
+  albedo : vec3<f32>,
+  metallic : f32,
+  roughness : f32,
+  normal : vec3<f32>,
+  f0 : vec3<f32>,
+  ao : f32,
+  emissive : vec3<f32>,
+  v : vec3<f32>,
 }
 
 fn GetSurfaceInfo(input : VertexOutput) -> SurfaceInfo {
@@ -258,11 +258,11 @@ let LightType_Spot = 1u;
 let LightType_Directional = 2u;
 
 struct PuctualLight {
-  lightType : u32;
-  pointToLight : vec3<f32>;
-  range : f32;
-  color : vec3<f32>;
-  intensity : f32;
+  lightType : u32,
+  pointToLight : vec3<f32>,
+  range : f32,
+  color : vec3<f32>,
+  intensity : f32,
 }
 
 fn FresnelSchlick(cosTheta : f32, F0 : vec3<f32>) -> vec3<f32> {
@@ -325,9 +325,9 @@ fn lightRadiance(light : PuctualLight, surface : SurfaceInfo) -> vec3<f32> {
 
 struct FragmentOutput {
   @location(0)
-  color : vec4<f32>;
+  color : vec4<f32>,
   @location(1)
-  emissive : vec4<f32>;
+  emissive : vec4<f32>,
 }
 
 @stage(fragment)

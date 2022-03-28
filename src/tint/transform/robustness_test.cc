@@ -323,8 +323,8 @@ var<private> a : array<f32, 3>;
 TEST_F(RobustnessTest, DISABLED_LargeArrays_Idx) {
   auto* src = R"(
 struct S {
-  a : array<f32, 0x7fffffff>;
-  b : array<f32>;
+  a : array<f32, 0x7fffffff>,
+  b : array<f32>,
 };
 @group(0) @binding(0) var<storage, read> s : S;
 
@@ -361,8 +361,8 @@ fn f() {
 
   auto* expect = R"(
 struct S {
-  a : array<f32, 2147483647>;
-  b : array<f32>;
+  a : array<f32, 2147483647>,
+  b : array<f32>,
 };
 
 @group(0) @binding(0) var<storage, read> s : S;
@@ -1093,8 +1093,8 @@ TEST_F(RobustnessTest, DISABLED_Matrix_Row_Constant_Id_Clamps) {
 TEST_F(RobustnessTest, RuntimeArray_Clamps) {
   auto* src = R"(
 struct S {
-  a : f32;
-  b : array<f32>;
+  a : f32,
+  b : array<f32>,
 };
 @group(0) @binding(0) var<storage, read> s : S;
 
@@ -1105,8 +1105,8 @@ fn f() {
 
   auto* expect = R"(
 struct S {
-  a : f32;
-  b : array<f32>;
+  a : f32,
+  b : array<f32>,
 }
 
 @group(0) @binding(0) var<storage, read> s : S;
@@ -1130,8 +1130,8 @@ fn f() {
 @group(0) @binding(0) var<storage, read> s : S;
 
 struct S {
-  a : f32;
-  b : array<f32>;
+  a : f32,
+  b : array<f32>,
 };
 )";
 
@@ -1143,8 +1143,8 @@ fn f() {
 @group(0) @binding(0) var<storage, read> s : S;
 
 struct S {
-  a : f32;
-  b : array<f32>;
+  a : f32,
+  b : array<f32>,
 }
 )";
 
@@ -1387,8 +1387,8 @@ TEST_F(RobustnessTest, DISABLED_Shadowed_Variable) {
 TEST_F(RobustnessTest, DontRenameSymbols) {
   auto* src = R"(
 struct S {
-  a : f32;
-  b : array<f32>;
+  a : f32,
+  b : array<f32>,
 };
 
 @group(0) @binding(0) var<storage, read> s : S;
@@ -1404,8 +1404,8 @@ fn f() {
 
   auto* expect = R"(
 struct S {
-  a : f32;
-  b : array<f32>;
+  a : f32,
+  b : array<f32>,
 }
 
 @group(0) @binding(0) var<storage, read> s : S;
@@ -1426,14 +1426,14 @@ fn f() {
 
 const char* kOmitSourceShader = R"(
 struct S {
-  a : array<f32, 4>;
-  b : array<f32>;
+  a : array<f32, 4>,
+  b : array<f32>,
 };
 @group(0) @binding(0) var<storage, read> s : S;
 
 type UArr = array<vec4<f32>, 4>;
 struct U {
-  a : UArr;
+  a : UArr,
 };
 @group(1) @binding(0) var<uniform> u : U;
 
@@ -1484,8 +1484,8 @@ fn f() {
 TEST_F(RobustnessTest, OmitNone) {
   auto* expect = R"(
 struct S {
-  a : array<f32, 4>;
-  b : array<f32>;
+  a : array<f32, 4>,
+  b : array<f32>,
 }
 
 @group(0) @binding(0) var<storage, read> s : S;
@@ -1493,7 +1493,7 @@ struct S {
 type UArr = array<vec4<f32>, 4>;
 
 struct U {
-  a : UArr;
+  a : UArr,
 }
 
 @group(1) @binding(0) var<uniform> u : U;
@@ -1547,8 +1547,8 @@ fn f() {
 TEST_F(RobustnessTest, OmitStorage) {
   auto* expect = R"(
 struct S {
-  a : array<f32, 4>;
-  b : array<f32>;
+  a : array<f32, 4>,
+  b : array<f32>,
 }
 
 @group(0) @binding(0) var<storage, read> s : S;
@@ -1556,7 +1556,7 @@ struct S {
 type UArr = array<vec4<f32>, 4>;
 
 struct U {
-  a : UArr;
+  a : UArr,
 }
 
 @group(1) @binding(0) var<uniform> u : U;
@@ -1612,8 +1612,8 @@ fn f() {
 TEST_F(RobustnessTest, OmitUniform) {
   auto* expect = R"(
 struct S {
-  a : array<f32, 4>;
-  b : array<f32>;
+  a : array<f32, 4>,
+  b : array<f32>,
 }
 
 @group(0) @binding(0) var<storage, read> s : S;
@@ -1621,7 +1621,7 @@ struct S {
 type UArr = array<vec4<f32>, 4>;
 
 struct U {
-  a : UArr;
+  a : UArr,
 }
 
 @group(1) @binding(0) var<uniform> u : U;
@@ -1677,8 +1677,8 @@ fn f() {
 TEST_F(RobustnessTest, OmitBoth) {
   auto* expect = R"(
 struct S {
-  a : array<f32, 4>;
-  b : array<f32>;
+  a : array<f32, 4>,
+  b : array<f32>,
 }
 
 @group(0) @binding(0) var<storage, read> s : S;
@@ -1686,7 +1686,7 @@ struct S {
 type UArr = array<vec4<f32>, 4>;
 
 struct U {
-  a : UArr;
+  a : UArr,
 }
 
 @group(1) @binding(0) var<uniform> u : U;

@@ -4,7 +4,7 @@
 // densely packed starting at 0.
 
 struct S {
-  a : f32;
+  a : f32,
 };
 
 @group(0)  @binding(0) var<storage> b0  : S;

@@ -1,11 +1,11 @@
 type ArrayType = array<vec4<i32>, 4>;
 
 struct S {
-  arr : ArrayType;
+  arr : ArrayType,
 }
 
 struct S_nested {
-  arr : array<array<array<i32, 2>, 3>, 4>;
+  arr : array<array<array<i32, 2>, 3>, 4>,
 }
 
 var<private> src_private : ArrayType;

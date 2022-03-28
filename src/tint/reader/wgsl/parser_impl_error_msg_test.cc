@@ -672,59 +672,51 @@ struct S };
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructDeclMissingRBrace) {
-  EXPECT("struct S { i : i32;",
+  EXPECT("struct S { i : i32,",
          R"(test.wgsl:1:20 error: expected '}' for struct declaration
-struct S { i : i32;
+struct S { i : i32,
                    ^
 )");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberInvalidIdentifier) {
-  EXPECT("struct S { 1 : i32; };",
-         R"(test.wgsl:1:12 error: expected identifier for struct member
-struct S { 1 : i32; };
+  EXPECT("struct S { 1 : i32, };",
+         R"(test.wgsl:1:12 error: expected '}' for struct declaration
+struct S { 1 : i32, };
            ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclStructMemberMissingSemicolon) {
-  EXPECT("struct S { i : i32 };",
-         R"(test.wgsl:1:20 error: expected ';' for struct member
-struct S { i : i32 };
-                   ^
 )");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberAlignInvaldValue) {
   EXPECT(
-      "struct S { @align(x) i : i32; };",
+      "struct S { @align(x) i : i32, };",
       R"(test.wgsl:1:19 error: expected signed integer literal for align attribute
-struct S { @align(x) i : i32; };
+struct S { @align(x) i : i32, };
                   ^
 )");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberAlignNegativeValue) {
-  EXPECT("struct S { @align(-2) i : i32; };",
+  EXPECT("struct S { @align(-2) i : i32, };",
          R"(test.wgsl:1:19 error: align attribute must be positive
-struct S { @align(-2) i : i32; };
+struct S { @align(-2) i : i32, };
                   ^^
 )");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberSizeInvaldValue) {
   EXPECT(
-      "struct S { @size(x) i : i32; };",
+      "struct S { @size(x) i : i32, };",
       R"(test.wgsl:1:18 error: expected signed integer literal for size attribute
-struct S { @size(x) i : i32; };
+struct S { @size(x) i : i32, };
                  ^
 )");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberSizeNegativeValue) {
-  EXPECT("struct S { @size(-2) i : i32; };",
+  EXPECT("struct S { @size(-2) i : i32, };",
          R"(test.wgsl:1:18 error: size attribute must be positive
-struct S { @size(-2) i : i32; };
+struct S { @size(-2) i : i32, };
                  ^^
 )");
 }

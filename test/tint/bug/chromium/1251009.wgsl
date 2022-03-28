@@ -1,10 +1,10 @@
 struct VertexInputs0 {
-  @builtin(vertex_index) vertex_index : u32;
-  @location(0) loc0 : i32;
+  @builtin(vertex_index) vertex_index : u32,
+  @location(0) loc0 : i32,
 };
 struct VertexInputs1 {
-  @location(2) loc1 : u32;
-  @location(3) loc3 : vec4<f32>;
+  @location(2) loc1 : u32,
+  @location(3) loc3 : vec4<f32>,
 };
 
 @stage(vertex)

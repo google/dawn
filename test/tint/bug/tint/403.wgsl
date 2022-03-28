@@ -1,9 +1,9 @@
 
 struct vertexUniformBuffer1 {
-  transform1 : mat2x2<f32>;
+  transform1 : mat2x2<f32>,
 };
 struct vertexUniformBuffer2 {
-  transform2 : mat2x2<f32>;
+  transform2 : mat2x2<f32>,
 };
 
 @group(0) @binding(0) var<uniform> x_20 : vertexUniformBuffer1;

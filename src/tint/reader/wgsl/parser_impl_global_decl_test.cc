@@ -92,7 +92,7 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_StructIdent) {
   auto p = parser(R"(struct A {
-  a : f32;
+  a : f32,
 }
 type B = A;)");
   p->expect_global_decl();
@@ -150,7 +150,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function_Invalid) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
-  auto p = parser("struct A { b: i32; c: f32;}");
+  auto p = parser("struct A { b: i32, c: f32}");
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 

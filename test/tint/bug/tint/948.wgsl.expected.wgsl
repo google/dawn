@@ -1,14 +1,14 @@
 struct LeftOver {
-  time : f32;
+  time : f32,
   @size(12)
-  padding : u32;
-  worldViewProjection : mat4x4<f32>;
-  outputSize : vec2<f32>;
-  stageSize : vec2<f32>;
-  spriteMapSize : vec2<f32>;
-  stageScale : f32;
-  spriteCount : f32;
-  colorMul : vec3<f32>;
+  padding : u32,
+  worldViewProjection : mat4x4<f32>,
+  outputSize : vec2<f32>,
+  stageSize : vec2<f32>,
+  spriteMapSize : vec2<f32>,
+  stageScale : f32,
+  spriteCount : f32,
+  colorMul : vec3<f32>,
 }
 
 @group(2) @binding(9) var<uniform> x_20 : LeftOver;
@@ -212,7 +212,7 @@ fn main_1() {
 
 struct main_out {
   @location(0)
-  glFragColor_1 : vec4<f32>;
+  glFragColor_1 : vec4<f32>,
 }
 
 @stage(fragment)

@@ -1,5 +1,5 @@
 struct MyStruct {
-    f1 : f32;
+    f1 : f32,
 };
 
 type MyArray = array<f32, 10>;

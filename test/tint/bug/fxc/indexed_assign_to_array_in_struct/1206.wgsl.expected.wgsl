@@ -1,16 +1,16 @@
 struct Simulation {
-  i : u32;
+  i : u32,
 }
 
 struct Particle {
-  position : array<vec3<f32>, 8>;
-  lifetime : f32;
-  color : vec4<f32>;
-  velocity : vec3<f32>;
+  position : array<vec3<f32>, 8>,
+  lifetime : f32,
+  color : vec4<f32>,
+  velocity : vec3<f32>,
 }
 
 struct Particles {
-  p : array<Particle>;
+  p : array<Particle>,
 }
 
 @group(1) @binding(3) var<storage, read> particles : Particles;

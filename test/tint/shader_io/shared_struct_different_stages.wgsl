@@ -1,7 +1,7 @@
 struct Interface {
-  @location(1) col1 : f32;
-  @location(2) col2 : f32;
-  @builtin(position) pos : vec4<f32>;
+  @location(1) col1 : f32,
+  @location(2) col2 : f32,
+  @builtin(position) pos : vec4<f32>,
 };
 
 @stage(vertex)

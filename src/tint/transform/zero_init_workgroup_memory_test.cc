@@ -177,7 +177,7 @@ TEST_F(ZeroInitWorkgroupMemoryTest,
 var<workgroup> v : i32;
 
 struct Params {
-  @builtin(local_invocation_index) local_idx : u32;
+  @builtin(local_invocation_index) local_idx : u32,
 };
 
 @stage(compute) @workgroup_size(1)
@@ -190,7 +190,7 @@ var<workgroup> v : i32;
 
 struct Params {
   @builtin(local_invocation_index)
-  local_idx : u32;
+  local_idx : u32,
 }
 
 @stage(compute) @workgroup_size(1)
@@ -217,7 +217,7 @@ fn f(params : Params) {
 }
 
 struct Params {
-  @builtin(local_invocation_index) local_idx : u32;
+  @builtin(local_invocation_index) local_idx : u32,
 };
 
 var<workgroup> v : i32;
@@ -234,7 +234,7 @@ fn f(params : Params) {
 
 struct Params {
   @builtin(local_invocation_index)
-  local_idx : u32;
+  local_idx : u32,
 }
 
 var<workgroup> v : i32;
@@ -304,8 +304,8 @@ TEST_F(ZeroInitWorkgroupMemoryTest,
        MultipleWorkgroupVar_ExistingLocalIndex_Size1) {
   auto* src = R"(
 struct S {
-  x : i32;
-  y : array<i32, 8>;
+  x : i32,
+  y : array<i32, 8>,
 };
 
 var<workgroup> a : i32;
@@ -323,8 +323,8 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 )";
   auto* expect = R"(
 struct S {
-  x : i32;
-  y : array<i32, 8>;
+  x : i32,
+  y : array<i32, 8>,
 }
 
 var<workgroup> a : i32;
@@ -381,8 +381,8 @@ var<workgroup> b : S;
 var<workgroup> c : array<S, 32>;
 
 struct S {
-  x : i32;
-  y : array<i32, 8>;
+  x : i32,
+  y : array<i32, 8>,
 };
 )";
   auto* expect = R"(
@@ -418,8 +418,8 @@ var<workgroup> b : S;
 var<workgroup> c : array<S, 32>;
 
 struct S {
-  x : i32;
-  y : array<i32, 8>;
+  x : i32,
+  y : array<i32, 8>,
 }
 )";
 
@@ -432,8 +432,8 @@ TEST_F(ZeroInitWorkgroupMemoryTest,
        MultipleWorkgroupVar_ExistingLocalIndex_Size_2_3) {
   auto* src = R"(
 struct S {
-  x : i32;
-  y : array<i32, 8>;
+  x : i32,
+  y : array<i32, 8>,
 };
 
 var<workgroup> a : i32;
@@ -451,8 +451,8 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 )";
   auto* expect = R"(
 struct S {
-  x : i32;
-  y : array<i32, 8>;
+  x : i32,
+  y : array<i32, 8>,
 }
 
 var<workgroup> a : i32;
@@ -496,8 +496,8 @@ TEST_F(ZeroInitWorkgroupMemoryTest,
        MultipleWorkgroupVar_ExistingLocalIndex_Size_2_3_X) {
   auto* src = R"(
 struct S {
-  x : i32;
-  y : array<i32, 8>;
+  x : i32,
+  y : array<i32, 8>,
 };
 
 var<workgroup> a : i32;
@@ -518,8 +518,8 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
   auto* expect =
       R"(
 struct S {
-  x : i32;
-  y : array<i32, 8>;
+  x : i32,
+  y : array<i32, 8>,
 }
 
 var<workgroup> a : i32;
@@ -565,9 +565,9 @@ TEST_F(ZeroInitWorkgroupMemoryTest,
        MultipleWorkgroupVar_ExistingLocalIndex_Size_5u_X_10u) {
   auto* src = R"(
 struct S {
-  x : array<array<i32, 8>, 10>;
-  y : array<i32, 8>;
-  z : array<array<array<i32, 8>, 10>, 20>;
+  x : array<array<i32, 8>, 10>,
+  y : array<i32, 8>,
+  z : array<array<array<i32, 8>, 10>, 20>,
 };
 
 var<workgroup> a : i32;
@@ -588,9 +588,9 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
   auto* expect =
       R"(
 struct S {
-  x : array<array<i32, 8>, 10>;
-  y : array<i32, 8>;
-  z : array<array<array<i32, 8>, 10>, 20>;
+  x : array<array<i32, 8>, 10>,
+  y : array<i32, 8>,
+  z : array<array<array<i32, 8>, 10>, 20>,
 }
 
 var<workgroup> a : i32;
@@ -654,8 +654,8 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 TEST_F(ZeroInitWorkgroupMemoryTest, MultipleWorkgroupVar_InjectedLocalIndex) {
   auto* src = R"(
 struct S {
-  x : i32;
-  y : array<i32, 8>;
+  x : i32,
+  y : array<i32, 8>,
 };
 
 var<workgroup> a : i32;
@@ -673,8 +673,8 @@ fn f(@builtin(local_invocation_id) local_invocation_id : vec3<u32>) {
 )";
   auto* expect = R"(
 struct S {
-  x : i32;
-  y : array<i32, 8>;
+  x : i32,
+  y : array<i32, 8>,
 }
 
 var<workgroup> a : i32;
@@ -731,8 +731,8 @@ var<workgroup> b : S;
 var<workgroup> c : array<S, 32>;
 
 struct S {
-  x : i32;
-  y : array<i32, 8>;
+  x : i32,
+  y : array<i32, 8>,
 };
 )";
   auto* expect = R"(
@@ -768,8 +768,8 @@ var<workgroup> b : S;
 var<workgroup> c : array<S, 32>;
 
 struct S {
-  x : i32;
-  y : array<i32, 8>;
+  x : i32,
+  y : array<i32, 8>,
 }
 )";
 
@@ -781,8 +781,8 @@ struct S {
 TEST_F(ZeroInitWorkgroupMemoryTest, MultipleWorkgroupVar_MultipleEntryPoints) {
   auto* src = R"(
 struct S {
-  x : i32;
-  y : array<i32, 8>;
+  x : i32,
+  y : array<i32, 8>,
 };
 
 var<workgroup> a : i32;
@@ -810,8 +810,8 @@ fn f3() {
 )";
   auto* expect = R"(
 struct S {
-  x : i32;
-  y : array<i32, 8>;
+  x : i32,
+  y : array<i32, 8>,
 }
 
 var<workgroup> a : i32;
@@ -904,8 +904,8 @@ var<workgroup> b : S;
 var<workgroup> c : array<S, 32>;
 
 struct S {
-  x : i32;
-  y : array<i32, 8>;
+  x : i32,
+  y : array<i32, 8>,
 };
 )";
   auto* expect = R"(
@@ -967,8 +967,8 @@ var<workgroup> b : S;
 var<workgroup> c : array<S, 32>;
 
 struct S {
-  x : i32;
-  y : array<i32, 8>;
+  x : i32,
+  y : array<i32, 8>,
 }
 )";
 
@@ -1132,11 +1132,11 @@ var<workgroup> u : atomic<u32>;
 TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupStructOfAtomics) {
   auto* src = R"(
 struct S {
-  a : i32;
-  i : atomic<i32>;
-  b : f32;
-  u : atomic<u32>;
-  c : u32;
+  a : i32,
+  i : atomic<i32>,
+  b : f32,
+  u : atomic<u32>,
+  c : u32,
 };
 
 var<workgroup> w : S;
@@ -1148,11 +1148,11 @@ fn f() {
 )";
   auto* expect = R"(
 struct S {
-  a : i32;
-  i : atomic<i32>;
-  b : f32;
-  u : atomic<u32>;
-  c : u32;
+  a : i32,
+  i : atomic<i32>,
+  b : f32,
+  u : atomic<u32>,
+  c : u32,
 }
 
 var<workgroup> w : S;
@@ -1186,11 +1186,11 @@ fn f() {
 var<workgroup> w : S;
 
 struct S {
-  a : i32;
-  i : atomic<i32>;
-  b : f32;
-  u : atomic<u32>;
-  c : u32;
+  a : i32,
+  i : atomic<i32>,
+  b : f32,
+  u : atomic<u32>,
+  c : u32,
 };
 )";
   auto* expect = R"(
@@ -1210,11 +1210,11 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
 var<workgroup> w : S;
 
 struct S {
-  a : i32;
-  i : atomic<i32>;
-  b : f32;
-  u : atomic<u32>;
-  c : u32;
+  a : i32,
+  i : atomic<i32>,
+  b : f32,
+  u : atomic<u32>,
+  c : u32,
 }
 )";
 
@@ -1282,11 +1282,11 @@ var<workgroup> w : array<atomic<u32>, 4>;
 TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupArrayOfStructOfAtomics) {
   auto* src = R"(
 struct S {
-  a : i32;
-  i : atomic<i32>;
-  b : f32;
-  u : atomic<u32>;
-  c : u32;
+  a : i32,
+  i : atomic<i32>,
+  b : f32,
+  u : atomic<u32>,
+  c : u32,
 };
 
 var<workgroup> w : array<S, 4>;
@@ -1298,11 +1298,11 @@ fn f() {
 )";
   auto* expect = R"(
 struct S {
-  a : i32;
-  i : atomic<i32>;
-  b : f32;
-  u : atomic<u32>;
-  c : u32;
+  a : i32,
+  i : atomic<i32>,
+  b : f32,
+  u : atomic<u32>,
+  c : u32,
 }
 
 var<workgroup> w : array<S, 4>;
@@ -1338,11 +1338,11 @@ fn f() {
 var<workgroup> w : array<S, 4>;
 
 struct S {
-  a : i32;
-  i : atomic<i32>;
-  b : f32;
-  u : atomic<u32>;
-  c : u32;
+  a : i32,
+  i : atomic<i32>,
+  b : f32,
+  u : atomic<u32>,
+  c : u32,
 };
 )";
   auto* expect = R"(
@@ -1363,11 +1363,11 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
 var<workgroup> w : array<S, 4>;
 
 struct S {
-  a : i32;
-  i : atomic<i32>;
-  b : f32;
-  u : atomic<u32>;
-  c : u32;
+  a : i32,
+  i : atomic<i32>,
+  b : f32,
+  u : atomic<u32>,
+  c : u32,
 }
 )";
 

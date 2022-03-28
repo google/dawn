@@ -1,14 +1,14 @@
 type Arr = array<i32, 6u>;
 
 struct sspp962805860buildInformationS {
-  footprint : vec4<f32>;
-  offset : vec4<f32>;
-  essence : i32;
-  orientation : Arr;
+  footprint : vec4<f32>,
+  offset : vec4<f32>,
+  essence : i32,
+  orientation : Arr,
 }
 
 struct x_B4_BuildInformation {
-  passthru : sspp962805860buildInformationS;
+  passthru : sspp962805860buildInformationS,
 }
 
 @group(0) @binding(2) var<storage, read> sspp962805860buildInformation : x_B4_BuildInformation;

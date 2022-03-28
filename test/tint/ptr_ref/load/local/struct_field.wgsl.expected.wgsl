@@ -1,5 +1,5 @@
 struct S {
-  i : i32;
+  i : i32,
 }
 
 @stage(compute) @workgroup_size(1)

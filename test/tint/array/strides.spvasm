@@ -1,7 +1,7 @@
 ; type ARR_A = @stride(8) array<f32, 2>;
 ; type ARR_B = @stride(128) array<@stride(16) array<ARR_A, 4>, 3>;
 ; struct S {
-;   a : ARR_B;
+;   a : ARR_B,
 ; };
 ; @group(0) @binding(0) var<storage, read_write> s : S;
 ;

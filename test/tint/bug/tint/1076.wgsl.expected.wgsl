@@ -1,8 +1,8 @@
 struct FragIn {
   @location(0)
-  a : f32;
+  a : f32,
   @builtin(sample_mask)
-  mask : u32;
+  mask : u32,
 }
 
 @stage(fragment)

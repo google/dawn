@@ -78,7 +78,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
   EXPECT_EQ(gen.result(), R"(  var<private> a0 : f32;
 
   struct S0 {
-    a : i32;
+    a : i32,
   }
 
   fn func() -> f32 {
@@ -88,7 +88,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
   var<private> a1 : f32;
 
   struct S1 {
-    a : i32;
+    a : i32,
   }
 
   @stage(compute) @workgroup_size(1)

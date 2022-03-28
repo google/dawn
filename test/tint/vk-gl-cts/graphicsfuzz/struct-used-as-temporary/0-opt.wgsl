@@ -1,9 +1,9 @@
 struct S {
-  field0 : vec4<f32>;
+  field0 : vec4<f32>,
 }
 
 struct S_1 {
-  field0 : vec4<f32>;
+  field0 : vec4<f32>,
 }
 
 var<private> x_3 : vec4<f32>;
@@ -21,7 +21,7 @@ fn main_1() {
 
 struct main_out {
   @location(0)
-  x_3_1 : vec4<f32>;
+  x_3_1 : vec4<f32>,
 }
 
 @stage(fragment)

@@ -1,5 +1,5 @@
 struct Out {
-  @builtin(position) @invariant pos : vec4<f32>;
+  @builtin(position) @invariant pos : vec4<f32>,
 };
 
 @stage(vertex)

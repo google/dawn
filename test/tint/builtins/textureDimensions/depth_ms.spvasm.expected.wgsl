@@ -22,7 +22,7 @@ fn vertex_main_1() {
 
 struct vertex_main_out {
   @builtin(position)
-  tint_symbol_1_1 : vec4<f32>;
+  tint_symbol_1_1 : vec4<f32>,
 }
 
 @stage(vertex)

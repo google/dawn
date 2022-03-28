@@ -1,11 +1,11 @@
  struct Uniforms {
-    dstTextureFlipY : u32;
-    isFloat16 : u32;
-    isRGB10A2Unorm : u32;
-    channelCount : u32;
+    dstTextureFlipY : u32,
+    isFloat16 : u32,
+    isRGB10A2Unorm : u32,
+    channelCount : u32,
 };
  struct OutputBuf {
-    result : array<u32>;
+    result : array<u32>,
 };
 @group(0) @binding(0) var src : texture_2d<f32>;
 @group(0) @binding(1) var dst : texture_2d<f32>;

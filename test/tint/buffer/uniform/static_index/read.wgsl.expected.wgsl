@@ -1,23 +1,23 @@
 struct Inner {
   @size(16)
-  x : i32;
+  x : i32,
 }
 
 struct S {
-  a : vec3<i32>;
-  b : i32;
-  c : vec3<u32>;
-  d : u32;
-  e : vec3<f32>;
-  f : f32;
-  g : vec2<i32>;
-  h : vec2<i32>;
-  i : mat2x3<f32>;
-  j : mat3x2<f32>;
+  a : vec3<i32>,
+  b : i32,
+  c : vec3<u32>,
+  d : u32,
+  e : vec3<f32>,
+  f : f32,
+  g : vec2<i32>,
+  h : vec2<i32>,
+  i : mat2x3<f32>,
+  j : mat3x2<f32>,
   @align(16)
-  k : Inner;
+  k : Inner,
   @align(16)
-  l : array<Inner, 4>;
+  l : array<Inner, 4>,
 }
 
 @binding(0) @group(0) var<uniform> s : S;

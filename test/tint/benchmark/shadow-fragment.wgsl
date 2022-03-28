@@ -1,9 +1,9 @@
 let shadowDepthTextureSize : f32 = 1024.0;
 
 struct Scene {
-  lightViewProjMatrix : mat4x4<f32>;
-  cameraViewProjMatrix : mat4x4<f32>;
-  lightPos : vec3<f32>;
+  lightViewProjMatrix : mat4x4<f32>,
+  cameraViewProjMatrix : mat4x4<f32>,
+  lightPos : vec3<f32>,
 }
 
 @group(0) @binding(0) var<uniform> scene : Scene;
@@ -14,11 +14,11 @@ struct Scene {
 
 struct FragmentInput {
   @location(0)
-  shadowPos : vec3<f32>;
+  shadowPos : vec3<f32>,
   @location(1)
-  fragPos : vec3<f32>;
+  fragPos : vec3<f32>,
   @location(2)
-  fragNorm : vec3<f32>;
+  fragNorm : vec3<f32>,
 }
 
 let albedo : vec3<f32> = vec3<f32>(0.899999976, 0.899999976, 0.899999976);

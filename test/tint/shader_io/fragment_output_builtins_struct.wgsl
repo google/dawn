@@ -1,6 +1,6 @@
 struct FragmentOutputs {
-  @builtin(frag_depth) frag_depth : f32;
-  @builtin(sample_mask) sample_mask : u32;
+  @builtin(frag_depth) frag_depth : f32,
+  @builtin(sample_mask) sample_mask : u32,
 };
 
 @stage(fragment)

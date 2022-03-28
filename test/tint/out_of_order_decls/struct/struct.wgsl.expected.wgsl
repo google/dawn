@@ -1,9 +1,9 @@
 struct S1 {
-  m : S2;
+  m : S2,
 }
 
 struct S2 {
-  m : i32;
+  m : i32,
 }
 
 @stage(fragment)

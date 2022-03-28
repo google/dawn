@@ -590,7 +590,7 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
 
     // Note: u32 is the smallest primitive we currently support. When WGSL
     // supports smaller types, this will need to be updated.
-    line() << UniqueIdentifier("padding") << " : u32;";
+    line() << UniqueIdentifier("padding") << " : u32,";
   };
 
   increment_indent();
@@ -629,7 +629,7 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
     if (!EmitType(out, mem->type)) {
       return false;
     }
-    out << ";";
+    out << ",";
   }
   decrement_indent();
 

@@ -1,8 +1,8 @@
 type Arr = array<u32, 50>;
 
 struct Buf{
-  count : u32;
-  data : Arr;
+  count : u32,
+  data : Arr,
 };
 
 @group(0) @binding(0) var<storage, read_write> b : Buf;

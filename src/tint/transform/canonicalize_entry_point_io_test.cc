@@ -106,9 +106,9 @@ fn frag_main(@location(1) loc1 : f32,
   auto* expect = R"(
 struct tint_symbol_1 {
   @location(1)
-  loc1 : f32;
+  loc1 : f32,
   @location(2) @interpolate(flat)
-  loc2 : vec4<u32>;
+  loc2 : vec4<u32>,
 }
 
 fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
@@ -142,11 +142,11 @@ fn frag_main(@location(1) loc1 : f32,
   auto* expect = R"(
 struct tint_symbol_1 {
   @location(1)
-  loc1 : f32;
+  loc1 : f32,
   @location(2) @interpolate(flat)
-  loc2 : vec4<u32>;
+  loc2 : vec4<u32>,
   @builtin(position)
-  coord : vec4<f32>;
+  coord : vec4<f32>,
 }
 
 fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
@@ -182,7 +182,7 @@ type myf32 = f32;
 
 struct tint_symbol_1 {
   @location(1)
-  loc1 : f32;
+  loc1 : f32,
 }
 
 fn frag_main_inner(loc1 : myf32) {
@@ -216,7 +216,7 @@ type myf32 = f32;
   auto* expect = R"(
 struct tint_symbol_1 {
   @location(1)
-  loc1 : f32;
+  loc1 : f32,
 }
 
 fn frag_main_inner(loc1 : myf32) {
@@ -242,11 +242,11 @@ type myf32 = f32;
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_Spirv) {
   auto* src = R"(
 struct FragBuiltins {
-  @builtin(position) coord : vec4<f32>;
+  @builtin(position) coord : vec4<f32>,
 };
 struct FragLocations {
-  @location(1) loc1 : f32;
-  @location(2) @interpolate(flat) loc2 : vec4<u32>;
+  @location(1) loc1 : f32,
+  @location(2) @interpolate(flat) loc2 : vec4<u32>,
 };
 
 @stage(fragment)
@@ -267,12 +267,12 @@ fn frag_main(@location(0) loc0 : f32,
 @builtin(position) @internal(disable_validation__ignore_storage_class) var<in> coord_1 : vec4<f32>;
 
 struct FragBuiltins {
-  coord : vec4<f32>;
+  coord : vec4<f32>,
 }
 
 struct FragLocations {
-  loc1 : f32;
-  loc2 : vec4<u32>;
+  loc1 : f32,
+  loc2 : vec4<u32>,
 }
 
 fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
@@ -303,11 +303,11 @@ fn frag_main(@location(0) loc0 : f32,
 }
 
 struct FragBuiltins {
-  @builtin(position) coord : vec4<f32>;
+  @builtin(position) coord : vec4<f32>,
 };
 struct FragLocations {
-  @location(1) loc1 : f32;
-  @location(2) @interpolate(flat) loc2 : vec4<u32>;
+  @location(1) loc1 : f32,
+  @location(2) @interpolate(flat) loc2 : vec4<u32>,
 };
 )";
 
@@ -330,12 +330,12 @@ fn frag_main() {
 }
 
 struct FragBuiltins {
-  coord : vec4<f32>;
+  coord : vec4<f32>,
 }
 
 struct FragLocations {
-  loc1 : f32;
-  loc2 : vec4<u32>;
+  loc1 : f32,
+  loc2 : vec4<u32>,
 }
 )";
 
@@ -350,11 +350,11 @@ struct FragLocations {
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_kMsl) {
   auto* src = R"(
 struct FragBuiltins {
-  @builtin(position) coord : vec4<f32>;
+  @builtin(position) coord : vec4<f32>,
 };
 struct FragLocations {
-  @location(1) loc1 : f32;
-  @location(2) @interpolate(flat) loc2 : vec4<u32>;
+  @location(1) loc1 : f32,
+  @location(2) @interpolate(flat) loc2 : vec4<u32>,
 };
 
 @stage(fragment)
@@ -367,21 +367,21 @@ fn frag_main(@location(0) loc0 : f32,
 
   auto* expect = R"(
 struct FragBuiltins {
-  coord : vec4<f32>;
+  coord : vec4<f32>,
 }
 
 struct FragLocations {
-  loc1 : f32;
-  loc2 : vec4<u32>;
+  loc1 : f32,
+  loc2 : vec4<u32>,
 }
 
 struct tint_symbol_1 {
   @location(0)
-  loc0 : f32;
+  loc0 : f32,
   @location(1)
-  loc1 : f32;
+  loc1 : f32,
   @location(2) @interpolate(flat)
-  loc2 : vec4<u32>;
+  loc2 : vec4<u32>,
 }
 
 fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
@@ -412,22 +412,22 @@ fn frag_main(@location(0) loc0 : f32,
 }
 
 struct FragBuiltins {
-  @builtin(position) coord : vec4<f32>;
+  @builtin(position) coord : vec4<f32>,
 };
 struct FragLocations {
-  @location(1) loc1 : f32;
-  @location(2) @interpolate(flat) loc2 : vec4<u32>;
+  @location(1) loc1 : f32,
+  @location(2) @interpolate(flat) loc2 : vec4<u32>,
 };
 )";
 
   auto* expect = R"(
 struct tint_symbol_1 {
   @location(0)
-  loc0 : f32;
+  loc0 : f32,
   @location(1)
-  loc1 : f32;
+  loc1 : f32,
   @location(2) @interpolate(flat)
-  loc2 : vec4<u32>;
+  loc2 : vec4<u32>,
 }
 
 fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
@@ -440,12 +440,12 @@ fn frag_main(@builtin(position) coord : vec4<f32>, tint_symbol : tint_symbol_1) 
 }
 
 struct FragBuiltins {
-  coord : vec4<f32>;
+  coord : vec4<f32>,
 }
 
 struct FragLocations {
-  loc1 : f32;
-  loc2 : vec4<u32>;
+  loc1 : f32,
+  loc2 : vec4<u32>,
 }
 )";
 
@@ -460,11 +460,11 @@ struct FragLocations {
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_Hlsl) {
   auto* src = R"(
 struct FragBuiltins {
-  @builtin(position) coord : vec4<f32>;
+  @builtin(position) coord : vec4<f32>,
 };
 struct FragLocations {
-  @location(1) loc1 : f32;
-  @location(2) @interpolate(flat) loc2 : vec4<u32>;
+  @location(1) loc1 : f32,
+  @location(2) @interpolate(flat) loc2 : vec4<u32>,
 };
 
 @stage(fragment)
@@ -477,23 +477,23 @@ fn frag_main(@location(0) loc0 : f32,
 
   auto* expect = R"(
 struct FragBuiltins {
-  coord : vec4<f32>;
+  coord : vec4<f32>,
 }
 
 struct FragLocations {
-  loc1 : f32;
-  loc2 : vec4<u32>;
+  loc1 : f32,
+  loc2 : vec4<u32>,
 }
 
 struct tint_symbol_1 {
   @location(0)
-  loc0 : f32;
+  loc0 : f32,
   @location(1)
-  loc1 : f32;
+  loc1 : f32,
   @location(2) @interpolate(flat)
-  loc2 : vec4<u32>;
+  loc2 : vec4<u32>,
   @builtin(position)
-  coord : vec4<f32>;
+  coord : vec4<f32>,
 }
 
 fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
@@ -524,24 +524,24 @@ fn frag_main(@location(0) loc0 : f32,
 }
 
 struct FragBuiltins {
-  @builtin(position) coord : vec4<f32>;
+  @builtin(position) coord : vec4<f32>,
 };
 struct FragLocations {
-  @location(1) loc1 : f32;
-  @location(2) @interpolate(flat) loc2 : vec4<u32>;
+  @location(1) loc1 : f32,
+  @location(2) @interpolate(flat) loc2 : vec4<u32>,
 };
 )";
 
   auto* expect = R"(
 struct tint_symbol_1 {
   @location(0)
-  loc0 : f32;
+  loc0 : f32,
   @location(1)
-  loc1 : f32;
+  loc1 : f32,
   @location(2) @interpolate(flat)
-  loc2 : vec4<u32>;
+  loc2 : vec4<u32>,
   @builtin(position)
-  coord : vec4<f32>;
+  coord : vec4<f32>,
 }
 
 fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
@@ -554,12 +554,12 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 }
 
 struct FragBuiltins {
-  coord : vec4<f32>;
+  coord : vec4<f32>,
 }
 
 struct FragLocations {
-  loc1 : f32;
-  loc2 : vec4<u32>;
+  loc1 : f32,
+  loc2 : vec4<u32>,
 }
 )";
 
@@ -612,7 +612,7 @@ fn frag_main() -> @builtin(frag_depth) f32 {
   auto* expect = R"(
 struct tint_symbol {
   @builtin(frag_depth)
-  value : f32;
+  value : f32,
 }
 
 fn frag_main_inner() -> f32 {
@@ -647,7 +647,7 @@ fn frag_main() -> @builtin(frag_depth) f32 {
   auto* expect = R"(
 struct tint_symbol {
   @builtin(frag_depth)
-  value : f32;
+  value : f32,
 }
 
 fn frag_main_inner() -> f32 {
@@ -674,9 +674,9 @@ fn frag_main() -> tint_symbol {
 TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Spirv) {
   auto* src = R"(
 struct FragOutput {
-  @location(0) color : vec4<f32>;
-  @builtin(frag_depth) depth : f32;
-  @builtin(sample_mask) mask : u32;
+  @location(0) color : vec4<f32>,
+  @builtin(frag_depth) depth : f32,
+  @builtin(sample_mask) mask : u32,
 };
 
 @stage(fragment)
@@ -697,9 +697,9 @@ fn frag_main() -> FragOutput {
 @builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<out> mask_1 : array<u32, 1>;
 
 struct FragOutput {
-  color : vec4<f32>;
-  depth : f32;
-  mask : u32;
+  color : vec4<f32>,
+  depth : f32,
+  mask : u32,
 }
 
 fn frag_main_inner() -> FragOutput {
@@ -739,9 +739,9 @@ fn frag_main() -> FragOutput {
 }
 
 struct FragOutput {
-  @location(0) color : vec4<f32>;
-  @builtin(frag_depth) depth : f32;
-  @builtin(sample_mask) mask : u32;
+  @location(0) color : vec4<f32>,
+  @builtin(frag_depth) depth : f32,
+  @builtin(sample_mask) mask : u32,
 };
 )";
 
@@ -769,9 +769,9 @@ fn frag_main() {
 }
 
 struct FragOutput {
-  color : vec4<f32>;
-  depth : f32;
-  mask : u32;
+  color : vec4<f32>,
+  depth : f32,
+  mask : u32,
 }
 )";
 
@@ -786,9 +786,9 @@ struct FragOutput {
 TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Msl) {
   auto* src = R"(
 struct FragOutput {
-  @location(0) color : vec4<f32>;
-  @builtin(frag_depth) depth : f32;
-  @builtin(sample_mask) mask : u32;
+  @location(0) color : vec4<f32>,
+  @builtin(frag_depth) depth : f32,
+  @builtin(sample_mask) mask : u32,
 };
 
 @stage(fragment)
@@ -803,18 +803,18 @@ fn frag_main() -> FragOutput {
 
   auto* expect = R"(
 struct FragOutput {
-  color : vec4<f32>;
-  depth : f32;
-  mask : u32;
+  color : vec4<f32>,
+  depth : f32,
+  mask : u32,
 }
 
 struct tint_symbol {
   @location(0)
-  color : vec4<f32>;
+  color : vec4<f32>,
   @builtin(frag_depth)
-  depth : f32;
+  depth : f32,
   @builtin(sample_mask)
-  mask : u32;
+  mask : u32,
 }
 
 fn frag_main_inner() -> FragOutput {
@@ -856,20 +856,20 @@ fn frag_main() -> FragOutput {
 }
 
 struct FragOutput {
-  @location(0) color : vec4<f32>;
-  @builtin(frag_depth) depth : f32;
-  @builtin(sample_mask) mask : u32;
+  @location(0) color : vec4<f32>,
+  @builtin(frag_depth) depth : f32,
+  @builtin(sample_mask) mask : u32,
 };
 )";
 
   auto* expect = R"(
 struct tint_symbol {
   @location(0)
-  color : vec4<f32>;
+  color : vec4<f32>,
   @builtin(frag_depth)
-  depth : f32;
+  depth : f32,
   @builtin(sample_mask)
-  mask : u32;
+  mask : u32,
 }
 
 fn frag_main_inner() -> FragOutput {
@@ -891,9 +891,9 @@ fn frag_main() -> tint_symbol {
 }
 
 struct FragOutput {
-  color : vec4<f32>;
-  depth : f32;
-  mask : u32;
+  color : vec4<f32>,
+  depth : f32,
+  mask : u32,
 }
 )";
 
@@ -908,9 +908,9 @@ struct FragOutput {
 TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Hlsl) {
   auto* src = R"(
 struct FragOutput {
-  @location(0) color : vec4<f32>;
-  @builtin(frag_depth) depth : f32;
-  @builtin(sample_mask) mask : u32;
+  @location(0) color : vec4<f32>,
+  @builtin(frag_depth) depth : f32,
+  @builtin(sample_mask) mask : u32,
 };
 
 @stage(fragment)
@@ -925,18 +925,18 @@ fn frag_main() -> FragOutput {
 
   auto* expect = R"(
 struct FragOutput {
-  color : vec4<f32>;
-  depth : f32;
-  mask : u32;
+  color : vec4<f32>,
+  depth : f32,
+  mask : u32,
 }
 
 struct tint_symbol {
   @location(0)
-  color : vec4<f32>;
+  color : vec4<f32>,
   @builtin(frag_depth)
-  depth : f32;
+  depth : f32,
   @builtin(sample_mask)
-  mask : u32;
+  mask : u32,
 }
 
 fn frag_main_inner() -> FragOutput {
@@ -978,20 +978,20 @@ fn frag_main() -> FragOutput {
 }
 
 struct FragOutput {
-  @location(0) color : vec4<f32>;
-  @builtin(frag_depth) depth : f32;
-  @builtin(sample_mask) mask : u32;
+  @location(0) color : vec4<f32>,
+  @builtin(frag_depth) depth : f32,
+  @builtin(sample_mask) mask : u32,
 };
 )";
 
   auto* expect = R"(
 struct tint_symbol {
   @location(0)
-  color : vec4<f32>;
+  color : vec4<f32>,
   @builtin(frag_depth)
-  depth : f32;
+  depth : f32,
   @builtin(sample_mask)
-  mask : u32;
+  mask : u32,
 }
 
 fn frag_main_inner() -> FragOutput {
@@ -1013,9 +1013,9 @@ fn frag_main() -> tint_symbol {
 }
 
 struct FragOutput {
-  color : vec4<f32>;
-  depth : f32;
-  mask : u32;
+  color : vec4<f32>,
+  depth : f32,
+  mask : u32,
 }
 )";
 
@@ -1031,8 +1031,8 @@ TEST_F(CanonicalizeEntryPointIOTest,
        StructParameters_SharedDeviceFunction_Spirv) {
   auto* src = R"(
 struct FragmentInput {
-  @location(0) value : f32;
-  @location(1) mul : f32;
+  @location(0) value : f32,
+  @location(1) mul : f32,
 };
 
 fn foo(x : FragmentInput) -> f32 {
@@ -1060,8 +1060,8 @@ fn frag_main2(inputs : FragmentInput) {
 @location(1) @internal(disable_validation__ignore_storage_class) var<in> mul_2 : f32;
 
 struct FragmentInput {
-  value : f32;
-  mul : f32;
+  value : f32,
+  mul : f32,
 }
 
 fn foo(x : FragmentInput) -> f32 {
@@ -1113,8 +1113,8 @@ fn foo(x : FragmentInput) -> f32 {
 }
 
 struct FragmentInput {
-  @location(0) value : f32;
-  @location(1) mul : f32;
+  @location(0) value : f32,
+  @location(1) mul : f32,
 };
 )";
 
@@ -1150,8 +1150,8 @@ fn foo(x : FragmentInput) -> f32 {
 }
 
 struct FragmentInput {
-  value : f32;
-  mul : f32;
+  value : f32,
+  mul : f32,
 }
 )";
 
@@ -1167,8 +1167,8 @@ TEST_F(CanonicalizeEntryPointIOTest,
        StructParameters_SharedDeviceFunction_Msl) {
   auto* src = R"(
 struct FragmentInput {
-  @location(0) value : f32;
-  @location(1) mul : f32;
+  @location(0) value : f32,
+  @location(1) mul : f32,
 };
 
 fn foo(x : FragmentInput) -> f32 {
@@ -1188,8 +1188,8 @@ fn frag_main2(inputs : FragmentInput) {
 
   auto* expect = R"(
 struct FragmentInput {
-  value : f32;
-  mul : f32;
+  value : f32,
+  mul : f32,
 }
 
 fn foo(x : FragmentInput) -> f32 {
@@ -1198,9 +1198,9 @@ fn foo(x : FragmentInput) -> f32 {
 
 struct tint_symbol_1 {
   @location(0)
-  value : f32;
+  value : f32,
   @location(1)
-  mul : f32;
+  mul : f32,
 }
 
 fn frag_main1_inner(inputs : FragmentInput) {
@@ -1214,9 +1214,9 @@ fn frag_main1(tint_symbol : tint_symbol_1) {
 
 struct tint_symbol_3 {
   @location(0)
-  value : f32;
+  value : f32,
   @location(1)
-  mul : f32;
+  mul : f32,
 }
 
 fn frag_main2_inner(inputs : FragmentInput) {
@@ -1255,17 +1255,17 @@ fn foo(x : FragmentInput) -> f32 {
 }
 
 struct FragmentInput {
-  @location(0) value : f32;
-  @location(1) mul : f32;
+  @location(0) value : f32,
+  @location(1) mul : f32,
 };
 )";
 
   auto* expect = R"(
 struct tint_symbol_1 {
   @location(0)
-  value : f32;
+  value : f32,
   @location(1)
-  mul : f32;
+  mul : f32,
 }
 
 fn frag_main1_inner(inputs : FragmentInput) {
@@ -1279,9 +1279,9 @@ fn frag_main1(tint_symbol : tint_symbol_1) {
 
 struct tint_symbol_3 {
   @location(0)
-  value : f32;
+  value : f32,
   @location(1)
-  mul : f32;
+  mul : f32,
 }
 
 fn frag_main2_inner(inputs : FragmentInput) {
@@ -1298,8 +1298,8 @@ fn foo(x : FragmentInput) -> f32 {
 }
 
 struct FragmentInput {
-  value : f32;
-  mul : f32;
+  value : f32,
+  mul : f32,
 }
 )";
 
@@ -1315,8 +1315,8 @@ TEST_F(CanonicalizeEntryPointIOTest,
        StructParameters_SharedDeviceFunction_Hlsl) {
   auto* src = R"(
 struct FragmentInput {
-  @location(0) value : f32;
-  @location(1) mul : f32;
+  @location(0) value : f32,
+  @location(1) mul : f32,
 };
 
 fn foo(x : FragmentInput) -> f32 {
@@ -1336,8 +1336,8 @@ fn frag_main2(inputs : FragmentInput) {
 
   auto* expect = R"(
 struct FragmentInput {
-  value : f32;
-  mul : f32;
+  value : f32,
+  mul : f32,
 }
 
 fn foo(x : FragmentInput) -> f32 {
@@ -1346,9 +1346,9 @@ fn foo(x : FragmentInput) -> f32 {
 
 struct tint_symbol_1 {
   @location(0)
-  value : f32;
+  value : f32,
   @location(1)
-  mul : f32;
+  mul : f32,
 }
 
 fn frag_main1_inner(inputs : FragmentInput) {
@@ -1362,9 +1362,9 @@ fn frag_main1(tint_symbol : tint_symbol_1) {
 
 struct tint_symbol_3 {
   @location(0)
-  value : f32;
+  value : f32,
   @location(1)
-  mul : f32;
+  mul : f32,
 }
 
 fn frag_main2_inner(inputs : FragmentInput) {
@@ -1403,17 +1403,17 @@ fn foo(x : FragmentInput) -> f32 {
 }
 
 struct FragmentInput {
-  @location(0) value : f32;
-  @location(1) mul : f32;
+  @location(0) value : f32,
+  @location(1) mul : f32,
 };
 )";
 
   auto* expect = R"(
 struct tint_symbol_1 {
   @location(0)
-  value : f32;
+  value : f32,
   @location(1)
-  mul : f32;
+  mul : f32,
 }
 
 fn frag_main1_inner(inputs : FragmentInput) {
@@ -1427,9 +1427,9 @@ fn frag_main1(tint_symbol : tint_symbol_1) {
 
 struct tint_symbol_3 {
   @location(0)
-  value : f32;
+  value : f32,
   @location(1)
-  mul : f32;
+  mul : f32,
 }
 
 fn frag_main2_inner(inputs : FragmentInput) {
@@ -1446,8 +1446,8 @@ fn foo(x : FragmentInput) -> f32 {
 }
 
 struct FragmentInput {
-  value : f32;
-  mul : f32;
+  value : f32,
+  mul : f32,
 }
 )";
 
@@ -1462,8 +1462,8 @@ struct FragmentInput {
 TEST_F(CanonicalizeEntryPointIOTest, Struct_ModuleScopeVariable) {
   auto* src = R"(
 struct FragmentInput {
-  @location(0) col1 : f32;
-  @location(1) col2 : f32;
+  @location(0) col1 : f32,
+  @location(1) col2 : f32,
 };
 
 var<private> global_inputs : FragmentInput;
@@ -1486,8 +1486,8 @@ fn frag_main1(inputs : FragmentInput) {
 
   auto* expect = R"(
 struct FragmentInput {
-  col1 : f32;
-  col2 : f32;
+  col1 : f32,
+  col2 : f32,
 }
 
 var<private> global_inputs : FragmentInput;
@@ -1502,9 +1502,9 @@ fn bar() -> f32 {
 
 struct tint_symbol_1 {
   @location(0)
-  col1 : f32;
+  col1 : f32,
   @location(1)
-  col2 : f32;
+  col2 : f32,
 }
 
 fn frag_main1_inner(inputs : FragmentInput) {
@@ -1547,17 +1547,17 @@ fn bar() -> f32 {
 var<private> global_inputs : FragmentInput;
 
 struct FragmentInput {
-  @location(0) col1 : f32;
-  @location(1) col2 : f32;
+  @location(0) col1 : f32,
+  @location(1) col2 : f32,
 };
 )";
 
   auto* expect = R"(
 struct tint_symbol_1 {
   @location(0)
-  col1 : f32;
+  col1 : f32,
   @location(1)
-  col2 : f32;
+  col2 : f32,
 }
 
 fn frag_main1_inner(inputs : FragmentInput) {
@@ -1582,8 +1582,8 @@ fn bar() -> f32 {
 var<private> global_inputs : FragmentInput;
 
 struct FragmentInput {
-  col1 : f32;
-  col2 : f32;
+  col1 : f32,
+  col2 : f32,
 }
 )";
 
@@ -1600,13 +1600,13 @@ TEST_F(CanonicalizeEntryPointIOTest, Struct_TypeAliases) {
 type myf32 = f32;
 
 struct FragmentInput {
-  @location(0) col1 : myf32;
-  @location(1) col2 : myf32;
+  @location(0) col1 : myf32,
+  @location(1) col2 : myf32,
 };
 
 struct FragmentOutput {
-  @location(0) col1 : myf32;
-  @location(1) col2 : myf32;
+  @location(0) col1 : myf32,
+  @location(1) col2 : myf32,
 };
 
 type MyFragmentInput = FragmentInput;
@@ -1628,13 +1628,13 @@ fn frag_main(inputs : MyFragmentInput) -> MyFragmentOutput {
 type myf32 = f32;
 
 struct FragmentInput {
-  col1 : myf32;
-  col2 : myf32;
+  col1 : myf32,
+  col2 : myf32,
 }
 
 struct FragmentOutput {
-  col1 : myf32;
-  col2 : myf32;
+  col1 : myf32,
+  col2 : myf32,
 }
 
 type MyFragmentInput = FragmentInput;
@@ -1647,16 +1647,16 @@ fn foo(x : MyFragmentInput) -> myf32 {
 
 struct tint_symbol_1 {
   @location(0)
-  col1 : f32;
+  col1 : f32,
   @location(1)
-  col2 : f32;
+  col2 : f32,
 }
 
 struct tint_symbol_2 {
   @location(0)
-  col1 : f32;
+  col1 : f32,
   @location(1)
-  col2 : f32;
+  col2 : f32,
 }
 
 fn frag_main_inner(inputs : MyFragmentInput) -> MyFragmentOutput {
@@ -1699,13 +1699,13 @@ fn foo(x : MyFragmentInput) -> myf32 {
 }
 
 struct FragmentInput {
-  @location(0) col1 : myf32;
-  @location(1) col2 : myf32;
+  @location(0) col1 : myf32,
+  @location(1) col2 : myf32,
 };
 
 struct FragmentOutput {
-  @location(0) col1 : myf32;
-  @location(1) col2 : myf32;
+  @location(0) col1 : myf32,
+  @location(1) col2 : myf32,
 };
 
 type myf32 = f32;
@@ -1714,16 +1714,16 @@ type myf32 = f32;
   auto* expect = R"(
 struct tint_symbol_1 {
   @location(0)
-  col1 : f32;
+  col1 : f32,
   @location(1)
-  col2 : f32;
+  col2 : f32,
 }
 
 struct tint_symbol_2 {
   @location(0)
-  col1 : f32;
+  col1 : f32,
   @location(1)
-  col2 : f32;
+  col2 : f32,
 }
 
 fn frag_main_inner(inputs : MyFragmentInput) -> MyFragmentOutput {
@@ -1749,13 +1749,13 @@ fn foo(x : MyFragmentInput) -> myf32 {
 }
 
 struct FragmentInput {
-  col1 : myf32;
-  col2 : myf32;
+  col1 : myf32,
+  col2 : myf32,
 }
 
 struct FragmentOutput {
-  col1 : myf32;
-  col2 : myf32;
+  col1 : myf32,
+  col2 : myf32,
 }
 
 type myf32 = f32;
@@ -1772,15 +1772,15 @@ type myf32 = f32;
 TEST_F(CanonicalizeEntryPointIOTest, InterpolateAttributes) {
   auto* src = R"(
 struct VertexOut {
-  @builtin(position) pos : vec4<f32>;
-  @location(1) @interpolate(flat) loc1: f32;
-  @location(2) @interpolate(linear, sample) loc2 : f32;
-  @location(3) @interpolate(perspective, centroid) loc3 : f32;
+  @builtin(position) pos : vec4<f32>,
+  @location(1) @interpolate(flat) loc1 : f32,
+  @location(2) @interpolate(linear, sample) loc2 : f32,
+  @location(3) @interpolate(perspective, centroid) loc3 : f32,
 };
 
 struct FragmentIn {
-  @location(1) @interpolate(flat) loc1: f32;
-  @location(2) @interpolate(linear, sample) loc2 : f32;
+  @location(1) @interpolate(flat) loc1 : f32,
+  @location(2) @interpolate(linear, sample) loc2 : f32,
 };
 
 @stage(vertex)
@@ -1797,26 +1797,26 @@ fn frag_main(inputs : FragmentIn,
 
   auto* expect = R"(
 struct VertexOut {
-  pos : vec4<f32>;
-  loc1 : f32;
-  loc2 : f32;
-  loc3 : f32;
+  pos : vec4<f32>,
+  loc1 : f32,
+  loc2 : f32,
+  loc3 : f32,
 }
 
 struct FragmentIn {
-  loc1 : f32;
-  loc2 : f32;
+  loc1 : f32,
+  loc2 : f32,
 }
 
 struct tint_symbol {
   @location(1) @interpolate(flat)
-  loc1 : f32;
+  loc1 : f32,
   @location(2) @interpolate(linear, sample)
-  loc2 : f32;
+  loc2 : f32,
   @location(3) @interpolate(perspective, centroid)
-  loc3 : f32;
+  loc3 : f32,
   @builtin(position)
-  pos : vec4<f32>;
+  pos : vec4<f32>,
 }
 
 fn vert_main_inner() -> VertexOut {
@@ -1836,11 +1836,11 @@ fn vert_main() -> tint_symbol {
 
 struct tint_symbol_2 {
   @location(1) @interpolate(flat)
-  loc1 : f32;
+  loc1 : f32,
   @location(2) @interpolate(linear, sample)
-  loc2 : f32;
+  loc2 : f32,
   @location(3) @interpolate(perspective, centroid)
-  loc3 : f32;
+  loc3 : f32,
 }
 
 fn frag_main_inner(inputs : FragmentIn, loc3 : f32) {
@@ -1875,26 +1875,26 @@ fn vert_main() -> VertexOut {
 }
 
 struct VertexOut {
-  @builtin(position) pos : vec4<f32>;
-  @location(1) @interpolate(flat) loc1: f32;
-  @location(2) @interpolate(linear, sample) loc2 : f32;
-  @location(3) @interpolate(perspective, centroid) loc3 : f32;
+  @builtin(position) pos : vec4<f32>,
+  @location(1) @interpolate(flat) loc1 : f32,
+  @location(2) @interpolate(linear, sample) loc2 : f32,
+  @location(3) @interpolate(perspective, centroid) loc3 : f32,
 };
 
 struct FragmentIn {
-  @location(1) @interpolate(flat) loc1: f32;
-  @location(2) @interpolate(linear, sample) loc2 : f32;
+  @location(1) @interpolate(flat) loc1: f32,
+  @location(2) @interpolate(linear, sample) loc2 : f32,
 };
 )";
 
   auto* expect = R"(
 struct tint_symbol_1 {
   @location(1) @interpolate(flat)
-  loc1 : f32;
+  loc1 : f32,
   @location(2) @interpolate(linear, sample)
-  loc2 : f32;
+  loc2 : f32,
   @location(3) @interpolate(perspective, centroid)
-  loc3 : f32;
+  loc3 : f32,
 }
 
 fn frag_main_inner(inputs : FragmentIn, loc3 : f32) {
@@ -1908,13 +1908,13 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 
 struct tint_symbol_2 {
   @location(1) @interpolate(flat)
-  loc1 : f32;
+  loc1 : f32,
   @location(2) @interpolate(linear, sample)
-  loc2 : f32;
+  loc2 : f32,
   @location(3) @interpolate(perspective, centroid)
-  loc3 : f32;
+  loc3 : f32,
   @builtin(position)
-  pos : vec4<f32>;
+  pos : vec4<f32>,
 }
 
 fn vert_main_inner() -> VertexOut {
@@ -1933,15 +1933,15 @@ fn vert_main() -> tint_symbol_2 {
 }
 
 struct VertexOut {
-  pos : vec4<f32>;
-  loc1 : f32;
-  loc2 : f32;
-  loc3 : f32;
+  pos : vec4<f32>,
+  loc1 : f32,
+  loc2 : f32,
+  loc3 : f32,
 }
 
 struct FragmentIn {
-  loc1 : f32;
-  loc2 : f32;
+  loc1 : f32,
+  loc2 : f32,
 }
 )";
 
@@ -1958,25 +1958,25 @@ TEST_F(CanonicalizeEntryPointIOTest, InterpolateAttributes_Integers_Spirv) {
   // fragment inputs, but not vertex inputs or fragment outputs.
   auto* src = R"(
 struct VertexIn {
-  @location(0) i : i32;
-  @location(1) u : u32;
-  @location(2) vi : vec4<i32>;
-  @location(3) vu : vec4<u32>;
+  @location(0) i : i32,
+  @location(1) u : u32,
+  @location(2) vi : vec4<i32>,
+  @location(3) vu : vec4<u32>,
 };
 
 struct VertexOut {
-  @location(0) @interpolate(flat) i : i32;
-  @location(1) @interpolate(flat) u : u32;
-  @location(2) @interpolate(flat) vi : vec4<i32>;
-  @location(3) @interpolate(flat) vu : vec4<u32>;
-  @builtin(position) pos : vec4<f32>;
+  @location(0) @interpolate(flat) i : i32,
+  @location(1) @interpolate(flat) u : u32,
+  @location(2) @interpolate(flat) vi : vec4<i32>,
+  @location(3) @interpolate(flat) vu : vec4<u32>,
+  @builtin(position) pos : vec4<f32>,
 };
 
 struct FragmentInterface {
-  @location(0) @interpolate(flat) i : i32;
-  @location(1) @interpolate(flat) u : u32;
-  @location(2) @interpolate(flat) vi : vec4<i32>;
-  @location(3) @interpolate(flat) vu : vec4<u32>;
+  @location(0) @interpolate(flat) i : i32,
+  @location(1) @interpolate(flat) u : u32,
+  @location(2) @interpolate(flat) vi : vec4<i32>,
+  @location(3) @interpolate(flat) vu : vec4<u32>,
 };
 
 @stage(vertex)
@@ -2027,25 +2027,25 @@ fn frag_main(inputs : FragmentInterface) -> FragmentInterface {
 @location(3) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> vu_4 : vec4<u32>;
 
 struct VertexIn {
-  i : i32;
-  u : u32;
-  vi : vec4<i32>;
-  vu : vec4<u32>;
+  i : i32,
+  u : u32,
+  vi : vec4<i32>,
+  vu : vec4<u32>,
 }
 
 struct VertexOut {
-  i : i32;
-  u : u32;
-  vi : vec4<i32>;
-  vu : vec4<u32>;
-  pos : vec4<f32>;
+  i : i32,
+  u : u32,
+  vi : vec4<i32>,
+  vu : vec4<u32>,
+  pos : vec4<f32>,
 }
 
 struct FragmentInterface {
-  i : i32;
-  u : u32;
-  vi : vec4<i32>;
-  vu : vec4<u32>;
+  i : i32,
+  u : u32,
+  vi : vec4<i32>,
+  vu : vec4<u32>,
 }
 
 fn vert_main_inner(in : VertexIn) -> VertexOut {
@@ -2100,25 +2100,25 @@ fn frag_main(inputs : FragmentInterface) -> FragmentInterface {
 }
 
 struct VertexIn {
-  @location(0) i : i32;
-  @location(1) u : u32;
-  @location(2) vi : vec4<i32>;
-  @location(3) vu : vec4<u32>;
+  @location(0) i : i32,
+  @location(1) u : u32,
+  @location(2) vi : vec4<i32>,
+  @location(3) vu : vec4<u32>,
 };
 
 struct VertexOut {
-  @location(0) @interpolate(flat) i : i32;
-  @location(1) @interpolate(flat) u : u32;
-  @location(2) @interpolate(flat) vi : vec4<i32>;
-  @location(3) @interpolate(flat) vu : vec4<u32>;
-  @builtin(position) pos : vec4<f32>;
+  @location(0) @interpolate(flat) i : i32,
+  @location(1) @interpolate(flat) u : u32,
+  @location(2) @interpolate(flat) vi : vec4<i32>,
+  @location(3) @interpolate(flat) vu : vec4<u32>,
+  @builtin(position) pos : vec4<f32>,
 };
 
 struct FragmentInterface {
-  @location(0) @interpolate(flat) i : i32;
-  @location(1) @interpolate(flat) u : u32;
-  @location(2) @interpolate(flat) vi : vec4<i32>;
-  @location(3) @interpolate(flat) vu : vec4<u32>;
+  @location(0) @interpolate(flat) i : i32,
+  @location(1) @interpolate(flat) u : u32,
+  @location(2) @interpolate(flat) vi : vec4<i32>,
+  @location(3) @interpolate(flat) vu : vec4<u32>,
 };
 )";
 
@@ -2186,25 +2186,25 @@ fn frag_main() {
 }
 
 struct VertexIn {
-  i : i32;
-  u : u32;
-  vi : vec4<i32>;
-  vu : vec4<u32>;
+  i : i32,
+  u : u32,
+  vi : vec4<i32>,
+  vu : vec4<u32>,
 }
 
 struct VertexOut {
-  i : i32;
-  u : u32;
-  vi : vec4<i32>;
-  vu : vec4<u32>;
-  pos : vec4<f32>;
+  i : i32,
+  u : u32,
+  vi : vec4<i32>,
+  vu : vec4<u32>,
+  pos : vec4<f32>,
 }
 
 struct FragmentInterface {
-  i : i32;
-  u : u32;
-  vi : vec4<i32>;
-  vu : vec4<u32>;
+  i : i32,
+  u : u32,
+  vi : vec4<i32>,
+  vu : vec4<u32>,
 }
 )";
 
@@ -2219,7 +2219,7 @@ struct FragmentInterface {
 TEST_F(CanonicalizeEntryPointIOTest, InvariantAttributes) {
   auto* src = R"(
 struct VertexOut {
-  @builtin(position) @invariant pos : vec4<f32>;
+  @builtin(position) @invariant pos : vec4<f32>,
 };
 
 @stage(vertex)
@@ -2235,12 +2235,12 @@ fn main2() -> @builtin(position) @invariant vec4<f32> {
 
   auto* expect = R"(
 struct VertexOut {
-  pos : vec4<f32>;
+  pos : vec4<f32>,
 }
 
 struct tint_symbol {
   @builtin(position) @invariant
-  pos : vec4<f32>;
+  pos : vec4<f32>,
 }
 
 fn main1_inner() -> VertexOut {
@@ -2257,7 +2257,7 @@ fn main1() -> tint_symbol {
 
 struct tint_symbol_1 {
   @builtin(position) @invariant
-  value : vec4<f32>;
+  value : vec4<f32>,
 }
 
 fn main2_inner() -> vec4<f32> {
@@ -2294,14 +2294,14 @@ fn main2() -> @builtin(position) @invariant vec4<f32> {
 }
 
 struct VertexOut {
-  @builtin(position) @invariant pos : vec4<f32>;
+  @builtin(position) @invariant pos : vec4<f32>,
 };
 )";
 
   auto* expect = R"(
 struct tint_symbol {
   @builtin(position) @invariant
-  pos : vec4<f32>;
+  pos : vec4<f32>,
 }
 
 fn main1_inner() -> VertexOut {
@@ -2318,7 +2318,7 @@ fn main1() -> tint_symbol {
 
 struct tint_symbol_1 {
   @builtin(position) @invariant
-  value : vec4<f32>;
+  value : vec4<f32>,
 }
 
 fn main2_inner() -> vec4<f32> {
@@ -2334,7 +2334,7 @@ fn main2() -> tint_symbol_1 {
 }
 
 struct VertexOut {
-  pos : vec4<f32>;
+  pos : vec4<f32>,
 }
 )";
 
@@ -2349,13 +2349,13 @@ struct VertexOut {
 TEST_F(CanonicalizeEntryPointIOTest, Struct_LayoutAttributes) {
   auto* src = R"(
 struct FragmentInput {
-  @size(16) @location(1) value : f32;
-  @builtin(position) @align(32) coord : vec4<f32>;
-  @location(0) @interpolate(linear, sample) @align(128) loc0 : f32;
+  @size(16) @location(1) value : f32,
+  @builtin(position) @align(32) coord : vec4<f32>,
+  @location(0) @interpolate(linear, sample) @align(128) loc0 : f32,
 };
 
 struct FragmentOutput {
-  @size(16) @location(1) @interpolate(flat) value : f32;
+  @size(16) @location(1) @interpolate(flat) value : f32,
 };
 
 @stage(fragment)
@@ -2367,30 +2367,30 @@ fn frag_main(inputs : FragmentInput) -> FragmentOutput {
   auto* expect = R"(
 struct FragmentInput {
   @size(16)
-  value : f32;
+  value : f32,
   @align(32)
-  coord : vec4<f32>;
+  coord : vec4<f32>,
   @align(128)
-  loc0 : f32;
+  loc0 : f32,
 }
 
 struct FragmentOutput {
   @size(16)
-  value : f32;
+  value : f32,
 }
 
 struct tint_symbol_1 {
   @location(0) @interpolate(linear, sample)
-  loc0 : f32;
+  loc0 : f32,
   @location(1)
-  value : f32;
+  value : f32,
   @builtin(position)
-  coord : vec4<f32>;
+  coord : vec4<f32>,
 }
 
 struct tint_symbol_2 {
   @location(1) @interpolate(flat)
-  value : f32;
+  value : f32,
 }
 
 fn frag_main_inner(inputs : FragmentInput) -> FragmentOutput {
@@ -2422,29 +2422,29 @@ fn frag_main(inputs : FragmentInput) -> FragmentOutput {
 }
 
 struct FragmentInput {
-  @size(16) @location(1) value : f32;
-  @builtin(position) @align(32) coord : vec4<f32>;
-  @location(0) @interpolate(linear, sample) @align(128) loc0 : f32;
+  @size(16) @location(1) value : f32,
+  @builtin(position) @align(32) coord : vec4<f32>,
+  @location(0) @interpolate(linear, sample) @align(128) loc0 : f32,
 };
 
 struct FragmentOutput {
-  @size(16) @location(1) @interpolate(flat) value : f32;
+  @size(16) @location(1) @interpolate(flat) value : f32,
 };
 )";
 
   auto* expect = R"(
 struct tint_symbol_1 {
   @location(0) @interpolate(linear, sample)
-  loc0 : f32;
+  loc0 : f32,
   @location(1)
-  value : f32;
+  value : f32,
   @builtin(position)
-  coord : vec4<f32>;
+  coord : vec4<f32>,
 }
 
 struct tint_symbol_2 {
   @location(1) @interpolate(flat)
-  value : f32;
+  value : f32,
 }
 
 fn frag_main_inner(inputs : FragmentInput) -> FragmentOutput {
@@ -2461,16 +2461,16 @@ fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 
 struct FragmentInput {
   @size(16)
-  value : f32;
+  value : f32,
   @align(32)
-  coord : vec4<f32>;
+  coord : vec4<f32>,
   @align(128)
-  loc0 : f32;
+  loc0 : f32,
 }
 
 struct FragmentOutput {
   @size(16)
-  value : f32;
+  value : f32,
 }
 )";
 
@@ -2485,17 +2485,17 @@ struct FragmentOutput {
 TEST_F(CanonicalizeEntryPointIOTest, SortedMembers) {
   auto* src = R"(
 struct VertexOutput {
-  @location(1) @interpolate(flat) b : u32;
-  @builtin(position) pos : vec4<f32>;
-  @location(3) @interpolate(flat) d : u32;
-  @location(0) a : f32;
-  @location(2) @interpolate(flat) c : i32;
+  @location(1) @interpolate(flat) b : u32,
+  @builtin(position) pos : vec4<f32>,
+  @location(3) @interpolate(flat) d : u32,
+  @location(0) a : f32,
+  @location(2) @interpolate(flat) c : i32,
 };
 
 struct FragmentInputExtra {
-  @location(3) @interpolate(flat) d : u32;
-  @builtin(position) pos : vec4<f32>;
-  @location(0) a : f32;
+  @location(3) @interpolate(flat) d : u32,
+  @builtin(position) pos : vec4<f32>,
+  @location(0) a : f32,
 };
 
 @stage(vertex)
@@ -2513,30 +2513,30 @@ fn frag_main(@builtin(front_facing) ff : bool,
 
   auto* expect = R"(
 struct VertexOutput {
-  b : u32;
-  pos : vec4<f32>;
-  d : u32;
-  a : f32;
-  c : i32;
+  b : u32,
+  pos : vec4<f32>,
+  d : u32,
+  a : f32,
+  c : i32,
 }
 
 struct FragmentInputExtra {
-  d : u32;
-  pos : vec4<f32>;
-  a : f32;
+  d : u32,
+  pos : vec4<f32>,
+  a : f32,
 }
 
 struct tint_symbol {
   @location(0)
-  a : f32;
+  a : f32,
   @location(1) @interpolate(flat)
-  b : u32;
+  b : u32,
   @location(2) @interpolate(flat)
-  c : i32;
+  c : i32,
   @location(3) @interpolate(flat)
-  d : u32;
+  d : u32,
   @builtin(position)
-  pos : vec4<f32>;
+  pos : vec4<f32>,
 }
 
 fn vert_main_inner() -> VertexOutput {
@@ -2557,17 +2557,17 @@ fn vert_main() -> tint_symbol {
 
 struct tint_symbol_2 {
   @location(0)
-  a : f32;
+  a : f32,
   @location(1) @interpolate(flat)
-  b : u32;
+  b : u32,
   @location(2) @interpolate(flat)
-  c : i32;
+  c : i32,
   @location(3) @interpolate(flat)
-  d : u32;
+  d : u32,
   @builtin(position)
-  pos : vec4<f32>;
+  pos : vec4<f32>,
   @builtin(front_facing)
-  ff : bool;
+  ff : bool,
 }
 
 fn frag_main_inner(ff : bool, c : i32, inputs : FragmentInputExtra, b : u32) {
@@ -2602,32 +2602,32 @@ fn frag_main(@builtin(front_facing) ff : bool,
 }
 
 struct VertexOutput {
-  @location(1) @interpolate(flat) b : u32;
-  @builtin(position) pos : vec4<f32>;
-  @location(3) @interpolate(flat) d : u32;
-  @location(0) a : f32;
-  @location(2) @interpolate(flat) c : i32;
+  @location(1) @interpolate(flat) b : u32,
+  @builtin(position) pos : vec4<f32>,
+  @location(3) @interpolate(flat) d : u32,
+  @location(0) a : f32,
+  @location(2) @interpolate(flat) c : i32,
 };
 
 struct FragmentInputExtra {
-  @location(3) @interpolate(flat) d : u32;
-  @builtin(position) pos : vec4<f32>;
-  @location(0) a : f32;
+  @location(3) @interpolate(flat) d : u32,
+  @builtin(position) pos : vec4<f32>,
+  @location(0) a : f32,
 };
 )";
 
   auto* expect = R"(
 struct tint_symbol {
   @location(0)
-  a : f32;
+  a : f32,
   @location(1) @interpolate(flat)
-  b : u32;
+  b : u32,
   @location(2) @interpolate(flat)
-  c : i32;
+  c : i32,
   @location(3) @interpolate(flat)
-  d : u32;
+  d : u32,
   @builtin(position)
-  pos : vec4<f32>;
+  pos : vec4<f32>,
 }
 
 fn vert_main_inner() -> VertexOutput {
@@ -2648,17 +2648,17 @@ fn vert_main() -> tint_symbol {
 
 struct tint_symbol_2 {
   @location(0)
-  a : f32;
+  a : f32,
   @location(1) @interpolate(flat)
-  b : u32;
+  b : u32,
   @location(2) @interpolate(flat)
-  c : i32;
+  c : i32,
   @location(3) @interpolate(flat)
-  d : u32;
+  d : u32,
   @builtin(position)
-  pos : vec4<f32>;
+  pos : vec4<f32>,
   @builtin(front_facing)
-  ff : bool;
+  ff : bool,
 }
 
 fn frag_main_inner(ff : bool, c : i32, inputs : FragmentInputExtra, b : u32) {
@@ -2670,17 +2670,17 @@ fn frag_main(tint_symbol_1 : tint_symbol_2) {
 }
 
 struct VertexOutput {
-  b : u32;
-  pos : vec4<f32>;
-  d : u32;
-  a : f32;
-  c : i32;
+  b : u32,
+  pos : vec4<f32>,
+  d : u32,
+  a : f32,
+  c : i32,
 }
 
 struct FragmentInputExtra {
-  d : u32;
-  pos : vec4<f32>;
-  a : f32;
+  d : u32,
+  pos : vec4<f32>,
+  a : f32,
 }
 )";
 
@@ -2702,7 +2702,7 @@ fn tint_symbol_1(@location(0) col : f32) {
   auto* expect = R"(
 struct tint_symbol_2 {
   @location(0)
-  col : f32;
+  col : f32,
 }
 
 fn tint_symbol_1_inner(col : f32) {
@@ -2732,7 +2732,7 @@ fn frag_main() {
   auto* expect = R"(
 struct tint_symbol {
   @builtin(sample_mask)
-  fixed_sample_mask : u32;
+  fixed_sample_mask : u32,
 }
 
 fn frag_main_inner() {
@@ -2766,7 +2766,7 @@ fn frag_main() {
   auto* expect = R"(
 struct tint_symbol {
   @builtin(sample_mask)
-  fixed_sample_mask : u32;
+  fixed_sample_mask : u32,
 }
 
 fn frag_main_inner() {
@@ -2801,7 +2801,7 @@ fn frag_main() -> @builtin(sample_mask) u32 {
   auto* expect = R"(
 struct tint_symbol {
   @builtin(sample_mask)
-  value : u32;
+  value : u32,
 }
 
 fn frag_main_inner() -> u32 {
@@ -2836,9 +2836,9 @@ fn frag_main() -> @location(0) f32 {
   auto* expect = R"(
 struct tint_symbol {
   @location(0)
-  value : f32;
+  value : f32,
   @builtin(sample_mask)
-  fixed_sample_mask : u32;
+  fixed_sample_mask : u32,
 }
 
 fn frag_main_inner() -> f32 {
@@ -2866,9 +2866,9 @@ fn frag_main() -> tint_symbol {
 TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_StructWithAuthoredMask) {
   auto* src = R"(
 struct Output {
-  @builtin(frag_depth) depth : f32;
-  @builtin(sample_mask) mask : u32;
-  @location(0) value : f32;
+  @builtin(frag_depth) depth : f32,
+  @builtin(sample_mask) mask : u32,
+  @location(0) value : f32,
 };
 
 @stage(fragment)
@@ -2879,18 +2879,18 @@ fn frag_main() -> Output {
 
   auto* expect = R"(
 struct Output {
-  depth : f32;
-  mask : u32;
-  value : f32;
+  depth : f32,
+  mask : u32,
+  value : f32,
 }
 
 struct tint_symbol {
   @location(0)
-  value : f32;
+  value : f32,
   @builtin(frag_depth)
-  depth : f32;
+  depth : f32,
   @builtin(sample_mask)
-  mask : u32;
+  mask : u32,
 }
 
 fn frag_main_inner() -> Output {
@@ -2925,20 +2925,20 @@ fn frag_main() -> Output {
 }
 
 struct Output {
-  @builtin(frag_depth) depth : f32;
-  @builtin(sample_mask) mask : u32;
-  @location(0) value : f32;
+  @builtin(frag_depth) depth : f32,
+  @builtin(sample_mask) mask : u32,
+  @location(0) value : f32,
 };
 )";
 
   auto* expect = R"(
 struct tint_symbol {
   @location(0)
-  value : f32;
+  value : f32,
   @builtin(frag_depth)
-  depth : f32;
+  depth : f32,
   @builtin(sample_mask)
-  mask : u32;
+  mask : u32,
 }
 
 fn frag_main_inner() -> Output {
@@ -2956,9 +2956,9 @@ fn frag_main() -> tint_symbol {
 }
 
 struct Output {
-  depth : f32;
-  mask : u32;
-  value : f32;
+  depth : f32,
+  mask : u32,
+  value : f32,
 }
 )";
 
@@ -2974,8 +2974,8 @@ TEST_F(CanonicalizeEntryPointIOTest,
        FixedSampleMask_StructWithoutAuthoredMask) {
   auto* src = R"(
 struct Output {
-  @builtin(frag_depth) depth : f32;
-  @location(0) value : f32;
+  @builtin(frag_depth) depth : f32,
+  @location(0) value : f32,
 };
 
 @stage(fragment)
@@ -2986,17 +2986,17 @@ fn frag_main() -> Output {
 
   auto* expect = R"(
 struct Output {
-  depth : f32;
-  value : f32;
+  depth : f32,
+  value : f32,
 }
 
 struct tint_symbol {
   @location(0)
-  value : f32;
+  value : f32,
   @builtin(frag_depth)
-  depth : f32;
+  depth : f32,
   @builtin(sample_mask)
-  fixed_sample_mask : u32;
+  fixed_sample_mask : u32,
 }
 
 fn frag_main_inner() -> Output {
@@ -3031,19 +3031,19 @@ fn frag_main() -> Output {
 }
 
 struct Output {
-  @builtin(frag_depth) depth : f32;
-  @location(0) value : f32;
+  @builtin(frag_depth) depth : f32,
+  @location(0) value : f32,
 };
 )";
 
   auto* expect = R"(
 struct tint_symbol {
   @location(0)
-  value : f32;
+  value : f32,
   @builtin(frag_depth)
-  depth : f32;
+  depth : f32,
   @builtin(sample_mask)
-  fixed_sample_mask : u32;
+  fixed_sample_mask : u32,
 }
 
 fn frag_main_inner() -> Output {
@@ -3061,8 +3061,8 @@ fn frag_main() -> tint_symbol {
 }
 
 struct Output {
-  depth : f32;
-  value : f32;
+  depth : f32,
+  value : f32,
 }
 )";
 
@@ -3099,7 +3099,7 @@ fn comp_main1() {
   auto* expect = R"(
 struct tint_symbol {
   @builtin(sample_mask)
-  value : u32;
+  value : u32,
 }
 
 fn frag_main1_inner() -> u32 {
@@ -3116,9 +3116,9 @@ fn frag_main1() -> tint_symbol {
 
 struct tint_symbol_1 {
   @location(0)
-  value : f32;
+  value : f32,
   @builtin(sample_mask)
-  fixed_sample_mask : u32;
+  fixed_sample_mask : u32,
 }
 
 fn frag_main2_inner() -> f32 {
@@ -3136,7 +3136,7 @@ fn frag_main2() -> tint_symbol_1 {
 
 struct tint_symbol_2 {
   @builtin(position)
-  value : vec4<f32>;
+  value : vec4<f32>,
 }
 
 fn vert_main1_inner() -> vec4<f32> {
@@ -3167,8 +3167,8 @@ fn comp_main1() {
 TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_AvoidNameClash) {
   auto* src = R"(
 struct FragOut {
-  @location(0) fixed_sample_mask : vec4<f32>;
-  @location(1) fixed_sample_mask_1 : vec4<f32>;
+  @location(0) fixed_sample_mask : vec4<f32>,
+  @location(1) fixed_sample_mask_1 : vec4<f32>,
 };
 
 @stage(fragment)
@@ -3179,17 +3179,17 @@ fn frag_main() -> FragOut {
 
   auto* expect = R"(
 struct FragOut {
-  fixed_sample_mask : vec4<f32>;
-  fixed_sample_mask_1 : vec4<f32>;
+  fixed_sample_mask : vec4<f32>,
+  fixed_sample_mask_1 : vec4<f32>,
 }
 
 struct tint_symbol {
   @location(0)
-  fixed_sample_mask : vec4<f32>;
+  fixed_sample_mask : vec4<f32>,
   @location(1)
-  fixed_sample_mask_1 : vec4<f32>;
+  fixed_sample_mask_1 : vec4<f32>,
   @builtin(sample_mask)
-  fixed_sample_mask_2 : u32;
+  fixed_sample_mask_2 : u32,
 }
 
 fn frag_main_inner() -> FragOut {
@@ -3260,9 +3260,9 @@ fn vert_main() -> @builtin(position) vec4<f32> {
   auto* expect = R"(
 struct tint_symbol {
   @builtin(position)
-  value : vec4<f32>;
+  value : vec4<f32>,
   @builtin(pointsize)
-  vertex_point_size : f32;
+  vertex_point_size : f32,
 }
 
 fn vert_main_inner() -> vec4<f32> {
@@ -3290,7 +3290,7 @@ fn vert_main() -> tint_symbol {
 TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_ReturnStruct_Spirv) {
   auto* src = R"(
 struct VertOut {
-  @builtin(position) pos : vec4<f32>;
+  @builtin(position) pos : vec4<f32>,
 };
 
 @stage(vertex)
@@ -3305,7 +3305,7 @@ fn vert_main() -> VertOut {
 @builtin(pointsize) @internal(disable_validation__ignore_storage_class) var<out> vertex_point_size : f32;
 
 struct VertOut {
-  pos : vec4<f32>;
+  pos : vec4<f32>,
 }
 
 fn vert_main_inner() -> VertOut {
@@ -3337,7 +3337,7 @@ fn vert_main() -> VertOut {
 }
 
 struct VertOut {
-  @builtin(position) pos : vec4<f32>;
+  @builtin(position) pos : vec4<f32>,
 };
 )";
 
@@ -3358,7 +3358,7 @@ fn vert_main() {
 }
 
 struct VertOut {
-  pos : vec4<f32>;
+  pos : vec4<f32>,
 }
 )";
 
@@ -3373,7 +3373,7 @@ struct VertOut {
 TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_ReturnStruct_Msl) {
   auto* src = R"(
 struct VertOut {
-  @builtin(position) pos : vec4<f32>;
+  @builtin(position) pos : vec4<f32>,
 };
 
 @stage(vertex)
@@ -3384,14 +3384,14 @@ fn vert_main() -> VertOut {
 
   auto* expect = R"(
 struct VertOut {
-  pos : vec4<f32>;
+  pos : vec4<f32>,
 }
 
 struct tint_symbol {
   @builtin(position)
-  pos : vec4<f32>;
+  pos : vec4<f32>,
   @builtin(pointsize)
-  vertex_point_size : f32;
+  vertex_point_size : f32,
 }
 
 fn vert_main_inner() -> VertOut {
@@ -3425,16 +3425,16 @@ fn vert_main() -> VertOut {
 }
 
 struct VertOut {
-  @builtin(position) pos : vec4<f32>;
+  @builtin(position) pos : vec4<f32>,
 };
 )";
 
   auto* expect = R"(
 struct tint_symbol {
   @builtin(position)
-  pos : vec4<f32>;
+  pos : vec4<f32>,
   @builtin(pointsize)
-  vertex_point_size : f32;
+  vertex_point_size : f32,
 }
 
 fn vert_main_inner() -> VertOut {
@@ -3451,7 +3451,7 @@ fn vert_main() -> tint_symbol {
 }
 
 struct VertOut {
-  pos : vec4<f32>;
+  pos : vec4<f32>,
 }
 )";
 
@@ -3470,16 +3470,16 @@ var<private> vertex_point_size_1 : f32;
 var<private> vertex_point_size_2 : f32;
 
 struct VertIn1 {
-  @location(0) collide : f32;
+  @location(0) collide : f32,
 };
 
 struct VertIn2 {
-  @location(1) collide : f32;
+  @location(1) collide : f32,
 };
 
 struct VertOut {
-  @location(0) vertex_point_size : f32;
-  @builtin(position) vertex_point_size_1 : vec4<f32>;
+  @location(0) vertex_point_size : f32,
+  @builtin(position) vertex_point_size_1 : vec4<f32>,
 };
 
 @stage(vertex)
@@ -3507,16 +3507,16 @@ var<private> vertex_point_size_1 : f32;
 var<private> vertex_point_size_2 : f32;
 
 struct VertIn1 {
-  collide : f32;
+  collide : f32,
 }
 
 struct VertIn2 {
-  collide : f32;
+  collide : f32,
 }
 
 struct VertOut {
-  vertex_point_size : f32;
-  vertex_point_size_1 : vec4<f32>;
+  vertex_point_size : f32,
+  vertex_point_size_1 : vec4<f32>,
 }
 
 fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
@@ -3551,11 +3551,11 @@ fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
 }
 
 struct VertIn1 {
-  @location(0) collide : f32;
+  @location(0) collide : f32,
 };
 
 struct VertIn2 {
-  @location(1) collide : f32;
+  @location(1) collide : f32,
 };
 
 var<private> vertex_point_size : f32;
@@ -3563,8 +3563,8 @@ var<private> vertex_point_size_1 : f32;
 var<private> vertex_point_size_2 : f32;
 
 struct VertOut {
-  @location(0) vertex_point_size : f32;
-  @builtin(position) vertex_point_size_1 : vec4<f32>;
+  @location(0) vertex_point_size : f32,
+  @builtin(position) vertex_point_size_1 : vec4<f32>,
 };
 )";
 
@@ -3593,11 +3593,11 @@ fn vert_main() {
 }
 
 struct VertIn1 {
-  collide : f32;
+  collide : f32,
 }
 
 struct VertIn2 {
-  collide : f32;
+  collide : f32,
 }
 
 var<private> vertex_point_size : f32;
@@ -3607,8 +3607,8 @@ var<private> vertex_point_size_1 : f32;
 var<private> vertex_point_size_2 : f32;
 
 struct VertOut {
-  vertex_point_size : f32;
-  vertex_point_size_1 : vec4<f32>;
+  vertex_point_size : f32,
+  vertex_point_size_1 : vec4<f32>,
 }
 )";
 
@@ -3623,16 +3623,16 @@ struct VertOut {
 TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_AvoidNameClash_Msl) {
   auto* src = R"(
 struct VertIn1 {
-  @location(0) collide : f32;
+  @location(0) collide : f32,
 };
 
 struct VertIn2 {
-  @location(1) collide : f32;
+  @location(1) collide : f32,
 };
 
 struct VertOut {
-  @location(0) vertex_point_size : vec4<f32>;
-  @builtin(position) vertex_point_size_1 : vec4<f32>;
+  @location(0) vertex_point_size : vec4<f32>,
+  @builtin(position) vertex_point_size_1 : vec4<f32>,
 };
 
 @stage(vertex)
@@ -3644,32 +3644,32 @@ fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
 
   auto* expect = R"(
 struct VertIn1 {
-  collide : f32;
+  collide : f32,
 }
 
 struct VertIn2 {
-  collide : f32;
+  collide : f32,
 }
 
 struct VertOut {
-  vertex_point_size : vec4<f32>;
-  vertex_point_size_1 : vec4<f32>;
+  vertex_point_size : vec4<f32>,
+  vertex_point_size_1 : vec4<f32>,
 }
 
 struct tint_symbol_1 {
   @location(0)
-  collide : f32;
+  collide : f32,
   @location(1)
-  collide_2 : f32;
+  collide_2 : f32,
 }
 
 struct tint_symbol_2 {
   @location(0)
-  vertex_point_size : vec4<f32>;
+  vertex_point_size : vec4<f32>,
   @builtin(position)
-  vertex_point_size_1 : vec4<f32>;
+  vertex_point_size_1 : vec4<f32>,
   @builtin(pointsize)
-  vertex_point_size_2 : f32;
+  vertex_point_size_2 : f32,
 }
 
 fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
@@ -3706,34 +3706,34 @@ fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
 }
 
 struct VertIn1 {
-  @location(0) collide : f32;
+  @location(0) collide : f32,
 };
 
 struct VertIn2 {
-  @location(1) collide : f32;
+  @location(1) collide : f32,
 };
 
 struct VertOut {
-  @location(0) vertex_point_size : vec4<f32>;
-  @builtin(position) vertex_point_size_1 : vec4<f32>;
+  @location(0) vertex_point_size : vec4<f32>,
+  @builtin(position) vertex_point_size_1 : vec4<f32>,
 };
 )";
 
   auto* expect = R"(
 struct tint_symbol_1 {
   @location(0)
-  collide : f32;
+  collide : f32,
   @location(1)
-  collide_2 : f32;
+  collide_2 : f32,
 }
 
 struct tint_symbol_2 {
   @location(0)
-  vertex_point_size : vec4<f32>;
+  vertex_point_size : vec4<f32>,
   @builtin(position)
-  vertex_point_size_1 : vec4<f32>;
+  vertex_point_size_1 : vec4<f32>,
   @builtin(pointsize)
-  vertex_point_size_2 : f32;
+  vertex_point_size_2 : f32,
 }
 
 fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
@@ -3752,16 +3752,16 @@ fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 }
 
 struct VertIn1 {
-  collide : f32;
+  collide : f32,
 }
 
 struct VertIn2 {
-  collide : f32;
+  collide : f32,
 }
 
 struct VertOut {
-  vertex_point_size : vec4<f32>;
-  vertex_point_size_1 : vec4<f32>;
+  vertex_point_size : vec4<f32>,
+  vertex_point_size_1 : vec4<f32>,
 }
 )";
 
@@ -3776,16 +3776,16 @@ struct VertOut {
 TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_AvoidNameClash_Hlsl) {
   auto* src = R"(
 struct VertIn1 {
-  @location(0) collide : f32;
+  @location(0) collide : f32,
 };
 
 struct VertIn2 {
-  @location(1) collide : f32;
+  @location(1) collide : f32,
 };
 
 struct VertOut {
-  @location(0) vertex_point_size : vec4<f32>;
-  @builtin(position) vertex_point_size_1 : vec4<f32>;
+  @location(0) vertex_point_size : vec4<f32>,
+  @builtin(position) vertex_point_size_1 : vec4<f32>,
 };
 
 @stage(vertex)
@@ -3797,32 +3797,32 @@ fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
 
   auto* expect = R"(
 struct VertIn1 {
-  collide : f32;
+  collide : f32,
 }
 
 struct VertIn2 {
-  collide : f32;
+  collide : f32,
 }
 
 struct VertOut {
-  vertex_point_size : vec4<f32>;
-  vertex_point_size_1 : vec4<f32>;
+  vertex_point_size : vec4<f32>,
+  vertex_point_size_1 : vec4<f32>,
 }
 
 struct tint_symbol_1 {
   @location(0)
-  collide : f32;
+  collide : f32,
   @location(1)
-  collide_2 : f32;
+  collide_2 : f32,
 }
 
 struct tint_symbol_2 {
   @location(0)
-  vertex_point_size : vec4<f32>;
+  vertex_point_size : vec4<f32>,
   @builtin(position)
-  vertex_point_size_1 : vec4<f32>;
+  vertex_point_size_1 : vec4<f32>,
   @builtin(pointsize)
-  vertex_point_size_2 : f32;
+  vertex_point_size_2 : f32,
 }
 
 fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
@@ -3859,34 +3859,34 @@ fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
 }
 
 struct VertIn1 {
-  @location(0) collide : f32;
+  @location(0) collide : f32,
 };
 
 struct VertIn2 {
-  @location(1) collide : f32;
+  @location(1) collide : f32,
 };
 
 struct VertOut {
-  @location(0) vertex_point_size : vec4<f32>;
-  @builtin(position) vertex_point_size_1 : vec4<f32>;
+  @location(0) vertex_point_size : vec4<f32>,
+  @builtin(position) vertex_point_size_1 : vec4<f32>,
 };
 )";
 
   auto* expect = R"(
 struct tint_symbol_1 {
   @location(0)
-  collide : f32;
+  collide : f32,
   @location(1)
-  collide_2 : f32;
+  collide_2 : f32,
 }
 
 struct tint_symbol_2 {
   @location(0)
-  vertex_point_size : vec4<f32>;
+  vertex_point_size : vec4<f32>,
   @builtin(position)
-  vertex_point_size_1 : vec4<f32>;
+  vertex_point_size_1 : vec4<f32>,
   @builtin(pointsize)
-  vertex_point_size_2 : f32;
+  vertex_point_size_2 : f32,
 }
 
 fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
@@ -3905,16 +3905,16 @@ fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 }
 
 struct VertIn1 {
-  collide : f32;
+  collide : f32,
 }
 
 struct VertIn2 {
-  collide : f32;
+  collide : f32,
 }
 
 struct VertOut {
-  vertex_point_size : vec4<f32>;
-  vertex_point_size_1 : vec4<f32>;
+  vertex_point_size : vec4<f32>,
+  vertex_point_size_1 : vec4<f32>,
 }
 )";
 

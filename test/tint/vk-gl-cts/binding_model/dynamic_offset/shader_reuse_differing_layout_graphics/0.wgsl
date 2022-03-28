@@ -1,5 +1,5 @@
 struct block0 {
-  in_color : vec4<f32>;
+  in_color : vec4<f32>,
 }
 
 var<private> position : vec4<f32>;
@@ -20,9 +20,9 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  gl_Position : vec4<f32>;
+  gl_Position : vec4<f32>,
   @location(0)
-  frag_color_1 : vec4<f32>;
+  frag_color_1 : vec4<f32>,
 }
 
 @stage(vertex)

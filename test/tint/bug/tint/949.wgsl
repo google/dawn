@@ -1,32 +1,32 @@
 // Dumped generated WGSL
 struct lightingInfo {
-  diffuse : vec3<f32>;
-  specular : vec3<f32>;
+  diffuse : vec3<f32>,
+  specular : vec3<f32>,
 };
 
 struct LeftOver {
-  u_World : mat4x4<f32>;
-  u_ViewProjection : mat4x4<f32>;
-  u_bumpStrength : f32;
+  u_World : mat4x4<f32>,
+  u_ViewProjection : mat4x4<f32>,
+  u_bumpStrength : f32,
   @size(12)
-  padding : u32;
-  u_cameraPosition : vec3<f32>;
-  u_parallaxScale : f32;
-  textureInfoName : f32;
+  padding : u32,
+  u_cameraPosition : vec3<f32>,
+  u_parallaxScale : f32,
+  textureInfoName : f32,
   @size(4)
-  padding_1 : u32;
-  tangentSpaceParameter0 : vec2<f32>;
+  padding_1 : u32,
+  tangentSpaceParameter0 : vec2<f32>,
 };
 
 struct Light0 {
-  vLightData : vec4<f32>;
-  vLightDiffuse : vec4<f32>;
-  vLightSpecular : vec4<f32>;
-  vLightGround : vec3<f32>;
+  vLightData : vec4<f32>,
+  vLightDiffuse : vec4<f32>,
+  vLightSpecular : vec4<f32>,
+  vLightGround : vec3<f32>,
   @size(4)
-  padding_2 : u32;
-  shadowsInfo : vec4<f32>;
-  depthValues : vec2<f32>;
+  padding_2 : u32,
+  shadowsInfo : vec4<f32>,
+  depthValues : vec2<f32>,
 };
 
 var<private> u_Float : f32;
@@ -438,7 +438,7 @@ fn main_1() {
 
 struct main_out {
   @location(0)
-  glFragColor_1 : vec4<f32>;
+  glFragColor_1 : vec4<f32>,
 };
 
 @stage(fragment)

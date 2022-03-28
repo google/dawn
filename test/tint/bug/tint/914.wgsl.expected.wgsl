@@ -1,11 +1,11 @@
 struct Uniforms {
-  dimAOuter : u32;
-  dimInner : u32;
-  dimBOuter : u32;
+  dimAOuter : u32,
+  dimInner : u32,
+  dimBOuter : u32,
 }
 
 struct Matrix {
-  numbers : array<f32>;
+  numbers : array<f32>,
 }
 
 @group(0) @binding(0) var<storage, read> firstMatrix : Matrix;

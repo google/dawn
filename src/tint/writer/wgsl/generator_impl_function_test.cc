@@ -209,7 +209,7 @@ TEST_F(WgslGeneratorImplTest,
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct Data {
-  d : f32;
+  d : f32,
 }
 
 @binding(0) @group(0) var<storage, read_write> data : Data;

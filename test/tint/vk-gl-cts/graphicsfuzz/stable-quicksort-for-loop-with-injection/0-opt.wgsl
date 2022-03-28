@@ -1,9 +1,9 @@
 struct QuicksortObject {
-  numbers : array<i32, 10u>;
+  numbers : array<i32, 10u>,
 }
 
 struct buf0 {
-  resolution : vec2<f32>;
+  resolution : vec2<f32>,
 }
 
 var<private> obj : QuicksortObject;
@@ -250,9 +250,9 @@ fn main_1() {
 
 struct main_out {
   @location(0)
-  frag_color_1 : vec4<f32>;
+  frag_color_1 : vec4<f32>,
   @builtin(position)
-  gl_Position : vec4<f32>;
+  gl_Position : vec4<f32>,
 }
 
 @stage(vertex)

@@ -28,14 +28,14 @@ TEST(ModuleCloneTest, Clone) {
   // See also fuzzers/tint_ast_clone_fuzzer.cc for further coverage of cloning.
   Source::File file("test.wgsl", R"(struct S0 {
   @size(4)
-  m0 : u32;
-  m1 : array<u32>;
+  m0 : u32,
+  m1 : array<u32>,
 };
 
 struct S1 {
   @size(4)
-  m0 : u32;
-  m1 : array<u32, 6>;
+  m0 : u32,
+  m1 : array<u32, 6>,
 };
 
 let c0 : i32 = 10;

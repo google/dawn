@@ -5,8 +5,8 @@ fn Bad(index : u32, rd : vec3<f32>) -> vec3<f32> {
 }
 
 struct S {
-  v : vec3<f32>;
-  i : u32;
+  v : vec3<f32>,
+  i : u32,
 }
 
 @binding(0) @group(0) var<storage, read_write> io : S;

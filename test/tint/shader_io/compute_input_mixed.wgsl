@@ -1,8 +1,8 @@
 struct ComputeInputs0 {
-  @builtin(local_invocation_id) local_invocation_id : vec3<u32>;
+  @builtin(local_invocation_id) local_invocation_id : vec3<u32>,
 };
 struct ComputeInputs1 {
-  @builtin(workgroup_id) workgroup_id : vec3<u32>;
+  @builtin(workgroup_id) workgroup_id : vec3<u32>,
 };
 
 @stage(compute) @workgroup_size(1)

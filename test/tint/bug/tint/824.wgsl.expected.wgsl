@@ -1,8 +1,8 @@
 struct Output {
   @builtin(position)
-  Position : vec4<f32>;
+  Position : vec4<f32>,
   @location(0)
-  color : vec4<f32>;
+  color : vec4<f32>,
 }
 
 @stage(vertex)

@@ -1,17 +1,17 @@
 struct Inner {
-    a : vec3<i32>;
-    b : i32;
-    c : vec3<u32>;
-    d : u32;
-    e : vec3<f32>;
-    f : f32;
-    g : mat2x3<f32>;
-    h : mat3x2<f32>;
-    i : array<vec4<i32>, 4>;
+    a : vec3<i32>,
+    b : i32,
+    c : vec3<u32>,
+    d : u32,
+    e : vec3<f32>,
+    f : f32,
+    g : mat2x3<f32>,
+    h : mat3x2<f32>,
+    i : array<vec4<i32>, 4>,
 };
 
 struct S {
-    arr : array<Inner>;
+    arr : array<Inner>,
 };
 
 @binding(0) @group(0) var<storage, read_write> s : S;

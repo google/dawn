@@ -20,16 +20,11 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, StructMember_Parses) {
-  auto p = parser("a : i32;");
+  auto p = parser("a : i32,");
 
   auto& builder = p->builder();
 
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_EQ(attrs.value.size(), 0u);
-
-  auto m = p->expect_struct_member(attrs.value);
+  auto m = p->expect_struct_member();
   ASSERT_FALSE(p->has_error());
   ASSERT_FALSE(m.errored);
   ASSERT_NE(m.value, nullptr);
@@ -43,16 +38,11 @@ TEST_F(ParserImplTest, StructMember_Parses) {
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithAlignAttribute) {
-  auto p = parser("@align(2) a : i32;");
+  auto p = parser("@align(2) a : i32,");
 
   auto& builder = p->builder();
 
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_TRUE(attrs.matched);
-  EXPECT_EQ(attrs.value.size(), 1u);
-
-  auto m = p->expect_struct_member(attrs.value);
+  auto m = p->expect_struct_member();
   ASSERT_FALSE(p->has_error());
   ASSERT_FALSE(m.errored);
   ASSERT_NE(m.value, nullptr);
@@ -68,41 +58,11 @@ TEST_F(ParserImplTest, StructMember_ParsesWithAlignAttribute) {
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithSizeAttribute) {
-  auto p = parser("@size(2) a : i32;");
+  auto p = parser("@size(2) a : i32,");
 
   auto& builder = p->builder();
 
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_TRUE(attrs.matched);
-  EXPECT_EQ(attrs.value.size(), 1u);
-
-  auto m = p->expect_struct_member(attrs.value);
-  ASSERT_FALSE(p->has_error());
-  ASSERT_FALSE(m.errored);
-  ASSERT_NE(m.value, nullptr);
-
-  EXPECT_EQ(m->symbol, builder.Symbols().Get("a"));
-  EXPECT_TRUE(m->type->Is<ast::I32>());
-  EXPECT_EQ(m->attributes.size(), 1u);
-  EXPECT_TRUE(m->attributes[0]->Is<ast::StructMemberSizeAttribute>());
-  EXPECT_EQ(m->attributes[0]->As<ast::StructMemberSizeAttribute>()->size, 2u);
-
-  EXPECT_EQ(m->source.range, (Source::Range{{1u, 10u}, {1u, 11u}}));
-  EXPECT_EQ(m->type->source.range, (Source::Range{{1u, 14u}, {1u, 17u}}));
-}
-
-TEST_F(ParserImplTest, StructMember_ParsesWithAttribute) {
-  auto p = parser("@size(2) a : i32;");
-
-  auto& builder = p->builder();
-
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_TRUE(attrs.matched);
-  EXPECT_EQ(attrs.value.size(), 1u);
-
-  auto m = p->expect_struct_member(attrs.value);
+  auto m = p->expect_struct_member();
   ASSERT_FALSE(p->has_error());
   ASSERT_FALSE(m.errored);
   ASSERT_NE(m.value, nullptr);
@@ -119,16 +79,11 @@ TEST_F(ParserImplTest, StructMember_ParsesWithAttribute) {
 
 TEST_F(ParserImplTest, StructMember_ParsesWithMultipleattributes) {
   auto p = parser(R"(@size(2)
-@align(4) a : i32;)");
+@align(4) a : i32,)");
 
   auto& builder = p->builder();
 
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_TRUE(attrs.matched);
-  EXPECT_EQ(attrs.value.size(), 2u);
-
-  auto m = p->expect_struct_member(attrs.value);
+  auto m = p->expect_struct_member();
   ASSERT_FALSE(p->has_error());
   ASSERT_FALSE(m.errored);
   ASSERT_NE(m.value, nullptr);
@@ -146,31 +101,15 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleattributes) {
 }
 
 TEST_F(ParserImplTest, StructMember_InvalidAttribute) {
-  auto p = parser("@size(nan) a : i32;");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
+  auto p = parser("@size(nan) a : i32,");
 
-  auto m = p->expect_struct_member(attrs.value);
-  ASSERT_FALSE(m.errored);
-  ASSERT_NE(m.value, nullptr);
+  auto m = p->expect_struct_member();
+  ASSERT_TRUE(m.errored);
+  ASSERT_EQ(m.value, nullptr);
 
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
             "1:7: expected signed integer literal for size attribute");
-}
-
-TEST_F(ParserImplTest, StructMember_MissingSemicolon) {
-  auto p = parser("a : i32");
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-
-  auto m = p->expect_struct_member(attrs.value);
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(m.errored);
-  ASSERT_EQ(m.value, nullptr);
-  EXPECT_EQ(p->error(), "1:8: expected ';' for struct member");
 }
 
 }  // namespace

@@ -1,6 +1,6 @@
  struct Uniforms {
-  i : u32;
-  j : u32;
+  i : u32,
+  j : u32,
 };
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;

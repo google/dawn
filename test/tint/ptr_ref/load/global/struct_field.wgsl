@@ -1,5 +1,5 @@
 struct S {
-  i : i32;
+  i : i32,
 };
 
 var<private> V : S;

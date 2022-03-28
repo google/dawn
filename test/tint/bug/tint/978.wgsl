@@ -1,12 +1,12 @@
 
 struct FragmentInput
 {
-	@location(2) vUv : vec2<f32>;
+	@location(2) vUv : vec2<f32>
 };
 
 struct FragmentOutput
 {
-	@location(0) color : vec4<f32>;
+	@location(0) color : vec4<f32>
 };
 
 @binding(5) @group(1) var depthMap : texture_depth_2d;

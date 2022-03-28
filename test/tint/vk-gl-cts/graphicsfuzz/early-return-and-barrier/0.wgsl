@@ -1,5 +1,5 @@
 struct theSSBO {
-  out_data : i32;
+  out_data : i32,
 }
 
 @group(0) @binding(0) var<storage, read_write> x_4 : theSSBO;

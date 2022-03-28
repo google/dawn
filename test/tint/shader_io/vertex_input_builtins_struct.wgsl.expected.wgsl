@@ -1,8 +1,8 @@
 struct VertexInputs {
   @builtin(vertex_index)
-  vertex_index : u32;
+  vertex_index : u32,
   @builtin(instance_index)
-  instance_index : u32;
+  instance_index : u32,
 }
 
 @stage(vertex)

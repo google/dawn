@@ -1,5 +1,5 @@
 struct S {
-  i : i32;
+  i : i32,
 }
 
 fn main_1() {

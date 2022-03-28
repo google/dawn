@@ -1,8 +1,8 @@
 struct FragmentOutputs {
-  @location(0) loc0 : i32;
-  @location(1) loc1 : u32;
-  @location(2) loc2 : f32;
-  @location(3) loc3 : vec4<f32>;
+  @location(0) loc0 : i32,
+  @location(1) loc1 : u32,
+  @location(2) loc2 : f32,
+  @location(3) loc3 : vec4<f32>,
 };
 
 @stage(fragment)

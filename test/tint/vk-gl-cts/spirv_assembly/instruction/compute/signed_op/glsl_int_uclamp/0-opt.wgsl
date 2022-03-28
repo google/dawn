@@ -1,7 +1,7 @@
 type RTArr = array<i32>;
 
 struct S {
-  field0 : RTArr;
+  field0 : RTArr,
 }
 
 var<private> x_3 : vec3<u32>;

@@ -162,11 +162,11 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl) {
   ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
   @size(8)
-  padding : u32;
-  a : i32;
+  padding : u32,
+  a : i32,
   @size(4)
-  padding_1 : u32;
-  b : f32;
+  padding_1 : u32,
+  b : f32,
 }
 )");
 }
@@ -183,11 +183,11 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl_WithSymbolCollisions) {
   ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
   @size(8)
-  padding : u32;
-  tint_0_padding : i32;
+  padding : u32,
+  tint_0_padding : i32,
   @size(4)
-  padding_1 : u32;
-  tint_2_padding : f32;
+  padding_1 : u32,
+  tint_2_padding : f32,
 }
 )");
 }
@@ -203,9 +203,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructAlignDecl) {
   ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
   @align(8)
-  a : i32;
+  a : i32,
   @align(16)
-  b : f32;
+  b : f32,
 }
 )");
 }
@@ -221,9 +221,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructSizeDecl) {
   ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
   @size(16)
-  a : i32;
+  a : i32,
   @size(32)
-  b : f32;
+  b : f32,
 }
 )");
 }
@@ -238,9 +238,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithAttribute) {
 
   ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
-  a : i32;
+  a : i32,
   @align(8)
-  b : f32;
+  b : f32,
 }
 )");
 }
@@ -256,9 +256,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithEntryPointAttributes) {
   ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
   @builtin(vertex_index)
-  a : u32;
+  a : u32,
   @location(2)
-  b : f32;
+  b : f32,
 }
 )");
 }

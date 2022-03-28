@@ -1,17 +1,17 @@
 struct Scene {
-  vEyePosition : vec4<f32>;
+  vEyePosition : vec4<f32>,
 };
 
 struct Material {
-  vDiffuseColor : vec4<f32>;
-  vAmbientColor : vec3<f32>;
-  dummy: f32;
-  vEmissiveColor : vec3<f32>;
-  dummy2: f32;
+  vDiffuseColor : vec4<f32>,
+  vAmbientColor : vec3<f32>,
+  dummy: f32,
+  vEmissiveColor : vec3<f32>,
+  dummy2: f32,
 };
 
 struct Mesh {
-  visibility : f32;
+  visibility : f32,
 };
 
 var<private> fClipDistance3 : f32;
@@ -105,7 +105,7 @@ fn main_1() {
 
 struct main_out {
   @location(0)
-  glFragColor_1 : vec4<f32>;
+  glFragColor_1 : vec4<f32>,
 };
 
 @stage(fragment)

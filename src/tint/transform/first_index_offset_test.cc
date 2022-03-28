@@ -108,7 +108,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> 
 
   auto* expect = R"(
 struct tint_symbol {
-  first_vertex_index : u32;
+  first_vertex_index : u32,
 }
 
 @binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
@@ -154,7 +154,7 @@ fn test(vert_idx : u32) -> u32 {
 
   auto* expect = R"(
 struct tint_symbol {
-  first_vertex_index : u32;
+  first_vertex_index : u32,
 }
 
 @binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
@@ -200,7 +200,7 @@ fn entry(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32
 
   auto* expect = R"(
 struct tint_symbol {
-  first_instance_index : u32;
+  first_instance_index : u32,
 }
 
 @binding(1) @group(7) var<uniform> tint_symbol_1 : tint_symbol;
@@ -246,7 +246,7 @@ fn test(inst_idx : u32) -> u32 {
 
   auto* expect = R"(
 struct tint_symbol {
-  first_instance_index : u32;
+  first_instance_index : u32,
 }
 
 @binding(1) @group(7) var<uniform> tint_symbol_1 : tint_symbol;
@@ -284,8 +284,8 @@ fn test(instance_idx : u32, vert_idx : u32) -> u32 {
 }
 
 struct Inputs {
-  @builtin(instance_index) instance_idx : u32;
-  @builtin(vertex_index) vert_idx : u32;
+  @builtin(instance_index) instance_idx : u32,
+  @builtin(vertex_index) vert_idx : u32,
 };
 
 @stage(vertex)
@@ -297,8 +297,8 @@ fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
 
   auto* expect = R"(
 struct tint_symbol {
-  first_vertex_index : u32;
-  first_instance_index : u32;
+  first_vertex_index : u32,
+  first_instance_index : u32,
 }
 
 @binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
@@ -309,9 +309,9 @@ fn test(instance_idx : u32, vert_idx : u32) -> u32 {
 
 struct Inputs {
   @builtin(instance_index)
-  instance_idx : u32;
+  instance_idx : u32,
   @builtin(vertex_index)
-  vert_idx : u32;
+  vert_idx : u32,
 }
 
 @stage(vertex)
@@ -345,8 +345,8 @@ fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
 }
 
 struct Inputs {
-  @builtin(instance_index) instance_idx : u32;
-  @builtin(vertex_index) vert_idx : u32;
+  @builtin(instance_index) instance_idx : u32,
+  @builtin(vertex_index) vert_idx : u32,
 };
 
 fn test(instance_idx : u32, vert_idx : u32) -> u32 {
@@ -356,8 +356,8 @@ fn test(instance_idx : u32, vert_idx : u32) -> u32 {
 
   auto* expect = R"(
 struct tint_symbol {
-  first_vertex_index : u32;
-  first_instance_index : u32;
+  first_vertex_index : u32,
+  first_instance_index : u32,
 }
 
 @binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
@@ -370,9 +370,9 @@ fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
 
 struct Inputs {
   @builtin(instance_index)
-  instance_idx : u32;
+  instance_idx : u32,
   @builtin(vertex_index)
-  vert_idx : u32;
+  vert_idx : u32,
 }
 
 fn test(instance_idx : u32, vert_idx : u32) -> u32 {
@@ -414,7 +414,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> 
 
   auto* expect = R"(
 struct tint_symbol {
-  first_vertex_index : u32;
+  first_vertex_index : u32,
 }
 
 @binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
@@ -468,7 +468,7 @@ fn func1(vert_idx : u32) -> u32 {
 
   auto* expect = R"(
 struct tint_symbol {
-  first_vertex_index : u32;
+  first_vertex_index : u32,
 }
 
 @binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
@@ -530,8 +530,8 @@ fn entry_c(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f
 
   auto* expect = R"(
 struct tint_symbol {
-  first_vertex_index : u32;
-  first_instance_index : u32;
+  first_vertex_index : u32,
+  first_instance_index : u32,
 }
 
 @binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
@@ -601,8 +601,8 @@ fn func(i : u32) -> u32 {
 
   auto* expect = R"(
 struct tint_symbol {
-  first_vertex_index : u32;
-  first_instance_index : u32;
+  first_vertex_index : u32,
+  first_instance_index : u32,
 }
 
 @binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;

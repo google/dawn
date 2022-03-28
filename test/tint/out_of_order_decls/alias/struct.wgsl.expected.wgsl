@@ -1,7 +1,7 @@
 type T = S;
 
 struct S {
-  m : i32;
+  m : i32,
 }
 
 @stage(fragment)

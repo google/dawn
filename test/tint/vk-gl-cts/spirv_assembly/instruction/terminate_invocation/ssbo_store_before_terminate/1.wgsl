@@ -1,7 +1,7 @@
 type RTArr = array<i32>;
 
 struct S {
-  field0 : RTArr;
+  field0 : RTArr,
 }
 
 var<private> x_2 : vec4<f32>;
@@ -26,7 +26,7 @@ fn main_1() {
 
 struct main_out {
   @location(0) @interpolate(flat)
-  x_4_1 : i32;
+  x_4_1 : i32,
 }
 
 @stage(fragment)

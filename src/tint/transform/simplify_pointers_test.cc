@@ -131,7 +131,7 @@ fn f() {
 TEST_F(SimplifyPointersTest, SavedVars) {
   auto* src = R"(
 struct S {
-  i : i32;
+  i : i32,
 };
 
 fn arr() {
@@ -155,7 +155,7 @@ fn matrix() {
 
   auto* expect = R"(
 struct S {
-  i : i32;
+  i : i32,
 }
 
 fn arr() {
@@ -283,11 +283,11 @@ fn z() -> i32 {
 }
 
 struct Inner {
-  a : array<i32, 2>;
+  a : array<i32, 2>,
 };
 
 struct Outer {
-  a : array<Inner, 2>;
+  a : array<Inner, 2>,
 };
 
 fn f() {
@@ -312,11 +312,11 @@ fn z() -> i32 {
 }
 
 struct Inner {
-  a : array<i32, 2>;
+  a : array<i32, 2>,
 }
 
 struct Outer {
-  a : array<Inner, 2>;
+  a : array<Inner, 2>,
 }
 
 fn f() {

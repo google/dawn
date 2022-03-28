@@ -1,12 +1,12 @@
 struct strided_arr {
   @size(16)
-  el : i32;
+  el : i32,
 }
 
 type Arr = array<strided_arr, 3u>;
 
 struct buf0 {
-  x_GLF_uniform_int_values : Arr;
+  x_GLF_uniform_int_values : Arr,
 }
 
 @group(0) @binding(0) var<uniform> x_6 : buf0;
@@ -44,7 +44,7 @@ fn main_1() {
 
 struct main_out {
   @location(0)
-  x_GLF_color_1 : vec4<f32>;
+  x_GLF_color_1 : vec4<f32>,
 }
 
 @stage(fragment)

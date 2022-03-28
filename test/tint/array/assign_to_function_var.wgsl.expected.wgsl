@@ -1,7 +1,7 @@
 type ArrayType = array<vec4<i32>, 4>;
 
 struct S {
-  arr : ArrayType;
+  arr : ArrayType,
 }
 
 var<private> src_private : ArrayType;

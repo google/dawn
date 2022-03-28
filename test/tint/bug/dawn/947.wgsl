@@ -1,12 +1,12 @@
  struct Uniforms {
-    u_scale : vec2<f32>;
-    u_offset : vec2<f32>;
+    u_scale : vec2<f32>,
+    u_offset : vec2<f32>,
 };
 @binding(0) @group(0) var<uniform> uniforms : Uniforms;
 
 struct VertexOutputs {
-    @location(0) texcoords : vec2<f32>;
-    @builtin(position) position : vec4<f32>;
+    @location(0) texcoords : vec2<f32>,
+    @builtin(position) position : vec4<f32>,
 };
 
 @stage(vertex) fn vs_main(

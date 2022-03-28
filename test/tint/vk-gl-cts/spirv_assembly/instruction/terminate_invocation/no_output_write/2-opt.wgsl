@@ -17,7 +17,7 @@ fn main_1() {
 
 struct main_out {
   @location(0) @interpolate(flat)
-  out_data_1 : i32;
+  out_data_1 : i32,
 }
 
 @stage(fragment)

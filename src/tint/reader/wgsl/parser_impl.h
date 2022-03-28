@@ -429,12 +429,9 @@ class ParserImpl {
   /// Parses a `struct_body_decl` grammar element, erroring on parse failure.
   /// @returns the struct members
   Expect<ast::StructMemberList> expect_struct_body_decl();
-  /// Parses a `struct_member` grammar element with the initial
-  /// `struct_member_attribute_decl+` provided as `attrs`, erroring on parse
-  /// failure.
-  /// @param attrs the list of attributes for the struct member.
+  /// Parses a `struct_member` grammar element, erroring on parse failure.
   /// @returns the struct member or nullptr
-  Expect<ast::StructMember*> expect_struct_member(ast::AttributeList& attrs);
+  Expect<ast::StructMember*> expect_struct_member();
   /// Parses a `function_decl` grammar element with the initial
   /// `function_attribute_decl*` provided as `attrs`.
   /// @param attrs the list of attributes for the function declaration.

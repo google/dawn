@@ -1,10 +1,10 @@
 struct S {
   @align(64) @location(0)
-  f : f32;
+  f : f32,
   @size(32) @location(1) @interpolate(flat)
-  u : u32;
+  u : u32,
   @align(128) @builtin(position)
-  v : vec4<f32>;
+  v : vec4<f32>,
 }
 
 @group(0) @binding(0) var<storage, write> output : S;

@@ -1,10 +1,10 @@
 struct strided_arr {
   @size(16)
-  el : vec2<f32>;
+  el : vec2<f32>,
 }
 
 struct SSBO {
-  m : array<strided_arr, 2u>;
+  m : array<strided_arr, 2u>,
 }
 
 @group(0) @binding(0) var<storage, read_write> ssbo : SSBO;

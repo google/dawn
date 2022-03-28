@@ -129,7 +129,7 @@ TEST_F(DecomposeStridedArrayTest, PrivateStridedArray) {
   auto* expect = R"(
 struct strided_arr {
   @size(32)
-  el : f32;
+  el : f32,
 }
 
 var<private> arr : array<strided_arr, 4>;
@@ -149,7 +149,7 @@ fn f() {
 
 TEST_F(DecomposeStridedArrayTest, ReadUniformStridedArray) {
   // struct S {
-  //   a : @stride(32) array<f32, 4>;
+  //   a : @stride(32) array<f32, 4>,
   // };
   // @group(0) @binding(0) var<uniform> s : S;
   //
@@ -177,11 +177,11 @@ TEST_F(DecomposeStridedArrayTest, ReadUniformStridedArray) {
   auto* expect = R"(
 struct strided_arr {
   @size(32)
-  el : f32;
+  el : f32,
 }
 
 struct S {
-  a : array<strided_arr, 4>;
+  a : array<strided_arr, 4>,
 }
 
 @group(0) @binding(0) var<uniform> s : S;
@@ -201,7 +201,7 @@ fn f() {
 
 TEST_F(DecomposeStridedArrayTest, ReadUniformDefaultStridedArray) {
   // struct S {
-  //   a : @stride(16) array<vec4<f32>, 4>;
+  //   a : @stride(16) array<vec4<f32>, 4>,
   // };
   // @group(0) @binding(0) var<uniform> s : S;
   //
@@ -232,7 +232,7 @@ TEST_F(DecomposeStridedArrayTest, ReadUniformDefaultStridedArray) {
   auto* expect =
       R"(
 struct S {
-  a : array<vec4<f32>, 4>;
+  a : array<vec4<f32>, 4>,
 }
 
 @group(0) @binding(0) var<uniform> s : S;
@@ -252,7 +252,7 @@ fn f() {
 
 TEST_F(DecomposeStridedArrayTest, ReadStorageStridedArray) {
   // struct S {
-  //   a : @stride(32) array<f32, 4>;
+  //   a : @stride(32) array<f32, 4>,
   // };
   // @group(0) @binding(0) var<storage> s : S;
   //
@@ -280,11 +280,11 @@ TEST_F(DecomposeStridedArrayTest, ReadStorageStridedArray) {
   auto* expect = R"(
 struct strided_arr {
   @size(32)
-  el : f32;
+  el : f32,
 }
 
 struct S {
-  a : array<strided_arr, 4>;
+  a : array<strided_arr, 4>,
 }
 
 @group(0) @binding(0) var<storage> s : S;
@@ -304,7 +304,7 @@ fn f() {
 
 TEST_F(DecomposeStridedArrayTest, ReadStorageDefaultStridedArray) {
   // struct S {
-  //   a : @stride(4) array<f32, 4>;
+  //   a : @stride(4) array<f32, 4>,
   // };
   // @group(0) @binding(0) var<storage> s : S;
   //
@@ -331,7 +331,7 @@ TEST_F(DecomposeStridedArrayTest, ReadStorageDefaultStridedArray) {
 
   auto* expect = R"(
 struct S {
-  a : array<f32, 4>;
+  a : array<f32, 4>,
 }
 
 @group(0) @binding(0) var<storage> s : S;
@@ -351,7 +351,7 @@ fn f() {
 
 TEST_F(DecomposeStridedArrayTest, WriteStorageStridedArray) {
   // struct S {
-  //   a : @stride(32) array<f32, 4>;
+  //   a : @stride(32) array<f32, 4>,
   // };
   // @group(0) @binding(0) var<storage, read_write> s : S;
   //
@@ -383,11 +383,11 @@ TEST_F(DecomposeStridedArrayTest, WriteStorageStridedArray) {
       R"(
 struct strided_arr {
   @size(32)
-  el : f32;
+  el : f32,
 }
 
 struct S {
-  a : array<strided_arr, 4>;
+  a : array<strided_arr, 4>,
 }
 
 @group(0) @binding(0) var<storage, read_write> s : S;
@@ -408,7 +408,7 @@ fn f() {
 
 TEST_F(DecomposeStridedArrayTest, WriteStorageDefaultStridedArray) {
   // struct S {
-  //   a : @stride(4) array<f32, 4>;
+  //   a : @stride(4) array<f32, 4>,
   // };
   // @group(0) @binding(0) var<storage, read_write> s : S;
   //
@@ -439,7 +439,7 @@ TEST_F(DecomposeStridedArrayTest, WriteStorageDefaultStridedArray) {
   auto* expect =
       R"(
 struct S {
-  a : array<f32, 4>;
+  a : array<f32, 4>,
 }
 
 @group(0) @binding(0) var<storage, read_write> s : S;
@@ -460,7 +460,7 @@ fn f() {
 
 TEST_F(DecomposeStridedArrayTest, ReadWriteViaPointerLets) {
   // struct S {
-  //   a : @stride(32) array<f32, 4>;
+  //   a : @stride(32) array<f32, 4>,
   // };
   // @group(0) @binding(0) var<storage, read_write> s : S;
   //
@@ -498,11 +498,11 @@ TEST_F(DecomposeStridedArrayTest, ReadWriteViaPointerLets) {
       R"(
 struct strided_arr {
   @size(32)
-  el : f32;
+  el : f32,
 }
 
 struct S {
-  a : array<strided_arr, 4>;
+  a : array<strided_arr, 4>,
 }
 
 @group(0) @binding(0) var<storage, read_write> s : S;
@@ -525,7 +525,7 @@ fn f() {
 TEST_F(DecomposeStridedArrayTest, PrivateAliasedStridedArray) {
   // type ARR = @stride(32) array<f32, 4>;
   // struct S {
-  //   a : ARR;
+  //   a : ARR,
   // };
   // @group(0) @binding(0) var<storage, read_write> s : S;
   //
@@ -563,13 +563,13 @@ TEST_F(DecomposeStridedArrayTest, PrivateAliasedStridedArray) {
   auto* expect = R"(
 struct strided_arr {
   @size(32)
-  el : f32;
+  el : f32,
 }
 
 type ARR = array<strided_arr, 4>;
 
 struct S {
-  a : ARR;
+  a : ARR,
 }
 
 @group(0) @binding(0) var<storage, read_write> s : S;
@@ -594,7 +594,7 @@ TEST_F(DecomposeStridedArrayTest, PrivateNestedStridedArray) {
   // type ARR_A = @stride(8) array<f32, 2>;
   // type ARR_B = @stride(128) array<@stride(16) array<ARR_A, 3>, 4>;
   // struct S {
-  //   a : ARR_B;
+  //   a : ARR_B,
   // };
   // @group(0) @binding(0) var<storage, read_write> s : S;
   //
@@ -659,20 +659,20 @@ TEST_F(DecomposeStridedArrayTest, PrivateNestedStridedArray) {
       R"(
 struct strided_arr {
   @size(8)
-  el : f32;
+  el : f32,
 }
 
 type ARR_A = array<strided_arr, 2>;
 
 struct strided_arr_1 {
   @size(128)
-  el : array<ARR_A, 3>;
+  el : array<ARR_A, 3>,
 }
 
 type ARR_B = array<strided_arr_1, 4>;
 
 struct S {
-  a : ARR_B;
+  a : ARR_B,
 }
 
 @group(0) @binding(0) var<storage, read_write> s : S;

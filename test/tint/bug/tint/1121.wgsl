@@ -8,40 +8,40 @@
 //   $TILE_SIZE = 16
 
 struct LightData {
-    position : vec4<f32>;
-    color : vec3<f32>;
-    radius : f32;
+    position : vec4<f32>,
+    color : vec3<f32>,
+    radius : f32,
 };
  struct LightsBuffer {
-    lights: array<LightData>;
+    lights: array<LightData>,
 };
 @group(0) @binding(0) var<storage, read_write> lightsBuffer: LightsBuffer;
 struct TileLightIdData {
-    count: atomic<u32>;
-    lightId: array<u32, 64>;
+    count: atomic<u32>,
+    lightId: array<u32, 64>,
 };
  struct Tiles {
-    data: array<TileLightIdData, 4>;
+    data: array<TileLightIdData, 4>,
 };
 @group(1) @binding(0) var<storage, read_write> tileLightId: Tiles;
 
  struct Config {
-    numLights : u32;
-    numTiles : u32;
-    tileCountX : u32;
-    tileCountY : u32;
-    numTileLightSlot : u32;
-    tileSize : u32;
+    numLights : u32,
+    numTiles : u32,
+    tileCountX : u32,
+    tileCountY : u32,
+    numTileLightSlot : u32,
+    tileSize : u32,
 };
 @group(2) @binding(0) var<uniform> config: Config;
  struct Uniforms {
-    min : vec4<f32>;
-    max : vec4<f32>;
+    min : vec4<f32>,
+    max : vec4<f32>,
     // camera
-    viewMatrix : mat4x4<f32>;
-    projectionMatrix : mat4x4<f32>;
+    viewMatrix : mat4x4<f32>,
+    projectionMatrix : mat4x4<f32>,
     // Tile info
-    fullScreenSize : vec4<f32>;    // width, height
+    fullScreenSize : vec4<f32>,    // width, height
 };
 @group(3) @binding(0) var<uniform> uniforms: Uniforms;
 @stage(compute) @workgroup_size(64, 1, 1)

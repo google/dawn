@@ -1,9 +1,9 @@
 struct Input {
-  @location(0) position: vec4<f32>;
+  @location(0) position: vec4<f32>,
 };
 
 struct Output {
-  @builtin(position) position : vec4<f32>;
+  @builtin(position) position : vec4<f32>,
 };
 
 @stage(vertex)

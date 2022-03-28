@@ -1,18 +1,18 @@
 struct Uniforms {
-  i : u32;
-  j : u32;
+  i : u32,
+  j : u32,
 };
 
 struct InnerS {
-  v : i32;
+  v : i32,
 };
 
 struct S1 {
-  a2 : array<InnerS, 8>;
+  a2 : array<InnerS, 8>,
 };
 
 struct OuterS {
-  a1 : array<S1, 8>;
+  a1 : array<S1, 8>,
 };
 
 var<private> nextIndex : u32;

@@ -11,7 +11,7 @@ fn main_1() {
 
 struct main_out {
   @builtin(position)
-  gl_Position : vec4<f32>;
+  gl_Position : vec4<f32>,
 }
 
 @stage(vertex)

@@ -1,5 +1,5 @@
 struct S {
-  m : T;
+  m : T,
 }
 
 type T = i32;

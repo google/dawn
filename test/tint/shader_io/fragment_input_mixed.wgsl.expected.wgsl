@@ -1,15 +1,15 @@
 struct FragmentInputs0 {
   @builtin(position)
-  position : vec4<f32>;
+  position : vec4<f32>,
   @location(0) @interpolate(flat)
-  loc0 : i32;
+  loc0 : i32,
 }
 
 struct FragmentInputs1 {
   @location(3)
-  loc3 : vec4<f32>;
+  loc3 : vec4<f32>,
   @builtin(sample_mask)
-  sample_mask : u32;
+  sample_mask : u32,
 }
 
 @stage(fragment)

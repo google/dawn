@@ -71,7 +71,7 @@ TEST_P(ParserImplReservedKeywordTest, Struct) {
 }
 TEST_P(ParserImplReservedKeywordTest, StructMember) {
   auto name = GetParam();
-  auto p = parser("struct S { " + name + " : i32; };");
+  auto p = parser("struct S { " + name + " : i32, };");
   EXPECT_FALSE(p->Parse());
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:12: '" + name + "' is a reserved keyword");

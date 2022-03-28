@@ -41,7 +41,7 @@ TEST_F(ParserImplTest, Parses_ExtraSemicolons) {
   auto p = parser(R"(
 ;
 struct S {
-  a : f32;
+  a : f32,
 };;
 ;
 fn foo() -> S {

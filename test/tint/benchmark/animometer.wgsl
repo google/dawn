@@ -1,13 +1,13 @@
 struct Time {
-  value : f32;
+  value : f32,
 }
 
 struct Uniforms {
-  scale : f32;
-  offsetX : f32;
-  offsetY : f32;
-  scalar : f32;
-  scalarOffset : f32;
+  scale : f32,
+  offsetX : f32,
+  offsetY : f32,
+  scalar : f32,
+  scalarOffset : f32,
 }
 
 @binding(0) @group(0) var<uniform> time : Time;
@@ -16,9 +16,9 @@ struct Uniforms {
 
 struct VertexOutput {
   @builtin(position)
-  Position : vec4<f32>;
+  Position : vec4<f32>,
   @location(0)
-  v_color : vec4<f32>;
+  v_color : vec4<f32>,
 }
 
 @stage(vertex)

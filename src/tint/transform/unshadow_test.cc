@@ -117,7 +117,7 @@ type a = i32;
 TEST_F(UnshadowTest, LocalShadowsStruct) {
   auto* src = R"(
 struct a {
-  m : i32;
+  m : i32,
 };
 
 fn X() {
@@ -131,7 +131,7 @@ fn Y() {
 
   auto* expect = R"(
 struct a {
-  m : i32;
+  m : i32,
 }
 
 fn X() {
@@ -159,7 +159,7 @@ fn Y() {
 }
 
 struct a {
-  m : i32;
+  m : i32,
 };
 
 )";
@@ -174,7 +174,7 @@ fn Y() {
 }
 
 struct a {
-  m : i32;
+  m : i32,
 }
 )";
 

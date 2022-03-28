@@ -1,5 +1,5 @@
 struct SB_RW {
-  arg_0 : atomic<i32>;
+  arg_0 : atomic<i32>,
 }
 
 @group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW;

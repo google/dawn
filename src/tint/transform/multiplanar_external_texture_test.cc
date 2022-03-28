@@ -108,11 +108,11 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(1) var ext_tex_plane_1 : texture_2d<f32>;
@@ -151,11 +151,11 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(1) var ext_tex_plane_1 : texture_2d<f32>;
@@ -193,11 +193,11 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -249,11 +249,11 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -304,11 +304,11 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(1) var ext_tex_plane_1 : texture_2d<f32>;
@@ -357,11 +357,11 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(1) var ext_tex_plane_1 : texture_2d<f32>;
@@ -412,11 +412,11 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -483,11 +483,11 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -556,11 +556,11 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(4) var ext_tex_plane_1 : texture_2d<f32>;
@@ -640,11 +640,11 @@ fn main() {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -707,11 +707,11 @@ fn f(t : texture_external, s : sampler) {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -773,11 +773,11 @@ fn main() {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -841,11 +841,11 @@ fn main() {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(3) var ext_tex_plane_1 : texture_2d<f32>;
@@ -919,11 +919,11 @@ fn f(t : texture_external, s : sampler, t2 : texture_external) {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(3) var ext_tex_plane_1 : texture_2d<f32>;
@@ -997,11 +997,11 @@ fn main() {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -1072,11 +1072,11 @@ fn main() {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -1135,11 +1135,11 @@ fn f(ext_tex : texture_external) -> vec2<i32> {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 fn f(ext_tex : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : ExternalTextureParams) -> vec2<i32> {
@@ -1174,11 +1174,11 @@ fn main() {
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -1243,11 +1243,11 @@ type ET = texture_external;
 
   auto* expect = R"(
 struct ExternalTextureParams {
-  numPlanes : u32;
-  vr : f32;
-  ug : f32;
-  vg : f32;
-  ub : f32;
+  numPlanes : u32,
+  vr : f32,
+  ug : f32,
+  vg : f32,
+  ub : f32,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;

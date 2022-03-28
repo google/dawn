@@ -953,8 +953,8 @@ TEST_F(SpvParserMemoryTest, RemapStorageBuffer_TypesAndVarDeclarations) {
   EXPECT_THAT(module_str, HasSubstr(R"(type RTArr = @stride(4) array<u32>;
 
 struct S {
-  field0 : u32;
-  field1 : RTArr;
+  field0 : u32,
+  field1 : RTArr,
 }
 
 @group(0) @binding(0) var<storage, read_write> myvar : S;

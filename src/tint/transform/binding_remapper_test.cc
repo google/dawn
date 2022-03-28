@@ -68,7 +68,7 @@ TEST_F(BindingRemapperTest, ShouldRunAccessControlRemappings) {
 TEST_F(BindingRemapperTest, NoRemappings) {
   auto* src = R"(
 struct S {
-  a : f32;
+  a : f32,
 }
 
 @group(2) @binding(1) var<storage, read> a : S;
@@ -93,7 +93,7 @@ fn f() {
 TEST_F(BindingRemapperTest, RemapBindingPoints) {
   auto* src = R"(
 struct S {
-  a : f32;
+  a : f32,
 };
 
 @group(2) @binding(1) var<storage, read> a : S;
@@ -107,7 +107,7 @@ fn f() {
 
   auto* expect = R"(
 struct S {
-  a : f32;
+  a : f32,
 }
 
 @group(1) @binding(2) var<storage, read> a : S;
@@ -135,7 +135,7 @@ fn f() {
 TEST_F(BindingRemapperTest, RemapAccessControls) {
   auto* src = R"(
 struct S {
-  a : f32;
+  a : f32,
 };
 
 @group(2) @binding(1) var<storage, read> a : S;
@@ -151,7 +151,7 @@ fn f() {
 
   auto* expect = R"(
 struct S {
-  a : f32;
+  a : f32,
 }
 
 @group(2) @binding(1) var<storage, write> a : S;
@@ -181,7 +181,7 @@ fn f() {
 TEST_F(BindingRemapperTest, RemapAll) {
   auto* src = R"(
 struct S {
-  a : f32;
+  a : f32,
 };
 
 @group(2) @binding(1) var<storage, read> a : S;
@@ -195,7 +195,7 @@ fn f() {
 
   auto* expect = R"(
 struct S {
-  a : f32;
+  a : f32,
 }
 
 @group(4) @binding(5) var<storage, write> a : S;
@@ -225,7 +225,7 @@ fn f() {
 TEST_F(BindingRemapperTest, BindingCollisionsSameEntryPoint) {
   auto* src = R"(
 struct S {
-  i : i32;
+  i : i32,
 };
 
 @group(2) @binding(1) var<storage, read> a : S;
@@ -244,7 +244,7 @@ fn f() {
 
   auto* expect = R"(
 struct S {
-  i : i32;
+  i : i32,
 }
 
 @internal(disable_validation__binding_point_collision) @group(1) @binding(1) var<storage, read> a : S;
@@ -277,7 +277,7 @@ fn f() {
 TEST_F(BindingRemapperTest, BindingCollisionsDifferentEntryPoints) {
   auto* src = R"(
 struct S {
-  i : i32;
+  i : i32,
 };
 
 @group(2) @binding(1) var<storage, read> a : S;
@@ -301,7 +301,7 @@ fn f2() {
 
   auto* expect = R"(
 struct S {
-  i : i32;
+  i : i32,
 }
 
 @group(1) @binding(1) var<storage, read> a : S;
@@ -339,7 +339,7 @@ fn f2() {
 TEST_F(BindingRemapperTest, NoData) {
   auto* src = R"(
 struct S {
-  a : f32;
+  a : f32,
 }
 
 @group(2) @binding(1) var<storage, read> a : S;

@@ -1,7 +1,7 @@
 type RTArr = array<f32>;
 
 struct doesNotMatter {
-  x_compute_data : RTArr;
+  x_compute_data : RTArr,
 }
 
 @group(0) @binding(0) var<storage, read_write> x_9 : doesNotMatter;

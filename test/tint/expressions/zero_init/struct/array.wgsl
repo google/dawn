@@ -1,5 +1,5 @@
 struct S {
-    a : array<f32, 4>;
+    a : array<f32, 4>,
 };
 
 fn f() {

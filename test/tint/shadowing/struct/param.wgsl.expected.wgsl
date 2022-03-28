@@ -1,5 +1,5 @@
 struct a {
-  a : i32;
+  a : i32,
 }
 
 fn f(a : a) {

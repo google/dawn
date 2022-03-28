@@ -15,9 +15,9 @@ fn main_1() {
 
 struct main_out {
   @location(0) @interpolate(flat)
-  x_4_1 : u32;
+  x_4_1 : u32,
   @builtin(position)
-  gl_Position : vec4<f32>;
+  gl_Position : vec4<f32>,
 }
 
 @stage(vertex)

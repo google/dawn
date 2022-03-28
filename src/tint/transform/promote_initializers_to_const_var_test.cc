@@ -62,9 +62,9 @@ fn f() {
 TEST_F(PromoteInitializersToConstVarTest, BasicStruct) {
   auto* src = R"(
 struct S {
-  a : i32;
-  b : f32;
-  c : vec3<f32>;
+  a : i32,
+  b : f32,
+  c : vec3<f32>,
 };
 
 fn f() {
@@ -74,9 +74,9 @@ fn f() {
 
   auto* expect = R"(
 struct S {
-  a : i32;
-  b : f32;
-  c : vec3<f32>;
+  a : i32,
+  b : f32,
+  c : vec3<f32>,
 }
 
 fn f() {
@@ -98,9 +98,9 @@ fn f() {
 }
 
 struct S {
-  a : i32;
-  b : f32;
-  c : vec3<f32>;
+  a : i32,
+  b : f32,
+  c : vec3<f32>,
 };
 )";
 
@@ -111,9 +111,9 @@ fn f() {
 }
 
 struct S {
-  a : i32;
-  b : f32;
-  c : vec3<f32>;
+  a : i32,
+  b : f32,
+  c : vec3<f32>,
 }
 )";
 
@@ -152,9 +152,9 @@ fn f() {
 TEST_F(PromoteInitializersToConstVarTest, StructInForLoopInit) {
   auto* src = R"(
 struct S {
-  a : i32;
-  b : f32;
-  c : vec3<f32>;
+  a : i32,
+  b : f32,
+  c : vec3<f32>,
 };
 
 fn f() {
@@ -167,9 +167,9 @@ fn f() {
 
   auto* expect = R"(
 struct S {
-  a : i32;
-  b : f32;
-  c : vec3<f32>;
+  a : i32,
+  b : f32,
+  c : vec3<f32>,
 }
 
 fn f() {
@@ -197,9 +197,9 @@ fn f() {
 }
 
 struct S {
-  a : i32;
-  b : f32;
-  c : vec3<f32>;
+  a : i32,
+  b : f32,
+  c : vec3<f32>,
 };
 )";
 
@@ -213,9 +213,9 @@ fn f() {
 }
 
 struct S {
-  a : i32;
-  b : f32;
-  c : vec3<f32>;
+  a : i32,
+  b : f32,
+  c : vec3<f32>,
 }
 )";
 
@@ -443,17 +443,17 @@ fn f() {
 TEST_F(PromoteInitializersToConstVarTest, StructNested) {
   auto* src = R"(
 struct S1 {
-  a : i32;
+  a : i32,
 };
 
 struct S2 {
-  a : i32;
-  b : S1;
-  c : i32;
+  a : i32,
+  b : S1,
+  c : i32,
 };
 
 struct S3 {
-  a : S2;
+  a : S2,
 };
 
 fn f() {
@@ -463,17 +463,17 @@ fn f() {
 
   auto* expect = R"(
 struct S1 {
-  a : i32;
+  a : i32,
 }
 
 struct S2 {
-  a : i32;
-  b : S1;
-  c : i32;
+  a : i32,
+  b : S1,
+  c : i32,
 }
 
 struct S3 {
-  a : S2;
+  a : S2,
 }
 
 fn f() {
@@ -493,11 +493,11 @@ fn f() {
 TEST_F(PromoteInitializersToConstVarTest, Mixed) {
   auto* src = R"(
 struct S1 {
-  a : i32;
+  a : i32,
 };
 
 struct S2 {
-  a : array<S1, 3u>;
+  a : array<S1, 3u>,
 };
 
 fn f() {
@@ -507,11 +507,11 @@ fn f() {
 
   auto* expect = R"(
 struct S1 {
-  a : i32;
+  a : i32,
 }
 
 struct S2 {
-  a : array<S1, 3u>;
+  a : array<S1, 3u>,
 }
 
 fn f() {
@@ -537,11 +537,11 @@ fn f() {
 }
 
 struct S2 {
-  a : array<S1, 3u>;
+  a : array<S1, 3u>,
 };
 
 struct S1 {
-  a : i32;
+  a : i32,
 };
 )";
 
@@ -556,11 +556,11 @@ fn f() {
 }
 
 struct S2 {
-  a : array<S1, 3u>;
+  a : array<S1, 3u>,
 }
 
 struct S1 {
-  a : i32;
+  a : i32,
 }
 )";
 
@@ -573,9 +573,9 @@ struct S1 {
 TEST_F(PromoteInitializersToConstVarTest, NoChangeOnVarDecl) {
   auto* src = R"(
 struct S {
-  a : i32;
-  b : f32;
-  c : i32;
+  a : i32,
+  b : f32,
+  c : i32,
 }
 
 fn f() {
@@ -606,9 +606,9 @@ fn f() {
 let module_str : S = S(1, 2.0, 3);
 
 struct S {
-  a : i32;
-  b : f32;
-  c : i32;
+  a : i32,
+  b : f32,
+  c : i32,
 }
 
 let module_arr : array<f32, 4u> = array<f32, 4u>(0.0, 1.0, 2.0, 3.0);

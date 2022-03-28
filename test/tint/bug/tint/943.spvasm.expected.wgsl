@@ -1,17 +1,17 @@
 struct Uniforms {
-  NAN : f32;
+  NAN : f32,
   @size(12)
-  padding : u32;
-  aShape : vec3<i32>;
+  padding : u32,
+  aShape : vec3<i32>,
   @size(4)
-  padding_1 : u32;
-  bShape : vec3<i32>;
+  padding_1 : u32,
+  bShape : vec3<i32>,
   @size(4)
-  padding_2 : u32;
-  outShape : vec3<i32>;
+  padding_2 : u32,
+  outShape : vec3<i32>,
   @size(4)
-  padding_3 : u32;
-  outShapeStrides : vec2<i32>;
+  padding_3 : u32,
+  outShapeStrides : vec2<i32>,
 }
 
 type RTArr = array<f32>;
@@ -19,17 +19,17 @@ type RTArr = array<f32>;
 type RTArr_1 = array<f32>;
 
 struct ssbOut {
-  result : RTArr_1;
+  result : RTArr_1,
 }
 
 type RTArr_2 = array<f32>;
 
 struct ssbA {
-  A : RTArr_1;
+  A : RTArr_1,
 }
 
 struct ssbB {
-  B : RTArr_1;
+  B : RTArr_1,
 }
 
 var<private> dimAOuter_1 : i32;

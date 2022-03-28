@@ -2,9 +2,9 @@ SKIP: FAILED
 
 
 struct S {
-  field0 : u32;
-  field1 : f32;
-  field2 : array<u32, 2u>;
+  field0 : u32,
+  field1 : f32,
+  field2 : array<u32, 2u>,
 }
 
 var<private> x_1 : u32;

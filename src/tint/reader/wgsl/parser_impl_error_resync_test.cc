@@ -110,24 +110,24 @@ test.wgsl:5:11 error: expected ';' for discard statement
 TEST_F(ParserImplErrorResyncTest, StructMembers) {
   EXPECT(R"(
 struct S {
-    blah blah blah;
-    a : i32;
-    blah blah blah;
-    b : i32;
-    @- x : i32;
-    c : i32;
+    blah blah blah,
+    a : i32,
+    blah blah blah,
+    b : i32,
+    @- x : i32,
+    c : i32,
 }
 )",
          R"(test.wgsl:3:10 error: expected ':' for struct member
-    blah blah blah;
+    blah blah blah,
          ^^^^
 
 test.wgsl:5:10 error: expected ':' for struct member
-    blah blah blah;
+    blah blah blah,
          ^^^^
 
 test.wgsl:7:6 error: expected attribute
-    @- x : i32;
+    @- x : i32,
      ^
 )");
 }

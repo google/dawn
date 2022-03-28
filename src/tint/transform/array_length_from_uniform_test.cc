@@ -35,8 +35,8 @@ TEST_F(ArrayLengthFromUniformTest, ShouldRunEmptyModule) {
 TEST_F(ArrayLengthFromUniformTest, ShouldRunNoArrayLength) {
   auto* src = R"(
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 };
 
 @group(0) @binding(0) var<storage, read> sb : SB;
@@ -52,8 +52,8 @@ fn main() {
 TEST_F(ArrayLengthFromUniformTest, ShouldRunWithArrayLength) {
   auto* src = R"(
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 };
 
 @group(0) @binding(0) var<storage, read> sb : SB;
@@ -70,8 +70,8 @@ fn main() {
 TEST_F(ArrayLengthFromUniformTest, Error_MissingTransformData) {
   auto* src = R"(
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 };
 
 @group(0) @binding(0) var<storage, read> sb : SB;
@@ -103,7 +103,7 @@ fn main() {
 
   auto* expect = R"(
 struct tint_symbol {
-  buffer_size : array<vec4<u32>, 1u>;
+  buffer_size : array<vec4<u32>, 1u>,
 }
 
 @group(0) @binding(30) var<uniform> tint_symbol_1 : tint_symbol;
@@ -132,8 +132,8 @@ fn main() {
 TEST_F(ArrayLengthFromUniformTest, BasicInStruct) {
   auto* src = R"(
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 };
 
 @group(0) @binding(0) var<storage, read> sb : SB;
@@ -146,14 +146,14 @@ fn main() {
 
   auto* expect = R"(
 struct tint_symbol {
-  buffer_size : array<vec4<u32>, 1u>;
+  buffer_size : array<vec4<u32>, 1u>,
 }
 
 @group(0) @binding(30) var<uniform> tint_symbol_1 : tint_symbol;
 
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 }
 
 @group(0) @binding(0) var<storage, read> sb : SB;
@@ -180,16 +180,16 @@ fn main() {
 TEST_F(ArrayLengthFromUniformTest, MultipleStorageBuffers) {
   auto* src = R"(
 struct SB1 {
-  x : i32;
-  arr1 : array<i32>;
+  x : i32,
+  arr1 : array<i32>,
 };
 struct SB2 {
-  x : i32;
-  arr2 : array<vec4<f32>>;
+  x : i32,
+  arr2 : array<vec4<f32>>,
 };
 struct SB4 {
-  x : i32;
-  arr4 : array<vec4<f32>>;
+  x : i32,
+  arr4 : array<vec4<f32>>,
 };
 
 @group(0) @binding(2) var<storage, read> sb1 : SB1;
@@ -211,24 +211,24 @@ fn main() {
 
   auto* expect = R"(
 struct tint_symbol {
-  buffer_size : array<vec4<u32>, 2u>;
+  buffer_size : array<vec4<u32>, 2u>,
 }
 
 @group(0) @binding(30) var<uniform> tint_symbol_1 : tint_symbol;
 
 struct SB1 {
-  x : i32;
-  arr1 : array<i32>;
+  x : i32,
+  arr1 : array<i32>,
 }
 
 struct SB2 {
-  x : i32;
-  arr2 : array<vec4<f32>>;
+  x : i32,
+  arr2 : array<vec4<f32>>,
 }
 
 struct SB4 {
-  x : i32;
-  arr4 : array<vec4<f32>>;
+  x : i32,
+  arr4 : array<vec4<f32>>,
 }
 
 @group(0) @binding(2) var<storage, read> sb1 : SB1;
@@ -272,16 +272,16 @@ fn main() {
 TEST_F(ArrayLengthFromUniformTest, MultipleUnusedStorageBuffers) {
   auto* src = R"(
 struct SB1 {
-  x : i32;
-  arr1 : array<i32>;
+  x : i32,
+  arr1 : array<i32>,
 };
 struct SB2 {
-  x : i32;
-  arr2 : array<vec4<f32>>;
+  x : i32,
+  arr2 : array<vec4<f32>>,
 };
 struct SB4 {
-  x : i32;
-  arr4 : array<vec4<f32>>;
+  x : i32,
+  arr4 : array<vec4<f32>>,
 };
 
 @group(0) @binding(2) var<storage, read> sb1 : SB1;
@@ -300,24 +300,24 @@ fn main() {
 
   auto* expect = R"(
 struct tint_symbol {
-  buffer_size : array<vec4<u32>, 1u>;
+  buffer_size : array<vec4<u32>, 1u>,
 }
 
 @group(0) @binding(30) var<uniform> tint_symbol_1 : tint_symbol;
 
 struct SB1 {
-  x : i32;
-  arr1 : array<i32>;
+  x : i32,
+  arr1 : array<i32>,
 }
 
 struct SB2 {
-  x : i32;
-  arr2 : array<vec4<f32>>;
+  x : i32,
+  arr2 : array<vec4<f32>>,
 }
 
 struct SB4 {
-  x : i32;
-  arr4 : array<vec4<f32>>;
+  x : i32,
+  arr4 : array<vec4<f32>>,
 }
 
 @group(0) @binding(2) var<storage, read> sb1 : SB1;
@@ -358,8 +358,8 @@ fn main() {
 TEST_F(ArrayLengthFromUniformTest, NoArrayLengthCalls) {
   auto* src = R"(
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 }
 
 @group(0) @binding(0) var<storage, read> sb : SB;
@@ -385,13 +385,13 @@ fn main() {
 TEST_F(ArrayLengthFromUniformTest, MissingBindingPointToIndexMapping) {
   auto* src = R"(
 struct SB1 {
-  x : i32;
-  arr1 : array<i32>;
+  x : i32,
+  arr1 : array<i32>,
 };
 
 struct SB2 {
-  x : i32;
-  arr2 : array<vec4<f32>>;
+  x : i32,
+  arr2 : array<vec4<f32>>,
 };
 
 @group(0) @binding(2) var<storage, read> sb1 : SB1;
@@ -408,19 +408,19 @@ fn main() {
 
   auto* expect = R"(
 struct tint_symbol {
-  buffer_size : array<vec4<u32>, 1u>;
+  buffer_size : array<vec4<u32>, 1u>,
 }
 
 @group(0) @binding(30) var<uniform> tint_symbol_1 : tint_symbol;
 
 struct SB1 {
-  x : i32;
-  arr1 : array<i32>;
+  x : i32,
+  arr1 : array<i32>,
 }
 
 struct SB2 {
-  x : i32;
-  arr2 : array<vec4<f32>>;
+  x : i32,
+  arr2 : array<vec4<f32>>,
 }
 
 @group(0) @binding(2) var<storage, read> sb1 : SB1;
@@ -458,14 +458,14 @@ fn main() {
 @group(0) @binding(0) var<storage, read> sb : SB;
 
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 };
 )";
 
   auto* expect = R"(
 struct tint_symbol {
-  buffer_size : array<vec4<u32>, 1u>;
+  buffer_size : array<vec4<u32>, 1u>,
 }
 
 @group(0) @binding(30) var<uniform> tint_symbol_1 : tint_symbol;
@@ -478,8 +478,8 @@ fn main() {
 @group(0) @binding(0) var<storage, read> sb : SB;
 
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 }
 )";
 

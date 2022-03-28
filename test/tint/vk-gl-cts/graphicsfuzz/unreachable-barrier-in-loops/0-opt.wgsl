@@ -1,15 +1,15 @@
 struct buf1 {
-  injectionSwitch : vec2<f32>;
+  injectionSwitch : vec2<f32>,
 }
 
 struct buf2 {
-  resolution : vec2<f32>;
+  resolution : vec2<f32>,
 }
 
 type RTArr = array<i32>;
 
 struct doesNotMatter {
-  x_compute_data : RTArr;
+  x_compute_data : RTArr,
 }
 
 var<private> gl_GlobalInvocationID : vec3<u32>;

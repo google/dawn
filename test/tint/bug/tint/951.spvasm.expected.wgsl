@@ -3,19 +3,19 @@ type RTArr = array<f32>;
 type RTArr_1 = array<f32>;
 
 struct ssbOut {
-  result : RTArr_1;
+  result : RTArr_1,
 }
 
 struct ssbA {
-  A : RTArr_1;
+  A : RTArr_1,
 }
 
 struct Uniforms {
-  NAN : f32;
-  aShape : i32;
-  outShape : i32;
-  outShapeStrides : i32;
-  size : i32;
+  NAN : f32,
+  aShape : i32,
+  outShape : i32,
+  outShapeStrides : i32,
+  size : i32,
 }
 
 @group(0) @binding(0) var<storage, read_write> x_16 : ssbOut;

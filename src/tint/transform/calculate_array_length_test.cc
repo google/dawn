@@ -33,8 +33,8 @@ TEST_F(CalculateArrayLengthTest, ShouldRunEmptyModule) {
 TEST_F(CalculateArrayLengthTest, ShouldRunNoArrayLength) {
   auto* src = R"(
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 };
 
 @group(0) @binding(0) var<storage, read> sb : SB;
@@ -50,8 +50,8 @@ fn main() {
 TEST_F(CalculateArrayLengthTest, ShouldRunWithArrayLength) {
   auto* src = R"(
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 };
 
 @group(0) @binding(0) var<storage, read> sb : SB;
@@ -98,8 +98,8 @@ fn main() {
 TEST_F(CalculateArrayLengthTest, BasicInStruct) {
   auto* src = R"(
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 };
 
 @group(0) @binding(0) var<storage, read> sb : SB;
@@ -115,8 +115,8 @@ fn main() {
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, result : ptr<function, u32>)
 
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 }
 
 @group(0) @binding(0) var<storage, read> sb : SB;
@@ -138,7 +138,7 @@ fn main() {
 TEST_F(CalculateArrayLengthTest, ArrayOfStruct) {
   auto* src = R"(
 struct S {
-  f : f32;
+  f : f32,
 }
 
 @group(0) @binding(0) var<storage, read> arr : array<S>;
@@ -153,7 +153,7 @@ fn main() {
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : array<S>, result : ptr<function, u32>)
 
 struct S {
-  f : f32;
+  f : f32,
 }
 
 @group(0) @binding(0) var<storage, read> arr : array<S>;
@@ -175,7 +175,7 @@ fn main() {
 TEST_F(CalculateArrayLengthTest, ArrayOfArrayOfStruct) {
   auto* src = R"(
 struct S {
-  f : f32;
+  f : f32,
 }
 
 @group(0) @binding(0) var<storage, read> arr : array<array<S, 4>>;
@@ -190,7 +190,7 @@ fn main() {
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : array<array<S, 4u>>, result : ptr<function, u32>)
 
 struct S {
-  f : f32;
+  f : f32,
 }
 
 @group(0) @binding(0) var<storage, read> arr : array<array<S, 4>>;
@@ -246,8 +246,8 @@ fn main() {
 TEST_F(CalculateArrayLengthTest, InSameBlock_Struct) {
   auto* src = R"(
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 };
 
 @group(0) @binding(0) var<storage, read> sb : SB;
@@ -265,8 +265,8 @@ fn main() {
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, result : ptr<function, u32>)
 
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 }
 
 @group(0) @binding(0) var<storage, read> sb : SB;
@@ -290,8 +290,8 @@ fn main() {
 TEST_F(CalculateArrayLengthTest, Nested) {
   auto* src = R"(
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 };
 
 @group(0) @binding(0) var<storage, read> sb : SB;
@@ -313,8 +313,8 @@ fn main() {
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, result : ptr<function, u32>)
 
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 }
 
 @group(0) @binding(0) var<storage, read> sb : SB;
@@ -345,13 +345,13 @@ fn main() {
 TEST_F(CalculateArrayLengthTest, MultipleStorageBuffers) {
   auto* src = R"(
 struct SB1 {
-  x : i32;
-  arr1 : array<i32>;
+  x : i32,
+  arr1 : array<i32>,
 };
 
 struct SB2 {
-  x : i32;
-  arr2 : array<vec4<f32>>;
+  x : i32,
+  arr2 : array<vec4<f32>>,
 };
 
 @group(0) @binding(0) var<storage, read> sb1 : SB1;
@@ -380,13 +380,13 @@ fn tint_symbol_3(@internal(disable_validation__ignore_constructible_function_par
 fn tint_symbol_6(@internal(disable_validation__ignore_constructible_function_parameter) buffer : array<i32>, result : ptr<function, u32>)
 
 struct SB1 {
-  x : i32;
-  arr1 : array<i32>;
+  x : i32,
+  arr1 : array<i32>,
 }
 
 struct SB2 {
-  x : i32;
-  arr2 : array<vec4<f32>>;
+  x : i32,
+  arr2 : array<vec4<f32>>,
 }
 
 @group(0) @binding(0) var<storage, read> sb1 : SB1;
@@ -421,8 +421,8 @@ fn main() {
 TEST_F(CalculateArrayLengthTest, Shadowing) {
   auto* src = R"(
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 };
 
 @group(0) @binding(0) var<storage, read> a : SB;
@@ -444,8 +444,8 @@ fn main() {
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, result : ptr<function, u32>)
 
 struct SB {
-  x : i32;
-  arr : array<i32>;
+  x : i32,
+  arr : array<i32>,
 }
 
 @group(0) @binding(0) var<storage, read> a : SB;
@@ -485,15 +485,15 @@ fn main() {
 @group(0) @binding(0) var<storage, read> sb1 : SB1;
 
 struct SB1 {
-  x : i32;
-  arr1 : array<i32>;
+  x : i32,
+  arr1 : array<i32>,
 };
 
 @group(0) @binding(1) var<storage, read> sb2 : SB2;
 
 struct SB2 {
-  x : i32;
-  arr2 : array<vec4<f32>>;
+  x : i32,
+  arr2 : array<vec4<f32>>,
 };
 
 @group(0) @binding(2) var<storage, read> sb3 : array<i32>;
@@ -529,15 +529,15 @@ fn main() {
 @group(0) @binding(0) var<storage, read> sb1 : SB1;
 
 struct SB1 {
-  x : i32;
-  arr1 : array<i32>;
+  x : i32,
+  arr1 : array<i32>,
 }
 
 @group(0) @binding(1) var<storage, read> sb2 : SB2;
 
 struct SB2 {
-  x : i32;
-  arr2 : array<vec4<f32>>;
+  x : i32,
+  arr2 : array<vec4<f32>>,
 }
 
 @group(0) @binding(2) var<storage, read> sb3 : array<i32>;

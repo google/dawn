@@ -1,9 +1,9 @@
 struct Uniforms {
-  i : u32;
+  i : u32,
 }
 
 struct OuterS {
-  v1 : vec3<f32>;
+  v1 : vec3<f32>,
 }
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;

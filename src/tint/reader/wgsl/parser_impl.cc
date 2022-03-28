@@ -1166,56 +1166,61 @@ Maybe<const ast::Struct*> ParserImpl::struct_decl() {
 }
 
 // struct_body_decl
-//   : BRACKET_LEFT struct_member* BRACKET_RIGHT
+//   : BRACE_LEFT (struct_member COMMA)* struct_member COMMA? BRACE_RIGHT
 Expect<ast::StructMemberList> ParserImpl::expect_struct_body_decl() {
   return expect_brace_block(
       "struct declaration", [&]() -> Expect<ast::StructMemberList> {
-        bool errored = false;
-
         ast::StructMemberList members;
+        bool errored = false;
+        while (continue_parsing()) {
+          // Check for the end of the list.
+          auto t = peek();
+          if (!t.IsIdentifier() && !t.Is(Token::Type::kAttr)) {
+            break;
+          }
 
-        while (continue_parsing() && !peek_is(Token::Type::kBraceRight) &&
-               !peek_is(Token::Type::kEOF)) {
-          auto member = sync(Token::Type::kSemicolon,
-                             [&]() -> Expect<ast::StructMember*> {
-                               auto attrs = attribute_list();
-                               if (attrs.errored) {
-                                 errored = true;
-                               }
-                               if (!synchronized_) {
-                                 return Failure::kErrored;
-                               }
-                               return expect_struct_member(attrs.value);
-                             });
-
+          auto member = expect_struct_member();
           if (member.errored) {
             errored = true;
+            if (!sync_to(Token::Type::kComma, /* consume: */ false)) {
+              return Failure::kErrored;
+            }
           } else {
             members.push_back(member.value);
           }
+
+          // TODO(crbug.com/tint/1475): Remove support for semicolons.
+          if (auto sc = peek(); sc.Is(Token::Type::kSemicolon)) {
+            deprecated(sc.source(),
+                       "struct members should be separated with commas");
+            next();
+            continue;
+          }
+          if (!match(Token::Type::kComma))
+            break;
         }
-
-        if (errored)
+        if (errored) {
           return Failure::kErrored;
-
+        }
         return members;
       });
 }
 
 // struct_member
-//   : struct_member_attribute_decl+ variable_ident_decl SEMICOLON
-Expect<ast::StructMember*> ParserImpl::expect_struct_member(
-    ast::AttributeList& attrs) {
+//   : attribute* variable_ident_decl
+Expect<ast::StructMember*> ParserImpl::expect_struct_member() {
+  auto attrs = attribute_list();
+  if (attrs.errored) {
+    return Failure::kErrored;
+  }
+
   auto decl = expect_variable_ident_decl("struct member");
   if (decl.errored)
     return Failure::kErrored;
 
-  if (!expect("struct member", Token::Type::kSemicolon))
-    return Failure::kErrored;
-
   return create<ast::StructMember>(decl->source,
                                    builder_.Symbols().Register(decl->name),
-                                   decl->type, std::move(attrs));
+                                   decl->type, std::move(attrs.value));
 }
 
 // function_decl

@@ -1,5 +1,5 @@
 struct S {
-  a : f32;
+  a : f32,
 }
 
 let bool_let : bool = bool();

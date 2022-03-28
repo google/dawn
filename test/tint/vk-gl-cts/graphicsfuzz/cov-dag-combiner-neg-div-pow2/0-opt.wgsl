@@ -1,9 +1,9 @@
 struct buf1 {
-  ten : i32;
+  ten : i32,
 }
 
 struct buf0 {
-  minusEight : i32;
+  minusEight : i32,
 }
 
 @group(0) @binding(1) var<uniform> x_8 : buf1;
@@ -52,7 +52,7 @@ fn main_1() {
 
 struct main_out {
   @location(0)
-  x_GLF_color_1 : vec4<f32>;
+  x_GLF_color_1 : vec4<f32>,
 }
 
 @stage(fragment)

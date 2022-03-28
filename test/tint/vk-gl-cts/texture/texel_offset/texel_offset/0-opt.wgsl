@@ -11,7 +11,7 @@ fn main_1() {
 
 struct main_out {
   @location(0)
-  result_1 : vec4<f32>;
+  result_1 : vec4<f32>,
 }
 
 @stage(fragment)

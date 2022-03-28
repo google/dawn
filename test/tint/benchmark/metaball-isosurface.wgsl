@@ -1,49 +1,49 @@
 struct Tables {
-  edges : array<u32, 256>;
-  tris : array<i32, 4096>;
+  edges : array<u32, 256>,
+  tris : array<i32, 4096>,
 }
 
 @group(0) @binding(0) var<storage> tables : Tables;
 
 struct IsosurfaceVolume {
-  min : vec3<f32>;
-  max : vec3<f32>;
-  step : vec3<f32>;
-  size : vec3<u32>;
-  threshold : f32;
-  values : array<f32>;
+  min : vec3<f32>,
+  max : vec3<f32>,
+  step : vec3<f32>,
+  size : vec3<u32>,
+  threshold : f32,
+  values : array<f32>,
 }
 
 @group(0) @binding(1) var<storage, write> volume : IsosurfaceVolume;
 
 struct PositionBuffer {
-  values : array<f32>;
+  values : array<f32>,
 }
 
 @group(0) @binding(2) var<storage, write> positionsOut : PositionBuffer;
 
 struct NormalBuffer {
-  values : array<f32>;
+  values : array<f32>,
 }
 
 @group(0) @binding(3) var<storage, write> normalsOut : NormalBuffer;
 
 struct IndexBuffer {
-  tris : array<u32>;
+  tris : array<u32>,
 }
 
 @group(0) @binding(4) var<storage, write> indicesOut : IndexBuffer;
 
 struct DrawIndirectArgs {
-  vc : u32;
-  vertexCount : atomic<u32>;
-  firstVertex : u32;
-  firstInstance : u32;
-  indexCount : atomic<u32>;
-  indexedInstanceCount : u32;
-  indexedFirstIndex : u32;
-  indexedBaseVertex : u32;
-  indexedFirstInstance : u32;
+  vc : u32,
+  vertexCount : atomic<u32>,
+  firstVertex : u32,
+  firstInstance : u32,
+  indexCount : atomic<u32>,
+  indexedInstanceCount : u32,
+  indexedFirstIndex : u32,
+  indexedBaseVertex : u32,
+  indexedFirstInstance : u32,
 }
 
 @group(0) @binding(5) var<storage, read_write> drawOut : DrawIndirectArgs;

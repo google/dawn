@@ -295,7 +295,7 @@ fn xor(a : u32, b : u32) -> u32 {
 TEST_F(RemovePhoniesTest, ForLoop) {
   auto* src = R"(
 struct S {
-  arr : array<i32>;
+  arr : array<i32>,
 };
 
 @group(0) @binding(0) var<storage, read_write> s : S;
@@ -324,7 +324,7 @@ fn f() {
 
   auto* expect = R"(
 struct S {
-  arr : array<i32>;
+  arr : array<i32>,
 }
 
 @group(0) @binding(0) var<storage, read_write> s : S;
@@ -383,7 +383,7 @@ fn z() -> i32 {
 }
 
 struct S {
-  arr : array<i32>;
+  arr : array<i32>,
 };
 
 @group(0) @binding(0) var<storage, read_write> s : S;
@@ -415,7 +415,7 @@ fn z() -> i32 {
 }
 
 struct S {
-  arr : array<i32>;
+  arr : array<i32>,
 }
 
 @group(0) @binding(0) var<storage, read_write> s : S;
