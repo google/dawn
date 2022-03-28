@@ -44,10 +44,10 @@ namespace dawn::native::vulkan {
                                      const ComputePassResourceUsage& resourceUsages);
         MaybeError RecordRenderPass(CommandRecordingContext* recordingContext,
                                     BeginRenderPassCmd* renderPass);
-        void RecordCopyImageWithTemporaryBuffer(CommandRecordingContext* recordingContext,
-                                                const TextureCopy& srcCopy,
-                                                const TextureCopy& dstCopy,
-                                                const Extent3D& copySize);
+        MaybeError RecordCopyImageWithTemporaryBuffer(CommandRecordingContext* recordingContext,
+                                                      const TextureCopy& srcCopy,
+                                                      const TextureCopy& dstCopy,
+                                                      const Extent3D& copySize);
     };
 
 }  // namespace dawn::native::vulkan

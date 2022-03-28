@@ -444,7 +444,7 @@ namespace dawn::native::vulkan {
         : CommandBufferBase(encoder, descriptor) {
     }
 
-    void CommandBuffer::RecordCopyImageWithTemporaryBuffer(
+    MaybeError CommandBuffer::RecordCopyImageWithTemporaryBuffer(
         CommandRecordingContext* recordingContext,
         const TextureCopy& srcCopy,
         const TextureCopy& dstCopy,
@@ -467,12 +467,12 @@ namespace dawn::native::vulkan {
         tempBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
 
         Device* device = ToBackend(GetDevice());
-        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-        Ref<Buffer> tempBuffer =
-            AcquireRef(ToBackend(device->APICreateBuffer(&tempBufferDescriptor)));
+        Ref<BufferBase> tempBufferBase;
+        DAWN_TRY_ASSIGN(tempBufferBase, device->CreateBuffer(&tempBufferDescriptor));
+        Buffer* tempBuffer = ToBackend(tempBufferBase.Get());
 
         BufferCopy tempBufferCopy;
-        tempBufferCopy.buffer = tempBuffer.Get();
+        tempBufferCopy.buffer = tempBuffer;
         tempBufferCopy.rowsPerImage = heightInBlocks;
         tempBufferCopy.offset = 0;
         tempBufferCopy.bytesPerRow = copySize.width / blockInfo.width * blockInfo.byteSize;
@@ -500,6 +500,8 @@ namespace dawn::native::vulkan {
                                         &tempBufferToDstRegion);
 
         recordingContext->tempBuffers.emplace_back(tempBuffer);
+
+        return {};
     }
 
     MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingContext) {
@@ -706,8 +708,8 @@ namespace dawn::native::vulkan {
                                                     1, &region);
                         }
                     } else {
-                        RecordCopyImageWithTemporaryBuffer(recordingContext, src, dst,
-                                                           copy->copySize);
+                        DAWN_TRY(RecordCopyImageWithTemporaryBuffer(recordingContext, src, dst,
+                                                                    copy->copySize));
                     }
 
                     break;
