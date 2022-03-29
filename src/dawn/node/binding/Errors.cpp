@@ -49,7 +49,7 @@ namespace wgpu::binding {
 
         static Napi::Error New(Napi::Env env,
                                std::string name,
-                               std::string message = {},
+                               std::string message,
                                unsigned short code = 0) {
             auto err = Napi::Error::New(env);
             err.Set("name", name);
@@ -60,120 +60,120 @@ namespace wgpu::binding {
 
     }  // namespace
 
-    Napi::Error Errors::HierarchyRequestError(Napi::Env env) {
-        return New(env, kHierarchyRequestError);
+    Napi::Error Errors::HierarchyRequestError(Napi::Env env, std::string message) {
+        return New(env, kHierarchyRequestError, message);
     }
 
-    Napi::Error Errors::WrongDocumentError(Napi::Env env) {
-        return New(env, kWrongDocumentError);
+    Napi::Error Errors::WrongDocumentError(Napi::Env env, std::string message) {
+        return New(env, kWrongDocumentError, message);
     }
 
-    Napi::Error Errors::InvalidCharacterError(Napi::Env env) {
-        return New(env, kInvalidCharacterError);
+    Napi::Error Errors::InvalidCharacterError(Napi::Env env, std::string message) {
+        return New(env, kInvalidCharacterError, message);
     }
 
-    Napi::Error Errors::NoModificationAllowedError(Napi::Env env) {
-        return New(env, kNoModificationAllowedError);
+    Napi::Error Errors::NoModificationAllowedError(Napi::Env env, std::string message) {
+        return New(env, kNoModificationAllowedError, message);
     }
 
-    Napi::Error Errors::NotFoundError(Napi::Env env) {
-        return New(env, kNotFoundError);
+    Napi::Error Errors::NotFoundError(Napi::Env env, std::string message) {
+        return New(env, kNotFoundError, message);
     }
 
-    Napi::Error Errors::NotSupportedError(Napi::Env env) {
-        return New(env, kNotSupportedError);
+    Napi::Error Errors::NotSupportedError(Napi::Env env, std::string message) {
+        return New(env, kNotSupportedError, message);
     }
 
-    Napi::Error Errors::InUseAttributeError(Napi::Env env) {
-        return New(env, kInUseAttributeError);
+    Napi::Error Errors::InUseAttributeError(Napi::Env env, std::string message) {
+        return New(env, kInUseAttributeError, message);
     }
 
-    Napi::Error Errors::InvalidStateError(Napi::Env env) {
-        return New(env, kInvalidStateError);
+    Napi::Error Errors::InvalidStateError(Napi::Env env, std::string message) {
+        return New(env, kInvalidStateError, message);
     }
 
-    Napi::Error Errors::SyntaxError(Napi::Env env) {
-        return New(env, kSyntaxError);
+    Napi::Error Errors::SyntaxError(Napi::Env env, std::string message) {
+        return New(env, kSyntaxError, message);
     }
 
-    Napi::Error Errors::InvalidModificationError(Napi::Env env) {
-        return New(env, kInvalidModificationError);
+    Napi::Error Errors::InvalidModificationError(Napi::Env env, std::string message) {
+        return New(env, kInvalidModificationError, message);
     }
 
-    Napi::Error Errors::NamespaceError(Napi::Env env) {
-        return New(env, kNamespaceError);
+    Napi::Error Errors::NamespaceError(Napi::Env env, std::string message) {
+        return New(env, kNamespaceError, message);
     }
 
-    Napi::Error Errors::SecurityError(Napi::Env env) {
-        return New(env, kSecurityError);
+    Napi::Error Errors::SecurityError(Napi::Env env, std::string message) {
+        return New(env, kSecurityError, message);
     }
 
-    Napi::Error Errors::NetworkError(Napi::Env env) {
-        return New(env, kNetworkError);
+    Napi::Error Errors::NetworkError(Napi::Env env, std::string message) {
+        return New(env, kNetworkError, message);
     }
 
-    Napi::Error Errors::AbortError(Napi::Env env) {
-        return New(env, kAbortError);
+    Napi::Error Errors::AbortError(Napi::Env env, std::string message) {
+        return New(env, kAbortError, message);
     }
 
-    Napi::Error Errors::URLMismatchError(Napi::Env env) {
-        return New(env, kURLMismatchError);
+    Napi::Error Errors::URLMismatchError(Napi::Env env, std::string message) {
+        return New(env, kURLMismatchError, message);
     }
 
-    Napi::Error Errors::QuotaExceededError(Napi::Env env) {
-        return New(env, kQuotaExceededError);
+    Napi::Error Errors::QuotaExceededError(Napi::Env env, std::string message) {
+        return New(env, kQuotaExceededError, message);
     }
 
-    Napi::Error Errors::TimeoutError(Napi::Env env) {
-        return New(env, kTimeoutError);
+    Napi::Error Errors::TimeoutError(Napi::Env env, std::string message) {
+        return New(env, kTimeoutError, message);
     }
 
-    Napi::Error Errors::InvalidNodeTypeError(Napi::Env env) {
-        return New(env, kInvalidNodeTypeError);
+    Napi::Error Errors::InvalidNodeTypeError(Napi::Env env, std::string message) {
+        return New(env, kInvalidNodeTypeError, message);
     }
 
-    Napi::Error Errors::DataCloneError(Napi::Env env) {
-        return New(env, kDataCloneError);
+    Napi::Error Errors::DataCloneError(Napi::Env env, std::string message) {
+        return New(env, kDataCloneError, message);
     }
 
-    Napi::Error Errors::EncodingError(Napi::Env env) {
-        return New(env, kEncodingError);
+    Napi::Error Errors::EncodingError(Napi::Env env, std::string message) {
+        return New(env, kEncodingError, message);
     }
 
-    Napi::Error Errors::NotReadableError(Napi::Env env) {
-        return New(env, kNotReadableError);
+    Napi::Error Errors::NotReadableError(Napi::Env env, std::string message) {
+        return New(env, kNotReadableError, message);
     }
 
-    Napi::Error Errors::UnknownError(Napi::Env env) {
-        return New(env, kUnknownError);
+    Napi::Error Errors::UnknownError(Napi::Env env, std::string message) {
+        return New(env, kUnknownError, message);
     }
 
-    Napi::Error Errors::ConstraintError(Napi::Env env) {
-        return New(env, kConstraintError);
+    Napi::Error Errors::ConstraintError(Napi::Env env, std::string message) {
+        return New(env, kConstraintError, message);
     }
 
-    Napi::Error Errors::DataError(Napi::Env env) {
-        return New(env, kDataError);
+    Napi::Error Errors::DataError(Napi::Env env, std::string message) {
+        return New(env, kDataError, message);
     }
 
-    Napi::Error Errors::TransactionInactiveError(Napi::Env env) {
-        return New(env, kTransactionInactiveError);
+    Napi::Error Errors::TransactionInactiveError(Napi::Env env, std::string message) {
+        return New(env, kTransactionInactiveError, message);
     }
 
-    Napi::Error Errors::ReadOnlyError(Napi::Env env) {
-        return New(env, kReadOnlyError);
+    Napi::Error Errors::ReadOnlyError(Napi::Env env, std::string message) {
+        return New(env, kReadOnlyError, message);
     }
 
-    Napi::Error Errors::VersionError(Napi::Env env) {
-        return New(env, kVersionError);
+    Napi::Error Errors::VersionError(Napi::Env env, std::string message) {
+        return New(env, kVersionError, message);
     }
 
-    Napi::Error Errors::OperationError(Napi::Env env) {
-        return New(env, kOperationError);
+    Napi::Error Errors::OperationError(Napi::Env env, std::string message) {
+        return New(env, kOperationError, message);
     }
 
-    Napi::Error Errors::NotAllowedError(Napi::Env env) {
-        return New(env, kNotAllowedError);
+    Napi::Error Errors::NotAllowedError(Napi::Env env, std::string message) {
+        return New(env, kNotAllowedError, message);
     }
 
 }  // namespace wgpu::binding

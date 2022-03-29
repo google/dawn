@@ -16,6 +16,7 @@
 
 #include <unordered_set>
 
+#include "src/dawn/node/binding/Errors.h"
 #include "src/dawn/node/binding/Flags.h"
 #include "src/dawn/node/binding/GPUDevice.h"
 #include "src/dawn/node/binding/GPUSupportedLimits.h"
@@ -47,6 +48,34 @@ namespace {
         return result;
     }
 }  // namespace
+
+#define FOR_EACH_LIMIT(X)                        \
+    X(maxTextureDimension1D)                     \
+    X(maxTextureDimension2D)                     \
+    X(maxTextureDimension3D)                     \
+    X(maxTextureArrayLayers)                     \
+    X(maxBindGroups)                             \
+    X(maxDynamicUniformBuffersPerPipelineLayout) \
+    X(maxDynamicStorageBuffersPerPipelineLayout) \
+    X(maxSampledTexturesPerShaderStage)          \
+    X(maxSamplersPerShaderStage)                 \
+    X(maxStorageBuffersPerShaderStage)           \
+    X(maxStorageTexturesPerShaderStage)          \
+    X(maxUniformBuffersPerShaderStage)           \
+    X(maxUniformBufferBindingSize)               \
+    X(maxStorageBufferBindingSize)               \
+    X(minUniformBufferOffsetAlignment)           \
+    X(minStorageBufferOffsetAlignment)           \
+    X(maxVertexBuffers)                          \
+    X(maxVertexAttributes)                       \
+    X(maxVertexBufferArrayStride)                \
+    X(maxInterStageShaderComponents)             \
+    X(maxComputeWorkgroupStorageSize)            \
+    X(maxComputeInvocationsPerWorkgroup)         \
+    X(maxComputeWorkgroupSizeX)                  \
+    X(maxComputeWorkgroupSizeY)                  \
+    X(maxComputeWorkgroupSizeZ)                  \
+    X(maxComputeWorkgroupsPerDimension)
 
 namespace wgpu::binding {
 
@@ -138,33 +167,8 @@ namespace wgpu::binding {
 
         wgpu::SupportedLimits wgpuLimits{};
 
-#define COPY_LIMIT(LIMIT) wgpuLimits.limits.LIMIT = limits.limits.LIMIT
-        COPY_LIMIT(maxTextureDimension1D);
-        COPY_LIMIT(maxTextureDimension2D);
-        COPY_LIMIT(maxTextureDimension3D);
-        COPY_LIMIT(maxTextureArrayLayers);
-        COPY_LIMIT(maxBindGroups);
-        COPY_LIMIT(maxDynamicUniformBuffersPerPipelineLayout);
-        COPY_LIMIT(maxDynamicStorageBuffersPerPipelineLayout);
-        COPY_LIMIT(maxSampledTexturesPerShaderStage);
-        COPY_LIMIT(maxSamplersPerShaderStage);
-        COPY_LIMIT(maxStorageBuffersPerShaderStage);
-        COPY_LIMIT(maxStorageTexturesPerShaderStage);
-        COPY_LIMIT(maxUniformBuffersPerShaderStage);
-        COPY_LIMIT(maxUniformBufferBindingSize);
-        COPY_LIMIT(maxStorageBufferBindingSize);
-        COPY_LIMIT(minUniformBufferOffsetAlignment);
-        COPY_LIMIT(minStorageBufferOffsetAlignment);
-        COPY_LIMIT(maxVertexBuffers);
-        COPY_LIMIT(maxVertexAttributes);
-        COPY_LIMIT(maxVertexBufferArrayStride);
-        COPY_LIMIT(maxInterStageShaderComponents);
-        COPY_LIMIT(maxComputeWorkgroupStorageSize);
-        COPY_LIMIT(maxComputeInvocationsPerWorkgroup);
-        COPY_LIMIT(maxComputeWorkgroupSizeX);
-        COPY_LIMIT(maxComputeWorkgroupSizeY);
-        COPY_LIMIT(maxComputeWorkgroupSizeZ);
-        COPY_LIMIT(maxComputeWorkgroupsPerDimension);
+#define COPY_LIMIT(LIMIT) wgpuLimits.limits.LIMIT = limits.limits.LIMIT;
+        FOR_EACH_LIMIT(COPY_LIMIT)
 #undef COPY_LIMIT
 
         return interop::GPUSupportedLimits::Create<GPUSupportedLimits>(env, wgpuLimits);
@@ -210,6 +214,20 @@ namespace wgpu::binding {
             UNIMPLEMENTED("required: ", required);
         }
 
+        wgpu::RequiredLimits limits;
+#define COPY_LIMIT(LIMIT)                                        \
+    if (descriptor.requiredLimits.count(#LIMIT)) {               \
+        limits.limits.LIMIT = descriptor.requiredLimits[#LIMIT]; \
+        descriptor.requiredLimits.erase(#LIMIT);                 \
+    }
+        FOR_EACH_LIMIT(COPY_LIMIT)
+#undef COPY_LIMIT
+
+        for (auto [key, _] : descriptor.requiredLimits) {
+            promise.Reject(binding::Errors::OperationError(env, "Unknown limit \"" + key + "\""));
+            return promise;
+        }
+
         // Propogate enabled/disabled dawn features
         // Note: DawnDeviceTogglesDescriptor::forceEnabledToggles and forceDisabledToggles are
         // vectors of 'const char*', so we make sure the parsed strings survive the CreateDevice()
@@ -233,6 +251,7 @@ namespace wgpu::binding {
 
         desc.requiredFeaturesCount = requiredFeatures.size();
         desc.requiredFeatures = requiredFeatures.data();
+        desc.requiredLimits = &limits;
 
         DawnTogglesDeviceDescriptor togglesDesc = {};
         desc.nextInChain = &togglesDesc;
@@ -245,7 +264,7 @@ namespace wgpu::binding {
         if (wgpu_device) {
             promise.Resolve(interop::GPUDevice::Create<GPUDevice>(env, env, wgpu_device));
         } else {
-            Napi::Error::New(env, "failed to create device").ThrowAsJavaScriptException();
+            promise.Reject(binding::Errors::OperationError(env, "failed to create device"));
         }
         return promise;
     }
