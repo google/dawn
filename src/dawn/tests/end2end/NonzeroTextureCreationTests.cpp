@@ -92,10 +92,6 @@ namespace {
             DAWN_TEST_UNSUPPORTED_IF(GetParam().mFormat == wgpu::TextureFormat::RGBA8Snorm &&
                                      HasToggleEnabled("disable_snorm_read"));
 
-            // TODO(crbug.com/angleproject/5967): This texture readback hits an assert in ANGLE.
-            DAWN_SUPPRESS_TEST_IF(GetParam().mDimension == wgpu::TextureDimension::e3D &&
-                                  IsANGLE());
-
             // TODO(crbug.com/dawn/791): Determine Intel specific platforms this occurs on, and
             // implement a workaround on all backends (happens on Windows too, but not on our test
             // machines).

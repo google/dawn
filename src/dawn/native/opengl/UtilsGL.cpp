@@ -140,8 +140,8 @@ namespace dawn::native::opengl {
                                                dstLevel, dst.z + layer);
                 }
             }
-            gl.BlitFramebuffer(src.x, src.y, size.width, size.height, dst.x, dst.y, size.width,
-                               size.height, blitMask, GL_NEAREST);
+            gl.BlitFramebuffer(src.x, src.y, src.x + size.width, src.y + size.height, dst.x, dst.y,
+                               dst.x + size.width, dst.y + size.height, blitMask, GL_NEAREST);
         }
         gl.Enable(GL_SCISSOR_TEST);
         gl.DeleteFramebuffers(1, &readFBO);
