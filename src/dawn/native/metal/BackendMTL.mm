@@ -316,11 +316,33 @@ namespace dawn::native::metal {
         }
 
         MaybeError InitializeSupportedFeaturesImpl() override {
+            // Check compressed texture format with deprecated MTLFeatureSet way.
 #if defined(DAWN_PLATFORM_MACOS)
             if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1]) {
                 mSupportedFeatures.EnableFeature(Feature::TextureCompressionBC);
             }
 #endif
+#if defined(DAWN_PLATFORM_IOS)
+            if ([*mDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily1_v1]) {
+                mSupportedFeatures.EnableFeature(Feature::TextureCompressionETC2);
+            }
+            if ([*mDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily2_v1]) {
+                mSupportedFeatures.EnableFeature(Feature::TextureCompressionASTC);
+            }
+#endif
+
+            // Check compressed texture format with MTLGPUFamily
+            if (@available(macOS 10.15, iOS 13.0, *)) {
+                if ([*mDevice supportsFamily:MTLGPUFamilyMac1]) {
+                    mSupportedFeatures.EnableFeature(Feature::TextureCompressionBC);
+                }
+                if ([*mDevice supportsFamily:MTLGPUFamilyApple2]) {
+                    mSupportedFeatures.EnableFeature(Feature::TextureCompressionETC2);
+                }
+                if ([*mDevice supportsFamily:MTLGPUFamilyApple3]) {
+                    mSupportedFeatures.EnableFeature(Feature::TextureCompressionASTC);
+                }
+            }
 
             if (@available(macOS 10.15, iOS 14.0, *)) {
                 if (IsGPUCounterSupported(

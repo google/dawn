@@ -356,48 +356,237 @@ namespace dawn::native::metal {
             case wgpu::TextureFormat::BC7RGBAUnormSrgb:
 #endif
 
-            case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
-
             case wgpu::TextureFormat::ETC2RGB8Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatETC2_RGB8;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ETC2RGB8UnormSrgb:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatETC2_RGB8_sRGB;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ETC2RGB8A1Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatETC2_RGB8A1;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ETC2RGB8A1UnormSrgb:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatETC2_RGB8A1_sRGB;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ETC2RGBA8Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatEAC_RGBA8;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ETC2RGBA8UnormSrgb:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatEAC_RGBA8_sRGB;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::EACR11Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatEAC_R11Unorm;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::EACR11Snorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatEAC_R11Snorm;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::EACRG11Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatEAC_RG11Unorm;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::EACRG11Snorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatEAC_RG11Snorm;
+                } else {
+                    UNREACHABLE();
+                }
 
             case wgpu::TextureFormat::ASTC4x4Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_4x4_LDR;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC4x4UnormSrgb:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_4x4_sRGB;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC5x4Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_5x4_LDR;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC5x4UnormSrgb:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_5x4_sRGB;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC5x5Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_5x5_LDR;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC5x5UnormSrgb:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_5x5_sRGB;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC6x5Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_6x5_LDR;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC6x5UnormSrgb:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_6x5_sRGB;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC6x6Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_6x6_LDR;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC6x6UnormSrgb:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_6x6_sRGB;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC8x5Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_8x5_LDR;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC8x5UnormSrgb:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_8x5_sRGB;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC8x6Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_8x6_LDR;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC8x6UnormSrgb:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_8x6_sRGB;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC8x8Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_8x8_LDR;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC8x8UnormSrgb:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_8x8_sRGB;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC10x5Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_10x5_LDR;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC10x5UnormSrgb:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_10x5_sRGB;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC10x6Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_10x6_LDR;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC10x6UnormSrgb:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_10x6_sRGB;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC10x8Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_10x8_LDR;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC10x8UnormSrgb:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_10x8_sRGB;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC10x10Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_10x10_LDR;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC10x10UnormSrgb:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_10x10_sRGB;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC12x10Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_12x10_LDR;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC12x10UnormSrgb:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_12x10_sRGB;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC12x12Unorm:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_12x12_LDR;
+                } else {
+                    UNREACHABLE();
+                }
             case wgpu::TextureFormat::ASTC12x12UnormSrgb:
+                if (@available(macOS 11.0, iOS 8.0, *)) {
+                    return MTLPixelFormatASTC_12x12_sRGB;
+                } else {
+                    UNREACHABLE();
+                }
 
+            case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
             case wgpu::TextureFormat::Undefined:
                 UNREACHABLE();
         }
