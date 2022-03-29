@@ -1060,7 +1060,8 @@ namespace dawn::native::metal {
             }
         } else {
             MTLPixelFormat format = MetalPixelFormat(descriptor->format);
-            if (descriptor->aspect == wgpu::TextureAspect::StencilOnly) {
+            if (descriptor->aspect == wgpu::TextureAspect::StencilOnly &&
+                format != MTLPixelFormatStencil8) {
                 if (@available(macOS 10.12, iOS 10.0, *)) {
                     if (format == MTLPixelFormatDepth32Float_Stencil8) {
                         format = MTLPixelFormatX32_Stencil8;
