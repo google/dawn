@@ -56,7 +56,7 @@ namespace dawn::native {
             WindowsHWND,
             WindowsCoreWindow,
             WindowsSwapChainPanel,
-            Xlib
+            XlibWindow,
         };
         Type GetType() const;
         InstanceBase* GetInstance();

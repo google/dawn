@@ -159,7 +159,7 @@ namespace dawn::native::vulkan {
 #endif  // defined(DAWN_PLATFORM_ANDROID)
 
 #if defined(DAWN_USE_X11)
-                case Surface::Type::Xlib: {
+                case Surface::Type::XlibWindow: {
                     if (info.HasExt(InstanceExt::XlibSurface)) {
                         VkXlibSurfaceCreateInfoKHR createInfo;
                         createInfo.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;

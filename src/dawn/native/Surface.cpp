@@ -35,6 +35,9 @@ namespace dawn::native {
         const absl::FormatConversionSpec& spec,
         absl::FormatSink* s) {
         switch (value) {
+            case Surface::Type::AndroidWindow:
+                s->Append("AndroidWindow");
+                break;
             case Surface::Type::MetalLayer:
                 s->Append("MetalLayer");
                 break;
@@ -47,11 +50,8 @@ namespace dawn::native {
             case Surface::Type::WindowsSwapChainPanel:
                 s->Append("WindowsSwapChainPanel");
                 break;
-            case Surface::Type::Xlib:
-                s->Append("Xlib");
-                break;
-            case Surface::Type::AndroidWindow:
-                s->Append("AndroidWindow");
+            case Surface::Type::XlibWindow:
+                s->Append("XlibWindow");
                 break;
         }
         return {true};
@@ -190,7 +190,7 @@ namespace dawn::native {
             mSwapChainPanel = static_cast<IUnknown*>(swapChainPanelDesc->swapChainPanel);
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
         } else if (xDesc) {
-            mType = Type::Xlib;
+            mType = Type::XlibWindow;
             mXDisplay = xDesc->display;
             mXWindow = xDesc->window;
         } else {
@@ -259,11 +259,11 @@ namespace dawn::native {
     }
 
     void* Surface::GetXDisplay() const {
-        ASSERT(mType == Type::Xlib);
+        ASSERT(mType == Type::XlibWindow);
         return mXDisplay;
     }
     uint32_t Surface::GetXWindow() const {
-        ASSERT(mType == Type::Xlib);
+        ASSERT(mType == Type::XlibWindow);
         return mXWindow;
     }
 
