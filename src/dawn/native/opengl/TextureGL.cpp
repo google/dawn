@@ -41,6 +41,7 @@ namespace dawn::native::opengl {
                         }
                     }
                 case wgpu::TextureDimension::e3D:
+                    ASSERT(descriptor->sampleCount == 1);
                     return GL_TEXTURE_3D;
 
                 case wgpu::TextureDimension::e1D:
@@ -63,8 +64,12 @@ namespace dawn::native::opengl {
                     ASSERT(sampleCount == 1);
                     return GL_TEXTURE_2D_ARRAY;
                 case wgpu::TextureViewDimension::Cube:
+                    ASSERT(sampleCount == 1);
+                    ASSERT(arrayLayerCount == 6);
                     return GL_TEXTURE_CUBE_MAP;
                 case wgpu::TextureViewDimension::CubeArray:
+                    ASSERT(sampleCount == 1);
+                    ASSERT(arrayLayerCount % 6 == 0);
                     return GL_TEXTURE_CUBE_MAP_ARRAY;
                 case wgpu::TextureViewDimension::e3D:
                     return GL_TEXTURE_3D;
@@ -129,6 +134,34 @@ namespace dawn::native::opengl {
             return false;
         }
 
+        void AllocateTexture(const OpenGLFunctions& gl,
+                             GLenum target,
+                             GLsizei samples,
+                             GLuint levels,
+                             GLenum internalFormat,
+                             const Extent3D& size) {
+            // glTextureView() requires the value of GL_TEXTURE_IMMUTABLE_FORMAT for origtexture to
+            // be GL_TRUE, so the storage of the texture must be allocated with glTexStorage*D.
+            // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTextureView.xhtml
+            switch (target) {
+                case GL_TEXTURE_2D_ARRAY:
+                case GL_TEXTURE_3D:
+                    gl.TexStorage3D(target, levels, internalFormat, size.width, size.height,
+                                    size.depthOrArrayLayers);
+                    break;
+                case GL_TEXTURE_2D:
+                case GL_TEXTURE_CUBE_MAP:
+                    gl.TexStorage2D(target, levels, internalFormat, size.width, size.height);
+                    break;
+                case GL_TEXTURE_2D_MULTISAMPLE:
+                    gl.TexStorage2DMultisample(target, samples, internalFormat, size.width,
+                                               size.height, true);
+                    break;
+                default:
+                    UNREACHABLE();
+            }
+        }
+
     }  // namespace
 
     // Texture
@@ -137,44 +170,13 @@ namespace dawn::native::opengl {
         : Texture(device, descriptor, GenTexture(device->gl), TextureState::OwnedInternal) {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
 
-        uint32_t width = GetWidth();
-        uint32_t height = GetHeight();
         uint32_t levels = GetNumMipLevels();
-        uint32_t arrayLayers = GetArrayLayers();
-        uint32_t sampleCount = GetSampleCount();
 
         const GLFormat& glFormat = GetGLFormat();
 
         gl.BindTexture(mTarget, mHandle);
 
-        // glTextureView() requires the value of GL_TEXTURE_IMMUTABLE_FORMAT for origtexture to be
-        // GL_TRUE, so the storage of the texture must be allocated with glTexStorage*D.
-        // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTextureView.xhtml
-        switch (GetDimension()) {
-            case wgpu::TextureDimension::e2D:
-                if (arrayLayers > 1) {
-                    ASSERT(!IsMultisampledTexture());
-                    gl.TexStorage3D(mTarget, levels, glFormat.internalFormat, width, height,
-                                    arrayLayers);
-                } else {
-                    if (IsMultisampledTexture()) {
-                        gl.TexStorage2DMultisample(mTarget, sampleCount, glFormat.internalFormat,
-                                                   width, height, true);
-                    } else {
-                        gl.TexStorage2D(mTarget, levels, glFormat.internalFormat, width, height);
-                    }
-                }
-                break;
-            case wgpu::TextureDimension::e3D:
-                ASSERT(!IsMultisampledTexture());
-                ASSERT(arrayLayers == 1);
-                gl.TexStorage3D(mTarget, levels, glFormat.internalFormat, width, height,
-                                GetDepth());
-                break;
-
-            case wgpu::TextureDimension::e1D:
-                UNREACHABLE();
-        }
+        AllocateTexture(gl, mTarget, GetSampleCount(), levels, glFormat.internalFormat, GetSize());
 
         // The texture is not complete if it uses mipmapping and not all levels up to
         // MAX_LEVEL have been defined.
