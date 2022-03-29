@@ -351,10 +351,7 @@ namespace dawn::native {
                                            static_cast<const uint8_t*>(pass.batchData.get()),
                                            pass.batchDataSize);
 
-            // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-            ComputePassDescriptor descriptor = {};
-            Ref<ComputePassEncoder> passEncoder =
-                AcquireRef(commandEncoder->APIBeginComputePass(&descriptor));
+            Ref<ComputePassEncoder> passEncoder = commandEncoder->BeginComputePass();
             passEncoder->APISetPipeline(pipeline);
 
             clientIndirectBinding.buffer = pass.clientIndirectBuffer;

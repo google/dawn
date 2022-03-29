@@ -423,7 +423,6 @@ namespace dawn::native::null {
 
     ResultOrError<Ref<TextureViewBase>> SwapChain::GetCurrentTextureViewImpl() {
         TextureDescriptor textureDesc = GetSwapChainBaseTextureDescriptor(this);
-        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
         mTexture = AcquireRef(
             new Texture(GetDevice(), &textureDesc, TextureBase::TextureState::OwnedInternal));
         return mTexture->CreateView();
