@@ -668,12 +668,17 @@ namespace dawn::native {
         return {clampedCopyExtentWidth, clampedCopyExtentHeight, extent.depthOrArrayLayers};
     }
 
+    ResultOrError<Ref<TextureViewBase>> TextureBase::CreateView(
+        const TextureViewDescriptor* descriptor) {
+        return GetDevice()->CreateTextureView(this, descriptor);
+    }
+
     TextureViewBase* TextureBase::APICreateView(const TextureViewDescriptor* descriptor) {
         DeviceBase* device = GetDevice();
 
         Ref<TextureViewBase> result;
-        if (device->ConsumedError(device->CreateTextureView(this, descriptor), &result,
-                                  "calling %s.CreateView(%s).", this, descriptor)) {
+        if (device->ConsumedError(CreateView(descriptor), &result, "calling %s.CreateView(%s).",
+                                  this, descriptor)) {
             return TextureViewBase::MakeError(device);
         }
         return result.Detach();

@@ -63,7 +63,7 @@ namespace dawn::native::d3d12 {
 
         // NewSwapChainBase implementation
         MaybeError PresentImpl() override;
-        ResultOrError<TextureViewBase*> GetCurrentTextureViewImpl() override;
+        ResultOrError<Ref<TextureViewBase>> GetCurrentTextureViewImpl() override;
         void DetachFromSurfaceImpl() override;
 
         // Does the swapchain initialization steps assuming there is nothing we can reuse.

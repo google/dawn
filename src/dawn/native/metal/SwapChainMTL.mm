@@ -129,7 +129,7 @@ namespace dawn::native::metal {
         return {};
     }
 
-    ResultOrError<TextureViewBase*> SwapChain::GetCurrentTextureViewImpl() {
+    ResultOrError<Ref<TextureViewBase>> SwapChain::GetCurrentTextureViewImpl() {
         ASSERT(mCurrentDrawable == nullptr);
         mCurrentDrawable = [*mLayer nextDrawable];
 
@@ -137,8 +137,7 @@ namespace dawn::native::metal {
 
         mTexture = Texture::CreateWrapping(ToBackend(GetDevice()), &textureDesc,
                                            [*mCurrentDrawable texture]);
-        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-        return mTexture->APICreateView();
+        return mTexture->CreateView();
     }
 
     void SwapChain::DetachFromSurfaceImpl() {

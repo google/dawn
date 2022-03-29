@@ -91,6 +91,9 @@ namespace dawn::native {
                                             const Origin3D& origin,
                                             const Extent3D& extent) const;
 
+        ResultOrError<Ref<TextureViewBase>> CreateView(
+            const TextureViewDescriptor* descriptor = nullptr);
+
         // Dawn API
         TextureViewBase* APICreateView(const TextureViewDescriptor* descriptor = nullptr);
         void APIDestroy();

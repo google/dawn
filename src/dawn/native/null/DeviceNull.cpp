@@ -421,13 +421,12 @@ namespace dawn::native::null {
         return {};
     }
 
-    ResultOrError<TextureViewBase*> SwapChain::GetCurrentTextureViewImpl() {
+    ResultOrError<Ref<TextureViewBase>> SwapChain::GetCurrentTextureViewImpl() {
         TextureDescriptor textureDesc = GetSwapChainBaseTextureDescriptor(this);
         // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
         mTexture = AcquireRef(
             new Texture(GetDevice(), &textureDesc, TextureBase::TextureState::OwnedInternal));
-        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-        return mTexture->APICreateView();
+        return mTexture->CreateView();
     }
 
     void SwapChain::DetachFromSurfaceImpl() {

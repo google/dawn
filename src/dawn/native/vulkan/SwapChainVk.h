@@ -75,11 +75,11 @@ namespace dawn::native::vulkan {
             bool needsBlit = false;
         };
         ResultOrError<Config> ChooseConfig(const VulkanSurfaceInfo& surfaceInfo) const;
-        ResultOrError<TextureViewBase*> GetCurrentTextureViewInternal(bool isReentrant = false);
+        ResultOrError<Ref<TextureViewBase>> GetCurrentTextureViewInternal(bool isReentrant = false);
 
         // NewSwapChainBase implementation
         MaybeError PresentImpl() override;
-        ResultOrError<TextureViewBase*> GetCurrentTextureViewImpl() override;
+        ResultOrError<Ref<TextureViewBase>> GetCurrentTextureViewImpl() override;
         void DetachFromSurfaceImpl() override;
 
         Config mConfig;

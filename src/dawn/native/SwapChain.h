@@ -154,7 +154,8 @@ namespace dawn::native {
         // manner, starting with GetCurrentTextureViewImpl.
 
         // The returned texture view must match the swapchain descriptor exactly.
-        virtual ResultOrError<TextureViewBase*> GetCurrentTextureViewImpl() = 0;
+        ResultOrError<Ref<TextureViewBase>> GetCurrentTextureView();
+        virtual ResultOrError<Ref<TextureViewBase>> GetCurrentTextureViewImpl() = 0;
         // The call to present must destroy the current view's texture so further access to it are
         // invalid.
         virtual MaybeError PresentImpl() = 0;

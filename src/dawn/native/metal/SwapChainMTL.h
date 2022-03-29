@@ -58,7 +58,7 @@ namespace dawn::native::metal {
         Ref<Texture> mTexture;
 
         MaybeError PresentImpl() override;
-        ResultOrError<TextureViewBase*> GetCurrentTextureViewImpl() override;
+        ResultOrError<Ref<TextureViewBase>> GetCurrentTextureViewImpl() override;
         void DetachFromSurfaceImpl() override;
     };
 

@@ -593,11 +593,11 @@ namespace dawn::native::vulkan {
         }
     }
 
-    ResultOrError<TextureViewBase*> SwapChain::GetCurrentTextureViewImpl() {
+    ResultOrError<Ref<TextureViewBase>> SwapChain::GetCurrentTextureViewImpl() {
         return GetCurrentTextureViewInternal();
     }
 
-    ResultOrError<TextureViewBase*> SwapChain::GetCurrentTextureViewInternal(bool isReentrant) {
+    ResultOrError<Ref<TextureViewBase>> SwapChain::GetCurrentTextureViewInternal(bool isReentrant) {
         Device* device = ToBackend(GetDevice());
 
         // Transiently create a semaphore that will be signaled when the presentation engine is done
@@ -664,8 +664,7 @@ namespace dawn::native::vulkan {
 
         // In the happy path we can use the swapchain image directly.
         if (!mConfig.needsBlit) {
-            // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-            return mTexture->APICreateView();
+            return mTexture->CreateView();
         }
 
         // The blit texture always perfectly matches what the user requested for the swapchain.
@@ -673,8 +672,7 @@ namespace dawn::native::vulkan {
         TextureDescriptor desc = GetSwapChainBaseTextureDescriptor(this);
         DAWN_TRY_ASSIGN(mBlitTexture,
                         Texture::Create(device, &desc, VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
-        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-        return mBlitTexture->APICreateView();
+        return mBlitTexture->CreateView();
     }
 
     void SwapChain::DetachFromSurfaceImpl() {
