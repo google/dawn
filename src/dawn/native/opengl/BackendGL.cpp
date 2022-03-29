@@ -244,6 +244,7 @@ namespace dawn::native::opengl {
                     supportsBPTC) {
                     mSupportedFeatures.EnableFeature(dawn::native::Feature::TextureCompressionBC);
                 }
+                mSupportedFeatures.EnableFeature(Feature::Depth24UnormStencil8);
             }
 
             return {};
