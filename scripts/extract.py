@@ -97,7 +97,7 @@ def main(args):
         # Skip archives that weren't downloaded.
         return 0
 
-    with open(archive) as f:
+    with open(archive, 'rb') as f:
         sha256 = hashlib.sha256()
         while True:
             chunk = f.read(1024 * 1024)
