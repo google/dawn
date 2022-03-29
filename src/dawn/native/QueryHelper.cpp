@@ -204,9 +204,7 @@ namespace dawn::native {
                                              {{0, timestamps}, {1, availability}, {2, params}}));
 
         // Create compute encoder and issue dispatch.
-        ComputePassDescriptor passDesc = {};
-        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-        Ref<ComputePassEncoder> pass = AcquireRef(encoder->APIBeginComputePass(&passDesc));
+        Ref<ComputePassEncoder> pass = encoder->BeginComputePass();
         pass->APISetPipeline(pipeline);
         pass->APISetBindGroup(0, bindGroup.Get());
         pass->APIDispatch(

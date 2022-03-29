@@ -27,15 +27,14 @@ namespace dawn::native {
 
     class ComputePassEncoder final : public ProgrammableEncoder {
       public:
-        ComputePassEncoder(DeviceBase* device,
-                           const ComputePassDescriptor* descriptor,
-                           CommandEncoder* commandEncoder,
-                           EncodingContext* encodingContext,
-                           std::vector<TimestampWrite> timestampWritesAtEnd);
-
-        static ComputePassEncoder* MakeError(DeviceBase* device,
-                                             CommandEncoder* commandEncoder,
-                                             EncodingContext* encodingContext);
+        static Ref<ComputePassEncoder> Create(DeviceBase* device,
+                                              const ComputePassDescriptor* descriptor,
+                                              CommandEncoder* commandEncoder,
+                                              EncodingContext* encodingContext,
+                                              std::vector<TimestampWrite> timestampWritesAtEnd);
+        static Ref<ComputePassEncoder> MakeError(DeviceBase* device,
+                                                 CommandEncoder* commandEncoder,
+                                                 EncodingContext* encodingContext);
 
         ObjectType GetType() const override;
 
@@ -61,6 +60,11 @@ namespace dawn::native {
         }
 
       protected:
+        ComputePassEncoder(DeviceBase* device,
+                           const ComputePassDescriptor* descriptor,
+                           CommandEncoder* commandEncoder,
+                           EncodingContext* encodingContext,
+                           std::vector<TimestampWrite> timestampWritesAtEnd);
         ComputePassEncoder(DeviceBase* device,
                            CommandEncoder* commandEncoder,
                            EncodingContext* encodingContext,

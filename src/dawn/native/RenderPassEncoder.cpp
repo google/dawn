@@ -74,6 +74,25 @@ namespace dawn::native {
         TrackInDevice();
     }
 
+    // static
+    Ref<RenderPassEncoder> RenderPassEncoder::Create(
+        DeviceBase* device,
+        const RenderPassDescriptor* descriptor,
+        CommandEncoder* commandEncoder,
+        EncodingContext* encodingContext,
+        RenderPassResourceUsageTracker usageTracker,
+        Ref<AttachmentState> attachmentState,
+        std::vector<TimestampWrite> timestampWritesAtEnd,
+        uint32_t renderTargetWidth,
+        uint32_t renderTargetHeight,
+        bool depthReadOnly,
+        bool stencilReadOnly) {
+        return AcquireRef(new RenderPassEncoder(
+            device, descriptor, commandEncoder, encodingContext, std::move(usageTracker),
+            std::move(attachmentState), std::move(timestampWritesAtEnd), renderTargetWidth,
+            renderTargetHeight, depthReadOnly, stencilReadOnly));
+    }
+
     RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
                                          CommandEncoder* commandEncoder,
                                          EncodingContext* encodingContext,
@@ -81,10 +100,12 @@ namespace dawn::native {
         : RenderEncoderBase(device, encodingContext, errorTag), mCommandEncoder(commandEncoder) {
     }
 
-    RenderPassEncoder* RenderPassEncoder::MakeError(DeviceBase* device,
-                                                    CommandEncoder* commandEncoder,
-                                                    EncodingContext* encodingContext) {
-        return new RenderPassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError);
+    // static
+    Ref<RenderPassEncoder> RenderPassEncoder::MakeError(DeviceBase* device,
+                                                        CommandEncoder* commandEncoder,
+                                                        EncodingContext* encodingContext) {
+        return AcquireRef(
+            new RenderPassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError));
     }
 
     void RenderPassEncoder::DestroyImpl() {

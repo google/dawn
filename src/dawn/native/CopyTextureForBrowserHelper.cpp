@@ -555,9 +555,8 @@ namespace dawn::native {
                                        {{0, uniformBuffer}, {1, sampler}, {2, srcTextureView}}));
 
         // Create command encoder.
-        CommandEncoderDescriptor encoderDesc = {};
-        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-        Ref<CommandEncoder> encoder = AcquireRef(device->APICreateCommandEncoder(&encoderDesc));
+        Ref<CommandEncoder> encoder;
+        DAWN_TRY_ASSIGN(encoder, device->CreateCommandEncoder());
 
         // Prepare dst texture view as color Attachment.
         TextureViewDescriptor dstTextureViewDesc;
@@ -581,9 +580,7 @@ namespace dawn::native {
         RenderPassDescriptor renderPassDesc;
         renderPassDesc.colorAttachmentCount = 1;
         renderPassDesc.colorAttachments = &colorAttachmentDesc;
-        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-        Ref<RenderPassEncoder> passEncoder =
-            AcquireRef(encoder->APIBeginRenderPass(&renderPassDesc));
+        Ref<RenderPassEncoder> passEncoder = encoder->BeginRenderPass(&renderPassDesc);
 
         // Start pipeline  and encode commands to complete
         // the copy from src texture to dst texture with transformation.
@@ -595,8 +592,8 @@ namespace dawn::native {
         passEncoder->APIEnd();
 
         // Finsh encoding.
-        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-        Ref<CommandBufferBase> commandBuffer = AcquireRef(encoder->APIFinish());
+        Ref<CommandBufferBase> commandBuffer;
+        DAWN_TRY_ASSIGN(commandBuffer, encoder->Finish());
         CommandBufferBase* submitCommandBuffer = commandBuffer.Get();
 
         // Submit command buffer.

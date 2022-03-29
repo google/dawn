@@ -701,6 +701,11 @@ namespace dawn::native {
 
     ComputePassEncoder* CommandEncoder::APIBeginComputePass(
         const ComputePassDescriptor* descriptor) {
+        return BeginComputePass(descriptor).Detach();
+    }
+
+    Ref<ComputePassEncoder> CommandEncoder::BeginComputePass(
+        const ComputePassDescriptor* descriptor) {
         DeviceBase* device = GetDevice();
 
         std::vector<TimestampWrite> timestampWritesAtBeginning;
@@ -748,9 +753,9 @@ namespace dawn::native {
                 descriptor = &defaultDescriptor;
             }
 
-            ComputePassEncoder* passEncoder = new ComputePassEncoder(
+            Ref<ComputePassEncoder> passEncoder = ComputePassEncoder::Create(
                 device, descriptor, this, &mEncodingContext, std::move(timestampWritesAtEnd));
-            mEncodingContext.EnterPass(passEncoder);
+            mEncodingContext.EnterPass(passEncoder.Get());
             return passEncoder;
         }
 
@@ -758,6 +763,10 @@ namespace dawn::native {
     }
 
     RenderPassEncoder* CommandEncoder::APIBeginRenderPass(const RenderPassDescriptor* descriptor) {
+        return BeginRenderPass(descriptor).Detach();
+    }
+
+    Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescriptor* descriptor) {
         DeviceBase* device = GetDevice();
 
         RenderPassResourceUsageTracker usageTracker;
@@ -907,11 +916,11 @@ namespace dawn::native {
             "encoding %s.BeginRenderPass(%s).", this, descriptor);
 
         if (success) {
-            RenderPassEncoder* passEncoder = new RenderPassEncoder(
+            Ref<RenderPassEncoder> passEncoder = RenderPassEncoder::Create(
                 device, descriptor, this, &mEncodingContext, std::move(usageTracker),
                 std::move(attachmentState), std::move(timestampWritesAtEnd), width, height,
                 depthReadOnly, stencilReadOnly);
-            mEncodingContext.EnterPass(passEncoder);
+            mEncodingContext.EnterPass(passEncoder.Get());
             return passEncoder;
         }
 
@@ -1355,14 +1364,14 @@ namespace dawn::native {
 
     CommandBufferBase* CommandEncoder::APIFinish(const CommandBufferDescriptor* descriptor) {
         Ref<CommandBufferBase> commandBuffer;
-        if (GetDevice()->ConsumedError(FinishInternal(descriptor), &commandBuffer)) {
+        if (GetDevice()->ConsumedError(Finish(descriptor), &commandBuffer)) {
             return CommandBufferBase::MakeError(GetDevice());
         }
         ASSERT(!IsError());
         return commandBuffer.Detach();
     }
 
-    ResultOrError<Ref<CommandBufferBase>> CommandEncoder::FinishInternal(
+    ResultOrError<Ref<CommandBufferBase>> CommandEncoder::Finish(
         const CommandBufferDescriptor* descriptor) {
         DeviceBase* device = GetDevice();
 

@@ -86,13 +86,16 @@ namespace dawn::native {
 
         CommandBufferBase* APIFinish(const CommandBufferDescriptor* descriptor = nullptr);
 
+        Ref<ComputePassEncoder> BeginComputePass(const ComputePassDescriptor* descriptor = nullptr);
+        Ref<RenderPassEncoder> BeginRenderPass(const RenderPassDescriptor* descriptor);
+        ResultOrError<Ref<CommandBufferBase>> Finish(
+            const CommandBufferDescriptor* descriptor = nullptr);
+
       private:
         CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor* descriptor);
         CommandEncoder(DeviceBase* device, ObjectBase::ErrorTag tag);
 
         void DestroyImpl() override;
-        ResultOrError<Ref<CommandBufferBase>> FinishInternal(
-            const CommandBufferDescriptor* descriptor);
 
         // Helper to be able to implement both APICopyTextureToTexture and
         // APICopyTextureToTextureInternal. The only difference between both

@@ -201,7 +201,7 @@ namespace dawn::native {
             bool allowInternalBinding = false);
         ResultOrError<Ref<BufferBase>> CreateBuffer(const BufferDescriptor* descriptor);
         ResultOrError<Ref<CommandEncoder>> CreateCommandEncoder(
-            const CommandEncoderDescriptor* descriptor);
+            const CommandEncoderDescriptor* descriptor = nullptr);
         ResultOrError<Ref<ComputePipelineBase>> CreateComputePipeline(
             const ComputePipelineDescriptor* descriptor);
         MaybeError CreateComputePipelineAsync(const ComputePipelineDescriptor* descriptor,
@@ -218,7 +218,8 @@ namespace dawn::native {
         MaybeError CreateRenderPipelineAsync(const RenderPipelineDescriptor* descriptor,
                                              WGPUCreateRenderPipelineAsyncCallback callback,
                                              void* userdata);
-        ResultOrError<Ref<SamplerBase>> CreateSampler(const SamplerDescriptor* descriptor);
+        ResultOrError<Ref<SamplerBase>> CreateSampler(
+            const SamplerDescriptor* descriptor = nullptr);
         ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(
             const ShaderModuleDescriptor* descriptor,
             OwnedCompilationMessages* compilationMessages = nullptr);

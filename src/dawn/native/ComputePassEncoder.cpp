@@ -121,6 +121,17 @@ namespace dawn::native {
         TrackInDevice();
     }
 
+    // static
+    Ref<ComputePassEncoder> ComputePassEncoder::Create(
+        DeviceBase* device,
+        const ComputePassDescriptor* descriptor,
+        CommandEncoder* commandEncoder,
+        EncodingContext* encodingContext,
+        std::vector<TimestampWrite> timestampWritesAtEnd) {
+        return AcquireRef(new ComputePassEncoder(device, descriptor, commandEncoder,
+                                                 encodingContext, std::move(timestampWritesAtEnd)));
+    }
+
     ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                            CommandEncoder* commandEncoder,
                                            EncodingContext* encodingContext,
@@ -128,10 +139,12 @@ namespace dawn::native {
         : ProgrammableEncoder(device, encodingContext, errorTag), mCommandEncoder(commandEncoder) {
     }
 
-    ComputePassEncoder* ComputePassEncoder::MakeError(DeviceBase* device,
-                                                      CommandEncoder* commandEncoder,
-                                                      EncodingContext* encodingContext) {
-        return new ComputePassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError);
+    // static
+    Ref<ComputePassEncoder> ComputePassEncoder::MakeError(DeviceBase* device,
+                                                          CommandEncoder* commandEncoder,
+                                                          EncodingContext* encodingContext) {
+        return AcquireRef(
+            new ComputePassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError));
     }
 
     void ComputePassEncoder::DestroyImpl() {
