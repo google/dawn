@@ -54,6 +54,7 @@ namespace dawn::native::opengl {
 
         GLuint GetHandle() const;
         GLenum GetGLTarget() const;
+        void BindToFramebuffer(GLenum target, GLenum attachment);
 
       private:
         ~TextureView() override;

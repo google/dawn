@@ -390,35 +390,15 @@ namespace dawn::native::opengl {
                         gl.GenFramebuffers(1, &writeFbo);
                     }
 
-                    const TextureBase* colorTexture =
-                        renderPass->colorAttachments[i].view->GetTexture();
-                    ASSERT(colorTexture->IsMultisampledTexture());
-                    ASSERT(colorTexture->GetArrayLayers() == 1);
-                    ASSERT(renderPass->colorAttachments[i].view->GetBaseMipLevel() == 0);
+                    TextureView* colorView = ToBackend(renderPass->colorAttachments[i].view.Get());
 
-                    GLuint colorHandle = ToBackend(colorTexture)->GetHandle();
                     gl.BindFramebuffer(GL_READ_FRAMEBUFFER, readFbo);
-                    gl.FramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                            ToBackend(colorTexture)->GetGLTarget(), colorHandle, 0);
+                    colorView->BindToFramebuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0);
 
-                    const TextureBase* resolveTexture =
-                        renderPass->colorAttachments[i].resolveTarget->GetTexture();
-                    GLuint resolveTextureHandle = ToBackend(resolveTexture)->GetHandle();
-                    GLuint resolveTargetMipmapLevel =
-                        renderPass->colorAttachments[i].resolveTarget->GetBaseMipLevel();
+                    TextureView* resolveView =
+                        ToBackend(renderPass->colorAttachments[i].resolveTarget.Get());
                     gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, writeFbo);
-                    if (resolveTexture->GetArrayLayers() == 1) {
-                        gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                                GL_TEXTURE_2D, resolveTextureHandle,
-                                                resolveTargetMipmapLevel);
-                    } else {
-                        GLuint resolveTargetArrayLayer =
-                            renderPass->colorAttachments[i].resolveTarget->GetBaseArrayLayer();
-                        gl.FramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                                   resolveTextureHandle, resolveTargetMipmapLevel,
-                                                   resolveTargetArrayLayer);
-                    }
-
+                    resolveView->BindToFramebuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0);
                     gl.BlitFramebuffer(0, 0, renderPass->width, renderPass->height, 0, 0,
                                        renderPass->width, renderPass->height, GL_COLOR_BUFFER_BIT,
                                        GL_NEAREST);
@@ -889,21 +869,11 @@ namespace dawn::native::opengl {
             ColorAttachmentIndex attachmentCount(uint8_t(0));
             for (ColorAttachmentIndex i :
                  IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
-                TextureViewBase* textureView = renderPass->colorAttachments[i].view.Get();
-                GLuint texture = ToBackend(textureView->GetTexture())->GetHandle();
-
+                TextureView* textureView = ToBackend(renderPass->colorAttachments[i].view.Get());
                 GLenum glAttachment = GL_COLOR_ATTACHMENT0 + static_cast<uint8_t>(i);
 
                 // Attach color buffers.
-                if (textureView->GetTexture()->GetArrayLayers() == 1) {
-                    GLenum target = ToBackend(textureView->GetTexture())->GetGLTarget();
-                    gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, glAttachment, target, texture,
-                                            textureView->GetBaseMipLevel());
-                } else {
-                    gl.FramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, glAttachment, texture,
-                                               textureView->GetBaseMipLevel(),
-                                               textureView->GetBaseArrayLayer());
-                }
+                textureView->BindToFramebuffer(GL_DRAW_FRAMEBUFFER, glAttachment);
                 drawBuffers[i] = glAttachment;
                 attachmentCount = i;
                 attachmentCount++;
@@ -911,8 +881,7 @@ namespace dawn::native::opengl {
             gl.DrawBuffers(static_cast<uint8_t>(attachmentCount), drawBuffers.data());
 
             if (renderPass->attachmentState->HasDepthStencilAttachment()) {
-                TextureViewBase* textureView = renderPass->depthStencilAttachment.view.Get();
-                GLuint texture = ToBackend(textureView->GetTexture())->GetHandle();
+                TextureView* textureView = ToBackend(renderPass->depthStencilAttachment.view.Get());
                 const Format& format = textureView->GetTexture()->GetFormat();
 
                 // Attach depth/stencil buffer.
@@ -927,15 +896,7 @@ namespace dawn::native::opengl {
                     UNREACHABLE();
                 }
 
-                if (textureView->GetTexture()->GetArrayLayers() == 1) {
-                    GLenum target = ToBackend(textureView->GetTexture())->GetGLTarget();
-                    gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, glAttachment, target, texture,
-                                            textureView->GetBaseMipLevel());
-                } else {
-                    gl.FramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, glAttachment, texture,
-                                               textureView->GetBaseMipLevel(),
-                                               textureView->GetBaseArrayLayer());
-                }
+                textureView->BindToFramebuffer(GL_DRAW_FRAMEBUFFER, glAttachment);
             }
         }
 
