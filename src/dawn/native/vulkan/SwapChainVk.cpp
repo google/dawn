@@ -444,7 +444,7 @@ namespace dawn::native::vulkan {
             VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
         };
         for (uint32_t i = 0; i < 4; i++) {
-            if (surfCapabilities.supportedCompositeAlpha & compositeAlphaFlags[i]) {
+            if (surfaceInfo.capabilities.supportedCompositeAlpha & compositeAlphaFlags[i]) {
                 config.alphaMode = compositeAlphaFlags[i];
                 break;
             }
