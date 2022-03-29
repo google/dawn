@@ -667,6 +667,10 @@ namespace dawn::native::d3d12 {
         // We can set mSwapChainTexture to false to avoid passing a nullptr to
         // ID3D12SharingContract::Present.
         mSwapChainTexture = false;
+
+        // Now that the texture has been destroyed. It should release the refptr
+        // of the d3d11on12 resource.
+        mD3D11on12Resource = nullptr;
     }
 
     DXGI_FORMAT Texture::GetD3D12Format() const {
