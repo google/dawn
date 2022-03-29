@@ -327,6 +327,4 @@ int main(int argc, const char* argv[]) {
         frame();
         utils::USleep(16000);
     }
-
-    // TODO release stuff
 }
