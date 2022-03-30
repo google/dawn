@@ -176,10 +176,10 @@ fn compute_main() {
 {{-     $access  := Eval "Access"       $p.Type -}}
 {{-     if and (eq $filter_storage $storage) (eq $filter_access $access) }}
 {{-       if eq "ptr" $p.Type.Target.Name  }}
-  arg_{{$i}}: {{template "Type" (index $p.Type.TemplateArguments 1)}};
+  arg_{{$i}}: {{template "Type" (index $p.Type.TemplateArguments 1)}},
 {{          $args.Put $i (printf "&%v.arg_%v" $var_name $i) -}}
 {{-       else  }}
-  arg_{{$i}}: {{template "Type" $p.Type}};
+  arg_{{$i}}: {{template "Type" $p.Type}},
 {{          $args.Put $i (printf "%v.arg_%v" $var_name $i) -}}
 {{-       end -}}
 {{-     end -}}
