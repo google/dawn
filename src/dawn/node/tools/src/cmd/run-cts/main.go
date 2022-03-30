@@ -134,7 +134,7 @@ func run() error {
 	var numRunners int
 	var flags dawnNodeFlags
 	flag.StringVar(&dawnNode, "dawn-node", "", "path to dawn.node module")
-	flag.StringVar(&cts, "cts", "", "root directory of WebGPU CTS")
+	flag.StringVar(&cts, "cts", defaultCtsPath(), "root directory of WebGPU CTS")
 	flag.StringVar(&node, "node", defaultNodePath(), "path to node executable")
 	flag.StringVar(&npx, "npx", "", "path to npx executable")
 	flag.StringVar(&resultsPath, "output", "", "path to write test results file")
@@ -1075,21 +1075,23 @@ func saveExpectations(path string, ex testcaseStatuses) error {
 // command line flag.
 func defaultNodePath() string {
 	if dir := thisDir(); dir != "" {
-		node := filepath.Join(dir, "../../../../../../../third_party/node")
-		if info, err := os.Stat(node); err == nil && info.IsDir() {
-			path := ""
-			switch fmt.Sprintf("%v/%v", runtime.GOOS, runtime.GOARCH) { // See `go tool dist list`
-			case "darwin/amd64":
-				path = filepath.Join(node, "node-darwin-x64/bin/node")
-			case "darwin/arm64":
-				path = filepath.Join(node, "node-darwin-arm64/bin/node")
-			case "linux/amd64":
-				path = filepath.Join(node, "node-linux-x64/bin/node")
-			case "windows/amd64":
-				path = filepath.Join(node, "node.exe")
-			}
-			if _, err := os.Stat(path); err == nil {
-				return path
+		if dawnRoot := getDawnRoot(); dawnRoot != "" {
+			node := filepath.Join(dawnRoot, "third_party/node")
+			if info, err := os.Stat(node); err == nil && info.IsDir() {
+				path := ""
+				switch fmt.Sprintf("%v/%v", runtime.GOOS, runtime.GOARCH) { // See `go tool dist list`
+				case "darwin/amd64":
+					path = filepath.Join(node, "node-darwin-x64/bin/node")
+				case "darwin/arm64":
+					path = filepath.Join(node, "node-darwin-arm64/bin/node")
+				case "linux/amd64":
+					path = filepath.Join(node, "node-linux-x64/bin/node")
+				case "windows/amd64":
+					path = filepath.Join(node, "node.exe")
+				}
+				if _, err := os.Stat(path); err == nil {
+					return path
+				}
 			}
 		}
 	}
@@ -1098,6 +1100,45 @@ func defaultNodePath() string {
 		return path
 	}
 
+	return ""
+}
+
+// defaultCtsPath looks for the webgpu-cts directory in dawn's third_party
+// directory. This is used as the default for the --cts command line flag.
+func defaultCtsPath() string {
+	if dir := thisDir(); dir != "" {
+		if dawnRoot := getDawnRoot(); dawnRoot != "" {
+			cts := filepath.Join(dawnRoot, "third_party/webgpu-cts")
+			if info, err := os.Stat(cts); err == nil && info.IsDir() {
+				return cts
+			}
+		}
+	}
+
+	return ""
+}
+
+// getDawnRoot returns the path to the dawn project's root directory or empty
+// string if not found.
+func getDawnRoot() string {
+	return getPathOfFileInParentDirs(thisDir(), "DEPS")
+}
+
+// getPathOfFileInParentDirs looks for file with `name` in paths starting from
+// `path`, and up into parent directories, returning the clean path in which the
+// file is found, or empty string if not found.
+func getPathOfFileInParentDirs(path string, name string) string {
+	sep := string(filepath.Separator)
+	path, _ = filepath.Abs(path)
+	numDirs := strings.Count(path, sep) + 1
+	for i := 0; i < numDirs; i++ {
+		test := filepath.Join(path, name)
+		if _, err := os.Stat(test); err == nil {
+			return filepath.Clean(path)
+		}
+
+		path = path + sep + ".."
+	}
 	return ""
 }
 
