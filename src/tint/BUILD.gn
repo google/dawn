@@ -489,6 +489,8 @@ libtint_source_set("libtint_core_all_src") {
     "transform/unshadow.h",
     "transform/unwind_discard_functions.cc",
     "transform/unwind_discard_functions.h",
+    "transform/utils/get_insertion_point.cc",
+    "transform/utils/get_insertion_point.h",
     "transform/utils/hoist_to_decl_before.cc",
     "transform/utils/hoist_to_decl_before.h",
     "transform/var_for_dynamic_index.cc",

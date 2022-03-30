@@ -377,6 +377,8 @@ set(TINT_LIB_SRCS
   transform/wrap_arrays_in_structs.h
   transform/zero_init_workgroup_memory.cc
   transform/zero_init_workgroup_memory.h
+  transform/utils/get_insertion_point.cc
+  transform/utils/get_insertion_point.h
   transform/utils/hoist_to_decl_before.cc
   transform/utils/hoist_to_decl_before.h
   sem/bool_type.cc
@@ -1039,6 +1041,7 @@ if(TINT_BUILD_TESTS)
       transform/vertex_pulling_test.cc
       transform/wrap_arrays_in_structs_test.cc
       transform/zero_init_workgroup_memory_test.cc
+      transform/utils/get_insertion_point_test.cc
       transform/utils/hoist_to_decl_before_test.cc
     )
   endif()

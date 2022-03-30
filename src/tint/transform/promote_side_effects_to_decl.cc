@@ -28,6 +28,7 @@
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/transform/manager.h"
+#include "src/tint/transform/utils/get_insertion_point.h"
 #include "src/tint/transform/utils/hoist_to_decl_before.h"
 #include "src/tint/utils/scoped_assignment.h"
 
@@ -556,33 +557,11 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
         });
   }
 
-  // For the input statement, returns the block and statement within that block
-  // to insert before/after.
-  std::pair<const sem::BlockStatement*, const ast::Statement*>
-  GetInsertionPoint(const ast::Statement* stmt) {
-    auto* sem_stmt = sem.Get(stmt);
-    if (sem_stmt) {
-      auto* parent = sem_stmt->Parent();
-      if (auto* block = parent->As<sem::BlockStatement>()) {
-        // Common case, just insert in the current block above the input
-        // statement.
-        return {block, stmt};
-      }
-      if (auto* fl = parent->As<sem::ForLoopStatement>()) {
-        if (fl->Declaration()->initializer == stmt) {
-          // For loop init, insert above the for loop itself.
-          return {fl->Block(), fl->Declaration()};
-        }
-      }
-    }
-    return {};
-  }
-
   // Inserts statements in `stmts` before `stmt`
   void InsertBefore(const ast::StatementList& stmts,
                     const ast::Statement* stmt) {
     if (!stmts.empty()) {
-      auto ip = GetInsertionPoint(stmt);
+      auto ip = utils::GetInsertionPoint(ctx, stmt);
       for (auto* s : stmts) {
         ctx.InsertBefore(ip.first->Declaration()->statements, ip.second, s);
       }

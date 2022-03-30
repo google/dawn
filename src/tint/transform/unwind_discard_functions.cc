@@ -28,6 +28,7 @@
 #include "src/tint/sem/for_loop_statement.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/if_statement.h"
+#include "src/tint/transform/utils/get_insertion_point.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::UnwindDiscardFunctions);
 
@@ -41,46 +42,6 @@ class State {
   const sem::Info& sem;
   Symbol module_discard_var_name;   // Use ModuleDiscardVarName() to read
   Symbol module_discard_func_name;  // Use ModuleDiscardFuncName() to read
-
-  // For the input statement, returns the block and statement within that
-  // block to insert before/after.
-  std::pair<const sem::BlockStatement*, const ast::Statement*>
-  GetInsertionPoint(const ast::Statement* stmt) {
-    using RetType =
-        std::pair<const sem::BlockStatement*, const ast::Statement*>;
-
-    if (auto* sem_stmt = sem.Get(stmt)) {
-      auto* parent = sem_stmt->Parent();
-      return Switch(
-          parent,
-          [&](const sem::BlockStatement* block) -> RetType {
-            // Common case, just insert in the current block above the input
-            // statement.
-            return {block, stmt};
-          },
-          [&](const sem::ForLoopStatement* fl) -> RetType {
-            // `stmt` is either the for loop initializer or the continuing
-            // statement of a for-loop.
-            if (fl->Declaration()->initializer == stmt) {
-              // For loop init, insert above the for loop itself.
-              return {fl->Block(), fl->Declaration()};
-            }
-
-            TINT_ICE(Transform, b.Diagnostics())
-                << "cannot insert before or after continuing statement of a "
-                   "for-loop";
-            return {};
-          },
-          [&](Default) -> RetType {
-            TINT_ICE(Transform, b.Diagnostics())
-                << "expected parent of statement to be either a block or for "
-                   "loop";
-            return {};
-          });
-    }
-
-    return {};
-  }
 
   // If `block`'s parent is of type TO, returns pointer to it.
   template <typename TO>
@@ -186,7 +147,7 @@ class State {
                                              const sem::Expression* sem_expr) {
     auto* expr = sem_expr->Declaration();
 
-    auto ip = GetInsertionPoint(stmt);
+    auto ip = utils::GetInsertionPoint(ctx, stmt);
     auto var_name = b.Sym();
     auto* decl = b.Decl(b.Var(var_name, nullptr, ctx.Clone(expr)));
     ctx.InsertBefore(ip.first->Declaration()->statements, ip.second, decl);
@@ -239,7 +200,7 @@ class State {
       return HoistAndInsertBefore(stmt, sem_expr);
     }
 
-    auto ip = GetInsertionPoint(stmt);
+    auto ip = utils::GetInsertionPoint(ctx, stmt);
     ctx.InsertAfter(ip.first->Declaration()->statements, ip.second,
                     IfDiscardReturn(stmt));
     return nullptr;  // Don't replace current statement
@@ -269,7 +230,7 @@ class State {
       to_insert = b.Assign(var_name, true);
     }
 
-    auto ip = GetInsertionPoint(stmt);
+    auto ip = utils::GetInsertionPoint(ctx, stmt);
     ctx.InsertBefore(ip.first->Declaration()->statements, ip.second, to_insert);
     return Return(stmt);
   }
