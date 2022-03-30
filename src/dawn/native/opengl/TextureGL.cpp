@@ -258,6 +258,7 @@ namespace dawn::native::opengl {
                 GLuint framebuffer = 0;
                 gl.GenFramebuffers(1, &framebuffer);
                 gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
+                gl.Disable(GL_SCISSOR_TEST);
 
                 GLenum attachment;
                 if (range.aspects == (Aspect::Depth | Aspect::Stencil)) {
@@ -328,6 +329,7 @@ namespace dawn::native::opengl {
                     }
                 }
 
+                gl.Enable(GL_SCISSOR_TEST);
                 gl.DeleteFramebuffers(1, &framebuffer);
             } else {
                 ASSERT(range.aspects == Aspect::Color);

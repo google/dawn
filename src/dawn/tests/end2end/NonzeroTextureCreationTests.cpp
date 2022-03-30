@@ -106,24 +106,16 @@ namespace {
                                   GetParam().mMipCount > 1 &&
                                   HasToggleEnabled("disable_r8_rg8_mipmaps"));
 
-            // Copies from depth textures not fully supported on the OpenGL backend right now.
-            DAWN_SUPPRESS_TEST_IF(GetParam().mFormat == wgpu::TextureFormat::Depth32Float &&
-                                  (IsOpenGL() || IsOpenGLES()));
-
-            // Copies from stencil textures not fully supported on the OpenGL backend right now.
+            // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support
+            // reading from depth/stencil.
             DAWN_SUPPRESS_TEST_IF(GetParam().mFormat == wgpu::TextureFormat::Depth24PlusStencil8 &&
                                   GetParam().mAspect == wgpu::TextureAspect::StencilOnly &&
-                                  (IsOpenGL() || IsOpenGLES()));
+                                  HasToggleEnabled("disable_depth_stencil_read"));
 
             // TODO(crbug.com/dawn/593): Test depends on glTextureView which is unsupported on GLES.
             DAWN_SUPPRESS_TEST_IF(GetParam().mFormat == wgpu::TextureFormat::Depth24PlusStencil8 &&
                                   GetParam().mAspect == wgpu::TextureAspect::DepthOnly &&
                                   IsOpenGLES());
-
-            // Sampled depth only populates the first texel when running on OpenGL Mesa.
-            DAWN_SUPPRESS_TEST_IF(GetParam().mFormat == wgpu::TextureFormat::Depth24PlusStencil8 &&
-                                  GetParam().mAspect == wgpu::TextureAspect::DepthOnly &&
-                                  IsOpenGL() && IsLinux());
 
             // GL may support the feature, but reading data back is not implemented.
             DAWN_TEST_UNSUPPORTED_IF(GetParam().mFormat == wgpu::TextureFormat::BC1RGBAUnorm &&
