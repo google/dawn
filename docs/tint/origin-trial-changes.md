@@ -14,6 +14,10 @@
 * Attributes using `[[attribute]]` syntax are no longer supported. [tint:1382](crbug.com/tint/1382)
 * The `elseif` keyword is no longer supported. [tint:1289](crbug.com/tint/1289)
 
+### Deprecated Features
+
+* The `smoothStep()` builtin has been renamed to `smoothstep()`. [tint:1483](crbug.com/tint/1483)
+
 ## Changes for M101
 
 ### New Features

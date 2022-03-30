@@ -216,6 +216,7 @@ uint32_t builtin_to_glsl_method(const sem::Builtin* builtin) {
       return GLSLstd450Sin;
     case BuiltinType::kSinh:
       return GLSLstd450Sinh;
+    case BuiltinType::kSmoothstep:
     case BuiltinType::kSmoothStep:
       return GLSLstd450SmoothStep;
     case BuiltinType::kSqrt:

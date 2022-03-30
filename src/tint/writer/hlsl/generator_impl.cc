@@ -2547,6 +2547,7 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
       return "lerp";
     case sem::BuiltinType::kReverseBits:
       return "reversebits";
+    case sem::BuiltinType::kSmoothstep:
     case sem::BuiltinType::kSmoothStep:
       return "smoothstep";
     default:

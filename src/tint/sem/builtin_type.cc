@@ -225,6 +225,9 @@ BuiltinType ParseBuiltinType(const std::string& name) {
   if (name == "sinh") {
     return BuiltinType::kSinh;
   }
+  if (name == "smoothstep") {
+    return BuiltinType::kSmoothstep;
+  }
   if (name == "smoothStep") {
     return BuiltinType::kSmoothStep;
   }
@@ -479,6 +482,8 @@ const char* str(BuiltinType i) {
       return "sin";
     case BuiltinType::kSinh:
       return "sinh";
+    case BuiltinType::kSmoothstep:
+      return "smoothstep";
     case BuiltinType::kSmoothStep:
       return "smoothStep";
     case BuiltinType::kSqrt:

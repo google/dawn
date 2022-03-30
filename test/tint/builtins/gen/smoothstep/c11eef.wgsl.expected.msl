@@ -1,3 +1,7 @@
+builtins/gen/smoothstep/c11eef.wgsl:28:24 warning: use of deprecated builtin
+  var res: vec2<f32> = smoothStep(vec2<f32>(), vec2<f32>(), vec2<f32>());
+                       ^^^^^^^^^^
+
 #include <metal_stdlib>
 
 using namespace metal;

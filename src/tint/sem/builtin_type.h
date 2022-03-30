@@ -99,6 +99,7 @@ enum class BuiltinType {
   kSign,
   kSin,
   kSinh,
+  kSmoothstep,
   kSmoothStep,
   kSqrt,
   kStep,

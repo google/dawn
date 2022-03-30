@@ -1,11 +1,11 @@
 #version 310 es
 
-void smoothStep_658be3() {
-  vec3 res = smoothstep(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
+void smoothstep_40864c() {
+  vec4 res = smoothstep(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 vec4 vertex_main() {
-  smoothStep_658be3();
+  smoothstep_40864c();
   return vec4(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
@@ -19,12 +19,12 @@ void main() {
 #version 310 es
 precision mediump float;
 
-void smoothStep_658be3() {
-  vec3 res = smoothstep(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
+void smoothstep_40864c() {
+  vec4 res = smoothstep(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 void fragment_main() {
-  smoothStep_658be3();
+  smoothstep_40864c();
 }
 
 void main() {
@@ -33,12 +33,12 @@ void main() {
 }
 #version 310 es
 
-void smoothStep_658be3() {
-  vec3 res = smoothstep(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
+void smoothstep_40864c() {
+  vec4 res = smoothstep(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 void compute_main() {
-  smoothStep_658be3();
+  smoothstep_40864c();
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

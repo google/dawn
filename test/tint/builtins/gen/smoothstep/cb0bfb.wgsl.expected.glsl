@@ -1,11 +1,15 @@
+builtins/gen/smoothstep/cb0bfb.wgsl:28:18 warning: use of deprecated builtin
+  var res: f32 = smoothStep(1.0, 1.0, 1.0);
+                 ^^^^^^^^^^
+
 #version 310 es
 
-void smoothStep_5f615b() {
-  vec4 res = smoothstep(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
+void smoothStep_cb0bfb() {
+  float res = smoothstep(1.0f, 1.0f, 1.0f);
 }
 
 vec4 vertex_main() {
-  smoothStep_5f615b();
+  smoothStep_cb0bfb();
   return vec4(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
@@ -19,12 +23,12 @@ void main() {
 #version 310 es
 precision mediump float;
 
-void smoothStep_5f615b() {
-  vec4 res = smoothstep(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
+void smoothStep_cb0bfb() {
+  float res = smoothstep(1.0f, 1.0f, 1.0f);
 }
 
 void fragment_main() {
-  smoothStep_5f615b();
+  smoothStep_cb0bfb();
 }
 
 void main() {
@@ -33,12 +37,12 @@ void main() {
 }
 #version 310 es
 
-void smoothStep_5f615b() {
-  vec4 res = smoothstep(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
+void smoothStep_cb0bfb() {
+  float res = smoothstep(1.0f, 1.0f, 1.0f);
 }
 
 void compute_main() {
-  smoothStep_5f615b();
+  smoothStep_cb0bfb();
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

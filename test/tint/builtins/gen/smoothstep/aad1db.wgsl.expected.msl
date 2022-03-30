@@ -1,8 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void smoothStep_5f615b() {
-  float4 res = smoothstep(float4(), float4(), float4());
+void smoothstep_aad1db() {
+  float3 res = smoothstep(float3(), float3(), float3());
 }
 
 struct tint_symbol {
@@ -10,7 +10,7 @@ struct tint_symbol {
 };
 
 float4 vertex_main_inner() {
-  smoothStep_5f615b();
+  smoothstep_aad1db();
   return float4();
 }
 
@@ -22,12 +22,12 @@ vertex tint_symbol vertex_main() {
 }
 
 fragment void fragment_main() {
-  smoothStep_5f615b();
+  smoothstep_aad1db();
   return;
 }
 
 kernel void compute_main() {
-  smoothStep_5f615b();
+  smoothstep_aad1db();
   return;
 }
 

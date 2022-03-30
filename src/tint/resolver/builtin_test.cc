@@ -1300,6 +1300,7 @@ INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverBuiltinTest_ThreeParam,
     testing::Values(BuiltinData{"mix", BuiltinType::kMix},
+                    BuiltinData{"smoothstep", BuiltinType::kSmoothstep},
                     BuiltinData{"smoothStep", BuiltinType::kSmoothStep},
                     BuiltinData{"fma", BuiltinType::kFma}));
 

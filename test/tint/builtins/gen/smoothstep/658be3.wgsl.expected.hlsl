@@ -1,5 +1,9 @@
-void smoothStep_cb0bfb() {
-  float res = smoothstep(1.0f, 1.0f, 1.0f);
+builtins/gen/smoothstep/658be3.wgsl:28:24 warning: use of deprecated builtin
+  var res: vec3<f32> = smoothStep(vec3<f32>(), vec3<f32>(), vec3<f32>());
+                       ^^^^^^^^^^
+
+void smoothStep_658be3() {
+  float3 res = smoothstep(float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f));
 }
 
 struct tint_symbol {
@@ -7,7 +11,7 @@ struct tint_symbol {
 };
 
 float4 vertex_main_inner() {
-  smoothStep_cb0bfb();
+  smoothStep_658be3();
   return float4(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
@@ -19,12 +23,12 @@ tint_symbol vertex_main() {
 }
 
 void fragment_main() {
-  smoothStep_cb0bfb();
+  smoothStep_658be3();
   return;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  smoothStep_cb0bfb();
+  smoothStep_658be3();
   return;
 }

@@ -1,5 +1,5 @@
-void smoothStep_5f615b() {
-  float4 res = smoothstep(float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f));
+void smoothstep_aad1db() {
+  float3 res = smoothstep(float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f));
 }
 
 struct tint_symbol {
@@ -7,7 +7,7 @@ struct tint_symbol {
 };
 
 float4 vertex_main_inner() {
-  smoothStep_5f615b();
+  smoothstep_aad1db();
   return float4(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
@@ -19,12 +19,12 @@ tint_symbol vertex_main() {
 }
 
 void fragment_main() {
-  smoothStep_5f615b();
+  smoothstep_aad1db();
   return;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  smoothStep_5f615b();
+  smoothstep_aad1db();
   return;
 }

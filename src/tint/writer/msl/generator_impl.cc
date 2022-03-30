@@ -1423,6 +1423,7 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
     case sem::BuiltinType::kRound:
       out += "rint";
       break;
+    case sem::BuiltinType::kSmoothstep:
     case sem::BuiltinType::kSmoothStep:
       out += "smoothstep";
       break;

@@ -1,3 +1,7 @@
+builtins/gen/smoothstep/c11eef.wgsl:28:24 warning: use of deprecated builtin
+  var res: vec2<f32> = smoothStep(vec2<f32>(), vec2<f32>(), vec2<f32>());
+                       ^^^^^^^^^^
+
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
@@ -13,7 +17,7 @@
                OpExecutionMode %compute_main LocalSize 1 1 1
                OpName %value "value"
                OpName %vertex_point_size "vertex_point_size"
-               OpName %smoothStep_658be3 "smoothStep_658be3"
+               OpName %smoothStep_c11eef "smoothStep_c11eef"
                OpName %res "res"
                OpName %vertex_main_inner "vertex_main_inner"
                OpName %vertex_main "vertex_main"
@@ -31,21 +35,21 @@
 %vertex_point_size = OpVariable %_ptr_Output_float Output %8
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
-    %v3float = OpTypeVector %float 3
-         %16 = OpConstantNull %v3float
-%_ptr_Function_v3float = OpTypePointer Function %v3float
+    %v2float = OpTypeVector %float 2
+         %16 = OpConstantNull %v2float
+%_ptr_Function_v2float = OpTypePointer Function %v2float
          %19 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
-%smoothStep_658be3 = OpFunction %void None %9
+%smoothStep_c11eef = OpFunction %void None %9
          %12 = OpLabel
-        %res = OpVariable %_ptr_Function_v3float Function %16
-         %13 = OpExtInst %v3float %15 SmoothStep %16 %16 %16
+        %res = OpVariable %_ptr_Function_v2float Function %16
+         %13 = OpExtInst %v2float %15 SmoothStep %16 %16 %16
                OpStore %res %13
                OpReturn
                OpFunctionEnd
 %vertex_main_inner = OpFunction %v4float None %19
          %21 = OpLabel
-         %22 = OpFunctionCall %void %smoothStep_658be3
+         %22 = OpFunctionCall %void %smoothStep_c11eef
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
@@ -57,11 +61,11 @@
                OpFunctionEnd
 %fragment_main = OpFunction %void None %9
          %28 = OpLabel
-         %29 = OpFunctionCall %void %smoothStep_658be3
+         %29 = OpFunctionCall %void %smoothStep_c11eef
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
          %31 = OpLabel
-         %32 = OpFunctionCall %void %smoothStep_658be3
+         %32 = OpFunctionCall %void %smoothStep_c11eef
                OpReturn
                OpFunctionEnd
