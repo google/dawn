@@ -168,7 +168,7 @@ void frame() {
             pass.Draw(3);
         }
 
-        pass.EndPass();
+        pass.End();
     }
 
     wgpu::CommandBuffer commands = encoder.Finish();

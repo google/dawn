@@ -112,7 +112,7 @@ void frame() {
     {
         colorAttachment.view = backbufferView;
         colorAttachment.resolveTarget = nullptr;
-        colorAttachment.clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
+        colorAttachment.clearValue = {0.0f, 0.0f, 0.0f, 0.0f};
         colorAttachment.loadOp = WGPULoadOp_Clear;
         colorAttachment.storeOp = WGPUStoreOp_Store;
         renderpassInfo.colorAttachmentCount = 1;
@@ -126,7 +126,7 @@ void frame() {
         WGPURenderPassEncoder pass = wgpuCommandEncoderBeginRenderPass(encoder, &renderpassInfo);
         wgpuRenderPassEncoderSetPipeline(pass, pipeline);
         wgpuRenderPassEncoderDraw(pass, 3, 1, 0, 0);
-        wgpuRenderPassEncoderEndPass(pass);
+        wgpuRenderPassEncoderEnd(pass);
         wgpuRenderPassEncoderRelease(pass);
 
         commands = wgpuCommandEncoderFinish(encoder, nullptr);

@@ -165,7 +165,7 @@ void initSim() {
             particles : array<Particle>;
         };
         @binding(0) @group(0) var<uniform> params : SimParams;
-        @binding(1) @group(0) var<storage, read> particlesA : Particles;
+        @binding(1) @group(0) var<storage, read_write> particlesA : Particles;
         @binding(2) @group(0) var<storage, read_write> particlesB : Particles;
 
         // https://github.com/austinEng/Project6-Vulkan-Flocking/blob/master/data/shaders/computeparticles/particle.comp
@@ -276,7 +276,7 @@ wgpu::CommandBuffer createCommandBuffer(const wgpu::TextureView backbufferView, 
         pass.SetPipeline(updatePipeline);
         pass.SetBindGroup(0, updateBGs[i]);
         pass.Dispatch(kNumParticles);
-        pass.EndPass();
+        pass.End();
     }
 
     {
@@ -286,7 +286,7 @@ wgpu::CommandBuffer createCommandBuffer(const wgpu::TextureView backbufferView, 
         pass.SetVertexBuffer(0, bufferDst);
         pass.SetVertexBuffer(1, modelBuffer);
         pass.Draw(3, kNumParticles);
-        pass.EndPass();
+        pass.End();
     }
 
     return encoder.Finish();
