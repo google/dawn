@@ -1,14 +1,10 @@
-SKIP: FAILED
-
-
-struct S {
-  a : vec4<i32>,
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+  return;
 }
 
-@group(0) @binding(0) var<storage, read_write> v : S;
+RWByteAddressBuffer v : register(u0, space0);
 
-fn foo() {
-  v.a %= 2;
+void foo() {
+  v.Store4(0u, asuint((asint(v.Load4(0u)) % 2)));
 }
-
-Failed to generate: error: cannot assign to value of type 'vec4<i32>'

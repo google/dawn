@@ -1,19 +1,18 @@
-SKIP: FAILED
-
-
-var<private> a : i32;
-
-var<private> b : f32;
-
-fn foo(maybe_zero : i32) {
-  a /= 0;
-  a %= 0;
-  a /= maybe_zero;
-  a %= maybe_zero;
-  b /= 0.0;
-  b %= 0.0;
-  b /= f32(maybe_zero);
-  b %= f32(maybe_zero);
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+  return;
 }
 
-Failed to generate: error: unknown statement type: tint::ast::CompoundAssignmentStatement
+static int a = 0;
+static float b = 0.0f;
+
+void foo(int maybe_zero) {
+  a = (a / 1);
+  a = (a % 1);
+  a = (a / (maybe_zero == 0 ? 1 : maybe_zero));
+  a = (a % (maybe_zero == 0 ? 1 : maybe_zero));
+  b = (b / 0.0f);
+  b = (b % 0.0f);
+  b = (b / float(maybe_zero));
+  b = (b % float(maybe_zero));
+}

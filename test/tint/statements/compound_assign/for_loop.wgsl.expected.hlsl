@@ -1,35 +1,44 @@
-SKIP: FAILED
-
-
-struct S {
-  a : i32,
-  b : vec4<f32>,
-  c : mat2x2<f32>,
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+  return;
 }
 
-@group(0) @binding(0) var<storage, read_write> v : S;
+RWByteAddressBuffer v : register(u0, space0);
+static uint i = 0u;
 
-var<private> i : u32;
-
-fn idx1() -> i32 {
-  i += 1u;
+int idx1() {
+  i = (i + 1u);
   return 1;
 }
 
-fn idx2() -> i32 {
-  i += 2u;
+int idx2() {
+  i = (i + 2u);
   return 1;
 }
 
-fn idx3() -> i32 {
-  i += 3u;
+int idx3() {
+  i = (i + 3u);
   return 1;
 }
 
-fn foo() {
-  var a = array<f32, 4>();
-  for(a[idx1()] *= 2.0; (a[idx2()] < 10.0); a[idx3()] += 1.0) {
+void foo() {
+  float a[4] = (float[4])0;
+  const int tint_symbol_2 = idx1();
+  const int tint_symbol_save = tint_symbol_2;
+  {
+    a[tint_symbol_save] = (a[tint_symbol_save] * 2.0f);
+    [loop] while (true) {
+      const int tint_symbol_3 = idx2();
+      if (!((a[tint_symbol_3] < 10.0f))) {
+        break;
+      }
+      {
+      }
+      {
+        const int tint_symbol_4 = idx3();
+        const int tint_symbol_1_save = tint_symbol_4;
+        a[tint_symbol_1_save] = (a[tint_symbol_1_save] + 1.0f);
+      }
+    }
   }
 }
-
-Failed to generate: error: unknown statement type: tint::ast::CompoundAssignmentStatement

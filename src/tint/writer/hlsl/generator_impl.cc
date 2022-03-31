@@ -52,6 +52,7 @@
 #include "src/tint/transform/calculate_array_length.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
 #include "src/tint/transform/decompose_memory_access.h"
+#include "src/tint/transform/expand_compound_assignment.h"
 #include "src/tint/transform/fold_trivial_single_use_lets.h"
 #include "src/tint/transform/localize_struct_array_assignment.h"
 #include "src/tint/transform/loop_to_for_loop.h"
@@ -188,6 +189,7 @@ SanitizedResult Sanitize(
   // assumes that num_workgroups builtins only appear as struct members and are
   // only accessed directly via member accessors.
   manager.Add<transform::NumWorkgroupsFromUniform>();
+  manager.Add<transform::ExpandCompoundAssignment>();
   manager.Add<transform::PromoteSideEffectsToDecl>();
   manager.Add<transform::UnwindDiscardFunctions>();
   manager.Add<transform::SimplifyPointers>();

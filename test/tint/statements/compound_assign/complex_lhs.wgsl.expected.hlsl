@@ -1,26 +1,32 @@
-SKIP: FAILED
+void set_int4(inout int4 vec, int idx, int val) {
+  vec = (idx.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : vec;
+}
 
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+  return;
+}
 
 struct S {
-  a : array<vec4<i32>, 4>,
-}
+  int4 a[4];
+};
 
-var<private> counter : i32;
+static int counter = 0;
 
-fn foo() -> i32 {
-  counter += 1;
+int foo() {
+  counter = (counter + 1);
   return counter;
 }
 
-fn bar() -> i32 {
-  counter += 2;
+int bar() {
+  counter = (counter + 2);
   return counter;
 }
 
-fn main() {
-  var x = S();
-  let p = &(x);
-  (*(p)).a[foo()][bar()] += 5;
+void main() {
+  S x = (S)0;
+  const int tint_symbol_2 = foo();
+  const int tint_symbol_save = tint_symbol_2;
+  const int tint_symbol_1 = bar();
+  set_int4(x.a[tint_symbol_save], tint_symbol_1, (x.a[tint_symbol_save][tint_symbol_1] + 5));
 }
-
-Failed to generate: error: unknown statement type: tint::ast::CompoundAssignmentStatement
