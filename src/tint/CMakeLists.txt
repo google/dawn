@@ -98,6 +98,8 @@ set(TINT_LIB_SRCS
   ast/call_statement.h
   ast/case_statement.cc
   ast/case_statement.h
+  ast/compound_assignment_statement.cc
+  ast/compound_assignment_statement.h
   ast/continue_statement.cc
   ast/continue_statement.h
   ast/depth_multisampled_texture.cc
@@ -658,6 +660,7 @@ if(TINT_BUILD_TESTS)
     ast/call_expression_test.cc
     ast/call_statement_test.cc
     ast/case_statement_test.cc
+    ast/compound_assignment_statement_test.cc
     ast/continue_statement_test.cc
     ast/depth_multisampled_texture_test.cc
     ast/depth_texture_test.cc

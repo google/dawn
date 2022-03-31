@@ -158,6 +158,7 @@ tint_unittests_source_set("tint_unittests_ast_src") {
     "../../src/tint/ast/call_expression_test.cc",
     "../../src/tint/ast/call_statement_test.cc",
     "../../src/tint/ast/case_statement_test.cc",
+    "../../src/tint/ast/compound_assignment_statement_test.cc",
     "../../src/tint/ast/continue_statement_test.cc",
     "../../src/tint/ast/depth_multisampled_texture_test.cc",
     "../../src/tint/ast/depth_texture_test.cc",
