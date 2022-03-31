@@ -29,7 +29,7 @@
 
 ## Compiler support
 
-Tint requires C++14.
+Tint requires C++17.
 
 Tint uses the Chromium build system and will stay synchronized with that system.
 Compiler configurations beyond that baseline is on a best-effort basis.
@@ -45,6 +45,3 @@ However, test code should still be readable and maintainable.
 For test code, the tradeoff between readability and maintainability
 and other factors is weighted even more strongly toward readability
 and maintainability.
-
-
-
