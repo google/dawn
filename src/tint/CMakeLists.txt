@@ -351,6 +351,8 @@ set(TINT_LIB_SRCS
   transform/promote_side_effects_to_decl.h
   transform/remove_phonies.cc
   transform/remove_phonies.h
+  transform/remove_continue_in_switch.cc
+  transform/remove_continue_in_switch.h
   transform/remove_unreachable_statements.cc
   transform/remove_unreachable_statements.h
   transform/renamer.cc
@@ -1027,6 +1029,7 @@ if(TINT_BUILD_TESTS)
       transform/num_workgroups_from_uniform_test.cc
       transform/promote_initializers_to_const_var_test.cc
       transform/promote_side_effects_to_decl_test.cc
+      transform/remove_continue_in_switch_test.cc
       transform/remove_phonies_test.cc
       transform/remove_unreachable_statements_test.cc
       transform/renamer_test.cc

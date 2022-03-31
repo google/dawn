@@ -59,6 +59,7 @@
 #include "src/tint/transform/num_workgroups_from_uniform.h"
 #include "src/tint/transform/promote_initializers_to_const_var.h"
 #include "src/tint/transform/promote_side_effects_to_decl.h"
+#include "src/tint/transform/remove_continue_in_switch.h"
 #include "src/tint/transform/remove_phonies.h"
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/transform/unshadow.h"
@@ -209,6 +210,8 @@ SanitizedResult Sanitize(
   // will be transformed by CalculateArrayLength
   manager.Add<transform::CalculateArrayLength>();
   manager.Add<transform::PromoteInitializersToConstVar>();
+
+  manager.Add<transform::RemoveContinueInSwitch>();
 
   manager.Add<transform::AddEmptyEntryPoint>();
 
