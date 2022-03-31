@@ -1,16 +1,9 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
-var<private> a : i32;
-
-var<private> b : vec4<f32>;
-
-var<private> c : mat2x2<f32>;
-
-fn foo() {
-  a /= 2;
-  b *= mat4x4<f32>();
-  c *= 2.0;
+using namespace metal;
+void foo(thread int* const tint_symbol, thread float4* const tint_symbol_1, thread float2x2* const tint_symbol_2) {
+  *(tint_symbol) = (*(tint_symbol) / 2);
+  *(tint_symbol_1) = (*(tint_symbol_1) * float4x4());
+  *(tint_symbol_2) = (*(tint_symbol_2) * 2.0f);
 }
 
-Failed to generate: error: unknown statement type: tint::ast::CompoundAssignmentStatement

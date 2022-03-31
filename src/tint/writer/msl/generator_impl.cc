@@ -61,6 +61,7 @@
 #include "src/tint/transform/array_length_from_uniform.h"
 #include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
+#include "src/tint/transform/expand_compound_assignment.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/transform/module_scope_var_to_entry_point_param.h"
 #include "src/tint/transform/promote_initializers_to_const_var.h"
@@ -174,6 +175,7 @@ SanitizedResult Sanitize(
     manager.Add<transform::ZeroInitWorkgroupMemory>();
   }
   manager.Add<transform::CanonicalizeEntryPointIO>();
+  manager.Add<transform::ExpandCompoundAssignment>();
   manager.Add<transform::PromoteSideEffectsToDecl>();
   manager.Add<transform::UnwindDiscardFunctions>();
   manager.Add<transform::PromoteInitializersToConstVar>();

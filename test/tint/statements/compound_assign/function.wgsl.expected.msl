@@ -1,13 +1,12 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
-fn foo() {
-  var<function> a : i32;
-  var<function> b : vec4<f32>;
-  var<function> c : mat2x2<f32>;
-  a /= 2;
-  b *= mat4x4<f32>();
-  c *= 2.0;
+using namespace metal;
+void foo() {
+  int a = 0;
+  float4 b = 0.0f;
+  float2x2 c = float2x2(0.0f);
+  a = (a / 2);
+  b = (b * float4x4());
+  c = (c * 2.0f);
 }
 
-Failed to generate: error: unknown statement type: tint::ast::CompoundAssignmentStatement

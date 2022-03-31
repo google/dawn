@@ -1,14 +1,11 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
+using namespace metal;
 struct S {
-  a : vec4<i32>,
+  /* 0x0000 */ int4 a;
+};
+
+void foo(device S* const tint_symbol) {
+  (*(tint_symbol)).a = ((*(tint_symbol)).a % 2);
 }
 
-@group(0) @binding(0) var<storage, read_write> v : S;
-
-fn foo() {
-  v.a %= 2;
-}
-
-Failed to generate: error: unknown statement type: tint::ast::CompoundAssignmentStatement

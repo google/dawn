@@ -1,26 +1,29 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
+using namespace metal;
+struct tint_array_wrapper {
+  int4 arr[4];
+};
 
 struct S {
-  a : array<vec4<i32>, 4>,
+  tint_array_wrapper a;
+};
+
+int foo(thread int* const tint_symbol_4) {
+  *(tint_symbol_4) = as_type<int>((as_type<uint>(*(tint_symbol_4)) + as_type<uint>(1)));
+  return *(tint_symbol_4);
 }
 
-var<private> counter : i32;
-
-fn foo() -> i32 {
-  counter += 1;
-  return counter;
+int bar(thread int* const tint_symbol_5) {
+  *(tint_symbol_5) = as_type<int>((as_type<uint>(*(tint_symbol_5)) + as_type<uint>(2)));
+  return *(tint_symbol_5);
 }
 
-fn bar() -> i32 {
-  counter += 2;
-  return counter;
+void tint_symbol(thread int* const tint_symbol_6) {
+  S x = {};
+  int const tint_symbol_3 = foo(tint_symbol_6);
+  int const tint_symbol_1_save = tint_symbol_3;
+  int const tint_symbol_2 = bar(tint_symbol_6);
+  x.a.arr[tint_symbol_1_save][tint_symbol_2] = as_type<int>((as_type<uint>(x.a.arr[tint_symbol_1_save][tint_symbol_2]) + as_type<uint>(5)));
 }
 
-fn tint_symbol() {
-  var x = S();
-  let p = &(x);
-  (*(p)).a[foo()][bar()] += 5;
-}
-
-Failed to generate: error: unknown statement type: tint::ast::CompoundAssignmentStatement
