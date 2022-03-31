@@ -137,6 +137,7 @@ namespace dawn::native {
         // valid and supported.
         // The reference returned has the same lifetime as the device.
         const Format& GetValidInternalFormat(wgpu::TextureFormat format) const;
+        const Format& GetValidInternalFormat(FormatIndex formatIndex) const;
 
         virtual ResultOrError<Ref<CommandBufferBase>> CreateCommandBuffer(
             CommandEncoder* encoder,

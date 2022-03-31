@@ -34,6 +34,8 @@ namespace ityp {
         }
 
       public:
+        using reference = typename Base::reference;
+
         constexpr bitset() noexcept : Base() {
         }
 

@@ -34,7 +34,7 @@ namespace dawn::native::opengl {
         ComponentType componentType;
     };
 
-    using GLFormatTable = std::array<GLFormat, kKnownFormatCount>;
+    using GLFormatTable = ityp::array<FormatIndex, GLFormat, kKnownFormatCount>;
     GLFormatTable BuildGLFormatTable();
 
 }  // namespace dawn::native::opengl

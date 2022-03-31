@@ -655,16 +655,32 @@ namespace dawn::native::vulkan {
         VkImageCreateInfo createInfo = {};
         FillVulkanCreateInfoSizesAndType(*this, &createInfo);
 
+        PNextChainBuilder createInfoChain(&createInfo);
+
         createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        createInfo.pNext = nullptr;
-        createInfo.flags = 0;
         createInfo.format = VulkanImageFormat(device, GetFormat().format);
         createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
         createInfo.usage = VulkanImageUsage(GetInternalUsage(), GetFormat()) | extraUsages;
         createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        createInfo.queueFamilyIndexCount = 0;
-        createInfo.pQueueFamilyIndices = nullptr;
         createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+        VkImageFormatListCreateInfo imageFormatListInfo = {};
+        std::vector<VkFormat> viewFormats;
+        if (GetViewFormats().any()) {
+            createInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
+            if (device->GetDeviceInfo().HasExt(DeviceExt::ImageFormatList)) {
+                createInfoChain.Add(&imageFormatListInfo,
+                                    VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO);
+                viewFormats.push_back(VulkanImageFormat(device, GetFormat().format));
+                for (FormatIndex i : IterateBitSet(GetViewFormats())) {
+                    const Format& viewFormat = device->GetValidInternalFormat(i);
+                    viewFormats.push_back(VulkanImageFormat(device, viewFormat.format));
+                }
+
+                imageFormatListInfo.viewFormatCount = viewFormats.size();
+                imageFormatListInfo.pViewFormats = viewFormats.data();
+            }
+        }
 
         ASSERT(IsSampleCountSupported(device, createInfo));
 
@@ -707,7 +723,8 @@ namespace dawn::native::vulkan {
     // Internally managed, but imported from external handle
     MaybeError Texture::InitializeFromExternal(const ExternalImageDescriptorVk* descriptor,
                                                external_memory::Service* externalMemoryService) {
-        VkFormat format = VulkanImageFormat(ToBackend(GetDevice()), GetFormat().format);
+        Device* device = ToBackend(GetDevice());
+        VkFormat format = VulkanImageFormat(device, GetFormat().format);
         VkImageUsageFlags usage = VulkanImageUsage(GetInternalUsage(), GetFormat());
         DAWN_INVALID_IF(!externalMemoryService->SupportsCreateImage(descriptor, format, usage,
                                                                     &mSupportsDisjointVkImage),
@@ -728,8 +745,9 @@ namespace dawn::native::vulkan {
         VkImageCreateInfo baseCreateInfo = {};
         FillVulkanCreateInfoSizesAndType(*this, &baseCreateInfo);
 
+        PNextChainBuilder createInfoChain(&baseCreateInfo);
+
         baseCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        baseCreateInfo.pNext = nullptr;
         baseCreateInfo.format = format;
         baseCreateInfo.usage = usage;
         baseCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -740,6 +758,23 @@ namespace dawn::native::vulkan {
         // that are used in vkCmdClearColorImage() must have been created with this flag, which is
         // also required for the implementation of robust resource initialization.
         baseCreateInfo.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
+        VkImageFormatListCreateInfo imageFormatListInfo = {};
+        std::vector<VkFormat> viewFormats;
+        if (GetViewFormats().any()) {
+            baseCreateInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
+            if (device->GetDeviceInfo().HasExt(DeviceExt::ImageFormatList)) {
+                createInfoChain.Add(&imageFormatListInfo,
+                                    VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO);
+                for (FormatIndex i : IterateBitSet(GetViewFormats())) {
+                    const Format& viewFormat = device->GetValidInternalFormat(i);
+                    viewFormats.push_back(VulkanImageFormat(device, viewFormat.format));
+                }
+
+                imageFormatListInfo.viewFormatCount = viewFormats.size();
+                imageFormatListInfo.pViewFormats = viewFormats.data();
+            }
+        }
 
         DAWN_TRY_ASSIGN(mHandle, externalMemoryService->CreateImage(descriptor, baseCreateInfo));
 

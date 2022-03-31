@@ -18,6 +18,7 @@
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/Format.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/Subresource.h"
@@ -55,6 +56,7 @@ namespace dawn::native {
 
         wgpu::TextureDimension GetDimension() const;
         const Format& GetFormat() const;
+        const FormatSet& GetViewFormats() const;
         const Extent3D& GetSize() const;
         uint32_t GetWidth() const;
         uint32_t GetHeight() const;
@@ -109,6 +111,7 @@ namespace dawn::native {
         MaybeError ValidateDestroy() const;
         wgpu::TextureDimension mDimension;
         const Format& mFormat;
+        FormatSet mViewFormats;
         Extent3D mSize;
         uint32_t mMipLevelCount;
         uint32_t mSampleCount;

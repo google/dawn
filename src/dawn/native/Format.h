@@ -17,6 +17,8 @@
 
 #include "dawn/native/dawn_platform.h"
 
+#include "dawn/common/TypedInteger.h"
+#include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/EnumClassBitmasks.h"
 #include "dawn/native/Error.h"
@@ -77,15 +79,18 @@ namespace dawn::native {
 
     // The number of formats Dawn knows about. Asserts in BuildFormatTable ensure that this is the
     // exact number of known format.
-    static constexpr size_t kKnownFormatCount = 96;
+    static constexpr uint32_t kKnownFormatCount = 96;
+
+    using FormatIndex = TypedInteger<struct FormatIndexT, uint32_t>;
 
     struct Format;
-    using FormatTable = std::array<Format, kKnownFormatCount>;
+    using FormatTable = ityp::array<FormatIndex, Format, kKnownFormatCount>;
 
     // A wgpu::TextureFormat along with all the information about it necessary for validation.
     struct Format {
         wgpu::TextureFormat format;
 
+        // TODO(crbug.com/dawn/1332): These members could be stored in a Format capability matrix.
         bool isRenderable;
         bool isCompressed;
         // A format can be known but not supported because it is part of a disabled extension.
@@ -111,15 +116,20 @@ namespace dawn::native {
 
         // The index of the format in the list of all known formats: a unique number for each format
         // in [0, kKnownFormatCount)
-        size_t GetIndex() const;
+        FormatIndex GetIndex() const;
 
         // baseFormat represents the memory layout of the format.
-        // If two formats has the same baseFormat, they could copy to each other.
+        // If two formats has the same baseFormat, they could copy to and be viewed as the other
+        // format. Currently two formats have the same baseFormat if they differ only in sRGB-ness.
         wgpu::TextureFormat baseFormat;
 
-        // CopyCompatibleWith() returns true if the input format has the same baseFormat
-        // with current format.
+        // Returns true if the formats are copy compatible.
+        // Currently means they differ only in sRGB-ness.
         bool CopyCompatibleWith(const Format& format) const;
+
+        // Returns true if the formats are texture view format compatible.
+        // Currently means they differ only in sRGB-ness.
+        bool ViewCompatibleWith(const Format& format) const;
 
       private:
         // Used to store the aspectInfo for one or more planes. For single plane "color" formats,
@@ -131,10 +141,21 @@ namespace dawn::native {
         friend FormatTable BuildFormatTable(const DeviceBase* device);
     };
 
+    class FormatSet : public ityp::bitset<FormatIndex, kKnownFormatCount> {
+        using Base = ityp::bitset<FormatIndex, kKnownFormatCount>;
+
+      public:
+        using Base::Base;
+        using Base::operator[];
+
+        bool operator[](const Format& format) const;
+        typename Base::reference operator[](const Format& format);
+    };
+
     // Implementation details of the format table in the device.
 
     // Returns the index of a format in the FormatTable.
-    size_t ComputeFormatIndex(wgpu::TextureFormat format);
+    FormatIndex ComputeFormatIndex(wgpu::TextureFormat format);
     // Builds the format table with the extensions enabled on the device.
     FormatTable BuildFormatTable(const DeviceBase* device);
 

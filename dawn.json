@@ -2536,8 +2536,8 @@
             {"name": "format", "type": "texture format"},
             {"name": "mip level count", "type": "uint32_t", "default": 1},
             {"name": "sample count", "type": "uint32_t", "default": 1},
-            {"name": "view format count", "type": "uint32_t", "default": 0, "tags": ["upstream"]},
-            {"name": "view formats", "type": "texture format", "annotation": "const*", "length": "view format count", "tags": ["upstream"]}
+            {"name": "view format count", "type": "uint32_t", "default": 0},
+            {"name": "view formats", "type": "texture format", "annotation": "const*", "length": "view format count"}
         ]
     },
     "texture dimension": {

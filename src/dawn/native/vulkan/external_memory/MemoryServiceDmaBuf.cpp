@@ -305,8 +305,8 @@ namespace dawn::native { namespace vulkan::external_memory {
 
         VkImageCreateInfo createInfo = baseCreateInfo;
         createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        createInfo.flags = 0;
         createInfo.tiling = VK_IMAGE_TILING_DRM_FORMAT_MODIFIER_EXT;
+
         PNextChainBuilder createInfoChain(&createInfo);
 
         VkExternalMemoryImageCreateInfo externalMemoryImageCreateInfo = {};

@@ -59,7 +59,9 @@ namespace dawn::native::vulkan {
         template <typename VK_STRUCT_TYPE>
         explicit PNextChainBuilder(VK_STRUCT_TYPE* head)
             : mCurrent(reinterpret_cast<VkBaseOutStructure*>(head)) {
-            ASSERT(head->pNext == nullptr);
+            while (mCurrent->pNext != nullptr) {
+                mCurrent = mCurrent->pNext;
+            }
         }
 
         // Add one item to the chain. |vk_struct| must be a Vulkan structure

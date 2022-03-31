@@ -17,6 +17,7 @@
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/TextureVk.h"
+#include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
 #include "dawn/native/vulkan/external_memory/MemoryService.h"
 
@@ -133,16 +134,19 @@ namespace dawn::native { namespace vulkan::external_memory {
 
     ResultOrError<VkImage> Service::CreateImage(const ExternalImageDescriptor* descriptor,
                                                 const VkImageCreateInfo& baseCreateInfo) {
+        VkImageCreateInfo createInfo = baseCreateInfo;
+        createInfo.flags |= VK_IMAGE_CREATE_ALIAS_BIT_KHR;
+        createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+        createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
         VkExternalMemoryImageCreateInfo externalMemoryImageCreateInfo;
         externalMemoryImageCreateInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO;
         externalMemoryImageCreateInfo.pNext = nullptr;
         externalMemoryImageCreateInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
 
-        VkImageCreateInfo createInfo = baseCreateInfo;
-        createInfo.pNext = &externalMemoryImageCreateInfo;
-        createInfo.flags = VK_IMAGE_CREATE_ALIAS_BIT_KHR;
-        createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-        createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        PNextChainBuilder createInfoChain(&createInfo);
+        createInfoChain.Add(&externalMemoryImageCreateInfo,
+                            VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO);
 
         ASSERT(IsSampleCountSupported(mDevice, createInfo));
 

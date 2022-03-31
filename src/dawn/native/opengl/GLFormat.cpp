@@ -23,7 +23,7 @@ namespace dawn::native::opengl {
 
         auto AddFormat = [&table](wgpu::TextureFormat dawnFormat, GLenum internalFormat,
                                   GLenum format, GLenum type, Type componentType) {
-            size_t index = ComputeFormatIndex(dawnFormat);
+            FormatIndex index = ComputeFormatIndex(dawnFormat);
             ASSERT(index < table.size());
 
             table[index].internalFormat = internalFormat;
