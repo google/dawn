@@ -1,14 +1,17 @@
-SKIP: FAILED
+#version 310 es
 
-
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void unused_entry_point() {
+  return;
+}
 struct S {
-  a : i32,
+  int a;
+};
+
+layout(binding = 0, std430) buffer S_1 {
+  int a;
+} v;
+void foo() {
+  v.a = (v.a | 2);
 }
 
-@group(0) @binding(0) var<storage, read_write> v : S;
-
-fn foo() {
-  v.a |= 2;
-}
-
-Failed to generate: error: unknown statement type: tint::ast::CompoundAssignmentStatement

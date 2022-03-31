@@ -1,26 +1,29 @@
-SKIP: FAILED
+#version 310 es
 
-
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void unused_entry_point() {
+  return;
+}
 struct S {
-  a : array<vec4<i32>, 4>,
-}
+  ivec4 a[4];
+};
 
-var<private> counter : i32;
-
-fn foo() -> i32 {
-  counter += 1;
+int counter = 0;
+int foo() {
+  counter = (counter + 1);
   return counter;
 }
 
-fn bar() -> i32 {
-  counter += 2;
+int bar() {
+  counter = (counter + 2);
   return counter;
 }
 
-fn main() {
-  var x = S();
-  let p = &(x);
-  (*(p)).a[foo()][bar()] += 5;
+void tint_symbol() {
+  S x = S(ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0)));
+  int tint_symbol_3 = foo();
+  int tint_symbol_1_save = tint_symbol_3;
+  int tint_symbol_2 = bar();
+  x.a[tint_symbol_1_save][tint_symbol_2] = (x.a[tint_symbol_1_save][tint_symbol_2] + 5);
 }
 
-Failed to generate: error: unknown statement type: tint::ast::CompoundAssignmentStatement

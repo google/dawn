@@ -1,13 +1,15 @@
-SKIP: FAILED
+#version 310 es
 
-
-fn foo() {
-  var<function> a : i32;
-  var<function> b : vec4<f32>;
-  var<function> c : mat2x2<f32>;
-  a /= 2;
-  b *= mat4x4<f32>();
-  c *= 2.0;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void unused_entry_point() {
+  return;
+}
+void foo() {
+  int a = 0;
+  vec4 b = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  mat2 c = mat2(0.0f, 0.0f, 0.0f, 0.0f);
+  a = (a / 2);
+  b = (b * mat4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  c = (c * 2.0f);
 }
 
-Failed to generate: error: unknown statement type: tint::ast::CompoundAssignmentStatement

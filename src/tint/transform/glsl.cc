@@ -24,6 +24,7 @@
 #include "src/tint/transform/canonicalize_entry_point_io.h"
 #include "src/tint/transform/combine_samplers.h"
 #include "src/tint/transform/decompose_memory_access.h"
+#include "src/tint/transform/expand_compound_assignment.h"
 #include "src/tint/transform/fold_trivial_single_use_lets.h"
 #include "src/tint/transform/loop_to_for_loop.h"
 #include "src/tint/transform/manager.h"
@@ -84,6 +85,7 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
     manager.Add<ZeroInitWorkgroupMemory>();
   }
   manager.Add<CanonicalizeEntryPointIO>();
+  manager.Add<ExpandCompoundAssignment>();
   manager.Add<PromoteSideEffectsToDecl>();
   manager.Add<UnwindDiscardFunctions>();
   manager.Add<SimplifyPointers>();
