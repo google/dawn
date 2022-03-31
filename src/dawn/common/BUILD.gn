@@ -15,6 +15,7 @@
 import("../../../scripts/dawn_overrides_with_defaults.gni")
 
 import("//build_overrides/build.gni")
+import("${dawn_root}/generator/dawn_generator.gni")
 import("${dawn_root}/scripts/dawn_features.gni")
 
 # Use Chromium's dcheck_always_on when available so that we respect it when
@@ -167,6 +168,15 @@ config("internal_config") {
 # Common dawn library
 ###############################################################################
 
+dawn_generator("dawn_version_gen") {
+  script = "${dawn_root}/generator/dawn_version_generator.py"
+  args = [
+    "--dawn-dir",
+    rebase_path("${dawn_root}", root_build_dir),
+  ]
+  outputs = [ "src/dawn/common/Version_autogen.h" ]
+}
+
 # This GN file is discovered by all Chromium builds, but common doesn't support
 # all of Chromium's OSes so we explicitly make the target visible only on
 # systems we know Dawn is able to compile on.
@@ -223,6 +233,8 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
       "xlib_with_undefs.h",
     ]
 
+    public_deps = [ ":dawn_version_gen" ]
+
     if (is_mac) {
       sources += [ "SystemUtils_mac.mm" ]
     }
@@ -241,7 +253,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
       ]
     }
     if (dawn_enable_vulkan) {
-      public_deps = [ "${dawn_root}/third_party/khronos:vulkan_headers" ]
+      public_deps += [ "${dawn_root}/third_party/khronos:vulkan_headers" ]
     }
     if (is_android) {
       libs = [ "log" ]

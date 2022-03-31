@@ -39,6 +39,7 @@ import("generator_lib.gni")
 
 dawn_allowed_gen_output_dirs = [
   "src/dawn/",
+  "src/dawn/common/",
   "src/dawn/native/",
   "src/dawn/native/opengl/",
   "src/dawn/wire/client/",
