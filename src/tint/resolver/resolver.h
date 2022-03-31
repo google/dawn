@@ -229,6 +229,12 @@ class Resolver {
   sem::Statement* VariableDeclStatement(const ast::VariableDeclStatement*);
   bool Statements(const ast::StatementList&);
 
+  // Resolve the result type of a binary operator.
+  // Returns nullptr if the types are not valid for this operator.
+  const sem::Type* BinaryOpType(const sem::Type* lhs_ty,
+                                const sem::Type* rhs_ty,
+                                ast::BinaryOp op);
+
   // AST and Type validation methods
   // Each return true on success, false on failure.
   bool ValidateAlias(const ast::Alias*);

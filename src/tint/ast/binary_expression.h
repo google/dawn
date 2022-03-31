@@ -122,7 +122,9 @@ class BinaryExpression final : public Castable<BinaryExpression, Expression> {
   const Expression* const rhs;
 };
 
-inline bool BinaryExpression::IsArithmetic() const {
+/// @param op the operator
+/// @returns true if the op is an arithmetic operation
+inline bool IsArithmetic(BinaryOp op) {
   switch (op) {
     case ast::BinaryOp::kAdd:
     case ast::BinaryOp::kSubtract:
@@ -135,7 +137,9 @@ inline bool BinaryExpression::IsArithmetic() const {
   }
 }
 
-inline bool BinaryExpression::IsComparison() const {
+/// @param op the operator
+/// @returns true if the op is a comparison operation
+inline bool IsComparison(BinaryOp op) {
   switch (op) {
     case ast::BinaryOp::kEqual:
     case ast::BinaryOp::kNotEqual:
@@ -149,7 +153,9 @@ inline bool BinaryExpression::IsComparison() const {
   }
 }
 
-inline bool BinaryExpression::IsBitwise() const {
+/// @param op the operator
+/// @returns true if the op is a bitwise operation
+inline bool IsBitwise(BinaryOp op) {
   switch (op) {
     case ast::BinaryOp::kAnd:
     case ast::BinaryOp::kOr:
@@ -160,7 +166,9 @@ inline bool BinaryExpression::IsBitwise() const {
   }
 }
 
-inline bool BinaryExpression::IsBitshift() const {
+/// @param op the operator
+/// @returns true if the op is a bit shift operation
+inline bool IsBitshift(BinaryOp op) {
   switch (op) {
     case ast::BinaryOp::kShiftLeft:
     case ast::BinaryOp::kShiftRight:
@@ -178,6 +186,22 @@ inline bool BinaryExpression::IsLogical() const {
     default:
       return false;
   }
+}
+
+inline bool BinaryExpression::IsArithmetic() const {
+  return ast::IsArithmetic(op);
+}
+
+inline bool BinaryExpression::IsComparison() const {
+  return ast::IsComparison(op);
+}
+
+inline bool BinaryExpression::IsBitwise() const {
+  return ast::IsBitwise(op);
+}
+
+inline bool BinaryExpression::IsBitshift() const {
+  return ast::IsBitshift(op);
 }
 
 /// @returns the human readable name of the given BinaryOp
