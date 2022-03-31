@@ -46,6 +46,14 @@ class HoistToDeclBefore {
            bool as_const,
            const char* decl_name = "");
 
+  /// Inserts `stmt` before `before_stmt`, possibly converting 'for-loop's to
+  /// 'loop's if necessary.
+  /// @param before_stmt statement to insert `stmt` before
+  /// @param stmt statement to insert
+  /// @return true on success
+  bool InsertBefore(const sem::Statement* before_stmt,
+                    const ast::Statement* stmt);
+
   /// Use to signal that we plan on hoisting a decl before `before_expr`. This
   /// will convert 'for-loop's to 'loop's and 'else-if's to 'else {if}'s if
   /// needed.

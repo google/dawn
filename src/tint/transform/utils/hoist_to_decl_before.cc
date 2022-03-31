@@ -59,84 +59,6 @@ class HoistToDeclBefore::State {
   /// If statements with 'else if's that need to be decomposed to 'else {if}'
   std::unordered_map<const sem::IfStatement*, IfInfo> ifs;
 
-  // Inserts `decl` before `before_expr`, possibly marking a for-loop to be
-  // converted to a loop, or an else-if to an else { if }. If `decl` is nullptr,
-  // for-loop and else-if conversions are marked, but no hoisting takes place.
-  bool InsertBefore(const sem::Expression* before_expr,
-                    const ast::VariableDeclStatement* decl) {
-    auto* sem_stmt = before_expr->Stmt();
-    auto* stmt = sem_stmt->Declaration();
-
-    if (auto* else_if = sem_stmt->As<sem::ElseStatement>()) {
-      // Expression used in 'else if' condition.
-      // Need to convert 'else if' to 'else { if }'.
-      auto& if_info = ifs[else_if->Parent()->As<sem::IfStatement>()];
-
-      // Index the map to convert this else if, even if `decl` is nullptr.
-      auto& decls = if_info.else_ifs[else_if].cond_decls;
-      if (decl) {
-        decls.emplace_back(decl);
-      }
-      return true;
-    }
-
-    if (auto* fl = sem_stmt->As<sem::ForLoopStatement>()) {
-      // Expression used in for-loop condition.
-      // For-loop needs to be decomposed to a loop.
-
-      // Index the map to convert this for-loop, even if `decl` is nullptr.
-      auto& decls = loops[fl].cond_decls;
-      if (decl) {
-        decls.emplace_back(decl);
-      }
-      return true;
-    }
-
-    auto* parent = sem_stmt->Parent();  // The statement's parent
-    if (auto* block = parent->As<sem::BlockStatement>()) {
-      // Expression's statement sits in a block. Simple case.
-      // Insert the decl before the parent statement
-      if (decl) {
-        ctx.InsertBefore(block->Declaration()->statements, stmt, decl);
-      }
-      return true;
-    }
-
-    if (auto* fl = parent->As<sem::ForLoopStatement>()) {
-      // Expression is used in a for-loop. These require special care.
-      if (fl->Declaration()->initializer == stmt) {
-        // Expression used in for-loop initializer.
-        // Insert the let above the for-loop.
-        if (decl) {
-          ctx.InsertBefore(fl->Block()->Declaration()->statements,
-                           fl->Declaration(), decl);
-        }
-        return true;
-      }
-
-      if (fl->Declaration()->continuing == stmt) {
-        // Expression used in for-loop continuing.
-        // For-loop needs to be decomposed to a loop.
-
-        // Index the map to convert this for-loop, even if `decl` is nullptr.
-        auto& decls = loops[fl].cont_decls;
-        if (decl) {
-          decls.emplace_back(decl);
-        }
-        return true;
-      }
-
-      TINT_ICE(Transform, b.Diagnostics())
-          << "unhandled use of expression in for-loop";
-      return false;
-    }
-
-    TINT_ICE(Transform, b.Diagnostics())
-        << "unhandled expression parent statement type: "
-        << parent->TypeInfo().name;
-    return false;
-  }
-
   // Converts any for-loops marked for conversion to loops, inserting
   // registered declaration statements before the condition or continuing
   // statement.
@@ -293,7 +215,7 @@ class HoistToDeclBefore::State {
                        : b.Var(name, nullptr, ctx.Clone(expr));
     auto* decl = b.Decl(v);
 
-    if (!InsertBefore(before_expr, decl)) {
+    if (!InsertBefore(before_expr->Stmt(), decl)) {
       return false;
     }
 
@@ -302,13 +224,95 @@ class HoistToDeclBefore::State {
     return true;
   }
 
+  /// Inserts `stmt` before `before_stmt`, possibly marking a for-loop to be
+  /// converted to a loop, or an else-if to an else { if }. If `decl` is
+  /// nullptr, for-loop and else-if conversions are marked, but no hoisting
+  /// takes place.
+  /// @param before_stmt statement to insert `stmt` before
+  /// @param stmt statement to insert
+  /// @return true on success
+  bool InsertBefore(const sem::Statement* before_stmt,
+                    const ast::Statement* stmt) {
+    auto* ip = before_stmt->Declaration();
+
+    if (auto* else_if = before_stmt->As<sem::ElseStatement>()) {
+      // Insertion point is an 'else if' condition.
+      // Need to convert 'else if' to 'else { if }'.
+      auto& if_info = ifs[else_if->Parent()->As<sem::IfStatement>()];
+
+      // Index the map to convert this else if, even if `stmt` is nullptr.
+      auto& decls = if_info.else_ifs[else_if].cond_decls;
+      if (stmt) {
+        decls.emplace_back(stmt);
+      }
+      return true;
+    }
+
+    if (auto* fl = before_stmt->As<sem::ForLoopStatement>()) {
+      // Insertion point is a for-loop condition.
+      // For-loop needs to be decomposed to a loop.
+
+      // Index the map to convert this for-loop, even if `stmt` is nullptr.
+      auto& decls = loops[fl].cond_decls;
+      if (stmt) {
+        decls.emplace_back(stmt);
+      }
+      return true;
+    }
+
+    auto* parent = before_stmt->Parent();  // The statement's parent
+    if (auto* block = parent->As<sem::BlockStatement>()) {
+      // Insert point sits in a block. Simple case.
+      // Insert the stmt before the parent statement.
+      if (stmt) {
+        ctx.InsertBefore(block->Declaration()->statements, ip, stmt);
+      }
+      return true;
+    }
+
+    if (auto* fl = parent->As<sem::ForLoopStatement>()) {
+      // Insertion point is a for-loop initializer or continuing statement.
+      // These require special care.
+      if (fl->Declaration()->initializer == ip) {
+        // Insertion point is a for-loop initializer.
+        // Insert the new statement above the for-loop.
+        if (stmt) {
+          ctx.InsertBefore(fl->Block()->Declaration()->statements,
+                           fl->Declaration(), stmt);
+        }
+        return true;
+      }
+
+      if (fl->Declaration()->continuing == ip) {
+        // Insertion point is a for-loop continuing statement.
+        // For-loop needs to be decomposed to a loop.
+
+        // Index the map to convert this for-loop, even if `stmt` is nullptr.
+        auto& decls = loops[fl].cont_decls;
+        if (stmt) {
+          decls.emplace_back(stmt);
+        }
+        return true;
+      }
+
+      TINT_ICE(Transform, b.Diagnostics())
+          << "unhandled use of expression in for-loop";
+      return false;
+    }
+
+    TINT_ICE(Transform, b.Diagnostics())
+        << "unhandled expression parent statement type: "
+        << parent->TypeInfo().name;
+    return false;
+  }
+
   /// Use to signal that we plan on hoisting a decl before `before_expr`. This
   /// will convert 'for-loop's to 'loop's and 'else-if's to 'else {if}'s if
   /// needed.
   /// @param before_expr expression we would hoist a decl before
   /// @return true on success
   bool Prepare(const sem::Expression* before_expr) {
-    return InsertBefore(before_expr, nullptr);
+    return InsertBefore(before_expr->Stmt(), nullptr);
   }
 
   /// Applies any scheduled insertions from previous calls to Add() to
@@ -331,6 +335,11 @@ bool HoistToDeclBefore::Add(const sem::Expression* before_expr,
                             bool as_const,
                             const char* decl_name) {
   return state_->Add(before_expr, expr, as_const, decl_name);
+}
+
+bool HoistToDeclBefore::InsertBefore(const sem::Statement* before_stmt,
+                                     const ast::Statement* stmt) {
+  return state_->InsertBefore(before_stmt, stmt);
 }
 
 bool HoistToDeclBefore::Prepare(const sem::Expression* before_expr) {
