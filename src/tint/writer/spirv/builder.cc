@@ -45,6 +45,7 @@
 #include "src/tint/transform/add_spirv_block_attribute.h"
 #include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
+#include "src/tint/transform/expand_compound_assignment.h"
 #include "src/tint/transform/fold_constants.h"
 #include "src/tint/transform/for_loop_to_loop.h"
 #include "src/tint/transform/manager.h"
@@ -279,6 +280,7 @@ SanitizedResult Sanitize(const Program* in,
     manager.Add<transform::ZeroInitWorkgroupMemory>();
   }
   manager.Add<transform::RemoveUnreachableStatements>();
+  manager.Add<transform::ExpandCompoundAssignment>();
   manager.Add<transform::PromoteSideEffectsToDecl>();
   manager.Add<transform::UnwindDiscardFunctions>();
   manager.Add<transform::SimplifyPointers>();  // Required for arrayLength()
