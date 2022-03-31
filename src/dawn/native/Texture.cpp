@@ -144,6 +144,11 @@ namespace dawn::native {
                 "of %s.",
                 descriptor->dimension, texture->GetDimension(), texture);
 
+            DAWN_INVALID_IF(texture->GetSampleCount() > 1 &&
+                                descriptor->dimension != wgpu::TextureViewDimension::e2D,
+                            "The dimension (%s) of the multisampled texture view is not %s.",
+                            descriptor->dimension, wgpu::TextureViewDimension::e2D);
+
             switch (descriptor->dimension) {
                 case wgpu::TextureViewDimension::Cube:
                 case wgpu::TextureViewDimension::CubeArray:

@@ -313,33 +313,6 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTexture) {
     }
 }
 
-// Test that a single-layer multisampled texture view can be created and resolved from.
-TEST_P(MultisampledRenderingTest, ResolveFromSingleLayerArrayInto2DTexture) {
-    constexpr bool kTestDepth = false;
-    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-    wgpu::RenderPipeline pipeline = CreateRenderPipelineWithOneOutputForTest(kTestDepth);
-
-    constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
-
-    // Draw a green triangle.
-    {
-        wgpu::TextureViewDescriptor desc = {};
-        desc.dimension = wgpu::TextureViewDimension::e2DArray;
-        desc.arrayLayerCount = 1;
-
-        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
-            {mMultisampledColorTexture.CreateView(&desc)}, {mResolveView}, wgpu::LoadOp::Clear,
-            wgpu::LoadOp::Clear, kTestDepth);
-
-        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kGreen);
-    }
-
-    wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
-    queue.Submit(1, &commandBuffer);
-
-    VerifyResolveTarget(kGreen, mResolveTexture);
-}
-
 // Test multisampled rendering with depth test works correctly.
 TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTest) {
     constexpr bool kTestDepth = true;

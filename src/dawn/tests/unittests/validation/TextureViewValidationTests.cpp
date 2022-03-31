@@ -405,6 +405,41 @@ namespace {
         // a single mip and layer.
     }
 
+    // Test creating texture view on a multisampled 2D texture
+    TEST_F(TextureViewValidationTest, CreateTextureViewOnMultisampledTexture2D) {
+        wgpu::Texture texture =
+            Create2DArrayTexture(device, /* arrayLayerCount */ 1, kWidth, kHeight,
+                                 /* mipLevelCount */ 1, /* sampleCount */ 4);
+
+        // It is OK to create a 2D texture view on a multisampled 2D texture.
+        {
+            wgpu::TextureViewDescriptor descriptor = {};
+            texture.CreateView(&descriptor);
+        }
+
+        // It is an error to create a 1-layer 2D array texture view on a multisampled 2D texture.
+        {
+            wgpu::TextureViewDescriptor descriptor = {};
+            descriptor.dimension = wgpu::TextureViewDimension::e2DArray;
+            descriptor.arrayLayerCount = 1;
+            ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
+        }
+
+        // It is an error to create a 1D texture view on a multisampled 2D texture.
+        {
+            wgpu::TextureViewDescriptor descriptor = {};
+            descriptor.dimension = wgpu::TextureViewDimension::e1D;
+            ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
+        }
+
+        // It is an error to create a 3D texture view on a multisampled 2D texture.
+        {
+            wgpu::TextureViewDescriptor descriptor = {};
+            descriptor.dimension = wgpu::TextureViewDimension::e3D;
+            ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
+        }
+    }
+
     // Using the "none" ("default") values validates the same as explicitly
     // specifying the values they're supposed to default to.
     // Variant for a 2D texture with more than 1 array layer.
