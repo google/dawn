@@ -118,6 +118,22 @@ class Token {
     kUnderscore,
     /// A '^'
     kXor,
+    /// A '+='
+    kPlusEqual,
+    /// A '-='
+    kMinusEqual,
+    /// A '*='
+    kTimesEqual,
+    /// A '/='
+    kDivisionEqual,
+    /// A '%='
+    kModuloEqual,
+    /// A '&='
+    kAndEqual,
+    /// A '|='
+    kOrEqual,
+    /// A '^='
+    kXorEqual,
 
     /// A 'array'
     kArray,

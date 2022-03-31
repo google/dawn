@@ -108,6 +108,22 @@ std::string_view Token::TypeToName(Type type) {
       return "_";
     case Token::Type::kXor:
       return "^";
+    case Token::Type::kPlusEqual:
+      return "+=";
+    case Token::Type::kMinusEqual:
+      return "-=";
+    case Token::Type::kTimesEqual:
+      return "*=";
+    case Token::Type::kDivisionEqual:
+      return "/=";
+    case Token::Type::kModuloEqual:
+      return "%=";
+    case Token::Type::kAndEqual:
+      return "&=";
+    case Token::Type::kOrEqual:
+      return "|=";
+    case Token::Type::kXorEqual:
+      return "^=";
 
     case Token::Type::kArray:
       return "array";

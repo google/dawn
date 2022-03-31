@@ -786,8 +786,21 @@ bool GeneratorImpl::EmitBinary(std::ostream& out,
     return false;
   }
   out << " ";
+  if (!EmitBinaryOp(out, expr->op)) {
+    return false;
+  }
+  out << " ";
 
-  switch (expr->op) {
+  if (!EmitExpression(out, expr->rhs)) {
+    return false;
+  }
+
+  out << ")";
+  return true;
+}
+
+bool GeneratorImpl::EmitBinaryOp(std::ostream& out, const ast::BinaryOp op) {
+  switch (op) {
     case ast::BinaryOp::kAnd:
       out << "&";
       break;
@@ -847,13 +860,6 @@ bool GeneratorImpl::EmitBinary(std::ostream& out,
                              "missing binary operation type");
       return false;
   }
-  out << " ";
-
-  if (!EmitExpression(out, expr->rhs)) {
-    return false;
-  }
-
-  out << ")";
   return true;
 }
 
@@ -910,6 +916,9 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
         }
         out << ";";
         return true;
+      },
+      [&](const ast::CompoundAssignmentStatement* c) {
+        return EmitCompoundAssign(c);
       },
       [&](const ast::ContinueStatement* c) { return EmitContinue(c); },
       [&](const ast::DiscardStatement* d) { return EmitDiscard(d); },
@@ -993,6 +1002,29 @@ bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
   }
 
   line() << "}";
+  return true;
+}
+
+bool GeneratorImpl::EmitCompoundAssign(
+    const ast::CompoundAssignmentStatement* stmt) {
+  auto out = line();
+
+  if (!EmitExpression(out, stmt->lhs)) {
+    return false;
+  }
+
+  out << " ";
+  if (!EmitBinaryOp(out, stmt->op)) {
+    return false;
+  }
+  out << "= ";
+
+  if (!EmitExpression(out, stmt->rhs)) {
+    return false;
+  }
+
+  out << ";";
+
   return true;
 }
 

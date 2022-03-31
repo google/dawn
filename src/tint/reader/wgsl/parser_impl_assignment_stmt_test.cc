@@ -27,17 +27,17 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->Is<ast::AssignmentStatement>());
-  ASSERT_NE(e->lhs, nullptr);
-  ASSERT_NE(e->rhs, nullptr);
+  auto* a = e->As<ast::AssignmentStatement>();
+  ASSERT_NE(a, nullptr);
+  ASSERT_NE(a->lhs, nullptr);
+  ASSERT_NE(a->rhs, nullptr);
 
-  ASSERT_TRUE(e->lhs->Is<ast::IdentifierExpression>());
-  auto* ident = e->lhs->As<ast::IdentifierExpression>();
+  ASSERT_TRUE(a->lhs->Is<ast::IdentifierExpression>());
+  auto* ident = a->lhs->As<ast::IdentifierExpression>();
   EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_NE(e->rhs, nullptr);
-  ASSERT_TRUE(e->rhs->Is<ast::SintLiteralExpression>());
-  EXPECT_EQ(e->rhs->As<ast::SintLiteralExpression>()->value, 123);
+  ASSERT_TRUE(a->rhs->Is<ast::SintLiteralExpression>());
+  EXPECT_EQ(a->rhs->As<ast::SintLiteralExpression>()->value, 123);
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
@@ -48,16 +48,16 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->Is<ast::AssignmentStatement>());
-  ASSERT_NE(e->lhs, nullptr);
-  ASSERT_NE(e->rhs, nullptr);
+  auto* a = e->As<ast::AssignmentStatement>();
+  ASSERT_NE(a, nullptr);
+  ASSERT_NE(a->lhs, nullptr);
+  ASSERT_NE(a->rhs, nullptr);
 
-  ASSERT_NE(e->rhs, nullptr);
-  ASSERT_TRUE(e->rhs->Is<ast::SintLiteralExpression>());
-  EXPECT_EQ(e->rhs->As<ast::SintLiteralExpression>()->value, 123);
+  ASSERT_TRUE(a->rhs->Is<ast::SintLiteralExpression>());
+  EXPECT_EQ(a->rhs->As<ast::SintLiteralExpression>()->value, 123);
 
-  ASSERT_TRUE(e->lhs->Is<ast::MemberAccessorExpression>());
-  auto* mem = e->lhs->As<ast::MemberAccessorExpression>();
+  ASSERT_TRUE(a->lhs->Is<ast::MemberAccessorExpression>());
+  auto* mem = a->lhs->As<ast::MemberAccessorExpression>();
 
   ASSERT_TRUE(mem->member->Is<ast::IdentifierExpression>());
   auto* ident = mem->member->As<ast::IdentifierExpression>();
@@ -96,15 +96,37 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToPhony) {
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->Is<ast::AssignmentStatement>());
-  ASSERT_NE(e->lhs, nullptr);
-  ASSERT_NE(e->rhs, nullptr);
+  auto* a = e->As<ast::AssignmentStatement>();
+  ASSERT_NE(a, nullptr);
+  ASSERT_NE(a->lhs, nullptr);
+  ASSERT_NE(a->rhs, nullptr);
 
-  ASSERT_NE(e->rhs, nullptr);
-  ASSERT_TRUE(e->rhs->Is<ast::SintLiteralExpression>());
-  EXPECT_EQ(e->rhs->As<ast::SintLiteralExpression>()->value, 123);
+  ASSERT_TRUE(a->rhs->Is<ast::SintLiteralExpression>());
+  EXPECT_EQ(a->rhs->As<ast::SintLiteralExpression>()->value, 123);
 
-  ASSERT_TRUE(e->lhs->Is<ast::PhonyExpression>());
+  ASSERT_TRUE(a->lhs->Is<ast::PhonyExpression>());
+}
+
+TEST_F(ParserImplTest, AssignmentStmt_Parses_CompoundOp) {
+  auto p = parser("a += 123");
+  auto e = p->assignment_stmt();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+
+  auto* a = e->As<ast::CompoundAssignmentStatement>();
+  ASSERT_NE(a, nullptr);
+  ASSERT_NE(a->lhs, nullptr);
+  ASSERT_NE(a->rhs, nullptr);
+  EXPECT_EQ(a->op, ast::BinaryOp::kAdd);
+
+  ASSERT_TRUE(a->lhs->Is<ast::IdentifierExpression>());
+  auto* ident = a->lhs->As<ast::IdentifierExpression>();
+  EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+
+  ASSERT_TRUE(a->rhs->Is<ast::SintLiteralExpression>());
+  EXPECT_EQ(a->rhs->As<ast::SintLiteralExpression>()->value, 123);
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_MissingEqual) {
@@ -115,6 +137,16 @@ TEST_F(ParserImplTest, AssignmentStmt_MissingEqual) {
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(e.value, nullptr);
   EXPECT_EQ(p->error(), "1:12: expected '=' for assignment");
+}
+
+TEST_F(ParserImplTest, AssignmentStmt_Compound_MissingEqual) {
+  auto p = parser("a + 123");
+  auto e = p->assignment_stmt();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_EQ(e.value, nullptr);
+  EXPECT_EQ(p->error(), "1:3: expected '=' for assignment");
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_InvalidLHS) {
@@ -134,6 +166,16 @@ TEST_F(ParserImplTest, AssignmentStmt_InvalidRHS) {
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:14: unable to parse right side of assignment");
+}
+
+TEST_F(ParserImplTest, AssignmentStmt_InvalidCompoundOp) {
+  auto p = parser("a &&= true");
+  auto e = p->assignment_stmt();
+  EXPECT_FALSE(e.matched);
+  EXPECT_TRUE(e.errored);
+  EXPECT_EQ(e.value, nullptr);
+  EXPECT_TRUE(p->has_error());
+  EXPECT_EQ(p->error(), "1:3: expected '=' for assignment");
 }
 
 }  // namespace

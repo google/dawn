@@ -31,7 +31,6 @@
 
 namespace tint {
 namespace ast {
-class AssignmentStatement;
 class BreakStatement;
 class CallStatement;
 class ContinueStatement;
@@ -657,9 +656,12 @@ class ParserImpl {
   /// Parses a `logical_or_expression` grammar element
   /// @returns the parsed expression or nullptr
   Maybe<const ast::Expression*> logical_or_expression();
+  /// Parses a `compound_assignment_operator` grammar element
+  /// @returns the parsed compound assignment operator
+  Maybe<ast::BinaryOp> compound_assignment_operator();
   /// Parses a `assignment_stmt` grammar element
   /// @returns the parsed assignment or nullptr
-  Maybe<const ast::AssignmentStatement*> assignment_stmt();
+  Maybe<const ast::Statement*> assignment_stmt();
   /// Parses one or more attribute lists.
   /// @return the parsed attribute list, or an empty list on error.
   Maybe<ast::AttributeList> attribute_list();

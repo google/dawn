@@ -829,10 +829,18 @@ Token Lexer::try_punctuation() {
     type = Token::Type::kAndAnd;
     pos_ += 2;
     location_.column += 2;
+  } else if (matches(pos_, "&=")) {
+    type = Token::Type::kAndEqual;
+    pos_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, "&")) {
     type = Token::Type::kAnd;
     pos_ += 1;
     location_.column += 1;
+  } else if (matches(pos_, "/=")) {
+    type = Token::Type::kDivisionEqual;
+    pos_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, "/")) {
     type = Token::Type::kForwardSlash;
     pos_ += 1;
@@ -885,6 +893,10 @@ Token Lexer::try_punctuation() {
     type = Token::Type::kLessThan;
     pos_ += 1;
     location_.column += 1;
+  } else if (matches(pos_, "%=")) {
+    type = Token::Type::kModuloEqual;
+    pos_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, "%")) {
     type = Token::Type::kMod;
     pos_ += 1;
@@ -895,6 +907,10 @@ Token Lexer::try_punctuation() {
     location_.column += 2;
   } else if (matches(pos_, "--")) {
     type = Token::Type::kMinusMinus;
+    pos_ += 2;
+    location_.column += 2;
+  } else if (matches(pos_, "-=")) {
+    type = Token::Type::kMinusEqual;
     pos_ += 2;
     location_.column += 2;
   } else if (matches(pos_, "-")) {
@@ -909,12 +925,20 @@ Token Lexer::try_punctuation() {
     type = Token::Type::kPlusPlus;
     pos_ += 2;
     location_.column += 2;
+  } else if (matches(pos_, "+=")) {
+    type = Token::Type::kPlusEqual;
+    pos_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, "+")) {
     type = Token::Type::kPlus;
     pos_ += 1;
     location_.column += 1;
   } else if (matches(pos_, "||")) {
     type = Token::Type::kOrOr;
+    pos_ += 2;
+    location_.column += 2;
+  } else if (matches(pos_, "|=")) {
+    type = Token::Type::kOrEqual;
     pos_ += 2;
     location_.column += 2;
   } else if (matches(pos_, "|")) {
@@ -925,6 +949,10 @@ Token Lexer::try_punctuation() {
     type = Token::Type::kSemicolon;
     pos_ += 1;
     location_.column += 1;
+  } else if (matches(pos_, "*=")) {
+    type = Token::Type::kTimesEqual;
+    pos_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, "*")) {
     type = Token::Type::kStar;
     pos_ += 1;
@@ -937,6 +965,10 @@ Token Lexer::try_punctuation() {
     type = Token::Type::kUnderscore;
     pos_ += 1;
     location_.column += 1;
+  } else if (matches(pos_, "^=")) {
+    type = Token::Type::kXorEqual;
+    pos_ += 2;
+    location_.column += 2;
   } else if (matches(pos_, "^")) {
     type = Token::Type::kXor;
     pos_ += 1;

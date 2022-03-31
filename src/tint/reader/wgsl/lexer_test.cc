@@ -832,7 +832,15 @@ INSTANTIATE_TEST_SUITE_P(
                     TokenData{"*", Token::Type::kStar},
                     TokenData{"~", Token::Type::kTilde},
                     TokenData{"_", Token::Type::kUnderscore},
-                    TokenData{"^", Token::Type::kXor}));
+                    TokenData{"^", Token::Type::kXor},
+                    TokenData{"+=", Token::Type::kPlusEqual},
+                    TokenData{"-=", Token::Type::kMinusEqual},
+                    TokenData{"*=", Token::Type::kTimesEqual},
+                    TokenData{"/=", Token::Type::kDivisionEqual},
+                    TokenData{"%=", Token::Type::kModuloEqual},
+                    TokenData{"&=", Token::Type::kAndEqual},
+                    TokenData{"|=", Token::Type::kOrEqual},
+                    TokenData{"^=", Token::Type::kXorEqual}));
 
 using KeywordTest = testing::TestWithParam<TokenData>;
 TEST_P(KeywordTest, Parses) {

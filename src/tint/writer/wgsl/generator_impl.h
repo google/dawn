@@ -21,6 +21,7 @@
 #include "src/tint/ast/binary_expression.h"
 #include "src/tint/ast/bitcast_expression.h"
 #include "src/tint/ast/break_statement.h"
+#include "src/tint/ast/compound_assignment_statement.h"
 #include "src/tint/ast/continue_statement.h"
 #include "src/tint/ast/discard_statement.h"
 #include "src/tint/ast/fallthrough_statement.h"
@@ -72,6 +73,11 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the binary expression
   /// @returns true if the expression was emitted, false otherwise
   bool EmitBinary(std::ostream& out, const ast::BinaryExpression* expr);
+  /// Handles generating a binary operator
+  /// @param out the output of the expression stream
+  /// @param op the binary operator
+  /// @returns true if the operator was emitted, false otherwise
+  bool EmitBinaryOp(std::ostream& out, const ast::BinaryOp op);
   /// Handles generating a bitcast expression
   /// @param out the output of the expression stream
   /// @param expr the bitcast expression
@@ -94,6 +100,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement
   /// @returns true if the statment was emitted successfully
   bool EmitCase(const ast::CaseStatement* stmt);
+  /// Handles a compound assignment statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was emitted successfully
+  bool EmitCompoundAssign(const ast::CompoundAssignmentStatement* stmt);
   /// Handles generating a literal expression
   /// @param out the output of the expression stream
   /// @param expr the literal expression expression
