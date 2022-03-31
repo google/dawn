@@ -860,6 +860,9 @@ sem::Statement* Resolver::Statement(const ast::Statement* stmt) {
       [&](const ast::AssignmentStatement* a) { return AssignmentStatement(a); },
       [&](const ast::BreakStatement* b) { return BreakStatement(b); },
       [&](const ast::CallStatement* c) { return CallStatement(c); },
+      [&](const ast::CompoundAssignmentStatement* c) {
+        return CompoundAssignmentStatement(c);
+      },
       [&](const ast::ContinueStatement* c) { return ContinueStatement(c); },
       [&](const ast::DiscardStatement* d) { return DiscardStatement(d); },
       [&](const ast::FallthroughStatement* f) {
@@ -2584,7 +2587,7 @@ sem::Statement* Resolver::AssignmentStatement(
       behaviors.Add(lhs->Behaviors());
     }
 
-    return ValidateAssignment(stmt);
+    return ValidateAssignment(stmt, TypeOf(stmt->rhs));
   });
 }
 
@@ -2607,6 +2610,37 @@ sem::Statement* Resolver::CallStatement(const ast::CallStatement* stmt) {
       return true;
     }
     return false;
+  });
+}
+
+sem::Statement* Resolver::CompoundAssignmentStatement(
+    const ast::CompoundAssignmentStatement* stmt) {
+  auto* sem = builder_->create<sem::Statement>(
+      stmt, current_compound_statement_, current_function_);
+  return StatementScope(stmt, sem, [&] {
+    auto* lhs = Expression(stmt->lhs);
+    if (!lhs) {
+      return false;
+    }
+
+    auto* rhs = Expression(stmt->rhs);
+    if (!rhs) {
+      return false;
+    }
+
+    sem->Behaviors() = rhs->Behaviors() + lhs->Behaviors();
+
+    auto* lhs_ty = lhs->Type()->UnwrapRef();
+    auto* rhs_ty = rhs->Type()->UnwrapRef();
+    auto* ty = BinaryOpType(lhs_ty, rhs_ty, stmt->op);
+    if (!ty) {
+      AddError("compound assignment operand types are invalid: " +
+                   TypeNameOf(lhs_ty) + " " + FriendlyName(stmt->op) + " " +
+                   TypeNameOf(rhs_ty),
+               stmt->source);
+      return false;
+    }
+    return ValidateAssignment(stmt, ty);
   });
 }
 

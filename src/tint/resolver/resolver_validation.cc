@@ -2264,10 +2264,22 @@ bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
   return true;
 }
 
-bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
-  auto const* rhs_ty = TypeOf(a->rhs);
+bool Resolver::ValidateAssignment(const ast::Statement* a,
+                                  const sem::Type* rhs_ty) {
+  const ast::Expression* lhs;
+  const ast::Expression* rhs;
+  if (auto* assign = a->As<ast::AssignmentStatement>()) {
+    lhs = assign->lhs;
+    rhs = assign->rhs;
+  } else if (auto* compound = a->As<ast::CompoundAssignmentStatement>()) {
+    lhs = compound->lhs;
+    rhs = compound->rhs;
+  } else {
+    TINT_ICE(Resolver, diagnostics_) << "invalid assignment statement";
+    return false;
+  }
 
-  if (a->lhs->Is<ast::PhonyExpression>()) {
+  if (lhs->Is<ast::PhonyExpression>()) {
     // https://www.w3.org/TR/WGSL/#phony-assignment-section
     auto* ty = rhs_ty->UnwrapRef();
     if (!ty->IsConstructible() &&
@@ -2276,26 +2288,26 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
           "cannot assign '" + TypeNameOf(rhs_ty) +
               "' to '_'. '_' can only be assigned a constructible, pointer, "
               "texture or sampler type",
-          a->rhs->source);
+          rhs->source);
       return false;
     }
     return true;  // RHS can be anything.
   }
 
   // https://gpuweb.github.io/gpuweb/wgsl/#assignment-statement
-  auto const* lhs_ty = TypeOf(a->lhs);
+  auto const* lhs_ty = TypeOf(lhs);
 
-  if (auto* var = ResolvedSymbol<sem::Variable>(a->lhs)) {
+  if (auto* var = ResolvedSymbol<sem::Variable>(lhs)) {
     auto* decl = var->Declaration();
     if (var->Is<sem::Parameter>()) {
-      AddError("cannot assign to function parameter", a->lhs->source);
+      AddError("cannot assign to function parameter", lhs->source);
       AddNote("'" + builder_->Symbols().NameFor(decl->symbol) +
                   "' is declared here:",
               decl->source);
       return false;
     }
     if (decl->is_const) {
-      AddError("cannot assign to const", a->lhs->source);
+      AddError("cannot assign to const", lhs->source);
       AddNote("'" + builder_->Symbols().NameFor(decl->symbol) +
                   "' is declared here:",
               decl->source);
@@ -2307,7 +2319,7 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
   if (!lhs_ref) {
     // LHS is not a reference, so it has no storage.
     AddError("cannot assign to value of type '" + TypeNameOf(lhs_ty) + "'",
-             a->lhs->source);
+             lhs->source);
     return false;
   }
 

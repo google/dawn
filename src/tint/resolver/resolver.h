@@ -214,6 +214,8 @@ class Resolver {
   sem::Statement* BreakStatement(const ast::BreakStatement*);
   sem::Statement* CallStatement(const ast::CallStatement*);
   sem::CaseStatement* CaseStatement(const ast::CaseStatement*);
+  sem::Statement* CompoundAssignmentStatement(
+      const ast::CompoundAssignmentStatement*);
   sem::Statement* ContinueStatement(const ast::ContinueStatement*);
   sem::Statement* DiscardStatement(const ast::DiscardStatement*);
   sem::ElseStatement* ElseStatement(const ast::ElseStatement*);
@@ -245,7 +247,7 @@ class Resolver {
                                     const Source& source);
   bool ValidateAtomic(const ast::Atomic* a, const sem::Atomic* s);
   bool ValidateAtomicVariable(const sem::Variable* var);
-  bool ValidateAssignment(const ast::AssignmentStatement* a);
+  bool ValidateAssignment(const ast::Statement* a, const sem::Type* rhs_ty);
   bool ValidateBitcast(const ast::BitcastExpression* cast, const sem::Type* to);
   bool ValidateBreakStatement(const sem::Statement* stmt);
   bool ValidateBuiltinAttribute(const ast::BuiltinAttribute* attr,

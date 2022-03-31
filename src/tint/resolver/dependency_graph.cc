@@ -222,6 +222,10 @@ class DependencyScanner {
         [&](const ast::CallStatement* r) {  //
           TraverseExpression(r->expr);
         },
+        [&](const ast::CompoundAssignmentStatement* a) {
+          TraverseExpression(a->lhs);
+          TraverseExpression(a->rhs);
+        },
         [&](const ast::ForLoopStatement* l) {
           scope_stack_.Push();
           TINT_DEFER(scope_stack_.Pop());

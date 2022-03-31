@@ -732,6 +732,7 @@ if(TINT_BUILD_TESTS)
     resolver/builtin_validation_test.cc
     resolver/call_test.cc
     resolver/call_validation_test.cc
+    resolver/compound_assignment_validation_test.cc
     resolver/compound_statement_test.cc
     resolver/control_block_validation_test.cc
     resolver/attribute_validation_test.cc

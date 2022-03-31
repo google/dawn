@@ -245,6 +245,7 @@ tint_unittests_source_set("tint_unittests_resolver_src") {
     "../../src/tint/resolver/builtins_validation_test.cc",
     "../../src/tint/resolver/call_test.cc",
     "../../src/tint/resolver/call_validation_test.cc",
+    "../../src/tint/resolver/compound_assignment_validation_test.cc",
     "../../src/tint/resolver/compound_statement_test.cc",
     "../../src/tint/resolver/control_block_validation_test.cc",
     "../../src/tint/resolver/dependency_graph_test.cc",

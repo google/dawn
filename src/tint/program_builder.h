@@ -32,6 +32,7 @@
 #include "src/tint/ast/call_expression.h"
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/case_statement.h"
+#include "src/tint/ast/compound_assignment_statement.h"
 #include "src/tint/ast/continue_statement.h"
 #include "src/tint/ast/depth_multisampled_texture.h"
 #include "src/tint/ast/depth_texture.h"
@@ -2263,6 +2264,40 @@ class ProgramBuilder {
     return create<ast::AssignmentStatement>(
         Expr(std::forward<LhsExpressionInit>(lhs)),
         Expr(std::forward<RhsExpressionInit>(rhs)));
+  }
+
+  /// Creates a ast::CompoundAssignmentStatement with input lhs and rhs
+  /// expressions, and a binary operator.
+  /// @param source the source information
+  /// @param lhs the left hand side expression initializer
+  /// @param rhs the right hand side expression initializer
+  /// @param op the binary operator
+  /// @returns the compound assignment statement pointer
+  template <typename LhsExpressionInit, typename RhsExpressionInit>
+  const ast::CompoundAssignmentStatement* CompoundAssign(
+      const Source& source,
+      LhsExpressionInit&& lhs,
+      RhsExpressionInit&& rhs,
+      ast::BinaryOp op) {
+    return create<ast::CompoundAssignmentStatement>(
+        source, Expr(std::forward<LhsExpressionInit>(lhs)),
+        Expr(std::forward<RhsExpressionInit>(rhs)), op);
+  }
+
+  /// Creates a ast::CompoundAssignmentStatement with input lhs and rhs
+  /// expressions, and a binary operator.
+  /// @param lhs the left hand side expression initializer
+  /// @param rhs the right hand side expression initializer
+  /// @param op the binary operator
+  /// @returns the compound assignment statement pointer
+  template <typename LhsExpressionInit, typename RhsExpressionInit>
+  const ast::CompoundAssignmentStatement* CompoundAssign(
+      LhsExpressionInit&& lhs,
+      RhsExpressionInit&& rhs,
+      ast::BinaryOp op) {
+    return create<ast::CompoundAssignmentStatement>(
+        Expr(std::forward<LhsExpressionInit>(lhs)),
+        Expr(std::forward<RhsExpressionInit>(rhs)), op);
   }
 
   /// Creates a ast::LoopStatement with input body and optional continuing
