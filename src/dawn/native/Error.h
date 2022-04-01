@@ -130,6 +130,8 @@ namespace dawn::native {
     // DAWN_TRY_ASSIGN is the same as DAWN_TRY for ResultOrError and assigns the success value, if
     // any, to VAR.
 #define DAWN_TRY_ASSIGN(VAR, EXPR) DAWN_TRY_ASSIGN_WITH_CLEANUP(VAR, EXPR, {})
+#define DAWN_TRY_ASSIGN_CONTEXT(VAR, EXPR, ...) \
+    DAWN_TRY_ASSIGN_WITH_CLEANUP(VAR, EXPR, { error->AppendContext(absl::StrFormat(__VA_ARGS__)); })
 
     // Argument helpers are used to determine which macro implementations should be called when
     // overloading with different number of variables.

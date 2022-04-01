@@ -374,9 +374,8 @@ namespace dawn::native {
                     return EntryPointMetadata::OverridableConstant::Type::Int32;
                 case tint::inspector::OverridableConstant::Type::kUint32:
                     return EntryPointMetadata::OverridableConstant::Type::Uint32;
-                default:
-                    UNREACHABLE();
             }
+            UNREACHABLE();
         }
 
         ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file,
@@ -598,351 +597,347 @@ namespace dawn::native {
             return {};
         }
 
+        ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
+            const DeviceBase* device,
+            tint::inspector::Inspector* inspector,
+            const tint::inspector::EntryPoint& entryPoint) {
+            const CombinedLimits& limits = device->GetLimits();
+            constexpr uint32_t kMaxInterStageShaderLocation = kMaxInterStageShaderVariables - 1;
+
+            std::unique_ptr<EntryPointMetadata> metadata = std::make_unique<EntryPointMetadata>();
+
+            if (!entryPoint.overridable_constants.empty()) {
+                DAWN_INVALID_IF(device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs),
+                                "Pipeline overridable constants are disallowed because they "
+                                "are partially implemented.");
+
+                const auto& name2Id = inspector->GetConstantNameToIdMap();
+                const auto& id2Scalar = inspector->GetConstantIDs();
+
+                for (auto& c : entryPoint.overridable_constants) {
+                    uint32_t id = name2Id.at(c.name);
+                    OverridableConstantScalar defaultValue;
+                    if (c.is_initialized) {
+                        // if it is initialized, the scalar must exist
+                        const auto& scalar = id2Scalar.at(id);
+                        if (scalar.IsBool()) {
+                            defaultValue.b = scalar.AsBool();
+                        } else if (scalar.IsU32()) {
+                            defaultValue.u32 = scalar.AsU32();
+                        } else if (scalar.IsI32()) {
+                            defaultValue.i32 = scalar.AsI32();
+                        } else if (scalar.IsFloat()) {
+                            defaultValue.f32 = scalar.AsFloat();
+                        } else {
+                            UNREACHABLE();
+                        }
+                    }
+                    EntryPointMetadata::OverridableConstant constant = {
+                        id, FromTintOverridableConstantType(c.type), c.is_initialized,
+                        defaultValue};
+
+                    std::string identifier =
+                        c.is_numeric_id_specified ? std::to_string(constant.id) : c.name;
+                    metadata->overridableConstants[identifier] = constant;
+
+                    if (!c.is_initialized) {
+                        auto [_, inserted] = metadata->uninitializedOverridableConstants.emplace(
+                            std::move(identifier));
+                        // The insertion should have taken place
+                        ASSERT(inserted);
+                    } else {
+                        auto [_, inserted] = metadata->initializedOverridableConstants.emplace(
+                            std::move(identifier));
+                        // The insertion should have taken place
+                        ASSERT(inserted);
+                    }
+                }
+            }
+
+            DAWN_TRY_ASSIGN(metadata->stage, TintPipelineStageToShaderStage(entryPoint.stage));
+
+            if (metadata->stage == SingleShaderStage::Compute) {
+                DAWN_INVALID_IF(
+                    entryPoint.workgroup_size_x > limits.v1.maxComputeWorkgroupSizeX ||
+                        entryPoint.workgroup_size_y > limits.v1.maxComputeWorkgroupSizeY ||
+                        entryPoint.workgroup_size_z > limits.v1.maxComputeWorkgroupSizeZ,
+                    "Entry-point uses workgroup_size(%u, %u, %u) that exceeds the "
+                    "maximum allowed (%u, %u, %u).",
+                    entryPoint.workgroup_size_x, entryPoint.workgroup_size_y,
+                    entryPoint.workgroup_size_z, limits.v1.maxComputeWorkgroupSizeX,
+                    limits.v1.maxComputeWorkgroupSizeY, limits.v1.maxComputeWorkgroupSizeZ);
+
+                // Dimensions have already been validated against their individual limits above.
+                // Cast to uint64_t to avoid overflow in this multiplication.
+                uint64_t numInvocations = static_cast<uint64_t>(entryPoint.workgroup_size_x) *
+                                          entryPoint.workgroup_size_y * entryPoint.workgroup_size_z;
+                DAWN_INVALID_IF(numInvocations > limits.v1.maxComputeInvocationsPerWorkgroup,
+                                "The total number of workgroup invocations (%u) exceeds the "
+                                "maximum allowed (%u).",
+                                numInvocations, limits.v1.maxComputeInvocationsPerWorkgroup);
+
+                const size_t workgroupStorageSize =
+                    inspector->GetWorkgroupStorageSize(entryPoint.name);
+                DAWN_INVALID_IF(workgroupStorageSize > limits.v1.maxComputeWorkgroupStorageSize,
+                                "The total use of workgroup storage (%u bytes) is larger than "
+                                "the maximum allowed (%u bytes).",
+                                workgroupStorageSize, limits.v1.maxComputeWorkgroupStorageSize);
+
+                metadata->localWorkgroupSize.x = entryPoint.workgroup_size_x;
+                metadata->localWorkgroupSize.y = entryPoint.workgroup_size_y;
+                metadata->localWorkgroupSize.z = entryPoint.workgroup_size_z;
+
+                metadata->usesNumWorkgroups = entryPoint.num_workgroups_used;
+            }
+
+            if (metadata->stage == SingleShaderStage::Vertex) {
+                for (const auto& inputVar : entryPoint.input_variables) {
+                    DAWN_INVALID_IF(
+                        !inputVar.has_location_decoration,
+                        "Vertex input variable \"%s\" doesn't have a location decoration.",
+                        inputVar.name);
+
+                    uint32_t unsanitizedLocation = inputVar.location_decoration;
+                    DAWN_INVALID_IF(unsanitizedLocation >= kMaxVertexAttributes,
+                                    "Vertex input variable \"%s\" has a location (%u) that "
+                                    "exceeds the maximum (%u)",
+                                    inputVar.name, unsanitizedLocation, kMaxVertexAttributes);
+                    VertexAttributeLocation location(static_cast<uint8_t>(unsanitizedLocation));
+
+                    DAWN_TRY_ASSIGN(
+                        metadata->vertexInputBaseTypes[location],
+                        TintComponentTypeToVertexFormatBaseType(inputVar.component_type));
+                    metadata->usedVertexInputs.set(location);
+                }
+
+                // [[position]] must be declared in a vertex shader but is not exposed as an
+                // output variable by Tint so we directly add its components to the total.
+                uint32_t totalInterStageShaderComponents = 4;
+                for (const auto& outputVar : entryPoint.output_variables) {
+                    DAWN_INVALID_IF(
+                        !outputVar.has_location_decoration,
+                        "Vertex ouput variable \"%s\" doesn't have a location decoration.",
+                        outputVar.name);
+
+                    uint32_t location = outputVar.location_decoration;
+                    DAWN_INVALID_IF(location > kMaxInterStageShaderLocation,
+                                    "Vertex output variable \"%s\" has a location (%u) that "
+                                    "exceeds the maximum (%u).",
+                                    outputVar.name, location, kMaxInterStageShaderLocation);
+
+                    metadata->usedInterStageVariables.set(location);
+                    DAWN_TRY_ASSIGN(
+                        metadata->interStageVariables[location].baseType,
+                        TintComponentTypeToInterStageComponentType(outputVar.component_type));
+                    DAWN_TRY_ASSIGN(
+                        metadata->interStageVariables[location].componentCount,
+                        TintCompositionTypeToInterStageComponentCount(outputVar.composition_type));
+                    DAWN_TRY_ASSIGN(
+                        metadata->interStageVariables[location].interpolationType,
+                        TintInterpolationTypeToInterpolationType(outputVar.interpolation_type));
+                    DAWN_TRY_ASSIGN(metadata->interStageVariables[location].interpolationSampling,
+                                    TintInterpolationSamplingToInterpolationSamplingType(
+                                        outputVar.interpolation_sampling));
+
+                    totalInterStageShaderComponents +=
+                        metadata->interStageVariables[location].componentCount;
+                }
+
+                DAWN_INVALID_IF(
+                    totalInterStageShaderComponents > kMaxInterStageShaderComponents,
+                    "Total vertex output components count (%u) exceeds the maximum (%u).",
+                    totalInterStageShaderComponents, kMaxInterStageShaderComponents);
+            }
+
+            if (metadata->stage == SingleShaderStage::Fragment) {
+                uint32_t totalInterStageShaderComponents = 0;
+                for (const auto& inputVar : entryPoint.input_variables) {
+                    DAWN_INVALID_IF(
+                        !inputVar.has_location_decoration,
+                        "Fragment input variable \"%s\" doesn't have a location decoration.",
+                        inputVar.name);
+
+                    uint32_t location = inputVar.location_decoration;
+                    DAWN_INVALID_IF(location > kMaxInterStageShaderLocation,
+                                    "Fragment input variable \"%s\" has a location (%u) that "
+                                    "exceeds the maximum (%u).",
+                                    inputVar.name, location, kMaxInterStageShaderLocation);
+
+                    metadata->usedInterStageVariables.set(location);
+                    DAWN_TRY_ASSIGN(
+                        metadata->interStageVariables[location].baseType,
+                        TintComponentTypeToInterStageComponentType(inputVar.component_type));
+                    DAWN_TRY_ASSIGN(
+                        metadata->interStageVariables[location].componentCount,
+                        TintCompositionTypeToInterStageComponentCount(inputVar.composition_type));
+                    DAWN_TRY_ASSIGN(
+                        metadata->interStageVariables[location].interpolationType,
+                        TintInterpolationTypeToInterpolationType(inputVar.interpolation_type));
+                    DAWN_TRY_ASSIGN(metadata->interStageVariables[location].interpolationSampling,
+                                    TintInterpolationSamplingToInterpolationSamplingType(
+                                        inputVar.interpolation_sampling));
+
+                    totalInterStageShaderComponents +=
+                        metadata->interStageVariables[location].componentCount;
+                }
+
+                if (entryPoint.front_facing_used) {
+                    totalInterStageShaderComponents += 1;
+                }
+                if (entryPoint.input_sample_mask_used) {
+                    totalInterStageShaderComponents += 1;
+                }
+                if (entryPoint.sample_index_used) {
+                    totalInterStageShaderComponents += 1;
+                }
+                if (entryPoint.input_position_used) {
+                    totalInterStageShaderComponents += 4;
+                }
+
+                DAWN_INVALID_IF(
+                    totalInterStageShaderComponents > kMaxInterStageShaderComponents,
+                    "Total fragment input components count (%u) exceeds the maximum (%u).",
+                    totalInterStageShaderComponents, kMaxInterStageShaderComponents);
+
+                for (const auto& outputVar : entryPoint.output_variables) {
+                    DAWN_INVALID_IF(
+                        !outputVar.has_location_decoration,
+                        "Fragment input variable \"%s\" doesn't have a location decoration.",
+                        outputVar.name);
+
+                    uint32_t unsanitizedAttachment = outputVar.location_decoration;
+                    DAWN_INVALID_IF(unsanitizedAttachment >= kMaxColorAttachments,
+                                    "Fragment output variable \"%s\" has a location (%u) that "
+                                    "exceeds the maximum (%u).",
+                                    outputVar.name, unsanitizedAttachment, kMaxColorAttachments);
+                    ColorAttachmentIndex attachment(static_cast<uint8_t>(unsanitizedAttachment));
+
+                    DAWN_TRY_ASSIGN(
+                        metadata->fragmentOutputVariables[attachment].baseType,
+                        TintComponentTypeToTextureComponentType(outputVar.component_type));
+                    uint32_t componentCount;
+                    DAWN_TRY_ASSIGN(componentCount, TintCompositionTypeToInterStageComponentCount(
+                                                        outputVar.composition_type));
+                    // componentCount should be no larger than 4u
+                    ASSERT(componentCount <= 4u);
+                    metadata->fragmentOutputVariables[attachment].componentCount = componentCount;
+                    metadata->fragmentOutputsWritten.set(attachment);
+                }
+            }
+
+            for (const tint::inspector::ResourceBinding& resource :
+                 inspector->GetResourceBindings(entryPoint.name)) {
+                DAWN_INVALID_IF(resource.bind_group >= kMaxBindGroups,
+                                "The entry-point uses a binding with a group decoration (%u) "
+                                "that exceeds the maximum (%u).",
+                                resource.bind_group, kMaxBindGroups);
+
+                BindingNumber bindingNumber(resource.binding);
+                BindGroupIndex bindGroupIndex(resource.bind_group);
+
+                DAWN_INVALID_IF(bindingNumber > kMaxBindingNumberTyped,
+                                "Binding number (%u) exceeds the maximum binding number (%u).",
+                                uint32_t(bindingNumber), uint32_t(kMaxBindingNumberTyped));
+
+                const auto& [binding, inserted] =
+                    metadata->bindings[bindGroupIndex].emplace(bindingNumber, ShaderBindingInfo{});
+                DAWN_INVALID_IF(!inserted,
+                                "Entry-point has a duplicate binding for (group:%u, binding:%u).",
+                                resource.binding, resource.bind_group);
+
+                ShaderBindingInfo* info = &binding->second;
+                info->bindingType = TintResourceTypeToBindingInfoType(resource.resource_type);
+
+                switch (info->bindingType) {
+                    case BindingInfoType::Buffer:
+                        info->buffer.minBindingSize = resource.size_no_padding;
+                        DAWN_TRY_ASSIGN(info->buffer.type, TintResourceTypeToBufferBindingType(
+                                                               resource.resource_type));
+                        break;
+                    case BindingInfoType::Sampler:
+                        switch (resource.resource_type) {
+                            case tint::inspector::ResourceBinding::ResourceType::kSampler:
+                                info->sampler.isComparison = false;
+                                break;
+                            case tint::inspector::ResourceBinding::ResourceType::kComparisonSampler:
+                                info->sampler.isComparison = true;
+                                break;
+                            default:
+                                UNREACHABLE();
+                        }
+                        break;
+                    case BindingInfoType::Texture:
+                        info->texture.viewDimension =
+                            TintTextureDimensionToTextureViewDimension(resource.dim);
+                        if (resource.resource_type ==
+                                tint::inspector::ResourceBinding::ResourceType::kDepthTexture ||
+                            resource.resource_type == tint::inspector::ResourceBinding::
+                                                          ResourceType::kDepthMultisampledTexture) {
+                            info->texture.compatibleSampleTypes = SampleTypeBit::Depth;
+                        } else {
+                            info->texture.compatibleSampleTypes =
+                                TintSampledKindToSampleTypeBit(resource.sampled_kind);
+                        }
+                        info->texture.multisampled =
+                            resource.resource_type == tint::inspector::ResourceBinding::
+                                                          ResourceType::kMultisampledTexture ||
+                            resource.resource_type == tint::inspector::ResourceBinding::
+                                                          ResourceType::kDepthMultisampledTexture;
+
+                        break;
+                    case BindingInfoType::StorageTexture:
+                        DAWN_TRY_ASSIGN(
+                            info->storageTexture.access,
+                            TintResourceTypeToStorageTextureAccess(resource.resource_type));
+                        info->storageTexture.format =
+                            TintImageFormatToTextureFormat(resource.image_format);
+                        info->storageTexture.viewDimension =
+                            TintTextureDimensionToTextureViewDimension(resource.dim);
+
+                        break;
+                    case BindingInfoType::ExternalTexture:
+                        break;
+                    default:
+                        return DAWN_VALIDATION_ERROR("Unknown binding type in Shader");
+                }
+            }
+
+            std::vector<tint::inspector::SamplerTexturePair> samplerTextureUses =
+                inspector->GetSamplerTextureUses(entryPoint.name);
+            metadata->samplerTexturePairs.reserve(samplerTextureUses.size());
+            std::transform(samplerTextureUses.begin(), samplerTextureUses.end(),
+                           std::back_inserter(metadata->samplerTexturePairs),
+                           [](const tint::inspector::SamplerTexturePair& pair) {
+                               EntryPointMetadata::SamplerTexturePair result;
+                               result.sampler = {BindGroupIndex(pair.sampler_binding_point.group),
+                                                 BindingNumber(pair.sampler_binding_point.binding)};
+                               result.texture = {BindGroupIndex(pair.texture_binding_point.group),
+                                                 BindingNumber(pair.texture_binding_point.binding)};
+                               return result;
+                           });
+
+            return std::move(metadata);
+        }
+
         ResultOrError<EntryPointMetadataTable> ReflectShaderUsingTint(
             const DeviceBase* device,
             const tint::Program* program) {
             ASSERT(program->IsValid());
 
-            const CombinedLimits& limits = device->GetLimits();
-
-            EntryPointMetadataTable result;
-
             tint::inspector::Inspector inspector(program);
-            auto entryPoints = inspector.GetEntryPoints();
+            std::vector<tint::inspector::EntryPoint> entryPoints = inspector.GetEntryPoints();
             DAWN_INVALID_IF(inspector.has_error(), "Tint Reflection failure: Inspector: %s\n",
                             inspector.error());
 
-            // TODO(dawn:563): use DAWN_TRY_CONTEXT to output the name of the entry point we're
-            // reflecting.
-            constexpr uint32_t kMaxInterStageShaderLocation = kMaxInterStageShaderVariables - 1;
-            for (auto& entryPoint : entryPoints) {
+            EntryPointMetadataTable result;
+
+            for (const tint::inspector::EntryPoint& entryPoint : entryPoints) {
+                std::unique_ptr<EntryPointMetadata> metadata;
+                DAWN_TRY_ASSIGN_CONTEXT(metadata,
+                                        ReflectEntryPointUsingTint(device, &inspector, entryPoint),
+                                        "processing entry point \"%s\".", entryPoint.name);
+
                 ASSERT(result.count(entryPoint.name) == 0);
-
-                auto metadata = std::make_unique<EntryPointMetadata>();
-
-                if (!entryPoint.overridable_constants.empty()) {
-                    DAWN_INVALID_IF(device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs),
-                                    "Pipeline overridable constants are disallowed because they "
-                                    "are partially implemented.");
-
-                    const auto& name2Id = inspector.GetConstantNameToIdMap();
-                    const auto& id2Scalar = inspector.GetConstantIDs();
-
-                    for (auto& c : entryPoint.overridable_constants) {
-                        uint32_t id = name2Id.at(c.name);
-                        OverridableConstantScalar defaultValue;
-                        if (c.is_initialized) {
-                            // if it is initialized, the scalar must exist
-                            const auto& scalar = id2Scalar.at(id);
-                            if (scalar.IsBool()) {
-                                defaultValue.b = scalar.AsBool();
-                            } else if (scalar.IsU32()) {
-                                defaultValue.u32 = scalar.AsU32();
-                            } else if (scalar.IsI32()) {
-                                defaultValue.i32 = scalar.AsI32();
-                            } else if (scalar.IsFloat()) {
-                                defaultValue.f32 = scalar.AsFloat();
-                            } else {
-                                UNREACHABLE();
-                            }
-                        }
-                        EntryPointMetadata::OverridableConstant constant = {
-                            id, FromTintOverridableConstantType(c.type), c.is_initialized,
-                            defaultValue};
-
-                        std::string identifier =
-                            c.is_numeric_id_specified ? std::to_string(constant.id) : c.name;
-                        metadata->overridableConstants[identifier] = constant;
-
-                        if (!c.is_initialized) {
-                            auto [_, inserted] =
-                                metadata->uninitializedOverridableConstants.emplace(
-                                    std::move(identifier));
-                            // The insertion should have taken place
-                            ASSERT(inserted);
-                        } else {
-                            auto [_, inserted] = metadata->initializedOverridableConstants.emplace(
-                                std::move(identifier));
-                            // The insertion should have taken place
-                            ASSERT(inserted);
-                        }
-                    }
-                }
-
-                DAWN_TRY_ASSIGN(metadata->stage, TintPipelineStageToShaderStage(entryPoint.stage));
-
-                if (metadata->stage == SingleShaderStage::Compute) {
-                    DAWN_INVALID_IF(
-                        entryPoint.workgroup_size_x > limits.v1.maxComputeWorkgroupSizeX ||
-                            entryPoint.workgroup_size_y > limits.v1.maxComputeWorkgroupSizeY ||
-                            entryPoint.workgroup_size_z > limits.v1.maxComputeWorkgroupSizeZ,
-                        "Entry-point uses workgroup_size(%u, %u, %u) that exceeds the "
-                        "maximum allowed (%u, %u, %u).",
-                        entryPoint.workgroup_size_x, entryPoint.workgroup_size_y,
-                        entryPoint.workgroup_size_z, limits.v1.maxComputeWorkgroupSizeX,
-                        limits.v1.maxComputeWorkgroupSizeY, limits.v1.maxComputeWorkgroupSizeZ);
-
-                    // Dimensions have already been validated against their individual limits above.
-                    // Cast to uint64_t to avoid overflow in this multiplication.
-                    uint64_t numInvocations = static_cast<uint64_t>(entryPoint.workgroup_size_x) *
-                                              entryPoint.workgroup_size_y *
-                                              entryPoint.workgroup_size_z;
-                    DAWN_INVALID_IF(numInvocations > limits.v1.maxComputeInvocationsPerWorkgroup,
-                                    "The total number of workgroup invocations (%u) exceeds the "
-                                    "maximum allowed (%u).",
-                                    numInvocations, limits.v1.maxComputeInvocationsPerWorkgroup);
-
-                    const size_t workgroupStorageSize =
-                        inspector.GetWorkgroupStorageSize(entryPoint.name);
-                    DAWN_INVALID_IF(workgroupStorageSize > limits.v1.maxComputeWorkgroupStorageSize,
-                                    "The total use of workgroup storage (%u bytes) is larger than "
-                                    "the maximum allowed (%u bytes).",
-                                    workgroupStorageSize, limits.v1.maxComputeWorkgroupStorageSize);
-
-                    metadata->localWorkgroupSize.x = entryPoint.workgroup_size_x;
-                    metadata->localWorkgroupSize.y = entryPoint.workgroup_size_y;
-                    metadata->localWorkgroupSize.z = entryPoint.workgroup_size_z;
-
-                    metadata->usesNumWorkgroups = entryPoint.num_workgroups_used;
-                }
-
-                if (metadata->stage == SingleShaderStage::Vertex) {
-                    for (const auto& inputVar : entryPoint.input_variables) {
-                        DAWN_INVALID_IF(
-                            !inputVar.has_location_decoration,
-                            "Vertex input variable \"%s\" doesn't have a location decoration.",
-                            inputVar.name);
-
-                        uint32_t unsanitizedLocation = inputVar.location_decoration;
-                        DAWN_INVALID_IF(unsanitizedLocation >= kMaxVertexAttributes,
-                                        "Vertex input variable \"%s\" has a location (%u) that "
-                                        "exceeds the maximum (%u)",
-                                        inputVar.name, unsanitizedLocation, kMaxVertexAttributes);
-                        VertexAttributeLocation location(static_cast<uint8_t>(unsanitizedLocation));
-
-                        DAWN_TRY_ASSIGN(
-                            metadata->vertexInputBaseTypes[location],
-                            TintComponentTypeToVertexFormatBaseType(inputVar.component_type));
-                        metadata->usedVertexInputs.set(location);
-                    }
-
-                    // [[position]] must be declared in a vertex shader but is not exposed as an
-                    // output variable by Tint so we directly add its components to the total.
-                    uint32_t totalInterStageShaderComponents = 4;
-                    for (const auto& outputVar : entryPoint.output_variables) {
-                        DAWN_INVALID_IF(
-                            !outputVar.has_location_decoration,
-                            "Vertex ouput variable \"%s\" doesn't have a location decoration.",
-                            outputVar.name);
-
-                        uint32_t location = outputVar.location_decoration;
-                        DAWN_INVALID_IF(location > kMaxInterStageShaderLocation,
-                                        "Vertex output variable \"%s\" has a location (%u) that "
-                                        "exceeds the maximum (%u).",
-                                        outputVar.name, location, kMaxInterStageShaderLocation);
-
-                        metadata->usedInterStageVariables.set(location);
-                        DAWN_TRY_ASSIGN(
-                            metadata->interStageVariables[location].baseType,
-                            TintComponentTypeToInterStageComponentType(outputVar.component_type));
-                        DAWN_TRY_ASSIGN(metadata->interStageVariables[location].componentCount,
-                                        TintCompositionTypeToInterStageComponentCount(
-                                            outputVar.composition_type));
-                        DAWN_TRY_ASSIGN(
-                            metadata->interStageVariables[location].interpolationType,
-                            TintInterpolationTypeToInterpolationType(outputVar.interpolation_type));
-                        DAWN_TRY_ASSIGN(
-                            metadata->interStageVariables[location].interpolationSampling,
-                            TintInterpolationSamplingToInterpolationSamplingType(
-                                outputVar.interpolation_sampling));
-
-                        totalInterStageShaderComponents +=
-                            metadata->interStageVariables[location].componentCount;
-                    }
-
-                    DAWN_INVALID_IF(
-                        totalInterStageShaderComponents > kMaxInterStageShaderComponents,
-                        "Total vertex output components count (%u) exceeds the maximum (%u).",
-                        totalInterStageShaderComponents, kMaxInterStageShaderComponents);
-                }
-
-                if (metadata->stage == SingleShaderStage::Fragment) {
-                    uint32_t totalInterStageShaderComponents = 0;
-                    for (const auto& inputVar : entryPoint.input_variables) {
-                        DAWN_INVALID_IF(
-                            !inputVar.has_location_decoration,
-                            "Fragment input variable \"%s\" doesn't have a location decoration.",
-                            inputVar.name);
-
-                        uint32_t location = inputVar.location_decoration;
-                        DAWN_INVALID_IF(location > kMaxInterStageShaderLocation,
-                                        "Fragment input variable \"%s\" has a location (%u) that "
-                                        "exceeds the maximum (%u).",
-                                        inputVar.name, location, kMaxInterStageShaderLocation);
-
-                        metadata->usedInterStageVariables.set(location);
-                        DAWN_TRY_ASSIGN(
-                            metadata->interStageVariables[location].baseType,
-                            TintComponentTypeToInterStageComponentType(inputVar.component_type));
-                        DAWN_TRY_ASSIGN(metadata->interStageVariables[location].componentCount,
-                                        TintCompositionTypeToInterStageComponentCount(
-                                            inputVar.composition_type));
-                        DAWN_TRY_ASSIGN(
-                            metadata->interStageVariables[location].interpolationType,
-                            TintInterpolationTypeToInterpolationType(inputVar.interpolation_type));
-                        DAWN_TRY_ASSIGN(
-                            metadata->interStageVariables[location].interpolationSampling,
-                            TintInterpolationSamplingToInterpolationSamplingType(
-                                inputVar.interpolation_sampling));
-
-                        totalInterStageShaderComponents +=
-                            metadata->interStageVariables[location].componentCount;
-                    }
-
-                    if (entryPoint.front_facing_used) {
-                        totalInterStageShaderComponents += 1;
-                    }
-                    if (entryPoint.input_sample_mask_used) {
-                        totalInterStageShaderComponents += 1;
-                    }
-                    if (entryPoint.sample_index_used) {
-                        totalInterStageShaderComponents += 1;
-                    }
-                    if (entryPoint.input_position_used) {
-                        totalInterStageShaderComponents += 4;
-                    }
-
-                    DAWN_INVALID_IF(
-                        totalInterStageShaderComponents > kMaxInterStageShaderComponents,
-                        "Total fragment input components count (%u) exceeds the maximum (%u).",
-                        totalInterStageShaderComponents, kMaxInterStageShaderComponents);
-
-                    for (const auto& outputVar : entryPoint.output_variables) {
-                        DAWN_INVALID_IF(
-                            !outputVar.has_location_decoration,
-                            "Fragment input variable \"%s\" doesn't have a location decoration.",
-                            outputVar.name);
-
-                        uint32_t unsanitizedAttachment = outputVar.location_decoration;
-                        DAWN_INVALID_IF(unsanitizedAttachment >= kMaxColorAttachments,
-                                        "Fragment output variable \"%s\" has a location (%u) that "
-                                        "exceeds the maximum (%u).",
-                                        outputVar.name, unsanitizedAttachment,
-                                        kMaxColorAttachments);
-                        ColorAttachmentIndex attachment(
-                            static_cast<uint8_t>(unsanitizedAttachment));
-
-                        DAWN_TRY_ASSIGN(
-                            metadata->fragmentOutputVariables[attachment].baseType,
-                            TintComponentTypeToTextureComponentType(outputVar.component_type));
-                        uint32_t componentCount;
-                        DAWN_TRY_ASSIGN(componentCount,
-                                        TintCompositionTypeToInterStageComponentCount(
-                                            outputVar.composition_type));
-                        // componentCount should be no larger than 4u
-                        ASSERT(componentCount <= 4u);
-                        metadata->fragmentOutputVariables[attachment].componentCount =
-                            componentCount;
-                        metadata->fragmentOutputsWritten.set(attachment);
-                    }
-                }
-
-                for (const tint::inspector::ResourceBinding& resource :
-                     inspector.GetResourceBindings(entryPoint.name)) {
-                    DAWN_INVALID_IF(resource.bind_group >= kMaxBindGroups,
-                                    "The entry-point uses a binding with a group decoration (%u) "
-                                    "that exceeds the maximum (%u).",
-                                    resource.bind_group, kMaxBindGroups);
-
-                    BindingNumber bindingNumber(resource.binding);
-                    BindGroupIndex bindGroupIndex(resource.bind_group);
-
-                    DAWN_INVALID_IF(bindingNumber > kMaxBindingNumberTyped,
-                                    "Binding number (%u) exceeds the maximum binding number (%u).",
-                                    uint32_t(bindingNumber), uint32_t(kMaxBindingNumberTyped));
-
-                    const auto& [binding, inserted] = metadata->bindings[bindGroupIndex].emplace(
-                        bindingNumber, ShaderBindingInfo{});
-                    DAWN_INVALID_IF(
-                        !inserted,
-                        "Entry-point has a duplicate binding for (group:%u, binding:%u).",
-                        resource.binding, resource.bind_group);
-
-                    ShaderBindingInfo* info = &binding->second;
-                    info->bindingType = TintResourceTypeToBindingInfoType(resource.resource_type);
-
-                    switch (info->bindingType) {
-                        case BindingInfoType::Buffer:
-                            info->buffer.minBindingSize = resource.size_no_padding;
-                            DAWN_TRY_ASSIGN(info->buffer.type, TintResourceTypeToBufferBindingType(
-                                                                   resource.resource_type));
-                            break;
-                        case BindingInfoType::Sampler:
-                            switch (resource.resource_type) {
-                                case tint::inspector::ResourceBinding::ResourceType::kSampler:
-                                    info->sampler.isComparison = false;
-                                    break;
-                                case tint::inspector::ResourceBinding::ResourceType::
-                                    kComparisonSampler:
-                                    info->sampler.isComparison = true;
-                                    break;
-                                default:
-                                    UNREACHABLE();
-                            }
-                            break;
-                        case BindingInfoType::Texture:
-                            info->texture.viewDimension =
-                                TintTextureDimensionToTextureViewDimension(resource.dim);
-                            if (resource.resource_type ==
-                                    tint::inspector::ResourceBinding::ResourceType::kDepthTexture ||
-                                resource.resource_type ==
-                                    tint::inspector::ResourceBinding::ResourceType::
-                                        kDepthMultisampledTexture) {
-                                info->texture.compatibleSampleTypes = SampleTypeBit::Depth;
-                            } else {
-                                info->texture.compatibleSampleTypes =
-                                    TintSampledKindToSampleTypeBit(resource.sampled_kind);
-                            }
-                            info->texture.multisampled =
-                                resource.resource_type == tint::inspector::ResourceBinding::
-                                                              ResourceType::kMultisampledTexture ||
-                                resource.resource_type ==
-                                    tint::inspector::ResourceBinding::ResourceType::
-                                        kDepthMultisampledTexture;
-
-                            break;
-                        case BindingInfoType::StorageTexture:
-                            DAWN_TRY_ASSIGN(
-                                info->storageTexture.access,
-                                TintResourceTypeToStorageTextureAccess(resource.resource_type));
-                            info->storageTexture.format =
-                                TintImageFormatToTextureFormat(resource.image_format);
-                            info->storageTexture.viewDimension =
-                                TintTextureDimensionToTextureViewDimension(resource.dim);
-
-                            break;
-                        case BindingInfoType::ExternalTexture:
-                            break;
-                        default:
-                            return DAWN_VALIDATION_ERROR("Unknown binding type in Shader");
-                    }
-                }
-
-                std::vector<tint::inspector::SamplerTexturePair> samplerTextureUses =
-                    inspector.GetSamplerTextureUses(entryPoint.name);
-                metadata->samplerTexturePairs.reserve(samplerTextureUses.size());
-                std::transform(
-                    samplerTextureUses.begin(), samplerTextureUses.end(),
-                    std::back_inserter(metadata->samplerTexturePairs),
-                    [](const tint::inspector::SamplerTexturePair& pair) {
-                        EntryPointMetadata::SamplerTexturePair result;
-                        result.sampler = {BindGroupIndex(pair.sampler_binding_point.group),
-                                          BindingNumber(pair.sampler_binding_point.binding)};
-                        result.texture = {BindGroupIndex(pair.texture_binding_point.group),
-                                          BindingNumber(pair.texture_binding_point.binding)};
-                        return result;
-                    });
-
                 result[entryPoint.name] = std::move(metadata);
             }
             return std::move(result);
