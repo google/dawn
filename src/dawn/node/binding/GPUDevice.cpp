@@ -135,7 +135,6 @@ namespace wgpu::binding {
     }
 
     interop::Interface<interop::GPUQueue> GPUDevice::getQueue(Napi::Env env) {
-        // TODO(crbug.com/dawn/1144): Should probably return the same Queue JS object.
         return interop::GPUQueue::Create<GPUQueue>(env, device_.GetQueue(), async_);
     }
 

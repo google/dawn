@@ -108,6 +108,7 @@ func run() error {
 		"ConstantsOf":                constantsOf,
 		"EnumEntryName":              enumEntryName,
 		"Eval":                       g.eval,
+		"HasAnnotation":              hasAnnotation,
 		"Include":                    g.include,
 		"IsBasicLiteral":             is(ast.BasicLiteral{}),
 		"IsConstructor":              isConstructor,
@@ -491,6 +492,22 @@ func isUndefinedType(ty ast.Type) bool {
 // enumEntryName formats the enum entry name 's' for use in a C++ enum.
 func enumEntryName(s string) string {
 	return "k" + strings.ReplaceAll(pascalCase(strings.Trim(s, `"`)), "-", "")
+}
+
+func findAnnotation(list []*ast.Annotation, name string) *ast.Annotation {
+	for _, annotation := range list {
+		if annotation.Name == name {
+			return annotation
+		}
+	}
+	return nil
+}
+
+func hasAnnotation(obj interface{}, name string) bool {
+	if member, ok := obj.(*ast.Member); ok {
+		return findAnnotation(member.Annotations, name) != nil
+	}
+	panic("Unhandled AST node type in hasAnnotation")
 }
 
 // Method describes a WebIDL interface method
