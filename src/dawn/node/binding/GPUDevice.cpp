@@ -454,7 +454,7 @@ namespace wgpu::binding {
         auto* ctx = new Context{env, Promise(env, PROMISE_INFO), async_};
         auto promise = ctx->promise;
 
-        bool ok = device_.PopErrorScope(
+        device_.PopErrorScope(
             [](WGPUErrorType type, char const* message, void* userdata) {
                 auto c = std::unique_ptr<Context>(static_cast<Context*>(userdata));
                 auto env = c->env;
@@ -465,11 +465,13 @@ namespace wgpu::binding {
                     case WGPUErrorType::WGPUErrorType_OutOfMemory:
                         c->promise.Resolve(interop::GPUOutOfMemoryError::Create<OOMError>(env));
                         break;
-                    case WGPUErrorType::WGPUErrorType_Unknown:
-                    case WGPUErrorType::WGPUErrorType_DeviceLost:
                     case WGPUErrorType::WGPUErrorType_Validation:
                         c->promise.Resolve(
                             interop::GPUValidationError::Create<ValidationError>(env, message));
+                        break;
+                    case WGPUErrorType::WGPUErrorType_Unknown:
+                    case WGPUErrorType::WGPUErrorType_DeviceLost:
+                        c->promise.Reject(Errors::OperationError(env, message));
                         break;
                     default:
                         c->promise.Reject("unhandled error type");
@@ -478,12 +480,6 @@ namespace wgpu::binding {
             },
             ctx);
 
-        if (ok) {
-            return promise;
-        }
-
-        delete ctx;
-        promise.Reject(Errors::OperationError(env));
         return promise;
     }
 
