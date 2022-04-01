@@ -641,8 +641,9 @@ inline void SwitchCases(T* object,
                         std::tuple<CASES...>&& cases) {
   using Cases = std::tuple<CASES...>;
   static constexpr int kDefaultIndex = detail::IndexOfDefaultCase<Cases>();
-  static_assert(kDefaultIndex == -1 || std::tuple_size_v<Cases> - 1,
-                "Default case must be last in Switch()");
+  static_assert(
+      kDefaultIndex == -1 || kDefaultIndex == std::tuple_size_v<Cases> - 1,
+      "Default case must be last in Switch()");
   static constexpr bool kHasDefaultCase = kDefaultIndex >= 0;
   static constexpr bool kHasReturnType = !std::is_same_v<RETURN_TYPE, void>;
 
