@@ -571,7 +571,7 @@ source_set("sources") {
   }
 
   if (dawn_enable_vulkan) {
-    public_deps += [ "${dawn_root}/third_party/khronos:vulkan_headers" ]
+    public_deps += [ "${dawn_vulkan_headers_dir}:vulkan_headers" ]
     sources += [
       "vulkan/AdapterVk.cpp",
       "vulkan/AdapterVk.h",

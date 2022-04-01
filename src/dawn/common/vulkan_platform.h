@@ -155,26 +155,46 @@ namespace dawn::native::vulkan {
 // Import additional parts of Vulkan that are supported on our architecture and preemptively include
 // headers that vulkan.h includes that we have "undefs" for.
 #if defined(DAWN_PLATFORM_WINDOWS)
-#    define VK_USE_PLATFORM_WIN32_KHR
+#    ifndef VK_USE_PLATFORM_WIN32_KHR
+#        define VK_USE_PLATFORM_WIN32_KHR
+#    endif
 #    include "dawn/common/windows_with_undefs.h"
+#else
+#    undef VK_USE_PLATFORM_WIN32_KHR
 #endif  // DAWN_PLATFORM_WINDOWS
 
 #if defined(DAWN_USE_X11)
 #    define VK_USE_PLATFORM_XLIB_KHR
-#    define VK_USE_PLATFORM_XCB_KHR
+#    ifndef VK_USE_PLATFORM_XCB_KHR
+#        define VK_USE_PLATFORM_XCB_KHR
+#    endif
 #    include "dawn/common/xlib_with_undefs.h"
+#else
+#    undef VK_USE_PLATFORM_XCB_KHR
 #endif  // defined(DAWN_USE_X11)
 
 #if defined(DAWN_ENABLE_BACKEND_METAL)
-#    define VK_USE_PLATFORM_METAL_EXT
+#    ifndef VK_USE_PLATFORM_METAL_EXT
+#        define VK_USE_PLATFORM_METAL_EXT
+#    endif
+#else
+#    undef VK_USE_PLATFORM_METAL_EXT
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
 #if defined(DAWN_PLATFORM_ANDROID)
-#    define VK_USE_PLATFORM_ANDROID_KHR
+#    ifndef VK_USE_PLATFORM_ANDROID_KHR
+#        define VK_USE_PLATFORM_ANDROID_KHR
+#    endif
+#else
+#    undef VK_USE_PLATFORM_ANDROID_KHR
 #endif  // defined(DAWN_PLATFORM_ANDROID)
 
 #if defined(DAWN_PLATFORM_FUCHSIA)
-#    define VK_USE_PLATFORM_FUCHSIA
+#    ifndef VK_USE_PLATFORM_FUCHSIA
+#        define VK_USE_PLATFORM_FUCHSIA
+#    endif
+#else
+#    undef VK_USE_PLATFORM_FUCHSIA
 #endif  // defined(DAWN_PLATFORM_FUCHSIA)
 
 // The actual inclusion of vulkan.h!
