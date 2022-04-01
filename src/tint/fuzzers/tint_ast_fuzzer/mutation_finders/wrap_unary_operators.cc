@@ -17,6 +17,7 @@
 #include <memory>
 #include <vector>
 
+#include "src/tint/fuzzers/tint_ast_fuzzer/expression_size.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutations/wrap_unary_operator.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/util.h"
 #include "src/tint/sem/expression.h"
@@ -26,11 +27,17 @@ namespace tint {
 namespace fuzzers {
 namespace ast_fuzzer {
 
+namespace {
+const size_t kMaxExpressionSize = 100;
+}  // namespace
+
 MutationList MutationFinderWrapUnaryOperators::FindMutations(
     const tint::Program& program,
     NodeIdMap* node_id_map,
     ProbabilityContext* probability_context) const {
   MutationList result;
+
+  ExpressionSize expression_size(program);
 
   // Iterate through all ast nodes and for each expression node, try to wrap
   // the inside a valid unary operator based on the type of the expression.
@@ -39,6 +46,10 @@ MutationList MutationFinderWrapUnaryOperators::FindMutations(
 
     // Transformation applies only when the node represents a valid expression.
     if (!expr_ast_node) {
+      continue;
+    }
+
+    if (expression_size(expr_ast_node) > kMaxExpressionSize) {
       continue;
     }
 

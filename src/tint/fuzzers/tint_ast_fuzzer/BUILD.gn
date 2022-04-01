@@ -41,6 +41,8 @@ if (build_with_chromium) {
     sources = [
       "cli.cc",
       "cli.h",
+      "expression_size.cc",
+      "expression_size.h",
       "fuzzer.cc",
       "mutation.cc",
       "mutation.h",
