@@ -18,15 +18,14 @@ namespace dawn::native {
 
     template <>
     void CacheKeySerializer<std::string>::Serialize(CacheKey* key, const std::string& t) {
-        std::string len = std::to_string(t.length());
-        key->insert(key->end(), len.begin(), len.end());
-        key->push_back('"');
+        key->Record(static_cast<size_t>(t.length()));
         key->insert(key->end(), t.begin(), t.end());
-        key->push_back('"');
     }
 
     template <>
     void CacheKeySerializer<CacheKey>::Serialize(CacheKey* key, const CacheKey& t) {
+        // For nested cache keys, we do not record the length, and just copy the key so that it
+        // appears we just flatten the keys into a single key.
         key->insert(key->end(), t.begin(), t.end());
     }
 

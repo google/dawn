@@ -15,73 +15,168 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <cstring>
+#include <iomanip>
 #include <string>
 
 #include "dawn/native/CacheKey.h"
 
 namespace dawn::native {
 
-    // Testing classes/structs with serializing implemented for testing.
-    struct A {};
+    // Testing classes with mock serializing implemented for testing.
+    class A {
+      public:
+        MOCK_METHOD(void, SerializeMock, (CacheKey*, const A&), (const));
+    };
     template <>
     void CacheKeySerializer<A>::Serialize(CacheKey* key, const A& t) {
-        std::string str = "structA";
-        key->insert(key->end(), str.begin(), str.end());
+        t.SerializeMock(key, t);
     }
 
-    class B {};
-    template <>
-    void CacheKeySerializer<B>::Serialize(CacheKey* key, const B& t) {
-        std::string str = "classB";
-        key->insert(key->end(), str.begin(), str.end());
+    // Custom printer for CacheKey for clearer debug testing messages.
+    void PrintTo(const CacheKey& key, std::ostream* stream) {
+        *stream << std::hex;
+        for (const int b : key) {
+            *stream << std::setfill('0') << std::setw(2) << b << " ";
+        }
+        *stream << std::dec;
     }
 
     namespace {
 
-        // Matcher to compare CacheKey to a string for easier testing.
-        MATCHER_P(CacheKeyEq,
-                  key,
-                  "cache key " + std::string(negation ? "not" : "") + "equal to " + key) {
-            return std::string(arg.begin(), arg.end()) == key;
+        using ::testing::InSequence;
+        using ::testing::NotNull;
+        using ::testing::PrintToString;
+        using ::testing::Ref;
+
+        // Matcher to compare CacheKeys for easier testing.
+        MATCHER_P(CacheKeyEq, key, PrintToString(key)) {
+            return memcmp(arg.data(), key.data(), arg.size()) == 0;
         }
 
-        TEST(CacheKeyTest, IntegralTypes) {
-            EXPECT_THAT(GetCacheKey((int)-1), CacheKeyEq("{0:-1}"));
-            EXPECT_THAT(GetCacheKey((uint8_t)2), CacheKeyEq("{0:2}"));
-            EXPECT_THAT(GetCacheKey((uint16_t)4), CacheKeyEq("{0:4}"));
-            EXPECT_THAT(GetCacheKey((uint32_t)8), CacheKeyEq("{0:8}"));
-            EXPECT_THAT(GetCacheKey((uint64_t)16), CacheKeyEq("{0:16}"));
+        TEST(CacheKeyTests, RecordSingleMember) {
+            CacheKey key;
 
-            EXPECT_THAT(GetCacheKey((int)-1, (uint8_t)2, (uint16_t)4, (uint32_t)8, (uint64_t)16),
-                        CacheKeyEq("{0:-1,1:2,2:4,3:8,4:16}"));
+            A a;
+            EXPECT_CALL(a, SerializeMock(NotNull(), Ref(a))).Times(1);
+            EXPECT_THAT(key.Record(a), CacheKeyEq(CacheKey()));
         }
 
-        TEST(CacheKeyTest, FloatingTypes) {
-            EXPECT_THAT(GetCacheKey((float)0.5), CacheKeyEq("{0:0.500000}"));
-            EXPECT_THAT(GetCacheKey((double)32.0), CacheKeyEq("{0:32.000000}"));
+        TEST(CacheKeyTests, RecordManyMembers) {
+            constexpr size_t kNumMembers = 100;
 
-            EXPECT_THAT(GetCacheKey((float)0.5, (double)32.0),
-                        CacheKeyEq("{0:0.500000,1:32.000000}"));
+            CacheKey key;
+            for (size_t i = 0; i < kNumMembers; ++i) {
+                A a;
+                EXPECT_CALL(a, SerializeMock(NotNull(), Ref(a))).Times(1);
+                key.Record(a);
+            }
+            EXPECT_THAT(key, CacheKeyEq(CacheKey()));
         }
 
-        TEST(CacheKeyTest, Strings) {
-            std::string str0 = "string0";
-            std::string str1 = "string1";
+        TEST(CacheKeyTests, RecordIterable) {
+            constexpr size_t kIterableSize = 100;
 
-            EXPECT_THAT(GetCacheKey("string0"), CacheKeyEq(R"({0:7"string0"})"));
-            EXPECT_THAT(GetCacheKey(str0), CacheKeyEq(R"({0:7"string0"})"));
-            EXPECT_THAT(GetCacheKey("string0", str1), CacheKeyEq(R"({0:7"string0",1:7"string1"})"));
+            // Expecting the size of the container.
+            CacheKey expected;
+            expected.Record(kIterableSize);
+
+            std::vector<A> iterable(kIterableSize);
+            {
+                InSequence seq;
+                for (const auto& a : iterable) {
+                    EXPECT_CALL(a, SerializeMock(NotNull(), Ref(a))).Times(1);
+                }
+                for (const auto& a : iterable) {
+                    EXPECT_CALL(a, SerializeMock(NotNull(), Ref(a))).Times(1);
+                }
+            }
+
+            EXPECT_THAT(CacheKey().RecordIterable(iterable), CacheKeyEq(expected));
+            EXPECT_THAT(CacheKey().RecordIterable(iterable.data(), kIterableSize),
+                        CacheKeyEq(expected));
         }
 
-        TEST(CacheKeyTest, NestedCacheKey) {
-            EXPECT_THAT(GetCacheKey(GetCacheKey((int)-1)), CacheKeyEq("{0:{0:-1}}"));
-            EXPECT_THAT(GetCacheKey(GetCacheKey("string")), CacheKeyEq(R"({0:{0:6"string"}})"));
-            EXPECT_THAT(GetCacheKey(GetCacheKey(A{})), CacheKeyEq("{0:{0:structA}}"));
-            EXPECT_THAT(GetCacheKey(GetCacheKey(B())), CacheKeyEq("{0:{0:classB}}"));
+        TEST(CacheKeyTests, RecordNested) {
+            CacheKey expected;
+            CacheKey actual;
+            {
+                // Recording a single member.
+                A a;
+                EXPECT_CALL(a, SerializeMock(NotNull(), Ref(a))).Times(1);
+                actual.Record(CacheKey().Record(a));
+            }
+            {
+                // Recording multiple members.
+                constexpr size_t kNumMembers = 2;
+                CacheKey sub;
+                for (size_t i = 0; i < kNumMembers; ++i) {
+                    A a;
+                    EXPECT_CALL(a, SerializeMock(NotNull(), Ref(a))).Times(1);
+                    sub.Record(a);
+                }
+                actual.Record(sub);
+            }
+            {
+                // Record an iterable.
+                constexpr size_t kIterableSize = 2;
+                expected.Record(kIterableSize);
+                std::vector<A> iterable(kIterableSize);
+                {
+                    InSequence seq;
+                    for (const auto& a : iterable) {
+                        EXPECT_CALL(a, SerializeMock(NotNull(), Ref(a))).Times(1);
+                    }
+                }
+                actual.Record(CacheKey().RecordIterable(iterable));
+            }
+            EXPECT_THAT(actual, CacheKeyEq(expected));
+        }
 
-            EXPECT_THAT(GetCacheKey(GetCacheKey((int)-1), GetCacheKey("string"), GetCacheKey(A{}),
-                                    GetCacheKey(B())),
-                        CacheKeyEq(R"({0:{0:-1},1:{0:6"string"},2:{0:structA},3:{0:classB}})"));
+        TEST(CacheKeySerializerTests, IntegralTypes) {
+            // Only testing explicitly sized types for simplicity, and using 0s for larger types to
+            // avoid dealing with endianess.
+            EXPECT_THAT(CacheKey().Record('c'), CacheKeyEq(CacheKey({'c'})));
+            EXPECT_THAT(CacheKey().Record(uint8_t(255)), CacheKeyEq(CacheKey({255})));
+            EXPECT_THAT(CacheKey().Record(uint16_t(0)), CacheKeyEq(CacheKey({0, 0})));
+            EXPECT_THAT(CacheKey().Record(uint32_t(0)), CacheKeyEq(CacheKey({0, 0, 0, 0})));
+        }
+
+        TEST(CacheKeySerializerTests, FloatingTypes) {
+            // Using 0s to avoid dealing with implementation specific float details.
+            EXPECT_THAT(CacheKey().Record(float(0)), CacheKeyEq(CacheKey(sizeof(float), 0)));
+            EXPECT_THAT(CacheKey().Record(double(0)), CacheKeyEq(CacheKey(sizeof(double), 0)));
+        }
+
+        TEST(CacheKeySerializerTests, LiteralStrings) {
+            // Using a std::string here to help with creating the expected result.
+            std::string str = "string";
+
+            CacheKey expected;
+            expected.Record(size_t(7));
+            expected.insert(expected.end(), str.begin(), str.end());
+            expected.push_back('\0');
+
+            EXPECT_THAT(CacheKey().Record("string"), CacheKeyEq(expected));
+        }
+
+        TEST(CacheKeySerializerTests, StdStrings) {
+            std::string str = "string";
+
+            CacheKey expected;
+            expected.Record((size_t)6);
+            expected.insert(expected.end(), str.begin(), str.end());
+
+            EXPECT_THAT(CacheKey().Record(str), CacheKeyEq(expected));
+        }
+
+        TEST(CacheKeySerializerTests, CacheKeys) {
+            CacheKey data = {'d', 'a', 't', 'a'};
+
+            CacheKey expected;
+            expected.insert(expected.end(), data.begin(), data.end());
+
+            EXPECT_THAT(CacheKey().Record(data), CacheKeyEq(expected));
         }
 
     }  // namespace
