@@ -56,9 +56,11 @@ namespace {
 void Initialize(Napi::Env env) {
   auto* wrapper = Wrappers::Init(env);
   auto global = env.Global();
-{{ range $ := .Declarations}}
+{{- range $ := .Declarations}}
 {{-   if IsInterfaceOrNamespace $}}
+{{-     if not (HasAnnotation $ "LegacyNoInterfaceObject")}}
   global.Set(Napi::String::New(env, "{{$.Name}}"), wrapper->{{$.Name}}_ctor.Value());
+{{-     end}}
 {{-   end}}
 {{- end}}
 }

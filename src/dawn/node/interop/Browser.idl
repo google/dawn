@@ -14,6 +14,10 @@
 
 // An IDL file that provides stub definitions for dictionaries and interfaces
 // used by the webgpu.idl file
+//
+// The [LegacyNoInterfaceObject] annotation asks idlgen to not create a global constructor for
+// an interface. It is a real WebIDL annotation but we use it liberally here.
+// https://webidl.spec.whatwg.org/#LegacyNoInterfaceObject
 
 dictionary EventInit {
   boolean bubbles = false;
@@ -21,25 +25,25 @@ dictionary EventInit {
   boolean composed = false;
 };
 
-interface Navigator {
+[LegacyNoInterfaceObject] interface Navigator {
   readonly attribute DOMString vendorSub;
   readonly attribute DOMString productSub;
   readonly attribute DOMString vendor;
 };
 
-interface Event {
+[LegacyNoInterfaceObject] interface Event {
   readonly attribute boolean bubbles;
   readonly attribute boolean cancelable;
   attribute boolean returnValue;
 };
 
-interface WorkerNavigator{};
+[LegacyNoInterfaceObject] interface WorkerNavigator{};
 
-interface EventListener {
+[LegacyNoInterfaceObject] interface EventListener {
   undefined handleEvent(Event event);
 };
 
-interface EventTarget {
+[LegacyNoInterfaceObject] interface EventTarget {
   undefined addEventListener(DOMString type, EventListener? callback, optional (AddEventListenerOptions or boolean) options);
   undefined removeEventListener(DOMString type, EventListener? callback, optional (EventListenerOptions or boolean) options);
   boolean dispatchEvent(Event event);
@@ -52,7 +56,7 @@ dictionary AddEventListenerOptions : EventListenerOptions {
   boolean once = false;
 };
 
-interface HTMLVideoElement {
+[LegacyNoInterfaceObject] interface HTMLVideoElement {
   attribute unsigned long width;
   attribute unsigned long height;
   readonly attribute unsigned long videoWidth;
@@ -66,19 +70,19 @@ typedef(Int8Array or Int16Array or Int32Array or Uint8Array or Uint16Array or
 
 typedef(ArrayBufferView or ArrayBuffer) BufferSource;
 
-interface ImageBitmap {
+[LegacyNoInterfaceObject] interface ImageBitmap {
   readonly attribute unsigned long width;
   readonly attribute unsigned long height;
 };
 
-interface HTMLCanvasElement {
+[LegacyNoInterfaceObject] interface HTMLCanvasElement {
   attribute unsigned long width;
   attribute unsigned long height;
 };
 
-interface OffscreenCanvas {
+[LegacyNoInterfaceObject] interface OffscreenCanvas {
   attribute unsigned long width;
   attribute unsigned long height;
 };
 
-interface EventHandler{};
+[LegacyNoInterfaceObject] interface EventHandler{};
