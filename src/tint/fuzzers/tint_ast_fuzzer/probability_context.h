@@ -65,6 +65,11 @@ class ProbabilityContext {
     return chance_of_replacing_identifiers_;
   }
 
+  /// @return the probability of wrapping an expression in a unary operator.
+  uint32_t GetChanceOfWrappingUnaryOperators() const {
+    return chance_of_wrapping_unary_operators_;
+  }
+
  private:
   /// @param range - a pair of integers `a` and `b` s.t. `a <= b`.
   /// @return an random number in the range `[a; b]`.
@@ -74,6 +79,7 @@ class ProbabilityContext {
 
   uint32_t chance_of_changing_binary_operators_;
   uint32_t chance_of_replacing_identifiers_;
+  uint32_t chance_of_wrapping_unary_operators_;
 };
 
 }  // namespace ast_fuzzer

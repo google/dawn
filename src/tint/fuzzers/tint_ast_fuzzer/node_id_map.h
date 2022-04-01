@@ -72,7 +72,7 @@ class NodeIdMap {
   /// @param id - an id that is used to check in the map.
   /// @return true the given id is fresh and valid (non-zero).
   /// @return false otherwise.
-  bool IdIsFreshAndValid(IdType id);
+  bool IdIsFreshAndValid(IdType id) const;
 
   /// @brief Returns an id that is guaranteed to be unoccupied in this map.
   ///

@@ -20,6 +20,7 @@ message Mutation {
   oneof mutation {
     MutationReplaceIdentifier replace_identifier = 1;
     MutationChangeBinaryOperator change_binary_operator = 2;
+    MutationWrapUnaryOperator wrap_unary_operator = 3;
   };
 }
 
@@ -58,4 +59,18 @@ message MutationChangeBinaryOperator {
 
   // A BinaryOp representing the new binary operator.
   uint32 new_operator = 2;
+}
+
+message MutationWrapUnaryOperator {
+  // This transformation wraps an expression with a allowed unary
+  // expression operator.
+
+  // The id of the expression.
+  uint32 expression_id = 1;
+
+  // A fresh id for the created unary expression.
+  uint32 fresh_id = 2;
+
+  // The unary operator to wrap the expression with.
+  uint32 unary_op_wrapper = 3;
 }

@@ -18,6 +18,7 @@
 
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutations/change_binary_operator.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutations/replace_identifier.h"
+#include "src/tint/fuzzers/tint_ast_fuzzer/mutations/wrap_unary_operator.h"
 
 namespace tint {
 namespace fuzzers {
@@ -34,6 +35,9 @@ std::unique_ptr<Mutation> Mutation::FromMessage(
     case protobufs::Mutation::kChangeBinaryOperator:
       return std::make_unique<MutationChangeBinaryOperator>(
           message.change_binary_operator());
+    case protobufs::Mutation::kWrapUnaryOperator:
+      return std::make_unique<MutationWrapUnaryOperator>(
+          message.wrap_unary_operator());
     case protobufs::Mutation::MUTATION_NOT_SET:
       assert(false && "Mutation is not set");
       break;

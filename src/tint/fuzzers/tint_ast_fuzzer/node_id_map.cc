@@ -51,7 +51,7 @@ void NodeIdMap::Add(const ast::Node* node, IdType id) {
   }
 }
 
-bool NodeIdMap::IdIsFreshAndValid(IdType id) {
+bool NodeIdMap::IdIsFreshAndValid(IdType id) const {
   return id && !id_to_node_.count(id);
 }
 

@@ -22,8 +22,8 @@
 
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutation_finders/change_binary_operators.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutation_finders/replace_identifiers.h"
+#include "src/tint/fuzzers/tint_ast_fuzzer/mutation_finders/wrap_unary_operators.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/node_id_map.h"
-
 #include "src/tint/program_builder.h"
 
 namespace tint {
@@ -49,6 +49,8 @@ MutationFinderList CreateMutationFinders(
     MaybeAddFinder<MutationFinderChangeBinaryOperators>(
         enable_all_mutations, probability_context, &result);
     MaybeAddFinder<MutationFinderReplaceIdentifiers>(
+        enable_all_mutations, probability_context, &result);
+    MaybeAddFinder<MutationFinderWrapUnaryOperators>(
         enable_all_mutations, probability_context, &result);
   } while (result.empty());
   return result;
