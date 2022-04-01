@@ -104,8 +104,10 @@ namespace wgpu::binding {
         Napi::Env env_;
         wgpu::Device device_;
         std::shared_ptr<AsyncRunner> async_;
-        std::vector<interop::Promise<interop::Interface<interop::GPUDeviceLostInfo>>>
-            lost_promises_;
+
+        // This promise's JS object lives as long as the device because it is stored in .lost
+        // of the wrapper JS object.
+        interop::Promise<interop::Interface<interop::GPUDeviceLostInfo>> lost_promise_;
     };
 
 }  // namespace wgpu::binding

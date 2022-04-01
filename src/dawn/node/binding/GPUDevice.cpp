@@ -77,7 +77,10 @@ namespace wgpu::binding {
     // wgpu::bindings::GPUDevice
     ////////////////////////////////////////////////////////////////////////////////
     GPUDevice::GPUDevice(Napi::Env env, wgpu::Device device)
-        : env_(env), device_(device), async_(std::make_shared<AsyncRunner>(env, device)) {
+        : env_(env),
+          device_(device),
+          async_(std::make_shared<AsyncRunner>(env, device)),
+          lost_promise_(env, PROMISE_INFO) {
         device_.SetLoggingCallback(
             [](WGPULoggingType type, char const* message, void* userdata) {
                 std::cout << type << ": " << message << std::endl;
@@ -102,8 +105,8 @@ namespace wgpu::binding {
                         break;
                 }
                 auto* self = static_cast<GPUDevice*>(userdata);
-                for (auto promise : self->lost_promises_) {
-                    promise.Resolve(
+                if (self->lost_promise_.GetState() == interop::PromiseState::Pending) {
+                    self->lost_promise_.Resolve(
                         interop::GPUDeviceLostInfo::Create<DeviceLostInfo>(self->env_, r, message));
                 }
             },
@@ -139,12 +142,11 @@ namespace wgpu::binding {
     }
 
     void GPUDevice::destroy(Napi::Env env) {
-        for (auto promise : lost_promises_) {
-            promise.Resolve(interop::GPUDeviceLostInfo::Create<DeviceLostInfo>(
+        if (lost_promise_.GetState() == interop::PromiseState::Pending) {
+            lost_promise_.Resolve(interop::GPUDeviceLostInfo::Create<DeviceLostInfo>(
                 env_, interop::GPUDeviceLostReason::kDestroyed, "device was destroyed"));
         }
-        lost_promises_.clear();
-        device_.Release();
+        device_.Destroy();
     }
 
     interop::Interface<interop::GPUBuffer> GPUDevice::createBuffer(
@@ -422,10 +424,7 @@ namespace wgpu::binding {
 
     interop::Promise<interop::Interface<interop::GPUDeviceLostInfo>> GPUDevice::getLost(
         Napi::Env env) {
-        auto promise =
-            interop::Promise<interop::Interface<interop::GPUDeviceLostInfo>>(env, PROMISE_INFO);
-        lost_promises_.emplace_back(promise);
-        return promise;
+        return lost_promise_;
     }
 
     void GPUDevice::pushErrorScope(Napi::Env env, interop::GPUErrorFilter filter) {

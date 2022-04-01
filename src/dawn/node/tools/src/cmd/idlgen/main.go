@@ -142,6 +142,9 @@ func run() error {
 
 	// simplify the definitions in the WebIDL before passing this to the template
 	idl, declarations := simplify(idl)
+
+	// Patch the IDL for the differences we need compared to the upstream IDL.
+	patch(idl, declarations)
 	g.declarations = declarations
 
 	// Write the file header
@@ -366,6 +369,17 @@ func (s *simplifier) visitType(t ast.Type) {
 		s.visitType(t.Elem)
 	default:
 		panic(fmt.Errorf("unhandled AST type %T", t))
+	}
+}
+
+func patch(idl *ast.File, decl declarations) {
+	// Add [SameObject] to GPUDevice.lost
+	for _, member := range decl["GPUDevice"].(*ast.Interface).Members {
+		if m := member.(*ast.Member); m != nil && m.Name == "lost" {
+			annotation := &ast.Annotation{}
+			annotation.Name = "SameObject"
+			m.Annotations = append(m.Annotations, annotation)
+		}
 	}
 }
 
