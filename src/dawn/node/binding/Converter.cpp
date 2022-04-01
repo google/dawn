@@ -448,7 +448,7 @@ namespace wgpu::binding {
                 out = wgpu::TextureFormat::ASTC12x10Unorm;
                 return true;
             case interop::GPUTextureFormat::kAstc12X10UnormSrgb:
-                out = wgpu::TextureFormat::ASTC12x12UnormSrgb;
+                out = wgpu::TextureFormat::ASTC12x10UnormSrgb;
                 return true;
             case interop::GPUTextureFormat::kAstc12X12Unorm:
                 out = wgpu::TextureFormat::ASTC12x12Unorm;
