@@ -1373,7 +1373,20 @@ namespace dawn::native::vulkan {
         createInfo.flags = 0;
         createInfo.image = ToBackend(GetTexture())->GetHandle();
         createInfo.viewType = VulkanImageViewType(descriptor->dimension);
-        createInfo.format = VulkanImageFormat(device, descriptor->format);
+
+        const Format& textureFormat = GetTexture()->GetFormat();
+        if (textureFormat.HasStencil() &&
+            (textureFormat.HasDepth() || !device->IsToggleEnabled(Toggle::VulkanUseS8))) {
+            // Unlike multi-planar formats, depth-stencil formats have multiple aspects but are not
+            // created with VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT.
+            // https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkImageViewCreateInfo.html#VUID-VkImageViewCreateInfo-image-01762
+            // Without, VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT, the view format must match the texture
+            // format.
+            createInfo.format = VulkanImageFormat(device, textureFormat.format);
+        } else {
+            createInfo.format = VulkanImageFormat(device, descriptor->format);
+        }
+
         createInfo.components = VkComponentMapping{VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G,
                                                    VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
 

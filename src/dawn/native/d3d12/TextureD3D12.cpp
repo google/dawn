@@ -1170,13 +1170,12 @@ namespace dawn::native::d3d12 {
         mSrvDesc.Format = D3D12TextureFormat(descriptor->format);
         mSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
-        // TODO(enga): This will need to be much more nuanced when WebGPU has
-        // texture view compatibility rules.
         UINT planeSlice = 0;
-        if (GetFormat().HasDepthOrStencil()) {
+        const Format& textureFormat = texture->GetFormat();
+        if (textureFormat.HasDepthOrStencil()) {
             // Configure the SRV descriptor to reinterpret the texture allocated as
             // TYPELESS as a single-plane shader-accessible view.
-            switch (descriptor->format) {
+            switch (textureFormat.format) {
                 case wgpu::TextureFormat::Depth32Float:
                 case wgpu::TextureFormat::Depth24Plus:
                     mSrvDesc.Format = DXGI_FORMAT_R32_FLOAT;
@@ -1184,28 +1183,22 @@ namespace dawn::native::d3d12 {
                 case wgpu::TextureFormat::Depth16Unorm:
                     mSrvDesc.Format = DXGI_FORMAT_R16_UNORM;
                     break;
-                case wgpu::TextureFormat::Stencil8: {
-                    // Stencil8 is always backed by a DXGI_FORMAT_R24G8_TYPELESS texture in D3D12,
-                    // so always treat it as if the StencilOnly aspect of a Depth24UnormStencil8 was
-                    // selected.
-                    planeSlice = 1;
-                    mSrvDesc.Format = DXGI_FORMAT_X24_TYPELESS_G8_UINT;
-                    // Stencil is accessed using the .g component in the shader.
-                    // Map it to the zeroth component to match other APIs.
-                    mSrvDesc.Shader4ComponentMapping = D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(
-                        D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_1,
-                        D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_0,
-                        D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_0,
-                        D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_1);
-                    break;
-                }
-                case wgpu::TextureFormat::Depth24UnormStencil8:
-                    switch (descriptor->aspect) {
-                        case wgpu::TextureAspect::DepthOnly:
+                case wgpu::TextureFormat::Stencil8:
+                case wgpu::TextureFormat::Depth24UnormStencil8: {
+                    Aspect aspects = SelectFormatAspects(textureFormat, descriptor->aspect);
+                    ASSERT(aspects != Aspect::None);
+                    if (!HasZeroOrOneBits(aspects)) {
+                        // A single aspect is not selected. The texture view must not be
+                        // sampled.
+                        mSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
+                        break;
+                    }
+                    switch (aspects) {
+                        case Aspect::Depth:
                             planeSlice = 0;
                             mSrvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
                             break;
-                        case wgpu::TextureAspect::StencilOnly:
+                        case Aspect::Stencil:
                             planeSlice = 1;
                             mSrvDesc.Format = DXGI_FORMAT_X24_TYPELESS_G8_UINT;
                             // Stencil is accessed using the .g component in the shader.
@@ -1217,27 +1210,28 @@ namespace dawn::native::d3d12 {
                                     D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_0,
                                     D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_1);
                             break;
-                        case wgpu::TextureAspect::All:
-                            // A single aspect is not selected. The texture view must not be
-                            // sampled.
-                            mSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
-                            break;
-
-                        // Depth formats cannot use plane aspects.
-                        case wgpu::TextureAspect::Plane0Only:
-                        case wgpu::TextureAspect::Plane1Only:
+                        default:
                             UNREACHABLE();
                             break;
                     }
                     break;
+                }
                 case wgpu::TextureFormat::Depth24PlusStencil8:
-                case wgpu::TextureFormat::Depth32FloatStencil8:
-                    switch (descriptor->aspect) {
-                        case wgpu::TextureAspect::DepthOnly:
+                case wgpu::TextureFormat::Depth32FloatStencil8: {
+                    Aspect aspects = SelectFormatAspects(textureFormat, descriptor->aspect);
+                    ASSERT(aspects != Aspect::None);
+                    if (!HasZeroOrOneBits(aspects)) {
+                        // A single aspect is not selected. The texture view must not be
+                        // sampled.
+                        mSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
+                        break;
+                    }
+                    switch (aspects) {
+                        case Aspect::Depth:
                             planeSlice = 0;
                             mSrvDesc.Format = DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS;
                             break;
-                        case wgpu::TextureAspect::StencilOnly:
+                        case Aspect::Stencil:
                             planeSlice = 1;
                             mSrvDesc.Format = DXGI_FORMAT_X32_TYPELESS_G8X24_UINT;
                             // Stencil is accessed using the .g component in the shader.
@@ -1249,19 +1243,12 @@ namespace dawn::native::d3d12 {
                                     D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_0,
                                     D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_1);
                             break;
-                        case wgpu::TextureAspect::All:
-                            // A single aspect is not selected. The texture view must not be
-                            // sampled.
-                            mSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
-                            break;
-
-                        // Depth formats cannot use plane aspects.
-                        case wgpu::TextureAspect::Plane0Only:
-                        case wgpu::TextureAspect::Plane1Only:
+                        default:
                             UNREACHABLE();
                             break;
                     }
                     break;
+                }
                 default:
                     UNREACHABLE();
                     break;

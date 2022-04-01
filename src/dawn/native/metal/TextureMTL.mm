@@ -86,7 +86,10 @@ namespace dawn::native::metal {
 
         bool RequiresCreatingNewTextureView(const TextureBase* texture,
                                             const TextureViewDescriptor* textureViewDescriptor) {
-            if (texture->GetFormat().format != textureViewDescriptor->format) {
+            if (texture->GetFormat().format != textureViewDescriptor->format &&
+                !texture->GetFormat().HasDepthOrStencil()) {
+                // Color format reinterpretation required. Note: Depth/stencil formats don't support
+                // reinterpretation.
                 return true;
             }
 
@@ -1059,16 +1062,17 @@ namespace dawn::native::metal {
                     "Failed to create MTLTexture view for external texture.");
             }
         } else {
-            MTLPixelFormat format = MetalPixelFormat(descriptor->format);
+            MTLPixelFormat viewFormat = MetalPixelFormat(descriptor->format);
+            MTLPixelFormat textureFormat = MetalPixelFormat(GetTexture()->GetFormat().format);
             if (descriptor->aspect == wgpu::TextureAspect::StencilOnly &&
-                format != MTLPixelFormatStencil8) {
+                textureFormat != MTLPixelFormatStencil8) {
                 if (@available(macOS 10.12, iOS 10.0, *)) {
-                    if (format == MTLPixelFormatDepth32Float_Stencil8) {
-                        format = MTLPixelFormatX32_Stencil8;
+                    if (textureFormat == MTLPixelFormatDepth32Float_Stencil8) {
+                        viewFormat = MTLPixelFormatX32_Stencil8;
                     }
 #if defined(DAWN_PLATFORM_MACOS)
-                    else if (format == MTLPixelFormatDepth24Unorm_Stencil8) {
-                        format = MTLPixelFormatX24_Stencil8;
+                    else if (textureFormat == MTLPixelFormatDepth24Unorm_Stencil8) {
+                        viewFormat = MTLPixelFormatX24_Stencil8;
                     }
 #endif
                     else {
@@ -1082,6 +1086,11 @@ namespace dawn::native::metal {
                         DAWN_DEVICE_LOST_ERROR("Cannot create stencil-only texture view of "
                                                "combined depth/stencil format."));
                 }
+            } else if (GetTexture()->GetFormat().HasDepth() &&
+                       GetTexture()->GetFormat().HasStencil()) {
+                // Depth-only views for depth/stencil textures in Metal simply use the original
+                // texture's format.
+                viewFormat = textureFormat;
             }
 
             MTLTextureType textureViewType =
@@ -1091,7 +1100,7 @@ namespace dawn::native::metal {
                 NSMakeRange(descriptor->baseArrayLayer, descriptor->arrayLayerCount);
 
             mMtlTextureView =
-                AcquireNSPRef([mtlTexture newTextureViewWithPixelFormat:format
+                AcquireNSPRef([mtlTexture newTextureViewWithPixelFormat:viewFormat
                                                             textureType:textureViewType
                                                                  levels:mipLevelRange
                                                                  slices:arrayLayerRange]);

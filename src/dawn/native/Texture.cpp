@@ -49,10 +49,6 @@ namespace dawn::native {
                                             wgpu::TextureAspect aspect) {
             const Format& format = texture->GetFormat();
 
-            if (format.format == viewFormat.format) {
-                return {};
-            }
-
             if (aspect != wgpu::TextureAspect::All) {
                 wgpu::TextureFormat aspectFormat = format.GetAspectInfo(aspect).format;
                 if (viewFormat.format == aspectFormat) {
@@ -62,6 +58,10 @@ namespace dawn::native {
                         "The view format (%s) is not compatible with %s of %s (%s).",
                         viewFormat.format, aspect, format.format, aspectFormat);
                 }
+            }
+
+            if (format.format == viewFormat.format) {
+                return {};
             }
 
             const FormatSet& compatibleViewFormats = texture->GetViewFormats();
@@ -471,8 +471,13 @@ namespace dawn::native {
         }
 
         if (desc.format == wgpu::TextureFormat::Undefined) {
-            // TODO(dawn:682): Use GetAspectInfo(aspect).
-            desc.format = texture->GetFormat().format;
+            const Format& format = texture->GetFormat();
+            Aspect aspects = SelectFormatAspects(format, desc.aspect);
+            if (HasOneBit(aspects)) {
+                desc.format = format.GetAspectInfo(aspects).format;
+            } else {
+                desc.format = format.format;
+            }
         }
         if (desc.arrayLayerCount == wgpu::kArrayLayerCountUndefined) {
             switch (desc.dimension) {

@@ -95,7 +95,10 @@ namespace dawn::native::opengl {
 
         bool RequiresCreatingNewTextureView(const TextureBase* texture,
                                             const TextureViewDescriptor* textureViewDescriptor) {
-            if (texture->GetFormat().format != textureViewDescriptor->format) {
+            if (texture->GetFormat().format != textureViewDescriptor->format &&
+                !texture->GetFormat().HasDepthOrStencil()) {
+                // Color format reinterpretation required. Note: Depth/stencil formats don't support
+                // reinterpretation.
                 return true;
             }
 
@@ -561,7 +564,14 @@ namespace dawn::native::opengl {
             const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
             mHandle = GenTexture(gl);
             const Texture* textureGL = ToBackend(texture);
-            const GLFormat& glFormat = ToBackend(GetDevice())->GetGLFormat(GetFormat());
+
+            const Format& textureFormat = GetTexture()->GetFormat();
+            // Depth/stencil don't support reinterpretation, and the aspect is specified at
+            // bind time. In that case, we use the base texture format.
+            const GLFormat& glFormat = textureFormat.HasDepthOrStencil()
+                                           ? ToBackend(GetDevice())->GetGLFormat(textureFormat)
+                                           : ToBackend(GetDevice())->GetGLFormat(GetFormat());
+
             gl.TextureView(mHandle, mTarget, textureGL->GetHandle(), glFormat.internalFormat,
                            descriptor->baseMipLevel, descriptor->mipLevelCount,
                            descriptor->baseArrayLayer, descriptor->arrayLayerCount);

@@ -709,6 +709,26 @@ namespace {
             ASSERT_DEVICE_ERROR(texture.CreateView(&viewDesc));
         }
 
+        // It is invalid to create a texture view with a combined depth-stencil format if only
+        // the depth aspect is selected.
+        {
+            textureDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
+            viewDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
+            viewDesc.aspect = wgpu::TextureAspect::DepthOnly;
+            wgpu::Texture texture = device.CreateTexture(&textureDesc);
+            ASSERT_DEVICE_ERROR(texture.CreateView(&viewDesc));
+        }
+
+        // It is invalid to create a texture view with a combined depth-stencil format if only
+        // the stencil aspect is selected.
+        {
+            textureDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
+            viewDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
+            viewDesc.aspect = wgpu::TextureAspect::StencilOnly;
+            wgpu::Texture texture = device.CreateTexture(&textureDesc);
+            ASSERT_DEVICE_ERROR(texture.CreateView(&viewDesc));
+        }
+
         // It is valid to create a texture view with a depth format of a depth-stencil texture
         // if the depth only aspect is selected.
         {
