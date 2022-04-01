@@ -199,9 +199,22 @@ func run() error {
 		}
 	}
 
+	// Forward the backend to use, if specified.
 	if backend != "default" {
 		fmt.Println("Forcing backend to", backend)
 		flags = append(flags, fmt.Sprint("dawn-backend=", backend))
+	}
+
+	// While running the CTS, always allow unsafe APIs so they can be tested.
+	disableDawnFeaturesFound := false
+	for i, flag := range flags {
+		if strings.HasPrefix(flag, "disable-dawn-features=") {
+			flags[i] = flag + ",disallow_unsafe_apis"
+			disableDawnFeaturesFound = true
+		}
+	}
+	if !disableDawnFeaturesFound {
+		flags = append(flags, "disable-dawn-features=disallow_unsafe_apis")
 	}
 
 	r := runner{
