@@ -45,7 +45,7 @@ namespace dawn::native::d3d12 {
                                                  const DeviceDescriptor* descriptor);
         ~Device() override;
 
-        MaybeError Initialize();
+        MaybeError Initialize(const DeviceDescriptor* descriptor);
 
         ResultOrError<Ref<CommandBufferBase>> CreateCommandBuffer(
             CommandEncoder* encoder,
@@ -146,6 +146,9 @@ namespace dawn::native::d3d12 {
 
         bool ShouldDuplicateNumWorkgroupsForDispatchIndirect(
             ComputePipelineBase* computePipeline) const override;
+
+        // Dawn API
+        void SetLabelImpl() override;
 
       private:
         using DeviceBase::DeviceBase;

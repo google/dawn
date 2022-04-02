@@ -42,7 +42,7 @@ namespace dawn::native::opengl {
                                                  const OpenGLFunctions& functions);
         ~Device() override;
 
-        MaybeError Initialize();
+        MaybeError Initialize(const DeviceDescriptor* descriptor);
 
         // Contains all the OpenGL entry points, glDoFoo is called via device->gl.DoFoo.
         const OpenGLFunctions gl;

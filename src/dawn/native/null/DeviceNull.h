@@ -90,7 +90,7 @@ namespace dawn::native::null {
                                                  const DeviceDescriptor* descriptor);
         ~Device() override;
 
-        MaybeError Initialize();
+        MaybeError Initialize(const DeviceDescriptor* descriptor);
 
         ResultOrError<Ref<CommandBufferBase>> CreateCommandBuffer(
             CommandEncoder* encoder,
