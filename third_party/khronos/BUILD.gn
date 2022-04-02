@@ -15,23 +15,6 @@
 # Empty targets to add the include dirs and list the sources of Khronos
 # headers for header inclusion check.
 
-config("vulkan_headers_config") {
-  include_dirs = [ "." ]
-}
-
-source_set("vulkan_headers") {
-  sources = [
-    "vulkan/vk_icd.h",
-    "vulkan/vk_layer.h",
-    "vulkan/vk_platform.h",
-    "vulkan/vk_sdk_platform.h",
-    "vulkan/vulkan.h",
-    "vulkan/vulkan_core.h",
-  ]
-
-  public_configs = [ ":vulkan_headers_config" ]
-}
-
 config("khronos_headers_public") {
   include_dirs = [ "." ]
 }

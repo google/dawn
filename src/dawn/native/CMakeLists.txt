@@ -508,7 +508,7 @@ if (DAWN_ENABLE_VULKAN)
         "vulkan/external_semaphore/SemaphoreService.h"
     )
 
-    target_link_libraries(dawn_native PUBLIC dawn_vulkan_headers)
+    target_link_libraries(dawn_native PUBLIC Vulkan-Headers)
 
     if (UNIX AND NOT APPLE)
         target_sources(dawn_native PRIVATE

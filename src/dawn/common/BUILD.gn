@@ -253,7 +253,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
       ]
     }
     if (dawn_enable_vulkan) {
-      public_deps += [ "${dawn_root}/third_party/khronos:vulkan_headers" ]
+      public_deps += [ "${dawn_vulkan_headers_dir}:vulkan_headers" ]
     }
     if (is_android) {
       libs = [ "log" ]

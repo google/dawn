@@ -510,7 +510,7 @@ source_set("white_box_tests_sources") {
   ]
 
   if (dawn_enable_vulkan) {
-    deps += [ "${dawn_root}/third_party/khronos:vulkan_headers" ]
+    deps += [ "${dawn_vulkan_headers_dir}:vulkan_headers" ]
 
     if (is_chromeos) {
       sources += [
