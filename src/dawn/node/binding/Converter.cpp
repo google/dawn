@@ -538,8 +538,22 @@ namespace wgpu::binding {
     bool Converter::Convert(wgpu::ProgrammableStageDescriptor& out,
                             const interop::GPUProgrammableStage& in) {
         out = {};
-        out.entryPoint = in.entryPoint.c_str();
         out.module = *in.module.As<GPUShaderModule>();
+
+        // Replace nulls in the entryPoint name with another character that's disallowed in
+        // identifiers. This is so that using "main\0" doesn't match an entryPoint named "main".
+        // TODO(dawn:1345): Replace with a way to size strings explicitly in webgpu.h
+        char* entryPoint = Allocate<char>(in.entryPoint.size() + 1);
+        entryPoint[in.entryPoint.size()] = '\0';
+        for (size_t i = 0; i < in.entryPoint.size(); i++) {
+            if (in.entryPoint[i] == '\0') {
+                entryPoint[i] = '#';
+            } else {
+                entryPoint[i] = in.entryPoint[i];
+            }
+        }
+        out.entryPoint = entryPoint;
+
         return Convert(out.constants, out.constantCount, in.constants);
     }
 
