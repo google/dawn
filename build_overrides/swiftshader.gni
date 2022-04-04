@@ -18,9 +18,6 @@ swiftshader_standalone = false
 # Path to SwiftShader
 swiftshader_dir = "//third_party/swiftshader"
 
-# Paths to SwiftShader dependencies in Dawn
-swiftshader_spirv_tools_dir = "//third_party/vulkan-deps/spirv-tools/src"
-
 # Forward to ozone_platform_x11 when inside Dawn's repository
 import("../scripts/dawn_features.gni")
 ozone_platform_x11 = dawn_use_x11
