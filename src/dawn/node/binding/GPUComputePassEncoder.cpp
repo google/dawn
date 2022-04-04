@@ -84,6 +84,22 @@ namespace wgpu::binding {
             return;
         }
 
+        if (dynamicOffsetsDataStart > dynamicOffsetsData.ElementLength()) {
+            Napi::RangeError::New(env,
+                                  "dynamicOffsetsDataStart is out of bound of dynamicOffsetData")
+                .ThrowAsJavaScriptException();
+            return;
+        }
+
+        if (dynamicOffsetsDataLength >
+            dynamicOffsetsData.ElementLength() - dynamicOffsetsDataStart) {
+            Napi::RangeError::New(env,
+                                  "dynamicOffsetsDataLength + dynamicOffsetsDataStart is out of "
+                                  "bound of dynamicOffsetData")
+                .ThrowAsJavaScriptException();
+            return;
+        }
+
         enc_.SetBindGroup(index, bg, dynamicOffsetsDataLength,
                           dynamicOffsetsData.Data() + dynamicOffsetsDataStart);
     }
