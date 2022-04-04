@@ -729,6 +729,15 @@ namespace {
             ASSERT_DEVICE_ERROR(texture.CreateView(&viewDesc));
         }
 
+        // Regression test for crbug.com/1312780.
+        // viewFormat is not supported (Null backend does not support any optional features).
+        {
+            textureDesc.format = wgpu::TextureFormat::Depth24PlusStencil8;
+            viewDesc.format = wgpu::TextureFormat::Depth24UnormStencil8;
+            wgpu::Texture texture = device.CreateTexture(&textureDesc);
+            ASSERT_DEVICE_ERROR(texture.CreateView(&viewDesc), testing::HasSubstr("Unsupported"));
+        }
+
         // It is valid to create a texture view with a depth format of a depth-stencil texture
         // if the depth only aspect is selected.
         {

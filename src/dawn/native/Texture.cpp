@@ -411,7 +411,8 @@ namespace dawn::native {
         DAWN_TRY(ValidateTextureAspect(descriptor->aspect));
 
         const Format& format = texture->GetFormat();
-        const Format& viewFormat = device->GetValidInternalFormat(descriptor->format);
+        const Format* viewFormat;
+        DAWN_TRY_ASSIGN(viewFormat, device->GetInternalFormat(descriptor->format));
 
         DAWN_INVALID_IF(
             SelectFormatAspects(format, descriptor->aspect) == Aspect::None,
@@ -436,7 +437,7 @@ namespace dawn::native {
             "texture's mip level count (%u).",
             descriptor->baseMipLevel, descriptor->mipLevelCount, texture->GetNumMipLevels());
 
-        DAWN_TRY(ValidateCanViewTextureAs(device, texture, viewFormat, descriptor->aspect));
+        DAWN_TRY(ValidateCanViewTextureAs(device, texture, *viewFormat, descriptor->aspect));
         DAWN_TRY(ValidateTextureViewDimensionCompatibility(texture, descriptor));
 
         return {};
