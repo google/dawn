@@ -95,7 +95,8 @@ namespace wgpu::binding {
         // BufferSource is the converted type of interop::BufferSource.
         struct BufferSource {
             void* data;
-            size_t size;
+            size_t size;             // in bytes
+            size_t bytesPerElement;  // 1 for ArrayBuffers
         };
 
       private:

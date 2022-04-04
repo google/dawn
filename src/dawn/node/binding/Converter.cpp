@@ -149,6 +149,7 @@ namespace wgpu::binding {
                     auto arr = v.ArrayBuffer();
                     out.data = arr.Data();
                     out.size = arr.ByteLength();
+                    out.bytesPerElement = v.ElementSize();
                 },
                 *view);
             return true;
@@ -156,6 +157,7 @@ namespace wgpu::binding {
         if (auto* arr = std::get_if<interop::ArrayBuffer>(&in)) {
             out.data = arr->Data();
             out.size = arr->ByteLength();
+            out.bytesPerElement = 1;
             return true;
         }
         Napi::Error::New(env, "invalid value for BufferSource").ThrowAsJavaScriptException();
