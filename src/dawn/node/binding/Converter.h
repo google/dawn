@@ -281,6 +281,20 @@ namespace wgpu::binding {
             return true;
         }
 
+        // ClampedInteger<T>
+        template <typename T>
+        inline bool Convert(T& out, const interop::ClampedInteger<T>& in) {
+            out = in;
+            return true;
+        }
+
+        // EnforceRangeInteger<T>
+        template <typename T>
+        inline bool Convert(T& out, const interop::EnforceRangeInteger<T>& in) {
+            out = in;
+            return true;
+        }
+
         template <typename OUT, typename... IN_TYPES>
         inline bool Convert(OUT& out, const std::variant<IN_TYPES...>& in) {
             return std::visit([&](auto&& i) { return Convert(out, i); }, in);

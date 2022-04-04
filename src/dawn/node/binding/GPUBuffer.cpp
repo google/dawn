@@ -69,7 +69,7 @@ namespace wgpu::binding {
         auto ctx = new Context{env, interop::Promise<void>(env, PROMISE_INFO), async_, state_};
         auto promise = ctx->promise;
 
-        uint64_t s = size.has_value() ? size.value() : (desc_.size - offset);
+        uint64_t s = size.has_value() ? size.value().value : (desc_.size - offset);
 
         state_ = State::MappingPending;
 
@@ -114,7 +114,7 @@ namespace wgpu::binding {
             return {};
         }
 
-        uint64_t s = size.has_value() ? size.value() : (desc_.size - offset);
+        uint64_t s = size.has_value() ? size.value().value : (desc_.size - offset);
 
         uint64_t start = offset;
         uint64_t end = offset + s;

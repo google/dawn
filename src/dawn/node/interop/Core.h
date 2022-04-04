@@ -69,6 +69,40 @@ namespace wgpu::interop {
     template <typename T>
     using FrozenArray = std::vector<T>;
 
+    // A wrapper class for integers that's as transparent as possible and is used to distinguish
+    // that the type is tagged with the [Clamp] WebIDL attribute.
+    template <typename T>
+    struct ClampedInteger {
+        static_assert(std::is_integral_v<T>);
+
+        using IntegerType = T;
+        ClampedInteger() : value(0) {
+        }
+        ClampedInteger(T value) : value(value) {
+        }
+        operator T() const {
+            return value;
+        }
+        T value;
+    };
+
+    // A wrapper class for integers that's as transparent as possible and is used to distinguish
+    // that the type is tagged with the [EnforceRange] WebIDL attribute.
+    template <typename T>
+    struct EnforceRangeInteger {
+        static_assert(std::is_integral_v<T>);
+
+        using IntegerType = T;
+        EnforceRangeInteger() : value(0) {
+        }
+        EnforceRangeInteger(T value) : value(value) {
+        }
+        operator T() const {
+            return value;
+        }
+        T value;
+    };
+
     ////////////////////////////////////////////////////////////////////////////////
     // Result
     ////////////////////////////////////////////////////////////////////////////////
@@ -445,6 +479,75 @@ namespace wgpu::interop {
       public:
         static Result FromJS(Napi::Env, Napi::Value, double&);
         static Napi::Value ToJS(Napi::Env, double);
+    };
+
+    // [Clamp]ed integers must convert values outside of the integer range by clamping them.
+    template <typename T>
+    class Converter<ClampedInteger<T>> {
+      public:
+        static Result FromJS(Napi::Env env, Napi::Value value, ClampedInteger<T>& out) {
+            double doubleValue;
+            Result res = Converter<double>::FromJS(env, value, doubleValue);
+            if (!res) {
+                return res;
+            }
+
+            // Check for clamping first.
+            constexpr T kMin = std::numeric_limits<T>::min();
+            constexpr T kMax = std::numeric_limits<T>::max();
+            if (doubleValue < kMin) {
+                out = kMin;
+                return Success;
+            }
+            if (doubleValue > kMax) {
+                out = kMax;
+                return Success;
+            }
+
+            // Yay, no clamping! We can convert the integer type as usual.
+            T correctValue;
+            res = Converter<T>::FromJS(env, value, correctValue);
+            if (!res) {
+                return res;
+            }
+            out = correctValue;
+            return Success;
+        }
+        static Napi::Value ToJS(Napi::Env env, const ClampedInteger<T>& value) {
+            return Converter<T>::ToJS(env, value.value);
+        }
+    };
+
+    // [EnforceRange] integers cause a TypeError when converted from out of range values
+    template <typename T>
+    class Converter<EnforceRangeInteger<T>> {
+      public:
+        static Result FromJS(Napi::Env env, Napi::Value value, EnforceRangeInteger<T>& out) {
+            double doubleValue;
+            Result res = Converter<double>::FromJS(env, value, doubleValue);
+            if (!res) {
+                return res;
+            }
+
+            // Check for out of range and throw a type error.
+            constexpr T kMin = std::numeric_limits<T>::min();
+            constexpr T kMax = std::numeric_limits<T>::max();
+            if (!(kMin <= doubleValue && doubleValue <= kMax)) {
+                return Error("Values are out of the range of that integer.");
+            }
+
+            // Yay, no error! We can convert the integer type as usual.
+            T correctValue;
+            res = Converter<T>::FromJS(env, value, correctValue);
+            if (!res) {
+                return res;
+            }
+            out = correctValue;
+            return Success;
+        }
+        static Napi::Value ToJS(Napi::Env env, const EnforceRangeInteger<T>& value) {
+            return Converter<T>::ToJS(env, value.value);
+        }
     };
 
     template <>

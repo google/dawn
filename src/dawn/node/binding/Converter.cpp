@@ -464,27 +464,27 @@ namespace wgpu::binding {
     }
 
     bool Converter::Convert(wgpu::TextureUsage& out, const interop::GPUTextureUsageFlags& in) {
-        out = static_cast<wgpu::TextureUsage>(in);
+        out = static_cast<wgpu::TextureUsage>(in.value);
         return true;
     }
 
     bool Converter::Convert(wgpu::ColorWriteMask& out, const interop::GPUColorWriteFlags& in) {
-        out = static_cast<wgpu::ColorWriteMask>(in);
+        out = static_cast<wgpu::ColorWriteMask>(in.value);
         return true;
     }
 
     bool Converter::Convert(wgpu::BufferUsage& out, const interop::GPUBufferUsageFlags& in) {
-        out = static_cast<wgpu::BufferUsage>(in);
+        out = static_cast<wgpu::BufferUsage>(in.value);
         return true;
     }
 
     bool Converter::Convert(wgpu::MapMode& out, const interop::GPUMapModeFlags& in) {
-        out = static_cast<wgpu::MapMode>(in);
+        out = static_cast<wgpu::MapMode>(in.value);
         return true;
     }
 
     bool Converter::Convert(wgpu::ShaderStage& out, const interop::GPUShaderStageFlags& in) {
-        out = static_cast<wgpu::ShaderStage>(in);
+        out = static_cast<wgpu::ShaderStage>(in.value);
         return true;
     }
 

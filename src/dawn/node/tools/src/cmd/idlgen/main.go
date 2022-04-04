@@ -519,12 +519,16 @@ func findAnnotation(list []*ast.Annotation, name string) *ast.Annotation {
 
 func hasAnnotation(obj interface{}, name string) bool {
 	switch obj := obj.(type) {
-	case *ast.Member:
-		return findAnnotation(obj.Annotations, name) != nil
 	case *ast.Interface:
+		return findAnnotation(obj.Annotations, name) != nil
+	case *ast.Member:
 		return findAnnotation(obj.Annotations, name) != nil
 	case *ast.Namespace:
 		return findAnnotation(obj.Annotations, name) != nil
+	case *ast.Parameter:
+		return findAnnotation(obj.Annotations, name) != nil
+	case *ast.Typedef:
+		return findAnnotation(obj.Annotations, name) != nil || findAnnotation(obj.TypeAnnotations, name) != nil
 	}
 	panic("Unhandled AST node type in hasAnnotation")
 }

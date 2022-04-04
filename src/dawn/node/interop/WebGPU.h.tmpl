@@ -146,7 +146,11 @@ public:
 --------------------------------------------------------------------------------
 */ -}}
 {{- define "Typedef"}}
+{{-   if HasAnnotation $ "EnforceRange"}}
+using {{$.Name}} = EnforceRangeInteger<{{template "Type" $.Type}}>;
+{{-   else}}
 using {{$.Name}} = {{template "Type" $.Type}};
+{{-   end}}
 {{end}}
 
 

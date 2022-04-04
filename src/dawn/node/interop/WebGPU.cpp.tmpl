@@ -172,7 +172,7 @@ Wrappers* Wrappers::instance = nullptr;
       if (res) {
           return ToJS(info.Env(), impl->has(info.Env(), std::get<0>(args)));
       }
-      Napi::Error::New(info.Env(), res.error).ThrowAsJavaScriptException();
+      Napi::TypeError::New(info.Env(), res.error).ThrowAsJavaScriptException();
       return {};
     }
     Napi::Value keys(const Napi::CallbackInfo& info) {
@@ -217,7 +217,7 @@ Wrappers* Wrappers::instance = nullptr;
         error = {{if $overloaded}}"\noverload {{$overload_idx}} failed to match:\n" + {{end}}res.error;
       }
 {{-    end}}
-      Napi::Error::New(info.Env(), "no overload matched for {{$m.Name}}:\n" + error).ThrowAsJavaScriptException();
+      Napi::TypeError::New(info.Env(), "no overload matched for {{$m.Name}}:\n" + error).ThrowAsJavaScriptException();
       return {};
     }
 {{-  end}}
@@ -235,7 +235,7 @@ Wrappers* Wrappers::instance = nullptr;
         impl->set{{Title $a.Name}}(info.Env(), std::move(v));
       } else {
         res = res.Append("invalid value to {{$a.Name}}");
-        Napi::Error::New(info.Env(), res.error).ThrowAsJavaScriptException();
+        Napi::TypeError::New(info.Env(), res.error).ThrowAsJavaScriptException();
       }
     }
 {{-    end}}

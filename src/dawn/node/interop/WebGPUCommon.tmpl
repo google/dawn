@@ -39,6 +39,8 @@ See:
 {{-        if IsUndefinedType $}}void
 {{-   else if IsTypeName      $}}
 {{-          if eq $.Name "boolean"             }}bool
+{{-     else if eq $.Name "short"               }}int16_t
+{{-     else if eq $.Name "unsigned short"      }}uint16_t
 {{-     else if eq $.Name "long"                }}int32_t
 {{-     else if eq $.Name "unsigned long"       }}uint32_t
 {{-     else if eq $.Name "long long"           }}int64_t
@@ -66,10 +68,26 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 {{- define "AttributeType" -}}
-{{-   if      $.Required }}{{template "Type" $.Type}}
-{{-   else if $.Init     }}{{template "Type" $.Type}}
-{{-   else               }}std::optional<{{template "Type" $.Type}}>
+{{-   if      $.Required }}{{template "AttributeClampHelper" $}}
+{{-   else if $.Init     }}{{template "AttributeClampHelper" $}}
+{{-   else               }}std::optional<{{template "AttributeClampHelper" $}}>
 {{-   end}}
+{{- end }}
+
+
+{{- /*
+    A helper for AttributeType that wraps integer types if necessary for WebIDL attributes.
+    Note that [Clamp] and [EnforceRange] are supposed to be an annotation on the type and not
+    the attribute, but webidlparser doesn't parse this correctly.
+*/ -}}
+{{- define "AttributeClampHelper" -}}
+{{-   if HasAnnotation $ "Clamp" }}
+ClampedInteger<{{template "Type" $.Type}}>
+{{-   else if HasAnnotation $ "EnforceRange" }}
+EnforceRangeInteger<{{template "Type" $.Type}}>
+{{-   else}}
+{{template "Type" $.Type}}
+{{-   end }}
 {{- end }}
 
 

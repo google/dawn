@@ -218,7 +218,7 @@ namespace wgpu::binding {
         Converter conv(env);
 
         wgpu::Buffer b{};
-        uint32_t o = 0;
+        uint64_t o = 0;
 
         if (!conv(b, indirectBuffer) ||  //
             !conv(o, indirectOffset)) {
@@ -234,7 +234,7 @@ namespace wgpu::binding {
         Converter conv(env);
 
         wgpu::Buffer b{};
-        uint32_t o = 0;
+        uint64_t o = 0;
 
         if (!conv(b, indirectBuffer) ||  //
             !conv(o, indirectOffset)) {
