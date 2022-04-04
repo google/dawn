@@ -37,6 +37,15 @@ namespace dawn::native {
 
         const EntryPointMetadata& metadata = module->GetEntryPoint(entryPoint);
 
+        if (!metadata.infringedLimitErrors.empty()) {
+            std::ostringstream out;
+            out << "Entry point \"" << entryPoint << "\" infringes limits:\n";
+            for (const std::string& limit : metadata.infringedLimitErrors) {
+                out << " - " << limit << "\n";
+            }
+            return DAWN_VALIDATION_ERROR(out.str());
+        }
+
         DAWN_INVALID_IF(metadata.stage != stage,
                         "The stage (%s) of the entry point \"%s\" isn't the expected one (%s).",
                         metadata.stage, entryPoint, stage);
