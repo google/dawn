@@ -703,11 +703,6 @@ namespace dawn::native {
 
             if (metadata->stage == SingleShaderStage::Vertex) {
                 for (const auto& inputVar : entryPoint.input_variables) {
-                    DAWN_INVALID_IF(
-                        !inputVar.has_location_decoration,
-                        "Vertex input variable \"%s\" doesn't have a location decoration.",
-                        inputVar.name);
-
                     uint32_t unsanitizedLocation = inputVar.location_decoration;
                     if (DelayedInvalidIf(unsanitizedLocation >= kMaxVertexAttributes,
                                          "Vertex input variable \"%s\" has a location (%u) that "
@@ -741,11 +736,6 @@ namespace dawn::native {
                                     TintInterpolationSamplingToInterpolationSamplingType(
                                         outputVar.interpolation_sampling));
                     totalInterStageShaderComponents += variable.componentCount;
-
-                    DAWN_INVALID_IF(
-                        !outputVar.has_location_decoration,
-                        "Vertex ouput variable \"%s\" doesn't have a location decoration.",
-                        outputVar.name);
 
                     uint32_t location = outputVar.location_decoration;
                     if (DelayedInvalidIf(location > kMaxInterStageShaderLocation,
@@ -781,11 +771,6 @@ namespace dawn::native {
                                     TintInterpolationSamplingToInterpolationSamplingType(
                                         inputVar.interpolation_sampling));
                     totalInterStageShaderComponents += variable.componentCount;
-
-                    DAWN_INVALID_IF(
-                        !inputVar.has_location_decoration,
-                        "Fragment input variable \"%s\" doesn't have a location decoration.",
-                        inputVar.name);
 
                     uint32_t location = inputVar.location_decoration;
                     if (DelayedInvalidIf(location > kMaxInterStageShaderLocation,
@@ -825,11 +810,6 @@ namespace dawn::native {
                         variable.componentCount,
                         TintCompositionTypeToInterStageComponentCount(outputVar.composition_type));
                     ASSERT(variable.componentCount <= 4);
-
-                    DAWN_INVALID_IF(
-                        !outputVar.has_location_decoration,
-                        "Fragment input variable \"%s\" doesn't have a location decoration.",
-                        outputVar.name);
 
                     uint32_t unsanitizedAttachment = outputVar.location_decoration;
                     if (DelayedInvalidIf(unsanitizedAttachment >= kMaxColorAttachments,

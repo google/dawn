@@ -575,3 +575,87 @@ TEST_F(ShaderModuleValidationTest, MaxBindingNumber) {
     )");
     ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&desc));
 }
+
+// Test that missing decorations on shader IO or bindings causes a validation error.
+TEST_F(ShaderModuleValidationTest, MissingDecorations) {
+    // Vertex input.
+    utils::CreateShaderModule(device, R"(
+        @stage(vertex) fn main(@location(0) a : vec4<f32>) -> @builtin(position) vec4<f32> {
+            return vec4(1.0);
+        }
+    )");
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+        @stage(vertex) fn main(a : vec4<f32>) -> @builtin(position) vec4<f32> {
+            return vec4(1.0);
+        }
+    )"));
+
+    // Vertex output
+    utils::CreateShaderModule(device, R"(
+        struct Output {
+            @builtin(position) pos : vec4<f32>,
+            @location(0) a : f32,
+        }
+        @stage(vertex) fn main() -> Output {
+            var output : Output;
+            return output;
+        }
+    )");
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+        struct Output {
+            @builtin(position) pos : vec4<f32>,
+            a : f32,
+        }
+        @stage(vertex) fn main() -> Output {
+            var output : Output;
+            return output;
+        }
+    )"));
+
+    // Fragment input
+    utils::CreateShaderModule(device, R"(
+        @stage(fragment) fn main(@location(0) a : vec4<f32>) -> @location(0) f32 {
+            return 1.0;
+        }
+    )");
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+        @stage(fragment) fn main(a : vec4<f32>) -> @location(0) f32 {
+            return 1.0;
+        }
+    )"));
+
+    // Fragment input
+    utils::CreateShaderModule(device, R"(
+        @stage(fragment) fn main() -> @location(0) f32 {
+            return 1.0;
+        }
+    )");
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+        @stage(fragment) fn main() -> f32 {
+            return 1.0;
+        }
+    )"));
+
+    // Binding decorations
+    utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var s : sampler;
+        @stage(fragment) fn main() -> @location(0) f32 {
+            _ = s;
+            return 1.0;
+        }
+    )");
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+        @binding(0) var s : sampler;
+        @stage(fragment) fn main() -> @location(0) f32 {
+            _ = s;
+            return 1.0;
+        }
+    )"));
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+        @group(0) var s : sampler;
+        @stage(fragment) fn main() -> @location(0) f32 {
+            _ = s;
+            return 1.0;
+        }
+    )"));
+}
