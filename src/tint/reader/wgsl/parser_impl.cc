@@ -1761,8 +1761,8 @@ Maybe<const ast::SwitchStatement*> ParserImpl::switch_stmt() {
 }
 
 // switch_body
-//   : CASE case_selectors COLON BRACKET_LEFT case_body BRACKET_RIGHT
-//   | DEFAULT COLON BRACKET_LEFT case_body BRACKET_RIGHT
+//   : CASE case_selectors COLON? BRACKET_LEFT case_body BRACKET_RIGHT
+//   | DEFAULT COLON? BRACKET_LEFT case_body BRACKET_RIGHT
 Maybe<const ast::CaseStatement*> ParserImpl::switch_body() {
   if (!peek_is(Token::Type::kCase) && !peek_is(Token::Type::kDefault))
     return Failure::kNoMatch;
@@ -1779,11 +1779,10 @@ Maybe<const ast::CaseStatement*> ParserImpl::switch_body() {
     selector_list = std::move(selectors.value);
   }
 
+  // Consume the optional colon if present.
+  match(Token::Type::kColon);
+
   const char* use = "case statement";
-
-  if (!expect(use, Token::Type::kColon))
-    return Failure::kErrored;
-
   auto body = expect_brace_block(use, [&] { return case_body(); });
 
   if (body.errored)

@@ -1174,14 +1174,6 @@ fn f() { switch(1) { case false: } }
 )");
 }
 
-TEST_F(ParserImplErrorTest, SwitchStmtCaseMissingColon) {
-  EXPECT("fn f() { switch(1) { case 1 {} } }",
-         R"(test.wgsl:1:29 error: expected ':' for case statement
-fn f() { switch(1) { case 1 {} } }
-                            ^
-)");
-}
-
 TEST_F(ParserImplErrorTest, SwitchStmtCaseMissingLBrace) {
   EXPECT("fn f() { switch(1) { case 1: } }",
          R"(test.wgsl:1:30 error: expected '{' for case statement
