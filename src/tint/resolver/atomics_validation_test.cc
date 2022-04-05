@@ -34,6 +34,14 @@ TEST_F(ResolverAtomicValidationTest, StorageClass_WorkGroup) {
 }
 
 TEST_F(ResolverAtomicValidationTest, StorageClass_Storage) {
+  Global("g", ty.atomic(Source{{12, 34}}, ty.i32()),
+         ast::StorageClass::kStorage, ast::Access::kReadWrite,
+         GroupAndBinding(0, 0));
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverAtomicValidationTest, StorageClass_Storage_Struct) {
   auto* s =
       Structure("s", {Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
   Global("g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,

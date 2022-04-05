@@ -517,7 +517,8 @@ bool Resolver::ValidateAtomicVariable(const sem::Variable* var) {
   auto source = decl->type ? decl->type->source : decl->source;
 
   if (type->Is<sem::Atomic>()) {
-    if (sc != ast::StorageClass::kWorkgroup) {
+    if (sc != ast::StorageClass::kWorkgroup &&
+        sc != ast::StorageClass::kStorage) {
       AddError(
           "atomic variables must have <storage> or <workgroup> storage class",
           source);
