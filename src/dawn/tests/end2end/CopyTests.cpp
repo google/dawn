@@ -2179,6 +2179,9 @@ TEST_P(CopyTests_T2T, CopyFromNonZeroMipLevelWithTexelBlockSizeLessThan4Bytes) {
     // try bots.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsWindows() && IsIntel());
 
+    // This test also fails on D3D12 on Intel Windows. See http://crbug.com/1312066 for details.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWindows() && IsIntel());
+
     constexpr std::array<wgpu::TextureFormat, 11> kFormats = {
         {wgpu::TextureFormat::RG8Sint, wgpu::TextureFormat::RG8Uint, wgpu::TextureFormat::RG8Snorm,
          wgpu::TextureFormat::RG8Unorm, wgpu::TextureFormat::R16Float, wgpu::TextureFormat::R16Sint,
