@@ -472,7 +472,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitMultisampledTexture) {
   ASSERT_TRUE(gen.EmitType(out, s, ast::StorageClass::kNone,
                            ast::Access::kReadWrite, ""))
       << gen.error();
-  EXPECT_EQ(out.str(), "uniform highp sampler2DMS");
+  EXPECT_EQ(out.str(), "highp sampler2DMS");
 }
 
 struct GlslStorageTextureData {
