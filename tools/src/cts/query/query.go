@@ -17,12 +17,12 @@
 // The full query syntax is described at:
 // https://github.com/gpuweb/cts/blob/main/docs/terms.md#queries
 //
-// Note that this package supports a superset of the official CTS query syntax, 
+// Note that this package supports a superset of the official CTS query syntax,
 // as this package permits parsing and printing of queries that do not end in a
 // wildcard, whereas the CTS requires that all queries end in wildcards unless
 // they identify a specific test.
 // For example, the following queries are considered valid by this  package, but
-// would be rejected by the CTS: 
+// would be rejected by the CTS:
 // `suite`, `suite:file`, `suite:file,file`, `suite:file,file:test`.
 //
 // This relaxation is intentional as the Query type is used for constructing and
@@ -95,7 +95,7 @@ const (
 )
 
 // Parse parses a query string
-func Parse(s string) (Query, error) {
+func Parse(s string) Query {
 	parts := strings.Split(s, TargetDelimiter)
 	q := Query{}
 	switch len(parts) {
@@ -111,7 +111,7 @@ func Parse(s string) (Query, error) {
 	case 1:
 		q.Suite = parts[0]
 	}
-	return q, nil
+	return q
 }
 
 // AppendFiles returns a new query with the strings appended to the 'files'

@@ -23,13 +23,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func Q(name string) query.Query {
-	q, err := query.Parse(name)
-	if err != nil {
-		panic(err)
-	}
-	return q
-}
+var Q = query.Parse
 
 func TestTargetFormat(t *testing.T) {
 	type Test struct {
@@ -590,11 +584,7 @@ func TestParsePrint(t *testing.T) {
 			},
 		},
 	} {
-		parsed, err := query.Parse(test.in)
-		if err != nil {
-			t.Errorf("query.Parse('%v') returned %v", test.in, err)
-			continue
-		}
+		parsed := query.Parse(test.in)
 		if diff := cmp.Diff(test.expect, parsed); diff != "" {
 			t.Errorf("query.Parse('%v')\n%v", test.in, diff)
 		}
