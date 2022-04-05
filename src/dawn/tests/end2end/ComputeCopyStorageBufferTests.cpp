@@ -89,8 +89,8 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
 TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfBasic) {
     BasicTest(R"(
         struct Buf {
-            s : array<vec4<u32>, 4>;
-        };
+            s : array<vec4<u32>, 4>
+        }
 
         @group(0) @binding(0) var<storage, read_write> src : Buf;
         @group(0) @binding(1) var<storage, read_write> dst : Buf;
@@ -107,13 +107,13 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfBasic) {
 TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
     BasicTest(R"(
         struct S {
-            a : vec2<u32>;
-            b : vec2<u32>;
-        };
+            a : vec2<u32>,
+            b : vec2<u32>,
+        }
 
         struct Buf {
-            s : array<S, 4>;
-        };
+            s : array<S, 4>
+        }
 
         @group(0) @binding(0) var<storage, read_write> src : Buf;
         @group(0) @binding(1) var<storage, read_write> dst : Buf;
@@ -130,8 +130,8 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
 TEST_P(ComputeCopyStorageBufferTests, UnsizedArrayOfBasic) {
     BasicTest(R"(
         struct Buf {
-            s : array<vec4<u32>>;
-        };
+            s : array<vec4<u32>>
+        }
 
         @group(0) @binding(0) var<storage, read_write> src : Buf;
         @group(0) @binding(1) var<storage, read_write> dst : Buf;

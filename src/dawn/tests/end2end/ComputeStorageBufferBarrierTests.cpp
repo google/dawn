@@ -33,8 +33,8 @@ TEST_P(ComputeStorageBufferBarrierTests, AddIncrement) {
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct Buf {
-            data : array<u32, 100>;
-        };
+            data : array<u32, 100>
+        }
 
         @group(0) @binding(0) var<storage, read_write> buf : Buf;
 
@@ -83,8 +83,8 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct Buf {
-            data : array<u32, 100>;
-        };
+            data : array<u32, 100>
+        }
 
         @group(0) @binding(0) var<storage, read_write> src : Buf;
         @group(0) @binding(1) var<storage, read_write> dst : Buf;
@@ -149,8 +149,8 @@ TEST_P(ComputeStorageBufferBarrierTests, StorageAndReadonlyStoragePingPongInOneP
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct Buf {
-            data : array<u32, 100>;
-        };
+            data : array<u32, 100>
+        }
 
         @group(0) @binding(0) var<storage, read> src : Buf;
         @group(0) @binding(1) var<storage, read_write> dst : Buf;
@@ -217,8 +217,8 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct Buf {
-            data : array<vec4<u32>, 25>;
-        };
+            data : array<vec4<u32>, 25>
+        }
 
         @group(0) @binding(0) var<uniform> src : Buf;
         @group(0) @binding(1) var<storage, read_write> dst : Buf;
@@ -285,8 +285,8 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct Buf {
-            data : array<vec4<u32>, 25>;
-        };
+            data : array<vec4<u32>, 25>
+        }
 
         @group(0) @binding(0) var<uniform> src : Buf;
         @group(0) @binding(1) var<storage, read_write> dst : Buf;
@@ -343,8 +343,8 @@ TEST_P(ComputeStorageBufferBarrierTests, IndirectBufferCorrectBarrier) {
     step2PipelineDesc.compute.entryPoint = "main";
     step2PipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
         struct Buf {
-            data : array<u32, 3>;
-        };
+            data : array<u32, 3>
+        }
         @group(0) @binding(0) var<storage, read_write> buf : Buf;
 
         @stage(compute) @workgroup_size(1) fn main() {
@@ -357,13 +357,13 @@ TEST_P(ComputeStorageBufferBarrierTests, IndirectBufferCorrectBarrier) {
     step3PipelineDesc.compute.entryPoint = "main";
     step3PipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
         struct Buf {
-            data : array<u32, 3>;
-        };
+            data : array<u32, 3>
+        }
         @group(0) @binding(0) var<storage, read> buf : Buf;
 
         struct Result {
-            data : u32;
-        };
+            data : u32
+        }
         @group(0) @binding(1) var<storage, read_write> result : Result;
 
         @stage(compute) @workgroup_size(1) fn main() {

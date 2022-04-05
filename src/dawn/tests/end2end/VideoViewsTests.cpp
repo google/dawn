@@ -173,9 +173,9 @@ std::vector<uint8_t> VideoViewsTests::GetTestTextureDataWithPlaneIndex(size_t pl
 wgpu::ShaderModule VideoViewsTests::GetTestVertexShaderModule() const {
     return utils::CreateShaderModule(device, R"(
                 struct VertexOut {
-                    @location(0) texCoord : vec2 <f32>;
-                    @builtin(position) position : vec4<f32>;
-                };
+                    @location(0) texCoord : vec2 <f32>,
+                    @builtin(position) position : vec4<f32>,
+                }
 
                 @stage(vertex)
                 fn main(@builtin(vertex_index) VertexIndex : u32) -> VertexOut {

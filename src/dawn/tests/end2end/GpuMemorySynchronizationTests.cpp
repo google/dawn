@@ -37,8 +37,8 @@ class GpuMemorySyncTests : public DawnTest {
         const wgpu::Buffer& buffer) {
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
             struct Data {
-                a : i32;
-            };
+                a : i32
+            }
             @group(0) @binding(0) var<storage, read_write> data : Data;
             @stage(compute) @workgroup_size(1) fn main() {
                 data.a = data.a + 1;
@@ -64,8 +64,8 @@ class GpuMemorySyncTests : public DawnTest {
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             struct Data {
-                i : i32;
-            };
+                i : i32
+            }
             @group(0) @binding(0) var<storage, read_write> data : Data;
             @stage(fragment) fn main() -> @location(0) vec4<f32> {
                 data.i = data.i + 1;
@@ -229,8 +229,8 @@ class StorageToUniformSyncTests : public DawnTest {
     std::tuple<wgpu::ComputePipeline, wgpu::BindGroup> CreatePipelineAndBindGroupForCompute() {
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
             struct Data {
-                a : f32;
-            };
+                a : f32
+            }
             @group(0) @binding(0) var<storage, read_write> data : Data;
             @stage(compute) @workgroup_size(1) fn main() {
                 data.a = 1.0;
@@ -255,8 +255,8 @@ class StorageToUniformSyncTests : public DawnTest {
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             struct Contents {
-                color : f32;
-            };
+                color : f32
+            }
             @group(0) @binding(0) var<uniform> contents : Contents;
 
             @stage(fragment) fn main() -> @location(0) vec4<f32> {
@@ -414,18 +414,18 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
     // Create pipeline, bind group, and different buffers for compute pass.
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
         struct VBContents {
-            pos : array<vec4<f32>, 4>;
-        };
+            pos : array<vec4<f32>, 4>
+        }
         @group(0) @binding(0) var<storage, read_write> vbContents : VBContents;
 
         struct IBContents {
-            indices : array<vec4<i32>, 2>;
-        };
+            indices : array<vec4<i32>, 2>
+        }
         @group(0) @binding(1) var<storage, read_write> ibContents : IBContents;
 
         struct ColorContents {
-            color : f32;
-        };
+            color : f32
+        }
         @group(0) @binding(2) var<storage, read_write> uniformContents : ColorContents;
         @group(0) @binding(3) var<storage, read_write> storageContents : ColorContents;
 
@@ -477,8 +477,8 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct Buf {
-            color : f32;
-        };
+            color : f32
+        }
 
         @group(0) @binding(0) var<uniform> uniformBuffer : Buf;
         @group(0) @binding(1) var<storage, read> storageBuffer : Buf;
@@ -536,11 +536,11 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
     // Create pipeline, bind group, and a complex buffer for compute pass.
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
         struct Contents {
-            @align(256) pos : array<vec4<f32>, 4>;
-            @align(256) indices : array<vec4<i32>, 2>;
-            @align(256) color0 : f32;
-            @align(256) color1 : f32;
-        };
+            @align(256) pos : array<vec4<f32>, 4>,
+            @align(256) indices : array<vec4<i32>, 2>,
+            @align(256) color0 : f32,
+            @align(256) color1 : f32,
+        }
 
         @group(0) @binding(0) var<storage, read_write> contents : Contents;
 
@@ -594,8 +594,8 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct Buf {
-            color : f32;
-        };
+            color : f32
+        }
         @group(0) @binding(0) var<uniform> uniformBuffer : Buf;
         @group(0) @binding(1) var<storage, read> storageBuffer : Buf;
 

@@ -46,9 +46,9 @@ class DepthClampingTest : public DawnTest {
 
         vsModule = utils::CreateShaderModule(device, R"(
             struct UBO {
-                color : vec3<f32>;
-                depth : f32;
-            };
+                color : vec3<f32>,
+                depth : f32,
+            }
             @group(0) @binding(0) var<uniform> ubo : UBO;
 
             @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
@@ -57,9 +57,9 @@ class DepthClampingTest : public DawnTest {
 
         fsModule = utils::CreateShaderModule(device, R"(
             struct UBO {
-                color : vec3<f32>;
-                depth : f32;
-            };
+                color : vec3<f32>,
+                depth : f32,
+            }
             @group(0) @binding(0) var<uniform> ubo : UBO;
 
             @stage(fragment) fn main() -> @location(0) vec4<f32> {

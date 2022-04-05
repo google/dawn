@@ -134,8 +134,8 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         struct SSBO {
-            value : u32;
-        };
+            value : u32
+        }
         @group(0) @binding(0) var<storage, read_write> ssbo : SSBO;
 
         @stage(compute) @workgroup_size(1) fn main() {
@@ -164,8 +164,8 @@ TEST_P(CreatePipelineAsyncTest, ReleaseEntryPointAfterCreatComputePipelineAsync)
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         struct SSBO {
-            value : u32;
-        };
+            value : u32
+        }
         @group(0) @binding(0) var<storage, read_write> ssbo : SSBO;
 
         @stage(compute) @workgroup_size(1) fn main() {
@@ -203,8 +203,8 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineFailed) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         struct SSBO {
-            value : u32;
-        };
+            value : u32
+        }
         @group(0) @binding(0) var<storage, read_write> ssbo : SSBO;
 
         @stage(compute) @workgroup_size(1) fn main() {
@@ -483,8 +483,8 @@ TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwice) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         struct SSBO {
-            value : u32;
-        };
+            value : u32
+        }
         @group(0) @binding(0) var<storage, read_write> ssbo : SSBO;
 
         @stage(compute) @workgroup_size(1) fn main() {
@@ -542,8 +542,8 @@ TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwiceAtSameTime) {
     csDesc.layout = pipelineLayout;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         struct SSBO {
-            value : u32;
-        };
+            value : u32
+        }
         @group(0) @binding(0) var<storage, read_write> ssbo : SSBO;
 
         @stage(compute) @workgroup_size(1) fn main() {
@@ -635,14 +635,14 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithVertexBufferLayouts
         utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
         renderPipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
         struct VertexInput {
-            @location(0) input0: u32;
-            @location(1) input1: u32;
-        };
+            @location(0) input0: u32,
+            @location(1) input1: u32,
+        }
 
         struct VertexOutput {
-            @location(0) vertexColorOut: vec4<f32>;
-            @builtin(position) position: vec4<f32>;
-        };
+            @location(0) vertexColorOut: vec4<f32>,
+            @builtin(position) position: vec4<f32>,
+        }
 
         @stage(vertex)
         fn main(vertexInput : VertexInput) -> VertexOutput {
@@ -886,9 +886,9 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithBlendState) {
         })");
         renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
          struct FragmentOut {
-            @location(0) fragColor0 : vec4<f32>;
-            @location(1) fragColor1 : vec4<f32>;
-        };
+            @location(0) fragColor0 : vec4<f32>,
+            @location(1) fragColor1 : vec4<f32>,
+        }
 
         @stage(fragment) fn main() -> FragmentOut {
             var output : FragmentOut;

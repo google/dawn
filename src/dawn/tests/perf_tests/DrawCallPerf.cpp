@@ -40,8 +40,8 @@ namespace {
 
     constexpr char kFragmentShaderA[] = R"(
         struct Uniforms {
-            color : vec3<f32>;
-        };
+            color : vec3<f32>
+        }
         @group(0) @binding(0) var<uniform> uniforms : Uniforms;
         @stage(fragment) fn main() -> @location(0) vec4<f32> {
             return vec4<f32>(uniforms.color * (1.0 / 5000.0), 1.0);
@@ -49,11 +49,11 @@ namespace {
 
     constexpr char kFragmentShaderB[] = R"(
         struct Constants {
-            color : vec3<f32>;
-        };
+            color : vec3<f32>
+        }
         struct Uniforms {
-            color : vec3<f32>;
-        };
+            color : vec3<f32>
+        }
         @group(0) @binding(0) var<uniform> constants : Constants;
         @group(1) @binding(0) var<uniform> uniforms : Uniforms;
 

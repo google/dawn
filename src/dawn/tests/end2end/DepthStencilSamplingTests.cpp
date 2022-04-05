@@ -84,11 +84,11 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
         shaderSource << "type StencilValues = array<u32, " << components.size() << ">;\n";
         shaderSource << R"(
             struct DepthResult {
-                value : f32;
-            };
+                value : f32
+            }
             struct StencilResult {
-                values : StencilValues;
-            };)";
+                values : StencilValues
+            })";
         shaderSource << "\n";
 
         uint32_t index = 0;
@@ -195,8 +195,8 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
             @group(0) @binding(0) var samp : sampler_comparison;
             @group(0) @binding(1) var tex : texture_depth_2d;
             struct Uniforms {
-                compareRef : f32;
-            };
+                compareRef : f32
+            }
             @group(0) @binding(2) var<uniform> uniforms : Uniforms;
 
             @stage(fragment) fn main() -> @location(0) f32 {
@@ -217,13 +217,13 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
             @group(0) @binding(0) var samp : sampler_comparison;
             @group(0) @binding(1) var tex : texture_depth_2d;
             struct Uniforms {
-                compareRef : f32;
-            };
+                compareRef : f32
+            }
             @group(0) @binding(2) var<uniform> uniforms : Uniforms;
 
             struct SamplerResult {
-                value : f32;
-            };
+                value : f32
+            }
             @group(0) @binding(3) var<storage, read_write> samplerResult : SamplerResult;
 
             @stage(compute) @workgroup_size(1) fn main() {

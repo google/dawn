@@ -34,19 +34,19 @@ TEST_P(MaxLimitTests, MaxComputeWorkgroupStorageSize) {
 
     std::string shader = R"(
         struct Dst {
-            value0 : u32;
-            value1 : u32;
-        };
+            value0 : u32,
+            value1 : u32,
+        }
 
         @group(0) @binding(0) var<storage, write> dst : Dst;
 
         struct WGData {
-          value0 : u32;
+          value0 : u32,
           // padding such that value0 and value1 are the first and last bytes of the memory.
           @size()" + std::to_string(maxComputeWorkgroupStorageSize / 4 - 2) +
-                         R"() padding : u32;
-          value1 : u32;
-        };
+                         R"() padding : u32,
+          value1 : u32,
+        }
         var<workgroup> wg_data : WGData;
 
         @stage(compute) @workgroup_size(2,1,1)
@@ -130,13 +130,13 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                 }
                 shader = R"(
                   struct Buf {
-                      values : array<u32>;
-                  };
+                      values : array<u32>
+                  }
 
                   struct Result {
-                      value0 : u32;
-                      value1 : u32;
-                  };
+                      value0 : u32,
+                      value1 : u32,
+                  }
 
                   @group(0) @binding(0) var<storage, read> buf : Buf;
                   @group(0) @binding(1) var<storage, write> result : Result;
@@ -157,17 +157,17 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
 
                 shader = R"(
                   struct Buf {
-                      value0 : u32;
+                      value0 : u32,
                       // padding such that value0 and value1 are the first and last bytes of the memory.
                       @size()" +
-                         std::to_string(maxBufferBindingSize - 8) + R"() padding : u32;
-                      value1 : u32;
-                  };
+                         std::to_string(maxBufferBindingSize - 8) + R"() padding : u32,
+                      value1 : u32,
+                  }
 
                   struct Result {
-                      value0 : u32;
-                      value1 : u32;
-                  };
+                      value0 : u32,
+                      value1 : u32,
+                  }
 
                   @group(0) @binding(0) var<uniform> buf : Buf;
                   @group(0) @binding(1) var<storage, write> result : Result;

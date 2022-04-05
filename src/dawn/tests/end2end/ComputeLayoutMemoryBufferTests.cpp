@@ -169,24 +169,24 @@ TEST_P(ComputeLayoutMemoryBufferTests, Fields) {
 
     std::string shader = R"(
 struct Data {
-    header : u32;
-    @align({field_align}) @size({field_size}) field : {field_type};
-    footer : u32;
-};
+    header : u32,
+    @align({field_align}) @size({field_size}) field : {field_type},
+    footer : u32,
+}
 
 struct Input {
-    header : u32;
-    {data_align}data : Data;
-    {footer_align}footer : u32;
-};
+    header : u32,
+    {data_align}data : Data,
+    {footer_align}footer : u32,
+}
 
 struct Output {
-    data : {field_type};
-};
+    data : {field_type}
+}
 
 struct Status {
-    code : u32;
-};
+    code : u32
+}
 
 @group(0) @binding(0) var<{input_qualifiers}> input : Input;
 @group(0) @binding(1) var<storage, read_write> output : Output;

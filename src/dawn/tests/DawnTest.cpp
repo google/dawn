@@ -1166,8 +1166,8 @@ std::ostringstream& DawnTestBase::ExpectSampledFloatDataImpl(wgpu::TextureView t
     shaderSource << "@group(0) @binding(0) var tex : " << wgslTextureType << ";\n";
     shaderSource << R"(
         struct Result {
-            values : array<f32>;
-        };
+            values : array<f32>
+        }
         @group(0) @binding(1) var<storage, read_write> result : Result;
     )";
     shaderSource << "let componentCount : u32 = " << componentCount << "u;\n";
@@ -1352,9 +1352,9 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
             @group(0) @binding(0) var texture0 : texture_2d<f32>;
 
             struct FragmentOut {
-                @location(0) result : u32;
-                @builtin(frag_depth) fragDepth : f32;
-            };
+                @location(0) result : u32,
+                @builtin(frag_depth) fragDepth : f32,
+            }
 
             @stage(fragment)
             fn main(@builtin(position) FragCoord : vec4<f32>) -> FragmentOut {

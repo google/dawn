@@ -68,8 +68,8 @@ class BindGroupTests : public DawnTest {
         std::ostringstream fs;
         for (size_t i = 0; i < bindingTypes.size(); ++i) {
             fs << "struct Buffer" << i << R"( {
-                color : vec4<f32>;
-            };)";
+                color : vec4<f32>
+            })";
 
             switch (bindingTypes[i]) {
                 case wgpu::BufferBindingType::Uniform:
@@ -130,8 +130,8 @@ class BindGroupTests : public DawnTest {
 TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct Contents {
-            f : f32;
-        };
+            f : f32
+        }
         @group(0) @binding(0) var <uniform> contents: Contents;
 
         @stage(compute) @workgroup_size(1) fn main() {
@@ -165,8 +165,8 @@ TEST_P(BindGroupTests, ReusedUBO) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         // TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
         struct VertexUniformBuffer {
-            transform : vec4<f32>;
-        };
+            transform : vec4<f32>
+        }
 
         @group(0) @binding(0) var <uniform> vertexUbo : VertexUniformBuffer;
 
@@ -183,8 +183,8 @@ TEST_P(BindGroupTests, ReusedUBO) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct FragmentUniformBuffer {
-            color : vec4<f32>;
-        };
+            color : vec4<f32>
+        }
         @group(0) @binding(1) var <uniform> fragmentUbo : FragmentUniformBuffer;
 
         @stage(fragment) fn main() -> @location(0) vec4<f32> {
@@ -243,8 +243,8 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         // TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
         struct VertexUniformBuffer {
-            transform : vec4<f32>;
-        };
+            transform : vec4<f32>
+        }
         @group(0) @binding(0) var <uniform> vertexUbo : VertexUniformBuffer;
 
         @stage(vertex)
@@ -346,8 +346,8 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         // TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
         struct VertexUniformBuffer {
-            transform : vec4<f32>;
-        };
+            transform : vec4<f32>
+        }
 
         @group(0) @binding(0) var <uniform> vertexUbo1 : VertexUniformBuffer;
         @group(1) @binding(0) var <uniform> vertexUbo2 : VertexUniformBuffer;
@@ -367,8 +367,8 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct FragmentUniformBuffer {
-            color : vec4<f32>;
-        };
+            color : vec4<f32>
+        }
 
         @group(0) @binding(1) var <uniform> fragmentUbo1 : FragmentUniformBuffer;
         @group(1) @binding(1) var <uniform> fragmentUbo2 : FragmentUniformBuffer;
@@ -436,8 +436,8 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
 TEST_P(BindGroupTests, MultipleEntryPointsWithMultipleNonZeroGroups) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct Contents {
-            f : f32;
-        };
+            f : f32
+        }
         @group(0) @binding(0) var <uniform> contents0: Contents;
         @group(1) @binding(0) var <uniform> contents1: Contents;
         @group(2) @binding(0) var <uniform> contents2: Contents;
@@ -1036,12 +1036,12 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
     wgpu::ComputePipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.compute.module = utils::CreateShaderModule(device, R"(
         struct Buffer {
-            value : u32;
-        };
+            value : u32
+        }
 
         struct OutputBuffer {
-            value : vec3<u32>;
-        };
+            value : vec3<u32>
+        }
 
         @group(0) @binding(2) var<uniform> buffer2 : Buffer;
         @group(0) @binding(3) var<storage, read> buffer3 : Buffer;
@@ -1119,12 +1119,12 @@ TEST_P(BindGroupTests, DynamicAndNonDynamicBindingsDoNotConflictAfterRemapping) 
         wgpu::ComputePipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.compute.module = utils::CreateShaderModule(device, R"(
         struct Buffer {
-            value : u32;
-        };
+            value : u32
+        }
 
         struct OutputBuffer {
-            value : vec2<u32>;
-        };
+            value : vec2<u32>
+        }
 
         @group(0) @binding(0) var<uniform> buffer0 : Buffer;
         @group(0) @binding(1) var<uniform> buffer1 : Buffer;
@@ -1245,8 +1245,8 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct Ubo {
-            color : vec4<f32>;
-        };
+            color : vec4<f32>
+        }
 
         @group(0) @binding(953) var <uniform> ubo1 : Ubo;
         @group(0) @binding(47) var <uniform> ubo2 : Ubo;
@@ -1387,8 +1387,8 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
 
     pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
         struct Buffer0 {
-            color : vec4<f32>;
-        };
+            color : vec4<f32>
+        }
         @group(0) @binding(0) var<storage, read> buffer0 : Buffer0;
 
         @stage(fragment) fn main() -> @location(0) vec4<f32> {
@@ -1502,8 +1502,8 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
         bgEntries.push_back({nullptr, binding, buffer, 0, 4 * sizeof(uint32_t), nullptr, nullptr});
 
         interface << "struct UniformBuffer" << i << R"({
-                value : u32;
-            };
+                value : u32
+            }
         )";
         interface << "@group(0) @binding(" << binding++ << ") "
                   << "var<uniform> ubuf" << i << " : UniformBuffer" << i << ";\n";
@@ -1519,8 +1519,8 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
         bgEntries.push_back({nullptr, binding, buffer, 0, sizeof(uint32_t), nullptr, nullptr});
 
         interface << "struct ReadOnlyStorageBuffer" << i << R"({
-                value : u32;
-            };
+                value : u32
+            }
         )";
         interface << "@group(0) @binding(" << binding++ << ") "
                   << "var<storage, read> sbuf" << i << " : ReadOnlyStorageBuffer" << i << ";\n";
@@ -1535,8 +1535,8 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
     bgEntries.push_back({nullptr, binding, result, 0, sizeof(uint32_t), nullptr, nullptr});
 
     interface << R"(struct ReadWriteStorageBuffer{
-            value : u32;
-        };
+            value : u32
+        }
     )";
     interface << "@group(0) @binding(" << binding++ << ") "
               << "var<storage, read_write> result : ReadWriteStorageBuffer;\n";

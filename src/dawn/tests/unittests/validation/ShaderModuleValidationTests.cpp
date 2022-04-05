@@ -538,8 +538,8 @@ TEST_F(ShaderModuleValidationTest, OverridableConstantsNumericIDConflicts) {
 @id(1234) override c1: u32;
 
 struct Buf {
-    data : array<u32, 2>;
-};
+    data : array<u32, 2>
+}
 
 @group(0) @binding(0) var<storage, read_write> buf : Buf;
 

@@ -228,9 +228,9 @@ TEST_P(SwapChainValidationTests, ReturnedViewCharacteristics) {
         })");
     pipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
         struct FragmentOut {
-            @location(0) target0 : vec4<f32>;
-            @location(1) target1 : f32;
-        };
+            @location(0) target0 : vec4<f32>,
+            @location(1) target1 : f32,
+        }
         @stage(fragment) fn main() -> FragmentOut {
             var out : FragmentOut;
             out.target0 = vec4<f32>(0.0, 1.0, 0.0, 1.0);

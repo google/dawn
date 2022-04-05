@@ -159,8 +159,8 @@ class TextureFormatTest : public DawnTest {
         std::ostringstream fsSource;
         fsSource << "@group(0) @binding(0) var myTexture : texture_2d<" << type << ">;\n";
         fsSource << "struct FragmentOut {\n";
-        fsSource << "   @location(0) color : vec4<" << type << ">;\n";
-        fsSource << R"(};
+        fsSource << "   @location(0) color : vec4<" << type << ">\n";
+        fsSource << R"(}
             @stage(fragment)
             fn main(@builtin(position) FragCoord : vec4<f32>) -> FragmentOut {
                 var output : FragmentOut;

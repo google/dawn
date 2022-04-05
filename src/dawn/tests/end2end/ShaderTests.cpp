@@ -51,8 +51,8 @@ TEST_P(ShaderTests, ComputeLog2) {
 
     std::string shader = R"(
 struct Buf {
-    data : array<u32, 19>;
-};
+    data : array<u32, 19>
+}
 
 @group(0) @binding(0) var<storage, read_write> buf : Buf;
 
@@ -143,14 +143,14 @@ fn main(@builtin(position) fragCoord : vec4<f32>) -> @location(0) vec4<f32> {
 TEST_P(ShaderTests, WGSLMixedStructParamIO) {
     std::string vertexShader = R"(
 struct VertexIn {
-    @location(0) position : vec3<f32>;
-    @location(1) color : vec4<f32>;
-};
+    @location(0) position : vec3<f32>,
+    @location(1) color : vec4<f32>,
+}
 
 struct VertexOut {
-    @location(0) color : vec4<f32>;
-    @builtin(position) position : vec4<f32>;
-};
+    @location(0) color : vec4<f32>,
+    @builtin(position) position : vec4<f32>,
+}
 
 @stage(vertex)
 fn main(input : VertexIn) -> VertexOut {
@@ -186,14 +186,14 @@ fn main(@location(0) color : vec4<f32>) -> @location(0) vec4<f32> {
 TEST_P(ShaderTests, WGSLStructIO) {
     std::string vertexShader = R"(
 struct VertexIn {
-    @location(0) position : vec3<f32>;
-    @location(1) color : vec4<f32>;
-};
+    @location(0) position : vec3<f32>,
+    @location(1) color : vec4<f32>,
+}
 
 struct VertexOut {
-    @location(0) color : vec4<f32>;
-    @builtin(position) position : vec4<f32>;
-};
+    @location(0) color : vec4<f32>,
+    @builtin(position) position : vec4<f32>,
+}
 
 @stage(vertex)
 fn main(input : VertexIn) -> VertexOut {
@@ -206,9 +206,9 @@ fn main(input : VertexIn) -> VertexOut {
 
     std::string fragmentShader = R"(
 struct FragmentIn {
-    @location(0) color : vec4<f32>;
-    @builtin(position) fragCoord : vec4<f32>;
-};
+    @location(0) color : vec4<f32>,
+    @builtin(position) fragCoord : vec4<f32>,
+}
 
 @stage(fragment)
 fn main(input : FragmentIn) -> @location(0) vec4<f32> {
@@ -233,14 +233,14 @@ fn main(input : FragmentIn) -> @location(0) vec4<f32> {
 TEST_P(ShaderTests, WGSLUnsortedStructIO) {
     std::string vertexShader = R"(
 struct VertexIn {
-    @location(0) position : vec3<f32>;
-    @location(1) color : vec4<f32>;
-};
+    @location(0) position : vec3<f32>,
+    @location(1) color : vec4<f32>,
+}
 
 struct VertexOut {
-    @builtin(position) position : vec4<f32>;
-    @location(0) color : vec4<f32>;
-};
+    @builtin(position) position : vec4<f32>,
+    @location(0) color : vec4<f32>,
+}
 
 @stage(vertex)
 fn main(input : VertexIn) -> VertexOut {
@@ -253,9 +253,9 @@ fn main(input : VertexIn) -> VertexOut {
 
     std::string fragmentShader = R"(
 struct FragmentIn {
-    @location(0) color : vec4<f32>;
-    @builtin(position) fragCoord : vec4<f32>;
-};
+    @location(0) color : vec4<f32>,
+    @builtin(position) fragCoord : vec4<f32>,
+}
 
 @stage(fragment)
 fn main(input : FragmentIn) -> @location(0) vec4<f32> {
@@ -280,14 +280,14 @@ fn main(input : FragmentIn) -> @location(0) vec4<f32> {
 TEST_P(ShaderTests, WGSLSharedStructIO) {
     std::string shader = R"(
 struct VertexIn {
-    @location(0) position : vec3<f32>;
-    @location(1) color : vec4<f32>;
-};
+    @location(0) position : vec3<f32>,
+    @location(1) color : vec4<f32>,
+}
 
 struct VertexOut {
-    @location(0) color : vec4<f32>;
-    @builtin(position) position : vec4<f32>;
-};
+    @location(0) color : vec4<f32>,
+    @builtin(position) position : vec4<f32>,
+}
 
 @stage(vertex)
 fn vertexMain(input : VertexIn) -> VertexOut {
@@ -329,13 +329,13 @@ TEST_P(ShaderTests, FirstIndexOffsetRegisterConflictInHLSLTransforms) {
 // Dumped WGSL:
 
 struct Inputs {
-  @location(1) attrib1 : u32;
+  @location(1) attrib1 : u32,
   // The extra register added to handle base_vertex for vertex_index conflicts with [1]
-  @builtin(vertex_index) vertexIndex: u32;
-};
+  @builtin(vertex_index) vertexIndex: u32,
+}
 
 // [1] a binding point that conflicts with the regitster
-struct S1 { data : array<vec4<u32>, 20>; };
+struct S1 { data : array<vec4<u32>, 20> }
 @group(0) @binding(1) var<uniform> providedData1 : S1;
 
 @stage(vertex) fn vsMain(input : Inputs) -> @builtin(position) vec4<f32> {
@@ -413,8 +413,8 @@ override c9: u32 = 0u;          // default override
 override c10: u32 = 10u;        // default
 
 struct Buf {
-    data : array<u32, 11>;
-};
+    data : array<u32, 11>
+}
 
 @group(0) @binding(0) var<storage, read_write> buf : Buf;
 
@@ -483,8 +483,8 @@ TEST_P(ShaderTests, OverridableConstantsNumericIdentifiers) {
 @id(1004) override c4: u32;            // default unspecified
 
 struct Buf {
-    data : array<u32, 4>;
-};
+    data : array<u32, 4>
+}
 
 @group(0) @binding(0) var<storage, read_write> buf : Buf;
 
@@ -540,8 +540,8 @@ TEST_P(ShaderTests, OverridableConstantsPrecision) {
 @id(1002) override c2: f32;
 
 struct Buf {
-    data : array<f32, 2>;
-};
+    data : array<f32, 2>
+}
 
 @group(0) @binding(0) var<storage, read_write> buf : Buf;
 
@@ -594,8 +594,8 @@ TEST_P(ShaderTests, OverridableConstantsMultipleEntryPoints) {
 @id(1002) override c2: u32;
 
 struct Buf {
-    data : array<u32, 1>;
-};
+    data : array<u32, 1>
+}
 
 @group(0) @binding(0) var<storage, read_write> buf : Buf;
 

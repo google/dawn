@@ -47,8 +47,8 @@ TEST_F(GetBindGroupLayoutTests, SameObject) {
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         struct S {
-            pos : vec4<f32>;
-        };
+            pos : vec4<f32>
+        }
         @group(0) @binding(0) var<uniform> uniform0 : S;
         @group(1) @binding(0) var<uniform> uniform1 : S;
 
@@ -60,13 +60,13 @@ TEST_F(GetBindGroupLayoutTests, SameObject) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct S2 {
-            pos : vec4<f32>;
-        };
+            pos : vec4<f32>
+        }
         @group(2) @binding(0) var<uniform> uniform2 : S2;
 
         struct S3 {
-            pos : mat4x4<f32>;
-        };
+            pos : mat4x4<f32>
+        }
         @group(3) @binding(0) var<storage, read_write> storage3 : S3;
 
         @stage(fragment) fn main() {
@@ -99,8 +99,8 @@ TEST_F(GetBindGroupLayoutTests, SameObject) {
 TEST_F(GetBindGroupLayoutTests, DefaultBindGroupLayoutPipelineCompatibility) {
     wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
         struct S {
-            pos : vec4<f32>;
-        };
+            pos : vec4<f32>
+        }
         @group(0) @binding(0) var<uniform> uniforms : S;
 
         @stage(fragment) fn main() {
@@ -121,8 +121,8 @@ TEST_F(GetBindGroupLayoutTests, DefaultShaderStageAndDynamicOffsets) {
 
     wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
         struct S {
-            pos : vec4<f32>;
-        };
+            pos : vec4<f32>
+        }
         @group(0) @binding(0) var<uniform> uniforms : S;
 
         @stage(fragment) fn main() {
@@ -291,8 +291,8 @@ TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
 
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
         struct S {
-            pos : vec4<f32>;
-        };
+            pos : vec4<f32>
+        }
         @group(0) @binding(0) var<uniform> uniforms : S;
 
         @stage(compute) @workgroup_size(1) fn main() {
@@ -344,8 +344,8 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
         binding.buffer.type = wgpu::BufferBindingType::Storage;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             struct S {
-                pos : vec4<f32>;
-            };
+                pos : vec4<f32>
+            }
             @group(0) @binding(0) var<storage, read_write> ssbo : S;
 
             @stage(fragment) fn main() {
@@ -358,8 +358,8 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
         binding.buffer.type = wgpu::BufferBindingType::Uniform;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             struct S {
-                pos : vec4<f32>;
-            };
+                pos : vec4<f32>
+            }
             @group(0) @binding(0) var<uniform> uniforms : S;
 
             @stage(fragment) fn main() {
@@ -373,8 +373,8 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
         binding.buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             struct S {
-                pos : vec4<f32>;
-            };
+                pos : vec4<f32>
+            }
             @group(0) @binding(0) var<storage, read> ssbo : S;
 
             @stage(fragment) fn main() {
@@ -613,8 +613,8 @@ TEST_F(GetBindGroupLayoutTests, BindingIndices) {
         binding.binding = 0;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             struct S {
-                pos : vec4<f32>;
-            };
+                pos : vec4<f32>
+            }
             @group(0) @binding(0) var<uniform> uniforms : S;
 
             @stage(fragment) fn main() {
@@ -628,8 +628,8 @@ TEST_F(GetBindGroupLayoutTests, BindingIndices) {
         binding.binding = 1;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             struct S {
-                pos : vec4<f32>;
-            };
+                pos : vec4<f32>
+            }
             @group(0) @binding(1) var<uniform> uniforms : S;
 
             @stage(fragment) fn main() {
@@ -643,8 +643,8 @@ TEST_F(GetBindGroupLayoutTests, BindingIndices) {
         binding.binding = 2;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             struct S {
-                pos : vec4<f32>;
-            };
+                pos : vec4<f32>
+            }
             @group(0) @binding(1) var<uniform> uniforms : S;
 
             @stage(fragment) fn main() {
@@ -659,8 +659,8 @@ TEST_F(GetBindGroupLayoutTests, BindingIndices) {
 TEST_F(GetBindGroupLayoutTests, DuplicateBinding) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         struct S {
-            pos : vec4<f32>;
-        };
+            pos : vec4<f32>
+        }
         @group(0) @binding(0) var<uniform> uniform0 : S;
         @group(1) @binding(0) var<uniform> uniform1 : S;
 
@@ -672,8 +672,8 @@ TEST_F(GetBindGroupLayoutTests, DuplicateBinding) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct S {
-            pos : vec4<f32>;
-        };
+            pos : vec4<f32>
+        }
         @group(1) @binding(0) var<uniform> uniforms : S;
 
         @stage(fragment) fn main() {
@@ -698,8 +698,8 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
 
     wgpu::ShaderModule vsModule4 = utils::CreateShaderModule(device, R"(
         struct S {
-            pos : f32;
-        };
+            pos : f32
+        }
         @group(0) @binding(0) var<uniform> uniforms : S;
 
         @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
@@ -709,8 +709,8 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
 
     wgpu::ShaderModule vsModule64 = utils::CreateShaderModule(device, R"(
         struct S {
-            pos : mat4x4<f32>;
-        };
+            pos : mat4x4<f32>
+        }
         @group(0) @binding(0) var<uniform> uniforms : S;
 
         @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
@@ -720,8 +720,8 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
 
     wgpu::ShaderModule fsModule4 = utils::CreateShaderModule(device, R"(
         struct S {
-            pos : f32;
-        };
+            pos : f32
+        }
         @group(0) @binding(0) var<uniform> uniforms : S;
 
         @stage(fragment) fn main() {
@@ -730,8 +730,8 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
 
     wgpu::ShaderModule fsModule64 = utils::CreateShaderModule(device, R"(
         struct S {
-            pos : mat4x4<f32>;
-        };
+            pos : mat4x4<f32>
+        }
         @group(0) @binding(0) var<uniform> uniforms : S;
 
         @stage(fragment) fn main() {
@@ -865,8 +865,8 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
 TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         struct S {
-            pos : vec4<f32>;
-        };
+            pos : vec4<f32>
+        }
         @group(0) @binding(0) var<uniform> ubo : S;
 
         @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
@@ -876,8 +876,8 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct S {
-            pos : vec4<f32>;
-        };
+            pos : vec4<f32>
+        }
         @group(0) @binding(0) var<storage, read_write> ssbo : S;
 
         @stage(fragment) fn main() {
@@ -989,8 +989,8 @@ TEST_F(GetBindGroupLayoutTests, UnusedIndex) {
 
     wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
         struct S {
-            pos : vec4<f32>;
-        };
+            pos : vec4<f32>
+        }
         @group(0) @binding(0) var<uniform> uniforms0 : S;
         @group(2) @binding(0) var<uniform> uniforms2 : S;
 
@@ -1042,8 +1042,8 @@ TEST_F(GetBindGroupLayoutTests, Reflection) {
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         struct S {
-            pos : vec4<f32>;
-        };
+            pos : vec4<f32>
+        }
         @group(0) @binding(0) var<uniform> uniforms : S;
 
         @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
@@ -1083,8 +1083,8 @@ TEST_F(GetBindGroupLayoutTests, Reflection) {
 TEST_F(GetBindGroupLayoutTests, FromCorrectEntryPoint) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct Data {
-            data : f32;
-        };
+            data : f32
+        }
         @group(0) @binding(0) var<storage, read_write> data0 : Data;
         @group(0) @binding(1) var<storage, read_write> data1 : Data;
 

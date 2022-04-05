@@ -116,8 +116,8 @@ class DynamicBufferOffsetTests : public DawnTest {
         std::string multipleNumber = isInheritedPipeline ? "2" : "1";
         fs << R"(
             struct Buf {
-                value : vec2<u32>;
-            };
+                value : vec2<u32>
+            }
 
             @group(0) @binding(0) var<uniform> uBufferNotDynamic : Buf;
             @group(0) @binding(1) var<storage, read_write> sBufferNotDynamic : Buf;
@@ -166,8 +166,8 @@ class DynamicBufferOffsetTests : public DawnTest {
         std::string multipleNumber = isInheritedPipeline ? "2" : "1";
         cs << R"(
             struct Buf {
-                value : vec2<u32>;
-            };
+                value : vec2<u32>
+            }
 
             @group(0) @binding(0) var<uniform> uBufferNotDynamic : Buf;
             @group(0) @binding(1) var<storage, read_write> sBufferNotDynamic : Buf;
@@ -454,16 +454,16 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
             case wgpu::BufferUsage::Uniform:
                 shader << R"(
                     struct Src {
-                        values : array<vec4<u32>, kArrayLength>;
-                    };
+                        values : array<vec4<u32>, kArrayLength>
+                    }
                     @group(0) @binding(0) var<uniform> src : Src;
                 )";
                 break;
             case wgpu::BufferUsage::Storage:
                 shader << R"(
                     struct Src {
-                        values : array<vec4<u32>>;
-                    };
+                        values : array<vec4<u32>>
+                    }
                     @group(0) @binding(0) var<storage, read> src : Src;
                 )";
                 break;
@@ -473,8 +473,8 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
 
         shader << R"(
             struct Dst {
-                values : array<vec4<u32>>;
-            };
+                values : array<vec4<u32>>
+            }
             @group(0) @binding(1) var<storage, read_write> dst : Dst;
         )";
         shader << R"(

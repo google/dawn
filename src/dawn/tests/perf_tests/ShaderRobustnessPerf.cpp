@@ -21,13 +21,13 @@ namespace {
 
     const std::string& kMatMulFloatHeader = R"(
         struct Uniforms {
-            dimAOuter : u32;
-            dimInner : u32;
-            dimBOuter : u32;
-        };
+            dimAOuter : u32,
+            dimInner : u32,
+            dimBOuter : u32,
+        }
         struct Matrix {
-            numbers: array<f32>;
-        };
+            numbers: array<f32>
+        }
 
         @group(0) @binding(0) var<storage, read> firstMatrix : Matrix;
         @group(0) @binding(1) var<storage, read> secondMatrix : Matrix;
@@ -188,13 +188,13 @@ namespace {
     // The vec4 version requires that dimInner and dimBOuter are divisible by 4.
     const std::string& kMatMulVec4Header = R"(
         struct Uniforms {
-            dimAOuter : u32;
-            dimInner : u32;
-            dimBOuter : u32;
-        };
+            dimAOuter : u32,
+            dimInner : u32,
+            dimBOuter : u32,
+        }
         struct Matrix {
-            numbers: array<vec4<f32>>;
-        };
+            numbers: array<vec4<f32>>
+        }
 
         @group(0) @binding(0) var<storage, read> firstMatrix : Matrix;
         @group(0) @binding(1) var<storage, read> secondMatrix : Matrix;

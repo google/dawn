@@ -92,33 +92,33 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
     std::stringstream fragmentInputs;
     std::stringstream fragmentBody;
 
-    vertexInputs << "  @location(0) position : vec4<f32>;\n";
-    vertexOutputs << "  @builtin(position) position : vec4<f32>;\n";
+    vertexInputs << "  @location(0) position : vec4<f32>,\n";
+    vertexOutputs << "  @builtin(position) position : vec4<f32>,\n";
 
     if ((checkIndex & CheckIndex::Vertex) != 0) {
-        vertexInputs << "  @builtin(vertex_index) vertex_index : u32;\n";
-        vertexOutputs << "  @location(1) @interpolate(flat) vertex_index : u32;\n";
+        vertexInputs << "  @builtin(vertex_index) vertex_index : u32,\n";
+        vertexOutputs << "  @location(1) @interpolate(flat) vertex_index : u32,\n";
         vertexBody << "  output.vertex_index = input.vertex_index;\n";
 
-        fragmentInputs << "  @location(1) @interpolate(flat) vertex_index : u32;\n";
+        fragmentInputs << "  @location(1) @interpolate(flat) vertex_index : u32,\n";
         fragmentBody << "  _ = atomicMin(&idx_vals.vertex_index, input.vertex_index);\n";
     }
     if ((checkIndex & CheckIndex::Instance) != 0) {
-        vertexInputs << "  @builtin(instance_index) instance_index : u32;\n";
-        vertexOutputs << "  @location(2) @interpolate(flat) instance_index : u32;\n";
+        vertexInputs << "  @builtin(instance_index) instance_index : u32,\n";
+        vertexOutputs << "  @location(2) @interpolate(flat) instance_index : u32,\n";
         vertexBody << "  output.instance_index = input.instance_index;\n";
 
-        fragmentInputs << "  @location(2) @interpolate(flat) instance_index : u32;\n";
+        fragmentInputs << "  @location(2) @interpolate(flat) instance_index : u32,\n";
         fragmentBody << "  _ = atomicMin(&idx_vals.instance_index, input.instance_index);\n";
     }
 
     std::string vertexShader = R"(
 struct VertexInputs {
 )" + vertexInputs.str() + R"(
-};
+}
 struct VertexOutputs {
 )" + vertexOutputs.str() + R"(
-};
+}
 @stage(vertex) fn main(input : VertexInputs) -> VertexOutputs {
   var output : VertexOutputs;
 )" + vertexBody.str() + R"(
@@ -128,14 +128,14 @@ struct VertexOutputs {
 
     std::string fragmentShader = R"(
 struct IndexVals {
-  vertex_index : atomic<u32>;
-  instance_index : atomic<u32>;
-};
+  vertex_index : atomic<u32>,
+  instance_index : atomic<u32>,
+}
 @group(0) @binding(0) var<storage, read_write> idx_vals : IndexVals;
 
 struct FragInputs {
 )" + fragmentInputs.str() + R"(
-};
+}
 @stage(fragment) fn main(input : FragInputs) {
 )" + fragmentBody.str() + R"(
 })";

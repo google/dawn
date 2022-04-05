@@ -75,8 +75,8 @@ TEST_P(ComputeSharedMemoryTests, Basic) {
         let kInstances : u32 = 11u;
 
         struct Dst {
-            x : u32;
-        };
+            x : u32
+        }
 
         @group(0) @binding(0) var<storage, write> dst : Dst;
         var<workgroup> tmp : u32;
@@ -107,15 +107,15 @@ TEST_P(ComputeSharedMemoryTests, AssortedTypes) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         struct StructValues {
-            m: mat2x2<f32>;
-        };
+            m: mat2x2<f32>
+        }
 
         struct Dst {
-            d_struct : StructValues;
-            d_matrix : mat2x2<f32>;
-            d_array : array<u32, 4>;
-            d_vector : vec4<f32>;
-        };
+            d_struct : StructValues,
+            d_matrix : mat2x2<f32>,
+            d_array : array<u32, 4>,
+            d_vector : vec4<f32>,
+        }
 
         @group(0) @binding(0) var<storage, write> dst : Dst;
 

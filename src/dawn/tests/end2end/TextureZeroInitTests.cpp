@@ -102,8 +102,8 @@ class TextureZeroInitTest : public DawnTest {
         return utils::CreateShaderModule(device, R"(
             @group(0) @binding(0) var texture0 : texture_2d<f32>;
             struct FragmentOut {
-                @location(0) color : vec4<f32>;
-            };
+                @location(0) color : vec4<f32>
+            }
             @stage(fragment)
             fn main(@builtin(position) FragCoord : vec4<f32>) -> FragmentOut {
                 var output : FragmentOut;
@@ -981,8 +981,8 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
     const char* cs = R"(
         @group(0) @binding(0) var tex : texture_2d<f32>;
         struct Result {
-            value : vec4<f32>;
-        };
+            value : vec4<f32>
+        }
         @group(0) @binding(1) var<storage, read_write> result : Result;
         @stage(compute) @workgroup_size(1) fn main() {
            result.value = textureLoad(tex, vec2<i32>(0,0), 0);

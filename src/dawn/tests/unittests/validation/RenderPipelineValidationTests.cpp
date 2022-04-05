@@ -856,8 +856,8 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
 TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
     wgpu::ShaderModule vsModuleWithStorageBuffer = utils::CreateShaderModule(device, R"(
         struct Dst {
-            data : array<u32, 100>;
-        };
+            data : array<u32, 100>
+        }
         @group(0) @binding(0) var<storage, read_write> dst : Dst;
         @stage(vertex) fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
             dst.data[VertexIndex] = 0x1234u;
@@ -1105,9 +1105,9 @@ TEST_F(RenderPipelineValidationTest, UnwrittenFragmentOutputsMask0) {
 
     wgpu::ShaderModule fsModuleWriteBoth = utils::CreateShaderModule(device, R"(
         struct FragmentOut {
-            @location(0) target0 : vec4<f32>;
-            @location(1) target1 : vec4<f32>;
-        };
+            @location(0) target0 : vec4<f32>,
+            @location(1) target1 : vec4<f32>,
+        }
         @stage(fragment) fn main() -> FragmentOut {
             var out : FragmentOut;
             return out;
@@ -1215,8 +1215,8 @@ TEST_F(RenderPipelineValidationTest, UnwrittenFragmentOutputsMask0) {
 TEST_F(RenderPipelineValidationTest, BindingsFromCorrectEntryPoint) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct Uniforms {
-            data : vec4<f32>;
-        };
+            data : vec4<f32>
+        }
         @group(0) @binding(0) var<uniform> var0 : Uniforms;
         @group(0) @binding(1) var<uniform> var1 : Uniforms;
 
@@ -1314,9 +1314,9 @@ class InterStageVariableMatchingValidationTest : public RenderPipelineValidation
 TEST_F(InterStageVariableMatchingValidationTest, MissingDeclarationAtSameLocation) {
     wgpu::ShaderModule vertexModuleOutputAtLocation0 = utils::CreateShaderModule(device, R"(
             struct A {
-                @location(0) vout: f32;
-                @builtin(position) pos: vec4<f32>;
-            };
+                @location(0) vout: f32,
+                @builtin(position) pos: vec4<f32>,
+            }
             @stage(vertex) fn main() -> A {
                 var vertexOut: A;
                 vertexOut.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
@@ -1324,23 +1324,23 @@ TEST_F(InterStageVariableMatchingValidationTest, MissingDeclarationAtSameLocatio
             })");
     wgpu::ShaderModule fragmentModuleAtLocation0 = utils::CreateShaderModule(device, R"(
             struct B {
-                @location(0) fin: f32;
-            };
+                @location(0) fin: f32
+            }
             @stage(fragment) fn main(fragmentIn: B) -> @location(0) vec4<f32>  {
                 return vec4<f32>(fragmentIn.fin, 0.0, 0.0, 1.0);
             })");
     wgpu::ShaderModule fragmentModuleInputAtLocation1 = utils::CreateShaderModule(device, R"(
             struct A {
-                @location(1) vout: f32;
-            };
+                @location(1) vout: f32
+            }
             @stage(fragment) fn main(vertexOut: A) -> @location(0) vec4<f32>  {
                 return vec4<f32>(vertexOut.vout, 0.0, 0.0, 1.0);
             })");
     wgpu::ShaderModule vertexModuleOutputAtLocation1 = utils::CreateShaderModule(device, R"(
             struct B {
-                @location(1) fin: f32;
-                @builtin(position) pos: vec4<f32>;
-            };
+                @location(1) fin: f32,
+                @builtin(position) pos: vec4<f32>,
+            }
             @stage(vertex) fn main() -> B {
                 var fragmentIn: B;
                 fragmentIn.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
@@ -1376,15 +1376,15 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentTypeAtSameLocation) {
         std::string interfaceDeclaration;
         {
             std::ostringstream sstream;
-            sstream << "struct A { @location(0) @interpolate(flat) a: " << kTypes[i] << ";"
+            sstream << "struct A { @location(0) @interpolate(flat) a: " << kTypes[i] << ","
                     << std::endl;
             interfaceDeclaration = sstream.str();
         }
         {
             std::ostringstream vertexStream;
             vertexStream << interfaceDeclaration << R"(
-                    @builtin(position) pos: vec4<f32>;
-                };
+                    @builtin(position) pos: vec4<f32>,
+                }
                 @stage(vertex) fn main() -> A {
                     var vertexOut: A;
                     vertexOut.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
@@ -1395,7 +1395,7 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentTypeAtSameLocation) {
         {
             std::ostringstream fragmentStream;
             fragmentStream << interfaceDeclaration << R"(
-                };
+                }
                 @stage(fragment) fn main(fragmentIn: A) -> @location(0) vec4<f32> {
                     return vec4<f32>(0.0, 0.0, 0.0, 1.0);
                 })";
@@ -1475,14 +1475,14 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentInterpolationAttribute
                 }
                 sstream << ")";
             }
-            sstream << " a : vec4<f32>;" << std::endl;
+            sstream << " a : vec4<f32>," << std::endl;
             interfaceDeclaration = sstream.str();
         }
         {
             std::ostringstream vertexStream;
             vertexStream << interfaceDeclaration << R"(
-                    @builtin(position) pos: vec4<f32>;
-                };
+                    @builtin(position) pos: vec4<f32>,
+                }
                 @stage(vertex) fn main() -> A {
                     var vertexOut: A;
                     vertexOut.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
@@ -1493,7 +1493,7 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentInterpolationAttribute
         {
             std::ostringstream fragmentStream;
             fragmentStream << interfaceDeclaration << R"(
-                };
+                }
                 @stage(fragment) fn main(fragmentIn: A) -> @location(0) vec4<f32> {
                     return fragmentIn.a;
                 })";

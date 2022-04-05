@@ -209,8 +209,8 @@ TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPointsPerStage) {
 TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPoints) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct Data {
-            data : u32;
-        };
+            data : u32
+        }
         @binding(0) @group(0) var<storage, read_write> data : Data;
 
         @stage(compute) @workgroup_size(1) fn write1() {

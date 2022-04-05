@@ -30,11 +30,11 @@ TEST_P(RenderAttachmentTest, MoreFragmentOutputsThanAttachments) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct Output {
-            @location(0) color0 : vec4<f32>;
-            @location(1) color1 : vec4<f32>;
-            @location(2) color2 : vec4<f32>;
-            @location(3) color3 : vec4<f32>;
-        };
+            @location(0) color0 : vec4<f32>,
+            @location(1) color1 : vec4<f32>,
+            @location(2) color2 : vec4<f32>,
+            @location(3) color3 : vec4<f32>,
+        }
 
         @stage(fragment)
         fn main() -> Output {

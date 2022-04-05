@@ -54,8 +54,8 @@ class OpArrayLengthTest : public DawnTest {
         // 0.
         mShaderInterface = R"(
             struct DataBuffer {
-                data : array<f32>;
-            };
+                data : array<f32>
+            }
 
             // The length should be 1 because the buffer is 4-byte long.
             @group(0) @binding(0) var<storage, read> buffer1 : DataBuffer;
@@ -66,14 +66,14 @@ class OpArrayLengthTest : public DawnTest {
             // The length should be (512 - 16*4) / 8 = 56 because the buffer is 512 bytes long
             // and the structure is 8 bytes big.
             struct Buffer3Data {
-                a : f32;
-                b : i32;
-            };
+                a : f32,
+                b : i32,
+            }
 
             struct Buffer3 {
-                @size(64) garbage : mat4x4<f32>;
-                data : array<Buffer3Data>;
-            };
+                @size(64) garbage : mat4x4<f32>,
+                data : array<Buffer3Data>,
+            }
             @group(0) @binding(2) var<storage, read> buffer3 : Buffer3;
         )";
 
@@ -125,8 +125,8 @@ TEST_P(OpArrayLengthTest, Compute) {
     pipelineDesc.compute.entryPoint = "main";
     pipelineDesc.compute.module = utils::CreateShaderModule(device, (R"(
         struct ResultBuffer {
-            data : array<u32, 3>;
-        };
+            data : array<u32, 3>
+        }
         @group(1) @binding(0) var<storage, read_write> result : ResultBuffer;
         )" + mShaderInterface + R"(
         @stage(compute) @workgroup_size(1) fn main() {
@@ -224,9 +224,9 @@ TEST_P(OpArrayLengthTest, Vertex) {
     // pass pixel.
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, (mShaderInterface + R"(
         struct VertexOut {
-            @location(0) color : vec4<f32>;
-            @builtin(position) position : vec4<f32>;
-        };
+            @location(0) color : vec4<f32>,
+            @builtin(position) position : vec4<f32>,
+        }
 
         @stage(vertex) fn main() -> VertexOut {
             var output : VertexOut;

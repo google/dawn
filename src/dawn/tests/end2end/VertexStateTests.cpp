@@ -77,18 +77,18 @@ class VertexStateTest : public DawnTest {
         //    @location(1) input1 : vec4<f32>;
         for (const auto& input : testSpec) {
             vs << "@location(" << input.location << ") input" << input.location
-               << " : vec4<f32>;\n";
+               << " : vec4<f32>,\n";
         }
 
         vs << R"(
-                @builtin(vertex_index) VertexIndex : u32;
-                @builtin(instance_index) InstanceIndex : u32;
-            };
+                @builtin(vertex_index) VertexIndex : u32,
+                @builtin(instance_index) InstanceIndex : u32,
+            }
 
             struct VertexOut {
-                @location(0) color : vec4<f32>;
-                @builtin(position) position : vec4<f32>;
-            };
+                @location(0) color : vec4<f32>,
+                @builtin(position) position : vec4<f32>,
+            }
 
             @stage(vertex) fn main(input : VertexIn) -> VertexOut {
                 var output : VertexOut;
@@ -586,16 +586,16 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
     utils::ComboRenderPipelineDescriptor pipelineDesc;
     pipelineDesc.vertex.module = utils::CreateShaderModule(device, R"(
         struct VertexIn {
-            @location(0) attr0 : vec4<f32>;
-            @location(1) attr1 : vec2<u32>;
-            @location(2) attr2 : vec4<f32>;
-            @location(3) attr3 : f32;
-        };
+            @location(0) attr0 : vec4<f32>,
+            @location(1) attr1 : vec2<u32>,
+            @location(2) attr2 : vec4<f32>,
+            @location(3) attr3 : f32,
+        }
 
         struct VertexOut {
-            @location(0) color : vec4<f32>;
-            @builtin(position) position : vec4<f32>;
-        };
+            @location(0) color : vec4<f32>,
+            @builtin(position) position : vec4<f32>,
+        }
 
         @stage(vertex) fn main(input : VertexIn) -> VertexOut {
             var output : VertexOut;

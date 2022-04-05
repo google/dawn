@@ -1448,8 +1448,8 @@ class SetBindGroupValidationTest : public ValidationTest {
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
                 struct S {
-                    value : vec2<f32>;
-                };
+                    value : vec2<f32>
+                }
 
                 @group(0) @binding(0) var<uniform> uBufferDynamic : S;
                 @group(0) @binding(1) var<uniform> uBuffer : S;
@@ -1472,8 +1472,8 @@ class SetBindGroupValidationTest : public ValidationTest {
     wgpu::ComputePipeline CreateComputePipeline() {
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
                 struct S {
-                    value : vec2<f32>;
-                };
+                    value : vec2<f32>
+                }
 
                 @group(0) @binding(0) var<uniform> uBufferDynamic : S;
                 @group(0) @binding(1) var<uniform> uBuffer : S;
@@ -1899,7 +1899,7 @@ class SetBindGroupPersistenceValidationTest : public ValidationTest {
             device.CreatePipelineLayout(&pipelineLayoutDescriptor);
 
         std::stringstream ss;
-        ss << "struct S { value : vec2<f32>; };";
+        ss << "struct S { value : vec2<f32> }";
 
         // Build a shader which has bindings that match the pipeline layout.
         for (uint32_t l = 0; l < layouts.size(); ++l) {
@@ -2074,8 +2074,8 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
     wgpu::RenderPipeline CreateRenderPipeline(std::vector<wgpu::BindGroupLayout> bindGroupLayouts) {
         return CreateFSRenderPipeline(R"(
             struct S {
-                value : vec2<f32>;
-            };
+                value : vec2<f32>
+            }
 
             @group(0) @binding(0) var<storage, read_write> sBufferDynamic : S;
             @group(1) @binding(0) var<storage, read> sReadonlyBufferDynamic : S;
@@ -2109,8 +2109,8 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
         std::vector<wgpu::BindGroupLayout> bindGroupLayouts) {
         return CreateComputePipeline(R"(
             struct S {
-                value : vec2<f32>;
-            };
+                value : vec2<f32>
+            }
 
             @group(0) @binding(0) var<storage, read_write> sBufferDynamic : S;
             @group(1) @binding(0) var<storage, read> sReadonlyBufferDynamic : S;

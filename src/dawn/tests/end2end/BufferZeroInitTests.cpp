@@ -251,9 +251,9 @@ class BufferZeroInitTest : public DawnTest {
 
         wgpu::RenderPipeline renderPipeline = CreateRenderPipelineForTest(R"(
             struct VertexOut {
-                @location(0) color : vec4<f32>;
-                @builtin(position) position : vec4<f32>;
-            };
+                @location(0) color : vec4<f32>,
+                @builtin(position) position : vec4<f32>,
+            }
 
             @stage(vertex) fn main(@location(0) pos : vec4<f32>) -> VertexOut {
                 var output : VertexOut;
@@ -295,9 +295,9 @@ class BufferZeroInitTest : public DawnTest {
         wgpu::RenderPipeline renderPipeline =
             CreateRenderPipelineForTest(R"(
             struct VertexOut {
-                @location(0) color : vec4<f32>;
-                @builtin(position) position : vec4<f32>;
-            };
+                @location(0) color : vec4<f32>,
+                @builtin(position) position : vec4<f32>,
+            }
 
             @stage(vertex)
             fn main(@builtin(vertex_index) VertexIndex : u32) -> VertexOut {
@@ -345,9 +345,9 @@ class BufferZeroInitTest : public DawnTest {
         wgpu::RenderPipeline renderPipeline =
             CreateRenderPipelineForTest(R"(
             struct VertexOut {
-                @location(0) color : vec4<f32>;
-                @builtin(position) position : vec4<f32>;
-            };
+                @location(0) color : vec4<f32>,
+                @builtin(position) position : vec4<f32>,
+            }
 
             @stage(vertex) fn main() -> VertexOut {
                 var output : VertexOut;
@@ -386,9 +386,9 @@ class BufferZeroInitTest : public DawnTest {
         wgpu::RenderPipeline renderPipeline =
             CreateRenderPipelineForTest(R"(
             struct VertexOut {
-                @location(0) color : vec4<f32>;
-                @builtin(position) position : vec4<f32>;
-            };
+                @location(0) color : vec4<f32>,
+                @builtin(position) position : vec4<f32>,
+            }
 
             @stage(vertex) fn main() -> VertexOut {
                 var output : VertexOut;
@@ -998,8 +998,8 @@ TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
     constexpr uint32_t kBoundBufferSize = 16u;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct UBO {
-            value : vec4<u32>;
-        };
+            value : vec4<u32>
+        }
         @group(0) @binding(0) var<uniform> ubo : UBO;
         @group(0) @binding(1) var outImage : texture_storage_2d<rgba8unorm, write>;
 
@@ -1037,8 +1037,8 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
     constexpr uint32_t kBoundBufferSize = 16u;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct SSBO {
-            value : vec4<u32>;
-        };
+            value : vec4<u32>
+        }
         @group(0) @binding(0) var<storage, read> ssbo : SSBO;
         @group(0) @binding(1) var outImage : texture_storage_2d<rgba8unorm, write>;
 
@@ -1076,8 +1076,8 @@ TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
     constexpr uint32_t kBoundBufferSize = 32u;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct SSBO {
-            value : array<vec4<u32>, 2>;
-        };
+            value : array<vec4<u32>, 2>
+        }
         @group(0) @binding(0) var<storage, read_write> ssbo : SSBO;
         @group(0) @binding(1) var outImage : texture_storage_2d<rgba8unorm, write>;
 
@@ -1150,9 +1150,9 @@ TEST_P(BufferZeroInitTest, PaddingInitialized) {
         wgpu::RenderPipeline renderPipeline =
             CreateRenderPipelineForTest(R"(
             struct VertexOut {
-                @location(0) color : vec4<f32>;
-                @builtin(position) position : vec4<f32>;
-            };
+                @location(0) color : vec4<f32>,
+                @builtin(position) position : vec4<f32>,
+            }
 
             @stage(vertex) fn main(@location(0) pos : vec2<f32>) -> VertexOut {
                 var output : VertexOut;

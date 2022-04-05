@@ -57,9 +57,9 @@ class DepthStencilStateTest : public DawnTest {
 
         vsModule = utils::CreateShaderModule(device, R"(
             struct UBO {
-                color : vec3<f32>;
-                depth : f32;
-            };
+                color : vec3<f32>,
+                depth : f32,
+            }
             @group(0) @binding(0) var<uniform> ubo : UBO;
 
             @stage(vertex)
@@ -76,9 +76,9 @@ class DepthStencilStateTest : public DawnTest {
 
         fsModule = utils::CreateShaderModule(device, R"(
             struct UBO {
-                color : vec3<f32>;
-                depth : f32;
-            };
+                color : vec3<f32>,
+                depth : f32,
+            }
             @group(0) @binding(0) var<uniform> ubo : UBO;
 
             @stage(fragment) fn main() -> @location(0) vec4<f32> {
