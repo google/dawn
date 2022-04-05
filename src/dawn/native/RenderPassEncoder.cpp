@@ -281,12 +281,13 @@ namespace dawn::native {
                     for (uint32_t i = 0; i < count; ++i) {
                         DAWN_TRY(GetDevice()->ValidateObject(renderBundles[i]));
 
-                        // TODO(dawn:563): Give more detail about why the states are incompatible.
-                        DAWN_INVALID_IF(
-                            attachmentState != renderBundles[i]->GetAttachmentState(),
-                            "Attachment state of renderBundles[%i] (%s) is not compatible with "
-                            "attachment state of %s.",
-                            i, renderBundles[i], this);
+                        DAWN_INVALID_IF(attachmentState != renderBundles[i]->GetAttachmentState(),
+                                        "Attachment state of renderBundles[%i] (%s) is not "
+                                        "compatible with %s.\n"
+                                        "%s expects an attachment state of %s.\n"
+                                        "renderBundles[%i] (%s) has an attachment state of %s.",
+                                        i, renderBundles[i], this, this, attachmentState, i,
+                                        renderBundles[i], renderBundles[i]->GetAttachmentState());
 
                         bool depthReadOnlyInBundle = renderBundles[i]->IsDepthReadOnly();
                         DAWN_INVALID_IF(

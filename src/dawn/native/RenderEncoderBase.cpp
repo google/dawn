@@ -237,8 +237,6 @@ namespace dawn::native {
                 if (IsValidationEnabled()) {
                     DAWN_TRY(GetDevice()->ValidateObject(pipeline));
 
-                    // TODO(dawn:563): More detail about why the states are incompatible would be
-                    // nice.
                     DAWN_INVALID_IF(pipeline->GetAttachmentState() != mAttachmentState.Get(),
                                     "Attachment state of %s is not compatible with %s.\n"
                                     "%s expects an attachment state of %s.\n"
