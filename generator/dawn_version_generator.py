@@ -28,11 +28,17 @@ def get_gitHash(dawnDir):
                             cwd=dawnDir)
     if result.returncode == 0:
         return result.stdout.decode('utf-8').strip()
+    # No hash was available (possibly) because the directory was not a git checkout. Dawn should
+    # explicitly handle its absenece and disable features relying on the hash, i.e. caching.
     return ''
 
 
 def get_gitHead(dawnDir):
-    return [os.path.join(dawnDir, '.git', 'HEAD')]
+    return os.path.join(dawnDir, '.git', 'HEAD')
+
+
+def gitExists(dawnDir):
+    return os.path.exists(get_gitHead(dawnDir))
 
 
 def unpackGitRef(packed, resolved):
@@ -89,8 +95,10 @@ class DawnVersionGenerator(Generator):
                             help='The Dawn root directory path to use')
 
     def get_dependencies(self, args):
-        dawn_dir = os.path.abspath(args.dawn_dir)
-        return get_gitHead(dawn_dir) + get_gitResolvedHead(dawn_dir)
+        dawnDir = os.path.abspath(args.dawn_dir)
+        if gitExists(dawnDir):
+            return [get_gitHead(dawnDir)] + get_gitResolvedHead(dawnDir)
+        return []
 
     def get_file_renders(self, args):
         params = compute_params(args)
