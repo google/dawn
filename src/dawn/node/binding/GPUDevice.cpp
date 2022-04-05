@@ -400,7 +400,9 @@ namespace wgpu::binding {
         if (!conv(desc.label, descriptor.label) ||
             !conv(desc.colorFormats, desc.colorFormatsCount, descriptor.colorFormats) ||
             !conv(desc.depthStencilFormat, descriptor.depthStencilFormat) ||
-            !conv(desc.sampleCount, descriptor.sampleCount)) {
+            !conv(desc.sampleCount, descriptor.sampleCount) ||
+            !conv(desc.depthReadOnly, descriptor.depthReadOnly) ||
+            !conv(desc.stencilReadOnly, descriptor.stencilReadOnly)) {
             return {};
         }
 
