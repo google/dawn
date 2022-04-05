@@ -970,7 +970,7 @@ namespace wgpu::binding {
         out = {};
         return Convert(out.view, in.view) &&                    //
                Convert(out.resolveTarget, in.resolveTarget) &&  //
-               Convert(out.clearColor, in.clearValue) &&        //
+               Convert(out.clearValue, in.clearValue) &&        //
                Convert(out.loadOp, in.loadOp) &&                //
                Convert(out.storeOp, in.storeOp);
     }
@@ -978,14 +978,14 @@ namespace wgpu::binding {
     bool Converter::Convert(wgpu::RenderPassDepthStencilAttachment& out,
                             const interop::GPURenderPassDepthStencilAttachment& in) {
         out = {};
-        return Convert(out.view, in.view) &&                       //
-               Convert(out.clearDepth, in.depthClearValue) &&      //
-               Convert(out.depthLoadOp, in.depthLoadOp) &&         //
-               Convert(out.depthStoreOp, in.depthStoreOp) &&       //
-               Convert(out.depthReadOnly, in.depthReadOnly) &&     //
-               Convert(out.clearStencil, in.stencilClearValue) &&  //
-               Convert(out.stencilLoadOp, in.stencilLoadOp) &&     //
-               Convert(out.stencilStoreOp, in.stencilStoreOp) &&   //
+        return Convert(out.view, in.view) &&                            //
+               Convert(out.depthClearValue, in.depthClearValue) &&      //
+               Convert(out.depthLoadOp, in.depthLoadOp) &&              //
+               Convert(out.depthStoreOp, in.depthStoreOp) &&            //
+               Convert(out.depthReadOnly, in.depthReadOnly) &&          //
+               Convert(out.stencilClearValue, in.stencilClearValue) &&  //
+               Convert(out.stencilLoadOp, in.stencilLoadOp) &&          //
+               Convert(out.stencilStoreOp, in.stencilStoreOp) &&        //
                Convert(out.stencilReadOnly, in.stencilReadOnly);
     }
 
