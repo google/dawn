@@ -25,9 +25,6 @@ namespace dawn::native::vulkan {
       public:
         static Queue* Create(Device* device);
 
-        // Dawn API
-        void SetLabelImpl() override;
-
       private:
         Queue(Device* device);
         ~Queue() override;

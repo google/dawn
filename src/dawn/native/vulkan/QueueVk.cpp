@@ -22,7 +22,6 @@
 #include "dawn/native/vulkan/CommandBufferVk.h"
 #include "dawn/native/vulkan/CommandRecordingContext.h"
 #include "dawn/native/vulkan/DeviceVk.h"
-#include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
@@ -34,7 +33,6 @@ namespace dawn::native::vulkan {
     }
 
     Queue::Queue(Device* device) : QueueBase(device) {
-        SetLabelImpl();
     }
 
     Queue::~Queue() {
@@ -56,15 +54,6 @@ namespace dawn::native::vulkan {
         DAWN_TRY(device->SubmitPendingCommands());
 
         return {};
-    }
-
-    void Queue::SetLabelImpl() {
-        Device* device = ToBackend(GetDevice());
-        VkQueue handle = device->GetQueue();
-        // TODO(crbug.com/dawn/1344): When we start using multiple queues this needs to be adjusted
-        // so it doesn't always change the default queue's label.
-        SetDebugName(device, VK_OBJECT_TYPE_QUEUE, reinterpret_cast<uint64_t&>(handle),
-                     "Dawn_Queue", GetLabel());
     }
 
 }  // namespace dawn::native::vulkan

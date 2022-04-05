@@ -48,7 +48,7 @@ namespace dawn::native::vulkan {
     ResultOrError<Ref<Device>> Device::Create(Adapter* adapter,
                                               const DeviceDescriptor* descriptor) {
         Ref<Device> device = AcquireRef(new Device(adapter, descriptor));
-        DAWN_TRY(device->Initialize(descriptor));
+        DAWN_TRY(device->Initialize());
         return device;
     }
 
@@ -57,7 +57,7 @@ namespace dawn::native::vulkan {
         InitTogglesFromDriver();
     }
 
-    MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
+    MaybeError Device::Initialize() {
         // Copy the adapter's device info to the device so that we can change the "knobs"
         mDeviceInfo = ToBackend(GetAdapter())->GetDeviceInfo();
 
@@ -101,9 +101,7 @@ namespace dawn::native::vulkan {
         // extension is available. Override the decision if it is no applicable.
         ApplyUseZeroInitializeWorkgroupMemoryExtensionToggle();
 
-        SetLabelImpl();
-
-        return DeviceBase::Initialize(Queue::Create(this), descriptor);
+        return DeviceBase::Initialize(Queue::Create(this));
     }
 
     Device::~Device() {
@@ -1050,11 +1048,6 @@ namespace dawn::native::vulkan {
 
     float Device::GetTimestampPeriodInNS() const {
         return mDeviceInfo.properties.limits.timestampPeriod;
-    }
-
-    void Device::SetLabelImpl() {
-        SetDebugName(this, VK_OBJECT_TYPE_DEVICE, reinterpret_cast<uint64_t&>(mVkDevice),
-                     "Dawn_Device", GetLabel());
     }
 
 }  // namespace dawn::native::vulkan

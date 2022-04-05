@@ -103,7 +103,7 @@ namespace dawn::native::null {
     ResultOrError<Ref<Device>> Device::Create(Adapter* adapter,
                                               const DeviceDescriptor* descriptor) {
         Ref<Device> device = AcquireRef(new Device(adapter, descriptor));
-        DAWN_TRY(device->Initialize(descriptor));
+        DAWN_TRY(device->Initialize());
         return device;
     }
 
@@ -111,8 +111,8 @@ namespace dawn::native::null {
         Destroy();
     }
 
-    MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
-        return DeviceBase::Initialize(new Queue(this), descriptor);
+    MaybeError Device::Initialize() {
+        return DeviceBase::Initialize(new Queue(this));
     }
 
     ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(

@@ -30,9 +30,6 @@ namespace dawn::native::d3d12 {
 
       private:
         MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
-
-        // Dawn API
-        void SetLabelImpl() override;
     };
 
 }  // namespace dawn::native::d3d12
