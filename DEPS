@@ -290,53 +290,6 @@ hooks = [
                 '-s', 'buildtools/linux64/clang-format.sha1',
     ],
   },
-  # Pull the compilers and system libraries for hermetic builds
-  {
-    'name': 'sysroot_x86',
-    'pattern': '.',
-    'condition': 'checkout_linux and ((checkout_x86 or checkout_x64))',
-    'action': ['python3', 'build/linux/sysroot_scripts/install-sysroot.py',
-               '--arch=x86'],
-  },
-  {
-    'name': 'sysroot_x64',
-    'pattern': '.',
-    'condition': 'checkout_linux and (checkout_x64)',
-    'action': ['python3', 'build/linux/sysroot_scripts/install-sysroot.py',
-               '--arch=x64'],
-  },
-  {
-    # Update the Mac toolchain if necessary.
-    'name': 'mac_toolchain',
-    'pattern': '.',
-    'condition': 'checkout_mac',
-    'action': ['python3', 'build/mac_toolchain.py'],
-  },
-  {
-    # Update the Windows toolchain if necessary. Must run before 'clang' below.
-    'name': 'win_toolchain',
-    'pattern': '.',
-    'condition': 'checkout_win',
-    'action': ['python3', 'build/vs_toolchain.py', 'update', '--force'],
-  },
-  {
-    # Note: On Win, this should run after win_toolchain, as it may use it.
-    'name': 'clang',
-    'pattern': '.',
-    'action': ['python3', 'tools/clang/scripts/update.py'],
-  },
-  {
-    # Pull rc binaries using checked-in hashes.
-    'name': 'rc_win',
-    'pattern': '.',
-    'condition': 'checkout_win and (host_os == "win")',
-    'action': [ 'download_from_google_storage',
-                '--no_resume',
-                '--no_auth',
-                '--bucket', 'chromium-browser-clang/rc',
-                '-s', 'build/toolchain/win/rc/win/rc.exe.sha1',
-    ],
-  },
   # Update build/util/LASTCHANGE.
   {
     'name': 'lastchange',
