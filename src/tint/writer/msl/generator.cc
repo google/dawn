@@ -38,6 +38,7 @@ Result Generate(const Program* program, const Options& options) {
   auto sanitized_result = Sanitize(
       program, options.buffer_size_ubo_index, options.fixed_sample_mask,
       options.emit_vertex_point_size, options.disable_workgroup_init,
+      options.generate_external_texture_bindings,
       options.array_length_from_uniform);
   if (!sanitized_result.program.IsValid()) {
     result.success = false;

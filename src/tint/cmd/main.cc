@@ -569,6 +569,7 @@ bool GenerateSpirv(const tint::Program* program, const Options& options) {
   // TODO(jrprice): Provide a way for the user to set non-default options.
   tint::writer::spirv::Options gen_options;
   gen_options.disable_workgroup_init = options.disable_workgroup_init;
+  gen_options.generate_external_texture_bindings = true;
   auto result = tint::writer::spirv::Generate(program, gen_options);
   if (!result.success) {
     PrintWGSL(std::cerr, *program);
@@ -717,6 +718,7 @@ bool GenerateMsl(const tint::Program* program, const Options& options) {
   // TODO(jrprice): Provide a way for the user to set non-default options.
   tint::writer::msl::Options gen_options;
   gen_options.disable_workgroup_init = options.disable_workgroup_init;
+  gen_options.generate_external_texture_bindings = true;
   auto result = tint::writer::msl::Generate(input_program, gen_options);
   if (!result.success) {
     PrintWGSL(std::cerr, *program);
@@ -771,6 +773,7 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
   // TODO(jrprice): Provide a way for the user to set non-default options.
   tint::writer::hlsl::Options gen_options;
   gen_options.disable_workgroup_init = options.disable_workgroup_init;
+  gen_options.generate_external_texture_bindings = true;
   auto result = tint::writer::hlsl::Generate(program, gen_options);
   if (!result.success) {
     PrintWGSL(std::cerr, *program);
@@ -846,6 +849,7 @@ bool GenerateGlsl(const tint::Program* program, const Options& options) {
   auto generate = [&](const tint::Program* prg,
                       const std::string entry_point_name) -> bool {
     tint::writer::glsl::Options gen_options;
+    gen_options.generate_external_texture_bindings = true;
     auto result =
         tint::writer::glsl::Generate(prg, gen_options, entry_point_name);
     if (!result.success) {

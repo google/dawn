@@ -37,6 +37,7 @@
 #include "src/tint/transform/unshadow.h"
 #include "src/tint/transform/unwind_discard_functions.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
+#include "src/tint/writer/generate_external_texture_bindings.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Glsl);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Glsl::Config);
@@ -91,6 +92,13 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
   manager.Add<SimplifyPointers>();
 
   manager.Add<RemovePhonies>();
+
+  if (cfg && cfg->generate_external_texture_bindings) {
+    auto new_bindings_map = writer::GenerateExternalTextureBindings(in);
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(new_bindings_map);
+  }
+  manager.Add<MultiplanarExternalTexture>();
+
   manager.Add<CombineSamplers>();
   if (auto* binding_info = inputs.Get<CombineSamplers::BindingInfo>()) {
     data.Add<CombineSamplers::BindingInfo>(*binding_info);
@@ -106,6 +114,7 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
     BindingRemapper::AccessControls ac;
     data.Add<BindingRemapper::Remappings>(bp, ac, /* mayCollide */ true);
   }
+
   manager.Add<PromoteInitializersToConstVar>();
 
   manager.Add<AddEmptyEntryPoint>();
@@ -124,8 +133,13 @@ Output Glsl::Run(const Program* in, const DataMap& inputs) const {
   return Output{Program(std::move(builder))};
 }
 
-Glsl::Config::Config(const std::string& ep, bool disable_wi)
-    : entry_point(ep), disable_workgroup_init(disable_wi) {}
+Glsl::Config::Config(const std::string& entry_point_in,
+                     bool disable_workgroup_init_in,
+                     bool generate_external_texture_bindings_in)
+    : entry_point(entry_point_in),
+      disable_workgroup_init(disable_workgroup_init_in),
+      generate_external_texture_bindings(
+          generate_external_texture_bindings_in) {}
 Glsl::Config::Config(const Config&) = default;
 Glsl::Config::~Config() = default;
 

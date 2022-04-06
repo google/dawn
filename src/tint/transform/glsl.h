@@ -37,8 +37,11 @@ class Glsl final : public Castable<Glsl, Transform> {
     /// @param entry_point the root entry point function to generate
     /// @param disable_workgroup_init `true` to disable workgroup memory zero
     ///        initialization
+    /// @param generate_external_texture_bindings 'true' to generates binding
+    /// mappings for external textures
     explicit Config(const std::string& entry_point,
-                    bool disable_workgroup_init = false);
+                    bool disable_workgroup_init,
+                    bool generate_external_texture_bindings);
 
     /// Copy constructor
     Config(const Config&);
@@ -51,6 +54,9 @@ class Glsl final : public Castable<Glsl, Transform> {
 
     /// Set to `true` to disable workgroup memory zero initialization
     bool disable_workgroup_init = false;
+
+    /// Set to 'true' to generates binding mappings for external textures
+    bool generate_external_texture_bindings = false;
   };
 
   /// Constructor

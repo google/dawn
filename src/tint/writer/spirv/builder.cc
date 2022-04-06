@@ -60,6 +60,7 @@
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/writer/append_vector.h"
+#include "src/tint/writer/generate_external_texture_bindings.h"
 
 namespace tint {
 namespace writer {
@@ -258,7 +259,8 @@ const sem::Type* ElementTypeOf(const sem::Type* ty) {
 
 SanitizedResult Sanitize(const Program* in,
                          bool emit_vertex_point_size,
-                         bool disable_workgroup_init) {
+                         bool disable_workgroup_init,
+                         bool generate_external_texture_bindings) {
   transform::Manager manager;
   transform::DataMap data;
 
@@ -274,6 +276,13 @@ SanitizedResult Sanitize(const Program* in,
     data.Add<transform::BuiltinPolyfill::Config>(polyfills);
     manager.Add<transform::BuiltinPolyfill>();
   }
+
+  if (generate_external_texture_bindings) {
+    auto new_bindings_map = GenerateExternalTextureBindings(in);
+    data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(
+        new_bindings_map);
+  }
+  manager.Add<transform::MultiplanarExternalTexture>();
 
   manager.Add<transform::Unshadow>();
   if (!disable_workgroup_init) {

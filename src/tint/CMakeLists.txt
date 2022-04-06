@@ -451,6 +451,8 @@ set(TINT_LIB_SRCS
   writer/array_length_from_uniform_options.h
   writer/float_to_string.cc
   writer/float_to_string.h
+  writer/generate_external_texture_bindings.cc
+  writer/generate_external_texture_bindings.h
   writer/text_generator.cc
   writer/text_generator.h
   writer/text.cc
@@ -810,6 +812,7 @@ if(TINT_BUILD_TESTS)
     utils/unique_vector_test.cc
     writer/append_vector_test.cc
     writer/float_to_string_test.cc
+    writer/generate_external_texture_bindings_test.cc
     writer/text_generator_test.cc
   )
 

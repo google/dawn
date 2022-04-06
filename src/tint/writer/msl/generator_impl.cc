@@ -77,6 +77,7 @@
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/scoped_assignment.h"
 #include "src/tint/writer/float_to_string.h"
+#include "src/tint/writer/generate_external_texture_bindings.h"
 
 namespace tint {
 namespace writer {
@@ -113,6 +114,7 @@ class ScopedBitCast {
  private:
   std::ostream& s;
 };
+
 }  // namespace
 
 SanitizedResult::SanitizedResult() = default;
@@ -125,6 +127,7 @@ SanitizedResult Sanitize(
     uint32_t fixed_sample_mask,
     bool emit_vertex_point_size,
     bool disable_workgroup_init,
+    bool generate_external_texture_bindings,
     const ArrayLengthFromUniformOptions& array_length_from_uniform) {
   transform::Manager manager;
   transform::DataMap data;
@@ -166,6 +169,13 @@ SanitizedResult Sanitize(
   auto entry_point_io_cfg = transform::CanonicalizeEntryPointIO::Config(
       transform::CanonicalizeEntryPointIO::ShaderStyle::kMsl, fixed_sample_mask,
       emit_vertex_point_size);
+
+  if (generate_external_texture_bindings) {
+    auto new_bindings_map = GenerateExternalTextureBindings(in);
+    data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(
+        new_bindings_map);
+  }
+  manager.Add<transform::MultiplanarExternalTexture>();
 
   manager.Add<transform::Unshadow>();
 

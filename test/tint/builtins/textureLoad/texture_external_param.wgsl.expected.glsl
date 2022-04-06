@@ -32,14 +32,18 @@ vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, ive
   return vec4(r, g, b, 1.0f);
 }
 
+vec4 textureLoad2d(highp sampler2D tint_symbol_1, highp sampler2D ext_tex_plane_1_1_1, ExternalTextureParams ext_tex_params_1, ivec2 coords) {
+  return textureLoadExternal(tint_symbol_1, ext_tex_plane_1_1_1, coords, ext_tex_params_1);
+}
+
 uniform highp sampler2D arg_0_1;
-uniform highp sampler2D ext_tex_plane_1_1;
-void textureLoad_8acf41() {
-  vec4 res = textureLoadExternal(arg_0_1, ext_tex_plane_1_1, ivec2(0, 0), ext_tex_params);
+uniform highp sampler2D ext_tex_plane_1_2;
+void doTextureLoad() {
+  vec4 res = textureLoad2d(arg_0_1, ext_tex_plane_1_2, ext_tex_params, ivec2(0, 0));
 }
 
 vec4 vertex_main() {
-  textureLoad_8acf41();
+  doTextureLoad();
   return vec4(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
@@ -51,9 +55,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:36: 'textureLoadExternal' : no matching overloaded function found 
-ERROR: 0:36: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of float'
-ERROR: 0:36: '' : compilation terminated 
+ERROR: 0:40: 'textureLoad2d' : no matching overloaded function found 
+ERROR: 0:40: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of float'
+ERROR: 0:40: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 
@@ -91,14 +95,18 @@ vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, ive
   return vec4(r, g, b, 1.0f);
 }
 
+vec4 textureLoad2d(highp sampler2D tint_symbol_1, highp sampler2D ext_tex_plane_1_1_1, ExternalTextureParams ext_tex_params_1, ivec2 coords) {
+  return textureLoadExternal(tint_symbol_1, ext_tex_plane_1_1_1, coords, ext_tex_params_1);
+}
+
 uniform highp sampler2D arg_0_1;
-uniform highp sampler2D ext_tex_plane_1_1;
-void textureLoad_8acf41() {
-  vec4 res = textureLoadExternal(arg_0_1, ext_tex_plane_1_1, ivec2(0, 0), ext_tex_params);
+uniform highp sampler2D ext_tex_plane_1_2;
+void doTextureLoad() {
+  vec4 res = textureLoad2d(arg_0_1, ext_tex_plane_1_2, ext_tex_params, ivec2(0, 0));
 }
 
 void fragment_main() {
-  textureLoad_8acf41();
+  doTextureLoad();
 }
 
 void main() {
@@ -106,9 +114,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:37: 'textureLoadExternal' : no matching overloaded function found 
-ERROR: 0:37: '=' :  cannot convert from ' const float' to ' temp mediump 4-component vector of float'
-ERROR: 0:37: '' : compilation terminated 
+ERROR: 0:41: 'textureLoad2d' : no matching overloaded function found 
+ERROR: 0:41: '=' :  cannot convert from ' const float' to ' temp mediump 4-component vector of float'
+ERROR: 0:41: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 
@@ -145,14 +153,18 @@ vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, ive
   return vec4(r, g, b, 1.0f);
 }
 
+vec4 textureLoad2d(highp sampler2D tint_symbol_1, highp sampler2D ext_tex_plane_1_1_1, ExternalTextureParams ext_tex_params_1, ivec2 coords) {
+  return textureLoadExternal(tint_symbol_1, ext_tex_plane_1_1_1, coords, ext_tex_params_1);
+}
+
 uniform highp sampler2D arg_0_1;
-uniform highp sampler2D ext_tex_plane_1_1;
-void textureLoad_8acf41() {
-  vec4 res = textureLoadExternal(arg_0_1, ext_tex_plane_1_1, ivec2(0, 0), ext_tex_params);
+uniform highp sampler2D ext_tex_plane_1_2;
+void doTextureLoad() {
+  vec4 res = textureLoad2d(arg_0_1, ext_tex_plane_1_2, ext_tex_params, ivec2(0, 0));
 }
 
 void compute_main() {
-  textureLoad_8acf41();
+  doTextureLoad();
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -161,9 +173,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:36: 'textureLoadExternal' : no matching overloaded function found 
-ERROR: 0:36: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of float'
-ERROR: 0:36: '' : compilation terminated 
+ERROR: 0:40: 'textureLoad2d' : no matching overloaded function found 
+ERROR: 0:40: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of float'
+ERROR: 0:40: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

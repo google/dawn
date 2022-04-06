@@ -77,6 +77,7 @@ SanitizedResult Sanitize(
     const Program* program,
     sem::BindingPoint root_constant_binding_point = {},
     bool disable_workgroup_init = false,
+    bool generate_external_texture_bindings = false,
     const ArrayLengthFromUniformOptions& array_length_from_uniform = {});
 
 /// Implementation class for HLSL generator

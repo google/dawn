@@ -42,6 +42,9 @@ struct Options {
   /// Set to `true` to disable workgroup memory zero initialization
   bool disable_workgroup_init = false;
 
+  /// Set to 'true' to generates binding mappings for external textures
+  bool generate_external_texture_bindings = false;
+
   /// Set to `true` to initialize workgroup memory with OpConstantNull when
   /// VK_KHR_zero_initialize_workgroup_memory is enabled.
   bool use_zero_initialize_workgroup_memory_extension = false;

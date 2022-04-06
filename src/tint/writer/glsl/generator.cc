@@ -43,7 +43,9 @@ Result Generate(const Program* program,
                                                    options.allow_collisions);
   data.Add<transform::CombineSamplers::BindingInfo>(
       options.binding_map, options.placeholder_binding_point);
-  data.Add<transform::Glsl::Config>(entry_point);
+  data.Add<transform::Glsl::Config>(entry_point,
+                                    /* disable_workgroup_init */ false,
+                                    options.generate_external_texture_bindings);
   transform::Glsl sanitizer;
   auto output = sanitizer.Run(program, data);
   if (!output.program.IsValid()) {

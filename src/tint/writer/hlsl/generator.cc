@@ -35,6 +35,7 @@ Result Generate(const Program* program, const Options& options) {
   // Sanitize the program.
   auto sanitized_result = Sanitize(program, options.root_constant_binding_point,
                                    options.disable_workgroup_init,
+                                   options.generate_external_texture_bindings,
                                    options.array_length_from_uniform);
   if (!sanitized_result.program.IsValid()) {
     result.success = false;

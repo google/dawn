@@ -527,6 +527,8 @@ libtint_source_set("libtint_core_all_src") {
     "writer/array_length_from_uniform_options.h",
     "writer/float_to_string.cc",
     "writer/float_to_string.h",
+    "writer/generate_external_texture_bindings.cc",
+    "writer/generate_external_texture_bindings.h",
     "writer/text.cc",
     "writer/text.h",
     "writer/text_generator.cc",

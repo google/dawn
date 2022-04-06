@@ -53,6 +53,8 @@ struct Options {
   sem::BindingPoint root_constant_binding_point;
   /// Set to `true` to disable workgroup memory zero initialization
   bool disable_workgroup_init = false;
+  /// Set to 'true' to generates binding mappings for external textures
+  bool generate_external_texture_bindings = false;
   /// Options used to specify a mapping of binding points to indices into a UBO
   /// from which to load buffer sizes.
   ArrayLengthFromUniformOptions array_length_from_uniform = {};

@@ -172,6 +172,7 @@ class DataBuilder {
       b->build(out.fixed_sample_mask);
       b->build(out.emit_vertex_point_size);
       b->build(out.disable_workgroup_init);
+      b->build(out.generate_external_texture_bindings);
       b->build(out.array_length_from_uniform);
       return out;
     }

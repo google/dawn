@@ -84,6 +84,7 @@ SanitizedResult Sanitize(
     uint32_t fixed_sample_mask = 0xFFFFFFFF,
     bool emit_vertex_point_size = false,
     bool disable_workgroup_init = false,
+    bool generate_external_texture_bindings = false,
     const ArrayLengthFromUniformOptions& array_length_from_uniform = {});
 
 /// Implementation class for MSL generator

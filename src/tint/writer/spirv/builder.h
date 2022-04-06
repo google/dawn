@@ -65,7 +65,8 @@ struct SanitizedResult {
 /// @returns the sanitized program and any supplementary information
 SanitizedResult Sanitize(const Program* program,
                          bool emit_vertex_point_size = false,
-                         bool disable_workgroup_init = false);
+                         bool disable_workgroup_init = false,
+                         bool generate_external_texture_bindings = false);
 
 /// Builder class to create SPIR-V instructions from a module.
 class Builder {
