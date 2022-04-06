@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Light {
+  float3 position;
+  float3 colour;
+};
+
+struct Lights {
+  Light light[1];
+};
+

@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  /* 0x0000 */ float arr[4];
+};
+
+kernel void tint_symbol(device tint_array_wrapper* tint_symbol_1 [[buffer(0)]], const device tint_array_wrapper* tint_symbol_2 [[buffer(1)]]) {
+  *(tint_symbol_1) = *(tint_symbol_2);
+  return;
+}
+

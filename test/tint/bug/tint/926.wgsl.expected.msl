@@ -1,0 +1,17 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct DrawIndirectArgs {
+  /* 0x0000 */ atomic_uint vertexCount;
+};
+
+void computeMain_inner(uint3 global_id, device DrawIndirectArgs* const tint_symbol, thread uint* const tint_symbol_1) {
+  uint const firstVertex = atomic_fetch_add_explicit(&((*(tint_symbol)).vertexCount), *(tint_symbol_1), memory_order_relaxed);
+}
+
+kernel void computeMain(device DrawIndirectArgs* tint_symbol_2 [[buffer(0)]], uint3 global_id [[thread_position_in_grid]]) {
+  thread uint tint_symbol_3 = 0u;
+  computeMain_inner(global_id, tint_symbol_2, &(tint_symbol_3));
+  return;
+}
+

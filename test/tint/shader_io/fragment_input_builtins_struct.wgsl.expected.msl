@@ -1,0 +1,23 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct FragmentInputs {
+  float4 position;
+  bool front_facing;
+  uint sample_index;
+  uint sample_mask;
+};
+
+void tint_symbol_inner(FragmentInputs inputs) {
+  if (inputs.front_facing) {
+    float4 const foo = inputs.position;
+    uint const bar = (inputs.sample_index + inputs.sample_mask);
+  }
+}
+
+fragment void tint_symbol(float4 position [[position]], bool front_facing [[front_facing]], uint sample_index [[sample_id]], uint sample_mask [[sample_mask]]) {
+  FragmentInputs const tint_symbol_1 = {.position=position, .front_facing=front_facing, .sample_index=sample_index, .sample_mask=sample_mask};
+  tint_symbol_inner(tint_symbol_1);
+  return;
+}
+

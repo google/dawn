@@ -1,0 +1,57 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  /* 0x0000 */ int4 arr[4];
+};
+
+struct S {
+  /* 0x0000 */ tint_array_wrapper arr;
+};
+
+struct tint_array_wrapper_3 {
+  /* 0x0000 */ int arr[2];
+};
+
+struct tint_array_wrapper_2 {
+  /* 0x0000 */ tint_array_wrapper_3 arr[3];
+};
+
+struct tint_array_wrapper_1 {
+  /* 0x0000 */ tint_array_wrapper_2 arr[4];
+};
+
+struct S_nested {
+  /* 0x0000 */ tint_array_wrapper_1 arr;
+};
+
+tint_array_wrapper ret_arr() {
+  tint_array_wrapper const tint_symbol_2 = {.arr={}};
+  return tint_symbol_2;
+}
+
+S ret_struct_arr() {
+  S const tint_symbol_3 = {};
+  return tint_symbol_3;
+}
+
+void foo(tint_array_wrapper src_param, device S* const tint_symbol_5, thread tint_array_wrapper* const tint_symbol_6, threadgroup tint_array_wrapper* const tint_symbol_7, const constant S* const tint_symbol_8, device S* const tint_symbol_9, device S_nested* const tint_symbol_10) {
+  tint_array_wrapper src_function = {};
+  tint_array_wrapper const tint_symbol_4 = {.arr={int4(1), int4(2), int4(3), int4(3)}};
+  (*(tint_symbol_5)).arr = tint_symbol_4;
+  (*(tint_symbol_5)).arr = src_param;
+  tint_array_wrapper const tint_symbol = ret_arr();
+  (*(tint_symbol_5)).arr = tint_symbol;
+  tint_array_wrapper const src_let = {.arr={}};
+  (*(tint_symbol_5)).arr = src_let;
+  (*(tint_symbol_5)).arr = src_function;
+  (*(tint_symbol_5)).arr = *(tint_symbol_6);
+  (*(tint_symbol_5)).arr = *(tint_symbol_7);
+  S const tint_symbol_1 = ret_struct_arr();
+  (*(tint_symbol_5)).arr = tint_symbol_1.arr;
+  (*(tint_symbol_5)).arr = (*(tint_symbol_8)).arr;
+  (*(tint_symbol_5)).arr = (*(tint_symbol_9)).arr;
+  tint_array_wrapper_1 src_nested = {};
+  (*(tint_symbol_10)).arr = src_nested;
+}
+

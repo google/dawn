@@ -1,0 +1,50 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 25
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %out_var_SV_TARGET_1_1
+               OpExecutionMode %main OriginUpperLeft
+               OpName %out_var_SV_TARGET_1_1 "out_var_SV_TARGET_1_1"
+               OpName %out_var_SV_TARGET "out_var_SV_TARGET"
+               OpName %main_1 "main_1"
+               OpName %main_out "main_out"
+               OpMemberName %main_out 0 "out_var_SV_TARGET_1"
+               OpName %main_inner "main_inner"
+               OpName %main "main"
+               OpDecorate %out_var_SV_TARGET_1_1 Location 0
+               OpMemberDecorate %main_out 0 Offset 0
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+%out_var_SV_TARGET_1_1 = OpVariable %_ptr_Output_v4float Output %5
+%_ptr_Private_v4float = OpTypePointer Private %v4float
+%out_var_SV_TARGET = OpVariable %_ptr_Private_v4float Private %5
+       %void = OpTypeVoid
+          %8 = OpTypeFunction %void
+%float_0x1p_128 = OpConstant %float 0x1p+128
+         %13 = OpConstantComposite %v4float %float_0x1p_128 %float_0x1p_128 %float_0x1p_128 %float_0x1p_128
+   %main_out = OpTypeStruct %v4float
+         %14 = OpTypeFunction %main_out
+     %main_1 = OpFunction %void None %8
+         %11 = OpLabel
+               OpStore %out_var_SV_TARGET %13
+               OpReturn
+               OpFunctionEnd
+ %main_inner = OpFunction %main_out None %14
+         %17 = OpLabel
+         %18 = OpFunctionCall %void %main_1
+         %19 = OpLoad %v4float %out_var_SV_TARGET
+         %20 = OpCompositeConstruct %main_out %19
+               OpReturnValue %20
+               OpFunctionEnd
+       %main = OpFunction %void None %8
+         %22 = OpLabel
+         %23 = OpFunctionCall %main_out %main_inner
+         %24 = OpCompositeExtract %v4float %23 0
+               OpStore %out_var_SV_TARGET_1_1 %24
+               OpReturn
+               OpFunctionEnd

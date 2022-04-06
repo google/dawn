@@ -1,0 +1,51 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 27
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %computeMain "computeMain" %global_id_1
+               OpExecutionMode %computeMain LocalSize 1 1 1
+               OpName %global_id_1 "global_id_1"
+               OpName %DrawIndirectArgs "DrawIndirectArgs"
+               OpMemberName %DrawIndirectArgs 0 "vertexCount"
+               OpName %drawOut "drawOut"
+               OpName %cubeVerts "cubeVerts"
+               OpName %computeMain_inner "computeMain_inner"
+               OpName %global_id "global_id"
+               OpName %computeMain "computeMain"
+               OpDecorate %global_id_1 BuiltIn GlobalInvocationId
+               OpDecorate %DrawIndirectArgs Block
+               OpMemberDecorate %DrawIndirectArgs 0 Offset 0
+               OpDecorate %drawOut DescriptorSet 0
+               OpDecorate %drawOut Binding 5
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%global_id_1 = OpVariable %_ptr_Input_v3uint Input
+%DrawIndirectArgs = OpTypeStruct %uint
+%_ptr_StorageBuffer_DrawIndirectArgs = OpTypePointer StorageBuffer %DrawIndirectArgs
+    %drawOut = OpVariable %_ptr_StorageBuffer_DrawIndirectArgs StorageBuffer
+     %uint_0 = OpConstant %uint 0
+%_ptr_Private_uint = OpTypePointer Private %uint
+  %cubeVerts = OpVariable %_ptr_Private_uint Private %uint_0
+       %void = OpTypeVoid
+         %11 = OpTypeFunction %void %v3uint
+     %uint_1 = OpConstant %uint 1
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+         %22 = OpTypeFunction %void
+%computeMain_inner = OpFunction %void None %11
+  %global_id = OpFunctionParameter %v3uint
+         %15 = OpLabel
+         %20 = OpAccessChain %_ptr_StorageBuffer_uint %drawOut %uint_0
+         %21 = OpLoad %uint %cubeVerts
+         %16 = OpAtomicIAdd %uint %20 %uint_1 %uint_0 %21
+               OpReturn
+               OpFunctionEnd
+%computeMain = OpFunction %void None %22
+         %24 = OpLabel
+         %26 = OpLoad %v3uint %global_id_1
+         %25 = OpFunctionCall %void %computeMain_inner %26
+               OpReturn
+               OpFunctionEnd

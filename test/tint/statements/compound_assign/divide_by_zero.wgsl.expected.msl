@@ -1,0 +1,14 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void foo(int maybe_zero, thread int* const tint_symbol, thread float* const tint_symbol_1) {
+  *(tint_symbol) = (*(tint_symbol) / 0);
+  *(tint_symbol) = (*(tint_symbol) % 0);
+  *(tint_symbol) = (*(tint_symbol) / maybe_zero);
+  *(tint_symbol) = (*(tint_symbol) % maybe_zero);
+  *(tint_symbol_1) = (*(tint_symbol_1) / 0.0f);
+  *(tint_symbol_1) = fmod(*(tint_symbol_1), 0.0f);
+  *(tint_symbol_1) = (*(tint_symbol_1) / float(maybe_zero));
+  *(tint_symbol_1) = fmod(*(tint_symbol_1), float(maybe_zero));
+}
+

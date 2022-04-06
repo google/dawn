@@ -1,0 +1,138 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 66
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %vert_main "vert_main" %i_1 %u_1 %vi_1 %vu_1 %pos_1 %vertex_point_size
+               OpEntryPoint Fragment %frag_main "frag_main" %i_2 %u_2 %vi_2 %vu_2 %pos_2 %value
+               OpExecutionMode %frag_main OriginUpperLeft
+               OpName %i_1 "i_1"
+               OpName %u_1 "u_1"
+               OpName %vi_1 "vi_1"
+               OpName %vu_1 "vu_1"
+               OpName %pos_1 "pos_1"
+               OpName %vertex_point_size "vertex_point_size"
+               OpName %i_2 "i_2"
+               OpName %u_2 "u_2"
+               OpName %vi_2 "vi_2"
+               OpName %vu_2 "vu_2"
+               OpName %pos_2 "pos_2"
+               OpName %value "value"
+               OpName %Interface "Interface"
+               OpMemberName %Interface 0 "i"
+               OpMemberName %Interface 1 "u"
+               OpMemberName %Interface 2 "vi"
+               OpMemberName %Interface 3 "vu"
+               OpMemberName %Interface 4 "pos"
+               OpName %vert_main_inner "vert_main_inner"
+               OpName %vert_main "vert_main"
+               OpName %frag_main_inner "frag_main_inner"
+               OpName %inputs "inputs"
+               OpName %frag_main "frag_main"
+               OpDecorate %i_1 Location 0
+               OpDecorate %i_1 Flat
+               OpDecorate %u_1 Location 1
+               OpDecorate %u_1 Flat
+               OpDecorate %vi_1 Location 2
+               OpDecorate %vi_1 Flat
+               OpDecorate %vu_1 Location 3
+               OpDecorate %vu_1 Flat
+               OpDecorate %pos_1 BuiltIn Position
+               OpDecorate %vertex_point_size BuiltIn PointSize
+               OpDecorate %i_2 Location 0
+               OpDecorate %i_2 Flat
+               OpDecorate %u_2 Location 1
+               OpDecorate %u_2 Flat
+               OpDecorate %vi_2 Location 2
+               OpDecorate %vi_2 Flat
+               OpDecorate %vu_2 Location 3
+               OpDecorate %vu_2 Flat
+               OpDecorate %pos_2 BuiltIn FragCoord
+               OpDecorate %value Location 0
+               OpMemberDecorate %Interface 0 Offset 0
+               OpMemberDecorate %Interface 1 Offset 4
+               OpMemberDecorate %Interface 2 Offset 16
+               OpMemberDecorate %Interface 3 Offset 32
+               OpMemberDecorate %Interface 4 Offset 48
+        %int = OpTypeInt 32 1
+%_ptr_Output_int = OpTypePointer Output %int
+          %4 = OpConstantNull %int
+        %i_1 = OpVariable %_ptr_Output_int Output %4
+       %uint = OpTypeInt 32 0
+%_ptr_Output_uint = OpTypePointer Output %uint
+          %8 = OpConstantNull %uint
+        %u_1 = OpVariable %_ptr_Output_uint Output %8
+      %v4int = OpTypeVector %int 4
+%_ptr_Output_v4int = OpTypePointer Output %v4int
+         %12 = OpConstantNull %v4int
+       %vi_1 = OpVariable %_ptr_Output_v4int Output %12
+     %v4uint = OpTypeVector %uint 4
+%_ptr_Output_v4uint = OpTypePointer Output %v4uint
+         %16 = OpConstantNull %v4uint
+       %vu_1 = OpVariable %_ptr_Output_v4uint Output %16
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+         %21 = OpConstantNull %v4float
+      %pos_1 = OpVariable %_ptr_Output_v4float Output %21
+%_ptr_Output_float = OpTypePointer Output %float
+         %24 = OpConstantNull %float
+%vertex_point_size = OpVariable %_ptr_Output_float Output %24
+%_ptr_Input_int = OpTypePointer Input %int
+        %i_2 = OpVariable %_ptr_Input_int Input
+%_ptr_Input_uint = OpTypePointer Input %uint
+        %u_2 = OpVariable %_ptr_Input_uint Input
+%_ptr_Input_v4int = OpTypePointer Input %v4int
+       %vi_2 = OpVariable %_ptr_Input_v4int Input
+%_ptr_Input_v4uint = OpTypePointer Input %v4uint
+       %vu_2 = OpVariable %_ptr_Input_v4uint Input
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+      %pos_2 = OpVariable %_ptr_Input_v4float Input
+      %value = OpVariable %_ptr_Output_int Output %4
+  %Interface = OpTypeStruct %int %uint %v4int %v4uint %v4float
+         %36 = OpTypeFunction %Interface
+         %40 = OpConstantNull %Interface
+       %void = OpTypeVoid
+         %41 = OpTypeFunction %void
+    %float_1 = OpConstant %float 1
+         %52 = OpTypeFunction %int %Interface
+%vert_main_inner = OpFunction %Interface None %36
+         %39 = OpLabel
+               OpReturnValue %40
+               OpFunctionEnd
+  %vert_main = OpFunction %void None %41
+         %44 = OpLabel
+         %45 = OpFunctionCall %Interface %vert_main_inner
+         %46 = OpCompositeExtract %int %45 0
+               OpStore %i_1 %46
+         %47 = OpCompositeExtract %uint %45 1
+               OpStore %u_1 %47
+         %48 = OpCompositeExtract %v4int %45 2
+               OpStore %vi_1 %48
+         %49 = OpCompositeExtract %v4uint %45 3
+               OpStore %vu_1 %49
+         %50 = OpCompositeExtract %v4float %45 4
+               OpStore %pos_1 %50
+               OpStore %vertex_point_size %float_1
+               OpReturn
+               OpFunctionEnd
+%frag_main_inner = OpFunction %int None %52
+     %inputs = OpFunctionParameter %Interface
+         %55 = OpLabel
+         %56 = OpCompositeExtract %int %inputs 0
+               OpReturnValue %56
+               OpFunctionEnd
+  %frag_main = OpFunction %void None %41
+         %58 = OpLabel
+         %60 = OpLoad %int %i_2
+         %61 = OpLoad %uint %u_2
+         %62 = OpLoad %v4int %vi_2
+         %63 = OpLoad %v4uint %vu_2
+         %64 = OpLoad %v4float %pos_2
+         %65 = OpCompositeConstruct %Interface %60 %61 %62 %63 %64
+         %59 = OpFunctionCall %int %frag_main_inner %65
+               OpStore %value %59
+               OpReturn
+               OpFunctionEnd

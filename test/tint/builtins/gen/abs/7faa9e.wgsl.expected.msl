@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void abs_7faa9e() {
+  int2 res = abs(int2());
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  abs_7faa9e();
+  return float4();
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  abs_7faa9e();
+  return;
+}
+
+kernel void compute_main() {
+  abs_7faa9e();
+  return;
+}
+

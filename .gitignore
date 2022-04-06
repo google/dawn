@@ -9,12 +9,15 @@
 /testing
 /third_party/abseil-cpp/
 /third_party/angle
+/third_party/benchmark
+/third_party/binutils
 /third_party/catapult
 /third_party/clang-format
+/third_party/cpplint
 /third_party/glfw
 /third_party/googletest
 /third_party/gpuweb
-/third_party/webgpu-cts
+/third_party/gpuweb-cts
 /third_party/jinja2
 /third_party/jsoncpp
 /third_party/llvm-build
@@ -22,10 +25,11 @@
 /third_party/node
 /third_party/node-addon-api
 /third_party/node-api-headers
+/third_party/protobuf
 /third_party/swiftshader
-/third_party/tint
 /third_party/vulkan-deps
 /third_party/vulkan_memory_allocator
+/third_party/webgpu-cts
 /third_party/zlib
 /tools/clang
 /tools/cmake
@@ -33,7 +37,7 @@
 /tools/memory
 /out
 
-# Modified from https://www.gitignore.io/api/vim,macos,linux,emacs,windows,sublimetext,visualstudio,visualstudiocode
+# Modified from https://www.gitignore.io/api/vim,macos,linux,emacs,windows,sublimetext,visualstudio,visualstudiocode,intellij
 
 ### Emacs ###
 *~
@@ -101,8 +105,19 @@ ehthumbs_vista.db
 Desktop.ini
 $RECYCLE.BIN/
 
+### Intellij ###
+.idea
+
 ### Dawn node tools binaries
 src/dawn/node/tools/bin/
 
 ### Cached node transpiled tools
 /.node_transpile_work_dir
+
+# Misc inherited from Tint
+/test.wgsl
+coverage.summary
+default.profraw
+lcov.info
+/cmake-build-*/
+/testing

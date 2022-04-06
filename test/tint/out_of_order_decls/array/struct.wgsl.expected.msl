@@ -1,0 +1,18 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  int m;
+};
+
+struct tint_array_wrapper {
+  S arr[4];
+};
+
+fragment void f() {
+  thread tint_array_wrapper tint_symbol_1 = {};
+  S const tint_symbol = {.m=1};
+  tint_symbol_1.arr[0] = tint_symbol;
+  return;
+}
+

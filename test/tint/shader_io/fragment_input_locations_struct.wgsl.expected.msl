@@ -1,0 +1,30 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct FragmentInputs {
+  int loc0;
+  uint loc1;
+  float loc2;
+  float4 loc3;
+};
+
+struct tint_symbol_2 {
+  int loc0 [[user(locn0)]] [[flat]];
+  uint loc1 [[user(locn1)]] [[flat]];
+  float loc2 [[user(locn2)]];
+  float4 loc3 [[user(locn3)]];
+};
+
+void tint_symbol_inner(FragmentInputs inputs) {
+  int const i = inputs.loc0;
+  uint const u = inputs.loc1;
+  float const f = inputs.loc2;
+  float4 const v = inputs.loc3;
+}
+
+fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  FragmentInputs const tint_symbol_3 = {.loc0=tint_symbol_1.loc0, .loc1=tint_symbol_1.loc1, .loc2=tint_symbol_1.loc2, .loc3=tint_symbol_1.loc3};
+  tint_symbol_inner(tint_symbol_3);
+  return;
+}
+

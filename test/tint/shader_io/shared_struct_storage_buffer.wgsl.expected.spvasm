@@ -1,0 +1,64 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 29
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %frag_main "frag_main" %f_1 %u_1 %v_1
+               OpExecutionMode %frag_main OriginUpperLeft
+               OpName %f_1 "f_1"
+               OpName %u_1 "u_1"
+               OpName %v_1 "v_1"
+               OpName %S "S"
+               OpMemberName %S 0 "f"
+               OpMemberName %S 1 "u"
+               OpMemberName %S 2 "v"
+               OpName %output "output"
+               OpName %frag_main_inner "frag_main_inner"
+               OpName %input "input"
+               OpName %frag_main "frag_main"
+               OpDecorate %f_1 Location 0
+               OpDecorate %u_1 Location 1
+               OpDecorate %u_1 Flat
+               OpDecorate %v_1 BuiltIn FragCoord
+               OpDecorate %S Block
+               OpMemberDecorate %S 0 Offset 0
+               OpMemberDecorate %S 1 Offset 4
+               OpMemberDecorate %S 2 Offset 128
+               OpDecorate %output NonReadable
+               OpDecorate %output DescriptorSet 0
+               OpDecorate %output Binding 0
+      %float = OpTypeFloat 32
+%_ptr_Input_float = OpTypePointer Input %float
+        %f_1 = OpVariable %_ptr_Input_float Input
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+        %u_1 = OpVariable %_ptr_Input_uint Input
+    %v4float = OpTypeVector %float 4
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+        %v_1 = OpVariable %_ptr_Input_v4float Input
+          %S = OpTypeStruct %float %uint %v4float
+%_ptr_StorageBuffer_S = OpTypePointer StorageBuffer %S
+     %output = OpVariable %_ptr_StorageBuffer_S StorageBuffer
+       %void = OpTypeVoid
+         %13 = OpTypeFunction %void %S
+         %21 = OpTypeFunction %void
+%frag_main_inner = OpFunction %void None %13
+      %input = OpFunctionParameter %S
+         %17 = OpLabel
+         %18 = OpCompositeExtract %float %input 0
+         %19 = OpCompositeExtract %uint %input 1
+         %20 = OpCompositeExtract %v4float %input 2
+               OpStore %output %input
+               OpReturn
+               OpFunctionEnd
+  %frag_main = OpFunction %void None %21
+         %23 = OpLabel
+         %25 = OpLoad %float %f_1
+         %26 = OpLoad %uint %u_1
+         %27 = OpLoad %v4float %v_1
+         %28 = OpCompositeConstruct %S %25 %26 %27
+         %24 = OpFunctionCall %void %frag_main_inner %28
+               OpReturn
+               OpFunctionEnd

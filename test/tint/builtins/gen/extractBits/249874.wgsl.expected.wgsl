@@ -1,0 +1,19 @@
+fn extractBits_249874() {
+  var res : i32 = extractBits(1, 1u, 1u);
+}
+
+@stage(vertex)
+fn vertex_main() -> @builtin(position) vec4<f32> {
+  extractBits_249874();
+  return vec4<f32>();
+}
+
+@stage(fragment)
+fn fragment_main() {
+  extractBits_249874();
+}
+
+@stage(compute) @workgroup_size(1)
+fn compute_main() {
+  extractBits_249874();
+}

@@ -1,0 +1,37 @@
+builtins/gen/smoothstep/5f615b.wgsl:28:24 warning: use of deprecated builtin
+  var res: vec4<f32> = smoothStep(vec4<f32>(), vec4<f32>(), vec4<f32>());
+                       ^^^^^^^^^^
+
+#include <metal_stdlib>
+
+using namespace metal;
+void smoothStep_5f615b() {
+  float4 res = smoothstep(float4(), float4(), float4());
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  smoothStep_5f615b();
+  return float4();
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  smoothStep_5f615b();
+  return;
+}
+
+kernel void compute_main() {
+  smoothStep_5f615b();
+  return;
+}
+

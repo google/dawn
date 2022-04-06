@@ -1,0 +1,94 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 79
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+               OpDecorate %_arr_int_uint_4 ArrayStride 4
+               OpDecorate %_arr__arr_int_uint_4_uint_3 ArrayStride 16
+               OpDecorate %_arr__arr__arr_int_uint_4_uint_3_uint_2 ArrayStride 48
+               OpDecorate %_arr__arr_int_uint_4_uint_2 ArrayStride 16
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+     %int_42 = OpConstant %int 42
+       %uint = OpTypeInt 32 0
+     %uint_4 = OpConstant %uint 4
+%_arr_int_uint_4 = OpTypeArray %int %uint_4
+         %10 = OpConstantNull %_arr_int_uint_4
+      %int_1 = OpConstant %int 1
+      %int_2 = OpConstant %int 2
+      %int_3 = OpConstant %int 3
+      %int_4 = OpConstant %int 4
+         %15 = OpConstantComposite %_arr_int_uint_4 %int_1 %int_2 %int_3 %int_4
+     %uint_3 = OpConstant %uint 3
+%_arr__arr_int_uint_4_uint_3 = OpTypeArray %_arr_int_uint_4 %uint_3
+     %uint_2 = OpConstant %uint 2
+%_arr__arr__arr_int_uint_4_uint_3_uint_2 = OpTypeArray %_arr__arr_int_uint_4_uint_3 %uint_2
+         %23 = OpConstantNull %_arr__arr__arr_int_uint_4_uint_3_uint_2
+      %int_5 = OpConstant %int 5
+      %int_6 = OpConstant %int 6
+      %int_7 = OpConstant %int 7
+      %int_8 = OpConstant %int 8
+         %28 = OpConstantComposite %_arr_int_uint_4 %int_5 %int_6 %int_7 %int_8
+      %int_9 = OpConstant %int 9
+     %int_10 = OpConstant %int 10
+     %int_11 = OpConstant %int 11
+     %int_12 = OpConstant %int 12
+         %33 = OpConstantComposite %_arr_int_uint_4 %int_9 %int_10 %int_11 %int_12
+         %34 = OpConstantComposite %_arr__arr_int_uint_4_uint_3 %15 %28 %33
+     %int_13 = OpConstant %int 13
+     %int_14 = OpConstant %int 14
+     %int_15 = OpConstant %int 15
+     %int_16 = OpConstant %int 16
+         %39 = OpConstantComposite %_arr_int_uint_4 %int_13 %int_14 %int_15 %int_16
+     %int_17 = OpConstant %int 17
+     %int_18 = OpConstant %int 18
+     %int_19 = OpConstant %int 19
+     %int_20 = OpConstant %int 20
+         %44 = OpConstantComposite %_arr_int_uint_4 %int_17 %int_18 %int_19 %int_20
+     %int_21 = OpConstant %int 21
+     %int_22 = OpConstant %int 22
+     %int_23 = OpConstant %int 23
+     %int_24 = OpConstant %int 24
+         %49 = OpConstantComposite %_arr_int_uint_4 %int_21 %int_22 %int_23 %int_24
+         %50 = OpConstantComposite %_arr__arr_int_uint_4_uint_3 %39 %44 %49
+         %51 = OpConstantComposite %_arr__arr__arr_int_uint_4_uint_3_uint_2 %34 %50
+%_arr__arr_int_uint_4_uint_2 = OpTypeArray %_arr_int_uint_4 %uint_2
+         %68 = OpConstantNull %_arr__arr_int_uint_4_uint_2
+         %70 = OpConstantComposite %_arr__arr_int_uint_4_uint_2 %15 %28
+       %main = OpFunction %void None %1
+          %4 = OpLabel
+         %16 = OpIAdd %int %int_42 %int_1
+         %17 = OpCompositeExtract %int %15 3
+         %18 = OpCompositeConstruct %_arr_int_uint_4 %int_1 %int_42 %16 %17
+         %52 = OpIAdd %int %int_42 %int_1
+         %53 = OpCompositeConstruct %_arr_int_uint_4 %int_1 %int_2 %int_42 %52
+         %54 = OpCompositeExtract %int %15 2
+         %55 = OpCompositeExtract %int %15 3
+         %56 = OpIAdd %int %55 %int_1
+         %57 = OpCompositeConstruct %_arr_int_uint_4 %int_5 %int_6 %54 %56
+         %58 = OpCompositeConstruct %_arr__arr_int_uint_4_uint_3 %53 %57 %15
+         %59 = OpCompositeExtract %_arr__arr_int_uint_4_uint_3 %51 1
+         %60 = OpCompositeConstruct %_arr__arr__arr_int_uint_4_uint_3_uint_2 %58 %59
+         %61 = OpCompositeExtract %int %10 1
+         %62 = OpCompositeExtract %int %15 2
+         %63 = OpIAdd %int %int_42 %int_1
+         %64 = OpCompositeExtract %int %15 3
+         %65 = OpCompositeConstruct %_arr_int_uint_4 %int_1 %int_42 %63 %64
+         %66 = OpCompositeExtract %int %65 2
+         %69 = OpCompositeExtract %_arr_int_uint_4 %68 1
+         %71 = OpCompositeExtract %_arr_int_uint_4 %70 1
+         %72 = OpIAdd %int %int_42 %int_1
+         %73 = OpCompositeExtract %int %15 3
+         %74 = OpCompositeConstruct %_arr_int_uint_4 %int_1 %int_42 %72 %73
+         %75 = OpCompositeExtract %_arr__arr_int_uint_4_uint_3 %51 1
+         %76 = OpCompositeExtract %_arr_int_uint_4 %75 2
+         %77 = OpCompositeConstruct %_arr__arr_int_uint_4_uint_2 %74 %76
+         %78 = OpCompositeExtract %_arr_int_uint_4 %77 1
+               OpReturn
+               OpFunctionEnd

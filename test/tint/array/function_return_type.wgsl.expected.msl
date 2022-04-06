@@ -1,0 +1,42 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  float arr[4];
+};
+
+tint_array_wrapper f1() {
+  tint_array_wrapper const tint_symbol_6 = {.arr={}};
+  return tint_symbol_6;
+}
+
+struct tint_array_wrapper_1 {
+  tint_array_wrapper arr[3];
+};
+
+tint_array_wrapper_1 f2() {
+  tint_array_wrapper const tint_symbol_1 = f1();
+  tint_array_wrapper const tint_symbol_2 = f1();
+  tint_array_wrapper const tint_symbol_3 = f1();
+  tint_array_wrapper_1 const tint_symbol_7 = {.arr={tint_symbol_1, tint_symbol_2, tint_symbol_3}};
+  return tint_symbol_7;
+}
+
+struct tint_array_wrapper_2 {
+  tint_array_wrapper_1 arr[2];
+};
+
+tint_array_wrapper_2 f3() {
+  tint_array_wrapper_1 const tint_symbol_4 = f2();
+  tint_array_wrapper_1 const tint_symbol_5 = f2();
+  tint_array_wrapper_2 const tint_symbol_8 = {.arr={tint_symbol_4, tint_symbol_5}};
+  return tint_symbol_8;
+}
+
+kernel void tint_symbol() {
+  tint_array_wrapper const a1 = f1();
+  tint_array_wrapper_1 const a2 = f2();
+  tint_array_wrapper_2 const a3 = f3();
+  return;
+}
+

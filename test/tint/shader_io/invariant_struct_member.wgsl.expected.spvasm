@@ -1,0 +1,44 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 21
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %pos_1 %vertex_point_size
+               OpName %pos_1 "pos_1"
+               OpName %vertex_point_size "vertex_point_size"
+               OpName %Out "Out"
+               OpMemberName %Out 0 "pos"
+               OpName %main_inner "main_inner"
+               OpName %main "main"
+               OpDecorate %pos_1 BuiltIn Position
+               OpDecorate %pos_1 Invariant
+               OpDecorate %vertex_point_size BuiltIn PointSize
+               OpMemberDecorate %Out 0 Offset 0
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+      %pos_1 = OpVariable %_ptr_Output_v4float Output %5
+%_ptr_Output_float = OpTypePointer Output %float
+          %8 = OpConstantNull %float
+%vertex_point_size = OpVariable %_ptr_Output_float Output %8
+        %Out = OpTypeStruct %v4float
+          %9 = OpTypeFunction %Out
+         %13 = OpConstantNull %Out
+       %void = OpTypeVoid
+         %14 = OpTypeFunction %void
+    %float_1 = OpConstant %float 1
+ %main_inner = OpFunction %Out None %9
+         %12 = OpLabel
+               OpReturnValue %13
+               OpFunctionEnd
+       %main = OpFunction %void None %14
+         %17 = OpLabel
+         %18 = OpFunctionCall %Out %main_inner
+         %19 = OpCompositeExtract %v4float %18 0
+               OpStore %pos_1 %19
+               OpStore %vertex_point_size %float_1
+               OpReturn
+               OpFunctionEnd

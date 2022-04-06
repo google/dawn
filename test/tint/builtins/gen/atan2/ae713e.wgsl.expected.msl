@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void atan2_ae713e() {
+  float4 res = atan2(float4(), float4());
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  atan2_ae713e();
+  return float4();
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  atan2_ae713e();
+  return;
+}
+
+kernel void compute_main() {
+  atan2_ae713e();
+  return;
+}
+

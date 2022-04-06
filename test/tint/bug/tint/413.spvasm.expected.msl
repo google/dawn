@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1(texture2d<uint, access::sample> tint_symbol_1, texture2d<uint, access::write> tint_symbol_2) {
+  uint4 srcValue = 0u;
+  uint4 const x_18 = tint_symbol_1.read(uint2(int2(0, 0)), 0);
+  srcValue = x_18;
+  uint const x_22 = srcValue[0];
+  srcValue[0] = (x_22 + as_type<uint>(1));
+  uint4 const x_27 = srcValue;
+  tint_symbol_2.write(x_27, uint2(int2(0, 0)));
+  return;
+}
+
+kernel void tint_symbol(texture2d<uint, access::sample> tint_symbol_3 [[texture(0)]], texture2d<uint, access::write> tint_symbol_4 [[texture(1)]]) {
+  main_1(tint_symbol_3, tint_symbol_4);
+  return;
+}
+

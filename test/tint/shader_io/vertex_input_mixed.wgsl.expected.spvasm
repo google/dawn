@@ -1,0 +1,94 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 49
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %vertex_index_1 %loc0_1 %loc1_1 %instance_index_1 %loc2_1 %loc3_1 %value %vertex_point_size
+               OpName %vertex_index_1 "vertex_index_1"
+               OpName %loc0_1 "loc0_1"
+               OpName %loc1_1 "loc1_1"
+               OpName %instance_index_1 "instance_index_1"
+               OpName %loc2_1 "loc2_1"
+               OpName %loc3_1 "loc3_1"
+               OpName %value "value"
+               OpName %vertex_point_size "vertex_point_size"
+               OpName %VertexInputs0 "VertexInputs0"
+               OpMemberName %VertexInputs0 0 "vertex_index"
+               OpMemberName %VertexInputs0 1 "loc0"
+               OpName %VertexInputs1 "VertexInputs1"
+               OpMemberName %VertexInputs1 0 "loc2"
+               OpMemberName %VertexInputs1 1 "loc3"
+               OpName %main_inner "main_inner"
+               OpName %inputs0 "inputs0"
+               OpName %loc1 "loc1"
+               OpName %instance_index "instance_index"
+               OpName %inputs1 "inputs1"
+               OpName %main "main"
+               OpDecorate %vertex_index_1 BuiltIn VertexIndex
+               OpDecorate %loc0_1 Location 0
+               OpDecorate %loc1_1 Location 1
+               OpDecorate %instance_index_1 BuiltIn InstanceIndex
+               OpDecorate %loc2_1 Location 2
+               OpDecorate %loc3_1 Location 3
+               OpDecorate %value BuiltIn Position
+               OpDecorate %vertex_point_size BuiltIn PointSize
+               OpMemberDecorate %VertexInputs0 0 Offset 0
+               OpMemberDecorate %VertexInputs0 1 Offset 4
+               OpMemberDecorate %VertexInputs1 0 Offset 0
+               OpMemberDecorate %VertexInputs1 1 Offset 16
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%vertex_index_1 = OpVariable %_ptr_Input_uint Input
+        %int = OpTypeInt 32 1
+%_ptr_Input_int = OpTypePointer Input %int
+     %loc0_1 = OpVariable %_ptr_Input_int Input
+     %loc1_1 = OpVariable %_ptr_Input_uint Input
+%instance_index_1 = OpVariable %_ptr_Input_uint Input
+      %float = OpTypeFloat 32
+%_ptr_Input_float = OpTypePointer Input %float
+     %loc2_1 = OpVariable %_ptr_Input_float Input
+    %v4float = OpTypeVector %float 4
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+     %loc3_1 = OpVariable %_ptr_Input_v4float Input
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+         %17 = OpConstantNull %v4float
+      %value = OpVariable %_ptr_Output_v4float Output %17
+%_ptr_Output_float = OpTypePointer Output %float
+         %20 = OpConstantNull %float
+%vertex_point_size = OpVariable %_ptr_Output_float Output %20
+%VertexInputs0 = OpTypeStruct %uint %int
+%VertexInputs1 = OpTypeStruct %float %v4float
+         %21 = OpTypeFunction %v4float %VertexInputs0 %uint %uint %VertexInputs1
+       %void = OpTypeVoid
+         %35 = OpTypeFunction %void
+    %float_1 = OpConstant %float 1
+ %main_inner = OpFunction %v4float None %21
+    %inputs0 = OpFunctionParameter %VertexInputs0
+       %loc1 = OpFunctionParameter %uint
+%instance_index = OpFunctionParameter %uint
+    %inputs1 = OpFunctionParameter %VertexInputs1
+         %29 = OpLabel
+         %30 = OpCompositeExtract %uint %inputs0 0
+         %31 = OpIAdd %uint %30 %instance_index
+         %32 = OpCompositeExtract %int %inputs0 1
+         %33 = OpCompositeExtract %float %inputs1 0
+         %34 = OpCompositeExtract %v4float %inputs1 1
+               OpReturnValue %17
+               OpFunctionEnd
+       %main = OpFunction %void None %35
+         %38 = OpLabel
+         %40 = OpLoad %uint %vertex_index_1
+         %41 = OpLoad %int %loc0_1
+         %42 = OpCompositeConstruct %VertexInputs0 %40 %41
+         %43 = OpLoad %uint %loc1_1
+         %44 = OpLoad %uint %instance_index_1
+         %45 = OpLoad %float %loc2_1
+         %46 = OpLoad %v4float %loc3_1
+         %47 = OpCompositeConstruct %VertexInputs1 %45 %46
+         %39 = OpFunctionCall %v4float %main_inner %42 %43 %44 %47
+               OpStore %value %39
+               OpStore %vertex_point_size %float_1
+               OpReturn
+               OpFunctionEnd

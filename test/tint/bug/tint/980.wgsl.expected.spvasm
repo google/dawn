@@ -1,0 +1,82 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 47
+; Schema: 0
+               OpCapability Shader
+         %23 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %idx_1
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %idx_1 "idx_1"
+               OpName %S "S"
+               OpMemberName %S 0 "v"
+               OpMemberName %S 1 "i"
+               OpName %io "io"
+               OpName %Bad "Bad"
+               OpName %index "index"
+               OpName %rd "rd"
+               OpName %normal "normal"
+               OpName %main_inner "main_inner"
+               OpName %idx "idx"
+               OpName %main "main"
+               OpDecorate %idx_1 BuiltIn LocalInvocationIndex
+               OpDecorate %S Block
+               OpMemberDecorate %S 0 Offset 0
+               OpMemberDecorate %S 1 Offset 12
+               OpDecorate %io Binding 0
+               OpDecorate %io DescriptorSet 0
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+      %idx_1 = OpVariable %_ptr_Input_uint Input
+      %float = OpTypeFloat 32
+    %v3float = OpTypeVector %float 3
+          %S = OpTypeStruct %v3float %uint
+%_ptr_StorageBuffer_S = OpTypePointer StorageBuffer %S
+         %io = OpVariable %_ptr_StorageBuffer_S StorageBuffer
+          %9 = OpTypeFunction %v3float %uint %v3float
+    %float_0 = OpConstant %float 0
+         %15 = OpConstantComposite %v3float %float_0 %float_0 %float_0
+%_ptr_Function_v3float = OpTypePointer Function %v3float
+         %18 = OpConstantNull %v3float
+%_ptr_Function_float = OpTypePointer Function %float
+       %void = OpTypeVoid
+         %27 = OpTypeFunction %void %uint
+     %uint_1 = OpConstant %uint 1
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_v3float = OpTypePointer StorageBuffer %v3float
+         %42 = OpTypeFunction %void
+        %Bad = OpFunction %v3float None %9
+      %index = OpFunctionParameter %uint
+         %rd = OpFunctionParameter %v3float
+         %13 = OpLabel
+     %normal = OpVariable %_ptr_Function_v3float Function %18
+               OpStore %normal %15
+         %20 = OpAccessChain %_ptr_Function_float %normal %index
+         %24 = OpVectorExtractDynamic %float %rd %index
+         %22 = OpExtInst %float %23 FSign %24
+         %21 = OpFNegate %float %22
+               OpStore %20 %21
+         %26 = OpLoad %v3float %normal
+         %25 = OpExtInst %v3float %23 Normalize %26
+               OpReturnValue %25
+               OpFunctionEnd
+ %main_inner = OpFunction %void None %27
+        %idx = OpFunctionParameter %uint
+         %31 = OpLabel
+         %35 = OpAccessChain %_ptr_StorageBuffer_uint %io %uint_1
+         %36 = OpLoad %uint %35
+         %39 = OpAccessChain %_ptr_StorageBuffer_v3float %io %uint_0
+         %40 = OpLoad %v3float %39
+         %32 = OpFunctionCall %v3float %Bad %36 %40
+         %41 = OpAccessChain %_ptr_StorageBuffer_v3float %io %uint_0
+               OpStore %41 %32
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %42
+         %44 = OpLabel
+         %46 = OpLoad %uint %idx_1
+         %45 = OpFunctionCall %void %main_inner %46
+               OpReturn
+               OpFunctionEnd

@@ -1,0 +1,12 @@
+break-outside-for-or-switch.fail.wgsl
+continue-outside-for.fail.wgsl
+duplicate-stuct-name-v2.fail.wgsl
+duplicate-stuct-name.fail.wgsl
+duplicate-var-name-within-func.fail.wgsl
+global-vars-must-be-unique-v2.fail.wgsl
+global-vars-must-be-unique-v3.fail.wgsl
+runtime-array-not-last.fail.wgsl
+self-recursion-v2.fail.wgsl
+self-recursion.fail.wgsl
+struct-member-def-before-use-v3.fail.wgsl
+struct-use-before-def.fail.wgsl

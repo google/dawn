@@ -1,0 +1,39 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 19
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %slen "slen"
+               OpName %ulen "ulen"
+               OpName %main "main"
+               OpName %signed_literal "signed_literal"
+               OpName %unsigned_literal "unsigned_literal"
+               OpName %signed_constant "signed_constant"
+               OpName %unsigned_constant "unsigned_constant"
+               OpDecorate %_arr_float_ulen ArrayStride 4
+        %int = OpTypeInt 32 1
+       %slen = OpConstant %int 4
+       %uint = OpTypeInt 32 0
+       %ulen = OpConstant %uint 4
+       %void = OpTypeVoid
+          %5 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+%_arr_float_ulen = OpTypeArray %float %ulen
+%_ptr_Function__arr_float_ulen = OpTypePointer Function %_arr_float_ulen
+         %13 = OpConstantNull %_arr_float_ulen
+       %main = OpFunction %void None %5
+          %8 = OpLabel
+%signed_literal = OpVariable %_ptr_Function__arr_float_ulen Function %13
+%unsigned_literal = OpVariable %_ptr_Function__arr_float_ulen Function %13
+%signed_constant = OpVariable %_ptr_Function__arr_float_ulen Function %13
+%unsigned_constant = OpVariable %_ptr_Function__arr_float_ulen Function %13
+         %17 = OpLoad %_arr_float_ulen %unsigned_constant
+               OpStore %signed_literal %17
+         %18 = OpLoad %_arr_float_ulen %unsigned_literal
+               OpStore %signed_constant %18
+               OpReturn
+               OpFunctionEnd

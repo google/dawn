@@ -1,0 +1,41 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol_1 {
+  /* 0x0000 */ uint4 buffer_size[1];
+};
+
+struct SB_RW {
+  float arg_0[1];
+};
+
+void arrayLength_cdd123(const constant tint_symbol_1* const tint_symbol_3) {
+  uint res = (((*(tint_symbol_3)).buffer_size[0u][0u] - 0u) / 4u);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner(const constant tint_symbol_1* const tint_symbol_4) {
+  arrayLength_cdd123(tint_symbol_4);
+  return float4();
+}
+
+vertex tint_symbol vertex_main(const constant tint_symbol_1* tint_symbol_5 [[buffer(30)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_5);
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main(const constant tint_symbol_1* tint_symbol_6 [[buffer(30)]]) {
+  arrayLength_cdd123(tint_symbol_6);
+  return;
+}
+
+kernel void compute_main(const constant tint_symbol_1* tint_symbol_7 [[buffer(30)]]) {
+  arrayLength_cdd123(tint_symbol_7);
+  return;
+}
+

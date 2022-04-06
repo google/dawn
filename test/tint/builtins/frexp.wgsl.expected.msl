@@ -1,0 +1,21 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+struct frexp_result {
+  float sig;
+  int exp;
+};
+frexp_result tint_frexp(float param_0) {
+  int exp;
+  float sig = frexp(param_0, exp);
+  return {sig, exp};
+}
+
+kernel void tint_symbol() {
+  frexp_result const res = tint_frexp(1.230000019f);
+  int const exp = res.exp;
+  float const sig = res.sig;
+  return;
+}
+

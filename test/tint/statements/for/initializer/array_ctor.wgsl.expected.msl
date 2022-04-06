@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  int arr[1];
+};
+
+void f() {
+  tint_array_wrapper const tint_symbol = {.arr={1}};
+  for(int i = tint_symbol.arr[0]; false; ) {
+  }
+}
+

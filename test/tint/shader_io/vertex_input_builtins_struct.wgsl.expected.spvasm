@@ -1,0 +1,59 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 30
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %vertex_index_1 %instance_index_1 %value %vertex_point_size
+               OpName %vertex_index_1 "vertex_index_1"
+               OpName %instance_index_1 "instance_index_1"
+               OpName %value "value"
+               OpName %vertex_point_size "vertex_point_size"
+               OpName %VertexInputs "VertexInputs"
+               OpMemberName %VertexInputs 0 "vertex_index"
+               OpMemberName %VertexInputs 1 "instance_index"
+               OpName %main_inner "main_inner"
+               OpName %inputs "inputs"
+               OpName %main "main"
+               OpDecorate %vertex_index_1 BuiltIn VertexIndex
+               OpDecorate %instance_index_1 BuiltIn InstanceIndex
+               OpDecorate %value BuiltIn Position
+               OpDecorate %vertex_point_size BuiltIn PointSize
+               OpMemberDecorate %VertexInputs 0 Offset 0
+               OpMemberDecorate %VertexInputs 1 Offset 4
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%vertex_index_1 = OpVariable %_ptr_Input_uint Input
+%instance_index_1 = OpVariable %_ptr_Input_uint Input
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %9 = OpConstantNull %v4float
+      %value = OpVariable %_ptr_Output_v4float Output %9
+%_ptr_Output_float = OpTypePointer Output %float
+         %12 = OpConstantNull %float
+%vertex_point_size = OpVariable %_ptr_Output_float Output %12
+%VertexInputs = OpTypeStruct %uint %uint
+         %13 = OpTypeFunction %v4float %VertexInputs
+       %void = OpTypeVoid
+         %21 = OpTypeFunction %void
+    %float_1 = OpConstant %float 1
+ %main_inner = OpFunction %v4float None %13
+     %inputs = OpFunctionParameter %VertexInputs
+         %17 = OpLabel
+         %18 = OpCompositeExtract %uint %inputs 0
+         %19 = OpCompositeExtract %uint %inputs 1
+         %20 = OpIAdd %uint %18 %19
+               OpReturnValue %9
+               OpFunctionEnd
+       %main = OpFunction %void None %21
+         %24 = OpLabel
+         %26 = OpLoad %uint %vertex_index_1
+         %27 = OpLoad %uint %instance_index_1
+         %28 = OpCompositeConstruct %VertexInputs %26 %27
+         %25 = OpFunctionCall %v4float %main_inner %28
+               OpStore %value %25
+               OpStore %vertex_point_size %float_1
+               OpReturn
+               OpFunctionEnd

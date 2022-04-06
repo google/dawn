@@ -1,0 +1,15 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  /* 0x0000 */ packed_int3 v;
+  /* 0x000c */ int8_t tint_pad[4];
+};
+
+void f(device S* const tint_symbol) {
+  (*(tint_symbol)).v = int3(1, 2, 3);
+  (*(tint_symbol)).v[0] = 1;
+  (*(tint_symbol)).v[1] = 2;
+  (*(tint_symbol)).v[2] = 3;
+}
+

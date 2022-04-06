@@ -1,0 +1,95 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 46
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %vert_main1 "vert_main1" %pos_1 %loc0_1 %vertex_point_size
+               OpEntryPoint Vertex %vert_main2 "vert_main2" %pos_2 %loc0_2 %vertex_point_size_1
+               OpName %pos_1 "pos_1"
+               OpName %loc0_1 "loc0_1"
+               OpName %vertex_point_size "vertex_point_size"
+               OpName %pos_2 "pos_2"
+               OpName %loc0_2 "loc0_2"
+               OpName %vertex_point_size_1 "vertex_point_size_1"
+               OpName %VertexOutput "VertexOutput"
+               OpMemberName %VertexOutput 0 "pos"
+               OpMemberName %VertexOutput 1 "loc0"
+               OpName %foo "foo"
+               OpName %x "x"
+               OpName %vert_main1_inner "vert_main1_inner"
+               OpName %vert_main1 "vert_main1"
+               OpName %vert_main2_inner "vert_main2_inner"
+               OpName %vert_main2 "vert_main2"
+               OpDecorate %pos_1 BuiltIn Position
+               OpDecorate %loc0_1 Location 0
+               OpDecorate %loc0_1 Flat
+               OpDecorate %vertex_point_size BuiltIn PointSize
+               OpDecorate %pos_2 BuiltIn Position
+               OpDecorate %loc0_2 Location 0
+               OpDecorate %loc0_2 Flat
+               OpDecorate %vertex_point_size_1 BuiltIn PointSize
+               OpMemberDecorate %VertexOutput 0 Offset 0
+               OpMemberDecorate %VertexOutput 1 Offset 16
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+      %pos_1 = OpVariable %_ptr_Output_v4float Output %5
+        %int = OpTypeInt 32 1
+%_ptr_Output_int = OpTypePointer Output %int
+          %9 = OpConstantNull %int
+     %loc0_1 = OpVariable %_ptr_Output_int Output %9
+%_ptr_Output_float = OpTypePointer Output %float
+         %12 = OpConstantNull %float
+%vertex_point_size = OpVariable %_ptr_Output_float Output %12
+      %pos_2 = OpVariable %_ptr_Output_v4float Output %5
+     %loc0_2 = OpVariable %_ptr_Output_int Output %9
+%vertex_point_size_1 = OpVariable %_ptr_Output_float Output %12
+%VertexOutput = OpTypeStruct %v4float %int
+         %16 = OpTypeFunction %VertexOutput %float
+    %float_1 = OpConstant %float 1
+     %int_42 = OpConstant %int 42
+         %25 = OpTypeFunction %VertexOutput
+  %float_0_5 = OpConstant %float 0.5
+       %void = OpTypeVoid
+         %30 = OpTypeFunction %void
+ %float_0_25 = OpConstant %float 0.25
+        %foo = OpFunction %VertexOutput None %16
+          %x = OpFunctionParameter %float
+         %20 = OpLabel
+         %22 = OpCompositeConstruct %v4float %x %x %x %float_1
+         %24 = OpCompositeConstruct %VertexOutput %22 %int_42
+               OpReturnValue %24
+               OpFunctionEnd
+%vert_main1_inner = OpFunction %VertexOutput None %25
+         %27 = OpLabel
+         %28 = OpFunctionCall %VertexOutput %foo %float_0_5
+               OpReturnValue %28
+               OpFunctionEnd
+ %vert_main1 = OpFunction %void None %30
+         %33 = OpLabel
+         %34 = OpFunctionCall %VertexOutput %vert_main1_inner
+         %35 = OpCompositeExtract %v4float %34 0
+               OpStore %pos_1 %35
+         %36 = OpCompositeExtract %int %34 1
+               OpStore %loc0_1 %36
+               OpStore %vertex_point_size %float_1
+               OpReturn
+               OpFunctionEnd
+%vert_main2_inner = OpFunction %VertexOutput None %25
+         %38 = OpLabel
+         %39 = OpFunctionCall %VertexOutput %foo %float_0_25
+               OpReturnValue %39
+               OpFunctionEnd
+ %vert_main2 = OpFunction %void None %30
+         %42 = OpLabel
+         %43 = OpFunctionCall %VertexOutput %vert_main2_inner
+         %44 = OpCompositeExtract %v4float %43 0
+               OpStore %pos_2 %44
+         %45 = OpCompositeExtract %int %43 1
+               OpStore %loc0_2 %45
+               OpStore %vertex_point_size_1 %float_1
+               OpReturn
+               OpFunctionEnd

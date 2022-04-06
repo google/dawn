@@ -1,0 +1,132 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 79
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %GlobalInvocationID_1
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %GlobalInvocationID_1 "GlobalInvocationID_1"
+               OpName %Constants "Constants"
+               OpMemberName %Constants 0 "level"
+               OpName %constants "constants"
+               OpName %myTexture "myTexture"
+               OpName %Result "Result"
+               OpMemberName %Result 0 "values"
+               OpName %result "result"
+               OpName %main_inner "main_inner"
+               OpName %GlobalInvocationID "GlobalInvocationID"
+               OpName %flatIndex "flatIndex"
+               OpName %texel "texel"
+               OpName %i "i"
+               OpName %main "main"
+               OpDecorate %GlobalInvocationID_1 BuiltIn GlobalInvocationId
+               OpDecorate %Constants Block
+               OpMemberDecorate %Constants 0 Offset 0
+               OpDecorate %constants NonWritable
+               OpDecorate %constants DescriptorSet 0
+               OpDecorate %constants Binding 0
+               OpDecorate %myTexture DescriptorSet 0
+               OpDecorate %myTexture Binding 1
+               OpDecorate %Result Block
+               OpMemberDecorate %Result 0 Offset 0
+               OpDecorate %_runtimearr_float ArrayStride 4
+               OpDecorate %result DescriptorSet 0
+               OpDecorate %result Binding 3
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%GlobalInvocationID_1 = OpVariable %_ptr_Input_v3uint Input
+        %int = OpTypeInt 32 1
+  %Constants = OpTypeStruct %int
+%_ptr_Uniform_Constants = OpTypePointer Uniform %Constants
+  %constants = OpVariable %_ptr_Uniform_Constants Uniform
+      %float = OpTypeFloat 32
+         %11 = OpTypeImage %float 2D 0 1 0 1 Unknown
+%_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11
+  %myTexture = OpVariable %_ptr_UniformConstant_11 UniformConstant
+%_runtimearr_float = OpTypeRuntimeArray %float
+     %Result = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_Result = OpTypePointer StorageBuffer %Result
+     %result = OpVariable %_ptr_StorageBuffer_Result StorageBuffer
+       %void = OpTypeVoid
+         %17 = OpTypeFunction %void %v3uint
+     %uint_2 = OpConstant %uint 2
+%_ptr_Function_uint = OpTypePointer Function %uint
+         %33 = OpConstantNull %uint
+     %uint_1 = OpConstant %uint 1
+    %v4float = OpTypeVector %float 4
+      %v3int = OpTypeVector %int 3
+      %v2int = OpTypeVector %int 2
+     %v2uint = OpTypeVector %uint 2
+      %int_0 = OpConstant %int 0
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+         %51 = OpConstantNull %v4float
+     %uint_0 = OpConstant %uint 0
+       %bool = OpTypeBool
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+%_ptr_Function_float = OpTypePointer Function %float
+         %74 = OpTypeFunction %void
+ %main_inner = OpFunction %void None %17
+%GlobalInvocationID = OpFunctionParameter %v3uint
+         %21 = OpLabel
+  %flatIndex = OpVariable %_ptr_Function_uint Function %33
+      %texel = OpVariable %_ptr_Function_v4float Function %51
+          %i = OpVariable %_ptr_Function_uint Function %33
+         %23 = OpIMul %uint %uint_2 %uint_2
+         %24 = OpCompositeExtract %uint %GlobalInvocationID 2
+         %25 = OpIMul %uint %23 %24
+         %26 = OpCompositeExtract %uint %GlobalInvocationID 1
+         %27 = OpIMul %uint %uint_2 %26
+         %28 = OpIAdd %uint %25 %27
+         %29 = OpCompositeExtract %uint %GlobalInvocationID 0
+         %30 = OpIAdd %uint %28 %29
+               OpStore %flatIndex %30
+         %34 = OpLoad %uint %flatIndex
+         %36 = OpIMul %uint %34 %uint_1
+               OpStore %flatIndex %36
+         %39 = OpLoad %11 %myTexture
+         %44 = OpVectorShuffle %v2uint %GlobalInvocationID %GlobalInvocationID 0 1
+         %41 = OpBitcast %v2int %44
+         %45 = OpCompositeExtract %int %41 0
+         %46 = OpCompositeExtract %int %41 1
+         %48 = OpCompositeConstruct %v3int %45 %46 %int_0
+         %37 = OpImageFetch %v4float %39 %48 Lod %int_0
+               OpStore %texel %37
+               OpStore %i %uint_0
+               OpBranch %54
+         %54 = OpLabel
+               OpLoopMerge %55 %56 None
+               OpBranch %57
+         %57 = OpLabel
+         %59 = OpLoad %uint %i
+         %60 = OpULessThan %bool %59 %uint_1
+         %58 = OpLogicalNot %bool %60
+               OpSelectionMerge %62 None
+               OpBranchConditional %58 %63 %62
+         %63 = OpLabel
+               OpBranch %55
+         %62 = OpLabel
+         %64 = OpLoad %uint %flatIndex
+         %65 = OpLoad %uint %i
+         %66 = OpIAdd %uint %64 %65
+         %68 = OpAccessChain %_ptr_StorageBuffer_float %result %uint_0 %66
+         %70 = OpAccessChain %_ptr_Function_float %texel %uint_0
+         %71 = OpLoad %float %70
+               OpStore %68 %71
+               OpBranch %56
+         %56 = OpLabel
+         %72 = OpLoad %uint %i
+         %73 = OpIAdd %uint %72 %uint_1
+               OpStore %i %73
+               OpBranch %54
+         %55 = OpLabel
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %74
+         %76 = OpLabel
+         %78 = OpLoad %v3uint %GlobalInvocationID_1
+         %77 = OpFunctionCall %void %main_inner %78
+               OpReturn
+               OpFunctionEnd

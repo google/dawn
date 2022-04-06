@@ -1,0 +1,23 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void foo(thread float2* const tint_symbol_1, thread int3* const tint_symbol_2, thread uint4* const tint_symbol_3, thread bool2* const tint_symbol_4) {
+  for(int i = 0; (i < 2); i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+    (*(tint_symbol_1))[i] = 1.0f;
+    (*(tint_symbol_2))[i] = 1;
+    (*(tint_symbol_3))[i] = 1u;
+    (*(tint_symbol_4))[i] = true;
+  }
+}
+
+kernel void tint_symbol() {
+  thread float2 tint_symbol_5 = 0.0f;
+  thread int3 tint_symbol_6 = 0;
+  thread uint4 tint_symbol_7 = 0u;
+  thread bool2 tint_symbol_8 = false;
+  for(int i = 0; (i < 2); i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+    foo(&(tint_symbol_5), &(tint_symbol_6), &(tint_symbol_7), &(tint_symbol_8));
+  }
+  return;
+}
+

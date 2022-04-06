@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void dpdy_7f8d84() {
+  float res = dfdy(1.0f);
+}
+
+fragment void fragment_main() {
+  dpdy_7f8d84();
+  return;
+}
+

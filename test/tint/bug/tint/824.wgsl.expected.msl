@@ -1,0 +1,39 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Output {
+  float4 Position;
+  float4 color;
+};
+
+struct tint_symbol_1 {
+  float4 color [[user(locn0)]];
+  float4 Position [[position]];
+};
+
+struct tint_array_wrapper {
+  float2 arr[4];
+};
+
+struct tint_array_wrapper_1 {
+  float4 arr[4];
+};
+
+Output tint_symbol_inner(uint VertexIndex, uint InstanceIndex) {
+  tint_array_wrapper const zv = {.arr={float2(0.200000003f, 0.200000003f), float2(0.300000012f, 0.300000012f), float2(-0.100000001f, -0.100000001f), float2(1.100000024f, 1.100000024f)}};
+  float const z = zv.arr[InstanceIndex][0];
+  Output output = {};
+  output.Position = float4(0.5f, 0.5f, z, 1.0f);
+  tint_array_wrapper_1 const colors = {.arr={float4(1.0f, 0.0f, 0.0f, 1.0f), float4(0.0f, 1.0f, 0.0f, 1.0f), float4(0.0f, 0.0f, 1.0f, 1.0f), float4(1.0f, 1.0f, 1.0f, 1.0f)}};
+  output.color = colors.arr[InstanceIndex];
+  return output;
+}
+
+vertex tint_symbol_1 tint_symbol(uint VertexIndex [[vertex_id]], uint InstanceIndex [[instance_id]]) {
+  Output const inner_result = tint_symbol_inner(VertexIndex, InstanceIndex);
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.Position = inner_result.Position;
+  wrapper_result.color = inner_result.color;
+  return wrapper_result;
+}
+

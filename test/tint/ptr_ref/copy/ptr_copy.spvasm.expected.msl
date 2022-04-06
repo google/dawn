@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1() {
+  uint x_10 = 0u;
+  return;
+}
+
+kernel void tint_symbol() {
+  main_1();
+  return;
+}
+

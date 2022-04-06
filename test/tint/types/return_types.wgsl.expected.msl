@@ -1,0 +1,57 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  float a;
+};
+
+bool ret_bool() {
+  return bool();
+}
+
+int ret_i32() {
+  return int();
+}
+
+uint ret_u32() {
+  return uint();
+}
+
+float ret_f32() {
+  return float();
+}
+
+int2 ret_v2i32() {
+  return int2();
+}
+
+uint3 ret_v3u32() {
+  return uint3();
+}
+
+float4 ret_v4f32() {
+  return float4();
+}
+
+float2x3 ret_m2x3() {
+  return float2x3();
+}
+
+struct tint_array_wrapper {
+  float arr[4];
+};
+
+tint_array_wrapper ret_arr() {
+  tint_array_wrapper const tint_symbol_1 = {.arr={}};
+  return tint_symbol_1;
+}
+
+S ret_struct() {
+  S const tint_symbol_2 = {};
+  return tint_symbol_2;
+}
+
+kernel void tint_symbol() {
+  return;
+}
+

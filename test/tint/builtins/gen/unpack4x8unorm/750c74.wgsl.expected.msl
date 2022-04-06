@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void unpack4x8unorm_750c74() {
+  float4 res = unpack_unorm4x8_to_float(1u);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  unpack4x8unorm_750c74();
+  return float4();
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  unpack4x8unorm_750c74();
+  return;
+}
+
+kernel void compute_main() {
+  unpack4x8unorm_750c74();
+  return;
+}
+

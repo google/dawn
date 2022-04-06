@@ -1,0 +1,71 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 41
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %counter "counter"
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %foo "foo"
+               OpName %bar "bar"
+               OpName %main "main"
+               OpName %S "S"
+               OpMemberName %S 0 "a"
+               OpName %x "x"
+               OpMemberDecorate %S 0 Offset 0
+               OpDecorate %_arr_v4int_uint_4 ArrayStride 16
+        %int = OpTypeInt 32 1
+%_ptr_Private_int = OpTypePointer Private %int
+          %4 = OpConstantNull %int
+    %counter = OpVariable %_ptr_Private_int Private %4
+       %void = OpTypeVoid
+          %5 = OpTypeFunction %void
+          %9 = OpTypeFunction %int
+      %int_1 = OpConstant %int 1
+      %int_2 = OpConstant %int 2
+      %v4int = OpTypeVector %int 4
+       %uint = OpTypeInt 32 0
+     %uint_4 = OpConstant %uint 4
+%_arr_v4int_uint_4 = OpTypeArray %v4int %uint_4
+          %S = OpTypeStruct %_arr_v4int_uint_4
+         %29 = OpConstantNull %S
+%_ptr_Function_S = OpTypePointer Function %S
+     %uint_0 = OpConstant %uint 0
+%_ptr_Function_int = OpTypePointer Function %int
+      %int_5 = OpConstant %int 5
+%unused_entry_point = OpFunction %void None %5
+          %8 = OpLabel
+               OpReturn
+               OpFunctionEnd
+        %foo = OpFunction %int None %9
+         %11 = OpLabel
+         %12 = OpLoad %int %counter
+         %14 = OpIAdd %int %12 %int_1
+               OpStore %counter %14
+         %15 = OpLoad %int %counter
+               OpReturnValue %15
+               OpFunctionEnd
+        %bar = OpFunction %int None %9
+         %17 = OpLabel
+         %18 = OpLoad %int %counter
+         %20 = OpIAdd %int %18 %int_2
+               OpStore %counter %20
+         %21 = OpLoad %int %counter
+               OpReturnValue %21
+               OpFunctionEnd
+       %main = OpFunction %void None %5
+         %23 = OpLabel
+          %x = OpVariable %_ptr_Function_S Function %29
+               OpStore %x %29
+         %32 = OpFunctionCall %int %foo
+         %33 = OpFunctionCall %int %bar
+         %36 = OpAccessChain %_ptr_Function_int %x %uint_0 %32 %33
+         %37 = OpAccessChain %_ptr_Function_int %x %uint_0 %32 %33
+         %38 = OpLoad %int %37
+         %40 = OpIAdd %int %38 %int_5
+               OpStore %36 %40
+               OpReturn
+               OpFunctionEnd

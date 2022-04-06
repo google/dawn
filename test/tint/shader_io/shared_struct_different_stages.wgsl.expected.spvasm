@@ -1,0 +1,92 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 45
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %vert_main "vert_main" %col1_1 %col2_1 %pos_1 %vertex_point_size
+               OpEntryPoint Fragment %frag_main "frag_main" %col1_2 %col2_2 %pos_2
+               OpExecutionMode %frag_main OriginUpperLeft
+               OpName %col1_1 "col1_1"
+               OpName %col2_1 "col2_1"
+               OpName %pos_1 "pos_1"
+               OpName %vertex_point_size "vertex_point_size"
+               OpName %col1_2 "col1_2"
+               OpName %col2_2 "col2_2"
+               OpName %pos_2 "pos_2"
+               OpName %Interface "Interface"
+               OpMemberName %Interface 0 "col1"
+               OpMemberName %Interface 1 "col2"
+               OpMemberName %Interface 2 "pos"
+               OpName %vert_main_inner "vert_main_inner"
+               OpName %vert_main "vert_main"
+               OpName %frag_main_inner "frag_main_inner"
+               OpName %colors "colors"
+               OpName %frag_main "frag_main"
+               OpDecorate %col1_1 Location 1
+               OpDecorate %col2_1 Location 2
+               OpDecorate %pos_1 BuiltIn Position
+               OpDecorate %vertex_point_size BuiltIn PointSize
+               OpDecorate %col1_2 Location 1
+               OpDecorate %col2_2 Location 2
+               OpDecorate %pos_2 BuiltIn FragCoord
+               OpMemberDecorate %Interface 0 Offset 0
+               OpMemberDecorate %Interface 1 Offset 4
+               OpMemberDecorate %Interface 2 Offset 16
+      %float = OpTypeFloat 32
+%_ptr_Output_float = OpTypePointer Output %float
+          %4 = OpConstantNull %float
+     %col1_1 = OpVariable %_ptr_Output_float Output %4
+     %col2_1 = OpVariable %_ptr_Output_float Output %4
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %9 = OpConstantNull %v4float
+      %pos_1 = OpVariable %_ptr_Output_v4float Output %9
+%vertex_point_size = OpVariable %_ptr_Output_float Output %4
+%_ptr_Input_float = OpTypePointer Input %float
+     %col1_2 = OpVariable %_ptr_Input_float Input
+     %col2_2 = OpVariable %_ptr_Input_float Input
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+      %pos_2 = OpVariable %_ptr_Input_v4float Input
+  %Interface = OpTypeStruct %float %float %v4float
+         %16 = OpTypeFunction %Interface
+%float_0_400000006 = OpConstant %float 0.400000006
+%float_0_600000024 = OpConstant %float 0.600000024
+         %22 = OpConstantComposite %Interface %float_0_400000006 %float_0_600000024 %9
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+    %float_1 = OpConstant %float 1
+         %32 = OpTypeFunction %void %Interface
+%vert_main_inner = OpFunction %Interface None %16
+         %19 = OpLabel
+               OpReturnValue %22
+               OpFunctionEnd
+  %vert_main = OpFunction %void None %23
+         %26 = OpLabel
+         %27 = OpFunctionCall %Interface %vert_main_inner
+         %28 = OpCompositeExtract %float %27 0
+               OpStore %col1_1 %28
+         %29 = OpCompositeExtract %float %27 1
+               OpStore %col2_1 %29
+         %30 = OpCompositeExtract %v4float %27 2
+               OpStore %pos_1 %30
+               OpStore %vertex_point_size %float_1
+               OpReturn
+               OpFunctionEnd
+%frag_main_inner = OpFunction %void None %32
+     %colors = OpFunctionParameter %Interface
+         %35 = OpLabel
+         %36 = OpCompositeExtract %float %colors 0
+         %37 = OpCompositeExtract %float %colors 1
+               OpReturn
+               OpFunctionEnd
+  %frag_main = OpFunction %void None %23
+         %39 = OpLabel
+         %41 = OpLoad %float %col1_2
+         %42 = OpLoad %float %col2_2
+         %43 = OpLoad %v4float %pos_2
+         %44 = OpCompositeConstruct %Interface %41 %42 %43
+         %40 = OpFunctionCall %void %frag_main_inner %44
+               OpReturn
+               OpFunctionEnd

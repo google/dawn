@@ -1,0 +1,82 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 35
+; Schema: 0
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %none_1 %flat_1 %perspective_center_1 %perspective_centroid_1 %perspective_sample_1 %linear_center_1 %linear_centroid_1 %linear_sample_1
+               OpExecutionMode %main OriginUpperLeft
+               OpName %none_1 "none_1"
+               OpName %flat_1 "flat_1"
+               OpName %perspective_center_1 "perspective_center_1"
+               OpName %perspective_centroid_1 "perspective_centroid_1"
+               OpName %perspective_sample_1 "perspective_sample_1"
+               OpName %linear_center_1 "linear_center_1"
+               OpName %linear_centroid_1 "linear_centroid_1"
+               OpName %linear_sample_1 "linear_sample_1"
+               OpName %main_inner "main_inner"
+               OpName %none "none"
+               OpName %flat "flat"
+               OpName %perspective_center "perspective_center"
+               OpName %perspective_centroid "perspective_centroid"
+               OpName %perspective_sample "perspective_sample"
+               OpName %linear_center "linear_center"
+               OpName %linear_centroid "linear_centroid"
+               OpName %linear_sample "linear_sample"
+               OpName %main "main"
+               OpDecorate %none_1 Location 0
+               OpDecorate %flat_1 Location 1
+               OpDecorate %flat_1 Flat
+               OpDecorate %perspective_center_1 Location 2
+               OpDecorate %perspective_centroid_1 Location 3
+               OpDecorate %perspective_centroid_1 Centroid
+               OpDecorate %perspective_sample_1 Location 4
+               OpDecorate %perspective_sample_1 Sample
+               OpDecorate %linear_center_1 Location 5
+               OpDecorate %linear_center_1 NoPerspective
+               OpDecorate %linear_centroid_1 Location 6
+               OpDecorate %linear_centroid_1 NoPerspective
+               OpDecorate %linear_centroid_1 Centroid
+               OpDecorate %linear_sample_1 Location 7
+               OpDecorate %linear_sample_1 NoPerspective
+               OpDecorate %linear_sample_1 Sample
+      %float = OpTypeFloat 32
+%_ptr_Input_float = OpTypePointer Input %float
+     %none_1 = OpVariable %_ptr_Input_float Input
+     %flat_1 = OpVariable %_ptr_Input_float Input
+%perspective_center_1 = OpVariable %_ptr_Input_float Input
+%perspective_centroid_1 = OpVariable %_ptr_Input_float Input
+%perspective_sample_1 = OpVariable %_ptr_Input_float Input
+%linear_center_1 = OpVariable %_ptr_Input_float Input
+%linear_centroid_1 = OpVariable %_ptr_Input_float Input
+%linear_sample_1 = OpVariable %_ptr_Input_float Input
+       %void = OpTypeVoid
+         %11 = OpTypeFunction %void %float %float %float %float %float %float %float %float
+         %23 = OpTypeFunction %void
+ %main_inner = OpFunction %void None %11
+       %none = OpFunctionParameter %float
+       %flat = OpFunctionParameter %float
+%perspective_center = OpFunctionParameter %float
+%perspective_centroid = OpFunctionParameter %float
+%perspective_sample = OpFunctionParameter %float
+%linear_center = OpFunctionParameter %float
+%linear_centroid = OpFunctionParameter %float
+%linear_sample = OpFunctionParameter %float
+         %22 = OpLabel
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %23
+         %25 = OpLabel
+         %27 = OpLoad %float %none_1
+         %28 = OpLoad %float %flat_1
+         %29 = OpLoad %float %perspective_center_1
+         %30 = OpLoad %float %perspective_centroid_1
+         %31 = OpLoad %float %perspective_sample_1
+         %32 = OpLoad %float %linear_center_1
+         %33 = OpLoad %float %linear_centroid_1
+         %34 = OpLoad %float %linear_sample_1
+         %26 = OpFunctionCall %void %main_inner %27 %28 %29 %30 %31 %32 %33 %34
+               OpReturn
+               OpFunctionEnd

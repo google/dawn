@@ -1,0 +1,48 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Uniforms {
+  /* 0x0000 */ uint dstTextureFlipY;
+  /* 0x0004 */ uint isFloat16;
+  /* 0x0008 */ uint isRGB10A2Unorm;
+  /* 0x000c */ uint channelCount;
+};
+
+struct OutputBuf {
+  /* 0x0000 */ uint result[1];
+};
+
+uint ConvertToFp16FloatValue(float fp32) {
+  return 1u;
+}
+
+void tint_symbol_inner(uint3 GlobalInvocationID, texture2d<float, access::sample> tint_symbol_2, const constant Uniforms* const tint_symbol_3, texture2d<float, access::sample> tint_symbol_4, device OutputBuf* const tint_symbol_5) {
+  int2 size = int2(tint_symbol_2.get_width(), tint_symbol_2.get_height());
+  int2 dstTexCoord = int2(uint3(GlobalInvocationID).xy);
+  int2 srcTexCoord = dstTexCoord;
+  if (((*(tint_symbol_3)).dstTextureFlipY == 1u)) {
+    srcTexCoord[1] = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(size[1]) - as_type<uint>(dstTexCoord[1])))) - as_type<uint>(1)));
+  }
+  float4 srcColor = tint_symbol_2.read(uint2(srcTexCoord), 0);
+  float4 dstColor = tint_symbol_4.read(uint2(dstTexCoord), 0);
+  bool success = true;
+  uint4 srcColorBits = 0u;
+  uint4 dstColorBits = uint4(dstColor);
+  for(uint i = 0u; (i < (*(tint_symbol_3)).channelCount); i = (i + 1u)) {
+    uint const tint_symbol_1 = ConvertToFp16FloatValue(srcColor[i]);
+    srcColorBits[i] = tint_symbol_1;
+    success = (success && (srcColorBits[i] == dstColorBits[i]));
+  }
+  uint outputIndex = ((GlobalInvocationID[1] * uint(size[0])) + GlobalInvocationID[0]);
+  if (success) {
+    (*(tint_symbol_5)).result[outputIndex] = uint(1);
+  } else {
+    (*(tint_symbol_5)).result[outputIndex] = uint(0);
+  }
+}
+
+kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_6 [[texture(0)]], const constant Uniforms* tint_symbol_7 [[buffer(0)]], texture2d<float, access::sample> tint_symbol_8 [[texture(1)]], device OutputBuf* tint_symbol_9 [[buffer(1)]], uint3 GlobalInvocationID [[thread_position_in_grid]]) {
+  tint_symbol_inner(GlobalInvocationID, tint_symbol_6, tint_symbol_7, tint_symbol_8, tint_symbol_9);
+  return;
+}
+

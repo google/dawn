@@ -1,0 +1,5 @@
+#include <metal_stdlib>
+
+using namespace metal;
+constant bool3 v = bool3(false, true, false);
+

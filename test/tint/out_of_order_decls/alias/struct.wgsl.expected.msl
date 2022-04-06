@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  int m;
+};
+
+fragment void f() {
+  S v = {};
+  return;
+}
+

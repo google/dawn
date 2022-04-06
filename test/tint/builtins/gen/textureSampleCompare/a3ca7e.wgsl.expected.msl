@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void textureSampleCompare_a3ca7e(depthcube_array<float, access::sample> tint_symbol, sampler tint_symbol_1) {
+  float res = tint_symbol.sample_compare(tint_symbol_1, float3(), 1, 1.0f);
+}
+
+fragment void fragment_main(depthcube_array<float, access::sample> tint_symbol_2 [[texture(0)]], sampler tint_symbol_3 [[sampler(0)]]) {
+  textureSampleCompare_a3ca7e(tint_symbol_2, tint_symbol_3);
+  return;
+}
+

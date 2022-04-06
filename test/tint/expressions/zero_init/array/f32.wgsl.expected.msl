@@ -1,0 +1,11 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  float arr[4];
+};
+
+void f() {
+  tint_array_wrapper v = {.arr={}};
+}
+

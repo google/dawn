@@ -1,0 +1,34 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct In {
+  float none;
+  float flat;
+  float perspective_center;
+  float perspective_centroid;
+  float perspective_sample;
+  float linear_center;
+  float linear_centroid;
+  float linear_sample;
+};
+
+struct tint_symbol_2 {
+  float none [[user(locn0)]];
+  float flat [[user(locn1)]] [[flat]];
+  float perspective_center [[user(locn2)]] [[center_perspective]];
+  float perspective_centroid [[user(locn3)]] [[centroid_perspective]];
+  float perspective_sample [[user(locn4)]] [[sample_perspective]];
+  float linear_center [[user(locn5)]] [[center_no_perspective]];
+  float linear_centroid [[user(locn6)]] [[centroid_no_perspective]];
+  float linear_sample [[user(locn7)]] [[sample_no_perspective]];
+};
+
+void tint_symbol_inner(In in) {
+}
+
+fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  In const tint_symbol_3 = {.none=tint_symbol_1.none, .flat=tint_symbol_1.flat, .perspective_center=tint_symbol_1.perspective_center, .perspective_centroid=tint_symbol_1.perspective_centroid, .perspective_sample=tint_symbol_1.perspective_sample, .linear_center=tint_symbol_1.linear_center, .linear_centroid=tint_symbol_1.linear_centroid, .linear_sample=tint_symbol_1.linear_sample};
+  tint_symbol_inner(tint_symbol_3);
+  return;
+}
+

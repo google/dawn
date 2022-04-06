@@ -1,0 +1,78 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct PointLight {
+  float4 position;
+};
+
+struct PointLights {
+  PointLight values[1];
+};
+
+struct Uniforms {
+  /* 0x0000 */ float4x4 worldView;
+  /* 0x0040 */ float4x4 proj;
+  /* 0x0080 */ uint numPointLights;
+  /* 0x0084 */ uint color_source;
+  /* 0x0088 */ int8_t tint_pad[8];
+  /* 0x0090 */ float4 color;
+};
+
+struct FragmentInput {
+  float4 position;
+  float4 view_position;
+  float4 normal;
+  float2 uv;
+  float4 color;
+};
+
+struct FragmentOutput {
+  float4 color;
+};
+
+float4 getColor(FragmentInput tint_symbol, const constant Uniforms* const tint_symbol_6, texture2d<float, access::sample> tint_symbol_7, sampler tint_symbol_8) {
+  float4 color = 0.0f;
+  if (((*(tint_symbol_6)).color_source == 0u)) {
+    color = tint_symbol.color;
+  } else {
+    if (((*(tint_symbol_6)).color_source == 1u)) {
+      color = tint_symbol.normal;
+      color[3] = 1.0f;
+    } else {
+      if (((*(tint_symbol_6)).color_source == 2u)) {
+        color = (*(tint_symbol_6)).color;
+      } else {
+        if (((*(tint_symbol_6)).color_source == 3u)) {
+          color = tint_symbol_7.sample(tint_symbol_8, tint_symbol.uv);
+        }
+      }
+    }
+  }
+  return color;
+}
+
+struct tint_symbol_3 {
+  float4 view_position [[user(locn0)]];
+  float4 normal [[user(locn1)]];
+  float2 uv [[user(locn2)]];
+  float4 color [[user(locn3)]];
+};
+
+struct tint_symbol_4 {
+  float4 color [[color(0)]];
+};
+
+FragmentOutput tint_symbol_1_inner(FragmentInput tint_symbol) {
+  FragmentOutput output = {};
+  output.color = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  return output;
+}
+
+fragment tint_symbol_4 tint_symbol_1(float4 position [[position]], tint_symbol_3 tint_symbol_2 [[stage_in]]) {
+  FragmentInput const tint_symbol_5 = {.position=position, .view_position=tint_symbol_2.view_position, .normal=tint_symbol_2.normal, .uv=tint_symbol_2.uv, .color=tint_symbol_2.color};
+  FragmentOutput const inner_result = tint_symbol_1_inner(tint_symbol_5);
+  tint_symbol_4 wrapper_result = {};
+  wrapper_result.color = inner_result.color;
+  return wrapper_result;
+}
+

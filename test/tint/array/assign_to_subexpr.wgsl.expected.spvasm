@@ -1,0 +1,57 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 30
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %foo "foo"
+               OpName %dst "dst"
+               OpName %S "S"
+               OpMemberName %S 0 "arr"
+               OpName %dst_struct "dst_struct"
+               OpName %dst_array "dst_array"
+               OpDecorate %_arr_int_uint_4 ArrayStride 4
+               OpMemberDecorate %S 0 Offset 0
+               OpDecorate %_arr__arr_int_uint_4_uint_2 ArrayStride 16
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+     %uint_4 = OpConstant %uint 4
+%_arr_int_uint_4 = OpTypeArray %int %uint_4
+         %11 = OpConstantNull %_arr_int_uint_4
+%_ptr_Function__arr_int_uint_4 = OpTypePointer Function %_arr_int_uint_4
+          %S = OpTypeStruct %_arr_int_uint_4
+%_ptr_Function_S = OpTypePointer Function %S
+         %17 = OpConstantNull %S
+     %uint_2 = OpConstant %uint 2
+%_arr__arr_int_uint_4_uint_2 = OpTypeArray %_arr_int_uint_4 %uint_2
+%_ptr_Function__arr__arr_int_uint_4_uint_2 = OpTypePointer Function %_arr__arr_int_uint_4_uint_2
+         %22 = OpConstantNull %_arr__arr_int_uint_4_uint_2
+     %uint_0 = OpConstant %uint 0
+      %int_1 = OpConstant %int 1
+      %int_0 = OpConstant %int 0
+%unused_entry_point = OpFunction %void None %1
+          %4 = OpLabel
+               OpReturn
+               OpFunctionEnd
+        %foo = OpFunction %void None %1
+          %6 = OpLabel
+        %dst = OpVariable %_ptr_Function__arr_int_uint_4 Function %11
+ %dst_struct = OpVariable %_ptr_Function_S Function %17
+  %dst_array = OpVariable %_ptr_Function__arr__arr_int_uint_4_uint_2 Function %22
+         %24 = OpAccessChain %_ptr_Function__arr_int_uint_4 %dst_struct %uint_0
+               OpStore %24 %11
+         %26 = OpAccessChain %_ptr_Function__arr_int_uint_4 %dst_array %int_1
+               OpStore %26 %11
+               OpStore %dst %11
+         %27 = OpAccessChain %_ptr_Function__arr_int_uint_4 %dst_struct %uint_0
+               OpStore %27 %11
+         %29 = OpAccessChain %_ptr_Function__arr_int_uint_4 %dst_array %int_0
+               OpStore %29 %11
+               OpReturn
+               OpFunctionEnd

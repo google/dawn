@@ -1,0 +1,16 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1() {
+  int i = 0;
+  i = 123;
+  i = 123;
+  i = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(100) + as_type<uint>(20)))) + as_type<uint>(3)));
+  return;
+}
+
+kernel void tint_symbol() {
+  main_1();
+  return;
+}
+

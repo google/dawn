@@ -1,0 +1,11 @@
+#include <metal_stdlib>
+
+using namespace metal;
+float tint_symbol() {
+  return (((2.0f * 3.0f) - 4.0f) / 5.0f);
+}
+
+kernel void ep() {
+  return;
+}
+

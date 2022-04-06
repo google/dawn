@@ -1,0 +1,14 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  int3 v;
+};
+
+void f(thread S* const tint_symbol) {
+  (*(tint_symbol)).v = int3(1, 2, 3);
+  (*(tint_symbol)).v[0] = 1;
+  (*(tint_symbol)).v[1] = 2;
+  (*(tint_symbol)).v[2] = 3;
+}
+

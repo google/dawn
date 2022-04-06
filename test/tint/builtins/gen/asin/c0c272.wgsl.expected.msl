@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void asin_c0c272() {
+  float res = asin(1.0f);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  asin_c0c272();
+  return float4();
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  asin_c0c272();
+  return;
+}
+
+kernel void compute_main() {
+  asin_c0c272();
+  return;
+}
+

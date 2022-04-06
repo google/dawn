@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void textureSample_7e9ffd(depth2d_array<float, access::sample> tint_symbol, sampler tint_symbol_1) {
+  float res = tint_symbol.sample(tint_symbol_1, float2(), 1);
+}
+
+fragment void fragment_main(depth2d_array<float, access::sample> tint_symbol_2 [[texture(0)]], sampler tint_symbol_3 [[sampler(0)]]) {
+  textureSample_7e9ffd(tint_symbol_2, tint_symbol_3);
+  return;
+}
+

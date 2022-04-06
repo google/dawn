@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void dpdy_feb40f() {
+  float3 res = dfdy(float3());
+}
+
+fragment void fragment_main() {
+  dpdy_feb40f();
+  return;
+}
+

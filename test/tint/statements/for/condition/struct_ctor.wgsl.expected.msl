@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  int i;
+};
+
+void f() {
+  int i = 0;
+  while (true) {
+    S const tint_symbol = {.i=1};
+    if (!((i < tint_symbol.i))) {
+      break;
+    }
+    {
+    }
+  }
+}
+

@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void dpdx_99edb1() {
+  float2 res = dfdx(float2());
+}
+
+fragment void fragment_main() {
+  dpdx_99edb1();
+  return;
+}
+

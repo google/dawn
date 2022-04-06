@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void dpdyFine_df33aa() {
+  float2 res = dfdy(float2());
+}
+
+fragment void fragment_main() {
+  dpdyFine_df33aa();
+  return;
+}
+

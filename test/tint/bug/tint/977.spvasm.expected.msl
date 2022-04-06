@@ -1,0 +1,69 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct ResultMatrix {
+  /* 0x0000 */ float numbers[1];
+};
+
+struct FirstMatrix {
+  float numbers[1];
+};
+
+struct SecondMatrix {
+  float numbers[1];
+};
+
+struct Uniforms {
+  float tint_symbol;
+  int sizeA;
+  int sizeB;
+};
+
+float binaryOperation_f1_f1_(thread float* const a, thread float* const b) {
+  float x_26 = 0.0f;
+  float const x_13 = *(b);
+  if ((x_13 == 0.0f)) {
+    return 1.0f;
+  }
+  float const x_21 = *(b);
+  if (!((rint((x_21 - (2.0f * floor((x_21 / 2.0f))))) == 1.0f))) {
+    float const x_29 = *(a);
+    float const x_31 = *(b);
+    x_26 = pow(fabs(x_29), x_31);
+  } else {
+    float const x_34 = *(a);
+    float const x_36 = *(a);
+    float const x_38 = *(b);
+    x_26 = (sign(x_34) * pow(fabs(x_36), x_38));
+  }
+  float const x_41 = x_26;
+  return x_41;
+}
+
+void main_1(thread uint3* const tint_symbol_2, device ResultMatrix* const tint_symbol_3) {
+  int index = 0;
+  int a_1 = 0;
+  float param = 0.0f;
+  float param_1 = 0.0f;
+  uint const x_54 = (*(tint_symbol_2))[0];
+  index = as_type<int>(x_54);
+  a_1 = -10;
+  int const x_63 = index;
+  param = -4.0f;
+  param_1 = -3.0f;
+  float const x_68 = binaryOperation_f1_f1_(&(param), &(param_1));
+  (*(tint_symbol_3)).numbers[x_63] = x_68;
+  return;
+}
+
+void tint_symbol_1_inner(uint3 gl_GlobalInvocationID_param, thread uint3* const tint_symbol_4, device ResultMatrix* const tint_symbol_5) {
+  *(tint_symbol_4) = gl_GlobalInvocationID_param;
+  main_1(tint_symbol_4, tint_symbol_5);
+}
+
+kernel void tint_symbol_1(device ResultMatrix* tint_symbol_7 [[buffer(0)]], uint3 gl_GlobalInvocationID_param [[thread_position_in_grid]]) {
+  thread uint3 tint_symbol_6 = 0u;
+  tint_symbol_1_inner(gl_GlobalInvocationID_param, &(tint_symbol_6), tint_symbol_7);
+  return;
+}
+

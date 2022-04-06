@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void fwidthCoarse_159c8a() {
+  float res = fwidth(1.0f);
+}
+
+fragment void fragment_main() {
+  fwidthCoarse_159c8a();
+  return;
+}
+

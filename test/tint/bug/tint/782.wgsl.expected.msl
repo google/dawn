@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  int arr[2];
+};
+
+void foo() {
+  tint_array_wrapper tint_symbol = {};
+  tint_array_wrapper implict = {};
+  implict = tint_symbol;
+}
+

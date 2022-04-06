@@ -1,0 +1,10 @@
+#include <metal_stdlib>
+
+using namespace metal;
+int add_int_min_explicit() {
+  int a = (-2147483647 - 1);
+  int b = as_type<int>((as_type<uint>(a) + as_type<uint>(1)));
+  int c = as_type<int>((as_type<uint>((-2147483647 - 1)) + as_type<uint>(1)));
+  return c;
+}
+

@@ -1,0 +1,30 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Constants {
+  /* 0x0000 */ uint zero;
+};
+
+struct Result {
+  /* 0x0000 */ uint value;
+};
+
+struct tint_array_wrapper {
+  /* 0x0000 */ atomic_int arr[3];
+};
+
+struct TestData {
+  /* 0x0000 */ tint_array_wrapper data;
+};
+
+int runTest(device TestData* const tint_symbol_3, const constant Constants* const tint_symbol_4) {
+  return atomic_load_explicit(&((*(tint_symbol_3)).data.arr[(0u + uint((*(tint_symbol_4)).zero))]), memory_order_relaxed);
+}
+
+kernel void tint_symbol(device TestData* tint_symbol_5 [[buffer(2)]], const constant Constants* tint_symbol_6 [[buffer(0)]], device Result* tint_symbol_7 [[buffer(1)]]) {
+  int const tint_symbol_1 = runTest(tint_symbol_5, tint_symbol_6);
+  uint const tint_symbol_2 = uint(tint_symbol_1);
+  (*(tint_symbol_7)).value = tint_symbol_2;
+  return;
+}
+

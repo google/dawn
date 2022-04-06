@@ -1,0 +1,166 @@
+               OpCapability Shader
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %_GLF_color
+               OpExecutionMode %main OriginUpperLeft
+               OpSource ESSL 310
+               OpName %main "main"
+               OpName %a "a"
+               OpName %buf0 "buf0"
+               OpMemberName %buf0 0 "one"
+               OpName %_ ""
+               OpName %b "b"
+               OpName %c "c"
+               OpName %d "d"
+               OpName %e "e"
+               OpName %f "f"
+               OpName %_GLF_color "_GLF_color"
+               OpMemberDecorate %buf0 0 Offset 0
+               OpDecorate %buf0 Block
+               OpDecorate %_ DescriptorSet 0
+               OpDecorate %_ Binding 0
+               OpDecorate %_GLF_color Location 0
+       %void = OpTypeVoid
+         %13 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+%_ptr_Function_uint = OpTypePointer Function %uint
+    %uint_77 = OpConstant %uint 77
+       %buf0 = OpTypeStruct %uint
+%_ptr_Uniform_buf0 = OpTypePointer Uniform %buf0
+          %_ = OpVariable %_ptr_Uniform_buf0 Uniform
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+%_ptr_Uniform_uint = OpTypePointer Uniform %uint
+    %uint_32 = OpConstant %uint 32
+  %uint_3243 = OpConstant %uint 3243
+    %uint_33 = OpConstant %uint 33
+    %uint_23 = OpConstant %uint 23
+   %uint_345 = OpConstant %uint 345
+  %uint_2395 = OpConstant %uint 2395
+%uint_290485 = OpConstant %uint 290485
+ %uint_44321 = OpConstant %uint 44321
+     %uint_1 = OpConstant %uint 1
+       %bool = OpTypeBool
+     %uint_0 = OpConstant %uint 0
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+ %_GLF_color = OpVariable %_ptr_Output_v4float Output
+    %float_1 = OpConstant %float 1
+    %float_0 = OpConstant %float 0
+         %37 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
+         %38 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_0
+       %main = OpFunction %void None %13
+         %39 = OpLabel
+          %a = OpVariable %_ptr_Function_uint Function
+          %b = OpVariable %_ptr_Function_uint Function
+          %c = OpVariable %_ptr_Function_uint Function
+          %d = OpVariable %_ptr_Function_uint Function
+          %e = OpVariable %_ptr_Function_uint Function
+          %f = OpVariable %_ptr_Function_uint Function
+         %40 = OpAccessChain %_ptr_Uniform_uint %_ %int_0
+         %41 = OpLoad %uint %40
+         %42 = OpIAdd %uint %uint_77 %41
+         %43 = OpShiftRightLogical %uint %42 %uint_32
+               OpStore %a %43
+         %44 = OpAccessChain %_ptr_Uniform_uint %_ %int_0
+         %45 = OpLoad %uint %44
+         %46 = OpIAdd %uint %uint_3243 %45
+         %47 = OpShiftRightLogical %uint %46 %uint_33
+               OpStore %b %47
+         %48 = OpAccessChain %_ptr_Uniform_uint %_ %int_0
+         %49 = OpLoad %uint %48
+         %50 = OpIAdd %uint %uint_23 %49
+         %51 = OpShiftRightLogical %uint %50 %uint_345
+               OpStore %c %51
+         %52 = OpAccessChain %_ptr_Uniform_uint %_ %int_0
+         %53 = OpLoad %uint %52
+         %54 = OpIAdd %uint %uint_2395 %53
+         %55 = OpShiftLeftLogical %uint %54 %uint_32
+               OpStore %d %55
+         %56 = OpAccessChain %_ptr_Uniform_uint %_ %int_0
+         %57 = OpLoad %uint %56
+         %58 = OpIAdd %uint %uint_290485 %57
+         %59 = OpShiftLeftLogical %uint %58 %uint_33
+               OpStore %e %59
+         %60 = OpAccessChain %_ptr_Uniform_uint %_ %int_0
+         %61 = OpLoad %uint %60
+         %62 = OpIAdd %uint %uint_44321 %61
+         %63 = OpShiftLeftLogical %uint %62 %uint_345
+               OpStore %f %63
+         %64 = OpLoad %uint %a
+         %65 = OpINotEqual %bool %64 %uint_1
+               OpSelectionMerge %66 None
+               OpBranchConditional %65 %67 %66
+         %67 = OpLabel
+               OpStore %a %uint_1
+               OpBranch %66
+         %66 = OpLabel
+         %68 = OpLoad %uint %b
+         %69 = OpINotEqual %bool %68 %uint_0
+               OpSelectionMerge %70 None
+               OpBranchConditional %69 %71 %70
+         %71 = OpLabel
+               OpStore %b %uint_0
+               OpBranch %70
+         %70 = OpLabel
+         %72 = OpLoad %uint %c
+         %73 = OpINotEqual %bool %72 %uint_1
+               OpSelectionMerge %74 None
+               OpBranchConditional %73 %75 %74
+         %75 = OpLabel
+               OpStore %c %uint_1
+               OpBranch %74
+         %74 = OpLabel
+         %76 = OpLoad %uint %d
+         %77 = OpINotEqual %bool %76 %uint_0
+               OpSelectionMerge %78 None
+               OpBranchConditional %77 %79 %78
+         %79 = OpLabel
+               OpStore %d %uint_0
+               OpBranch %78
+         %78 = OpLabel
+         %80 = OpLoad %uint %e
+         %81 = OpINotEqual %bool %80 %uint_1
+               OpSelectionMerge %82 None
+               OpBranchConditional %81 %83 %82
+         %83 = OpLabel
+               OpStore %e %uint_1
+               OpBranch %82
+         %82 = OpLabel
+         %84 = OpLoad %uint %f
+         %85 = OpINotEqual %bool %84 %uint_0
+               OpSelectionMerge %86 None
+               OpBranchConditional %85 %87 %86
+         %87 = OpLabel
+               OpStore %f %uint_0
+               OpBranch %86
+         %86 = OpLabel
+         %88 = OpLoad %uint %a
+         %89 = OpIEqual %bool %88 %uint_1
+         %90 = OpLoad %uint %b
+         %91 = OpIEqual %bool %90 %uint_0
+         %92 = OpLogicalAnd %bool %89 %91
+         %93 = OpLoad %uint %c
+         %94 = OpIEqual %bool %93 %uint_1
+         %95 = OpLogicalAnd %bool %92 %94
+         %96 = OpLoad %uint %d
+         %97 = OpIEqual %bool %96 %uint_0
+         %98 = OpLogicalAnd %bool %95 %97
+         %99 = OpLoad %uint %e
+        %100 = OpIEqual %bool %99 %uint_1
+        %101 = OpLogicalAnd %bool %98 %100
+        %102 = OpLoad %uint %f
+        %103 = OpIEqual %bool %102 %uint_0
+        %104 = OpLogicalAnd %bool %101 %103
+               OpSelectionMerge %105 None
+               OpBranchConditional %104 %106 %107
+        %106 = OpLabel
+               OpStore %_GLF_color %37
+               OpBranch %105
+        %107 = OpLabel
+               OpStore %_GLF_color %38
+               OpBranch %105
+        %105 = OpLabel
+               OpReturn
+               OpFunctionEnd

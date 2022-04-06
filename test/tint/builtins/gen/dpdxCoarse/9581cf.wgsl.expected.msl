@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void dpdxCoarse_9581cf() {
+  float2 res = dfdx(float2());
+}
+
+fragment void fragment_main() {
+  dpdxCoarse_9581cf();
+  return;
+}
+

@@ -1,0 +1,10 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void f() {
+  int v = as_type<int>((as_type<uint>(1) + as_type<uint>(2)));
+  int2 v2 = int2(v);
+  int3 v3 = int3(v);
+  int4 v4 = int4(v);
+}
+

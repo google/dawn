@@ -1,0 +1,30 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Uniforms {
+  /* 0x0000 */ uint i;
+};
+
+struct InnerS {
+  int v;
+};
+
+struct S1 {
+  InnerS s2;
+};
+
+struct tint_array_wrapper {
+  S1 arr[8];
+};
+
+struct OuterS {
+  tint_array_wrapper a1;
+};
+
+kernel void tint_symbol(const constant Uniforms* tint_symbol_1 [[buffer(0)]]) {
+  InnerS v = {};
+  OuterS s1 = {};
+  s1.a1.arr[(*(tint_symbol_1)).i].s2 = v;
+  return;
+}
+

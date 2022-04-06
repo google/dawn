@@ -1,0 +1,35 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  float a;
+};
+
+constant bool bool_let = bool();
+
+constant int i32_let = int();
+
+constant uint u32_let = uint();
+
+constant float f32_let = float();
+
+constant int2 v2i32_let = int2();
+
+constant uint3 v3u32_let = uint3();
+
+constant float4 v4f32_let = float4();
+
+constant float3x4 m3x4_let = float3x4();
+
+struct tint_array_wrapper {
+  float arr[4];
+};
+
+constant tint_array_wrapper arr_let = {.arr={}};
+
+constant S struct_let = {};
+
+kernel void tint_symbol() {
+  return;
+}
+

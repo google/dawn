@@ -1,0 +1,18 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Uniforms {
+  /* 0x0000 */ uint i;
+};
+
+struct OuterS {
+  float2x4 m1;
+};
+
+kernel void tint_symbol(const constant Uniforms* tint_symbol_1 [[buffer(0)]]) {
+  OuterS s1 = {};
+  s1.m1[(*(tint_symbol_1)).i] = float4(1.0f);
+  s1.m1[(*(tint_symbol_1)).i][(*(tint_symbol_1)).i] = 1.0f;
+  return;
+}
+

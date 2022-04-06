@@ -1,0 +1,57 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 29
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %loc0_1 %loc1_1 %loc2_1 %loc3_1
+               OpExecutionMode %main OriginUpperLeft
+               OpName %loc0_1 "loc0_1"
+               OpName %loc1_1 "loc1_1"
+               OpName %loc2_1 "loc2_1"
+               OpName %loc3_1 "loc3_1"
+               OpName %main_inner "main_inner"
+               OpName %loc0 "loc0"
+               OpName %loc1 "loc1"
+               OpName %loc2 "loc2"
+               OpName %loc3 "loc3"
+               OpName %main "main"
+               OpDecorate %loc0_1 Location 0
+               OpDecorate %loc0_1 Flat
+               OpDecorate %loc1_1 Location 1
+               OpDecorate %loc1_1 Flat
+               OpDecorate %loc2_1 Location 2
+               OpDecorate %loc3_1 Location 3
+        %int = OpTypeInt 32 1
+%_ptr_Input_int = OpTypePointer Input %int
+     %loc0_1 = OpVariable %_ptr_Input_int Input
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+     %loc1_1 = OpVariable %_ptr_Input_uint Input
+      %float = OpTypeFloat 32
+%_ptr_Input_float = OpTypePointer Input %float
+     %loc2_1 = OpVariable %_ptr_Input_float Input
+    %v4float = OpTypeVector %float 4
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+     %loc3_1 = OpVariable %_ptr_Input_v4float Input
+       %void = OpTypeVoid
+         %13 = OpTypeFunction %void %int %uint %float %v4float
+         %21 = OpTypeFunction %void
+ %main_inner = OpFunction %void None %13
+       %loc0 = OpFunctionParameter %int
+       %loc1 = OpFunctionParameter %uint
+       %loc2 = OpFunctionParameter %float
+       %loc3 = OpFunctionParameter %v4float
+         %20 = OpLabel
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %21
+         %23 = OpLabel
+         %25 = OpLoad %int %loc0_1
+         %26 = OpLoad %uint %loc1_1
+         %27 = OpLoad %float %loc2_1
+         %28 = OpLoad %v4float %loc3_1
+         %24 = OpFunctionCall %void %main_inner %25 %26 %27 %28
+               OpReturn
+               OpFunctionEnd

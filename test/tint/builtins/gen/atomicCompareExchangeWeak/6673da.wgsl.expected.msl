@@ -1,0 +1,29 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+template <typename A, typename T>
+vec<T, 2> atomicCompareExchangeWeak_1(device A* atomic, T compare, T value) {
+  T prev_value = compare;
+  bool matched = atomic_compare_exchange_weak_explicit(atomic, &prev_value, value, memory_order_relaxed, memory_order_relaxed);
+  return {prev_value, matched};
+}
+
+struct SB_RW {
+  /* 0x0000 */ atomic_uint arg_0;
+};
+
+void atomicCompareExchangeWeak_6673da(device SB_RW* const tint_symbol) {
+  uint2 res = atomicCompareExchangeWeak_1(&((*(tint_symbol)).arg_0), 1u, 1u);
+}
+
+fragment void fragment_main(device SB_RW* tint_symbol_1 [[buffer(0)]]) {
+  atomicCompareExchangeWeak_6673da(tint_symbol_1);
+  return;
+}
+
+kernel void compute_main(device SB_RW* tint_symbol_2 [[buffer(0)]]) {
+  atomicCompareExchangeWeak_6673da(tint_symbol_2);
+  return;
+}
+

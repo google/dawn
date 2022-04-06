@@ -1,0 +1,9 @@
+#include <metal_stdlib>
+
+using namespace metal;
+fragment void f() {
+  thread int tint_symbol = 1;
+  int const b = tint_symbol;
+  return;
+}
+

@@ -1,0 +1,45 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct strided_arr {
+  /* 0x0000 */ float el;
+  /* 0x0004 */ int8_t tint_pad[4];
+};
+
+struct tint_array_wrapper {
+  /* 0x0000 */ strided_arr arr[2];
+};
+
+struct tint_array_wrapper_1 {
+  /* 0x0000 */ tint_array_wrapper arr[3];
+};
+
+struct strided_arr_1 {
+  /* 0x0000 */ tint_array_wrapper_1 el;
+  /* 0x0030 */ int8_t tint_pad_1[80];
+};
+
+struct tint_array_wrapper_2 {
+  /* 0x0000 */ strided_arr_1 arr[4];
+};
+
+struct S {
+  /* 0x0000 */ tint_array_wrapper_2 a;
+};
+
+void f_1(device S* const tint_symbol_1) {
+  tint_array_wrapper_2 const x_19 = (*(tint_symbol_1)).a;
+  tint_array_wrapper_1 const x_24 = (*(tint_symbol_1)).a.arr[3].el;
+  tint_array_wrapper const x_28 = (*(tint_symbol_1)).a.arr[3].el.arr[2];
+  float const x_32 = (*(tint_symbol_1)).a.arr[3].el.arr[2].arr[1].el;
+  tint_array_wrapper_2 const tint_symbol = {.arr={}};
+  (*(tint_symbol_1)).a = tint_symbol;
+  (*(tint_symbol_1)).a.arr[3].el.arr[2].arr[1].el = 5.0f;
+  return;
+}
+
+kernel void f(device S* tint_symbol_2 [[buffer(0)]]) {
+  f_1(tint_symbol_2);
+  return;
+}
+

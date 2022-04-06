@@ -1,0 +1,108 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 37
+; Schema: 0
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %pos_1 %none_1 %flat_1 %perspective_center_1 %perspective_centroid_1 %perspective_sample_1 %linear_center_1 %linear_centroid_1 %linear_sample_1 %vertex_point_size
+               OpName %pos_1 "pos_1"
+               OpName %none_1 "none_1"
+               OpName %flat_1 "flat_1"
+               OpName %perspective_center_1 "perspective_center_1"
+               OpName %perspective_centroid_1 "perspective_centroid_1"
+               OpName %perspective_sample_1 "perspective_sample_1"
+               OpName %linear_center_1 "linear_center_1"
+               OpName %linear_centroid_1 "linear_centroid_1"
+               OpName %linear_sample_1 "linear_sample_1"
+               OpName %vertex_point_size "vertex_point_size"
+               OpName %Out "Out"
+               OpMemberName %Out 0 "pos"
+               OpMemberName %Out 1 "none"
+               OpMemberName %Out 2 "flat"
+               OpMemberName %Out 3 "perspective_center"
+               OpMemberName %Out 4 "perspective_centroid"
+               OpMemberName %Out 5 "perspective_sample"
+               OpMemberName %Out 6 "linear_center"
+               OpMemberName %Out 7 "linear_centroid"
+               OpMemberName %Out 8 "linear_sample"
+               OpName %main_inner "main_inner"
+               OpName %main "main"
+               OpDecorate %pos_1 BuiltIn Position
+               OpDecorate %none_1 Location 0
+               OpDecorate %flat_1 Location 1
+               OpDecorate %flat_1 Flat
+               OpDecorate %perspective_center_1 Location 2
+               OpDecorate %perspective_centroid_1 Location 3
+               OpDecorate %perspective_centroid_1 Centroid
+               OpDecorate %perspective_sample_1 Location 4
+               OpDecorate %perspective_sample_1 Sample
+               OpDecorate %linear_center_1 Location 5
+               OpDecorate %linear_center_1 NoPerspective
+               OpDecorate %linear_centroid_1 Location 6
+               OpDecorate %linear_centroid_1 NoPerspective
+               OpDecorate %linear_centroid_1 Centroid
+               OpDecorate %linear_sample_1 Location 7
+               OpDecorate %linear_sample_1 NoPerspective
+               OpDecorate %linear_sample_1 Sample
+               OpDecorate %vertex_point_size BuiltIn PointSize
+               OpMemberDecorate %Out 0 Offset 0
+               OpMemberDecorate %Out 1 Offset 16
+               OpMemberDecorate %Out 2 Offset 20
+               OpMemberDecorate %Out 3 Offset 24
+               OpMemberDecorate %Out 4 Offset 28
+               OpMemberDecorate %Out 5 Offset 32
+               OpMemberDecorate %Out 6 Offset 36
+               OpMemberDecorate %Out 7 Offset 40
+               OpMemberDecorate %Out 8 Offset 44
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+      %pos_1 = OpVariable %_ptr_Output_v4float Output %5
+%_ptr_Output_float = OpTypePointer Output %float
+          %8 = OpConstantNull %float
+     %none_1 = OpVariable %_ptr_Output_float Output %8
+     %flat_1 = OpVariable %_ptr_Output_float Output %8
+%perspective_center_1 = OpVariable %_ptr_Output_float Output %8
+%perspective_centroid_1 = OpVariable %_ptr_Output_float Output %8
+%perspective_sample_1 = OpVariable %_ptr_Output_float Output %8
+%linear_center_1 = OpVariable %_ptr_Output_float Output %8
+%linear_centroid_1 = OpVariable %_ptr_Output_float Output %8
+%linear_sample_1 = OpVariable %_ptr_Output_float Output %8
+%vertex_point_size = OpVariable %_ptr_Output_float Output %8
+        %Out = OpTypeStruct %v4float %float %float %float %float %float %float %float %float
+         %17 = OpTypeFunction %Out
+         %21 = OpConstantNull %Out
+       %void = OpTypeVoid
+         %22 = OpTypeFunction %void
+    %float_1 = OpConstant %float 1
+ %main_inner = OpFunction %Out None %17
+         %20 = OpLabel
+               OpReturnValue %21
+               OpFunctionEnd
+       %main = OpFunction %void None %22
+         %25 = OpLabel
+         %26 = OpFunctionCall %Out %main_inner
+         %27 = OpCompositeExtract %v4float %26 0
+               OpStore %pos_1 %27
+         %28 = OpCompositeExtract %float %26 1
+               OpStore %none_1 %28
+         %29 = OpCompositeExtract %float %26 2
+               OpStore %flat_1 %29
+         %30 = OpCompositeExtract %float %26 3
+               OpStore %perspective_center_1 %30
+         %31 = OpCompositeExtract %float %26 4
+               OpStore %perspective_centroid_1 %31
+         %32 = OpCompositeExtract %float %26 5
+               OpStore %perspective_sample_1 %32
+         %33 = OpCompositeExtract %float %26 6
+               OpStore %linear_center_1 %33
+         %34 = OpCompositeExtract %float %26 7
+               OpStore %linear_centroid_1 %34
+         %35 = OpCompositeExtract %float %26 8
+               OpStore %linear_sample_1 %35
+               OpStore %vertex_point_size %float_1
+               OpReturn
+               OpFunctionEnd

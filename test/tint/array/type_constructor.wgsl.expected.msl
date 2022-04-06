@@ -1,0 +1,56 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  int arr[4];
+};
+
+struct tint_array_wrapper_2 {
+  tint_array_wrapper arr[3];
+};
+
+struct tint_array_wrapper_1 {
+  tint_array_wrapper_2 arr[2];
+};
+
+struct tint_array_wrapper_3 {
+  tint_array_wrapper arr[2];
+};
+
+kernel void tint_symbol() {
+  int const x = 42;
+  tint_array_wrapper const empty = {.arr={}};
+  tint_array_wrapper const nonempty = {.arr={1, 2, 3, 4}};
+  tint_array_wrapper const nonempty_with_expr = {.arr={1, x, as_type<int>((as_type<uint>(x) + as_type<uint>(1))), nonempty.arr[3]}};
+  tint_array_wrapper_1 const nested_empty = {.arr={}};
+  tint_array_wrapper const tint_symbol_1 = {.arr={1, 2, 3, 4}};
+  tint_array_wrapper const tint_symbol_2 = {.arr={5, 6, 7, 8}};
+  tint_array_wrapper const tint_symbol_3 = {.arr={9, 10, 11, 12}};
+  tint_array_wrapper_2 const tint_symbol_4 = {.arr={tint_symbol_1, tint_symbol_2, tint_symbol_3}};
+  tint_array_wrapper const tint_symbol_5 = {.arr={13, 14, 15, 16}};
+  tint_array_wrapper const tint_symbol_6 = {.arr={17, 18, 19, 20}};
+  tint_array_wrapper const tint_symbol_7 = {.arr={21, 22, 23, 24}};
+  tint_array_wrapper_2 const tint_symbol_8 = {.arr={tint_symbol_5, tint_symbol_6, tint_symbol_7}};
+  tint_array_wrapper_1 const nested_nonempty = {.arr={tint_symbol_4, tint_symbol_8}};
+  tint_array_wrapper const tint_symbol_9 = {.arr={1, 2, x, as_type<int>((as_type<uint>(x) + as_type<uint>(1)))}};
+  tint_array_wrapper const tint_symbol_10 = {.arr={5, 6, nonempty.arr[2], as_type<int>((as_type<uint>(nonempty.arr[3]) + as_type<uint>(1)))}};
+  tint_array_wrapper_2 const tint_symbol_11 = {.arr={tint_symbol_9, tint_symbol_10, nonempty}};
+  tint_array_wrapper_1 const nested_nonempty_with_expr = {.arr={tint_symbol_11, nested_nonempty.arr[1]}};
+  tint_array_wrapper const tint_symbol_12 = {.arr={}};
+  int const subexpr_empty = tint_symbol_12.arr[1];
+  tint_array_wrapper const tint_symbol_13 = {.arr={1, 2, 3, 4}};
+  int const subexpr_nonempty = tint_symbol_13.arr[2];
+  tint_array_wrapper const tint_symbol_14 = {.arr={1, x, as_type<int>((as_type<uint>(x) + as_type<uint>(1))), nonempty.arr[3]}};
+  int const subexpr_nonempty_with_expr = tint_symbol_14.arr[2];
+  tint_array_wrapper_3 const tint_symbol_15 = {.arr={}};
+  tint_array_wrapper const subexpr_nested_empty = tint_symbol_15.arr[1];
+  tint_array_wrapper const tint_symbol_16 = {.arr={1, 2, 3, 4}};
+  tint_array_wrapper const tint_symbol_17 = {.arr={5, 6, 7, 8}};
+  tint_array_wrapper_3 const tint_symbol_18 = {.arr={tint_symbol_16, tint_symbol_17}};
+  tint_array_wrapper const subexpr_nested_nonempty = tint_symbol_18.arr[1];
+  tint_array_wrapper const tint_symbol_19 = {.arr={1, x, as_type<int>((as_type<uint>(x) + as_type<uint>(1))), nonempty.arr[3]}};
+  tint_array_wrapper_3 const tint_symbol_20 = {.arr={tint_symbol_19, nested_nonempty.arr[1].arr[2]}};
+  tint_array_wrapper const subexpr_nested_nonempty_with_expr = tint_symbol_20.arr[1];
+  return;
+}
+

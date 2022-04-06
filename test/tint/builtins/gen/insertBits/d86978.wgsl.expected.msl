@@ -1,0 +1,39 @@
+#include <metal_stdlib>
+
+using namespace metal;
+int4 tint_insert_bits(int4 v, int4 n, uint offset, uint count) {
+  uint const s = min(offset, 32u);
+  uint const e = min(32u, (s + count));
+  return insert_bits(v, n, s, (e - s));
+}
+
+void insertBits_d86978() {
+  int4 res = tint_insert_bits(int4(), int4(), 1u, 1u);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  insertBits_d86978();
+  return float4();
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  insertBits_d86978();
+  return;
+}
+
+kernel void compute_main() {
+  insertBits_d86978();
+  return;
+}
+

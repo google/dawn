@@ -1,0 +1,20 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  int i;
+};
+
+void main_1() {
+  int i = 0;
+  S V = {};
+  int const x_14 = V.i;
+  i = x_14;
+  return;
+}
+
+kernel void tint_symbol() {
+  main_1();
+  return;
+}
+

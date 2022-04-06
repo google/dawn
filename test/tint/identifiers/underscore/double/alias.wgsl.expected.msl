@@ -1,0 +1,8 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void f() {
+  int c = 0;
+  int d = 0;
+}
+

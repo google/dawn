@@ -1,0 +1,35 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct UBO {
+  /* 0x0000 */ int dynamic_idx;
+};
+
+struct tint_array_wrapper {
+  int arr[64];
+};
+
+struct S {
+  tint_array_wrapper data;
+};
+
+struct Result {
+  /* 0x0000 */ int out;
+};
+
+void f_inner(uint local_invocation_index, threadgroup S* const tint_symbol, const constant UBO* const tint_symbol_1, device Result* const tint_symbol_2) {
+  for(uint idx = local_invocation_index; (idx < 64u); idx = (idx + 1u)) {
+    uint const i = idx;
+    (*(tint_symbol)).data.arr[i] = int();
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  (*(tint_symbol)).data.arr[(*(tint_symbol_1)).dynamic_idx] = 1;
+  (*(tint_symbol_2)).out = (*(tint_symbol)).data.arr[3];
+}
+
+kernel void f(const constant UBO* tint_symbol_4 [[buffer(0)]], device Result* tint_symbol_5 [[buffer(1)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup S tint_symbol_3;
+  f_inner(local_invocation_index, &(tint_symbol_3), tint_symbol_4, tint_symbol_5);
+  return;
+}
+

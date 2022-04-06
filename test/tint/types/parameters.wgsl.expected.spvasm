@@ -1,0 +1,67 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 36
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %S "S"
+               OpMemberName %S 0 "a"
+               OpName %foo "foo"
+               OpName %param_bool "param_bool"
+               OpName %param_i32 "param_i32"
+               OpName %param_u32 "param_u32"
+               OpName %param_f32 "param_f32"
+               OpName %param_v2i32 "param_v2i32"
+               OpName %param_v3u32 "param_v3u32"
+               OpName %param_v4f32 "param_v4f32"
+               OpName %param_m2x3 "param_m2x3"
+               OpName %param_arr "param_arr"
+               OpName %param_struct "param_struct"
+               OpName %param_ptr_f32 "param_ptr_f32"
+               OpName %param_ptr_vec "param_ptr_vec"
+               OpName %param_ptr_arr "param_ptr_arr"
+               OpName %main "main"
+               OpDecorate %_arr_float_uint_4 ArrayStride 4
+               OpMemberDecorate %S 0 Offset 0
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+      %float = OpTypeFloat 32
+      %v2int = OpTypeVector %int 2
+     %v3uint = OpTypeVector %uint 3
+    %v4float = OpTypeVector %float 4
+    %v3float = OpTypeVector %float 3
+%mat2v3float = OpTypeMatrix %v3float 2
+     %uint_4 = OpConstant %uint 4
+%_arr_float_uint_4 = OpTypeArray %float %uint_4
+          %S = OpTypeStruct %float
+%_ptr_Function_float = OpTypePointer Function %float
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+%_ptr_Function__arr_float_uint_4 = OpTypePointer Function %_arr_float_uint_4
+          %1 = OpTypeFunction %void %bool %int %uint %float %v2int %v3uint %v4float %mat2v3float %_arr_float_uint_4 %S %_ptr_Function_float %_ptr_Function_v4float %_ptr_Function__arr_float_uint_4
+         %33 = OpTypeFunction %void
+        %foo = OpFunction %void None %1
+ %param_bool = OpFunctionParameter %bool
+  %param_i32 = OpFunctionParameter %int
+  %param_u32 = OpFunctionParameter %uint
+  %param_f32 = OpFunctionParameter %float
+%param_v2i32 = OpFunctionParameter %v2int
+%param_v3u32 = OpFunctionParameter %v3uint
+%param_v4f32 = OpFunctionParameter %v4float
+ %param_m2x3 = OpFunctionParameter %mat2v3float
+  %param_arr = OpFunctionParameter %_arr_float_uint_4
+%param_struct = OpFunctionParameter %S
+%param_ptr_f32 = OpFunctionParameter %_ptr_Function_float
+%param_ptr_vec = OpFunctionParameter %_ptr_Function_v4float
+%param_ptr_arr = OpFunctionParameter %_ptr_Function__arr_float_uint_4
+         %32 = OpLabel
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %33
+         %35 = OpLabel
+               OpReturn
+               OpFunctionEnd

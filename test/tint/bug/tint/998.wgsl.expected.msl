@@ -1,0 +1,25 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Constants {
+  /* 0x0000 */ uint zero;
+};
+
+struct Result {
+  uint value;
+};
+
+struct tint_array_wrapper {
+  uint arr[3];
+};
+
+struct S {
+  tint_array_wrapper data;
+};
+
+kernel void tint_symbol(const constant Constants* tint_symbol_2 [[buffer(0)]]) {
+  thread S tint_symbol_1 = {};
+  tint_symbol_1.data.arr[(*(tint_symbol_2)).zero] = 0u;
+  return;
+}
+

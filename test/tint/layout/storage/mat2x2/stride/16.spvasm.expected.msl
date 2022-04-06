@@ -1,0 +1,39 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct strided_arr {
+  /* 0x0000 */ float2 el;
+  /* 0x0008 */ int8_t tint_pad[8];
+};
+
+struct tint_array_wrapper {
+  /* 0x0000 */ strided_arr arr[2];
+};
+
+struct SSBO {
+  /* 0x0000 */ tint_array_wrapper m;
+};
+
+float2x2 arr_to_mat2x2_stride_16(tint_array_wrapper arr) {
+  return float2x2(arr.arr[0u].el, arr.arr[1u].el);
+}
+
+tint_array_wrapper mat2x2_stride_16_to_arr(float2x2 m) {
+  strided_arr const tint_symbol_1 = {.el=m[0u]};
+  strided_arr const tint_symbol_2 = {.el=m[1u]};
+  tint_array_wrapper const tint_symbol_3 = {.arr={tint_symbol_1, tint_symbol_2}};
+  return tint_symbol_3;
+}
+
+void f_1(device SSBO* const tint_symbol_4) {
+  float2x2 const x_15 = arr_to_mat2x2_stride_16((*(tint_symbol_4)).m);
+  tint_array_wrapper const tint_symbol = mat2x2_stride_16_to_arr(x_15);
+  (*(tint_symbol_4)).m = tint_symbol;
+  return;
+}
+
+kernel void f(device SSBO* tint_symbol_5 [[buffer(0)]]) {
+  f_1(tint_symbol_5);
+  return;
+}
+

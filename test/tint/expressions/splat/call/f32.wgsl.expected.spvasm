@@ -1,0 +1,53 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 30
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %get_f32 "get_f32"
+               OpName %f "f"
+               OpName %v2 "v2"
+               OpName %v3 "v3"
+               OpName %v4 "v4"
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+          %5 = OpTypeFunction %float
+    %float_1 = OpConstant %float 1
+    %v2float = OpTypeVector %float 2
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+         %17 = OpConstantNull %v2float
+    %v3float = OpTypeVector %float 3
+%_ptr_Function_v3float = OpTypePointer Function %v3float
+         %23 = OpConstantNull %v3float
+    %v4float = OpTypeVector %float 4
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+         %29 = OpConstantNull %v4float
+%unused_entry_point = OpFunction %void None %1
+          %4 = OpLabel
+               OpReturn
+               OpFunctionEnd
+    %get_f32 = OpFunction %float None %5
+          %8 = OpLabel
+               OpReturnValue %float_1
+               OpFunctionEnd
+          %f = OpFunction %void None %1
+         %11 = OpLabel
+         %v2 = OpVariable %_ptr_Function_v2float Function %17
+         %v3 = OpVariable %_ptr_Function_v3float Function %23
+         %v4 = OpVariable %_ptr_Function_v4float Function %29
+         %12 = OpFunctionCall %float %get_f32
+         %14 = OpCompositeConstruct %v2float %12 %12
+               OpStore %v2 %14
+         %18 = OpFunctionCall %float %get_f32
+         %20 = OpCompositeConstruct %v3float %18 %18 %18
+               OpStore %v3 %20
+         %24 = OpFunctionCall %float %get_f32
+         %26 = OpCompositeConstruct %v4float %24 %24 %24 %24
+               OpStore %v4 %26
+               OpReturn
+               OpFunctionEnd

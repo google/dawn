@@ -1,0 +1,20 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol {
+  float4 value [[color(0)]];
+};
+
+float4 frag_main_inner() {
+  float b = 0.0f;
+  float3 v = float3(b);
+  return float4(v, 1.0f);
+}
+
+fragment tint_symbol frag_main() {
+  float4 const inner_result = frag_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+

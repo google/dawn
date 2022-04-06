@@ -1,0 +1,51 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 28
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %value %vertex_point_size
+               OpName %value "value"
+               OpName %vertex_point_size "vertex_point_size"
+               OpName %main_inner "main_inner"
+               OpName %light "light"
+               OpName %negative_light "negative_light"
+               OpName %main "main"
+               OpDecorate %value BuiltIn Position
+               OpDecorate %vertex_point_size BuiltIn PointSize
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+      %value = OpVariable %_ptr_Output_v4float Output %5
+%_ptr_Output_float = OpTypePointer Output %float
+          %8 = OpConstantNull %float
+%vertex_point_size = OpVariable %_ptr_Output_float Output %8
+          %9 = OpTypeFunction %v4float
+    %v3float = OpTypeVector %float 3
+%float_1_20000005 = OpConstant %float 1.20000005
+    %float_1 = OpConstant %float 1
+    %float_2 = OpConstant %float 2
+         %16 = OpConstantComposite %v3float %float_1_20000005 %float_1 %float_2
+%_ptr_Function_v3float = OpTypePointer Function %v3float
+         %19 = OpConstantNull %v3float
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+ %main_inner = OpFunction %v4float None %9
+         %11 = OpLabel
+      %light = OpVariable %_ptr_Function_v3float Function %19
+%negative_light = OpVariable %_ptr_Function_v3float Function %19
+               OpStore %light %16
+         %21 = OpLoad %v3float %light
+         %20 = OpFNegate %v3float %21
+               OpStore %negative_light %20
+               OpReturnValue %5
+               OpFunctionEnd
+       %main = OpFunction %void None %23
+         %26 = OpLabel
+         %27 = OpFunctionCall %v4float %main_inner
+               OpStore %value %27
+               OpStore %vertex_point_size %float_1
+               OpReturn
+               OpFunctionEnd

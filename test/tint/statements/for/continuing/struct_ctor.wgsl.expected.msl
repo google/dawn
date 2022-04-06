@@ -1,0 +1,24 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  int i;
+};
+
+void f() {
+  {
+    int i = 0;
+    while (true) {
+      if (!(false)) {
+        break;
+      }
+      {
+      }
+      {
+        S const tint_symbol = {.i=1};
+        i = as_type<int>((as_type<uint>(i) + as_type<uint>(tint_symbol.i)));
+      }
+    }
+  }
+}
+

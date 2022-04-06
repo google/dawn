@@ -1,0 +1,21 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct ComputeInputs {
+  uint3 local_invocation_id;
+  uint local_invocation_index;
+  uint3 global_invocation_id;
+  uint3 workgroup_id;
+  uint3 num_workgroups;
+};
+
+void tint_symbol_inner(ComputeInputs inputs) {
+  uint const foo = ((((inputs.local_invocation_id[0] + inputs.local_invocation_index) + inputs.global_invocation_id[0]) + inputs.workgroup_id[0]) + inputs.num_workgroups[0]);
+}
+
+kernel void tint_symbol(uint3 local_invocation_id [[thread_position_in_threadgroup]], uint local_invocation_index [[thread_index_in_threadgroup]], uint3 global_invocation_id [[thread_position_in_grid]], uint3 workgroup_id [[threadgroup_position_in_grid]], uint3 num_workgroups [[threadgroups_per_grid]]) {
+  ComputeInputs const tint_symbol_1 = {.local_invocation_id=local_invocation_id, .local_invocation_index=local_invocation_index, .global_invocation_id=global_invocation_id, .workgroup_id=workgroup_id, .num_workgroups=num_workgroups};
+  tint_symbol_inner(tint_symbol_1);
+  return;
+}
+

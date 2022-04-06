@@ -1,0 +1,25 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+template<typename T, int N, int M>
+inline vec<T, M> operator*(matrix<T, N, M> lhs, packed_vec<T, N> rhs) {
+  return lhs * vec<T, N>(rhs);
+}
+
+template<typename T, int N, int M>
+inline vec<T, N> operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
+  return vec<T, M>(lhs) * rhs;
+}
+
+struct S {
+  /* 0x0000 */ float4x3 tint_symbol;
+  /* 0x0040 */ packed_float3 vector;
+  /* 0x004c */ int8_t tint_pad[4];
+};
+
+fragment void tint_symbol_1(const constant S* tint_symbol_2 [[buffer(0)]]) {
+  float4 const x = ((*(tint_symbol_2)).vector * (*(tint_symbol_2)).tint_symbol);
+  return;
+}
+

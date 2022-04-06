@@ -1,0 +1,16 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void f() {
+  int i = 0;
+  switch(i) {
+    case 0: {
+      /* fallthrough */
+    }
+    default: {
+      break;
+    }
+  }
+  return;
+}
+

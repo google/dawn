@@ -1,0 +1,25 @@
+#include <metal_stdlib>
+
+using namespace metal;
+uint tint_extract_bits(uint v, uint offset, uint count) {
+  uint const s = min(offset, 32u);
+  uint const e = min(32u, (s + count));
+  return extract_bits(v, s, (e - s));
+}
+
+void f_1() {
+  uint v = 0u;
+  uint offset_1 = 0u;
+  uint count = 0u;
+  uint const x_13 = v;
+  uint const x_14 = offset_1;
+  uint const x_15 = count;
+  uint const x_11 = tint_extract_bits(x_13, x_14, x_15);
+  return;
+}
+
+kernel void f() {
+  f_1();
+  return;
+}
+

@@ -1,0 +1,50 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  int a;
+  float4 b;
+  float2x2 c;
+};
+
+int idx1(thread uint* const tint_symbol_5) {
+  *(tint_symbol_5) = (*(tint_symbol_5) + 1u);
+  return 1;
+}
+
+int idx2(thread uint* const tint_symbol_6) {
+  *(tint_symbol_6) = (*(tint_symbol_6) + 2u);
+  return 1;
+}
+
+int idx3(thread uint* const tint_symbol_7) {
+  *(tint_symbol_7) = (*(tint_symbol_7) + 3u);
+  return 1;
+}
+
+struct tint_array_wrapper {
+  float arr[4];
+};
+
+void foo(thread uint* const tint_symbol_8) {
+  tint_array_wrapper a = {.arr={}};
+  int const tint_symbol_2 = idx1(tint_symbol_8);
+  int const tint_symbol_save = tint_symbol_2;
+  {
+    a.arr[tint_symbol_save] = (a.arr[tint_symbol_save] * 2.0f);
+    while (true) {
+      int const tint_symbol_3 = idx2(tint_symbol_8);
+      if (!((a.arr[tint_symbol_3] < 10.0f))) {
+        break;
+      }
+      {
+      }
+      {
+        int const tint_symbol_4 = idx3(tint_symbol_8);
+        int const tint_symbol_1_save = tint_symbol_4;
+        a.arr[tint_symbol_1_save] = (a.arr[tint_symbol_1_save] + 1.0f);
+      }
+    }
+  }
+}
+

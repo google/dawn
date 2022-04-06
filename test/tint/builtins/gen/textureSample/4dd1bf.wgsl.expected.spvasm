@@ -1,0 +1,52 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 29
+; Schema: 0
+               OpCapability Shader
+               OpCapability SampledCubeArray
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpName %arg_0 "arg_0"
+               OpName %arg_1 "arg_1"
+               OpName %textureSample_4dd1bf "textureSample_4dd1bf"
+               OpName %res "res"
+               OpName %fragment_main "fragment_main"
+               OpDecorate %arg_0 DescriptorSet 1
+               OpDecorate %arg_0 Binding 0
+               OpDecorate %arg_1 DescriptorSet 1
+               OpDecorate %arg_1 Binding 1
+      %float = OpTypeFloat 32
+          %3 = OpTypeImage %float Cube 0 1 0 1 Unknown
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+      %arg_0 = OpVariable %_ptr_UniformConstant_3 UniformConstant
+          %7 = OpTypeSampler
+%_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
+      %arg_1 = OpVariable %_ptr_UniformConstant_7 UniformConstant
+       %void = OpTypeVoid
+          %8 = OpTypeFunction %void
+    %v4float = OpTypeVector %float 4
+         %16 = OpTypeSampledImage %3
+    %float_0 = OpConstant %float 0
+        %int = OpTypeInt 32 1
+      %int_1 = OpConstant %int 1
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+         %25 = OpConstantNull %v4float
+%textureSample_4dd1bf = OpFunction %void None %8
+         %11 = OpLabel
+        %res = OpVariable %_ptr_Function_v4float Function %25
+         %14 = OpLoad %7 %arg_1
+         %15 = OpLoad %3 %arg_0
+         %17 = OpSampledImage %16 %15 %14
+         %19 = OpConvertSToF %float %int_1
+         %22 = OpCompositeConstruct %v4float %float_0 %float_0 %float_0 %19
+         %12 = OpImageSampleImplicitLod %v4float %17 %22
+               OpStore %res %12
+               OpReturn
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %8
+         %27 = OpLabel
+         %28 = OpFunctionCall %void %textureSample_4dd1bf
+               OpReturn
+               OpFunctionEnd

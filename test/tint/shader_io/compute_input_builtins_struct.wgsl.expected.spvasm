@@ -1,0 +1,75 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 39
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %local_invocation_id_1 %local_invocation_index_1 %global_invocation_id_1 %workgroup_id_1 %num_workgroups_1
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %local_invocation_id_1 "local_invocation_id_1"
+               OpName %local_invocation_index_1 "local_invocation_index_1"
+               OpName %global_invocation_id_1 "global_invocation_id_1"
+               OpName %workgroup_id_1 "workgroup_id_1"
+               OpName %num_workgroups_1 "num_workgroups_1"
+               OpName %ComputeInputs "ComputeInputs"
+               OpMemberName %ComputeInputs 0 "local_invocation_id"
+               OpMemberName %ComputeInputs 1 "local_invocation_index"
+               OpMemberName %ComputeInputs 2 "global_invocation_id"
+               OpMemberName %ComputeInputs 3 "workgroup_id"
+               OpMemberName %ComputeInputs 4 "num_workgroups"
+               OpName %main_inner "main_inner"
+               OpName %inputs "inputs"
+               OpName %main "main"
+               OpDecorate %local_invocation_id_1 BuiltIn LocalInvocationId
+               OpDecorate %local_invocation_index_1 BuiltIn LocalInvocationIndex
+               OpDecorate %global_invocation_id_1 BuiltIn GlobalInvocationId
+               OpDecorate %workgroup_id_1 BuiltIn WorkgroupId
+               OpDecorate %num_workgroups_1 BuiltIn NumWorkgroups
+               OpMemberDecorate %ComputeInputs 0 Offset 0
+               OpMemberDecorate %ComputeInputs 1 Offset 12
+               OpMemberDecorate %ComputeInputs 2 Offset 16
+               OpMemberDecorate %ComputeInputs 3 Offset 32
+               OpMemberDecorate %ComputeInputs 4 Offset 48
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%local_invocation_id_1 = OpVariable %_ptr_Input_v3uint Input
+%_ptr_Input_uint = OpTypePointer Input %uint
+%local_invocation_index_1 = OpVariable %_ptr_Input_uint Input
+%global_invocation_id_1 = OpVariable %_ptr_Input_v3uint Input
+%workgroup_id_1 = OpVariable %_ptr_Input_v3uint Input
+%num_workgroups_1 = OpVariable %_ptr_Input_v3uint Input
+       %void = OpTypeVoid
+%ComputeInputs = OpTypeStruct %v3uint %uint %v3uint %v3uint %v3uint
+         %10 = OpTypeFunction %void %ComputeInputs
+         %29 = OpTypeFunction %void
+ %main_inner = OpFunction %void None %10
+     %inputs = OpFunctionParameter %ComputeInputs
+         %15 = OpLabel
+         %16 = OpCompositeExtract %v3uint %inputs 0
+         %17 = OpCompositeExtract %uint %16 0
+         %18 = OpCompositeExtract %uint %inputs 1
+         %19 = OpIAdd %uint %17 %18
+         %20 = OpCompositeExtract %v3uint %inputs 2
+         %21 = OpCompositeExtract %uint %20 0
+         %22 = OpIAdd %uint %19 %21
+         %23 = OpCompositeExtract %v3uint %inputs 3
+         %24 = OpCompositeExtract %uint %23 0
+         %25 = OpIAdd %uint %22 %24
+         %26 = OpCompositeExtract %v3uint %inputs 4
+         %27 = OpCompositeExtract %uint %26 0
+         %28 = OpIAdd %uint %25 %27
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %29
+         %31 = OpLabel
+         %33 = OpLoad %v3uint %local_invocation_id_1
+         %34 = OpLoad %uint %local_invocation_index_1
+         %35 = OpLoad %v3uint %global_invocation_id_1
+         %36 = OpLoad %v3uint %workgroup_id_1
+         %37 = OpLoad %v3uint %num_workgroups_1
+         %38 = OpCompositeConstruct %ComputeInputs %33 %34 %35 %36 %37
+         %32 = OpFunctionCall %void %main_inner %38
+               OpReturn
+               OpFunctionEnd

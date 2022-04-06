@@ -1,0 +1,35 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  /* 0x0000 */ uint arr[50];
+};
+
+struct Buf {
+  /* 0x0000 */ uint count;
+  /* 0x0004 */ tint_array_wrapper data;
+};
+
+kernel void tint_symbol(device Buf* tint_symbol_1 [[buffer(0)]]) {
+  uint i = 0u;
+  while (true) {
+    if ((i >= (*(tint_symbol_1)).count)) {
+      break;
+    }
+    uint const p_save = i;
+    if (((i % 2u) == 0u)) {
+      {
+        (*(tint_symbol_1)).data.arr[p_save] = ((*(tint_symbol_1)).data.arr[p_save] * 2u);
+        i = (i + 1u);
+      }
+      continue;
+    }
+    (*(tint_symbol_1)).data.arr[p_save] = 0u;
+    {
+      (*(tint_symbol_1)).data.arr[p_save] = ((*(tint_symbol_1)).data.arr[p_save] * 2u);
+      i = (i + 1u);
+    }
+  }
+  return;
+}
+

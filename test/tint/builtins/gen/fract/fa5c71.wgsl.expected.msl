@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void fract_fa5c71() {
+  float res = fract(1.0f);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  fract_fa5c71();
+  return float4();
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  fract_fa5c71();
+  return;
+}
+
+kernel void compute_main() {
+  fract_fa5c71();
+  return;
+}
+

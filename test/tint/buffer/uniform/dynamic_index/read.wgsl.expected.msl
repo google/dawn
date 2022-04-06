@@ -1,0 +1,60 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+template<typename T, int N, int M>
+inline vec<T, M> operator*(matrix<T, N, M> lhs, packed_vec<T, N> rhs) {
+  return lhs * vec<T, N>(rhs);
+}
+
+template<typename T, int N, int M>
+inline vec<T, N> operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
+  return vec<T, M>(lhs) * rhs;
+}
+
+struct tint_array_wrapper {
+  /* 0x0000 */ int4 arr[4];
+};
+
+struct Inner {
+  /* 0x0000 */ packed_int3 a;
+  /* 0x000c */ int b;
+  /* 0x0010 */ packed_uint3 c;
+  /* 0x001c */ uint d;
+  /* 0x0020 */ packed_float3 e;
+  /* 0x002c */ float f;
+  /* 0x0030 */ int2 g;
+  /* 0x0038 */ int2 h;
+  /* 0x0040 */ float2x3 i;
+  /* 0x0060 */ float3x2 j;
+  /* 0x0078 */ int8_t tint_pad[8];
+  /* 0x0080 */ tint_array_wrapper k;
+};
+
+struct tint_array_wrapper_1 {
+  /* 0x0000 */ Inner arr[8];
+};
+
+struct S {
+  /* 0x0000 */ tint_array_wrapper_1 arr;
+};
+
+void tint_symbol_inner(uint idx, const constant S* const tint_symbol_1) {
+  int3 const a = (*(tint_symbol_1)).arr.arr[idx].a;
+  int const b = (*(tint_symbol_1)).arr.arr[idx].b;
+  uint3 const c = (*(tint_symbol_1)).arr.arr[idx].c;
+  uint const d = (*(tint_symbol_1)).arr.arr[idx].d;
+  float3 const e = (*(tint_symbol_1)).arr.arr[idx].e;
+  float const f = (*(tint_symbol_1)).arr.arr[idx].f;
+  int2 const g = (*(tint_symbol_1)).arr.arr[idx].g;
+  int2 const h = (*(tint_symbol_1)).arr.arr[idx].h;
+  float2x3 const i = (*(tint_symbol_1)).arr.arr[idx].i;
+  float3x2 const j = (*(tint_symbol_1)).arr.arr[idx].j;
+  tint_array_wrapper const k = (*(tint_symbol_1)).arr.arr[idx].k;
+}
+
+kernel void tint_symbol(const constant S* tint_symbol_2 [[buffer(0)]], uint idx [[thread_index_in_threadgroup]]) {
+  tint_symbol_inner(idx, tint_symbol_2);
+  return;
+}
+

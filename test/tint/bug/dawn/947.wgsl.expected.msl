@@ -1,0 +1,78 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Uniforms {
+  /* 0x0000 */ float2 u_scale;
+  /* 0x0008 */ float2 u_offset;
+};
+
+struct VertexOutputs {
+  float2 texcoords;
+  float4 position;
+};
+
+struct tint_symbol {
+  float2 texcoords [[user(locn0)]];
+  float4 position [[position]];
+};
+
+struct tint_array_wrapper {
+  float2 arr[3];
+};
+
+VertexOutputs vs_main_inner(uint VertexIndex, const constant Uniforms* const tint_symbol_5) {
+  tint_array_wrapper texcoord = {.arr={float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)}};
+  VertexOutputs output = {};
+  output.position = float4(((texcoord.arr[VertexIndex] * 2.0f) - float2(1.0f, 1.0f)), 0.0f, 1.0f);
+  bool flipY = ((*(tint_symbol_5)).u_scale[1] < 0.0f);
+  if (flipY) {
+    output.texcoords = ((((texcoord.arr[VertexIndex] * (*(tint_symbol_5)).u_scale) + (*(tint_symbol_5)).u_offset) * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f));
+  } else {
+    output.texcoords = ((((texcoord.arr[VertexIndex] * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f)) * (*(tint_symbol_5)).u_scale) + (*(tint_symbol_5)).u_offset);
+  }
+  return output;
+}
+
+vertex tint_symbol vs_main(const constant Uniforms* tint_symbol_6 [[buffer(0)]], uint VertexIndex [[vertex_id]]) {
+  VertexOutputs const inner_result = vs_main_inner(VertexIndex, tint_symbol_6);
+  tint_symbol wrapper_result = {};
+  wrapper_result.texcoords = inner_result.texcoords;
+  wrapper_result.position = inner_result.position;
+  return wrapper_result;
+}
+
+struct tint_symbol_2 {
+  float2 texcoord [[user(locn0)]];
+};
+
+struct tint_symbol_3 {
+  float4 value [[color(0)]];
+};
+
+float4 fs_main_inner(float2 texcoord, thread bool* const tint_symbol_7, texture2d<float, access::sample> tint_symbol_8, sampler tint_symbol_9) {
+  float2 clampedTexcoord = clamp(texcoord, float2(0.0f, 0.0f), float2(1.0f, 1.0f));
+  if (!(all((clampedTexcoord == texcoord)))) {
+    *(tint_symbol_7) = true;
+    return float4();
+  }
+  float4 srcColor = tint_symbol_8.sample(tint_symbol_9, texcoord);
+  return srcColor;
+}
+
+void tint_discard_func() {
+  discard_fragment();
+}
+
+fragment tint_symbol_3 fs_main(texture2d<float, access::sample> tint_symbol_11 [[texture(0)]], sampler tint_symbol_12 [[sampler(0)]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  thread bool tint_symbol_10 = false;
+  float4 const inner_result_1 = fs_main_inner(tint_symbol_1.texcoord, &(tint_symbol_10), tint_symbol_11, tint_symbol_12);
+  if (tint_symbol_10) {
+    tint_discard_func();
+    tint_symbol_3 const tint_symbol_4 = {};
+    return tint_symbol_4;
+  }
+  tint_symbol_3 wrapper_result_1 = {};
+  wrapper_result_1.value = inner_result_1;
+  return wrapper_result_1;
+}
+

@@ -1,0 +1,126 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol_1 {
+  float2 a_particlePos [[attribute(0)]];
+  float2 a_particleVel [[attribute(1)]];
+  float2 a_pos [[attribute(2)]];
+};
+
+struct tint_symbol_2 {
+  float4 value [[position]];
+};
+
+float4 vert_main_inner(float2 a_particlePos, float2 a_particleVel, float2 a_pos) {
+  float angle = -(atan2(a_particleVel[0], a_particleVel[1]));
+  float2 pos = float2(((a_pos[0] * cos(angle)) - (a_pos[1] * sin(angle))), ((a_pos[0] * sin(angle)) + (a_pos[1] * cos(angle))));
+  return float4((pos + a_particlePos), 0.0f, 1.0f);
+}
+
+vertex tint_symbol_2 vert_main(tint_symbol_1 tint_symbol [[stage_in]]) {
+  float4 const inner_result = vert_main_inner(tint_symbol.a_particlePos, tint_symbol.a_particleVel, tint_symbol.a_pos);
+  tint_symbol_2 wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+struct tint_symbol_3 {
+  float4 value [[color(0)]];
+};
+
+float4 frag_main_inner() {
+  return float4(1.0f, 1.0f, 1.0f, 1.0f);
+}
+
+fragment tint_symbol_3 frag_main() {
+  float4 const inner_result_1 = frag_main_inner();
+  tint_symbol_3 wrapper_result_1 = {};
+  wrapper_result_1.value = inner_result_1;
+  return wrapper_result_1;
+}
+
+struct Particle {
+  /* 0x0000 */ float2 pos;
+  /* 0x0008 */ float2 vel;
+};
+
+struct SimParams {
+  /* 0x0000 */ float deltaT;
+  /* 0x0004 */ float rule1Distance;
+  /* 0x0008 */ float rule2Distance;
+  /* 0x000c */ float rule3Distance;
+  /* 0x0010 */ float rule1Scale;
+  /* 0x0014 */ float rule2Scale;
+  /* 0x0018 */ float rule3Scale;
+};
+
+struct tint_array_wrapper {
+  /* 0x0000 */ Particle arr[5];
+};
+
+struct Particles {
+  /* 0x0000 */ tint_array_wrapper particles;
+};
+
+void comp_main_inner(uint3 gl_GlobalInvocationID, device Particles* const tint_symbol_4, const constant SimParams* const tint_symbol_5, device Particles* const tint_symbol_6) {
+  uint index = gl_GlobalInvocationID[0];
+  if ((index >= 5u)) {
+    return;
+  }
+  float2 vPos = (*(tint_symbol_4)).particles.arr[index].pos;
+  float2 vVel = (*(tint_symbol_4)).particles.arr[index].vel;
+  float2 cMass = float2(0.0f, 0.0f);
+  float2 cVel = float2(0.0f, 0.0f);
+  float2 colVel = float2(0.0f, 0.0f);
+  int cMassCount = 0;
+  int cVelCount = 0;
+  float2 pos = 0.0f;
+  float2 vel = 0.0f;
+  for(uint i = 0u; (i < 5u); i = (i + 1u)) {
+    if ((i == index)) {
+      continue;
+    }
+    pos = float2((*(tint_symbol_4)).particles.arr[i].pos).xy;
+    vel = float2((*(tint_symbol_4)).particles.arr[i].vel).xy;
+    if ((distance(pos, vPos) < (*(tint_symbol_5)).rule1Distance)) {
+      cMass = (cMass + pos);
+      cMassCount = as_type<int>((as_type<uint>(cMassCount) + as_type<uint>(1)));
+    }
+    if ((distance(pos, vPos) < (*(tint_symbol_5)).rule2Distance)) {
+      colVel = (colVel - (pos - vPos));
+    }
+    if ((distance(pos, vPos) < (*(tint_symbol_5)).rule3Distance)) {
+      cVel = (cVel + vel);
+      cVelCount = as_type<int>((as_type<uint>(cVelCount) + as_type<uint>(1)));
+    }
+  }
+  if ((cMassCount > 0)) {
+    cMass = ((cMass / float2(float(cMassCount), float(cMassCount))) - vPos);
+  }
+  if ((cVelCount > 0)) {
+    cVel = (cVel / float2(float(cVelCount), float(cVelCount)));
+  }
+  vVel = (((vVel + (cMass * (*(tint_symbol_5)).rule1Scale)) + (colVel * (*(tint_symbol_5)).rule2Scale)) + (cVel * (*(tint_symbol_5)).rule3Scale));
+  vVel = (normalize(vVel) * clamp(length(vVel), 0.0f, 0.100000001f));
+  vPos = (vPos + (vVel * (*(tint_symbol_5)).deltaT));
+  if ((vPos[0] < -1.0f)) {
+    vPos[0] = 1.0f;
+  }
+  if ((vPos[0] > 1.0f)) {
+    vPos[0] = -1.0f;
+  }
+  if ((vPos[1] < -1.0f)) {
+    vPos[1] = 1.0f;
+  }
+  if ((vPos[1] > 1.0f)) {
+    vPos[1] = -1.0f;
+  }
+  (*(tint_symbol_6)).particles.arr[index].pos = vPos;
+  (*(tint_symbol_6)).particles.arr[index].vel = vVel;
+}
+
+kernel void comp_main(device Particles* tint_symbol_7 [[buffer(1)]], const constant SimParams* tint_symbol_8 [[buffer(0)]], device Particles* tint_symbol_9 [[buffer(2)]], uint3 gl_GlobalInvocationID [[thread_position_in_grid]]) {
+  comp_main_inner(gl_GlobalInvocationID, tint_symbol_7, tint_symbol_8, tint_symbol_9);
+  return;
+}
+

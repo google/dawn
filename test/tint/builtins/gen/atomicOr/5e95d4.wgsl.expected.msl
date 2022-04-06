@@ -1,0 +1,21 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct SB_RW {
+  /* 0x0000 */ atomic_uint arg_0;
+};
+
+void atomicOr_5e95d4(device SB_RW* const tint_symbol) {
+  uint res = atomic_fetch_or_explicit(&((*(tint_symbol)).arg_0), 1u, memory_order_relaxed);
+}
+
+fragment void fragment_main(device SB_RW* tint_symbol_1 [[buffer(0)]]) {
+  atomicOr_5e95d4(tint_symbol_1);
+  return;
+}
+
+kernel void compute_main(device SB_RW* tint_symbol_2 [[buffer(0)]]) {
+  atomicOr_5e95d4(tint_symbol_2);
+  return;
+}
+

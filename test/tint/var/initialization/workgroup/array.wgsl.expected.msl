@@ -1,0 +1,21 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  int arr[3];
+};
+
+void tint_symbol_inner(uint local_invocation_index, threadgroup tint_array_wrapper* const tint_symbol_1) {
+  for(uint idx = local_invocation_index; (idx < 3u); idx = (idx + 1u)) {
+    uint const i = idx;
+    (*(tint_symbol_1)).arr[i] = int();
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+}
+
+kernel void tint_symbol(uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup tint_array_wrapper tint_symbol_2;
+  tint_symbol_inner(local_invocation_index, &(tint_symbol_2));
+  return;
+}
+

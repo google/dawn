@@ -1,0 +1,64 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 34
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %value
+               OpExecutionMode %main OriginUpperLeft
+               OpName %value "value"
+               OpName %v1 "v1"
+               OpName %v2 "v2"
+               OpName %v3 "v3"
+               OpName %v4 "v4"
+               OpName %v5 "v5"
+               OpName %v6 "v6"
+               OpName %v7 "v7"
+               OpName %MyStruct "MyStruct"
+               OpMemberName %MyStruct 0 "f1"
+               OpName %v8 "v8"
+               OpName %v9 "v9"
+               OpName %main_inner "main_inner"
+               OpName %main "main"
+               OpDecorate %value Location 0
+               OpMemberDecorate %MyStruct 0 Offset 0
+               OpDecorate %_arr_float_uint_10 ArrayStride 4
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+      %value = OpVariable %_ptr_Output_v4float Output %5
+        %int = OpTypeInt 32 1
+         %v1 = OpConstant %int 1
+       %uint = OpTypeInt 32 0
+         %v2 = OpConstant %uint 1
+         %v3 = OpConstant %float 1
+      %v3int = OpTypeVector %int 3
+         %v4 = OpConstantComposite %v3int %v1 %v1 %v1
+     %v3uint = OpTypeVector %uint 3
+         %v5 = OpConstantComposite %v3uint %v2 %v2 %v2
+    %v3float = OpTypeVector %float 3
+         %v6 = OpConstantComposite %v3float %v3 %v3 %v3
+%mat3v3float = OpTypeMatrix %v3float 3
+         %v7 = OpConstantComposite %mat3v3float %v6 %v6 %v6
+   %MyStruct = OpTypeStruct %float
+         %v8 = OpConstantNull %MyStruct
+    %uint_10 = OpConstant %uint 10
+%_arr_float_uint_10 = OpTypeArray %float %uint_10
+         %v9 = OpConstantNull %_arr_float_uint_10
+         %24 = OpTypeFunction %v4float
+    %float_0 = OpConstant %float 0
+         %28 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_0
+       %void = OpTypeVoid
+         %29 = OpTypeFunction %void
+ %main_inner = OpFunction %v4float None %24
+         %26 = OpLabel
+               OpReturnValue %28
+               OpFunctionEnd
+       %main = OpFunction %void None %29
+         %32 = OpLabel
+         %33 = OpFunctionCall %v4float %main_inner
+               OpStore %value %33
+               OpReturn
+               OpFunctionEnd

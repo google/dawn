@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void clamp_2bde41() {
+  float4 res = clamp(float4(), float4(), float4());
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  clamp_2bde41();
+  return float4();
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  clamp_2bde41();
+  return;
+}
+
+kernel void compute_main() {
+  clamp_2bde41();
+  return;
+}
+

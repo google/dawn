@@ -1,0 +1,35 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  /* 0x0000 */ int arr[6];
+};
+
+struct sspp962805860buildInformationS {
+  /* 0x0000 */ float4 footprint;
+  /* 0x0010 */ float4 offset;
+  /* 0x0020 */ int essence;
+  /* 0x0024 */ tint_array_wrapper orientation;
+};
+
+struct x_B4_BuildInformation {
+  /* 0x0000 */ sspp962805860buildInformationS passthru;
+};
+
+void main_1(const device x_B4_BuildInformation* const tint_symbol_1) {
+  tint_array_wrapper orientation = {};
+  tint_array_wrapper const x_23 = (*(tint_symbol_1)).passthru.orientation;
+  orientation.arr[0] = x_23.arr[0u];
+  orientation.arr[1] = x_23.arr[1u];
+  orientation.arr[2] = x_23.arr[2u];
+  orientation.arr[3] = x_23.arr[3u];
+  orientation.arr[4] = x_23.arr[4u];
+  orientation.arr[5] = x_23.arr[5u];
+  return;
+}
+
+fragment void tint_symbol(const device x_B4_BuildInformation* tint_symbol_2 [[buffer(0)]]) {
+  main_1(tint_symbol_2);
+  return;
+}
+

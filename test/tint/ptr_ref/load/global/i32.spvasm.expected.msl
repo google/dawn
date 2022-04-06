@@ -1,0 +1,15 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void main_1(thread int* const tint_symbol_1) {
+  int const x_9 = *(tint_symbol_1);
+  int const x_11 = as_type<int>((as_type<uint>(x_9) + as_type<uint>(1)));
+  return;
+}
+
+kernel void tint_symbol() {
+  thread int tint_symbol_2 = 0;
+  main_1(&(tint_symbol_2));
+  return;
+}
+

@@ -1,0 +1,38 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct vertexUniformBuffer1 {
+  /* 0x0000 */ float2x2 transform1;
+};
+
+struct vertexUniformBuffer2 {
+  /* 0x0000 */ float2x2 transform2;
+};
+
+struct tint_symbol_1 {
+  float4 value [[position]];
+};
+
+struct tint_array_wrapper {
+  float2 arr[3];
+};
+
+float4 tint_symbol_inner(uint gl_VertexIndex, const constant vertexUniformBuffer1* const tint_symbol_3, const constant vertexUniformBuffer2* const tint_symbol_4) {
+  tint_array_wrapper indexable = {};
+  float2x2 const x_23 = (*(tint_symbol_3)).transform1;
+  float2x2 const x_28 = (*(tint_symbol_4)).transform2;
+  uint const x_46 = gl_VertexIndex;
+  tint_array_wrapper const tint_symbol_2 = {.arr={float2(-1.0f, 1.0f), float2(1.0f, 1.0f), float2(-1.0f, -1.0f)}};
+  indexable = tint_symbol_2;
+  float2 const x_51 = indexable.arr[x_46];
+  float2 const x_52 = (float2x2((x_23[0u] + x_28[0u]), (x_23[1u] + x_28[1u])) * x_51);
+  return float4(x_52[0], x_52[1], 0.0f, 1.0f);
+}
+
+vertex tint_symbol_1 tint_symbol(const constant vertexUniformBuffer1* tint_symbol_5 [[buffer(0)]], const constant vertexUniformBuffer2* tint_symbol_6 [[buffer(1)]], uint gl_VertexIndex [[vertex_id]]) {
+  float4 const inner_result = tint_symbol_inner(gl_VertexIndex, tint_symbol_5, tint_symbol_6);
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+

@@ -1,0 +1,11 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void tint_symbol() {
+  float3 v = 0.0f;
+  float const scalar = v[1];
+  float2 const swizzle2 = float3(v).xz;
+  float3 const swizzle3 = float3(v).xzy;
+  return;
+}
+

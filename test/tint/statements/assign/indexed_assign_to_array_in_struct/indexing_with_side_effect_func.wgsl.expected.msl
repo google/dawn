@@ -1,0 +1,43 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Uniforms {
+  /* 0x0000 */ uint i;
+  /* 0x0004 */ uint j;
+};
+
+struct InnerS {
+  int v;
+};
+
+struct tint_array_wrapper {
+  InnerS arr[8];
+};
+
+struct S1 {
+  tint_array_wrapper a2;
+};
+
+struct tint_array_wrapper_1 {
+  S1 arr[8];
+};
+
+struct OuterS {
+  tint_array_wrapper_1 a1;
+};
+
+uint getNextIndex(thread uint* const tint_symbol_3) {
+  *(tint_symbol_3) = (*(tint_symbol_3) + 1u);
+  return *(tint_symbol_3);
+}
+
+kernel void tint_symbol(const constant Uniforms* tint_symbol_5 [[buffer(0)]]) {
+  thread uint tint_symbol_4 = 0u;
+  InnerS v = {};
+  OuterS s = {};
+  InnerS const tint_symbol_1 = v;
+  uint const tint_symbol_2 = getNextIndex(&(tint_symbol_4));
+  s.a1.arr[tint_symbol_2].a2.arr[(*(tint_symbol_5)).j] = tint_symbol_1;
+  return;
+}
+

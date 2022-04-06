@@ -1,0 +1,62 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 37
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %a "a"
+               OpName %b "b"
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %foo "foo"
+               OpName %maybe_zero "maybe_zero"
+        %int = OpTypeInt 32 1
+%_ptr_Private_int = OpTypePointer Private %int
+          %4 = OpConstantNull %int
+          %a = OpVariable %_ptr_Private_int Private %4
+      %float = OpTypeFloat 32
+%_ptr_Private_float = OpTypePointer Private %float
+          %8 = OpConstantNull %float
+          %b = OpVariable %_ptr_Private_float Private %8
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+         %13 = OpTypeFunction %void %int
+      %int_0 = OpConstant %int 0
+    %float_0 = OpConstant %float 0
+%unused_entry_point = OpFunction %void None %9
+         %12 = OpLabel
+               OpReturn
+               OpFunctionEnd
+        %foo = OpFunction %void None %13
+ %maybe_zero = OpFunctionParameter %int
+         %16 = OpLabel
+         %17 = OpLoad %int %a
+         %19 = OpSDiv %int %17 %int_0
+               OpStore %a %19
+         %20 = OpLoad %int %a
+         %21 = OpSMod %int %20 %int_0
+               OpStore %a %21
+         %22 = OpLoad %int %a
+         %23 = OpSDiv %int %22 %maybe_zero
+               OpStore %a %23
+         %24 = OpLoad %int %a
+         %25 = OpSMod %int %24 %maybe_zero
+               OpStore %a %25
+         %26 = OpLoad %float %b
+         %28 = OpFDiv %float %26 %float_0
+               OpStore %b %28
+         %29 = OpLoad %float %b
+         %30 = OpFRem %float %29 %float_0
+               OpStore %b %30
+         %31 = OpLoad %float %b
+         %32 = OpConvertSToF %float %maybe_zero
+         %33 = OpFDiv %float %31 %32
+               OpStore %b %33
+         %34 = OpLoad %float %b
+         %35 = OpConvertSToF %float %maybe_zero
+         %36 = OpFRem %float %34 %35
+               OpStore %b %36
+               OpReturn
+               OpFunctionEnd
