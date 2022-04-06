@@ -28,7 +28,7 @@ namespace fuzzers {
 namespace ast_fuzzer {
 
 namespace {
-const size_t kMaxExpressionSize = 100;
+const size_t kMaxExpressionSize = 50;
 }  // namespace
 
 MutationList MutationFinderWrapUnaryOperators::FindMutations(
