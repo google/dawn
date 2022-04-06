@@ -227,6 +227,7 @@ namespace dawn::native::d3d12 {
             }
         }
         mAllocationsToDelete.ClearUpTo(completedSerial);
+        mHeapsToDelete.ClearUpTo(completedSerial);
     }
 
     void ResourceAllocatorManager::DeallocateMemory(ResourceHeapAllocation& allocation) {
@@ -238,9 +239,12 @@ namespace dawn::native::d3d12 {
 
         // Directly allocated ResourceHeapAllocations are created with a heap object that must be
         // manually deleted upon deallocation. See ResourceAllocatorManager::CreateCommittedResource
-        // for more information.
+        // for more information. Acquire this heap as a unique_ptr and add it to the queue of heaps
+        // to delete. It cannot be deleted immediately because it may be in use by in-flight or
+        // pending commands.
         if (allocation.GetInfo().mMethod == AllocationMethod::kDirect) {
-            delete allocation.GetResourceHeap();
+            mHeapsToDelete.Enqueue(std::unique_ptr<ResourceHeapBase>(allocation.GetResourceHeap()),
+                                   mDevice->GetPendingCommandSerial());
         }
 
         // Invalidate the allocation immediately in case one accidentally
