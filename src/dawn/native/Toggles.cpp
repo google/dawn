@@ -90,6 +90,13 @@ namespace dawn::native {
               "recently used resources local to the GPU. Turning this component off can cause "
               "allocation failures when application memory exceeds physical device memory.",
               "https://crbug.com/dawn/193"}},
+            {Toggle::DisableResourceSuballocation,
+             {"disable_resource_suballocation",
+              "Force the backends to not perform resource suballocation. This may expose "
+              "allocation "
+              "patterns which would otherwise only occur with large or specific types of "
+              "resources.",
+              "https://crbug.com/1313172"}},
             {Toggle::SkipValidation,
              {"skip_validation", "Skip expensive validation of Dawn commands.",
               "https://crbug.com/dawn/271"}},

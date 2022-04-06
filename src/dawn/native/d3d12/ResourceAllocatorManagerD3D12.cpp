@@ -199,11 +199,13 @@ namespace dawn::native::d3d12 {
         // For very small resources, it is inefficent to suballocate given the min. heap
         // size could be much larger then the resource allocation.
         // Attempt to satisfy the request using sub-allocation (placed resource in a heap).
-        ResourceHeapAllocation subAllocation;
-        DAWN_TRY_ASSIGN(subAllocation, CreatePlacedResource(heapType, resourceDescriptor,
-                                                            optimizedClearValue, initialUsage));
-        if (subAllocation.GetInfo().mMethod != AllocationMethod::kInvalid) {
-            return std::move(subAllocation);
+        if (!mDevice->IsToggleEnabled(Toggle::DisableResourceSuballocation)) {
+            ResourceHeapAllocation subAllocation;
+            DAWN_TRY_ASSIGN(subAllocation, CreatePlacedResource(heapType, resourceDescriptor,
+                                                                optimizedClearValue, initialUsage));
+            if (subAllocation.GetInfo().mMethod != AllocationMethod::kInvalid) {
+                return std::move(subAllocation);
+            }
         }
 
         // If sub-allocation fails, fall-back to direct allocation (committed resource).

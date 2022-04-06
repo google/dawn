@@ -134,7 +134,8 @@ namespace dawn::native::vulkan {
         // Sub-allocate non-mappable resources because at the moment the mapped pointer
         // is part of the resource and not the heap, which doesn't match the Vulkan model.
         // TODO(crbug.com/dawn/849): allow sub-allocating mappable resources, maybe.
-        if (requirements.size < kMaxSizeForSubAllocation && kind != MemoryKind::LinearMappable) {
+        if (requirements.size < kMaxSizeForSubAllocation && kind != MemoryKind::LinearMappable &&
+            !mDevice->IsToggleEnabled(Toggle::DisableResourceSuballocation)) {
             // When sub-allocating, Vulkan requires that we respect bufferImageGranularity. Some
             // hardware puts information on the memory's page table entry and allocating a linear
             // resource in the same page as a non-linear (aka opaque) resource can cause issues.

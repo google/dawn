@@ -908,3 +908,35 @@ DAWN_INSTANTIATE_TEST(BufferTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+class BufferNoSuballocationTests : public DawnTest {};
+
+// Regression test for crbug.com/1313172
+// This tests a buffer. It then performs writeBuffer and immediately destroys
+// it. Though writeBuffer references a destroyed buffer, it should not crash.
+TEST_P(BufferNoSuballocationTests, WriteBufferThenDestroy) {
+    uint32_t myData = 0x01020304;
+
+    wgpu::BufferDescriptor desc;
+    desc.size = 1024;
+    desc.usage = wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&desc);
+
+    // Enqueue a pending write into the buffer.
+    constexpr size_t kSize = sizeof(myData);
+    queue.WriteBuffer(buffer, 0, &myData, kSize);
+
+    // Destroy the buffer.
+    buffer.Destroy();
+
+    // Flush and wait for all commands.
+    queue.Submit(0, nullptr);
+    WaitForAllOperations();
+}
+
+DAWN_INSTANTIATE_TEST(BufferNoSuballocationTests,
+                      D3D12Backend({"disable_resource_suballocation"}),
+                      MetalBackend({"disable_resource_suballocation"}),
+                      OpenGLBackend({"disable_resource_suballocation"}),
+                      OpenGLESBackend({"disable_resource_suballocation"}),
+                      VulkanBackend({"disable_resource_suballocation"}));
