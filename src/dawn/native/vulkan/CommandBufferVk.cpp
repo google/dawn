@@ -449,7 +449,7 @@ namespace dawn::native::vulkan {
         const TextureCopy& srcCopy,
         const TextureCopy& dstCopy,
         const Extent3D& copySize) {
-        ASSERT(srcCopy.texture->GetFormat().format == dstCopy.texture->GetFormat().format);
+        ASSERT(srcCopy.texture->GetFormat().CopyCompatibleWith(dstCopy.texture->GetFormat()));
         ASSERT(srcCopy.aspect == dstCopy.aspect);
         dawn::native::Format format = srcCopy.texture->GetFormat();
         const TexelBlockInfo& blockInfo = format.GetAspectInfo(srcCopy.aspect).block;
