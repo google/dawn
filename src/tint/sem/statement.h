@@ -26,16 +26,12 @@ class Statement;
 }  // namespace ast
 namespace sem {
 class BlockStatement;
+class CompoundStatement;
+class Function;
 }  // namespace sem
 }  // namespace tint
 
-namespace tint {
-namespace sem {
-
-/// Forward declaration
-class CompoundStatement;
-class Function;
-
+namespace tint::sem {
 namespace detail {
 /// FindFirstParentReturn is a traits helper for determining the return type for
 /// the template member function Statement::FindFirstParent().
@@ -182,7 +178,6 @@ const detail::FindFirstParentReturnType<TYPES...>* Statement::FindFirstParent()
   return nullptr;
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_STATEMENT_H_

@@ -19,8 +19,7 @@
 
 #include "src/tint/sem/type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// A atomic type.
 class Atomic final : public Castable<Atomic, Type> {
@@ -62,7 +61,6 @@ class Atomic final : public Castable<Atomic, Type> {
   sem::Type const* const subtype_;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_ATOMIC_TYPE_H_

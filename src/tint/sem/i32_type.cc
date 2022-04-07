@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::I32);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 I32::I32() = default;
 
@@ -51,5 +50,4 @@ uint32_t I32::Align() const {
   return 4;
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

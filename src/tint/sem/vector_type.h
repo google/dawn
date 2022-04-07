@@ -19,8 +19,7 @@
 
 #include "src/tint/sem/type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// A vector type.
 class Vector final : public Castable<Vector, Type> {
@@ -75,7 +74,6 @@ class Vector final : public Castable<Vector, Type> {
   const uint32_t width_;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_VECTOR_TYPE_H_

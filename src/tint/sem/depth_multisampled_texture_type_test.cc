@@ -20,8 +20,7 @@
 #include "src/tint/sem/sampled_texture_type.h"
 #include "src/tint/sem/storage_texture_type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 namespace {
 
 using DepthMultisampledTextureTest = TestHelper;
@@ -60,5 +59,4 @@ TEST_F(DepthMultisampledTextureTest, FriendlyName) {
 }
 
 }  // namespace
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

@@ -14,8 +14,7 @@
 
 #include "src/tint/sem/behavior.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 std::ostream& operator<<(std::ostream& out, Behavior behavior) {
   switch (behavior) {
@@ -35,5 +34,4 @@ std::ostream& operator<<(std::ostream& out, Behavior behavior) {
   return out << "<unknown>";
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

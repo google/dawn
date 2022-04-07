@@ -19,8 +19,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Reference);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Reference::Reference(const Type* subtype,
                      ast::StorageClass storage_class,
@@ -58,5 +57,4 @@ Reference::Reference(Reference&&) = default;
 
 Reference::~Reference() = default;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

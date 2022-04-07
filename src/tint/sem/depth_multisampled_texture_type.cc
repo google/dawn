@@ -19,8 +19,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::DepthMultisampledTexture);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 namespace {
 
 bool IsValidDepthDimension(ast::TextureDimension dim) {
@@ -57,5 +56,4 @@ std::string DepthMultisampledTexture::FriendlyName(const SymbolTable&) const {
   return out.str();
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

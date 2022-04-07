@@ -17,8 +17,7 @@
 
 #include "src/tint/sem/call_target.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// TypeConversion is the CallTarget for a type conversion (cast).
 class TypeConversion final : public Castable<TypeConversion, CallTarget> {
@@ -38,7 +37,6 @@ class TypeConversion final : public Castable<TypeConversion, CallTarget> {
   const sem::Type* Target() const { return ReturnType(); }
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_TYPE_CONVERSION_H_

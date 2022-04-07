@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Void);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Void::Void() = default;
 
@@ -39,5 +38,4 @@ std::string Void::FriendlyName(const SymbolTable&) const {
   return "void";
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

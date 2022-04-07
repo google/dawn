@@ -16,8 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 namespace {
 
 struct BuiltinData {
@@ -124,5 +123,4 @@ TEST_F(BuiltinTypeTest, ParseNoMatch) {
 }
 
 }  // namespace
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

@@ -22,10 +22,12 @@
 #include "src/tint/sem/variable.h"
 #include "src/tint/utils/hash.h"
 
-namespace tint {
-namespace sem {
 // Forward declarations
+namespace tint::sem {
 class Type;
+}
+
+namespace tint::sem {
 
 /// CallTargetSignature holds the return type and parameters for a call target
 struct CallTargetSignature {
@@ -84,8 +86,7 @@ class CallTarget : public Castable<CallTarget, Node> {
   CallTargetSignature signature_;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 namespace std {
 

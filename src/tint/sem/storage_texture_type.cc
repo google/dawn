@@ -19,8 +19,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::StorageTexture);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 StorageTexture::StorageTexture(ast::TextureDimension dim,
                                ast::TexelFormat format,
@@ -87,5 +86,4 @@ sem::Type* StorageTexture::SubtypeFor(ast::TexelFormat format,
   return nullptr;
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

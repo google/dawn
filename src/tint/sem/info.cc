@@ -14,8 +14,7 @@
 
 #include "src/tint/sem/info.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Info::Info() = default;
 
@@ -25,5 +24,4 @@ Info::~Info() = default;
 
 Info& Info::operator=(Info&&) = default;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

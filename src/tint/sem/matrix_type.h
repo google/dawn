@@ -19,11 +19,12 @@
 
 #include "src/tint/sem/type.h"
 
-namespace tint {
-namespace sem {
-
 // Forward declaration
+namespace tint::sem {
 class Vector;
+}
+
+namespace tint::sem {
 
 /// A matrix type
 class Matrix final : public Castable<Matrix, Type> {
@@ -79,7 +80,6 @@ class Matrix final : public Castable<Matrix, Type> {
   const uint32_t columns_;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_MATRIX_TYPE_H_

@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::ExternalTexture);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 ExternalTexture::ExternalTexture() : Base(ast::TextureDimension::k2d) {}
 
@@ -39,5 +38,4 @@ std::string ExternalTexture::FriendlyName(const SymbolTable&) const {
   return "texture_external";
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

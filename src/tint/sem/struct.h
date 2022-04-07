@@ -27,18 +27,18 @@
 #include "src/tint/sem/type.h"
 #include "src/tint/symbol.h"
 
-namespace tint {
-
 // Forward declarations
+namespace tint {
 namespace ast {
 class StructMember;
 }  // namespace ast
-
 namespace sem {
-
-// Forward declarations
 class StructMember;
 class Type;
+}  // namespace sem
+}  // namespace tint
+
+namespace tint::sem {
 
 /// A vector of StructMember pointers.
 using StructMemberList = std::vector<const StructMember*>;
@@ -230,7 +230,6 @@ class StructMember : public Castable<StructMember, Node> {
   const uint32_t size_;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_STRUCT_H_

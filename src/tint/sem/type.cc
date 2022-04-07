@@ -27,8 +27,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Type);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Type::Type() = default;
 
@@ -154,5 +153,4 @@ bool Type::is_handle() const {
   return IsAnyOf<Sampler, Texture>();
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

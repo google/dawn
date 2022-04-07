@@ -20,8 +20,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Pointer);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Pointer::Pointer(const Type* subtype,
                  ast::StorageClass storage_class,
@@ -59,5 +58,4 @@ Pointer::Pointer(Pointer&&) = default;
 
 Pointer::~Pointer() = default;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

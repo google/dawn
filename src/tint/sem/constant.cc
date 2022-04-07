@@ -21,8 +21,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 namespace {
 
@@ -80,5 +79,4 @@ bool Constant::AnyZero() const {
   return false;
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

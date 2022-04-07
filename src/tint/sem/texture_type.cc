@@ -16,8 +16,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Texture);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Texture::Texture(ast::TextureDimension dim) : dim_(dim) {}
 
@@ -25,5 +24,4 @@ Texture::Texture(Texture&&) = default;
 
 Texture::~Texture() = default;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

@@ -24,20 +24,20 @@
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/parameter_usage.h"
 
-namespace tint {
-
 // Forward declarations
+namespace tint {
 namespace ast {
 class IdentifierExpression;
 class Variable;
 }  // namespace ast
-
 namespace sem {
-
-// Forward declarations
 class CallTarget;
 class Type;
 class VariableUser;
+}  // namespace sem
+}  // namespace tint
+
+namespace tint::sem {
 
 /// Variable is the base class for local variables, global variables and
 /// parameters.
@@ -252,8 +252,7 @@ class VariableUser final : public Castable<VariableUser, Expression> {
 /// A pair of sem::Variables. Can be hashed.
 typedef std::pair<const Variable*, const Variable*> VariablePair;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 namespace std {
 

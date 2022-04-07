@@ -19,8 +19,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Call);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Call::Call(const ast::CallExpression* declaration,
            const CallTarget* target,
@@ -38,5 +37,4 @@ Call::Call(const ast::CallExpression* declaration,
 
 Call::~Call() = default;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

@@ -25,8 +25,7 @@
 #ifndef SRC_TINT_SEM_PARAMETER_USAGE_H_
 #define SRC_TINT_SEM_PARAMETER_USAGE_H_
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// ParameterUsage is extra metadata for identifying a parameter based on its
 /// overload position
@@ -50,7 +49,6 @@ enum class ParameterUsage {
 /// @returns a string representation of the given parameter usage.
 const char* str(ParameterUsage usage);
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_PARAMETER_USAGE_H_

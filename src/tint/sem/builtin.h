@@ -23,8 +23,7 @@
 #include "src/tint/sem/pipeline_stage_set.h"
 #include "src/tint/utils/hash.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// Determines if the given `i` is a coarse derivative
 /// @param i the builtin type
@@ -147,8 +146,7 @@ static constexpr double kRadToDeg = 57.295779513082322865;
 /// Constant value used by the radians() builtin
 static constexpr double kDegToRad = 0.017453292519943295474;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 namespace std {
 

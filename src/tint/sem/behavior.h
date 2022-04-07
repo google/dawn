@@ -17,8 +17,7 @@
 
 #include "src/tint/utils/enum_set.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// Behavior enumerates the possible behaviors of an expression or statement.
 /// @see https://www.w3.org/TR/WGSL/#behaviors
@@ -40,7 +39,6 @@ using Behaviors = utils::EnumSet<Behavior>;
 /// @returns out so calls can be chained
 std::ostream& operator<<(std::ostream& out, Behavior behavior);
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_BEHAVIOR_H_

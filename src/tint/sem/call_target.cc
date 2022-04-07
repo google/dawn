@@ -19,8 +19,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::CallTarget);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 CallTarget::CallTarget(const sem::Type* return_type,
                        const ParameterList& parameters)
@@ -61,8 +60,7 @@ bool CallTargetSignature::operator==(const CallTargetSignature& other) const {
   return true;
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 namespace std {
 

@@ -16,8 +16,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Node);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Node::Node() = default;
 
@@ -25,5 +24,4 @@ Node::Node(const Node&) = default;
 
 Node::~Node() = default;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

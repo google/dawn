@@ -25,8 +25,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Function);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Function::Function(const ast::Function* declaration,
                    Type* return_type,
@@ -38,7 +37,7 @@ Function::Function(const ast::Function* declaration,
   for (auto* parameter : parameters) {
     parameter->SetOwner(this);
   }
-}  // namespace sem
+}
 
 Function::~Function() = default;
 
@@ -193,5 +192,4 @@ Function::TransitivelyReferencedSampledTextureVariablesImpl(
   return ret;
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

@@ -22,14 +22,11 @@
 #include "src/tint/sem/type.h"
 
 // Forward declarations
-namespace tint {
-namespace ast {
+namespace tint::ast {
 class Array;
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// Array holds the semantic information for Array nodes.
 class Array final : public Castable<Array, Type> {
@@ -111,7 +108,6 @@ class Array final : public Castable<Array, Type> {
   const bool constructible_;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_ARRAY_H_

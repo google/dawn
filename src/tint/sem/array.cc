@@ -21,8 +21,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Array);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Array::Array(const Type* element,
              uint32_t count,
@@ -81,5 +80,4 @@ uint32_t Array::Size() const {
   return size_;
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

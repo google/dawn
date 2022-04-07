@@ -20,8 +20,7 @@
 #include "src/tint/ast/sampler.h"
 #include "src/tint/sem/type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// A sampler type.
 class Sampler final : public Castable<Sampler, Type> {
@@ -57,7 +56,6 @@ class Sampler final : public Castable<Sampler, Type> {
   ast::SamplerKind const kind_;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_SAMPLER_TYPE_H_

@@ -22,10 +22,12 @@
 #include "src/tint/sem/node.h"
 #include "src/tint/sem/type_mappings.h"
 
-namespace tint::sem {
-
 // Forward declarations
+namespace tint::sem {
 class Module;
+}
+
+namespace tint::sem {
 
 /// Info holds all the resolved semantic information for a Program.
 class Info {

@@ -18,15 +18,12 @@
 #include "src/tint/sem/block_statement.h"
 
 // Forward declarations
-namespace tint {
-namespace ast {
+namespace tint::ast {
 class CaseStatement;
 class SwitchStatement;
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// Holds semantic information about an switch statement
 class SwitchStatement final
@@ -74,7 +71,6 @@ class CaseStatement final : public Castable<CaseStatement, CompoundStatement> {
   const BlockStatement* body_ = nullptr;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_SWITCH_STATEMENT_H_

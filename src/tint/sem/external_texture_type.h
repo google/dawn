@@ -19,8 +19,7 @@
 
 #include "src/tint/sem/texture_type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// An external texture type
 class ExternalTexture final : public Castable<ExternalTexture, Texture> {
@@ -45,7 +44,6 @@ class ExternalTexture final : public Castable<ExternalTexture, Texture> {
   std::string FriendlyName(const SymbolTable& symbols) const override;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_EXTERNAL_TEXTURE_TYPE_H_

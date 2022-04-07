@@ -20,8 +20,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// A Constant is compile-time known expression value, expressed as a flattened
 /// list of scalar values. Value may be of a scalar or vector type.
@@ -139,7 +138,6 @@ class Constant {
   Scalars elems_;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_CONSTANT_H_

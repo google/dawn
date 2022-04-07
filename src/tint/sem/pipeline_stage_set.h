@@ -18,12 +18,10 @@
 #include "src/tint/ast/pipeline_stage.h"
 #include "src/tint/utils/enum_set.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 using PipelineStageSet = utils::EnumSet<ast::PipelineStage>;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_PIPELINE_STAGE_SET_H_

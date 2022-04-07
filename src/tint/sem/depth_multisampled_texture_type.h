@@ -19,8 +19,7 @@
 
 #include "src/tint/sem/texture_type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// A multisampled depth texture type.
 class DepthMultisampledTexture final
@@ -46,7 +45,6 @@ class DepthMultisampledTexture final
   std::string FriendlyName(const SymbolTable& symbols) const override;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_DEPTH_MULTISAMPLED_TEXTURE_TYPE_H_

@@ -20,8 +20,7 @@
 
 #include "src/tint/sem/binding_point.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// Mapping of a sampler to a texture it samples.
 struct SamplerTexturePair {
@@ -46,8 +45,7 @@ struct SamplerTexturePair {
   }
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 namespace std {
 

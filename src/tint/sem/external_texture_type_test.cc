@@ -20,8 +20,7 @@
 #include "src/tint/sem/storage_texture_type.h"
 #include "src/tint/sem/test_helper.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 namespace {
 
 using ExternalTextureTest = TestHelper;
@@ -68,5 +67,4 @@ TEST_F(ExternalTextureTest, FriendlyName) {
 }
 
 }  // namespace
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

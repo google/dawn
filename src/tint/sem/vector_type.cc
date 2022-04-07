@@ -19,8 +19,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Vector);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Vector::Vector(Type const* subtype, uint32_t width)
     : subtype_(subtype), width_(width) {
@@ -85,5 +84,4 @@ uint32_t Vector::AlignOf(uint32_t width) {
   return 0;  // Unreachable
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

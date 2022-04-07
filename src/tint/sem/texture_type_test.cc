@@ -17,8 +17,7 @@
 #include "src/tint/sem/sampled_texture_type.h"
 #include "src/tint/sem/test_helper.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 namespace {
 
 using TextureTypeDimTest = TestParamHelper<ast::TextureDimension>;
@@ -42,5 +41,4 @@ INSTANTIATE_TEST_SUITE_P(Dimensions,
                                            ast::TextureDimension::kCubeArray));
 
 }  // namespace
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

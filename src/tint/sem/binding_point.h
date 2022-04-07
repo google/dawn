@@ -21,8 +21,7 @@
 
 #include "src/tint/utils/hash.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// BindingPoint holds a group and binding index.
 struct BindingPoint {
@@ -46,8 +45,7 @@ struct BindingPoint {
   }
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 namespace std {
 

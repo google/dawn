@@ -21,10 +21,12 @@
 #include "src/tint/ast/storage_texture.h"
 #include "src/tint/sem/texture_type.h"
 
-namespace tint {
-namespace sem {
-
+// Forward Declarations
+namespace tint::sem {
 class Manager;
+}
+
+namespace tint::sem {
 
 /// A storage texture type.
 class StorageTexture final : public Castable<StorageTexture, Texture> {
@@ -75,7 +77,6 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
   Type* const subtype_;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_STORAGE_TEXTURE_TYPE_H_

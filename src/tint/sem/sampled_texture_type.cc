@@ -19,8 +19,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::SampledTexture);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 SampledTexture::SampledTexture(ast::TextureDimension dim, const Type* type)
     : Base(dim), type_(type) {
@@ -49,5 +48,4 @@ std::string SampledTexture::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

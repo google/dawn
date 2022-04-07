@@ -20,12 +20,13 @@
 #include "src/tint/sem/constant.h"
 #include "src/tint/sem/node.h"
 
-namespace tint {
-namespace sem {
 // Forward declarations
+namespace tint::sem {
 class Statement;
 class Type;
+}  // namespace tint::sem
 
+namespace tint::sem {
 /// Expression holds the semantic information for expression nodes.
 class Expression : public Castable<Expression, Node> {
  public:
@@ -77,7 +78,6 @@ class Expression : public Castable<Expression, Node> {
   const bool has_side_effects_;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_EXPRESSION_H_

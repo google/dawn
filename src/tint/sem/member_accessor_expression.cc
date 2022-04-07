@@ -21,8 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::MemberAccessorExpression);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMemberAccess);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Swizzle);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 MemberAccessorExpression::MemberAccessorExpression(
     const ast::MemberAccessorExpression* declaration,
@@ -53,5 +52,4 @@ Swizzle::Swizzle(const ast::MemberAccessorExpression* declaration,
 
 Swizzle::~Swizzle() = default;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

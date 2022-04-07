@@ -19,8 +19,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::MultisampledTexture);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 MultisampledTexture::MultisampledTexture(ast::TextureDimension dim,
                                          const Type* type)
@@ -52,5 +51,4 @@ std::string MultisampledTexture::FriendlyName(
   return out.str();
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

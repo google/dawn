@@ -19,8 +19,7 @@
 
 #include "src/tint/sem/type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// A float 32 type
 class F32 final : public Castable<F32, Type> {
@@ -54,7 +53,6 @@ class F32 final : public Castable<F32, Type> {
   uint32_t Align() const override;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_F32_TYPE_H_

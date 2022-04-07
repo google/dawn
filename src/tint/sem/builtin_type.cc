@@ -26,8 +26,7 @@
 
 #include <sstream>
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 BuiltinType ParseBuiltinType(const std::string& name) {
   if (name == "abs") {
@@ -571,5 +570,4 @@ std::ostream& operator<<(std::ostream& out, BuiltinType i) {
   return out;
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

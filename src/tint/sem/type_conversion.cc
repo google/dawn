@@ -16,8 +16,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::TypeConversion);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 TypeConversion::TypeConversion(const sem::Type* type,
                                const sem::Parameter* parameter)
@@ -25,5 +24,4 @@ TypeConversion::TypeConversion(const sem::Type* type,
 
 TypeConversion::~TypeConversion() = default;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

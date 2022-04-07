@@ -20,8 +20,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/program_builder.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// Helper class for testing
 template <typename BASE>
@@ -43,7 +42,6 @@ using TestHelper = TestHelperBase<testing::Test>;
 template <typename T>
 using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_TEST_HELPER_H_

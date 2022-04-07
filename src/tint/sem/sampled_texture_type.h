@@ -19,8 +19,7 @@
 
 #include "src/tint/sem/texture_type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// A sampled texture type.
 class SampledTexture final : public Castable<SampledTexture, Texture> {
@@ -52,7 +51,6 @@ class SampledTexture final : public Castable<SampledTexture, Texture> {
   const Type* const type_;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_SAMPLED_TEXTURE_TYPE_H_

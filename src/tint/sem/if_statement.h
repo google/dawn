@@ -25,11 +25,10 @@ class ElseStatement;
 }  // namespace ast
 namespace sem {
 class Expression;
-}  // namespace sem
+}
 }  // namespace tint
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// Holds semantic information about an if statement
 class IfStatement final : public Castable<IfStatement, CompoundStatement> {
@@ -92,7 +91,6 @@ class ElseStatement final : public Castable<ElseStatement, CompoundStatement> {
   const Expression* condition_ = nullptr;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_IF_STATEMENT_H_

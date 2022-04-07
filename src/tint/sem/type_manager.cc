@@ -14,13 +14,11 @@
 
 #include "src/tint/sem/type_manager.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Manager::Manager() = default;
 Manager::Manager(Manager&&) = default;
 Manager& Manager::operator=(Manager&& rhs) = default;
 Manager::~Manager() = default;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

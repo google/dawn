@@ -20,8 +20,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Matrix);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Matrix::Matrix(const Vector* column_type, uint32_t columns)
     : subtype_(column_type->type()),
@@ -74,5 +73,4 @@ uint32_t Matrix::ColumnStride() const {
   return column_type_->Align();
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

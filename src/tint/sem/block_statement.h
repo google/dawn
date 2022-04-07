@@ -21,17 +21,14 @@
 #include "src/tint/sem/statement.h"
 
 // Forward declarations
-namespace tint {
-namespace ast {
+namespace tint::ast {
 class BlockStatement;
 class ContinueStatement;
 class Function;
 class Variable;
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// Holds semantic information about a block, such as parent block and variables
 /// declared in the block.
@@ -117,7 +114,6 @@ class LoopBlockStatement final
   size_t num_decls_at_first_continue_ = 0;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_BLOCK_STATEMENT_H_

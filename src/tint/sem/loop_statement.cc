@@ -19,8 +19,7 @@
 TINT_INSTANTIATE_TYPEINFO(tint::sem::LoopStatement);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::LoopContinuingBlockStatement);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 LoopStatement::LoopStatement(const ast::LoopStatement* declaration,
                              const CompoundStatement* parent,
@@ -42,5 +41,4 @@ LoopContinuingBlockStatement::LoopContinuingBlockStatement(
 }
 LoopContinuingBlockStatement::~LoopContinuingBlockStatement() = default;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

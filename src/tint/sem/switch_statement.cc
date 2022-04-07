@@ -19,8 +19,7 @@
 TINT_INSTANTIATE_TYPEINFO(tint::sem::CaseStatement);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::SwitchStatement);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 SwitchStatement::SwitchStatement(const ast::SwitchStatement* declaration,
                                  const CompoundStatement* parent,
@@ -49,5 +48,4 @@ const ast::CaseStatement* CaseStatement::Declaration() const {
   return static_cast<const ast::CaseStatement*>(Base::Declaration());
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

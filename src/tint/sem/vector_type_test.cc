@@ -15,8 +15,7 @@
 #include "src/tint/sem/test_helper.h"
 #include "src/tint/sem/texture_type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 namespace {
 
 using VectorTest = TestHelper;
@@ -65,5 +64,4 @@ TEST_F(VectorTest, FriendlyName) {
 }
 
 }  // namespace
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

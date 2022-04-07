@@ -20,13 +20,13 @@
 
 #include "src/tint/sem/node.h"
 
-namespace tint {
-
 // Forward declarations
+namespace tint {
 class ProgramBuilder;
 class SymbolTable;
+}  // namespace tint
 
-namespace sem {
+namespace tint::sem {
 
 /// Supported memory layouts for calculating sizes
 enum class MemoryLayout { kUniformBuffer, kStorageBuffer };
@@ -118,8 +118,7 @@ class Type : public Castable<Type, Node> {
   Type();
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 namespace std {
 

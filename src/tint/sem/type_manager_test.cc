@@ -18,8 +18,7 @@
 #include "src/tint/sem/i32_type.h"
 #include "src/tint/sem/u32_type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 namespace {
 
 template <typename T>
@@ -79,5 +78,4 @@ TEST_F(TypeManagerTest, WrapDoesntAffectInner) {
 }
 
 }  // namespace
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

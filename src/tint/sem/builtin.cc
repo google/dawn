@@ -23,8 +23,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Builtin);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 const char* Builtin::str() const {
   return sem::str(type_);
@@ -161,7 +160,6 @@ bool Builtin::HasSideEffects() const {
   return false;
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 //! @endcond

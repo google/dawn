@@ -17,8 +17,7 @@
 
 #include "src/tint/sem/call_target.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// TypeConstructor is the CallTarget for a type constructor.
 class TypeConstructor final : public Castable<TypeConstructor, CallTarget> {
@@ -32,7 +31,6 @@ class TypeConstructor final : public Castable<TypeConstructor, CallTarget> {
   ~TypeConstructor() override;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_TYPE_CONSTRUCTOR_H_

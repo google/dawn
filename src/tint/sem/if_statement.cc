@@ -19,8 +19,7 @@
 TINT_INSTANTIATE_TYPEINFO(tint::sem::IfStatement);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::ElseStatement);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 IfStatement::IfStatement(const ast::IfStatement* declaration,
                          const CompoundStatement* parent,
@@ -44,5 +43,4 @@ const ast::ElseStatement* ElseStatement::Declaration() const {
   return static_cast<const ast::ElseStatement*>(Base::Declaration());
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

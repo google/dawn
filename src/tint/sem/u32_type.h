@@ -19,8 +19,7 @@
 
 #include "src/tint/sem/type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// A unsigned int 32 type.
 class U32 final : public Castable<U32, Type> {
@@ -54,7 +53,6 @@ class U32 final : public Castable<U32, Type> {
   uint32_t Align() const override;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_U32_TYPE_H_

@@ -18,8 +18,7 @@
 #include "src/tint/ast/texture.h"
 #include "src/tint/sem/type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// A texture type.
 class Texture : public Castable<Texture, Type> {
@@ -38,7 +37,6 @@ class Texture : public Castable<Texture, Type> {
   ast::TextureDimension const dim_;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_TEXTURE_TYPE_H_

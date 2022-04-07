@@ -25,8 +25,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::LocalVariable);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Parameter);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::VariableUser);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Variable::Variable(const ast::Variable* declaration,
                    const sem::Type* type,
@@ -85,5 +84,4 @@ VariableUser::VariableUser(const ast::IdentifierExpression* declaration,
            /* has_side_effects */ false),
       variable_(variable) {}
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

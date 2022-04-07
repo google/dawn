@@ -20,8 +20,7 @@
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/expression.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// Call is the base class for semantic nodes that hold semantic information for
 /// ast::CallExpression nodes.
@@ -62,7 +61,6 @@ class Call final : public Castable<Call, Expression> {
   std::vector<const sem::Expression*> arguments_;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_CALL_H_

@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::ForLoopStatement);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 ForLoopStatement::ForLoopStatement(const ast::ForLoopStatement* declaration,
                                    const CompoundStatement* parent,
@@ -32,5 +31,4 @@ const ast::ForLoopStatement* ForLoopStatement::Declaration() const {
   return static_cast<const ast::ForLoopStatement*>(Base::Declaration());
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

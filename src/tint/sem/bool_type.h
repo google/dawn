@@ -25,8 +25,7 @@
 #undef Bool
 #endif
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// A boolean type
 class Bool final : public Castable<Bool, Type> {
@@ -64,7 +63,6 @@ class Bool final : public Castable<Bool, Type> {
   uint32_t Align() const override;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_BOOL_TYPE_H_

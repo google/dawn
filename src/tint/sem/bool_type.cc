@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Bool);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Bool::Bool() = default;
 
@@ -51,5 +50,4 @@ uint32_t Bool::Align() const {
   return 4;
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

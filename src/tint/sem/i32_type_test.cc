@@ -15,8 +15,7 @@
 #include "src/tint/sem/test_helper.h"
 #include "src/tint/sem/texture_type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 namespace {
 
 using I32Test = TestHelper;
@@ -46,5 +45,4 @@ TEST_F(I32Test, FriendlyName) {
 }
 
 }  // namespace
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

@@ -19,18 +19,18 @@
 
 #include "src/tint/sem/expression.h"
 
-namespace tint {
-
 /// Forward declarations
+namespace tint {
 namespace ast {
 class MemberAccessorExpression;
 }  // namespace ast
-
 namespace sem {
-
-/// Forward declarations
 class Struct;
 class StructMember;
+}  // namespace sem
+}  // namespace tint
+
+namespace tint::sem {
 
 /// MemberAccessorExpression holds the semantic information for a
 /// ast::MemberAccessorExpression node.
@@ -105,7 +105,6 @@ class Swizzle final : public Castable<Swizzle, MemberAccessorExpression> {
   std::vector<uint32_t> const indices_;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_MEMBER_ACCESSOR_EXPRESSION_H_

@@ -16,8 +16,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::TypeConstructor);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 TypeConstructor::TypeConstructor(const sem::Type* type,
                                  const ParameterList& parameters)
@@ -25,5 +24,4 @@ TypeConstructor::TypeConstructor(const sem::Type* type,
 
 TypeConstructor::~TypeConstructor() = default;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

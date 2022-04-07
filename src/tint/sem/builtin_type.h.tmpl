@@ -14,8 +14,7 @@ See:
 #include <sstream>
 #include <string>
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// Enumerator of all builtin functions
 enum class BuiltinType {
@@ -39,7 +38,6 @@ const char* str(BuiltinType i);
 /// matches the name in the WGSL spec.
 std::ostream& operator<<(std::ostream& out, BuiltinType i);
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_BUILTIN_TYPE_H_

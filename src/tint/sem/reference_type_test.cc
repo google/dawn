@@ -15,8 +15,7 @@
 #include "src/tint/sem/reference_type.h"
 #include "src/tint/sem/test_helper.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 namespace {
 
 using ReferenceTest = TestHelper;
@@ -93,5 +92,4 @@ TEST_F(ReferenceTest, FriendlyNameWithStorageClass) {
 }
 
 }  // namespace
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

@@ -20,8 +20,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Atomic);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Atomic::Atomic(const sem::Type* subtype) : subtype_(subtype) {
   TINT_ASSERT(AST, !subtype->Is<Reference>());
@@ -60,5 +59,4 @@ Atomic::Atomic(Atomic&&) = default;
 
 Atomic::~Atomic() = default;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

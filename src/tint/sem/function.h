@@ -23,20 +23,21 @@
 #include "src/tint/sem/call.h"
 #include "src/tint/utils/unique_vector.h"
 
-namespace tint {
-
 // Forward declarations
+namespace tint {
 namespace ast {
 class BuiltinAttribute;
 class Function;
 class LocationAttribute;
 class ReturnStatement;
 }  // namespace ast
-
 namespace sem {
-
 class Builtin;
 class Variable;
+}  // namespace sem
+}  // namespace tint
+
+namespace tint::sem {
 
 /// WorkgroupDimension describes the size of a single dimension of an entry
 /// point's workgroup size.
@@ -283,7 +284,6 @@ class Function final : public Castable<Function, CallTarget> {
   sem::Behaviors behaviors_{sem::Behavior::kNext};
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_FUNCTION_H_

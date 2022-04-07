@@ -19,8 +19,7 @@
 
 #include "src/tint/sem/type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// A void type
 class Void final : public Castable<Void, Type> {
@@ -44,7 +43,6 @@ class Void final : public Castable<Void, Type> {
   std::string FriendlyName(const SymbolTable& symbols) const override;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_VOID_TYPE_H_

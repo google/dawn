@@ -26,8 +26,7 @@
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Struct);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMember);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Struct::Struct(const ast::Struct* declaration,
                Symbol name,
@@ -181,5 +180,4 @@ StructMember::StructMember(const ast::StructMember* declaration,
 
 StructMember::~StructMember() = default;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

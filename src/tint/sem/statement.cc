@@ -23,8 +23,7 @@
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Statement);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::CompoundStatement);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Statement::Statement(const ast::Statement* declaration,
                      const CompoundStatement* parent,
@@ -44,5 +43,4 @@ CompoundStatement::CompoundStatement(const ast::Statement* declaration,
 
 CompoundStatement::~CompoundStatement() = default;
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

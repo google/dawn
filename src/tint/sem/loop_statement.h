@@ -18,14 +18,11 @@
 #include "src/tint/sem/block_statement.h"
 
 // Forward declarations
-namespace tint {
-namespace ast {
+namespace tint::ast {
 class LoopStatement;
-}  // namespace ast
-}  // namespace tint
+}
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// Holds semantic information about a loop statement
 class LoopStatement final : public Castable<LoopStatement, CompoundStatement> {
@@ -58,7 +55,6 @@ class LoopContinuingBlockStatement final
   ~LoopContinuingBlockStatement() override;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_LOOP_STATEMENT_H_

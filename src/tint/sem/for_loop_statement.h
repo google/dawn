@@ -17,17 +17,17 @@
 
 #include "src/tint/sem/statement.h"
 
+// Forward Declarations
 namespace tint {
 namespace ast {
 class ForLoopStatement;
-}  // namespace ast
+}
 namespace sem {
 class Expression;
-}  // namespace sem
+}
 }  // namespace tint
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// Holds semantic information about a for-loop statement
 class ForLoopStatement final
@@ -58,7 +58,6 @@ class ForLoopStatement final
   const Expression* condition_ = nullptr;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_FOR_LOOP_STATEMENT_H_

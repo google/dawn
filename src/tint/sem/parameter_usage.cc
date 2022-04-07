@@ -24,8 +24,7 @@
 
 #include "src/tint/sem/parameter_usage.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 const char* str(ParameterUsage usage) {
   switch (usage) {
@@ -61,5 +60,4 @@ const char* str(ParameterUsage usage) {
   return "<unknown>";
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

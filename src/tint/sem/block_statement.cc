@@ -22,8 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::BlockStatement);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::FunctionBlockStatement);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::LoopBlockStatement);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 BlockStatement::BlockStatement(const ast::BlockStatement* declaration,
                                const CompoundStatement* parent,
@@ -63,5 +62,4 @@ void LoopBlockStatement::SetFirstContinue(
   num_decls_at_first_continue_ = num_decls;
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

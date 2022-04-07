@@ -21,8 +21,7 @@
 #include "src/tint/ast/storage_class.h"
 #include "src/tint/sem/type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// A reference type.
 class Reference final : public Castable<Reference, Type> {
@@ -66,7 +65,6 @@ class Reference final : public Castable<Reference, Type> {
   ast::Access const access_;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_REFERENCE_TYPE_H_

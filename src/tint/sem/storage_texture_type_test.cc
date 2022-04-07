@@ -19,8 +19,7 @@
 #include "src/tint/sem/sampled_texture_type.h"
 #include "src/tint/sem/test_helper.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 namespace {
 
 struct StorageTextureTest : public TestHelper {
@@ -152,5 +151,4 @@ TEST_F(StorageTextureTest, I32) {
 }
 
 }  // namespace
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem

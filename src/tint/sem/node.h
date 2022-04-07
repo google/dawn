@@ -17,8 +17,7 @@
 
 #include "src/tint/castable.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// Node is the base class for all semantic nodes
 class Node : public Castable<Node> {
@@ -33,7 +32,6 @@ class Node : public Castable<Node> {
   ~Node() override;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_NODE_H_

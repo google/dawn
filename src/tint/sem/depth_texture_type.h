@@ -19,8 +19,7 @@
 
 #include "src/tint/sem/texture_type.h"
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 /// A depth texture type.
 class DepthTexture final : public Castable<DepthTexture, Texture> {
@@ -45,7 +44,6 @@ class DepthTexture final : public Castable<DepthTexture, Texture> {
   std::string FriendlyName(const SymbolTable& symbols) const override;
 };
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 #endif  // SRC_TINT_SEM_DEPTH_TEXTURE_TYPE_H_

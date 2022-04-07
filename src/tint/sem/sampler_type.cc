@@ -19,8 +19,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Sampler);
 
-namespace tint {
-namespace sem {
+namespace tint::sem {
 
 Sampler::Sampler(ast::SamplerKind kind) : kind_(kind) {}
 
@@ -43,5 +42,4 @@ std::string Sampler::FriendlyName(const SymbolTable&) const {
   return kind_ == ast::SamplerKind::kSampler ? "sampler" : "sampler_comparison";
 }
 
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
