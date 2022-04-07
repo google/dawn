@@ -24,9 +24,7 @@
 #include "src/tint/transform/manager.h"
 #include "src/tint/writer/glsl/generator_impl.h"
 
-namespace tint {
-namespace writer {
-namespace glsl {
+namespace tint::writer::glsl {
 
 /// Helper class for testing
 template <typename BODY>
@@ -102,8 +100,6 @@ using TestHelper = TestHelperBase<testing::Test>;
 template <typename T>
 using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
-}  // namespace glsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::glsl
 
 #endif  // SRC_TINT_WRITER_GLSL_TEST_HELPER_H_

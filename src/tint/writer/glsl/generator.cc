@@ -19,9 +19,7 @@
 #include "src/tint/transform/glsl.h"
 #include "src/tint/writer/glsl/generator_impl.h"
 
-namespace tint {
-namespace writer {
-namespace glsl {
+namespace tint::writer::glsl {
 
 Options::Options() = default;
 Options::~Options() = default;
@@ -71,6 +69,4 @@ Result Generate(const Program* program,
   return result;
 }
 
-}  // namespace glsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::glsl

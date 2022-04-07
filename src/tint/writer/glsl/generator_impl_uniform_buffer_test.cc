@@ -17,9 +17,7 @@
 
 using ::testing::HasSubstr;
 
-namespace tint {
-namespace writer {
-namespace glsl {
+namespace tint::writer::glsl {
 namespace {
 
 using GlslGeneratorImplTest_UniformBuffer = TestHelper;
@@ -67,6 +65,4 @@ layout(binding = 0, std140) uniform Simple_1 {
 }
 
 }  // namespace
-}  // namespace glsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::glsl

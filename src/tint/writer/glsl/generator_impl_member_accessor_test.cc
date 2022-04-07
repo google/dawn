@@ -16,9 +16,7 @@
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace glsl {
+namespace tint::writer::glsl {
 namespace {
 
 using ::testing::HasSubstr;
@@ -879,6 +877,4 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, Swizzle_gbr) {
 }
 
 }  // namespace
-}  // namespace glsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::glsl

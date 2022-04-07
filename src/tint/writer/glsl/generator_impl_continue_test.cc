@@ -14,9 +14,7 @@
 
 #include "src/tint/writer/glsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace glsl {
+namespace tint::writer::glsl {
 namespace {
 
 using GlslGeneratorImplTest_Continue = TestHelper;
@@ -41,6 +39,4 @@ TEST_F(GlslGeneratorImplTest_Continue, Emit_Continue) {
 }
 
 }  // namespace
-}  // namespace glsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::glsl

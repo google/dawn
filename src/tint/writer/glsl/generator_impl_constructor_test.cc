@@ -15,9 +15,7 @@
 #include "gmock/gmock.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace glsl {
+namespace tint::writer::glsl {
 namespace {
 
 using ::testing::HasSubstr;
@@ -235,6 +233,4 @@ TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct_Empty) {
 }
 
 }  // namespace
-}  // namespace glsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::glsl

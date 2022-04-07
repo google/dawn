@@ -14,9 +14,7 @@
 
 #include "src/tint/writer/glsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace glsl {
+namespace tint::writer::glsl {
 namespace {
 
 using GlslGeneratorImplTest_Switch = TestHelper;
@@ -59,6 +57,4 @@ TEST_F(GlslGeneratorImplTest_Switch, Emit_Switch) {
 }
 
 }  // namespace
-}  // namespace glsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::glsl

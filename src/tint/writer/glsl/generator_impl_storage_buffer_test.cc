@@ -17,9 +17,7 @@
 
 using ::testing::HasSubstr;
 
-namespace tint {
-namespace writer {
-namespace glsl {
+namespace tint::writer::glsl {
 namespace {
 
 using GlslGeneratorImplTest_StorageBuffer = TestHelper;
@@ -92,6 +90,4 @@ layout(binding = 0, std430) buffer Nephews_1 {
 }
 
 }  // namespace
-}  // namespace glsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::glsl

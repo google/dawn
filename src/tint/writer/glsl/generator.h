@@ -28,16 +28,15 @@
 #include "src/tint/writer/glsl/version.h"
 #include "src/tint/writer/text.h"
 
+// Forward declarations
 namespace tint {
-
-// Forward declarations
 class Program;
-
-namespace writer {
-namespace glsl {
-
-// Forward declarations
+namespace writer::glsl {
 class GeneratorImpl;
+}  // namespace writer::glsl
+}  // namespace tint
+
+namespace tint::writer::glsl {
 
 using BindingMap = std::unordered_map<sem::SamplerTexturePair, std::string>;
 
@@ -112,8 +111,6 @@ Result Generate(const Program* program,
                 const Options& options,
                 const std::string& entry_point);
 
-}  // namespace glsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::glsl
 
 #endif  // SRC_TINT_WRITER_GLSL_GENERATOR_H_

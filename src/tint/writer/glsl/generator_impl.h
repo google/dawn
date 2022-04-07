@@ -38,18 +38,15 @@
 #include "src/tint/writer/glsl/version.h"
 #include "src/tint/writer/text_generator.h"
 
-namespace tint {
-
 // Forward declarations
-namespace sem {
+namespace tint::sem {
 class Call;
 class Builtin;
 class TypeConstructor;
 class TypeConversion;
-}  // namespace sem
+}  // namespace tint::sem
 
-namespace writer {
-namespace glsl {
+namespace tint::writer::glsl {
 
 /// Implementation class for GLSL generator
 class GeneratorImpl : public TextGenerator {
@@ -500,8 +497,6 @@ class GeneratorImpl : public TextGenerator {
   Version version_;
 };
 
-}  // namespace glsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::glsl
 
 #endif  // SRC_TINT_WRITER_GLSL_GENERATOR_IMPL_H_

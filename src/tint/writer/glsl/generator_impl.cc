@@ -75,9 +75,7 @@ bool RequiresOESSampleVariables(tint::ast::Builtin builtin) {
 
 }  // namespace
 
-namespace tint {
-namespace writer {
-namespace glsl {
+namespace tint::writer::glsl {
 namespace {
 
 const char kTempNamePrefix[] = "tint_tmp";
@@ -2890,6 +2888,4 @@ sem::Type* GeneratorImpl::BoolTypeToUint(const sem::Type* type) {
   }
 }
 
-}  // namespace glsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::glsl

@@ -22,9 +22,7 @@
 #include "src/tint/sem/storage_texture_type.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace glsl {
+namespace tint::writer::glsl {
 namespace {
 
 using ::testing::HasSubstr;
@@ -537,6 +535,4 @@ INSTANTIATE_TEST_SUITE_P(
                                ast::TexelFormat::kRgba32Sint, "image1D tex;"}));
 
 }  // namespace
-}  // namespace glsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::glsl
