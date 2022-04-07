@@ -15,9 +15,7 @@
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, GlobalConstantDecl) {
@@ -191,6 +189,4 @@ TEST_F(ParserImplTest, GlobalConstantDec_Override_InvalidId) {
 }
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

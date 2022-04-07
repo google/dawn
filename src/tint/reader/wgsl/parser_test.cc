@@ -18,9 +18,7 @@
 
 #include "src/tint/ast/module.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 namespace {
 
 using ParserTest = testing::Test;
@@ -64,6 +62,4 @@ fn main() ->  {  // missing return type
 }
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

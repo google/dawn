@@ -18,9 +18,7 @@
 
 #include "src/tint/reader/wgsl/parser_impl.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 
 Program Parse(Source::File const* file) {
   ParserImpl parser(file);
@@ -28,6 +26,4 @@ Program Parse(Source::File const* file) {
   return Program(std::move(parser.builder()));
 }
 
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

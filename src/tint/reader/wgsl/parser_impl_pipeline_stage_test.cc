@@ -14,9 +14,7 @@
 
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 namespace {
 
 struct PipelineStageData {
@@ -62,6 +60,4 @@ TEST_F(ParserImplTest, PipelineStage_NoMatch) {
 }
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

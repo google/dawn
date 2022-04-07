@@ -42,9 +42,7 @@
 #include "src/tint/sem/multisampled_texture_type.h"
 #include "src/tint/sem/sampled_texture_type.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 namespace {
 
 template <typename T>
@@ -3299,6 +3297,4 @@ ParserImpl::MultiTokenSource ParserImpl::make_source_range_from(
   return MultiTokenSource(this, start);
 }
 
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

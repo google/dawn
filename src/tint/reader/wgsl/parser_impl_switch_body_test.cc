@@ -14,9 +14,7 @@
 
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, SwitchBody_Case) {
@@ -268,6 +266,4 @@ TEST_F(ParserImplTest, SwitchBody_Default_InvalidCaseBody) {
 }
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

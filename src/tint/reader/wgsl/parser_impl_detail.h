@@ -17,10 +17,7 @@
 
 #include <memory>
 
-namespace tint {
-namespace reader {
-namespace wgsl {
-namespace detail {
+namespace tint::reader::wgsl::detail {
 
 /// OperatorArrow is a traits helper for ParserImpl::Expect<T>::operator->() and
 /// ParserImpl::Maybe<T>::operator->() so that pointer types are automatically
@@ -62,9 +59,6 @@ struct OperatorArrow<T*> {
   static inline T* ptr(T* val) { return val; }
 };
 
-}  // namespace detail
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl::detail
 
 #endif  // SRC_TINT_READER_WGSL_PARSER_IMPL_DETAIL_H_

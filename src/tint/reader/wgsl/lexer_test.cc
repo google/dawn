@@ -18,9 +18,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 namespace {
 
 using LexerTest = testing::Test;
@@ -934,6 +932,4 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"workgroup", Token::Type::kWorkgroup}));
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

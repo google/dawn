@@ -19,9 +19,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 namespace {
 
 // Makes an IEEE 754 binary32 floating point number with
@@ -520,6 +518,4 @@ TEST_F(ParserImplTest, ConstLiteral_NoMatch) {
 }
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

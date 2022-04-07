@@ -14,9 +14,7 @@
 
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ParenRhsStmt) {
@@ -65,6 +63,4 @@ TEST_F(ParserImplTest, ParenRhsStmt_MissingExpression) {
 }
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

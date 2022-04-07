@@ -17,9 +17,7 @@
 
 #include "src/tint/program.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 
 /// Parses the WGSL source, returning the parsed program.
 /// If the source fails to parse then the returned
@@ -29,8 +27,6 @@ namespace wgsl {
 /// @returns the parsed program
 Program Parse(Source::File const* file);
 
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl
 
 #endif  // SRC_TINT_READER_WGSL_PARSER_H_

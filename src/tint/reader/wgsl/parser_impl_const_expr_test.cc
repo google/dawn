@@ -14,9 +14,7 @@
 
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
@@ -169,6 +167,4 @@ TEST_F(ParserImplTest, UnaryOp_Recursion) {
 }
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

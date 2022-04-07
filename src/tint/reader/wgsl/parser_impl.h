@@ -29,8 +29,7 @@
 #include "src/tint/reader/wgsl/token.h"
 #include "src/tint/sem/storage_texture_type.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 class BreakStatement;
 class CallStatement;
 class ContinueStatement;
@@ -39,10 +38,9 @@ class LoopStatement;
 class ReturnStatement;
 class SwitchStatement;
 class VariableDeclStatement;
-}  // namespace ast
+}  // namespace tint::ast
 
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 
 class Lexer;
 
@@ -876,8 +874,6 @@ class ParserImpl {
   size_t max_errors_ = 25;
 };
 
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl
 
 #endif  // SRC_TINT_READER_WGSL_PARSER_IMPL_H_

@@ -15,9 +15,7 @@
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 #include "src/tint/sem/depth_texture_type.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, DepthTextureType_Invalid) {
@@ -94,6 +92,4 @@ TEST_F(ParserImplTest, DepthTextureType_Multisampled2d) {
 }
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

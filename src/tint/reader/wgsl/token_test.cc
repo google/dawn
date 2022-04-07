@@ -18,9 +18,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 namespace {
 
 using TokenTest = testing::Test;
@@ -74,6 +72,4 @@ TEST_F(TokenTest, Source) {
 }
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

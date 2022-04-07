@@ -15,9 +15,7 @@
 #include "src/tint/ast/discard_statement.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, BodyStmt) {
@@ -58,6 +56,4 @@ TEST_F(ParserImplTest, BodyStmt_MissingRightParen) {
 }
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

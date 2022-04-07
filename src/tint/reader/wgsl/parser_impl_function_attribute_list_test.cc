@@ -15,9 +15,7 @@
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, AttributeList_Parses) {
@@ -66,6 +64,4 @@ TEST_F(ParserImplTest, AttributeList_BadAttribute) {
 }
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

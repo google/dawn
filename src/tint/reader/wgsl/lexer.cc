@@ -23,9 +23,7 @@
 #include "src/tint/debug.h"
 #include "src/tint/text/unicode.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 namespace {
 
 bool is_blankspace(char c) {
@@ -1132,6 +1130,4 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
   return {};
 }
 
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

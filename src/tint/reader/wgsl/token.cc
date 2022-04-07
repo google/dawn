@@ -14,9 +14,7 @@
 
 #include "src/tint/reader/wgsl/token.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 
 // static
 std::string_view Token::TypeToName(Type type) {
@@ -333,6 +331,4 @@ int32_t Token::to_i32() const {
   return std::get<int32_t>(value_);
 }
 
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

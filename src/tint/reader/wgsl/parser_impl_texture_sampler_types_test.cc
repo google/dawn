@@ -17,9 +17,7 @@
 #include "src/tint/sem/multisampled_texture_type.h"
 #include "src/tint/sem/sampled_texture_type.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, TextureSamplerTypes_Invalid) {
@@ -262,6 +260,4 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingGreaterThan) {
 }
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

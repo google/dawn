@@ -14,9 +14,7 @@
 
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 namespace {
 
 using ParserImplReservedKeywordTest = ParserImplTestWithParam<std::string>;
@@ -110,6 +108,4 @@ INSTANTIATE_TEST_SUITE_P(ParserImplReservedKeywordTest,
                                          "while"));
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl

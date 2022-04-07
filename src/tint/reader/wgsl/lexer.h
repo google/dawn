@@ -19,9 +19,7 @@
 
 #include "src/tint/reader/wgsl/token.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 
 /// Converts the input stream into a series of Tokens
 class Lexer {
@@ -92,8 +90,6 @@ class Lexer {
   Source::Location location_;
 };
 
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl
 
 #endif  // SRC_TINT_READER_WGSL_LEXER_H_

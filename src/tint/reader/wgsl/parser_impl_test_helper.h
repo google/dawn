@@ -23,9 +23,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/reader/wgsl/parser_impl.h"
 
-namespace tint {
-namespace reader {
-namespace wgsl {
+namespace tint::reader::wgsl {
 
 /// WGSL Parser test class
 class ParserImplTest : public testing::Test, public ProgramBuilder {
@@ -71,8 +69,6 @@ class ParserImplTestWithParam : public testing::TestWithParam<T>,
   std::vector<std::unique_ptr<Source::File>> files_;
 };
 
-}  // namespace wgsl
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::wgsl
 
 #endif  // SRC_TINT_READER_WGSL_PARSER_IMPL_TEST_HELPER_H_
