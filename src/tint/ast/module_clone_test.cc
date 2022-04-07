@@ -18,8 +18,7 @@
 #include "src/tint/reader/wgsl/parser.h"
 #include "src/tint/writer/wgsl/generator.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 TEST(ModuleCloneTest, Clone) {
@@ -177,5 +176,4 @@ let declaration_order_check_4 : i32 = 1;
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

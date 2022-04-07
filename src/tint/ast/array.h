@@ -20,8 +20,7 @@
 #include "src/tint/ast/attribute.h"
 #include "src/tint/ast/type.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 // Forward declarations.
 class Expression;
@@ -69,7 +68,6 @@ class Array final : public Castable<Array, Type> {
   const AttributeList attributes;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_ARRAY_H_

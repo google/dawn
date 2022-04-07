@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::TypeDecl);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 TypeDecl::TypeDecl(ProgramID pid, const Source& src, Symbol n)
     : Base(pid, src), name(n) {
@@ -30,5 +29,4 @@ TypeDecl::TypeDecl(TypeDecl&&) = default;
 
 TypeDecl::~TypeDecl() = default;
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

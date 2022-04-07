@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Atomic);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 Atomic::Atomic(ProgramID pid, const Source& src, const Type* const subtype)
     : Base(pid, src), type(subtype) {}
@@ -41,5 +40,4 @@ const Atomic* Atomic::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Atomic>(src, ty);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

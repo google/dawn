@@ -21,8 +21,7 @@
 #include "src/tint/ast/node.h"
 #include "src/tint/sem/type.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// Base expression class
 class Expression : public Castable<Expression, Node> {
@@ -41,7 +40,6 @@ class Expression : public Castable<Expression, Node> {
 /// A list of expressions
 using ExpressionList = std::vector<const Expression*>;
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_EXPRESSION_H_

@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/attribute.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A location attribute
 class LocationAttribute final : public Castable<LocationAttribute, Attribute> {
@@ -45,7 +44,6 @@ class LocationAttribute final : public Castable<LocationAttribute, Attribute> {
   const uint32_t value;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_LOCATION_ATTRIBUTE_H_

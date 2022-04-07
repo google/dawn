@@ -28,8 +28,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Type);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 Type::Type(ProgramID pid, const Source& src) : Base(pid, src) {}
 
@@ -37,5 +36,4 @@ Type::Type(Type&&) = default;
 
 Type::~Type() = default;
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

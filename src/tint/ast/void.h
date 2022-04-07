@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/type.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A void type
 class Void final : public Castable<Void, Type> {
@@ -44,7 +43,6 @@ class Void final : public Castable<Void, Type> {
   const Void* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_VOID_H_

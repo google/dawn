@@ -17,8 +17,7 @@
 
 #include <ostream>
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// The pipeline stage
 enum class PipelineStage { kNone = -1, kVertex, kFragment, kCompute };
@@ -28,7 +27,6 @@ enum class PipelineStage { kNone = -1, kVertex, kFragment, kCompute };
 /// @return the std::ostream so calls can be chained
 std::ostream& operator<<(std::ostream& out, PipelineStage stage);
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_PIPELINE_STAGE_H_

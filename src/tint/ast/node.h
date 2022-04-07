@@ -19,17 +19,16 @@
 
 #include "src/tint/clone_context.h"
 
-namespace tint {
-
 // Forward declarations
+namespace tint {
 class CloneContext;
 namespace sem {
 class Type;
-}
-namespace sem {
 class Info;
 }
+}  // namespace tint
 
+namespace tint {
 namespace ast {
 
 /// AST base class node

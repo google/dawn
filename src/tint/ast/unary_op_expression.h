@@ -18,8 +18,7 @@
 #include "src/tint/ast/expression.h"
 #include "src/tint/ast/unary_op.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A unary op expression
 class UnaryOpExpression final : public Castable<UnaryOpExpression, Expression> {
@@ -50,7 +49,6 @@ class UnaryOpExpression final : public Castable<UnaryOpExpression, Expression> {
   const Expression* const expr;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_UNARY_OP_EXPRESSION_H_

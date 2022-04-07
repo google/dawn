@@ -20,8 +20,7 @@
 
 #include "src/tint/ast/attribute.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// The interpolation type.
 enum class InterpolationType { kPerspective, kLinear, kFlat };
@@ -70,7 +69,6 @@ std::ostream& operator<<(std::ostream& out, InterpolationType type);
 /// @return the std::ostream so calls can be chained
 std::ostream& operator<<(std::ostream& out, InterpolationSampling sampling);
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_INTERPOLATE_ATTRIBUTE_H_

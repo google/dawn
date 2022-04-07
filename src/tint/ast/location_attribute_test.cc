@@ -14,8 +14,7 @@
 
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using LocationAttributeTest = TestHelper;
@@ -26,5 +25,4 @@ TEST_F(LocationAttributeTest, Creation) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

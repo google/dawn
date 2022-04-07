@@ -17,8 +17,7 @@
 
 #include "src/tint/ast/identifier_expression.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A member accessor expression
 class MemberAccessorExpression final
@@ -50,7 +49,6 @@ class MemberAccessorExpression final
   const IdentifierExpression* const member;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_MEMBER_ACCESSOR_EXPRESSION_H_

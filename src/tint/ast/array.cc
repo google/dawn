@@ -20,8 +20,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Array);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 namespace {
 // Returns the string representation of an array size expression.
@@ -74,5 +73,4 @@ const Array* Array::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Array>(src, ty, cnt, attrs);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

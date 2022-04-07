@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::SampledTexture);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 SampledTexture::SampledTexture(ProgramID pid,
                                const Source& src,
@@ -46,5 +45,4 @@ const SampledTexture* SampledTexture::Clone(CloneContext* ctx) const {
   return ctx->dst->create<SampledTexture>(src, dim, ty);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

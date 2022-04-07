@@ -18,10 +18,7 @@
 #include "src/tint/sem/multisampled_texture_type.h"
 #include "src/tint/sem/sampled_texture_type.h"
 
-namespace tint {
-namespace ast {
-namespace builtin {
-namespace test {
+namespace tint::ast::builtin::test {
 
 using u32 = ProgramBuilder::u32;
 using i32 = ProgramBuilder::i32;
@@ -2280,7 +2277,4 @@ bool ReturnsVoid(ValidTextureOverload texture_overload) {
   }
 }
 
-}  // namespace test
-}  // namespace builtin
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast::builtin::test

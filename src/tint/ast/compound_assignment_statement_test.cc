@@ -17,8 +17,7 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using CompoundAssignmentStatementTest = TestHelper;
@@ -98,5 +97,4 @@ TEST_F(CompoundAssignmentStatementTest, Assert_DifferentProgramID_RHS) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

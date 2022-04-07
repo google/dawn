@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/literal_expression.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A boolean literal
 class BoolLiteralExpression final
@@ -43,7 +42,6 @@ class BoolLiteralExpression final
   const bool value;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_BOOL_LITERAL_EXPRESSION_H_

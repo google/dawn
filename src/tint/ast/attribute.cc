@@ -16,10 +16,8 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Attribute);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 Attribute::~Attribute() = default;
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

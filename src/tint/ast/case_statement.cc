@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::CaseStatement);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 CaseStatement::CaseStatement(ProgramID pid,
                              const Source& src,
@@ -46,5 +45,4 @@ const CaseStatement* CaseStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<CaseStatement>(src, sel, b);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

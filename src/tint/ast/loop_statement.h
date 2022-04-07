@@ -17,8 +17,7 @@
 
 #include "src/tint/ast/block_statement.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A loop statement
 class LoopStatement final : public Castable<LoopStatement, Statement> {
@@ -49,7 +48,6 @@ class LoopStatement final : public Castable<LoopStatement, Statement> {
   const BlockStatement* const continuing;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_LOOP_STATEMENT_H_

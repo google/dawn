@@ -18,8 +18,7 @@
 #include "src/tint/ast/discard_statement.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using IfStatementTest = TestHelper;
@@ -102,5 +101,4 @@ TEST_F(IfStatementTest, Assert_DifferentProgramID_ElseStatement) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

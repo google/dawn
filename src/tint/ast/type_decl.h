@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/type.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// The base class for type declarations.
 class TypeDecl : public Castable<TypeDecl, Node> {
@@ -39,7 +38,6 @@ class TypeDecl : public Castable<TypeDecl, Node> {
   const Symbol name;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_TYPE_DECL_H_

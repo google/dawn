@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/texture.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A sampled texture type.
 class SampledTexture final : public Castable<SampledTexture, Texture> {
@@ -52,7 +51,6 @@ class SampledTexture final : public Castable<SampledTexture, Texture> {
   const Type* const type;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_SAMPLED_TEXTURE_H_

@@ -14,8 +14,7 @@
 
 #include "src/tint/ast/pipeline_stage.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 std::ostream& operator<<(std::ostream& out, PipelineStage stage) {
   switch (stage) {
@@ -39,5 +38,4 @@ std::ostream& operator<<(std::ostream& out, PipelineStage stage) {
   return out;
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

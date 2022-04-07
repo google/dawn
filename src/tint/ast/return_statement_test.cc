@@ -17,8 +17,7 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using ReturnStatementTest = TestHelper;
@@ -64,5 +63,4 @@ TEST_F(ReturnStatementTest, Assert_DifferentProgramID_Expr) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

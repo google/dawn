@@ -17,8 +17,7 @@
 
 #include "src/tint/ast/statement.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// An continue statement
 class ContinueStatement final : public Castable<ContinueStatement, Statement> {
@@ -38,7 +37,6 @@ class ContinueStatement final : public Castable<ContinueStatement, Statement> {
   const ContinueStatement* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_CONTINUE_STATEMENT_H_

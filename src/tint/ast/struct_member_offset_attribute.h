@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/attribute.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A struct member offset attribute
 /// @note The WGSL spec removed the `@offset(n)` attribute for `@size(n)`
@@ -57,7 +56,6 @@ class StructMemberOffsetAttribute final
   const uint32_t offset;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_STRUCT_MEMBER_OFFSET_ATTRIBUTE_H_

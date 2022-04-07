@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::BinaryExpression);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 BinaryExpression::BinaryExpression(ProgramID pid,
                                    const Source& src,
@@ -46,5 +45,4 @@ const BinaryExpression* BinaryExpression::Clone(CloneContext* ctx) const {
   return ctx->dst->create<BinaryExpression>(src, op, l, r);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

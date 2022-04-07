@@ -20,8 +20,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMemberOffsetAttribute);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 StructMemberOffsetAttribute::StructMemberOffsetAttribute(ProgramID pid,
                                                          const Source& src,
@@ -41,5 +40,4 @@ const StructMemberOffsetAttribute* StructMemberOffsetAttribute::Clone(
   return ctx->dst->create<StructMemberOffsetAttribute>(src, offset);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

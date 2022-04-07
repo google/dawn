@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::DepthTexture);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 bool IsValidDepthDimension(TextureDimension dim) {
@@ -49,5 +48,4 @@ const DepthTexture* DepthTexture::Clone(CloneContext* ctx) const {
   return ctx->dst->create<DepthTexture>(src, dim);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

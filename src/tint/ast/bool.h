@@ -25,8 +25,7 @@
 #undef Bool
 #endif
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A boolean type
 class Bool final : public Castable<Bool, Type> {
@@ -50,7 +49,6 @@ class Bool final : public Castable<Bool, Type> {
   const Bool* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_BOOL_H_

@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::BlockStatement);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 BlockStatement::BlockStatement(ProgramID pid,
                                const Source& src,
@@ -42,5 +41,4 @@ const BlockStatement* BlockStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<BlockStatement>(src, stmts);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

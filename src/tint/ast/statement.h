@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/node.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// Base statement class
 class Statement : public Castable<Statement, Node> {
@@ -42,7 +41,6 @@ class Statement : public Castable<Statement, Node> {
 /// A list of statements
 using StatementList = std::vector<const Statement*>;
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_STATEMENT_H_

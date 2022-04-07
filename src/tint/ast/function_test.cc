@@ -18,8 +18,7 @@
 #include "src/tint/ast/test_helper.h"
 #include "src/tint/ast/workgroup_attribute.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using FunctionTest = TestHelper;
@@ -192,5 +191,4 @@ TEST_F(FunctionListTest, HasStage) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

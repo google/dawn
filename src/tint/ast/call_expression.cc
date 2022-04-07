@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::CallExpression);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 namespace {
 CallExpression::Target ToTarget(const IdentifierExpression* name) {
@@ -74,5 +73,4 @@ const CallExpression* CallExpression::Clone(CloneContext* ctx) const {
                                                 p);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

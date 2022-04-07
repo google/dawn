@@ -15,8 +15,7 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using StructMemberTest = TestHelper;
@@ -94,5 +93,4 @@ TEST_F(StructMemberTest, Assert_DifferentProgramID_Attribute) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

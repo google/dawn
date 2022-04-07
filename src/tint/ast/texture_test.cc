@@ -27,8 +27,7 @@
 #include "src/tint/ast/u32.h"
 #include "src/tint/ast/vector.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using AstTextureTypeTest = TestHelper;
@@ -54,5 +53,4 @@ TEST_F(AstTextureTypeTest, NumCoordinateAxes) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

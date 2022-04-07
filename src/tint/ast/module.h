@@ -21,8 +21,7 @@
 #include "src/tint/ast/function.h"
 #include "src/tint/ast/type.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 class TypeDecl;
 
@@ -119,7 +118,6 @@ class Module final : public Castable<Module, Node> {
   VariableList global_variables_;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_MODULE_H_

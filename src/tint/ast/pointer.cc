@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Pointer);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 Pointer::Pointer(ProgramID pid,
                  const Source& src,
@@ -53,5 +52,4 @@ const Pointer* Pointer::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Pointer>(src, ty, storage_class, access);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

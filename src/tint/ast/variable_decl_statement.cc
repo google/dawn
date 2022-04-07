@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::VariableDeclStatement);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 VariableDeclStatement::VariableDeclStatement(ProgramID pid,
                                              const Source& src,
@@ -41,5 +40,4 @@ const VariableDeclStatement* VariableDeclStatement::Clone(
   return ctx->dst->create<VariableDeclStatement>(src, var);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

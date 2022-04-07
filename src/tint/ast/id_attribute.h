@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/attribute.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// An id attribute for pipeline-overridable constants
 class IdAttribute final : public Castable<IdAttribute, Attribute> {
@@ -45,7 +44,6 @@ class IdAttribute final : public Castable<IdAttribute, Attribute> {
   const uint32_t value;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_ID_ATTRIBUTE_H_

@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::BitcastExpression);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 BitcastExpression::BitcastExpression(ProgramID pid,
                                      const Source& src,
@@ -42,5 +41,4 @@ const BitcastExpression* BitcastExpression::Clone(CloneContext* ctx) const {
   return ctx->dst->create<BitcastExpression>(src, t, e);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

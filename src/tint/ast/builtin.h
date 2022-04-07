@@ -17,8 +17,7 @@
 
 #include <ostream>
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// The builtin identifiers
 enum class Builtin {
@@ -46,7 +45,6 @@ enum class Builtin {
 /// @return the std::ostream so calls can be chained
 std::ostream& operator<<(std::ostream& out, Builtin builtin);
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_BUILTIN_H_

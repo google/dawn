@@ -17,8 +17,7 @@
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using VariableTest = TestHelper;
@@ -152,5 +151,4 @@ TEST_F(VariableTest, BindingPointMissingBindingAttribute) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

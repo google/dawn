@@ -20,8 +20,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Struct);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 Struct::Struct(ProgramID pid,
                const Source& src,
@@ -52,5 +51,4 @@ const Struct* Struct::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Struct>(src, n, mem, attrs);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

@@ -18,8 +18,7 @@
 #include "src/tint/ast/call_expression.h"
 #include "src/tint/ast/statement.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A call expression
 class CallStatement final : public Castable<CallStatement, Statement> {
@@ -43,7 +42,6 @@ class CallStatement final : public Castable<CallStatement, Statement> {
   const CallExpression* const expr;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_CALL_STATEMENT_H_

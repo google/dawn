@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::BoolLiteralExpression);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 BoolLiteralExpression::BoolLiteralExpression(ProgramID pid,
                                              const Source& src,
@@ -35,5 +34,4 @@ const BoolLiteralExpression* BoolLiteralExpression::Clone(
   return ctx->dst->create<BoolLiteralExpression>(src, value);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

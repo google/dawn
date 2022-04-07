@@ -19,8 +19,7 @@
 #include "src/tint/ast/expression.h"
 #include "src/tint/ast/statement.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A compound assignment statement
 class CompoundAssignmentStatement final
@@ -57,7 +56,6 @@ class CompoundAssignmentStatement final
   const BinaryOp op;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_COMPOUND_ASSIGNMENT_STATEMENT_H_

@@ -20,8 +20,7 @@
 
 #include "src/tint/ast/attribute.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A struct member size attribute
 class StructMemberSizeAttribute final
@@ -47,7 +46,6 @@ class StructMemberSizeAttribute final
   const uint32_t size;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_STRUCT_MEMBER_SIZE_ATTRIBUTE_H_

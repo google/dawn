@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::IndexAccessorExpression);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 IndexAccessorExpression::IndexAccessorExpression(ProgramID pid,
                                                  const Source& src,
@@ -46,5 +45,4 @@ const IndexAccessorExpression* IndexAccessorExpression::Clone(
   return ctx->dst->create<IndexAccessorExpression>(src, obj, idx);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

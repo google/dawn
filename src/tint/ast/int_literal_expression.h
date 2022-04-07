@@ -17,8 +17,7 @@
 
 #include "src/tint/ast/literal_expression.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// An integer literal. This could be either signed or unsigned.
 class IntLiteralExpression
@@ -39,7 +38,6 @@ class IntLiteralExpression
   IntLiteralExpression(ProgramID pid, const Source& src);
 };  // namespace ast
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_INT_LITERAL_EXPRESSION_H_

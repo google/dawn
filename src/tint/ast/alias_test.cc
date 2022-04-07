@@ -27,8 +27,7 @@
 #include "src/tint/ast/u32.h"
 #include "src/tint/ast/vector.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using AstAliasTest = TestHelper;
@@ -41,5 +40,4 @@ TEST_F(AstAliasTest, Create) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

@@ -17,8 +17,7 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using SwitchStatementTest = TestHelper;
@@ -114,5 +113,4 @@ TEST_F(SwitchStatementTest, Assert_DifferentProgramID_CaseStatement) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

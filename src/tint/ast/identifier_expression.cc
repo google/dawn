@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::IdentifierExpression);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 IdentifierExpression::IdentifierExpression(ProgramID pid,
                                            const Source& src,
@@ -41,5 +40,4 @@ const IdentifierExpression* IdentifierExpression::Clone(
   return ctx->dst->create<IdentifierExpression>(src, sym);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

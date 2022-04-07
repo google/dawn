@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::PhonyExpression);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 PhonyExpression::PhonyExpression(ProgramID pid, const Source& src)
     : Base(pid, src) {}
@@ -34,5 +33,4 @@ const PhonyExpression* PhonyExpression::Clone(CloneContext* ctx) const {
   return ctx->dst->create<PhonyExpression>(src);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

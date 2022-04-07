@@ -17,8 +17,7 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using BitcastExpressionTest = TestHelper;
@@ -77,5 +76,4 @@ TEST_F(BitcastExpressionTest, Assert_DifferentProgramID_Expr) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

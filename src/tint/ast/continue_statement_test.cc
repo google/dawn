@@ -16,8 +16,7 @@
 
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using ContinueStatementTest = TestHelper;
@@ -35,5 +34,4 @@ TEST_F(ContinueStatementTest, IsContinue) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

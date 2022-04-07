@@ -17,8 +17,7 @@
 
 #include "src/tint/ast/expression.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// The operator type
 enum class BinaryOp {
@@ -258,7 +257,6 @@ inline std::ostream& operator<<(std::ostream& out, BinaryOp op) {
   return out;
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_BINARY_EXPRESSION_H_

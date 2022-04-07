@@ -15,8 +15,7 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using MemberAccessorExpressionTest = TestHelper;
@@ -85,5 +84,4 @@ TEST_F(MemberAccessorExpressionTest, Assert_DifferentProgramID_Member) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

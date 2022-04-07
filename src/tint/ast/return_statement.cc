@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::ReturnStatement);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 ReturnStatement::ReturnStatement(ProgramID pid, const Source& src)
     : Base(pid, src), value(nullptr) {}
@@ -42,5 +41,4 @@ const ReturnStatement* ReturnStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<ReturnStatement>(src, ret);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

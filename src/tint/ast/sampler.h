@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/type.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// The different kinds of samplers
 enum class SamplerKind {
@@ -64,7 +63,6 @@ class Sampler final : public Castable<Sampler, Type> {
   const SamplerKind kind;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_SAMPLER_H_

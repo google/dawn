@@ -17,8 +17,7 @@
 
 #include "src/tint/ast/statement.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// An break statement
 class BreakStatement final : public Castable<BreakStatement, Statement> {
@@ -38,7 +37,6 @@ class BreakStatement final : public Castable<BreakStatement, Statement> {
   const BreakStatement* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_BREAK_STATEMENT_H_

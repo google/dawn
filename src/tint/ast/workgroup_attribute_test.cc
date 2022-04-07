@@ -17,8 +17,7 @@
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using WorkgroupAttributeTest = TestHelper;
@@ -76,5 +75,4 @@ TEST_F(WorkgroupAttributeTest, Creation_WithIdentifier) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

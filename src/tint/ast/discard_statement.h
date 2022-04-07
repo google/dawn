@@ -17,8 +17,7 @@
 
 #include "src/tint/ast/statement.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A discard statement
 class DiscardStatement final : public Castable<DiscardStatement, Statement> {
@@ -38,7 +37,6 @@ class DiscardStatement final : public Castable<DiscardStatement, Statement> {
   const DiscardStatement* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_DISCARD_STATEMENT_H_

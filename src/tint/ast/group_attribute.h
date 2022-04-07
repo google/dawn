@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/attribute.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A group attribute
 class GroupAttribute final : public Castable<GroupAttribute, Attribute> {
@@ -45,7 +44,6 @@ class GroupAttribute final : public Castable<GroupAttribute, Attribute> {
   const uint32_t value;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_GROUP_ATTRIBUTE_H_

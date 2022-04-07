@@ -17,8 +17,7 @@
 
 #include "src/tint/ast/statement.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// An fallthrough statement
 class FallthroughStatement final
@@ -39,7 +38,6 @@ class FallthroughStatement final
   const FallthroughStatement* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_FALLTHROUGH_STATEMENT_H_

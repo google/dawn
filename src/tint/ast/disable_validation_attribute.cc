@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::DisableValidationAttribute);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 DisableValidationAttribute::DisableValidationAttribute(ProgramID pid,
                                                        DisabledValidation val)
@@ -53,5 +52,4 @@ const DisableValidationAttribute* DisableValidationAttribute::Clone(
                                                                  validation);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

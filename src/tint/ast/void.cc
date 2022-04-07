@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Void);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 Void::Void(ProgramID pid, const Source& src) : Base(pid, src) {}
 
@@ -36,5 +35,4 @@ const Void* Void::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Void>(src);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

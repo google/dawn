@@ -20,8 +20,7 @@
 #include "src/tint/ast/attribute.h"
 #include "src/tint/ast/pipeline_stage.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A workgroup attribute
 class StageAttribute final : public Castable<StageAttribute, Attribute> {
@@ -48,7 +47,6 @@ class StageAttribute final : public Castable<StageAttribute, Attribute> {
   const PipelineStage stage;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_STAGE_ATTRIBUTE_H_

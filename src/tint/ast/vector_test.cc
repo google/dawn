@@ -17,8 +17,7 @@
 #include "src/tint/ast/i32.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using AstVectorTest = TestHelper;
@@ -37,5 +36,4 @@ TEST_F(AstVectorTest, FriendlyName) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

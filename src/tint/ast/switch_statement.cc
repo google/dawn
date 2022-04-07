@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::SwitchStatement);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 SwitchStatement::SwitchStatement(ProgramID pid,
                                  const Source& src,
@@ -46,5 +45,4 @@ const SwitchStatement* SwitchStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<SwitchStatement>(src, cond, b);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

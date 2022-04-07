@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::F32);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 F32::F32(ProgramID pid, const Source& src) : Base(pid, src) {}
 
@@ -36,5 +35,4 @@ const F32* F32::Clone(CloneContext* ctx) const {
   return ctx->dst->create<F32>(src);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

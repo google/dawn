@@ -18,8 +18,7 @@
 #include "src/tint/ast/expression.h"
 #include "src/tint/ast/statement.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A return statement
 class ReturnStatement final : public Castable<ReturnStatement, Statement> {
@@ -48,7 +47,6 @@ class ReturnStatement final : public Castable<ReturnStatement, Statement> {
   const Expression* const value;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_RETURN_STATEMENT_H_

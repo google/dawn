@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::ContinueStatement);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 ContinueStatement::ContinueStatement(ProgramID pid, const Source& src)
     : Base(pid, src) {}
@@ -34,5 +33,4 @@ const ContinueStatement* ContinueStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<ContinueStatement>(src);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

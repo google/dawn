@@ -17,8 +17,7 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using VariableDeclStatementTest = TestHelper;
@@ -68,5 +67,4 @@ TEST_F(VariableDeclStatementTest, Assert_DifferentProgramID_Variable) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

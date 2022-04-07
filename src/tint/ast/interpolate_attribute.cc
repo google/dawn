@@ -20,8 +20,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::InterpolateAttribute);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 InterpolateAttribute::InterpolateAttribute(ProgramID pid,
                                            const Source& src,
@@ -82,5 +81,4 @@ std::ostream& operator<<(std::ostream& out, InterpolationSampling sampling) {
   return out;
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

@@ -20,8 +20,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::StrideAttribute);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 StrideAttribute::StrideAttribute(ProgramID pid, const Source& src, uint32_t s)
     : Base(pid, src), stride(s) {}
@@ -38,5 +37,4 @@ const StrideAttribute* StrideAttribute::Clone(CloneContext* ctx) const {
   return ctx->dst->create<StrideAttribute>(src, stride);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

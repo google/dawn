@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::CompoundAssignmentStatement);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 CompoundAssignmentStatement::CompoundAssignmentStatement(ProgramID pid,
                                                          const Source& src,
@@ -47,5 +46,4 @@ const CompoundAssignmentStatement* CompoundAssignmentStatement::Clone(
   return ctx->dst->create<CompoundAssignmentStatement>(src, l, r, op);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

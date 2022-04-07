@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/type_decl.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A type alias type. Holds a name and pointer to another type.
 class Alias final : public Castable<Alias, TypeDecl> {
@@ -48,7 +47,6 @@ class Alias final : public Castable<Alias, TypeDecl> {
   const Type* const type;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_ALIAS_H_

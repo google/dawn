@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/attribute.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A binding attribute
 class BindingAttribute final : public Castable<BindingAttribute, Attribute> {
@@ -45,7 +44,6 @@ class BindingAttribute final : public Castable<BindingAttribute, Attribute> {
   const uint32_t value;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_BINDING_ATTRIBUTE_H_

@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Matrix);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 Matrix::Matrix(ProgramID pid,
                const Source& src,
@@ -52,5 +51,4 @@ const Matrix* Matrix::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Matrix>(src, ty, rows, columns);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

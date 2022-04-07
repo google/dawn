@@ -20,8 +20,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Function);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 Function::Function(ProgramID pid,
                    const Source& src,
@@ -104,5 +103,4 @@ bool FunctionList::HasStage(ast::PipelineStage stage) const {
   return false;
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

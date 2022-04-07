@@ -27,8 +27,7 @@
 #include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/utils/reverse.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// The action to perform after calling the TraverseExpressions() callback
 /// function.
@@ -148,7 +147,6 @@ bool TraverseExpressions(const ast::Expression* root,
   return true;
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_TRAVERSE_EXPRESSIONS_H_

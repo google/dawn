@@ -17,8 +17,7 @@
 
 #include "src/tint/ast/type.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// The dimensionality of the texture
 enum class TextureDimension {
@@ -77,7 +76,6 @@ class Texture : public Castable<Texture, Type> {
   const TextureDimension dim;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_TEXTURE_H_

@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::DepthMultisampledTexture);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 bool IsValidDepthDimension(TextureDimension dim) {
@@ -52,5 +51,4 @@ const DepthMultisampledTexture* DepthMultisampledTexture::Clone(
   return ctx->dst->create<DepthMultisampledTexture>(src, dim);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

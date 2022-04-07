@@ -20,14 +20,13 @@
 #include "src/tint/ast/node.h"
 #include "src/tint/clone_context.h"
 
-namespace tint {
-
 // Forward declarations
+namespace tint {
 class ProgramBuilder;
 class SymbolTable;
+}  // namespace tint
 
-namespace ast {
-
+namespace tint::ast {
 /// Base class for a type in the system
 class Type : public Castable<Type, Node> {
  public:
@@ -47,7 +46,6 @@ class Type : public Castable<Type, Node> {
   Type(ProgramID pid, const Source& src);
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_TYPE_H_

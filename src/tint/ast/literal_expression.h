@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/expression.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// Base class for a literal value expressions
 class LiteralExpression : public Castable<LiteralExpression, Expression> {
@@ -34,7 +33,6 @@ class LiteralExpression : public Castable<LiteralExpression, Expression> {
   LiteralExpression(ProgramID pid, const Source& src);
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_LITERAL_EXPRESSION_H_

@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Alias);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 Alias::Alias(ProgramID pid,
              const Source& src,
@@ -41,5 +40,4 @@ const Alias* Alias::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Alias>(src, sym, ty);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

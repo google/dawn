@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::ForLoopStatement);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 ForLoopStatement::ForLoopStatement(ProgramID pid,
                                    const Source& src,
@@ -55,5 +54,4 @@ const ForLoopStatement* ForLoopStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<ForLoopStatement>(src, init, cond, cont, b);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::FallthroughStatement);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 FallthroughStatement::FallthroughStatement(ProgramID pid, const Source& src)
     : Base(pid, src) {}
@@ -35,5 +34,4 @@ const FallthroughStatement* FallthroughStatement::Clone(
   return ctx->dst->create<FallthroughStatement>(src);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

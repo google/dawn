@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::BreakStatement);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 BreakStatement::BreakStatement(ProgramID pid, const Source& src)
     : Base(pid, src) {}
@@ -34,5 +33,4 @@ const BreakStatement* BreakStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<BreakStatement>(src);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

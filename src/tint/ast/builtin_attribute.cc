@@ -20,8 +20,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::BuiltinAttribute);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 BuiltinAttribute::BuiltinAttribute(ProgramID pid, const Source& src, Builtin b)
     : Base(pid, src), builtin(b) {}
@@ -38,5 +37,4 @@ const BuiltinAttribute* BuiltinAttribute::Clone(CloneContext* ctx) const {
   return ctx->dst->create<BuiltinAttribute>(src, builtin);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

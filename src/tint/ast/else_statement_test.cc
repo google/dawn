@@ -17,8 +17,7 @@
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using ElseStatementTest = TestHelper;
@@ -90,5 +89,4 @@ TEST_F(ElseStatementTest, Assert_DifferentProgramID_Body) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

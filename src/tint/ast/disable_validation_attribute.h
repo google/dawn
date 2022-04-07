@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/internal_attribute.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// Enumerator of validation features that can be disabled with a
 /// DisableValidationAttribute attribute.
@@ -77,7 +76,6 @@ class DisableValidationAttribute final
   const DisabledValidation validation;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_DISABLE_VALIDATION_ATTRIBUTE_H_

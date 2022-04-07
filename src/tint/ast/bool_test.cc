@@ -16,8 +16,7 @@
 
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using AstBoolTest = TestHelper;
@@ -28,5 +27,4 @@ TEST_F(AstBoolTest, FriendlyName) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

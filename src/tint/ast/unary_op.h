@@ -17,8 +17,7 @@
 
 #include <ostream>
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// The unary op
 enum class UnaryOp {
@@ -34,7 +33,6 @@ enum class UnaryOp {
 /// @return the std::ostream so calls can be chained
 std::ostream& operator<<(std::ostream& out, UnaryOp mod);
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_UNARY_OP_H_

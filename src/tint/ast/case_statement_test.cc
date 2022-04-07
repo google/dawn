@@ -19,8 +19,7 @@
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using CaseStatementTest = TestHelper;
@@ -133,5 +132,4 @@ TEST_F(CaseStatementTest, Assert_DifferentProgramID_Selector) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

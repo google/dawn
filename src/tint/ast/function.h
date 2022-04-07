@@ -29,8 +29,7 @@
 #include "src/tint/ast/pipeline_stage.h"
 #include "src/tint/ast/variable.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A Function statement.
 class Function final : public Castable<Function, Node> {
@@ -112,7 +111,6 @@ class FunctionList : public std::vector<const Function*> {
   bool HasStage(PipelineStage stage) const;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_FUNCTION_H_

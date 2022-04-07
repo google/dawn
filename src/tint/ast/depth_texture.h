@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/texture.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A depth texture type.
 class DepthTexture final : public Castable<DepthTexture, Texture> {
@@ -45,7 +44,6 @@ class DepthTexture final : public Castable<DepthTexture, Texture> {
   const DepthTexture* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_DEPTH_TEXTURE_H_

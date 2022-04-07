@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/texture.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// An external texture type
 class ExternalTexture final : public Castable<ExternalTexture, Texture> {
@@ -45,7 +44,6 @@ class ExternalTexture final : public Castable<ExternalTexture, Texture> {
   const ExternalTexture* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_EXTERNAL_TEXTURE_H_

@@ -17,8 +17,7 @@
 
 #include <ostream>
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// Storage class of a given pointer.
 enum class StorageClass {
@@ -50,7 +49,6 @@ const char* ToString(StorageClass sc);
 /// @return the std::ostream so calls can be chained
 std::ostream& operator<<(std::ostream& out, StorageClass sc);
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_STORAGE_CLASS_H_

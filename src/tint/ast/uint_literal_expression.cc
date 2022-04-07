@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::UintLiteralExpression);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 UintLiteralExpression::UintLiteralExpression(ProgramID pid,
                                              const Source& src,
@@ -39,5 +38,4 @@ const UintLiteralExpression* UintLiteralExpression::Clone(
   return ctx->dst->create<UintLiteralExpression>(src, value);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

@@ -14,8 +14,7 @@
 
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using StrideAttributeTest = TestHelper;
@@ -35,5 +34,4 @@ TEST_F(StrideAttributeTest, Source) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

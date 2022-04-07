@@ -19,8 +19,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Variable);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 Variable::Variable(ProgramID pid,
                    const Source& src,
@@ -75,5 +74,4 @@ const Variable* Variable::Clone(CloneContext* ctx) const {
                                     is_overridable, ctor, attrs);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

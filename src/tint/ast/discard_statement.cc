@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::DiscardStatement);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 DiscardStatement::DiscardStatement(ProgramID pid, const Source& src)
     : Base(pid, src) {}
@@ -34,5 +33,4 @@ const DiscardStatement* DiscardStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<DiscardStatement>(src);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

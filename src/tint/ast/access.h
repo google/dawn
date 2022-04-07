@@ -18,8 +18,7 @@
 #include <ostream>
 #include <string>
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// The access control settings
 enum Access {
@@ -40,7 +39,6 @@ enum Access {
 /// @return the std::ostream so calls can be chained
 std::ostream& operator<<(std::ostream& out, Access access);
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_ACCESS_H_

@@ -14,8 +14,7 @@
 
 #include "src/tint/ast/access.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 std::ostream& operator<<(std::ostream& out, Access access) {
   switch (access) {
@@ -39,5 +38,4 @@ std::ostream& operator<<(std::ostream& out, Access access) {
   return out;
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

@@ -16,8 +16,7 @@
 #include "src/tint/ast/binary_expression.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using ForLoopStatementTest = TestHelper;
@@ -100,5 +99,4 @@ TEST_F(ForLoopStatementTest, Assert_DifferentProgramID_Body) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

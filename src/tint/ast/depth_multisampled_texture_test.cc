@@ -16,8 +16,7 @@
 
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using AstDepthMultisampledTextureTest = TestHelper;
@@ -33,5 +32,4 @@ TEST_F(AstDepthMultisampledTextureTest, FriendlyName) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

@@ -16,8 +16,7 @@
 #include "gmock/gmock.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using ::testing::ElementsAre;
@@ -233,5 +232,4 @@ TEST_F(TraverseExpressionsTest, Stop) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

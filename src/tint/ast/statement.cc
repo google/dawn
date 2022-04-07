@@ -28,8 +28,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Statement);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 Statement::Statement(ProgramID pid, const Source& src) : Base(pid, src) {}
 
@@ -83,5 +82,4 @@ const char* Statement::Name() const {
   return "statement";
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

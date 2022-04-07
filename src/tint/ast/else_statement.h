@@ -20,8 +20,7 @@
 #include "src/tint/ast/block_statement.h"
 #include "src/tint/ast/expression.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// An else statement
 class ElseStatement final : public Castable<ElseStatement, Statement> {
@@ -55,7 +54,6 @@ class ElseStatement final : public Castable<ElseStatement, Statement> {
 /// A list of else statements
 using ElseStatementList = std::vector<const ElseStatement*>;
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_ELSE_STATEMENT_H_

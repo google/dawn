@@ -18,8 +18,7 @@
 #include "src/tint/ast/case_statement.h"
 #include "src/tint/ast/expression.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A switch statement
 class SwitchStatement final : public Castable<SwitchStatement, Statement> {
@@ -54,7 +53,6 @@ class SwitchStatement final : public Castable<SwitchStatement, Statement> {
   SwitchStatement(const SwitchStatement&) = delete;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_SWITCH_STATEMENT_H_

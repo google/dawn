@@ -20,8 +20,7 @@
 #include "src/tint/ast/block_statement.h"
 #include "src/tint/ast/int_literal_expression.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A list of case literals
 using CaseSelectorList = std::vector<const IntLiteralExpression*>;
@@ -61,7 +60,6 @@ class CaseStatement final : public Castable<CaseStatement, Statement> {
 /// A list of case statements
 using CaseStatementList = std::vector<const CaseStatement*>;
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_CASE_STATEMENT_H_

@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::UnaryOpExpression);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 UnaryOpExpression::UnaryOpExpression(ProgramID pid,
                                      const Source& src,
@@ -41,5 +40,4 @@ const UnaryOpExpression* UnaryOpExpression::Clone(CloneContext* ctx) const {
   return ctx->dst->create<UnaryOpExpression>(src, op, e);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/attribute.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// The invariant attribute
 class InvariantAttribute final
@@ -42,7 +41,6 @@ class InvariantAttribute final
   const InvariantAttribute* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_INVARIANT_ATTRIBUTE_H_

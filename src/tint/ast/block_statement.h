@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/statement.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A block statement
 class BlockStatement final : public Castable<BlockStatement, Statement> {
@@ -54,7 +53,6 @@ class BlockStatement final : public Castable<BlockStatement, Statement> {
   const StatementList statements;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_BLOCK_STATEMENT_H_

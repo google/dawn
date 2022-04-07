@@ -17,8 +17,7 @@
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using BlockStatementTest = TestHelper;
@@ -67,5 +66,4 @@ TEST_F(BlockStatementTest, Assert_DifferentProgramID_Statement) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

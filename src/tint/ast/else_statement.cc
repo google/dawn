@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::ElseStatement);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 ElseStatement::ElseStatement(ProgramID pid,
                              const Source& src,
@@ -43,5 +42,4 @@ const ElseStatement* ElseStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<ElseStatement>(src, cond, b);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

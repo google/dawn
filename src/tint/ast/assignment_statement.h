@@ -18,8 +18,7 @@
 #include "src/tint/ast/expression.h"
 #include "src/tint/ast/statement.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// An assignment statement
 class AssignmentStatement final
@@ -51,7 +50,6 @@ class AssignmentStatement final
   const Expression* const rhs;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_ASSIGNMENT_STATEMENT_H_

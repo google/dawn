@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/type.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// An atomic type.
 class Atomic final : public Castable<Atomic, Type> {
@@ -48,7 +47,6 @@ class Atomic final : public Castable<Atomic, Type> {
   const Type* const type;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_ATOMIC_H_

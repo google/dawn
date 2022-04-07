@@ -20,8 +20,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::LocationAttribute);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 LocationAttribute::LocationAttribute(ProgramID pid,
                                      const Source& src,
@@ -40,5 +39,4 @@ const LocationAttribute* LocationAttribute::Clone(CloneContext* ctx) const {
   return ctx->dst->create<LocationAttribute>(src, value);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

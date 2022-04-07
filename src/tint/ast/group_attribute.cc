@@ -20,8 +20,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::GroupAttribute);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 GroupAttribute::GroupAttribute(ProgramID pid, const Source& src, uint32_t val)
     : Base(pid, src), value(val) {}
@@ -38,5 +37,4 @@ const GroupAttribute* GroupAttribute::Clone(CloneContext* ctx) const {
   return ctx->dst->create<GroupAttribute>(src, value);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

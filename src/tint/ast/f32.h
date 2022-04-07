@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/type.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A float 32 type
 class F32 final : public Castable<F32, Type> {
@@ -44,7 +43,6 @@ class F32 final : public Castable<F32, Type> {
   const F32* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_F32_H_

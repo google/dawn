@@ -28,8 +28,7 @@
 #include "src/tint/ast/vector.h"
 #include "src/tint/transform/add_spirv_block_attribute.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using AstStructTest = TestHelper;
@@ -129,5 +128,4 @@ TEST_F(AstStructTest, Assert_DifferentProgramID_Attribute) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

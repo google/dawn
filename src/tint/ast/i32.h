@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/type.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A signed int 32 type.
 class I32 final : public Castable<I32, Type> {
@@ -44,7 +43,6 @@ class I32 final : public Castable<I32, Type> {
   const I32* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_I32_H_

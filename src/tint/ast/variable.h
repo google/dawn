@@ -23,8 +23,7 @@
 #include "src/tint/ast/expression.h"
 #include "src/tint/ast/storage_class.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 // Forward declarations
 class BindingAttribute;
@@ -180,7 +179,6 @@ class Variable final : public Castable<Variable, Node> {
 /// A list of variables
 using VariableList = std::vector<const Variable*>;
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_VARIABLE_H_

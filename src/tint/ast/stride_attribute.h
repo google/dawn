@@ -20,8 +20,7 @@
 #include "src/tint/ast/attribute.h"
 #include "src/tint/ast/internal_attribute.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A stride attribute used by the SPIR-V reader for strided arrays and
 /// matrices.
@@ -47,7 +46,6 @@ class StrideAttribute final : public Castable<StrideAttribute, Attribute> {
   const uint32_t stride;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_STRIDE_ATTRIBUTE_H_

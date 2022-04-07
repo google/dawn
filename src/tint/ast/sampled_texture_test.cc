@@ -17,8 +17,7 @@
 #include "src/tint/ast/f32.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using AstSampledTextureTest = TestHelper;
@@ -50,5 +49,4 @@ TEST_F(AstSampledTextureTest, FriendlyName) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

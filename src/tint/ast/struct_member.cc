@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMember);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 StructMember::StructMember(ProgramID pid,
                            const Source& src,
@@ -49,5 +48,4 @@ const StructMember* StructMember::Clone(CloneContext* ctx) const {
   return ctx->dst->create<StructMember>(src, sym, ty, attrs);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

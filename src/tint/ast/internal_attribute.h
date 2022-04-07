@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/attribute.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// An attribute used to indicate that a function is tint-internal.
 /// These attributes are not produced by generators, but instead are usually
@@ -42,7 +41,6 @@ class InternalAttribute : public Castable<InternalAttribute, Attribute> {
   std::string Name() const override;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_INTERNAL_ATTRIBUTE_H_

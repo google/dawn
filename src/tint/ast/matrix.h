@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/type.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A matrix type
 class Matrix final : public Castable<Matrix, Type> {
@@ -64,7 +63,6 @@ class Matrix final : public Castable<Matrix, Type> {
   const uint32_t columns;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_MATRIX_H_

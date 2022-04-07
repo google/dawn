@@ -21,8 +21,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMemberAlignAttribute);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 StructMemberAlignAttribute::StructMemberAlignAttribute(ProgramID pid,
                                                        const Source& src,
@@ -42,5 +41,4 @@ const StructMemberAlignAttribute* StructMemberAlignAttribute::Clone(
   return ctx->dst->create<StructMemberAlignAttribute>(src, align);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

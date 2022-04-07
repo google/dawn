@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Vector);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 Vector::Vector(ProgramID pid,
                Source const& src,
@@ -51,5 +50,4 @@ const Vector* Vector::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Vector>(src, ty, width);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

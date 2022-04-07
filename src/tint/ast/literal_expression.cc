@@ -16,13 +16,11 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::LiteralExpression);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 LiteralExpression::LiteralExpression(ProgramID pid, const Source& src)
     : Base(pid, src) {}
 
 LiteralExpression::~LiteralExpression() = default;
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

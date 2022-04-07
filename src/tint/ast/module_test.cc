@@ -16,8 +16,7 @@
 #include "src/tint/ast/test_helper.h"
 #include "src/tint/clone_context.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using ModuleTest = TestHelper;
@@ -139,5 +138,4 @@ TEST_F(ModuleTest, CloneOrder) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

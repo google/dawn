@@ -17,8 +17,7 @@
 
 #include "src/tint/ast/block_statement.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 class Expression;
 
@@ -61,7 +60,6 @@ class ForLoopStatement final : public Castable<ForLoopStatement, Statement> {
   const BlockStatement* const body;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_FOR_LOOP_STATEMENT_H_

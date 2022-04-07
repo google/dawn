@@ -21,8 +21,7 @@
 #include "src/tint/ast/storage_class.h"
 #include "src/tint/ast/type.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A pointer type.
 class Pointer final : public Castable<Pointer, Type> {
@@ -62,7 +61,6 @@ class Pointer final : public Castable<Pointer, Type> {
   ast::Access const access;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_POINTER_H_

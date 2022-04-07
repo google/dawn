@@ -19,8 +19,7 @@
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using LoopStatementTest = TestHelper;
@@ -101,5 +100,4 @@ TEST_F(LoopStatementTest, Assert_DifferentProgramID_Continuing) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

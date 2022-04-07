@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::TypeName);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 TypeName::TypeName(ProgramID pid, const Source& src, Symbol n)
     : Base(pid, src), name(n) {}
@@ -38,5 +37,4 @@ const TypeName* TypeName::Clone(CloneContext* ctx) const {
   return ctx->dst->create<TypeName>(src, n);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

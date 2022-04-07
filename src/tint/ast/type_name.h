@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/type.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A named type (i.e. struct or alias)
 class TypeName final : public Castable<TypeName, Type> {
@@ -49,7 +48,6 @@ class TypeName final : public Castable<TypeName, Type> {
   Symbol name;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_TYPE_NAME_H_

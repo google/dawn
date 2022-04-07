@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/literal_expression.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A float literal
 class FloatLiteralExpression final
@@ -43,7 +42,6 @@ class FloatLiteralExpression final
   const float value;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_FLOAT_LITERAL_EXPRESSION_H_

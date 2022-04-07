@@ -20,8 +20,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::WorkgroupAttribute);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 WorkgroupAttribute::WorkgroupAttribute(ProgramID pid,
                                        const Source& src,
@@ -45,5 +44,4 @@ const WorkgroupAttribute* WorkgroupAttribute::Clone(CloneContext* ctx) const {
   return ctx->dst->create<WorkgroupAttribute>(src, x_, y_, z_);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

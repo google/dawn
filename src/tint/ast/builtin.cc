@@ -14,8 +14,7 @@
 
 #include "src/tint/ast/builtin.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 std::ostream& operator<<(std::ostream& out, Builtin builtin) {
   switch (builtin) {
@@ -78,5 +77,4 @@ std::ostream& operator<<(std::ostream& out, Builtin builtin) {
   return out;
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

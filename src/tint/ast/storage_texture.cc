@@ -21,8 +21,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::StorageTexture);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 // Note, these names match the names in the WGSL spec. This behaviour is used
 // in the WGSL writer to emit the texture format names.
@@ -142,5 +141,4 @@ Type* StorageTexture::SubtypeFor(TexelFormat format, ProgramBuilder& builder) {
   return nullptr;
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

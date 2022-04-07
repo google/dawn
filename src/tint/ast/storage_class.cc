@@ -14,8 +14,7 @@
 
 #include "src/tint/ast/storage_class.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 const char* ToString(StorageClass sc) {
   switch (sc) {
@@ -47,5 +46,4 @@ std::ostream& operator<<(std::ostream& out, StorageClass sc) {
   return out;
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

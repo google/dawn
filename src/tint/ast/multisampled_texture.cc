@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::MultisampledTexture);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 MultisampledTexture::MultisampledTexture(ProgramID pid,
                                          const Source& src,
@@ -48,5 +47,4 @@ const MultisampledTexture* MultisampledTexture::Clone(CloneContext* ctx) const {
   return ctx->dst->create<MultisampledTexture>(src, dim, ty);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

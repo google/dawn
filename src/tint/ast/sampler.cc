@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Sampler);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 std::ostream& operator<<(std::ostream& out, SamplerKind kind) {
   switch (kind) {
@@ -49,5 +48,4 @@ const Sampler* Sampler::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Sampler>(src, kind);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

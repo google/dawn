@@ -15,8 +15,7 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using IndexAccessorExpressionTest = TestHelper;
@@ -87,5 +86,4 @@ TEST_F(IndexAccessorExpressionTest, Assert_DifferentProgramID_Index) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

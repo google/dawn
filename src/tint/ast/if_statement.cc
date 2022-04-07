@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::IfStatement);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 IfStatement::IfStatement(ProgramID pid,
                          const Source& src,
@@ -53,5 +52,4 @@ const IfStatement* IfStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<IfStatement>(src, cond, b, el);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

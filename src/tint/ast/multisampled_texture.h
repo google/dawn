@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/texture.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A multisampled texture type.
 class MultisampledTexture final
@@ -53,7 +52,6 @@ class MultisampledTexture final
   const Type* const type;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_MULTISAMPLED_TEXTURE_H_

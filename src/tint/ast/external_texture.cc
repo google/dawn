@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::ExternalTexture);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 // ExternalTexture::ExternalTexture() : Base(ast::TextureDimension::k2d) {}
 ExternalTexture::ExternalTexture(ProgramID pid, const Source& src)
@@ -37,5 +36,4 @@ const ExternalTexture* ExternalTexture::Clone(CloneContext* ctx) const {
   return ctx->dst->create<ExternalTexture>();
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

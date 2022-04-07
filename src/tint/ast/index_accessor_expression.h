@@ -17,8 +17,7 @@
 
 #include "src/tint/ast/expression.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// An index accessor expression
 class IndexAccessorExpression final
@@ -50,7 +49,6 @@ class IndexAccessorExpression final
   const Expression* const index;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_INDEX_ACCESSOR_EXPRESSION_H_

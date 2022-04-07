@@ -20,8 +20,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::BindingAttribute);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 BindingAttribute::BindingAttribute(ProgramID pid,
                                    const Source& src,
@@ -40,5 +39,4 @@ const BindingAttribute* BindingAttribute::Clone(CloneContext* ctx) const {
   return ctx->dst->create<BindingAttribute>(src, value);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

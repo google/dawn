@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/int_literal_expression.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A uint literal
 class UintLiteralExpression final
@@ -46,7 +45,6 @@ class UintLiteralExpression final
   const uint32_t value;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_UINT_LITERAL_EXPRESSION_H_

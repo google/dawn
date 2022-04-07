@@ -15,8 +15,7 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using BinaryExpressionTest = TestHelper;
@@ -91,5 +90,4 @@ TEST_F(BinaryExpressionTest, Assert_DifferentProgramID_RHS) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

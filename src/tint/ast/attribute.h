@@ -20,8 +20,7 @@
 
 #include "src/tint/ast/node.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// The base class for all attributes
 class Attribute : public Castable<Attribute, Node> {
@@ -65,7 +64,6 @@ const T* GetAttribute(const AttributeList& attributes) {
   return nullptr;
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_ATTRIBUTE_H_

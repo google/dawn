@@ -14,8 +14,7 @@
 
 #include "src/tint/ast/unary_op.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 std::ostream& operator<<(std::ostream& out, UnaryOp mod) {
   switch (mod) {
@@ -43,5 +42,4 @@ std::ostream& operator<<(std::ostream& out, UnaryOp mod) {
   return out;
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

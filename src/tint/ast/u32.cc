@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::U32);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 U32::U32(ProgramID pid, const Source& src) : Base(pid, src) {}
 
@@ -36,5 +35,4 @@ const U32* U32::Clone(CloneContext* ctx) const {
   return ctx->dst->create<U32>(src);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

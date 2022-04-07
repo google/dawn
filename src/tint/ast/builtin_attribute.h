@@ -20,8 +20,7 @@
 #include "src/tint/ast/attribute.h"
 #include "src/tint/ast/builtin.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A builtin attribute
 class BuiltinAttribute final : public Castable<BuiltinAttribute, Attribute> {
@@ -46,7 +45,6 @@ class BuiltinAttribute final : public Castable<BuiltinAttribute, Attribute> {
   const Builtin builtin;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_BUILTIN_ATTRIBUTE_H_

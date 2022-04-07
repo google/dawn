@@ -17,8 +17,7 @@
 
 #include "src/tint/ast/expression.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// Represents the `_` of a phony assignment `_ = <expr>`
 /// @see https://www.w3.org/TR/WGSL/#phony-assignment-section
@@ -39,7 +38,6 @@ class PhonyExpression final : public Castable<PhonyExpression, Expression> {
   const PhonyExpression* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_PHONY_EXPRESSION_H_

@@ -20,8 +20,7 @@
 #include "src/tint/ast/access.h"
 #include "src/tint/ast/texture.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// The texel format in the storage texture
 enum class TexelFormat {
@@ -95,7 +94,6 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
   const Access access;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_STORAGE_TEXTURE_H_

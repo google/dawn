@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Bool);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 Bool::Bool(ProgramID pid, const Source& src) : Base(pid, src) {}
 
@@ -36,5 +35,4 @@ const Bool* Bool::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Bool>(src);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

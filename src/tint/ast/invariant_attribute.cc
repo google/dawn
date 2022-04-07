@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::InvariantAttribute);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 InvariantAttribute::InvariantAttribute(ProgramID pid, const Source& src)
     : Base(pid, src) {}
@@ -36,5 +35,4 @@ const InvariantAttribute* InvariantAttribute::Clone(CloneContext* ctx) const {
   return ctx->dst->create<InvariantAttribute>(src);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

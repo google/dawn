@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::MemberAccessorExpression);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 MemberAccessorExpression::MemberAccessorExpression(
     ProgramID pid,
@@ -47,5 +46,4 @@ const MemberAccessorExpression* MemberAccessorExpression::Clone(
   return ctx->dst->create<MemberAccessorExpression>(src, str, mem);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

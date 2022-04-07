@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::CallStatement);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 CallStatement::CallStatement(ProgramID pid,
                              const Source& src,
@@ -40,5 +39,4 @@ const CallStatement* CallStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<CallStatement>(src, call);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

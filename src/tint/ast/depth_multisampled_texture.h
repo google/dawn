@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/texture.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A multisampled depth texture type.
 class DepthMultisampledTexture final
@@ -48,7 +47,6 @@ class DepthMultisampledTexture final
   const DepthMultisampledTexture* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_DEPTH_MULTISAMPLED_TEXTURE_H_

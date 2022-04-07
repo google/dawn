@@ -21,10 +21,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/storage_texture_type.h"
 
-namespace tint {
-namespace ast {
-namespace builtin {
-namespace test {
+namespace tint::ast::builtin::test {
 
 enum class TextureKind {
   kRegular,
@@ -261,9 +258,6 @@ struct TextureOverloadCase {
 
 std::ostream& operator<<(std::ostream& out, const TextureOverloadCase& data);
 
-}  // namespace test
-}  // namespace builtin
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast::builtin::test
 
 #endif  // SRC_TINT_AST_BUILTIN_TEXTURE_HELPER_TEST_H_

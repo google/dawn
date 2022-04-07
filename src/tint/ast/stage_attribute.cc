@@ -20,8 +20,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::StageAttribute);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 StageAttribute::StageAttribute(ProgramID pid,
                                const Source& src,
@@ -40,5 +39,4 @@ const StageAttribute* StageAttribute::Clone(CloneContext* ctx) const {
   return ctx->dst->create<StageAttribute>(src, stage);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

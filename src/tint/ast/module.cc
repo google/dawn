@@ -21,8 +21,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Module);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 Module::Module(ProgramID pid, const Source& src) : Base(pid, src) {}
 
@@ -123,5 +122,4 @@ void Module::Copy(CloneContext* ctx, const Module* src) {
   }
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

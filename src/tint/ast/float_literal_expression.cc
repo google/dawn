@@ -20,8 +20,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::FloatLiteralExpression);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 FloatLiteralExpression::FloatLiteralExpression(ProgramID pid,
                                                const Source& src,
@@ -37,5 +36,4 @@ const FloatLiteralExpression* FloatLiteralExpression::Clone(
   return ctx->dst->create<FloatLiteralExpression>(src, value);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

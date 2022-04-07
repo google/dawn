@@ -16,8 +16,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Texture);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 std::ostream& operator<<(std::ostream& out, TextureDimension dim) {
   switch (dim) {
@@ -85,5 +84,4 @@ Texture::Texture(Texture&&) = default;
 
 Texture::~Texture() = default;
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

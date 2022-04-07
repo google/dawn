@@ -14,8 +14,7 @@
 
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using BoolLiteralExpressionTest = TestHelper;
@@ -33,5 +32,4 @@ TEST_F(BoolLiteralExpressionTest, False) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

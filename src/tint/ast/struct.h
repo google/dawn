@@ -22,8 +22,7 @@
 #include "src/tint/ast/struct_member.h"
 #include "src/tint/ast/type_decl.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A struct statement.
 class Struct final : public Castable<Struct, TypeDecl> {
@@ -57,7 +56,6 @@ class Struct final : public Castable<Struct, TypeDecl> {
   const AttributeList attributes;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_STRUCT_H_

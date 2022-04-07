@@ -18,8 +18,7 @@
 #include "src/tint/ast/statement.h"
 #include "src/tint/ast/variable.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A variable declaration statement
 class VariableDeclStatement final
@@ -46,7 +45,6 @@ class VariableDeclStatement final
   const Variable* const variable;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_VARIABLE_DECL_STATEMENT_H_

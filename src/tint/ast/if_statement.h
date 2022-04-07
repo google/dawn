@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/else_statement.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// An if statement
 class IfStatement final : public Castable<IfStatement, Statement> {
@@ -56,7 +55,6 @@ class IfStatement final : public Castable<IfStatement, Statement> {
   const ElseStatementList else_statements;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_IF_STATEMENT_H_

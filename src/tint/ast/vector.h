@@ -19,8 +19,7 @@
 
 #include "src/tint/ast/type.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A vector type.
 class Vector final : public Castable<Vector, Type> {
@@ -56,7 +55,6 @@ class Vector final : public Castable<Vector, Type> {
   const uint32_t width;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_VECTOR_H_

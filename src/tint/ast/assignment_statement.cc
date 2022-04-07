@@ -18,8 +18,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::AssignmentStatement);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 AssignmentStatement::AssignmentStatement(ProgramID pid,
                                          const Source& src,
@@ -44,5 +43,4 @@ const AssignmentStatement* AssignmentStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<AssignmentStatement>(src, l, r);
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

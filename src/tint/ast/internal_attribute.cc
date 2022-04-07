@@ -16,8 +16,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::InternalAttribute);
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 InternalAttribute::InternalAttribute(ProgramID pid) : Base(pid, Source{}) {}
 
@@ -27,5 +26,4 @@ std::string InternalAttribute::Name() const {
   return "internal";
 }
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast

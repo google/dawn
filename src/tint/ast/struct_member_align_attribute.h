@@ -20,8 +20,7 @@
 
 #include "src/tint/ast/attribute.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// A struct member align attribute
 class StructMemberAlignAttribute final
@@ -47,7 +46,6 @@ class StructMemberAlignAttribute final
   const uint32_t align;
 };
 
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_STRUCT_MEMBER_ALIGN_ATTRIBUTE_H_

@@ -15,8 +15,7 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/test_helper.h"
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 namespace {
 
 using CallExpressionTest = TestHelper;
@@ -145,5 +144,4 @@ TEST_F(CallExpressionTest, Assert_DifferentProgramID_Param) {
 }
 
 }  // namespace
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
