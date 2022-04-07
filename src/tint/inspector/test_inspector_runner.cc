@@ -14,8 +14,7 @@
 
 #include "src/tint/inspector/test_inspector_runner.h"
 
-namespace tint {
-namespace inspector {
+namespace tint::inspector {
 
 InspectorRunner::InspectorRunner() = default;
 InspectorRunner::~InspectorRunner() = default;
@@ -35,5 +34,4 @@ Inspector& InspectorRunner::Initialize(std::string shader) {
   return *inspector_;
 }
 
-}  // namespace inspector
-}  // namespace tint
+}  // namespace tint::inspector

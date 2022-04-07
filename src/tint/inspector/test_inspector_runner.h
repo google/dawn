@@ -21,8 +21,7 @@
 #include "gtest/gtest.h"
 #include "tint/tint.h"
 
-namespace tint {
-namespace inspector {
+namespace tint::inspector {
 
 /// Utility class for running shaders in inspector tests
 class InspectorRunner {
@@ -45,7 +44,6 @@ class InspectorRunner {
   std::unique_ptr<Inspector> inspector_;
 };
 
-}  // namespace inspector
-}  // namespace tint
+}  // namespace tint::inspector
 
 #endif  // SRC_TINT_INSPECTOR_TEST_INSPECTOR_RUNNER_H_

@@ -14,8 +14,7 @@
 
 #include "src/tint/inspector/entry_point.h"
 
-namespace tint {
-namespace inspector {
+namespace tint::inspector {
 
 StageVariable::StageVariable() = default;
 StageVariable::StageVariable(const StageVariable& other)
@@ -66,5 +65,4 @@ InterpolationSampling ASTToInspectorInterpolationSampling(
   return InterpolationSampling::kUnknown;
 }
 
-}  // namespace inspector
-}  // namespace tint
+}  // namespace tint::inspector

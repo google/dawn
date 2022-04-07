@@ -20,8 +20,7 @@
 #include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/texture.h"
 
-namespace tint {
-namespace inspector {
+namespace tint::inspector {
 
 /// Container for information about how a resource is bound
 struct ResourceBinding {
@@ -123,7 +122,6 @@ ResourceBinding::SampledKind BaseTypeToSampledKind(const sem::Type* base_type);
 ResourceBinding::TexelFormat TypeTexelFormatToResourceBindingTexelFormat(
     const ast::TexelFormat& image_format);
 
-}  // namespace inspector
-}  // namespace tint
+}  // namespace tint::inspector
 
 #endif  // SRC_TINT_INSPECTOR_RESOURCE_BINDING_H_

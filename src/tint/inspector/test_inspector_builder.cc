@@ -22,8 +22,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace inspector {
+namespace tint::inspector {
 
 InspectorBuilder::InspectorBuilder() = default;
 InspectorBuilder::~InspectorBuilder() = default;
@@ -395,5 +394,4 @@ Inspector& InspectorBuilder::Build() {
   return *inspector_;
 }
 
-}  // namespace inspector
-}  // namespace tint
+}  // namespace tint::inspector

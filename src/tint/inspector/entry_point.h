@@ -22,8 +22,7 @@
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/pipeline_stage.h"
 
-namespace tint {
-namespace inspector {
+namespace tint::inspector {
 
 /// Base component type of a stage variable.
 enum class ComponentType {
@@ -181,7 +180,6 @@ struct EntryPoint {
   }
 };
 
-}  // namespace inspector
-}  // namespace tint
+}  // namespace tint::inspector
 
 #endif  // SRC_TINT_INSPECTOR_ENTRY_POINT_H_

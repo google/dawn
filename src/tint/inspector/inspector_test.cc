@@ -28,8 +28,7 @@
 #include "src/tint/sem/variable.h"
 #include "tint/tint.h"
 
-namespace tint {
-namespace inspector {
+namespace tint::inspector {
 namespace {
 
 // All the tests that descend from InspectorBuilder are expected to define their
@@ -3027,5 +3026,4 @@ fn main(@location(0) fragUV: vec2<f32>,
 }
 
 }  // namespace
-}  // namespace inspector
-}  // namespace tint
+}  // namespace tint::inspector

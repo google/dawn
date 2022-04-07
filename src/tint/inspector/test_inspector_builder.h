@@ -33,8 +33,7 @@
 #include "src/tint/sem/variable.h"
 #include "tint/tint.h"
 
-namespace tint {
-namespace inspector {
+namespace tint::inspector {
 
 /// Utility class for building programs in inspector tests
 class InspectorBuilder : public ProgramBuilder {
@@ -380,7 +379,6 @@ class InspectorBuilder : public ProgramBuilder {
   std::unique_ptr<Inspector> inspector_;
 };
 
-}  // namespace inspector
-}  // namespace tint
+}  // namespace tint::inspector
 
 #endif  // SRC_TINT_INSPECTOR_TEST_INSPECTOR_BUILDER_H_

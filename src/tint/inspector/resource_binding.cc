@@ -22,8 +22,7 @@
 #include "src/tint/sem/u32_type.h"
 #include "src/tint/sem/vector_type.h"
 
-namespace tint {
-namespace inspector {
+namespace tint::inspector {
 
 ResourceBinding::TextureDimension
 TypeTextureDimensionToResourceBindingTextureDimension(
@@ -112,5 +111,4 @@ ResourceBinding::TexelFormat TypeTexelFormatToResourceBindingTexelFormat(
   return ResourceBinding::TexelFormat::kNone;
 }
 
-}  // namespace inspector
-}  // namespace tint
+}  // namespace tint::inspector

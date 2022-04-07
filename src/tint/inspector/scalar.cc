@@ -14,8 +14,7 @@
 
 #include "src/tint/inspector/scalar.h"
 
-namespace tint {
-namespace inspector {
+namespace tint::inspector {
 
 Scalar::Scalar() : type_(kNull) {}
 
@@ -71,5 +70,4 @@ float Scalar::AsFloat() const {
   return value_.f;
 }
 
-}  // namespace inspector
-}  // namespace tint
+}  // namespace tint::inspector

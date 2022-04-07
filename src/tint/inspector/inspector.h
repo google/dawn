@@ -29,8 +29,7 @@
 #include "src/tint/sem/sampler_texture_pair.h"
 #include "src/tint/utils/unique_vector.h"
 
-namespace tint {
-namespace inspector {
+namespace tint::inspector {
 
 /// A temporary alias to sem::SamplerTexturePair. [DEPRECATED]
 using SamplerTexturePair = sem::SamplerTexturePair;
@@ -228,7 +227,6 @@ class Inspector {
                                F&& cb);
 };
 
-}  // namespace inspector
-}  // namespace tint
+}  // namespace tint::inspector
 
 #endif  // SRC_TINT_INSPECTOR_INSPECTOR_H_

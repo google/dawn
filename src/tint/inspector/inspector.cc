@@ -45,8 +45,7 @@
 #include "src/tint/utils/math.h"
 #include "src/tint/utils/unique_vector.h"
 
-namespace tint {
-namespace inspector {
+namespace tint::inspector {
 
 namespace {
 
@@ -952,5 +951,4 @@ void Inspector::GetOriginatingResources(
   }
 }
 
-}  // namespace inspector
-}  // namespace tint
+}  // namespace tint::inspector

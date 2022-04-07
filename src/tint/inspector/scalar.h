@@ -17,8 +17,7 @@
 
 #include <cstdint>
 
-namespace tint {
-namespace inspector {
+namespace tint::inspector {
 
 /// Contains a literal scalar value
 class Scalar {
@@ -74,7 +73,6 @@ class Scalar {
   Value value_;
 };
 
-}  // namespace inspector
-}  // namespace tint
+}  // namespace tint::inspector
 
 #endif  // SRC_TINT_INSPECTOR_SCALAR_H_
