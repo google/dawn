@@ -22,8 +22,7 @@
 #include "src/tint/val/val.h"
 #pragma clang diagnostic pop
 
-namespace tint {
-namespace val {
+namespace tint::val {
 
 Result MslUsingMetalAPI(const std::string& src) {
   tint::val::Result result;
@@ -55,7 +54,6 @@ Result MslUsingMetalAPI(const std::string& src) {
   return result;
 }
 
-}  // namespace val
-}  // namespace tint
+}  // namespace tint::val
 
 #endif  // TINT_ENABLE_MSL_VALIDATION_USING_METAL_API

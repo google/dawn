@@ -19,8 +19,7 @@
 #include "src/tint/utils/io/command.h"
 #include "src/tint/utils/io/tmpfile.h"
 
-namespace tint {
-namespace val {
+namespace tint::val {
 
 Result Msl(const std::string& xcrun_path, const std::string& source) {
   Result result;
@@ -65,5 +64,4 @@ Result Msl(const std::string& xcrun_path, const std::string& source) {
   return result;
 }
 
-}  // namespace val
-}  // namespace tint
+}  // namespace tint::val

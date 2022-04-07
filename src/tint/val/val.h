@@ -26,8 +26,7 @@ namespace tint {
 class Program;
 }  // namespace tint
 
-namespace tint {
-namespace val {
+namespace tint::val {
 
 using EntryPointList = std::vector<std::pair<std::string, ast::PipelineStage>>;
 
@@ -74,7 +73,6 @@ Result Msl(const std::string& xcrun_path, const std::string& source);
 Result MslUsingMetalAPI(const std::string& source);
 #endif  // TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
 
-}  // namespace val
-}  // namespace tint
+}  // namespace tint::val
 
 #endif  // SRC_TINT_VAL_VAL_H_

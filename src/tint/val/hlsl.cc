@@ -26,8 +26,7 @@
 using Microsoft::WRL::ComPtr;
 #endif  // _WIN32
 
-namespace tint {
-namespace val {
+namespace tint::val {
 
 Result HlslUsingDXC(const std::string& dxc_path,
                     const std::string& source,
@@ -174,5 +173,4 @@ Result HlslUsingFXC(const std::string& source,
 }
 #endif  // _WIN32
 
-}  // namespace val
-}  // namespace tint
+}  // namespace tint::val
