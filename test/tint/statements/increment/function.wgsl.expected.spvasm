@@ -1,0 +1,9 @@
+SKIP: FAILED
+
+
+fn main() {
+  var i = 0;
+  i++;
+}
+
+Failed to generate: Unknown statement: tint::ast::IncrementDecrementStatement

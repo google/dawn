@@ -1118,6 +1118,14 @@ fn f() { return 1 | >; }
 )");
 }
 
+TEST_F(ParserImplErrorTest, PostfixIncrementAsExpr) {
+  EXPECT("fn f() { var x : i32; let y = x++; }",
+         R"(test.wgsl:1:32 error: expected ';' for variable declaration
+fn f() { var x : i32; let y = x++; }
+                               ^^
+)");
+}
+
 TEST_F(ParserImplErrorTest, RelationalInvalidExpr) {
   EXPECT("fn f() { return 1 < >; }",
          R"(test.wgsl:1:21 error: unable to parse right side of < expression

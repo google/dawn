@@ -499,6 +499,7 @@ tint_unittests_source_set("tint_unittests_wgsl_reader_src") {
     "../../src/tint/reader/wgsl/parser_impl_global_variable_decl_test.cc",
     "../../src/tint/reader/wgsl/parser_impl_if_stmt_test.cc",
     "../../src/tint/reader/wgsl/parser_impl_inclusive_or_expression_test.cc",
+    "../../src/tint/reader/wgsl/parser_impl_increment_decrement_stmt_test.cc",
     "../../src/tint/reader/wgsl/parser_impl_logical_and_expression_test.cc",
     "../../src/tint/reader/wgsl/parser_impl_logical_or_expression_test.cc",
     "../../src/tint/reader/wgsl/parser_impl_loop_stmt_test.cc",

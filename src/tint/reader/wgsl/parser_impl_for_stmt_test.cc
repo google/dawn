@@ -112,6 +112,19 @@ TEST_F(ForStmtTest, InitializerStatementAssignment) {
   EXPECT_TRUE(fl->body->Empty());
 }
 
+// Test a for loop incrementing a variable in the initializer statement.
+TEST_F(ForStmtTest, InitializerStatementIncrement) {
+  auto p = parser("for (i++;;) { }");
+  auto fl = p->for_stmt();
+  EXPECT_FALSE(p->has_error()) << p->error();
+  EXPECT_FALSE(fl.errored);
+  ASSERT_TRUE(fl.matched);
+  EXPECT_TRUE(Is<ast::IncrementDecrementStatement>(fl->initializer));
+  EXPECT_EQ(fl->condition, nullptr);
+  EXPECT_EQ(fl->continuing, nullptr);
+  EXPECT_TRUE(fl->body->Empty());
+}
+
 // Test a for loop calling a function in the initializer statement.
 TEST_F(ForStmtTest, InitializerStatementFuncCall) {
   auto p = parser("for (a(b,c) ;;) { }");
@@ -148,6 +161,19 @@ TEST_F(ForStmtTest, ContinuingAssignment) {
   EXPECT_EQ(fl->initializer, nullptr);
   EXPECT_EQ(fl->condition, nullptr);
   EXPECT_TRUE(Is<ast::AssignmentStatement>(fl->continuing));
+  EXPECT_TRUE(fl->body->Empty());
+}
+
+// Test a for loop with an increment statement as the continuing statement.
+TEST_F(ForStmtTest, ContinuingIncrement) {
+  auto p = parser("for (;; x++) { }");
+  auto fl = p->for_stmt();
+  EXPECT_FALSE(p->has_error()) << p->error();
+  EXPECT_FALSE(fl.errored);
+  ASSERT_TRUE(fl.matched);
+  EXPECT_EQ(fl->initializer, nullptr);
+  EXPECT_EQ(fl->condition, nullptr);
+  EXPECT_TRUE(Is<ast::IncrementDecrementStatement>(fl->continuing));
   EXPECT_TRUE(fl->body->Empty());
 }
 

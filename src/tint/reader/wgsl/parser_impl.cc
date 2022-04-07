@@ -25,6 +25,7 @@
 #include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/if_statement.h"
+#include "src/tint/ast/increment_decrement_statement.h"
 #include "src/tint/ast/invariant_attribute.h"
 #include "src/tint/ast/loop_statement.h"
 #include "src/tint/ast/return_statement.h"
@@ -1464,6 +1465,8 @@ Expect<ast::StatementList> ParserImpl::expect_statements() {
 //      | continue_stmt SEMICOLON
 //      | DISCARD SEMICOLON
 //      | assignment_stmt SEMICOLON
+//      | increment_stmt SEMICOLON
+//      | decrement_stmt SEMICOLON
 Maybe<const ast::Statement*> ParserImpl::statement() {
   while (match(Token::Type::kSemicolon)) {
     // Skip empty statements
@@ -1520,6 +1523,8 @@ Maybe<const ast::Statement*> ParserImpl::statement() {
 //   | continue_stmt SEMICOLON
 //   | DISCARD SEMICOLON
 //   | assignment_stmt SEMICOLON
+//   | increment_stmt SEMICOLON
+//   | decrement_stmt SEMICOLON
 Maybe<const ast::Statement*> ParserImpl::non_block_statement() {
   auto stmt = [&]() -> Maybe<const ast::Statement*> {
     auto ret_stmt = return_stmt();
@@ -1878,7 +1883,8 @@ ForHeader::ForHeader(const ast::Statement* init,
 
 ForHeader::~ForHeader() = default;
 
-// (variable_stmt | assignment_stmt | func_call_stmt)?
+// (variable_stmt | increment_stmt | decrement_stmt | assignment_stmt |
+// func_call_stmt)?
 Maybe<const ast::Statement*> ParserImpl::for_header_initializer() {
   auto call = func_call_stmt();
   if (call.errored)
@@ -1901,7 +1907,7 @@ Maybe<const ast::Statement*> ParserImpl::for_header_initializer() {
   return Failure::kNoMatch;
 }
 
-// (assignment_stmt | func_call_stmt)?
+// (increment_stmt | decrement_stmt | assignment_stmt | func_call_stmt)?
 Maybe<const ast::Statement*> ParserImpl::for_header_continuing() {
   auto call_stmt = func_call_stmt();
   if (call_stmt.errored)
@@ -2104,14 +2110,6 @@ Maybe<const ast::Expression*> ParserImpl::postfix_expression(
   Source source;
 
   while (continue_parsing()) {
-    if (match(Token::Type::kPlusPlus, &source) ||
-        match(Token::Type::kMinusMinus, &source)) {
-      add_error(source,
-                "postfix increment and decrement operators are reserved for a "
-                "future WGSL version");
-      return Failure::kErrored;
-    }
-
     if (match(Token::Type::kBracketLeft, &source)) {
       auto res = sync(
           Token::Type::kBracketRight, [&]() -> Maybe<const ast::Expression*> {
@@ -2689,6 +2687,10 @@ Maybe<ast::BinaryOp> ParserImpl::compound_assignment_operator() {
 // assignment_stmt
 // | lhs_expression ( equal | compound_assignment_operator ) expression
 // | underscore equal expression
+// increment_stmt
+// | lhs_expression PLUS_PLUS
+// decrement_stmt
+// | lhs_expression MINUS_MINUS
 Maybe<const ast::Statement*> ParserImpl::assignment_stmt() {
   auto t = peek();
   auto source = t.source();
@@ -2710,6 +2712,16 @@ Maybe<const ast::Statement*> ParserImpl::assignment_stmt() {
       return Failure::kNoMatch;
     }
     lhs = create<ast::PhonyExpression>(source);
+  }
+
+  // Handle increment and decrement statements.
+  // We do this here because the parsing of the LHS expression overlaps with
+  // the assignment statement, and we cannot tell which we are parsing until we
+  // hit the ++/--/= token.
+  if (match(Token::Type::kPlusPlus)) {
+    return create<ast::IncrementDecrementStatement>(source, lhs.value, true);
+  } else if (match(Token::Type::kMinusMinus)) {
+    return create<ast::IncrementDecrementStatement>(source, lhs.value, false);
   }
 
   auto compound_op = compound_assignment_operator();

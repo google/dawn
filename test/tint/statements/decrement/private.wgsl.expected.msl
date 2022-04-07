@@ -1,0 +1,10 @@
+SKIP: FAILED
+
+
+var<private> i : i32 = 0;
+
+fn tint_symbol() {
+  i--;
+}
+
+Failed to generate: error: unknown statement type: tint::ast::IncrementDecrementStatement

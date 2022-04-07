@@ -133,6 +133,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was successfully emitted
   bool EmitIf(const ast::IfStatement* stmt);
+  /// Handles an increment/decrement statement
+  /// @param stmt the statement to emit
+  /// @returns true if the statement was successfully emitted
+  bool EmitIncrementDecrement(const ast::IncrementDecrementStatement* stmt);
   /// Handles generating a discard statement
   /// @param stmt the discard statement
   /// @returns true if the statement was successfully emitted

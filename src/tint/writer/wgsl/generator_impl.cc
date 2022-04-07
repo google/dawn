@@ -922,6 +922,9 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
       [&](const ast::DiscardStatement* d) { return EmitDiscard(d); },
       [&](const ast::FallthroughStatement* f) { return EmitFallthrough(f); },
       [&](const ast::IfStatement* i) { return EmitIf(i); },
+      [&](const ast::IncrementDecrementStatement* l) {
+        return EmitIncrementDecrement(l);
+      },
       [&](const ast::LoopStatement* l) { return EmitLoop(l); },
       [&](const ast::ForLoopStatement* l) { return EmitForLoop(l); },
       [&](const ast::ReturnStatement* r) { return EmitReturn(r); },
@@ -1069,6 +1072,16 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
 
   line() << "}";
 
+  return true;
+}
+
+bool GeneratorImpl::EmitIncrementDecrement(
+    const ast::IncrementDecrementStatement* stmt) {
+  auto out = line();
+  if (!EmitExpression(out, stmt->lhs)) {
+    return false;
+  }
+  out << (stmt->increment ? "++" : "--") << ";";
   return true;
 }
 
