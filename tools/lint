@@ -24,7 +24,7 @@ if ! command -v cpplint.py &> /dev/null; then
 fi
 
 FILTER="-runtime/references"
-FILES="`find src -type f` `find src/tint/cmd -type f`"
+FILES="`find src/tint -type f` `find src/tint/cmd -type f`"
 FILES+="`find tools/src -type f` `find src/tint/cmd -type f`"
 
 if command -v go &> /dev/null; then
