@@ -22,8 +22,7 @@
 
 #include "src/tint/traits.h"
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 
 /// Transform performs an element-wise transformation of a vector.
 /// @param in the input vector.
@@ -56,7 +55,6 @@ auto Transform(const std::vector<IN>& in, TRANSFORMER&& transform)
   return result;
 }
 
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils
 
 #endif  // SRC_TINT_UTILS_TRANSFORM_H_

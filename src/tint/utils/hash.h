@@ -20,8 +20,7 @@
 #include <functional>
 #include <vector>
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 namespace detail {
 
 /// Helper for obtaining a seed bias value for HashCombine with a bit-width
@@ -77,7 +76,6 @@ size_t Hash(const ARGS&... args) {
   return hash;
 }
 
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils
 
 #endif  // SRC_TINT_UTILS_HASH_H_

@@ -19,8 +19,7 @@
 #include <sstream>
 #include <string>
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 
 namespace {
 
@@ -245,5 +244,4 @@ Command::Output Command::Exec(
   return output;
 }
 
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils

@@ -18,8 +18,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 namespace {
 
 TEST(ReverseTest, Vector) {
@@ -32,5 +31,4 @@ TEST(ReverseTest, Vector) {
 }
 
 }  // namespace
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils

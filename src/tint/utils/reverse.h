@@ -17,8 +17,7 @@
 
 #include <iterator>
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 
 namespace detail {
 /// Used by utils::Reverse to hold the underlying iterable.
@@ -58,7 +57,6 @@ detail::ReverseIterable<T> Reverse(T&& iterable) {
   return {iterable};
 }
 
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils
 
 #endif  // SRC_TINT_UTILS_REVERSE_H_

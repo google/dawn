@@ -14,8 +14,7 @@
 
 #include "src/tint/utils/io/tmpfile.h"
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 
 TmpFile::TmpFile(std::string) {}
 
@@ -25,5 +24,4 @@ bool TmpFile::Append(const void*, size_t) const {
   return false;
 }
 
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils

@@ -18,8 +18,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 namespace {
 
 TEST(Lookup, Test) {
@@ -54,5 +53,4 @@ TEST(GetOrCreateTest, ExistingKey) {
 }
 
 }  // namespace
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils

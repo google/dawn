@@ -19,8 +19,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 namespace {
 
 using ::testing::ElementsAre;
@@ -240,5 +239,4 @@ TEST(EnumSetTest, Ostream) {
 }
 
 }  // namespace
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils

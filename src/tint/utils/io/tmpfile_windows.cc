@@ -17,8 +17,7 @@
 #include <stdio.h>
 #include <cstdio>
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 
 namespace {
 
@@ -59,5 +58,4 @@ bool TmpFile::Append(const void* data, size_t size) const {
   return true;
 }
 
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils

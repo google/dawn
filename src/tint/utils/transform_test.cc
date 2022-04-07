@@ -23,8 +23,7 @@
   static_assert(std::is_same<decltype(vector)::value_type, expected>::value, \
                 "unexpected result vector element type")
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 namespace {
 
 TEST(TransformTest, Empty) {
@@ -90,5 +89,4 @@ TEST(TransformTest, TransformDifferentType) {
 }
 
 }  // namespace
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils

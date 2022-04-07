@@ -21,8 +21,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 
 /// EnumSet is a set of enum values.
 /// @note As the EnumSet is backed by a single uint64_t value, it can only hold
@@ -237,8 +236,7 @@ inline std::ostream& operator<<(std::ostream& out, EnumSet<ENUM> set) {
   return out << "}";
 }
 
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils
 
 namespace std {
 

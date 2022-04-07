@@ -18,8 +18,7 @@
 
 #include <vector>
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 
 /// @param in a vector of `T*`
 /// @returns a vector of `const T*` with the content of `in`.
@@ -33,7 +32,6 @@ std::vector<const T*> ToConstPtrVec(const std::vector<T*>& in) {
   return out;
 }
 
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils
 
 #endif  // SRC_TINT_UTILS_TO_CONST_PTR_VEC_H_

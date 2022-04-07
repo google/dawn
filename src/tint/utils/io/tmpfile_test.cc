@@ -18,8 +18,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 namespace {
 
 TEST(TmpFileTest, WriteReadAppendDelete) {
@@ -86,5 +85,4 @@ TEST(TmpFileTest, FileExtension) {
 }
 
 }  // namespace
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils

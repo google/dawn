@@ -17,8 +17,7 @@
 
 #include <string>
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 
 /// @param str the string to apply replacements to
 /// @param substr the string to search for
@@ -35,7 +34,6 @@ inline std::string ReplaceAll(std::string str,
   return str;
 }
 
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils
 
 #endif  // SRC_TINT_UTILS_STRING_H_

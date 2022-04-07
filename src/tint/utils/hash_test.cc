@@ -18,8 +18,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 namespace {
 
 TEST(HashTests, Basic) {
@@ -45,5 +44,4 @@ TEST(HashTests, Vector) {
 }
 
 }  // namespace
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils

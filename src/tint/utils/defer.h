@@ -19,8 +19,7 @@
 
 #include "src/tint/utils/concat.h"
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 
 /// Defer executes a function or function like object when it is destructed.
 template <typename F>
@@ -51,8 +50,7 @@ inline Defer<F> MakeDefer(F&& f) {
   return Defer<F>(std::forward<F>(f));
 }
 
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils
 
 /// TINT_DEFER(S) executes the statement(s) `S` when exiting the current lexical
 /// scope.

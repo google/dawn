@@ -19,8 +19,7 @@
 #include <string>
 #include <type_traits>
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 
 /// @param alignment the next multiple to round `value` to
 /// @param value the value to round to the next multiple of `alignment`
@@ -51,7 +50,6 @@ inline std::enable_if_t<std::is_unsigned<T>::value, T> MaxAlignOf(T value) {
   return pot;
 }
 
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils
 
 #endif  // SRC_TINT_UTILS_MATH_H_

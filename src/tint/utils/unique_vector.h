@@ -21,8 +21,7 @@
 #include <utility>
 #include <vector>
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 
 /// UniqueVector is an ordered container that only contains unique items.
 /// Attempting to add a duplicate is a no-op.
@@ -107,7 +106,6 @@ struct UniqueVector {
   std::unordered_set<T, HASH, EQUAL> set;
 };
 
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils
 
 #endif  // SRC_TINT_UTILS_UNIQUE_VECTOR_H_

@@ -17,8 +17,7 @@
 
 #include <unordered_map>
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 
 /// Lookup is a utility function for fetching a value from an unordered map if
 /// it exists, otherwise returning the `if_missing` argument.
@@ -56,7 +55,6 @@ V GetOrCreate(std::unordered_map<K, V, H, C>& map,
   return value;
 }
 
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils
 
 #endif  // SRC_TINT_UTILS_MAP_H_

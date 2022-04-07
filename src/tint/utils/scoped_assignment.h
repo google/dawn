@@ -20,8 +20,7 @@
 
 #include "src/tint/utils/concat.h"
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 
 /// Helper class that temporarily assigns a value to a variable for the lifetime
 /// of the ScopedAssignment object. Once the ScopedAssignment is destructed, the
@@ -50,8 +49,7 @@ class ScopedAssignment {
   T old_value_;
 };
 
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils
 
 /// TINT_SCOPED_ASSIGNMENT(var, val) assigns `val` to `var`, and automatically
 /// restores the original value of `var` when exiting the current lexical scope.

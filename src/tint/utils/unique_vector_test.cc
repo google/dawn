@@ -17,8 +17,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 namespace {
 
 TEST(UniqueVectorTest, Empty) {
@@ -141,5 +140,4 @@ TEST(UniqueVectorTest, PopBack) {
 }
 
 }  // namespace
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils

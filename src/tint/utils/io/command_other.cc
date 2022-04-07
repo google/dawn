@@ -14,8 +14,7 @@
 
 #include "src/tint/utils/io/command.h"
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 
 Command::Command(const std::string&) {}
 
@@ -33,5 +32,4 @@ Command::Output Command::Exec(std::initializer_list<std::string>) const {
   return out;
 }
 
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils

@@ -16,8 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 namespace {
 
 TEST(ScopedAssignmentTest, Scopes) {
@@ -43,5 +42,4 @@ TEST(ScopedAssignmentTest, Scopes) {
 }
 
 }  // namespace
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils

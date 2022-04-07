@@ -21,8 +21,7 @@
 #include <sstream>
 #include <vector>
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 
 namespace {
 
@@ -261,5 +260,4 @@ Command::Output Command::Exec(
   }
 }
 
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils

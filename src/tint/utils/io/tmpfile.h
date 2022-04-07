@@ -18,8 +18,7 @@
 #include <sstream>
 #include <string>
 
-namespace tint {
-namespace utils {
+namespace tint::utils {
 
 /// TmpFile constructs a temporary file that can be written to, and is
 /// automatically deleted on destruction.
@@ -70,7 +69,6 @@ class TmpFile {
   std::string path_;
 };
 
-}  // namespace utils
-}  // namespace tint
+}  // namespace tint::utils
 
 #endif  // SRC_TINT_UTILS_IO_TMPFILE_H_
