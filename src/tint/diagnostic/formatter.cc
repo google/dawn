@@ -21,8 +21,7 @@
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/diagnostic/printer.h"
 
-namespace tint {
-namespace diag {
+namespace tint::diag {
 namespace {
 
 const char* to_str(Severity severity) {
@@ -267,5 +266,4 @@ std::string Formatter::format(const List& list) const {
 
 Formatter::~Formatter() = default;
 
-}  // namespace diag
-}  // namespace tint
+}  // namespace tint::diag

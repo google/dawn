@@ -18,8 +18,7 @@
 
 #include "src/tint/diagnostic/printer.h"
 
-namespace tint {
-namespace diag {
+namespace tint::diag {
 namespace {
 
 bool supports_colors(FILE* f) {
@@ -96,5 +95,4 @@ std::unique_ptr<Printer> Printer::create(FILE* out, bool use_colors) {
   return std::make_unique<PrinterLinux>(out, use_colors);
 }
 
-}  // namespace diag
-}  // namespace tint
+}  // namespace tint::diag

@@ -18,8 +18,7 @@
 
 #include "src/tint/diagnostic/formatter.h"
 
-namespace tint {
-namespace diag {
+namespace tint::diag {
 
 Diagnostic::Diagnostic() = default;
 Diagnostic::Diagnostic(const Diagnostic&) = default;
@@ -44,5 +43,4 @@ std::string List::str() const {
   return Formatter{style}.format(*this);
 }
 
-}  // namespace diag
-}  // namespace tint
+}  // namespace tint::diag

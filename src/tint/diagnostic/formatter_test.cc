@@ -19,8 +19,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/diagnostic/diagnostic.h"
 
-namespace tint {
-namespace diag {
+namespace tint::diag {
 namespace {
 
 Diagnostic Diag(Severity severity,
@@ -306,5 +305,4 @@ TEST_F(DiagFormatterTest, RangeOOB) {
 }
 
 }  // namespace
-}  // namespace diag
-}  // namespace tint
+}  // namespace tint::diag

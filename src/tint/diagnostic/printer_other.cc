@@ -16,8 +16,7 @@
 
 #include "src/tint/diagnostic/printer.h"
 
-namespace tint {
-namespace diag {
+namespace tint::diag {
 namespace {
 
 class PrinterOther : public Printer {
@@ -38,5 +37,4 @@ std::unique_ptr<Printer> Printer::create(FILE* out, bool) {
   return std::make_unique<PrinterOther>(out);
 }
 
-}  // namespace diag
-}  // namespace tint
+}  // namespace tint::diag

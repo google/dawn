@@ -19,8 +19,7 @@
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
 
-namespace tint {
-namespace diag {
+namespace tint::diag {
 namespace {
 
 struct ConsoleInfo {
@@ -109,5 +108,4 @@ std::unique_ptr<Printer> Printer::create(FILE* out, bool use_colors) {
   return std::make_unique<PrinterWindows>(out, use_colors);
 }
 
-}  // namespace diag
-}  // namespace tint
+}  // namespace tint::diag

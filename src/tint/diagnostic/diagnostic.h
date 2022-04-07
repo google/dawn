@@ -22,8 +22,7 @@
 
 #include "src/tint/source.h"
 
-namespace tint {
-namespace diag {
+namespace tint::diag {
 
 /// Severity is an enumerator of diagnostic severities.
 enum class Severity { Note, Warning, Error, InternalCompilerError, Fatal };
@@ -246,7 +245,6 @@ class List {
   size_t error_count_ = 0;
 };
 
-}  // namespace diag
-}  // namespace tint
+}  // namespace tint::diag
 
 #endif  // SRC_TINT_DIAGNOSTIC_DIAGNOSTIC_H_

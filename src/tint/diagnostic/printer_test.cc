@@ -16,8 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace diag {
+namespace tint::diag {
 namespace {
 
 // Actually verifying that the expected colors are printed is exceptionally
@@ -94,5 +93,4 @@ TEST_F(PrinterTest, BoldWithoutColors) {
 
 #endif  // ENABLE_PRINTER_TESTS
 }  // namespace
-}  // namespace diag
-}  // namespace tint
+}  // namespace tint::diag

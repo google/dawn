@@ -19,8 +19,7 @@
 #include <sstream>
 #include <string>
 
-namespace tint {
-namespace diag {
+namespace tint::diag {
 
 class List;
 
@@ -77,7 +76,6 @@ class StringPrinter : public Printer {
   std::stringstream stream;
 };
 
-}  // namespace diag
-}  // namespace tint
+}  // namespace tint::diag
 
 #endif  // SRC_TINT_DIAGNOSTIC_PRINTER_H_

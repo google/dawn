@@ -14,8 +14,7 @@
 
 #include "src/tint/diagnostic/printer.h"
 
-namespace tint {
-namespace diag {
+namespace tint::diag {
 
 Printer::~Printer() = default;
 
@@ -30,5 +29,4 @@ void StringPrinter::write(const std::string& str, const Style&) {
   stream << str;
 }
 
-}  // namespace diag
-}  // namespace tint
+}  // namespace tint::diag

@@ -17,8 +17,7 @@
 
 #include <string>
 
-namespace tint {
-namespace diag {
+namespace tint::diag {
 
 class Diagnostic;
 class List;
@@ -66,7 +65,6 @@ class Formatter {
   const Style style_;
 };
 
-}  // namespace diag
-}  // namespace tint
+}  // namespace tint::diag
 
 #endif  // SRC_TINT_DIAGNOSTIC_FORMATTER_H_
