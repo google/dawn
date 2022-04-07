@@ -18,7 +18,7 @@ package lut
 import (
 	"sort"
 
-	"dawn.googlesource.com/tint/tools/src/list"
+	"dawn.googlesource.com/dawn/tools/src/list"
 )
 
 // LUT is a look up table.

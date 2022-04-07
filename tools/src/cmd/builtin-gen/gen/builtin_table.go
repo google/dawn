@@ -17,9 +17,9 @@ package gen
 import (
 	"fmt"
 
-	"dawn.googlesource.com/tint/tools/src/cmd/builtin-gen/sem"
-	"dawn.googlesource.com/tint/tools/src/list"
-	"dawn.googlesource.com/tint/tools/src/lut"
+	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/sem"
+	"dawn.googlesource.com/dawn/tools/src/list"
+	"dawn.googlesource.com/dawn/tools/src/lut"
 )
 
 // BuiltinTable holds data specific to the intrinsic_table.inl.tmpl template

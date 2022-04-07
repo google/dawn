@@ -19,8 +19,8 @@ import (
 	"strings"
 	"testing"
 
-	"dawn.googlesource.com/tint/tools/src/cmd/builtin-gen/parser"
-	"dawn.googlesource.com/tint/tools/src/cmd/builtin-gen/resolver"
+	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/parser"
+	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/resolver"
 )
 
 func TestResolver(t *testing.T) {

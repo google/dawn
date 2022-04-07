@@ -24,7 +24,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"dawn.googlesource.com/tint/tools/src/match"
+	"dawn.googlesource.com/dawn/tools/src/match"
 )
 
 // Scan walks all files and subdirectories from root, returning those

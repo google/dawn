@@ -25,11 +25,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"dawn.googlesource.com/tint/tools/src/cmd/builtin-gen/gen"
-	"dawn.googlesource.com/tint/tools/src/cmd/builtin-gen/parser"
-	"dawn.googlesource.com/tint/tools/src/cmd/builtin-gen/resolver"
-	"dawn.googlesource.com/tint/tools/src/fileutils"
-	"dawn.googlesource.com/tint/tools/src/glob"
+	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/gen"
+	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/parser"
+	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/resolver"
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/glob"
 )
 
 const defProjectRelPath = "src/tint/builtins.def"
@@ -82,8 +82,8 @@ func run() error {
 	// Recursively find all the template files in the <tint>/src directory
 	files, err := glob.Scan(projectRoot, glob.MustParseConfig(`{
 		"paths": [{"include": [
-			"src/**.tmpl",
-			"test/**.tmpl"
+			"src/tint/**.tmpl",
+			"test/tint/**.tmpl"
 		]}]
 	}`))
 	if err != nil {

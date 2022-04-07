@@ -18,8 +18,8 @@ import (
 	"fmt"
 	"testing"
 
-	"dawn.googlesource.com/tint/tools/src/cmd/builtin-gen/lexer"
-	"dawn.googlesource.com/tint/tools/src/cmd/builtin-gen/tok"
+	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/lexer"
+	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/tok"
 )
 
 func TestLexTokens(t *testing.T) {

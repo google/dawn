@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"strings"
 
-	"dawn.googlesource.com/tint/tools/src/cmd/builtin-gen/sem"
-	"dawn.googlesource.com/tint/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/sem"
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
 )
 
 // Permuter generates permutations of intrinsic overloads

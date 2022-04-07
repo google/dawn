@@ -34,8 +34,8 @@ import (
 	"sync"
 	"time"
 
-	"dawn.googlesource.com/tint/tools/src/fileutils"
-	"dawn.googlesource.com/tint/tools/src/glob"
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/glob"
 )
 
 var (

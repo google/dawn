@@ -26,7 +26,7 @@ import (
 	"regexp"
 	"strings"
 
-	"dawn.googlesource.com/tint/tools/src/substr"
+	"dawn.googlesource.com/dawn/tools/src/substr"
 )
 
 func main() {

@@ -23,7 +23,7 @@ import (
 	"regexp"
 	"time"
 
-	"dawn.googlesource.com/tint/tools/src/gerrit"
+	"dawn.googlesource.com/dawn/tools/src/gerrit"
 )
 
 const yyyymmdd = "2006-01-02"

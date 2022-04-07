@@ -17,8 +17,8 @@ package lut_test
 import (
 	"testing"
 
-	"dawn.googlesource.com/tint/tools/src/list"
-	"dawn.googlesource.com/tint/tools/src/lut"
+	"dawn.googlesource.com/dawn/tools/src/list"
+	"dawn.googlesource.com/dawn/tools/src/lut"
 )
 
 func TestCompactWithFragments(t *testing.T) {

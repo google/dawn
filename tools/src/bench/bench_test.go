@@ -19,7 +19,7 @@ import (
 	"testing"
 	"time"
 
-	"dawn.googlesource.com/tint/tools/src/bench"
+	"dawn.googlesource.com/dawn/tools/src/bench"
 )
 
 func TestParseJson(t *testing.T) {

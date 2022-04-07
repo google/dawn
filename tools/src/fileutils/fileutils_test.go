@@ -20,7 +20,7 @@ import (
 	"strings"
 	"testing"
 
-	"dawn.googlesource.com/tint/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
 )
 
 func TestGoSourcePath(t *testing.T) {

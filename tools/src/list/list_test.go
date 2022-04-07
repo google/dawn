@@ -18,7 +18,7 @@ import (
 	"reflect"
 	"testing"
 
-	"dawn.googlesource.com/tint/tools/src/list"
+	"dawn.googlesource.com/dawn/tools/src/list"
 )
 
 // A simple implementation of list.List. Many methods are just stubs

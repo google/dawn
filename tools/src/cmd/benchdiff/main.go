@@ -25,7 +25,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"dawn.googlesource.com/tint/tools/src/bench"
+	"dawn.googlesource.com/dawn/tools/src/bench"
 )
 
 var (

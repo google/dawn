@@ -32,8 +32,8 @@ import (
 	"strings"
 	"time"
 
-	"dawn.googlesource.com/tint/tools/src/bench"
-	"dawn.googlesource.com/tint/tools/src/git"
+	"dawn.googlesource.com/dawn/tools/src/bench"
+	"dawn.googlesource.com/dawn/tools/src/git"
 	"github.com/andygrunwald/go-gerrit"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
