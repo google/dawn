@@ -20,9 +20,7 @@
 
 using ::testing::HasSubstr;
 
-namespace tint {
-namespace writer {
-namespace hlsl {
+namespace tint::writer::hlsl {
 namespace {
 
 using HlslGeneratorImplTest_Function = TestHelper;
@@ -912,6 +910,4 @@ void b() {
 }
 
 }  // namespace
-}  // namespace hlsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::hlsl

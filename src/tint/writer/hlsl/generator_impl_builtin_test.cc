@@ -18,9 +18,7 @@
 #include "src/tint/sem/call.h"
 #include "src/tint/writer/hlsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace hlsl {
+namespace tint::writer::hlsl {
 namespace {
 
 using BuiltinType = sem::BuiltinType;
@@ -730,6 +728,4 @@ void main() {
 }
 
 }  // namespace
-}  // namespace hlsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::hlsl

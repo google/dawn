@@ -17,9 +17,7 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/writer/hlsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace hlsl {
+namespace tint::writer::hlsl {
 namespace {
 
 using HlslSanitizerTest = TestHelper;
@@ -334,6 +332,4 @@ TEST_F(HlslSanitizerTest, InlinePtrLetsComplexChain) {
 }
 
 }  // namespace
-}  // namespace hlsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::hlsl

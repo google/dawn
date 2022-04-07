@@ -73,9 +73,7 @@
 #include "src/tint/writer/float_to_string.h"
 #include "src/tint/writer/generate_external_texture_bindings.h"
 
-namespace tint {
-namespace writer {
-namespace hlsl {
+namespace tint::writer::hlsl {
 namespace {
 
 const char kTempNamePrefix[] = "tint_tmp";
@@ -4028,6 +4026,4 @@ bool GeneratorImpl::CallBuiltinHelper(std::ostream& out,
   return true;
 }
 
-}  // namespace hlsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::hlsl

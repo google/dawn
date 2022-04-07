@@ -39,18 +39,15 @@
 #include "src/tint/writer/array_length_from_uniform_options.h"
 #include "src/tint/writer/text_generator.h"
 
-namespace tint {
-
 // Forward declarations
-namespace sem {
+namespace tint::sem {
 class Call;
 class Builtin;
 class TypeConstructor;
 class TypeConversion;
-}  // namespace sem
+}  // namespace tint::sem
 
-namespace writer {
-namespace hlsl {
+namespace tint::writer::hlsl {
 
 /// The result of sanitizing a program for generation.
 struct SanitizedResult {
@@ -539,8 +536,6 @@ class GeneratorImpl : public TextGenerator {
   std::unordered_map<const sem::Type*, std::string> value_or_one_if_zero_;
 };
 
-}  // namespace hlsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::hlsl
 
 #endif  // SRC_TINT_WRITER_HLSL_GENERATOR_IMPL_H_

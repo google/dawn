@@ -22,9 +22,7 @@
 #include "src/tint/sem/storage_texture_type.h"
 #include "src/tint/writer/hlsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace hlsl {
+namespace tint::writer::hlsl {
 namespace {
 
 using ::testing::HasSubstr;
@@ -566,6 +564,4 @@ INSTANTIATE_TEST_SUITE_P(
             "RWTexture1D<int4> tex : register(u1, space2);"}));
 
 }  // namespace
-}  // namespace hlsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::hlsl

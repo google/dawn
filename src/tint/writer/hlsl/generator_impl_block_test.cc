@@ -14,9 +14,7 @@
 
 #include "src/tint/writer/hlsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace hlsl {
+namespace tint::writer::hlsl {
 namespace {
 
 using HlslGeneratorImplTest_Block = TestHelper;
@@ -37,6 +35,4 @@ TEST_F(HlslGeneratorImplTest_Block, Emit_Block) {
 }
 
 }  // namespace
-}  // namespace hlsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::hlsl

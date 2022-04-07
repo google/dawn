@@ -14,9 +14,7 @@
 
 #include "src/tint/writer/hlsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace hlsl {
+namespace tint::writer::hlsl {
 namespace {
 
 using HlslGeneratorImplTest = TestHelper;
@@ -67,6 +65,4 @@ INSTANTIATE_TEST_SUITE_P(
         HlslBuiltinData{ast::Builtin::kSampleMask, "SV_Coverage"}));
 
 }  // namespace
-}  // namespace hlsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::hlsl

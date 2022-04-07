@@ -26,16 +26,15 @@
 #include "src/tint/writer/array_length_from_uniform_options.h"
 #include "src/tint/writer/text.h"
 
+// Forward declarations
 namespace tint {
-
-// Forward declarations
 class Program;
-
-namespace writer {
-namespace hlsl {
-
-// Forward declarations
+namespace writer::hlsl {
 class GeneratorImpl;
+}  // namespace writer::hlsl
+}  // namespace tint
+
+namespace tint::writer::hlsl {
 
 /// Configuration options used for generating HLSL.
 struct Options {
@@ -99,8 +98,6 @@ struct Result {
 /// @returns the resulting HLSL and supplementary information
 Result Generate(const Program* program, const Options& options);
 
-}  // namespace hlsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::hlsl
 
 #endif  // SRC_TINT_WRITER_HLSL_GENERATOR_H_

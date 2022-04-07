@@ -16,9 +16,7 @@
 
 #include "src/tint/writer/hlsl/generator_impl.h"
 
-namespace tint {
-namespace writer {
-namespace hlsl {
+namespace tint::writer::hlsl {
 
 Options::Options() = default;
 Options::~Options() = default;
@@ -63,6 +61,4 @@ Result Generate(const Program* program, const Options& options) {
   return result;
 }
 
-}  // namespace hlsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::hlsl

@@ -14,9 +14,7 @@
 
 #include "src/tint/writer/hlsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace hlsl {
+namespace tint::writer::hlsl {
 namespace {
 
 using HlslUnaryOpTest = TestHelper;
@@ -88,6 +86,4 @@ TEST_F(HlslUnaryOpTest, Negation) {
   EXPECT_EQ(out.str(), "-(expr)");
 }
 }  // namespace
-}  // namespace hlsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::hlsl

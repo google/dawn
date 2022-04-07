@@ -15,9 +15,7 @@
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/writer/hlsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace hlsl {
+namespace tint::writer::hlsl {
 namespace {
 
 using HlslGeneratorImplTest_ModuleConstant = TestHelper;
@@ -87,6 +85,4 @@ static const float b = WGSL_SPEC_CONSTANT_1;
 }
 
 }  // namespace
-}  // namespace hlsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::hlsl

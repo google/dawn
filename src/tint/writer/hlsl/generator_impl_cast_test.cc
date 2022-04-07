@@ -14,9 +14,7 @@
 
 #include "src/tint/writer/hlsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace hlsl {
+namespace tint::writer::hlsl {
 namespace {
 
 using HlslGeneratorImplTest_Cast = TestHelper;
@@ -44,6 +42,4 @@ TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Vector) {
 }
 
 }  // namespace
-}  // namespace hlsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::hlsl

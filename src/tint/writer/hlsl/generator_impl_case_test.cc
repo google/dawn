@@ -15,9 +15,7 @@
 #include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/writer/hlsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace hlsl {
+namespace tint::writer::hlsl {
 namespace {
 
 using HlslGeneratorImplTest_Case = TestHelper;
@@ -110,6 +108,4 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_Default) {
 }
 
 }  // namespace
-}  // namespace hlsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::hlsl
