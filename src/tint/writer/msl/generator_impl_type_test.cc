@@ -24,9 +24,7 @@
 #include "src/tint/sem/storage_texture_type.h"
 #include "src/tint/writer/msl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace msl {
+namespace tint::writer::msl {
 namespace {
 
 using ::testing::HasSubstr;
@@ -842,6 +840,4 @@ INSTANTIATE_TEST_SUITE_P(
                                           "texture3d<float, access::write>"}));
 
 }  // namespace
-}  // namespace msl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::msl

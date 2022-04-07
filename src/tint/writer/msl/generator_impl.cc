@@ -79,9 +79,7 @@
 #include "src/tint/writer/float_to_string.h"
 #include "src/tint/writer/generate_external_texture_bindings.h"
 
-namespace tint {
-namespace writer {
-namespace msl {
+namespace tint::writer::msl {
 namespace {
 
 bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
@@ -3050,6 +3048,4 @@ bool GeneratorImpl::CallBuiltinHelper(std::ostream& out,
   return true;
 }
 
-}  // namespace msl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::msl

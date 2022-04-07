@@ -24,9 +24,7 @@
 #include "src/tint/writer/msl/generator.h"
 #include "src/tint/writer/msl/generator_impl.h"
 
-namespace tint {
-namespace writer {
-namespace msl {
+namespace tint::writer::msl {
 
 /// Helper class for testing
 template <typename BASE>
@@ -101,8 +99,6 @@ using TestHelper = TestHelperBase<testing::Test>;
 template <typename T>
 using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
-}  // namespace msl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::msl
 
 #endif  // SRC_TINT_WRITER_MSL_TEST_HELPER_H_

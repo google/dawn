@@ -14,9 +14,7 @@
 
 #include "src/tint/writer/msl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace msl {
+namespace tint::writer::msl {
 namespace {
 
 using MslGeneratorImplTest = TestHelper;
@@ -33,6 +31,4 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Bitcast) {
 }
 
 }  // namespace
-}  // namespace msl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::msl

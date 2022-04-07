@@ -24,15 +24,15 @@
 #include "src/tint/writer/array_length_from_uniform_options.h"
 #include "src/tint/writer/text.h"
 
-namespace tint {
-
 // Forward declarations
+namespace tint {
 class Program;
-
-namespace writer {
-namespace msl {
-
+namespace writer::msl {
 class GeneratorImpl;
+}  // namespace writer::msl
+}  // namespace tint
+
+namespace tint::writer::msl {
 
 /// Configuration options used for generating MSL.
 struct Options {
@@ -116,8 +116,6 @@ struct Result {
 /// @returns the resulting MSL and supplementary information
 Result Generate(const Program* program, const Options& options);
 
-}  // namespace msl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::msl
 
 #endif  // SRC_TINT_WRITER_MSL_GENERATOR_H_

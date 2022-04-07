@@ -18,9 +18,7 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/writer/msl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace msl {
+namespace tint::writer::msl {
 namespace {
 
 using ::testing::HasSubstr;
@@ -256,6 +254,4 @@ TEST_F(MslSanitizerTest,
 }
 
 }  // namespace
-}  // namespace msl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::msl

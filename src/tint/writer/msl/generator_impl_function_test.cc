@@ -16,9 +16,7 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/writer/msl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace msl {
+namespace tint::writer::msl {
 namespace {
 
 using MslGeneratorImplTest = TestHelper;
@@ -708,6 +706,4 @@ kernel void b(device Data* tint_symbol_1 [[buffer(0)]]) {
 }
 
 }  // namespace
-}  // namespace msl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::msl

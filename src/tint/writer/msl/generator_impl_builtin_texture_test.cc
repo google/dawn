@@ -16,9 +16,7 @@
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/writer/msl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace msl {
+namespace tint::writer::msl {
 namespace {
 
 std::string expected_texture_overload(
@@ -300,6 +298,4 @@ INSTANTIATE_TEST_SUITE_P(
     testing::ValuesIn(ast::builtin::test::TextureOverloadCase::ValidCases()));
 
 }  // namespace
-}  // namespace msl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::msl

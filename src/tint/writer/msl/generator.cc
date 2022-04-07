@@ -18,9 +18,7 @@
 
 #include "src/tint/writer/msl/generator_impl.h"
 
-namespace tint {
-namespace writer {
-namespace msl {
+namespace tint::writer::msl {
 
 Options::Options() = default;
 Options::~Options() = default;
@@ -61,6 +59,4 @@ Result Generate(const Program* program, const Options& options) {
   return result;
 }
 
-}  // namespace msl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::msl
