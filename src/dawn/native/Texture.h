@@ -34,7 +34,7 @@ namespace dawn::native {
     MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
                                              const TextureBase* texture,
                                              const TextureViewDescriptor* descriptor);
-    TextureViewDescriptor GetTextureViewDescriptorWithDefaults(
+    ResultOrError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
         const TextureBase* texture,
         const TextureViewDescriptor* descriptor);
 

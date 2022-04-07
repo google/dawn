@@ -443,7 +443,7 @@ namespace dawn::native {
         return {};
     }
 
-    TextureViewDescriptor GetTextureViewDescriptorWithDefaults(
+    ResultOrError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
         const TextureBase* texture,
         const TextureViewDescriptor* descriptor) {
         ASSERT(texture);
@@ -473,6 +473,11 @@ namespace dawn::native {
 
         if (desc.format == wgpu::TextureFormat::Undefined) {
             const Format& format = texture->GetFormat();
+
+            // Check the aspect since |SelectFormatAspects| assumes a valid aspect.
+            // Creation would have failed validation later since the aspect is invalid.
+            DAWN_TRY(ValidateTextureAspect(desc.aspect));
+
             Aspect aspects = SelectFormatAspects(format, desc.aspect);
             if (HasOneBit(aspects)) {
                 desc.format = format.GetAspectInfo(aspects).format;

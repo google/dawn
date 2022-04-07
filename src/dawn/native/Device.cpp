@@ -1630,7 +1630,10 @@ namespace dawn::native {
         const TextureViewDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         DAWN_TRY(ValidateObject(texture));
-        TextureViewDescriptor desc = GetTextureViewDescriptorWithDefaults(texture, descriptor);
+
+        TextureViewDescriptor desc;
+        DAWN_TRY_ASSIGN(desc, GetTextureViewDescriptorWithDefaults(texture, descriptor));
+
         if (IsValidationEnabled()) {
             DAWN_TRY_CONTEXT(ValidateTextureViewDescriptor(this, texture, &desc),
                              "validating %s against %s.", &desc, texture);

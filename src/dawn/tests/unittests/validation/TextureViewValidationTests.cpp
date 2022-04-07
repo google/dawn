@@ -590,6 +590,20 @@ namespace {
         }
     }
 
+    // Regression test for crbug.com/1314049. Format default depends on the aspect.
+    // Test that computing the default does not crash if the aspect is invalid.
+    TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaultsInvalidAspect) {
+        wgpu::Texture texture =
+            CreateDepthStencilTexture(device, wgpu::TextureFormat::Depth24PlusStencil8);
+
+        wgpu::TextureViewDescriptor viewDesc = {};
+        viewDesc.aspect = static_cast<wgpu::TextureAspect>(-1);
+
+        // Validation should catch the invalid aspect.
+        ASSERT_DEVICE_ERROR(texture.CreateView(&viewDesc),
+                            testing::HasSubstr("Invalid value for WGPUTextureAspect"));
+    }
+
     // Test creating cube map texture view
     TEST_F(TextureViewValidationTest, CreateCubeMapTextureView) {
         constexpr uint32_t kDefaultArrayLayers = 16;
