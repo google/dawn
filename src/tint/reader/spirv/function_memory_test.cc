@@ -262,25 +262,6 @@ TEST_F(SpvParserMemoryTest,
   EXPECT_THAT(got, HasSubstr(expected));
 }
 
-TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_NoOperands) {
-  auto err = test::AssembleFailure(Preamble() + R"(
-     %void = OpTypeVoid
-     %voidfn = OpTypeFunction %void
-     %ty = OpTypeInt 32 0
-     %val = OpConstant %ty 42
-     %ptr_ty = OpTypePointer Private %ty
-     %1 = OpVariable %ptr_ty Private
-     %100 = OpFunction %void None %voidfn
-     %entry = OpLabel
-
-     %2 = OpAccessChain %ptr_ty  ; Needs a base operand
-     OpStore %1 %val
-     OpReturn
-  )");
-  EXPECT_THAT(err,
-              Eq("16:5: Expected operand, found next instruction instead."));
-}
-
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_BaseIsNotPointer) {
   auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid

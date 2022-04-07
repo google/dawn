@@ -28,11 +28,6 @@ namespace test {
 /// are preserved.
 std::vector<uint32_t> Assemble(const std::string& spirv_assembly);
 
-/// Attempts to assemble given SPIR-V assembly text.  Expect it to fail.
-/// @param spirv_assembly the SPIR-V assembly
-/// @returns the failure message.
-std::string AssembleFailure(const std::string& spirv_assembly);
-
 /// @param spirv_module a SPIR-V binary module
 /// @returns the disassembled module
 std::string Disassemble(const std::vector<uint32_t>& spirv_module);

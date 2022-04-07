@@ -2571,38 +2571,6 @@ TEST_F(SpvParserHandleTest, ImageWrite_TooFewSrcTexelComponents_1_vs_4) {
       << p->error();
 }
 
-TEST_F(SpvParserHandleTest, ImageWrite_ThreeComponentStorageTexture_IsError) {
-  // SPIR-V doesn't allow a 3-element storage texture format.
-  const auto assembly = Preamble() + R"(
-     OpEntryPoint Fragment %main "main"
-     OpExecutionMode %main OriginUpperLeft
-     OpName %vf123 "vf123"
-     OpName %coords12 "coords12"
-     OpDecorate %20 DescriptorSet 2
-     OpDecorate %20 Binding 1
-)" + CommonBasicTypes() +
-                        R"(
-     %im_ty = OpTypeImage %void 2D 0 0 0 2 Rgb32f
-     %ptr_im_ty = OpTypePointer UniformConstant %im_ty
-
-     %20 = OpVariable %ptr_im_ty UniformConstant
-
-     %main = OpFunction %void None %voidfn
-     %entry = OpLabel
-
-     %vf123 = OpCopyObject %v3float %the_vf123
-
-     %coords12 = OpCopyObject %v2float %the_vf12
-
-     %im = OpLoad %im_ty %20
-     OpImageWrite %im %coords12 %vf123
-     OpReturn
-     OpFunctionEnd
-  )";
-  auto error = test::AssembleFailure(assembly);
-  EXPECT_THAT(error, HasSubstr("Invalid image format 'Rgb32f'"));
-}
-
 INSTANTIATE_TEST_SUITE_P(
     // The texel operand signedness must match the channel type signedness.
     // SPIR-V validation checks that.

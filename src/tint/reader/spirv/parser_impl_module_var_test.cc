@@ -1255,34 +1255,6 @@ TEST_F(SpvModuleScopeVarParserTest, StructUndefInitializer) {
   p->DeliberatelyInvalidSpirv();
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       LocationDecoration_MissingOperandWontAssemble) {
-  const auto assembly = Preamble() + FragMain() + R"(
-     OpName %myvar "myvar"
-     OpDecorate %myvar Location
-)" + CommonTypes() + R"(
-     %ptr = OpTypePointer Input %uint
-     %myvar = OpVariable %ptr Input
-  )" + MainBody();
-  EXPECT_THAT(test::AssembleFailure(assembly),
-              Eq("10:4: Expected operand, found next instruction instead."));
-}
-
-TEST_F(SpvModuleScopeVarParserTest,
-       LocationDecoration_TwoOperandsWontAssemble) {
-  const auto assembly = Preamble() + FragMain() + R"(
-     OpName %myvar "myvar"
-     OpDecorate %myvar Location 3 4
-)" + CommonTypes() + R"(
-     %ptr = OpTypePointer Input %uint
-     %myvar = OpVariable %ptr Input
-  )" + MainBody();
-  EXPECT_THAT(
-      test::AssembleFailure(assembly),
-      Eq("8:34: Expected <opcode> or <result-id> at the beginning of an "
-         "instruction, found '4'."));
-}
-
 TEST_F(SpvModuleScopeVarParserTest, DescriptorGroupDecoration_Valid) {
   auto p = parser(test::Assemble(Preamble() + FragMain() + CommonLayout() + R"(
      OpDecorate %1 DescriptorSet 3
@@ -1302,36 +1274,6 @@ TEST_F(SpvModuleScopeVarParserTest, DescriptorGroupDecoration_Valid) {
       << module_str;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       DescriptorGroupDecoration_MissingOperandWontAssemble) {
-  const auto assembly = Preamble() + FragMain() + CommonLayout() + R"(
-     OpDecorate %1 DescriptorSet
-     OpDecorate %strct Block
-)" + CommonTypes() + StructTypes() +
-                        R"(
-     %ptr_sb_strct = OpTypePointer StorageBuffer %strct
-     %1 = OpVariable %ptr_sb_strct StorageBuffer
-  )" + MainBody();
-  EXPECT_THAT(test::AssembleFailure(assembly),
-              Eq("13:5: Expected operand, found next instruction instead."));
-}
-
-TEST_F(SpvModuleScopeVarParserTest,
-       DescriptorGroupDecoration_TwoOperandsWontAssemble) {
-  const auto assembly = Preamble() + FragMain() + R"(
-     OpName %myvar "myvar"
-     OpDecorate %myvar DescriptorSet 3 4
-     OpDecorate %strct Block
-)" + CommonTypes() + StructTypes() +
-                        R"(
-     %ptr_sb_strct = OpTypePointer StorageBuffer %strct
-     %myvar = OpVariable %ptr_sb_strct StorageBuffer
-  )" + MainBody();
-  EXPECT_THAT(
-      test::AssembleFailure(assembly),
-      Eq("8:39: Expected <opcode> or <result-id> at the beginning of an "
-         "instruction, found '4'."));
-}
 
 TEST_F(SpvModuleScopeVarParserTest, BindingDecoration_Valid) {
   auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
@@ -1351,37 +1293,6 @@ TEST_F(SpvModuleScopeVarParserTest, BindingDecoration_Valid) {
       module_str,
       HasSubstr("@group(0) @binding(3) var<storage, read_write> x_1 : S;"))
       << module_str;
-}
-
-TEST_F(SpvModuleScopeVarParserTest,
-       BindingDecoration_MissingOperandWontAssemble) {
-  const auto assembly = Preamble() + FragMain() + R"(
-     OpName %myvar "myvar"
-     OpDecorate %myvar Binding
-     OpDecorate %strct Block
-)" + CommonTypes() + StructTypes() +
-                        R"(
-     %ptr_sb_strct = OpTypePointer StorageBuffer %strct
-     %myvar = OpVariable %ptr_sb_strct StorageBuffer
-  )" + MainBody();
-  EXPECT_THAT(test::AssembleFailure(assembly),
-              Eq("9:5: Expected operand, found next instruction instead."));
-}
-
-TEST_F(SpvModuleScopeVarParserTest, BindingDecoration_TwoOperandsWontAssemble) {
-  const auto assembly = Preamble() + FragMain() + R"(
-     OpName %myvar "myvar"
-     OpDecorate %myvar Binding 3 4
-     OpDecorate %strct Block
-)" + CommonTypes() + StructTypes() +
-                        R"(
-     %ptr_sb_strct = OpTypePointer StorageBuffer %strct
-     %myvar = OpVariable %ptr_sb_strct StorageBuffer
-  )" + MainBody();
-  EXPECT_THAT(
-      test::AssembleFailure(assembly),
-      Eq("8:33: Expected <opcode> or <result-id> at the beginning of an "
-         "instruction, found '4'."));
 }
 
 TEST_F(SpvModuleScopeVarParserTest,
