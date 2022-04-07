@@ -433,7 +433,7 @@ namespace dawn::native::vulkan {
         config.alphaMode = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 #if !defined(DAWN_PLATFORM_ANDROID)
         DAWN_INVALID_IF((surfaceInfo.capabilities.supportedCompositeAlpha &
-                            VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR) == 0,
+                         VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR) == 0,
                         "Vulkan SwapChain must support opaque alpha.");
 #else
         // TODO(dawn:286): investigate composite alpha for WebGPU native

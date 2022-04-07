@@ -28,11 +28,6 @@
 namespace dawn::native::metal {
 
     namespace {
-        bool UsageNeedsTextureView(wgpu::TextureUsage usage) {
-            constexpr wgpu::TextureUsage kUsageNeedsTextureView =
-                wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::TextureBinding;
-            return usage & kUsageNeedsTextureView;
-        }
 
         MTLTextureUsage MetalTextureUsage(const Format& format,
                                           wgpu::TextureUsage usage,
@@ -46,8 +41,10 @@ namespace dawn::native::metal {
             if (usage & (wgpu::TextureUsage::TextureBinding)) {
                 result |= MTLTextureUsageShaderRead;
 
-                // For sampling stencil aspect of combined depth/stencil. See TextureView
-                // constructor.
+                // For sampling stencil aspect of combined depth/stencil.
+                // See TextureView::Initialize.
+                // Depth views for depth/stencil textures in Metal simply use the original
+                // texture's format, but stencil views require format reinterpretation.
                 if (@available(macOS 10.12, iOS 10.0, *)) {
                     if (IsSubset(Aspect::Depth | Aspect::Stencil, format.aspects)) {
                         result |= MTLTextureUsagePixelFormatView;
@@ -86,11 +83,26 @@ namespace dawn::native::metal {
 
         bool RequiresCreatingNewTextureView(const TextureBase* texture,
                                             const TextureViewDescriptor* textureViewDescriptor) {
+            constexpr wgpu::TextureUsage kShaderUsageNeedsView =
+                wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::TextureBinding;
+            constexpr wgpu::TextureUsage kUsageNeedsView =
+                kShaderUsageNeedsView | wgpu::TextureUsage::RenderAttachment;
+            if ((texture->GetInternalUsage() & kUsageNeedsView) == 0) {
+                return false;
+            }
+
             if (texture->GetFormat().format != textureViewDescriptor->format &&
                 !texture->GetFormat().HasDepthOrStencil()) {
-                // Color format reinterpretation required. Note: Depth/stencil formats don't support
-                // reinterpretation.
+                // Color format reinterpretation required.
+                // Note: Depth/stencil formats don't support reinterpretation.
+                // See also TextureView::GetAttachmentInfo when modifying this condition.
                 return true;
+            }
+
+            // Reinterpretation not required. Now, we only need a new view if the view dimension or
+            // set of subresources for the shader is different from the base texture.
+            if ((texture->GetInternalUsage() & kShaderUsageNeedsView) == 0) {
+                return false;
             }
 
             if (texture->GetArrayLayers() != textureViewDescriptor->arrayLayerCount ||
@@ -107,8 +119,11 @@ namespace dawn::native::metal {
                 return true;
             }
 
-            if (IsSubset(Aspect::Depth | Aspect::Stencil, texture->GetFormat().aspects) &&
-                textureViewDescriptor->aspect == wgpu::TextureAspect::StencilOnly) {
+            // If the texture is created with MTLTextureUsagePixelFormatView, we need
+            // a new view to perform format reinterpretation.
+            if ((MetalTextureUsage(texture->GetFormat(), texture->GetInternalUsage(),
+                                   texture->GetSampleCount()) &
+                 MTLTextureUsagePixelFormatView) != 0) {
                 return true;
             }
 
@@ -776,7 +791,7 @@ namespace dawn::native::metal {
         mIOSurface = nullptr;
     }
 
-    id<MTLTexture> Texture::GetMTLTexture() {
+    id<MTLTexture> Texture::GetMTLTexture() const {
         return mMtlTexture.Get();
     }
 
@@ -1026,9 +1041,7 @@ namespace dawn::native::metal {
 
         id<MTLTexture> mtlTexture = texture->GetMTLTexture();
 
-        if (!UsageNeedsTextureView(texture->GetInternalUsage())) {
-            mMtlTextureView = nullptr;
-        } else if (!RequiresCreatingNewTextureView(texture, descriptor)) {
+        if (!RequiresCreatingNewTextureView(texture, descriptor)) {
             mMtlTextureView = mtlTexture;
         } else if (texture->GetFormat().IsMultiPlanar()) {
             NSRef<MTLTextureDescriptor> mtlDescRef = AcquireNSRef([MTLTextureDescriptor new]);
@@ -1112,8 +1125,30 @@ namespace dawn::native::metal {
         return {};
     }
 
-    id<MTLTexture> TextureView::GetMTLTexture() {
+    id<MTLTexture> TextureView::GetMTLTexture() const {
         ASSERT(mMtlTextureView != nullptr);
         return mMtlTextureView.Get();
     }
+
+    TextureView::AttachmentInfo TextureView::GetAttachmentInfo() const {
+        ASSERT(GetTexture()->GetInternalUsage() & wgpu::TextureUsage::RenderAttachment);
+        // Use our own view if the formats do not match.
+        // If the formats do not match, format reinterpretation will be required.
+        // Note: Depth/stencil formats don't support reinterpretation.
+        // Also, we compute |useOwnView| here instead of relying on whether or not
+        // a view was created in Initialize, because rendering to a depth/stencil
+        // texture on Metal only works when using the original texture, not a view.
+        bool useOwnView = GetFormat().format != GetTexture()->GetFormat().format &&
+                          !GetTexture()->GetFormat().HasDepthOrStencil();
+        if (useOwnView) {
+            ASSERT(mMtlTextureView.Get());
+            return {mMtlTextureView, 0, 0};
+        }
+        AttachmentInfo info;
+        info.texture = ToBackend(GetTexture())->GetMTLTexture();
+        info.baseMipLevel = GetBaseMipLevel();
+        info.baseArrayLayer = GetBaseArrayLayer();
+        return info;
+    }
+
 }  // namespace dawn::native::metal

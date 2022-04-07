@@ -909,11 +909,12 @@ namespace dawn::native::d3d12 {
         });
     }
 
-    D3D12_RENDER_TARGET_VIEW_DESC Texture::GetRTVDescriptor(uint32_t mipLevel,
+    D3D12_RENDER_TARGET_VIEW_DESC Texture::GetRTVDescriptor(const Format& format,
+                                                            uint32_t mipLevel,
                                                             uint32_t baseSlice,
                                                             uint32_t sliceCount) const {
         D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
-        rtvDesc.Format = GetD3D12Format();
+        rtvDesc.Format = D3D12TextureFormat(format.format);
         if (IsMultisampledTexture()) {
             ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
             ASSERT(GetNumMipLevels() == 1);
@@ -1070,7 +1071,7 @@ namespace dawn::native::d3d12 {
                         sliceCount = std::max(GetDepth() >> level, 1u);
                     }
                     D3D12_RENDER_TARGET_VIEW_DESC rtvDesc =
-                        GetRTVDescriptor(level, baseSlice, sliceCount);
+                        GetRTVDescriptor(GetFormat(), level, baseSlice, sliceCount);
                     device->GetD3D12Device()->CreateRenderTargetView(GetD3D12Resource(), &rtvDesc,
                                                                      rtvHandle);
                     commandList->ClearRenderTargetView(rtvHandle, clearColorRGBA, 0, nullptr);
@@ -1340,7 +1341,8 @@ namespace dawn::native::d3d12 {
 
     D3D12_RENDER_TARGET_VIEW_DESC TextureView::GetRTVDescriptor() const {
         return ToBackend(GetTexture())
-            ->GetRTVDescriptor(GetBaseMipLevel(), GetBaseArrayLayer(), GetLayerCount());
+            ->GetRTVDescriptor(GetFormat(), GetBaseMipLevel(), GetBaseArrayLayer(),
+                               GetLayerCount());
     }
 
     D3D12_DEPTH_STENCIL_VIEW_DESC TextureView::GetDSVDescriptor(bool depthReadOnly,

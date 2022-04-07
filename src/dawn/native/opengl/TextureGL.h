@@ -60,6 +60,7 @@ namespace dawn::native::opengl {
         ~TextureView() override;
         void DestroyImpl() override;
 
+        // TODO(crbug.com/dawn/1355): Delete this handle on texture destroy.
         GLuint mHandle;
         GLenum mTarget;
         bool mOwnsHandle;

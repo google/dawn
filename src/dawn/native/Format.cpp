@@ -315,39 +315,38 @@ namespace dawn::native {
                 AddFormat(internalFormat);
             };
 
-        auto AddMultiAspectFormat =
-            [&AddFormat, &table](wgpu::TextureFormat format, Aspect aspects,
-                                 wgpu::TextureFormat firstFormat, wgpu::TextureFormat secondFormat,
-                                 bool isRenderable, bool isSupported, bool supportsMultisample,
-                                 uint8_t componentCount) {
-                Format internalFormat;
-                internalFormat.format = format;
-                internalFormat.baseFormat = format;
-                internalFormat.isRenderable = isRenderable;
-                internalFormat.isCompressed = false;
-                internalFormat.isSupported = isSupported;
-                internalFormat.supportsStorageUsage = false;
-                internalFormat.supportsMultisample = supportsMultisample;
-                internalFormat.supportsResolveTarget = false;
-                internalFormat.aspects = aspects;
-                internalFormat.componentCount = componentCount;
+        auto AddMultiAspectFormat = [&AddFormat, &table](wgpu::TextureFormat format, Aspect aspects,
+                                                         wgpu::TextureFormat firstFormat,
+                                                         wgpu::TextureFormat secondFormat,
+                                                         bool isRenderable, bool isSupported,
+                                                         bool supportsMultisample,
+                                                         uint8_t componentCount) {
+            Format internalFormat;
+            internalFormat.format = format;
+            internalFormat.baseFormat = format;
+            internalFormat.isRenderable = isRenderable;
+            internalFormat.isCompressed = false;
+            internalFormat.isSupported = isSupported;
+            internalFormat.supportsStorageUsage = false;
+            internalFormat.supportsMultisample = supportsMultisample;
+            internalFormat.supportsResolveTarget = false;
+            internalFormat.aspects = aspects;
+            internalFormat.componentCount = componentCount;
 
-                // Multi aspect formats just copy information about single-aspect formats. This
-                // means that the single-plane formats must have been added before multi-aspect
-                // ones. (it is ASSERTed below).
-                const FormatIndex firstFormatIndex = ComputeFormatIndex(firstFormat);
-                const FormatIndex secondFormatIndex = ComputeFormatIndex(secondFormat);
+            // Multi aspect formats just copy information about single-aspect formats. This
+            // means that the single-plane formats must have been added before multi-aspect
+            // ones. (it is ASSERTed below).
+            const FormatIndex firstFormatIndex = ComputeFormatIndex(firstFormat);
+            const FormatIndex secondFormatIndex = ComputeFormatIndex(secondFormat);
 
-                ASSERT(table[firstFormatIndex].aspectInfo[0].format !=
-                       wgpu::TextureFormat::Undefined);
-                ASSERT(table[secondFormatIndex].aspectInfo[0].format !=
-                       wgpu::TextureFormat::Undefined);
+            ASSERT(table[firstFormatIndex].aspectInfo[0].format != wgpu::TextureFormat::Undefined);
+            ASSERT(table[secondFormatIndex].aspectInfo[0].format != wgpu::TextureFormat::Undefined);
 
-                internalFormat.aspectInfo[0] = table[firstFormatIndex].aspectInfo[0];
-                internalFormat.aspectInfo[1] = table[secondFormatIndex].aspectInfo[0];
+            internalFormat.aspectInfo[0] = table[firstFormatIndex].aspectInfo[0];
+            internalFormat.aspectInfo[1] = table[secondFormatIndex].aspectInfo[0];
 
-                AddFormat(internalFormat);
-            };
+            AddFormat(internalFormat);
+        };
 
         // clang-format off
         // 1 byte color formats

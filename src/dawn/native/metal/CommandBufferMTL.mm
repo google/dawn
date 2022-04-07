@@ -87,19 +87,18 @@ namespace dawn::native::metal {
                         break;
                 }
 
-                descriptor.colorAttachments[i].texture =
-                    ToBackend(attachmentInfo.view->GetTexture())->GetMTLTexture();
-                descriptor.colorAttachments[i].level = attachmentInfo.view->GetBaseMipLevel();
-                descriptor.colorAttachments[i].slice = attachmentInfo.view->GetBaseArrayLayer();
+                auto colorAttachment = ToBackend(attachmentInfo.view)->GetAttachmentInfo();
+                descriptor.colorAttachments[i].texture = colorAttachment.texture.Get();
+                descriptor.colorAttachments[i].level = colorAttachment.baseMipLevel;
+                descriptor.colorAttachments[i].slice = colorAttachment.baseArrayLayer;
 
                 bool hasResolveTarget = attachmentInfo.resolveTarget != nullptr;
                 if (hasResolveTarget) {
-                    descriptor.colorAttachments[i].resolveTexture =
-                        ToBackend(attachmentInfo.resolveTarget->GetTexture())->GetMTLTexture();
-                    descriptor.colorAttachments[i].resolveLevel =
-                        attachmentInfo.resolveTarget->GetBaseMipLevel();
-                    descriptor.colorAttachments[i].resolveSlice =
-                        attachmentInfo.resolveTarget->GetBaseArrayLayer();
+                    auto resolveAttachment =
+                        ToBackend(attachmentInfo.resolveTarget)->GetAttachmentInfo();
+                    descriptor.colorAttachments[i].resolveTexture = resolveAttachment.texture.Get();
+                    descriptor.colorAttachments[i].resolveLevel = resolveAttachment.baseMipLevel;
+                    descriptor.colorAttachments[i].resolveSlice = resolveAttachment.baseArrayLayer;
 
                     switch (attachmentInfo.storeOp) {
                         case wgpu::StoreOp::Store:
@@ -132,14 +131,13 @@ namespace dawn::native::metal {
             if (renderPass->attachmentState->HasDepthStencilAttachment()) {
                 auto& attachmentInfo = renderPass->depthStencilAttachment;
 
-                id<MTLTexture> texture =
-                    ToBackend(attachmentInfo.view->GetTexture())->GetMTLTexture();
-                const Format& format = attachmentInfo.view->GetTexture()->GetFormat();
+                auto depthStencilAttachment = ToBackend(attachmentInfo.view)->GetAttachmentInfo();
+                const Format& format = attachmentInfo.view->GetFormat();
 
                 if (format.HasDepth()) {
-                    descriptor.depthAttachment.texture = texture;
-                    descriptor.depthAttachment.level = attachmentInfo.view->GetBaseMipLevel();
-                    descriptor.depthAttachment.slice = attachmentInfo.view->GetBaseArrayLayer();
+                    descriptor.depthAttachment.texture = depthStencilAttachment.texture.Get();
+                    descriptor.depthAttachment.level = depthStencilAttachment.baseMipLevel;
+                    descriptor.depthAttachment.slice = depthStencilAttachment.baseArrayLayer;
 
                     switch (attachmentInfo.depthStoreOp) {
                         case wgpu::StoreOp::Store:
@@ -172,9 +170,9 @@ namespace dawn::native::metal {
                 }
 
                 if (format.HasStencil()) {
-                    descriptor.stencilAttachment.texture = texture;
-                    descriptor.stencilAttachment.level = attachmentInfo.view->GetBaseMipLevel();
-                    descriptor.stencilAttachment.slice = attachmentInfo.view->GetBaseArrayLayer();
+                    descriptor.stencilAttachment.texture = depthStencilAttachment.texture.Get();
+                    descriptor.stencilAttachment.level = depthStencilAttachment.baseMipLevel;
+                    descriptor.stencilAttachment.slice = depthStencilAttachment.baseArrayLayer;
 
                     switch (attachmentInfo.stencilStoreOp) {
                         case wgpu::StoreOp::Store:
