@@ -527,7 +527,7 @@ System: %+v`, path, res.System, e.system)
 func (e env) fetchTintDeps() error {
 	gclientConfig := filepath.Join(e.tintDir, ".gclient")
 	if _, err := os.Stat(gclientConfig); errors.Is(err, os.ErrNotExist) {
-		standalone := filepath.Join(e.tintDir, "standalone.gclient")
+		standalone := filepath.Join(e.tintDir, "scripts", "standalone.gclient")
 		if err := copyFile(gclientConfig, standalone); err != nil {
 			return fmt.Errorf("failed to copy '%v' to '%v':\n  %w", standalone, gclientConfig, err)
 		}

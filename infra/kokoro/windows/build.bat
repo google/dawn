@@ -108,7 +108,7 @@ call git clone %ORIGINAL_SRC_DIR% . || goto :error
 
 call :status "Fetching dependencies"
 @echo on
-copy standalone.gclient .gclient || goto :error
+copy scripts\standalone.gclient .gclient || goto :error
 call gclient sync || goto :error
 @echo off
 

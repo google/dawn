@@ -87,7 +87,7 @@ cd ${SRC_DIR}
 git clone ${CLONE_SRC_DIR} .
 
 status "Fetching dependencies"
-cp standalone.gclient .gclient
+cp scripts/standalone.gclient .gclient
 with_retry gclient sync
 
 status "Linting"
