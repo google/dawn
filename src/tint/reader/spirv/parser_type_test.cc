@@ -16,9 +16,7 @@
 
 #include "src/tint/reader/spirv/parser_type.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 namespace {
 
 TEST(SpvParserTypeTest, SameArgumentsGivesSamePointer) {
@@ -97,6 +95,4 @@ TEST(SpvParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
 }
 
 }  // namespace
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv

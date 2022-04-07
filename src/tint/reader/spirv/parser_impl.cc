@@ -32,9 +32,7 @@
 #include "src/tint/sem/sampled_texture_type.h"
 #include "src/tint/utils/unique_vector.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 
 namespace {
 
@@ -2791,6 +2789,4 @@ WorkgroupSizeInfo::WorkgroupSizeInfo() = default;
 
 WorkgroupSizeInfo::~WorkgroupSizeInfo() = default;
 
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv

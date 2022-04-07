@@ -17,9 +17,7 @@
 #include "src/tint/reader/spirv/parser_impl_test_helper.h"
 #include "src/tint/reader/spirv/spirv_tools_helpers_test.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 namespace {
 
 using ::testing::HasSubstr;
@@ -987,6 +985,4 @@ TEST_F(SpvLogicalTest, IsInf_Vector) {
 // TODO(dneto): OpSelect over more general types, as in SPIR-V 1.4
 
 }  // namespace
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv

@@ -26,9 +26,7 @@
 #include "src/tint/reader/spirv/construct.h"
 #include "src/tint/reader/spirv/parser_impl.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 
 /// Kinds of CFG edges.
 //
@@ -1297,8 +1295,6 @@ class FunctionEmitter {
   const EntryPointInfo* ep_info_ = nullptr;
 };
 
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv
 
 #endif  // SRC_TINT_READER_SPIRV_FUNCTION_H_

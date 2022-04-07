@@ -19,9 +19,7 @@
 #include "src/tint/reader/spirv/spirv_tools_helpers_test.h"
 #include "src/tint/sem/call.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 namespace {
 
 using ::testing::Eq;
@@ -208,6 +206,4 @@ TEST_F(SpvParserTest, ErrStorageBarrierInvalidMemory) {
 }
 
 }  // namespace
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv

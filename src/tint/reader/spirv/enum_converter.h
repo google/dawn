@@ -22,9 +22,7 @@
 #include "src/tint/reader/spirv/fail_stream.h"
 #include "src/tint/sem/storage_texture_type.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 
 /// A converter from SPIR-V enums to Tint AST enums.
 class EnumConverter {
@@ -74,8 +72,6 @@ class EnumConverter {
   FailStream fail_stream_;
 };
 
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv
 
 #endif  // SRC_TINT_READER_SPIRV_ENUM_CONVERTER_H_

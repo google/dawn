@@ -45,9 +45,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Named);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Alias);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Struct);
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 
 namespace {
 struct PointerHasher {
@@ -638,6 +636,4 @@ std::string Named::String() const {
 }
 #endif  // NDEBUG
 
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv

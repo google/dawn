@@ -15,10 +15,7 @@
 #include "src/tint/reader/spirv/parser_impl_test_helper.h"
 #include "src/tint/writer/wgsl/generator_impl.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
-namespace test {
+namespace tint::reader::spirv::test {
 
 // Default to not dumping the SPIR-V assembly.
 bool ParserImplWrapperForTest::dump_successfully_converted_spirv_ = false;
@@ -79,7 +76,4 @@ std::string ToString(const Program& program, const ast::Node* node) {
   return writer.result();
 }
 
-}  // namespace test
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv::test

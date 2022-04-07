@@ -14,9 +14,7 @@
 
 #include "src/tint/reader/spirv/enum_converter.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 
 EnumConverter::EnumConverter(const FailStream& fs) : fail_stream_(fs) {}
 
@@ -177,6 +175,4 @@ ast::TexelFormat EnumConverter::ToTexelFormat(SpvImageFormat fmt) {
   return ast::TexelFormat::kNone;
 }
 
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv

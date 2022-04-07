@@ -19,9 +19,7 @@
 
 #include "src/tint/program.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 
 /// Parses the SPIR-V source data, returning the parsed program.
 /// If the source data fails to parse then the returned
@@ -31,8 +29,6 @@ namespace spirv {
 /// @returns the parsed program
 Program Parse(const std::vector<uint32_t>& input);
 
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv
 
 #endif  // SRC_TINT_READER_SPIRV_PARSER_H_

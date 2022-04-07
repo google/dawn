@@ -16,9 +16,7 @@
 #include "src/tint/reader/spirv/parser_impl_test_helper.h"
 #include "src/tint/reader/spirv/spirv_tools_helpers_test.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 namespace {
 
 using ::testing::HasSubstr;
@@ -470,6 +468,4 @@ TEST_F(SpvParserTest, EmitFunctions_GenerateParamNames) {
 }
 
 }  // namespace
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv

@@ -14,9 +14,7 @@
 
 #include "src/tint/reader/spirv/construct.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 
 Construct::Construct(const Construct* the_parent,
                      int the_depth,
@@ -65,6 +63,4 @@ Construct::Construct(const Construct* the_parent,
       end_pos(the_end_pos),
       scope_end_pos(the_scope_end_pos) {}
 
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv

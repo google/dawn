@@ -34,9 +34,7 @@
 #include "src/tint/reader/spirv/spirv_tools_helpers_test.h"
 #include "src/tint/reader/spirv/usage.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 namespace test {
 
 /// A test class that wraps ParseImpl
@@ -312,8 +310,6 @@ class SpvParserTestBase : public T {
 // Use this form when you don't need to template any further.
 using SpvParserTest = SpvParserTestBase<::testing::Test>;
 
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv
 
 #endif  // SRC_TINT_READER_SPIRV_PARSER_IMPL_TEST_HELPER_H_

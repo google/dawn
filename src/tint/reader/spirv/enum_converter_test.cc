@@ -18,9 +18,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 namespace {
 
 // Pipeline stage
@@ -424,6 +422,4 @@ INSTANTIATE_TEST_SUITE_P(
         TexelFormatCase{SpvImageFormatRg8ui, false, ast::TexelFormat::kNone}));
 
 }  // namespace
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv

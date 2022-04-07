@@ -16,9 +16,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 namespace {
 
 using ::testing::Eq;
@@ -402,6 +400,4 @@ INSTANTIATE_TEST_SUITE_P(SpvParserTest_ReservedWords,
                          }));
 
 }  // namespace
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv

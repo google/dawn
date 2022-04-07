@@ -16,9 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 namespace {
 
 using ParserTest = testing::Test;
@@ -35,6 +33,4 @@ TEST_F(ParserTest, DataEmpty) {
 // TODO(dneto): uint32 vec, invalid SPIR-V
 
 }  // namespace
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv

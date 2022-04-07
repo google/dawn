@@ -16,9 +16,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 namespace {
 
 using ::testing::Eq;
@@ -68,6 +66,4 @@ TEST_F(FailStreamTest, ShiftOperatorAccumulatesValues) {
 }
 
 }  // namespace
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv

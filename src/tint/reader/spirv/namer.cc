@@ -20,9 +20,7 @@
 
 #include "src/tint/debug.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 
 namespace {
 
@@ -234,6 +232,4 @@ void Namer::ResolveMemberNamesForStruct(uint32_t struct_id,
   }
 }
 
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv

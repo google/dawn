@@ -18,9 +18,7 @@
 #include "src/tint/reader/spirv/spirv_tools_helpers_test.h"
 #include "src/tint/utils/string.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 namespace {
 
 using SpvModuleScopeVarParserTest = SpvParserTest;
@@ -5284,6 +5282,4 @@ fn main(@location(1) @interpolate(flat) x_1_param : u32, @location(2) @interpola
 }
 
 }  // namespace
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv

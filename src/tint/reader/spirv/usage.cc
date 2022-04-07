@@ -16,9 +16,7 @@
 
 #include <sstream>
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 
 Usage::Usage() {}
 Usage::Usage(const Usage& other) = default;
@@ -189,6 +187,4 @@ std::string Usage::to_str() const {
   return ss.str();
 }
 
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv

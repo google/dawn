@@ -17,10 +17,7 @@
 #include "gtest/gtest.h"
 #include "spirv-tools/libspirv.hpp"
 
-namespace tint {
-namespace reader {
-namespace spirv {
-namespace test {
+namespace tint::reader::spirv::test {
 
 std::vector<uint32_t> Assemble(const std::string& spirv_assembly) {
   // TODO(dneto): Use ScopedTrace?
@@ -61,7 +58,4 @@ std::string Disassemble(const std::vector<uint32_t>& spirv_module) {
   return result;
 }
 
-}  // namespace test
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv::test

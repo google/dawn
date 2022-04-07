@@ -21,9 +21,7 @@
 
 #include "src/tint/reader/spirv/fail_stream.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 
 /// A Namer maps SPIR-V IDs to strings.
 ///
@@ -158,8 +156,6 @@ class Namer {
   std::unordered_map<std::string, uint32_t> next_unusued_derived_name_id_;
 };
 
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv
 
 #endif  // SRC_TINT_READER_SPIRV_NAMER_H_

@@ -17,9 +17,7 @@
 
 #include <string>
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 
 /// Records the properties of a sampler or texture based on how it's used
 /// by image instructions inside function bodies.
@@ -130,8 +128,6 @@ inline std::ostream& operator<<(std::ostream& out, const Usage& u) {
   return u.operator<<(out);
 }
 
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv
 
 #endif  // SRC_TINT_READER_SPIRV_USAGE_H_

@@ -24,9 +24,7 @@
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/transform/unshadow.h"
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 
 Program Parse(const std::vector<uint32_t>& input) {
   ParserImpl parser(input);
@@ -60,6 +58,4 @@ Program Parse(const std::vector<uint32_t>& input) {
   return manager.Run(&program).program;
 }
 
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv

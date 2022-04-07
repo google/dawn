@@ -137,9 +137,7 @@
 //           constructs
 //
 
-namespace tint {
-namespace reader {
-namespace spirv {
+namespace tint::reader::spirv {
 
 namespace {
 
@@ -6143,9 +6141,7 @@ bool FunctionEmitter::IsFloatOne(uint32_t value_id) {
 FunctionEmitter::FunctionDeclaration::FunctionDeclaration() = default;
 FunctionEmitter::FunctionDeclaration::~FunctionDeclaration() = default;
 
-}  // namespace spirv
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader::spirv
 
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::StatementBuilder);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::SwitchStatementBuilder);
