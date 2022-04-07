@@ -16,8 +16,7 @@
 
 #include "src/tint/resolver/resolver_test_helper.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 class ResolverPipelineOverridableConstantTest : public ResolverTest {
@@ -104,5 +103,4 @@ TEST_F(ResolverPipelineOverridableConstantTest, IdTooLarge) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

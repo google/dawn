@@ -18,8 +18,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 struct ResolverPtrRefTest : public resolver::TestHelper,
@@ -120,5 +119,4 @@ TEST_F(ResolverPtrRefTest, DefaultPtrStorageClass) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

@@ -18,8 +18,7 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/struct.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using ResolverStructLayoutTest = ResolverTest;
@@ -401,5 +400,4 @@ TEST_F(ResolverStructLayoutTest, StructWithLotsOfPadding) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

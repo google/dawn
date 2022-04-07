@@ -18,8 +18,7 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/struct.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using ResolverHostShareableValidationTest = ResolverTest;
@@ -141,5 +140,4 @@ TEST_F(ResolverHostShareableValidationTest, NoError) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

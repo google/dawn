@@ -22,8 +22,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 // Helpers and typedefs
@@ -1154,5 +1153,4 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
 }  // namespace VectorTests
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

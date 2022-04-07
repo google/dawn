@@ -18,8 +18,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 struct Type {
@@ -224,5 +223,4 @@ INSTANTIATE_TEST_SUITE_P(
                      testing::ValuesIn(kNumericScalars)));
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

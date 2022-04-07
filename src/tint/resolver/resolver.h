@@ -35,9 +35,8 @@
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/unique_vector.h"
 
-namespace tint {
-
 // Forward declarations
+namespace tint {
 namespace ast {
 class IndexAccessorExpression;
 class BinaryExpression;
@@ -69,8 +68,9 @@ class Statement;
 class SwitchStatement;
 class TypeConstructor;
 }  // namespace sem
+}  // namespace tint
 
-namespace resolver {
+namespace tint::resolver {
 
 /// Resolves types for all items in the given tint program
 class Resolver {
@@ -551,7 +551,6 @@ class Resolver {
   sem::BlockStatement* current_block_ = nullptr;
 };
 
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver
 
 #endif  // SRC_TINT_RESOLVER_RESOLVER_H_

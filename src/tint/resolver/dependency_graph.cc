@@ -32,8 +32,7 @@
 
 #define TINT_DUMP_DEPENDENCY_GRAPH 0
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 // Forward declaration
@@ -738,5 +737,4 @@ bool DependencyGraph::Build(const ast::Module& module,
   return da.Run(module);
 }
 
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

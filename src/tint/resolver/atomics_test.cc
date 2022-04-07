@@ -19,8 +19,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 struct ResolverAtomicTest : public resolver::TestHelper,
@@ -69,5 +68,4 @@ TEST_F(ResolverAtomicTest, GlobalStorageStruct) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

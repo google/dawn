@@ -20,8 +20,7 @@
 #include "src/tint/sem/for_loop_statement.h"
 #include "src/tint/sem/if_statement.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 class ResolverBehaviorTest : public ResolverTest {
@@ -655,5 +654,4 @@ TEST_F(ResolverBehaviorTest, StmtVarDecl_RHSDiscardOrNext) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

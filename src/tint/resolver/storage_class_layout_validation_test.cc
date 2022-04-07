@@ -17,8 +17,7 @@
 #include "gmock/gmock.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using ResolverStorageClassLayoutValidationTest = ResolverTest;
@@ -539,5 +538,4 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

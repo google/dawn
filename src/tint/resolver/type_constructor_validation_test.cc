@@ -18,8 +18,7 @@
 #include "src/tint/sem/type_constructor.h"
 #include "src/tint/sem/type_conversion.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using ::testing::HasSubstr;
@@ -2933,5 +2932,4 @@ TEST_F(ResolverTypeConstructorValidationTest, TypeConversionAsStatement) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

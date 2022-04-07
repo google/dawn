@@ -16,12 +16,10 @@
 
 #include <memory>
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 
 TestHelper::TestHelper() : resolver_(std::make_unique<Resolver>(this)) {}
 
 TestHelper::~TestHelper() = default;
 
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

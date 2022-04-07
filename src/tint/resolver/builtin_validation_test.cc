@@ -15,8 +15,7 @@
 #include "src/tint/ast/builtin_texture_helper_test.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using ResolverBuiltinValidationTest = ResolverTest;
@@ -398,5 +397,4 @@ INSTANTIATE_TEST_SUITE_P(
 }  // namespace texture_constexpr_args
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

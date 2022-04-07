@@ -22,8 +22,7 @@
 #include "src/tint/sem/loop_statement.h"
 #include "src/tint/sem/switch_statement.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using ResolverCompoundStatementTest = ResolverTest;
@@ -376,5 +375,4 @@ TEST_F(ResolverCompoundStatementTest, Switch) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

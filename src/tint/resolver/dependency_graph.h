@@ -21,8 +21,7 @@
 #include "src/tint/ast/module.h"
 #include "src/tint/diagnostic/diagnostic.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 
 /// DependencyGraph holds information about module-scope declaration dependency
 /// analysis and symbol resolutions.
@@ -60,7 +59,6 @@ struct DependencyGraph {
   std::unordered_map<const ast::Variable*, const ast::Node*> shadows;
 };
 
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver
 
 #endif  // SRC_TINT_RESOLVER_DEPENDENCY_GRAPH_H_

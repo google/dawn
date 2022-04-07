@@ -17,8 +17,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 // Helpers and typedefs
@@ -171,5 +170,4 @@ TEST_F(ResolverInferredTypeTest, InferStruct_Pass) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

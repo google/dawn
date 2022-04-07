@@ -18,8 +18,7 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/atomic_type.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using ResolverIsStorableTest = ResolverTest;
@@ -136,5 +135,4 @@ TEST_F(ResolverIsStorableTest, Struct_NestedNonStorable) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

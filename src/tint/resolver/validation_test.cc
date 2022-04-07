@@ -41,8 +41,7 @@
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using ResolverValidationTest = ResolverTest;
@@ -1313,8 +1312,7 @@ TEST_F(ResolverTest, Expr_Constructor_Cast_Pointer) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver
 
 TINT_INSTANTIATE_TYPEINFO(tint::resolver::FakeStmt);
 TINT_INSTANTIATE_TYPEINFO(tint::resolver::FakeExpr);

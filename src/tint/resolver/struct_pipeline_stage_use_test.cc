@@ -21,8 +21,7 @@
 
 using ::testing::UnorderedElementsAre;
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using ResolverPipelineStageUseTest = ResolverTest;
@@ -187,5 +186,4 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderReturnTypeViaAlias) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

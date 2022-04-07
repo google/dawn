@@ -18,8 +18,7 @@
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using ResolverCallValidationTest = ResolverTest;
@@ -284,5 +283,4 @@ TEST_F(ResolverCallValidationTest, CallVariableShadowsFunction) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

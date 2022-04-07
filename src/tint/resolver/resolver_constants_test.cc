@@ -18,8 +18,7 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/expression.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using Scalar = sem::Constant::Scalar;
@@ -429,5 +428,4 @@ TEST_F(ResolverConstantsTest, Vec3_Cast_u32_to_f32) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

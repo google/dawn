@@ -18,8 +18,7 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/storage_texture_type.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using ResolverAssignmentValidationTest = ResolverTest;
@@ -389,5 +388,4 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_Pass) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

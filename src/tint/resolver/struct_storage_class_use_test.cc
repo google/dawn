@@ -20,8 +20,7 @@
 
 using ::testing::UnorderedElementsAre;
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using ResolverStorageClassUseTest = ResolverTest;
@@ -191,5 +190,4 @@ TEST_F(ResolverStorageClassUseTest, StructMultipleStorageClassUses) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

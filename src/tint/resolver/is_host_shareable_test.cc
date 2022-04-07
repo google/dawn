@@ -18,8 +18,7 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/atomic_type.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using ResolverIsHostShareable = ResolverTest;
@@ -120,5 +119,4 @@ TEST_F(ResolverIsHostShareable, ArrayUnsizedOfHostShareable) {
 // Note: Structure tests covered in host_shareable_validation_test.cc
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

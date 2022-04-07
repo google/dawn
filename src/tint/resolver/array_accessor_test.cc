@@ -18,8 +18,7 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/reference_type.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using ResolverIndexAccessorTest = ResolverTest;
@@ -308,5 +307,4 @@ TEST_F(ResolverIndexAccessorTest, Exr_Deref_BadParent) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

@@ -18,8 +18,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 struct ResolverVarLetTest : public resolver::TestHelper,
@@ -693,5 +692,4 @@ TEST_F(ResolverVarLetTest, ParamShadowsAlias) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

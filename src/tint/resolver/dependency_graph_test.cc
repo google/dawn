@@ -20,8 +20,7 @@
 #include "src/tint/resolver/dependency_graph.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using ::testing::ElementsAre;
@@ -1338,5 +1337,4 @@ TEST_F(ResolverDependencyGraphTraversalTest, chromium_1273451) {
 }  // namespace ast_traversal
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

@@ -18,8 +18,7 @@
 #include "src/tint/sem/type_constructor.h"
 #include "src/tint/utils/map.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using i32 = ProgramBuilder::i32;
@@ -140,5 +139,4 @@ sem::Constant Resolver::ConstantCast(const sem::Constant& value,
   return sem::Constant(target_type, elems);
 }
 
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

@@ -79,8 +79,7 @@
 #include "src/tint/utils/scoped_assignment.h"
 #include "src/tint/utils/transform.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 
 Resolver::Resolver(ProgramBuilder* builder)
     : builder_(builder),
@@ -518,7 +517,7 @@ void Resolver::SetShadows() {
         [&](sem::LocalVariable* local) { local->SetShadows(Sem(it.second)); },
         [&](sem::Parameter* param) { param->SetShadows(Sem(it.second)); });
   }
-}  // namespace resolver
+}
 
 sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* var) {
   auto* sem = Variable(var, VariableKind::kGlobal);
@@ -2928,5 +2927,4 @@ std::size_t Resolver::TypeConstructorSig::Hasher::operator()(
   return utils::Hash(sig.type, sig.parameters);
 }
 
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

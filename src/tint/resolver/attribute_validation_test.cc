@@ -19,8 +19,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 
 // Helpers and typedefs
 template <typename T>
@@ -1367,5 +1366,4 @@ TEST_F(InterpolateTest, MissingLocationAttribute_Struct) {
 }  // namespace
 }  // namespace InterpolateTests
 
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

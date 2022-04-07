@@ -20,10 +20,10 @@
 
 #include "gmock/gmock.h"
 
-namespace tint {
+namespace tint::resolver {
 namespace {
 
-class ResolverFunctionValidationTest : public resolver::TestHelper,
+class ResolverFunctionValidationTest : public TestHelper,
                                        public testing::Test {};
 
 TEST_F(ResolverFunctionValidationTest, DuplicateParameterName) {
@@ -793,7 +793,7 @@ struct TestParams {
   bool should_pass;
 };
 
-struct TestWithParams : resolver::ResolverTestWithParam<TestParams> {};
+struct TestWithParams : ResolverTestWithParam<TestParams> {};
 
 using ResolverFunctionParameterValidationTest = TestWithParams;
 TEST_P(ResolverFunctionParameterValidationTest, StorageClass) {
@@ -827,4 +827,4 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{ast::StorageClass::kFunction, true}));
 
 }  // namespace
-}  // namespace tint
+}  // namespace tint::resolver

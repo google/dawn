@@ -18,8 +18,7 @@
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 // Helpers and typedefs
 template <typename T>
@@ -114,5 +113,4 @@ TEST_F(ResolverCallTest, OutOfOrder) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

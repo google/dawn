@@ -39,8 +39,7 @@
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 using BuiltinType = sem::BuiltinType;
@@ -1987,5 +1986,4 @@ TEST_P(ResolverBuiltinTest_Texture, Call) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

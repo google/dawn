@@ -19,8 +19,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 struct ResolverAtomicValidationTest : public resolver::TestHelper,
@@ -334,5 +333,4 @@ TEST_F(ResolverAtomicValidationTest, Local) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

@@ -47,8 +47,7 @@
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 // Helpers and typedefs
@@ -2179,5 +2178,4 @@ TEST_F(ResolverTest, ModuleDependencyOrderedDeclarations) {
 }
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

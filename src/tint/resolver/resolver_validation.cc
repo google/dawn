@@ -77,8 +77,7 @@
 #include "src/tint/utils/scoped_assignment.h"
 #include "src/tint/utils/transform.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 bool IsValidStorageTextureDimension(ast::TextureDimension dim) {
@@ -2426,5 +2425,4 @@ bool Resolver::IsValidationEnabled(const ast::AttributeList& attributes,
   return !IsValidationDisabled(attributes, validation);
 }
 
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

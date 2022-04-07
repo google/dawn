@@ -18,10 +18,10 @@
 #include "src/tint/ast/switch_statement.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
-namespace tint {
+namespace tint::resolver {
 namespace {
 
-class ResolverControlBlockValidationTest : public resolver::TestHelper,
+class ResolverControlBlockValidationTest : public TestHelper,
                                            public testing::Test {};
 
 TEST_F(ResolverControlBlockValidationTest,
@@ -361,4 +361,4 @@ TEST_F(ResolverControlBlockValidationTest, SwitchCaseAlias_Pass) {
 }
 
 }  // namespace
-}  // namespace tint
+}  // namespace tint::resolver

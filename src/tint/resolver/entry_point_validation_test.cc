@@ -21,8 +21,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 namespace {
 
 // Helpers and typedefs
@@ -793,5 +792,4 @@ TEST_F(LocationAttributeTests, Duplicate_struct) {
 }  // namespace LocationAttributeTests
 
 }  // namespace
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver

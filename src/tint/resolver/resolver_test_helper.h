@@ -26,8 +26,7 @@
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
 
-namespace tint {
-namespace resolver {
+namespace tint::resolver {
 
 /// Helper class for testing
 class TestHelper : public ProgramBuilder {
@@ -483,7 +482,6 @@ constexpr CreatePtrs CreatePtrsFor() {
 
 }  // namespace builder
 
-}  // namespace resolver
-}  // namespace tint
+}  // namespace tint::resolver
 
 #endif  // SRC_TINT_RESOLVER_RESOLVER_TEST_HELPER_H_
