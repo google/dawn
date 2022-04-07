@@ -1,10 +1,10 @@
-SKIP: FAILED
-
-
-var<private> i : i32 = 0;
-
-fn main() {
-  i--;
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+  return;
 }
 
-Failed to generate: error: unknown statement type: tint::ast::IncrementDecrementStatement
+static int i = 0;
+
+void main() {
+  i = (i - 1);
+}

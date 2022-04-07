@@ -6,6 +6,7 @@
 
 * Parentheses are no longer required around expressions for if and switch statements [tint:1424](crbug.com/tint/1424)
 * Compound assignment statements are now supported. [tint:1325](https://crbug.com/tint/1325)
+* Postfix increment and decrement statements are now supported. [tint:1488](crbug.com/tint/1488)
 * The colon in case statements is now optional. [tint:1485](crbug.com/tint/1485)
 
 ### Breaking changes

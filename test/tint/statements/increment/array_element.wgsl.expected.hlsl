@@ -1,10 +1,10 @@
-SKIP: FAILED
-
-
-@group(0) @binding(0) var<storage, read_write> a : array<u32>;
-
-fn main() {
-  a[1]++;
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+  return;
 }
 
-Failed to generate: error: cannot modify value of type 'u32'
+RWByteAddressBuffer a : register(u0, space0);
+
+void main() {
+  a.Store(4u, asuint((a.Load(4u) + 1u)));
+}

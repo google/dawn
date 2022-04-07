@@ -1,9 +1,11 @@
-SKIP: FAILED
+#version 310 es
 
-
-fn main() {
-  var i = 0;
-  i++;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void unused_entry_point() {
+  return;
+}
+void tint_symbol() {
+  int i = 0;
+  i = (i + 1);
 }
 
-Failed to generate: error: unknown statement type: tint::ast::IncrementDecrementStatement

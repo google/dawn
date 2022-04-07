@@ -1,11 +1,20 @@
-SKIP: FAILED
+#version 310 es
 
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void unused_entry_point() {
+  return;
+}
+struct i_block {
+  uint inner;
+};
 
-@group(0) @binding(0) var<storage, read_write> i : u32;
-
-fn main() {
-  for(i++; (i < 10u); ) {
+layout(binding = 0, std430) buffer i_block_1 {
+  uint inner;
+} i;
+void tint_symbol() {
+  {
+    for(i.inner = (i.inner + 1u); (i.inner < 10u); ) {
+    }
   }
 }
 
-Failed to generate: error: unknown statement type: tint::ast::IncrementDecrementStatement

@@ -1,47 +1,63 @@
-SKIP: FAILED
-
-
-struct S {
-  a : array<vec4<i32>, 4>,
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+  return;
 }
 
-@group(0) @binding(0) var<storage, read_write> buffer : array<S>;
+RWByteAddressBuffer buffer : register(u0, space0);
+static uint v = 0u;
 
-var<private> v : u32;
-
-fn idx1() -> i32 {
-  v++;
+int idx1() {
+  v = (v + 1u);
   return 1;
 }
 
-fn idx2() -> i32 {
-  v++;
+int idx2() {
+  v = (v + 1u);
   return 2;
 }
 
-fn idx3() -> i32 {
-  v++;
+int idx3() {
+  v = (v + 1u);
   return 3;
 }
 
-fn idx4() -> i32 {
-  v++;
+int idx4() {
+  v = (v + 1u);
   return 4;
 }
 
-fn idx5() -> i32 {
-  v++;
+int idx5() {
+  v = (v + 1u);
   return 0;
 }
 
-fn idx6() -> i32 {
-  v++;
+int idx6() {
+  v = (v + 1u);
   return 2;
 }
 
-fn main() {
-  for(buffer[idx1()].a[idx2()][idx3()]++; (v < 10u); buffer[idx4()].a[idx5()][idx6()]++) {
+void main() {
+  const int tint_symbol_4 = idx1();
+  const int tint_symbol_5 = idx2();
+  const int tint_symbol_save = tint_symbol_4;
+  const int tint_symbol_save_1 = tint_symbol_5;
+  const int tint_symbol_1 = idx3();
+  {
+    buffer.Store((((64u * uint(tint_symbol_save)) + (16u * uint(tint_symbol_save_1))) + (4u * uint(tint_symbol_1))), asuint((asint(buffer.Load((((64u * uint(tint_symbol_save)) + (16u * uint(tint_symbol_save_1))) + (4u * uint(tint_symbol_1))))) + 1)));
+    [loop] while (true) {
+      if (!((v < 10u))) {
+        break;
+      }
+      {
+      }
+      {
+        const int tint_symbol_6 = idx4();
+        const int tint_symbol_7 = idx5();
+        const int tint_symbol_2_save = tint_symbol_6;
+        const int tint_symbol_2_save_1 = tint_symbol_7;
+        const int tint_symbol_3 = idx6();
+        buffer.Store((((64u * uint(tint_symbol_2_save)) + (16u * uint(tint_symbol_2_save_1))) + (4u * uint(tint_symbol_3))), asuint((asint(buffer.Load((((64u * uint(tint_symbol_2_save)) + (16u * uint(tint_symbol_2_save_1))) + (4u * uint(tint_symbol_3))))) + 1)));
+      }
+    }
   }
 }
-
-Failed to generate: error: cannot modify value of type 'i32'

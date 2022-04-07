@@ -36,6 +36,9 @@ namespace transform {
 ///   let _idx = bar();
 ///   (*_vec)[_idx] = (*_vec)[_idx] * 2.0;
 /// ```
+///
+/// This transform also handles increment and decrement statements in the same
+/// manner, by replacing `i++` with `i = i + 1`.
 class ExpandCompoundAssignment
     : public Castable<ExpandCompoundAssignment, Transform> {
  public:

@@ -1,10 +1,10 @@
-SKIP: FAILED
-
-
-var<workgroup> i : i32;
-
-fn main() {
-  i++;
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+  return;
 }
 
-Failed to generate: error: unknown statement type: tint::ast::IncrementDecrementStatement
+groupshared int i;
+
+void main() {
+  i = (i + 1);
+}

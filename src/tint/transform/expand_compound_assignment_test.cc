@@ -41,6 +41,17 @@ fn foo() {
   EXPECT_TRUE(ShouldRun<ExpandCompoundAssignment>(src));
 }
 
+TEST_F(ExpandCompoundAssignmentTest, ShouldRunHasIncrementDecrement) {
+  auto* src = R"(
+fn foo() {
+  var v : i32;
+  v++;
+}
+)";
+
+  EXPECT_TRUE(ShouldRun<ExpandCompoundAssignment>(src));
+}
+
 TEST_F(ExpandCompoundAssignmentTest, Basic) {
   auto* src = R"(
 fn main() {
@@ -412,6 +423,284 @@ fn idx2() -> i32 {
 
 fn main() {
   for (; ; a[idx1()][idx2()] += 1) {
+    break;
+  }
+}
+)";
+
+  auto* expect = R"(
+var<private> a : array<vec4<i32>, 4>;
+
+var<private> p : i32;
+
+fn idx1() -> i32 {
+  p = (p + 1);
+  return 3;
+}
+
+fn idx2() -> i32 {
+  p = (p * 3);
+  return 2;
+}
+
+fn main() {
+  loop {
+    {
+      break;
+    }
+
+    continuing {
+      let tint_symbol = &(a[idx1()]);
+      let tint_symbol_1 = idx2();
+      (*(tint_symbol))[tint_symbol_1] = ((*(tint_symbol))[tint_symbol_1] + 1);
+    }
+  }
+}
+)";
+
+  auto got = Run<ExpandCompoundAssignment>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ExpandCompoundAssignmentTest, Increment_I32) {
+  auto* src = R"(
+fn main() {
+  var v : i32;
+  v++;
+}
+)";
+
+  auto* expect = R"(
+fn main() {
+  var v : i32;
+  v = (v + 1);
+}
+)";
+
+  auto got = Run<ExpandCompoundAssignment>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ExpandCompoundAssignmentTest, Increment_U32) {
+  auto* src = R"(
+fn main() {
+  var v : u32;
+  v++;
+}
+)";
+
+  auto* expect = R"(
+fn main() {
+  var v : u32;
+  v = (v + 1u);
+}
+)";
+
+  auto got = Run<ExpandCompoundAssignment>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ExpandCompoundAssignmentTest, Decrement_I32) {
+  auto* src = R"(
+fn main() {
+  var v : i32;
+  v--;
+}
+)";
+
+  auto* expect = R"(
+fn main() {
+  var v : i32;
+  v = (v - 1);
+}
+)";
+
+  auto got = Run<ExpandCompoundAssignment>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ExpandCompoundAssignmentTest, Decrement_U32) {
+  auto* src = R"(
+fn main() {
+  var v : u32;
+  v--;
+}
+)";
+
+  auto* expect = R"(
+fn main() {
+  var v : u32;
+  v = (v - 1u);
+}
+)";
+
+  auto got = Run<ExpandCompoundAssignment>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ExpandCompoundAssignmentTest, Increment_LhsPointer) {
+  auto* src = R"(
+fn main() {
+  var v : i32;
+  let p = &v;
+  *p++;
+}
+)";
+
+  auto* expect = R"(
+fn main() {
+  var v : i32;
+  let p = &(v);
+  let tint_symbol = &(*(p));
+  *(tint_symbol) = (*(tint_symbol) + 1);
+}
+)";
+
+  auto got = Run<ExpandCompoundAssignment>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ExpandCompoundAssignmentTest, Increment_LhsStructMember) {
+  auto* src = R"(
+struct S {
+  m : i32,
+}
+
+fn main() {
+  var s : S;
+  s.m++;
+}
+)";
+
+  auto* expect = R"(
+struct S {
+  m : i32,
+}
+
+fn main() {
+  var s : S;
+  s.m = (s.m + 1);
+}
+)";
+
+  auto got = Run<ExpandCompoundAssignment>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ExpandCompoundAssignmentTest, Increment_LhsArrayElement) {
+  auto* src = R"(
+var<private> a : array<i32, 4>;
+
+fn idx() -> i32 {
+  a[1] = 42;
+  return 1;
+}
+
+fn main() {
+  a[idx()]++;
+}
+)";
+
+  auto* expect = R"(
+var<private> a : array<i32, 4>;
+
+fn idx() -> i32 {
+  a[1] = 42;
+  return 1;
+}
+
+fn main() {
+  let tint_symbol = &(a[idx()]);
+  *(tint_symbol) = (*(tint_symbol) + 1);
+}
+)";
+
+  auto got = Run<ExpandCompoundAssignment>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ExpandCompoundAssignmentTest,
+       Increment_LhsVectorComponent_ArrayAccessor) {
+  auto* src = R"(
+var<private> v : vec4<i32>;
+
+fn idx() -> i32 {
+  v.y = 42;
+  return 1;
+}
+
+fn main() {
+  v[idx()]++;
+}
+)";
+
+  auto* expect = R"(
+var<private> v : vec4<i32>;
+
+fn idx() -> i32 {
+  v.y = 42;
+  return 1;
+}
+
+fn main() {
+  let tint_symbol = &(v);
+  let tint_symbol_1 = idx();
+  (*(tint_symbol))[tint_symbol_1] = ((*(tint_symbol))[tint_symbol_1] + 1);
+}
+)";
+
+  auto got = Run<ExpandCompoundAssignment>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ExpandCompoundAssignmentTest,
+       Increment_LhsVectorComponent_MemberAccessor) {
+  auto* src = R"(
+fn main() {
+  var v : vec4<i32>;
+  v.y++;
+}
+)";
+
+  auto* expect = R"(
+fn main() {
+  var v : vec4<i32>;
+  v.y = (v.y + 1);
+}
+)";
+
+  auto got = Run<ExpandCompoundAssignment>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ExpandCompoundAssignmentTest, Increment_ForLoopCont) {
+  auto* src = R"(
+var<private> a : array<vec4<i32>, 4>;
+
+var<private> p : i32;
+
+fn idx1() -> i32 {
+  p = (p + 1);
+  return 3;
+}
+
+fn idx2() -> i32 {
+  p = (p * 3);
+  return 2;
+}
+
+fn main() {
+  for (; ; a[idx1()][idx2()]++) {
     break;
   }
 }

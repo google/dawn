@@ -1,9 +1,9 @@
-SKIP: FAILED
-
-
-fn main() {
-  var i = 0;
-  i--;
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+  return;
 }
 
-Failed to generate: error: unknown statement type: tint::ast::IncrementDecrementStatement
+void main() {
+  int i = 0;
+  i = (i - 1);
+}

@@ -1,47 +1,67 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
+using namespace metal;
+struct tint_array_wrapper {
+  /* 0x0000 */ int4 arr[4];
+};
 
 struct S {
-  a : array<vec4<i32>, 4>,
-}
+  /* 0x0000 */ tint_array_wrapper a;
+};
 
-@group(0) @binding(0) var<storage, read_write> tint_symbol : array<S>;
-
-var<private> v : u32;
-
-fn idx1() -> i32 {
-  v++;
+int idx1(thread uint* const tint_symbol_10) {
+  *(tint_symbol_10) = (*(tint_symbol_10) + 1u);
   return 1;
 }
 
-fn idx2() -> i32 {
-  v++;
+int idx2(thread uint* const tint_symbol_11) {
+  *(tint_symbol_11) = (*(tint_symbol_11) + 1u);
   return 2;
 }
 
-fn idx3() -> i32 {
-  v++;
+int idx3(thread uint* const tint_symbol_12) {
+  *(tint_symbol_12) = (*(tint_symbol_12) + 1u);
   return 3;
 }
 
-fn idx4() -> i32 {
-  v++;
+int idx4(thread uint* const tint_symbol_13) {
+  *(tint_symbol_13) = (*(tint_symbol_13) + 1u);
   return 4;
 }
 
-fn idx5() -> i32 {
-  v++;
+int idx5(thread uint* const tint_symbol_14) {
+  *(tint_symbol_14) = (*(tint_symbol_14) + 1u);
   return 0;
 }
 
-fn idx6() -> i32 {
-  v++;
+int idx6(thread uint* const tint_symbol_15) {
+  *(tint_symbol_15) = (*(tint_symbol_15) + 1u);
   return 2;
 }
 
-fn tint_symbol_1() {
-  for(tint_symbol[idx1()].a[idx2()][idx3()]++; (v < 10u); tint_symbol[idx4()].a[idx5()][idx6()]++) {
+void tint_symbol_1(thread uint* const tint_symbol_16, device S (*const tint_symbol_17)[1]) {
+  int const tint_symbol_6 = idx1(tint_symbol_16);
+  int const tint_symbol_7 = idx2(tint_symbol_16);
+  int const tint_symbol_2_save = tint_symbol_6;
+  int const tint_symbol_2_save_1 = tint_symbol_7;
+  int const tint_symbol_3 = idx3(tint_symbol_16);
+  {
+    (*(tint_symbol_17))[tint_symbol_2_save].a.arr[tint_symbol_2_save_1][tint_symbol_3] = as_type<int>((as_type<uint>((*(tint_symbol_17))[tint_symbol_2_save].a.arr[tint_symbol_2_save_1][tint_symbol_3]) + as_type<uint>(1)));
+    while (true) {
+      if (!((*(tint_symbol_16) < 10u))) {
+        break;
+      }
+      {
+      }
+      {
+        int const tint_symbol_8 = idx4(tint_symbol_16);
+        int const tint_symbol_9 = idx5(tint_symbol_16);
+        int const tint_symbol_4_save = tint_symbol_8;
+        int const tint_symbol_4_save_1 = tint_symbol_9;
+        int const tint_symbol_5 = idx6(tint_symbol_16);
+        (*(tint_symbol_17))[tint_symbol_4_save].a.arr[tint_symbol_4_save_1][tint_symbol_5] = as_type<int>((as_type<uint>((*(tint_symbol_17))[tint_symbol_4_save].a.arr[tint_symbol_4_save_1][tint_symbol_5]) + as_type<uint>(1)));
+      }
+    }
   }
 }
 
-Failed to generate: error: unknown statement type: tint::ast::IncrementDecrementStatement

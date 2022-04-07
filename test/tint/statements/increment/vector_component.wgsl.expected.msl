@@ -1,11 +1,9 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
-@group(0) @binding(0) var<storage, read_write> a : vec4<u32>;
-
-fn tint_symbol() {
-  a[1]++;
-  a.z++;
+using namespace metal;
+void tint_symbol(device uint4* const tint_symbol_3) {
+  int const tint_symbol_2 = 1;
+  (*(tint_symbol_3))[tint_symbol_2] = ((*(tint_symbol_3))[tint_symbol_2] + 1u);
+  (*(tint_symbol_3))[2] = ((*(tint_symbol_3))[2] + 1u);
 }
 
-Failed to generate: error: unknown statement type: tint::ast::IncrementDecrementStatement
