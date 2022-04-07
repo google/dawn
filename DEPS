@@ -256,6 +256,17 @@ hooks = [
   },
   # Pull clang-format binaries using checked-in hashes.
   {
+    'name': 'clang_format_win',
+    'pattern': '.',
+    'condition': 'dawn_standalone and host_os == "win"',
+    'action': [ 'download_from_google_storage',
+                '--no_resume',
+                '--no_auth',
+                '--bucket', 'chromium-clang-format',
+                '-s', 'buildtools/win/clang-format.exe.sha1',
+    ],
+  },
+  {
     'name': 'clang_format_mac_x64',
     'pattern': '.',
     'condition': 'dawn_standalone and host_os == "mac" and host_cpu == "x64"',
