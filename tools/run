@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright 2021 The Tint Authors
+# Copyright 2022 The Tint Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,19 +15,41 @@
 
 set -e # Fail on any error.
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
+TOOL="$1"
+BINARY="${SCRIPT_DIR}/bin/${TOOL}"
+
 if [ ! -x "$(which go)" ] ; then
-    echo "error: go needs to be on \$PATH to use $0"
-    exit 1
+  echo "error: go needs to be on \$PATH to use $0"
+  exit 1
 fi
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
-ROOT_DIR="$( cd "${SCRIPT_DIR}/.." >/dev/null 2>&1 && pwd )"
-BINARY="${SCRIPT_DIR}/bin/get-test-plan"
+function list_tools() {
+  echo "Available tools:"
+  ls "${SCRIPT_DIR}/src/cmd"
+}
+
+function show_usage() {
+  echo "run <tool> <args>"
+  echo
+  echo "builds and runs the go tool in <dawn>/tools/src/cmd"
+  echo
+  list_tools
+  exit 1
+}
+
+if [ -z "${TOOL}" ]; then
+  show_usage
+fi
+
+if [ ! -d "${SCRIPT_DIR}/src/cmd/${TOOL}" ]; then
+  show_usage
+fi
 
 # Rebuild the binary.
 # Note, go caches build artifacts, so this is quick for repeat calls
-pushd "${SCRIPT_DIR}/src/cmd/get-test-plan" > /dev/null
-    go build -o "${BINARY}" main.go
+pushd "${SCRIPT_DIR}/src" > /dev/null
+    go build -o "${BINARY}" "./cmd/${TOOL}"
 popd > /dev/null
 
-"${BINARY}" "$@"
+"${BINARY}" "${@:2}"

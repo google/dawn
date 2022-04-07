@@ -19,11 +19,11 @@ set -e # Fail on any error.
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
 
 function usage() {
-    echo "test-all.sh is a simple wrapper around <tint>/tools/test-runner that"    
+    echo "test-all.sh is a simple wrapper around <tint>/tools/test-runner that"
     echo "injects the <tint>/test directory as the second command line argument"
     echo
-    echo "Usage of <tint>/tools/test-runner:"
-    "${SCRIPT_DIR}/../../tools/test-runner" --help
+    echo "Usage of test-runner:"
+    "${SCRIPT_DIR}/../../tools/run" "test-runner" --help
 }
 
 TINT="$1"
@@ -41,4 +41,4 @@ if [ ! -x "$TINT" ]; then
     exit 1
 fi
 
-"${SCRIPT_DIR}/../../tools/test-runner" "${@:2}" "${TINT}" "${SCRIPT_DIR}"
+"${SCRIPT_DIR}/../../tools/run" "test-runner" "${@:2}" "${TINT}" "${SCRIPT_DIR}"
