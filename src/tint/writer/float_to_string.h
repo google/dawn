@@ -17,8 +17,7 @@
 
 #include <string>
 
-namespace tint {
-namespace writer {
+namespace tint::writer {
 
 /// Converts the float `f` to a string using fixed-point notation (not
 /// scientific). The float will be printed with the full precision required to
@@ -33,7 +32,6 @@ std::string FloatToString(float f);
 /// @return the float f formatted to a string
 std::string FloatToBitPreservingString(float f);
 
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer
 
 #endif  // SRC_TINT_WRITER_FLOAT_TO_STRING_H_

@@ -16,8 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace writer {
+namespace tint::writer {
 namespace {
 
 TEST(TextGeneratorTest, UniqueIdentifier) {
@@ -44,5 +43,4 @@ TEST(TextGeneratorTest, UniqueIdentifier_ConflictWithExisting) {
 }
 
 }  // namespace
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer

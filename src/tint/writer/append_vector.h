@@ -17,14 +17,13 @@
 
 #include "src/tint/program_builder.h"
 
-namespace tint {
-
-namespace ast {
+// Forward Declarations
+namespace tint::ast {
 class CallExpression;
 class Expression;
-}  // namespace ast
+}  // namespace tint::ast
 
-namespace writer {
+namespace tint::writer {
 
 /// A helper function used to append a vector with an additional scalar.
 /// If the scalar's type does not match the target vector element type,
@@ -40,7 +39,6 @@ const sem::Call* AppendVector(ProgramBuilder* builder,
                               const ast::Expression* vector,
                               const ast::Expression* scalar);
 
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer
 
 #endif  // SRC_TINT_WRITER_APPEND_VECTOR_H_

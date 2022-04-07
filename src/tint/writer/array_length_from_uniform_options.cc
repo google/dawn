@@ -14,8 +14,7 @@
 
 #include "src/tint/writer/array_length_from_uniform_options.h"
 
-namespace tint {
-namespace writer {
+namespace tint::writer {
 
 ArrayLengthFromUniformOptions::ArrayLengthFromUniformOptions() = default;
 ArrayLengthFromUniformOptions::~ArrayLengthFromUniformOptions() = default;
@@ -26,5 +25,4 @@ ArrayLengthFromUniformOptions& ArrayLengthFromUniformOptions::operator=(
 ArrayLengthFromUniformOptions::ArrayLengthFromUniformOptions(
     ArrayLengthFromUniformOptions&&) = default;
 
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer

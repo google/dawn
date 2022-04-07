@@ -17,8 +17,7 @@
 
 #include <string>
 
-namespace tint {
-namespace writer {
+namespace tint::writer {
 
 /// Base class for the output writers
 class Writer {
@@ -41,7 +40,6 @@ class Writer {
   std::string error_;
 };
 
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer
 
 #endif  // SRC_TINT_WRITER_WRITER_H_

@@ -23,8 +23,7 @@
 
 #include "src/tint/debug.h"
 
-namespace tint {
-namespace writer {
+namespace tint::writer {
 
 std::string FloatToString(float f) {
   // Try printing the float in fixed point, with a smallish limit on the
@@ -154,5 +153,4 @@ std::string FloatToBitPreservingString(float f) {
   return ss.str();
 }
 
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer

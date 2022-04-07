@@ -23,9 +23,7 @@
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/utils/transform.h"
 
-namespace tint {
-namespace writer {
-
+namespace tint::writer {
 namespace {
 
 struct VectorConstructorInfo {
@@ -172,5 +170,4 @@ const sem::Call* AppendVector(ProgramBuilder* b,
   return constructor_sem;
 }
 
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer

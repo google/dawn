@@ -24,8 +24,7 @@
 #include "src/tint/diagnostic/diagnostic.h"
 #include "src/tint/program_builder.h"
 
-namespace tint {
-namespace writer {
+namespace tint::writer {
 
 /// Helper methods for generators which are creating text output
 class TextGenerator {
@@ -236,7 +235,6 @@ class TextGenerator {
   std::unordered_map<const sem::Struct*, std::string> builtin_struct_names_;
 };
 
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer
 
 #endif  // SRC_TINT_WRITER_TEXT_GENERATOR_H_

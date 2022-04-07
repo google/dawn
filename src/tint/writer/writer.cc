@@ -14,10 +14,8 @@
 
 #include "src/tint/writer/writer.h"
 
-namespace tint {
-namespace writer {
+namespace tint::writer {
 
 Writer::~Writer() = default;
 
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer

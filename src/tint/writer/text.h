@@ -19,8 +19,7 @@
 
 #include "src/tint/writer/writer.h"
 
-namespace tint {
-namespace writer {
+namespace tint::writer {
 
 /// Class to generate text source
 class Text : public Writer {
@@ -31,7 +30,6 @@ class Text : public Writer {
   virtual std::string result() const = 0;
 };
 
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer
 
 #endif  // SRC_TINT_WRITER_TEXT_H_

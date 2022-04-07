@@ -20,8 +20,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace writer {
+namespace tint::writer {
 namespace {
 
 // Makes an IEEE 754 binary32 floating point number with
@@ -222,5 +221,4 @@ TEST(FloatToBitPreservingStringTest, DISABLED_NaN_NonMsb) {
 }
 
 }  // namespace
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer

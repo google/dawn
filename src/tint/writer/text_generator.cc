@@ -19,8 +19,7 @@
 
 #include "src/tint/utils/map.h"
 
-namespace tint {
-namespace writer {
+namespace tint::writer {
 
 TextGenerator::TextGenerator(const Program* program)
     : program_(program), builder_(ProgramBuilder::Wrap(program)) {}
@@ -151,5 +150,4 @@ TextGenerator::ScopedIndent::~ScopedIndent() {
   buffer_->DecrementIndent();
 }
 
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer

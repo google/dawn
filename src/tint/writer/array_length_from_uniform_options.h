@@ -19,8 +19,7 @@
 
 #include "src/tint/sem/binding_point.h"
 
-namespace tint {
-namespace writer {
+namespace tint::writer {
 
 /// Options used to specify a mapping of binding points to indices into a UBO
 /// from which to load buffer sizes.
@@ -49,7 +48,6 @@ struct ArrayLengthFromUniformOptions {
   // struct members.
 };
 
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer
 
 #endif  // SRC_TINT_WRITER_ARRAY_LENGTH_FROM_UNIFORM_OPTIONS_H_

@@ -19,8 +19,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace writer {
+namespace tint::writer {
 namespace {
 
 class AppendVectorTest : public ::testing::Test, public ProgramBuilder {};
@@ -484,5 +483,4 @@ TEST_F(AppendVectorTest, ZeroVec3i32_i32) {
 }
 
 }  // namespace
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer
