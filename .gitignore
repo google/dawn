@@ -32,7 +32,7 @@
 /third_party/webgpu-cts
 /third_party/zlib
 /tools/clang
-/tools/cmake
+/tools/cmake*
 /tools/golang
 /tools/memory
 /out
