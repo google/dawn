@@ -21,8 +21,8 @@ group("all") {
     "src/dawn/native:webgpu_dawn",
     "src/dawn/tests",
     "src/fuzzers/dawn:dawn_fuzzers",
-    "src/tint/fuzzers",
     "src/tint:libtint",
+    "src/tint/fuzzers",
     "test/tint:tint_unittests",
   ]
   if (dawn_standalone) {

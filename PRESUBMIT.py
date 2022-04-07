@@ -129,10 +129,8 @@ def _DoCommonChecks(input_api, output_api):
             input_api, output_api))
     results.extend(
         input_api.canned_checks.CheckDoNotSubmit(input_api, output_api))
-    results.extend(
-        input_api.canned_checks.CheckChangeLintsClean(input_api,
-                                                      output_api,
-                                                      lint_filters=""))
+    # TODO(dawn:1339): Add back CheckChangeLintsClean, it fails on all Dawn
+    # source files because they where never linted (and use different rules).
     results.extend(
         _CheckNonInclusiveLanguage(input_api, output_api,
                                    _NonInclusiveFileFilter))

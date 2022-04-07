@@ -161,9 +161,9 @@ source_set("sources") {
     ":headers",
     ":utils_gen",
     "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/tint:libtint",
     "${dawn_spirv_tools_dir}:spvtools_opt",
     "${dawn_spirv_tools_dir}:spvtools_val",
-    "${dawn_root}/src/tint:libtint",
   ]
   defines = []
   libs = []
