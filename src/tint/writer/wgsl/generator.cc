@@ -15,9 +15,7 @@
 #include "src/tint/writer/wgsl/generator.h"
 #include "src/tint/writer/wgsl/generator_impl.h"
 
-namespace tint {
-namespace writer {
-namespace wgsl {
+namespace tint::writer::wgsl {
 
 Result::Result() = default;
 Result::~Result() = default;
@@ -35,6 +33,4 @@ Result Generate(const Program* program, const Options&) {
   return result;
 }
 
-}  // namespace wgsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::wgsl

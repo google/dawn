@@ -16,9 +16,7 @@
 
 #include "src/tint/writer/wgsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace wgsl {
+namespace tint::writer::wgsl {
 namespace {
 
 // Makes an IEEE 754 binary32 floating point number with
@@ -127,6 +125,4 @@ INSTANTIATE_TEST_SUITE_P(
         {MakeFloat(1, 255, 0x40101f), "-0x1.80203ep+128"}}));
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::wgsl

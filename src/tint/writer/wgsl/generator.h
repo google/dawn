@@ -25,8 +25,7 @@ namespace tint {
 // Forward declarations
 class Program;
 
-namespace writer {
-namespace wgsl {
+namespace writer::wgsl {
 
 class GeneratorImpl;
 
@@ -62,8 +61,7 @@ struct Result {
 /// @returns the resulting WGSL and supplementary information
 Result Generate(const Program* program, const Options& options);
 
-}  // namespace wgsl
-}  // namespace writer
+}  // namespace writer::wgsl
 }  // namespace tint
 
 #endif  // SRC_TINT_WRITER_WGSL_GENERATOR_H_

@@ -22,9 +22,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/writer/wgsl/generator_impl.h"
 
-namespace tint {
-namespace writer {
-namespace wgsl {
+namespace tint::writer::wgsl {
 
 /// Helper class for testing
 template <typename BASE>
@@ -63,8 +61,6 @@ using TestHelper = TestHelperBase<testing::Test>;
 template <typename T>
 using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
-}  // namespace wgsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::wgsl
 
 #endif  // SRC_TINT_WRITER_WGSL_TEST_HELPER_H_

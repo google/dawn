@@ -56,9 +56,7 @@
 #include "src/tint/utils/scoped_assignment.h"
 #include "src/tint/writer/float_to_string.h"
 
-namespace tint {
-namespace writer {
-namespace wgsl {
+namespace tint::writer::wgsl {
 
 GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
 
@@ -1212,6 +1210,4 @@ bool GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
   return true;
 }
 
-}  // namespace wgsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::wgsl

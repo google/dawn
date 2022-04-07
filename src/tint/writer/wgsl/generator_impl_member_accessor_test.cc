@@ -14,9 +14,7 @@
 
 #include "src/tint/writer/wgsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace wgsl {
+namespace tint::writer::wgsl {
 namespace {
 
 using WgslGeneratorImplTest = TestHelper;
@@ -51,6 +49,4 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor_OfDref) {
 }
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::wgsl

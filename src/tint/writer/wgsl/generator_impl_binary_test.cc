@@ -14,9 +14,7 @@
 
 #include "src/tint/writer/wgsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace wgsl {
+namespace tint::writer::wgsl {
 namespace {
 
 struct BinaryData {
@@ -78,6 +76,4 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::wgsl

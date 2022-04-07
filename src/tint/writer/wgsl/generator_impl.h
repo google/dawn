@@ -38,9 +38,7 @@
 #include "src/tint/sem/struct.h"
 #include "src/tint/writer/text_generator.h"
 
-namespace tint {
-namespace writer {
-namespace wgsl {
+namespace tint::writer::wgsl {
 
 /// Implementation class for WGSL generator
 class GeneratorImpl : public TextGenerator {
@@ -209,8 +207,6 @@ class GeneratorImpl : public TextGenerator {
   bool EmitAttributes(std::ostream& out, const ast::AttributeList& attrs);
 };
 
-}  // namespace wgsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::wgsl
 
 #endif  // SRC_TINT_WRITER_WGSL_GENERATOR_IMPL_H_

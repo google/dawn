@@ -15,9 +15,7 @@
 #include "gmock/gmock.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace wgsl {
+namespace tint::writer::wgsl {
 namespace {
 
 using ::testing::HasSubstr;
@@ -131,6 +129,4 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Array) {
 }
 
 }  // namespace
-}  // namespace wgsl
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::wgsl
