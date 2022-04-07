@@ -253,6 +253,7 @@ tint_unittests_source_set("tint_unittests_resolver_src") {
     "../../src/tint/resolver/entry_point_validation_test.cc",
     "../../src/tint/resolver/function_validation_test.cc",
     "../../src/tint/resolver/host_shareable_validation_test.cc",
+    "../../src/tint/resolver/increment_decrement_validation_test.cc",
     "../../src/tint/resolver/is_host_shareable_test.cc",
     "../../src/tint/resolver/is_storeable_test.cc",
     "../../src/tint/resolver/pipeline_overridable_constant_test.cc",

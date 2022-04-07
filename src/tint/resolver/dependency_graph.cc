@@ -234,6 +234,9 @@ class DependencyScanner {
           TraverseStatement(l->continuing);
           TraverseStatement(l->body);
         },
+        [&](const ast::IncrementDecrementStatement* i) {
+          TraverseExpression(i->lhs);
+        },
         [&](const ast::LoopStatement* l) {
           scope_stack_.Push();
           TINT_DEFER(scope_stack_.Pop());

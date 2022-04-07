@@ -224,6 +224,8 @@ class Resolver {
   sem::GlobalVariable* GlobalVariable(const ast::Variable*);
   sem::Statement* Parameter(const ast::Variable*);
   sem::IfStatement* IfStatement(const ast::IfStatement*);
+  sem::Statement* IncrementDecrementStatement(
+      const ast::IncrementDecrementStatement*);
   sem::LoopStatement* LoopStatement(const ast::LoopStatement*);
   sem::Statement* ReturnStatement(const ast::ReturnStatement*);
   sem::Statement* Statement(const ast::Statement*);
@@ -263,6 +265,8 @@ class Resolver {
   bool ValidateFunctionCall(const sem::Call* call);
   bool ValidateGlobalVariable(const sem::Variable* var);
   bool ValidateIfStatement(const sem::IfStatement* stmt);
+  bool ValidateIncrementDecrementStatement(
+      const ast::IncrementDecrementStatement* stmt);
   bool ValidateInterpolateAttribute(const ast::InterpolateAttribute* attr,
                                     const sem::Type* storage_type);
   bool ValidateBuiltinCall(const sem::Call* call);

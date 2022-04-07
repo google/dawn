@@ -868,6 +868,9 @@ sem::Statement* Resolver::Statement(const ast::Statement* stmt) {
       [&](const ast::FallthroughStatement* f) {
         return FallthroughStatement(f);
       },
+      [&](const ast::IncrementDecrementStatement* i) {
+        return IncrementDecrementStatement(i);
+      },
       [&](const ast::ReturnStatement* r) { return ReturnStatement(r); },
       [&](const ast::VariableDeclStatement* v) {
         return VariableDeclStatement(v);
@@ -2682,6 +2685,21 @@ sem::Statement* Resolver::FallthroughStatement(
     sem->Behaviors() = sem::Behavior::kFallthrough;
 
     return ValidateFallthroughStatement(sem);
+  });
+}
+
+sem::Statement* Resolver::IncrementDecrementStatement(
+    const ast::IncrementDecrementStatement* stmt) {
+  auto* sem = builder_->create<sem::Statement>(
+      stmt, current_compound_statement_, current_function_);
+  return StatementScope(stmt, sem, [&] {
+    auto* lhs = Expression(stmt->lhs);
+    if (!lhs) {
+      return false;
+    }
+    sem->Behaviors() = lhs->Behaviors();
+
+    return ValidateIncrementDecrementStatement(stmt);
   });
 }
 

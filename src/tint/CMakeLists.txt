@@ -747,6 +747,7 @@ if(TINT_BUILD_TESTS)
     resolver/entry_point_validation_test.cc
     resolver/function_validation_test.cc
     resolver/host_shareable_validation_test.cc
+    resolver/increment_decrement_validation_test.cc
     resolver/inferred_type_test.cc
     resolver/is_host_shareable_test.cc
     resolver/is_storeable_test.cc

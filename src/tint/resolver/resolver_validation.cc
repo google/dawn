@@ -2347,6 +2347,54 @@ bool Resolver::ValidateAssignment(const ast::Statement* a,
   return true;
 }
 
+bool Resolver::ValidateIncrementDecrementStatement(
+    const ast::IncrementDecrementStatement* inc) {
+  const ast::Expression* lhs = inc->lhs;
+
+  // https://gpuweb.github.io/gpuweb/wgsl/#increment-decrement
+
+  if (auto* var = ResolvedSymbol<sem::Variable>(lhs)) {
+    auto* decl = var->Declaration();
+    if (var->Is<sem::Parameter>()) {
+      AddError("cannot modify function parameter", lhs->source);
+      AddNote("'" + builder_->Symbols().NameFor(decl->symbol) +
+                  "' is declared here:",
+              decl->source);
+      return false;
+    }
+    if (decl->is_const) {
+      AddError("cannot modify constant value", lhs->source);
+      AddNote("'" + builder_->Symbols().NameFor(decl->symbol) +
+                  "' is declared here:",
+              decl->source);
+      return false;
+    }
+  }
+
+  auto const* lhs_ty = TypeOf(lhs);
+  auto* lhs_ref = lhs_ty->As<sem::Reference>();
+  if (!lhs_ref) {
+    // LHS is not a reference, so it has no storage.
+    AddError("cannot modify value of type '" + TypeNameOf(lhs_ty) + "'",
+             lhs->source);
+    return false;
+  }
+
+  if (!lhs_ref->StoreType()->is_integer_scalar()) {
+    const std::string kind = inc->increment ? "increment" : "decrement";
+    AddError(kind + " statement can only be applied to an integer scalar",
+             lhs->source);
+    return false;
+  }
+
+  if (lhs_ref->Access() == ast::Access::kRead) {
+    AddError("cannot modify read-only type '" + RawTypeNameOf(lhs_ty) + "'",
+             inc->source);
+    return false;
+  }
+  return true;
+}
+
 bool Resolver::ValidateNoDuplicateAttributes(
     const ast::AttributeList& attributes) {
   std::unordered_map<const TypeInfo*, Source> seen;
