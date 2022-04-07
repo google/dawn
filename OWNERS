@@ -1,19 +1,12 @@
+# Top level owners, if you can, try to look at more targeted OWNERS
 bclayton@google.com
 cwallez@chromium.org
+dneto@google.com
+dsinclair@chromium.org
 enga@chromium.org
 jiawei.shao@intel.com
 
-# Backup reviewers if needed.
-kainino@chromium.org
-
-per-file dawn.json=kainino@chromium.org
+# TODO(dawn:1337): Move this file in src/dawn.
+per-file dawn.json=file://src/dawn/OWNERS
 per-file DEPS=*
-per-file README.md=file://docs/dawn/OWNERS
-
-# Tint specific OWNERS
-amaiorano@google.com
-bclayton@chromium.org
-cwallez@chromium.org
-dneto@google.com
-jrprice@google.com
-rharrison@chromium.org
+per-file README.md=file://docs/OWNERS
