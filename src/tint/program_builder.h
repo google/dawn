@@ -99,11 +99,9 @@
 #endif
 
 // Forward declarations
-namespace tint {
-namespace ast {
+namespace tint::ast {
 class VariableDeclStatement;
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
 namespace tint {
 class CloneContext;

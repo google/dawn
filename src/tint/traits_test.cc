@@ -16,8 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace traits {
+namespace tint::traits {
 
 namespace {
 struct S {};
@@ -231,5 +230,4 @@ TEST(SliceTuple, MixedTupleSliceHighPart) {
   static_assert(std::is_same_v<std::tuple_element_t<1, sliced>, float>);
 }
 
-}  // namespace traits
-}  // namespace tint
+}  // namespace tint::traits
