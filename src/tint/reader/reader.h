@@ -19,8 +19,7 @@
 
 #include "src/tint/program.h"
 
-namespace tint {
-namespace reader {
+namespace tint::reader {
 
 /// Base class for input readers
 class Reader {
@@ -59,7 +58,6 @@ class Reader {
   diag::List diags_;
 };
 
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader
 
 #endif  // SRC_TINT_READER_READER_H_

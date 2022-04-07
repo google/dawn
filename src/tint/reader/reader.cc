@@ -14,12 +14,10 @@
 
 #include "src/tint/reader/reader.h"
 
-namespace tint {
-namespace reader {
+namespace tint::reader {
 
 Reader::Reader() = default;
 
 Reader::~Reader() = default;
 
-}  // namespace reader
-}  // namespace tint
+}  // namespace tint::reader
