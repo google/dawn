@@ -136,6 +136,8 @@ set(TINT_LIB_SRCS
   ast/identifier_expression.h
   ast/if_statement.cc
   ast/if_statement.h
+  ast/increment_decrement_statement.cc
+  ast/increment_decrement_statement.h
   ast/int_literal_expression.cc
   ast/int_literal_expression.h
   ast/internal_attribute.cc
@@ -681,6 +683,7 @@ if(TINT_BUILD_TESTS)
     ast/id_attribute_test.cc
     ast/identifier_expression_test.cc
     ast/if_statement_test.cc
+    ast/increment_decrement_statement_test.cc
     ast/index_accessor_expression_test.cc
     ast/int_literal_expression_test.cc
     ast/interpolate_attribute_test.cc

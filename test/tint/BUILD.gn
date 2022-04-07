@@ -175,6 +175,7 @@ tint_unittests_source_set("tint_unittests_ast_src") {
     "../../src/tint/ast/id_attribute_test.cc",
     "../../src/tint/ast/identifier_expression_test.cc",
     "../../src/tint/ast/if_statement_test.cc",
+    "../../src/tint/ast/increment_decrement_statement_test.cc",
     "../../src/tint/ast/index_accessor_expression_test.cc",
     "../../src/tint/ast/int_literal_expression_test.cc",
     "../../src/tint/ast/interpolate_attribute_test.cc",

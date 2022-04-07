@@ -248,6 +248,8 @@ libtint_source_set("libtint_core_all_src") {
     "ast/identifier_expression.h",
     "ast/if_statement.cc",
     "ast/if_statement.h",
+    "ast/increment_decrement_statement.cc",
+    "ast/increment_decrement_statement.h",
     "ast/index_accessor_expression.cc",
     "ast/index_accessor_expression.h",
     "ast/int_literal_expression.cc",

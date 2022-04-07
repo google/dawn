@@ -46,6 +46,7 @@
 #include "src/tint/ast/i32.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/if_statement.h"
+#include "src/tint/ast/increment_decrement_statement.h"
 #include "src/tint/ast/index_accessor_expression.h"
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/invariant_attribute.h"
@@ -2298,6 +2299,46 @@ class ProgramBuilder {
     return create<ast::CompoundAssignmentStatement>(
         Expr(std::forward<LhsExpressionInit>(lhs)),
         Expr(std::forward<RhsExpressionInit>(rhs)), op);
+  }
+
+  /// Creates an ast::IncrementDecrementStatement with input lhs.
+  /// @param source the source information
+  /// @param lhs the left hand side expression initializer
+  /// @returns the increment decrement statement pointer
+  template <typename LhsExpressionInit>
+  const ast::IncrementDecrementStatement* Increment(const Source& source,
+                                                    LhsExpressionInit&& lhs) {
+    return create<ast::IncrementDecrementStatement>(
+        source, Expr(std::forward<LhsExpressionInit>(lhs)), true);
+  }
+
+  /// Creates a ast::IncrementDecrementStatement with input lhs.
+  /// @param lhs the left hand side expression initializer
+  /// @returns the increment decrement statement pointer
+  template <typename LhsExpressionInit>
+  const ast::IncrementDecrementStatement* Increment(LhsExpressionInit&& lhs) {
+    return create<ast::IncrementDecrementStatement>(
+        Expr(std::forward<LhsExpressionInit>(lhs)), true);
+  }
+
+  /// Creates an ast::IncrementDecrementStatement with input lhs.
+  /// @param source the source information
+  /// @param lhs the left hand side expression initializer
+  /// @returns the increment decrement statement pointer
+  template <typename LhsExpressionInit>
+  const ast::IncrementDecrementStatement* Decrement(const Source& source,
+                                                    LhsExpressionInit&& lhs) {
+    return create<ast::IncrementDecrementStatement>(
+        source, Expr(std::forward<LhsExpressionInit>(lhs)), false);
+  }
+
+  /// Creates a ast::IncrementDecrementStatement with input lhs.
+  /// @param lhs the left hand side expression initializer
+  /// @returns the increment decrement statement pointer
+  template <typename LhsExpressionInit>
+  const ast::IncrementDecrementStatement* Decrement(LhsExpressionInit&& lhs) {
+    return create<ast::IncrementDecrementStatement>(
+        Expr(std::forward<LhsExpressionInit>(lhs)), false);
   }
 
   /// Creates a ast::LoopStatement with input body and optional continuing
