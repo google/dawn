@@ -1,9 +1,9 @@
+bclayton@google.com
 cwallez@chromium.org
 enga@chromium.org
 jiawei.shao@intel.com
 
 # Backup reviewers if needed.
-bclayton@google.com
 kainino@chromium.org
 
 per-file dawn.json=kainino@chromium.org
@@ -13,7 +13,6 @@ per-file README.md=file://docs/dawn/OWNERS
 # Tint specific OWNERS
 amaiorano@google.com
 bclayton@chromium.org
-bclayton@google.com
 cwallez@chromium.org
 dneto@google.com
 jrprice@google.com
