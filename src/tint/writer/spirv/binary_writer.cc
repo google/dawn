@@ -16,9 +16,7 @@
 
 #include <cstring>
 
-namespace tint {
-namespace writer {
-namespace spirv {
+namespace tint::writer::spirv {
 namespace {
 
 const uint32_t kGeneratorId = 23u << 16;
@@ -72,6 +70,4 @@ void BinaryWriter::process_op(const Operand& op) {
   }
 }
 
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv

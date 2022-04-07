@@ -19,9 +19,7 @@
 
 #include "src/tint/writer/spirv/builder.h"
 
-namespace tint {
-namespace writer {
-namespace spirv {
+namespace tint::writer::spirv {
 
 /// Writer to convert from builder to SPIR-V binary
 class BinaryWriter {
@@ -54,8 +52,6 @@ class BinaryWriter {
   std::vector<uint32_t> out_;
 };
 
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv
 
 #endif  // SRC_TINT_WRITER_SPIRV_BINARY_WRITER_H_

@@ -23,9 +23,7 @@
 #include "spirv-tools/libspirv.hpp"
 #include "src/tint/writer/spirv/binary_writer.h"
 
-namespace tint {
-namespace writer {
-namespace spirv {
+namespace tint::writer::spirv {
 
 /// Helper class for testing
 template <typename BASE>
@@ -132,8 +130,6 @@ using TestHelper = TestHelperBase<testing::Test>;
 template <typename T>
 using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv
 
 #endif  // SRC_TINT_WRITER_SPIRV_TEST_HELPER_H_

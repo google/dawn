@@ -21,17 +21,16 @@
 
 #include "src/tint/writer/writer.h"
 
-namespace tint {
-
 // Forward declarations
+namespace tint {
 class Program;
-
-namespace writer {
-namespace spirv {
-
-/// Forward declarations
+namespace writer::spirv {
 class Builder;
 class BinaryWriter;
+}  // namespace writer::spirv
+}  // namespace tint
+
+namespace tint::writer::spirv {
 
 /// Configuration options used for generating SPIR-V.
 struct Options {
@@ -79,8 +78,6 @@ struct Result {
 /// @returns the resulting SPIR-V and supplementary information
 Result Generate(const Program* program, const Options& options);
 
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv
 
 #endif  // SRC_TINT_WRITER_SPIRV_GENERATOR_H_

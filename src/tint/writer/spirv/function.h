@@ -19,9 +19,7 @@
 
 #include "src/tint/writer/spirv/instruction.h"
 
-namespace tint {
-namespace writer {
-namespace spirv {
+namespace tint::writer::spirv {
 
 /// A SPIR-V function
 class Function {
@@ -94,8 +92,6 @@ class Function {
   InstructionList instructions_;
 };
 
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv
 
 #endif  // SRC_TINT_WRITER_SPIRV_FUNCTION_H_

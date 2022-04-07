@@ -15,9 +15,7 @@
 #include "src/tint/writer/spirv/scalar_constant.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace spirv {
+namespace tint::writer::spirv {
 namespace {
 
 using SpirvScalarConstantTest = TestHelper;
@@ -55,6 +53,4 @@ TEST_F(SpirvScalarConstantTest, U32) {
 }
 
 }  // namespace
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv

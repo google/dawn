@@ -16,9 +16,7 @@
 
 #include <utility>
 
-namespace tint {
-namespace writer {
-namespace spirv {
+namespace tint::writer::spirv {
 
 Instruction::Instruction(spv::Op op, OperandList operands)
     : op_(op), operands_(std::move(operands)) {}
@@ -35,6 +33,4 @@ uint32_t Instruction::word_length() const {
   return size;
 }
 
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv

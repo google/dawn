@@ -14,9 +14,7 @@
 
 #include "src/tint/writer/spirv/operand.h"
 
-namespace tint {
-namespace writer {
-namespace spirv {
+namespace tint::writer::spirv {
 
 // static
 Operand Operand::Float(float val) {
@@ -60,6 +58,4 @@ uint32_t Operand::length() const {
   return val;
 }
 
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv

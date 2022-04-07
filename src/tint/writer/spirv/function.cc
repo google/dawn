@@ -14,9 +14,7 @@
 
 #include "src/tint/writer/spirv/function.h"
 
-namespace tint {
-namespace writer {
-namespace spirv {
+namespace tint::writer::spirv {
 
 Function::Function()
     : declaration_(Instruction{spv::Op::OpNop, {}}),
@@ -50,6 +48,4 @@ void Function::iterate(std::function<void(const Instruction&)> cb) const {
   cb(Instruction{spv::Op::OpFunctionEnd, {}});
 }
 
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv

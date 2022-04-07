@@ -20,9 +20,7 @@
 
 #include "src/tint/writer/spirv/builder.h"
 
-namespace tint {
-namespace writer {
-namespace spirv {
+namespace tint::writer::spirv {
 
 /// Dumps the given builder to a SPIR-V disassembly string
 /// @param builder the builder to convert
@@ -39,8 +37,6 @@ std::string DumpInstruction(const Instruction& inst);
 /// @returns the instruction as a SPIR-V disassembly string
 std::string DumpInstructions(const InstructionList& insts);
 
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv
 
 #endif  // SRC_TINT_WRITER_SPIRV_SPV_DUMP_H_

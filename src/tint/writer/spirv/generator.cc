@@ -16,9 +16,7 @@
 
 #include "src/tint/writer/spirv/binary_writer.h"
 
-namespace tint {
-namespace writer {
-namespace spirv {
+namespace tint::writer::spirv {
 
 Result::Result() = default;
 Result::~Result() = default;
@@ -62,6 +60,4 @@ Result Generate(const Program* program, const Options& options) {
   return result;
 }
 
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv

@@ -62,9 +62,7 @@
 #include "src/tint/writer/append_vector.h"
 #include "src/tint/writer/generate_external_texture_bindings.h"
 
-namespace tint {
-namespace writer {
-namespace spirv {
+namespace tint::writer::spirv {
 namespace {
 
 using BuiltinType = sem::BuiltinType;
@@ -4380,6 +4378,4 @@ Builder::Backedge& Builder::Backedge::operator=(
     const Builder::Backedge& other) = default;
 Builder::Backedge::~Backedge() = default;
 
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv

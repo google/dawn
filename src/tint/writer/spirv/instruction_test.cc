@@ -16,9 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace writer {
-namespace spirv {
+namespace tint::writer::spirv {
 namespace {
 
 using InstructionTest = testing::Test;
@@ -47,6 +45,4 @@ TEST_F(InstructionTest, Length) {
 }
 
 }  // namespace
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv

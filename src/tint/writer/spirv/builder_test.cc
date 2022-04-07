@@ -15,9 +15,7 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
-namespace tint {
-namespace writer {
-namespace spirv {
+namespace tint::writer::spirv {
 namespace {
 
 using BuilderTest = TestHelper;
@@ -43,6 +41,4 @@ TEST_F(BuilderTest, Capabilities_Dedup) {
 }
 
 }  // namespace
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv

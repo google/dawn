@@ -17,9 +17,7 @@
 #include "spirv-tools/libspirv.hpp"
 #include "src/tint/writer/spirv/binary_writer.h"
 
-namespace tint {
-namespace writer {
-namespace spirv {
+namespace tint::writer::spirv {
 namespace {
 
 std::string Disassemble(const std::vector<uint32_t>& data) {
@@ -84,6 +82,4 @@ std::string DumpInstructions(const InstructionList& insts) {
   return Disassemble(writer.result());
 }
 
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv

@@ -20,9 +20,7 @@
 #include "spirv/unified1/spirv.hpp11"
 #include "src/tint/writer/spirv/operand.h"
 
-namespace tint {
-namespace writer {
-namespace spirv {
+namespace tint::writer::spirv {
 
 /// A single SPIR-V instruction
 class Instruction {
@@ -52,8 +50,6 @@ class Instruction {
 /// A list of instructions
 using InstructionList = std::vector<Instruction>;
 
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv
 
 #endif  // SRC_TINT_WRITER_SPIRV_INSTRUCTION_H_

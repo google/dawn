@@ -18,9 +18,7 @@
 #include <string>
 #include <vector>
 
-namespace tint {
-namespace writer {
-namespace spirv {
+namespace tint::writer::spirv {
 
 /// A single SPIR-V instruction operand
 class Operand {
@@ -92,8 +90,6 @@ class Operand {
 /// A list of operands
 using OperandList = std::vector<Operand>;
 
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv
 
 #endif  // SRC_TINT_WRITER_SPIRV_OPERAND_H_

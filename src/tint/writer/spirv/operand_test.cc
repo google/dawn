@@ -16,9 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace writer {
-namespace spirv {
+namespace tint::writer::spirv {
 namespace {
 
 using OperandTest = testing::Test;
@@ -62,6 +60,4 @@ TEST_F(OperandTest, Length_String_Empty) {
 }
 
 }  // namespace
-}  // namespace spirv
-}  // namespace writer
-}  // namespace tint
+}  // namespace tint::writer::spirv
