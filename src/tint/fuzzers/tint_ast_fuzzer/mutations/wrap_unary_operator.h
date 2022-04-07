@@ -21,9 +21,7 @@
 
 #include "src/tint/sem/variable.h"
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 
 /// @see MutationWrapUnaryOperator::Apply
 class MutationWrapUnaryOperator : public Mutation {
@@ -78,8 +76,6 @@ class MutationWrapUnaryOperator : public Mutation {
   protobufs::MutationWrapUnaryOperator message_;
 };
 
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer
 
 #endif  // SRC_TINT_FUZZERS_TINT_AST_FUZZER_MUTATIONS_WRAP_UNARY_OPERATOR_H_

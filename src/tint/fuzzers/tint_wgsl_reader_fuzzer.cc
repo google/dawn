@@ -17,8 +17,7 @@
 #include "src/tint/fuzzers/fuzzer_init.h"
 #include "src/tint/fuzzers/tint_common_fuzzer.h"
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kNone);
@@ -26,5 +25,4 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   return fuzzer.Run(data, size);
 }
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers

@@ -17,13 +17,11 @@
 
 #include "src/tint/fuzzers/cli.h"
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 /// Returns the common CliParams parsed and populated by LLVMFuzzerInitialize()
 const CliParams& GetCliParams();
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers
 
 #endif  // SRC_TINT_FUZZERS_FUZZER_INIT_H_

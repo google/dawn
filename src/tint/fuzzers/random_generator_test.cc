@@ -20,8 +20,7 @@
 
 #include "src/tint/fuzzers/mersenne_twister_engine.h"
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 namespace {
 
 /// Implementation of RandomGeneratorEngine that just returns a stream of
@@ -198,5 +197,4 @@ TEST_F(RandomGeneratorTest, GetRandomElement) {
 }
 
 }  // namespace
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers

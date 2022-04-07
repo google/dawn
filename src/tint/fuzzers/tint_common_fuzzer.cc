@@ -32,8 +32,7 @@
 #include "src/tint/program.h"
 #include "src/tint/utils/hash.h"
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 namespace {
 
@@ -346,5 +345,4 @@ void CommonFuzzer::RunInspector(Program* program) {
   }
 }
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers

@@ -21,8 +21,7 @@
 #include <string>
 #include <utility>
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 namespace {
 
 const char* const kHelpMessage = R"(
@@ -112,5 +111,4 @@ CliParams ParseCliParams(int* argc, char** argv) {
   return cli_params;
 }
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers

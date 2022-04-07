@@ -14,9 +14,7 @@
 
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/mutator.h"
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
+namespace tint::fuzzers::spvtools_fuzzer {
 
 // We need to define constructor here so that vtable is produced in this
 // translation unit (see -Wweak-vtables clang flag).
@@ -29,6 +27,4 @@ Mutator::Result::Result(Status status, bool is_changed)
          "Returning invalid result state");
 }
 
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer

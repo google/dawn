@@ -19,9 +19,7 @@
 
 #include "src/tint/program_builder.h"
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 
 MutationWrapUnaryOperator::MutationWrapUnaryOperator(
     protobufs::MutationWrapUnaryOperator message)
@@ -122,6 +120,4 @@ std::vector<ast::UnaryOp> MutationWrapUnaryOperator::GetValidUnaryWrapper(
   return {};
 }
 
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer

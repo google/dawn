@@ -15,8 +15,7 @@
 #include "src/tint/fuzzers/fuzzer_init.h"
 #include "src/tint/fuzzers/cli.h"
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 namespace {
 CliParams cli_params;
@@ -31,5 +30,4 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
   return 0;
 }
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers

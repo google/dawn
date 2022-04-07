@@ -20,8 +20,7 @@
 #include "src/tint/fuzzers/tint_common_fuzzer.h"
 #include "src/tint/fuzzers/transform_builder.h"
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 /// Wrapper around the common fuzzing class for tint_*_reader_*_writter fuzzers
 class ReaderWriterFuzzer : public CommonFuzzer {
@@ -66,7 +65,6 @@ class ReaderWriterFuzzer : public CommonFuzzer {
   std::unique_ptr<TransformBuilder> tb_;
 };
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers
 
 #endif  // SRC_TINT_FUZZERS_TINT_READER_WRITER_FUZZER_H_

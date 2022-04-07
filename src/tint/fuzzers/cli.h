@@ -17,8 +17,7 @@
 
 #include <cstdint>
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 /// CLI parameters accepted by the fuzzer. Type -tint_help in the CLI to see the
 /// help message
@@ -40,7 +39,6 @@ struct CliParams {
 /// @return parsed parameters.
 CliParams ParseCliParams(int* argc, char** argv);
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers
 
 #endif  // SRC_TINT_FUZZERS_CLI_H_

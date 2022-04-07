@@ -22,9 +22,7 @@
 #include "spirv-tools/optimizer.hpp"
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/util.h"
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
+namespace tint::fuzzers::spvtools_fuzzer {
 
 SpirvOptMutator::SpirvOptMutator(spv_target_env target_env,
                                  uint32_t seed,
@@ -154,6 +152,4 @@ void SpirvOptMutator::LogErrors(const std::string* path, uint32_t count) const {
   }
 }
 
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer

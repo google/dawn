@@ -25,9 +25,7 @@
 #include "src/tint/reader/wgsl/parser.h"
 #include "src/tint/writer/wgsl/generator.h"
 
-namespace tint {
-namespace fuzzers {
-namespace regex_fuzzer {
+namespace tint::fuzzers::regex_fuzzer {
 namespace {
 
 CliParams cli_params{};
@@ -151,6 +149,4 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 }
 
 }  // namespace
-}  // namespace regex_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::regex_fuzzer

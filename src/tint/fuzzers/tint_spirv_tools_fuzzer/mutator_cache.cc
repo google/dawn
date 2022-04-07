@@ -14,9 +14,7 @@
 
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/mutator_cache.h"
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
+namespace tint::fuzzers::spvtools_fuzzer {
 
 MutatorCache::MutatorCache(size_t max_size)
     : map_(), entries_(), max_size_(max_size) {
@@ -73,6 +71,4 @@ void MutatorCache::UpdateUsage(Map::iterator it) {
   it->second = entries_.begin();
 }
 
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer

@@ -15,14 +15,10 @@
 #include "src/tint/fuzzers/tint_regex_fuzzer/cli.h"
 #include "src/tint/fuzzers/tint_regex_fuzzer/override_cli_params.h"
 
-namespace tint {
-namespace fuzzers {
-namespace regex_fuzzer {
+namespace tint::fuzzers::regex_fuzzer {
 
 void OverrideCliParams(CliParams& /*unused*/) {
   // Leave the CLI parameters unchanged.
 }
 
-}  // namespace regex_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::regex_fuzzer

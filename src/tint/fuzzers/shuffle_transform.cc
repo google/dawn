@@ -18,8 +18,7 @@
 
 #include "src/tint/program_builder.h"
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 ShuffleTransform::ShuffleTransform(size_t seed) : seed_(seed) {}
 
@@ -34,5 +33,4 @@ void ShuffleTransform::Run(CloneContext& ctx,
   }
 }
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers

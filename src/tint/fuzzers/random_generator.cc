@@ -22,8 +22,7 @@
 #include "src/tint/fuzzers/random_generator_engine.h"
 #include "src/tint/utils/hash.h"
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 namespace {
 
@@ -120,5 +119,4 @@ uint64_t RandomGenerator::CalculateSeed(const uint8_t* data, size_t size) {
   auto hash_size = static_cast<size_t>(hash_end_i64) - hash_begin;
   return HashBuffer(data + hash_begin, hash_size);
 }
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers

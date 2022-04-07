@@ -26,9 +26,7 @@
 
 #include "source/reduce/reduction_opportunity_finder.h"
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
+namespace tint::fuzzers::spvtools_fuzzer {
 
 /// Mutates SPIR-V binary by running spirv-reduce tool.
 ///
@@ -125,8 +123,6 @@ class SpirvReduceMutator : public Mutator {
   const uint32_t seed_;
 };
 
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer
 
 #endif  // SRC_TINT_FUZZERS_TINT_SPIRV_TOOLS_FUZZER_SPIRV_REDUCE_MUTATOR_H_

@@ -21,9 +21,7 @@
 
 #include "src/tint/fuzzers/random_generator.h"
 
-namespace tint {
-namespace fuzzers {
-namespace regex_fuzzer {
+namespace tint::fuzzers::regex_fuzzer {
 
 /// A function that given a delimiter, returns a vector that contains
 /// all the positions of the delimiter in the WGSL code.
@@ -179,8 +177,6 @@ bool ReplaceRandomIntLiteral(std::string& wgsl_code,
 /// @param generator - the random number generator.
 /// @return true if the mutation was succesful or false otherwise.
 bool InsertReturnStatement(std::string& wgsl_code, RandomGenerator& generator);
-}  // namespace regex_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::regex_fuzzer
 
 #endif  // SRC_TINT_FUZZERS_TINT_REGEX_FUZZER_WGSL_MUTATOR_H_

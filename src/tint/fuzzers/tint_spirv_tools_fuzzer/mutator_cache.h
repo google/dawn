@@ -24,9 +24,7 @@
 
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/mutator.h"
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
+namespace tint::fuzzers::spvtools_fuzzer {
 
 /// Implementation of a fixed size LRU cache. That is, when the number of
 /// elements reaches a certain threshold, the element that wasn't used for the
@@ -92,8 +90,6 @@ class MutatorCache {
   const size_t max_size_;
 };
 
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer
 
 #endif  // SRC_TINT_FUZZERS_TINT_SPIRV_TOOLS_FUZZER_MUTATOR_CACHE_H_

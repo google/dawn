@@ -17,10 +17,7 @@
 
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/util.h"
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
-namespace util {
+namespace tint::fuzzers::spvtools_fuzzer::util {
 namespace {
 
 bool WriteBinary(const std::string& path, const uint8_t* data, size_t size) {
@@ -151,7 +148,4 @@ bool WriteBinary(const std::string& path, const std::vector<uint32_t>& binary) {
                      binary.size() * sizeof(uint32_t));
 }
 
-}  // namespace util
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer::util

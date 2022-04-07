@@ -26,8 +26,7 @@
 
 #include "src/tint/fuzzers/data_builder.h"
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 // TODO(crbug.com/tint/1356): Add using shader reflection to generate options
 //                            that are potentially valid for Generate*Options
@@ -156,7 +155,6 @@ class CommonFuzzer {
   void RunInspector(Program* program);
 };
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers
 
 #endif  // SRC_TINT_FUZZERS_TINT_COMMON_FUZZER_H_

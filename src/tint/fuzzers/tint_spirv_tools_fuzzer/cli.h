@@ -20,9 +20,7 @@
 
 #include "source/fuzz/fuzzer.h"
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
+namespace tint::fuzzers::spvtools_fuzzer {
 
 /// Default SPIR-V environment that will be used during fuzzing.
 const auto kDefaultTargetEnv = SPV_ENV_VULKAN_1_1;
@@ -160,8 +158,6 @@ FuzzerCliParams ParseFuzzerCliParams(int* argc, char** argv);
 MutatorDebuggerCliParams ParseMutatorDebuggerCliParams(int argc,
                                                        const char* const* argv);
 
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer
 
 #endif  // SRC_TINT_FUZZERS_TINT_SPIRV_TOOLS_FUZZER_CLI_H_

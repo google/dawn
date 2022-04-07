@@ -19,8 +19,7 @@
 
 #include "src/tint/utils/hash.h"
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 namespace {
 
@@ -55,5 +54,4 @@ void MersenneTwisterEngine::RandomNBytes(uint8_t* dest, size_t n) {
       std::independent_bits_engine<std::mt19937_64, 8, uint8_t>(engine_));
 }
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers

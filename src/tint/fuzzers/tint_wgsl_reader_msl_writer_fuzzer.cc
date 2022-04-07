@@ -17,8 +17,7 @@
 #include "src/tint/fuzzers/fuzzer_init.h"
 #include "src/tint/fuzzers/tint_reader_writer_fuzzer.h"
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   DataBuilder db(data, size);
@@ -33,5 +32,4 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   return fuzzer.Run(data, size);
 }
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers

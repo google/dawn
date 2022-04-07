@@ -26,9 +26,7 @@
 #include "src/tint/reader/wgsl/parser.h"
 #include "src/tint/writer/wgsl/generator.h"
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 namespace {
 
 std::string OpToString(ast::BinaryOp op) {
@@ -719,6 +717,4 @@ TEST(ChangeBinaryOperatorTest, ShiftLeftShiftRight) {
 }
 
 }  // namespace
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer

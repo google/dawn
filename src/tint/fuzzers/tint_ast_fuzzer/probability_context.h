@@ -20,9 +20,7 @@
 
 #include "src/tint/fuzzers/random_generator.h"
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 
 /// This class is intended to be used by the `MutationFinder`s to introduce some
 /// variance to the mutation process.
@@ -82,8 +80,6 @@ class ProbabilityContext {
   uint32_t chance_of_wrapping_unary_operators_;
 };
 
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer
 
 #endif  // SRC_TINT_FUZZERS_TINT_AST_FUZZER_PROBABILITY_CONTEXT_H_

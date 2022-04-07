@@ -17,9 +17,7 @@
 
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutation_finder.h"
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 
 /// Looks for opportunities to apply
 /// `MutationFinderWrapUnaryOperators`.
@@ -36,8 +34,6 @@ class MutationFinderWrapUnaryOperators : public MutationFinder {
       ProbabilityContext* probability_context) const override;
 };
 
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer
 
 #endif  // SRC_TINT_FUZZERS_TINT_AST_FUZZER_MUTATION_FINDERS_WRAP_UNARY_OPERATORS_H_

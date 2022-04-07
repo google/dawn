@@ -17,9 +17,7 @@
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/cli.h"
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/override_cli_params.h"
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
+namespace tint::fuzzers::spvtools_fuzzer {
 
 void OverrideCliParams(FuzzerCliParams& cli_params) {
   assert(cli_params.fuzzing_target == FuzzingTarget::kAll &&
@@ -28,6 +26,4 @@ void OverrideCliParams(FuzzerCliParams& cli_params) {
   cli_params.fuzzing_target = FuzzingTarget::kHlsl;
 }
 
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer

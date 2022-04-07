@@ -18,9 +18,7 @@
 
 #include "src/tint/fuzzers/tint_regex_fuzzer/wgsl_mutator.h"
 
-namespace tint {
-namespace fuzzers {
-namespace regex_fuzzer {
+namespace tint::fuzzers::regex_fuzzer {
 namespace {
 
 // Swaps two non-consecutive regions in the edge
@@ -516,6 +514,4 @@ TEST(TestInsertReturn, TestMissingSemicolon) {
 }
 
 }  // namespace
-}  // namespace regex_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::regex_fuzzer

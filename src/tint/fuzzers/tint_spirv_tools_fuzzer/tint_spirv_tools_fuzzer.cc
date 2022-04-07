@@ -17,14 +17,10 @@
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/cli.h"
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/override_cli_params.h"
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
+namespace tint::fuzzers::spvtools_fuzzer {
 
 void OverrideCliParams(FuzzerCliParams& /*unused*/) {
   // Leave the CLI parameters unchanged.
 }
 
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer

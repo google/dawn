@@ -28,9 +28,7 @@
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/spirv_reduce_mutator.h"
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/util.h"
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
+namespace tint::fuzzers::spvtools_fuzzer {
 namespace {
 
 struct Context {
@@ -258,6 +256,4 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 }
 
 }  // namespace
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer

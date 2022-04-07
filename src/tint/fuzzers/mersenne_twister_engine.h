@@ -19,8 +19,7 @@
 
 #include "src/tint/fuzzers/random_generator_engine.h"
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 /// Standard MT based random number generation
 class MersenneTwisterEngine : public RandomGeneratorEngine {
@@ -55,7 +54,6 @@ class MersenneTwisterEngine : public RandomGeneratorEngine {
   std::mt19937_64 engine_;
 };  // class MersenneTwisterEngine
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers
 
 #endif  // SRC_TINT_FUZZERS_MERSENNE_TWISTER_ENGINE_H_

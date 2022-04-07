@@ -24,9 +24,7 @@
 #include "src/tint/clone_context.h"
 #include "src/tint/program.h"
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 
 /// The base class for all the mutations in the fuzzer. Children must override
 /// three methods:
@@ -79,8 +77,6 @@ class Mutation {
 
 using MutationList = std::vector<std::unique_ptr<Mutation>>;
 
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer
 
 #endif  // SRC_TINT_FUZZERS_TINT_AST_FUZZER_MUTATION_H_

@@ -17,9 +17,7 @@
 #include "src/tint/fuzzers/tint_regex_fuzzer/cli.h"
 #include "src/tint/fuzzers/tint_regex_fuzzer/override_cli_params.h"
 
-namespace tint {
-namespace fuzzers {
-namespace regex_fuzzer {
+namespace tint::fuzzers::regex_fuzzer {
 
 void OverrideCliParams(CliParams& cli_params) {
   assert(cli_params.fuzzing_target == FuzzingTarget::kAll &&
@@ -28,6 +26,4 @@ void OverrideCliParams(CliParams& cli_params) {
   cli_params.fuzzing_target = FuzzingTarget::kMsl;
 }
 
-}  // namespace regex_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::regex_fuzzer

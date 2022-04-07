@@ -15,14 +15,10 @@
 #include "src/tint/fuzzers/tint_ast_fuzzer/cli.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/override_cli_params.h"
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 
 void OverrideCliParams(CliParams& /*unused*/) {
   // Leave the CLI parameters unchanged.
 }
 
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer

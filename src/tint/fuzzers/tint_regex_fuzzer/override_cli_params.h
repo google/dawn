@@ -17,9 +17,7 @@
 
 #include "src/tint/fuzzers/tint_regex_fuzzer/cli.h"
 
-namespace tint {
-namespace fuzzers {
-namespace regex_fuzzer {
+namespace tint::fuzzers::regex_fuzzer {
 
 /// @brief Allows CLI parameters to be overridden.
 ///
@@ -29,8 +27,6 @@ namespace regex_fuzzer {
 /// @param cli_params - the parsed CLI parameters to be updated.
 void OverrideCliParams(CliParams& cli_params);
 
-}  // namespace regex_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::regex_fuzzer
 
 #endif  // SRC_TINT_FUZZERS_TINT_REGEX_FUZZER_OVERRIDE_CLI_PARAMS_H_

@@ -25,8 +25,7 @@
 #include "src/tint/writer/hlsl/generator.h"
 #include "src/tint/writer/msl/generator.h"
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 /// Builder for generic pseudo-random data
 class DataBuilder {
@@ -240,7 +239,6 @@ class DataBuilder {
   };
 };
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers
 
 #endif  // SRC_TINT_FUZZERS_DATA_BUILDER_H_

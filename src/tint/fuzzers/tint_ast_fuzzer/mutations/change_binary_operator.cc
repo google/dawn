@@ -18,9 +18,7 @@
 
 #include "src/tint/sem/reference_type.h"
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 
 namespace {
 
@@ -484,6 +482,4 @@ protobufs::Mutation MutationChangeBinaryOperator::ToMessage() const {
   return mutation;
 }
 
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer

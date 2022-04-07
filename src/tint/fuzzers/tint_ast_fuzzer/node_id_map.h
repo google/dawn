@@ -19,9 +19,7 @@
 
 #include "src/tint/program.h"
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 
 /// Contains a one-to-one mapping between the nodes in the AST of the program
 /// and their ids.
@@ -89,8 +87,6 @@ class NodeIdMap {
   std::unordered_map<IdType, const ast::Node*> id_to_node_;
 };
 
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer
 
 #endif  // SRC_TINT_FUZZERS_TINT_AST_FUZZER_NODE_ID_MAP_H_

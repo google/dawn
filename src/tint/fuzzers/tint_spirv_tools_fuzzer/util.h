@@ -24,10 +24,7 @@
 
 #include "spirv-tools/libspirv.hpp"
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
-namespace util {
+namespace tint::fuzzers::spvtools_fuzzer::util {
 
 /// @param buffer will be used to output errors by the returned message
 ///     consumer. Must remain in scope as long as the returned consumer is in
@@ -88,9 +85,6 @@ bool ReadBinary(const std::string& path, std::vector<uint32_t>* out);
 /// @return whether the operation was successful.
 bool WriteBinary(const std::string& path, const std::vector<uint32_t>& binary);
 
-}  // namespace util
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer::util
 
 #endif  // SRC_TINT_FUZZERS_TINT_SPIRV_TOOLS_FUZZER_UTIL_H_

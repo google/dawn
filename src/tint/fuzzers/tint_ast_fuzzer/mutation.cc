@@ -20,9 +20,7 @@
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutations/replace_identifier.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutations/wrap_unary_operator.h"
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 
 Mutation::~Mutation() = default;
 
@@ -45,6 +43,4 @@ std::unique_ptr<Mutation> Mutation::FromMessage(
   return nullptr;
 }
 
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer

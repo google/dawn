@@ -32,9 +32,7 @@
 #include "source/reduce/structured_loop_to_selection_reduction_opportunity_finder.h"
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/util.h"
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
+namespace tint::fuzzers::spvtools_fuzzer {
 
 SpirvReduceMutator::SpirvReduceMutator(spv_target_env target_env,
                                        std::vector<uint32_t> binary,
@@ -185,6 +183,4 @@ void SpirvReduceMutator::LogErrors(const std::string* path,
   }
 }
 
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer

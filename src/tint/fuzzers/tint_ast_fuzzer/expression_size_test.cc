@@ -24,9 +24,7 @@
 #include "src/tint/program.h"
 #include "src/tint/reader/wgsl/parser.h"
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 namespace {
 
 TEST(ExpressionSizeTest, Basic) {
@@ -65,6 +63,4 @@ TEST(ExpressionSizeTest, Basic) {
 }
 
 }  // namespace
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer

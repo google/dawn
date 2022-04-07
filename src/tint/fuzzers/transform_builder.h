@@ -23,8 +23,7 @@
 #include "src/tint/fuzzers/data_builder.h"
 #include "src/tint/fuzzers/shuffle_transform.h"
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 /// Fuzzer utility class to build inputs for transforms and setup the transform
 /// manager.
@@ -222,7 +221,6 @@ class TransformBuilder {
   };
 };  // class TransformBuilder
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers
 
 #endif  // SRC_TINT_FUZZERS_TRANSFORM_BUILDER_H_

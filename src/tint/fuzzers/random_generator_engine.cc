@@ -14,13 +14,11 @@
 
 #include "src/tint/fuzzers/random_generator_engine.h"
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 // Not in header to avoid weak vtable warnings from clang
 RandomGeneratorEngine::RandomGeneratorEngine() = default;
 RandomGeneratorEngine::~RandomGeneratorEngine() = default;
 RandomGeneratorEngine::RandomGeneratorEngine(RandomGeneratorEngine&&) = default;
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers

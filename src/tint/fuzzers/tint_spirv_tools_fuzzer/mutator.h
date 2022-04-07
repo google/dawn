@@ -20,9 +20,7 @@
 #include <string>
 #include <vector>
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
+namespace tint::fuzzers::spvtools_fuzzer {
 
 /// This is an interface that is used to define custom mutators based on the
 /// SPIR-V tools.
@@ -101,8 +99,6 @@ class Mutator {
   virtual std::string GetErrors() const = 0;
 };
 
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer
 
 #endif  // SRC_TINT_FUZZERS_TINT_SPIRV_TOOLS_FUZZER_MUTATOR_H_

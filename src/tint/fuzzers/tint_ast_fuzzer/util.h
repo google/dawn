@@ -26,10 +26,7 @@
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
-namespace util {
+namespace tint::fuzzers::ast_fuzzer::util {
 /// @file
 
 /// @brief Returns all in-scope variables (including formal function parameters)
@@ -101,9 +98,6 @@ std::vector<const sem::Variable*> GetAllVarsInScope(
   return result;
 }
 
-}  // namespace util
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer::util
 
 #endif  // SRC_TINT_FUZZERS_TINT_AST_FUZZER_UTIL_H_

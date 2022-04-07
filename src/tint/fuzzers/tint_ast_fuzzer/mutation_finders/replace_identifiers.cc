@@ -23,9 +23,7 @@
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 
 MutationList MutationFinderReplaceIdentifiers::FindMutations(
     const tint::Program& program,
@@ -74,6 +72,4 @@ uint32_t MutationFinderReplaceIdentifiers::GetChanceOfApplyingMutation(
   return probability_context->GetChanceOfReplacingIdentifiers();
 }
 
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer

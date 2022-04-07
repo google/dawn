@@ -24,9 +24,7 @@
 #include "source/opt/build_module.h"
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/util.h"
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
+namespace tint::fuzzers::spvtools_fuzzer {
 namespace {
 
 const char* const kMutatorParameters = R"(
@@ -479,6 +477,4 @@ MutatorDebuggerCliParams ParseMutatorDebuggerCliParams(
   return cli_params;
 }
 
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer

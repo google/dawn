@@ -20,9 +20,7 @@
 #include "source/opt/build_module.h"
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/util.h"
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
+namespace tint::fuzzers::spvtools_fuzzer {
 
 SpirvFuzzMutator::SpirvFuzzMutator(
     spv_target_env target_env,
@@ -122,6 +120,4 @@ void SpirvFuzzMutator::LogErrors(const std::string* path,
   }
 }
 
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer

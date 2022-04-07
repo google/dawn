@@ -23,9 +23,7 @@
 #include "src/tint/fuzzers/random_generator.h"
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/mutator.h"
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
+namespace tint::fuzzers::spvtools_fuzzer {
 
 /// Mutates the SPIR-V module using the spirv-opt tool.
 ///
@@ -89,8 +87,6 @@ class SpirvOptMutator : public Mutator {
   RandomGenerator generator_;
 };
 
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer
 
 #endif  // SRC_TINT_FUZZERS_TINT_SPIRV_TOOLS_FUZZER_SPIRV_OPT_MUTATOR_H_

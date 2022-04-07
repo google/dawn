@@ -19,9 +19,7 @@
 #include "src/tint/fuzzers/tint_ast_fuzzer/util.h"
 #include "src/tint/program_builder.h"
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 
 MutationReplaceIdentifier::MutationReplaceIdentifier(
     protobufs::MutationReplaceIdentifier message)
@@ -101,6 +99,4 @@ protobufs::Mutation MutationReplaceIdentifier::ToMessage() const {
   return mutation;
 }
 
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer

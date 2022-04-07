@@ -17,8 +17,7 @@
 
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 /// ShuffleTransform reorders the module scope declarations into a random order
 class ShuffleTransform : public tint::transform::Transform {
@@ -36,7 +35,6 @@ class ShuffleTransform : public tint::transform::Transform {
   size_t seed_;
 };
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers
 
 #endif  // SRC_TINT_FUZZERS_SHUFFLE_TRANSFORM_H_

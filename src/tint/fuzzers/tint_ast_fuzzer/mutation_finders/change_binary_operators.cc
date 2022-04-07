@@ -20,9 +20,7 @@
 #include "src/tint/ast/binary_expression.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutations/change_binary_operator.h"
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 
 MutationList MutationFinderChangeBinaryOperators::FindMutations(
     const tint::Program& program,
@@ -87,6 +85,4 @@ uint32_t MutationFinderChangeBinaryOperators::GetChanceOfApplyingMutation(
   return probability_context->GetChanceOfChangingBinaryOperators();
 }
 
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer

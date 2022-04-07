@@ -17,9 +17,7 @@
 
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/cli.h"
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
+namespace tint::fuzzers::spvtools_fuzzer {
 
 /// @brief Allows CLI parameters to be overridden.
 ///
@@ -29,8 +27,6 @@ namespace spvtools_fuzzer {
 /// @param cli_params - the parsed CLI parameters to be updated.
 void OverrideCliParams(FuzzerCliParams& cli_params);
 
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer
 
 #endif  // SRC_TINT_FUZZERS_TINT_SPIRV_TOOLS_FUZZER_OVERRIDE_CLI_PARAMS_H_

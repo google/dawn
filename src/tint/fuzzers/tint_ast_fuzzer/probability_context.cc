@@ -16,9 +16,7 @@
 
 #include <cassert>
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 namespace {
 
 const std::pair<uint32_t, uint32_t> kChanceOfChangingBinaryOperators = {30, 90};
@@ -45,6 +43,4 @@ uint32_t ProbabilityContext::RandomFromRange(
       range.first, range.second + 1);  // + 1 need since range is inclusive.
 }
 
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer

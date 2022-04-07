@@ -16,9 +16,7 @@
 
 #include <cassert>
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 
 NodeIdMap::NodeIdMap() = default;
 
@@ -60,6 +58,4 @@ NodeIdMap::IdType NodeIdMap::TakeFreshId() {
   return fresh_id_++;
 }
 
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer

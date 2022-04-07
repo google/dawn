@@ -23,9 +23,7 @@
 
 #include "src/tint/program.h"
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 /// @file
 
 /// @brief Tries to apply a `mutation` to the `program`.
@@ -94,8 +92,6 @@ tint::Program Mutate(tint::Program program,
                      uint32_t max_applied_mutations,
                      protobufs::MutationSequence* mutation_sequence);
 
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer
 
 #endif  // SRC_TINT_FUZZERS_TINT_AST_FUZZER_MUTATOR_H_

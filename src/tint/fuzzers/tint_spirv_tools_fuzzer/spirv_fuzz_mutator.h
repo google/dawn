@@ -26,9 +26,7 @@
 #include "source/fuzz/protobufs/spirvfuzz_protobufs.h"
 #include "source/fuzz/pseudo_random_generator.h"
 
-namespace tint {
-namespace fuzzers {
-namespace spvtools_fuzzer {
+namespace tint::fuzzers::spvtools_fuzzer {
 
 /// The mutator that uses spirv-fuzz to mutate SPIR-V.
 ///
@@ -88,8 +86,6 @@ class SpirvFuzzMutator : public Mutator {
   const uint32_t seed_;
 };
 
-}  // namespace spvtools_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::spvtools_fuzzer
 
 #endif  // SRC_TINT_FUZZERS_TINT_SPIRV_TOOLS_FUZZER_SPIRV_FUZZ_MUTATOR_H_

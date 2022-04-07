@@ -24,9 +24,7 @@
 
 #include "src/tint/fuzzers/random_generator.h"
 
-namespace tint {
-namespace fuzzers {
-namespace regex_fuzzer {
+namespace tint::fuzzers::regex_fuzzer {
 
 std::vector<size_t> FindDelimiterIndices(const std::string& delimiter,
                                          const std::string& wgsl_code) {
@@ -353,6 +351,4 @@ bool ReplaceRandomIntLiteral(std::string& wgsl_code,
   return true;
 }
 
-}  // namespace regex_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::regex_fuzzer

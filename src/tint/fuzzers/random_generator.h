@@ -21,8 +21,7 @@
 
 #include "src/tint/fuzzers/random_generator_engine.h"
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 /// Pseudo random generator utility class for fuzzing
 class RandomGenerator {
@@ -112,7 +111,6 @@ class RandomGenerator {
   std::unique_ptr<RandomGeneratorEngine> engine_;
 };  // class RandomGenerator
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers
 
 #endif  // SRC_TINT_FUZZERS_RANDOM_GENERATOR_H_

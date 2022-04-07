@@ -19,8 +19,7 @@
 #include <random>
 #include <vector>
 
-namespace tint {
-namespace fuzzers {
+namespace tint::fuzzers {
 
 /// Wrapper interface around STL random number engine
 class RandomGeneratorEngine {
@@ -57,7 +56,6 @@ class RandomGeneratorEngine {
   RandomGeneratorEngine& operator=(const RandomGeneratorEngine&) = delete;
 };  // class RandomGeneratorEngine
 
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers
 
 #endif  // SRC_TINT_FUZZERS_RANDOM_GENERATOR_ENGINE_H_

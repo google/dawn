@@ -17,9 +17,7 @@
 
 #include <cstdint>
 
-namespace tint {
-namespace fuzzers {
-namespace regex_fuzzer {
+namespace tint::fuzzers::regex_fuzzer {
 
 /// The backend this fuzzer will test.
 enum class FuzzingTarget {
@@ -57,8 +55,6 @@ struct CliParams {
 /// @return parsed parameters.
 CliParams ParseCliParams(int* argc, char** argv);
 
-}  // namespace regex_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::regex_fuzzer
 
 #endif  // SRC_TINT_FUZZERS_TINT_REGEX_FUZZER_CLI_H_

@@ -23,9 +23,7 @@
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/statement.h"
 
-namespace tint {
-namespace fuzzers {
-namespace ast_fuzzer {
+namespace tint::fuzzers::ast_fuzzer {
 
 namespace {
 const size_t kMaxExpressionSize = 50;
@@ -87,6 +85,4 @@ uint32_t MutationFinderWrapUnaryOperators::GetChanceOfApplyingMutation(
   return probability_context->GetChanceOfWrappingUnaryOperators();
 }
 
-}  // namespace ast_fuzzer
-}  // namespace fuzzers
-}  // namespace tint
+}  // namespace tint::fuzzers::ast_fuzzer
