@@ -15,8 +15,7 @@
 #include "src/tint/transform/remove_continue_in_switch.h"
 #include "src/tint/transform/test_helper.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 using RemoveContinueInSwitchTest = TransformTest;
@@ -561,5 +560,4 @@ fn f() {
 }
 
 }  // namespace
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

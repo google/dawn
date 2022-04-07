@@ -28,8 +28,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::FirstIndexOffset);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::FirstIndexOffset::BindingPoint);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::FirstIndexOffset::Data);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 // Uniform buffer member names
@@ -184,5 +183,4 @@ void FirstIndexOffset::Run(CloneContext& ctx,
                     instance_index_offset);
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

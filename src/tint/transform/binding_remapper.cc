@@ -26,8 +26,7 @@
 TINT_INSTANTIATE_TYPEINFO(tint::transform::BindingRemapper);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::BindingRemapper::Remappings);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 BindingRemapper::Remappings::Remappings(BindingPoints bp,
                                         AccessControls ac,
@@ -159,5 +158,4 @@ void BindingRemapper::Run(CloneContext& ctx,
   ctx.Clone();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

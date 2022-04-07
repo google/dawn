@@ -19,8 +19,7 @@
 
 #include "src/tint/transform/test_helper.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 using CombineSamplersTest = TransformTest;
@@ -1008,5 +1007,4 @@ fn main() -> vec4<f32> {
 }
 
 }  // namespace
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

@@ -34,8 +34,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::CalculateArrayLength);
 TINT_INSTANTIATE_TYPEINFO(
     tint::transform::CalculateArrayLength::BufferSizeIntrinsic);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 namespace {
 
@@ -239,5 +238,4 @@ void CalculateArrayLength::Run(CloneContext& ctx,
   ctx.Clone();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

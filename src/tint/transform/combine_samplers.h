@@ -21,8 +21,7 @@
 #include "src/tint/sem/sampler_texture_pair.h"
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// This transform converts all separate texture/sampler refences in a
 /// program into combined texture/samplers. This is required for GLSL,
@@ -104,7 +103,6 @@ class CombineSamplers final : public Castable<CombineSamplers, Transform> {
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_COMBINE_SAMPLERS_H_

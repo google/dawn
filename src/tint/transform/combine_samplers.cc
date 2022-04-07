@@ -36,8 +36,7 @@ bool IsGlobal(const tint::sem::VariablePair& pair) {
 
 }  // namespace
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 CombineSamplers::BindingInfo::BindingInfo(const BindingMap& map,
                                           const sem::BindingPoint& placeholder)
@@ -351,5 +350,4 @@ void CombineSamplers::Run(CloneContext& ctx,
   State(ctx, binding_info).Run();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

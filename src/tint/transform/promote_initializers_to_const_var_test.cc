@@ -16,8 +16,7 @@
 
 #include "src/tint/transform/test_helper.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 using PromoteInitializersToConstVarTest = TransformTest;
@@ -623,5 +622,4 @@ let module_arr : array<f32, 4u> = array<f32, 4u>(0.0, 1.0, 2.0, 3.0);
 }
 
 }  // namespace
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

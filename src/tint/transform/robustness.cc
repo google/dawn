@@ -28,8 +28,7 @@
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Robustness);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Robustness::Config);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// State holds the current transform state
 struct Robustness::State {
@@ -316,5 +315,4 @@ void Robustness::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) const {
   ctx.Clone();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

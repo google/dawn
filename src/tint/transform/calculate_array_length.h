@@ -20,12 +20,12 @@
 #include "src/tint/ast/internal_attribute.h"
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-
 // Forward declarations
+namespace tint {
 class CloneContext;
+}
 
-namespace transform {
+namespace tint::transform {
 
 /// CalculateArrayLength is a transform used to replace calls to arrayLength()
 /// with a value calculated from the size of the storage buffer.
@@ -78,7 +78,6 @@ class CalculateArrayLength final
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_CALCULATE_ARRAY_LENGTH_H_

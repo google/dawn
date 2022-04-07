@@ -15,8 +15,7 @@
 #include "src/tint/transform/multiplanar_external_texture.h"
 #include "src/tint/transform/test_helper.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 using MultiplanarExternalTextureTest = TransformTest;
@@ -1293,5 +1292,4 @@ type ET = texture_external;
 }
 
 }  // namespace
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

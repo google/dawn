@@ -19,8 +19,7 @@
 
 #include "src/tint/transform/test_helper.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 using WrapArraysInStructsTest = TransformTest;
@@ -420,5 +419,4 @@ type T0 = i32;
 }
 
 }  // namespace
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

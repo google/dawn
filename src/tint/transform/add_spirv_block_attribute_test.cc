@@ -19,8 +19,7 @@
 
 #include "src/tint/transform/test_helper.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 using AddSpirvBlockAttributeTest = TransformTest;
@@ -611,5 +610,4 @@ struct Inner {
 }
 
 }  // namespace
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

@@ -17,8 +17,7 @@
 
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// ZeroInitWorkgroupMemory is a transform that injects code at the top of entry
 /// points to zero-initialize workgroup memory used by that entry point (and all
@@ -53,7 +52,6 @@ class ZeroInitWorkgroupMemory
   struct State;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_ZERO_INIT_WORKGROUP_MEMORY_H_

@@ -17,8 +17,7 @@
 
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// SimplifyPointers is a Transform that moves all usage of function-scope
 /// `let` statements of a pointer type into their places of usage, while also
@@ -54,7 +53,6 @@ class SimplifyPointers : public Castable<SimplifyPointers, Transform> {
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_SIMPLIFY_POINTERS_H_

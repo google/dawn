@@ -30,8 +30,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::ZeroInitWorkgroupMemory);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// PIMPL state for the ZeroInitWorkgroupMemory transform
 struct ZeroInitWorkgroupMemory::State {
@@ -457,5 +456,4 @@ void ZeroInitWorkgroupMemory::Run(CloneContext& ctx,
   ctx.Clone();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

@@ -17,8 +17,7 @@
 
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// FoldConstants transforms the AST by folding constant expressions
 class FoldConstants final : public Castable<FoldConstants, Transform> {
@@ -41,7 +40,6 @@ class FoldConstants final : public Castable<FoldConstants, Transform> {
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_FOLD_CONSTANTS_H_

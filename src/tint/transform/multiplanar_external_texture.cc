@@ -27,8 +27,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::MultiplanarExternalTexture);
 TINT_INSTANTIATE_TYPEINFO(
     tint::transform::MultiplanarExternalTexture::NewBindingPoints);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 /// This struct stores symbols for new bindings created as a result of
@@ -450,5 +449,4 @@ void MultiplanarExternalTexture::Run(CloneContext& ctx,
   ctx.Clone();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

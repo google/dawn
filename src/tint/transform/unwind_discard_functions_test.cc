@@ -16,8 +16,7 @@
 #include "src/tint/transform/promote_side_effects_to_decl.h"
 #include "src/tint/transform/test_helper.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 using UnwindDiscardFunctionsTest = TransformTest;
@@ -1417,5 +1416,4 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 
 }  // namespace
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

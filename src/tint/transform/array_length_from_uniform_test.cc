@@ -20,8 +20,7 @@
 #include "src/tint/transform/test_helper.h"
 #include "src/tint/transform/unshadow.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 using ArrayLengthFromUniformTest = TransformTest;
@@ -497,5 +496,4 @@ struct SB {
 }
 
 }  // namespace
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

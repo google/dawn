@@ -20,8 +20,7 @@
 #include "src/tint/transform/test_helper.h"
 #include "src/tint/utils/string.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 using VectorizeScalarMatrixConstructorsTest =
@@ -120,5 +119,4 @@ INSTANTIATE_TEST_SUITE_P(VectorizeScalarMatrixConstructorsTest,
                                          std::make_pair(4, 4)));
 
 }  // namespace
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

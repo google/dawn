@@ -23,8 +23,7 @@
 #include "src/tint/sem/builtin_type.h"
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// BindingPoint is an alias to sem::BindingPoint
 using BindingPoint = sem::BindingPoint;
@@ -96,7 +95,6 @@ class MultiplanarExternalTexture
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_MULTIPLANAR_EXTERNAL_TEXTURE_H_

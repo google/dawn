@@ -27,8 +27,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::ExpandCompoundAssignment);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 ExpandCompoundAssignment::ExpandCompoundAssignment() = default;
 
@@ -192,5 +191,4 @@ void ExpandCompoundAssignment::Run(CloneContext& ctx,
   state.Finalize();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

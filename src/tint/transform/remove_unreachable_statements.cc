@@ -30,8 +30,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::RemoveUnreachableStatements);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 RemoveUnreachableStatements::RemoveUnreachableStatements() = default;
 
@@ -63,5 +62,4 @@ void RemoveUnreachableStatements::Run(CloneContext& ctx,
   ctx.Clone();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

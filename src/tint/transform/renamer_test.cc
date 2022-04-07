@@ -19,8 +19,7 @@
 #include "gmock/gmock.h"
 #include "src/tint/transform/test_helper.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 constexpr const char kUnicodeIdentifier[] =  // "𝖎𝖉𝖊𝖓𝖙𝖎𝖋𝖎𝖊𝖗123"
@@ -1459,5 +1458,4 @@ INSTANTIATE_TEST_SUITE_P(
         kUnicodeIdentifier));
 
 }  // namespace
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

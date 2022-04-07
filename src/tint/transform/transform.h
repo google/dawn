@@ -22,8 +22,7 @@
 #include "src/tint/castable.h"
 #include "src/tint/program.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// Data is the base class for transforms that accept extra input or emit extra
 /// output information along with a Program.
@@ -193,7 +192,6 @@ class Transform : public Castable<Transform> {
                                            const sem::Type* ty);
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_TRANSFORM_H_

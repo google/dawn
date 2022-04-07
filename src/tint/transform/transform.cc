@@ -28,8 +28,7 @@
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Transform);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Data);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 Data::Data() = default;
 Data::Data(const Data&) = default;
@@ -156,5 +155,4 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx,
   return nullptr;
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

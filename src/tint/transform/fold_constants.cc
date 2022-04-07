@@ -26,8 +26,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::FoldConstants);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 FoldConstants::FoldConstants() = default;
 
@@ -95,5 +94,4 @@ void FoldConstants::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
   ctx.Clone();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

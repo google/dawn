@@ -18,8 +18,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 // Inherit from Transform so we have access to protected methods
@@ -119,5 +118,4 @@ TEST_F(CreateASTTypeForTest, Struct) {
 }
 
 }  // namespace
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

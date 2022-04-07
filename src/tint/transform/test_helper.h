@@ -25,8 +25,7 @@
 #include "src/tint/transform/manager.h"
 #include "src/tint/writer/wgsl/generator.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// @param program the program to get an output WGSL string from
 /// @returns the output program as a WGSL string, or an error string if the
@@ -148,7 +147,6 @@ using TransformTest = TransformTestBase<testing::Test>;
 template <typename T>
 using TransformTestWithParam = TransformTestBase<testing::TestWithParam<T>>;
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_TEST_HELPER_H_

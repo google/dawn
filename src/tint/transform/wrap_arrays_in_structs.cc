@@ -26,8 +26,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::WrapArraysInStructs);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 WrapArraysInStructs::WrappedArrayInfo::WrappedArrayInfo() = default;
 WrapArraysInStructs::WrappedArrayInfo::WrappedArrayInfo(
@@ -167,5 +166,4 @@ WrapArraysInStructs::WrappedArrayInfo WrapArraysInStructs::WrapArray(
   });
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

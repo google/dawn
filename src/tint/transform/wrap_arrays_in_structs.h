@@ -21,14 +21,11 @@
 #include "src/tint/transform/transform.h"
 
 // Forward declarations
-namespace tint {
-namespace ast {
+namespace tint::ast {
 class Type;
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// WrapArraysInStructs is a transform that replaces all array types with a
 /// structure holding a single field of that array type.
@@ -89,7 +86,6 @@ class WrapArraysInStructs : public Castable<WrapArraysInStructs, Transform> {
       const sem::Array* array) const;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_WRAP_ARRAYS_IN_STRUCTS_H_

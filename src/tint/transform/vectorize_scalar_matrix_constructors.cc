@@ -23,8 +23,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::VectorizeScalarMatrixConstructors);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 VectorizeScalarMatrixConstructors::VectorizeScalarMatrixConstructors() =
     default;
@@ -93,5 +92,4 @@ void VectorizeScalarMatrixConstructors::Run(CloneContext& ctx,
   ctx.Clone();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

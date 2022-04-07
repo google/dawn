@@ -18,12 +18,12 @@
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-
 // Forward declarations
+namespace tint {
 class CloneContext;
+}
 
-namespace transform {
+namespace tint::transform {
 
 /// NumWorkgroupsFromUniform is a transform that implements the `num_workgroups`
 /// builtin by loading it from a uniform buffer.
@@ -84,7 +84,6 @@ class NumWorkgroupsFromUniform
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_NUM_WORKGROUPS_FROM_UNIFORM_H_

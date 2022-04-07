@@ -17,8 +17,7 @@
 
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// LoopToForLoop is a Transform that attempts to convert WGSL `loop {}`
 /// statements into a for-loop statement.
@@ -48,7 +47,6 @@ class LoopToForLoop : public Castable<LoopToForLoop, Transform> {
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_LOOP_TO_FOR_LOOP_H_

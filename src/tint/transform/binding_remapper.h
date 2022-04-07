@@ -21,8 +21,7 @@
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// BindingPoint is an alias to sem::BindingPoint
 using BindingPoint = sem::BindingPoint;
@@ -86,7 +85,6 @@ class BindingRemapper final : public Castable<BindingRemapper, Transform> {
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_BINDING_REMAPPER_H_

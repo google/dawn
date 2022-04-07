@@ -28,8 +28,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::ModuleScopeVarToEntryPointParam);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 // Returns `true` if `type` is or contains a matrix type.
 bool ContainsMatrix(const sem::Type* type) {
@@ -395,5 +394,4 @@ void ModuleScopeVarToEntryPointParam::Run(CloneContext& ctx,
   ctx.Clone();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

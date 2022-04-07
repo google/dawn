@@ -26,8 +26,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::AddSpirvBlockAttribute);
 TINT_INSTANTIATE_TYPEINFO(
     tint::transform::AddSpirvBlockAttribute::SpirvBlockAttribute);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 AddSpirvBlockAttribute::AddSpirvBlockAttribute() = default;
 
@@ -118,5 +117,4 @@ AddSpirvBlockAttribute::SpirvBlockAttribute::Clone(CloneContext* ctx) const {
       .Create<AddSpirvBlockAttribute::SpirvBlockAttribute>(ctx->dst->ID());
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

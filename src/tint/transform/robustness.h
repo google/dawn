@@ -20,15 +20,12 @@
 #include "src/tint/transform/transform.h"
 
 // Forward declarations
-namespace tint {
-namespace ast {
+namespace tint::ast {
 class IndexAccessorExpression;
 class CallExpression;
-}  // namespace ast
-}  // namespace tint
+}  // namespace tint::ast
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// This transform is responsible for clamping all array accesses to be within
 /// the bounds of the array. Any access before the start of the array will clamp
@@ -82,7 +79,6 @@ class Robustness : public Castable<Robustness, Transform> {
   struct State;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_ROBUSTNESS_H_

@@ -20,8 +20,7 @@
 
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// FoldTrivialSingleUseLets is an optimizer for folding away trivial `let`
 /// statements into their single place of use. This transform is intended to
@@ -55,7 +54,6 @@ class FoldTrivialSingleUseLets final
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_FOLD_TRIVIAL_SINGLE_USE_LETS_H_

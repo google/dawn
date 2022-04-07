@@ -17,8 +17,7 @@
 
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// Add an empty entry point to the module, if no other entry points exist.
 class AddEmptyEntryPoint final
@@ -47,7 +46,6 @@ class AddEmptyEntryPoint final
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_ADD_EMPTY_ENTRY_POINT_H_

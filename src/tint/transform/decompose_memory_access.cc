@@ -41,8 +41,7 @@
 TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeMemoryAccess);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeMemoryAccess::Intrinsic);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 namespace {
 
@@ -991,8 +990,7 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx,
   ctx.Clone();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Offset);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::OffsetLiteral);

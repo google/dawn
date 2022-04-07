@@ -19,8 +19,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::ForLoopToLoop);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 ForLoopToLoop::ForLoopToLoop() = default;
 
 ForLoopToLoop::~ForLoopToLoop() = default;
@@ -72,5 +71,4 @@ void ForLoopToLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
   ctx.Clone();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

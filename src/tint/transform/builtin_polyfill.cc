@@ -24,8 +24,7 @@
 TINT_INSTANTIATE_TYPEINFO(tint::transform::BuiltinPolyfill);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::BuiltinPolyfill::Config);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// The PIMPL state for the BuiltinPolyfill transform
 struct BuiltinPolyfill::State {
@@ -598,5 +597,4 @@ BuiltinPolyfill::Config::Config(const Builtins& b) : builtins(b) {}
 BuiltinPolyfill::Config::Config(const Config&) = default;
 BuiltinPolyfill::Config::~Config() = default;
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

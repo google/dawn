@@ -16,8 +16,7 @@
 
 #include "src/tint/transform/test_helper.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 using GlslTest = TransformTest;
@@ -37,5 +36,4 @@ fn unused_entry_point() {
 }
 
 }  // namespace
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

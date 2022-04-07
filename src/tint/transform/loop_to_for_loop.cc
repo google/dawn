@@ -25,8 +25,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::LoopToForLoop);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 bool IsBlockWithSingleBreak(const ast::BlockStatement* block) {
@@ -141,5 +140,4 @@ void LoopToForLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
   ctx.Clone();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

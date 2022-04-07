@@ -29,8 +29,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeStridedArray);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 using DecomposedArrays = std::unordered_map<const sem::Array*, Symbol>;
@@ -158,5 +157,4 @@ void DecomposeStridedArray::Run(CloneContext& ctx,
   ctx.Clone();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

@@ -27,8 +27,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeStridedMatrix);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 /// MatrixInfo describes a matrix member with a custom stride
@@ -247,5 +246,4 @@ void DecomposeStridedMatrix::Run(CloneContext& ctx,
   ctx.Clone();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

@@ -20,8 +20,7 @@
 #include "src/tint/ast/internal_attribute.h"
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// AddSpirvBlockAttribute is a transform that adds an
 /// `@internal(spirv_block)` attribute to any structure that is used as the
@@ -70,7 +69,6 @@ class AddSpirvBlockAttribute final
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_ADD_SPIRV_BLOCK_ATTRIBUTE_H_

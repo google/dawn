@@ -17,8 +17,7 @@
 
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// Implements builtins for backends that do not have a native implementation.
 class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
@@ -91,7 +90,6 @@ class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_BUILTIN_POLYFILL_H_

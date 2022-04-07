@@ -26,8 +26,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Manager);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 Manager::Manager() = default;
 Manager::~Manager() = default;
@@ -82,5 +81,4 @@ Output Manager::Run(const Program* program, const DataMap& data) const {
   return out;
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

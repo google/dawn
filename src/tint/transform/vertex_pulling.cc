@@ -28,8 +28,7 @@
 TINT_INSTANTIATE_TYPEINFO(tint::transform::VertexPulling);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::VertexPulling::Config);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 namespace {
 
@@ -958,5 +957,4 @@ VertexBufferLayoutDescriptor& VertexBufferLayoutDescriptor::operator=(
 
 VertexBufferLayoutDescriptor::~VertexBufferLayoutDescriptor() = default;
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

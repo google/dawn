@@ -28,8 +28,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::SimplifyPointers);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 namespace {
 
@@ -235,5 +234,4 @@ void SimplifyPointers::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
   State(ctx).Run();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

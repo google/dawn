@@ -42,8 +42,7 @@
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Glsl);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Glsl::Config);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 Glsl::Glsl() = default;
 Glsl::~Glsl() = default;
@@ -143,5 +142,4 @@ Glsl::Config::Config(const std::string& entry_point_in,
 Glsl::Config::Config(const Config&) = default;
 Glsl::Config::~Config() = default;
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

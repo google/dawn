@@ -30,8 +30,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::RemovePhonies);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 struct SinkSignature {
@@ -152,5 +151,4 @@ void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
   ctx.Clone();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

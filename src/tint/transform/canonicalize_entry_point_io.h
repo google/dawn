@@ -17,8 +17,7 @@
 
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// CanonicalizeEntryPointIO is a transform used to rewrite shader entry point
 /// interfaces into a form that the generators can handle. Each entry point
@@ -143,7 +142,6 @@ class CanonicalizeEntryPointIO final
   struct State;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_CANONICALIZE_ENTRY_POINT_IO_H_

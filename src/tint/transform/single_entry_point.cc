@@ -24,8 +24,7 @@
 TINT_INSTANTIATE_TYPEINFO(tint::transform::SingleEntryPoint);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::SingleEntryPoint::Config);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 SingleEntryPoint::SingleEntryPoint() = default;
 
@@ -113,5 +112,4 @@ SingleEntryPoint::Config::~Config() = default;
 SingleEntryPoint::Config& SingleEntryPoint::Config::operator=(const Config&) =
     default;
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

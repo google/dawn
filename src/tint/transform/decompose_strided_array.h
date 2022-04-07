@@ -17,8 +17,7 @@
 
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// DecomposeStridedArray transforms replaces arrays with a non-default
 /// `@stride` attribute with an array of structure elements, where the
@@ -55,7 +54,6 @@ class DecomposeStridedArray final
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_DECOMPOSE_STRIDED_ARRAY_H_

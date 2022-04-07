@@ -21,8 +21,7 @@
 
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// A collection of Transforms that act as a single Transform.
 /// The inner transforms will execute in the appended order.
@@ -58,7 +57,6 @@ class Manager : public Castable<Manager, Transform> {
   std::vector<std::unique_ptr<Transform>> transforms_;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_MANAGER_H_

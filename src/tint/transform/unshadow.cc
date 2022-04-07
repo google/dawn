@@ -26,8 +26,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Unshadow);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// The PIMPL state for the Unshadow transform
 struct Unshadow::State {
@@ -95,5 +94,4 @@ void Unshadow::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
   State(ctx).Run();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

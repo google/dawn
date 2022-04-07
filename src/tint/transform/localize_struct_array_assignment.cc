@@ -30,8 +30,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::LocalizeStructArrayAssignment);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// Private implementation of LocalizeStructArrayAssignment transform
 class LocalizeStructArrayAssignment::State {
@@ -220,5 +219,4 @@ void LocalizeStructArrayAssignment::Run(CloneContext& ctx,
   state.Run();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

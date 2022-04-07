@@ -20,8 +20,7 @@
 
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// RemovePhonies is a Transform that removes all phony-assignment statements,
 /// while preserving function call expressions in the RHS of the assignment that
@@ -52,7 +51,6 @@ class RemovePhonies : public Castable<RemovePhonies, Transform> {
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_REMOVE_PHONIES_H_

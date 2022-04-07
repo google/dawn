@@ -18,8 +18,7 @@
 
 #include "src/tint/transform/test_helper.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 using AddEmptyEntryPointTest = TransformTest;
@@ -84,5 +83,4 @@ var<private> unused_entry_point : f32;
 }
 
 }  // namespace
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

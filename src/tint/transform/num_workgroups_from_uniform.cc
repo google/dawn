@@ -27,8 +27,7 @@
 TINT_INSTANTIATE_TYPEINFO(tint::transform::NumWorkgroupsFromUniform);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::NumWorkgroupsFromUniform::Config);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 /// Accessor describes the identifiers used in a member accessor that is being
 /// used to retrieve the num_workgroups builtin from a parameter.
@@ -166,5 +165,4 @@ NumWorkgroupsFromUniform::Config::Config(sem::BindingPoint ubo_bp)
 NumWorkgroupsFromUniform::Config::Config(const Config&) = default;
 NumWorkgroupsFromUniform::Config::~Config() = default;
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

@@ -20,8 +20,7 @@
 
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// RemoveUnreachableStatements is a Transform that removes all statements
 /// marked as unreachable.
@@ -52,7 +51,6 @@ class RemoveUnreachableStatements
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_REMOVE_UNREACHABLE_STATEMENTS_H_

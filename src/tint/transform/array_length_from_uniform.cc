@@ -28,8 +28,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::ArrayLengthFromUniform);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::ArrayLengthFromUniform::Config);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::ArrayLengthFromUniform::Result);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 ArrayLengthFromUniform::ArrayLengthFromUniform() = default;
 ArrayLengthFromUniform::~ArrayLengthFromUniform() = default;
@@ -229,5 +228,4 @@ ArrayLengthFromUniform::Result::Result(
 ArrayLengthFromUniform::Result::Result(const Result&) = default;
 ArrayLengthFromUniform::Result::~Result() = default;
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

@@ -19,12 +19,12 @@
 
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-
 // Forward declarations
+namespace tint {
 class CloneContext;
+}
 
-namespace transform {
+namespace tint::transform {
 
 /// Glsl is a transform used to sanitize a Program for use with the Glsl writer.
 /// Passing a non-sanitized Program to the Glsl writer will result in undefined
@@ -70,7 +70,6 @@ class Glsl final : public Castable<Glsl, Transform> {
   Output Run(const Program* program, const DataMap& data = {}) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_GLSL_H_

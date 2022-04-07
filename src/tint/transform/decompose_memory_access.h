@@ -20,12 +20,12 @@
 #include "src/tint/ast/internal_attribute.h"
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-
 // Forward declarations
+namespace tint {
 class CloneContext;
+}
 
-namespace transform {
+namespace tint::transform {
 
 /// DecomposeMemoryAccess is a transform used to replace storage and uniform
 /// buffer accesses with a combination of load, store or atomic functions on
@@ -125,7 +125,6 @@ class DecomposeMemoryAccess final
   struct State;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_DECOMPOSE_MEMORY_ACCESS_H_

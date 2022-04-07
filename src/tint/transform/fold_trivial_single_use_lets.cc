@@ -23,8 +23,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::FoldTrivialSingleUseLets);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 const ast::VariableDeclStatement* AsTrivialLetDecl(const ast::Statement* stmt) {
@@ -88,5 +87,4 @@ void FoldTrivialSingleUseLets::Run(CloneContext& ctx,
   ctx.Clone();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

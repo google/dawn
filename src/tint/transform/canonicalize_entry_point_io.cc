@@ -28,8 +28,7 @@
 TINT_INSTANTIATE_TYPEINFO(tint::transform::CanonicalizeEntryPointIO);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::CanonicalizeEntryPointIO::Config);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 CanonicalizeEntryPointIO::CanonicalizeEntryPointIO() = default;
 CanonicalizeEntryPointIO::~CanonicalizeEntryPointIO() = default;
@@ -775,5 +774,4 @@ CanonicalizeEntryPointIO::Config::Config(ShaderStyle style,
 CanonicalizeEntryPointIO::Config::Config(const Config&) = default;
 CanonicalizeEntryPointIO::Config::~Config() = default;
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

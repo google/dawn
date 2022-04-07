@@ -20,8 +20,7 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::AddEmptyEntryPoint);
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 AddEmptyEntryPoint::AddEmptyEntryPoint() = default;
 
@@ -47,5 +46,4 @@ void AddEmptyEntryPoint::Run(CloneContext& ctx,
   ctx.Clone();
 }
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

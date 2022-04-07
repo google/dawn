@@ -17,8 +17,7 @@
 
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// Unshadow is a Transform that renames any variables that shadow another
 /// variable.
@@ -44,7 +43,6 @@ class Unshadow : public Castable<Unshadow, Transform> {
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_UNSHADOW_H_

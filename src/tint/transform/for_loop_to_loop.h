@@ -17,8 +17,7 @@
 
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// ForLoopToLoop is a Transform that converts a for-loop statement into a loop
 /// statement. This is required by the SPIR-V writer.
@@ -48,7 +47,6 @@ class ForLoopToLoop final : public Castable<ForLoopToLoop, Transform> {
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_FOR_LOOP_TO_LOOP_H_

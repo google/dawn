@@ -18,8 +18,7 @@
 
 #include "src/tint/transform/test_helper.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 namespace {
 
 using SingleEntryPointTest = TransformTest;
@@ -513,5 +512,4 @@ fn comp_main1() {
 }
 
 }  // namespace
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform

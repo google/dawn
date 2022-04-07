@@ -17,8 +17,7 @@
 
 #include "src/tint/transform/transform.h"
 
-namespace tint {
-namespace transform {
+namespace tint::transform {
 
 /// A transform that converts scalar matrix constructors to the vector form.
 class VectorizeScalarMatrixConstructors
@@ -48,7 +47,6 @@ class VectorizeScalarMatrixConstructors
            DataMap& outputs) const override;
 };
 
-}  // namespace transform
-}  // namespace tint
+}  // namespace tint::transform
 
 #endif  // SRC_TINT_TRANSFORM_VECTORIZE_SCALAR_MATRIX_CONSTRUCTORS_H_
