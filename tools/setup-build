@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Copyright 2022 The Tint Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -e # Fail on any error.
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
+ROOT_DIR="$( cd "${SCRIPT_DIR}/.." >/dev/null 2>&1 && pwd )"
+BUILD_SYSTEM=$(echo "$1" | tr '[:upper:]' '[:lower:]') # lowercase
+BUILD_TYPE=$(echo "$2" | tr '[:upper:]' '[:lower:]') # lowercase
+BUILD_DIR="${BUILD_SYSTEM}-${BUILD_TYPE}"
+
+function show_usage() {
+  echo "setup-build [gn|cmake] [debug|release]"
+  echo
+  echo "creates a build directory in <dawn>/out using either GN or CMake, then"
+  echo "updates the '<dawn>/out/active' symlink to point to the build directory"
+  exit 1
+}
+
+function generate() {
+  CMD=$1
+  pushd "$ROOT_DIR" > /dev/null
+  ${CMD}
+  rm -fr "out/active" || true
+  ln -s "$BUILD_DIR" "out/active"
+  popd > /dev/null
+}
+
+case $BUILD_SYSTEM in
+  "gn")
+    case $BUILD_TYPE in
+      "debug")
+        generate "gn gen out/${BUILD_DIR} --args=is_debug=true"
+      ;;
+      "release")
+        generate "gn gen out/${BUILD_DIR}"
+      ;;
+      *)
+        echo "invalid build type '${BUILD_TYPE}'"
+        show_usage
+      ;;
+    esac
+  ;;
+  "cmake")
+    case $BUILD_TYPE in
+      "debug")
+        generate "cmake -S . -B out/$BUILD_DIR -GNinja -DCMAKE_BUILD_TYPE=Debug"
+      ;;
+      "release")
+        generate "cmake -S . -B out/$BUILD_DIR -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo"
+      ;;
+      *)
+        echo "invalid build type '${BUILD_TYPE}'"
+        show_usage
+      ;;
+    esac
+  ;;
+  "--help" | "-help" | "-h")
+    show_usage
+  ;;
+  *)
+    echo "invalid build system '${BUILD_SYSTEM}'"
+    show_usage
+  ;;
+esac
