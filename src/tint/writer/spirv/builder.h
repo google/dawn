@@ -40,7 +40,6 @@
 #include "src/tint/writer/spirv/function.h"
 #include "src/tint/writer/spirv/scalar_constant.h"
 
-
 // Forward declarations
 namespace tint::sem {
 class Call;

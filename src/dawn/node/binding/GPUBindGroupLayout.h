@@ -34,8 +34,8 @@ namespace wgpu::binding {
         }
 
         // interop::GPUBindGroupLayout interface compliance
-        std::variant<std::string, interop::UndefinedType>getLabel(Napi::Env) override;
-        void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType>value) override;
+        std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
+        void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
 
       private:
         wgpu::BindGroupLayout layout_;
