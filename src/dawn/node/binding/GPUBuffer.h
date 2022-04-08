@@ -55,6 +55,8 @@ namespace wgpu::binding {
         void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
 
       private:
+        void DetachMappings();
+
         struct Mapping {
             uint64_t start;
             uint64_t end;
