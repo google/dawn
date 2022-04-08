@@ -27,7 +27,12 @@ std::vector<std::string_view> SplitLines(std::string_view str) {
   size_t lineStart = 0;
   for (size_t i = 0; i < str.size(); ++i) {
     if (str[i] == '\n') {
-      lines.push_back(str.substr(lineStart, i - lineStart));
+      // Handle CRLF on Windows
+      size_t curr = i;
+      if (i > 0 && str[i - 1] == '\r') {
+        --curr;
+      }
+      lines.push_back(str.substr(lineStart, curr - lineStart));
       lineStart = i + 1;
     }
   }
