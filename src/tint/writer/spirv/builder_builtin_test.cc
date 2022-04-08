@@ -485,7 +485,7 @@ TEST_F(BuiltinBuilderTest, Call_TextureSampleCompare_Twice) {
   EXPECT_EQ(b.GenerateExpression(expr2), 17u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler

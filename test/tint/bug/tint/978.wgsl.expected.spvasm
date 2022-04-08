@@ -35,7 +35,7 @@
 %_ptr_Output_v4float = OpTypePointer Output %v4float
           %8 = OpConstantNull %v4float
     %color_1 = OpVariable %_ptr_Output_v4float Output %8
-         %11 = OpTypeImage %float 2D 1 0 0 1 Unknown
+         %11 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11
    %depthMap = OpVariable %_ptr_UniformConstant_11 UniformConstant
          %14 = OpTypeSampler

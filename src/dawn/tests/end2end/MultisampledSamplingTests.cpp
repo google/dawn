@@ -50,9 +50,6 @@ class MultisampledSamplingTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
-        // TODO(crbug.com/dawn/1030): Compute pipeline compilation crashes.
-        DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsIntel());
-
         {
             utils::ComboRenderPipelineDescriptor desc;
 

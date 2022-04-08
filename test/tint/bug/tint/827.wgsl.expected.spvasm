@@ -30,7 +30,7 @@
 %GlobalInvocationId_1 = OpVariable %_ptr_Input_v3uint Input
       %width = OpConstant %uint 128
       %float = OpTypeFloat 32
-          %8 = OpTypeImage %float 2D 1 0 0 1 Unknown
+          %8 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_8 = OpTypePointer UniformConstant %8
         %tex = OpVariable %_ptr_UniformConstant_8 UniformConstant
 %_runtimearr_float = OpTypeRuntimeArray %float

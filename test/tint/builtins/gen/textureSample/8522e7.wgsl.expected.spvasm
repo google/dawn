@@ -17,7 +17,7 @@
                OpDecorate %arg_1 DescriptorSet 1
                OpDecorate %arg_1 Binding 1
       %float = OpTypeFloat 32
-          %3 = OpTypeImage %float 2D 1 1 0 1 Unknown
+          %3 = OpTypeImage %float 2D 0 1 0 1 Unknown
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
       %arg_0 = OpVariable %_ptr_UniformConstant_3 UniformConstant
           %7 = OpTypeSampler

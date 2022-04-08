@@ -34,7 +34,7 @@
 %_ptr_Output_float = OpTypePointer Output %float
           %8 = OpConstantNull %float
 %vertex_point_size = OpVariable %_ptr_Output_float Output %8
-         %11 = OpTypeImage %float 2D 1 0 0 1 Unknown
+         %11 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11
       %arg_0 = OpVariable %_ptr_UniformConstant_11 UniformConstant
          %14 = OpTypeSampler

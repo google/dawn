@@ -561,7 +561,7 @@ TEST_F(BuilderTest_Type, DepthTexture_Generate_2d) {
   EXPECT_EQ(1u, id_two_d);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeImage %2 2D 1 0 0 1 Unknown
+%1 = OpTypeImage %2 2D 0 0 0 1 Unknown
 )");
 }
 
@@ -576,7 +576,7 @@ TEST_F(BuilderTest_Type, DepthTexture_Generate_2dArray) {
   EXPECT_EQ(1u, id_two_d_array);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeImage %2 2D 1 1 0 1 Unknown
+%1 = OpTypeImage %2 2D 0 1 0 1 Unknown
 )");
 }
 
@@ -590,7 +590,7 @@ TEST_F(BuilderTest_Type, DepthTexture_Generate_Cube) {
   EXPECT_EQ(1u, id_cube);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeImage %2 Cube 1 0 0 1 Unknown
+%1 = OpTypeImage %2 Cube 0 0 0 1 Unknown
 )");
   EXPECT_EQ(DumpInstructions(b.capabilities()), "");
 }
@@ -606,7 +606,7 @@ TEST_F(BuilderTest_Type, DepthTexture_Generate_CubeArray) {
   EXPECT_EQ(1u, id_cube_array);
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeImage %2 Cube 1 1 0 1 Unknown
+%1 = OpTypeImage %2 Cube 0 1 0 1 Unknown
 )");
   EXPECT_EQ(DumpInstructions(b.capabilities()),
             R"(OpCapability SampledCubeArray

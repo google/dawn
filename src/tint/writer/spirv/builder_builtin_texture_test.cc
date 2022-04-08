@@ -297,7 +297,7 @@ OpCapability ImageQuery
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -318,7 +318,7 @@ OpCapability ImageQuery
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -339,7 +339,7 @@ OpCapability ImageQuery
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -362,7 +362,7 @@ OpCapability ImageQuery
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -385,7 +385,7 @@ OpCapability ImageQuery
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -406,7 +406,7 @@ OpCapability ImageQuery
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -427,7 +427,7 @@ OpCapability ImageQuery
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -451,7 +451,7 @@ OpCapability ImageQuery
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -475,7 +475,7 @@ OpCapability ImageQuery
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 1 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 1 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -748,7 +748,7 @@ OpCapability SampledCubeArray
     case ValidTextureOverload::kGatherDepth2dF32:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -774,7 +774,7 @@ OpCapability SampledCubeArray
     case ValidTextureOverload::kGatherDepth2dOffsetF32:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -804,7 +804,7 @@ OpCapability SampledCubeArray
     case ValidTextureOverload::kGatherDepth2dArrayF32:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -832,7 +832,7 @@ OpCapability SampledCubeArray
     case ValidTextureOverload::kGatherDepth2dArrayOffsetF32:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -864,7 +864,7 @@ OpCapability SampledCubeArray
     case ValidTextureOverload::kGatherDepthCubeF32:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -891,7 +891,7 @@ OpCapability SampledCubeArray
     case ValidTextureOverload::kGatherDepthCubeArrayF32:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -920,7 +920,7 @@ OpCapability SampledCubeArray
     case ValidTextureOverload::kGatherCompareDepth2dF32:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -945,7 +945,7 @@ OpCapability SampledCubeArray
     case ValidTextureOverload::kGatherCompareDepth2dOffsetF32:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -975,7 +975,7 @@ OpCapability SampledCubeArray
     case ValidTextureOverload::kGatherCompareDepth2dArrayF32:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -1003,7 +1003,7 @@ OpCapability SampledCubeArray
     case ValidTextureOverload::kGatherCompareDepth2dArrayOffsetF32:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -1035,7 +1035,7 @@ OpCapability SampledCubeArray
     case ValidTextureOverload::kGatherCompareDepthCubeF32:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -1061,7 +1061,7 @@ OpCapability SampledCubeArray
     case ValidTextureOverload::kGatherCompareDepthCubeArrayF32:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -1133,7 +1133,7 @@ OpCapability ImageQuery
     case ValidTextureOverload::kNumLayersDepth2dArray:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -1154,7 +1154,7 @@ OpCapability ImageQuery
     case ValidTextureOverload::kNumLayersDepthCubeArray:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -1287,7 +1287,7 @@ OpCapability ImageQuery
     case ValidTextureOverload::kNumLevelsDepth2d:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -1305,7 +1305,7 @@ OpCapability ImageQuery
     case ValidTextureOverload::kNumLevelsDepth2dArray:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -1323,7 +1323,7 @@ OpCapability ImageQuery
     case ValidTextureOverload::kNumLevelsDepthCube:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -1341,7 +1341,7 @@ OpCapability ImageQuery
     case ValidTextureOverload::kNumLevelsDepthCubeArray:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -1378,7 +1378,7 @@ OpCapability ImageQuery
     case ValidTextureOverload::kNumSamplesDepthMultisampled2d:
       return {R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 1 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 1 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -1648,7 +1648,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -1674,7 +1674,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -1705,7 +1705,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -1734,7 +1734,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -1767,7 +1767,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -1794,7 +1794,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -2296,7 +2296,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -2325,7 +2325,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -2358,7 +2358,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -2389,7 +2389,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -2424,7 +2424,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -2454,7 +2454,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -2772,7 +2772,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -2797,7 +2797,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -2827,7 +2827,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -2855,7 +2855,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -2887,7 +2887,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -2913,7 +2913,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -2943,7 +2943,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -2969,7 +2969,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -3000,7 +3000,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -3029,7 +3029,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -3062,7 +3062,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 0 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -3089,7 +3089,7 @@ OpCapability SampledCubeArray
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 Cube 1 1 0 1 Unknown
+%3 = OpTypeImage %4 Cube 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -3475,7 +3475,7 @@ OpCapability Sampled1D
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 0 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -3500,7 +3500,7 @@ OpCapability Sampled1D
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler
@@ -3526,7 +3526,7 @@ OpCapability Sampled1D
       return {
           R"(
 %4 = OpTypeFloat 32
-%3 = OpTypeImage %4 2D 1 1 0 1 Unknown
+%3 = OpTypeImage %4 2D 0 1 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
 %7 = OpTypeSampler

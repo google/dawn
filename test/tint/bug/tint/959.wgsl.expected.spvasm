@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 64
+; Bound: 63
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -202,38 +202,37 @@
          %t5 = OpVariable %_ptr_UniformConstant_23 UniformConstant
          %t6 = OpVariable %_ptr_UniformConstant_23 UniformConstant
          %t7 = OpVariable %_ptr_UniformConstant_23 UniformConstant
-         %33 = OpTypeImage %float 2D 1 0 0 1 Unknown
-%_ptr_UniformConstant_33 = OpTypePointer UniformConstant %33
-         %t8 = OpVariable %_ptr_UniformConstant_33 UniformConstant
-         %t9 = OpVariable %_ptr_UniformConstant_33 UniformConstant
-        %t10 = OpVariable %_ptr_UniformConstant_33 UniformConstant
-        %t11 = OpVariable %_ptr_UniformConstant_33 UniformConstant
-        %t12 = OpVariable %_ptr_UniformConstant_33 UniformConstant
-        %t13 = OpVariable %_ptr_UniformConstant_33 UniformConstant
-        %t14 = OpVariable %_ptr_UniformConstant_33 UniformConstant
-        %t15 = OpVariable %_ptr_UniformConstant_33 UniformConstant
-         %43 = OpTypeSampler
-%_ptr_UniformConstant_43 = OpTypePointer UniformConstant %43
-         %s0 = OpVariable %_ptr_UniformConstant_43 UniformConstant
-         %s1 = OpVariable %_ptr_UniformConstant_43 UniformConstant
-         %s2 = OpVariable %_ptr_UniformConstant_43 UniformConstant
-         %s3 = OpVariable %_ptr_UniformConstant_43 UniformConstant
-         %s4 = OpVariable %_ptr_UniformConstant_43 UniformConstant
-         %s5 = OpVariable %_ptr_UniformConstant_43 UniformConstant
-         %s6 = OpVariable %_ptr_UniformConstant_43 UniformConstant
-         %s7 = OpVariable %_ptr_UniformConstant_43 UniformConstant
-%_ptr_UniformConstant_43_0 = OpTypePointer UniformConstant %43
-         %s8 = OpVariable %_ptr_UniformConstant_43_0 UniformConstant
-         %s9 = OpVariable %_ptr_UniformConstant_43_0 UniformConstant
-        %s10 = OpVariable %_ptr_UniformConstant_43_0 UniformConstant
-        %s11 = OpVariable %_ptr_UniformConstant_43_0 UniformConstant
-        %s12 = OpVariable %_ptr_UniformConstant_43_0 UniformConstant
-        %s13 = OpVariable %_ptr_UniformConstant_43_0 UniformConstant
-        %s14 = OpVariable %_ptr_UniformConstant_43_0 UniformConstant
-        %s15 = OpVariable %_ptr_UniformConstant_43_0 UniformConstant
+%_ptr_UniformConstant_23_0 = OpTypePointer UniformConstant %23
+         %t8 = OpVariable %_ptr_UniformConstant_23_0 UniformConstant
+         %t9 = OpVariable %_ptr_UniformConstant_23_0 UniformConstant
+        %t10 = OpVariable %_ptr_UniformConstant_23_0 UniformConstant
+        %t11 = OpVariable %_ptr_UniformConstant_23_0 UniformConstant
+        %t12 = OpVariable %_ptr_UniformConstant_23_0 UniformConstant
+        %t13 = OpVariable %_ptr_UniformConstant_23_0 UniformConstant
+        %t14 = OpVariable %_ptr_UniformConstant_23_0 UniformConstant
+        %t15 = OpVariable %_ptr_UniformConstant_23_0 UniformConstant
+         %42 = OpTypeSampler
+%_ptr_UniformConstant_42 = OpTypePointer UniformConstant %42
+         %s0 = OpVariable %_ptr_UniformConstant_42 UniformConstant
+         %s1 = OpVariable %_ptr_UniformConstant_42 UniformConstant
+         %s2 = OpVariable %_ptr_UniformConstant_42 UniformConstant
+         %s3 = OpVariable %_ptr_UniformConstant_42 UniformConstant
+         %s4 = OpVariable %_ptr_UniformConstant_42 UniformConstant
+         %s5 = OpVariable %_ptr_UniformConstant_42 UniformConstant
+         %s6 = OpVariable %_ptr_UniformConstant_42 UniformConstant
+         %s7 = OpVariable %_ptr_UniformConstant_42 UniformConstant
+%_ptr_UniformConstant_42_0 = OpTypePointer UniformConstant %42
+         %s8 = OpVariable %_ptr_UniformConstant_42_0 UniformConstant
+         %s9 = OpVariable %_ptr_UniformConstant_42_0 UniformConstant
+        %s10 = OpVariable %_ptr_UniformConstant_42_0 UniformConstant
+        %s11 = OpVariable %_ptr_UniformConstant_42_0 UniformConstant
+        %s12 = OpVariable %_ptr_UniformConstant_42_0 UniformConstant
+        %s13 = OpVariable %_ptr_UniformConstant_42_0 UniformConstant
+        %s14 = OpVariable %_ptr_UniformConstant_42_0 UniformConstant
+        %s15 = OpVariable %_ptr_UniformConstant_42_0 UniformConstant
        %void = OpTypeVoid
-         %60 = OpTypeFunction %void
-       %main = OpFunction %void None %60
-         %63 = OpLabel
+         %59 = OpTypeFunction %void
+       %main = OpFunction %void None %59
+         %62 = OpLabel
                OpReturn
                OpFunctionEnd

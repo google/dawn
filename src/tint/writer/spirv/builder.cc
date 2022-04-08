@@ -3352,6 +3352,15 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
 uint32_t Builder::GenerateSampledImage(const sem::Type* texture_type,
                                        Operand texture_operand,
                                        Operand sampler_operand) {
+  // DepthTexture is always declared as SampledTexture.
+  // The Vulkan spec says: The "Depth" operand of OpTypeImage is ignored.
+  // In SPIRV, 0 means not depth, 1 means depth, and 2 means unknown.
+  // Using anything other than 0 is problematic on various Vulkan drivers.
+  if (auto* depthTextureType = texture_type->As<sem::DepthTexture>()) {
+    texture_type = builder_.create<sem::SampledTexture>(
+        depthTextureType->dim(), builder_.create<sem::F32>());
+  }
+
   uint32_t sampled_image_type_id = utils::GetOrCreate(
       texture_type_to_sampled_image_type_id_, texture_type, [&] {
         // We need to create the sampled image type and cache the result.
@@ -3810,6 +3819,19 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
     return GenerateTypeIfNeeded(atomic->Type());
   }
 
+  // DepthTexture is always declared as SampledTexture.
+  // The Vulkan spec says: The "Depth" operand of OpTypeImage is ignored.
+  // In SPIRV, 0 means not depth, 1 means depth, and 2 means unknown.
+  // Using anything other than 0 is problematic on various Vulkan drivers.
+  if (auto* depthTextureType = type->As<sem::DepthTexture>()) {
+    type = builder_.create<sem::SampledTexture>(depthTextureType->dim(),
+                                                builder_.create<sem::F32>());
+  } else if (auto* multisampledDepthTextureType =
+                 type->As<sem::DepthMultisampledTexture>()) {
+    type = builder_.create<sem::MultisampledTexture>(
+        multisampledDepthTextureType->dim(), builder_.create<sem::F32>());
+  }
+
   // Pointers and references with differing accesses should not result in a
   // different SPIR-V types, so we explicitly ignore the access.
   // Pointers and References both map to a SPIR-V pointer type.
@@ -3959,9 +3981,9 @@ bool Builder::GenerateTextureType(const sem::Texture* texture,
   }
 
   uint32_t depth_literal = 0u;
-  if (texture->IsAnyOf<sem::DepthTexture, sem::DepthMultisampledTexture>()) {
-    depth_literal = 1u;
-  }
+  // The Vulkan spec says: The "Depth" operand of OpTypeImage is ignored.
+  // In SPIRV, 0 means not depth, 1 means depth, and 2 means unknown.
+  // Using anything other than 0 is problematic on various Vulkan drivers.
 
   uint32_t sampled_literal = 2u;
   if (texture->IsAnyOf<sem::MultisampledTexture, sem::SampledTexture,

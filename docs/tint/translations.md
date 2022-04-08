@@ -118,11 +118,11 @@ decorated with `NonWritable` or each member of the struct can be decorated with
 | | | |
 | texture_multisampled_2d&lt;type&gt; | OpTypeImage 2D MS=1 Sampled=1 | texture2d_ms&lt;type, access::sample&gt; | Texture2D |
 | | | |
-| texture_depth_2d | OpTypeImage 2D Depth=1 Sampled=1 | depth2d&lt;float, access::sample&gt;| Texture2D |
-| texture_depth_2d_array | OpTypeImage 2D Depth=1 Arrayed=1 Sampled=1 | depth2d_array&lt;float, access::sample&gt; | Texture2DArray |
-| texture_depth_cube | OpTypeImage Cube Depth=1 Sampled=1 | depthcube&lt;float, access::sample&gt; | TextureCube |
-| texture_depth_cube_array | OpTypeImage Cube Depth=1 Arrayed=1 Sampled=1 | depthcube_array&lt;float, access::sample&gt; | TextureCubeArray |
-| texture_depth_multisampled_2d | OpTypeImage 2D Depth=1 MS=1 Sampled=1 | depth2d&lt;float, access::sample&gt;| Texture2DMSArray |
+| texture_depth_2d | OpTypeImage 2D Sampled=1 | depth2d&lt;float, access::sample&gt;| Texture2D |
+| texture_depth_2d_array | OpTypeImage 2D Arrayed=1 Sampled=1 | depth2d_array&lt;float, access::sample&gt; | Texture2DArray |
+| texture_depth_cube | OpTypeImage Cube Sampled=1 | depthcube&lt;float, access::sample&gt; | TextureCube |
+| texture_depth_cube_array | OpTypeImage Cube Arrayed=1 Sampled=1 | depthcube_array&lt;float, access::sample&gt; | TextureCubeArray |
+| texture_depth_multisampled_2d | OpTypeImage 2D MS=1 Sampled=1 | depth2d&lt;float, access::sample&gt;| Texture2DMSArray |
 | | | |
 | texture_storage_1d&lt;image_storage_type&gt; | OpTypeImage 1D Sampled=2| texture1d&lt;type, access::read&gt; | RWTexture1D |
 | texture_storage_2d&lt;image_storage_type&gt; | OpTypeImage 2D Sampled=2 | texture2d&lt;type, access::read&gt; | RWTexture2D |
