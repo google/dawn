@@ -71,6 +71,15 @@ NONINCLUSIVE_REGEX_LIST = []
 for reg in NONINCLUSIVE_REGEXES:
     NONINCLUSIVE_REGEX_LIST.append(re.compile(reg))
 
+LINT_FILTERS = [
+    "-build/header_guard", "-build/include", "-build/include_directory",
+    "-build/include_order", "-build/include_what_you_use", "-build/namespaces",
+    "-legal/copyright", "-readability/braces", "-readability/casting",
+    "-readability/inheritance", "-readability/namespace", "-runtime/explicit",
+    "-runtime/indentation_namespace", "-runtime/int", "-runtime/printf",
+    "-whitespace/comments", "-whitespace/empty_if_body"
+]
+
 
 def _CheckNonInclusiveLanguage(input_api, output_api, source_file_filter=None):
     """Checks the files for non-inclusive language."""
@@ -129,8 +138,9 @@ def _DoCommonChecks(input_api, output_api):
             input_api, output_api))
     results.extend(
         input_api.canned_checks.CheckDoNotSubmit(input_api, output_api))
-    # TODO(dawn:1339): Add back CheckChangeLintsClean, it fails on all Dawn
-    # source files because they where never linted (and use different rules).
+    results.extend(
+        input_api.canned_checks.CheckChangeLintsClean(
+            input_api, output_api, lint_filters=LINT_FILTERS))
     results.extend(
         _CheckNonInclusiveLanguage(input_api, output_api,
                                    _NonInclusiveFileFilter))
