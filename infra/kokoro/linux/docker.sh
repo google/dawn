@@ -93,6 +93,21 @@ with_retry gclient sync
 status "Linting"
 ./tools/lint
 
+if [ "$BUILD_SYSTEM" == "cmake" ]; then
+    # TODO(crbug.com/dawn/1358): Remove the need to depend on GLFW.
+    status "Installing GLFW system dependencies [crbug.com/dawn/1358]"
+    sudo apt update
+    sudo apt -y install \
+        libgl-dev \
+        libx11-dev \
+        libx11-xcb-dev \
+        libxcursor-dev \
+        libxext-dev \
+        libxi-dev \
+        libxinerama-dev \
+        libxrandr-dev
+fi
+
 status "Configuring build system"
 if [ "$BUILD_SYSTEM" == "cmake" ]; then
     using cmake-3.17.2
@@ -121,16 +136,18 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
 
     cd ${BUILD_DIR}
 
-    status "Running Doxygen"
-    echo "NOTE: This will fail on first warning. Run with -DTINT_DOCS_WARN_AS_ERROR=OFF to see all warnings".
-    echo ""
-    show_cmds
-        # NOTE: If we upgrade Doxygen to a more recent version, we can set DOXYGEN_WARN_AS_ERROR to
-        # "FAIL_ON_WARNINGS" instead of "YES" in our CMakeLists.txt so see all warnings, and then
-        # fail. See https://www.doxygen.nl/manual/config.html#cfg_warn_as_error
-        cmake ${SRC_DIR} ${CMAKE_FLAGS} ${COMMON_CMAKE_FLAGS}
-        cmake --build . --target tint-docs
-    hide_cmds
+    # TODO(crbug.com/tint/1498): Doxygen is currently disabled.
+    #
+    # status "Running Doxygen"
+    # echo "NOTE: This will fail on first warning. Run with -DTINT_DOCS_WARN_AS_ERROR=OFF to see all warnings".
+    # echo ""
+    # show_cmds
+    #     # NOTE: If we upgrade Doxygen to a more recent version, we can set DOXYGEN_WARN_AS_ERROR to
+    #     # "FAIL_ON_WARNINGS" instead of "YES" in our CMakeLists.txt so see all warnings, and then
+    #     # fail. See https://www.doxygen.nl/manual/config.html#cfg_warn_as_error
+    #     cmake ${SRC_DIR} ${CMAKE_FLAGS} ${COMMON_CMAKE_FLAGS}
+    #     cmake --build . --target tint-docs
+    # hide_cmds
 
     status "Building dawn in '${BUILD_DIR}'"
     show_cmds
