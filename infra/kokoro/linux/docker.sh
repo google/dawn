@@ -86,6 +86,9 @@ status "Cloning to source directory '${SRC_DIR}'"
 cd ${SRC_DIR}
 git clone ${CLONE_SRC_DIR} .
 
+status "Checking for CRLF"
+./tools/check-no-crlf
+
 status "Fetching dependencies"
 cp scripts/standalone.gclient .gclient
 with_retry gclient sync
