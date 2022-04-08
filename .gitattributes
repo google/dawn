@@ -1,4 +1,9 @@
-*     text=auto
-*.sh  eol=lf
-*.gn  eol=lf
-*.gni eol=lf
+*        text=auto
+*.glsl   eol=lf
+*.gn     eol=lf
+*.gni    eol=lf
+*.hlsl   eol=lf
+*.msl    eol=lf
+*.sh     eol=lf
+*.spvasm eol=lf
+*.wgsl   eol=lf

@@ -4,7 +4,7 @@
       "name": "x64-Debug",
       "generator": "Ninja",
       "configurationType": "Debug",
-      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "inheritEnvironments": ["msvc_x64_x64"],
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "",
@@ -21,7 +21,7 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "inheritEnvironments": ["msvc_x64_x64"],
       "variables": []
     },
     {
@@ -33,7 +33,7 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x86" ],
+      "inheritEnvironments": ["msvc_x86"],
       "variables": []
     },
     {
@@ -45,7 +45,7 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x86" ],
+      "inheritEnvironments": ["msvc_x86"],
       "variables": []
     },
     {
@@ -57,7 +57,7 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "clang_cl_x64_x64" ],
+      "inheritEnvironments": ["clang_cl_x64_x64"],
       "variables": []
     },
     {
@@ -69,7 +69,7 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "clang_cl_x64_x64" ],
+      "inheritEnvironments": ["clang_cl_x64_x64"],
       "variables": []
     },
     {
@@ -81,7 +81,7 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "clang_cl_x86" ],
+      "inheritEnvironments": ["clang_cl_x86"],
       "variables": []
     },
     {
@@ -93,7 +93,7 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "clang_cl_x86" ],
+      "inheritEnvironments": ["clang_cl_x86"],
       "variables": []
     }
   ]

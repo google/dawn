@@ -63,7 +63,7 @@
 	</Type>
 
 	<Type Name="tint::ast::IdentifierExpression">
-		 <!--the ",sb" specifier removes the double quotes on the displayed string --> 
+		 <!--the ",sb" specifier removes the double quotes on the displayed string -->
 		<DisplayString>{symbol}</DisplayString>
 		<Expand>
 			<Item Name="symbol">symbol</Item>
@@ -89,7 +89,7 @@
 	<Type Name="tint::ast::Variable">
 		<!-- Hack: we can deduce that this variable is a parameter if it's const with a type but no constructor, which is illegal for a let  -->
 		<DisplayString Condition=" is_const &amp; !!type &amp;  !constructor">{symbol} : {*type}</DisplayString>
-		
+
 		<DisplayString Condition=" is_const &amp; !!type &amp; !!constructor">let {symbol} : {*type} = {*constructor}</DisplayString>
 		<DisplayString Condition=" is_const &amp;  !type &amp;  !constructor">let {symbol} = {*constructor}</DisplayString>
 		<DisplayString Condition="!is_const &amp; !!type &amp; !!constructor">var {symbol} : {*type} = {*constructor}</DisplayString>

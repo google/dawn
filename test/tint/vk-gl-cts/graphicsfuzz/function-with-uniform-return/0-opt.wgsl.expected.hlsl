@@ -67,7 +67,7 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-error: validation errors
+error: validation errors
 C:\src\temp\uvqg.0:62: error: Loop must have break.
 Validation failed.
 

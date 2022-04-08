@@ -93,7 +93,7 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-error: validation errors
+error: validation errors
 C:\src\temp\u1r54.0:88: error: Loop must have break.
 Validation failed.
 
