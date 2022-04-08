@@ -181,16 +181,16 @@ class QueryInternalShaderTests : public DawnTest {
     }
 };
 
-// Test the accuracy of timestamp compute shader which uses unsigned 32-bit integers to simulate
-// unsigned 64-bit integers (timestamps) multiplied by float (period).
-// The arguments pass to timestamp internal pipeline:
-// - The timestamps buffer contains the original timestamps resolved from query set (created
+// Test the accuracy of timestamp compute shader which uses unsigned 32-bit integers to simulate
+// unsigned 64-bit integers (timestamps) multiplied by float (period).
+// The arguments pass to timestamp internal pipeline:
+// - The timestamps buffer contains the original timestamps resolved from query set (created
 //   manually here), and will be used to store the results processed by the compute shader.
 //   Expect 0 for unavailable timestamps and nanoseconds for available timestamps in an expected
 //   error tolerance ratio.
-// - The availability buffer passes the data of which slot in timestamps buffer is an initialized
+// - The availability buffer passes the data of which slot in timestamps buffer is an initialized
 //   timestamp.
-// - The params buffer passes the timestamp count, the offset in timestamps buffer and the
+// - The params buffer passes the timestamp count, the offset in timestamps buffer and the
 //   timestamp period (here use GPU frequency (HZ) on Intel D3D12 to calculate the period in
 //   ns for testing).
 TEST_P(QueryInternalShaderTests, TimestampComputeShader) {

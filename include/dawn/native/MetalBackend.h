@@ -30,7 +30,7 @@ typedef __IOSurface* IOSurfaceRef;
 
 #ifdef __OBJC__
 #    import <Metal/Metal.h>
-#endif  //__OBJC__
+#endif  // __OBJC__
 
 namespace dawn::native::metal {
 

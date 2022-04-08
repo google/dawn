@@ -1690,9 +1690,9 @@ namespace {
 
     // TODO (yunchao.he@intel.com):
     //
-    //	* Add tests for multiple encoders upon the same resource simultaneously. This situation fits
-    //	some cases like VR, multi-threading, etc.
+    //  * Add tests for multiple encoders upon the same resource simultaneously. This situation fits
+    //    some cases like VR, multi-threading, etc.
     //
-    //	* Add tests for bundle
+    //  * Add tests for bundle
 
 }  // anonymous namespace

@@ -77,7 +77,7 @@ LINT_FILTERS = [
     "-legal/copyright", "-readability/braces", "-readability/casting",
     "-readability/inheritance", "-readability/namespace", "-runtime/explicit",
     "-runtime/indentation_namespace", "-runtime/int", "-runtime/printf",
-    "-whitespace/comments", "-whitespace/empty_if_body"
+    "-whitespace/empty_if_body"
 ]
 
 
