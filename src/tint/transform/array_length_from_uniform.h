@@ -98,7 +98,7 @@ class ArrayLengthFromUniform final
     ~Result() override;
 
     /// Indices into the UBO that are statically used.
-    const std::unordered_set<uint32_t> used_size_indices;
+    std::unordered_set<uint32_t> used_size_indices;
   };
 
   /// @param program the program to inspect

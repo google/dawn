@@ -88,6 +88,13 @@ class DataMap {
   /// Put()
   template <typename T>
   T const* Get() const {
+    return const_cast<DataMap*>(this)->Get<T>();
+  }
+
+  /// @returns a pointer to the Data placed into the DataMap with a call to
+  /// Put()
+  template <typename T>
+  T* Get() {
     auto it = map_.find(&TypeInfo::Of<T>());
     if (it == map_.end()) {
       return nullptr;
