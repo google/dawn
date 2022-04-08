@@ -64,6 +64,7 @@ DawnJSONGenerator(
 # directory, they don't see the GENERATED property and fail to configure
 # because the file doesn't exist on disk.
 add_library(dawn_headers STATIC ${DAWN_DUMMY_FILE})
+common_compile_options(dawn_headers)
 target_sources(dawn_headers PRIVATE
     "${DAWN_INCLUDE_DIR}/dawn/dawn_wsi.h"
     ${DAWN_HEADERS_GEN_SOURCES}
@@ -83,6 +84,7 @@ DawnJSONGenerator(
 # This headers only library needs to be a STATIC library, see comment for
 # dawn_headers above.
 add_library(dawncpp_headers STATIC ${DAWN_DUMMY_FILE})
+common_compile_options(dawncpp_headers)
 target_sources(dawncpp_headers PRIVATE
     "${DAWN_INCLUDE_DIR}/dawn/EnumClassBitmasks.h"
     ${DAWNCPP_HEADERS_GEN_SOURCES}
@@ -100,6 +102,7 @@ DawnJSONGenerator(
 )
 
 add_library(dawncpp STATIC ${DAWN_DUMMY_FILE})
+common_compile_options(dawncpp)
 target_sources(dawncpp PRIVATE ${DAWNCPP_GEN_SOURCES})
 target_link_libraries(dawncpp PUBLIC dawncpp_headers)
 
@@ -114,6 +117,7 @@ DawnJSONGenerator(
 )
 
 add_library(dawn_proc ${DAWN_DUMMY_FILE})
+common_compile_options(dawn_proc)
 target_compile_definitions(dawn_proc PRIVATE "WGPU_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(dawn_proc PRIVATE "WGPU_SHARED_LIBRARY")

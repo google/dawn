@@ -13,6 +13,7 @@
 # limitations under the License.
 
 add_library(dawn_platform ${DAWN_DUMMY_FILE})
+common_compile_options(dawn_platform)
 
 target_compile_definitions(dawn_platform PRIVATE "DAWN_PLATFORM_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)

@@ -61,6 +61,7 @@ add_subdirectory(interop)
 add_library(dawn_node SHARED
     "Module.cpp"
 )
+common_compile_options(dawn_node)
 set_target_properties(dawn_node PROPERTIES
     PREFIX ""
     OUTPUT_NAME "dawn"

@@ -66,6 +66,7 @@ add_library(dawn_node_binding STATIC
     "GPUTextureView.cpp"
     "GPUTextureView.h"
 )
+common_compile_options(dawn_node_binding)
 
 target_include_directories(dawn_node_binding
     PRIVATE

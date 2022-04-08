@@ -21,6 +21,7 @@ DawnGenerator(
 )
 
 add_library(dawn_common STATIC ${DAWN_DUMMY_FILE})
+common_compile_options(dawn_common)
 target_sources(dawn_common PRIVATE
     ${DAWN_VERSION_AUTOGEN_SOURCES}
     "Alloc.h"

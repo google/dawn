@@ -131,9 +131,9 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
     fi
 
     if [ "$BUILD_SANITIZER" == "asan" ]; then
-        COMMON_CMAKE_FLAGS+=" -DTINT_ENABLE_ASAN=1"
+        COMMON_CMAKE_FLAGS+=" -DDAWN_ENABLE_ASAN=1"
     elif [ "$BUILD_SANITIZER" == "ubsan" ]; then
-        COMMON_CMAKE_FLAGS+=" -DTINT_ENABLE_UBSAN=1"
+        COMMON_CMAKE_FLAGS+=" -DDAWN_ENABLE_UBSAN=1"
         export UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1
     fi
 

@@ -113,6 +113,10 @@ if (DAWN_SUPPORTS_GLFW_FOR_WINDOWING)
     set(BUILD_SAMPLES ON)
 endif()
 
+option_if_not_defined(DAWN_ENABLE_MSAN "Enable memory sanitizer" OFF)
+option_if_not_defined(DAWN_ENABLE_ASAN "Enable address sanitizer" OFF)
+option_if_not_defined(DAWN_ENABLE_UBSAN "Enable undefined behaviour sanitizer" OFF)
+
 option_if_not_defined(DAWN_ENABLE_D3D12 "Enable compilation of the D3D12 backend" ${ENABLE_D3D12})
 option_if_not_defined(DAWN_ENABLE_METAL "Enable compilation of the Metal backend" ${ENABLE_METAL})
 option_if_not_defined(DAWN_ENABLE_NULL "Enable compilation of the Null backend" ON)
@@ -154,6 +158,30 @@ endif()
 if(DAWN_ENABLE_PIC)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
+
+################################################################################
+# common_compile_options - sets compiler and linker options common for dawn and
+# tint on the given target
+################################################################################
+function(common_compile_options TARGET)
+  if (COMPILER_IS_LIKE_GNU)
+    target_compile_options(${TARGET} PRIVATE
+      -fno-exceptions
+      -fno-rtti
+    )
+
+    if (${DAWN_ENABLE_MSAN})
+      target_compile_options(${TARGET} PRIVATE -fsanitize=memory)
+      target_link_options(${TARGET} PRIVATE -fsanitize=memory)
+    elseif (${DAWN_ENABLE_ASAN})
+      target_compile_options(${TARGET} PRIVATE -fsanitize=address)
+      target_link_options(${TARGET} PRIVATE -fsanitize=address)
+    elseif (${DAWN_ENABLE_UBSAN})
+      target_compile_options(${TARGET} PRIVATE -fsanitize=undefined)
+      target_link_options(${TARGET} PRIVATE -fsanitize=undefined)
+    endif()
+  endif(COMPILER_IS_LIKE_GNU)
+endfunction()
 
 ################################################################################
 # Dawn's public and internal "configs"
@@ -251,10 +279,6 @@ option_if_not_defined(TINT_BUILD_REMOTE_COMPILE "Build the remote-compile tool f
 
 set(TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS "" CACHE STRING "Used by OSS-Fuzz to control, via link options, which fuzzing engine should be used")
 
-option_if_not_defined(TINT_ENABLE_MSAN "Enable memory sanitizer" OFF)
-option_if_not_defined(TINT_ENABLE_ASAN "Enable address sanitizer" OFF)
-option_if_not_defined(TINT_ENABLE_UBSAN "Enable undefined behaviour sanitizer" OFF)
-
 option_if_not_defined(TINT_ENABLE_BREAK_IN_DEBUGGER "Enable tint::debugger::Break()" OFF)
 
 option_if_not_defined(TINT_EMIT_COVERAGE "Emit code coverage information" OFF)
@@ -279,9 +303,9 @@ message(STATUS "Tint build AST fuzzer: ${TINT_BUILD_AST_FUZZER}")
 message(STATUS "Tint build regex fuzzer: ${TINT_BUILD_REGEX_FUZZER}")
 message(STATUS "Tint build benchmarks: ${TINT_BUILD_BENCHMARKS}")
 message(STATUS "Tint build tests: ${TINT_BUILD_TESTS}")
-message(STATUS "Tint build with ASAN: ${TINT_ENABLE_ASAN}")
-message(STATUS "Tint build with MSAN: ${TINT_ENABLE_MSAN}")
-message(STATUS "Tint build with UBSAN: ${TINT_ENABLE_UBSAN}")
+message(STATUS "Tint build with ASAN: ${DAWN_ENABLE_ASAN}")
+message(STATUS "Tint build with MSAN: ${DAWN_ENABLE_MSAN}")
+message(STATUS "Tint build with UBSAN: ${DAWN_ENABLE_UBSAN}")
 message(STATUS "Tint build checking [chromium-style]: ${TINT_CHECK_CHROMIUM_STYLE}")
 message(STATUS "Tint build remote-compile tool: ${TINT_BUILD_REMOTE_COMPILE}")
 
@@ -438,24 +462,7 @@ function(tint_core_compile_options TARGET)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_SPV_WRITER=$<BOOL:${TINT_BUILD_SPV_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_WGSL_WRITER=$<BOOL:${TINT_BUILD_WGSL_WRITER}>)
 
-  if (COMPILER_IS_LIKE_GNU)
-    target_compile_options(${TARGET} PRIVATE
-      -std=c++17
-      -fno-exceptions
-      -fno-rtti
-    )
-
-    if (${TINT_ENABLE_MSAN})
-      target_compile_options(${TARGET} PRIVATE -fsanitize=memory)
-      target_link_options(${TARGET} PRIVATE -fsanitize=memory)
-    elseif (${TINT_ENABLE_ASAN})
-      target_compile_options(${TARGET} PRIVATE -fsanitize=address)
-      target_link_options(${TARGET} PRIVATE -fsanitize=address)
-    elseif (${TINT_ENABLE_UBSAN})
-      target_compile_options(${TARGET} PRIVATE -fsanitize=undefined)
-      target_link_options(${TARGET} PRIVATE -fsanitize=undefined)
-    endif()
-  endif(COMPILER_IS_LIKE_GNU)
+  common_compile_options(${TARGET})
 
   if (TINT_EMIT_COVERAGE)
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")

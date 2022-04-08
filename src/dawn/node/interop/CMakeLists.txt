@@ -47,6 +47,7 @@ add_library(dawn_node_interop STATIC
     "${INTEROP_WEBGPU_H}"
     "${INTEROP_WEBGPU_CPP}"
 )
+common_compile_options(dawn_node_interop)
 
 target_include_directories(dawn_node_interop
     PRIVATE
