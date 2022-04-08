@@ -78,7 +78,7 @@ TEST(Limits, ValidateLimits) {
         EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
     }
 
-    // Test that better than max is invalid.
+    // Test that better than supported is invalid for "maximum" limits.
     {
         dawn::native::Limits required = {};
         required.maxTextureDimension3D = defaults.maxTextureDimension3D + 1;
@@ -87,14 +87,14 @@ TEST(Limits, ValidateLimits) {
         err.AcquireError();
     }
 
-    // Test that worse than max is valid.
+    // Test that worse than supported is valid for "maximum" limits.
     {
         dawn::native::Limits required = {};
         required.maxComputeWorkgroupSizeX = defaults.maxComputeWorkgroupSizeX - 1;
         EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
     }
 
-    // Test that better than min is invalid.
+    // Test that better than min is invalid for "alignment" limits.
     {
         dawn::native::Limits required = {};
         required.minUniformBufferOffsetAlignment = defaults.minUniformBufferOffsetAlignment / 2;
@@ -103,11 +103,20 @@ TEST(Limits, ValidateLimits) {
         err.AcquireError();
     }
 
-    // Test that worse than min is valid.
+    // Test that worse than min and a power of two is valid for "alignment" limits.
     {
         dawn::native::Limits required = {};
         required.minStorageBufferOffsetAlignment = defaults.minStorageBufferOffsetAlignment * 2;
         EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
+    }
+
+    // Test that worse than min and not a power of two is invalid for "alignment" limits.
+    {
+        dawn::native::Limits required = {};
+        required.minStorageBufferOffsetAlignment = defaults.minStorageBufferOffsetAlignment * 3;
+        dawn::native::MaybeError err = ValidateLimits(defaults, required);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
     }
 }
 
