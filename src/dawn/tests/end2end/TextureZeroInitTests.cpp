@@ -899,9 +899,6 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
 // sampled and attachment (with LoadOp::Clear so the lazy clear can be skipped) then the sampled
 // subresource is correctly cleared.
 TEST_P(TextureZeroInitTest, TextureBothSampledAndAttachmentClear) {
-    // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     // Create a 2D array texture, layer 0 will be used as attachment, layer 1 as sampled.
     wgpu::TextureDescriptor texDesc;
     texDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment |
@@ -1342,9 +1339,6 @@ TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
 // Test that if one layer of a texture is initialized and another is uninitialized, lazy clearing
 // the uninitialized layer does not clear the initialized layer.
 TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
-    // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     wgpu::TextureDescriptor sampleTextureDescriptor =
         CreateTextureDescriptor(1, 2,
                                 wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
@@ -1875,7 +1869,7 @@ TEST_P(CompressedTextureZeroInitTest, HalfCopyBufferToTexture) {
 // Test that 0 lazy clear count happens when we copy buffer to texture to a nonzero mip level
 // (with physical size different from the virtual mip size)
 TEST_P(CompressedTextureZeroInitTest, FullCopyToNonZeroMipLevel) {
-    // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
+    // TODO(crbug.com/dawn/1328): ES3.1 does not support subsetting of compressed textures.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     wgpu::TextureDescriptor textureDescriptor;
@@ -1924,7 +1918,7 @@ TEST_P(CompressedTextureZeroInitTest, HalfCopyToNonZeroMipLevel) {
 
 // Test that 0 lazy clear count happens when we copy buffer to nonzero array layer
 TEST_P(CompressedTextureZeroInitTest, FullCopyToNonZeroArrayLayer) {
-    // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
+    // TODO(crbug.com/dawn/1328): ES3.1 does not support subsetting of compressed textures.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     wgpu::TextureDescriptor textureDescriptor;
@@ -1964,7 +1958,7 @@ TEST_P(CompressedTextureZeroInitTest, HalfCopyToNonZeroArrayLayer) {
 
 // full copy texture to texture, 0 lazy clears are needed
 TEST_P(CompressedTextureZeroInitTest, FullCopyTextureToTextureMipLevel) {
-    // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
+    // TODO(crbug.com/dawn/1328): ES3.1 does not support subsetting of compressed textures.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     // create srcTexture and fill it with data

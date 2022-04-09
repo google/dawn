@@ -249,6 +249,17 @@ namespace dawn::native::opengl {
                     const BindingInfo& bindingInfo =
                         group->GetLayout()->GetBindingInfo(bindingIndex);
 
+                    if (bindingInfo.bindingType == BindingInfoType::Texture) {
+                        TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
+                        view->CopyIfNeeded();
+                    }
+                }
+
+                for (BindingIndex bindingIndex{0};
+                     bindingIndex < group->GetLayout()->GetBindingCount(); ++bindingIndex) {
+                    const BindingInfo& bindingInfo =
+                        group->GetLayout()->GetBindingInfo(bindingIndex);
+
                     switch (bindingInfo.bindingType) {
                         case BindingInfoType::Buffer: {
                             BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
@@ -361,6 +372,7 @@ namespace dawn::native::opengl {
                             gl.BindImageTexture(imageIndex, handle, view->GetBaseMipLevel(),
                                                 isLayered, view->GetBaseArrayLayer(), access,
                                                 texture->GetGLFormat().internalFormat);
+                            texture->Touch();
                             break;
                         }
 
@@ -402,6 +414,7 @@ namespace dawn::native::opengl {
                     gl.BlitFramebuffer(0, 0, renderPass->width, renderPass->height, 0, 0,
                                        renderPass->width, renderPass->height, GL_COLOR_BUFFER_BIT,
                                        GL_NEAREST);
+                    ToBackend(resolveView->GetTexture())->Touch();
                 }
             }
 
@@ -552,6 +565,7 @@ namespace dawn::native::opengl {
                     DoTexSubImage(gl, dst, reinterpret_cast<void*>(src.offset), dataLayout,
                                   copy->copySize);
                     gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+                    ToBackend(dst.texture)->Touch();
                     break;
                 }
 
@@ -698,6 +712,7 @@ namespace dawn::native::opengl {
                                      srcTexture->GetGLTarget(), src.mipLevel, src.origin,
                                      dstTexture->GetHandle(), dstTexture->GetGLTarget(),
                                      dst.mipLevel, dst.origin, copySize);
+                    ToBackend(dst.texture)->Touch();
                     break;
                 }
 
@@ -1134,6 +1149,17 @@ namespace dawn::native::opengl {
                 case Command::EndRenderPass: {
                     mCommands.NextCommand<EndRenderPassCmd>();
 
+                    for (ColorAttachmentIndex i :
+                         IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+                        TextureView* textureView =
+                            ToBackend(renderPass->colorAttachments[i].view.Get());
+                        ToBackend(textureView->GetTexture())->Touch();
+                    }
+                    if (renderPass->attachmentState->HasDepthStencilAttachment()) {
+                        TextureView* textureView =
+                            ToBackend(renderPass->depthStencilAttachment.view.Get());
+                        ToBackend(textureView->GetTexture())->Touch();
+                    }
                     if (renderPass->attachmentState->GetSampleCount() > 1) {
                         ResolveMultisampledRenderTargets(gl, renderPass);
                     }

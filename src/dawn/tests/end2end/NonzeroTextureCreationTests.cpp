@@ -111,12 +111,6 @@ namespace {
             DAWN_SUPPRESS_TEST_IF(GetParam().mFormat == wgpu::TextureFormat::Depth24PlusStencil8 &&
                                   GetParam().mAspect == wgpu::TextureAspect::StencilOnly &&
                                   HasToggleEnabled("disable_depth_stencil_read"));
-
-            // TODO(crbug.com/dawn/593): Test depends on glTextureView which is unsupported on GLES.
-            DAWN_SUPPRESS_TEST_IF(GetParam().mFormat == wgpu::TextureFormat::Depth24PlusStencil8 &&
-                                  GetParam().mAspect == wgpu::TextureAspect::DepthOnly &&
-                                  IsOpenGLES());
-
             // GL may support the feature, but reading data back is not implemented.
             DAWN_TEST_UNSUPPORTED_IF(GetParam().mFormat == wgpu::TextureFormat::BC1RGBAUnorm &&
                                      (IsOpenGL() || IsOpenGLES()));

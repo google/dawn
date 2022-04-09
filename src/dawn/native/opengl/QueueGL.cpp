@@ -74,6 +74,7 @@ namespace dawn::native::opengl {
             ToBackend(destination.texture)->EnsureSubresourceContentInitialized(range);
         }
         DoTexSubImage(ToBackend(GetDevice())->gl, textureCopy, data, dataLayout, writeSizePixel);
+        ToBackend(destination.texture)->Touch();
         return {};
     }
 

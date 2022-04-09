@@ -138,9 +138,6 @@ class TextureSubresourceTest : public DawnTest {
 
 // Test different mipmap levels
 TEST_P(TextureSubresourceTest, MipmapLevelsTest) {
-    // TODO(crbug.com/dawn/593): This test requires glTextureView, which is unsupported on GLES.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     // Create a texture with 2 mipmap levels and 1 layer
     wgpu::Texture texture =
         CreateTexture(2, 1,
@@ -167,8 +164,6 @@ TEST_P(TextureSubresourceTest, MipmapLevelsTest) {
 
 // Test different array layers
 TEST_P(TextureSubresourceTest, ArrayLayersTest) {
-    // TODO(crbug.com/dawn/593): This test requires glTextureView, which is unsupported on GLES.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
     // Create a texture with 1 mipmap level and 2 layers
     wgpu::Texture texture =
         CreateTexture(1, 2,
