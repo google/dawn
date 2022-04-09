@@ -22,6 +22,8 @@
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
 
+#include <utility>
+
 namespace dawn::native::vulkan {
 
     // static
@@ -46,10 +48,11 @@ namespace dawn::native::vulkan {
         createInfo.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
         // Generate a new VkShaderModule with BindingRemapper tint transform for each pipeline
         const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
-        DAWN_TRY_ASSIGN(createInfo.stage.module,
-                        ToBackend(computeStage.module.Get())
-                            ->GetTransformedModuleHandle(computeStage.entryPoint.c_str(),
-                                                         ToBackend(GetLayout())));
+        ShaderModule* module = ToBackend(computeStage.module.Get());
+        PipelineLayout* layout = ToBackend(GetLayout());
+        const ShaderModule::Spirv* spirv;
+        DAWN_TRY_ASSIGN((std::tie(createInfo.stage.module, spirv)),
+                        module->GetHandleAndSpirv(computeStage.entryPoint.c_str(), layout));
 
         createInfo.stage.pName = computeStage.entryPoint.c_str();
 
@@ -73,6 +76,11 @@ namespace dawn::native::vulkan {
                 &subgroupSizeInfo,
                 VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO_EXT);
         }
+
+        // Record cache key information now since the createInfo is not stored.
+        GetCacheKey()
+            ->Record(createInfo, static_cast<const ComputePipeline*>(this)->GetLayout())
+            .RecordIterable(*spirv);
 
         DAWN_TRY(CheckVkSuccess(
             device->fn.CreateComputePipelines(device->GetVkDevice(), ::VK_NULL_HANDLE, 1,

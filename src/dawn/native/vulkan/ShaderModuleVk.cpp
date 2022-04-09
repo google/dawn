@@ -38,35 +38,38 @@ namespace dawn::native::vulkan {
     ShaderModule::ConcurrentTransformedShaderModuleCache::
         ~ConcurrentTransformedShaderModuleCache() {
         std::lock_guard<std::mutex> lock(mMutex);
-        for (const auto& [_, module] : mTransformedShaderModuleCache) {
-            mDevice->GetFencedDeleter()->DeleteWhenUnused(module);
+        for (const auto& [_, moduleAndSpirv] : mTransformedShaderModuleCache) {
+            mDevice->GetFencedDeleter()->DeleteWhenUnused(moduleAndSpirv.first);
         }
     }
 
-    VkShaderModule ShaderModule::ConcurrentTransformedShaderModuleCache::FindShaderModule(
+    std::optional<ShaderModule::ModuleAndSpirv>
+    ShaderModule::ConcurrentTransformedShaderModuleCache::Find(
         const PipelineLayoutEntryPointPair& key) {
         std::lock_guard<std::mutex> lock(mMutex);
         auto iter = mTransformedShaderModuleCache.find(key);
         if (iter != mTransformedShaderModuleCache.end()) {
-            auto cached = iter->second;
-            return cached;
+            return std::make_pair(iter->second.first, iter->second.second.get());
         }
-        return VK_NULL_HANDLE;
+        return {};
     }
 
-    VkShaderModule ShaderModule::ConcurrentTransformedShaderModuleCache::AddOrGetCachedShaderModule(
+    ShaderModule::ModuleAndSpirv ShaderModule::ConcurrentTransformedShaderModuleCache::AddOrGet(
         const PipelineLayoutEntryPointPair& key,
-        VkShaderModule value) {
-        ASSERT(value != VK_NULL_HANDLE);
+        VkShaderModule module,
+        std::vector<uint32_t>&& spirv) {
+        ASSERT(module != VK_NULL_HANDLE);
         std::lock_guard<std::mutex> lock(mMutex);
         auto iter = mTransformedShaderModuleCache.find(key);
         if (iter == mTransformedShaderModuleCache.end()) {
-            mTransformedShaderModuleCache.emplace(key, value);
-            return value;
+            mTransformedShaderModuleCache.emplace(
+                key, std::make_pair(module, std::unique_ptr<Spirv>(new Spirv(spirv))));
         } else {
-            mDevice->GetFencedDeleter()->DeleteWhenUnused(value);
-            return iter->second;
+            mDevice->GetFencedDeleter()->DeleteWhenUnused(module);
         }
+        // Now the key should exist in the map, so find it again and return it.
+        iter = mTransformedShaderModuleCache.find(key);
+        return std::make_pair(iter->second.first, iter->second.second.get());
     }
 
     // static
@@ -109,25 +112,24 @@ namespace dawn::native::vulkan {
 
     ShaderModule::~ShaderModule() = default;
 
-    ResultOrError<VkShaderModule> ShaderModule::GetTransformedModuleHandle(
+    ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         const char* entryPointName,
         PipelineLayout* layout) {
-        TRACE_EVENT0(GetDevice()->GetPlatform(), General,
-                     "ShaderModuleVk::GetTransformedModuleHandle");
+        TRACE_EVENT0(GetDevice()->GetPlatform(), General, "ShaderModuleVk::GetHandleAndSpirv");
 
         // If the shader was destroyed, we should never call this function.
         ASSERT(IsAlive());
 
         ScopedTintICEHandler scopedICEHandler(GetDevice());
 
+        // Check to see if we have the handle and spirv cached already.
         auto cacheKey = std::make_pair(layout, entryPointName);
-        VkShaderModule cachedShaderModule =
-            mTransformedShaderModuleCache->FindShaderModule(cacheKey);
-        if (cachedShaderModule != VK_NULL_HANDLE) {
-            return cachedShaderModule;
+        auto handleAndSpirv = mTransformedShaderModuleCache->Find(cacheKey);
+        if (handleAndSpirv.has_value()) {
+            return std::move(*handleAndSpirv);
         }
 
-        // Creation of VkShaderModule is deferred to this point when using tint generator
+        // Creation of module and spirv is deferred to this point when using tint generator
 
         // Remap BindingNumber to BindingIndex in WGSL shader
         using BindingRemapper = tint::transform::BindingRemapper;
@@ -207,7 +209,7 @@ namespace dawn::native::vulkan {
         options.use_zero_initialize_workgroup_memory_extension =
             GetDevice()->IsToggleEnabled(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension);
 
-        std::vector<uint32_t> spirv;
+        Spirv spirv;
         {
             TRACE_EVENT0(GetDevice()->GetPlatform(), General, "tint::writer::spirv::Generate()");
             auto result = tint::writer::spirv::Generate(&program, options);
@@ -236,15 +238,17 @@ namespace dawn::native::vulkan {
                                         device->GetVkDevice(), &createInfo, nullptr, &*newHandle),
                                     "CreateShaderModule"));
         }
+        ModuleAndSpirv moduleAndSpirv;
         if (newHandle != VK_NULL_HANDLE) {
-            newHandle =
-                mTransformedShaderModuleCache->AddOrGetCachedShaderModule(cacheKey, newHandle);
+            moduleAndSpirv =
+                mTransformedShaderModuleCache->AddOrGet(cacheKey, newHandle, std::move(spirv));
         }
 
         SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_SHADER_MODULE,
-                     reinterpret_cast<uint64_t&>(newHandle), "Dawn_ShaderModule", GetLabel());
+                     reinterpret_cast<uint64_t&>(moduleAndSpirv.first), "Dawn_ShaderModule",
+                     GetLabel());
 
-        return newHandle;
+        return std::move(moduleAndSpirv);
     }
 
 }  // namespace dawn::native::vulkan

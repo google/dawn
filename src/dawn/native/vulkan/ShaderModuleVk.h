@@ -20,7 +20,11 @@
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Error.h"
 
+#include <memory>
 #include <mutex>
+#include <optional>
+#include <utility>
+#include <vector>
 
 namespace dawn::native::vulkan {
 
@@ -29,12 +33,15 @@ namespace dawn::native::vulkan {
 
     class ShaderModule final : public ShaderModuleBase {
       public:
+        using Spirv = std::vector<uint32_t>;
+        using ModuleAndSpirv = std::pair<VkShaderModule, const Spirv*>;
+
         static ResultOrError<Ref<ShaderModule>> Create(Device* device,
                                                        const ShaderModuleDescriptor* descriptor,
                                                        ShaderModuleParseResult* parseResult);
 
-        ResultOrError<VkShaderModule> GetTransformedModuleHandle(const char* entryPointName,
-                                                                 PipelineLayout* layout);
+        ResultOrError<ModuleAndSpirv> GetHandleAndSpirv(const char* entryPointName,
+                                                        PipelineLayout* layout);
 
       private:
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
@@ -42,20 +49,24 @@ namespace dawn::native::vulkan {
         MaybeError Initialize(ShaderModuleParseResult* parseResult);
         void DestroyImpl() override;
 
-        // New handles created by GetTransformedModuleHandle at pipeline creation time
+        // New handles created by GetHandleAndSpirv at pipeline creation time.
         class ConcurrentTransformedShaderModuleCache {
           public:
             explicit ConcurrentTransformedShaderModuleCache(Device* device);
             ~ConcurrentTransformedShaderModuleCache();
-            VkShaderModule FindShaderModule(const PipelineLayoutEntryPointPair& key);
-            VkShaderModule AddOrGetCachedShaderModule(const PipelineLayoutEntryPointPair& key,
-                                                      VkShaderModule value);
+
+            std::optional<ModuleAndSpirv> Find(const PipelineLayoutEntryPointPair& key);
+            ModuleAndSpirv AddOrGet(const PipelineLayoutEntryPointPair& key,
+                                    VkShaderModule module,
+                                    std::vector<uint32_t>&& spirv);
 
           private:
+            using Entry = std::pair<VkShaderModule, std::unique_ptr<Spirv>>;
+
             Device* mDevice;
             std::mutex mMutex;
             std::unordered_map<PipelineLayoutEntryPointPair,
-                               VkShaderModule,
+                               Entry,
                                PipelineLayoutEntryPointPairHashFunc>
                 mTransformedShaderModuleCache;
         };

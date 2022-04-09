@@ -332,6 +332,7 @@ namespace dawn::native::vulkan {
 
     MaybeError RenderPipeline::Initialize() {
         Device* device = ToBackend(GetDevice());
+        PipelineLayout* layout = ToBackend(GetLayout());
 
         // There are at most 2 shader stages in render pipeline, i.e. vertex and fragment
         std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
@@ -344,10 +345,11 @@ namespace dawn::native::vulkan {
             VkPipelineShaderStageCreateInfo shaderStage;
 
             const ProgrammableStage& programmableStage = GetStage(stage);
-            DAWN_TRY_ASSIGN(shaderStage.module,
-                            ToBackend(programmableStage.module)
-                                ->GetTransformedModuleHandle(programmableStage.entryPoint.c_str(),
-                                                             ToBackend(GetLayout())));
+            ShaderModule* module = ToBackend(programmableStage.module.Get());
+            const ShaderModule::Spirv* spirv;
+            DAWN_TRY_ASSIGN(
+                std::tie(shaderStage.module, spirv),
+                module->GetHandleAndSpirv(programmableStage.entryPoint.c_str(), layout));
 
             shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
             shaderStage.pNext = nullptr;

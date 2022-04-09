@@ -455,6 +455,8 @@ if (DAWN_ENABLE_VULKAN)
         "vulkan/BindGroupVk.h"
         "vulkan/BufferVk.cpp"
         "vulkan/BufferVk.h"
+        "vulkan/CacheKeyVk.cpp"
+        "vulkan/CacheKeyVk.h"
         "vulkan/CommandBufferVk.cpp"
         "vulkan/CommandBufferVk.h"
         "vulkan/CommandRecordingContext.h"
@@ -510,6 +512,7 @@ if (DAWN_ENABLE_VULKAN)
     )
 
     target_link_libraries(dawn_native PUBLIC Vulkan-Headers)
+    target_include_directories(dawn_native PRIVATE ${DAWN_VULKAN_DEPS_DIR})
 
     if (UNIX AND NOT APPLE)
         target_sources(dawn_native PRIVATE

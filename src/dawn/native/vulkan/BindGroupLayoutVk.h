@@ -22,6 +22,10 @@
 
 #include <vector>
 
+namespace dawn::native {
+    class CacheKey;
+}  // namespace dawn::native
+
 namespace dawn::native::vulkan {
 
     class BindGroup;

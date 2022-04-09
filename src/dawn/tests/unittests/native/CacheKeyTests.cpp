@@ -51,7 +51,7 @@ namespace dawn::native {
 
         // Matcher to compare CacheKeys for easier testing.
         MATCHER_P(CacheKeyEq, key, PrintToString(key)) {
-            return memcmp(arg.data(), key.data(), arg.size()) == 0;
+            return arg.size() == key.size() && memcmp(arg.data(), key.data(), key.size()) == 0;
         }
 
         TEST(CacheKeyTests, RecordSingleMember) {

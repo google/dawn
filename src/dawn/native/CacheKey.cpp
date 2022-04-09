@@ -14,7 +14,18 @@
 
 #include "dawn/native/CacheKey.h"
 
+#include <iomanip>
+
 namespace dawn::native {
+
+    std::ostream& operator<<(std::ostream& os, const CacheKey& key) {
+        os << std::hex;
+        for (const int b : key) {
+            os << std::setfill('0') << std::setw(2) << b << " ";
+        }
+        os << std::dec;
+        return os;
+    }
 
     template <>
     void CacheKeySerializer<std::string>::Serialize(CacheKey* key, const std::string& t) {

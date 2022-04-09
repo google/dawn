@@ -16,6 +16,7 @@
 
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/ityp_vector.h"
+#include "dawn/native/CacheKey.h"
 #include "dawn/native/vulkan/BindGroupVk.h"
 #include "dawn/native/vulkan/DescriptorSetAllocator.h"
 #include "dawn/native/vulkan/DeviceVk.h"
@@ -114,6 +115,9 @@ namespace dawn::native::vulkan {
         createInfo.flags = 0;
         createInfo.bindingCount = static_cast<uint32_t>(bindings.size());
         createInfo.pBindings = bindings.data();
+
+        // Record cache key information now since the createInfo is not stored.
+        GetCacheKey()->Record(createInfo);
 
         Device* device = ToBackend(GetDevice());
         DAWN_TRY(CheckVkSuccess(device->fn.CreateDescriptorSetLayout(

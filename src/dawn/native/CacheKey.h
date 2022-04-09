@@ -15,17 +15,20 @@
 #ifndef DAWNNATIVE_CACHE_KEY_H_
 #define DAWNNATIVE_CACHE_KEY_H_
 
+#include <iostream>
 #include <limits>
 #include <string>
 #include <type_traits>
 #include <vector>
 
-#include "dawn/common/Assert.h"
-
 namespace dawn::native {
 
-    // Forward declare CacheKey class because of co-dependency.
+    // Forward declare classes because of co-dependency.
     class CacheKey;
+    class CachedObject;
+
+    // Stream operator for CacheKey for debugging.
+    std::ostream& operator<<(std::ostream& os, const CacheKey& key);
 
     // Overridable serializer struct that should be implemented for cache key serializable
     // types/classes.
@@ -82,7 +85,31 @@ namespace dawn::native {
         }
     };
 
-    // Specialized overload for string literals. Note we drop the null-terminator.
+    // Specialized overload for enums.
+    template <typename T>
+    class CacheKeySerializer<T, std::enable_if_t<std::is_enum_v<T>>> {
+      public:
+        static void Serialize(CacheKey* key, const T t) {
+            CacheKeySerializer<std::underlying_type_t<T>>::Serialize(
+                key, static_cast<std::underlying_type_t<T>>(t));
+        }
+    };
+
+    // Specialized overload for pointers. Since we are serializing for a cache key, we always
+    // serialize via value, not by pointer. To handle nullptr scenarios, we always serialize whether
+    // the pointer was nullptr followed by the contents if applicable.
+    template <typename T>
+    class CacheKeySerializer<T, std::enable_if_t<std::is_pointer_v<T>>> {
+      public:
+        static void Serialize(CacheKey* key, const T t) {
+            key->Record(t == nullptr);
+            if (t != nullptr) {
+                CacheKeySerializer<std::remove_cv_t<std::remove_pointer_t<T>>>::Serialize(key, *t);
+            }
+        }
+    };
+
+    // Specialized overload for string literals.
     template <size_t N>
     class CacheKeySerializer<char[N]> {
       public:
@@ -90,6 +117,15 @@ namespace dawn::native {
             static_assert(N > 0);
             key->Record(static_cast<size_t>(N));
             key->insert(key->end(), t, t + N);
+        }
+    };
+
+    // Specialized overload for CachedObjects.
+    template <typename T>
+    class CacheKeySerializer<T, std::enable_if_t<std::is_base_of_v<CachedObject, T>>> {
+      public:
+        static void Serialize(CacheKey* key, const T& t) {
+            key->Record(t.GetCacheKey());
         }
     };
 
