@@ -14,7 +14,6 @@
 
 add_library(dawn_sample_utils STATIC ${DAWN_DUMMY_FILE})
 common_compile_options(dawn_sample_utils)
-target_include_directories(dawn_sample_utils PRIVATE ${PROJECT_SOURCE_DIR})
 target_sources(dawn_sample_utils PRIVATE
     "SampleUtils.cpp"
     "SampleUtils.h"

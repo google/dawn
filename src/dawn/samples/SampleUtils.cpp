@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "samples/dawn/SampleUtils.h"
+#include "dawn/samples/SampleUtils.h"
 
 #include "GLFW/glfw3.h"
 #include "dawn/common/Assert.h"

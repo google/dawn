@@ -572,12 +572,6 @@ add_subdirectory(src/dawn)
 # Samples
 ################################################################################
 
-if (DAWN_BUILD_SAMPLES)
-    #TODO(dawn:269): Add this once implementation-based swapchains are removed.
-    #add_subdirectory(src/utils)
-    add_subdirectory(samples/dawn)
-endif()
-
 if (TINT_BUILD_SAMPLES)
   add_subdirectory(src/tint/cmd)
 endif()

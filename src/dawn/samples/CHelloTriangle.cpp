@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "SampleUtils.h"
+#include "dawn/samples/SampleUtils.h"
 
 #include "dawn/utils/ScopedAutoreleasePool.h"
 #include "dawn/utils/SystemUtils.h"

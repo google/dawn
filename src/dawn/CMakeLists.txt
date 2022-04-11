@@ -23,6 +23,12 @@ add_subdirectory(wire)
 # TODO(dawn:269): Remove once the implementation-based swapchains are removed.
 add_subdirectory(utils)
 
+if (DAWN_BUILD_SAMPLES)
+    #TODO(dawn:269): Add this once implementation-based swapchains are removed.
+    #add_subdirectory(src/utils)
+    add_subdirectory(samples)
+endif()
+
 if (DAWN_BUILD_NODE_BINDINGS)
     set(NODE_BINDING_DEPS
         ${NODE_ADDON_API_DIR}

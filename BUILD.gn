@@ -27,7 +27,7 @@ group("all") {
   ]
   if (dawn_standalone) {
     deps += [
-      "samples/dawn:samples",
+      "src/dawn/samples",
       "src/tint/cmd:tint",
     ]
   }
