@@ -487,11 +487,11 @@ namespace wgpu::binding {
 
     std::variant<std::string, interop::UndefinedType> GPUDevice::getLabel(Napi::Env) {
         UNIMPLEMENTED();
-    };
+    }
 
     void GPUDevice::setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) {
         UNIMPLEMENTED();
-    };
+    }
 
     interop::Interface<interop::EventHandler> GPUDevice::getOnuncapturederror(Napi::Env) {
         // TODO(dawn:1348): Implement support for the "unhandlederror" event.

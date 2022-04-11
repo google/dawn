@@ -31,6 +31,6 @@ namespace wgpu::binding {
     void GPUTextureView::setLabel(Napi::Env,
                                   std::variant<std::string, interop::UndefinedType> value) {
         UNIMPLEMENTED();
-    };
+    }
 
 }  // namespace wgpu::binding

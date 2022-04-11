@@ -340,7 +340,7 @@ namespace wgpu::interop {
                 return Success;
             }
             return Error("value is not a ArrayBuffer");
-        };
+        }
         static inline Napi::Value ToJS(Napi::Env, ArrayBuffer value) {
             return value;
         }
@@ -355,7 +355,7 @@ namespace wgpu::interop {
                 return Success;
             }
             return Error("value is not a TypedArray");
-        };
+        }
         static inline Napi::Value ToJS(Napi::Env, ArrayBuffer value) {
             return value;
         }
@@ -391,7 +391,7 @@ namespace wgpu::interop {
                 return Error("value is not a TypedArray of the correct element type");
             }
             return Error("value is not a TypedArray");
-        };
+        }
         static inline Napi::Value ToJS(Napi::Env, ArrayBuffer value) {
             return value;
         }

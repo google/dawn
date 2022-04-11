@@ -58,7 +58,7 @@ namespace wgpu::binding {
         // Calls AsyncRunner::Begin()
         inline AsyncTask(std::shared_ptr<AsyncRunner> runner) : runner_(std::move(runner)) {
             runner_->Begin();
-        };
+        }
 
         // Destructor.
         // Calls AsyncRunner::End()
