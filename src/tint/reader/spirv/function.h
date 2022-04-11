@@ -68,7 +68,8 @@ enum class EdgeKind {
   kForward
 };
 
-enum : uint32_t { kInvalidBlockPos = ~(0u) };
+/// The number used to represent an invalid block position
+static constexpr uint32_t kInvalidBlockPos = ~0u;
 
 /// Bookkeeping info for a basic block.
 struct BlockInfo {

@@ -67,7 +67,6 @@ struct SanitizedResult {
 };
 
 /// Sanitize a program in preparation for generating HLSL.
-/// @program The program to sanitize
 /// @param program the input program
 /// @param options The HLSL generator options.
 /// @returns the sanitized program and any supplementary information
