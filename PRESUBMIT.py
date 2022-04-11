@@ -71,14 +71,7 @@ NONINCLUSIVE_REGEX_LIST = []
 for reg in NONINCLUSIVE_REGEXES:
     NONINCLUSIVE_REGEX_LIST.append(re.compile(reg))
 
-LINT_FILTERS = [
-    "-build/header_guard", "-build/include", "-build/include_directory",
-    "-build/include_order", "-build/include_what_you_use", "-build/namespaces",
-    "-legal/copyright", "-readability/braces", "-readability/casting",
-    "-readability/inheritance", "-readability/namespace", "-runtime/explicit",
-    "-runtime/indentation_namespace", "-runtime/int", "-runtime/printf",
-    "-whitespace/empty_if_body"
-]
+LINT_FILTERS = []
 
 
 def _CheckNonInclusiveLanguage(input_api, output_api, source_file_filter=None):
@@ -97,7 +90,7 @@ def _CheckNonInclusiveLanguage(input_api, output_api, source_file_filter=None):
 
     if len(matches):
         return [
-            output_api.PresubmitPromptWarning('Non-inclusive language found:',
+            output_api.PresubmitPromptWarning("Non-inclusive language found:",
                                               items=matches)
         ]
 
