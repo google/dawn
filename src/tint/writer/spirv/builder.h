@@ -38,7 +38,6 @@
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/storage_texture_type.h"
 #include "src/tint/writer/spirv/function.h"
-#include "src/tint/writer/spirv/generator.h"
 #include "src/tint/writer/spirv/scalar_constant.h"
 
 // Forward declarations
@@ -50,17 +49,6 @@ class TypeConversion;
 }  // namespace tint::sem
 
 namespace tint::writer::spirv {
-
-/// The result of sanitizing a program for generation.
-struct SanitizedResult {
-  /// The sanitized program.
-  Program program;
-};
-
-/// Sanitize a program in preparation for generating SPIR-V.
-/// @program The program to sanitize
-/// @param options The SPIR-V generator options.
-SanitizedResult Sanitize(const Program* program, const Options& options);
 
 /// Builder class to create SPIR-V instructions from a module.
 class Builder {

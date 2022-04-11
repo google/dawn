@@ -45,6 +45,9 @@ class BinaryWriter {
   /// @returns the assembled SPIR-V
   const std::vector<uint32_t>& result() const { return out_; }
 
+  /// @returns the assembled SPIR-V
+  std::vector<uint32_t>& result() { return out_; }
+
  private:
   void process_instruction(const Instruction& inst);
   void process_op(const Operand& op);

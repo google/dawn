@@ -41,26 +41,10 @@
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/sem/vector_type.h"
-#include "src/tint/transform/add_empty_entry_point.h"
 #include "src/tint/transform/add_spirv_block_attribute.h"
-#include "src/tint/transform/builtin_polyfill.h"
-#include "src/tint/transform/canonicalize_entry_point_io.h"
-#include "src/tint/transform/expand_compound_assignment.h"
-#include "src/tint/transform/fold_constants.h"
-#include "src/tint/transform/for_loop_to_loop.h"
-#include "src/tint/transform/manager.h"
-#include "src/tint/transform/promote_side_effects_to_decl.h"
-#include "src/tint/transform/remove_unreachable_statements.h"
-#include "src/tint/transform/simplify_pointers.h"
-#include "src/tint/transform/unshadow.h"
-#include "src/tint/transform/unwind_discard_functions.h"
-#include "src/tint/transform/var_for_dynamic_index.h"
-#include "src/tint/transform/vectorize_scalar_matrix_constructors.h"
-#include "src/tint/transform/zero_init_workgroup_memory.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/writer/append_vector.h"
-#include "src/tint/writer/generate_external_texture_bindings.h"
 
 namespace tint::writer::spirv {
 namespace {
@@ -254,61 +238,6 @@ const sem::Type* ElementTypeOf(const sem::Type* ty) {
 }
 
 }  // namespace
-
-SanitizedResult Sanitize(const Program* in, const Options& options) {
-  transform::Manager manager;
-  transform::DataMap data;
-
-  {  // Builtin polyfills
-    transform::BuiltinPolyfill::Builtins polyfills;
-    polyfills.count_leading_zeros = true;
-    polyfills.count_trailing_zeros = true;
-    polyfills.extract_bits =
-        transform::BuiltinPolyfill::Level::kClampParameters;
-    polyfills.first_leading_bit = true;
-    polyfills.first_trailing_bit = true;
-    polyfills.insert_bits = transform::BuiltinPolyfill::Level::kClampParameters;
-    data.Add<transform::BuiltinPolyfill::Config>(polyfills);
-    manager.Add<transform::BuiltinPolyfill>();
-  }
-
-  if (options.generate_external_texture_bindings) {
-    auto new_bindings_map = GenerateExternalTextureBindings(in);
-    data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(
-        new_bindings_map);
-  }
-  manager.Add<transform::MultiplanarExternalTexture>();
-
-  manager.Add<transform::Unshadow>();
-  bool disable_workgroup_init_in_sanitizer =
-      options.disable_workgroup_init ||
-      options.use_zero_initialize_workgroup_memory_extension;
-  if (!disable_workgroup_init_in_sanitizer) {
-    manager.Add<transform::ZeroInitWorkgroupMemory>();
-  }
-  manager.Add<transform::RemoveUnreachableStatements>();
-  manager.Add<transform::ExpandCompoundAssignment>();
-  manager.Add<transform::PromoteSideEffectsToDecl>();
-  manager.Add<transform::UnwindDiscardFunctions>();
-  manager.Add<transform::SimplifyPointers>();  // Required for arrayLength()
-  manager.Add<transform::FoldConstants>();
-  manager.Add<transform::VectorizeScalarMatrixConstructors>();
-  manager.Add<transform::ForLoopToLoop>();  // Must come after
-                                            // ZeroInitWorkgroupMemory
-  manager.Add<transform::CanonicalizeEntryPointIO>();
-  manager.Add<transform::AddEmptyEntryPoint>();
-  manager.Add<transform::AddSpirvBlockAttribute>();
-  manager.Add<transform::VarForDynamicIndex>();
-
-  data.Add<transform::CanonicalizeEntryPointIO::Config>(
-      transform::CanonicalizeEntryPointIO::Config(
-          transform::CanonicalizeEntryPointIO::ShaderStyle::kSpirv, 0xFFFFFFFF,
-          options.emit_vertex_point_size));
-
-  SanitizedResult result;
-  result.program = std::move(manager.Run(in, data).program);
-  return result;
-}
 
 Builder::AccessorInfo::AccessorInfo() : source_id(0), source_type(nullptr) {}
 

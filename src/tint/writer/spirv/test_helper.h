@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 #include "spirv-tools/libspirv.hpp"
 #include "src/tint/writer/spirv/binary_writer.h"
+#include "src/tint/writer/spirv/generator_impl.h"
 
 namespace tint::writer::spirv {
 

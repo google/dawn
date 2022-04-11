@@ -688,6 +688,8 @@ libtint_source_set("libtint_spv_writer_src") {
     "writer/spirv/function.h",
     "writer/spirv/generator.cc",
     "writer/spirv/generator.h",
+    "writer/spirv/generator_impl.cc",
+    "writer/spirv/generator_impl.h",
     "writer/spirv/instruction.cc",
     "writer/spirv/instruction.h",
     "writer/spirv/operand.cc",

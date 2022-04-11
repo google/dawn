@@ -14,7 +14,9 @@
 
 #include "src/tint/writer/spirv/generator.h"
 
-#include "src/tint/writer/spirv/binary_writer.h"
+#include <utility>
+
+#include "src/tint/writer/spirv/generator_impl.h"
 
 namespace tint::writer::spirv {
 
@@ -37,20 +39,12 @@ Result Generate(const Program* program, const Options& options) {
   bool zero_initialize_workgroup_memory =
       !options.disable_workgroup_init &&
       options.use_zero_initialize_workgroup_memory_extension;
-  auto builder = std::make_unique<Builder>(&sanitized_result.program,
-                                           zero_initialize_workgroup_memory);
-  auto writer = std::make_unique<BinaryWriter>();
-  if (!builder->Build()) {
-    result.success = false;
-    result.error = builder->error();
-    return result;
-  }
 
-  writer->WriteHeader(builder->id_bound());
-  writer->WriteBuilder(builder.get());
-
-  result.success = true;
-  result.spirv = writer->result();
+  auto impl = std::make_unique<GeneratorImpl>(&sanitized_result.program,
+                                              zero_initialize_workgroup_memory);
+  result.success = impl->Generate();
+  result.error = impl->error();
+  result.spirv = std::move(impl->result());
 
   return result;
 }
