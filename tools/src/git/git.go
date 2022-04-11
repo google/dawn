@@ -306,6 +306,33 @@ func (r Repository) Log(opt *LogOptions) ([]CommitInfo, error) {
 	return parseLog(out)
 }
 
+// Optional settings for Repository.ConfigOptions
+type ConfigOptions struct {
+	// Timeout for the operation
+	Timeout time.Duration
+}
+
+// Config returns the git configuration values for the repo
+func (r Repository) Config(opt *ConfigOptions) (map[string]string, error) {
+	if opt == nil {
+		opt = &ConfigOptions{}
+	}
+	text, err := r.run(opt.Timeout, "config", "-l")
+	if err != nil {
+		return nil, err
+	}
+	lines := strings.Split(text, "\n")
+	out := make(map[string]string, len(lines))
+	for _, line := range lines {
+		idx := strings.Index(line, "=")
+		if idx > 0 {
+			key, value := line[:idx], line[idx+1:]
+			out[key] = value
+		}
+	}
+	return out, nil
+}
+
 func (r Repository) run(timeout time.Duration, args ...string) (string, error) {
 	return r.Git.run(r.Path, timeout, args...)
 }

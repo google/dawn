@@ -20,10 +20,12 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"os/exec"
 	"regexp"
 	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/gerrit"
+	"dawn.googlesource.com/dawn/tools/src/git"
 )
 
 const yyyymmdd = "2006-01-02"
@@ -33,13 +35,28 @@ var (
 	// username and password for gerrit.
 	gerritUser  = flag.String("gerrit-user", "", "gerrit authentication username")
 	gerritPass  = flag.String("gerrit-pass", "", "gerrit authentication password")
-	repoFlag    = flag.String("repo", "tint", "the project (tint or dawn)")
-	userFlag    = flag.String("user", "", "user name / email")
+	repoFlag    = flag.String("repo", "dawn", "the project (tint or dawn)")
+	userFlag    = flag.String("user", defaultUser(), "user name / email")
 	afterFlag   = flag.String("after", "", "start date")
 	beforeFlag  = flag.String("before", "", "end date")
 	daysFlag    = flag.Int("days", 182, "interval in days (used if --after is not specified)")
 	verboseFlag = flag.Bool("v", false, "verbose mode - lists all the changes")
 )
+
+func defaultUser() string {
+	if gitExe, err := exec.LookPath("git"); err == nil {
+		if g, err := git.New(gitExe); err == nil {
+			if cwd, err := os.Getwd(); err == nil {
+				if r, err := g.Open(cwd); err == nil {
+					if cfg, err := r.Config(nil); err == nil {
+						return cfg["user.email"]
+					}
+				}
+			}
+		}
+	}
+	return ""
+}
 
 func main() {
 	flag.Parse()
