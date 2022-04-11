@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_WEBGPUABSLFORMAT_H_
-#define DAWNNATIVE_WEBGPUABSLFORMAT_H_
+#ifndef SRC_DAWN_NATIVE_WEBGPU_ABSL_FORMAT_H_
+#define SRC_DAWN_NATIVE_WEBGPU_ABSL_FORMAT_H_
 
 #include "absl/strings/str_format.h"
 #include "dawn/native/dawn_platform.h"
@@ -131,4 +131,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_WEBGPUABSLFORMAT_H_
+#endif  // SRC_DAWN_NATIVE_WEBGPU_ABSL_FORMAT_H_

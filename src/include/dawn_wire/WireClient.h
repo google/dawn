@@ -1,1 +1,6 @@
+#ifndef SRC_INCLUDE_DAWN_WIRE_WIRECLIENT_H_
+#define SRC_INCLUDE_DAWN_WIRE_WIRECLIENT_H_
+
 #include <dawn/wire/WireClient.h>
+
+#endif  // SRC_INCLUDE_DAWN_WIRE_WIRECLIENT_H_

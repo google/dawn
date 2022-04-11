@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNWIRE_WIREDESERIALIZEALLOCATOR_H_
-#define DAWNWIRE_WIREDESERIALIZEALLOCATOR_H_
+#ifndef SRC_DAWN_WIRE_WIREDESERIALIZEALLOCATOR_H_
+#define SRC_DAWN_WIRE_WIREDESERIALIZEALLOCATOR_H_
 
 #include "dawn/wire/WireCmd_autogen.h"
 
@@ -40,4 +40,4 @@ namespace dawn::wire {
     };
 }  // namespace dawn::wire
 
-#endif  // DAWNWIRE_WIREDESERIALIZEALLOCATOR_H_
+#endif  // SRC_DAWN_WIRE_WIREDESERIALIZEALLOCATOR_H_

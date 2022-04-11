@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNWIRE_WIRECLIENT_H_
-#define DAWNWIRE_WIRECLIENT_H_
+#ifndef INCLUDE_DAWN_WIRE_WIRECLIENT_H_
+#define INCLUDE_DAWN_WIRE_WIRECLIENT_H_
 
 #include "dawn/dawn_proc_table.h"
 #include "dawn/wire/Wire.h"
@@ -180,4 +180,4 @@ namespace dawn::wire {
     }  // namespace client
 }  // namespace dawn::wire
 
-#endif  // DAWNWIRE_WIRECLIENT_H_
+#endif  // INCLUDE_DAWN_WIRE_WIRECLIENT_H_

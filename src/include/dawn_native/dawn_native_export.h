@@ -1,1 +1,6 @@
+#ifndef SRC_INCLUDE_DAWN_NATIVE_DAWN_NATIVE_EXPORT_H_
+#define SRC_INCLUDE_DAWN_NATIVE_DAWN_NATIVE_EXPORT_H_
+
 #include <dawn/native/dawn_native_export.h>
+
+#endif  // SRC_INCLUDE_DAWN_NATIVE_DAWN_NATIVE_EXPORT_H_

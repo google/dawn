@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNODE_UTILS_DEBUG_H_
-#define DAWNNODE_UTILS_DEBUG_H_
+#ifndef SRC_DAWN_NODE_UTILS_DEBUG_H_
+#define SRC_DAWN_NODE_UTILS_DEBUG_H_
 
 #include <iostream>
 #include <optional>
@@ -143,4 +143,4 @@ namespace wgpu::utils {
 
 }  // namespace wgpu::utils
 
-#endif  // DAWNNODE_UTILS_DEBUG_H_
+#endif  // SRC_DAWN_NODE_UTILS_DEBUG_H_

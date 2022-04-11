@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef SRC_DAWN_TESTS_UNITTESTS_WIRE_WIRETEST_H_
+#define SRC_DAWN_TESTS_UNITTESTS_WIRE_WIRETEST_H_
+
 #include "dawn/mock_webgpu.h"
 #include "gtest/gtest.h"
 
@@ -148,3 +151,5 @@ class WireTest : public testing::Test {
     std::unique_ptr<utils::TerribleCommandBuffer> mS2cBuf;
     std::unique_ptr<utils::TerribleCommandBuffer> mC2sBuf;
 };
+
+#endif  // SRC_DAWN_TESTS_UNITTESTS_WIRE_WIRETEST_H_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_CACHE_KEY_H_
-#define DAWNNATIVE_CACHE_KEY_H_
+#ifndef SRC_DAWN_NATIVE_CACHEKEY_H_
+#define SRC_DAWN_NATIVE_CACHEKEY_H_
 
 #include <iostream>
 #include <limits>
@@ -131,4 +131,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_CACHE_KEY_H_
+#endif  // SRC_DAWN_NATIVE_CACHEKEY_H_

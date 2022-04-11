@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_UTILS_WGPUHELPERS_H_
-#define DAWNNATIVE_UTILS_WGPUHELPERS_H_
+#ifndef SRC_DAWN_NATIVE_UTILS_WGPUHELPERS_H_
+#define SRC_DAWN_NATIVE_UTILS_WGPUHELPERS_H_
 
 #include <dawn/native/dawn_platform.h>
 
@@ -120,4 +120,4 @@ namespace dawn::native::utils {
 
 }  // namespace dawn::native::utils
 
-#endif  // DAWNNATIVE_UTILS_WGPUHELPERS_H_
+#endif  // SRC_DAWN_NATIVE_UTILS_WGPUHELPERS_H_

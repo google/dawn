@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_WORKERTHREAD_H_
-#define COMMON_WORKERTHREAD_H_
+#ifndef SRC_DAWN_PLATFORM_WORKERTHREAD_H_
+#define SRC_DAWN_PLATFORM_WORKERTHREAD_H_
 
 #include "dawn/common/NonCopyable.h"
 #include "dawn/platform/DawnPlatform.h"
@@ -29,4 +29,4 @@ namespace dawn::platform {
 
 }  // namespace dawn::platform
 
-#endif
+#endif  // SRC_DAWN_PLATFORM_WORKERTHREAD_H_

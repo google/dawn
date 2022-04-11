@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TESTS_UNITTESTS_VALIDATIONTEST_H_
-#define TESTS_UNITTESTS_VALIDATIONTEST_H_
+#ifndef SRC_DAWN_TESTS_UNITTESTS_VALIDATION_VALIDATIONTEST_H_
+#define SRC_DAWN_TESTS_UNITTESTS_VALIDATION_VALIDATIONTEST_H_
 
 #include "dawn/common/Log.h"
 #include "dawn/native/DawnNative.h"
@@ -156,4 +156,4 @@ class ValidationTest : public testing::Test {
     bool mExpectDestruction = false;
 };
 
-#endif  // TESTS_UNITTESTS_VALIDATIONTEST_H_
+#endif  // SRC_DAWN_TESTS_UNITTESTS_VALIDATION_VALIDATIONTEST_H_

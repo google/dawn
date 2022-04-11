@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_CONCURRENT_CACHE_H_
-#define COMMON_CONCURRENT_CACHE_H_
+#ifndef SRC_DAWN_COMMON_CONCURRENTCACHE_H_
+#define SRC_DAWN_COMMON_CONCURRENTCACHE_H_
 
 #include "dawn/common/NonCopyable.h"
 
@@ -51,4 +51,4 @@ class ConcurrentCache : public NonMovable {
     std::unordered_set<T*, typename T::HashFunc, typename T::EqualityFunc> mCache;
 };
 
-#endif
+#endif  // SRC_DAWN_COMMON_CONCURRENTCACHE_H_

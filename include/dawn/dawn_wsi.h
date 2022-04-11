@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWN_DAWN_WSI_H_
-#define DAWN_DAWN_WSI_H_
+#ifndef INCLUDE_DAWN_DAWN_WSI_H_
+#define INCLUDE_DAWN_DAWN_WSI_H_
 
 #include <dawn/webgpu.h>
 
@@ -83,4 +83,4 @@ typedef struct {
 } DawnWSIContextVulkan;
 #endif
 
-#endif  // DAWN_DAWN_WSI_H
+#endif  // INCLUDE_DAWN_DAWN_WSI_H_

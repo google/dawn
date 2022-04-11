@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef UTILS_BACKENDBINDING_H_
-#define UTILS_BACKENDBINDING_H_
+#ifndef SRC_DAWN_UTILS_BACKENDBINDING_H_
+#define SRC_DAWN_UTILS_BACKENDBINDING_H_
 
 #include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp.h"
@@ -43,4 +43,4 @@ namespace utils {
 
 }  // namespace utils
 
-#endif  // UTILS_BACKENDBINDING_H_
+#endif  // SRC_DAWN_UTILS_BACKENDBINDING_H_

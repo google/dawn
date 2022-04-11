@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_PLATFORM_H_
-#define COMMON_PLATFORM_H_
+#ifndef SRC_DAWN_COMMON_PLATFORM_H_
+#define SRC_DAWN_COMMON_PLATFORM_H_
 
 #if defined(_WIN32) || defined(_WIN64)
 #    include <winapifamily.h>
@@ -79,4 +79,4 @@ static_assert(sizeof(sizeof(char)) == 4, "Expect sizeof(size_t) == 4");
 #    error "Unsupported platform"
 #endif
 
-#endif  // COMMON_PLATFORM_H_
+#endif  // SRC_DAWN_COMMON_PLATFORM_H_

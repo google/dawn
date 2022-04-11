@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_PLACEMENTALLOCATED_H_
-#define COMMON_PLACEMENTALLOCATED_H_
+#ifndef SRC_DAWN_COMMON_PLACEMENTALLOCATED_H_
+#define SRC_DAWN_COMMON_PLACEMENTALLOCATED_H_
 
 #include <cstddef>
 
@@ -39,4 +39,4 @@ class PlacementAllocated {
     }
 };
 
-#endif  // COMMON_PLACEMENTALLOCATED_H_
+#endif  // SRC_DAWN_COMMON_PLACEMENTALLOCATED_H_

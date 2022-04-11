@@ -1,1 +1,6 @@
+#ifndef SRC_INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_
+#define SRC_INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_
+
 #include <dawn/native/DawnNative.h>
+
+#endif  // SRC_INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_

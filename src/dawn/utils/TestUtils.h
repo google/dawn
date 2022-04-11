@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef UTILS_TESTHELPERS_H_
-#define UTILS_TESTHELPERS_H_
+#ifndef SRC_DAWN_UTILS_TESTUTILS_H_
+#define SRC_DAWN_UTILS_TESTUTILS_H_
 
 #include <dawn/webgpu_cpp.h>
 
@@ -64,4 +64,4 @@ namespace utils {
 
 }  // namespace utils
 
-#endif  // UTILS_TESTHELPERS_H_
+#endif  // SRC_DAWN_UTILS_TESTUTILS_H_

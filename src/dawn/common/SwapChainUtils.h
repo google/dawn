@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_SWAPCHAINUTILS_H_
-#define COMMON_SWAPCHAINUTILS_H_
+#ifndef SRC_DAWN_COMMON_SWAPCHAINUTILS_H_
+#define SRC_DAWN_COMMON_SWAPCHAINUTILS_H_
 
 #include "dawn/dawn_wsi.h"
 
@@ -37,4 +37,4 @@ DawnSwapChainImplementation CreateSwapChainImplementation(T* swapChain) {
     return impl;
 }
 
-#endif  // COMMON_SWAPCHAINUTILS_H_
+#endif  // SRC_DAWN_COMMON_SWAPCHAINUTILS_H_

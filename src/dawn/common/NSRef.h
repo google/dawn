@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_NSREF_H_
-#define COMMON_NSREF_H_
+#ifndef SRC_DAWN_COMMON_NSREF_H_
+#define SRC_DAWN_COMMON_NSREF_H_
 
 #include "dawn/common/RefBase.h"
 
@@ -120,4 +120,4 @@ NSPRef<T> AcquireNSPRef(T pointee) {
     return ref;
 }
 
-#endif  // COMMON_NSREF_H_
+#endif  // SRC_DAWN_COMMON_NSREF_H_

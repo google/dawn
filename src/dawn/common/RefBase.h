@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_REFBASE_H_
-#define COMMON_REFBASE_H_
+#ifndef SRC_DAWN_COMMON_REFBASE_H_
+#define SRC_DAWN_COMMON_REFBASE_H_
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Compiler.h"
@@ -180,4 +180,4 @@ class RefBase {
     T mValue;
 };
 
-#endif  // COMMON_REFBASE_H_
+#endif  // SRC_DAWN_COMMON_REFBASE_H_

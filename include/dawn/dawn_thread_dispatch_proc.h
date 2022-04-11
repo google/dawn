@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWN_DAWN_THREAD_DISPATCH_PROC_H_
-#define DAWN_DAWN_THREAD_DISPATCH_PROC_H_
+#ifndef INCLUDE_DAWN_DAWN_THREAD_DISPATCH_PROC_H_
+#define INCLUDE_DAWN_DAWN_THREAD_DISPATCH_PROC_H_
 
 #include "dawn/dawn_proc.h"
 
@@ -30,4 +30,4 @@ WGPU_EXPORT void dawnProcSetPerThreadProcs(const DawnProcTable* procs);
 }  // extern "C"
 #endif
 
-#endif  // DAWN_DAWN_THREAD_DISPATCH_PROC_H_
+#endif  // INCLUDE_DAWN_DAWN_THREAD_DISPATCH_PROC_H_

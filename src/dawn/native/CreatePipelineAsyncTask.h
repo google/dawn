@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_CREATEPIPELINEASYNCTASK_H_
-#define DAWNNATIVE_CREATEPIPELINEASYNCTASK_H_
+#ifndef SRC_DAWN_NATIVE_CREATEPIPELINEASYNCTASK_H_
+#define SRC_DAWN_NATIVE_CREATEPIPELINEASYNCTASK_H_
 
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/CallbackTaskManager.h"
@@ -105,4 +105,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_CREATEPIPELINEASYNCTASK_H_
+#endif  // SRC_DAWN_NATIVE_CREATEPIPELINEASYNCTASK_H_

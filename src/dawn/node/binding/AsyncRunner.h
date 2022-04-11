@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWN_NODE_BINDING_ASYNC_RUNNER_H_
-#define DAWN_NODE_BINDING_ASYNC_RUNNER_H_
+#ifndef SRC_DAWN_NODE_BINDING_ASYNCRUNNER_H_
+#define SRC_DAWN_NODE_BINDING_ASYNCRUNNER_H_
 
 #include <stdint.h>
 #include <memory>
@@ -74,4 +74,4 @@ namespace wgpu::binding {
 
 }  // namespace wgpu::binding
 
-#endif  // DAWN_NODE_BINDING_ASYNC_RUNNER_H_
+#endif  // SRC_DAWN_NODE_BINDING_ASYNCRUNNER_H_

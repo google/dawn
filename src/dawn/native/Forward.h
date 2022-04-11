@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_FORWARD_H_
-#define DAWNNATIVE_FORWARD_H_
+#ifndef SRC_DAWN_NATIVE_FORWARD_H_
+#define SRC_DAWN_NATIVE_FORWARD_H_
 
 #include <cstdint>
 
@@ -68,4 +68,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_FORWARD_H_
+#endif  // SRC_DAWN_NATIVE_FORWARD_H_

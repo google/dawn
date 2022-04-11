@@ -149,8 +149,8 @@
 // trace points would carry a significant performance cost of aquiring a lock
 // and resolving the category.
 
-#ifndef DAWNPLATFORM_TRACING_TRACEEVENT_H_
-#define DAWNPLATFORM_TRACING_TRACEEVENT_H_
+#ifndef SRC_DAWN_PLATFORM_TRACING_TRACEEVENT_H_
+#define SRC_DAWN_PLATFORM_TRACING_TRACEEVENT_H_
 
 #include <string>
 
@@ -988,4 +988,4 @@ namespace dawn::platform::TraceEvent {
 
 }  // namespace dawn::platform::TraceEvent
 
-#endif  // DAWNPLATFORM_TRACING_TRACEEVENT_H_
+#endif  // SRC_DAWN_PLATFORM_TRACING_TRACEEVENT_H_

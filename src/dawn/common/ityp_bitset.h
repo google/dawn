@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_ITYP_BITSET_H_
-#define COMMON_ITYP_BITSET_H_
+#ifndef SRC_DAWN_COMMON_ITYP_BITSET_H_
+#define SRC_DAWN_COMMON_ITYP_BITSET_H_
 
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/TypedInteger.h"
@@ -185,4 +185,4 @@ Index GetHighestBitIndexPlusOne(const ityp::bitset<Index, N>& bitset) {
 #endif  // defined(DAWN_COMPILER_MSVC)
 }
 
-#endif  // COMMON_ITYP_BITSET_H_
+#endif  // SRC_DAWN_COMMON_ITYP_BITSET_H_

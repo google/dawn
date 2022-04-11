@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TESTS_PARAMGENERATOR_H_
-#define TESTS_PARAMGENERATOR_H_
+#ifndef SRC_DAWN_TESTS_PARAMGENERATOR_H_
+#define SRC_DAWN_TESTS_PARAMGENERATOR_H_
 
 #include <tuple>
 #include <vector>
@@ -137,4 +137,4 @@ auto MakeParamGenerator(std::vector<BackendTestConfig>&& first, std::vector<Para
         std::forward<std::vector<Params>&&>(params)...);
 }
 
-#endif  // TESTS_PARAMGENERATOR_H_
+#endif  // SRC_DAWN_TESTS_PARAMGENERATOR_H_

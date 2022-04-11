@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_CONSTANTS_H_
-#define COMMON_CONSTANTS_H_
+#ifndef SRC_DAWN_COMMON_CONSTANTS_H_
+#define SRC_DAWN_COMMON_CONSTANTS_H_
 
 #include <cstdint>
 
@@ -65,4 +65,4 @@ static constexpr uint8_t kUniformsPerExternalTexture = 1u;
 // A spec defined constant but that doesn't have a name.
 static constexpr uint32_t kMaxBindingNumber = 65535;
 
-#endif  // COMMON_CONSTANTS_H_
+#endif  // SRC_DAWN_COMMON_CONSTANTS_H_

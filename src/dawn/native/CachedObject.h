@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_CACHED_OBJECT_H_
-#define DAWNNATIVE_CACHED_OBJECT_H_
+#ifndef SRC_DAWN_NATIVE_CACHEDOBJECT_H_
+#define SRC_DAWN_NATIVE_CACHEDOBJECT_H_
 
 #include "dawn/native/CacheKey.h"
 #include "dawn/native/Forward.h"
@@ -62,4 +62,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_CACHED_OBJECT_H_
+#endif  // SRC_DAWN_NATIVE_CACHEDOBJECT_H_

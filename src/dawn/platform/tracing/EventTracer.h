@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNPLATFORM_TRACING_EVENTTRACER_H_
-#define DAWNPLATFORM_TRACING_EVENTTRACER_H_
+#ifndef SRC_DAWN_PLATFORM_TRACING_EVENTTRACER_H_
+#define SRC_DAWN_PLATFORM_TRACING_EVENTTRACER_H_
 
 #include "dawn/platform/dawn_platform_export.h"
 
@@ -48,4 +48,4 @@ namespace dawn::platform {
     }  // namespace tracing
 }  // namespace dawn::platform
 
-#endif  // DAWNPLATFORM_TRACING_EVENTTRACER_H_
+#endif  // SRC_DAWN_PLATFORM_TRACING_EVENTTRACER_H_

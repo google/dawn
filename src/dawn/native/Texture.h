@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_TEXTURE_H_
-#define DAWNNATIVE_TEXTURE_H_
+#ifndef SRC_DAWN_NATIVE_TEXTURE_H_
+#define SRC_DAWN_NATIVE_TEXTURE_H_
 
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
@@ -160,4 +160,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_TEXTURE_H_
+#endif  // SRC_DAWN_NATIVE_TEXTURE_H_

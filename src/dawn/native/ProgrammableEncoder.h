@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_PROGRAMMABLEENCODER_H_
-#define DAWNNATIVE_PROGRAMMABLEENCODER_H_
+#ifndef SRC_DAWN_NATIVE_PROGRAMMABLEENCODER_H_
+#define SRC_DAWN_NATIVE_PROGRAMMABLEENCODER_H_
 
 #include "dawn/native/CommandEncoder.h"
 #include "dawn/native/Error.h"
@@ -69,4 +69,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_PROGRAMMABLEENCODER_H_
+#endif  // SRC_DAWN_NATIVE_PROGRAMMABLEENCODER_H_

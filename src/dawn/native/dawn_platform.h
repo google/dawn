@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_DAWNPLATFORM_H_
-#define DAWNNATIVE_DAWNPLATFORM_H_
+#ifndef SRC_DAWN_NATIVE_DAWN_PLATFORM_H_
+#define SRC_DAWN_NATIVE_DAWN_PLATFORM_H_
 
 // Use webgpu_cpp to have the enum and bitfield definitions
 #include <dawn/webgpu_cpp.h>
@@ -59,4 +59,4 @@ namespace dawn::native {
         static_cast<wgpu::BufferBindingType>(0xFFFFFFFF);
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_DAWNPLATFORM_H_
+#endif  // SRC_DAWN_NATIVE_DAWN_PLATFORM_H_

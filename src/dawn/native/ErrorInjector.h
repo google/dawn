@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_ERRORINJECTOR_H_
-#define DAWNNATIVE_ERRORINJECTOR_H_
+#ifndef SRC_DAWN_NATIVE_ERRORINJECTOR_H_
+#define SRC_DAWN_NATIVE_ERRORINJECTOR_H_
 
 #include <stdint.h>
 #include <type_traits>
@@ -65,4 +65,4 @@ namespace dawn::native {
 
 #endif
 
-#endif  // DAWNNATIVE_ERRORINJECTOR_H_
+#endif  // SRC_DAWN_NATIVE_ERRORINJECTOR_H_

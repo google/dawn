@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_SERIALSTORAGE_H_
-#define COMMON_SERIALSTORAGE_H_
+#ifndef SRC_DAWN_COMMON_SERIALSTORAGE_H_
+#define SRC_DAWN_COMMON_SERIALSTORAGE_H_
 
 #include "dawn/common/Assert.h"
 
@@ -319,4 +319,4 @@ const typename SerialStorage<Derived>::Value& SerialStorage<Derived>::ConstItera
     return *mSerialIterator;
 }
 
-#endif  // COMMON_SERIALSTORAGE_H_
+#endif  // SRC_DAWN_COMMON_SERIALSTORAGE_H_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TESTS_TOGGLEPARSER_H_
-#define TESTS_TOGGLEPARSER_H_
+#ifndef SRC_DAWN_TESTS_TOGGLEPARSER_H_
+#define SRC_DAWN_TESTS_TOGGLEPARSER_H_
 
 #include <string>
 #include <vector>
@@ -34,4 +34,4 @@ class ToggleParser {
     std::vector<std::string> mDisabledToggles;
 };
 
-#endif  // TESTS_TOGGLEPARSER_H_
+#endif  // SRC_DAWN_TESTS_TOGGLEPARSER_H_

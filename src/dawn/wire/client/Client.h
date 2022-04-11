@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNWIRE_CLIENT_CLIENT_H_
-#define DAWNWIRE_CLIENT_CLIENT_H_
+#ifndef SRC_DAWN_WIRE_CLIENT_CLIENT_H_
+#define SRC_DAWN_WIRE_CLIENT_CLIENT_H_
 
 #include <dawn/webgpu.h>
 #include <dawn/wire/Wire.h>
@@ -92,4 +92,4 @@ namespace dawn::wire::client {
 
 }  // namespace dawn::wire::client
 
-#endif  // DAWNWIRE_CLIENT_CLIENT_H_
+#endif  // SRC_DAWN_WIRE_CLIENT_CLIENT_H_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_RENDERENCODERBASE_H_
-#define DAWNNATIVE_RENDERENCODERBASE_H_
+#ifndef SRC_DAWN_NATIVE_RENDERENCODERBASE_H_
+#define SRC_DAWN_NATIVE_RENDERENCODERBASE_H_
 
 #include "dawn/native/AttachmentState.h"
 #include "dawn/native/CommandBufferStateTracker.h"
@@ -84,4 +84,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_RENDERENCODERBASE_H_
+#endif  // SRC_DAWN_NATIVE_RENDERENCODERBASE_H_

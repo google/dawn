@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_ERRORDATA_H_
-#define DAWNNATIVE_ERRORDATA_H_
+#ifndef SRC_DAWN_NATIVE_ERRORDATA_H_
+#define SRC_DAWN_NATIVE_ERRORDATA_H_
 
 #include "dawn/common/Compiler.h"
 
@@ -67,4 +67,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_ERRORDATA_H_
+#endif  // SRC_DAWN_NATIVE_ERRORDATA_H_

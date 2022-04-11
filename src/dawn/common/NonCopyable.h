@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_NONCOPYABLE_H_
-#define COMMON_NONCOPYABLE_H_
+#ifndef SRC_DAWN_COMMON_NONCOPYABLE_H_
+#define SRC_DAWN_COMMON_NONCOPYABLE_H_
 
 // A base class to make a class non-copyable.
 class NonCopyable {
@@ -40,4 +40,4 @@ class NonMovable : NonCopyable {
     void operator=(NonMovable&&) = delete;
 };
 
-#endif
+#endif  // SRC_DAWN_COMMON_NONCOPYABLE_H_

@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef SRC_DAWN_FUZZERS_DAWNWIRESERVERFUZZER_H_
+#define SRC_DAWN_FUZZERS_DAWNWIRESERVERFUZZER_H_
+
 #include "dawn/webgpu_cpp.h"
 
 #include <cstdint>
@@ -32,3 +35,5 @@ namespace DawnWireServerFuzzer {
     int Run(const uint8_t* data, size_t size, MakeDeviceFn MakeDevice, bool supportsErrorInjection);
 
 }  // namespace DawnWireServerFuzzer
+
+#endif  // SRC_DAWN_FUZZERS_DAWNWIRESERVERFUZZER_H_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_COREFOUNDATIONREF_H_
-#define COMMON_COREFOUNDATIONREF_H_
+#ifndef SRC_DAWN_COMMON_COREFOUNDATIONREF_H_
+#define SRC_DAWN_COMMON_COREFOUNDATIONREF_H_
 
 #include "dawn/common/RefBase.h"
 
@@ -43,4 +43,4 @@ CFRef<T> AcquireCFRef(T pointee) {
     return ref;
 }
 
-#endif  // COMMON_COREFOUNDATIONREF_H_
+#endif  // SRC_DAWN_COMMON_COREFOUNDATIONREF_H_

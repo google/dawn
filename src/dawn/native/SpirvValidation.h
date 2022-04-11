@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef SRC_DAWN_NATIVE_SPIRVVALIDATION_H_
+#define SRC_DAWN_NATIVE_SPIRVVALIDATION_H_
+
 #include "dawn/native/Error.h"
 
 #include <vector>
@@ -25,3 +28,5 @@ namespace dawn::native {
                              bool dumpSpirv);
 
 }  // namespace dawn::native
+
+#endif  // SRC_DAWN_NATIVE_SPIRVVALIDATION_H_

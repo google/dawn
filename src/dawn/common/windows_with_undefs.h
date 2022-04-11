@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_WINDOWS_WITH_UNDEFS_H_
-#define COMMON_WINDOWS_WITH_UNDEFS_H_
+#ifndef SRC_DAWN_COMMON_WINDOWS_WITH_UNDEFS_H_
+#define SRC_DAWN_COMMON_WINDOWS_WITH_UNDEFS_H_
 
 #include "dawn/common/Platform.h"
 
@@ -35,4 +35,4 @@
 // Macro defined as an alias of GetTickCount
 #undef GetCurrentTime
 
-#endif  // COMMON_WINDOWS_WITH_UNDEFS_H_
+#endif  // SRC_DAWN_COMMON_WINDOWS_WITH_UNDEFS_H_

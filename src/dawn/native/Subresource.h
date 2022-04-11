@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_SUBRESOURCE_H_
-#define DAWNNATIVE_SUBRESOURCE_H_
+#ifndef SRC_DAWN_NATIVE_SUBRESOURCE_H_
+#define SRC_DAWN_NATIVE_SUBRESOURCE_H_
 
 #include "dawn/native/EnumClassBitmasks.h"
 #include "dawn/native/dawn_platform.h"
@@ -109,4 +109,4 @@ namespace dawn {
 
 }  // namespace dawn
 
-#endif  // DAWNNATIVE_SUBRESOURCE_H_
+#endif  // SRC_DAWN_NATIVE_SUBRESOURCE_H_

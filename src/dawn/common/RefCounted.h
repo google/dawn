@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_REFCOUNTED_H_
-#define COMMON_REFCOUNTED_H_
+#ifndef SRC_DAWN_COMMON_REFCOUNTED_H_
+#define SRC_DAWN_COMMON_REFCOUNTED_H_
 
 #include "dawn/common/RefBase.h"
 
@@ -66,4 +66,4 @@ Ref<T> AcquireRef(T* pointee) {
     return ref;
 }
 
-#endif  // COMMON_REFCOUNTED_H_
+#endif  // SRC_DAWN_COMMON_REFCOUNTED_H_

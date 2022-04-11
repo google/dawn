@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNWIRE_WIRE_H_
-#define DAWNWIRE_WIRE_H_
+#ifndef INCLUDE_DAWN_WIRE_WIRE_H_
+#define INCLUDE_DAWN_WIRE_WIRE_H_
 
 #include <cstdint>
 #include <limits>
@@ -76,4 +76,4 @@ namespace dawn::wire {
 // TODO(dawn:824): Remove once the deprecation period is passed.
 namespace dawn_wire = dawn::wire;
 
-#endif  // DAWNWIRE_WIRE_H_
+#endif  // INCLUDE_DAWN_WIRE_WIRE_H_

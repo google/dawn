@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_FEATURES_H_
-#define DAWNNATIVE_FEATURES_H_
+#ifndef SRC_DAWN_NATIVE_FEATURES_H_
+#define SRC_DAWN_NATIVE_FEATURES_H_
 
 #include <bitset>
 #include <unordered_map>
@@ -80,4 +80,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_FEATURES_H_
+#endif  // SRC_DAWN_NATIVE_FEATURES_H_

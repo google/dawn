@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWN_NODE_BINDING_FLAGS_H_
-#define DAWN_NODE_BINDING_FLAGS_H_
+#ifndef SRC_DAWN_NODE_BINDING_FLAGS_H_
+#define SRC_DAWN_NODE_BINDING_FLAGS_H_
 
 #include <optional>
 #include <string>
@@ -32,4 +32,4 @@ namespace wgpu::binding {
     };
 }  // namespace wgpu::binding
 
-#endif  // DAWN_NODE_BINDING_FLAGS_H_
+#endif  // SRC_DAWN_NODE_BINDING_FLAGS_H_

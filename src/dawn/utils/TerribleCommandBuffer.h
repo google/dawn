@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef UTILS_TERRIBLE_COMMAND_BUFFER_H_
-#define UTILS_TERRIBLE_COMMAND_BUFFER_H_
+#ifndef SRC_DAWN_UTILS_TERRIBLECOMMANDBUFFER_H_
+#define SRC_DAWN_UTILS_TERRIBLECOMMANDBUFFER_H_
 
 #include "dawn/wire/Wire.h"
 
@@ -39,4 +39,4 @@ namespace utils {
 
 }  // namespace utils
 
-#endif  // UTILS_TERRIBLE_COMMAND_BUFFER_H_
+#endif  // SRC_DAWN_UTILS_TERRIBLECOMMANDBUFFER_H_

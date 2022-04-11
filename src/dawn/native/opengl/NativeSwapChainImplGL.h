@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_OPENGL_NATIVESWAPCHAINIMPLGL_H_
-#define DAWNNATIVE_OPENGL_NATIVESWAPCHAINIMPLGL_H_
+#ifndef SRC_DAWN_NATIVE_OPENGL_NATIVESWAPCHAINIMPLGL_H_
+#define SRC_DAWN_NATIVE_OPENGL_NATIVESWAPCHAINIMPLGL_H_
 
 #include "dawn/native/OpenGLBackend.h"
 
@@ -55,4 +55,4 @@ namespace dawn::native::opengl {
 
 }  // namespace dawn::native::opengl
 
-#endif  // DAWNNATIVE_OPENGL_NATIVESWAPCHAINIMPLGL_H_
+#endif  // SRC_DAWN_NATIVE_OPENGL_NATIVESWAPCHAINIMPLGL_H_

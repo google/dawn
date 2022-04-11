@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWN_ENUM_CLASS_BITMASKS_H_
-#define DAWN_ENUM_CLASS_BITMASKS_H_
+#ifndef INCLUDE_DAWN_ENUMCLASSBITMASKS_H_
+#define INCLUDE_DAWN_ENUMCLASSBITMASKS_H_
 
 #include <type_traits>
 
@@ -153,4 +153,4 @@ namespace dawn {
 
 }  // namespace dawn
 
-#endif  // DAWN_ENUM_CLASS_BITMASKS_H_
+#endif  // INCLUDE_DAWN_ENUMCLASSBITMASKS_H_

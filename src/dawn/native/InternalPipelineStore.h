@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_INTERNALPIPELINESTORE_H_
-#define DAWNNATIVE_INTERNALPIPELINESTORE_H_
+#ifndef SRC_DAWN_NATIVE_INTERNALPIPELINESTORE_H_
+#define SRC_DAWN_NATIVE_INTERNALPIPELINESTORE_H_
 
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/ScratchBuffer.h"
@@ -57,4 +57,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_INTERNALPIPELINESTORE_H_
+#endif  // SRC_DAWN_NATIVE_INTERNALPIPELINESTORE_H_

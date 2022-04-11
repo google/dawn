@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_VULKANPLATFORM_H_
-#define COMMON_VULKANPLATFORM_H_
+#ifndef SRC_DAWN_COMMON_VULKAN_PLATFORM_H_
+#define SRC_DAWN_COMMON_VULKAN_PLATFORM_H_
 
 #if !defined(DAWN_ENABLE_BACKEND_VULKAN)
 #    error "vulkan_platform.h included without the Vulkan backend enabled"
@@ -203,4 +203,4 @@ static constexpr uint64_t VK_NULL_HANDLE = 0;
 #    error "Unsupported platform"
 #endif
 
-#endif  // COMMON_VULKANPLATFORM_H_
+#endif  // SRC_DAWN_COMMON_VULKAN_PLATFORM_H_

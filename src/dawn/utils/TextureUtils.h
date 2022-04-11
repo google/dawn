@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef UTILS_TEXTURE_UTILS_H_
-#define UTILS_TEXTURE_UTILS_H_
+#ifndef SRC_DAWN_UTILS_TEXTUREUTILS_H_
+#define SRC_DAWN_UTILS_TEXTUREUTILS_H_
 
 #include <array>
 
@@ -248,4 +248,4 @@ namespace utils {
         const wgpu::TextureViewDimension dimension);
 }  // namespace utils
 
-#endif
+#endif  // SRC_DAWN_UTILS_TEXTUREUTILS_H_

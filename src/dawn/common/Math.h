@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_MATH_H_
-#define COMMON_MATH_H_
+#ifndef SRC_DAWN_COMMON_MATH_H_
+#define SRC_DAWN_COMMON_MATH_H_
 
 #include "dawn/common/Assert.h"
 
@@ -104,4 +104,4 @@ constexpr bool IsSubset(T1 subset, T2 set) {
     return bitsAlsoInSet == subset;
 }
 
-#endif  // COMMON_MATH_H_
+#endif  // SRC_DAWN_COMMON_MATH_H_

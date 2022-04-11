@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TESTS_DAWNNATIVETEST_H_
-#define TESTS_DAWNNATIVETEST_H_
+#ifndef SRC_DAWN_TESTS_DAWNNATIVETEST_H_
+#define SRC_DAWN_TESTS_DAWNNATIVETEST_H_
 
 #include <gtest/gtest.h>
 
@@ -50,4 +50,4 @@ class DawnNativeTest : public ::testing::Test {
     static void OnDeviceError(WGPUErrorType type, const char* message, void* userdata);
 };
 
-#endif  // TESTS_DAWNNATIVETEST_H_
+#endif  // SRC_DAWN_TESTS_DAWNNATIVETEST_H_

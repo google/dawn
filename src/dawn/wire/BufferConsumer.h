@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNWIRE_BUFFERCONSUMER_H_
-#define DAWNWIRE_BUFFERCONSUMER_H_
+#ifndef SRC_DAWN_WIRE_BUFFERCONSUMER_H_
+#define SRC_DAWN_WIRE_BUFFERCONSUMER_H_
 
 #include "dawn/wire/WireResult.h"
 
@@ -82,4 +82,4 @@ namespace dawn::wire {
 
 }  // namespace dawn::wire
 
-#endif  // DAWNWIRE_BUFFERCONSUMER_H_
+#endif  // SRC_DAWN_WIRE_BUFFERCONSUMER_H_

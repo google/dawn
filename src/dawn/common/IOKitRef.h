@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_IOKITREF_H_
-#define COMMON_IOKITREF_H_
+#ifndef SRC_DAWN_COMMON_IOKITREF_H_
+#define SRC_DAWN_COMMON_IOKITREF_H_
 
 #include "dawn/common/RefBase.h"
 
@@ -43,4 +43,4 @@ IORef<T> AcquireIORef(T pointee) {
     return ref;
 }
 
-#endif  // COMMON_IOKITREF_H_
+#endif  // SRC_DAWN_COMMON_IOKITREF_H_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_COMPILATIONMESSAGES_H_
-#define DAWNNATIVE_COMPILATIONMESSAGES_H_
+#ifndef SRC_DAWN_NATIVE_COMPILATIONMESSAGES_H_
+#define SRC_DAWN_NATIVE_COMPILATIONMESSAGES_H_
 
 #include "dawn/native/dawn_platform.h"
 
@@ -59,4 +59,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_COMPILATIONMESSAGES_H_
+#endif  // SRC_DAWN_NATIVE_COMPILATIONMESSAGES_H_

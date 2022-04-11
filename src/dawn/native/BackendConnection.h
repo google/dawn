@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_BACKENDCONNECTION_H_
-#define DAWNNATIVE_BACKENDCONNECTION_H_
+#ifndef SRC_DAWN_NATIVE_BACKENDCONNECTION_H_
+#define SRC_DAWN_NATIVE_BACKENDCONNECTION_H_
 
 #include "dawn/native/Adapter.h"
 #include "dawn/native/DawnNative.h"
@@ -47,4 +47,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_BACKENDCONNECTION_H_
+#endif  // SRC_DAWN_NATIVE_BACKENDCONNECTION_H_

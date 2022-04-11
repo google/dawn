@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_BUDDYMEMORYALLOCATOR_H_
-#define DAWNNATIVE_BUDDYMEMORYALLOCATOR_H_
+#ifndef SRC_DAWN_NATIVE_BUDDYMEMORYALLOCATOR_H_
+#define SRC_DAWN_NATIVE_BUDDYMEMORYALLOCATOR_H_
 
 #include "dawn/native/BuddyAllocator.h"
 #include "dawn/native/Error.h"
@@ -71,4 +71,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_BUDDYMEMORYALLOCATOR_H_
+#endif  // SRC_DAWN_NATIVE_BUDDYMEMORYALLOCATOR_H_

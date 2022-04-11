@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TESTS_VULKANIMAGEWRAPPINGTESTS_H_
-#define TESTS_VULKANIMAGEWRAPPINGTESTS_H_
+#ifndef SRC_DAWN_TESTS_WHITE_BOX_VULKANIMAGEWRAPPINGTESTS_H_
+#define SRC_DAWN_TESTS_WHITE_BOX_VULKANIMAGEWRAPPINGTESTS_H_
 
 // This must be above all other includes otherwise VulkanBackend.h includes vulkan.h before we had
 // time to wrap it with vulkan_platform.h
@@ -73,4 +73,4 @@ namespace dawn::native::vulkan {
 
 }  // namespace dawn::native::vulkan
 
-#endif  // TESTS_VULKANIMAGEWRAPPINGTESTS_H_
+#endif  // SRC_DAWN_TESTS_WHITE_BOX_VULKANIMAGEWRAPPINGTESTS_H_

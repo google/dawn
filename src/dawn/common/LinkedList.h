@@ -8,8 +8,8 @@
 //   - Added in list check before removing node to prevent segfault, now returns true iff removed
 //   - Added MoveInto functionality for moving list elements to another list
 
-#ifndef COMMON_LINKED_LIST_H
-#define COMMON_LINKED_LIST_H
+#ifndef SRC_DAWN_COMMON_LINKEDLIST_H_
+#define SRC_DAWN_COMMON_LINKEDLIST_H_
 
 #include "dawn/common/Assert.h"
 
@@ -271,4 +271,4 @@ LinkedListIterator<T> end(LinkedList<T>& l) {
     return LinkedListIterator<T>(l.tail()->next());
 }
 
-#endif  // COMMON_LINKED_LIST_H
+#endif  // SRC_DAWN_COMMON_LINKEDLIST_H_

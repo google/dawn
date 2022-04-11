@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_ITYP_ARRAY_H_
-#define COMMON_ITYP_ARRAY_H_
+#ifndef SRC_DAWN_COMMON_ITYP_ARRAY_H_
+#define SRC_DAWN_COMMON_ITYP_ARRAY_H_
 
 #include "dawn/common/TypedInteger.h"
 #include "dawn/common/UnderlyingType.h"
@@ -95,4 +95,4 @@ namespace ityp {
 
 }  // namespace ityp
 
-#endif  // COMMON_ITYP_ARRAY_H_
+#endif  // SRC_DAWN_COMMON_ITYP_ARRAY_H_

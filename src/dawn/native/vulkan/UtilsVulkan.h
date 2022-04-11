@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_VULKAN_UTILSVULKAN_H_
-#define DAWNNATIVE_VULKAN_UTILSVULKAN_H_
+#ifndef SRC_DAWN_NATIVE_VULKAN_UTILSVULKAN_H_
+#define SRC_DAWN_NATIVE_VULKAN_UTILSVULKAN_H_
 
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Commands.h"
@@ -120,4 +120,4 @@ namespace dawn::native::vulkan {
 
 }  // namespace dawn::native::vulkan
 
-#endif  // DAWNNATIVE_VULKAN_UTILSVULKAN_H_
+#endif  // SRC_DAWN_NATIVE_VULKAN_UTILSVULKAN_H_

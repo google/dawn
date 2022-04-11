@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_GPUINFO_H
-#define COMMON_GPUINFO_H
+#ifndef SRC_DAWN_COMMON_GPUINFO_H_
+#define SRC_DAWN_COMMON_GPUINFO_H_
 
 #include <array>
 #include <cstdint>
@@ -63,4 +63,4 @@ namespace gpu_info {
     bool IsCoffeelake(PCIDeviceID deviceId);
 
 }  // namespace gpu_info
-#endif  // COMMON_GPUINFO_H
+#endif  // SRC_DAWN_COMMON_GPUINFO_H_

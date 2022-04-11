@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TESTS_VIDEOVIEWSTESTS_H_
-#define TESTS_VIDEOVIEWSTESTS_H_
+#ifndef SRC_DAWN_TESTS_END2END_VIDEOVIEWSTESTS_H_
+#define SRC_DAWN_TESTS_END2END_VIDEOVIEWSTESTS_H_
 
 #include "dawn/tests/DawnTest.h"
 
@@ -92,4 +92,4 @@ class VideoViewsTests : public DawnTest {
     bool mIsMultiPlanarFormatsSupported = false;
 };
 
-#endif  // TESTS_VIDEOVIEWSTESTS_H_
+#endif  // SRC_DAWN_TESTS_END2END_VIDEOVIEWSTESTS_H_

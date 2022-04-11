@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_SERIALQUEUE_H_
-#define COMMON_SERIALQUEUE_H_
+#ifndef SRC_DAWN_COMMON_SERIALQUEUE_H_
+#define SRC_DAWN_COMMON_SERIALQUEUE_H_
 
 #include "dawn/common/SerialStorage.h"
 
@@ -82,4 +82,4 @@ void SerialQueue<Serial, Value>::Enqueue(std::vector<Value>&& values, Serial ser
     this->mStorage.emplace_back(serial, values);
 }
 
-#endif  // COMMON_SERIALQUEUE_H_
+#endif  // SRC_DAWN_COMMON_SERIALQUEUE_H_

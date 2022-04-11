@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_METALBACKEND_H_
-#define DAWNNATIVE_METALBACKEND_H_
+#ifndef INCLUDE_DAWN_NATIVE_METALBACKEND_H_
+#define INCLUDE_DAWN_NATIVE_METALBACKEND_H_
 
 #include <dawn/dawn_wsi.h>
 #include <dawn/native/DawnNative.h>
@@ -70,4 +70,4 @@ namespace dawn::native::metal {
 
 #pragma clang diagnostic pop
 
-#endif  // DAWNNATIVE_METALBACKEND_H_
+#endif  // INCLUDE_DAWN_NATIVE_METALBACKEND_H_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_BINDGROUPTRACKER_H_
-#define DAWNNATIVE_BINDGROUPTRACKER_H_
+#ifndef SRC_DAWN_NATIVE_BINDGROUPTRACKER_H_
+#define SRC_DAWN_NATIVE_BINDGROUPTRACKER_H_
 
 #include "dawn/common/Constants.h"
 #include "dawn/native/BindGroupLayout.h"
@@ -139,4 +139,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_BINDGROUPTRACKER_H_
+#endif  // SRC_DAWN_NATIVE_BINDGROUPTRACKER_H_

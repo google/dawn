@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_RESOURCEHEAPALLOCATOR_H_
-#define DAWNNATIVE_RESOURCEHEAPALLOCATOR_H_
+#ifndef SRC_DAWN_NATIVE_RESOURCEHEAPALLOCATOR_H_
+#define SRC_DAWN_NATIVE_RESOURCEHEAPALLOCATOR_H_
 
 #include "dawn/native/Error.h"
 #include "dawn/native/ResourceHeap.h"
@@ -34,4 +34,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_RESOURCEHEAPALLOCATOR_H_
+#endif  // SRC_DAWN_NATIVE_RESOURCEHEAPALLOCATOR_H_

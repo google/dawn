@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_ATTACHMENTSTATE_H_
-#define DAWNNATIVE_ATTACHMENTSTATE_H_
+#ifndef SRC_DAWN_NATIVE_ATTACHMENTSTATE_H_
+#define SRC_DAWN_NATIVE_ATTACHMENTSTATE_H_
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/ityp_array.h"
@@ -80,4 +80,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_ATTACHMENTSTATE_H_
+#endif  // SRC_DAWN_NATIVE_ATTACHMENTSTATE_H_

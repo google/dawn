@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TESTS_PERFTESTS_DAWNPERFTESTPLATFORM_H_
-#define TESTS_PERFTESTS_DAWNPERFTESTPLATFORM_H_
+#ifndef SRC_DAWN_TESTS_PERF_TESTS_DAWNPERFTESTPLATFORM_H_
+#define SRC_DAWN_TESTS_PERF_TESTS_DAWNPERFTESTPLATFORM_H_
 
 #include "dawn/platform/DawnPlatform.h"
 
@@ -88,4 +88,4 @@ class DawnPerfTestPlatform : public dawn::platform::Platform {
     std::mutex mTraceEventBufferMapMutex;
 };
 
-#endif  // TESTS_PERFTESTS_DAWNPERFTESTPLATFORM_H_
+#endif  // SRC_DAWN_TESTS_PERF_TESTS_DAWNPERFTESTPLATFORM_H_

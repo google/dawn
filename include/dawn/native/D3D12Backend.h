@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_D3D12BACKEND_H_
-#define DAWNNATIVE_D3D12BACKEND_H_
+#ifndef INCLUDE_DAWN_NATIVE_D3D12BACKEND_H_
+#define INCLUDE_DAWN_NATIVE_D3D12BACKEND_H_
 
 #include <dawn/dawn_wsi.h>
 #include <dawn/native/DawnNative.h>
@@ -108,4 +108,4 @@ namespace dawn::native::d3d12 {
 
 }  // namespace dawn::native::d3d12
 
-#endif  // DAWNNATIVE_D3D12BACKEND_H_
+#endif  // INCLUDE_DAWN_NATIVE_D3D12BACKEND_H_

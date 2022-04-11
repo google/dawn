@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_DAWNNATIVE_H_
-#define DAWNNATIVE_DAWNNATIVE_H_
+#ifndef INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_
+#define INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_
 
 #include <dawn/dawn_proc_table.h>
 #include <dawn/native/dawn_native_export.h>
@@ -258,4 +258,4 @@ namespace dawn::native {
 // TODO(dawn:824): Remove once the deprecation period is passed.
 namespace dawn_native = dawn::native;
 
-#endif  // DAWNNATIVE_DAWNNATIVE_H_
+#endif  // INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_

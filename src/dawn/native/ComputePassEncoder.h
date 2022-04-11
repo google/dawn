@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_COMPUTEPASSENCODER_H_
-#define DAWNNATIVE_COMPUTEPASSENCODER_H_
+#ifndef SRC_DAWN_NATIVE_COMPUTEPASSENCODER_H_
+#define SRC_DAWN_NATIVE_COMPUTEPASSENCODER_H_
 
 #include "dawn/native/CommandBufferStateTracker.h"
 #include "dawn/native/Error.h"
@@ -95,4 +95,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_COMPUTEPASSENCODER_H_
+#endif  // SRC_DAWN_NATIVE_COMPUTEPASSENCODER_H_

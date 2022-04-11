@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_D3D12_SAMPLERHEAPCACHE_H_
-#define DAWNNATIVE_D3D12_SAMPLERHEAPCACHE_H_
+#ifndef SRC_DAWN_NATIVE_D3D12_SAMPLERHEAPCACHED3D12_H_
+#define SRC_DAWN_NATIVE_D3D12_SAMPLERHEAPCACHED3D12_H_
 
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/BindingInfo.h"
@@ -104,4 +104,4 @@ namespace dawn::native::d3d12 {
 
 }  // namespace dawn::native::d3d12
 
-#endif  // DAWNNATIVE_D3D12_SAMPLERHEAPCACHE_H_
+#endif  // SRC_DAWN_NATIVE_D3D12_SAMPLERHEAPCACHED3D12_H_

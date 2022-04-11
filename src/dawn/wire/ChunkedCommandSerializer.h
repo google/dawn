@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNWIRE_CHUNKEDCOMMANDSERIALIZER_H_
-#define DAWNWIRE_CHUNKEDCOMMANDSERIALIZER_H_
+#ifndef SRC_DAWN_WIRE_CHUNKEDCOMMANDSERIALIZER_H_
+#define SRC_DAWN_WIRE_CHUNKEDCOMMANDSERIALIZER_H_
 
 #include "dawn/common/Alloc.h"
 #include "dawn/common/Compiler.h"
@@ -111,4 +111,4 @@ namespace dawn::wire {
 
 }  // namespace dawn::wire
 
-#endif  // DAWNWIRE_CHUNKEDCOMMANDSERIALIZER_H_
+#endif  // SRC_DAWN_WIRE_CHUNKEDCOMMANDSERIALIZER_H_

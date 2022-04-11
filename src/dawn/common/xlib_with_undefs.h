@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_XLIB_WITH_UNDEFS_H_
-#define COMMON_XLIB_WITH_UNDEFS_H_
+#ifndef SRC_DAWN_COMMON_XLIB_WITH_UNDEFS_H_
+#define SRC_DAWN_COMMON_XLIB_WITH_UNDEFS_H_
 
 #include "dawn/common/Platform.h"
 
@@ -37,4 +37,4 @@
 
 using XErrorHandler = int (*)(Display*, XErrorEvent*);
 
-#endif  // COMMON_XLIB_WITH_UNDEFS_H_
+#endif  // SRC_DAWN_COMMON_XLIB_WITH_UNDEFS_H_

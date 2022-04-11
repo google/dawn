@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef SRC_DAWN_NATIVE_VULKAN_CACHEKEYVK_H_
+#define SRC_DAWN_NATIVE_VULKAN_CACHEKEYVK_H_
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/CacheKey.h"
@@ -83,3 +86,5 @@ namespace dawn::native::vulkan {
     }
 
 }  // namespace dawn::native::vulkan
+
+#endif  // SRC_DAWN_NATIVE_VULKAN_CACHEKEYVK_H_

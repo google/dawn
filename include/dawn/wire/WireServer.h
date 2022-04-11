@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNWIRE_WIRESERVER_H_
-#define DAWNWIRE_WIRESERVER_H_
+#ifndef INCLUDE_DAWN_WIRE_WIRESERVER_H_
+#define INCLUDE_DAWN_WIRE_WIRESERVER_H_
 
 #include <memory>
 
@@ -147,4 +147,4 @@ namespace dawn::wire {
 
 }  // namespace dawn::wire
 
-#endif  // DAWNWIRE_WIRESERVER_H_
+#endif  // INCLUDE_DAWN_WIRE_WIRESERVER_H_

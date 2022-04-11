@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_METAL_BINDGROUPLAYOUTMTL_H_
-#define DAWNNATIVE_METAL_BINDGROUPLAYOUTMTL_H_
+#ifndef SRC_DAWN_NATIVE_METAL_BINDGROUPLAYOUTMTL_H_
+#define SRC_DAWN_NATIVE_METAL_BINDGROUPLAYOUTMTL_H_
 
 #include "dawn/common/SlabAllocator.h"
 #include "dawn/native/BindGroupLayout.h"
@@ -43,4 +43,4 @@ namespace dawn::native::metal {
 
 }  // namespace dawn::native::metal
 
-#endif  // DAWNNATIVE_METAL_BINDGROUPLAYOUTMTL_H_
+#endif  // SRC_DAWN_NATIVE_METAL_BINDGROUPLAYOUTMTL_H_

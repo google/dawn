@@ -12,4 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef SRC_DAWN_NATIVE_OPENGL_OPENGL_PLATFORM_H_
+#define SRC_DAWN_NATIVE_OPENGL_OPENGL_PLATFORM_H_
+
 #include "dawn/native/opengl/opengl_platform_autogen.h"
+
+#endif  // SRC_DAWN_NATIVE_OPENGL_OPENGL_PLATFORM_H_

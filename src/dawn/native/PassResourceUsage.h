@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_PASSRESOURCEUSAGE_H
-#define DAWNNATIVE_PASSRESOURCEUSAGE_H
+#ifndef SRC_DAWN_NATIVE_PASSRESOURCEUSAGE_H_
+#define SRC_DAWN_NATIVE_PASSRESOURCEUSAGE_H_
 
 #include "dawn/native/SubresourceStorage.h"
 #include "dawn/native/dawn_platform.h"
@@ -97,4 +97,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_PASSRESOURCEUSAGE_H
+#endif  // SRC_DAWN_NATIVE_PASSRESOURCEUSAGE_H_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_WINDOWSUTILS_H_
-#define COMMON_WINDOWSUTILS_H_
+#ifndef SRC_DAWN_COMMON_WINDOWSUTILS_H_
+#define SRC_DAWN_COMMON_WINDOWSUTILS_H_
 
 #include <string>
 
@@ -21,4 +21,4 @@ std::string WCharToUTF8(const wchar_t* input);
 
 std::wstring UTF8ToWStr(const char* input);
 
-#endif  // COMMON_WINDOWSUTILS_H_
+#endif  // SRC_DAWN_COMMON_WINDOWSUTILS_H_

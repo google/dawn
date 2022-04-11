@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_UNDERLYINGTYPE_H_
-#define COMMON_UNDERLYINGTYPE_H_
+#ifndef SRC_DAWN_COMMON_UNDERLYINGTYPE_H_
+#define SRC_DAWN_COMMON_UNDERLYINGTYPE_H_
 
 #include <type_traits>
 
@@ -48,4 +48,4 @@ namespace detail {
 template <typename T>
 using UnderlyingType = typename detail::UnderlyingTypeImpl<T>::type;
 
-#endif  // COMMON_UNDERLYINGTYPE_H_
+#endif  // SRC_DAWN_COMMON_UNDERLYINGTYPE_H_

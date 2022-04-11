@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_VULKAN_EXTERNALSEMAPHORE_SERVICE_H_
-#define DAWNNATIVE_VULKAN_EXTERNALSEMAPHORE_SERVICE_H_
+#ifndef SRC_DAWN_NATIVE_VULKAN_EXTERNAL_SEMAPHORE_SEMAPHORESERVICE_H_
+#define SRC_DAWN_NATIVE_VULKAN_EXTERNAL_SEMAPHORE_SEMAPHORESERVICE_H_
 
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Error.h"
@@ -57,4 +57,4 @@ namespace dawn::native { namespace vulkan::external_semaphore {
 
 }}  // namespace dawn::native::vulkan::external_semaphore
 
-#endif  // DAWNNATIVE_VULKAN_EXTERNALSEMAPHORE_SERVICE_H_
+#endif  // SRC_DAWN_NATIVE_VULKAN_EXTERNAL_SEMAPHORE_SEMAPHORESERVICE_H_

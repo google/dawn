@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef SRC_DAWN_TESTS_MOCKCALLBACK_H_
+#define SRC_DAWN_TESTS_MOCKCALLBACK_H_
+
 #include <gmock/gmock.h>
 
 #include "dawn/common/Assert.h"
@@ -99,3 +102,5 @@ namespace testing {
     };
 
 }  // namespace testing
+
+#endif  // SRC_DAWN_TESTS_MOCKCALLBACK_H_

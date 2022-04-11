@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_RESULT_H_
-#define COMMON_RESULT_H_
+#ifndef SRC_DAWN_COMMON_RESULT_H_
+#define SRC_DAWN_COMMON_RESULT_H_
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Compiler.h"
@@ -523,4 +523,4 @@ std::unique_ptr<E> Result<T, E>::AcquireError() {
     return std::move(mError);
 }
 
-#endif  // COMMON_RESULT_H_
+#endif  // SRC_DAWN_COMMON_RESULT_H_

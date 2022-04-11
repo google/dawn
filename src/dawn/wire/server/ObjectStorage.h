@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNWIRE_SERVER_OBJECTSTORAGE_H_
-#define DAWNWIRE_SERVER_OBJECTSTORAGE_H_
+#ifndef SRC_DAWN_WIRE_SERVER_OBJECTSTORAGE_H_
+#define SRC_DAWN_WIRE_SERVER_OBJECTSTORAGE_H_
 
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/WireServer.h"
@@ -225,4 +225,4 @@ namespace dawn::wire::server {
 
 }  // namespace dawn::wire::server
 
-#endif  // DAWNWIRE_SERVER_OBJECTSTORAGE_H_
+#endif  // SRC_DAWN_WIRE_SERVER_OBJECTSTORAGE_H_

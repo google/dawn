@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_DEVICE_H_
-#define DAWNNATIVE_DEVICE_H_
+#ifndef SRC_DAWN_NATIVE_DEVICE_H_
+#define SRC_DAWN_NATIVE_DEVICE_H_
 
 #include "dawn/native/Commands.h"
 #include "dawn/native/ComputePipeline.h"
@@ -552,4 +552,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_DEVICE_H_
+#endif  // SRC_DAWN_NATIVE_DEVICE_H_

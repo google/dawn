@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_NULL_DEVICENULL_H_
-#define DAWNNATIVE_NULL_DEVICENULL_H_
+#ifndef SRC_DAWN_NATIVE_NULL_DEVICENULL_H_
+#define SRC_DAWN_NATIVE_NULL_DEVICENULL_H_
 
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BindGroup.h"
@@ -337,4 +337,4 @@ namespace dawn::native::null {
 
 }  // namespace dawn::native::null
 
-#endif  // DAWNNATIVE_NULL_DEVICENULL_H_
+#endif  // SRC_DAWN_NATIVE_NULL_DEVICENULL_H_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNWIRE_CLIENT_APIOBJECTS_H_
-#define DAWNWIRE_CLIENT_APIOBJECTS_H_
+#ifndef SRC_DAWN_WIRE_CLIENT_APIOBJECTS_H_
+#define SRC_DAWN_WIRE_CLIENT_APIOBJECTS_H_
 
 #include "dawn/wire/client/ObjectBase.h"
 
@@ -26,4 +26,4 @@
 
 #include "dawn/wire/client/ApiObjects_autogen.h"
 
-#endif  // DAWNWIRE_CLIENT_APIOBJECTS_H_
+#endif  // SRC_DAWN_WIRE_CLIENT_APIOBJECTS_H_

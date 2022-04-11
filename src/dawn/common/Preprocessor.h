@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_PREPROCESSOR_H_
-#define COMMON_PREPROCESSOR_H_
+#ifndef SRC_DAWN_COMMON_PREPROCESSOR_H_
+#define SRC_DAWN_COMMON_PREPROCESSOR_H_
 
 // DAWN_PP_GET_HEAD: get the first element of a __VA_ARGS__ without triggering empty
 // __VA_ARGS__ warnings.
@@ -67,4 +67,4 @@
 #define DAWN_PP_FOR_EACH(func, ...) \
     DAWN_PP_FOR_EACH_(DAWN_PP_FOR_EACH_NARG(__VA_ARGS__), func, __VA_ARGS__)
 
-#endif  // COMMON_PREPROCESSOR_H_
+#endif  // SRC_DAWN_COMMON_PREPROCESSOR_H_

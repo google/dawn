@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_ASYC_TASK_H_
-#define DAWNNATIVE_ASYC_TASK_H_
+#ifndef SRC_DAWN_NATIVE_ASYNCTASK_H_
+#define SRC_DAWN_NATIVE_ASYNCTASK_H_
 
 #include <functional>
 #include <memory>
@@ -62,4 +62,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif
+#endif  // SRC_DAWN_NATIVE_ASYNCTASK_H_

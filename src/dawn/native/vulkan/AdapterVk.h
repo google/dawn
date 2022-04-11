@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_VULKAN_ADAPTERVK_H_
-#define DAWNNATIVE_VULKAN_ADAPTERVK_H_
+#ifndef SRC_DAWN_NATIVE_VULKAN_ADAPTERVK_H_
+#define SRC_DAWN_NATIVE_VULKAN_ADAPTERVK_H_
 
 #include "dawn/native/Adapter.h"
 
@@ -56,4 +56,4 @@ namespace dawn::native::vulkan {
 
 }  // namespace dawn::native::vulkan
 
-#endif  // DAWNNATIVE_VULKAN_ADAPTERVK_H_
+#endif  // SRC_DAWN_NATIVE_VULKAN_ADAPTERVK_H_

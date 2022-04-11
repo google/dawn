@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef SRC_DAWN_SAMPLES_SAMPLEUTILS_H_
+#define SRC_DAWN_SAMPLES_SAMPLEUTILS_H_
+
 #include <dawn/dawn_wsi.h>
 #include <dawn/webgpu_cpp.h>
 
@@ -27,3 +30,5 @@ uint64_t GetSwapChainImplementation();
 wgpu::TextureFormat GetPreferredSwapChainTextureFormat();
 wgpu::SwapChain GetSwapChain(const wgpu::Device& device);
 wgpu::TextureView CreateDefaultDepthStencilView(const wgpu::Device& device);
+
+#endif  // SRC_DAWN_SAMPLES_SAMPLEUTILS_H_

@@ -4,8 +4,8 @@
 
 // This file is a modified copy of Chromium's /src/base/containers/stack_container.h
 
-#ifndef COMMON_STACKCONTAINER_H_
-#define COMMON_STACKCONTAINER_H_
+#ifndef SRC_DAWN_COMMON_STACKCONTAINER_H_
+#define SRC_DAWN_COMMON_STACKCONTAINER_H_
 
 #include "dawn/common/Compiler.h"
 
@@ -259,4 +259,4 @@ class StackVector
     StackVector& operator=(StackVector&& rhs) = delete;
 };
 
-#endif  // COMMON_STACKCONTAINER_H_
+#endif  // SRC_DAWN_COMMON_STACKCONTAINER_H_

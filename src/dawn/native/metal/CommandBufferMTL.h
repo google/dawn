@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_METAL_COMMANDBUFFERMTL_H_
-#define DAWNNATIVE_METAL_COMMANDBUFFERMTL_H_
+#ifndef SRC_DAWN_NATIVE_METAL_COMMANDBUFFERMTL_H_
+#define SRC_DAWN_NATIVE_METAL_COMMANDBUFFERMTL_H_
 
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/Error.h"
@@ -66,4 +66,4 @@ namespace dawn::native::metal {
 
 }  // namespace dawn::native::metal
 
-#endif  // DAWNNATIVE_METAL_COMMANDBUFFERMTL_H_
+#endif  // SRC_DAWN_NATIVE_METAL_COMMANDBUFFERMTL_H_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_D3D12_D3D12INFO_H_
-#define DAWNNATIVE_D3D12_D3D12INFO_H_
+#ifndef SRC_DAWN_NATIVE_D3D12_D3D12INFO_H_
+#define SRC_DAWN_NATIVE_D3D12_D3D12INFO_H_
 
 #include "dawn/native/Error.h"
 #include "dawn/native/PerStage.h"
@@ -38,4 +38,4 @@ namespace dawn::native::d3d12 {
     ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const Adapter& adapter);
 }  // namespace dawn::native::d3d12
 
-#endif  // DAWNNATIVE_D3D12_D3D12INFO_H_
+#endif  // SRC_DAWN_NATIVE_D3D12_D3D12INFO_H_

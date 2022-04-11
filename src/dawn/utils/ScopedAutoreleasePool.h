@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef UTILS_SCOPEDAUTORELEASEPOOL_H_
-#define UTILS_SCOPEDAUTORELEASEPOOL_H_
+#ifndef SRC_DAWN_UTILS_SCOPEDAUTORELEASEPOOL_H_
+#define SRC_DAWN_UTILS_SCOPEDAUTORELEASEPOOL_H_
 
 #include "dawn/common/Compiler.h"
 
@@ -58,4 +58,4 @@ namespace utils {
 
 }  // namespace utils
 
-#endif  // UTILS_SCOPEDAUTORELEASEPOOL_H_
+#endif  // SRC_DAWN_UTILS_SCOPEDAUTORELEASEPOOL_H_

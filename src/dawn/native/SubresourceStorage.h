@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_SUBRESOURCESTORAGE_H_
-#define DAWNNATIVE_SUBRESOURCESTORAGE_H_
+#ifndef SRC_DAWN_NATIVE_SUBRESOURCESTORAGE_H_
+#define SRC_DAWN_NATIVE_SUBRESOURCESTORAGE_H_
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/TypeTraits.h"
@@ -552,4 +552,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_SUBRESOURCESTORAGE_H_
+#endif  // SRC_DAWN_NATIVE_SUBRESOURCESTORAGE_H_

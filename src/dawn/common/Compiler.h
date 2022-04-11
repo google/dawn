@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_COMPILER_H_
-#define COMMON_COMPILER_H_
+#ifndef SRC_DAWN_COMMON_COMPILER_H_
+#define SRC_DAWN_COMMON_COMPILER_H_
 
 // Defines macros for compiler-specific functionality
 //  - DAWN_COMPILER_[CLANG|GCC|MSVC]: Compiler detection
@@ -94,4 +94,4 @@ extern void __cdecl __debugbreak(void);
 #    define DAWN_NOINLINE
 #endif
 
-#endif  // COMMON_COMPILER_H_
+#endif  // SRC_DAWN_COMMON_COMPILER_H_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_EXPORT_H_
-#define DAWNNATIVE_EXPORT_H_
+#ifndef INCLUDE_DAWN_NATIVE_DAWN_NATIVE_EXPORT_H_
+#define INCLUDE_DAWN_NATIVE_DAWN_NATIVE_EXPORT_H_
 
 #if defined(DAWN_NATIVE_SHARED_LIBRARY)
 #    if defined(_WIN32)
@@ -33,4 +33,4 @@
 #    define DAWN_NATIVE_EXPORT
 #endif  // defined(DAWN_NATIVE_SHARED_LIBRARY)
 
-#endif  // DAWNNATIVE_EXPORT_H_
+#endif  // INCLUDE_DAWN_NATIVE_DAWN_NATIVE_EXPORT_H_

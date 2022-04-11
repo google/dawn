@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_OPENGL_OPENGLFUNCTIONS_H_
-#define DAWNNATIVE_OPENGL_OPENGLFUNCTIONS_H_
+#ifndef SRC_DAWN_NATIVE_OPENGL_OPENGLFUNCTIONS_H_
+#define SRC_DAWN_NATIVE_OPENGL_OPENGLFUNCTIONS_H_
 
 #include <unordered_set>
 
@@ -42,4 +42,4 @@ namespace dawn::native::opengl {
 
 }  // namespace dawn::native::opengl
 
-#endif  // DAWNNATIVE_OPENGL_OPENGLFUNCTIONS_H_
+#endif  // SRC_DAWN_NATIVE_OPENGL_OPENGLFUNCTIONS_H_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_OBJECTBASE_H_
-#define DAWNNATIVE_OBJECTBASE_H_
+#ifndef SRC_DAWN_NATIVE_OBJECTBASE_H_
+#define SRC_DAWN_NATIVE_OBJECTBASE_H_
 
 #include "dawn/common/LinkedList.h"
 #include "dawn/common/RefCounted.h"
@@ -94,4 +94,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_OBJECTBASE_H_
+#endif  // SRC_DAWN_NATIVE_OBJECTBASE_H_

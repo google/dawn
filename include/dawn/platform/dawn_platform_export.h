@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNPLATFORM_EXPORT_H_
-#define DAWNPLATFORM_EXPORT_H_
+#ifndef INCLUDE_DAWN_PLATFORM_DAWN_PLATFORM_EXPORT_H_
+#define INCLUDE_DAWN_PLATFORM_DAWN_PLATFORM_EXPORT_H_
 
 #if defined(DAWN_PLATFORM_SHARED_LIBRARY)
 #    if defined(_WIN32)
@@ -33,4 +33,4 @@
 #    define DAWN_PLATFORM_EXPORT
 #endif  // defined(DAWN_PLATFORM_SHARED_LIBRARY)
 
-#endif  // DAWNPLATFORM_EXPORT_H_
+#endif  // INCLUDE_DAWN_PLATFORM_DAWN_PLATFORM_EXPORT_H_

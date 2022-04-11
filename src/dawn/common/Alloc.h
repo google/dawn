@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef COMMON_ALLOC_H_
-#define COMMON_ALLOC_H_
+#ifndef SRC_DAWN_COMMON_ALLOC_H_
+#define SRC_DAWN_COMMON_ALLOC_H_
 
 #include <cstddef>
 #include <new>
@@ -30,4 +30,4 @@ T* AllocNoThrow(size_t count) {
     return new (std::nothrow) T[count];
 }
 
-#endif  // COMMON_ALLOC_H_
+#endif  // SRC_DAWN_COMMON_ALLOC_H_

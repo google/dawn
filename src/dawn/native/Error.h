@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_ERROR_H_
-#define DAWNNATIVE_ERROR_H_
+#ifndef SRC_DAWN_NATIVE_ERROR_H_
+#define SRC_DAWN_NATIVE_ERROR_H_
 
 #include "absl/strings/str_format.h"
 #include "dawn/common/Result.h"
@@ -191,4 +191,4 @@ namespace dawn::native {
 
 }  // namespace dawn::native
 
-#endif  // DAWNNATIVE_ERROR_H_
+#endif  // SRC_DAWN_NATIVE_ERROR_H_

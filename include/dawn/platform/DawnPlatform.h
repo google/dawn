@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNPLATFORM_DAWNPLATFORM_H_
-#define DAWNPLATFORM_DAWNPLATFORM_H_
+#ifndef INCLUDE_DAWN_PLATFORM_DAWNPLATFORM_H_
+#define INCLUDE_DAWN_PLATFORM_DAWNPLATFORM_H_
 
 #include "dawn/platform/dawn_platform_export.h"
 
@@ -116,4 +116,4 @@ namespace dawn::platform {
 // TODO(dawn:824): Remove once the deprecation period is passed.
 namespace dawn_platform = dawn::platform;
 
-#endif  // DAWNPLATFORM_DAWNPLATFORM_H_
+#endif  // INCLUDE_DAWN_PLATFORM_DAWNPLATFORM_H_

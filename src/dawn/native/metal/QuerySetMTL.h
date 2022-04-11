@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWNNATIVE_METAL_QUERYSETMTL_H_
-#define DAWNNATIVE_METAL_QUERYSETMTL_H_
+#ifndef SRC_DAWN_NATIVE_METAL_QUERYSETMTL_H_
+#define SRC_DAWN_NATIVE_METAL_QUERYSETMTL_H_
 
 #include "dawn/native/QuerySet.h"
 
@@ -51,4 +51,4 @@ namespace dawn::native::metal {
 
 }  // namespace dawn::native::metal
 
-#endif  // DAWNNATIVE_METAL_QUERYSETMTL_H_
+#endif  // SRC_DAWN_NATIVE_METAL_QUERYSETMTL_H_
