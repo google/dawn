@@ -33,10 +33,6 @@
 #    include "dawn/native/MetalBackend.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
-#if defined(DAWN_ENABLE_BACKEND_METAL)
-#    include "dawn/native/MetalBackend.h"
-#endif  // defined(DAWN_ENABLE_BACKEND_METAL)
-
 #if defined(DAWN_ENABLE_BACKEND_DESKTOP_GL) || defined(DAWN_ENABLE_BACKEND_OPENGLES)
 #    include "GLFW/glfw3.h"
 #    include "dawn/native/OpenGLBackend.h"

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "DawnWireServerFuzzer.h"
+#include "dawn/fuzzers/DawnWireServerFuzzer.h"
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Log.h"
