@@ -530,8 +530,8 @@ namespace wgpu::interop {
             }
 
             // Check for out of range and throw a type error.
-            constexpr T kMin = std::numeric_limits<T>::min();
-            constexpr T kMax = std::numeric_limits<T>::max();
+            constexpr double kMin = static_cast<double>(std::numeric_limits<T>::min());
+            constexpr double kMax = static_cast<double>(std::numeric_limits<T>::max());
             if (!(kMin <= doubleValue && doubleValue <= kMax)) {
                 return Error("Values are out of the range of that integer.");
             }
