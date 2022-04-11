@@ -58,6 +58,8 @@ namespace tint::reader::spirv {
 /// Example:   { SpvDecorationBlock }
 /// Example:   { SpvDecorationArrayStride, 16 }
 using Decoration = std::vector<uint32_t>;
+
+/// DecorationList is a list of decorations
 using DecorationList = std::vector<Decoration>;
 
 /// An AST expression with its type.

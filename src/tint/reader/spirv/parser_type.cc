@@ -119,55 +119,47 @@ struct StorageTextureHasher {
 };
 }  // namespace
 
+// Equality operators
+//! @cond Doxygen_Suppress
 static bool operator==(const Pointer& a, const Pointer& b) {
   return a.type == b.type && a.storage_class == b.storage_class;
 }
-
 static bool operator==(const Reference& a, const Reference& b) {
   return a.type == b.type && a.storage_class == b.storage_class;
 }
-
 static bool operator==(const Vector& a, const Vector& b) {
   return a.type == b.type && a.size == b.size;
 }
-
 static bool operator==(const Matrix& a, const Matrix& b) {
   return a.type == b.type && a.columns == b.columns && a.rows == b.rows;
 }
-
 static bool operator==(const Array& a, const Array& b) {
   return a.type == b.type && a.size == b.size && a.stride == b.stride;
 }
-
 static bool operator==(const Named& a, const Named& b) {
   return a.name == b.name;
 }
-
 static bool operator==(const Sampler& a, const Sampler& b) {
   return a.kind == b.kind;
 }
-
 static bool operator==(const DepthTexture& a, const DepthTexture& b) {
   return a.dims == b.dims;
 }
-
 static bool operator==(const DepthMultisampledTexture& a,
                        const DepthMultisampledTexture& b) {
   return a.dims == b.dims;
 }
-
 static bool operator==(const MultisampledTexture& a,
                        const MultisampledTexture& b) {
   return a.dims == b.dims && a.type == b.type;
 }
-
 static bool operator==(const SampledTexture& a, const SampledTexture& b) {
   return a.dims == b.dims && a.type == b.type;
 }
-
 static bool operator==(const StorageTexture& a, const StorageTexture& b) {
   return a.dims == b.dims && a.format == b.format;
 }
+//! @endcond
 
 const ast::Type* Void::Build(ProgramBuilder& b) const {
   return b.ty.void_();

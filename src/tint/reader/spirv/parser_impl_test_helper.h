@@ -307,7 +307,8 @@ class SpvParserTestBase : public T {
   }
 };
 
-// Use this form when you don't need to template any further.
+/// SpvParserTest the the base class for SPIR-V reader unit tests.
+/// Use this form when you don't need to template any further.
 using SpvParserTest = SpvParserTestBase<::testing::Test>;
 
 }  // namespace tint::reader::spirv

@@ -124,6 +124,10 @@ class Usage {
   bool is_storage_write_ = false;
 };
 
+/// Writes the Usage to the ostream
+/// @param out the ostream
+/// @param u the Usage
+/// @returns the ostream so calls can be chained
 inline std::ostream& operator<<(std::ostream& out, const Usage& u) {
   return u.operator<<(out);
 }

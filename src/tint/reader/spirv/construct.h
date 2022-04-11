@@ -149,6 +149,7 @@ struct Construct {
   const uint32_t scope_end_pos = 0;
 };
 
+/// ConstructList is a list of Construct unique pointers.
 using ConstructList = std::vector<std::unique_ptr<Construct>>;
 
 /// Converts a construct kind to a string.

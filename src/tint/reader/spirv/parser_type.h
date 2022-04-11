@@ -87,6 +87,7 @@ class Type : public Castable<Type> {
 #endif  // NDEBUG
 };
 
+/// TypeList is a list of Types
 using TypeList = std::vector<const Type*>;
 
 /// `void` type

@@ -105,8 +105,13 @@ class TestHelperBase : public BODY, public ProgramBuilder {
  private:
   std::unique_ptr<GeneratorImpl> gen_;
 };
+
+/// TestHelper the the base class for HLSL writer unit tests.
+/// Use this form when you don't need to template any further.
 using TestHelper = TestHelperBase<testing::Test>;
 
+/// TestParamHelper the the base class for HLSL unit tests that take a templated
+/// parameter.
 template <typename T>
 using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 

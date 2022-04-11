@@ -175,6 +175,10 @@ struct BlockInfo {
   std::vector<uint32_t> phis_needing_state_vars;
 };
 
+/// Writes the BlockInfo to the ostream
+/// @param o the ostream
+/// @param bi the BlockInfo
+/// @returns the ostream so calls can be chained
 inline std::ostream& operator<<(std::ostream& o, const BlockInfo& bi) {
   o << "BlockInfo{"
     << " id: " << bi.id << " pos: " << bi.pos
@@ -312,6 +316,10 @@ struct DefInfo {
   SkipReason skip = SkipReason::kDontSkip;
 };
 
+/// Writes the DefInfo to the ostream
+/// @param o the ostream
+/// @param di the DefInfo
+/// @returns the ostream so calls can be chained
 inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
   o << "DefInfo{"
     << " inst.result_id: " << di.inst.result_id()
