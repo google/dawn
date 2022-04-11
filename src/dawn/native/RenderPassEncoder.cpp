@@ -131,31 +131,30 @@ namespace dawn::native {
     }
 
     void RenderPassEncoder::APIEnd() {
-        if (mEncodingContext->TryEncode(
-                this,
-                [&](CommandAllocator* allocator) -> MaybeError {
-                    if (IsValidationEnabled()) {
-                        DAWN_TRY(ValidateProgrammableEncoderEnd());
+        mEncodingContext->TryEncode(
+            this,
+            [&](CommandAllocator* allocator) -> MaybeError {
+                if (IsValidationEnabled()) {
+                    DAWN_TRY(ValidateProgrammableEncoderEnd());
 
-                        DAWN_INVALID_IF(
-                            mOcclusionQueryActive,
-                            "Render pass %s ended with incomplete occlusion query index %u of %s.",
-                            this, mCurrentOcclusionQueryIndex, mOcclusionQuerySet.Get());
-                    }
+                    DAWN_INVALID_IF(
+                        mOcclusionQueryActive,
+                        "Render pass %s ended with incomplete occlusion query index %u of %s.",
+                        this, mCurrentOcclusionQueryIndex, mOcclusionQuerySet.Get());
+                }
 
-                    EndRenderPassCmd* cmd =
-                        allocator->Allocate<EndRenderPassCmd>(Command::EndRenderPass);
-                    // The query availability has already been updated at the beginning of render
-                    // pass, and no need to do update here.
-                    cmd->timestampWrites = std::move(mTimestampWritesAtEnd);
+                EndRenderPassCmd* cmd =
+                    allocator->Allocate<EndRenderPassCmd>(Command::EndRenderPass);
+                // The query availability has already been updated at the beginning of render
+                // pass, and no need to do update here.
+                cmd->timestampWrites = std::move(mTimestampWritesAtEnd);
 
-                    DAWN_TRY(mEncodingContext->ExitRenderPass(this, std::move(mUsageTracker),
-                                                              mCommandEncoder.Get(),
-                                                              std::move(mIndirectDrawMetadata)));
-                    return {};
-                },
-                "encoding %s.End().", this)) {
-        }
+                DAWN_TRY(mEncodingContext->ExitRenderPass(this, std::move(mUsageTracker),
+                                                          mCommandEncoder.Get(),
+                                                          std::move(mIndirectDrawMetadata)));
+                return {};
+            },
+            "encoding %s.End().", this);
     }
 
     void RenderPassEncoder::APIEndPass() {
