@@ -442,6 +442,10 @@ if (DAWN_ENABLE_OPENGL)
     target_link_libraries(dawn_native PRIVATE dawn_khronos_platform)
 endif()
 
+if (DAWN_ENABLE_SWIFTSHADER)
+    target_compile_definitions(dawn_native PRIVATE "DAWN_ENABLE_SWIFTSHADER")
+endif()
+
 if (DAWN_ENABLE_VULKAN)
     target_sources(dawn_native PRIVATE
         "${DAWN_INCLUDE_DIR}/dawn/native/VulkanBackend.h"

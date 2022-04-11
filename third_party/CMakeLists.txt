@@ -96,6 +96,14 @@ target_sources(dawn_vulkan_headers INTERFACE
 )
 target_include_directories(dawn_vulkan_headers INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/khronos")
 
+if (${DAWN_ENABLE_SWIFTSHADER} AND NOT TARGET vk_swiftshader)
+    set(SWIFTSHADER_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(SWIFTSHADER_BUILD_BENCHMARKS OFF CACHE BOOL "" FORCE)
+
+    message(STATUS "Dawn: using Swiftshader at ${DAWN_SWIFTSHADER_DIR}")
+    add_subdirectory(${DAWN_SWIFTSHADER_DIR} "${CMAKE_CURRENT_BINARY_DIR}/swiftshader")
+endif()
+
 if (${TINT_BUILD_BENCHMARKS})
   set(BENCHMARK_ENABLE_TESTING FALSE CACHE BOOL FALSE FORCE)
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/benchmark EXCLUDE_FROM_ALL)
