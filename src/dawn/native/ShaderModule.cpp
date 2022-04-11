@@ -380,6 +380,7 @@ namespace dawn::native {
 
         ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file,
                                                OwnedCompilationMessages* outMessages) {
+#if TINT_BUILD_WGSL_READER
             tint::Program program = tint::reader::wgsl::Parse(file);
             if (outMessages != nullptr) {
                 outMessages->AddMessages(program.Diagnostics());
@@ -391,10 +392,14 @@ namespace dawn::native {
             }
 
             return std::move(program);
+#else
+            return DAWN_FORMAT_VALIDATION_ERROR("TINT_BUILD_WGSL_READER is not defined.");
+#endif
         }
 
         ResultOrError<tint::Program> ParseSPIRV(const std::vector<uint32_t>& spirv,
                                                 OwnedCompilationMessages* outMessages) {
+#if TINT_BUILD_SPV_READER
             tint::Program program = tint::reader::spirv::Parse(spirv);
             if (outMessages != nullptr) {
                 outMessages->AddMessages(program.Diagnostics());
@@ -405,6 +410,10 @@ namespace dawn::native {
             }
 
             return std::move(program);
+#else
+            return DAWN_FORMAT_VALIDATION_ERROR("TINT_BUILD_SPV_READER is not defined.");
+
+#endif
         }
 
         std::vector<uint64_t> GetBindGroupMinBufferSizes(const BindingGroupInfoMap& shaderBindings,
@@ -997,6 +1006,7 @@ namespace dawn::native {
         ShaderModuleWGSLDescriptor newWgslDesc;
         std::string newWgslCode;
         if (spirvDesc && device->IsToggleEnabled(Toggle::ForceWGSLStep)) {
+#if TINT_BUILD_WGSL_WRITER
             std::vector<uint32_t> spirv(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
             tint::Program program;
             DAWN_TRY_ASSIGN(program, ParseSPIRV(spirv, outMessages));
@@ -1010,6 +1020,11 @@ namespace dawn::native {
 
             spirvDesc = nullptr;
             wgslDesc = &newWgslDesc;
+#else
+            device->EmitLog(
+                WGPULoggingType_Info,
+                "Toggle::ForceWGSLStep skipped because TINT_BUILD_WGSL_WRITER is not defined\n");
+#endif
         }
 
         if (spirvDesc) {
