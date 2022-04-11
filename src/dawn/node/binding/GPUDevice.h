@@ -16,8 +16,9 @@
 #define SRC_DAWN_NODE_BINDING_GPUDEVICE_H_
 
 #include "dawn/webgpu_cpp.h"
-#include "node-addon-api/napi.h"
+
 #include "src/dawn/node/binding/AsyncRunner.h"
+#include "src/dawn/node/interop/Napi.h"
 #include "src/dawn/node/interop/WebGPU.h"
 
 namespace wgpu::binding {

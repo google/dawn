@@ -15,7 +15,7 @@
 #ifndef SRC_DAWN_NODE_BINDING_ERRORS_H_
 #define SRC_DAWN_NODE_BINDING_ERRORS_H_
 
-#include "node-addon-api/napi.h"
+#include "src/dawn/node/interop/Napi.h"
 
 namespace wgpu::binding {
 

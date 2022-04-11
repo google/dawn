@@ -26,7 +26,7 @@
 #include <variant>
 #include <vector>
 
-#include "node-addon-api/napi.h"
+#include "src/dawn/node/interop/Napi.h"
 
 #include "src/dawn/node/utils/Debug.h"
 
@@ -119,7 +119,7 @@ namespace wgpu::interop {
         // stringified values append to the error message.
         // If Result is a success, then a success Result is returned.
         template <typename... VALUES>
-        Result Append(VALUES && ... values) {
+        Result Append(VALUES&&... values) {
             if (*this) {
                 return *this;
             }
