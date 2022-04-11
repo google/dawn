@@ -19,10 +19,10 @@
 
 #include "src/tint/sem/type.h"
 
-// Forward declaration
+// Forward declarations
 namespace tint::sem {
 class Vector;
-}
+}  // namespace tint::sem
 
 namespace tint::sem {
 

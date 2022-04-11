@@ -25,17 +25,15 @@
 #include "src/tint/sem/parameter_usage.h"
 
 // Forward declarations
-namespace tint {
-namespace ast {
+namespace tint::ast {
 class IdentifierExpression;
 class Variable;
-}  // namespace ast
-namespace sem {
+}  // namespace tint::ast
+namespace tint::sem {
 class CallTarget;
 class Type;
 class VariableUser;
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 namespace tint::sem {
 

@@ -17,11 +17,13 @@
 
 #include "src/tint/ast/expression.h"
 
+// Forward declarations
 namespace tint::ast {
-
-// Forward declarations.
 class Type;
 class IdentifierExpression;
+}  // namespace tint::ast
+
+namespace tint::ast {
 
 /// A call expression - represents either a:
 /// * sem::Function

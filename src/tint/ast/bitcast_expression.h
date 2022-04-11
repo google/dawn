@@ -17,10 +17,12 @@
 
 #include "src/tint/ast/expression.h"
 
+// Forward declarations
 namespace tint::ast {
-
-// Forward declaration
 class Type;
+}  // namespace tint::ast
+
+namespace tint::ast {
 
 /// A bitcast expression
 class BitcastExpression final : public Castable<BitcastExpression, Expression> {

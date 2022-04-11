@@ -24,11 +24,11 @@
 // Forward declarations
 namespace tint {
 class Program;
-namespace writer::spirv {
+}
+namespace tint::writer::spirv {
 class Builder;
 class BinaryWriter;
-}  // namespace writer::spirv
-}  // namespace tint
+}  // namespace tint::writer::spirv
 
 namespace tint::writer::spirv {
 

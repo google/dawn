@@ -23,13 +23,15 @@
 #include "src/tint/ast/expression.h"
 #include "src/tint/ast/storage_class.h"
 
-namespace tint::ast {
-
 // Forward declarations
+namespace tint::ast {
 class BindingAttribute;
 class GroupAttribute;
 class LocationAttribute;
 class Type;
+}  // namespace tint::ast
+
+namespace tint::ast {
 
 /// VariableBindingPoint holds a group and binding attribute.
 struct VariableBindingPoint {

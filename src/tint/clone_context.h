@@ -29,17 +29,17 @@
 #include "src/tint/traits.h"
 
 // Forward declarations
+namespace tint {
+class CloneContext;
+class Program;
+class ProgramBuilder;
+}  // namespace tint
 namespace tint::ast {
 class FunctionList;
 class Node;
 }  // namespace tint::ast
 
 namespace tint {
-
-// Forward Declarations
-class CloneContext;
-class Program;
-class ProgramBuilder;
 
 ProgramID ProgramIDOf(const Program*);
 ProgramID ProgramIDOf(const ProgramBuilder*);

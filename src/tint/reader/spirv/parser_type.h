@@ -27,13 +27,13 @@
 #include "src/tint/castable.h"
 #include "src/tint/utils/block_allocator.h"
 
-// Forward Declarations
+// Forward declarations
 namespace tint {
 class ProgramBuilder;
-namespace ast {
-class Type;
-}
 }  // namespace tint
+namespace tint::ast {
+class Type;
+}  // namespace tint::ast
 
 namespace tint::reader::spirv {
 

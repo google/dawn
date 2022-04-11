@@ -22,14 +22,13 @@
 // Forward declarations
 namespace tint {
 class CloneContext;
-namespace sem {
+}  // namespace tint
+namespace tint::sem {
 class Type;
 class Info;
-}
-}  // namespace tint
+}  // namespace tint::sem
 
-namespace tint {
-namespace ast {
+namespace tint::ast {
 
 /// AST base class node
 class Node : public Castable<Node, Cloneable> {
@@ -54,7 +53,9 @@ class Node : public Castable<Node, Cloneable> {
   Node(const Node&) = delete;
 };
 
-}  // namespace ast
+}  // namespace tint::ast
+
+namespace tint {
 
 /// @param node a pointer to an AST node
 /// @returns the ProgramID of the given AST node.

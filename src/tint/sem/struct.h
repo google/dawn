@@ -28,15 +28,13 @@
 #include "src/tint/symbol.h"
 
 // Forward declarations
-namespace tint {
-namespace ast {
+namespace tint::ast {
 class StructMember;
-}  // namespace ast
-namespace sem {
+}  // namespace tint::ast
+namespace tint::sem {
 class StructMember;
 class Type;
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 namespace tint::sem {
 

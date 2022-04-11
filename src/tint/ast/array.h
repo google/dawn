@@ -20,10 +20,12 @@
 #include "src/tint/ast/attribute.h"
 #include "src/tint/ast/type.h"
 
+// Forward declarations
 namespace tint::ast {
-
-// Forward declarations.
 class Expression;
+}  // namespace tint::ast
+
+namespace tint::ast {
 
 /// An array type. If size is zero then it is a runtime array.
 class Array final : public Castable<Array, Type> {

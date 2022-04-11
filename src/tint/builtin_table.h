@@ -21,10 +21,12 @@
 
 #include "src/tint/sem/builtin.h"
 
-namespace tint {
-
 // Forward declarations
+namespace tint {
 class ProgramBuilder;
+}  // namespace tint
+
+namespace tint {
 
 /// BuiltinTable is a lookup table of all the WGSL builtin functions
 class BuiltinTable {

@@ -19,17 +19,15 @@
 #include "src/tint/sem/node.h"
 
 // Forward declarations
-namespace tint {
-namespace ast {
+namespace tint::ast {
 class Function;
 class Statement;
-}  // namespace ast
-namespace sem {
+}  // namespace tint::ast
+namespace tint::sem {
 class BlockStatement;
 class CompoundStatement;
 class Function;
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 namespace tint::sem {
 namespace detail {

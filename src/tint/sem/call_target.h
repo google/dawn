@@ -25,7 +25,7 @@
 // Forward declarations
 namespace tint::sem {
 class Type;
-}
+}  // namespace tint::sem
 
 namespace tint::sem {
 

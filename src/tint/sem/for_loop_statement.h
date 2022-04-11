@@ -17,15 +17,13 @@
 
 #include "src/tint/sem/statement.h"
 
-// Forward Declarations
-namespace tint {
-namespace ast {
+// Forward declarations
+namespace tint::ast {
 class ForLoopStatement;
-}
-namespace sem {
+}  // namespace tint::ast
+namespace tint::sem {
 class Expression;
-}
-}  // namespace tint
+}  // namespace tint::sem
 
 namespace tint::sem {
 

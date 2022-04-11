@@ -21,10 +21,10 @@
 #include "src/tint/ast/storage_texture.h"
 #include "src/tint/sem/texture_type.h"
 
-// Forward Declarations
+// Forward declarations
 namespace tint::sem {
 class Manager;
-}
+}  // namespace tint::sem
 
 namespace tint::sem {
 

@@ -20,7 +20,7 @@
 // Forward declarations
 namespace tint::ast {
 class LoopStatement;
-}
+}  // namespace tint::ast
 
 namespace tint::sem {
 

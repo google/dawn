@@ -18,8 +18,7 @@
 #include <type_traits>
 
 // Forward declarations
-namespace tint {
-namespace ast {
+namespace tint::ast {
 class Array;
 class CallExpression;
 class Expression;
@@ -35,8 +34,8 @@ class StructMember;
 class Type;
 class TypeDecl;
 class Variable;
-}  // namespace ast
-namespace sem {
+}  // namespace tint::ast
+namespace tint::sem {
 class Array;
 class Call;
 class Expression;
@@ -51,8 +50,7 @@ class Struct;
 class StructMember;
 class Type;
 class Variable;
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 namespace tint::sem {
 

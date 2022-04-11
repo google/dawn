@@ -36,8 +36,7 @@
 #include "src/tint/utils/unique_vector.h"
 
 // Forward declarations
-namespace tint {
-namespace ast {
+namespace tint::ast {
 class IndexAccessorExpression;
 class BinaryExpression;
 class BitcastExpression;
@@ -53,8 +52,8 @@ class ReturnStatement;
 class SwitchStatement;
 class UnaryOpExpression;
 class Variable;
-}  // namespace ast
-namespace sem {
+}  // namespace tint::ast
+namespace tint::sem {
 class Array;
 class Atomic;
 class BlockStatement;
@@ -67,8 +66,7 @@ class LoopStatement;
 class Statement;
 class SwitchStatement;
 class TypeConstructor;
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 namespace tint::resolver {
 

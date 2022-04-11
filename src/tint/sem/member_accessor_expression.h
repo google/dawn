@@ -19,16 +19,14 @@
 
 #include "src/tint/sem/expression.h"
 
-/// Forward declarations
-namespace tint {
-namespace ast {
+// Forward declarations
+namespace tint::ast {
 class MemberAccessorExpression;
-}  // namespace ast
-namespace sem {
+}  // namespace tint::ast
+namespace tint::sem {
 class Struct;
 class StructMember;
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 namespace tint::sem {
 

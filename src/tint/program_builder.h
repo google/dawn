@@ -99,12 +99,14 @@
 #endif
 
 // Forward declarations
+namespace tint {
+class CloneContext;
+}  // namespace tint
 namespace tint::ast {
 class VariableDeclStatement;
 }  // namespace tint::ast
 
 namespace tint {
-class CloneContext;
 
 /// ProgramBuilder is a mutable builder for a Program.
 /// To construct a Program, populate the builder and then `std::move` it to a

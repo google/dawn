@@ -25,14 +25,14 @@
 #include "src/tint/symbol_table.h"
 
 // Forward Declarations
+namespace tint {
+class CloneContext;
+}  // namespace tint
 namespace tint::ast {
 class Module;
 }  // namespace tint::ast
 
 namespace tint {
-
-// Forward declarations
-class CloneContext;
 
 /// Program holds the AST, Type information and SymbolTable for a tint program.
 class Program {

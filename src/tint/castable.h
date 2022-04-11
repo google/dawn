@@ -43,20 +43,21 @@
 
 TINT_CASTABLE_PUSH_DISABLE_WARNINGS();
 
+// Forward declarations
 namespace tint {
-
-// Forward declaration
 class CastableBase;
 
 /// Ignore is used as a special type used for skipping over types for trait
 /// helper functions.
 class Ignore {};
+}  // namespace tint
 
-namespace detail {
+namespace tint::detail {
 template <typename T>
 struct TypeInfoOf;
+}  // namespace tint::detail
 
-}  // namespace detail
+namespace tint {
 
 /// True if all template types that are not Ignore derive from CastableBase
 template <typename... TYPES>

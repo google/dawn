@@ -18,15 +18,13 @@
 #include "src/tint/sem/statement.h"
 
 // Forward declarations
-namespace tint {
-namespace ast {
+namespace tint::ast {
 class IfStatement;
 class ElseStatement;
-}  // namespace ast
-namespace sem {
+}  // namespace tint::ast
+namespace tint::sem {
 class Expression;
-}
-}  // namespace tint
+}  // namespace tint::sem
 
 namespace tint::sem {
 

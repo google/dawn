@@ -31,10 +31,10 @@
 // Forward declarations
 namespace tint {
 class Program;
-namespace writer::glsl {
-class GeneratorImpl;
-}  // namespace writer::glsl
 }  // namespace tint
+namespace tint::writer::glsl {
+class GeneratorImpl;
+}  // namespace tint::writer::glsl
 
 namespace tint::writer::glsl {
 

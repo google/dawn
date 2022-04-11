@@ -22,7 +22,7 @@
 // Forward declarations
 namespace tint {
 class CloneContext;
-}
+}  // namespace tint
 
 namespace tint::transform {
 

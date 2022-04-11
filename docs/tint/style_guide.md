@@ -27,6 +27,24 @@
   in WGSL or another shader language processed by Tint.  If the concept you are
   trying to name is about distinguishing between alternatives, use `kind` instead.
 
+* Forward declarations:
+  * Use forward declarations where possible, instead of using `#include`'s.
+  * Place forward declarations in their own **un-nested** namespace declarations. \
+    Example: \
+    to forward-declare `struct X` in namespace `A` and `struct Y`
+    in namespace `A::B`, you'd write:
+    ```c++
+    // Forward declarations
+    namespace A {
+      struct X;
+    }  // namespace A
+    namespace A::B {
+      struct Y;
+    }  // namespace A::B
+
+    // rest of the header code is declared below ...
+    ```
+
 ## Compiler support
 
 Tint requires C++17.

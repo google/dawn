@@ -24,18 +24,16 @@
 #include "src/tint/utils/unique_vector.h"
 
 // Forward declarations
-namespace tint {
-namespace ast {
+namespace tint::ast {
 class BuiltinAttribute;
 class Function;
 class LocationAttribute;
 class ReturnStatement;
-}  // namespace ast
-namespace sem {
+}  // namespace tint::ast
+namespace tint::sem {
 class Builtin;
 class Variable;
-}  // namespace sem
-}  // namespace tint
+}  // namespace tint::sem
 
 namespace tint::sem {
 
