@@ -751,8 +751,6 @@ libtint_source_set("libtint_hlsl_writer_src") {
 
 libtint_source_set("libtint_glsl_writer_src") {
   sources = [
-    "transform/glsl.cc",
-    "transform/glsl.h",
     "writer/glsl/generator.cc",
     "writer/glsl/generator.h",
     "writer/glsl/generator_impl.cc",

@@ -20,7 +20,6 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/tint/transform/glsl.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/writer/glsl/generator_impl.h"
 
@@ -61,7 +60,8 @@ class TestHelperBase : public BODY, public ProgramBuilder {
   /// return the same GeneratorImpl without rebuilding.
   /// @param version the GLSL version
   /// @return the built generator
-  GeneratorImpl& SanitizeAndBuild(Version version = Version()) {
+  GeneratorImpl& SanitizeAndBuild(Version version = Version(),
+                                  const Options& options = {}) {
     if (gen_) {
       return *gen_;
     }
@@ -76,15 +76,14 @@ class TestHelperBase : public BODY, public ProgramBuilder {
           << formatter.format(program->Diagnostics());
     }();
 
-    transform::Manager transform_manager;
-    transform::DataMap transform_data;
-    transform_manager.Add<tint::transform::Glsl>();
-    auto result = transform_manager.Run(program.get(), transform_data);
+    auto sanitized_result =
+        Sanitize(program.get(), options, /* entry_point */ "");
     [&]() {
-      ASSERT_TRUE(result.program.IsValid())
-          << formatter.format(result.program.Diagnostics());
+      ASSERT_TRUE(sanitized_result.program.IsValid())
+          << formatter.format(sanitized_result.program.Diagnostics());
     }();
-    *program = std::move(result.program);
+
+    *program = std::move(sanitized_result.program);
     gen_ = std::make_unique<GeneratorImpl>(program.get(), version);
     return *gen_;
   }

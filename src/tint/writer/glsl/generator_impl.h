@@ -35,6 +35,7 @@
 #include "src/tint/scope_stack.h"
 #include "src/tint/transform/decompose_memory_access.h"
 #include "src/tint/utils/hash.h"
+#include "src/tint/writer/glsl/generator.h"
 #include "src/tint/writer/glsl/version.h"
 #include "src/tint/writer/text_generator.h"
 
@@ -47,6 +48,28 @@ class TypeConversion;
 }  // namespace tint::sem
 
 namespace tint::writer::glsl {
+
+/// The result of sanitizing a program for generation.
+struct SanitizedResult {
+  /// Constructor
+  SanitizedResult();
+  /// Destructor
+  ~SanitizedResult();
+  /// Move constructor
+  SanitizedResult(SanitizedResult&&);
+
+  /// The sanitized program.
+  Program program;
+};
+
+/// Sanitize a program in preparation for generating GLSL.
+/// @program The program to sanitize
+/// @param options The HLSL generator options.
+/// @param entry_point the entry point to generate GLSL for
+/// @returns the sanitized program and any supplementary information
+SanitizedResult Sanitize(const Program* program,
+                         const Options& options,
+                         const std::string& entry_point);
 
 /// Implementation class for GLSL generator
 class GeneratorImpl : public TextGenerator {

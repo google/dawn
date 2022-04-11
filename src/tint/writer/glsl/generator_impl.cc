@@ -45,12 +45,32 @@
 #include "src/tint/sem/type_constructor.h"
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/variable.h"
-#include "src/tint/transform/glsl.h"
+#include "src/tint/transform/add_empty_entry_point.h"
+#include "src/tint/transform/add_spirv_block_attribute.h"
+#include "src/tint/transform/binding_remapper.h"
+#include "src/tint/transform/builtin_polyfill.h"
+#include "src/tint/transform/canonicalize_entry_point_io.h"
+#include "src/tint/transform/combine_samplers.h"
+#include "src/tint/transform/decompose_memory_access.h"
+#include "src/tint/transform/expand_compound_assignment.h"
+#include "src/tint/transform/fold_trivial_single_use_lets.h"
+#include "src/tint/transform/loop_to_for_loop.h"
+#include "src/tint/transform/manager.h"
+#include "src/tint/transform/promote_initializers_to_const_var.h"
+#include "src/tint/transform/promote_side_effects_to_decl.h"
+#include "src/tint/transform/remove_phonies.h"
+#include "src/tint/transform/renamer.h"
+#include "src/tint/transform/simplify_pointers.h"
+#include "src/tint/transform/single_entry_point.h"
+#include "src/tint/transform/unshadow.h"
+#include "src/tint/transform/unwind_discard_functions.h"
+#include "src/tint/transform/zero_init_workgroup_memory.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/scoped_assignment.h"
 #include "src/tint/writer/append_vector.h"
 #include "src/tint/writer/float_to_string.h"
+#include "src/tint/writer/generate_external_texture_bindings.h"
 
 namespace {
 
@@ -126,6 +146,86 @@ const char* convert_texel_format_to_glsl(const ast::TexelFormat format) {
 }
 
 }  // namespace
+
+SanitizedResult::SanitizedResult() = default;
+SanitizedResult::~SanitizedResult() = default;
+SanitizedResult::SanitizedResult(SanitizedResult&&) = default;
+
+SanitizedResult Sanitize(const Program* in,
+                         const Options& options,
+                         const std::string& entry_point) {
+  transform::Manager manager;
+  transform::DataMap data;
+
+  {  // Builtin polyfills
+    transform::BuiltinPolyfill::Builtins polyfills;
+    polyfills.count_leading_zeros = true;
+    polyfills.count_trailing_zeros = true;
+    polyfills.extract_bits =
+        transform::BuiltinPolyfill::Level::kClampParameters;
+    polyfills.first_leading_bit = true;
+    polyfills.first_trailing_bit = true;
+    polyfills.insert_bits = transform::BuiltinPolyfill::Level::kClampParameters;
+    data.Add<transform::BuiltinPolyfill::Config>(polyfills);
+    manager.Add<transform::BuiltinPolyfill>();
+  }
+
+  if (!entry_point.empty()) {
+    manager.Add<transform::SingleEntryPoint>();
+    data.Add<transform::SingleEntryPoint::Config>(entry_point);
+  }
+  manager.Add<transform::Renamer>();
+  data.Add<transform::Renamer::Config>(
+      transform::Renamer::Target::kGlslKeywords,
+      /* preserve_unicode */ false);
+  manager.Add<transform::Unshadow>();
+
+  // Attempt to convert `loop`s into for-loops. This is to try and massage the
+  // output into something that will not cause FXC to choke or misbehave.
+  manager.Add<transform::FoldTrivialSingleUseLets>();
+  manager.Add<transform::LoopToForLoop>();
+
+  if (!options.disable_workgroup_init) {
+    // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
+    // ZeroInitWorkgroupMemory may inject new builtin parameters.
+    manager.Add<transform::ZeroInitWorkgroupMemory>();
+  }
+  manager.Add<transform::CanonicalizeEntryPointIO>();
+  manager.Add<transform::ExpandCompoundAssignment>();
+  manager.Add<transform::PromoteSideEffectsToDecl>();
+  manager.Add<transform::UnwindDiscardFunctions>();
+  manager.Add<transform::SimplifyPointers>();
+
+  manager.Add<transform::RemovePhonies>();
+
+  if (options.generate_external_texture_bindings) {
+    auto new_bindings_map = writer::GenerateExternalTextureBindings(in);
+    data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(
+        new_bindings_map);
+  }
+  manager.Add<transform::MultiplanarExternalTexture>();
+
+  data.Add<transform::CombineSamplers::BindingInfo>(
+      options.binding_map, options.placeholder_binding_point);
+  manager.Add<transform::CombineSamplers>();
+
+  data.Add<transform::BindingRemapper::Remappings>(options.binding_points,
+                                                   options.access_controls,
+                                                   options.allow_collisions);
+  manager.Add<transform::BindingRemapper>();
+
+  manager.Add<transform::PromoteInitializersToConstVar>();
+  manager.Add<transform::AddEmptyEntryPoint>();
+  manager.Add<transform::AddSpirvBlockAttribute>();
+  data.Add<transform::CanonicalizeEntryPointIO::Config>(
+      transform::CanonicalizeEntryPointIO::ShaderStyle::kGlsl);
+
+  auto out = manager.Run(in, data);
+
+  SanitizedResult result;
+  result.program = std::move(out.program);
+  return result;
+}
 
 GeneratorImpl::GeneratorImpl(const Program* program, const Version& version)
     : TextGenerator(program), version_(version) {}

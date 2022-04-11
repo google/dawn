@@ -667,7 +667,6 @@ tint_unittests_source_set("tint_unittests_hlsl_writer_src") {
 
 tint_unittests_source_set("tint_unittests_glsl_writer_src") {
   sources = [
-    "../../src/tint/transform/glsl_test.cc",
     "../../src/tint/writer/glsl/generator_impl_array_accessor_test.cc",
     "../../src/tint/writer/glsl/generator_impl_assign_test.cc",
     "../../src/tint/writer/glsl/generator_impl_binary_test.cc",
