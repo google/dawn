@@ -71,8 +71,8 @@ common_compile_options(dawn_node_binding)
 target_include_directories(dawn_node_binding
     PRIVATE
         "${CMAKE_SOURCE_DIR}"
+        "${DAWN_THIRD_PARTY_DIR}"
         "${NODE_API_HEADERS_DIR}/include"
-        "${NODE_ADDON_API_DIR}"
         "${GEN_DIR}"
 )
 

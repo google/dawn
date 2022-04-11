@@ -17,7 +17,7 @@
 
 #include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp.h"
-#include "napi.h"
+#include "node-addon-api/napi.h"
 #include "src/dawn/node/binding/Flags.h"
 #include "src/dawn/node/interop/WebGPU.h"
 

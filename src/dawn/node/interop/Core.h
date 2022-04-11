@@ -26,7 +26,7 @@
 #include <variant>
 #include <vector>
 
-#include "napi.h"
+#include "node-addon-api/napi.h"
 
 #include "src/dawn/node/utils/Debug.h"
 
