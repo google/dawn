@@ -139,18 +139,16 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
 
     cd ${BUILD_DIR}
 
-    # TODO(crbug.com/tint/1498): Doxygen is currently disabled.
-    #
-    # status "Running Doxygen"
-    # echo "NOTE: This will fail on first warning. Run with -DTINT_DOCS_WARN_AS_ERROR=OFF to see all warnings".
-    # echo ""
-    # show_cmds
-    #     # NOTE: If we upgrade Doxygen to a more recent version, we can set DOXYGEN_WARN_AS_ERROR to
-    #     # "FAIL_ON_WARNINGS" instead of "YES" in our CMakeLists.txt so see all warnings, and then
-    #     # fail. See https://www.doxygen.nl/manual/config.html#cfg_warn_as_error
-    #     cmake ${SRC_DIR} ${CMAKE_FLAGS} ${COMMON_CMAKE_FLAGS}
-    #     cmake --build . --target tint-docs
-    # hide_cmds
+    status "Running Doxygen"
+    echo "NOTE: This will fail on first warning. Run with -DTINT_DOCS_WARN_AS_ERROR=OFF to see all warnings".
+    echo ""
+    show_cmds
+        # NOTE: If we upgrade Doxygen to a more recent version, we can set DOXYGEN_WARN_AS_ERROR to
+        # "FAIL_ON_WARNINGS" instead of "YES" in our CMakeLists.txt so see all warnings, and then
+        # fail. See https://www.doxygen.nl/manual/config.html#cfg_warn_as_error
+        cmake ${SRC_DIR} ${CMAKE_FLAGS} ${COMMON_CMAKE_FLAGS}
+        cmake --build . --target tint-docs
+    hide_cmds
 
     status "Building dawn in '${BUILD_DIR}'"
     show_cmds

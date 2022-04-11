@@ -258,9 +258,6 @@ else()
   set(TINT_BUILD_TESTS_DEFAULT ON)
 endif()
 
-# Forcing building docs off right now, since currently this will try to build docs for both Tint & Dawn, and Dawn isn't annotated yet.
-set(TINT_BUILD_DOCS_DEFAULT OFF)
-
 option_if_not_defined(TINT_BUILD_SAMPLES "Build samples" ON)
 option_if_not_defined(TINT_BUILD_DOCS "Build documentation" ${TINT_BUILD_DOCS_DEFAULT})
 option_if_not_defined(TINT_DOCS_WARN_AS_ERROR "When building documentation, treat warnings as errors" OFF)
