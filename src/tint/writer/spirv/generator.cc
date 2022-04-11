@@ -26,12 +26,7 @@ Result Generate(const Program* program, const Options& options) {
   Result result;
 
   // Sanitize the program.
-  bool disable_workgroup_init_in_sanitizer =
-      options.disable_workgroup_init ||
-      options.use_zero_initialize_workgroup_memory_extension;
-  auto sanitized_result = Sanitize(program, options.emit_vertex_point_size,
-                                   disable_workgroup_init_in_sanitizer,
-                                   options.generate_external_texture_bindings);
+  auto sanitized_result = Sanitize(program, options);
   if (!sanitized_result.program.IsValid()) {
     result.success = false;
     result.error = sanitized_result.program.Diagnostics().str();

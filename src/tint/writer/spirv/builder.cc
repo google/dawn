@@ -255,10 +255,7 @@ const sem::Type* ElementTypeOf(const sem::Type* ty) {
 
 }  // namespace
 
-SanitizedResult Sanitize(const Program* in,
-                         bool emit_vertex_point_size,
-                         bool disable_workgroup_init,
-                         bool generate_external_texture_bindings) {
+SanitizedResult Sanitize(const Program* in, const Options& options) {
   transform::Manager manager;
   transform::DataMap data;
 
@@ -275,7 +272,7 @@ SanitizedResult Sanitize(const Program* in,
     manager.Add<transform::BuiltinPolyfill>();
   }
 
-  if (generate_external_texture_bindings) {
+  if (options.generate_external_texture_bindings) {
     auto new_bindings_map = GenerateExternalTextureBindings(in);
     data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(
         new_bindings_map);
@@ -283,7 +280,10 @@ SanitizedResult Sanitize(const Program* in,
   manager.Add<transform::MultiplanarExternalTexture>();
 
   manager.Add<transform::Unshadow>();
-  if (!disable_workgroup_init) {
+  bool disable_workgroup_init_in_sanitizer =
+      options.disable_workgroup_init ||
+      options.use_zero_initialize_workgroup_memory_extension;
+  if (!disable_workgroup_init_in_sanitizer) {
     manager.Add<transform::ZeroInitWorkgroupMemory>();
   }
   manager.Add<transform::RemoveUnreachableStatements>();
@@ -303,7 +303,7 @@ SanitizedResult Sanitize(const Program* in,
   data.Add<transform::CanonicalizeEntryPointIO::Config>(
       transform::CanonicalizeEntryPointIO::Config(
           transform::CanonicalizeEntryPointIO::ShaderStyle::kSpirv, 0xFFFFFFFF,
-          emit_vertex_point_size));
+          options.emit_vertex_point_size));
 
   SanitizedResult result;
   result.program = std::move(manager.Run(in, data).program);

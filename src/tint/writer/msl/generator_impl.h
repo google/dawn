@@ -39,6 +39,7 @@
 #include "src/tint/scope_stack.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/writer/array_length_from_uniform_options.h"
+#include "src/tint/writer/msl/generator.h"
 #include "src/tint/writer/text_generator.h"
 
 // Forward declarations
@@ -70,19 +71,10 @@ struct SanitizedResult {
 };
 
 /// Sanitize a program in preparation for generating MSL.
-/// @param buffer_size_ubo_index the index to use for the buffer size UBO
-/// @param fixed_sample_mask the fixed sample mask to use for fragment shaders
-/// @param emit_vertex_point_size `true` to emit a vertex point size builtin
-/// @param disable_workgroup_init `true` to disable workgroup memory zero
+/// @program The program to sanitize
+/// @param options The MSL generator options.
 /// @returns the sanitized program and any supplementary information
-SanitizedResult Sanitize(
-    const Program* program,
-    uint32_t buffer_size_ubo_index,
-    uint32_t fixed_sample_mask = 0xFFFFFFFF,
-    bool emit_vertex_point_size = false,
-    bool disable_workgroup_init = false,
-    bool generate_external_texture_bindings = false,
-    const ArrayLengthFromUniformOptions& array_length_from_uniform = {});
+SanitizedResult Sanitize(const Program* program, const Options& options);
 
 /// Implementation class for MSL generator
 class GeneratorImpl : public TextGenerator {

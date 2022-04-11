@@ -33,11 +33,7 @@ Result Generate(const Program* program, const Options& options) {
   Result result;
 
   // Sanitize the program.
-  auto sanitized_result = Sanitize(
-      program, options.buffer_size_ubo_index, options.fixed_sample_mask,
-      options.emit_vertex_point_size, options.disable_workgroup_init,
-      options.generate_external_texture_bindings,
-      options.array_length_from_uniform);
+  auto sanitized_result = Sanitize(program, options);
   if (!sanitized_result.program.IsValid()) {
     result.success = false;
     result.error = sanitized_result.program.Diagnostics().str();

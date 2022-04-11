@@ -37,6 +37,7 @@
 #include "src/tint/transform/decompose_memory_access.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/writer/array_length_from_uniform_options.h"
+#include "src/tint/writer/hlsl/generator.h"
 #include "src/tint/writer/text_generator.h"
 
 // Forward declarations
@@ -66,16 +67,10 @@ struct SanitizedResult {
 };
 
 /// Sanitize a program in preparation for generating HLSL.
-/// @param root_constant_binding_point the binding point to use for information
-/// that will be passed via root constants
-/// @param disable_workgroup_init `true` to disable workgroup memory zero
+/// @program The program to sanitize
+/// @param options The HLSL generator options.
 /// @returns the sanitized program and any supplementary information
-SanitizedResult Sanitize(
-    const Program* program,
-    sem::BindingPoint root_constant_binding_point = {},
-    bool disable_workgroup_init = false,
-    bool generate_external_texture_bindings = false,
-    const ArrayLengthFromUniformOptions& array_length_from_uniform = {});
+SanitizedResult Sanitize(const Program* program, const Options& options);
 
 /// Implementation class for HLSL generator
 class GeneratorImpl : public TextGenerator {

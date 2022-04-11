@@ -221,30 +221,32 @@ TEST_F(BuilderTest, EntryPoint_SharedStruct) {
 
   EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
-OpEntryPoint Vertex %22 "vert_main" %1 %5
-OpEntryPoint Fragment %32 "frag_main" %9 %11 %13
-OpExecutionMode %32 OriginUpperLeft
-OpExecutionMode %32 DepthReplacing
+OpEntryPoint Vertex %23 "vert_main" %1 %5 %9
+OpEntryPoint Fragment %34 "frag_main" %10 %12 %14
+OpExecutionMode %34 OriginUpperLeft
+OpExecutionMode %34 DepthReplacing
 OpName %1 "value_1"
 OpName %5 "pos_1"
-OpName %9 "value_2"
-OpName %11 "pos_2"
-OpName %13 "value_3"
-OpName %15 "Interface"
-OpMemberName %15 0 "value"
-OpMemberName %15 1 "pos"
-OpName %16 "vert_main_inner"
-OpName %22 "vert_main"
-OpName %28 "frag_main_inner"
-OpName %29 "inputs"
-OpName %32 "frag_main"
+OpName %9 "vertex_point_size"
+OpName %10 "value_2"
+OpName %12 "pos_2"
+OpName %14 "value_3"
+OpName %16 "Interface"
+OpMemberName %16 0 "value"
+OpMemberName %16 1 "pos"
+OpName %17 "vert_main_inner"
+OpName %23 "vert_main"
+OpName %30 "frag_main_inner"
+OpName %31 "inputs"
+OpName %34 "frag_main"
 OpDecorate %1 Location 1
 OpDecorate %5 BuiltIn Position
-OpDecorate %9 Location 1
-OpDecorate %11 BuiltIn FragCoord
-OpDecorate %13 BuiltIn FragDepth
-OpMemberDecorate %15 0 Offset 0
-OpMemberDecorate %15 1 Offset 16
+OpDecorate %9 BuiltIn PointSize
+OpDecorate %10 Location 1
+OpDecorate %12 BuiltIn FragCoord
+OpDecorate %14 BuiltIn FragDepth
+OpMemberDecorate %16 0 Offset 0
+OpMemberDecorate %16 1 Offset 16
 %3 = OpTypeFloat 32
 %2 = OpTypePointer Output %3
 %4 = OpConstantNull %3
@@ -253,44 +255,47 @@ OpMemberDecorate %15 1 Offset 16
 %6 = OpTypePointer Output %7
 %8 = OpConstantNull %7
 %5 = OpVariable %6 Output %8
-%10 = OpTypePointer Input %3
-%9 = OpVariable %10 Input
-%12 = OpTypePointer Input %7
-%11 = OpVariable %12 Input
-%13 = OpVariable %2 Output %4
-%15 = OpTypeStruct %3 %7
-%14 = OpTypeFunction %15
-%18 = OpConstant %3 42
-%19 = OpConstantComposite %15 %18 %8
-%21 = OpTypeVoid
-%20 = OpTypeFunction %21
-%27 = OpTypeFunction %3 %15
-%16 = OpFunction %15 None %14
-%17 = OpLabel
-OpReturnValue %19
+%9 = OpVariable %2 Output %4
+%11 = OpTypePointer Input %3
+%10 = OpVariable %11 Input
+%13 = OpTypePointer Input %7
+%12 = OpVariable %13 Input
+%14 = OpVariable %2 Output %4
+%16 = OpTypeStruct %3 %7
+%15 = OpTypeFunction %16
+%19 = OpConstant %3 42
+%20 = OpConstantComposite %16 %19 %8
+%22 = OpTypeVoid
+%21 = OpTypeFunction %22
+%28 = OpConstant %3 1
+%29 = OpTypeFunction %3 %16
+%17 = OpFunction %16 None %15
+%18 = OpLabel
+OpReturnValue %20
 OpFunctionEnd
-%22 = OpFunction %21 None %20
-%23 = OpLabel
-%24 = OpFunctionCall %15 %16
-%25 = OpCompositeExtract %3 %24 0
-OpStore %1 %25
-%26 = OpCompositeExtract %7 %24 1
-OpStore %5 %26
+%23 = OpFunction %22 None %21
+%24 = OpLabel
+%25 = OpFunctionCall %16 %17
+%26 = OpCompositeExtract %3 %25 0
+OpStore %1 %26
+%27 = OpCompositeExtract %7 %25 1
+OpStore %5 %27
+OpStore %9 %28
 OpReturn
 OpFunctionEnd
-%28 = OpFunction %3 None %27
-%29 = OpFunctionParameter %15
-%30 = OpLabel
-%31 = OpCompositeExtract %3 %29 0
-OpReturnValue %31
+%30 = OpFunction %3 None %29
+%31 = OpFunctionParameter %16
+%32 = OpLabel
+%33 = OpCompositeExtract %3 %31 0
+OpReturnValue %33
 OpFunctionEnd
-%32 = OpFunction %21 None %20
-%33 = OpLabel
-%35 = OpLoad %3 %9
-%36 = OpLoad %7 %11
-%37 = OpCompositeConstruct %15 %35 %36
-%34 = OpFunctionCall %3 %28 %37
-OpStore %13 %34
+%34 = OpFunction %22 None %21
+%35 = OpLabel
+%37 = OpLoad %3 %10
+%38 = OpLoad %7 %12
+%39 = OpCompositeConstruct %16 %37 %38
+%36 = OpFunctionCall %3 %30 %39
+OpStore %14 %36
 OpReturn
 OpFunctionEnd
 )");

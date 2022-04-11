@@ -38,6 +38,7 @@
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/storage_texture_type.h"
 #include "src/tint/writer/spirv/function.h"
+#include "src/tint/writer/spirv/generator.h"
 #include "src/tint/writer/spirv/scalar_constant.h"
 
 // Forward declarations
@@ -57,13 +58,9 @@ struct SanitizedResult {
 };
 
 /// Sanitize a program in preparation for generating SPIR-V.
-/// @param emit_vertex_point_size `true` to emit a vertex point size builtin
-/// @param disable_workgroup_init `true` to disable workgroup memory zero
-/// @returns the sanitized program and any supplementary information
-SanitizedResult Sanitize(const Program* program,
-                         bool emit_vertex_point_size = false,
-                         bool disable_workgroup_init = false,
-                         bool generate_external_texture_bindings = false);
+/// @program The program to sanitize
+/// @param options The SPIR-V generator options.
+SanitizedResult Sanitize(const Program* program, const Options& options);
 
 /// Builder class to create SPIR-V instructions from a module.
 class Builder {

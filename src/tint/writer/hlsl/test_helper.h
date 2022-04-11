@@ -76,11 +76,7 @@ class TestHelperBase : public BODY, public ProgramBuilder {
           << formatter.format(program->Diagnostics());
     }();
 
-    auto sanitized_result =
-        Sanitize(program.get(), options.root_constant_binding_point,
-                 options.disable_workgroup_init,
-                 options.generate_external_texture_bindings,
-                 options.array_length_from_uniform);
+    auto sanitized_result = Sanitize(program.get(), options);
     [&]() {
       ASSERT_TRUE(sanitized_result.program.IsValid())
           << formatter.format(sanitized_result.program.Diagnostics());

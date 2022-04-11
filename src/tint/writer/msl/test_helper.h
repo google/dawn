@@ -74,11 +74,7 @@ class TestHelperBase : public BASE, public ProgramBuilder {
           << diag::Formatter().format(program->Diagnostics());
     }();
 
-    auto result = Sanitize(
-        program.get(), options.buffer_size_ubo_index, options.fixed_sample_mask,
-        options.emit_vertex_point_size, options.disable_workgroup_init,
-        options.generate_external_texture_bindings,
-        options.array_length_from_uniform);
+    auto result = Sanitize(program.get(), options);
     [&]() {
       ASSERT_TRUE(result.program.IsValid())
           << diag::Formatter().format(result.program.Diagnostics());

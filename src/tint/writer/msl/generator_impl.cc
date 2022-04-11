@@ -119,14 +119,7 @@ SanitizedResult::SanitizedResult() = default;
 SanitizedResult::~SanitizedResult() = default;
 SanitizedResult::SanitizedResult(SanitizedResult&&) = default;
 
-SanitizedResult Sanitize(
-    const Program* in,
-    uint32_t buffer_size_ubo_index,
-    uint32_t fixed_sample_mask,
-    bool emit_vertex_point_size,
-    bool disable_workgroup_init,
-    bool generate_external_texture_bindings,
-    const ArrayLengthFromUniformOptions& array_length_from_uniform) {
+SanitizedResult Sanitize(const Program* in, const Options& options) {
   transform::Manager manager;
   transform::DataMap data;
 
@@ -142,6 +135,7 @@ SanitizedResult Sanitize(
   }
 
   // Build the config for the internal ArrayLengthFromUniform transform.
+  auto& array_length_from_uniform = options.array_length_from_uniform;
   transform::ArrayLengthFromUniform::Config array_length_from_uniform_cfg(
       array_length_from_uniform.ubo_binding);
   if (!array_length_from_uniform.bindpoint_to_size_index.empty()) {
@@ -152,7 +146,7 @@ SanitizedResult Sanitize(
     // If the binding map is empty, use the deprecated |buffer_size_ubo_index|
     // and automatically choose indices using the binding numbers.
     array_length_from_uniform_cfg = transform::ArrayLengthFromUniform::Config(
-        sem::BindingPoint{0, buffer_size_ubo_index});
+        sem::BindingPoint{0, options.buffer_size_ubo_index});
     // Use the SSBO binding numbers as the indices for the buffer size lookups.
     for (auto* var : in->AST().GlobalVariables()) {
       auto* global = in->Sem().Get<sem::GlobalVariable>(var);
@@ -165,10 +159,10 @@ SanitizedResult Sanitize(
 
   // Build the configs for the internal CanonicalizeEntryPointIO transform.
   auto entry_point_io_cfg = transform::CanonicalizeEntryPointIO::Config(
-      transform::CanonicalizeEntryPointIO::ShaderStyle::kMsl, fixed_sample_mask,
-      emit_vertex_point_size);
+      transform::CanonicalizeEntryPointIO::ShaderStyle::kMsl,
+      options.fixed_sample_mask, options.emit_vertex_point_size);
 
-  if (generate_external_texture_bindings) {
+  if (options.generate_external_texture_bindings) {
     auto new_bindings_map = GenerateExternalTextureBindings(in);
     data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(
         new_bindings_map);
@@ -177,7 +171,7 @@ SanitizedResult Sanitize(
 
   manager.Add<transform::Unshadow>();
 
-  if (!disable_workgroup_init) {
+  if (!options.disable_workgroup_init) {
     // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
     // ZeroInitWorkgroupMemory may inject new builtin parameters.
     manager.Add<transform::ZeroInitWorkgroupMemory>();

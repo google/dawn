@@ -134,12 +134,7 @@ SanitizedResult::SanitizedResult() = default;
 SanitizedResult::~SanitizedResult() = default;
 SanitizedResult::SanitizedResult(SanitizedResult&&) = default;
 
-SanitizedResult Sanitize(
-    const Program* in,
-    sem::BindingPoint root_constant_binding_point,
-    bool disable_workgroup_init,
-    bool generate_external_texture_bindings,
-    const ArrayLengthFromUniformOptions& array_length_from_uniform) {
+SanitizedResult Sanitize(const Program* in, const Options& options) {
   transform::Manager manager;
   transform::DataMap data;
 
@@ -158,12 +153,13 @@ SanitizedResult Sanitize(
   }
 
   // Build the config for the internal ArrayLengthFromUniform transform.
+  auto& array_length_from_uniform = options.array_length_from_uniform;
   transform::ArrayLengthFromUniform::Config array_length_from_uniform_cfg(
       array_length_from_uniform.ubo_binding);
   array_length_from_uniform_cfg.bindpoint_to_size_index =
       array_length_from_uniform.bindpoint_to_size_index;
 
-  if (generate_external_texture_bindings) {
+  if (options.generate_external_texture_bindings) {
     auto new_bindings_map = GenerateExternalTextureBindings(in);
     data.Add<transform::MultiplanarExternalTexture::NewBindingPoints>(
         new_bindings_map);
@@ -186,7 +182,7 @@ SanitizedResult Sanitize(
   manager.Add<transform::FoldTrivialSingleUseLets>();
   manager.Add<transform::LoopToForLoop>();
 
-  if (!disable_workgroup_init) {
+  if (!options.disable_workgroup_init) {
     // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as
     // ZeroInitWorkgroupMemory may inject new builtin parameters.
     manager.Add<transform::ZeroInitWorkgroupMemory>();
@@ -227,7 +223,7 @@ SanitizedResult Sanitize(
   data.Add<transform::CanonicalizeEntryPointIO::Config>(
       transform::CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
   data.Add<transform::NumWorkgroupsFromUniform::Config>(
-      root_constant_binding_point);
+      options.root_constant_binding_point);
 
   auto out = manager.Run(in, data);
 
