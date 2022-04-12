@@ -22,7 +22,7 @@ namespace utils {
     class TerribleCommandBuffer : public dawn::wire::CommandSerializer {
       public:
         TerribleCommandBuffer();
-        TerribleCommandBuffer(dawn::wire::CommandHandler* handler);
+        explicit TerribleCommandBuffer(dawn::wire::CommandHandler* handler);
 
         void SetHandler(dawn::wire::CommandHandler* handler);
 

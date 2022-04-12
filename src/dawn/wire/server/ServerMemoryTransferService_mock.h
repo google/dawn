@@ -26,7 +26,7 @@ namespace dawn::wire::server {
       public:
         class MockReadHandle : public ReadHandle {
           public:
-            MockReadHandle(MockMemoryTransferService* service);
+            explicit MockReadHandle(MockMemoryTransferService* service);
             ~MockReadHandle() override;
 
             size_t SizeOfSerializeDataUpdate(size_t offset, size_t size) override;
@@ -41,7 +41,7 @@ namespace dawn::wire::server {
 
         class MockWriteHandle : public WriteHandle {
           public:
-            MockWriteHandle(MockMemoryTransferService* service);
+            explicit MockWriteHandle(MockMemoryTransferService* service);
             ~MockWriteHandle() override;
 
             bool DeserializeDataUpdate(const void* deserializePointer,

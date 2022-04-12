@@ -235,7 +235,7 @@ class LinkedList {
 template <typename T>
 class LinkedListIterator {
   public:
-    LinkedListIterator(LinkNode<T>* node) : current_(node), next_(node->next()) {
+    explicit LinkedListIterator(LinkNode<T>* node) : current_(node), next_(node->next()) {
     }
 
     // We keep an early reference to the next node in the list so that even if the current element

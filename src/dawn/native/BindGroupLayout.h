@@ -135,7 +135,7 @@ namespace dawn::native {
 
       protected:
         // Constructor used only for mocking and testing.
-        BindGroupLayoutBase(DeviceBase* device);
+        explicit BindGroupLayoutBase(DeviceBase* device);
         void DestroyImpl() override;
 
         template <typename BindGroup>

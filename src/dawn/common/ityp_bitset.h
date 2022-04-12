@@ -30,7 +30,7 @@ namespace ityp {
 
         static_assert(sizeof(I) <= sizeof(size_t));
 
-        constexpr bitset(const Base& rhs) : Base(rhs) {
+        explicit constexpr bitset(const Base& rhs) : Base(rhs) {
         }
 
       public:

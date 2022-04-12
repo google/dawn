@@ -21,7 +21,7 @@ namespace dawn::native {
 
     class StagingBufferBase {
       public:
-        StagingBufferBase(size_t size);
+        explicit StagingBufferBase(size_t size);
         virtual ~StagingBufferBase() = default;
 
         virtual MaybeError Initialize() = 0;

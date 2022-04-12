@@ -168,7 +168,7 @@ namespace dawn::native::null {
 
     class Adapter : public AdapterBase {
       public:
-        Adapter(InstanceBase* instance);
+        explicit Adapter(InstanceBase* instance);
         ~Adapter() override;
 
         // AdapterBase Implementation

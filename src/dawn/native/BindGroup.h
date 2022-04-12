@@ -74,7 +74,7 @@ namespace dawn::native {
         }
 
         // Constructor used only for mocking and testing.
-        BindGroupBase(DeviceBase* device);
+        explicit BindGroupBase(DeviceBase* device);
         void DestroyImpl() override;
 
         ~BindGroupBase() override;

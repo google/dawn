@@ -43,7 +43,7 @@ namespace dawn::native {
     // protected by mMutex.
     class PersistentCache {
       public:
-        PersistentCache(DeviceBase* device);
+        explicit PersistentCache(DeviceBase* device);
 
         // Combines load/store operations into a single call.
         // If the load was successful, a non-empty blob is returned to the caller.

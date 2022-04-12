@@ -154,7 +154,7 @@ namespace dawn::native {
 
         class ErrorQueue : public QueueBase {
           public:
-            ErrorQueue(DeviceBase* device) : QueueBase(device, ObjectBase::kError) {
+            explicit ErrorQueue(DeviceBase* device) : QueueBase(device, ObjectBase::kError) {
             }
 
           private:

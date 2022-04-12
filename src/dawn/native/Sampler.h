@@ -56,7 +56,7 @@ namespace dawn::native {
 
       protected:
         // Constructor used only for mocking and testing.
-        SamplerBase(DeviceBase* device);
+        explicit SamplerBase(DeviceBase* device);
         void DestroyImpl() override;
 
       private:

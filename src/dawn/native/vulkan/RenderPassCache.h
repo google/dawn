@@ -76,7 +76,7 @@ namespace dawn::native::vulkan {
     // TODO(cwallez@chromium.org): Make it an LRU cache somehow?
     class RenderPassCache {
       public:
-        RenderPassCache(Device* device);
+        explicit RenderPassCache(Device* device);
         ~RenderPassCache();
 
         ResultOrError<VkRenderPass> GetRenderPass(const RenderPassCacheQuery& query);

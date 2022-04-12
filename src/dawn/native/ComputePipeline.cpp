@@ -71,7 +71,7 @@ namespace dawn::native {
     ComputePipelineBase* ComputePipelineBase::MakeError(DeviceBase* device) {
         class ErrorComputePipeline final : public ComputePipelineBase {
           public:
-            ErrorComputePipeline(DeviceBase* device)
+            explicit ErrorComputePipeline(DeviceBase* device)
                 : ComputePipelineBase(device, ObjectBase::kError) {
             }
 

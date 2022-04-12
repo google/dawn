@@ -34,13 +34,13 @@ T roundUp(const T value, const T alignment) {
 template <size_t N, typename T>
 class BitSetIterator final {
   public:
-    BitSetIterator(const std::bitset<N>& bitset);
+    explicit BitSetIterator(const std::bitset<N>& bitset);
     BitSetIterator(const BitSetIterator& other);
     BitSetIterator& operator=(const BitSetIterator& other);
 
     class Iterator final {
       public:
-        Iterator(const std::bitset<N>& bits);
+        explicit Iterator(const std::bitset<N>& bits);
         Iterator& operator++();
 
         bool operator==(const Iterator& other) const;

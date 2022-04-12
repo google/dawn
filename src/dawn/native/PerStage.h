@@ -49,7 +49,7 @@ namespace dawn::native {
     class PerStage {
       public:
         PerStage() = default;
-        PerStage(const T& initialValue) {
+        explicit PerStage(const T& initialValue) {
             mData.fill(initialValue);
         }
 

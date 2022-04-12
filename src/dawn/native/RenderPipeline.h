@@ -112,7 +112,7 @@ namespace dawn::native {
 
       protected:
         // Constructor used only for mocking and testing.
-        RenderPipelineBase(DeviceBase* device);
+        explicit RenderPipelineBase(DeviceBase* device);
         void DestroyImpl() override;
 
       private:

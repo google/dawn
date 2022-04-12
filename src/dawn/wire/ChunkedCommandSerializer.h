@@ -28,7 +28,7 @@ namespace dawn::wire {
 
     class ChunkedCommandSerializer {
       public:
-        ChunkedCommandSerializer(CommandSerializer* serializer);
+        explicit ChunkedCommandSerializer(CommandSerializer* serializer);
 
         template <typename Cmd>
         void SerializeCommand(const Cmd& cmd) {

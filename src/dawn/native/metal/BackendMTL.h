@@ -21,7 +21,7 @@ namespace dawn::native::metal {
 
     class Backend : public BackendConnection {
       public:
-        Backend(InstanceBase* instance);
+        explicit Backend(InstanceBase* instance);
 
         std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters() override;
         ResultOrError<std::vector<Ref<AdapterBase>>> DiscoverAdapters(

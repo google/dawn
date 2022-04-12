@@ -974,7 +974,7 @@ namespace dawn::native {
     class TintSource {
       public:
         template <typename... ARGS>
-        TintSource(ARGS&&... args) : file(std::forward<ARGS>(args)...) {
+        explicit TintSource(ARGS&&... args) : file(std::forward<ARGS>(args)...) {
         }
 
         tint::Source::File file;

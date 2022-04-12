@@ -68,7 +68,8 @@ namespace dawn::native::null {
 
     class Backend : public BackendConnection {
       public:
-        Backend(InstanceBase* instance) : BackendConnection(instance, wgpu::BackendType::Null) {
+        explicit Backend(InstanceBase* instance)
+            : BackendConnection(instance, wgpu::BackendType::Null) {
         }
 
         std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters() override {

@@ -48,7 +48,7 @@ namespace dawn::native {
         QuerySetBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
         // Constructor used only for mocking and testing.
-        QuerySetBase(DeviceBase* device);
+        explicit QuerySetBase(DeviceBase* device);
         void DestroyImpl() override;
 
         ~QuerySetBase() override;

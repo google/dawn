@@ -319,7 +319,7 @@ namespace dawn::native::vulkan {
 
       private:
         // Private. Use VkResult::WrapUnsafe instead.
-        constexpr VkResult(::VkResult value) : mValue(value) {
+        explicit constexpr VkResult(::VkResult value) : mValue(value) {
         }
 
         ::VkResult mValue;

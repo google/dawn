@@ -145,7 +145,7 @@ namespace dawn::native {
 
       protected:
         // Constructor used only for mocking and testing.
-        TextureViewBase(TextureBase* texture);
+        explicit TextureViewBase(TextureBase* texture);
         void DestroyImpl() override;
 
       private:

@@ -81,7 +81,7 @@ namespace dawn::native {
         PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
         // Constructor used only for mocking and testing.
-        PipelineBase(DeviceBase* device);
+        explicit PipelineBase(DeviceBase* device);
 
       private:
         MaybeError ValidateGetBindGroupLayout(uint32_t group);

@@ -31,7 +31,7 @@ namespace ityp {
       public:
         stack_vec() : Base() {
         }
-        stack_vec(Index size) : Base() {
+        explicit stack_vec(Index size) : Base() {
             this->container().resize(static_cast<I>(size));
         }
 

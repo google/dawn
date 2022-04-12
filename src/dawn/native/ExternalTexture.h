@@ -54,7 +54,7 @@ namespace dawn::native {
 
       protected:
         // Constructor used only for mocking and testing.
-        ExternalTextureBase(DeviceBase* device);
+        explicit ExternalTextureBase(DeviceBase* device);
         void DestroyImpl() override;
 
         ~ExternalTextureBase() override;

@@ -43,7 +43,7 @@ namespace dawn::native {
 
       protected:
         // Constructor used only for mocking and testing.
-        ComputePipelineBase(DeviceBase* device);
+        explicit ComputePipelineBase(DeviceBase* device);
         void DestroyImpl() override;
 
       private:

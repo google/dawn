@@ -22,7 +22,7 @@
 
 class RefCounted {
   public:
-    RefCounted(uint64_t payload = 0);
+    explicit RefCounted(uint64_t payload = 0);
 
     uint64_t GetRefCountForTesting() const;
     uint64_t GetRefCountPayload() const;

@@ -53,8 +53,7 @@ namespace {
 
     class AsyncWaitableEvent final : public dawn::platform::WaitableEvent {
       public:
-        explicit AsyncWaitableEvent()
-            : mWaitableEventImpl(std::make_shared<AsyncWaitableEventImpl>()) {
+        AsyncWaitableEvent() : mWaitableEventImpl(std::make_shared<AsyncWaitableEventImpl>()) {
         }
 
         void Wait() override {

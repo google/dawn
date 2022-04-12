@@ -30,7 +30,7 @@ namespace dawn::native {
     // the pool and made AVAILABLE.
     class PooledResourceMemoryAllocator : public ResourceHeapAllocator {
       public:
-        PooledResourceMemoryAllocator(ResourceHeapAllocator* heapAllocator);
+        explicit PooledResourceMemoryAllocator(ResourceHeapAllocator* heapAllocator);
         ~PooledResourceMemoryAllocator() override = default;
 
         ResultOrError<std::unique_ptr<ResourceHeapBase>> AllocateResourceHeap(

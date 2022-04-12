@@ -35,7 +35,7 @@ namespace dawn::native {
     //
     class BuddyAllocator {
       public:
-        BuddyAllocator(uint64_t maxSize);
+        explicit BuddyAllocator(uint64_t maxSize);
         ~BuddyAllocator();
 
         // Required methods.

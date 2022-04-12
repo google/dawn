@@ -284,7 +284,7 @@ namespace dawn::native {
 
       protected:
         // Constructor used only for mocking and testing.
-        ShaderModuleBase(DeviceBase* device);
+        explicit ShaderModuleBase(DeviceBase* device);
         void DestroyImpl() override;
 
         MaybeError InitializeBase(ShaderModuleParseResult* parseResult);

@@ -28,7 +28,8 @@ namespace dawn::native {
 
     namespace {
         struct ComboDeprecatedDawnDeviceDescriptor : DeviceDescriptor {
-            ComboDeprecatedDawnDeviceDescriptor(const DawnDeviceDescriptor* deviceDescriptor) {
+            explicit ComboDeprecatedDawnDeviceDescriptor(
+                const DawnDeviceDescriptor* deviceDescriptor) {
                 dawn::WarningLog() << "DawnDeviceDescriptor is deprecated. Please use "
                                       "WGPUDeviceDescriptor instead.";
 

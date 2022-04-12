@@ -32,7 +32,7 @@ namespace dawn::native {
 
     class SwapChainBase : public ApiObjectBase {
       public:
-        SwapChainBase(DeviceBase* device);
+        explicit SwapChainBase(DeviceBase* device);
 
         static SwapChainBase* MakeError(DeviceBase* device);
 

@@ -27,7 +27,7 @@ namespace dawn::native {
 
         class ErrorQuerySet final : public QuerySetBase {
           public:
-            ErrorQuerySet(DeviceBase* device) : QuerySetBase(device, ObjectBase::kError) {
+            explicit ErrorQuerySet(DeviceBase* device) : QuerySetBase(device, ObjectBase::kError) {
             }
 
           private:

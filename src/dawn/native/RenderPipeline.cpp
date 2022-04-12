@@ -655,7 +655,7 @@ namespace dawn::native {
     RenderPipelineBase* RenderPipelineBase::MakeError(DeviceBase* device) {
         class ErrorRenderPipeline final : public RenderPipelineBase {
           public:
-            ErrorRenderPipeline(DeviceBase* device)
+            explicit ErrorRenderPipeline(DeviceBase* device)
                 : RenderPipelineBase(device, ObjectBase::kError) {
             }
 

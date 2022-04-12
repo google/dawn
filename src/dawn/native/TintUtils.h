@@ -25,7 +25,7 @@ namespace dawn::native {
     // reported to the given device.
     class ScopedTintICEHandler : public NonCopyable {
       public:
-        ScopedTintICEHandler(DeviceBase* device);
+        explicit ScopedTintICEHandler(DeviceBase* device);
         ~ScopedTintICEHandler();
 
       private:

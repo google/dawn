@@ -74,7 +74,7 @@ namespace dawn::native::utils {
             wgpu::TextureFormat format,
             wgpu::TextureViewDimension viewDimension = wgpu::TextureViewDimension::e2D);
 
-        BindingLayoutEntryInitializationHelper(const BindGroupLayoutEntry& entry);
+        explicit BindingLayoutEntryInitializationHelper(const BindGroupLayoutEntry& entry);
     };
 
     ResultOrError<Ref<BindGroupLayoutBase>> MakeBindGroupLayout(

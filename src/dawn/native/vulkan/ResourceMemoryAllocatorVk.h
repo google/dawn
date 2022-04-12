@@ -39,7 +39,7 @@ namespace dawn::native::vulkan {
 
     class ResourceMemoryAllocator {
       public:
-        ResourceMemoryAllocator(Device* device);
+        explicit ResourceMemoryAllocator(Device* device);
         ~ResourceMemoryAllocator();
 
         ResultOrError<ResourceMemoryAllocation> Allocate(const VkMemoryRequirements& requirements,

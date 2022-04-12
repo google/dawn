@@ -25,7 +25,7 @@ namespace dawn::native::vulkan {
 
     class FencedDeleter {
       public:
-        FencedDeleter(Device* device);
+        explicit FencedDeleter(Device* device);
         ~FencedDeleter();
 
         void DeleteWhenUnused(VkBuffer buffer);

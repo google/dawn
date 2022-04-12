@@ -68,7 +68,7 @@ namespace dawn::native::vulkan {
 
     class Backend : public BackendConnection {
       public:
-        Backend(InstanceBase* instance);
+        explicit Backend(InstanceBase* instance);
         ~Backend() override;
 
         MaybeError Initialize();

@@ -84,7 +84,7 @@ namespace dawn::native {
 
       protected:
         // Constructor used only for mocking and testing.
-        PipelineLayoutBase(DeviceBase* device);
+        explicit PipelineLayoutBase(DeviceBase* device);
         PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag);
         void DestroyImpl() override;
 

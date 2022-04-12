@@ -32,7 +32,7 @@ namespace dawn::native {
 
     class DynamicUploader {
       public:
-        DynamicUploader(DeviceBase* device);
+        explicit DynamicUploader(DeviceBase* device);
         ~DynamicUploader() = default;
 
         // We add functions to Release StagingBuffers to the DynamicUploader as there's
