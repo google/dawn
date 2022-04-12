@@ -210,7 +210,7 @@ namespace dawn::native {
         // Adapters are owned by mImpl so it is safe to return non RAII pointers to them
         std::vector<Adapter> adapters;
         for (const Ref<AdapterBase>& adapter : mImpl->GetAdapters()) {
-            adapters.push_back({adapter.Get()});
+            adapters.push_back(Adapter(adapter.Get()));
         }
         return adapters;
     }

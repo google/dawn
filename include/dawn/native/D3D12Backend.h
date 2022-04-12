@@ -101,7 +101,7 @@ namespace dawn::native::d3d12 {
 
     struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public AdapterDiscoveryOptionsBase {
         AdapterDiscoveryOptions();
-        AdapterDiscoveryOptions(Microsoft::WRL::ComPtr<IDXGIAdapter> adapter);
+        explicit AdapterDiscoveryOptions(Microsoft::WRL::ComPtr<IDXGIAdapter> adapter);
 
         Microsoft::WRL::ComPtr<IDXGIAdapter> dxgiAdapter;
     };

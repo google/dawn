@@ -36,7 +36,7 @@ namespace dawn::wire {
 
     class DAWN_WIRE_EXPORT WireServer : public CommandHandler {
       public:
-        WireServer(const WireServerDescriptor& descriptor);
+        explicit WireServer(const WireServerDescriptor& descriptor);
         ~WireServer() override;
 
         const volatile char* HandleCommands(const volatile char* commands,

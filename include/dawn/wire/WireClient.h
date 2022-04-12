@@ -65,7 +65,7 @@ namespace dawn::wire {
 
     class DAWN_WIRE_EXPORT WireClient : public CommandHandler {
       public:
-        WireClient(const WireClientDescriptor& descriptor);
+        explicit WireClient(const WireClientDescriptor& descriptor);
         ~WireClient() override;
 
         const volatile char* HandleCommands(const volatile char* commands,

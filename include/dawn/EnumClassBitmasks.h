@@ -54,6 +54,7 @@ namespace dawn {
     struct BoolConvertible {
         using Integral = typename std::underlying_type<T>::type;
 
+        // NOLINTNEXTLINE(runtime/explicit)
         constexpr BoolConvertible(Integral value) : value(value) {
         }
         constexpr operator bool() const {
