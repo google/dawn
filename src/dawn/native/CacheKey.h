@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_CACHEKEY_H_
 #define SRC_DAWN_NATIVE_CACHEKEY_H_
 
+#include <bitset>
 #include <iostream>
 #include <limits>
 #include <string>
@@ -82,6 +83,41 @@ namespace dawn::native {
         static void Serialize(CacheKey* key, const T t) {
             const char* it = reinterpret_cast<const char*>(&t);
             key->insert(key->end(), it, (it + sizeof(T)));
+        }
+    };
+
+    // Specialized overload for bitsets that are smaller than 64.
+    template <size_t N>
+    class CacheKeySerializer<std::bitset<N>, std::enable_if_t<(N <= 64)>> {
+      public:
+        static void Serialize(CacheKey* key, const std::bitset<N>& t) {
+            key->Record(t.to_ullong());
+        }
+    };
+
+    // Specialized overload for bitsets since using the built-in to_ullong have a size limit.
+    template <size_t N>
+    class CacheKeySerializer<std::bitset<N>, std::enable_if_t<(N > 64)>> {
+      public:
+        static void Serialize(CacheKey* key, const std::bitset<N>& t) {
+            // Serializes the bitset into series of uint8_t, along with recording the size.
+            static_assert(N > 0);
+            key->Record(static_cast<size_t>(N));
+            uint8_t value = 0;
+            for (size_t i = 0; i < N; i++) {
+                value <<= 1;
+                // Explicitly convert to numeric since MSVC doesn't like mixing of bools.
+                value |= t[i] ? 1 : 0;
+                if (i % 8 == 7) {
+                    // Whenever we fill an 8 bit value, record it and zero it out.
+                    key->Record(value);
+                    value = 0;
+                }
+            }
+            // Serialize the last value if we are not a multiple of 8.
+            if (N % 8 != 0) {
+                key->Record(value);
+            }
         }
     };
 

@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_DEVICE_H_
 #define SRC_DAWN_NATIVE_DEVICE_H_
 
+#include "dawn/native/CacheKey.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/ComputePipeline.h"
 #include "dawn/native/Error.h"
@@ -370,7 +371,7 @@ namespace dawn::native {
 
         PipelineCompatibilityToken GetNextPipelineCompatibilityToken();
 
-        const std::string& GetCacheIsolationKey() const;
+        const CacheKey& GetCacheKey() const;
         const std::string& GetLabel() const;
         void APISetLabel(const char* label);
         void APIDestroy();
@@ -547,7 +548,7 @@ namespace dawn::native {
         std::unique_ptr<CallbackTaskManager> mCallbackTaskManager;
         std::unique_ptr<dawn::platform::WorkerTaskPool> mWorkerTaskPool;
         std::string mLabel;
-        std::string mCacheIsolationKey = "";
+        CacheKey mDeviceCacheKey;
     };
 
 }  // namespace dawn::native

@@ -119,6 +119,7 @@ dawn_json_generator("utils_gen") {
     "src/dawn/native/webgpu_absl_format_autogen.cpp",
     "src/dawn/native/ObjectType_autogen.h",
     "src/dawn/native/ObjectType_autogen.cpp",
+    "src/dawn/native/CacheKey_autogen.cpp",
   ]
 }
 

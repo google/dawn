@@ -86,41 +86,55 @@ namespace {
     }
 
     TEST_F(DeviceCreationTest, CreateDeviceWithCacheSuccess) {
-        // Default device descriptor should have an empty cache isolation key.
+        // Default device descriptor should have the same cache key as a device descriptor with a
+        // default cache descriptor.
         {
             wgpu::DeviceDescriptor desc = {};
-            wgpu::Device device = adapter.CreateDevice(&desc);
-            EXPECT_NE(device, nullptr);
+            wgpu::Device device1 = adapter.CreateDevice(&desc);
+            EXPECT_NE(device1, nullptr);
 
-            EXPECT_THAT(dawn::native::FromAPI(device.Get())->GetCacheIsolationKey(),
-                        testing::StrEq(""));
-        }
-        // Device descriptor with empty cache descriptor should have an empty cache isolation key.
-        {
-            wgpu::DeviceDescriptor desc = {};
             wgpu::DawnCacheDeviceDescriptor cacheDesc = {};
             desc.nextInChain = &cacheDesc;
+            wgpu::Device device2 = adapter.CreateDevice(&desc);
 
-            wgpu::Device device = adapter.CreateDevice(&desc);
-            EXPECT_NE(device, nullptr);
-
-            EXPECT_THAT(dawn::native::FromAPI(device.Get())->GetCacheIsolationKey(),
-                        testing::StrEq(""));
+            EXPECT_EQ(dawn::native::FromAPI(device1.Get())->GetCacheKey(),
+                      dawn::native::FromAPI(device2.Get())->GetCacheKey());
         }
-        // Specified cache isolation key should be retained.
+        // Default device descriptor should not have the same cache key as a device descriptor with
+        // a non-default cache descriptor.
         {
             wgpu::DeviceDescriptor desc = {};
+            wgpu::Device device1 = adapter.CreateDevice(&desc);
+            EXPECT_NE(device1, nullptr);
+
             wgpu::DawnCacheDeviceDescriptor cacheDesc = {};
             desc.nextInChain = &cacheDesc;
-
             const char* isolationKey = "isolation key";
             cacheDesc.isolationKey = isolationKey;
+            wgpu::Device device2 = adapter.CreateDevice(&desc);
+            EXPECT_NE(device2, nullptr);
 
-            wgpu::Device device = adapter.CreateDevice(&desc);
-            EXPECT_NE(device, nullptr);
+            EXPECT_NE(dawn::native::FromAPI(device1.Get())->GetCacheKey(),
+                      dawn::native::FromAPI(device2.Get())->GetCacheKey());
+        }
+        // Two non-default cache descriptors should not have the same cache key.
+        {
+            wgpu::DawnCacheDeviceDescriptor cacheDesc = {};
+            const char* isolationKey1 = "isolation key 1";
+            const char* isolationKey2 = "isolation key 2";
+            wgpu::DeviceDescriptor desc = {};
+            desc.nextInChain = &cacheDesc;
 
-            EXPECT_THAT(dawn::native::FromAPI(device.Get())->GetCacheIsolationKey(),
-                        testing::StrEq(isolationKey));
+            cacheDesc.isolationKey = isolationKey1;
+            wgpu::Device device1 = adapter.CreateDevice(&desc);
+            EXPECT_NE(device1, nullptr);
+
+            cacheDesc.isolationKey = isolationKey2;
+            wgpu::Device device2 = adapter.CreateDevice(&desc);
+            EXPECT_NE(device2, nullptr);
+
+            EXPECT_NE(dawn::native::FromAPI(device1.Get())->GetCacheKey(),
+                      dawn::native::FromAPI(device2.Get())->GetCacheKey());
         }
     }
 

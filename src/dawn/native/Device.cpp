@@ -177,6 +177,9 @@ namespace dawn::native {
         : mInstance(adapter->GetInstance()), mAdapter(adapter), mNextPipelineCompatibilityToken(1) {
         ASSERT(descriptor != nullptr);
 
+        AdapterProperties adapterProperties;
+        adapter->APIGetProperties(&adapterProperties);
+
         const DawnTogglesDeviceDescriptor* togglesDesc = nullptr;
         FindInChain(descriptor->nextInChain, &togglesDesc);
         if (togglesDesc != nullptr) {
@@ -184,10 +187,11 @@ namespace dawn::native {
         }
         ApplyFeatures(descriptor);
 
+        DawnCacheDeviceDescriptor defaultCacheDesc = {};
         const DawnCacheDeviceDescriptor* cacheDesc = nullptr;
         FindInChain(descriptor->nextInChain, &cacheDesc);
-        if (cacheDesc != nullptr) {
-            mCacheIsolationKey = cacheDesc->isolationKey;
+        if (cacheDesc == nullptr) {
+            cacheDesc = &defaultCacheDesc;
         }
 
         if (descriptor->requiredLimits != nullptr) {
@@ -202,6 +206,12 @@ namespace dawn::native {
         if (descriptor->label != nullptr && strlen(descriptor->label) != 0) {
             mLabel = descriptor->label;
         }
+
+        // Record the cache key from the properties. Note that currently, if a new extension
+        // descriptor is added (and probably handled here), the cache key recording needs to be
+        // updated.
+        mDeviceCacheKey.Record(adapterProperties, mEnabledFeatures.featuresBitSet,
+                               mEnabledToggles.toggleBitset, cacheDesc);
     }
 
     DeviceBase::DeviceBase() : mState(State::Alive) {
@@ -1789,8 +1799,8 @@ namespace dawn::native {
         return PipelineCompatibilityToken(mNextPipelineCompatibilityToken++);
     }
 
-    const std::string& DeviceBase::GetCacheIsolationKey() const {
-        return mCacheIsolationKey;
+    const CacheKey& DeviceBase::GetCacheKey() const {
+        return mDeviceCacheKey;
     }
 
     const std::string& DeviceBase::GetLabel() const {
