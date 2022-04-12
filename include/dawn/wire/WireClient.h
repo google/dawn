@@ -68,8 +68,7 @@ namespace dawn::wire {
         explicit WireClient(const WireClientDescriptor& descriptor);
         ~WireClient() override;
 
-        const volatile char* HandleCommands(const volatile char* commands,
-                                            size_t size) override final;
+        const volatile char* HandleCommands(const volatile char* commands, size_t size) final;
 
         ReservedTexture ReserveTexture(WGPUDevice device);
         ReservedSwapChain ReserveSwapChain(WGPUDevice device);
