@@ -26,6 +26,7 @@
 # Usage:
 #    generate_wgsl_corpus.py <input_dir> <corpus_dir>
 
+import optparse
 import os
 import pathlib
 import shutil
@@ -40,11 +41,14 @@ def list_wgsl_files(root_search_dir):
 
 
 def main():
-    if len(sys.argv) != 3:
-        print("Usage: " + sys.argv[0] + " <input dir> <output dir>")
-        return 1
-    input_dir: str = os.path.abspath(sys.argv[1].rstrip(os.sep))
-    corpus_dir: str = os.path.abspath(sys.argv[2])
+    parser = optparse.OptionParser(
+        usage="usage: %prog [option] input-dir output-dir")
+    parser.add_option('--stamp', dest='stamp', help='stamp file')
+    options, args = parser.parse_args(sys.argv[1:])
+    if len(args) != 2:
+        parser.error("incorrect number of arguments")
+    input_dir: str = os.path.abspath(args[0].rstrip(os.sep))
+    corpus_dir: str = os.path.abspath(args[1])
     if os.path.exists(corpus_dir):
         shutil.rmtree(corpus_dir)
     os.makedirs(corpus_dir)
@@ -53,6 +57,8 @@ def main():
             continue
         out_file = in_file[len(input_dir) + 1:].replace(os.sep, '_')
         shutil.copy(in_file, corpus_dir + os.sep + out_file)
+    if options.stamp:
+        pathlib.Path(options.stamp).touch(mode=0o644, exist_ok=True)
 
 
 if __name__ == "__main__":

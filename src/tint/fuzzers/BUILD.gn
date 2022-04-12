@@ -22,14 +22,16 @@ if (build_with_chromium) {
   import("//testing/libfuzzer/fuzzer_test.gni")
 
   fuzzer_corpus_wgsl_dir = "${target_gen_dir}/fuzzer_corpus_wgsl"
+  fuzzer_corpus_wgsl_stamp = "${fuzzer_corpus_wgsl_dir}.stamp"
   action("tint_generate_wgsl_corpus") {
     script = "generate_wgsl_corpus.py"
     sources = [ "generate_wgsl_corpus.py" ]
     args = [
+      "--stamp=${fuzzer_corpus_wgsl_stamp}",
       rebase_path("${tint_root_dir}/test", root_build_dir),
       rebase_path(fuzzer_corpus_wgsl_dir, root_build_dir),
     ]
-    outputs = [ fuzzer_corpus_wgsl_dir ]
+    outputs = [ fuzzer_corpus_wgsl_stamp ]
   }
 
   tint_fuzzer_common_libfuzzer_options = [
