@@ -22,20 +22,28 @@
 #include "dawn/native/vulkan/CommandBufferVk.h"
 #include "dawn/native/vulkan/CommandRecordingContext.h"
 #include "dawn/native/vulkan/DeviceVk.h"
+#include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
 namespace dawn::native::vulkan {
 
     // static
-    Queue* Queue::Create(Device* device) {
-        return new Queue(device);
+    Ref<Queue> Queue::Create(Device* device, const QueueDescriptor* descriptor) {
+        Ref<Queue> queue = AcquireRef(new Queue(device, descriptor));
+        queue->Initialize();
+        return queue;
     }
 
-    Queue::Queue(Device* device) : QueueBase(device) {
+    Queue::Queue(Device* device, const QueueDescriptor* descriptor)
+        : QueueBase(device, descriptor) {
     }
 
     Queue::~Queue() {
+    }
+
+    void Queue::Initialize() {
+        SetLabelImpl();
     }
 
     MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
@@ -54,6 +62,18 @@ namespace dawn::native::vulkan {
         DAWN_TRY(device->SubmitPendingCommands());
 
         return {};
+    }
+
+    void Queue::SetLabelImpl() {
+        Device* device = ToBackend(GetDevice());
+        // VKDevice reinterpret_casts to a uint64_t rather than a uint64_t& like most other types
+        // because it's a dispatchable handle, and thus doesn't have the VkHandle wrapper that
+        // Dawn creates for anything defined with VK_DEFINE_NON_DISPATCHABLE_HANDLE.
+
+        // TODO(crbug.com/dawn/1344): When we start using multiple queues this needs to be adjusted
+        // so it doesn't always change the default queue's label.
+        SetDebugName(device, VK_OBJECT_TYPE_QUEUE, reinterpret_cast<uint64_t>(device->GetQueue()),
+                     "Dawn_Queue", GetLabel());
     }
 
 }  // namespace dawn::native::vulkan

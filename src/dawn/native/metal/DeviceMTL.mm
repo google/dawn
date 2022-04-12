@@ -110,7 +110,7 @@ namespace dawn::native::metal {
                                               NSPRef<id<MTLDevice>> mtlDevice,
                                               const DeviceDescriptor* descriptor) {
         Ref<Device> device = AcquireRef(new Device(adapter, std::move(mtlDevice), descriptor));
-        DAWN_TRY(device->Initialize());
+        DAWN_TRY(device->Initialize(descriptor));
         return device;
     }
 
@@ -124,7 +124,7 @@ namespace dawn::native::metal {
         Destroy();
     }
 
-    MaybeError Device::Initialize() {
+    MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
         InitTogglesFromDriver();
 
         mCommandQueue.Acquire([*mMtlDevice newCommandQueue]);
@@ -155,7 +155,7 @@ namespace dawn::native::metal {
             }
         }
 
-        return DeviceBase::Initialize(new Queue(this));
+        return DeviceBase::Initialize(AcquireRef(new Queue(this, &descriptor->defaultQueue)));
     }
 
     void Device::InitTogglesFromDriver() {

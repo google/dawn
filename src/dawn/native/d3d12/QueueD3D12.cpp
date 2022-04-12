@@ -21,12 +21,25 @@
 #include "dawn/native/d3d12/CommandBufferD3D12.h"
 #include "dawn/native/d3d12/D3D12Error.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
+#include "dawn/native/d3d12/UtilsD3D12.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
 namespace dawn::native::d3d12 {
 
-    Queue::Queue(Device* device) : QueueBase(device) {
+    // static
+    Ref<Queue> Queue::Create(Device* device, const QueueDescriptor* descriptor) {
+        Ref<Queue> queue = AcquireRef(new Queue(device, descriptor));
+        queue->Initialize();
+        return queue;
+    }
+
+    Queue::Queue(Device* device, const QueueDescriptor* descriptor)
+        : QueueBase(device, descriptor) {
+    }
+
+    void Queue::Initialize() {
+        SetLabelImpl();
     }
 
     MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
@@ -49,6 +62,13 @@ namespace dawn::native::d3d12 {
 
         DAWN_TRY(device->NextSerial());
         return {};
+    }
+
+    void Queue::SetLabelImpl() {
+        Device* device = ToBackend(GetDevice());
+        // TODO(crbug.com/dawn/1344): When we start using multiple queues this needs to be adjusted
+        // so it doesn't always change the default queue's label.
+        SetDebugName(device, device->GetCommandQueue().Get(), "Dawn_Queue", GetLabel());
     }
 
 }  // namespace dawn::native::d3d12

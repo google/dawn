@@ -48,7 +48,7 @@ namespace dawn::native::vulkan {
     ResultOrError<Ref<Device>> Device::Create(Adapter* adapter,
                                               const DeviceDescriptor* descriptor) {
         Ref<Device> device = AcquireRef(new Device(adapter, descriptor));
-        DAWN_TRY(device->Initialize());
+        DAWN_TRY(device->Initialize(descriptor));
         return device;
     }
 
@@ -57,7 +57,7 @@ namespace dawn::native::vulkan {
         InitTogglesFromDriver();
     }
 
-    MaybeError Device::Initialize() {
+    MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
         // Copy the adapter's device info to the device so that we can change the "knobs"
         mDeviceInfo = ToBackend(GetAdapter())->GetDeviceInfo();
 
@@ -101,7 +101,9 @@ namespace dawn::native::vulkan {
         // extension is available. Override the decision if it is no applicable.
         ApplyUseZeroInitializeWorkgroupMemoryExtensionToggle();
 
-        return DeviceBase::Initialize(Queue::Create(this));
+        SetLabelImpl();
+
+        return DeviceBase::Initialize(Queue::Create(this, &descriptor->defaultQueue));
     }
 
     Device::~Device() {
@@ -1048,6 +1050,14 @@ namespace dawn::native::vulkan {
 
     float Device::GetTimestampPeriodInNS() const {
         return mDeviceInfo.properties.limits.timestampPeriod;
+    }
+
+    void Device::SetLabelImpl() {
+        // VKDevice reinterpret_casts to a uint64_t rather than a uint64_t& like most other types
+        // because it's a dispatchable handle, and thus doesn't have the VkHandle wrapper that
+        // Dawn creates for anything defined with VK_DEFINE_NON_DISPATCHABLE_HANDLE.
+        SetDebugName(this, VK_OBJECT_TYPE_DEVICE, reinterpret_cast<uint64_t>(mVkDevice),
+                     "Dawn_Device", GetLabel());
     }
 
 }  // namespace dawn::native::vulkan

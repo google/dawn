@@ -39,7 +39,7 @@ namespace dawn::native::opengl {
                                               const DeviceDescriptor* descriptor,
                                               const OpenGLFunctions& functions) {
         Ref<Device> device = AcquireRef(new Device(adapter, descriptor, functions));
-        DAWN_TRY(device->Initialize());
+        DAWN_TRY(device->Initialize(descriptor));
         return device;
     }
 
@@ -53,11 +53,11 @@ namespace dawn::native::opengl {
         Destroy();
     }
 
-    MaybeError Device::Initialize() {
+    MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
         InitTogglesFromDriver();
         mFormatTable = BuildGLFormatTable();
 
-        return DeviceBase::Initialize(new Queue(this));
+        return DeviceBase::Initialize(AcquireRef(new Queue(this, &descriptor->defaultQueue)));
     }
 
     void Device::InitTogglesFromDriver() {

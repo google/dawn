@@ -59,11 +59,11 @@ namespace dawn::native::d3d12 {
     ResultOrError<Ref<Device>> Device::Create(Adapter* adapter,
                                               const DeviceDescriptor* descriptor) {
         Ref<Device> device = AcquireRef(new Device(adapter, descriptor));
-        DAWN_TRY(device->Initialize());
+        DAWN_TRY(device->Initialize(descriptor));
         return device;
     }
 
-    MaybeError Device::Initialize() {
+    MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
         InitTogglesFromDriver();
 
         mD3d12Device = ToBackend(GetAdapter())->GetDevice();
@@ -163,7 +163,7 @@ namespace dawn::native::d3d12 {
         GetD3D12Device()->CreateCommandSignature(&programDesc, NULL,
                                                  IID_PPV_ARGS(&mDrawIndexedIndirectSignature));
 
-        DAWN_TRY(DeviceBase::Initialize(new Queue(this)));
+        DAWN_TRY(DeviceBase::Initialize(Queue::Create(this, &descriptor->defaultQueue)));
         // Device shouldn't be used until after DeviceBase::Initialize so we must wait until after
         // device initialization to call NextSerial
         DAWN_TRY(NextSerial());
@@ -173,6 +173,8 @@ namespace dawn::native::d3d12 {
         DAWN_TRY(ApplyUseDxcToggle());
 
         DAWN_TRY(CreateZeroBuffer());
+
+        SetLabelImpl();
 
         return {};
     }
@@ -739,6 +741,10 @@ namespace dawn::native::d3d12 {
     bool Device::ShouldDuplicateNumWorkgroupsForDispatchIndirect(
         ComputePipelineBase* computePipeline) const {
         return ToBackend(computePipeline)->UsesNumWorkgroups();
+    }
+
+    void Device::SetLabelImpl() {
+        SetDebugName(this, mD3d12Device.Get(), "Dawn_Device", GetLabel());
     }
 
 }  // namespace dawn::native::d3d12

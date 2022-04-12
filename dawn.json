@@ -153,7 +153,7 @@
             {"name": "required features count", "type": "uint32_t", "default": 0},
             {"name": "required features", "type": "feature name", "annotation": "const*", "length": "required features count", "default": "nullptr"},
             {"name": "required limits", "type": "required limits", "annotation": "const*", "optional": true},
-            {"name": "default queue", "type": "queue descriptor", "tags": ["upstream"]}
+            {"name": "default queue", "type": "queue descriptor"}
         ]
     },
     "dawn toggles device descriptor": {
@@ -203,8 +203,6 @@
             {
                 "name": "set label",
                 "returns": "void",
-                "tags": ["dawn"],
-                "_TODO": "needs an upstream equivalent",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
@@ -239,8 +237,6 @@
             {
                 "name": "set label",
                 "returns": "void",
-                "tags": ["dawn"],
-                "_TODO": "needs an upstream equivalent",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
@@ -431,8 +427,6 @@
             {
                 "name": "set label",
                 "returns": "void",
-                "tags": ["dawn"],
-                "_TODO": "needs an upstream equivalent",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
@@ -527,8 +521,6 @@
             {
                 "name": "set label",
                 "returns": "void",
-                "tags": ["dawn"],
-                "_TODO": "needs an upstream equivalent",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
@@ -670,8 +662,6 @@
             {
                 "name": "set label",
                 "returns": "void",
-                "tags": ["dawn"],
-                "_TODO": "needs an upstream equivalent",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
@@ -833,8 +823,6 @@
             {
                 "name": "set label",
                 "returns": "void",
-                "tags": ["dawn"],
-                "_TODO": "needs an upstream equivalent",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
@@ -1152,6 +1140,13 @@
                     {"name": "callback", "type": "error callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
+            },
+            {
+                "name": "set label",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
             }
         ]
     },
@@ -1303,8 +1298,6 @@
             {
                 "name": "set label",
                 "returns": "void",
-                "tags": ["dawn"],
-                "_TODO": "needs an upstream equivalent",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
@@ -1500,8 +1493,6 @@
             {
                 "name": "set label",
                 "returns": "void",
-                "tags": ["dawn"],
-                "_TODO": "needs an upstream equivalent",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
@@ -1577,8 +1568,6 @@
             {
                 "name": "set label",
                 "returns": "void",
-                "tags": ["dawn"],
-                "_TODO": "needs an upstream equivalent",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
@@ -1663,13 +1652,19 @@
                     {"name": "copy size", "type": "extent 3D", "annotation": "const*"},
                     {"name": "options", "type": "copy texture for browser options", "annotation": "const*"}
                 ]
+            },
+            {
+                "name": "set label",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
             }
         ]
     },
     "queue descriptor": {
         "category": "structure",
         "extensible": "in",
-        "tags": ["upstream"],
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
         ]
@@ -1791,8 +1786,6 @@
             {
                 "name": "set label",
                 "returns": "void",
-                "tags": ["dawn"],
-                "_TODO": "needs an upstream equivalent",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
@@ -2027,8 +2020,6 @@
             {
                 "name": "set label",
                 "returns": "void",
-                "tags": ["dawn"],
-                "_TODO": "needs an upstream equivalent",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
@@ -2210,8 +2201,6 @@
             {
                 "name": "set label",
                 "returns": "void",
-                "tags": ["dawn"],
-                "_TODO": "needs an upstream equivalent",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
@@ -2486,8 +2475,6 @@
             {
                 "name": "set label",
                 "returns": "void",
-                "tags": ["dawn"],
-                "_TODO": "needs an upstream equivalent",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]
@@ -2692,8 +2679,6 @@
             {
                 "name": "set label",
                 "returns": "void",
-                "tags": ["dawn"],
-                "_TODO": "needs an upstream equivalent",
                 "args": [
                     {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
                 ]

@@ -198,6 +198,10 @@ namespace dawn::native {
 
         mFormatTable = BuildFormatTable(this);
         SetDefaultToggles();
+
+        if (descriptor->label != nullptr && strlen(descriptor->label) != 0) {
+            mLabel = descriptor->label;
+        }
     }
 
     DeviceBase::DeviceBase() : mState(State::Alive) {
@@ -210,8 +214,8 @@ namespace dawn::native {
         mQueue = nullptr;
     }
 
-    MaybeError DeviceBase::Initialize(QueueBase* defaultQueue) {
-        mQueue = AcquireRef(defaultQueue);
+    MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
+        mQueue = std::move(defaultQueue);
 
 #if defined(DAWN_ENABLE_ASSERTS)
         mUncapturedErrorCallback = [](WGPUErrorType, char const*, void*) {

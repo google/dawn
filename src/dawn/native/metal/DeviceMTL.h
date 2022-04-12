@@ -43,7 +43,7 @@ namespace dawn::native::metal {
                                                  const DeviceDescriptor* descriptor);
         ~Device() override;
 
-        MaybeError Initialize();
+        MaybeError Initialize(const DeviceDescriptor* descriptor);
 
         MaybeError TickImpl() override;
 

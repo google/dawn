@@ -23,14 +23,19 @@ namespace dawn::native::vulkan {
 
     class Queue final : public QueueBase {
       public:
-        static Queue* Create(Device* device);
+        static Ref<Queue> Create(Device* device, const QueueDescriptor* descriptor);
 
       private:
-        Queue(Device* device);
+        Queue(Device* device, const QueueDescriptor* descriptor);
         ~Queue() override;
         using QueueBase::QueueBase;
 
+        void Initialize();
+
         MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
+
+        // Dawn API
+        void SetLabelImpl() override;
     };
 
 }  // namespace dawn::native::vulkan

@@ -47,7 +47,7 @@ namespace dawn::native::vulkan {
                                                  const DeviceDescriptor* descriptor);
         ~Device() override;
 
-        MaybeError Initialize();
+        MaybeError Initialize(const DeviceDescriptor* descriptor);
 
         // Contains all the Vulkan entry points, vkDoFoo is called via device->fn.DoFoo.
         const VulkanFunctions fn;
@@ -104,6 +104,8 @@ namespace dawn::native::vulkan {
         uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;
 
         float GetTimestampPeriodInNS() const override;
+
+        void SetLabelImpl() override;
 
       private:
         Device(Adapter* adapter, const DeviceDescriptor* descriptor);

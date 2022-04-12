@@ -382,7 +382,7 @@ namespace dawn::native {
         void SetToggle(Toggle toggle, bool isEnabled);
         void ForceSetToggle(Toggle toggle, bool isEnabled);
 
-        MaybeError Initialize(QueueBase* defaultQueue);
+        MaybeError Initialize(Ref<QueueBase> defaultQueue);
         void DestroyObjects();
         void Destroy();
 

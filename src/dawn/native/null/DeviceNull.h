@@ -90,7 +90,7 @@ namespace dawn::native::null {
                                                  const DeviceDescriptor* descriptor);
         ~Device() override;
 
-        MaybeError Initialize();
+        MaybeError Initialize(const DeviceDescriptor* descriptor);
 
         ResultOrError<Ref<CommandBufferBase>> CreateCommandBuffer(
             CommandEncoder* encoder,
@@ -250,7 +250,7 @@ namespace dawn::native::null {
 
     class Queue final : public QueueBase {
       public:
-        Queue(Device* device);
+        Queue(Device* device, const QueueDescriptor* descriptor);
 
       private:
         ~Queue() override;

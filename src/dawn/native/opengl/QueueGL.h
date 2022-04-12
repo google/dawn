@@ -23,7 +23,7 @@ namespace dawn::native::opengl {
 
     class Queue final : public QueueBase {
       public:
-        Queue(Device* device);
+        Queue(Device* device, const QueueDescriptor* descriptor);
 
       private:
         MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
