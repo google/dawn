@@ -435,7 +435,7 @@ TEST_P(TextureViewSamplingTest, Texture2DArrayViewOnOneLevelOf2DArrayTexture) {
 // Test that an RGBA8 texture may be interpreted as RGBA8UnormSrgb and sampled from.
 // More extensive color value checks and format tests are left for the CTS.
 TEST_P(TextureViewSamplingTest, SRGBReinterpretation) {
-    // TODO(crbug.com/dawn/593): This test requires glTextureView, which is unsupported on GLES.
+    // TODO(crbug.com/dawn/1360): OpenGLES doesn't support view format reinterpretation.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     wgpu::TextureViewDescriptor viewDesc = {};
@@ -769,7 +769,7 @@ TEST_P(TextureViewRenderingTest, Texture2DArrayViewOnALayerOf2DArrayTextureAsCol
 // Test that an RGBA8 texture may be interpreted as RGBA8UnormSrgb and rendered to.
 // More extensive color value checks and format tests are left for the CTS.
 TEST_P(TextureViewRenderingTest, SRGBReinterpretationRenderAttachment) {
-    // TODO(crbug.com/dawn/593): This test requires glTextureView, which is unsupported on GLES.
+    // TODO(crbug.com/dawn/1360): OpenGLES doesn't support view format reinterpretation.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     // Test will render into an SRGB view
@@ -875,7 +875,7 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretationRenderAttachment) {
 // This test samples the RGBA8Unorm texture into an RGBA8Unorm multisample texture viewed as SRGB,
 // and resolves it into an RGBA8Unorm texture, viewed as SRGB.
 TEST_P(TextureViewRenderingTest, SRGBReinterpretionResolveAttachment) {
-    // TODO(crbug.com/dawn/593): This test requires glTextureView, which is unsupported on GLES.
+    // TODO(crbug.com/dawn/1360): OpenGLES doesn't support view format reinterpretation.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     // Test will resolve into an SRGB view
