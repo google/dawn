@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"dawn.googlesource.com/dawn/tools/src/dawn"
 	"dawn.googlesource.com/dawn/tools/src/gerrit"
 	"dawn.googlesource.com/dawn/tools/src/git"
 )
@@ -87,7 +88,9 @@ func run() error {
 		after = before.Add(-time.Hour * time.Duration(24**daysFlag))
 	}
 
-	g, err := gerrit.New(gerrit.Config{Username: *gerritUser, Password: *gerritPass})
+	g, err := gerrit.New(dawn.GerritURL, gerrit.Credentials{
+		Username: *gerritUser, Password: *gerritPass,
+	})
 	if err != nil {
 		return err
 	}
@@ -103,7 +106,7 @@ func run() error {
 
 	changesByProject := map[string][]string{}
 	for _, change := range submitted {
-		str := fmt.Sprintf(`* [%s](%sc/%s/+/%d)`, change.Subject, gerrit.URL, change.Project, change.Number)
+		str := fmt.Sprintf(`* [%s](%sc/%s/+/%d)`, change.Subject, dawn.GerritURL, change.Project, change.Number)
 		changesByProject[change.Project] = append(changesByProject[change.Project], str)
 	}
 

@@ -24,6 +24,7 @@ import (
 	"regexp"
 	"time"
 
+	"dawn.googlesource.com/dawn/tools/src/dawn"
 	"dawn.googlesource.com/dawn/tools/src/gerrit"
 	"dawn.googlesource.com/dawn/tools/src/git"
 )
@@ -90,7 +91,9 @@ func run() error {
 		after = before.Add(-time.Hour * time.Duration(24**daysFlag))
 	}
 
-	g, err := gerrit.New(gerrit.Config{Username: *gerritUser, Password: *gerritPass})
+	g, err := gerrit.New(dawn.GerritURL, gerrit.Credentials{
+		Username: *gerritUser, Password: *gerritPass,
+	})
 	if err != nil {
 		return err
 	}
@@ -154,8 +157,8 @@ func run() error {
 	}
 
 	fmt.Printf("\n")
-	fmt.Printf("Submitted query: %vq/%v\n", gerrit.URL, url.QueryEscape(submittedQuery))
-	fmt.Printf("Review query: %vq/%v\n", gerrit.URL, url.QueryEscape(reviewQuery))
+	fmt.Printf("Submitted query: %vq/%v\n", dawn.GerritURL, url.QueryEscape(submittedQuery))
+	fmt.Printf("Review query: %vq/%v\n", dawn.GerritURL, url.QueryEscape(reviewQuery))
 
 	return nil
 }
