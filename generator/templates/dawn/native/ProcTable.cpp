@@ -76,6 +76,43 @@ namespace {{native_namespace}} {
         {% endfor %}
     {% endfor %}
 
+    {% for function in by_category["function"] if function.name.canonical_case() != "get proc address" %}
+        {{as_cType(function.return_type.name)}} Native{{function.name.CamelCase()}}(
+            {%- for arg in function.arguments -%}
+                {%- if not loop.first %}, {% endif -%}
+                {{as_annotated_cType(arg)}}
+            {%- endfor -%}
+        ) {
+            {% for arg in function.arguments %}
+                {% set varName = as_varName(arg.name) %}
+                {% if arg.type.category in ["enum", "bitmask"] and arg.annotation == "value" %}
+                    auto {{varName}}_ = static_cast<{{as_frontendType(arg.type)}}>({{varName}});
+                {% elif arg.annotation != "value" or arg.type.category == "object" %}
+                    auto {{varName}}_ = reinterpret_cast<{{decorate("", as_frontendType(arg.type), arg)}}>({{varName}});
+                {% else %}
+                    auto {{varName}}_ = {{as_varName(arg.name)}};
+                {% endif %}
+            {%- endfor-%}
+
+            {% if function.return_type.name.canonical_case() != "void" %}
+                auto result =
+            {%- endif %}
+            API{{function.name.CamelCase()}}(
+                {%- for arg in function.arguments -%}
+                    {%- if not loop.first %}, {% endif -%}
+                    {{as_varName(arg.name)}}_
+                {%- endfor -%}
+            );
+            {% if function.return_type.name.canonical_case() != "void" %}
+                {% if function.return_type.category == "object" %}
+                    return ToAPI(result);
+                {% else %}
+                    return result;
+                {% endif %}
+            {% endif %}
+        }
+    {% endfor %}
+
     namespace {
 
         {% set c_prefix = metadata.c_prefix %}
@@ -92,46 +129,31 @@ namespace {{native_namespace}} {
 
     }  // anonymous namespace
 
-    {% for function in by_category["function"] %}
-        {{as_cType(function.return_type.name)}} Native{{as_cppType(function.name)}}(
-            {%- for arg in function.arguments -%}
-                {% if not loop.first %}, {% endif %}{{as_annotated_cType(arg)}}
-            {%- endfor -%}
-        ) {
-            {% if function.name.canonical_case() == "get proc address" %}
-                if (procName == nullptr) {
-                    return nullptr;
-                }
-
-                const ProcEntry* entry = std::lower_bound(&sProcMap[0], &sProcMap[sProcMapSize], procName,
-                    [](const ProcEntry &a, const char *b) -> bool {
-                        return strcmp(a.name, b) < 0;
-                    }
-                );
-
-                if (entry != &sProcMap[sProcMapSize] && strcmp(entry->name, procName) == 0) {
-                    return entry->proc;
-                }
-
-                // Special case the free-standing functions of the API.
-                // TODO(dawn:1238) Checking string one by one is slow, it needs to be optimized.
-                {% for function in by_category["function"] %}
-                    if (strcmp(procName, "{{as_cMethod(None, function.name)}}") == 0) {
-                        return reinterpret_cast<{{c_prefix}}Proc>(Native{{as_cppType(function.name)}});
-                    }
-
-                {% endfor %}
-                return nullptr;
-            {% else %}
-                return ToAPI({{as_cppType(function.return_type.name)}}Base::Create(
-                    {%- for arg in function.arguments -%}
-                        FromAPI({% if not loop.first %}, {% endif %}{{as_varName(arg.name)}})
-                    {%- endfor -%}
-                ));
-            {% endif %}
+    WGPUProc NativeGetProcAddress(WGPUDevice, const char* procName) {
+        if (procName == nullptr) {
+            return nullptr;
         }
 
-    {% endfor %}
+        const ProcEntry* entry = std::lower_bound(&sProcMap[0], &sProcMap[sProcMapSize], procName,
+            [](const ProcEntry &a, const char *b) -> bool {
+                return strcmp(a.name, b) < 0;
+            }
+        );
+
+        if (entry != &sProcMap[sProcMapSize] && strcmp(entry->name, procName) == 0) {
+            return entry->proc;
+        }
+
+        // Special case the free-standing functions of the API.
+        // TODO(dawn:1238) Checking string one by one is slow, it needs to be optimized.
+        {% for function in by_category["function"] %}
+            if (strcmp(procName, "{{as_cMethod(None, function.name)}}") == 0) {
+                return reinterpret_cast<{{c_prefix}}Proc>(Native{{as_cppType(function.name)}});
+            }
+
+        {% endfor %}
+        return nullptr;
+    }
 
     std::vector<const char*> GetProcMapNamesForTestingInternal() {
         std::vector<const char*> result;

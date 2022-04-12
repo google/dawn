@@ -39,11 +39,13 @@ namespace dawn::native {
 
     using BackendsBitset = ityp::bitset<wgpu::BackendType, kEnumCount<wgpu::BackendType>>;
 
+    InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor);
+
     // This is called InstanceBase for consistency across the frontend, even if the backends don't
     // specialize this class.
     class InstanceBase final : public RefCounted {
       public:
-        static InstanceBase* Create(const InstanceDescriptor* descriptor = nullptr);
+        static Ref<InstanceBase> Create(const InstanceDescriptor* descriptor = nullptr);
 
         void APIRequestAdapter(const RequestAdapterOptions* options,
                                WGPURequestAdapterCallback callback,

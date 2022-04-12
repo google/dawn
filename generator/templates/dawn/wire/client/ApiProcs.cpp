@@ -12,7 +12,6 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "dawn/common/Log.h"
 #include "dawn/wire/client/ApiObjects.h"
 #include "dawn/wire/client/Client.h"
 
@@ -172,6 +171,7 @@ namespace dawn::wire::client {
             {% endfor %}
         {% endfor %}
     };
+
     const {{Prefix}}ProcTable& GetProcs() {
         return gProcTable;
     }

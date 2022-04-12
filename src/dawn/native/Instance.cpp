@@ -93,10 +93,14 @@ namespace dawn::native {
 
     }  // anonymous namespace
 
+    InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor) {
+        return InstanceBase::Create().Detach();
+    }
+
     // InstanceBase
 
     // static
-    InstanceBase* InstanceBase::Create(const InstanceDescriptor* descriptor) {
+    Ref<InstanceBase> InstanceBase::Create(const InstanceDescriptor* descriptor) {
         Ref<InstanceBase> instance = AcquireRef(new InstanceBase);
         static constexpr InstanceDescriptor kDefaultDesc = {};
         if (descriptor == nullptr) {
@@ -105,7 +109,7 @@ namespace dawn::native {
         if (instance->ConsumedError(instance->Initialize(descriptor))) {
             return nullptr;
         }
-        return instance.Detach();
+        return instance;
     }
 
     // TODO(crbug.com/dawn/832): make the platform an initialization parameter of the instance.
