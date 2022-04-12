@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package git provides helpers for interfacing with the git tool
 package git
 
 import (
@@ -68,15 +69,28 @@ func New(exe string) (*Git, error) {
 	return &Git{exe: exe}, nil
 }
 
-// Auth holds git authentication credentials
-type Auth struct {
+// Credentials holds the user name and password used to perform git operations.
+type Credentials struct {
 	Username string
 	Password string
 }
 
 // Empty return true if there's no username or password for authentication
-func (a Auth) Empty() bool {
+func (a Credentials) Empty() bool {
 	return a.Username == "" && a.Password == ""
+}
+
+// addToURL returns the url with the credentials appended
+func (c Credentials) addToURL(u string) (string, error) {
+	if !c.Empty() {
+		modified, err := url.Parse(u)
+		if err != nil {
+			return "", fmt.Errorf("failed to parse url '%v': %v", u, err)
+		}
+		modified.User = url.UserPassword(c.Username, c.Password)
+		u = modified.String()
+	}
+	return u, nil
 }
 
 // ErrRepositoryDoesNotExist indicates that a repository does not exist
@@ -99,7 +113,7 @@ type CloneOptions struct {
 	// Timeout for the operation
 	Timeout time.Duration
 	// Authentication for the clone
-	Auth Auth
+	Credentials Credentials
 }
 
 // Clone performs a clone of the repository at url to path.
@@ -110,7 +124,7 @@ func (g Git) Clone(path, url string, opt *CloneOptions) (*Repository, error) {
 	if opt == nil {
 		opt = &CloneOptions{}
 	}
-	url, err := opt.Auth.addToURL(url)
+	url, err := opt.Credentials.addToURL(url)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +154,7 @@ type FetchOptions struct {
 	// Timeout for the operation
 	Timeout time.Duration
 	// Git authentication for the remote
-	Auth Auth
+	Credentials Credentials
 }
 
 // Fetch performs a fetch of a reference from the remote, returning the Hash of
@@ -169,7 +183,7 @@ type PushOptions struct {
 	// Timeout for the operation
 	Timeout time.Duration
 	// Git authentication for the remote
-	Auth Auth
+	Credentials Credentials
 }
 
 // Push performs a push of the local reference to the remote reference.
@@ -184,7 +198,7 @@ func (r Repository) Push(localRef, remoteRef string, opt *PushOptions) error {
 	if err != nil {
 		return err
 	}
-	url, err = opt.Auth.addToURL(url)
+	url, err = opt.Credentials.addToURL(url)
 	if err != nil {
 		return err
 	}
@@ -199,7 +213,7 @@ type AddOptions struct {
 	// Timeout for the operation
 	Timeout time.Duration
 	// Git authentication for the remote
-	Auth Auth
+	Credentials Credentials
 }
 
 // Add stages the listed files
@@ -221,6 +235,8 @@ type CommitOptions struct {
 	AuthorName string
 	// Author email address
 	AuthorEmail string
+	// Amend last commit?
+	Amend bool
 }
 
 // Commit commits the staged files with the given message, returning the hash of
@@ -229,7 +245,12 @@ func (r Repository) Commit(msg string, opt *CommitOptions) (Hash, error) {
 	if opt == nil {
 		opt = &CommitOptions{}
 	}
-	args := []string{"commit", "-m", msg}
+	args := []string{"commit"}
+	if opt.Amend {
+		args = append(args, "--amend")
+	} else {
+		args = append(args, "-m", msg)
+	}
 	if opt.AuthorName != "" || opt.AuthorEmail != "" {
 		args = append(args, "--author", fmt.Sprintf("%v <%v>", opt.AuthorName, opt.AuthorEmail))
 	}
@@ -366,18 +387,6 @@ func (g Git) run(dir string, timeout time.Duration, args ...string) (string, err
 			dir, g.exe, strings.Join(args, " "), err, string(out))
 	}
 	return strings.TrimSpace(string(out)), nil
-}
-
-func (a Auth) addToURL(u string) (string, error) {
-	if !a.Empty() {
-		modified, err := url.Parse(u)
-		if err != nil {
-			return "", fmt.Errorf("failed to parse url '%v': %v", u, err)
-		}
-		modified.User = url.UserPassword(a.Username, a.Password)
-		u = modified.String()
-	}
-	return u, nil
 }
 
 func parseLog(str string) ([]CommitInfo, error) {

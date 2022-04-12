@@ -141,9 +141,9 @@ type Config struct {
 
 // GitConfig holds the configuration options for accessing a git repo
 type GitConfig struct {
-	URL    string
-	Branch string
-	Auth   git.Auth
+	URL         string
+	Branch      string
+	Credentials git.Credentials
 }
 
 // GerritConfig holds the configuration options for accessing gerrit
@@ -298,7 +298,9 @@ func (e env) doSomeWork() (bool, error) {
 // benchmark results, which should be benchmarked.
 func (e env) changesToBenchmark() ([]git.Hash, error) {
 	log.Println("syncing tint repo...")
-	latest, err := e.tintRepo.Fetch(e.cfg.Tint.Branch, &git.FetchOptions{Auth: e.cfg.Tint.Auth})
+	latest, err := e.tintRepo.Fetch(e.cfg.Tint.Branch, &git.FetchOptions{
+		Credentials: e.cfg.Tint.Credentials,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -481,7 +483,9 @@ func (e env) pushUpdatedResults(res CommitResults) error {
 
 	// Push the change
 	log.Println("pushing updated results to results repo...")
-	if err := e.resultsRepo.Push(hash.String(), e.cfg.Results.Branch, &git.PushOptions{Auth: e.cfg.Results.Auth}); err != nil {
+	if err := e.resultsRepo.Push(hash.String(), e.cfg.Results.Branch, &git.PushOptions{
+		Credentials: e.cfg.Results.Credentials,
+	}); err != nil {
 		return fmt.Errorf("failed to push updated results file '%v':\n  %w", absPath, err)
 	}
 
@@ -700,7 +704,9 @@ func (e env) findGerritChangeToBenchmark() (*gerrit.ChangeInfo, error) {
 func (e env) benchmarkGerritChange(change gerrit.ChangeInfo) error {
 	current := change.Revisions[change.CurrentRevision]
 	log.Printf("fetching '%v'...", current.Ref)
-	currentHash, err := e.tintRepo.Fetch(current.Ref, &git.FetchOptions{Auth: e.cfg.Tint.Auth})
+	currentHash, err := e.tintRepo.Fetch(current.Ref, &git.FetchOptions{
+		Credentials: e.cfg.Tint.Credentials,
+	})
 	if err != nil {
 		return err
 	}
@@ -730,7 +736,9 @@ func (e env) benchmarkGerritChange(change gerrit.ChangeInfo) error {
 		}
 		return err
 	}
-	if _, err := e.tintRepo.Fetch(parent, &git.FetchOptions{Auth: e.cfg.Tint.Auth}); err != nil {
+	if _, err := e.tintRepo.Fetch(parent, &git.FetchOptions{
+		Credentials: e.cfg.Tint.Credentials,
+	}); err != nil {
 		return err
 	}
 	parentRun, err := e.benchmarkTintChange(parentHash)
@@ -786,8 +794,8 @@ func createOrOpenGitRepo(g *git.Git, filepath string, cfg GitConfig) (*git.Repos
 	if errors.Is(err, git.ErrRepositoryDoesNotExist) {
 		log.Printf("cloning '%v' branch '%v' to '%v'...", cfg.URL, cfg.Branch, filepath)
 		repo, err = g.Clone(filepath, cfg.URL, &git.CloneOptions{
-			Branch: cfg.Branch,
-			Auth:   cfg.Auth,
+			Branch:      cfg.Branch,
+			Credentials: cfg.Credentials,
 		})
 	}
 	if err != nil {
@@ -832,7 +840,9 @@ func makeWorkingDirs(cfg Config) (tintDir, resultsDir string, err error) {
 
 // fetchAndCheckoutLatest calls fetch(cfg.Branch) followed by checkoutLatest().
 func fetchAndCheckoutLatest(repo *git.Repository, cfg GitConfig) error {
-	hash, err := repo.Fetch(cfg.Branch, &git.FetchOptions{Auth: cfg.Auth})
+	hash, err := repo.Fetch(cfg.Branch, &git.FetchOptions{
+		Credentials: cfg.Credentials,
+	})
 	if err != nil {
 		return err
 	}
