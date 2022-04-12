@@ -59,6 +59,7 @@ class TestHelperBase : public BODY, public ProgramBuilder {
   /// @note The generator is only built once. Multiple calls to Build() will
   /// return the same GeneratorImpl without rebuilding.
   /// @param version the GLSL version
+  /// @param options the GLSL backend options
   /// @return the built generator
   GeneratorImpl& SanitizeAndBuild(Version version = Version(),
                                   const Options& options = {}) {
