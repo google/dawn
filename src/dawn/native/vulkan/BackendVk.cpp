@@ -77,9 +77,6 @@ constexpr SkippedMessage kSkippedMessages[] = {
      "stencil aspect during store with stencilStoreOp VK_ATTACHMENT_STORE_OP_STORE. Access info "
      "(usage: SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
      "SYNC_FRAGMENT_SHADER_SHADER_STORAGE_READ, read_barriers: VK_PIPELINE_STAGE_2_NONE"},
-
-    // http://crbug.com/1310052
-    {"", "VUID-vkCmdDraw-None-06538"},
 };
 
 namespace dawn::native::vulkan {
