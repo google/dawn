@@ -15,13 +15,13 @@
 #ifndef INCLUDE_DAWN_PLATFORM_DAWNPLATFORM_H_
 #define INCLUDE_DAWN_PLATFORM_DAWNPLATFORM_H_
 
-#include "dawn/platform/dawn_platform_export.h"
+#include <dawn/webgpu.h>
 
 #include <cstddef>
 #include <cstdint>
 #include <memory>
 
-#include <dawn/webgpu.h>
+#include "dawn/platform/dawn_platform_export.h"
 
 namespace dawn::platform {
 

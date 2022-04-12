@@ -15,11 +15,11 @@
 #ifndef INCLUDE_DAWN_WIRE_WIRECLIENT_H_
 #define INCLUDE_DAWN_WIRE_WIRECLIENT_H_
 
-#include "dawn/dawn_proc_table.h"
-#include "dawn/wire/Wire.h"
-
 #include <memory>
 #include <vector>
+
+#include "dawn/dawn_proc_table.h"
+#include "dawn/wire/Wire.h"
 
 namespace dawn::wire {
 
