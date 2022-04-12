@@ -75,7 +75,7 @@ CLONE_SRC_DIR="$(pwd)"
 . /bin/using.sh # Declare the bash `using` function for configuring toolchains.
 
 using depot_tools
-using go-1.14.4      # Speeds up ./tools/lint
+using go-1.18
 using doxygen-1.8.18
 
 status "Creating source directory '${SRC_DIR}' and build directory '${BUILD_DIR}'"
@@ -136,6 +136,13 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
         COMMON_CMAKE_FLAGS+=" -DDAWN_ENABLE_UBSAN=1"
         export UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1
     fi
+
+    status "Running go tool unittests"
+    show_cmds
+        pushd tools/src
+            go test ./...
+        popd
+    hide_cmds
 
     cd ${BUILD_DIR}
 
