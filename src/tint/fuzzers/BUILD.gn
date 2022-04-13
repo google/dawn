@@ -27,7 +27,7 @@ if (build_with_chromium) {
     script = "generate_wgsl_corpus.py"
     sources = [ "generate_wgsl_corpus.py" ]
     args = [
-      "--stamp=${fuzzer_corpus_wgsl_stamp}",
+      "--stamp=" + rebase_path(fuzzer_corpus_wgsl_stamp, root_build_dir),
       rebase_path("${tint_root_dir}/test", root_build_dir),
       rebase_path(fuzzer_corpus_wgsl_dir, root_build_dir),
     ]
