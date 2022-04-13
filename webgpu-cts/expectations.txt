@@ -59,6 +59,8 @@
 # WebGPU Backend Validation
 # tags: [ dawn-backend-validation dawn-no-backend-validation ]
 # results: [ Failure RetryOnFailure Skip Slow ]
+# WebGPU Adapter
+# tags: [ webgpu-adapter-default webgpu-adapter-swiftshader ]
 # END TAG HEADER
 
 ################################################################################
