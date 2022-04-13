@@ -62,7 +62,7 @@ namespace dawn::native::d3d12 {
         void UnmapImpl() override;
         void DestroyImpl() override;
         bool IsCPUWritableAtCreation() const override;
-        virtual MaybeError MapAtCreationImpl() override;
+        MaybeError MapAtCreationImpl() override;
         void* GetMappedPointerImpl() override;
 
         MaybeError MapInternal(bool isWrite, size_t start, size_t end, const char* contextInfo);
