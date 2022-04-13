@@ -328,10 +328,12 @@ crbug.com/dawn/0000 [ linux ] webgpu:api,operation,command_buffer,copyTextureToT
 # entry_point_name_must_match failures
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 webgpu:api,validation,createComputePipeline:entry_point_name_must_match:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,createComputePipeline:entry_point_name_must_match:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,createComputePipeline:entry_point_name_must_match:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,createComputePipeline:entry_point_name_must_match:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,createComputePipeline:entry_point_name_must_match:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,createComputePipeline:entry_point_name_must_match:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,createComputePipeline:entry_point_name_must_match:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,createComputePipeline:entry_point_name_must_match:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,createComputePipeline:entry_point_name_must_match:isAsync=false;shaderModuleEntryPoint="s%C3%A9quen%C3%A7age";* [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,createComputePipeline:entry_point_name_must_match:isAsync=true;shaderModuleEntryPoint="s%C3%A9quen%C3%A7age";* [ Failure ]
 
 ################################################################################
 # windows draw failures
@@ -465,8 +467,6 @@ crbug.com/dawn/0000 webgpu:api,validation,queue,copyToTexture,CopyExternalImageT
 crbug.com/dawn/0000 [ linux ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="_undef_" [ Failure ]
 crbug.com/dawn/0000 [ linux ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="2d" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ linux ] webgpu:api,validation,createTexture:texture_size,2d_texture,compressed_format:dimension="2d";format="astc-4x4-unorm-srgb";size=[1,8192,1] [ RetryOnFailure ]
-crbug.com/dawn/0000 [ linux ] webgpu:api,validation,createTexture:texture_usage:dimension="_undef_" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ linux ] webgpu:api,validation,createTexture:texture_usage:dimension="2d" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="_undef_" [ Failure ]
 crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="2d" [ Failure ]
 crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="3d" [ Failure ]
@@ -499,6 +499,12 @@ crbug.com/dawn/0000 webgpu:api,validation,vertex_state:vertex_shader_input_locat
 ################################################################################
 crbug.com/dawn/0000 [ mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,* [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,* [ Failure ]
+
+################################################################################
+# crbug.com/dawn/1364 Add validation that render attachments must be 2D (array) textures
+# KEEP
+################################################################################
+crbug.com/dawn/1364 webgpu:api,validation,createTexture:texture_usage:* [ Failure ]
 
 ################################################################################
 # untriaged failures
