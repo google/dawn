@@ -516,7 +516,7 @@ if (DAWN_ENABLE_VULKAN)
     )
 
     target_link_libraries(dawn_native PUBLIC Vulkan-Headers)
-    target_include_directories(dawn_native PRIVATE ${DAWN_VULKAN_DEPS_DIR})
+    target_include_directories(dawn_native PRIVATE ${DAWN_VULKAN_TOOLS_DIR})
 
     if (UNIX AND NOT APPLE)
         target_sources(dawn_native PRIVATE

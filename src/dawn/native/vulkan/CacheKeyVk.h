@@ -19,7 +19,7 @@
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/CacheKey.h"
 
-#include "vulkan-tools/src/icd/generated/vk_typemap_helper.h"
+#include "icd/generated/vk_typemap_helper.h"
 
 #include <map>
 
