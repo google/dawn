@@ -124,8 +124,7 @@ namespace dawn::native::vulkan {
     }
 
     void Sampler::SetLabelImpl() {
-        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_SAMPLER,
-                     reinterpret_cast<uint64_t&>(mHandle), "Dawn_Sampler", GetLabel());
+        SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_Sampler", GetLabel());
     }
 
 }  // namespace dawn::native::vulkan

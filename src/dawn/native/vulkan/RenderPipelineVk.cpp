@@ -574,8 +574,7 @@ namespace dawn::native::vulkan {
     }
 
     void RenderPipeline::SetLabelImpl() {
-        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_PIPELINE,
-                     reinterpret_cast<uint64_t&>(mHandle), "Dawn_RenderPipeline", GetLabel());
+        SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_RenderPipeline", GetLabel());
     }
 
     VkPipelineVertexInputStateCreateInfo RenderPipeline::ComputeVertexInputDesc(

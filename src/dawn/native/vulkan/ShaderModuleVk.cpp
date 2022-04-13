@@ -245,9 +245,7 @@ namespace dawn::native::vulkan {
                 mTransformedShaderModuleCache->AddOrGet(cacheKey, newHandle, std::move(spirv));
         }
 
-        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_SHADER_MODULE,
-                     reinterpret_cast<uint64_t&>(moduleAndSpirv.first), "Dawn_ShaderModule",
-                     GetLabel());
+        SetDebugName(ToBackend(GetDevice()), moduleAndSpirv.first, "Dawn_ShaderModule", GetLabel());
 
         return std::move(moduleAndSpirv);
 #else

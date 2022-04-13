@@ -381,8 +381,7 @@ namespace dawn::native::vulkan {
     }
 
     void Buffer::SetLabelImpl() {
-        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_BUFFER,
-                     reinterpret_cast<uint64_t&>(mHandle), "Dawn_Buffer", GetLabel());
+        SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_Buffer", GetLabel());
     }
 
     void Buffer::InitializeToZero(CommandRecordingContext* recordingContext) {

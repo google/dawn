@@ -889,8 +889,7 @@ namespace dawn::native::vulkan {
     }
 
     void Texture::SetLabelHelper(const char* prefix) {
-        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_IMAGE,
-                     reinterpret_cast<uint64_t&>(mHandle), prefix, GetLabel());
+        SetDebugName(ToBackend(GetDevice()), mHandle, prefix, GetLabel());
     }
 
     void Texture::SetLabelImpl() {
@@ -1423,8 +1422,7 @@ namespace dawn::native::vulkan {
     }
 
     void TextureView::SetLabelImpl() {
-        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_IMAGE_VIEW,
-                     reinterpret_cast<uint64_t&>(mHandle), "Dawn_InternalTextureView", GetLabel());
+        SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_TextureView", GetLabel());
     }
 
 }  // namespace dawn::native::vulkan

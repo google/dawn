@@ -103,11 +103,41 @@ namespace dawn::native::vulkan {
                                                    const TextureCopy& textureCopy,
                                                    const Extent3D& copySize);
 
+    // Gets the associated VkObjectType for any non-dispatchable handle
+    template <class HandleType>
+    VkObjectType GetVkObjectType(HandleType handle);
+
+    void SetDebugNameInternal(Device* device,
+                              VkObjectType objectType,
+                              uint64_t objectHandle,
+                              const char* prefix,
+                              std::string label);
+
+    // The majority of Vulkan handles are "non-dispatchable". Dawn wraps these by overriding
+    // VK_DEFINE_NON_DISPATCHABLE_HANDLE to add some capabilities like making null comparisons
+    // easier. In those cases we can make setting the debug name a bit easier by getting the
+    // object type automatically and handling the indirection to the native handle.
+    template <typename Tag, typename HandleType>
+    void SetDebugName(Device* device,
+                      detail::VkHandle<Tag, HandleType> objectHandle,
+                      const char* prefix,
+                      std::string label = "") {
+        SetDebugNameInternal(device, GetVkObjectType(objectHandle),
+                             reinterpret_cast<uint64_t>(objectHandle.GetHandle()), prefix, label);
+    }
+
+    // Handles like VkQueue and VKDevice require a special path because they are dispatchable, so
+    // they require an explicit VkObjectType and cast to a uint64_t directly rather than by getting
+    // the non-dispatchable wrapper's underlying handle.
+    template <typename HandleType>
     void SetDebugName(Device* device,
                       VkObjectType objectType,
-                      uint64_t objectHandle,
+                      HandleType objectHandle,
                       const char* prefix,
-                      std::string label = "");
+                      std::string label = "") {
+        SetDebugNameInternal(device, objectType, reinterpret_cast<uint64_t>(objectHandle), prefix,
+                             label);
+    }
 
     // Returns nullptr or &specializationInfo
     // specializationInfo, specializationDataEntries, specializationMapEntries needs to

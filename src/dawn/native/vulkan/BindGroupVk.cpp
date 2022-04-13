@@ -157,8 +157,7 @@ namespace dawn::native::vulkan {
     }
 
     void BindGroup::SetLabelImpl() {
-        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_DESCRIPTOR_SET,
-                     reinterpret_cast<uint64_t&>(mDescriptorSetAllocation.set), "Dawn_BindGroup",
+        SetDebugName(ToBackend(GetDevice()), mDescriptorSetAllocation.set, "Dawn_BindGroup",
                      GetLabel());
     }
 

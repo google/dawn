@@ -93,8 +93,7 @@ namespace dawn::native::vulkan {
     }
 
     void ComputePipeline::SetLabelImpl() {
-        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_PIPELINE,
-                     reinterpret_cast<uint64_t&>(mHandle), "Dawn_ComputePipeline", GetLabel());
+        SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_ComputePipeline", GetLabel());
     }
 
     ComputePipeline::~ComputePipeline() = default;

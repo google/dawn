@@ -58,8 +58,7 @@ namespace dawn::native::vulkan {
             return DAWN_INTERNAL_ERROR("Unable to map staging buffer.");
         }
 
-        SetDebugName(mDevice, VK_OBJECT_TYPE_BUFFER, reinterpret_cast<uint64_t&>(mBuffer),
-                     "Dawn_StagingBuffer");
+        SetDebugName(mDevice, mBuffer, "Dawn_StagingBuffer");
 
         return {};
     }

@@ -26,6 +26,25 @@
 
 namespace dawn::native::vulkan {
 
+#define VK_OBJECT_TYPE_GETTER(object, objectType)         \
+    template <>                                           \
+    VkObjectType GetVkObjectType<object>(object handle) { \
+        return objectType;                                \
+    }
+
+    VK_OBJECT_TYPE_GETTER(VkBuffer, VK_OBJECT_TYPE_BUFFER)
+    VK_OBJECT_TYPE_GETTER(VkDescriptorSetLayout, VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT)
+    VK_OBJECT_TYPE_GETTER(VkDescriptorSet, VK_OBJECT_TYPE_DESCRIPTOR_SET)
+    VK_OBJECT_TYPE_GETTER(VkPipeline, VK_OBJECT_TYPE_PIPELINE)
+    VK_OBJECT_TYPE_GETTER(VkPipelineLayout, VK_OBJECT_TYPE_PIPELINE_LAYOUT)
+    VK_OBJECT_TYPE_GETTER(VkQueryPool, VK_OBJECT_TYPE_QUERY_POOL)
+    VK_OBJECT_TYPE_GETTER(VkSampler, VK_OBJECT_TYPE_SAMPLER)
+    VK_OBJECT_TYPE_GETTER(VkShaderModule, VK_OBJECT_TYPE_SHADER_MODULE)
+    VK_OBJECT_TYPE_GETTER(VkImage, VK_OBJECT_TYPE_IMAGE)
+    VK_OBJECT_TYPE_GETTER(VkImageView, VK_OBJECT_TYPE_IMAGE_VIEW)
+
+#undef VK_OBJECT_TYPE_GETTER
+
     VkCompareOp ToVulkanCompareOp(wgpu::CompareFunction op) {
         switch (op) {
             case wgpu::CompareFunction::Never:
@@ -182,11 +201,11 @@ namespace dawn::native::vulkan {
         return region;
     }
 
-    void SetDebugName(Device* device,
-                      VkObjectType objectType,
-                      uint64_t objectHandle,
-                      const char* prefix,
-                      std::string label) {
+    void SetDebugNameInternal(Device* device,
+                              VkObjectType objectType,
+                              uint64_t objectHandle,
+                              const char* prefix,
+                              std::string label) {
         if (!objectHandle) {
             return;
         }

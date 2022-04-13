@@ -83,8 +83,7 @@ namespace dawn::native::vulkan {
     }
 
     void PipelineLayout::SetLabelImpl() {
-        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_PIPELINE_LAYOUT,
-                     reinterpret_cast<uint64_t&>(mHandle), "Dawn_PipelineLayout", GetLabel());
+        SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_PipelineLayout", GetLabel());
     }
 
 }  // namespace dawn::native::vulkan

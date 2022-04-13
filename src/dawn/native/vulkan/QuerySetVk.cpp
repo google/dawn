@@ -110,8 +110,7 @@ namespace dawn::native::vulkan {
     }
 
     void QuerySet::SetLabelImpl() {
-        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_QUERY_POOL,
-                     reinterpret_cast<uint64_t&>(mHandle), "Dawn_QuerySet", GetLabel());
+        SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_QuerySet", GetLabel());
     }
 
 }  // namespace dawn::native::vulkan

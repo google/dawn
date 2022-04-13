@@ -192,8 +192,7 @@ namespace dawn::native::vulkan {
     }
 
     void BindGroupLayout::SetLabelImpl() {
-        SetDebugName(ToBackend(GetDevice()), VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT,
-                     reinterpret_cast<uint64_t&>(mHandle), "Dawn_BindGroupLayout", GetLabel());
+        SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_BindGroupLayout", GetLabel());
     }
 
 }  // namespace dawn::native::vulkan

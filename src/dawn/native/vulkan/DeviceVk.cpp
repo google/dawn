@@ -1053,11 +1053,7 @@ namespace dawn::native::vulkan {
     }
 
     void Device::SetLabelImpl() {
-        // VKDevice reinterpret_casts to a uint64_t rather than a uint64_t& like most other types
-        // because it's a dispatchable handle, and thus doesn't have the VkHandle wrapper that
-        // Dawn creates for anything defined with VK_DEFINE_NON_DISPATCHABLE_HANDLE.
-        SetDebugName(this, VK_OBJECT_TYPE_DEVICE, reinterpret_cast<uint64_t>(mVkDevice),
-                     "Dawn_Device", GetLabel());
+        SetDebugName(this, VK_OBJECT_TYPE_DEVICE, mVkDevice, "Dawn_Device", GetLabel());
     }
 
 }  // namespace dawn::native::vulkan
