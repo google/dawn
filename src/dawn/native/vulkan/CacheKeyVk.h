@@ -70,32 +70,18 @@ namespace dawn::native::vulkan {
             SerializePnextImpl<VK_STRUCT_TYPES...>(key, root);
         }
 
-        template <typename VK_STRUCT_TYPE>
-        const VkBaseOutStructure* ToVkBaseOutStructure(const VK_STRUCT_TYPE* t) {
-            // Sanity checks to ensure proper type safety.
-            static_assert(
-                offsetof(VK_STRUCT_TYPE, sType) == offsetof(VkBaseOutStructure, sType) &&
-                    offsetof(VK_STRUCT_TYPE, pNext) == offsetof(VkBaseOutStructure, pNext),
-                "Argument type is not a proper Vulkan structure type");
-            return reinterpret_cast<const VkBaseOutStructure*>(t);
-        }
-
     }  // namespace detail
 
-    template <typename... VK_STRUCT_TYPES,
-              typename VK_STRUCT_TYPE,
-              typename = std::enable_if_t<(sizeof...(VK_STRUCT_TYPES) > 0)>>
-    void SerializePnext(CacheKey* key, const VK_STRUCT_TYPE* t) {
-        const VkBaseOutStructure* root = detail::ToVkBaseOutStructure(t);
+    template <typename... VK_STRUCT_TYPES>
+    void SerializePnext(CacheKey* key, const VkBaseOutStructure* root) {
         detail::ValidatePnextImpl<VK_STRUCT_TYPES...>(root);
         detail::SerializePnextImpl<VK_STRUCT_TYPES...>(key, root);
     }
 
     // Empty template specialization so that we can put this in to ensure failures occur if new
     // extensions are added without updating serialization.
-    template <typename VK_STRUCT_TYPE>
-    void SerializePnext(CacheKey* key, const VK_STRUCT_TYPE* t) {
-        const VkBaseOutStructure* root = detail::ToVkBaseOutStructure(t);
+    template <>
+    void SerializePnext(CacheKey* key, const VkBaseOutStructure* root) {
         detail::ValidatePnextImpl<>(root);
     }
 

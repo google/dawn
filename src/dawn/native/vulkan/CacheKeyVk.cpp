@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "dawn/native/vulkan/CacheKeyVk.h"
-#include "dawn/native/vulkan/RenderPassCache.h"
 
 #include <cstring>
 
@@ -31,7 +30,7 @@ namespace dawn::native {
         CacheKey* key,
         const VkDescriptorSetLayoutCreateInfo& t) {
         key->Record(t.flags).RecordIterable(t.pBindings, t.bindingCount);
-        vulkan::SerializePnext<>(key, &t);
+        vulkan::SerializePnext<>(key, reinterpret_cast<const VkBaseOutStructure*>(&t));
     }
 
     template <>
@@ -47,7 +46,7 @@ namespace dawn::native {
         // The set layouts are not serialized here because they are pointers to backend objects.
         // They need to be cross-referenced with the frontend objects and serialized from there.
         key->Record(t.flags).RecordIterable(t.pPushConstantRanges, t.pushConstantRangeCount);
-        vulkan::SerializePnext<>(key, &t);
+        vulkan::SerializePnext<>(key, reinterpret_cast<const VkBaseOutStructure*>(&t));
     }
 
     template <>
@@ -79,7 +78,8 @@ namespace dawn::native {
         key->Record(t.flags, t.stage)
             .RecordIterable(t.pName, strlen(t.pName))
             .Record(t.pSpecializationInfo);
-        vulkan::SerializePnext<VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT>(key, &t);
+        vulkan::SerializePnext<VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT>(
+            key, reinterpret_cast<const VkBaseOutStructure*>(&t));
     }
 
     template <>
@@ -92,166 +92,6 @@ namespace dawn::native {
         // backend implementation. If we decide to use them later on, they also need to be
         // cross-referenced from the frontend.
         key->Record(t.flags, t.stage);
-    }
-
-    template <>
-    void CacheKeySerializer<VkVertexInputBindingDescription>::Serialize(
-        CacheKey* key,
-        const VkVertexInputBindingDescription& t) {
-        key->Record(t.binding, t.stride, t.inputRate);
-    }
-
-    template <>
-    void CacheKeySerializer<VkVertexInputAttributeDescription>::Serialize(
-        CacheKey* key,
-        const VkVertexInputAttributeDescription& t) {
-        key->Record(t.location, t.binding, t.format, t.offset);
-    }
-
-    template <>
-    void CacheKeySerializer<VkPipelineVertexInputStateCreateInfo>::Serialize(
-        CacheKey* key,
-        const VkPipelineVertexInputStateCreateInfo& t) {
-        key->Record(t.flags)
-            .RecordIterable(t.pVertexBindingDescriptions, t.vertexBindingDescriptionCount)
-            .RecordIterable(t.pVertexAttributeDescriptions, t.vertexAttributeDescriptionCount);
-        vulkan::SerializePnext<>(key, &t);
-    }
-
-    template <>
-    void CacheKeySerializer<VkPipelineInputAssemblyStateCreateInfo>::Serialize(
-        CacheKey* key,
-        const VkPipelineInputAssemblyStateCreateInfo& t) {
-        key->Record(t.flags, t.topology, t.primitiveRestartEnable);
-        vulkan::SerializePnext<>(key, &t);
-    }
-
-    template <>
-    void CacheKeySerializer<VkPipelineTessellationStateCreateInfo>::Serialize(
-        CacheKey* key,
-        const VkPipelineTessellationStateCreateInfo& t) {
-        key->Record(t.flags, t.patchControlPoints);
-        vulkan::SerializePnext<>(key, &t);
-    }
-
-    template <>
-    void CacheKeySerializer<VkViewport>::Serialize(CacheKey* key, const VkViewport& t) {
-        key->Record(t.x, t.y, t.width, t.height, t.minDepth, t.maxDepth);
-    }
-
-    template <>
-    void CacheKeySerializer<VkOffset2D>::Serialize(CacheKey* key, const VkOffset2D& t) {
-        key->Record(t.x, t.y);
-    }
-
-    template <>
-    void CacheKeySerializer<VkExtent2D>::Serialize(CacheKey* key, const VkExtent2D& t) {
-        key->Record(t.width, t.height);
-    }
-
-    template <>
-    void CacheKeySerializer<VkRect2D>::Serialize(CacheKey* key, const VkRect2D& t) {
-        key->Record(t.offset, t.extent);
-    }
-
-    template <>
-    void CacheKeySerializer<VkPipelineViewportStateCreateInfo>::Serialize(
-        CacheKey* key,
-        const VkPipelineViewportStateCreateInfo& t) {
-        key->Record(t.flags)
-            .RecordIterable(t.pViewports, t.viewportCount)
-            .RecordIterable(t.pScissors, t.scissorCount);
-        vulkan::SerializePnext<>(key, &t);
-    }
-
-    template <>
-    void CacheKeySerializer<VkPipelineRasterizationStateCreateInfo>::Serialize(
-        CacheKey* key,
-        const VkPipelineRasterizationStateCreateInfo& t) {
-        key->Record(t.flags, t.depthClampEnable, t.rasterizerDiscardEnable, t.polygonMode,
-                    t.cullMode, t.frontFace, t.depthBiasEnable, t.depthBiasConstantFactor,
-                    t.depthBiasClamp, t.depthBiasSlopeFactor, t.lineWidth);
-        vulkan::SerializePnext<>(key, &t);
-    }
-
-    template <>
-    void CacheKeySerializer<VkPipelineMultisampleStateCreateInfo>::Serialize(
-        CacheKey* key,
-        const VkPipelineMultisampleStateCreateInfo& t) {
-        key->Record(t.flags, t.rasterizationSamples, t.sampleShadingEnable, t.minSampleShading,
-                    t.pSampleMask, t.alphaToCoverageEnable, t.alphaToOneEnable);
-        vulkan::SerializePnext<>(key, &t);
-    }
-
-    template <>
-    void CacheKeySerializer<VkStencilOpState>::Serialize(CacheKey* key, const VkStencilOpState& t) {
-        key->Record(t.failOp, t.passOp, t.depthFailOp, t.compareOp, t.compareMask, t.writeMask,
-                    t.reference);
-    }
-
-    template <>
-    void CacheKeySerializer<VkPipelineDepthStencilStateCreateInfo>::Serialize(
-        CacheKey* key,
-        const VkPipelineDepthStencilStateCreateInfo& t) {
-        key->Record(t.flags, t.depthTestEnable, t.depthWriteEnable, t.depthCompareOp,
-                    t.depthBoundsTestEnable, t.stencilTestEnable, t.front, t.back, t.minDepthBounds,
-                    t.maxDepthBounds);
-        vulkan::SerializePnext<>(key, &t);
-    }
-
-    template <>
-    void CacheKeySerializer<VkPipelineColorBlendAttachmentState>::Serialize(
-        CacheKey* key,
-        const VkPipelineColorBlendAttachmentState& t) {
-        key->Record(t.blendEnable, t.srcColorBlendFactor, t.dstColorBlendFactor, t.colorBlendOp,
-                    t.srcAlphaBlendFactor, t.dstAlphaBlendFactor, t.alphaBlendOp, t.colorWriteMask);
-    }
-
-    template <>
-    void CacheKeySerializer<VkPipelineColorBlendStateCreateInfo>::Serialize(
-        CacheKey* key,
-        const VkPipelineColorBlendStateCreateInfo& t) {
-        key->Record(t.flags, t.logicOpEnable, t.logicOp)
-            .RecordIterable(t.pAttachments, t.attachmentCount)
-            .Record(t.blendConstants);
-        vulkan::SerializePnext<>(key, &t);
-    }
-
-    template <>
-    void CacheKeySerializer<VkPipelineDynamicStateCreateInfo>::Serialize(
-        CacheKey* key,
-        const VkPipelineDynamicStateCreateInfo& t) {
-        key->Record(t.flags).RecordIterable(t.pDynamicStates, t.dynamicStateCount);
-        vulkan::SerializePnext<>(key, &t);
-    }
-
-    template <>
-    void CacheKeySerializer<vulkan::RenderPassCacheQuery>::Serialize(
-        CacheKey* key,
-        const vulkan::RenderPassCacheQuery& t) {
-        key->Record(t.colorMask.to_ulong(), t.resolveTargetMask.to_ulong())
-            .RecordIterable(t.colorFormats)
-            .RecordIterable(t.colorLoadOp)
-            .RecordIterable(t.colorStoreOp)
-            .Record(t.hasDepthStencil, t.depthStencilFormat, t.depthLoadOp, t.depthStoreOp,
-                    t.stencilLoadOp, t.stencilStoreOp, t.readOnlyDepthStencil, t.sampleCount);
-    }
-
-    template <>
-    void CacheKeySerializer<VkGraphicsPipelineCreateInfo>::Serialize(
-        CacheKey* key,
-        const VkGraphicsPipelineCreateInfo& t) {
-        // The pipeline layout and render pass are not serialized here because they are pointers to
-        // backend objects. They need to be cross-referenced with the frontend objects and
-        // serialized from there. The base pipeline information is also currently not recorded since
-        // we do not use them in our backend implementation. If we decide to use them later on, they
-        // also need to be cross-referenced from the frontend.
-        key->Record(t.flags)
-            .RecordIterable(t.pStages, t.stageCount)
-            .Record(t.pVertexInputState, t.pInputAssemblyState, t.pTessellationState,
-                    t.pViewportState, t.pRasterizationState, t.pMultisampleState,
-                    t.pDepthStencilState, t.pColorBlendState, t.pDynamicState, t.subpass);
-        vulkan::SerializePnext<>(key, &t);
     }
 
 }  // namespace dawn::native
