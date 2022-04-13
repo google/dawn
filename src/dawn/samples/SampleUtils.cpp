@@ -22,7 +22,6 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/dawn_wsi.h"
 #include "dawn/native/DawnNative.h"
-#include "dawn/utils/BackendBinding.h"
 #include "dawn/utils/GLFWUtils.h"
 #include "dawn/utils/TerribleCommandBuffer.h"
 #include "dawn/wire/WireClient.h"
@@ -81,7 +80,7 @@ static wgpu::BackendType backendType = wgpu::BackendType::OpenGL;
 
 static CmdBufType cmdBufType = CmdBufType::Terrible;
 static std::unique_ptr<dawn::native::Instance> instance;
-static utils::BackendBinding* binding = nullptr;
+static wgpu::SwapChain swapChain;
 
 static GLFWwindow* window = nullptr;
 
@@ -110,7 +109,7 @@ wgpu::Device CreateCppDawnDevice() {
     }
 
     instance = std::make_unique<dawn::native::Instance>();
-    utils::DiscoverAdapter(instance.get(), window, backendType);
+    instance->DiscoverDefaultAdapters();
 
     // Get an adapter for the backend to use, and create the device.
     dawn::native::Adapter backendAdapter;
@@ -129,12 +128,23 @@ wgpu::Device CreateCppDawnDevice() {
     WGPUDevice backendDevice = backendAdapter.CreateDevice();
     DawnProcTable backendProcs = dawn::native::GetProcs();
 
-    binding = utils::CreateBinding(backendType, window, backendDevice);
-    if (binding == nullptr) {
-        return wgpu::Device();
-    }
+    // Create the swapchain
+    auto surfaceChainedDesc = utils::SetupWindowAndGetSurfaceDescriptor(window);
+    WGPUSurfaceDescriptor surfaceDesc;
+    surfaceDesc.nextInChain = reinterpret_cast<WGPUChainedStruct*>(surfaceChainedDesc.get());
+    WGPUSurface surface = backendProcs.instanceCreateSurface(instance->Get(), &surfaceDesc);
 
-    // Choose whether to use the backend procs and devices directly, or set up the wire.
+    WGPUSwapChainDescriptor swapChainDesc;
+    swapChainDesc.usage = WGPUTextureUsage_RenderAttachment;
+    swapChainDesc.format = static_cast<WGPUTextureFormat>(GetPreferredSwapChainTextureFormat());
+    swapChainDesc.width = 640;
+    swapChainDesc.height = 480;
+    swapChainDesc.presentMode = WGPUPresentMode_Mailbox;
+    swapChainDesc.implementation = 0;
+    WGPUSwapChain backendSwapChain =
+        backendProcs.deviceCreateSwapChain(backendDevice, surface, &swapChainDesc);
+
+    // Choose whether to use the backend procs and devices/swapchains directly, or set up the wire.
     WGPUDevice cDevice = nullptr;
     DawnProcTable procs;
 
@@ -142,6 +152,7 @@ wgpu::Device CreateCppDawnDevice() {
         case CmdBufType::None:
             procs = backendProcs;
             cDevice = backendDevice;
+            swapChain = wgpu::SwapChain::Acquire(backendSwapChain);
             break;
 
         case CmdBufType::Terrible: {
@@ -165,8 +176,13 @@ wgpu::Device CreateCppDawnDevice() {
             auto deviceReservation = wireClient->ReserveDevice();
             wireServer->InjectDevice(backendDevice, deviceReservation.id,
                                      deviceReservation.generation);
-
             cDevice = deviceReservation.device;
+
+            auto swapChainReservation = wireClient->ReserveSwapChain(cDevice);
+            wireServer->InjectSwapChain(backendSwapChain, swapChainReservation.id,
+                                        swapChainReservation.generation, deviceReservation.id,
+                                        deviceReservation.generation);
+            swapChain = wgpu::SwapChain::Acquire(swapChainReservation.swapchain);
         } break;
     }
 
@@ -175,19 +191,13 @@ wgpu::Device CreateCppDawnDevice() {
     return wgpu::Device::Acquire(cDevice);
 }
 
-uint64_t GetSwapChainImplementation() {
-    return binding->GetSwapChainImplementation();
-}
-
 wgpu::TextureFormat GetPreferredSwapChainTextureFormat() {
-    DoFlush();
-    return static_cast<wgpu::TextureFormat>(binding->GetPreferredSwapChainTextureFormat());
+    // TODO(dawn:1362): Return the adapter's preferred format when implemented.
+    return wgpu::TextureFormat::BGRA8Unorm;
 }
 
-wgpu::SwapChain GetSwapChain(const wgpu::Device& device) {
-    wgpu::SwapChainDescriptor swapChainDesc;
-    swapChainDesc.implementation = GetSwapChainImplementation();
-    return device.CreateSwapChain(nullptr, &swapChainDesc);
+wgpu::SwapChain GetSwapChain() {
+    return swapChain;
 }
 
 wgpu::TextureView CreateDefaultDepthStencilView(const wgpu::Device& device) {
@@ -257,6 +267,16 @@ bool InitSample(int argc, const char** argv) {
             return false;
         }
     }
+
+    // TODO(dawn:810): Reenable once the OpenGL(ES) backend is able to create its own context such
+    // that it can use surface-based swapchains.
+    if (backendType == wgpu::BackendType::OpenGL || backendType == wgpu::BackendType::OpenGLES) {
+        fprintf(stderr,
+                "The OpenGL(ES) backend is temporarily not supported for samples. See "
+                "https://crbug.com/dawn/810");
+        return false;
+    }
+
     return true;
 }
 

@@ -28,14 +28,8 @@ WGPUTextureFormat swapChainFormat;
 void init() {
     device = CreateCppDawnDevice().Release();
     queue = wgpuDeviceGetQueue(device);
-
-    {
-        WGPUSwapChainDescriptor descriptor = {};
-        descriptor.implementation = GetSwapChainImplementation();
-        swapchain = wgpuDeviceCreateSwapChain(device, nullptr, &descriptor);
-    }
+    swapchain = GetSwapChain().Release();
     swapChainFormat = static_cast<WGPUTextureFormat>(GetPreferredSwapChainTextureFormat());
-    wgpuSwapChainConfigure(swapchain, swapChainFormat, WGPUTextureUsage_RenderAttachment, 640, 480);
 
     const char* vs = R"(
         @stage(vertex) fn main(

@@ -30,12 +30,12 @@ namespace utils {
     // Does the necessary setup on the GLFWwindow to allow creating a wgpu::Surface with it and
     // calls `instance.CreateSurface` with the correct descriptor for this window.
     // Returns a null wgpu::Surface on failure.
-    wgpu::Surface CreateSurfaceForWindow(wgpu::Instance instance, GLFWwindow* window);
+    wgpu::Surface CreateSurfaceForWindow(const wgpu::Instance& instance, GLFWwindow* window);
 
     // Use for testing only. Does everything that CreateSurfaceForWindow does except the call to
-    // CreateSurface so the descriptor can be modified for testing.
-    std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptorForTesting(
-        GLFWwindow* window);
+    // CreateSurface. Useful to be able to modify the descriptor for testing, or when trying to
+    // avoid using the global proc table.
+    std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptor(GLFWwindow* window);
 
 }  // namespace utils
 

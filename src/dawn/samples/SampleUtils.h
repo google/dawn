@@ -26,9 +26,8 @@ struct GLFWwindow;
 struct GLFWwindow* GetGLFWWindow();
 
 wgpu::Device CreateCppDawnDevice();
-uint64_t GetSwapChainImplementation();
 wgpu::TextureFormat GetPreferredSwapChainTextureFormat();
-wgpu::SwapChain GetSwapChain(const wgpu::Device& device);
+wgpu::SwapChain GetSwapChain();
 wgpu::TextureView CreateDefaultDepthStencilView(const wgpu::Device& device);
 
 #endif  // SRC_DAWN_SAMPLES_SAMPLEUTILS_H_

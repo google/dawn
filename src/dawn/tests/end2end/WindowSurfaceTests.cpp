@@ -85,7 +85,7 @@ class WindowSurfaceInstanceTests : public testing::Test {
 TEST_F(WindowSurfaceInstanceTests, ControlCase) {
     GLFWwindow* window = CreateWindow();
     std::unique_ptr<wgpu::ChainedStruct> chainedDescriptor =
-        utils::SetupWindowAndGetSurfaceDescriptorForTesting(window);
+        utils::SetupWindowAndGetSurfaceDescriptor(window);
 
     wgpu::SurfaceDescriptor descriptor;
     descriptor.nextInChain = chainedDescriptor.get();
@@ -127,9 +127,9 @@ TEST_F(WindowSurfaceInstanceTests, HTMLCanvasDescriptor) {
 TEST_F(WindowSurfaceInstanceTests, TwoChainedDescriptors) {
     GLFWwindow* window = CreateWindow();
     std::unique_ptr<wgpu::ChainedStruct> chainedDescriptor1 =
-        utils::SetupWindowAndGetSurfaceDescriptorForTesting(window);
+        utils::SetupWindowAndGetSurfaceDescriptor(window);
     std::unique_ptr<wgpu::ChainedStruct> chainedDescriptor2 =
-        utils::SetupWindowAndGetSurfaceDescriptorForTesting(window);
+        utils::SetupWindowAndGetSurfaceDescriptor(window);
 
     wgpu::SurfaceDescriptor descriptor;
     descriptor.nextInChain = chainedDescriptor1.get();
@@ -144,7 +144,7 @@ TEST_F(WindowSurfaceInstanceTests, TwoChainedDescriptors) {
 TEST_F(WindowSurfaceInstanceTests, CorrectSTypeHWND) {
     GLFWwindow* window = CreateWindow();
     std::unique_ptr<wgpu::ChainedStruct> chainedDescriptor =
-        utils::SetupWindowAndGetSurfaceDescriptorForTesting(window);
+        utils::SetupWindowAndGetSurfaceDescriptor(window);
     ASSERT_EQ(chainedDescriptor->sType, wgpu::SType::SurfaceDescriptorFromWindowsHWND);
 }
 
@@ -180,7 +180,7 @@ TEST_F(WindowSurfaceInstanceTests, HWNDSurfacesAreInvalid) {
 TEST_F(WindowSurfaceInstanceTests, CorrectSTypeXlib) {
     GLFWwindow* window = CreateWindow();
     std::unique_ptr<wgpu::ChainedStruct> chainedDescriptor =
-        utils::SetupWindowAndGetSurfaceDescriptorForTesting(window);
+        utils::SetupWindowAndGetSurfaceDescriptor(window);
     ASSERT_EQ(chainedDescriptor->sType, wgpu::SType::SurfaceDescriptorFromXlibWindow);
 }
 
@@ -220,7 +220,7 @@ TEST_F(WindowSurfaceInstanceTests, XlibSurfacesAreInvalid) {
 TEST_F(WindowSurfaceInstanceTests, CorrectSTypeMetal) {
     GLFWwindow* window = CreateWindow();
     std::unique_ptr<wgpu::ChainedStruct> chainedDescriptor =
-        utils::SetupWindowAndGetSurfaceDescriptorForTesting(window);
+        utils::SetupWindowAndGetSurfaceDescriptor(window);
     ASSERT_EQ(chainedDescriptor->sType, wgpu::SType::SurfaceDescriptorFromMetalLayer);
 }
 

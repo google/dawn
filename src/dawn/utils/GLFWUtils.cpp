@@ -48,9 +48,9 @@ namespace utils {
         }
     }
 
-    wgpu::Surface CreateSurfaceForWindow(wgpu::Instance instance, GLFWwindow* window) {
+    wgpu::Surface CreateSurfaceForWindow(const wgpu::Instance& instance, GLFWwindow* window) {
         std::unique_ptr<wgpu::ChainedStruct> chainedDescriptor =
-            SetupWindowAndGetSurfaceDescriptorForTesting(window);
+            SetupWindowAndGetSurfaceDescriptor(window);
 
         wgpu::SurfaceDescriptor descriptor;
         descriptor.nextInChain = chainedDescriptor.get();
@@ -60,8 +60,7 @@ namespace utils {
     }
 
 #if defined(DAWN_PLATFORM_WINDOWS)
-    std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptorForTesting(
-        GLFWwindow* window) {
+    std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptor(GLFWwindow* window) {
         std::unique_ptr<wgpu::SurfaceDescriptorFromWindowsHWND> desc =
             std::make_unique<wgpu::SurfaceDescriptorFromWindowsHWND>();
         desc->hwnd = glfwGetWin32Window(window);
@@ -69,8 +68,7 @@ namespace utils {
         return std::move(desc);
     }
 #elif defined(DAWN_USE_X11)
-    std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptorForTesting(
-        GLFWwindow* window) {
+    std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptor(GLFWwindow* window) {
         std::unique_ptr<wgpu::SurfaceDescriptorFromXlibWindow> desc =
             std::make_unique<wgpu::SurfaceDescriptorFromXlibWindow>();
         desc->display = glfwGetX11Display();
@@ -78,9 +76,9 @@ namespace utils {
         return std::move(desc);
     }
 #elif defined(DAWN_ENABLE_BACKEND_METAL)
-    // SetupWindowAndGetSurfaceDescriptorForTesting defined in GLFWUtils_metal.mm
+    // SetupWindowAndGetSurfaceDescriptor defined in GLFWUtils_metal.mm
 #else
-    std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptorForTesting(GLFWwindow*) {
+    std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptor(GLFWwindow*) {
         return nullptr;
     }
 #endif

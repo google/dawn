@@ -28,8 +28,7 @@
 
 namespace utils {
 
-    std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptorForTesting(
-        GLFWwindow* window) {
+    std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptor(GLFWwindow* window) {
         if (@available(macOS 10.11, *)) {
             NSWindow* nsWindow = glfwGetCocoaWindow(window);
             NSView* view = [nsWindow contentView];
