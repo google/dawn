@@ -17,7 +17,7 @@
 #include <cassert>
 #include <cstring>
 #include <map>
-#include <regex>  // NOLINT(build/c++11)
+#include <regex>
 #include <string>
 #include <utility>
 #include <vector>

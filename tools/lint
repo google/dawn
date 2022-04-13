@@ -27,6 +27,10 @@ FILTER="-runtime/references"
 FILES="`find src/tint -type f` `find src/tint/cmd -type f`"
 FILES+="`find tools/src -type f` `find src/tint/cmd -type f`"
 
+# Note, there is currently no verbosity level set for cpplint.py which means
+# it will use the default level of 1. This level needs to match what is in the
+# PRESUBMIT.py file in order to report the same errors between CQ and Kokoro.
+
 if command -v go &> /dev/null; then
     # Go is installed. Run cpplint in parallel for speed wins
     go run $SCRIPT_DIR/src/cmd/run-parallel/main.go \

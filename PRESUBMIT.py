@@ -131,9 +131,11 @@ def _DoCommonChecks(input_api, output_api):
             input_api, output_api))
     results.extend(
         input_api.canned_checks.CheckDoNotSubmit(input_api, output_api))
+    # Note, the verbose_level here should match what is set in tools/lint so
+    # the same set of lint errors are reported on the CQ and Kokoro bots.
     results.extend(
         input_api.canned_checks.CheckChangeLintsClean(
-            input_api, output_api, lint_filters=LINT_FILTERS))
+            input_api, output_api, lint_filters=LINT_FILTERS, verbose_level=1))
     results.extend(
         _CheckNonInclusiveLanguage(input_api, output_api,
                                    _NonInclusiveFileFilter))
