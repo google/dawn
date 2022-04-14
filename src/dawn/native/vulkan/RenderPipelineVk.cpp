@@ -381,6 +381,9 @@ namespace dawn::native::vulkan {
             DAWN_ASSERT(stageCount < 2);
             shaderStages[stageCount] = shaderStage;
             stageCount++;
+
+            // Record cache key for each shader since it will become inaccessible later on.
+            GetCacheKey()->Record(stage).RecordIterable(*spirv);
         }
 
         PipelineVertexInputStateCreateInfoTemporaryAllocations tempAllocations;
@@ -528,6 +531,7 @@ namespace dawn::native::vulkan {
 
             query.SetSampleCount(GetSampleCount());
 
+            GetCacheKey()->Record(query);
             DAWN_TRY_ASSIGN(renderPass, device->GetRenderPassCache()->GetRenderPass(query));
         }
 
@@ -554,6 +558,10 @@ namespace dawn::native::vulkan {
         createInfo.subpass = 0;
         createInfo.basePipelineHandle = VkPipeline{};
         createInfo.basePipelineIndex = -1;
+
+        // Record cache key information now since createInfo is not stored.
+        GetCacheKey()->Record(createInfo,
+                              static_cast<const RenderPipeline*>(this)->GetLayout()->GetCacheKey());
 
         DAWN_TRY(CheckVkSuccess(
             device->fn.CreateGraphicsPipelines(device->GetVkDevice(), VkPipelineCache{}, 1,
