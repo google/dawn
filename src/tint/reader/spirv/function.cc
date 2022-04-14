@@ -378,7 +378,7 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
     case GLSLstd450Sinh:
       return "sinh";
     case GLSLstd450SmoothStep:
-      return "smoothStep";
+      return "smoothstep";
     case GLSLstd450Sqrt:
       return "sqrt";
     case GLSLstd450Step:

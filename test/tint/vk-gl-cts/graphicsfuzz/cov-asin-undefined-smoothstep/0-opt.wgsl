@@ -37,7 +37,7 @@ fn main_1() {
   let x_52 : vec4<f32> = v1;
   let x_53 : vec4<f32> = v2;
   let x_54 : vec4<f32> = v3;
-  v4 = smoothStep(x_52, x_53, x_54);
+  v4 = smoothstep(x_52, x_53, x_54);
   let x_56 : vec4<f32> = v4;
   x_GLF_color = vec4<f32>(x_56.x, x_56.y, x_56.w, x_56.x);
   let x_59 : f32 = v4.x;

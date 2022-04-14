@@ -475,7 +475,7 @@ INSTANTIATE_TEST_SUITE_P(
         {"FClamp", "clamp"},  // WGSL FClamp promises more for NaN
         {"Fma", "fma"},
         {"FMix", "mix"},
-        {"SmoothStep", "smoothStep"}}));
+        {"SmoothStep", "smoothstep"}}));
 
 TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Scalar) {
   const auto assembly = Preamble() + R"(

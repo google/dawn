@@ -213,7 +213,7 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          testing::Values(HlslImportData{"fma", "mad"},
                                          HlslImportData{"mix", "lerp"},
                                          HlslImportData{"clamp", "clamp"},
-                                         HlslImportData{"smoothStep",
+                                         HlslImportData{"smoothstep",
                                                         "smoothstep"}));
 
 using HlslImportData_TripleParam_VectorTest = TestParamHelper<HlslImportData>;
@@ -239,7 +239,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(HlslImportData{"faceForward", "faceforward"},
                     HlslImportData{"fma", "mad"},
                     HlslImportData{"clamp", "clamp"},
-                    HlslImportData{"smoothStep", "smoothstep"}));
+                    HlslImportData{"smoothstep", "smoothstep"}));
 
 TEST_F(HlslGeneratorImplTest_Import, DISABLED_HlslImportData_FMix) {
   FAIL();

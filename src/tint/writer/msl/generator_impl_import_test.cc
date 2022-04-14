@@ -190,7 +190,7 @@ INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          testing::Values(MslImportData{"fma", "fma"},
                                          MslImportData{"mix", "mix"},
                                          MslImportData{"clamp", "clamp"},
-                                         MslImportData{"smoothStep",
+                                         MslImportData{"smoothstep",
                                                        "smoothstep"}));
 
 using MslImportData_TripleParam_VectorTest = TestParamHelper<MslImportData>;
@@ -216,7 +216,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(MslImportData{"faceForward", "faceforward"},
                     MslImportData{"fma", "fma"},
                     MslImportData{"clamp", "clamp"},
-                    MslImportData{"smoothStep", "smoothstep"}));
+                    MslImportData{"smoothstep", "smoothstep"}));
 
 using MslImportData_TripleParam_Int_Test = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_TripleParam_Int_Test, IntScalar) {

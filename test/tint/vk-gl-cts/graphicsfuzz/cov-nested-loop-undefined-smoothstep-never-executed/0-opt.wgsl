@@ -67,7 +67,7 @@ fn main_1() {
         let x_89 : f32 = x_6.x_GLF_uniform_float_values[1].el;
         let x_91 : vec4<f32> = v0;
         let x_93 : i32 = a;
-        v1[x_83] = smoothStep(vec4<f32>(x_85, x_87, x_89, 3.0), vec4<f32>(1.0, 1.0, 1.0, 1.0), x_91)[x_93];
+        v1[x_83] = smoothstep(vec4<f32>(x_85, x_87, x_89, 3.0), vec4<f32>(1.0, 1.0, 1.0, 1.0), x_91)[x_93];
       }
 
       continuing {

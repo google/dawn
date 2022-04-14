@@ -16,7 +16,7 @@ fn main_1() {
   }
   g = 3.0;
   let x_33 : f32 = g;
-  x_GLF_color = vec4<f32>(smoothStep(0.0, 1.0, x_33), 0.0, 0.0, 1.0);
+  x_GLF_color = vec4<f32>(smoothstep(0.0, 1.0, x_33), 0.0, 0.0, 1.0);
   return;
 }
 

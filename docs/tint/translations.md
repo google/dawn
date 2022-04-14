@@ -92,7 +92,7 @@ decorated with `NonWritable` or each member of the struct can be decorated with
 | sign | GLSLstd450FSign | sign | sign |
 | sin | GLSLstd450Sin | sin | sin |
 | sinh | GLSLstd450Sinh | sinh | sinh |
-| smoothStep | GLSLstd450SmoothStep | smoothstep | smoothstep |
+| smoothstep | GLSLstd450SmoothStep | smoothstep | smoothstep |
 | sqrt | GLSLstd450Sqrt | sqrt | sqrt |
 | step | GLSLstd450Step | step | step |
 | tan | GLSLstd450Tan | tan | tan |

@@ -941,7 +941,7 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                                          BuiltinData{"fma", "Fma"},
                                          BuiltinData{"mix", "FMix"},
 
-                                         BuiltinData{"smoothStep",
+                                         BuiltinData{"smoothstep",
                                                      "SmoothStep"}));
 
 TEST_F(BuiltinBuilderTest, Call_FaceForward_Vector) {

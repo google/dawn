@@ -212,7 +212,7 @@ INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_Import,
                          GlslImportData_TripleParam_ScalarTest,
                          testing::Values(GlslImportData{"mix", "mix"},
                                          GlslImportData{"clamp", "clamp"},
-                                         GlslImportData{"smoothStep",
+                                         GlslImportData{"smoothstep",
                                                         "smoothstep"}));
 
 using GlslImportData_TripleParam_VectorTest = TestParamHelper<GlslImportData>;
@@ -237,7 +237,7 @@ INSTANTIATE_TEST_SUITE_P(
     GlslImportData_TripleParam_VectorTest,
     testing::Values(GlslImportData{"faceForward", "faceforward"},
                     GlslImportData{"clamp", "clamp"},
-                    GlslImportData{"smoothStep", "smoothstep"}));
+                    GlslImportData{"smoothstep", "smoothstep"}));
 
 TEST_F(GlslGeneratorImplTest_Import, DISABLED_GlslImportData_FMix) {
   FAIL();
