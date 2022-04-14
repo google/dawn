@@ -19,7 +19,15 @@ import { parseQuery } from '../third_party/webgpu-cts/src/common/internal/query/
 
 import { TestWorker } from '../third_party/webgpu-cts/src/common/runtime/helper/test_worker.js';
 
+// The Python-side websockets library has a max payload size of 72638. Set the
+// max allowable logs size in a single payload to a bit less than that.
+const LOGS_MAX_BYTES = 72000;
+
 var socket;
+
+function byteSize(s) {
+  return new Blob([s]).size;
+}
 
 async function setupWebsocket(port) {
   socket = new WebSocket('ws://127.0.0.1:' + port)
@@ -54,8 +62,35 @@ async function runCtsTest(query, use_worker) {
         await testcase.run(rec, expectations);
       }
 
-      socket.send(JSON.stringify({'s': res.status,
-                                  'l': (res.logs ?? []).map(prettyPrintLog)}));
+      let fullLogs = (res.logs ?? []).map(prettyPrintLog);
+      fullLogs = fullLogs.join('\n\n\n');
+      let logPieces = [fullLogs]
+      // Split the log pieces until they all are guaranteed to fit into a
+      // websocket payload.
+      while (true) {
+        let tempLogPieces = []
+        for (const piece of logPieces) {
+          if (byteSize(piece) > LOGS_MAX_BYTES) {
+            let midpoint = Math.floor(piece.length / 2);
+            tempLogPieces.push(piece.substring(0, midpoint));
+            tempLogPieces.push(piece.substring(midpoint));
+          } else {
+            tempLogPieces.push(piece)
+          }
+        }
+        // Didn't make any changes - all pieces are under the size limit.
+        if (logPieces.every((value, index) => value == tempLogPieces[index])) {
+          break;
+        }
+        logPieces = tempLogPieces;
+      }
+
+      logPieces.forEach((piece, index, arr) => {
+        let isFinal = index == arr.length - 1;
+        socket.send(JSON.stringify({'s': res.status,
+                                    'l': piece,
+                                    'final': isFinal}));
+      });
     };
     await wpt_fn();
   }
