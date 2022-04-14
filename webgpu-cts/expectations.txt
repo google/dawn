@@ -485,7 +485,7 @@ crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,call,builtin,extr
 crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,call,builtin,firstTrailingBit:* [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,call,builtin,insertBits:* [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,call,builtin,ldexp:* [ Failure ]
-crbug.com/tint/1500 [ win nvidia release ] webgpu:shader,execution,shader_io,compute_builtins:inputs:* [ Failure ]
+crbug.com/tint/1500 [ nvidia release win ] webgpu:shader,execution,shader_io,compute_builtins:inputs:* [ Failure ]
 
 ################################################################################
 # vertex_state failures
@@ -613,3 +613,13 @@ crbug.com/dawn/0000 [ win ] webgpu:api,validation,image_copy,layout_related:rows
 crbug.com/dawn/0000 [ win ] webgpu:api,validation,image_copy,texture_related:copy_rectangle:method="CopyT2B";dimension="2d" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,validation,image_copy,texture_related:copy_rectangle:method="WriteTexture";dimension="3d" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ win ] webgpu:shader,validation,variable_and_const:io_shareable_type:storageClass="in";type="array%3Cu32,%2012%3E" [ RetryOnFailure ]
+
+# New flakes. Please triage:
+crbug.com/dawn/0000 [ angle-opengl dawn-backend-validation no-oop-c nvidia-0x2184 release skia-renderer-vulkan ubuntu ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg16uint";dstFormat="rg16uint";dimension="3d" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ angle-opengl dawn-backend-validation no-oop-c nvidia-0x2184 release skia-renderer-vulkan ubuntu ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg32sint";dstFormat="rg32sint";dimension="2d" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ angle-opengl dawn-backend-validation no-oop-c nvidia-0x2184 release skia-renderer-vulkan ubuntu ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba16float";dstFormat="rgba16float";dimension="3d" [ RetryOnFailure ]
+
+# New failures. Please triage:
+crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation intel-0x5912 no-oop-c release skia-renderer-vulkan ubuntu ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="astc-8x5-unorm-srgb";dstFormat="astc-8x5-unorm-srgb";dimension="2d" [ Failure ]
+crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation no-oop-c nvidia-0x2184 release skia-renderer-vulkan ubuntu ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="bgra8unorm";dstFormat="bgra8unorm";dimension="3d" [ Failure ]
+crbug.com/dawn/0000 [ angle-d3d11 dawn-no-backend-validation intel-0x5912 oop-c release-x64 skia-renderer-gl win10 ] webgpu:api,operation,memory_sync,texture,same_subresource:rw,* [ Slow ]
