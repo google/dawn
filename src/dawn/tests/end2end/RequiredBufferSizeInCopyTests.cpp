@@ -14,6 +14,7 @@
 
 #include "dawn/tests/DawnTest.h"
 
+#include "dawn/common/Platform.h"
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
@@ -71,6 +72,14 @@ namespace {
 class RequiredBufferSizeInCopyTests
     : public DawnTestWithParams<RequiredBufferSizeInCopyTestsParams> {
   protected:
+    void SetUp() override {
+        DawnTestWithParams<RequiredBufferSizeInCopyTestsParams>::SetUp();
+#ifdef DAWN_PLATFORM_32_BIT
+        // Suspect causing flaky hangs or crashes. crbug.com/dawn/1375.
+        DAWN_SUPPRESS_TEST_IF(IsWindows() && IsIntel());
+#endif
+    }
+
     void DoTest(const uint64_t bufferSize) {
         wgpu::BufferDescriptor descriptor;
         descriptor.size = bufferSize;
