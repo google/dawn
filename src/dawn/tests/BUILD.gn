@@ -186,6 +186,7 @@ dawn_test("dawn_unittests") {
     "${dawn_root}/src/dawn/native:static",
     "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn/wire",
+    "${dawn_root}/third_party/gn/abseil-cpp:strings",
   ]
 
   # Add internal dawn native config for internal unittests.
