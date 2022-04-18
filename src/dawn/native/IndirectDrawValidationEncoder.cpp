@@ -217,7 +217,7 @@ namespace dawn::native {
         // single pass as possible. Batches can be grouped together as long as they're validating
         // data from the same indirect buffer, but they may still be split into multiple passes if
         // the number of draw calls in a pass would exceed some (very high) upper bound.
-        size_t validatedParamsSize = 0;
+        uint64_t validatedParamsSize = 0;
         std::vector<Pass> passes;
         IndirectDrawMetadata::IndexedIndirectBufferValidationInfoMap& bufferInfoMap =
             *indirectDrawMetadata->GetIndexedIndirectBufferValidationInfo();
@@ -225,7 +225,7 @@ namespace dawn::native {
             return {};
         }
 
-        const uint32_t maxStorageBufferBindingSize =
+        const uint64_t maxStorageBufferBindingSize =
             device->GetLimits().v1.maxStorageBufferBindingSize;
         const uint32_t minStorageBufferOffsetAlignment =
             device->GetLimits().v1.minStorageBufferOffsetAlignment;

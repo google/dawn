@@ -34,7 +34,7 @@ namespace dawn::native {
 
     // In the unlikely scenario that indirect offsets used over a single buffer span more than
     // this length of the buffer, we split the validation work into multiple batches.
-    uint32_t ComputeMaxIndirectValidationBatchOffsetRange(const CombinedLimits& limits);
+    uint64_t ComputeMaxIndirectValidationBatchOffsetRange(const CombinedLimits& limits);
 
     // Metadata corresponding to the validation requirements of a single render pass. This metadata
     // is accumulated while its corresponding render pass is encoded, and is later used to encode
@@ -66,14 +66,14 @@ namespace dawn::native {
             // Logs a new drawIndexedIndirect call for the render pass. `cmd` is updated with an
             // assigned (and deferred) buffer ref and relative offset before returning.
             void AddIndexedIndirectDraw(uint32_t maxDrawCallsPerIndirectValidationBatch,
-                                        uint32_t maxBatchOffsetRange,
+                                        uint64_t maxBatchOffsetRange,
                                         IndexedIndirectDraw draw);
 
             // Adds draw calls from an already-computed batch, e.g. from a previously encoded
             // RenderBundle. The added batch is merged into an existing batch if possible, otherwise
             // it's added to mBatch.
             void AddBatch(uint32_t maxDrawCallsPerIndirectValidationBatch,
-                          uint32_t maxBatchOffsetRange,
+                          uint64_t maxBatchOffsetRange,
                           const IndexedIndirectValidationBatch& batch);
 
             const std::vector<IndexedIndirectValidationBatch>& GetBatches() const;
@@ -117,8 +117,8 @@ namespace dawn::native {
         IndexedIndirectBufferValidationInfoMap mIndexedIndirectBufferValidationInfo;
         std::set<RenderBundleBase*> mAddedBundles;
 
+        uint64_t mMaxBatchOffsetRange;
         uint32_t mMaxDrawCallsPerBatch;
-        uint32_t mMaxBatchOffsetRange;
     };
 
 }  // namespace dawn::native

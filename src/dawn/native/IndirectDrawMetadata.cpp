@@ -25,7 +25,7 @@
 
 namespace dawn::native {
 
-    uint32_t ComputeMaxIndirectValidationBatchOffsetRange(const CombinedLimits& limits) {
+    uint64_t ComputeMaxIndirectValidationBatchOffsetRange(const CombinedLimits& limits) {
         return limits.v1.maxStorageBufferBindingSize - limits.v1.minStorageBufferOffsetAlignment -
                kDrawIndexedIndirectSize;
     }
@@ -37,7 +37,7 @@ namespace dawn::native {
 
     void IndirectDrawMetadata::IndexedIndirectBufferValidationInfo::AddIndexedIndirectDraw(
         uint32_t maxDrawCallsPerIndirectValidationBatch,
-        uint32_t maxBatchOffsetRange,
+        uint64_t maxBatchOffsetRange,
         IndexedIndirectDraw draw) {
         const uint64_t newOffset = draw.clientBufferOffset;
         auto it = mBatches.begin();
@@ -92,7 +92,7 @@ namespace dawn::native {
 
     void IndirectDrawMetadata::IndexedIndirectBufferValidationInfo::AddBatch(
         uint32_t maxDrawCallsPerIndirectValidationBatch,
-        uint32_t maxBatchOffsetRange,
+        uint64_t maxBatchOffsetRange,
         const IndexedIndirectValidationBatch& newBatch) {
         auto it = mBatches.begin();
         while (it != mBatches.end()) {
@@ -123,8 +123,8 @@ namespace dawn::native {
     }
 
     IndirectDrawMetadata::IndirectDrawMetadata(const CombinedLimits& limits)
-        : mMaxDrawCallsPerBatch(ComputeMaxDrawCallsPerIndirectValidationBatch(limits)),
-          mMaxBatchOffsetRange(ComputeMaxIndirectValidationBatchOffsetRange(limits)) {
+        : mMaxBatchOffsetRange(ComputeMaxIndirectValidationBatchOffsetRange(limits)),
+          mMaxDrawCallsPerBatch(ComputeMaxDrawCallsPerIndirectValidationBatch(limits)) {
     }
 
     IndirectDrawMetadata::~IndirectDrawMetadata() = default;

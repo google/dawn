@@ -22,6 +22,14 @@ constexpr uint32_t kRTSize = 4;
 
 class DrawIndexedIndirectTest : public DawnTest {
   protected:
+    wgpu::RequiredLimits GetRequiredLimits(const wgpu::SupportedLimits& supported) override {
+        // Force larger limits, that might reach into the upper 32 bits of the 64bit limit values,
+        // to help detect integer arithmetic bugs like overflows and truncations.
+        wgpu::RequiredLimits required = {};
+        required.limits = supported.limits;
+        return required;
+    }
+
     void SetUp() override {
         DawnTest::SetUp();
 
