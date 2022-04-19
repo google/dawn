@@ -31,6 +31,7 @@ wgpu::BindGroup bindGroup;
 wgpu::Buffer ubo;
 
 float RandomFloat(float min, float max) {
+    // NOLINTNEXTLINE(runtime/threadsafe_fn)
     float zeroOne = rand() / float(RAND_MAX);
     return zeroOne * (max - min) + min;
 }
