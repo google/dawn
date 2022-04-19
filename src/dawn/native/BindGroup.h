@@ -86,7 +86,7 @@ namespace dawn::native {
         Ref<BindGroupLayoutBase> mLayout;
         BindGroupLayoutBase::BindingDataPointers mBindingData;
 
-        // TODO:(dawn:1293): Store external textures in
+        // TODO(dawn:1293): Store external textures in
         // BindGroupLayoutBase::BindingDataPointers::bindings
         std::vector<Ref<ExternalTextureBase>> mBoundExternalTextures;
     };

@@ -306,7 +306,6 @@ namespace dawn::native::d3d12 {
         }
 
         D3D12_MESSAGE_ID denyIds[] = {
-
             //
             // Permanent IDs: list of warnings that are not applicable
             //

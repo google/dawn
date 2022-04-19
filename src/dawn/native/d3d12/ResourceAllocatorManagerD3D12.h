@@ -32,7 +32,6 @@ namespace dawn::native::d3d12 {
     // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_heap_flags
     // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/ne-d3d12-d3d12_heap_type
     enum ResourceHeapKind {
-
         // Resource heap tier 2
         // Allows resource heaps to contain all buffer and textures types.
         // This enables better heap re-use by avoiding the need for separate heaps and

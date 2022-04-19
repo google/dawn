@@ -24,7 +24,6 @@ namespace dawn::native {
     // Allocation method determines how memory was sub-divided.
     // Used by the device to get the allocator that was responsible for the allocation.
     enum class AllocationMethod {
-
         // Memory not sub-divided.
         kDirect,
 

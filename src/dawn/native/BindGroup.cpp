@@ -308,7 +308,7 @@ namespace dawn::native {
             // external textures have been expanded into their underlying contents. For this reason
             // we must identify external texture binding entries by checking the bind group entry
             // itself.
-            // TODO:(dawn:1293): Store external textures in
+            // TODO(dawn:1293): Store external textures in
             // BindGroupLayoutBase::BindingDataPointers::bindings so checking external textures can
             // be moved in the switch below.
             const ExternalTextureBindingEntry* externalTextureBindingEntry = nullptr;
