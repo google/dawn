@@ -27,7 +27,7 @@ namespace wgpu::binding {
     // wgpu::CommandBuffer.
     class GPUCommandBuffer final : public interop::GPUCommandBuffer {
       public:
-        GPUCommandBuffer(wgpu::CommandBuffer cmd_buf);
+        explicit GPUCommandBuffer(wgpu::CommandBuffer cmd_buf);
 
         // Implicit cast operator to Dawn GPU object
         inline operator const wgpu::CommandBuffer&() const {

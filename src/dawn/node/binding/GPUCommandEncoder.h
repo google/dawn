@@ -27,7 +27,7 @@ namespace wgpu::binding {
     // wgpu::CommandEncoder.
     class GPUCommandEncoder final : public interop::GPUCommandEncoder {
       public:
-        GPUCommandEncoder(wgpu::CommandEncoder enc);
+        explicit GPUCommandEncoder(wgpu::CommandEncoder enc);
 
         // interop::GPUCommandEncoder interface compliance
         interop::Interface<interop::GPURenderPassEncoder> beginRenderPass(

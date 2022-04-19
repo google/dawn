@@ -65,7 +65,7 @@ namespace wgpu::binding {
     // automatically freed when the Converter is destructed.
     class Converter {
       public:
-        Converter(Napi::Env e) : env(e) {
+        explicit Converter(Napi::Env e) : env(e) {
         }
         ~Converter();
 

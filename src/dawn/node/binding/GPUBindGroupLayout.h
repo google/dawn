@@ -27,7 +27,7 @@ namespace wgpu::binding {
     // wgpu::BindGroupLayout.
     class GPUBindGroupLayout final : public interop::GPUBindGroupLayout {
       public:
-        GPUBindGroupLayout(wgpu::BindGroupLayout layout);
+        explicit GPUBindGroupLayout(wgpu::BindGroupLayout layout);
 
         // Implicit cast operator to Dawn GPU object
         inline operator const wgpu::BindGroupLayout&() const {

@@ -78,6 +78,7 @@ namespace wgpu::interop {
         using IntegerType = T;
         ClampedInteger() : value(0) {
         }
+        // NOLINTNEXTLINE(runtime/explicit)
         ClampedInteger(T value) : value(value) {
         }
         operator T() const {
@@ -95,6 +96,7 @@ namespace wgpu::interop {
         using IntegerType = T;
         EnforceRangeInteger() : value(0) {
         }
+        // NOLINTNEXTLINE(runtime/explicit)
         EnforceRangeInteger(T value) : value(value) {
         }
         operator T() const {

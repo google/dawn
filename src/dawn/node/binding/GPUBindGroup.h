@@ -26,7 +26,7 @@ namespace wgpu::binding {
     // GPUBindGroup is an implementation of interop::GPUBindGroup that wraps a wgpu::BindGroup.
     class GPUBindGroup final : public interop::GPUBindGroup {
       public:
-        GPUBindGroup(wgpu::BindGroup group);
+        explicit GPUBindGroup(wgpu::BindGroup group);
 
         // Implicit cast operator to Dawn GPU object
         inline operator const wgpu::BindGroup&() const {

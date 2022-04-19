@@ -27,7 +27,7 @@ namespace wgpu::binding {
     // wgpu::RenderBundleEncoder.
     class GPURenderBundleEncoder final : public interop::GPURenderBundleEncoder {
       public:
-        GPURenderBundleEncoder(wgpu::RenderBundleEncoder enc);
+        explicit GPURenderBundleEncoder(wgpu::RenderBundleEncoder enc);
 
         // interop::GPURenderBundleEncoder interface compliance
         interop::Interface<interop::GPURenderBundle> finish(

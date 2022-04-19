@@ -87,7 +87,7 @@ namespace wgpu::binding {
         ////////////////////////////////////////////////////////////////////////////////
         class Features : public interop::GPUSupportedFeatures {
           public:
-            Features(WGPUDeviceProperties properties) {
+            explicit Features(WGPUDeviceProperties properties) {
                 if (properties.depth24UnormStencil8) {
                     enabled_.emplace(interop::GPUFeatureName::kDepth24UnormStencil8);
                 }

@@ -26,7 +26,7 @@ namespace wgpu::binding {
     // GPUSupportedLimits is an implementation of interop::GPUSupportedLimits.
     class GPUSupportedLimits final : public interop::GPUSupportedLimits {
       public:
-        GPUSupportedLimits(wgpu::SupportedLimits);
+        explicit GPUSupportedLimits(wgpu::SupportedLimits);
 
         // interop::GPUSupportedLimits interface compliance
         uint32_t getMaxTextureDimension1D(Napi::Env) override;

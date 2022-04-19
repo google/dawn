@@ -60,7 +60,7 @@ namespace wgpu::binding {
         class OOMError : public interop::GPUOutOfMemoryError {};
         class ValidationError : public interop::GPUValidationError {
           public:
-            ValidationError(std::string message) : message_(std::move(message)) {
+            explicit ValidationError(std::string message) : message_(std::move(message)) {
             }
 
             std::string getMessage(Napi::Env) override {
@@ -316,7 +316,7 @@ namespace wgpu::binding {
             Promise promise;
             AsyncTask task;
         };
-        auto ctx = new Context{env, Promise(env, PROMISE_INFO), async_};
+        auto ctx = new Context{env, Promise(env, PROMISE_INFO), AsyncTask(async_)};
         auto promise = ctx->promise;
 
         device_.CreateComputePipelineAsync(
@@ -359,7 +359,7 @@ namespace wgpu::binding {
             Promise promise;
             AsyncTask task;
         };
-        auto ctx = new Context{env, Promise(env, PROMISE_INFO), async_};
+        auto ctx = new Context{env, Promise(env, PROMISE_INFO), AsyncTask(async_)};
         auto promise = ctx->promise;
 
         device_.CreateRenderPipelineAsync(
@@ -453,7 +453,7 @@ namespace wgpu::binding {
             Promise promise;
             AsyncTask task;
         };
-        auto* ctx = new Context{env, Promise(env, PROMISE_INFO), async_};
+        auto* ctx = new Context{env, Promise(env, PROMISE_INFO), AsyncTask(async_)};
         auto promise = ctx->promise;
 
         device_.PopErrorScope(

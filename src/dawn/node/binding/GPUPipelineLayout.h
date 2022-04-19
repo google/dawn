@@ -27,7 +27,7 @@ namespace wgpu::binding {
     // wgpu::PipelineLayout.
     class GPUPipelineLayout final : public interop::GPUPipelineLayout {
       public:
-        GPUPipelineLayout(wgpu::PipelineLayout layout);
+        explicit GPUPipelineLayout(wgpu::PipelineLayout layout);
 
         // Implicit cast operator to Dawn GPU object
         inline operator const wgpu::PipelineLayout&() const {

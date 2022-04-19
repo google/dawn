@@ -27,7 +27,7 @@ namespace wgpu::binding {
     // wgpu::ComputePipeline.
     class GPUComputePipeline final : public interop::GPUComputePipeline {
       public:
-        GPUComputePipeline(wgpu::ComputePipeline pipeline);
+        explicit GPUComputePipeline(wgpu::ComputePipeline pipeline);
 
         // Implicit cast operator to Dawn GPU object
         inline operator const wgpu::ComputePipeline&() const {

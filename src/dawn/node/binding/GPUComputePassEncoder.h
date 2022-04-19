@@ -27,7 +27,7 @@ namespace wgpu::binding {
     // wgpu::ComputePassEncoder.
     class GPUComputePassEncoder final : public interop::GPUComputePassEncoder {
       public:
-        GPUComputePassEncoder(wgpu::ComputePassEncoder enc);
+        explicit GPUComputePassEncoder(wgpu::ComputePassEncoder enc);
 
         // Implicit cast operator to Dawn GPU object
         inline operator const wgpu::ComputePassEncoder&() const {

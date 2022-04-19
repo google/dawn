@@ -27,7 +27,7 @@ namespace wgpu::binding {
     // wgpu::RenderPipeline.
     class GPURenderPipeline final : public interop::GPURenderPipeline {
       public:
-        GPURenderPipeline(wgpu::RenderPipeline pipeline);
+        explicit GPURenderPipeline(wgpu::RenderPipeline pipeline);
 
         // Implicit cast operator to Dawn GPU object
         inline operator const wgpu::RenderPipeline&() const {
