@@ -19,22 +19,22 @@ from generator_lib import Generator, run_generator, FileRender
 
 
 def get_git():
-    return 'git.bat' if sys.platform == 'win32' else 'git'
+    return "git.bat" if sys.platform == "win32" else "git"
 
 
 def get_gitHash(dawnDir):
-    result = subprocess.run([get_git(), 'rev-parse', 'HEAD'],
+    result = subprocess.run([get_git(), "rev-parse", "HEAD"],
                             stdout=subprocess.PIPE,
                             cwd=dawnDir)
     if result.returncode == 0:
-        return result.stdout.decode('utf-8').strip()
+        return result.stdout.decode("utf-8").strip()
     # No hash was available (possibly) because the directory was not a git checkout. Dawn should
     # explicitly handle its absenece and disable features relying on the hash, i.e. caching.
-    return ''
+    return ""
 
 
 def get_gitHead(dawnDir):
-    return os.path.join(dawnDir, '.git', 'HEAD')
+    return os.path.join(dawnDir, ".git", "HEAD")
 
 
 def gitExists(dawnDir):
@@ -43,71 +43,78 @@ def gitExists(dawnDir):
 
 def unpackGitRef(packed, resolved):
     with open(packed) as fin:
-        refs = fin.read().strip().split('\n')
+        refs = fin.read().strip().split("\n")
 
     # Strip comments
-    refs = [ref.split(' ') for ref in refs if ref.strip()[0] != '#']
+    refs = [ref.split(" ") for ref in refs if ref.strip()[0] != "#"]
 
     # Parse results which are in the format [<gitHash>, <refFile>] from previous step.
     refs = [gitHash for (gitHash, refFile) in refs if refFile == resolved]
     if len(refs) == 1:
-        with open(resolved, 'w') as fout:
-            fout.write(refs[0] + '\n')
+        with open(resolved, "w") as fout:
+            fout.write(refs[0] + "\n")
         return True
     return False
 
 
 def get_gitResolvedHead(dawnDir):
     result = subprocess.run(
-        [get_git(), 'rev-parse', '--symbolic-full-name', 'HEAD'],
+        [get_git(), "rev-parse", "--symbolic-full-name", "HEAD"],
         stdout=subprocess.PIPE,
-        cwd=dawnDir)
+        cwd=dawnDir,
+    )
     if result.returncode != 0:
-        raise Exception('Failed to execute git rev-parse to resolve git head.')
+        raise Exception("Failed to execute git rev-parse to resolve git head.")
 
-    resolved = os.path.join(dawnDir, '.git',
-                            result.stdout.decode('utf-8').strip())
+    resolved = os.path.join(dawnDir, ".git",
+                            result.stdout.decode("utf-8").strip())
 
     # Check a packed-refs file exists. If so, we need to potentially unpack and include it as a dep.
-    packed = os.path.join(dawnDir, '.git', 'packed-refs')
+    packed = os.path.join(dawnDir, ".git", "packed-refs")
     if os.path.exists(packed) and unpackGitRef(packed, resolved):
         return [packed, resolved]
 
     if not os.path.exists(resolved):
-        raise Exception('Unable to resolve git HEAD hash file:', path)
+        raise Exception("Unable to resolve git HEAD hash file:", resolved)
     return [resolved]
 
 
 def compute_params(args):
     return {
-        'get_gitHash': lambda: get_gitHash(os.path.abspath(args.dawn_dir)),
+        "get_gitHash": lambda: get_gitHash(os.path.abspath(args.dawn_dir)),
     }
 
 
 class DawnVersionGenerator(Generator):
     def get_description(self):
-        return 'Generates version dependent Dawn code. Currently regenerated dependent on git hash.'
+        return "Generates version dependent Dawn code. Currently regenerated dependent on git hash."
 
     def add_commandline_arguments(self, parser):
-        parser.add_argument('--dawn-dir',
-                            required=True,
-                            type=str,
-                            help='The Dawn root directory path to use')
+        parser.add_argument(
+            "--dawn-dir",
+            required=True,
+            type=str,
+            help="The Dawn root directory path to use",
+        )
 
     def get_dependencies(self, args):
         dawnDir = os.path.abspath(args.dawn_dir)
         if gitExists(dawnDir):
-            return [get_gitHead(dawnDir)] + get_gitResolvedHead(dawnDir)
+            try:
+                return [get_gitHead(dawnDir)] + get_gitResolvedHead(dawnDir)
+            except Exception as e:
+                print(e)
+                return []
         return []
 
     def get_file_renders(self, args):
         params = compute_params(args)
 
         return [
-            FileRender('dawn/common/Version.h',
-                       'src/dawn/common/Version_autogen.h', [params]),
+            FileRender("dawn/common/Version.h",
+                       "src/dawn/common/Version_autogen.h", [params]),
         ]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(run_generator(DawnVersionGenerator()))
