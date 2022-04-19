@@ -38,8 +38,8 @@ TEST_F(WireInjectTextureTests, CallAfterReserveInject) {
                                                reservation.deviceId, reservation.deviceGeneration));
 
     wgpuTextureCreateView(reservation.texture, nullptr);
-    WGPUTextureView apiDummyView = api.GetNewTextureView();
-    EXPECT_CALL(api, TextureCreateView(apiTexture, nullptr)).WillOnce(Return(apiDummyView));
+    WGPUTextureView apiPlaceholderView = api.GetNewTextureView();
+    EXPECT_CALL(api, TextureCreateView(apiTexture, nullptr)).WillOnce(Return(apiPlaceholderView));
     FlushClient();
 }
 

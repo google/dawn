@@ -99,8 +99,8 @@ namespace dawn::native::opengl {
         SetToggle(Toggle::DisableDepthStencilRead, !supportsDepthStencilRead);
         SetToggle(Toggle::DisableSampleVariables, !supportsSampleVariables);
         SetToggle(Toggle::FlushBeforeClientWaitSync, gl.GetVersion().IsES());
-        // For OpenGL ES, we must use dummy fragment shader for vertex-only render pipeline.
-        SetToggle(Toggle::UseDummyFragmentInVertexOnlyPipeline, gl.GetVersion().IsES());
+        // For OpenGL ES, we must use a placeholder fragment shader for vertex-only render pipeline.
+        SetToggle(Toggle::UsePlaceholderFragmentInVertexOnlyPipeline, gl.GetVersion().IsES());
     }
 
     const GLFormat& Device::GetGLFormat(const Format& format) {

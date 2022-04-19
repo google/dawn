@@ -308,12 +308,12 @@ TEST_P(VertexOnlyRenderPipelineTest, MultiplePass) {
 
 DAWN_INSTANTIATE_TEST(VertexOnlyRenderPipelineTest,
                       D3D12Backend(),
-                      D3D12Backend({"use_dummy_fragment_in_vertex_only_pipeline"}),
+                      D3D12Backend({"use_placeholder_fragment_in_vertex_only_pipeline"}),
                       MetalBackend(),
-                      MetalBackend({"use_dummy_fragment_in_vertex_only_pipeline"}),
+                      MetalBackend({"use_placeholder_fragment_in_vertex_only_pipeline"}),
                       OpenGLBackend(),
-                      OpenGLBackend({"use_dummy_fragment_in_vertex_only_pipeline"}),
+                      OpenGLBackend({"use_placeholder_fragment_in_vertex_only_pipeline"}),
                       OpenGLESBackend(),
-                      OpenGLESBackend({"use_dummy_fragment_in_vertex_only_pipeline"}),
+                      OpenGLESBackend({"use_placeholder_fragment_in_vertex_only_pipeline"}),
                       VulkanBackend(),
-                      VulkanBackend({"use_dummy_fragment_in_vertex_only_pipeline"}));
+                      VulkanBackend({"use_placeholder_fragment_in_vertex_only_pipeline"}));

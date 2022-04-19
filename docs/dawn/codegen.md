@@ -2,7 +2,7 @@
 
 Dawn relies on a lot of code generation to produce boilerplate code, especially webgpu.h-related code. They start by reading some JSON files (and sometimes XML too), process the data into an in-memory representation that's then used by some [Jinja2](https://jinja.palletsprojects.com/) templates to generate the code. This is similar to the model/view separation in Web development.
 
-Generators are based on [generator_lib.py](../generator/generator_lib.py) which provides facilities for integrating in build systems and using Jinja2. Templates can be found in [`generator/templates`](../generator/templates) and the generated files are in `out/<Debug/Release/foo>/gen/src` when building Dawn in standalone. Generated files can also be found in [Chromium's code search](https://source.chromium.org/chromium/chromium/src/+/master:out/Debug/gen/third_party/dawn/src/).
+Generators are based on [generator_lib.py](../generator/generator_lib.py) which provides facilities for integrating in build systems and using Jinja2. Templates can be found in [`generator/templates`](../generator/templates) and the generated files are in `out/<Debug/Release/foo>/gen/src` when building Dawn in standalone. Generated files can also be found in [Chromium's code search](https://source.chromium.org/chromium/chromium/src/+/main:out/Debug/gen/third_party/dawn/src/).
 
 ## Dawn "JSON API" generators
 

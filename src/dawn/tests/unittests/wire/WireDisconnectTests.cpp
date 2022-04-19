@@ -29,7 +29,7 @@ namespace {
 
 // Test that commands are not received if the client disconnects.
 TEST_F(WireDisconnectTests, CommandsAfterDisconnect) {
-    // Sanity check that commands work at all.
+    // Check that commands work at all.
     wgpuDeviceCreateCommandEncoder(device, nullptr);
 
     WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
@@ -49,7 +49,7 @@ TEST_F(WireDisconnectTests, CommandsAfterDisconnect) {
 // Test that commands that are serialized before a disconnect but flushed
 // after are received.
 TEST_F(WireDisconnectTests, FlushAfterDisconnect) {
-    // Sanity check that commands work at all.
+    // Check that commands work at all.
     wgpuDeviceCreateCommandEncoder(device, nullptr);
 
     // Disconnect.

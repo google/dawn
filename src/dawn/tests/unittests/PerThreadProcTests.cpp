@@ -36,10 +36,10 @@ class PerThreadProcTests : public testing::Test {
     dawn::native::null::Adapter mNativeAdapter;
 };
 
-// Test that procs can be set per thread. This test overrides deviceCreateBuffer with a dummy proc
-// for each thread that increments a counter. Because each thread has their own proc and counter,
-// there should be no data races. The per-thread procs also check that the current thread id is
-// exactly equal to the expected thread id.
+// Test that procs can be set per thread. This test overrides deviceCreateBuffer with a placeholder
+// proc for each thread that increments a counter. Because each thread has their own proc and
+// counter, there should be no data races. The per-thread procs also check that the current thread
+// id is exactly equal to the expected thread id.
 TEST_F(PerThreadProcTests, DispatchesPerThread) {
     dawnProcSetProcs(&dawnThreadDispatchProcTable);
 

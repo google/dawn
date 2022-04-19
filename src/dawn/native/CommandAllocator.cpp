@@ -167,7 +167,7 @@ namespace dawn::native {
     }
 
     bool CommandAllocator::IsEmpty() const {
-        return mCurrentPtr == reinterpret_cast<const uint8_t*>(&mDummyEnum[0]);
+        return mCurrentPtr == reinterpret_cast<const uint8_t*>(&mPlaceholderEnum[0]);
     }
 
     CommandBlocks&& CommandAllocator::AcquireBlocks() {
@@ -221,8 +221,8 @@ namespace dawn::native {
     }
 
     void CommandAllocator::ResetPointers() {
-        mCurrentPtr = reinterpret_cast<uint8_t*>(&mDummyEnum[0]);
-        mEndPtr = reinterpret_cast<uint8_t*>(&mDummyEnum[1]);
+        mCurrentPtr = reinterpret_cast<uint8_t*>(&mPlaceholderEnum[0]);
+        mEndPtr = reinterpret_cast<uint8_t*>(&mPlaceholderEnum[1]);
     }
 
 }  // namespace dawn::native

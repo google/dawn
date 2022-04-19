@@ -3,7 +3,7 @@
 # Dawn, a WebGPU implementation
 
 Dawn is an open-source and cross-platform implementation of the work-in-progress [WebGPU](https://webgpu.dev) standard.
-More precisely it implements [`webgpu.h`](https://github.com/webgpu-native/webgpu-headers/blob/master/webgpu.h) that is a one-to-one mapping with the WebGPU IDL.
+More precisely it implements [`webgpu.h`](https://github.com/webgpu-native/webgpu-headers/blob/main/webgpu.h) that is a one-to-one mapping with the WebGPU IDL.
 Dawn is meant to be integrated as part of a larger system and is the underlying implementation of WebGPU in Chromium.
 
 Dawn provides several WebGPU building blocks:

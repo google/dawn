@@ -25,12 +25,11 @@ import zipfile
 
 def CheckedJoin(output, path):
     """
-  CheckedJoin returns os.path.join(output, path). It does sanity checks to
-  ensure the resulting path is under output, but shouldn't be used on untrusted
-  input.
-  """
+    CheckedJoin returns os.path.join(output, path). It checks that the resulting
+    path is under output, but shouldn't be used on untrusted input.
+    """
     path = os.path.normpath(path)
-    if os.path.isabs(path) or path.startswith('.'):
+    if os.path.isabs(path) or path.startswith("."):
         raise ValueError(path)
     return os.path.join(output, path)
 
@@ -51,22 +50,22 @@ class SymlinkEntry(object):
 
 def IterateZip(path):
     """
-  IterateZip opens the zip file at path and returns a generator of entry objects
-  for each file in it.
-  """
-    with zipfile.ZipFile(path, 'r') as zip_file:
+    IterateZip opens the zip file at path and returns a generator of entry objects
+    for each file in it.
+    """
+    with zipfile.ZipFile(path, "r") as zip_file:
         for info in zip_file.infolist():
-            if info.filename.endswith('/'):
+            if info.filename.endswith("/"):
                 continue
             yield FileEntry(info.filename, None, zip_file.open(info))
 
 
 def IterateTar(path, compression):
     """
-  IterateTar opens the tar.gz or tar.bz2 file at path and returns a generator of
-  entry objects for each file in it.
-  """
-    with tarfile.open(path, 'r:' + compression) as tar_file:
+    IterateTar opens the tar.gz or tar.bz2 file at path and returns a generator of
+    entry objects for each file in it.
+    """
+    with tarfile.open(path, "r:" + compression) as tar_file:
         for info in tar_file:
             if info.isdir():
                 pass
@@ -80,11 +79,13 @@ def IterateTar(path, compression):
 
 
 def main(args):
-    parser = optparse.OptionParser(usage='Usage: %prog ARCHIVE OUTPUT')
-    parser.add_option('--no-prefix',
-                      dest='no_prefix',
-                      action='store_true',
-                      help='Do not remove a prefix from paths in the archive.')
+    parser = optparse.OptionParser(usage="Usage: %prog ARCHIVE OUTPUT")
+    parser.add_option(
+        "--no-prefix",
+        dest="no_prefix",
+        action="store_true",
+        help="Do not remove a prefix from paths in the archive.",
+    )
     options, args = parser.parse_args(args)
 
     if len(args) != 2:
@@ -97,7 +98,7 @@ def main(args):
         # Skip archives that weren't downloaded.
         return 0
 
-    with open(archive, 'rb') as f:
+    with open(archive, "rb") as f:
         sha256 = hashlib.sha256()
         while True:
             chunk = f.read(1024 * 1024)
@@ -113,12 +114,12 @@ def main(args):
                 print("Already up-to-date.")
                 return 0
 
-    if archive.endswith('.zip'):
+    if archive.endswith(".zip"):
         entries = IterateZip(archive)
-    elif archive.endswith('.tar.gz'):
-        entries = IterateTar(archive, 'gz')
-    elif archive.endswith('.tar.bz2'):
-        entries = IterateTar(archive, 'bz2')
+    elif archive.endswith(".tar.gz"):
+        entries = IterateTar(archive, "gz")
+    elif archive.endswith(".tar.bz2"):
+        entries = IterateTar(archive, "bz2")
     else:
         raise ValueError(archive)
 
@@ -132,11 +133,11 @@ def main(args):
         num_extracted = 0
         for entry in entries:
             # Even on Windows, zip files must always use forward slashes.
-            if '\\' in entry.path or entry.path.startswith('/'):
+            if "\\" in entry.path or entry.path.startswith("/"):
                 raise ValueError(entry.path)
 
             if not options.no_prefix:
-                new_prefix, rest = entry.path.split('/', 1)
+                new_prefix, rest = entry.path.split("/", 1)
 
                 # Ensure the archive is consistent.
                 if prefix is None:
@@ -151,12 +152,12 @@ def main(args):
             if not os.path.isdir(os.path.dirname(fixed_path)):
                 os.makedirs(os.path.dirname(fixed_path))
             if isinstance(entry, FileEntry):
-                with open(fixed_path, 'wb') as out:
+                with open(fixed_path, "wb") as out:
                     shutil.copyfileobj(entry.fileobj, out)
             elif isinstance(entry, SymlinkEntry):
                 os.symlink(entry.target, fixed_path)
             else:
-                raise TypeError('unknown entry type')
+                raise TypeError("unknown entry type")
 
             # Fix up permissions if needbe.
             # TODO(davidben): To be extra tidy, this should only track the execute bit
@@ -171,12 +172,12 @@ def main(args):
     finally:
         entries.close()
 
-    with open(stamp_path, 'w') as f:
+    with open(stamp_path, "w") as f:
         f.write(digest)
 
     print("Done. Extracted %d files." % (num_extracted, ))
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

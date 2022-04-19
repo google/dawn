@@ -25,7 +25,7 @@ class VertexBufferValidationTest : public ValidationTest {
     void SetUp() override {
         ValidationTest::SetUp();
 
-        // dummy vertex shader module
+        // Placeholder vertex shader module
         vsModule = utils::CreateShaderModule(device, R"(
             @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -106,7 +106,7 @@ class VertexBufferValidationTest : public ValidationTest {
 
 // Check that vertex buffers still count as bound if we switch the pipeline.
 TEST_F(VertexBufferValidationTest, VertexBuffersInheritedBetweenPipelines) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
     wgpu::ShaderModule vsModule2 = MakeVertexShader(2);
     wgpu::ShaderModule vsModule1 = MakeVertexShader(1);
 
@@ -143,7 +143,7 @@ TEST_F(VertexBufferValidationTest, VertexBuffersInheritedBetweenPipelines) {
 
 // Check that vertex buffers that are set are reset between render passes.
 TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRenderPasses) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
     wgpu::ShaderModule vsModule2 = MakeVertexShader(2);
     wgpu::ShaderModule vsModule1 = MakeVertexShader(1);
 
@@ -195,7 +195,7 @@ TEST_F(VertexBufferValidationTest, VertexBuffersNotInheritedBetweenRenderPasses)
 TEST_F(VertexBufferValidationTest, VertexBufferSlotValidation) {
     wgpu::Buffer buffer = MakeVertexBuffer();
 
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     // Control case: using the last vertex buffer slot in render passes is ok.
     {
@@ -238,7 +238,7 @@ TEST_F(VertexBufferValidationTest, VertexBufferSlotValidation) {
 TEST_F(VertexBufferValidationTest, VertexBufferOffsetOOBValidation) {
     wgpu::Buffer buffer = MakeVertexBuffer();
 
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
     // Control case, using the full buffer, with or without an explicit size is valid.
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -312,7 +312,7 @@ TEST_F(VertexBufferValidationTest, InvalidUsage) {
     wgpu::Buffer indexBuffer =
         utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index, {0, 0, 0});
 
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
     // Control case: using the vertex buffer is valid.
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -351,7 +351,7 @@ TEST_F(VertexBufferValidationTest, InvalidUsage) {
 TEST_F(VertexBufferValidationTest, OffsetAlignment) {
     wgpu::Buffer vertexBuffer = MakeVertexBuffer();
 
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
     // Control cases: vertex buffer offset is a multiple of 4
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -375,7 +375,7 @@ TEST_F(VertexBufferValidationTest, OffsetAlignment) {
 
 // Check vertex buffer stride requirements for draw command.
 TEST_F(VertexBufferValidationTest, DrawStrideLimitsVertex) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     // Create a buffer of size 28, containing 4 float32 elements, array stride size = 8
     // The last element doesn't have the full stride size
@@ -506,7 +506,7 @@ TEST_F(VertexBufferValidationTest, DrawStrideLimitsVertex) {
 
 // Check instance buffer stride requirements with instanced attributes for draw command.
 TEST_F(VertexBufferValidationTest, DrawStrideLimitsInstance) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     // Create a buffer of size 28, containing 4 float32 elements, array stride size = 8
     // The last element doesn't have the full stride size
@@ -637,7 +637,7 @@ TEST_F(VertexBufferValidationTest, DrawStrideLimitsInstance) {
 
 // Check vertex buffer stride requirements with instanced attributes for draw indexed command.
 TEST_F(VertexBufferValidationTest, DrawIndexedStrideLimitsInstance) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     // Create a buffer of size 28, containing 4 float32 elements, array stride size = 8
     // The last element doesn't have the full stride size
@@ -778,7 +778,7 @@ TEST_F(VertexBufferValidationTest, DrawIndexedStrideLimitsInstance) {
 
 // Check last stride is computed correctly for vertex buffer with multiple attributes.
 TEST_F(VertexBufferValidationTest, DrawStrideLimitsVertexMultipleAttributes) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     // Create a buffer of size 44, array stride size = 12
     wgpu::BufferDescriptor descriptor;

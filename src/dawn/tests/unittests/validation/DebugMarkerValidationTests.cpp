@@ -21,7 +21,7 @@ class DebugMarkerValidationTest : public ValidationTest {};
 
 // Correct usage of debug markers should succeed in render pass.
 TEST_F(DebugMarkerValidationTest, RenderSuccess) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
@@ -39,7 +39,7 @@ TEST_F(DebugMarkerValidationTest, RenderSuccess) {
 
 // A PushDebugGroup call without a following PopDebugGroup produces an error in render pass.
 TEST_F(DebugMarkerValidationTest, RenderUnbalancedPush) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
@@ -56,7 +56,7 @@ TEST_F(DebugMarkerValidationTest, RenderUnbalancedPush) {
 
 // A PopDebugGroup call without a preceding PushDebugGroup produces an error in render pass.
 TEST_F(DebugMarkerValidationTest, RenderUnbalancedPop) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
@@ -224,7 +224,7 @@ TEST_F(DebugMarkerValidationTest, NestedComputeInCommandEncoderIndependent) {
 
 // It is possible to nested pushes in a render pass in a command encoder.
 TEST_F(DebugMarkerValidationTest, NestedRenderInCommandEncoder) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.PushDebugGroup("Event Start");
@@ -241,7 +241,7 @@ TEST_F(DebugMarkerValidationTest, NestedRenderInCommandEncoder) {
 
 // Command encoder and render pass pushes must be balanced independently.
 TEST_F(DebugMarkerValidationTest, NestedRenderInCommandEncoderIndependent) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.PushDebugGroup("Event Start");

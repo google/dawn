@@ -101,7 +101,7 @@ Open or create the `.vscode/launch.json` file, and add:
             "outFiles": [ "./**/*.js" ],
             "args": [
                 "-e", "require('./src/common/tools/setup-ts-in-node.js');require('./src/common/runtime/cmdline.ts');",
-                "--", "dummy-arg",
+                "--", "placeholder-arg",
                 "--gpu-provider",
                 "[path-to-dawn.node]", // REPLACE: [path-to-dawn.node]
                 "[test-query]", // REPLACE: [test-query]
@@ -127,7 +127,7 @@ cd <cts-root-dir>
 [path-to-node] \ # for example <dawn-root-dir>/third_party/node/<arch>/node
     -e "require('./src/common/tools/setup-ts-in-node.js');require('./src/common/runtime/cmdline.ts');" \
     -- \
-    dummy-arg \
+    placeholder-arg \
     --gpu-provider [path to dawn.node] \
     [test-query]
 ```

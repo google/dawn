@@ -53,7 +53,7 @@ T NativeNonDispatachableHandleFromU64(uint64_t u64) {
 #    error "Unsupported platform"
 #endif
 
-// Define a dummy Vulkan handle for use before we include vulkan.h
+// Define a placeholder Vulkan handle for use before we include vulkan.h
 DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(VkSomeHandle)
 
 // Find out the alignment of native handles. Logically we would use alignof(VkSomeHandleNative) so

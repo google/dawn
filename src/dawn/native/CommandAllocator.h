@@ -259,7 +259,7 @@ namespace dawn::native {
         // Data used for the block range at initialization so that the first call to Allocate sees
         // there is not enough space and calls GetNewBlock. This avoids having to special case the
         // initialization in Allocate.
-        uint32_t mDummyEnum[1] = {0};
+        uint32_t mPlaceholderEnum[1] = {0};
 
         // Pointers to the current range of allocation in the block. Guaranteed to allow for at
         // least one uint32_t if not nullptr, so that the special kEndOfBlock command id can always

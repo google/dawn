@@ -300,7 +300,7 @@ class MinBufferSizeTestsBase : public ValidationTest {
     void TestDraw(const wgpu::RenderPipeline& renderPipeline,
                   const std::vector<wgpu::BindGroup>& bindGroups,
                   bool expectation) {
-        DummyRenderPass renderPass(device);
+        PlaceholderRenderPass renderPass(device);
 
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);

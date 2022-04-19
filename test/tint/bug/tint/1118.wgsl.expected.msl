@@ -19,9 +19,9 @@ struct Scene {
 struct Material {
   /* 0x0000 */ float4 vDiffuseColor;
   /* 0x0010 */ packed_float3 vAmbientColor;
-  /* 0x001c */ float dummy;
+  /* 0x001c */ float placeholder;
   /* 0x0020 */ packed_float3 vEmissiveColor;
-  /* 0x002c */ float dummy2;
+  /* 0x002c */ float placeholder2;
 };
 
 struct Mesh {
@@ -151,4 +151,3 @@ fragment tint_symbol_3 tint_symbol(const constant Scene* tint_symbol_24 [[buffer
   wrapper_result.glFragColor_1 = inner_result.glFragColor_1;
   return wrapper_result;
 }
-

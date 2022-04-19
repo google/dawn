@@ -86,8 +86,8 @@ namespace {
                 CreateBuffer(4, wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Index);
 
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            DummyRenderPass dummyRenderPass(device);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32);
             pass.SetVertexBuffer(0, buffer);
             pass.End();
@@ -130,8 +130,8 @@ namespace {
 
             // It is invalid to use the buffer as both index and storage in render pass
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            DummyRenderPass dummyRenderPass(device);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32);
             pass.SetBindGroup(0, bg);
             pass.End();
@@ -195,8 +195,8 @@ namespace {
         {
             // It is valid to use multiple storage usages on the same buffer in render pass
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            DummyRenderPass dummyRenderPass(device);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetBindGroup(0, bg);
             pass.End();
             encoder.Finish();
@@ -235,14 +235,14 @@ namespace {
 
             // Use these two buffers as both index and storage in different render passes
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            DummyRenderPass dummyRenderPass(device);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
 
-            wgpu::RenderPassEncoder pass0 = encoder.BeginRenderPass(&dummyRenderPass);
+            wgpu::RenderPassEncoder pass0 = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass0.SetIndexBuffer(buffer0, wgpu::IndexFormat::Uint32);
             pass0.SetBindGroup(0, bg1);
             pass0.End();
 
-            wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&dummyRenderPass);
+            wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass1.SetIndexBuffer(buffer1, wgpu::IndexFormat::Uint32);
             pass1.SetBindGroup(0, bg0);
             pass1.End();
@@ -297,8 +297,8 @@ namespace {
             pass0.SetBindGroup(0, bg0);
             pass0.End();
 
-            DummyRenderPass dummyRenderPass(device);
-            wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&dummyRenderPass);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
+            wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass1.SetBindGroup(1, bg1);
             pass1.End();
 
@@ -325,8 +325,8 @@ namespace {
             // It is not allowed to use the same buffer as both readable and writable in different
             // draws within the same render pass.
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            DummyRenderPass dummyRenderPass(device);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetPipeline(rp);
 
             pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32);
@@ -392,8 +392,8 @@ namespace {
             // It is invalid to use the same buffer as both readable and writable usages in a single
             // draw
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            DummyRenderPass dummyRenderPass(device);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetPipeline(rp);
 
             pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32);
@@ -455,8 +455,8 @@ namespace {
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
             encoder.CopyBufferToBuffer(bufferSrc, 0, bufferDst, 0, 4);
-            DummyRenderPass dummyRenderPass(device);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetBindGroup(0, bg0);
             pass.End();
             encoder.Finish();
@@ -492,14 +492,14 @@ namespace {
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage}});
         wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer0}});
 
-        DummyRenderPass dummyRenderPass(device);
+        PlaceholderRenderPass PlaceholderRenderPass(device);
 
         // Set index buffer twice. The second one overwrites the first one. No buffer is used as
         // both read and write in the same pass. But the overwritten index buffer (buffer0) still
         // take effect during resource tracking.
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetIndexBuffer(buffer0, wgpu::IndexFormat::Uint32);
             pass.SetIndexBuffer(buffer1, wgpu::IndexFormat::Uint32);
             pass.SetBindGroup(0, bg);
@@ -511,7 +511,7 @@ namespace {
         // read and write in the same pass
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetIndexBuffer(buffer1, wgpu::IndexFormat::Uint32);
             pass.SetIndexBuffer(buffer0, wgpu::IndexFormat::Uint32);
             pass.SetBindGroup(0, bg);
@@ -524,7 +524,7 @@ namespace {
         // (buffer0) still take effect during resource tracking.
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetVertexBuffer(0, buffer0);
             pass.SetVertexBuffer(0, buffer1);
             pass.SetBindGroup(0, bg);
@@ -536,7 +536,7 @@ namespace {
         // buffer0 is used as both read and write in the same pass
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetVertexBuffer(0, buffer1);
             pass.SetVertexBuffer(0, buffer0);
             pass.SetBindGroup(0, bg);
@@ -562,14 +562,14 @@ namespace {
             wgpu::BindGroup bg0 = utils::MakeBindGroup(device, bgl, {{0, buffer0}});
             wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl, {{0, buffer1}});
 
-            DummyRenderPass dummyRenderPass(device);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
 
             // Set bind group on the same index twice. The second one overwrites the first one.
             // No buffer is used as both read and write in the same pass. But the overwritten
             // bind group still take effect during resource tracking.
             {
                 wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
                 pass.SetIndexBuffer(buffer0, wgpu::IndexFormat::Uint32);
                 pass.SetBindGroup(0, bg0);
                 pass.SetBindGroup(0, bg1);
@@ -581,7 +581,7 @@ namespace {
             // buffer0 is used as both read and write in the same pass
             {
                 wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
                 pass.SetIndexBuffer(buffer0, wgpu::IndexFormat::Uint32);
                 pass.SetBindGroup(0, bg1);
                 pass.SetBindGroup(0, bg0);
@@ -656,8 +656,8 @@ namespace {
 
             // These two bindings are invisible in render pass. But we still track these bindings.
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            DummyRenderPass dummyRenderPass(device);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetBindGroup(0, bg);
             pass.End();
             ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -702,8 +702,8 @@ namespace {
             // Buffer usage in compute stage in bind group conflicts with index buffer. And binding
             // for compute stage is not visible in render pass. But we still track this binding.
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            DummyRenderPass dummyRenderPass(device);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Uint32);
             pass.SetBindGroup(0, bg);
             pass.End();
@@ -777,8 +777,8 @@ namespace {
             // Resource in bg1 conflicts with resources used in bg0. However, bindings in bg1 is
             // not used in pipeline. But we still track this binding.
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            DummyRenderPass dummyRenderPass(device);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetBindGroup(0, bg0);
             pass.SetBindGroup(1, bg1);
             pass.SetPipeline(rp);
@@ -963,8 +963,8 @@ namespace {
                 wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl, {{0, view}});
 
                 wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-                DummyRenderPass dummyRenderPass(device);
-                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+                PlaceholderRenderPass PlaceholderRenderPass(device);
+                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
                 pass.SetBindGroup(0, bg);
                 pass.SetBindGroup(1, bg1);
                 pass.End();
@@ -1155,8 +1155,8 @@ namespace {
             pass0.SetBindGroup(0, writeBG);
             pass0.End();
 
-            DummyRenderPass dummyRenderPass(device);
-            wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&dummyRenderPass);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
+            wgpu::RenderPassEncoder pass1 = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass1.SetBindGroup(0, readBG);
             pass1.End();
 
@@ -1190,8 +1190,8 @@ namespace {
             // It is not allowed to use the same texture as both readable and writable in different
             // draws within the same render pass.
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            DummyRenderPass dummyRenderPass(device);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetPipeline(rp);
 
             pass.SetBindGroup(0, sampledBG);
@@ -1262,8 +1262,8 @@ namespace {
             // It is invalid to use the same texture as both readable and writable usages in a
             // single draw
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            DummyRenderPass dummyRenderPass(device);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetPipeline(rp);
 
             pass.SetBindGroup(0, sampledBG);
@@ -1470,8 +1470,8 @@ namespace {
 
             // These two bindings are invisible in render pass. But we still track these bindings.
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            DummyRenderPass dummyRenderPass(device);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetBindGroup(0, bg);
             pass.End();
             ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -1595,8 +1595,8 @@ namespace {
             // Texture binding in readBG conflicts with texture binding in writeBG. The binding
             // in writeBG is not used in pipeline. But we still track this binding.
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            DummyRenderPass dummyRenderPass(device);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetBindGroup(0, readBG);
             pass.SetBindGroup(1, writeBG);
             pass.SetPipeline(rp);
@@ -1644,8 +1644,8 @@ namespace {
         // Test that indirect + readonly is allowed in the same render pass.
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            DummyRenderPass dummyRenderPass(device);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetPipeline(rp);
             pass.SetBindGroup(0, readBG);
             pass.DrawIndirect(buffer, 0);
@@ -1656,8 +1656,8 @@ namespace {
         // Test that indirect + writable is disallowed in the same render pass.
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            DummyRenderPass dummyRenderPass(device);
-            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&dummyRenderPass);
+            PlaceholderRenderPass PlaceholderRenderPass(device);
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&PlaceholderRenderPass);
             pass.SetPipeline(rp);
             pass.SetBindGroup(0, writeBG);
             pass.DrawIndirect(buffer, 0);

@@ -130,7 +130,7 @@ namespace dawn::native {
             mTextureViews[1] = descriptor->plane1;
         } else {
             DAWN_TRY_ASSIGN(mTextureViews[1],
-                            device->GetOrCreateDummyTextureViewForExternalTexture());
+                            device->GetOrCreatePlaceholderTextureViewForExternalTexture());
         }
 
         // We must create a buffer to store parameters needed by a shader that operates on this

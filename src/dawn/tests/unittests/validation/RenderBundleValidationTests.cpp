@@ -44,7 +44,7 @@ namespace {
                 @group(1) @binding(0) var<uniform> uniforms : Uniforms;
 
                 struct Storage {
-                    dummy : array<f32>
+                    placeholder : array<f32>
                 }
                 @group(1) @binding(1) var<storage, read_write> ssbo : Storage;
 
@@ -79,7 +79,7 @@ namespace {
             vertexBuffer = utils::CreateBufferFromData(device, kVertices, sizeof(kVertices),
                                                        wgpu::BufferUsage::Vertex);
 
-            // Dummy storage buffer.
+            // Placeholder storage buffer.
             wgpu::Buffer storageBuffer = utils::CreateBufferFromData(
                 device, kVertices, sizeof(kVertices), wgpu::BufferUsage::Storage);
 
@@ -125,7 +125,7 @@ namespace {
 
 // Test creating and encoding an empty render bundle.
 TEST_F(RenderBundleValidationTest, Empty) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
     desc.colorFormatsCount = 1;
@@ -145,7 +145,7 @@ TEST_F(RenderBundleValidationTest, Empty) {
 // This is a regression test for error render bundle encoders containing no commands would
 // produce non-error render bundles.
 TEST_F(RenderBundleValidationTest, EmptyErrorEncoderProducesErrorBundle) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
     // Having 0 attachments is invalid!
@@ -165,7 +165,7 @@ TEST_F(RenderBundleValidationTest, EmptyErrorEncoderProducesErrorBundle) {
 
 // Test executing zero render bundles.
 TEST_F(RenderBundleValidationTest, ZeroBundles) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPass);
@@ -176,7 +176,7 @@ TEST_F(RenderBundleValidationTest, ZeroBundles) {
 
 // Test successfully creating and encoding a render bundle into a command buffer.
 TEST_F(RenderBundleValidationTest, SimpleSuccess) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
     desc.colorFormatsCount = 1;
@@ -199,7 +199,7 @@ TEST_F(RenderBundleValidationTest, SimpleSuccess) {
 
 // Test that render bundle debug groups must be well nested.
 TEST_F(RenderBundleValidationTest, DebugGroups) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
     desc.colorFormatsCount = 1;
@@ -258,7 +258,7 @@ TEST_F(RenderBundleValidationTest, DebugGroups) {
 
 // Test render bundles do not inherit command buffer state
 TEST_F(RenderBundleValidationTest, StateInheritance) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
     desc.colorFormatsCount = 1;
@@ -343,7 +343,7 @@ TEST_F(RenderBundleValidationTest, StateInheritance) {
 
 // Test render bundles do not persist command buffer state
 TEST_F(RenderBundleValidationTest, StatePersistence) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
     desc.colorFormatsCount = 1;
@@ -428,7 +428,7 @@ TEST_F(RenderBundleValidationTest, StatePersistence) {
 
 // Test executing render bundles clears command buffer state
 TEST_F(RenderBundleValidationTest, ClearsState) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
     desc.colorFormatsCount = 1;
@@ -520,7 +520,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
 
 // Test creating and encoding multiple render bundles.
 TEST_F(RenderBundleValidationTest, MultipleBundles) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
     desc.colorFormatsCount = 1;
@@ -553,7 +553,7 @@ TEST_F(RenderBundleValidationTest, MultipleBundles) {
 
 // Test that is is valid to execute a render bundle more than once.
 TEST_F(RenderBundleValidationTest, ExecuteMultipleTimes) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
     desc.colorFormatsCount = 1;
@@ -696,7 +696,7 @@ TEST_F(RenderBundleValidationTest, DepthStencilReadOnly) {
 }
 // Test that resource usages are validated inside render bundles.
 TEST_F(RenderBundleValidationTest, UsageTracking) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
     desc.colorFormatsCount = 1;

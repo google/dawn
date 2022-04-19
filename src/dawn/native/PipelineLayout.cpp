@@ -325,8 +325,7 @@ namespace dawn::native {
         DAWN_TRY_ASSIGN(result, device->GetOrCreatePipelineLayout(&desc));
         ASSERT(!result->IsError());
 
-        // Sanity check in debug that the pipeline layout is compatible with the current
-        // pipeline.
+        // Check in debug that the pipeline layout is compatible with the current pipeline.
         for (const StageAndDescriptor& stage : stages) {
             const EntryPointMetadata& metadata = stage.module->GetEntryPoint(stage.entryPoint);
             ASSERT(ValidateCompatibilityWithPipelineLayout(device, metadata, result.Get())

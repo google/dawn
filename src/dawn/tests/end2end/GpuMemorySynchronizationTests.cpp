@@ -434,9 +434,9 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
             vbContents.pos[1] = vec4<f32>(1.0, 1.0, 0.0, 1.0);
             vbContents.pos[2] = vec4<f32>(1.0, -1.0, 0.0, 1.0);
             vbContents.pos[3] = vec4<f32>(-1.0, -1.0, 0.0, 1.0);
-            let dummy : i32 = 0;
+            let placeholder : i32 = 0;
             ibContents.indices[0] = vec4<i32>(0, 1, 2, 0);
-            ibContents.indices[1] = vec4<i32>(2, 3, dummy, dummy);
+            ibContents.indices[1] = vec4<i32>(2, 3, placeholder, placeholder);
             uniformContents.color = 1.0;
             storageContents.color = 1.0;
         })");
@@ -549,9 +549,9 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
             contents.pos[1] = vec4<f32>(1.0, 1.0, 0.0, 1.0);
             contents.pos[2] = vec4<f32>(1.0, -1.0, 0.0, 1.0);
             contents.pos[3] = vec4<f32>(-1.0, -1.0, 0.0, 1.0);
-            let dummy : i32 = 0;
+            let placeholder : i32 = 0;
             contents.indices[0] = vec4<i32>(0, 1, 2, 0);
-            contents.indices[1] = vec4<i32>(2, 3, dummy, dummy);
+            contents.indices[1] = vec4<i32>(2, 3, placeholder, placeholder);
             contents.color0 = 1.0;
             contents.color1 = 1.0;
         })");

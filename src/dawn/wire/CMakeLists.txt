@@ -18,7 +18,7 @@ DawnJSONGenerator(
     RESULT_VARIABLE "DAWN_WIRE_GEN_SOURCES"
 )
 
-add_library(dawn_wire ${DAWN_DUMMY_FILE})
+add_library(dawn_wire ${DAWN_PLACEHOLDER_FILE})
 common_compile_options(dawn_wire)
 
 target_compile_definitions(dawn_wire PRIVATE "DAWN_WIRE_IMPLEMENTATION")

@@ -232,11 +232,11 @@ namespace dawn::native {
               "Disables mipmaps for r8unorm and rg8unorm textures, which are known on some drivers "
               "to not clear correctly.",
               "https://crbug.com/dawn/1071"}},
-            {Toggle::UseDummyFragmentInVertexOnlyPipeline,
-             {"use_dummy_fragment_in_vertex_only_pipeline",
-              "Use a dummy empty fragment shader in vertex only render pipeline. This toggle must "
-              "be enabled for OpenGL ES backend, and serves as a workaround by default enabled on "
-              "some Metal devices with Intel GPU to ensure the depth result is correct.",
+            {Toggle::UsePlaceholderFragmentInVertexOnlyPipeline,
+             {"use_placeholder_fragment_in_vertex_only_pipeline",
+              "Use a placeholder empty fragment shader in vertex only render pipeline. This toggle "
+              "must be enabled for OpenGL ES backend, and serves as a workaround by default "
+              "enabled on some Metal devices with Intel GPU to ensure the depth result is correct.",
               "https://crbug.com/dawn/136"}},
             {Toggle::FxcOptimizations,
              {"fxc_optimizations",
@@ -260,7 +260,7 @@ namespace dawn::native {
               "VK_KHR_zero_initialize_workgroup_memory is supported.",
               "https://crbug.com/dawn/1302"}},
 
-            // Dummy comment to separate the }} so it is clearer what to copy-paste to add a toggle.
+            // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
         }};
     }  // anonymous namespace
 

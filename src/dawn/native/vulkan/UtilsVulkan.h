@@ -68,7 +68,7 @@ namespace dawn::native::vulkan {
         // that is already initialized.
         template <typename VK_STRUCT_TYPE>
         void Add(VK_STRUCT_TYPE* vkStruct) {
-            // Sanity checks to ensure proper type safety.
+            // Checks to ensure proper type safety.
             static_assert(
                 offsetof(VK_STRUCT_TYPE, sType) == offsetof(VkBaseOutStructure, sType) &&
                     offsetof(VK_STRUCT_TYPE, pNext) == offsetof(VkBaseOutStructure, pNext),

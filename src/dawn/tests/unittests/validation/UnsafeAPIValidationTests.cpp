@@ -39,7 +39,7 @@ class UnsafeAPIValidationTest : public ValidationTest {
 // Check that pipeline overridable constants are disallowed as part of unsafe APIs.
 // TODO(dawn:1041) Remove when implementation for all backend is added
 TEST_F(UnsafeAPIValidationTest, PipelineOverridableConstants) {
-    // Create the dummy compute pipeline.
+    // Create the placeholder compute pipeline.
     wgpu::ComputePipelineDescriptor pipelineDescBase;
     pipelineDescBase.compute.entryPoint = "main";
 

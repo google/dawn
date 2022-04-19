@@ -87,26 +87,26 @@ namespace dawn::native::opengl {
 
         // Create an OpenGL shader for each stage and gather the list of combined samplers.
         PerStage<CombinedSamplerInfo> combinedSamplers;
-        bool needsDummySampler = false;
+        bool needsPlaceholderSampler = false;
         std::vector<GLuint> glShaders;
         for (SingleShaderStage stage : IterateStages(activeStages)) {
             const ShaderModule* module = ToBackend(stages[stage].module.Get());
             std::string glsl;
             DAWN_TRY_ASSIGN(glsl, module->TranslateToGLSL(stages[stage].entryPoint.c_str(), stage,
                                                           &combinedSamplers[stage], layout,
-                                                          &needsDummySampler));
+                                                          &needsPlaceholderSampler));
             GLuint shader;
             DAWN_TRY_ASSIGN(shader, CreateShader(gl, GLShaderType(stage), glsl.c_str()));
             gl.AttachShader(mProgram, shader);
             glShaders.push_back(shader);
         }
 
-        if (needsDummySampler) {
+        if (needsPlaceholderSampler) {
             SamplerDescriptor desc = {};
             ASSERT(desc.minFilter == wgpu::FilterMode::Nearest);
             ASSERT(desc.magFilter == wgpu::FilterMode::Nearest);
             ASSERT(desc.mipmapFilter == wgpu::FilterMode::Nearest);
-            mDummySampler =
+            mPlaceholderSampler =
                 ToBackend(layout->GetDevice()->GetOrCreateSampler(&desc).AcquireSuccess());
         }
 
@@ -164,8 +164,8 @@ namespace dawn::native::opengl {
                                      wgpu::TextureSampleType::Float;
             }
             {
-                if (combined.useDummySampler) {
-                    mDummySamplerUnits.push_back(textureUnit);
+                if (combined.usePlaceholderSampler) {
+                    mPlaceholderSamplerUnits.push_back(textureUnit);
                 } else {
                     const BindGroupLayoutBase* bgl =
                         layout->GetBindGroupLayout(combined.samplerLocation.group);
@@ -209,9 +209,9 @@ namespace dawn::native::opengl {
 
     void PipelineGL::ApplyNow(const OpenGLFunctions& gl) {
         gl.UseProgram(mProgram);
-        for (GLuint unit : mDummySamplerUnits) {
-            ASSERT(mDummySampler.Get() != nullptr);
-            gl.BindSampler(unit, mDummySampler->GetNonFilteringHandle());
+        for (GLuint unit : mPlaceholderSamplerUnits) {
+            ASSERT(mPlaceholderSampler.Get() != nullptr);
+            gl.BindSampler(unit, mPlaceholderSampler->GetNonFilteringHandle());
         }
     }
 

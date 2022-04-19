@@ -91,7 +91,7 @@ namespace dawn::native {
     // The implementation of functions in this file can have a lot of control flow and corner cases
     // so each modification should come with extensive tests and ensure 100% code coverage of the
     // modified functions. See instructions at
-    // https://chromium.googlesource.com/chromium/src/+/master/docs/testing/code_coverage.md#local-coverage-script
+    // https://chromium.googlesource.com/chromium/src/+/main/docs/testing/code_coverage.md#local-coverage-script
     // to run the test with code coverage. A command line that worked in the past (with the right
     // GN args for the out/coverage directory in a Chromium checkout) is:
     //

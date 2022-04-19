@@ -50,7 +50,7 @@ TEST_F(IndexBufferValidationTest, UndefinedIndexFormat) {
     bufferDesc.size = 256;
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
 
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
     pass.SetIndexBuffer(buffer, wgpu::IndexFormat::Undefined);
@@ -65,7 +65,7 @@ TEST_F(IndexBufferValidationTest, InvalidIndexFormat) {
     bufferDesc.size = 256;
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
 
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
     pass.SetIndexBuffer(buffer, static_cast<wgpu::IndexFormat>(404));
@@ -80,7 +80,7 @@ TEST_F(IndexBufferValidationTest, IndexBufferOffsetOOBValidation) {
     bufferDesc.size = 256;
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
 
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
     // Control case, using the full buffer, with or without an explicit size is valid.
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -232,7 +232,7 @@ TEST_F(IndexBufferValidationTest, InvalidUsage) {
     wgpu::Buffer copyBuffer =
         utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::CopySrc, {0, 1, 2});
 
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
     // Control case: using the index buffer is valid.
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -272,7 +272,7 @@ TEST_F(IndexBufferValidationTest, OffsetAlignment) {
     wgpu::Buffer indexBuffer =
         utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index, {0, 1, 2});
 
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
     // Control cases: index buffer offset is a multiple of the index format size
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();

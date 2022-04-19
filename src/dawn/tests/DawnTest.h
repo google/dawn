@@ -679,7 +679,7 @@ using DawnTest = DawnTestWithParams<>;
 // AdapterTestParam, and whose constructor looks like:
 //     Param(AdapterTestParam, ABorC, 12or3, ..., otherParams... )
 //     You must also teach GTest how to print this struct.
-//     https://github.com/google/googletest/blob/master/docs/advanced.md#teaching-googletest-how-to-print-your-values
+//     https://github.com/google/googletest/blob/main/docs/advanced.md#teaching-googletest-how-to-print-your-values
 // Macro DAWN_TEST_PARAM_STRUCT can help generate this struct.
 #define DAWN_INSTANTIATE_TEST_P(testName, ...)                                                 \
     INSTANTIATE_TEST_SUITE_P(                                                                  \

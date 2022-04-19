@@ -5,9 +5,9 @@ struct Scene {
 struct Material {
   vDiffuseColor : vec4<f32>,
   vAmbientColor : vec3<f32>,
-  dummy : f32,
+  placeholder : f32,
   vEmissiveColor : vec3<f32>,
-  dummy2 : f32,
+  placeholder2 : f32,
 }
 
 struct Mesh {

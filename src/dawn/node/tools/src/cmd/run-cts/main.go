@@ -457,8 +457,8 @@ func (r *runner) gatherTestCases(query string, verbose bool) error {
 		"--", // Start of arguments
 		// src/common/runtime/helper/sys.ts expects 'node file.js <args>'
 		// and slices away the first two arguments. When running with '-e', args
-		// start at 1, so just inject a dummy argument.
-		"dummy-arg",
+		// start at 1, so just inject a placeholder argument.
+		"placeholder-arg",
 		"--list",
 	}, query)
 
@@ -603,8 +603,8 @@ func (r *runner) runServer(id int, caseIndices <-chan int, results chan<- result
 			"--",
 			// src/common/runtime/helper/sys.ts expects 'node file.js <args>'
 			// and slices away the first two arguments. When running with '-e', args
-			// start at 1, so just inject a dummy argument.
-			"dummy-arg",
+			// start at 1, so just inject a placeholder argument.
+			"placeholder-arg",
 			// Actual arguments begin here
 			"--gpu-provider", r.dawnNode,
 		}
@@ -940,8 +940,8 @@ func (r *runner) runTestcase(query string) result {
 		"--",
 		// src/common/runtime/helper/sys.ts expects 'node file.js <args>'
 		// and slices away the first two arguments. When running with '-e', args
-		// start at 1, so just inject a dummy argument.
-		"dummy-arg",
+		// start at 1, so just inject a placeholder argument.
+		"placeholder-arg",
 		// Actual arguments begin here
 		"--gpu-provider", r.dawnNode,
 		"--verbose",

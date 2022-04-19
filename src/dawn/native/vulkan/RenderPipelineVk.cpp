@@ -397,8 +397,8 @@ namespace dawn::native::vulkan {
         inputAssembly.topology = VulkanPrimitiveTopology(GetPrimitiveTopology());
         inputAssembly.primitiveRestartEnable = ShouldEnablePrimitiveRestart(GetPrimitiveTopology());
 
-        // A dummy viewport/scissor info. The validation layers force use to provide at least one
-        // scissor and one viewport here, even if we choose to make them dynamic.
+        // A placeholder viewport/scissor info. The validation layers force use to provide at least
+        // one scissor and one viewport here, even if we choose to make them dynamic.
         VkViewport viewportDesc;
         viewportDesc.x = 0.0f;
         viewportDesc.y = 0.0f;
@@ -490,7 +490,7 @@ namespace dawn::native::vulkan {
             colorBlend.logicOp = VK_LOGIC_OP_CLEAR;
             colorBlend.attachmentCount = static_cast<uint8_t>(highestColorAttachmentIndexPlusOne);
             colorBlend.pAttachments = colorBlendAttachments.data();
-            // The blend constant is always dynamic so we fill in a dummy value
+            // The blend constant is always dynamic so we fill in a placeholder value
             colorBlend.blendConstants[0] = 0.0f;
             colorBlend.blendConstants[1] = 0.0f;
             colorBlend.blendConstants[2] = 0.0f;

@@ -39,15 +39,15 @@ namespace dawn::native::opengl {
     }
 
     bool operator<(const CombinedSampler& a, const CombinedSampler& b) {
-        return std::tie(a.useDummySampler, a.samplerLocation, a.textureLocation) <
-               std::tie(b.useDummySampler, a.samplerLocation, b.textureLocation);
+        return std::tie(a.usePlaceholderSampler, a.samplerLocation, a.textureLocation) <
+               std::tie(b.usePlaceholderSampler, a.samplerLocation, b.textureLocation);
     }
 
     std::string CombinedSampler::GetName() const {
         std::ostringstream o;
         o << "dawn_combined";
-        if (useDummySampler) {
-            o << "_dummy_sampler";
+        if (usePlaceholderSampler) {
+            o << "_placeholder_sampler";
         } else {
             o << "_" << static_cast<uint32_t>(samplerLocation.group) << "_"
               << static_cast<uint32_t>(samplerLocation.binding);
@@ -82,7 +82,7 @@ namespace dawn::native::opengl {
                                                              SingleShaderStage stage,
                                                              CombinedSamplerInfo* combinedSamplers,
                                                              const PipelineLayout* layout,
-                                                             bool* needsDummySampler) const {
+                                                             bool* needsPlaceholderSampler) const {
         TRACE_EVENT0(GetDevice()->GetPlatform(), General, "TranslateToGLSL");
         tint::transform::Manager transformManager;
         tint::transform::DataMap transformInputs;
@@ -111,7 +111,7 @@ namespace dawn::native::opengl {
         // of the original texture and sampler, and generates a unique name. The
         // corresponding uniforms will be retrieved by these generated names
         // in PipelineGL. Any texture-only references will have
-        // "useDummySampler" set to true, and only the texture binding point
+        // "usePlaceholderSampler" set to true, and only the texture binding point
         // will be used in naming them. In addition, Dawn will bind a
         // non-filtering sampler for them (see PipelineGL).
         auto uses = inspector.GetSamplerTextureUses(entryPointName, placeholderBindingPoint);
@@ -120,10 +120,10 @@ namespace dawn::native::opengl {
 
             CombinedSampler* info = &combinedSamplers->back();
             if (use.sampler_binding_point == placeholderBindingPoint) {
-                info->useDummySampler = true;
-                *needsDummySampler = true;
+                info->usePlaceholderSampler = true;
+                *needsPlaceholderSampler = true;
             } else {
-                info->useDummySampler = false;
+                info->usePlaceholderSampler = false;
             }
             info->samplerLocation.group = BindGroupIndex(use.sampler_binding_point.group);
             info->samplerLocation.binding = BindingNumber(use.sampler_binding_point.binding);
@@ -131,7 +131,7 @@ namespace dawn::native::opengl {
             info->textureLocation.binding = BindingNumber(use.texture_binding_point.binding);
             tintOptions.binding_map[use] = info->GetName();
         }
-        if (*needsDummySampler) {
+        if (*needsPlaceholderSampler) {
             tintOptions.placeholder_binding_point = placeholderBindingPoint;
         }
 

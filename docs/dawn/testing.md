@@ -30,7 +30,7 @@ A Chromium checkout is required for the highest optimization flags. It is possib
  - `recording_time`: The time to convert Dawn commands to native commands.
 
 Metrics are reported according to the format specified at
-[[chromium]//build/scripts/slave/performance_log_processor.py](https://cs.chromium.org/chromium/build/scripts/slave/performance_log_processor.py)
+[[chromium]//build/recipes/performance_log_processor.py](https://cs.chromium.org/chromium/build/recipes/performance_log_processor.py)
 
 ### Dumping Trace Files
 

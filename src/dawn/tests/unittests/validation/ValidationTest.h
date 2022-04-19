@@ -115,9 +115,9 @@ class ValidationTest : public testing::Test {
 
     // Helper functions to create objects to test validation.
 
-    struct DummyRenderPass : public wgpu::RenderPassDescriptor {
+    struct PlaceholderRenderPass : public wgpu::RenderPassDescriptor {
       public:
-        explicit DummyRenderPass(const wgpu::Device& device);
+        explicit PlaceholderRenderPass(const wgpu::Device& device);
         wgpu::Texture attachment;
         wgpu::TextureFormat attachmentFormat;
         uint32_t width;

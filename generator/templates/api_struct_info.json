@@ -16,7 +16,7 @@
 //* This generator is used to produce part of Emscripten's struct_info.json,
 //* which is a list of struct fields that it uses to generate field offset
 //* information for its own code generators.
-//* https://github.com/emscripten-core/emscripten/blob/master/src/struct_info.json
+//* https://github.com/emscripten-core/emscripten/blob/main/src/struct_info.json
 //*
     {
         {% set api = metadata.api.lower() %}

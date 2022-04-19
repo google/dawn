@@ -33,7 +33,7 @@ namespace dawn::native {
     MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
                                                 const RenderPipelineDescriptor* descriptor);
 
-    std::vector<StageAndDescriptor> GetRenderStagesAndSetDummyShader(
+    std::vector<StageAndDescriptor> GetRenderStagesAndSetPlaceholderShader(
         DeviceBase* device,
         const RenderPipelineDescriptor* descriptor);
 

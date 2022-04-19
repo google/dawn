@@ -166,13 +166,13 @@ TEST_F(WireArgumentTests, CStringArgument) {
 
     wgpuDeviceCreateRenderPipeline(device, &pipelineDescriptor);
 
-    WGPURenderPipeline apiDummyPipeline = api.GetNewRenderPipeline();
+    WGPURenderPipeline apiPlaceholderPipeline = api.GetNewRenderPipeline();
     EXPECT_CALL(api,
                 DeviceCreateRenderPipeline(
                     apiDevice, MatchesLambda([](const WGPURenderPipelineDescriptor* desc) -> bool {
                         return desc->vertex.entryPoint == std::string("main");
                     })))
-        .WillOnce(Return(apiDummyPipeline));
+        .WillOnce(Return(apiPlaceholderPipeline));
 
     FlushClient();
 }
@@ -248,7 +248,7 @@ TEST_F(WireArgumentTests, StructureOfValuesArgument) {
 
     wgpuDeviceCreateSampler(device, &descriptor);
 
-    WGPUSampler apiDummySampler = api.GetNewSampler();
+    WGPUSampler apiPlaceholderSampler = api.GetNewSampler();
     EXPECT_CALL(api, DeviceCreateSampler(
                          apiDevice, MatchesLambda([](const WGPUSamplerDescriptor* desc) -> bool {
                              return desc->nextInChain == nullptr &&
@@ -261,7 +261,7 @@ TEST_F(WireArgumentTests, StructureOfValuesArgument) {
                                     desc->compare == WGPUCompareFunction_Never &&
                                     desc->lodMinClamp == kLodMin && desc->lodMaxClamp == kLodMax;
                          })))
-        .WillOnce(Return(apiDummySampler));
+        .WillOnce(Return(apiPlaceholderSampler));
 
     FlushClient();
 }
@@ -282,7 +282,7 @@ TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
 
     wgpuDeviceCreatePipelineLayout(device, &descriptor);
 
-    WGPUPipelineLayout apiDummyLayout = api.GetNewPipelineLayout();
+    WGPUPipelineLayout apiPlaceholderLayout = api.GetNewPipelineLayout();
     EXPECT_CALL(api, DeviceCreatePipelineLayout(
                          apiDevice,
                          MatchesLambda([apiBgl](const WGPUPipelineLayoutDescriptor* desc) -> bool {
@@ -290,7 +290,7 @@ TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
                                     desc->bindGroupLayoutCount == 1 &&
                                     desc->bindGroupLayouts[0] == apiBgl;
                          })))
-        .WillOnce(Return(apiDummyLayout));
+        .WillOnce(Return(apiPlaceholderLayout));
 
     FlushClient();
 }

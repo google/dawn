@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_library(dawn_sample_utils STATIC ${DAWN_DUMMY_FILE})
+add_library(dawn_sample_utils STATIC ${DAWN_PLACEHOLDER_FILE})
 common_compile_options(dawn_sample_utils)
 target_sources(dawn_sample_utils PRIVATE
     "SampleUtils.cpp"

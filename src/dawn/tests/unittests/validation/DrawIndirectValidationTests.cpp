@@ -72,7 +72,7 @@ class DrawIndirectValidationTest : public ValidationTest {
         wgpu::Buffer indirectBuffer =
             utils::CreateBufferFromData<uint32_t>(device, usage, bufferList);
 
-        DummyRenderPass renderPass(device);
+        PlaceholderRenderPass renderPass(device);
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         pass.SetPipeline(pipeline);

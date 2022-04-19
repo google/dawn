@@ -18,7 +18,7 @@
 
 namespace utils {
 
-    void* CreateDummyCALayer() {
+    void* CreatePlaceholderCALayer() {
         return [CALayer layer];
     }
 

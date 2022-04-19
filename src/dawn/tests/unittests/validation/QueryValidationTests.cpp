@@ -82,7 +82,7 @@ class OcclusionQueryValidationTest : public QuerySetValidationTest {};
 // Test the occlusionQuerySet in RenderPassDescriptor
 TEST_F(OcclusionQueryValidationTest, InvalidOcclusionQuerySet) {
     wgpu::QuerySet occlusionQuerySet = CreateQuerySet(device, wgpu::QueryType::Occlusion, 2);
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     // Success
     {
@@ -100,7 +100,7 @@ TEST_F(OcclusionQueryValidationTest, InvalidOcclusionQuerySet) {
     // Fail to begin occlusion query if the occlusionQuerySet is not set in RenderPassDescriptor
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        DummyRenderPass renderPassWithoutOcclusion(device);
+        PlaceholderRenderPass renderPassWithoutOcclusion(device);
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassWithoutOcclusion);
         pass.BeginOcclusionQuery(0);
         pass.EndOcclusionQuery();
@@ -142,7 +142,7 @@ TEST_F(OcclusionQueryValidationTest, InvalidOcclusionQuerySet) {
 // Test query index of occlusion query
 TEST_F(OcclusionQueryValidationTest, InvalidQueryIndex) {
     wgpu::QuerySet occlusionQuerySet = CreateQuerySet(device, wgpu::QueryType::Occlusion, 2);
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
     renderPass.occlusionQuerySet = occlusionQuerySet;
 
     // Fail to begin occlusion query if the query index exceeds the number of queries in query set
@@ -186,7 +186,7 @@ TEST_F(OcclusionQueryValidationTest, InvalidQueryIndex) {
 // Test the correspondence between BeginOcclusionQuery and EndOcclusionQuery
 TEST_F(OcclusionQueryValidationTest, InvalidBeginAndEnd) {
     wgpu::QuerySet occlusionQuerySet = CreateQuerySet(device, wgpu::QueryType::Occlusion, 2);
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
     renderPass.occlusionQuerySet = occlusionQuerySet;
 
     // Fail to begin an occlusion query without corresponding end operation
@@ -242,7 +242,7 @@ class TimestampQueryValidationTest : public QuerySetValidationTest {
     void EncodeRenderPassWithTimestampWrites(
         wgpu::CommandEncoder encoder,
         const std::vector<wgpu::RenderPassTimestampWrite>& timestampWrites) {
-        DummyRenderPass renderPass(device);
+        PlaceholderRenderPass renderPass(device);
         renderPass.timestampWriteCount = timestampWrites.size();
         renderPass.timestampWrites = timestampWrites.data();
 
@@ -290,7 +290,7 @@ TEST_F(TimestampQueryValidationTest, UnnecessaryPipelineStatistics) {
 TEST_F(TimestampQueryValidationTest, SetOcclusionQueryWithTimestampQuerySet) {
     // Fail to begin render pass if the type of occlusionQuerySet is not Occlusion
     wgpu::QuerySet querySet = CreateQuerySet(device, wgpu::QueryType::Timestamp, 1);
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
     renderPass.occlusionQuerySet = querySet;
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -558,7 +558,7 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnComputePassEncoder) {
 
 // Test write timestamp on render pass encoder
 TEST_F(TimestampQueryValidationTest, WriteTimestampOnRenderPassEncoder) {
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
 
     wgpu::QuerySet timestampQuerySet = CreateQuerySet(device, wgpu::QueryType::Timestamp, 2);
     wgpu::QuerySet occlusionQuerySet = CreateQuerySet(device, wgpu::QueryType::Occlusion, 2);
@@ -707,7 +707,7 @@ TEST_F(PipelineStatisticsQueryValidationTest, BeginRenderPassWithPipelineStatist
     wgpu::QuerySet querySet =
         CreateQuerySet(device, wgpu::QueryType::PipelineStatistics, 1,
                        {wgpu::PipelineStatisticName::VertexShaderInvocations});
-    DummyRenderPass renderPass(device);
+    PlaceholderRenderPass renderPass(device);
     renderPass.occlusionQuerySet = querySet;
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();

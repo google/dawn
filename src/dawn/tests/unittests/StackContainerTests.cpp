@@ -14,14 +14,14 @@
 
 namespace {
 
-    class Dummy : public RefCounted {
+    class Placeholder : public RefCounted {
       public:
-        explicit Dummy(int* alive) : mAlive(alive) {
+        explicit Placeholder(int* alive) : mAlive(alive) {
             ++*mAlive;
         }
 
       private:
-        ~Dummy() {
+        ~Placeholder() {
             --*mAlive;
         }
 
@@ -74,22 +74,22 @@ TEST(StackContainer, Vector) {
 
 TEST(StackContainer, VectorDoubleDelete) {
     // Regression testing for double-delete.
-    typedef StackVector<Ref<Dummy>, 2> Vector;
+    typedef StackVector<Ref<Placeholder>, 2> Vector;
     Vector vect;
 
     int alive = 0;
-    Ref<Dummy> dummy = AcquireRef(new Dummy(&alive));
+    Ref<Placeholder> placeholder = AcquireRef(new Placeholder(&alive));
     EXPECT_EQ(alive, 1);
 
-    vect->push_back(dummy);
+    vect->push_back(placeholder);
     EXPECT_EQ(alive, 1);
 
-    Dummy* dummy_unref = dummy.Get();
-    dummy = nullptr;
+    Placeholder* placeholder_unref = placeholder.Get();
+    placeholder = nullptr;
     EXPECT_EQ(alive, 1);
 
-    auto itr = std::find(vect->begin(), vect->end(), dummy_unref);
-    EXPECT_EQ(itr->Get(), dummy_unref);
+    auto itr = std::find(vect->begin(), vect->end(), placeholder_unref);
+    EXPECT_EQ(itr->Get(), placeholder_unref);
     vect->erase(itr);
     EXPECT_EQ(alive, 0);
 
@@ -138,7 +138,7 @@ TEST(StackContainer, BufferAlignment) {
 }
 
 template class StackVector<int, 2>;
-template class StackVector<Ref<Dummy>, 2>;
+template class StackVector<Ref<Placeholder>, 2>;
 
 template <typename T, size_t size>
 void CheckStackVectorElements(const StackVector<T, size>& vec, std::initializer_list<T> expected) {

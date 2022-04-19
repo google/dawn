@@ -18,7 +18,7 @@
 // DAWN_PP_GET_HEAD: get the first element of a __VA_ARGS__ without triggering empty
 // __VA_ARGS__ warnings.
 #define DAWN_INTERNAL_PP_GET_HEAD(firstParam, ...) firstParam
-#define DAWN_PP_GET_HEAD(...) DAWN_INTERNAL_PP_GET_HEAD(__VA_ARGS__, dummyArg)
+#define DAWN_PP_GET_HEAD(...) DAWN_INTERNAL_PP_GET_HEAD(__VA_ARGS__, placeholderArg)
 
 // DAWN_PP_CONCATENATE: Concatenate tokens, first expanding the arguments passed in.
 #define DAWN_PP_CONCATENATE(arg1, arg2) DAWN_PP_CONCATENATE_1(arg1, arg2)

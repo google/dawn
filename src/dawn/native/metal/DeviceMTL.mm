@@ -217,13 +217,14 @@ namespace dawn::native::metal {
         }
 
         // On some Intel GPU vertex only render pipeline get wrong depth result if no fragment
-        // shader provided. Create a dummy fragment shader module to work around this issue.
+        // shader provided. Create a placeholder fragment shader module to work around this issue.
         if (gpu_info::IsIntel(vendorId)) {
-            bool useDummyFragmentShader = true;
+            bool usePlaceholderFragmentShader = true;
             if (gpu_info::IsSkylake(deviceId)) {
-                useDummyFragmentShader = false;
+                usePlaceholderFragmentShader = false;
             }
-            SetToggle(Toggle::UseDummyFragmentInVertexOnlyPipeline, useDummyFragmentShader);
+            SetToggle(Toggle::UsePlaceholderFragmentInVertexOnlyPipeline,
+                      usePlaceholderFragmentShader);
         }
     }
 
