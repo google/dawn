@@ -230,7 +230,8 @@ bool Resolver::ValidateVariableConstructorOrCast(
 
 bool Resolver::ValidateStorageClassLayout(const sem::Type* store_ty,
                                           ast::StorageClass sc,
-                                          Source source) {
+                                          Source source,
+                                          ValidTypeStorageLayouts& layouts) {
   // https://gpuweb.github.io/gpuweb/wgsl/#storage-class-layout-constraints
 
   auto is_uniform_struct_or_array = [sc](const sem::Type* ty) {
@@ -270,8 +271,8 @@ bool Resolver::ValidateStorageClassLayout(const sem::Type* store_ty,
       uint32_t required_align = required_alignment_of(m->Type());
 
       // Recurse into the member type.
-      if (!ValidateStorageClassLayout(m->Type(), sc,
-                                      m->Declaration()->type->source)) {
+      if (!ValidateStorageClassLayout(
+              m->Type(), sc, m->Declaration()->type->source, layouts)) {
         AddNote("see layout of struct:\n" + str->Layout(builder_->Symbols()),
                 str->Declaration()->source);
         return false;
@@ -339,7 +340,7 @@ bool Resolver::ValidateStorageClassLayout(const sem::Type* store_ty,
     // TODO(crbug.com/tint/1388): Ideally we'd pass the source for nested
     // element type here, but we can't easily get that from the semantic node.
     // We should consider recursing through the AST type nodes instead.
-    if (!ValidateStorageClassLayout(arr->ElemType(), sc, source)) {
+    if (!ValidateStorageClassLayout(arr->ElemType(), sc, source, layouts)) {
       return false;
     }
 
@@ -381,10 +382,11 @@ bool Resolver::ValidateStorageClassLayout(const sem::Type* store_ty,
   return true;
 }
 
-bool Resolver::ValidateStorageClassLayout(const sem::Variable* var) {
+bool Resolver::ValidateStorageClassLayout(const sem::Variable* var,
+                                          ValidTypeStorageLayouts& layouts) {
   if (auto* str = var->Type()->UnwrapRef()->As<sem::Struct>()) {
     if (!ValidateStorageClassLayout(str, var->StorageClass(),
-                                    str->Declaration()->source)) {
+                                    str->Declaration()->source, layouts)) {
       AddNote("see declaration of variable", var->Declaration()->source);
       return false;
     }
@@ -394,7 +396,7 @@ bool Resolver::ValidateStorageClassLayout(const sem::Variable* var) {
       source = var->Declaration()->type->source;
     }
     if (!ValidateStorageClassLayout(var->Type()->UnwrapRef(),
-                                    var->StorageClass(), source)) {
+                                    var->StorageClass(), source, layouts)) {
       return false;
     }
   }

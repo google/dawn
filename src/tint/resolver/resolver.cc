@@ -554,7 +554,7 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* var) {
 
   // TODO(bclayton): Call this at the end of resolve on all uniform and storage
   // referenced structs
-  if (!ValidateStorageClassLayout(sem)) {
+  if (!ValidateStorageClassLayout(sem, valid_type_storage_layouts_)) {
     return nullptr;
   }
 

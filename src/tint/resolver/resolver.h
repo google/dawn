@@ -106,8 +106,9 @@ class Resolver {
   /// Describes the context in which a variable is declared
   enum class VariableKind { kParameter, kLocal, kGlobal };
 
-  std::set<std::pair<const sem::Type*, ast::StorageClass>>
-      valid_type_storage_layouts_;
+  using ValidTypeStorageLayouts =
+      std::set<std::pair<const sem::Type*, ast::StorageClass>>;
+  ValidTypeStorageLayouts valid_type_storage_layouts_;
 
   /// Structure holding semantic information about a block (i.e. scope), such as
   /// parent block and variables declared in the block.
@@ -307,8 +308,10 @@ class Resolver {
   bool ValidateNoDuplicateAttributes(const ast::AttributeList& attributes);
   bool ValidateStorageClassLayout(const sem::Type* type,
                                   ast::StorageClass sc,
-                                  Source source);
-  bool ValidateStorageClassLayout(const sem::Variable* var);
+                                  Source source,
+                                  ValidTypeStorageLayouts& layout);
+  bool ValidateStorageClassLayout(const sem::Variable* var,
+                                  ValidTypeStorageLayouts& layout);
 
   /// @returns true if the attribute list contains a
   /// ast::DisableValidationAttribute with the validation mode equal to
