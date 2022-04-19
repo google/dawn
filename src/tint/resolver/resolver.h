@@ -257,7 +257,7 @@ class Resolver {
   bool ValidateContinueStatement(const sem::Statement* stmt);
   bool ValidateDiscardStatement(const sem::Statement* stmt);
   bool ValidateElseStatement(const sem::ElseStatement* stmt);
-  bool ValidateEntryPoint(const sem::Function* func);
+  bool ValidateEntryPoint(const sem::Function* func, ast::PipelineStage stage);
   bool ValidateForLoopStatement(const sem::ForLoopStatement* stmt);
   bool ValidateFallthroughStatement(const sem::Statement* stmt);
   bool ValidateFunction(const sem::Function* func);
