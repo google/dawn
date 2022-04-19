@@ -84,7 +84,8 @@ namespace tint::resolver {
 Resolver::Resolver(ProgramBuilder* builder)
     : builder_(builder),
       diagnostics_(builder->Diagnostics()),
-      builtin_table_(BuiltinTable::Create(*builder)) {}
+      builtin_table_(BuiltinTable::Create(*builder)),
+      sem_(builder) {}
 
 Resolver::~Resolver() = default;
 
@@ -505,7 +506,7 @@ void Resolver::AllocateOverridableConstantIds() {
       next_constant_id = constant_id + 1;
     }
 
-    auto* sem = Sem<sem::GlobalVariable>(var);
+    auto* sem = sem_.Get<sem::GlobalVariable>(var);
     const_cast<sem::GlobalVariable*>(sem)->SetConstantId(constant_id);
   }
 }
@@ -513,9 +514,11 @@ void Resolver::AllocateOverridableConstantIds() {
 void Resolver::SetShadows() {
   for (auto it : dependencies_.shadows) {
     Switch(
-        Sem(it.first),  //
-        [&](sem::LocalVariable* local) { local->SetShadows(Sem(it.second)); },
-        [&](sem::Parameter* param) { param->SetShadows(Sem(it.second)); });
+        sem_.Get(it.first),  //
+        [&](sem::LocalVariable* local) {
+          local->SetShadows(sem_.Get(it.second));
+        },
+        [&](sem::Parameter* param) { param->SetShadows(sem_.Get(it.second)); });
   }
 }
 
@@ -755,7 +758,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
         "workgroup_size arguments must be of the same type, either i32 "
         "or u32";
 
-    auto* ty = TypeOf(expr);
+    auto* ty = sem_.TypeOf(expr);
     bool is_i32 = ty->UnwrapRef()->Is<sem::I32>();
     bool is_u32 = ty->UnwrapRef()->Is<sem::U32>();
     if (!is_i32 && !is_u32) {
@@ -772,7 +775,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
 
     sem::Constant value;
 
-    if (auto* user = Sem(expr)->As<sem::VariableUser>()) {
+    if (auto* user = sem_.Get(expr)->As<sem::VariableUser>()) {
       // We have an variable of a module-scope constant.
       auto* decl = user->Variable()->Declaration();
       if (!decl->is_const) {
@@ -785,14 +788,14 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
       }
 
       if (decl->constructor) {
-        value = Sem(decl->constructor)->ConstantValue();
+        value = sem_.Get(decl->constructor)->ConstantValue();
       } else {
         // No constructor means this value must be overriden by the user.
         ws[i].value = 0;
         continue;
       }
     } else if (expr->Is<ast::LiteralExpression>()) {
-      value = Sem(expr)->ConstantValue();
+      value = sem_.Get(expr)->ConstantValue();
     } else {
       AddError(
           "workgroup_size argument must be either a literal or a "
@@ -1168,8 +1171,8 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
 
 sem::Expression* Resolver::IndexAccessor(
     const ast::IndexAccessorExpression* expr) {
-  auto* idx = Sem(expr->index);
-  auto* obj = Sem(expr->object);
+  auto* idx = sem_.Get(expr->index);
+  auto* obj = sem_.Get(expr->object);
   auto* obj_raw_ty = obj->Type();
   auto* obj_ty = obj_raw_ty->UnwrapRef();
   auto* ty = Switch(
@@ -1180,7 +1183,7 @@ sem::Expression* Resolver::IndexAccessor(
         return builder_->create<sem::Vector>(mat->type(), mat->rows());
       },
       [&](Default) {
-        AddError("cannot index type '" + TypeNameOf(obj_ty) + "'",
+        AddError("cannot index type '" + sem_.TypeNameOf(obj_ty) + "'",
                  expr->source);
         return nullptr;
       });
@@ -1191,7 +1194,7 @@ sem::Expression* Resolver::IndexAccessor(
   auto* idx_ty = idx->Type()->UnwrapRef();
   if (!idx_ty->IsAnyOf<sem::I32, sem::U32>()) {
     AddError("index must be of type 'i32' or 'u32', found: '" +
-                 TypeNameOf(idx_ty) + "'",
+                 sem_.TypeNameOf(idx_ty) + "'",
              idx->Declaration()->source);
     return nullptr;
   }
@@ -1211,7 +1214,7 @@ sem::Expression* Resolver::IndexAccessor(
 }
 
 sem::Expression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
-  auto* inner = Sem(expr->expr);
+  auto* inner = sem_.Get(expr->expr);
   auto* ty = Type(expr->type);
   if (!ty) {
     return nullptr;
@@ -1240,7 +1243,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
   const sem::Type* arg_el_ty = nullptr;
 
   for (size_t i = 0; i < expr->args.size(); i++) {
-    auto* arg = Sem(expr->args[i]);
+    auto* arg = sem_.Get(expr->args[i]);
     if (!arg) {
       return nullptr;
     }
@@ -1637,7 +1640,7 @@ sem::Call* Resolver::TypeConstructor(
 }
 
 sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
-  auto* ty = TypeOf(literal);
+  auto* ty = sem_.TypeOf(literal);
   if (!ty) {
     return nullptr;
   }
@@ -1725,14 +1728,14 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
 
 sem::Expression* Resolver::MemberAccessor(
     const ast::MemberAccessorExpression* expr) {
-  auto* structure = TypeOf(expr->structure);
+  auto* structure = sem_.TypeOf(expr->structure);
   auto* storage_ty = structure->UnwrapRef();
 
   const sem::Type* ret = nullptr;
   std::vector<uint32_t> swizzle;
 
   // Structure may be a side-effecting expression (e.g. function call).
-  auto* sem_structure = Sem(expr->structure);
+  auto* sem_structure = sem_.Get(expr->structure);
   bool has_side_effects = sem_structure && sem_structure->HasSideEffects();
 
   if (auto* str = storage_ty->As<sem::Struct>()) {
@@ -1840,14 +1843,14 @@ sem::Expression* Resolver::MemberAccessor(
 
   AddError(
       "invalid member accessor expression. Expected vector or struct, got '" +
-          TypeNameOf(storage_ty) + "'",
+          sem_.TypeNameOf(storage_ty) + "'",
       expr->structure->source);
   return nullptr;
 }
 
 sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
-  auto* lhs = Sem(expr->lhs);
-  auto* rhs = Sem(expr->rhs);
+  auto* lhs = sem_.Get(expr->lhs);
+  auto* rhs = sem_.Get(expr->rhs);
   auto* lhs_ty = lhs->Type()->UnwrapRef();
   auto* rhs_ty = rhs->Type()->UnwrapRef();
 
@@ -1855,8 +1858,8 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
   if (!ty) {
     AddError(
         "Binary expression operand types are invalid for this operation: " +
-            TypeNameOf(lhs_ty) + " " + FriendlyName(expr->op) + " " +
-            TypeNameOf(rhs_ty),
+            sem_.TypeNameOf(lhs_ty) + " " + FriendlyName(expr->op) + " " +
+            sem_.TypeNameOf(rhs_ty),
         expr->source);
     return nullptr;
   }
@@ -2036,7 +2039,7 @@ const sem::Type* Resolver::BinaryOpType(const sem::Type* lhs_ty,
 }
 
 sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
-  auto* expr = Sem(unary->expr);
+  auto* expr = sem_.Get(unary->expr);
   auto* expr_ty = expr->Type();
   if (!expr_ty) {
     return nullptr;
@@ -2049,9 +2052,9 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
       // Result type matches the deref'd inner type.
       ty = expr_ty->UnwrapRef();
       if (!ty->Is<sem::Bool>() && !ty->is_bool_vector()) {
-        AddError(
-            "cannot logical negate expression of type '" + TypeNameOf(expr_ty),
-            unary->expr->source);
+        AddError("cannot logical negate expression of type '" +
+                     sem_.TypeNameOf(expr_ty),
+                 unary->expr->source);
         return nullptr;
       }
       break;
@@ -2061,7 +2064,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
       ty = expr_ty->UnwrapRef();
       if (!ty->is_integer_scalar_or_vector()) {
         AddError("cannot bitwise complement expression of type '" +
-                     TypeNameOf(expr_ty),
+                     sem_.TypeNameOf(expr_ty),
                  unary->expr->source);
         return nullptr;
       }
@@ -2072,8 +2075,9 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
       ty = expr_ty->UnwrapRef();
       if (!(ty->IsAnyOf<sem::F32, sem::I32>() ||
             ty->is_signed_integer_vector() || ty->is_float_vector())) {
-        AddError("cannot negate expression of type '" + TypeNameOf(expr_ty),
-                 unary->expr->source);
+        AddError(
+            "cannot negate expression of type '" + sem_.TypeNameOf(expr_ty),
+            unary->expr->source);
         return nullptr;
       }
       break;
@@ -2089,9 +2093,10 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
         auto* array = unary->expr->As<ast::IndexAccessorExpression>();
         auto* member = unary->expr->As<ast::MemberAccessorExpression>();
-        if ((array && TypeOf(array->object)->UnwrapRef()->Is<sem::Vector>()) ||
+        if ((array &&
+             sem_.TypeOf(array->object)->UnwrapRef()->Is<sem::Vector>()) ||
             (member &&
-             TypeOf(member->structure)->UnwrapRef()->Is<sem::Vector>())) {
+             sem_.TypeOf(member->structure)->UnwrapRef()->Is<sem::Vector>())) {
           AddError("cannot take the address of a vector component",
                    unary->expr->source);
           return nullptr;
@@ -2111,7 +2116,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
             ptr->StoreType(), ptr->StorageClass(), ptr->Access());
       } else {
         AddError("cannot dereference expression of type '" +
-                     TypeNameOf(expr_ty) + "'",
+                     sem_.TypeNameOf(expr_ty) + "'",
                  unary->expr->source);
         return nullptr;
       }
@@ -2143,41 +2148,6 @@ sem::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
   return result;
 }
 
-std::string Resolver::TypeNameOf(const sem::Type* ty) const {
-  return RawTypeNameOf(ty->UnwrapRef());
-}
-
-std::string Resolver::RawTypeNameOf(const sem::Type* ty) const {
-  return ty->FriendlyName(builder_->Symbols());
-}
-
-sem::Type* Resolver::TypeOf(const ast::Expression* expr) const {
-  auto* sem = Sem(expr);
-  return sem ? const_cast<sem::Type*>(sem->Type()) : nullptr;
-}
-
-sem::Type* Resolver::TypeOf(const ast::LiteralExpression* lit) {
-  return Switch(
-      lit,
-      [&](const ast::SintLiteralExpression*) {
-        return builder_->create<sem::I32>();
-      },
-      [&](const ast::UintLiteralExpression*) {
-        return builder_->create<sem::U32>();
-      },
-      [&](const ast::FloatLiteralExpression*) {
-        return builder_->create<sem::F32>();
-      },
-      [&](const ast::BoolLiteralExpression*) {
-        return builder_->create<sem::Bool>();
-      },
-      [&](Default) {
-        TINT_UNREACHABLE(Resolver, diagnostics_)
-            << "Unhandled literal type: " << lit->TypeInfo().name;
-        return nullptr;
-      });
-}
-
 sem::Array* Resolver::Array(const ast::Array* arr) {
   auto source = arr->source;
 
@@ -2187,7 +2157,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
   }
 
   if (!IsPlain(elem_type)) {  // Check must come before GetDefaultAlignAndSize()
-    AddError(TypeNameOf(elem_type) +
+    AddError(sem_.TypeNameOf(elem_type) +
                  " cannot be used as an element type of an array",
              source);
     return nullptr;
@@ -2367,7 +2337,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
 
     // Validate member type
     if (!IsPlain(type)) {
-      AddError(TypeNameOf(type) +
+      AddError(sem_.TypeNameOf(type) +
                    " cannot be used as the type of a structure member",
                member->source);
       return nullptr;
@@ -2507,7 +2477,7 @@ sem::Statement* Resolver::ReturnStatement(const ast::ReturnStatement* stmt) {
 
     // Validate after processing the return value expression so that its type
     // is available for validation.
-    auto* ret_type = stmt->value ? TypeOf(stmt->value)->UnwrapRef()
+    auto* ret_type = stmt->value ? sem_.TypeOf(stmt->value)->UnwrapRef()
                                  : builder_->create<sem::Void>();
     return ValidateReturn(stmt, current_function_->ReturnType(), ret_type);
   });
@@ -2597,7 +2567,7 @@ sem::Statement* Resolver::AssignmentStatement(
       behaviors.Add(lhs->Behaviors());
     }
 
-    return ValidateAssignment(stmt, TypeOf(stmt->rhs));
+    return ValidateAssignment(stmt, sem_.TypeOf(stmt->rhs));
   });
 }
 
@@ -2645,8 +2615,8 @@ sem::Statement* Resolver::CompoundAssignmentStatement(
     auto* ty = BinaryOpType(lhs_ty, rhs_ty, stmt->op);
     if (!ty) {
       AddError("compound assignment operand types are invalid: " +
-                   TypeNameOf(lhs_ty) + " " + FriendlyName(stmt->op) + " " +
-                   TypeNameOf(rhs_ty),
+                   sem_.TypeNameOf(lhs_ty) + " " + FriendlyName(stmt->op) +
+                   " " + sem_.TypeNameOf(rhs_ty),
                stmt->source);
       return false;
     }
@@ -2725,7 +2695,8 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
     for (auto* member : str->Members()) {
       if (!ApplyStorageClassUsageToType(sc, member->Type(), usage)) {
         std::stringstream err;
-        err << "while analysing structure member " << TypeNameOf(str) << "."
+        err << "while analysing structure member " << sem_.TypeNameOf(str)
+            << "."
             << builder_->Symbols().NameFor(member->Declaration()->symbol);
         AddNote(err.str(), member->Declaration()->source);
         return false;
@@ -2749,8 +2720,9 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
 
   if (ast::IsHostShareable(sc) && !IsHostShareable(ty)) {
     std::stringstream err;
-    err << "Type '" << TypeNameOf(ty) << "' cannot be used in storage class '"
-        << sc << "' as it is non-host-shareable";
+    err << "Type '" << sem_.TypeNameOf(ty)
+        << "' cannot be used in storage class '" << sc
+        << "' as it is non-host-shareable";
     AddError(err.str(), usage);
     return false;
   }

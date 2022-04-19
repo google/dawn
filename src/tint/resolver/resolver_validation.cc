@@ -201,8 +201,8 @@ bool Resolver::ValidateVariableConstructorOrCast(
   if (storage_ty != value_type) {
     std::string decl = var->is_const ? "let" : "var";
     AddError("cannot initialize " + decl + " of type '" +
-                 TypeNameOf(storage_ty) + "' with value of type '" +
-                 TypeNameOf(rhs_ty) + "'",
+                 sem_.TypeNameOf(storage_ty) + "' with value of type '" +
+                 sem_.TypeNameOf(rhs_ty) + "'",
              var->source);
     return false;
   }
@@ -536,9 +536,9 @@ bool Resolver::ValidateAtomicVariable(const sem::Variable* var) const {
         AddError(
             "atomic variables must have <storage> or <workgroup> storage class",
             source);
-        AddNote(
-            "atomic sub-type of '" + TypeNameOf(type) + "' is declared here",
-            found->second);
+        AddNote("atomic sub-type of '" + sem_.TypeNameOf(type) +
+                    "' is declared here",
+                found->second);
         return false;
       } else if (sc == ast::StorageClass::kStorage &&
                  access != ast::Access::kReadWrite) {
@@ -546,9 +546,9 @@ bool Resolver::ValidateAtomicVariable(const sem::Variable* var) const {
             "atomic variables in <storage> storage class must have read_write "
             "access mode",
             source);
-        AddNote(
-            "atomic sub-type of '" + TypeNameOf(type) + "' is declared here",
-            found->second);
+        AddNote("atomic sub-type of '" + sem_.TypeNameOf(type) +
+                    "' is declared here",
+                found->second);
         return false;
       }
     }
@@ -575,15 +575,17 @@ bool Resolver::ValidateVariable(const sem::Variable* var) const {
   }
 
   if (!decl->is_const && !IsStorable(storage_ty)) {
-    AddError(TypeNameOf(storage_ty) + " cannot be used as the type of a var",
-             decl->source);
+    AddError(
+        sem_.TypeNameOf(storage_ty) + " cannot be used as the type of a var",
+        decl->source);
     return false;
   }
 
   if (decl->is_const && !var->Is<sem::Parameter>() &&
       !(storage_ty->IsConstructible() || storage_ty->Is<sem::Pointer>())) {
-    AddError(TypeNameOf(storage_ty) + " cannot be used as the type of a let",
-             decl->source);
+    AddError(
+        sem_.TypeNameOf(storage_ty) + " cannot be used as the type of a let",
+        decl->source);
     return false;
   }
 
@@ -616,7 +618,7 @@ bool Resolver::ValidateVariable(const sem::Variable* var) const {
     // If the store type is a texture type or a sampler type, then the
     // variable declaration must not have a storage class attribute. The
     // storage class will always be handle.
-    AddError("variables of type '" + TypeNameOf(storage_ty) +
+    AddError("variables of type '" + sem_.TypeNameOf(storage_ty) +
                  "' must not have a storage class",
              decl->source);
     return false;
@@ -686,9 +688,9 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
     }
   } else if (!var->Type()
                   ->IsAnyOf<sem::Texture, sem::Sampler, sem::Pointer>()) {
-    AddError(
-        "store type of function parameter cannot be " + TypeNameOf(var->Type()),
-        decl->source);
+    AddError("store type of function parameter cannot be " +
+                 sem_.TypeNameOf(var->Type()),
+             decl->source);
     return false;
   }
 
@@ -886,7 +888,7 @@ bool Resolver::ValidateFunction(const sem::Function* func,
     if (decl->body) {
       sem::Behaviors behaviors{sem::Behavior::kNext};
       if (auto* last = decl->body->Last()) {
-        behaviors = Sem(last)->Behaviors();
+        behaviors = sem_.Get(last)->Behaviors();
       }
       if (behaviors.Contains(sem::Behavior::kNext)) {
         AddError("missing return at end of function", decl->source);
@@ -1222,7 +1224,7 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func,
 
 bool Resolver::ValidateStatements(const ast::StatementList& stmts) const {
   for (auto* stmt : stmts) {
-    if (!Sem(stmt)->IsReachable()) {
+    if (!sem_.Get(stmt)->IsReachable()) {
       /// TODO(https://github.com/gpuweb/gpuweb/issues/2378): This may need to
       /// become an error.
       AddWarning("code is unreachable", stmt->source);
@@ -1234,14 +1236,15 @@ bool Resolver::ValidateStatements(const ast::StatementList& stmts) const {
 
 bool Resolver::ValidateBitcast(const ast::BitcastExpression* cast,
                                const sem::Type* to) const {
-  auto* from = TypeOf(cast->expr)->UnwrapRef();
+  auto* from = sem_.TypeOf(cast->expr)->UnwrapRef();
   if (!from->is_numeric_scalar_or_vector()) {
-    AddError("'" + TypeNameOf(from) + "' cannot be bitcast",
+    AddError("'" + sem_.TypeNameOf(from) + "' cannot be bitcast",
              cast->expr->source);
     return false;
   }
   if (!to->is_numeric_scalar_or_vector()) {
-    AddError("cannot bitcast to '" + TypeNameOf(to) + "'", cast->type->source);
+    AddError("cannot bitcast to '" + sem_.TypeNameOf(to) + "'",
+             cast->type->source);
     return false;
   }
 
@@ -1253,8 +1256,8 @@ bool Resolver::ValidateBitcast(const ast::BitcastExpression* cast,
   };
 
   if (width(from) != width(to)) {
-    AddError("cannot bitcast from '" + TypeNameOf(from) + "' to '" +
-                 TypeNameOf(to) + "'",
+    AddError("cannot bitcast from '" + sem_.TypeNameOf(from) + "' to '" +
+                 sem_.TypeNameOf(to) + "'",
              cast->source);
     return false;
   }
@@ -1389,9 +1392,9 @@ bool Resolver::ValidateElseStatement(const sem::ElseStatement* stmt) const {
   if (auto* cond = stmt->Condition()) {
     auto* cond_ty = cond->Type()->UnwrapRef();
     if (!cond_ty->Is<sem::Bool>()) {
-      AddError(
-          "else statement condition must be bool, got " + TypeNameOf(cond_ty),
-          stmt->Condition()->Declaration()->source);
+      AddError("else statement condition must be bool, got " +
+                   sem_.TypeNameOf(cond_ty),
+               stmt->Condition()->Declaration()->source);
       return false;
     }
   }
@@ -1415,8 +1418,9 @@ bool Resolver::ValidateForLoopStatement(
   if (auto* cond = stmt->Condition()) {
     auto* cond_ty = cond->Type()->UnwrapRef();
     if (!cond_ty->Is<sem::Bool>()) {
-      AddError("for-loop condition must be bool, got " + TypeNameOf(cond_ty),
-               stmt->Condition()->Declaration()->source);
+      AddError(
+          "for-loop condition must be bool, got " + sem_.TypeNameOf(cond_ty),
+          stmt->Condition()->Declaration()->source);
       return false;
     }
   }
@@ -1426,8 +1430,9 @@ bool Resolver::ValidateForLoopStatement(
 bool Resolver::ValidateIfStatement(const sem::IfStatement* stmt) const {
   auto* cond_ty = stmt->Condition()->Type()->UnwrapRef();
   if (!cond_ty->Is<sem::Bool>()) {
-    AddError("if statement condition must be bool, got " + TypeNameOf(cond_ty),
-             stmt->Condition()->Declaration()->source);
+    AddError(
+        "if statement condition must be bool, got " + sem_.TypeNameOf(cond_ty),
+        stmt->Condition()->Declaration()->source);
     return false;
   }
   return true;
@@ -1556,13 +1561,13 @@ bool Resolver::ValidateFunctionCall(const sem::Call* call) const {
     const sem::Variable* param = target->Parameters()[i];
     const ast::Expression* arg_expr = decl->args[i];
     auto* param_type = param->Type();
-    auto* arg_type = TypeOf(arg_expr)->UnwrapRef();
+    auto* arg_type = sem_.TypeOf(arg_expr)->UnwrapRef();
 
     if (param_type != arg_type) {
       AddError("type mismatch for argument " + std::to_string(i + 1) +
                    " in call to '" + name + "', expected '" +
-                   TypeNameOf(param_type) + "', got '" + TypeNameOf(arg_type) +
-                   "'",
+                   sem_.TypeNameOf(param_type) + "', got '" +
+                   sem_.TypeNameOf(arg_type) + "'",
                arg_expr->source);
       return false;
     }
@@ -1664,13 +1669,13 @@ bool Resolver::ValidateStructureConstructorOrCast(
     }
     for (auto* member : struct_type->Members()) {
       auto* value = ctor->args[member->Index()];
-      auto* value_ty = TypeOf(value);
+      auto* value_ty = sem_.TypeOf(value);
       if (member->Type() != value_ty->UnwrapRef()) {
         AddError(
             "type in struct constructor does not match struct member type: "
             "expected '" +
-                TypeNameOf(member->Type()) + "', found '" +
-                TypeNameOf(value_ty) + "'",
+                sem_.TypeNameOf(member->Type()) + "', found '" +
+                sem_.TypeNameOf(value_ty) + "'",
             value->source);
         return false;
       }
@@ -1685,12 +1690,13 @@ bool Resolver::ValidateArrayConstructorOrCast(
   auto& values = ctor->args;
   auto* elem_ty = array_type->ElemType();
   for (auto* value : values) {
-    auto* value_ty = TypeOf(value)->UnwrapRef();
+    auto* value_ty = sem_.TypeOf(value)->UnwrapRef();
     if (value_ty != elem_ty) {
       AddError(
           "type in array constructor does not match array type: "
           "expected '" +
-              TypeNameOf(elem_ty) + "', found '" + TypeNameOf(value_ty) + "'",
+              sem_.TypeNameOf(elem_ty) + "', found '" +
+              sem_.TypeNameOf(value_ty) + "'",
           value->source);
       return false;
     }
@@ -1727,13 +1733,14 @@ bool Resolver::ValidateVectorConstructorOrCast(
   auto* elem_ty = vec_type->type();
   size_t value_cardinality_sum = 0;
   for (auto* value : values) {
-    auto* value_ty = TypeOf(value)->UnwrapRef();
+    auto* value_ty = sem_.TypeOf(value)->UnwrapRef();
     if (value_ty->is_scalar()) {
       if (elem_ty != value_ty) {
         AddError(
             "type in vector constructor does not match vector type: "
             "expected '" +
-                TypeNameOf(elem_ty) + "', found '" + TypeNameOf(value_ty) + "'",
+                sem_.TypeNameOf(elem_ty) + "', found '" +
+                sem_.TypeNameOf(value_ty) + "'",
             value->source);
         return false;
       }
@@ -1748,8 +1755,8 @@ bool Resolver::ValidateVectorConstructorOrCast(
         AddError(
             "type in vector constructor does not match vector type: "
             "expected '" +
-                TypeNameOf(elem_ty) + "', found '" + TypeNameOf(value_elem_ty) +
-                "'",
+                sem_.TypeNameOf(elem_ty) + "', found '" +
+                sem_.TypeNameOf(value_elem_ty) + "'",
             value->source);
         return false;
       }
@@ -1758,7 +1765,7 @@ bool Resolver::ValidateVectorConstructorOrCast(
     } else {
       // A vector constructor can only accept vectors and scalars.
       AddError("expected vector or scalar type in vector constructor; found: " +
-                   TypeNameOf(value_ty),
+                   sem_.TypeNameOf(value_ty),
                value->source);
       return false;
     }
@@ -1774,8 +1781,9 @@ bool Resolver::ValidateVectorConstructorOrCast(
     }
     const Source& values_start = values[0]->source;
     const Source& values_end = values[values.size() - 1]->source;
-    AddError("attempted to construct '" + TypeNameOf(vec_type) + "' with " +
-                 std::to_string(value_cardinality_sum) + " component(s)",
+    AddError("attempted to construct '" + sem_.TypeNameOf(vec_type) +
+                 "' with " + std::to_string(value_cardinality_sum) +
+                 " component(s)",
              Source::Combine(values_start, values_end));
     return false;
   }
@@ -1817,7 +1825,7 @@ bool Resolver::ValidateMatrixConstructorOrCast(
   std::vector<const sem::Type*> arg_tys;
   arg_tys.reserve(values.size());
   for (auto* value : values) {
-    arg_tys.emplace_back(TypeOf(value)->UnwrapRef());
+    arg_tys.emplace_back(sem_.TypeOf(value)->UnwrapRef());
   }
 
   auto* elem_type = matrix_ty->type();
@@ -1828,8 +1836,8 @@ bool Resolver::ValidateMatrixConstructorOrCast(
   auto print_error = [&]() {
     const Source& values_start = values[0]->source;
     const Source& values_end = values[values.size() - 1]->source;
-    auto type_name = TypeNameOf(matrix_ty);
-    auto elem_type_name = TypeNameOf(elem_type);
+    auto type_name = sem_.TypeNameOf(matrix_ty);
+    auto elem_type_name = sem_.TypeNameOf(elem_type);
     std::stringstream ss;
     ss << "no matching constructor " + type_name << "(";
     for (size_t i = 0; i < values.size(); i++) {
@@ -1891,7 +1899,7 @@ bool Resolver::ValidateScalarConstructorOrCast(const ast::CallExpression* ctor,
 
   // Validate constructor
   auto* value = ctor->args[0];
-  auto* value_ty = TypeOf(value)->UnwrapRef();
+  auto* value_ty = sem_.TypeOf(value)->UnwrapRef();
 
   using Bool = sem::Bool;
   using I32 = sem::I32;
@@ -1903,8 +1911,8 @@ bool Resolver::ValidateScalarConstructorOrCast(const ast::CallExpression* ctor,
                         (ty->Is<U32>() && value_ty->is_scalar()) ||
                         (ty->Is<F32>() && value_ty->is_scalar());
   if (!is_valid) {
-    AddError("cannot construct '" + TypeNameOf(ty) +
-                 "' with a value of type '" + TypeNameOf(value_ty) + "'",
+    AddError("cannot construct '" + sem_.TypeNameOf(ty) +
+                 "' with a value of type '" + sem_.TypeNameOf(value_ty) + "'",
              ctor->source);
 
     return false;
@@ -2172,7 +2180,7 @@ bool Resolver::ValidateLocationAttribute(
   }
 
   if (!type->is_numeric_scalar_or_vector()) {
-    std::string invalid_type = TypeNameOf(type);
+    std::string invalid_type = sem_.TypeNameOf(type);
     AddError("cannot apply 'location' attribute to declaration of type '" +
                  invalid_type + "'",
              source);
@@ -2200,13 +2208,13 @@ bool Resolver::ValidateReturn(const ast::ReturnStatement* ret,
     AddError(
         "return statement type must match its function "
         "return type, returned '" +
-            TypeNameOf(ret_type) + "', expected '" + TypeNameOf(func_type) +
-            "'",
+            sem_.TypeNameOf(ret_type) + "', expected '" +
+            sem_.TypeNameOf(func_type) + "'",
         ret->source);
     return false;
   }
 
-  auto* sem = Sem(ret);
+  auto* sem = sem_.Get(ret);
   if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ false)) {
     AddError("continuing blocks must not contain a return statement",
              ret->source);
@@ -2221,7 +2229,7 @@ bool Resolver::ValidateReturn(const ast::ReturnStatement* ret,
 }
 
 bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
-  auto* cond_ty = TypeOf(s->condition)->UnwrapRef();
+  auto* cond_ty = sem_.TypeOf(s->condition)->UnwrapRef();
   if (!cond_ty->is_integer_scalar()) {
     AddError(
         "switch statement selector expression must be of a "
@@ -2245,7 +2253,7 @@ bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
     }
 
     for (auto* selector : case_stmt->selectors) {
-      if (cond_ty != TypeOf(selector)) {
+      if (cond_ty != sem_.TypeOf(selector)) {
         AddError(
             "the case selector values must have the same "
             "type as the selector expression.",
@@ -2297,7 +2305,7 @@ bool Resolver::ValidateAssignment(const ast::Statement* a,
     if (!ty->IsConstructible() &&
         !ty->IsAnyOf<sem::Pointer, sem::Texture, sem::Sampler>()) {
       AddError(
-          "cannot assign '" + TypeNameOf(rhs_ty) +
+          "cannot assign '" + sem_.TypeNameOf(rhs_ty) +
               "' to '_'. '_' can only be assigned a constructible, pointer, "
               "texture or sampler type",
           rhs->source);
@@ -2307,7 +2315,7 @@ bool Resolver::ValidateAssignment(const ast::Statement* a,
   }
 
   // https://gpuweb.github.io/gpuweb/wgsl/#assignment-statement
-  auto const* lhs_ty = TypeOf(lhs);
+  auto const* lhs_ty = sem_.TypeOf(lhs);
 
   if (auto* var = ResolvedSymbol<sem::Variable>(lhs)) {
     auto* decl = var->Declaration();
@@ -2330,7 +2338,7 @@ bool Resolver::ValidateAssignment(const ast::Statement* a,
   auto* lhs_ref = lhs_ty->As<sem::Reference>();
   if (!lhs_ref) {
     // LHS is not a reference, so it has no storage.
-    AddError("cannot assign to value of type '" + TypeNameOf(lhs_ty) + "'",
+    AddError("cannot assign to value of type '" + sem_.TypeNameOf(lhs_ty) + "'",
              lhs->source);
     return false;
   }
@@ -2340,8 +2348,8 @@ bool Resolver::ValidateAssignment(const ast::Statement* a,
 
   // Value type has to match storage type
   if (storage_ty != value_type) {
-    AddError("cannot assign '" + TypeNameOf(rhs_ty) + "' to '" +
-                 TypeNameOf(lhs_ty) + "'",
+    AddError("cannot assign '" + sem_.TypeNameOf(rhs_ty) + "' to '" +
+                 sem_.TypeNameOf(lhs_ty) + "'",
              a->source);
     return false;
   }
@@ -2350,9 +2358,9 @@ bool Resolver::ValidateAssignment(const ast::Statement* a,
     return false;
   }
   if (lhs_ref->Access() == ast::Access::kRead) {
-    AddError(
-        "cannot store into a read-only type '" + RawTypeNameOf(lhs_ty) + "'",
-        a->source);
+    AddError("cannot store into a read-only type '" +
+                 sem_.RawTypeNameOf(lhs_ty) + "'",
+             a->source);
     return false;
   }
   return true;
@@ -2382,11 +2390,11 @@ bool Resolver::ValidateIncrementDecrementStatement(
     }
   }
 
-  auto const* lhs_ty = TypeOf(lhs);
+  auto const* lhs_ty = sem_.TypeOf(lhs);
   auto* lhs_ref = lhs_ty->As<sem::Reference>();
   if (!lhs_ref) {
     // LHS is not a reference, so it has no storage.
-    AddError("cannot modify value of type '" + TypeNameOf(lhs_ty) + "'",
+    AddError("cannot modify value of type '" + sem_.TypeNameOf(lhs_ty) + "'",
              lhs->source);
     return false;
   }
@@ -2399,8 +2407,9 @@ bool Resolver::ValidateIncrementDecrementStatement(
   }
 
   if (lhs_ref->Access() == ast::Access::kRead) {
-    AddError("cannot modify read-only type '" + RawTypeNameOf(lhs_ty) + "'",
-             inc->source);
+    AddError(
+        "cannot modify read-only type '" + sem_.RawTypeNameOf(lhs_ty) + "'",
+        inc->source);
     return false;
   }
   return true;

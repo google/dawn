@@ -258,6 +258,8 @@ set(TINT_LIB_SRCS
   resolver/resolver_constants.cc
   resolver/resolver_validation.cc
   resolver/resolver.h
+  resolver/sem_helper.cc
+  resolver/sem_helper.h
   scope_stack.h
   sem/array.cc
   sem/array.h

@@ -26,6 +26,7 @@
 #include "src/tint/builtin_table.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/resolver/dependency_graph.h"
+#include "src/tint/resolver/sem_helper.h"
 #include "src/tint/scope_stack.h"
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/sem/block_statement.h"
@@ -405,23 +406,6 @@ class Resolver {
   /// Set the shadowing information on variable declarations.
   /// @note this method must only be called after all semantic nodes are built.
   void SetShadows();
-
-  /// @returns the resolved type of the ast::Expression `expr`
-  /// @param expr the expression
-  sem::Type* TypeOf(const ast::Expression* expr) const;
-
-  /// @returns the type name of the given semantic type, unwrapping
-  /// references.
-  std::string TypeNameOf(const sem::Type* ty) const;
-
-  /// @returns the type name of the given semantic type, without unwrapping
-  /// references.
-  std::string RawTypeNameOf(const sem::Type* ty) const;
-
-  /// @returns the semantic type of the AST literal `lit`
-  /// @param lit the literal
-  sem::Type* TypeOf(const ast::LiteralExpression* lit);
-
   /// StatementScope() does the following:
   /// * Creates the AST -> SEM mapping.
   /// * Assigns `sem` to #current_statement_
@@ -466,21 +450,6 @@ class Resolver {
                                       const sem::Type* type);
   sem::Constant EvaluateConstantValue(const ast::CallExpression* call,
                                       const sem::Type* type);
-
-  /// Sem is a helper for obtaining the semantic node for the given AST node.
-  template <typename SEM = sem::Info::InferFromAST,
-            typename AST_OR_TYPE = CastableBase>
-  auto* Sem(const AST_OR_TYPE* ast) const {
-    using T = sem::Info::GetResultType<SEM, AST_OR_TYPE>;
-    auto* sem = builder_->Sem().Get(ast);
-    if (!sem) {
-      TINT_ICE(Resolver, diagnostics_)
-          << "AST node '" << ast->TypeInfo().name << "' had no semantic info\n"
-          << "At: " << ast->source << "\n"
-          << "Pointer: " << ast;
-    }
-    return const_cast<T*>(As<T>(sem));
-  }
 
   /// @returns true if the symbol is the name of a builtin function.
   bool IsBuiltin(Symbol) const;
@@ -541,6 +510,7 @@ class Resolver {
   diag::List& diagnostics_;
   std::unique_ptr<BuiltinTable> const builtin_table_;
   DependencyGraph dependencies_;
+  SemHelper sem_;
   std::vector<sem::Function*> entry_points_;
   std::unordered_map<const sem::Type*, const Source&> atomic_composite_info_;
   std::unordered_set<const ast::Node*> marked_;
