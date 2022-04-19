@@ -30,7 +30,7 @@ namespace dawn::native::d3d12 {
 
     class ResidencyManager {
       public:
-        ResidencyManager(Device* device);
+        explicit ResidencyManager(Device* device);
 
         MaybeError LockAllocation(Pageable* pageable);
         void UnlockAllocation(Pageable* pageable);

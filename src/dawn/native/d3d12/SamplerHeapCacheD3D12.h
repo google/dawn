@@ -45,7 +45,7 @@ namespace dawn::native::d3d12 {
     class SamplerHeapCacheEntry : public RefCounted {
       public:
         SamplerHeapCacheEntry() = default;
-        SamplerHeapCacheEntry(std::vector<Sampler*> samplers);
+        explicit SamplerHeapCacheEntry(std::vector<Sampler*> samplers);
         SamplerHeapCacheEntry(SamplerHeapCache* cache,
                               StagingDescriptorAllocator* allocator,
                               std::vector<Sampler*> samplers,
@@ -83,7 +83,7 @@ namespace dawn::native::d3d12 {
     // BindGroup.
     class SamplerHeapCache {
       public:
-        SamplerHeapCache(Device* device);
+        explicit SamplerHeapCache(Device* device);
         ~SamplerHeapCache();
 
         ResultOrError<Ref<SamplerHeapCacheEntry>> GetOrCreate(

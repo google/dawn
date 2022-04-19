@@ -25,7 +25,7 @@ namespace dawn::native::d3d12 {
 
     class Backend : public BackendConnection {
       public:
-        Backend(InstanceBase* instance);
+        explicit Backend(InstanceBase* instance);
 
         MaybeError Initialize();
 

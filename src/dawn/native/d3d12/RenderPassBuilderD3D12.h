@@ -35,7 +35,7 @@ namespace dawn::native::d3d12 {
     // operations is extracted from the descriptors.
     class RenderPassBuilder {
       public:
-        RenderPassBuilder(bool hasUAV);
+        explicit RenderPassBuilder(bool hasUAV);
 
         // Returns the highest color attachment index + 1. If there is no color attachment, returns
         // 0. Range: [0, kMaxColorAttachments + 1)

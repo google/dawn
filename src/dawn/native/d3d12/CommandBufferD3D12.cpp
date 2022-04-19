@@ -312,7 +312,7 @@ namespace dawn::native::d3d12 {
         using Base = BindGroupTrackerBase;
 
       public:
-        BindGroupStateTracker(Device* device)
+        explicit BindGroupStateTracker(Device* device)
             : BindGroupTrackerBase(),
               mDevice(device),
               mViewAllocator(device->GetViewShaderVisibleDescriptorAllocator()),

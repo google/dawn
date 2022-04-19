@@ -29,7 +29,7 @@ namespace dawn::native::d3d12 {
 
     class CommandAllocatorManager {
       public:
-        CommandAllocatorManager(Device* device);
+        explicit CommandAllocatorManager(Device* device);
 
         // A CommandAllocator that is reserved must be used on the next ExecuteCommandLists
         // otherwise its commands may be reset before execution has completed on the GPU

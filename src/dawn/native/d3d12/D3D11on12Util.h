@@ -31,7 +31,7 @@ namespace dawn::native::d3d12 {
     // Wraps 11 wrapped resources in a cache.
     class D3D11on12ResourceCacheEntry : public RefCounted {
       public:
-        D3D11on12ResourceCacheEntry(ComPtr<ID3D11On12Device> d3d11on12Device);
+        explicit D3D11on12ResourceCacheEntry(ComPtr<ID3D11On12Device> d3d11on12Device);
         D3D11on12ResourceCacheEntry(ComPtr<IDXGIKeyedMutex> d3d11on12Resource,
                                     ComPtr<ID3D11On12Device> d3d11on12Device);
         ~D3D11on12ResourceCacheEntry();

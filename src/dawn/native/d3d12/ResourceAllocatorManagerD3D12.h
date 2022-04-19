@@ -57,7 +57,7 @@ namespace dawn::native::d3d12 {
     // multiple allocation methods.
     class ResourceAllocatorManager {
       public:
-        ResourceAllocatorManager(Device* device);
+        explicit ResourceAllocatorManager(Device* device);
 
         ResultOrError<ResourceHeapAllocation> AllocateMemory(
             D3D12_HEAP_TYPE heapType,
