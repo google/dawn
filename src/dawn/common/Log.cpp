@@ -14,10 +14,10 @@
 
 #include "dawn/common/Log.h"
 
+#include <cstdio>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/Platform.h"
-
-#include <cstdio>
 
 #if defined(DAWN_PLATFORM_ANDROID)
 #    include <android/log.h>

@@ -15,12 +15,12 @@
 #ifndef SRC_DAWN_COMMON_ITYP_ARRAY_H_
 #define SRC_DAWN_COMMON_ITYP_ARRAY_H_
 
-#include "dawn/common/TypedInteger.h"
-#include "dawn/common/UnderlyingType.h"
-
 #include <array>
 #include <cstddef>
 #include <type_traits>
+
+#include "dawn/common/TypedInteger.h"
+#include "dawn/common/UnderlyingType.h"
 
 namespace ityp {
 

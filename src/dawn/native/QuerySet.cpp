@@ -14,12 +14,12 @@
 
 #include "dawn/native/QuerySet.h"
 
+#include <set>
+
 #include "dawn/native/Device.h"
 #include "dawn/native/Features.h"
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/ValidationUtils_autogen.h"
-
-#include <set>
 
 namespace dawn::native {
 

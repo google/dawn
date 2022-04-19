@@ -14,6 +14,8 @@
 
 #include "dawn/native/opengl/ShaderModuleGL.h"
 
+#include <sstream>
+
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/TintUtils.h"
 #include "dawn/native/opengl/DeviceGL.h"
@@ -21,9 +23,7 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
-#include <tint/tint.h>
-
-#include <sstream>
+#include "tint/tint.h"
 
 namespace dawn::native::opengl {
 

@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <algorithm>
+
 #include "dawn/wire/server/Server.h"
 
 #include "dawn/wire/SupportedFeatures.h"
-
-#include <algorithm>
 
 namespace dawn::wire::server {
 

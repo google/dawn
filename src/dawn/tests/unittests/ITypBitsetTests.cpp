@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#include <set>
+
+#include "gtest/gtest.h"
 
 #include "dawn/common/TypedInteger.h"
 #include "dawn/common/ityp_bitset.h"
-
-#include <set>
 
 class ITypBitsetTest : public testing::Test {
   protected:

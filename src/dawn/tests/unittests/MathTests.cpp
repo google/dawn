@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#include <cmath>
+
+#include "gtest/gtest.h"
 
 #include "dawn/EnumClassBitmasks.h"
 #include "dawn/common/Math.h"
 
-#include <cmath>
 #include "dawn/webgpu_cpp.h"
 
 namespace wgpu {

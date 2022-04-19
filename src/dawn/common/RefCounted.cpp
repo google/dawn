@@ -14,9 +14,9 @@
 
 #include "dawn/common/RefCounted.h"
 
-#include "dawn/common/Assert.h"
-
 #include <cstddef>
+
+#include "dawn/common/Assert.h"
 
 static constexpr size_t kPayloadBits = 1;
 static constexpr uint64_t kPayloadMask = (uint64_t(1) << kPayloadBits) - 1;

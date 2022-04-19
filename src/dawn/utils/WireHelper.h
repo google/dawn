@@ -15,10 +15,10 @@
 #ifndef SRC_DAWN_UTILS_WIREHELPER_H_
 #define SRC_DAWN_UTILS_WIREHELPER_H_
 
-#include "dawn/webgpu_cpp.h"
-
 #include <cstdint>
 #include <memory>
+
+#include "dawn/webgpu_cpp.h"
 
 namespace utils {
 

@@ -15,11 +15,11 @@
 #ifndef SRC_DAWN_COMMON_SLABALLOCATOR_H_
 #define SRC_DAWN_COMMON_SLABALLOCATOR_H_
 
-#include "dawn/common/PlacementAllocated.h"
-
 #include <cstdint>
 #include <type_traits>
 #include <utility>
+
+#include "dawn/common/PlacementAllocated.h"
 
 // The SlabAllocator allocates objects out of one or more fixed-size contiguous "slabs" of memory.
 // This makes it very quick to allocate and deallocate fixed-size objects because the allocator only

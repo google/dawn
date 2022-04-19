@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cmath>
+#include <type_traits>
+
 #include "dawn/tests/DawnTest.h"
 
 #include "dawn/common/Assert.h"
@@ -19,9 +22,6 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
-
-#include <cmath>
-#include <type_traits>
 
 // An expectation for float buffer content that can correctly compare different NaN values and
 // supports a basic tolerance for comparison of finite values.

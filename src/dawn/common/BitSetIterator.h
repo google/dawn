@@ -15,12 +15,12 @@
 #ifndef SRC_DAWN_COMMON_BITSETITERATOR_H_
 #define SRC_DAWN_COMMON_BITSETITERATOR_H_
 
+#include <bitset>
+#include <limits>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/Math.h"
 #include "dawn/common/UnderlyingType.h"
-
-#include <bitset>
-#include <limits>
 
 // This is ANGLE's BitSetIterator class with a customizable return type
 // TODO(crbug.com/dawn/306): it could be optimized, in particular when N <= 64

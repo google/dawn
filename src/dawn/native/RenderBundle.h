@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_RENDERBUNDLE_H_
 #define SRC_DAWN_NATIVE_RENDERBUNDLE_H_
 
+#include <bitset>
+
 #include "dawn/common/Constants.h"
 #include "dawn/native/AttachmentState.h"
 #include "dawn/native/CommandAllocator.h"
@@ -25,8 +27,6 @@
 #include "dawn/native/PassResourceUsage.h"
 
 #include "dawn/native/dawn_platform.h"
-
-#include <bitset>
 
 namespace dawn::native {
 

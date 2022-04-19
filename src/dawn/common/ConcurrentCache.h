@@ -15,11 +15,11 @@
 #ifndef SRC_DAWN_COMMON_CONCURRENTCACHE_H_
 #define SRC_DAWN_COMMON_CONCURRENTCACHE_H_
 
-#include "dawn/common/NonCopyable.h"
-
 #include <mutex>
 #include <unordered_set>
 #include <utility>
+
+#include "dawn/common/NonCopyable.h"
 
 template <typename T>
 class ConcurrentCache : public NonMovable {

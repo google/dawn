@@ -13,9 +13,10 @@
 // limitations under the License.
 
 #include "dawn/native/TintUtils.h"
+
 #include "dawn/native/Device.h"
 
-#include <tint/tint.h>
+#include "tint/tint.h"
 
 namespace dawn::native {
 

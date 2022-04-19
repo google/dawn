@@ -15,12 +15,12 @@
 #ifndef SRC_DAWN_WIRE_SERVER_OBJECTSTORAGE_H_
 #define SRC_DAWN_WIRE_SERVER_OBJECTSTORAGE_H_
 
-#include "dawn/wire/WireCmd_autogen.h"
-#include "dawn/wire/WireServer.h"
-
 #include <algorithm>
 #include <map>
 #include <unordered_set>
+
+#include "dawn/wire/WireCmd_autogen.h"
+#include "dawn/wire/WireServer.h"
 
 namespace dawn::wire::server {
 

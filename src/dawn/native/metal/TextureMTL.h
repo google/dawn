@@ -15,14 +15,14 @@
 #ifndef SRC_DAWN_NATIVE_METAL_TEXTUREMTL_H_
 #define SRC_DAWN_NATIVE_METAL_TEXTUREMTL_H_
 
+#include <IOSurface/IOSurfaceRef.h>
+#import <Metal/Metal.h>
+
 #include "dawn/native/Texture.h"
 
 #include "dawn/common/CoreFoundationRef.h"
 #include "dawn/common/NSRef.h"
 #include "dawn/native/DawnNative.h"
-
-#include <IOSurface/IOSurfaceRef.h>
-#import <Metal/Metal.h>
 
 namespace dawn::native::metal {
 

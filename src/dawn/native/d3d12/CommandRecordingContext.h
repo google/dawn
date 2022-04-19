@@ -14,12 +14,12 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_COMMANDRECORDINGCONTEXT_H_
 #define SRC_DAWN_NATIVE_D3D12_COMMANDRECORDINGCONTEXT_H_
 
+#include <set>
+
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/d3d12/BufferD3D12.h"
 #include "dawn/native/d3d12/d3d12_platform.h"
-
-#include <set>
 
 namespace dawn::native::d3d12 {
     class CommandAllocatorManager;

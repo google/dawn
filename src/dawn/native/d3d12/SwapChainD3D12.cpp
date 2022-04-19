@@ -14,14 +14,13 @@
 
 #include "dawn/native/d3d12/SwapChainD3D12.h"
 
+#include <windows.ui.xaml.media.dxinterop.h>
+
+#include "dawn/dawn_wsi.h"
 #include "dawn/native/Surface.h"
 #include "dawn/native/d3d12/D3D12Error.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/native/d3d12/TextureD3D12.h"
-
-#include "dawn/dawn_wsi.h"
-
-#include <windows.ui.xaml.media.dxinterop.h>
 
 namespace dawn::native::d3d12 {
     namespace {

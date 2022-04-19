@@ -15,10 +15,10 @@
 #ifndef SRC_DAWN_COMMON_REFCOUNTED_H_
 #define SRC_DAWN_COMMON_REFCOUNTED_H_
 
-#include "dawn/common/RefBase.h"
-
 #include <atomic>
 #include <cstdint>
+
+#include "dawn/common/RefBase.h"
 
 class RefCounted {
   public:

@@ -15,10 +15,10 @@
 #ifndef SRC_DAWN_NATIVE_SCRATCHBUFFER_H_
 #define SRC_DAWN_NATIVE_SCRATCHBUFFER_H_
 
+#include <cstdint>
+
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/Buffer.h"
-
-#include <cstdint>
 
 namespace dawn::native {
 

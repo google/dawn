@@ -14,6 +14,8 @@
 
 #include "dawn/native/vulkan/SwapChainVk.h"
 
+#include <algorithm>
+
 #include "dawn/common/Compiler.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/Surface.h"
@@ -23,8 +25,6 @@
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/VulkanError.h"
-
-#include <algorithm>
 
 #if defined(DAWN_USE_X11)
 #    include "dawn/native/XlibXcbFunctions.h"

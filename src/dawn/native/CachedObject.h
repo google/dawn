@@ -15,11 +15,11 @@
 #ifndef SRC_DAWN_NATIVE_CACHEDOBJECT_H_
 #define SRC_DAWN_NATIVE_CACHEDOBJECT_H_
 
-#include "dawn/native/CacheKey.h"
-#include "dawn/native/Forward.h"
-
 #include <cstddef>
 #include <string>
+
+#include "dawn/native/CacheKey.h"
+#include "dawn/native/Forward.h"
 
 namespace dawn::native {
 

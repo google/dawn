@@ -14,14 +14,14 @@
 
 #include "dawn/native/IndirectDrawMetadata.h"
 
+#include <algorithm>
+#include <utility>
+
 #include "dawn/common/Constants.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/IndirectDrawValidationEncoder.h"
 #include "dawn/native/Limits.h"
 #include "dawn/native/RenderBundle.h"
-
-#include <algorithm>
-#include <utility>
 
 namespace dawn::native {
 

@@ -15,13 +15,13 @@
 #ifndef SRC_DAWN_NATIVE_BINDGROUPTRACKER_H_
 #define SRC_DAWN_NATIVE_BINDGROUPTRACKER_H_
 
+#include <array>
+#include <bitset>
+
 #include "dawn/common/Constants.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/PipelineLayout.h"
-
-#include <array>
-#include <bitset>
 
 namespace dawn::native {
 

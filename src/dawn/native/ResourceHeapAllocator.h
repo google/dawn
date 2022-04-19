@@ -15,10 +15,10 @@
 #ifndef SRC_DAWN_NATIVE_RESOURCEHEAPALLOCATOR_H_
 #define SRC_DAWN_NATIVE_RESOURCEHEAPALLOCATOR_H_
 
+#include <memory>
+
 #include "dawn/native/Error.h"
 #include "dawn/native/ResourceHeap.h"
-
-#include <memory>
 
 namespace dawn::native {
 

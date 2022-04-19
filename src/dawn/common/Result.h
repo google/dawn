@@ -15,14 +15,14 @@
 #ifndef SRC_DAWN_COMMON_RESULT_H_
 #define SRC_DAWN_COMMON_RESULT_H_
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Compiler.h"
-
 #include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <type_traits>
 #include <utility>
+
+#include "dawn/common/Assert.h"
+#include "dawn/common/Compiler.h"
 
 // Result<T, E> is the following sum type (Haskell notation):
 //

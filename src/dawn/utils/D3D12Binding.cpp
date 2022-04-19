@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <memory>
+
 #include "dawn/utils/BackendBinding.h"
 
 #include "dawn/common/Assert.h"
@@ -20,8 +22,6 @@
 #include "GLFW/glfw3.h"
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include "GLFW/glfw3native.h"
-
-#include <memory>
 
 namespace utils {
 

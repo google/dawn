@@ -15,9 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_TEXTURECOPYSPLITTER_H_
 #define SRC_DAWN_NATIVE_D3D12_TEXTURECOPYSPLITTER_H_
 
-#include "dawn/native/dawn_platform.h"
-
 #include <array>
+
+#include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

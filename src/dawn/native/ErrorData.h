@@ -15,12 +15,12 @@
 #ifndef SRC_DAWN_NATIVE_ERRORDATA_H_
 #define SRC_DAWN_NATIVE_ERRORDATA_H_
 
-#include "dawn/common/Compiler.h"
-
 #include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "dawn/common/Compiler.h"
 
 namespace wgpu {
     enum class ErrorType : uint32_t;

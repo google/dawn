@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <string>
+// TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
 #include <variant>  // NOLINT: Found C system header after C++ system header.
 
 #include "benchmark/benchmark.h"

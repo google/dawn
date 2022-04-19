@@ -14,9 +14,9 @@
 
 #include "dawn/common/WindowsUtils.h"
 
-#include "dawn/common/windows_with_undefs.h"
-
 #include <memory>
+
+#include "dawn/common/windows_with_undefs.h"
 
 std::string WCharToUTF8(const wchar_t* input) {
     // The -1 argument asks WideCharToMultiByte to use the null terminator to know the size of

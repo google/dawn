@@ -15,12 +15,12 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_VULKANINFO_H_
 #define SRC_DAWN_NATIVE_VULKAN_VULKANINFO_H_
 
+#include <vector>
+
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/vulkan/VulkanExtensions.h"
-
-#include <vector>
 
 namespace dawn::native::vulkan {
 

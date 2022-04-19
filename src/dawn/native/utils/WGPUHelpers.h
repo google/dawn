@@ -15,14 +15,13 @@
 #ifndef SRC_DAWN_NATIVE_UTILS_WGPUHELPERS_H_
 #define SRC_DAWN_NATIVE_UTILS_WGPUHELPERS_H_
 
-#include "dawn/native/dawn_platform.h"
-
 #include <array>
 #include <initializer_list>
 #include <vector>
 
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/dawn_platform.h"
 
 namespace dawn::native::utils {
 

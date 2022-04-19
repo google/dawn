@@ -15,14 +15,13 @@
 #ifndef SRC_DAWN_UTILS_WGPUHELPERS_H_
 #define SRC_DAWN_UTILS_WGPUHELPERS_H_
 
-#include "dawn/webgpu_cpp.h"
-
 #include <array>
 #include <initializer_list>
 #include <vector>
 
 #include "dawn/common/Constants.h"
 #include "dawn/utils/TextureUtils.h"
+#include "dawn/webgpu_cpp.h"
 
 namespace utils {
 

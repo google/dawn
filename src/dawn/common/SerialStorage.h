@@ -15,10 +15,10 @@
 #ifndef SRC_DAWN_COMMON_SERIALSTORAGE_H_
 #define SRC_DAWN_COMMON_SERIALSTORAGE_H_
 
-#include "dawn/common/Assert.h"
-
 #include <cstdint>
 #include <utility>
+
+#include "dawn/common/Assert.h"
 
 template <typename T>
 struct SerialStorageTraits {};

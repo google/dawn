@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/tests/unittests/validation/ValidationTest.h"
-
 #include <array>
+
+#include "dawn/tests/unittests/validation/ValidationTest.h"
 
 namespace {
 

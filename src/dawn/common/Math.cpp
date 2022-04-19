@@ -14,12 +14,12 @@
 
 #include "dawn/common/Math.h"
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Platform.h"
-
 #include <algorithm>
 #include <cmath>
 #include <limits>
+
+#include "dawn/common/Assert.h"
+#include "dawn/common/Platform.h"
 
 #if defined(DAWN_COMPILER_MSVC)
 #    include <intrin.h>

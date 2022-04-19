@@ -15,11 +15,11 @@
 #ifndef SRC_DAWN_NATIVE_PASSRESOURCEUSAGE_H_
 #define SRC_DAWN_NATIVE_PASSRESOURCEUSAGE_H_
 
-#include "dawn/native/SubresourceStorage.h"
-#include "dawn/native/dawn_platform.h"
-
 #include <set>
 #include <vector>
+
+#include "dawn/native/SubresourceStorage.h"
+#include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

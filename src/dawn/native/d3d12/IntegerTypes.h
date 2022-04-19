@@ -15,10 +15,10 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_INTEGERTYPES_H_
 #define SRC_DAWN_NATIVE_D3D12_INTEGERTYPES_H_
 
+#include <cstdint>
+
 #include "dawn/common/Constants.h"
 #include "dawn/common/TypedInteger.h"
-
-#include <cstdint>
 
 namespace dawn::native::d3d12 {
 

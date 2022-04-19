@@ -15,14 +15,14 @@
 #ifndef SRC_DAWN_WIRE_CHUNKEDCOMMANDSERIALIZER_H_
 #define SRC_DAWN_WIRE_CHUNKEDCOMMANDSERIALIZER_H_
 
+#include <algorithm>
+#include <cstring>
+#include <memory>
+
 #include "dawn/common/Alloc.h"
 #include "dawn/common/Compiler.h"
 #include "dawn/wire/Wire.h"
 #include "dawn/wire/WireCmd_autogen.h"
-
-#include <algorithm>
-#include <cstring>
-#include <memory>
 
 namespace dawn::wire {
 

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <EGL/egl.h>
+
 #include "dawn/tests/DawnTest.h"
 
 #include "dawn/common/DynamicLib.h"
@@ -19,8 +21,6 @@
 #include "dawn/native/opengl/DeviceGL.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
-
-#include <EGL/egl.h>
 
 namespace {
 

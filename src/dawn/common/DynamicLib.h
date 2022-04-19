@@ -15,10 +15,10 @@
 #ifndef SRC_DAWN_COMMON_DYNAMICLIB_H_
 #define SRC_DAWN_COMMON_DYNAMICLIB_H_
 
-#include "dawn/common/Assert.h"
-
 #include <string>
 #include <type_traits>
+
+#include "dawn/common/Assert.h"
 
 class DynamicLib {
   public:

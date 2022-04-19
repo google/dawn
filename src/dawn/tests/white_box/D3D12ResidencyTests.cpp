@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <vector>
+
 #include "dawn/native/D3D12Backend.h"
 #include "dawn/native/d3d12/BufferD3D12.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
@@ -20,8 +22,6 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
-
-#include <vector>
 
 constexpr uint32_t kRestrictedBudgetSize = 100000000;         // 100MB
 constexpr uint32_t kDirectlyAllocatedResourceSize = 5000000;  // 5MB

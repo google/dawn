@@ -15,12 +15,12 @@
 #ifndef SRC_DAWN_NATIVE_BUDDYMEMORYALLOCATOR_H_
 #define SRC_DAWN_NATIVE_BUDDYMEMORYALLOCATOR_H_
 
+#include <memory>
+#include <vector>
+
 #include "dawn/native/BuddyAllocator.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/ResourceMemoryAllocation.h"
-
-#include <memory>
-#include <vector>
 
 namespace dawn::native {
 

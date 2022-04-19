@@ -14,6 +14,8 @@
 
 #include "dawn/native/PassResourceUsageTracker.h"
 
+#include <utility>
+
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/EnumMaskIterator.h"
@@ -21,8 +23,6 @@
 #include "dawn/native/Format.h"
 #include "dawn/native/QuerySet.h"
 #include "dawn/native/Texture.h"
-
-#include <utility>
 
 namespace dawn::native {
 

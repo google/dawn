@@ -14,6 +14,9 @@
 
 #include "dawn/native/RenderEncoderBase.h"
 
+#include <math.h>
+#include <cstring>
+
 #include "dawn/common/Constants.h"
 #include "dawn/common/Log.h"
 #include "dawn/native/Buffer.h"
@@ -23,9 +26,6 @@
 #include "dawn/native/Device.h"
 #include "dawn/native/RenderPipeline.h"
 #include "dawn/native/ValidationUtils_autogen.h"
-
-#include <math.h>
-#include <cstring>
 
 namespace dawn::native {
 

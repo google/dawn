@@ -15,9 +15,9 @@
 #ifndef SRC_DAWN_UTILS_GLFWUTILS_H_
 #define SRC_DAWN_UTILS_GLFWUTILS_H_
 
-#include "dawn/webgpu_cpp.h"
-
 #include <memory>
+
+#include "dawn/webgpu_cpp.h"
 
 struct GLFWwindow;
 

@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#include <array>
+
+#include "gtest/gtest.h"
 
 #include "dawn/common/TypedInteger.h"
 #include "dawn/common/ityp_span.h"
-
-#include <array>
 
 class ITypSpanTest : public testing::Test {
   protected:

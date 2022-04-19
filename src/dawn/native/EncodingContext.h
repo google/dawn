@@ -15,14 +15,14 @@
 #ifndef SRC_DAWN_NATIVE_ENCODINGCONTEXT_H_
 #define SRC_DAWN_NATIVE_ENCODINGCONTEXT_H_
 
+#include <string>
+
 #include "dawn/native/CommandAllocator.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/IndirectDrawMetadata.h"
 #include "dawn/native/PassResourceUsageTracker.h"
 #include "dawn/native/dawn_platform.h"
-
-#include <string>
 
 namespace dawn::native {
 

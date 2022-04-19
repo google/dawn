@@ -14,9 +14,9 @@
 
 #include "src/dawn/node/binding/GPU.h"
 
-#include "src/dawn/node/binding/GPUAdapter.h"
-
 #include <cstdlib>
+
+#include "src/dawn/node/binding/GPUAdapter.h"
 
 #if defined(_WIN32)
 #    include <Windows.h>

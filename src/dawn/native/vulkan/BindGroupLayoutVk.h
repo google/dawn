@@ -15,12 +15,12 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_BINDGROUPLAYOUTVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_BINDGROUPLAYOUTVK_H_
 
+#include <vector>
+
 #include "dawn/native/BindGroupLayout.h"
 
 #include "dawn/common/SlabAllocator.h"
 #include "dawn/common/vulkan_platform.h"
-
-#include <vector>
 
 namespace dawn::native {
     class CacheKey;

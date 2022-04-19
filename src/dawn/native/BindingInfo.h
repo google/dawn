@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_BINDINGINFO_H_
 #define SRC_DAWN_NATIVE_BINDINGINFO_H_
 
+#include <cstdint>
+
 #include "dawn/common/Constants.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/native/Error.h"
@@ -23,8 +25,6 @@
 #include "dawn/native/PerStage.h"
 
 #include "dawn/native/dawn_platform.h"
-
-#include <cstdint>
 
 namespace dawn::native {
 

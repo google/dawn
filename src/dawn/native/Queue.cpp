@@ -14,6 +14,8 @@
 
 #include "dawn/native/Queue.h"
 
+#include <cstring>
+
 #include "dawn/common/Constants.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/CommandBuffer.h"
@@ -31,8 +33,6 @@
 #include "dawn/native/Texture.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
-
-#include <cstring>
 
 namespace dawn::native {
 

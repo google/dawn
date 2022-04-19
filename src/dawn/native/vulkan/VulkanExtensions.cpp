@@ -14,11 +14,11 @@
 
 #include "dawn/native/vulkan/VulkanExtensions.h"
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/vulkan_platform.h"
-
 #include <array>
 #include <limits>
+
+#include "dawn/common/Assert.h"
+#include "dawn/common/vulkan_platform.h"
 
 namespace dawn::native::vulkan {
 

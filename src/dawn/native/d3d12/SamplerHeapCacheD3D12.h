@@ -15,12 +15,12 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_SAMPLERHEAPCACHED3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_SAMPLERHEAPCACHED3D12_H_
 
+#include <unordered_set>
+
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/BindingInfo.h"
 #include "dawn/native/d3d12/CPUDescriptorHeapAllocationD3D12.h"
 #include "dawn/native/d3d12/GPUDescriptorHeapAllocationD3D12.h"
-
-#include <unordered_set>
 
 // |SamplerHeapCacheEntry| maintains a cache of sampler descriptor heap allocations.
 // Each entry represents one or more sampler descriptors that co-exist in a CPU and

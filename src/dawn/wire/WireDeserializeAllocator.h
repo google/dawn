@@ -15,9 +15,9 @@
 #ifndef SRC_DAWN_WIRE_WIREDESERIALIZEALLOCATOR_H_
 #define SRC_DAWN_WIRE_WIREDESERIALIZEALLOCATOR_H_
 
-#include "dawn/wire/WireCmd_autogen.h"
-
 #include <vector>
+
+#include "dawn/wire/WireCmd_autogen.h"
 
 namespace dawn::wire {
     // A really really simple implementation of the DeserializeAllocator. It's main feature

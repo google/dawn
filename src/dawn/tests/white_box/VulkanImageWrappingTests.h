@@ -15,6 +15,9 @@
 #ifndef SRC_DAWN_TESTS_WHITE_BOX_VULKANIMAGEWRAPPINGTESTS_H_
 #define SRC_DAWN_TESTS_WHITE_BOX_VULKANIMAGEWRAPPINGTESTS_H_
 
+#include <memory>
+#include <vector>
+
 // This must be above all other includes otherwise VulkanBackend.h includes vulkan.h before we had
 // time to wrap it with vulkan_platform.h
 #include "dawn/common/vulkan_platform.h"
@@ -22,9 +25,6 @@
 #include "dawn/common/NonCopyable.h"
 #include "dawn/native/VulkanBackend.h"
 #include "dawn/webgpu_cpp.h"
-
-#include <memory>
-#include <vector>
 
 namespace dawn::native::vulkan {
 

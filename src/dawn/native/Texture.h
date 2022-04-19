@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_TEXTURE_H_
 #define SRC_DAWN_NATIVE_TEXTURE_H_
 
+#include <vector>
+
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Error.h"
@@ -24,8 +26,6 @@
 #include "dawn/native/Subresource.h"
 
 #include "dawn/native/dawn_platform.h"
-
-#include <vector>
 
 namespace dawn::native {
 

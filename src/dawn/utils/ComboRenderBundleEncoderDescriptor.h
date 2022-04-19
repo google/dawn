@@ -15,11 +15,10 @@
 #ifndef SRC_DAWN_UTILS_COMBORENDERBUNDLEENCODERDESCRIPTOR_H_
 #define SRC_DAWN_UTILS_COMBORENDERBUNDLEENCODERDESCRIPTOR_H_
 
-#include "dawn/webgpu_cpp.h"
+#include <array>
 
 #include "dawn/common/Constants.h"
-
-#include <array>
+#include "dawn/webgpu_cpp.h"
 
 namespace utils {
 

@@ -15,6 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_PIPELINELAYOUT_H_
 #define SRC_DAWN_NATIVE_PIPELINELAYOUT_H_
 
+#include <array>
+#include <bitset>
+
 #include "dawn/common/Constants.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
@@ -25,9 +28,6 @@
 #include "dawn/native/ObjectBase.h"
 
 #include "dawn/native/dawn_platform.h"
-
-#include <array>
-#include <bitset>
 
 namespace dawn::native {
 

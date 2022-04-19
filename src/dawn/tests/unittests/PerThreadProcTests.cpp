@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <atomic>
+#include <thread>
+
+#include "gtest/gtest.h"
+
 #include "dawn/dawn_thread_dispatch_proc.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/null/DeviceNull.h"
 #include "dawn/webgpu_cpp.h"
-
-#include <gtest/gtest.h>
-#include <atomic>
-#include <thread>
 
 class PerThreadProcTests : public testing::Test {
   public:

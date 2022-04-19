@@ -15,11 +15,11 @@
 #ifndef SRC_DAWN_COMMON_ITYP_VECTOR_H_
 #define SRC_DAWN_COMMON_ITYP_VECTOR_H_
 
-#include "dawn/common/TypedInteger.h"
-#include "dawn/common/UnderlyingType.h"
-
 #include <type_traits>
 #include <vector>
+
+#include "dawn/common/TypedInteger.h"
+#include "dawn/common/UnderlyingType.h"
 
 namespace ityp {
 

@@ -14,6 +14,8 @@
 
 #include "dawn/native/ProgrammableEncoder.h"
 
+#include <cstring>
+
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/native/BindGroup.h"
@@ -23,8 +25,6 @@
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/ValidationUtils_autogen.h"
-
-#include <cstring>
 
 namespace dawn::native {
 

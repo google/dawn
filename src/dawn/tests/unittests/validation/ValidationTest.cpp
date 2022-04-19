@@ -14,6 +14,8 @@
 
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 
+#include <algorithm>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/SystemUtils.h"
 #include "dawn/dawn_proc.h"
@@ -21,8 +23,6 @@
 #include "dawn/tests/ToggleParser.h"
 #include "dawn/utils/WireHelper.h"
 #include "dawn/webgpu.h"
-
-#include <algorithm>
 
 namespace {
 

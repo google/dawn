@@ -14,6 +14,10 @@
 
 #include "dawn/native/Device.h"
 
+#include <array>
+#include <mutex>
+#include <unordered_set>
+
 #include "dawn/common/Log.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/AsyncTask.h"
@@ -47,10 +51,6 @@
 #include "dawn/native/utils/WGPUHelpers.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
-
-#include <array>
-#include <mutex>
-#include <unordered_set>
 
 namespace dawn::native {
 

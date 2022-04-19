@@ -14,11 +14,11 @@
 
 #include "dawn/native/d3d12/PlatformFunctions.h"
 
-#include "dawn/common/DynamicLib.h"
-
 #include <comdef.h>
 #include <array>
 #include <sstream>
+
+#include "dawn/common/DynamicLib.h"
 
 namespace dawn::native::d3d12 {
     namespace {

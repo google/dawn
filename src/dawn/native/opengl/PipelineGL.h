@@ -15,12 +15,12 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_PIPELINEGL_H_
 #define SRC_DAWN_NATIVE_OPENGL_PIPELINEGL_H_
 
+#include <vector>
+
 #include "dawn/native/Pipeline.h"
 
 #include "dawn/native/PerStage.h"
 #include "dawn/native/opengl/opengl_platform.h"
-
-#include <vector>
 
 namespace dawn::native {
     struct ProgrammableStage;

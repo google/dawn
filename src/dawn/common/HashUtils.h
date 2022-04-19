@@ -15,12 +15,12 @@
 #ifndef SRC_DAWN_COMMON_HASHUTILS_H_
 #define SRC_DAWN_COMMON_HASHUTILS_H_
 
+#include <bitset>
+#include <functional>
+
 #include "dawn/common/Platform.h"
 #include "dawn/common/TypedInteger.h"
 #include "dawn/common/ityp_bitset.h"
-
-#include <bitset>
-#include <functional>
 
 // Wrapper around std::hash to make it a templated function instead of a functor. It is marginally
 // nicer, and avoids adding to the std namespace to add hashing of other types.

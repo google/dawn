@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <CoreFoundation/CoreFoundation.h>
+#include <CoreVideo/CVPixelBuffer.h>
+#include <IOSurface/IOSurfaceRef.h>
+
 #include "VideoViewsTests.h"
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/CoreFoundationRef.h"
 #include "dawn/native/MetalBackend.h"
-
-#include <CoreFoundation/CoreFoundation.h>
-#include <CoreVideo/CVPixelBuffer.h>
-#include <IOSurface/IOSurfaceRef.h>
 
 namespace {
     void AddIntegerValue(CFMutableDictionaryRef dictionary, const CFStringRef key, int32_t value) {

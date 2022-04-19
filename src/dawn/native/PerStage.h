@@ -15,14 +15,14 @@
 #ifndef SRC_DAWN_NATIVE_PERSTAGE_H_
 #define SRC_DAWN_NATIVE_PERSTAGE_H_
 
+#include <array>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Constants.h"
 #include "dawn/native/Error.h"
 
 #include "dawn/native/dawn_platform.h"
-
-#include <array>
 
 namespace dawn::native {
 

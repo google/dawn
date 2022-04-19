@@ -15,10 +15,10 @@
 #ifndef SRC_DAWN_NATIVE_PERSISTENTCACHE_H_
 #define SRC_DAWN_NATIVE_PERSISTENTCACHE_H_
 
-#include "dawn/native/Error.h"
-
 #include <mutex>
 #include <vector>
+
+#include "dawn/native/Error.h"
 
 namespace dawn::platform {
     class CachingInterface;

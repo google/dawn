@@ -15,6 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_COMMANDS_H_
 #define SRC_DAWN_NATIVE_COMMANDS_H_
 
+#include <array>
+#include <bitset>
+
 #include "dawn/common/Constants.h"
 
 #include "dawn/native/AttachmentState.h"
@@ -22,9 +25,6 @@
 #include "dawn/native/Texture.h"
 
 #include "dawn/native/dawn_platform.h"
-
-#include <array>
-#include <bitset>
 
 namespace dawn::native {
 

@@ -15,14 +15,14 @@
 #ifndef SRC_DAWN_NATIVE_BUFFER_H_
 #define SRC_DAWN_NATIVE_BUFFER_H_
 
+#include <memory>
+
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/ObjectBase.h"
 
 #include "dawn/native/dawn_platform.h"
-
-#include <memory>
 
 namespace dawn::native {
 

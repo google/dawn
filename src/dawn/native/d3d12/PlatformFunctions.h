@@ -15,12 +15,12 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_PLATFORMFUNCTIONS_H_
 #define SRC_DAWN_NATIVE_D3D12_PLATFORMFUNCTIONS_H_
 
+#include <d3dcompiler.h>
+
 #include "dawn/native/d3d12/d3d12_platform.h"
 
 #include "dawn/common/DynamicLib.h"
 #include "dawn/native/Error.h"
-
-#include <d3dcompiler.h>
 
 namespace dawn::native::d3d12 {
 

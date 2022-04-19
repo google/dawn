@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_FORMAT_H_
 #define SRC_DAWN_NATIVE_FORMAT_H_
 
+#include <array>
+
 #include "dawn/native/dawn_platform.h"
 
 #include "dawn/common/TypedInteger.h"
@@ -23,8 +25,6 @@
 #include "dawn/native/EnumClassBitmasks.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Subresource.h"
-
-#include <array>
 
 // About multi-planar formats.
 //

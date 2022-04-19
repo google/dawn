@@ -15,13 +15,13 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_CACHEKEYVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_CACHEKEYVK_H_
 
+#include <map>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/CacheKey.h"
 
 #include "icd/generated/vk_typemap_helper.h"
-
-#include <map>
 
 namespace dawn::native::vulkan {
 

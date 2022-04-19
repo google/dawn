@@ -15,11 +15,11 @@
 #ifndef SRC_DAWN_NATIVE_INTERNALPIPELINESTORE_H_
 #define SRC_DAWN_NATIVE_INTERNALPIPELINESTORE_H_
 
+#include <unordered_map>
+
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/ScratchBuffer.h"
 #include "dawn/native/dawn_platform.h"
-
-#include <unordered_map>
 
 namespace dawn::native {
 

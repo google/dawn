@@ -15,6 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_DEVICE_H_
 #define SRC_DAWN_NATIVE_DEVICE_H_
 
+#include <mutex>
+#include <utility>
+
 #include "dawn/native/CacheKey.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/ComputePipeline.h"
@@ -30,9 +33,6 @@
 
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/dawn_platform.h"
-
-#include <mutex>
-#include <utility>
 
 namespace dawn::platform {
     class WorkerTaskPool;

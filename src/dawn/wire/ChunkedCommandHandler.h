@@ -15,12 +15,12 @@
 #ifndef SRC_DAWN_WIRE_CHUNKEDCOMMANDHANDLER_H_
 #define SRC_DAWN_WIRE_CHUNKEDCOMMANDHANDLER_H_
 
+#include <cstdint>
+#include <memory>
+
 #include "dawn/common/Assert.h"
 #include "dawn/wire/Wire.h"
 #include "dawn/wire/WireCmd_autogen.h"
-
-#include <cstdint>
-#include <memory>
 
 namespace dawn::wire {
 

@@ -15,10 +15,10 @@
 #ifndef SRC_DAWN_NATIVE_OBJECTCONTENTHASHER_H_
 #define SRC_DAWN_NATIVE_OBJECTCONTENTHASHER_H_
 
-#include "dawn/common/HashUtils.h"
-
 #include <string>
 #include <vector>
+
+#include "dawn/common/HashUtils.h"
 
 namespace dawn::native {
 

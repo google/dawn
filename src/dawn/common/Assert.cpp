@@ -13,9 +13,10 @@
 // limitations under the License.
 
 #include "dawn/common/Assert.h"
-#include "dawn/common/Log.h"
 
 #include <cstdlib>
+
+#include "dawn/common/Log.h"
 
 void HandleAssertionFailure(const char* file,
                             const char* function,

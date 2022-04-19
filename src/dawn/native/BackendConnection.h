@@ -15,10 +15,10 @@
 #ifndef SRC_DAWN_NATIVE_BACKENDCONNECTION_H_
 #define SRC_DAWN_NATIVE_BACKENDCONNECTION_H_
 
+#include <memory>
+
 #include "dawn/native/Adapter.h"
 #include "dawn/native/DawnNative.h"
-
-#include <memory>
 
 namespace dawn::native {
 

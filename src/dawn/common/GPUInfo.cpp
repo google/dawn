@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <algorithm>
+#include <array>
+
 #include "dawn/common/GPUInfo.h"
 
 #include "dawn/common/Assert.h"
-
-#include <algorithm>
-#include <array>
 
 namespace gpu_info {
     namespace {

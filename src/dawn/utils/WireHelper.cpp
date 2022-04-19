@@ -14,6 +14,13 @@
 
 #include "dawn/utils/WireHelper.h"
 
+#include <algorithm>
+#include <cstring>
+#include <fstream>
+#include <iomanip>
+#include <set>
+#include <sstream>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/SystemUtils.h"
@@ -22,13 +29,6 @@
 #include "dawn/utils/TerribleCommandBuffer.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
-
-#include <algorithm>
-#include <cstring>
-#include <fstream>
-#include <iomanip>
-#include <set>
-#include <sstream>
 
 namespace utils {
 

@@ -15,15 +15,15 @@
 #ifndef SRC_DAWN_NATIVE_SUBRESOURCESTORAGE_H_
 #define SRC_DAWN_NATIVE_SUBRESOURCESTORAGE_H_
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/TypeTraits.h"
-#include "dawn/native/EnumMaskIterator.h"
-#include "dawn/native/Subresource.h"
-
 #include <array>
 #include <limits>
 #include <memory>
 #include <vector>
+
+#include "dawn/common/Assert.h"
+#include "dawn/common/TypeTraits.h"
+#include "dawn/native/EnumMaskIterator.h"
+#include "dawn/native/Subresource.h"
 
 namespace dawn::native {
 

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cstdio>
+
 #include "dawn/utils/BackendBinding.h"
 
 #include "dawn/common/Assert.h"
@@ -20,7 +22,6 @@
 #include "dawn/dawn_wsi.h"
 #include "dawn/native/OpenGLBackend.h"
 
-#include <cstdio>
 #include "GLFW/glfw3.h"
 
 namespace utils {

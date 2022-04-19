@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <array>
+#include <thread>
+
 #include "dawn/utils/PlatformDebugLogger.h"
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/windows_with_undefs.h"
-
-#include <array>
-#include <thread>
 
 namespace utils {
 

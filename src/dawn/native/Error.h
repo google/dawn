@@ -15,12 +15,12 @@
 #ifndef SRC_DAWN_NATIVE_ERROR_H_
 #define SRC_DAWN_NATIVE_ERROR_H_
 
+#include <string>
+
 #include "absl/strings/str_format.h"
 #include "dawn/common/Result.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/webgpu_absl_format.h"
-
-#include <string>
 
 namespace dawn::native {
 

@@ -15,9 +15,9 @@
 #ifndef SRC_DAWN_UTILS_SCOPEDAUTORELEASEPOOL_H_
 #define SRC_DAWN_UTILS_SCOPEDAUTORELEASEPOOL_H_
 
-#include "dawn/common/Compiler.h"
-
 #include <cstddef>
+
+#include "dawn/common/Compiler.h"
 
 namespace utils {
 

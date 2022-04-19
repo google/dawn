@@ -14,13 +14,13 @@
 
 #include "dawn/utils/TestUtils.h"
 
+#include <vector>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
-
-#include <vector>
 
 namespace utils {
 

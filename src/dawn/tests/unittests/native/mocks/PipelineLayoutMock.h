@@ -15,10 +15,10 @@
 #ifndef SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_PIPELINELAYOUTMOCK_H_
 #define SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_PIPELINELAYOUTMOCK_H_
 
+#include "gmock/gmock.h"
+
 #include "dawn/native/Device.h"
 #include "dawn/native/PipelineLayout.h"
-
-#include <gmock/gmock.h>
 
 namespace dawn::native {
 

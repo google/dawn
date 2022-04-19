@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <unistd.h>
+
+#include "gtest/gtest.h"
+
 #include "dawn/tests/white_box/VulkanImageWrappingTests.h"
 
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
-
-#include <gtest/gtest.h>
-#include <unistd.h>
 
 namespace dawn::native::vulkan {
 

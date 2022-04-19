@@ -15,9 +15,9 @@
 #ifndef SRC_DAWN_PLATFORM_TRACING_EVENTTRACER_H_
 #define SRC_DAWN_PLATFORM_TRACING_EVENTTRACER_H_
 
-#include "dawn/platform/dawn_platform_export.h"
-
 #include <cstdint>
+
+#include "dawn/platform/dawn_platform_export.h"
 
 namespace dawn::platform {
 

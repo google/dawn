@@ -14,12 +14,12 @@
 
 #include "dawn/native/vulkan/VulkanInfo.h"
 
+#include <cstring>
+
 #include "dawn/native/vulkan/AdapterVk.h"
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
-
-#include <cstring>
 
 namespace dawn::native::vulkan {
 

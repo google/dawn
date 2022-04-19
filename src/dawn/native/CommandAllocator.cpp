@@ -14,13 +14,13 @@
 
 #include "dawn/native/CommandAllocator.h"
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Math.h"
-
 #include <algorithm>
 #include <climits>
 #include <cstdlib>
 #include <utility>
+
+#include "dawn/common/Assert.h"
+#include "dawn/common/Math.h"
 
 namespace dawn::native {
 

@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+
 #include "dawn/samples/SampleUtils.h"
 
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/ScopedAutoreleasePool.h"
 #include "dawn/utils/SystemUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
-
-#include <cstdio>
-#include <cstdlib>
-#include <vector>
 
 wgpu::Device device;
 wgpu::Queue queue;

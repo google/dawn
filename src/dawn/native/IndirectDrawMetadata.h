@@ -15,17 +15,17 @@
 #ifndef SRC_DAWN_NATIVE_INDIRECTDRAWMETADATA_H_
 #define SRC_DAWN_NATIVE_INDIRECTDRAWMETADATA_H_
 
-#include "dawn/common/NonCopyable.h"
-#include "dawn/common/RefCounted.h"
-#include "dawn/native/Buffer.h"
-#include "dawn/native/CommandBufferStateTracker.h"
-#include "dawn/native/Commands.h"
-
 #include <cstdint>
 #include <map>
 #include <set>
 #include <utility>
 #include <vector>
+
+#include "dawn/common/NonCopyable.h"
+#include "dawn/common/RefCounted.h"
+#include "dawn/native/Buffer.h"
+#include "dawn/native/CommandBufferStateTracker.h"
+#include "dawn/native/Commands.h"
 
 namespace dawn::native {
 

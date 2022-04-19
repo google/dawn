@@ -15,6 +15,11 @@
 #ifndef SRC_DAWN_NATIVE_INSTANCE_H_
 #define SRC_DAWN_NATIVE_INSTANCE_H_
 
+#include <array>
+#include <memory>
+#include <unordered_map>
+#include <vector>
+
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Adapter.h"
@@ -22,11 +27,6 @@
 #include "dawn/native/Features.h"
 #include "dawn/native/Toggles.h"
 #include "dawn/native/dawn_platform.h"
-
-#include <array>
-#include <memory>
-#include <unordered_map>
-#include <vector>
 
 namespace dawn::platform {
     class Platform;

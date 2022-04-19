@@ -14,6 +14,14 @@
 
 #include "dawn/tests/DawnTest.h"
 
+#include <algorithm>
+#include <fstream>
+#include <iomanip>
+#include <regex>
+#include <sstream>
+#include <unordered_map>
+#include <unordered_set>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/GPUInfo.h"
 #include "dawn/common/Log.h"
@@ -30,14 +38,6 @@
 #include "dawn/utils/WireHelper.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
-
-#include <algorithm>
-#include <fstream>
-#include <iomanip>
-#include <regex>
-#include <sstream>
-#include <unordered_map>
-#include <unordered_set>
 
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
 #    include "GLFW/glfw3.h"

@@ -15,13 +15,13 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_NATIVESWAPCHAINIMPLD3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_NATIVESWAPCHAINIMPLD3D12_H_
 
+#include <vector>
+
 #include "dawn/native/d3d12/d3d12_platform.h"
 
 #include "dawn/dawn_wsi.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/dawn_platform.h"
-
-#include <vector>
 
 namespace dawn::native::d3d12 {
 

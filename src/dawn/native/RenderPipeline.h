@@ -15,6 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_RENDERPIPELINE_H_
 #define SRC_DAWN_NATIVE_RENDERPIPELINE_H_
 
+#include <array>
+#include <bitset>
+
 #include "dawn/common/TypedInteger.h"
 #include "dawn/native/AttachmentState.h"
 #include "dawn/native/Forward.h"
@@ -22,9 +25,6 @@
 #include "dawn/native/Pipeline.h"
 
 #include "dawn/native/dawn_platform.h"
-
-#include <array>
-#include <bitset>
 
 namespace dawn::native {
 

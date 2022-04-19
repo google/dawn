@@ -15,6 +15,12 @@
 #ifndef SRC_DAWN_NATIVE_SHADERMODULE_H_
 #define SRC_DAWN_NATIVE_SHADERMODULE_H_
 
+#include <bitset>
+#include <map>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
 #include "dawn/common/Constants.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/native/BindingInfo.h"
@@ -28,12 +34,6 @@
 #include "dawn/native/PerStage.h"
 #include "dawn/native/VertexFormat.h"
 #include "dawn/native/dawn_platform.h"
-
-#include <bitset>
-#include <map>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
 
 namespace tint {
 

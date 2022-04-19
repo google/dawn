@@ -17,13 +17,13 @@
 // a deprecation warning is emitted when the "old" behavior is used, and tests that an error is
 // emitted when both the old and the new behavior are used (when applicable).
 
+#include <cmath>
+
 #include "dawn/tests/DawnTest.h"
 
 #include "dawn/common/Constants.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
-
-#include <cmath>
 
 class DeprecationTests : public DawnTest {
   protected:

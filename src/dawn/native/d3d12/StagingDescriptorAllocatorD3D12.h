@@ -15,11 +15,11 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_STAGINGDESCRIPTORALLOCATORD3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_STAGINGDESCRIPTORALLOCATORD3D12_H_
 
+#include <vector>
+
 #include "dawn/native/Error.h"
 
 #include "dawn/native/d3d12/CPUDescriptorHeapAllocationD3D12.h"
-
-#include <vector>
 
 // |StagingDescriptorAllocator| allocates a fixed-size block of descriptors from a CPU
 // descriptor heap pool.

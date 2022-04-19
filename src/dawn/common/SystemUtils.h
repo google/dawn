@@ -15,10 +15,10 @@
 #ifndef SRC_DAWN_COMMON_SYSTEMUTILS_H_
 #define SRC_DAWN_COMMON_SYSTEMUTILS_H_
 
-#include "dawn/common/Platform.h"
-
 #include <optional>
 #include <string>
+
+#include "dawn/common/Platform.h"
 
 const char* GetPathSeparator();
 // Returns a pair of the environment variable's value, and a boolean indicating whether the variable

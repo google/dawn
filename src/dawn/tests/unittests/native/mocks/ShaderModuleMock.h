@@ -15,13 +15,13 @@
 #ifndef SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_SHADERMODULEMOCK_H_
 #define SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_SHADERMODULEMOCK_H_
 
+#include <memory>
+
+#include "gmock/gmock.h"
+
 #include "dawn/native/Device.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/ShaderModule.h"
-
-#include <memory>
-
-#include <gmock/gmock.h>
 
 namespace dawn::native {
 

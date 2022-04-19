@@ -15,16 +15,17 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_SHADERMODULEVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_SHADERMODULEVK_H_
 
+#include <memory>
+#include <mutex>
+// TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
+#include <optional>  // NOLINT(build/include_order))
+#include <utility>
+#include <vector>
+
 #include "dawn/native/ShaderModule.h"
 
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Error.h"
-
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <utility>
-#include <vector>
 
 namespace dawn::native::vulkan {
 

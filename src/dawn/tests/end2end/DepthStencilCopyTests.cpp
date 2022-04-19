@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <array>
+
 #include "dawn/tests/DawnTest.h"
 
-#include <array>
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"

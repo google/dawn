@@ -15,14 +15,14 @@
 #ifndef SRC_DAWN_COMMON_MATH_H_
 #define SRC_DAWN_COMMON_MATH_H_
 
-#include "dawn/common/Assert.h"
-
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
 
 #include <limits>
 #include <type_traits>
+
+#include "dawn/common/Assert.h"
 
 // The following are not valid for 0
 uint32_t ScanForward(uint32_t bits);

@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#include <type_traits>
+
+#include "gtest/gtest.h"
 
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/ToBackend.h"
-
-#include <type_traits>
 
 // Make our own Base - Backend object pair, reusing the AdapterBase name
 namespace dawn::native {

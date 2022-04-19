@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/utils/Timer.h"
-
 #include <CoreServices/CoreServices.h>
 #include <mach/mach.h>
 #include <mach/mach_time.h>
+
+#include "dawn/utils/Timer.h"
 
 namespace utils {
 

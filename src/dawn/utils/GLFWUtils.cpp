@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cstdlib>
+
 #include "dawn/utils/GLFWUtils.h"
 
 #include "GLFW/glfw3.h"
 #include "dawn/common/Platform.h"
-
-#include <cstdlib>
 
 #if defined(DAWN_PLATFORM_WINDOWS)
 #    define GLFW_EXPOSE_NATIVE_WIN32

@@ -14,6 +14,10 @@
 
 #include "dawn/native/BindGroupLayout.h"
 
+#include <algorithm>
+#include <functional>
+#include <set>
+
 #include "dawn/common/BitSetIterator.h"
 
 #include "dawn/native/ChainUtils_autogen.h"
@@ -23,10 +27,6 @@
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/PerStage.h"
 #include "dawn/native/ValidationUtils_autogen.h"
-
-#include <algorithm>
-#include <functional>
-#include <set>
 
 namespace dawn::native {
 

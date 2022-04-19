@@ -15,13 +15,13 @@
 #ifndef SRC_DAWN_NATIVE_COMMANDALLOCATOR_H_
 #define SRC_DAWN_NATIVE_COMMANDALLOCATOR_H_
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Math.h"
-#include "dawn/common/NonCopyable.h"
-
 #include <cstddef>
 #include <cstdint>
 #include <vector>
+
+#include "dawn/common/Assert.h"
+#include "dawn/common/Math.h"
+#include "dawn/common/NonCopyable.h"
 
 namespace dawn::native {
 

@@ -14,10 +14,10 @@
 
 #include "dawn/native/Limits.h"
 
+#include <array>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/Math.h"
-
-#include <array>
 
 // clang-format off
 // TODO(crbug.com/dawn/685):

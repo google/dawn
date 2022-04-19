@@ -15,9 +15,9 @@
 #ifndef SRC_DAWN_COMMON_IOKITREF_H_
 #define SRC_DAWN_COMMON_IOKITREF_H_
 
-#include "dawn/common/RefBase.h"
-
 #include <IOKit/IOKitLib.h>
+
+#include "dawn/common/RefBase.h"
 
 template <typename T>
 struct IOKitRefTraits {

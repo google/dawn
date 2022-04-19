@@ -15,15 +15,15 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_DESCRIPTORSETALLOCATOR_H_
 #define SRC_DAWN_NATIVE_VULKAN_DESCRIPTORSETALLOCATOR_H_
 
+#include <map>
+#include <vector>
+
 #include "dawn/common/SerialQueue.h"
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/vulkan/DescriptorSetAllocation.h"
-
-#include <map>
-#include <vector>
 
 namespace dawn::native::vulkan {
 

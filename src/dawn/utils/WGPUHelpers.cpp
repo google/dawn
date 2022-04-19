@@ -14,16 +14,16 @@
 
 #include "dawn/utils/WGPUHelpers.h"
 
-#include "dawn/common/Constants.h"
-#include "dawn/common/Log.h"
-
-#include "spirv-tools/optimizer.hpp"
-
 #include <cstring>
 #include <iomanip>
 #include <limits>
 #include <mutex>
 #include <sstream>
+
+#include "dawn/common/Constants.h"
+#include "dawn/common/Log.h"
+
+#include "spirv-tools/optimizer.hpp"
 
 namespace utils {
     wgpu::ShaderModule CreateShaderModuleFromASM(const wgpu::Device& device, const char* source) {

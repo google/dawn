@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_ADAPTER_H_
 #define SRC_DAWN_NATIVE_ADAPTER_H_
 
+#include <string>
+
 #include "dawn/native/DawnNative.h"
 
 #include "dawn/common/RefCounted.h"
@@ -23,8 +25,6 @@
 #include "dawn/native/Features.h"
 #include "dawn/native/Limits.h"
 #include "dawn/native/dawn_platform.h"
-
-#include <string>
 
 namespace dawn::native {
 

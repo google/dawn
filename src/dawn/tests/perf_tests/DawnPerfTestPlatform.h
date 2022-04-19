@@ -15,13 +15,13 @@
 #ifndef SRC_DAWN_TESTS_PERF_TESTS_DAWNPERFTESTPLATFORM_H_
 #define SRC_DAWN_TESTS_PERF_TESTS_DAWNPERFTESTPLATFORM_H_
 
-#include "dawn/platform/DawnPlatform.h"
-
 #include <memory>
 #include <mutex>
 #include <thread>
 #include <unordered_map>
 #include <vector>
+
+#include "dawn/platform/DawnPlatform.h"
 
 namespace utils {
     class Timer;

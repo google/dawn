@@ -15,11 +15,11 @@
 #ifndef SRC_DAWN_NATIVE_RINGBUFFERALLOCATOR_H_
 #define SRC_DAWN_NATIVE_RINGBUFFERALLOCATOR_H_
 
-#include "dawn/common/SerialQueue.h"
-#include "dawn/native/IntegerTypes.h"
-
 #include <limits>
 #include <memory>
+
+#include "dawn/common/SerialQueue.h"
+#include "dawn/native/IntegerTypes.h"
 
 // RingBufferAllocator is the front-end implementation used to manage a ring buffer in GPU memory.
 namespace dawn::native {

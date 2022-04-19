@@ -17,7 +17,7 @@
 #include "dawn/common/Assert.h"
 #include "dawn/native/dawn_platform.h"
 
-#include <tint/tint.h>
+#include "tint/tint.h"
 
 namespace dawn::native {
 

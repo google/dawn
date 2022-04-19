@@ -14,6 +14,8 @@
 
 #include "dawn/native/vulkan/ComputePipelineVk.h"
 
+#include <utility>
+
 #include "dawn/native/CreatePipelineAsyncTask.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
@@ -21,8 +23,6 @@
 #include "dawn/native/vulkan/ShaderModuleVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
-
-#include <utility>
 
 namespace dawn::native::vulkan {
 

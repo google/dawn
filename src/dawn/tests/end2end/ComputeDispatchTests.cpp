@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <initializer_list>
+
 #include "dawn/tests/DawnTest.h"
 
 #include "dawn/utils/WGPUHelpers.h"
-
-#include <initializer_list>
 
 constexpr static std::initializer_list<uint32_t> kSentinelData{0, 0, 0};
 

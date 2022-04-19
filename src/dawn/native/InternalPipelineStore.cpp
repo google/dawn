@@ -14,12 +14,12 @@
 
 #include "dawn/native/InternalPipelineStore.h"
 
+#include <unordered_map>
+
 #include "dawn/native/ComputePipeline.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/RenderPipeline.h"
 #include "dawn/native/ShaderModule.h"
-
-#include <unordered_map>
 
 namespace dawn::native {
 

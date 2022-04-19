@@ -14,10 +14,10 @@
 
 #include "dawn/native/SpirvValidation.h"
 
-#include "dawn/native/Device.h"
-
 #include <spirv-tools/libspirv.hpp>
 #include <sstream>
+
+#include "dawn/native/Device.h"
 
 namespace dawn::native {
 

@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <memory>
+
 #include "dawn/common/Assert.h"
 #include "dawn/wire/BufferConsumer_impl.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/server/Server.h"
-
-#include <memory>
 
 namespace dawn::wire::server {
 

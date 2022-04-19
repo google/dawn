@@ -14,6 +14,9 @@
 
 #include "dawn/native/opengl/PipelineGL.h"
 
+#include <set>
+#include <sstream>
+
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Device.h"
@@ -23,9 +26,6 @@
 #include "dawn/native/opengl/PipelineLayoutGL.h"
 #include "dawn/native/opengl/SamplerGL.h"
 #include "dawn/native/opengl/ShaderModuleGL.h"
-
-#include <set>
-#include <sstream>
 
 namespace dawn::native::opengl {
 

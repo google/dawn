@@ -14,12 +14,12 @@
 
 #include "dawn/native/Format.h"
 
+#include <bitset>
+
 #include "dawn/native/Device.h"
 #include "dawn/native/EnumMaskIterator.h"
 #include "dawn/native/Features.h"
 #include "dawn/native/Texture.h"
-
-#include <bitset>
 
 namespace dawn::native {
 

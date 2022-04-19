@@ -15,12 +15,12 @@
 #ifndef SRC_DAWN_NATIVE_COMPILATIONMESSAGES_H_
 #define SRC_DAWN_NATIVE_COMPILATIONMESSAGES_H_
 
+#include <string>
+#include <vector>
+
 #include "dawn/native/dawn_platform.h"
 
 #include "dawn/common/NonCopyable.h"
-
-#include <string>
-#include <vector>
 
 namespace tint::diag {
     class Diagnostic;

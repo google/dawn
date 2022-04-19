@@ -14,6 +14,12 @@
 
 #include "dawn/native/utils/WGPUHelpers.h"
 
+#include <cstring>
+#include <iomanip>
+#include <limits>
+#include <mutex>
+#include <sstream>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/Constants.h"
 #include "dawn/native/BindGroup.h"
@@ -24,12 +30,6 @@
 #include "dawn/native/Queue.h"
 #include "dawn/native/Sampler.h"
 #include "dawn/native/ShaderModule.h"
-
-#include <cstring>
-#include <iomanip>
-#include <limits>
-#include <mutex>
-#include <sstream>
 
 namespace dawn::native::utils {
 

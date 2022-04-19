@@ -7,10 +7,10 @@
 #ifndef SRC_DAWN_COMMON_STACKCONTAINER_H_
 #define SRC_DAWN_COMMON_STACKCONTAINER_H_
 
-#include "dawn/common/Compiler.h"
-
 #include <cstddef>
 #include <vector>
+
+#include "dawn/common/Compiler.h"
 
 // This allocator can be used with STL containers to provide a stack buffer
 // from which to allocate memory and overflows onto the heap. This stack buffer

@@ -14,6 +14,8 @@
 
 #include "dawn/native/CopyTextureForBrowserHelper.h"
 
+#include <unordered_set>
+
 #include "dawn/common/Log.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/BindGroupLayout.h"
@@ -30,8 +32,6 @@
 #include "dawn/native/Texture.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/native/utils/WGPUHelpers.h"
-
-#include <unordered_set>
 
 namespace dawn::native {
     namespace {

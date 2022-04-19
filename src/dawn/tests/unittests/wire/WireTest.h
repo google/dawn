@@ -15,10 +15,10 @@
 #ifndef SRC_DAWN_TESTS_UNITTESTS_WIRE_WIRETEST_H_
 #define SRC_DAWN_TESTS_UNITTESTS_WIRE_WIRETEST_H_
 
+#include <memory>
+
 #include "dawn/mock_webgpu.h"
 #include "gtest/gtest.h"
-
-#include <memory>
 
 // Definition of a "Lambda predicate matcher" for GMock to allow checking deep structures
 // are passed correctly by the wire.

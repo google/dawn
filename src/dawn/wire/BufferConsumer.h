@@ -15,9 +15,9 @@
 #ifndef SRC_DAWN_WIRE_BUFFERCONSUMER_H_
 #define SRC_DAWN_WIRE_BUFFERCONSUMER_H_
 
-#include "dawn/wire/WireResult.h"
-
 #include <cstddef>
+
+#include "dawn/wire/WireResult.h"
 
 namespace dawn::wire {
 

@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_DEVICEGL_H_
 #define SRC_DAWN_NATIVE_OPENGL_DEVICEGL_H_
 
+#include <queue>
+
 #include "dawn/native/dawn_platform.h"
 
 #include "dawn/common/Platform.h"
@@ -23,8 +25,6 @@
 #include "dawn/native/opengl/Forward.h"
 #include "dawn/native/opengl/GLFormat.h"
 #include "dawn/native/opengl/OpenGLFunctions.h"
-
-#include <queue>
 
 // Remove windows.h macros after glad's include of windows.h
 #if defined(DAWN_PLATFORM_WINDOWS)

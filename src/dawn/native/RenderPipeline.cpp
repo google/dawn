@@ -14,6 +14,9 @@
 
 #include "dawn/native/RenderPipeline.h"
 
+#include <cmath>
+#include <sstream>
+
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/native/ChainUtils_autogen.h"
 #include "dawn/native/Commands.h"
@@ -23,9 +26,6 @@
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/native/VertexFormat.h"
-
-#include <cmath>
-#include <sstream>
 
 namespace dawn::native {
 

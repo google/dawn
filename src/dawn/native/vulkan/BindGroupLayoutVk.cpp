@@ -14,6 +14,8 @@
 
 #include "dawn/native/vulkan/BindGroupLayoutVk.h"
 
+#include <map>
+
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/ityp_vector.h"
 #include "dawn/native/CacheKey.h"
@@ -23,8 +25,6 @@
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
-
-#include <map>
 
 namespace dawn::native::vulkan {
 

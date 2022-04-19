@@ -15,12 +15,12 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_RENDERPIPELINEGL_H_
 #define SRC_DAWN_NATIVE_OPENGL_RENDERPIPELINEGL_H_
 
+#include <vector>
+
 #include "dawn/native/RenderPipeline.h"
 
 #include "dawn/native/opengl/PipelineGL.h"
 #include "dawn/native/opengl/opengl_platform.h"
-
-#include <vector>
 
 namespace dawn::native::opengl {
 

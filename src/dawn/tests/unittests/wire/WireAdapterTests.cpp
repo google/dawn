@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <unordered_set>
+#include <vector>
+
 #include "dawn/tests/MockCallback.h"
 #include "dawn/tests/unittests/wire/WireTest.h"
 
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
 
-#include <webgpu/webgpu_cpp.h>
-#include <unordered_set>
-#include <vector>
+#include "webgpu/webgpu_cpp.h"
 
 namespace {
 

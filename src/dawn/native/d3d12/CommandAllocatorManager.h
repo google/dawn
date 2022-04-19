@@ -15,13 +15,13 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_COMMANDALLOCATORMANAGER_H_
 #define SRC_DAWN_NATIVE_D3D12_COMMANDALLOCATORMANAGER_H_
 
+#include <bitset>
+
 #include "dawn/native/d3d12/d3d12_platform.h"
 
 #include "dawn/common/SerialQueue.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
-
-#include <bitset>
 
 namespace dawn::native::d3d12 {
 

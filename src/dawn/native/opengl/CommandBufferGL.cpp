@@ -14,6 +14,8 @@
 
 #include "dawn/native/opengl/CommandBufferGL.h"
 
+#include <cstring>
+
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/BindGroupTracker.h"
 #include "dawn/native/CommandEncoder.h"
@@ -31,8 +33,6 @@
 #include "dawn/native/opengl/SamplerGL.h"
 #include "dawn/native/opengl/TextureGL.h"
 #include "dawn/native/opengl/UtilsGL.h"
-
-#include <cstring>
 
 namespace dawn::native::opengl {
 

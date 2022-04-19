@@ -15,9 +15,9 @@
 #ifndef SRC_DAWN_COMMON_SERIALQUEUE_H_
 #define SRC_DAWN_COMMON_SERIALQUEUE_H_
 
-#include "dawn/common/SerialStorage.h"
-
 #include <vector>
+
+#include "dawn/common/SerialStorage.h"
 
 template <typename Serial, typename Value>
 class SerialQueue;

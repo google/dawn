@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cstring>
+
+#include "gmock/gmock.h"
+
 #include "dawn/tests/DawnTest.h"
 
-#include <gmock/gmock.h>
 #include "dawn/tests/MockCallback.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
-
-#include <cstring>
 
 using namespace testing;
 

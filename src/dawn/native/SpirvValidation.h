@@ -15,9 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_SPIRVVALIDATION_H_
 #define SRC_DAWN_NATIVE_SPIRVVALIDATION_H_
 
-#include "dawn/native/Error.h"
-
 #include <vector>
+
+#include "dawn/native/Error.h"
 
 namespace dawn::native {
 

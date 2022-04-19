@@ -14,6 +14,12 @@
 
 #include "dawn/native/d3d12/ShaderModuleD3D12.h"
 
+#include <d3dcompiler.h>
+
+#include <map>
+#include <sstream>
+#include <unordered_map>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Log.h"
@@ -29,12 +35,7 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
-#include <d3dcompiler.h>
-
-#include <tint/tint.h>
-#include <map>
-#include <sstream>
-#include <unordered_map>
+#include "tint/tint.h"
 
 namespace dawn::native::d3d12 {
 

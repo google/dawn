@@ -15,6 +15,11 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_RENDERPASSCACHE_H_
 #define SRC_DAWN_NATIVE_VULKAN_RENDERPASSCACHE_H_
 
+#include <array>
+#include <bitset>
+#include <mutex>
+#include <unordered_map>
+
 #include "dawn/common/Constants.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
@@ -22,11 +27,6 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/dawn_platform.h"
-
-#include <array>
-#include <bitset>
-#include <mutex>
-#include <unordered_map>
 
 namespace dawn::native::vulkan {
 

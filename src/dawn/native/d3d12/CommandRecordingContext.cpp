@@ -13,6 +13,9 @@
 // limitations under the License.
 #include "dawn/native/d3d12/CommandRecordingContext.h"
 
+#include <profileapi.h>
+#include <sysinfoapi.h>
+
 #include "dawn/native/d3d12/CommandAllocatorManager.h"
 #include "dawn/native/d3d12/D3D12Error.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
@@ -20,9 +23,6 @@
 #include "dawn/native/d3d12/ResidencyManagerD3D12.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
-
-#include <profileapi.h>
-#include <sysinfoapi.h>
 
 namespace dawn::native::d3d12 {
 

@@ -15,10 +15,10 @@
 #ifndef SRC_DAWN_NATIVE_POOLEDRESOURCEMEMORYALLOCATOR_H_
 #define SRC_DAWN_NATIVE_POOLEDRESOURCEMEMORYALLOCATOR_H_
 
+#include <deque>
+
 #include "dawn/common/SerialQueue.h"
 #include "dawn/native/ResourceHeapAllocator.h"
-
-#include <deque>
 
 namespace dawn::native {
 

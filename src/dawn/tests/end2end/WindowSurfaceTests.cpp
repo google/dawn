@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cstdlib>
+
 #include "dawn/common/Log.h"
 #include "dawn/common/Platform.h"
 #include "dawn/dawn_proc.h"
@@ -19,9 +21,7 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/GLFWUtils.h"
 
-#include <gtest/gtest.h>
-
-#include <cstdlib>
+#include "gtest/gtest.h"
 
 // Include windows.h before GLFW so GLFW's APIENTRY macro doesn't conflict with windows.h's.
 #if defined(DAWN_PLATFORM_WINDOWS)

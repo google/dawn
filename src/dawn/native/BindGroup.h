@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_BINDGROUP_H_
 #define SRC_DAWN_NATIVE_BINDGROUP_H_
 
+#include <array>
+
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
 #include "dawn/native/BindGroupLayout.h"
@@ -23,8 +25,6 @@
 #include "dawn/native/ObjectBase.h"
 
 #include "dawn/native/dawn_platform.h"
-
-#include <array>
 
 namespace dawn::native {
 

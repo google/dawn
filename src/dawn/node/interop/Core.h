@@ -19,11 +19,13 @@
 #define SRC_DAWN_NODE_INTEROP_CORE_H_
 
 #include <cstdint>
-#include <optional>
+// TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
+#include <optional>  // NOLINT(build/include_order)
 #include <string>
 #include <type_traits>
 #include <unordered_map>
-#include <variant>
+// TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
+#include <variant>  // NOLINT(build/include_order)
 #include <vector>
 
 #include "src/dawn/node/interop/Napi.h"

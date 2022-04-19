@@ -4,13 +4,13 @@
 
 // This file is a modified copy of Chromium's /src/base/containers/stack_container_unittest.cc
 
-#include <gtest/gtest.h>
+#include <algorithm>
+#include <cstddef>
+
+#include "gtest/gtest.h"
 
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/StackContainer.h"
-
-#include <algorithm>
-#include <cstddef>
 
 namespace {
 

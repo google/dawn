@@ -15,10 +15,10 @@
 #ifndef SRC_DAWN_COMMON_SERIALMAP_H_
 #define SRC_DAWN_COMMON_SERIALMAP_H_
 
-#include "dawn/common/SerialStorage.h"
-
 #include <map>
 #include <vector>
+
+#include "dawn/common/SerialStorage.h"
 
 template <typename Serial, typename Value>
 class SerialMap;

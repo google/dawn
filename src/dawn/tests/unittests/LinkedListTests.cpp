@@ -4,11 +4,11 @@
 
 // This file is a copy of Chromium's /src/base/containers/linked_list_unittest.cc
 
-#include <gtest/gtest.h>
+#include <list>
+
+#include "gtest/gtest.h"
 
 #include "dawn/common/LinkedList.h"
-
-#include <list>
 
 class Node : public LinkNode<Node> {
   public:

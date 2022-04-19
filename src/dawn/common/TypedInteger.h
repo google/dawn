@@ -15,11 +15,11 @@
 #ifndef SRC_DAWN_COMMON_TYPEDINTEGER_H_
 #define SRC_DAWN_COMMON_TYPEDINTEGER_H_
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/UnderlyingType.h"
-
 #include <limits>
 #include <type_traits>
+
+#include "dawn/common/Assert.h"
+#include "dawn/common/UnderlyingType.h"
 
 // TypedInteger is helper class that provides additional type safety in Debug.
 //  - Integers of different (Tag, BaseIntegerType) may not be used interoperably

@@ -15,15 +15,15 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_RESOURCEMEMORYALLOCATORVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_RESOURCEMEMORYALLOCATORVK_H_
 
+#include <memory>
+#include <vector>
+
 #include "dawn/common/SerialQueue.h"
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/PooledResourceMemoryAllocator.h"
 #include "dawn/native/ResourceMemoryAllocation.h"
-
-#include <memory>
-#include <vector>
 
 namespace dawn::native::vulkan {
 

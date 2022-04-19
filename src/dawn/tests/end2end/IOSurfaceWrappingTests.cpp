@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <CoreFoundation/CoreFoundation.h>
+#include <CoreVideo/CVPixelBuffer.h>
+#include <IOSurface/IOSurface.h>
+
 #include "dawn/tests/DawnTest.h"
 
 #include "dawn/native/MetalBackend.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
-
-#include <CoreFoundation/CoreFoundation.h>
-#include <CoreVideo/CVPixelBuffer.h>
-#include <IOSurface/IOSurface.h>
 
 namespace {
 

@@ -14,13 +14,13 @@
 
 #include "dawn/common/SlabAllocator.h"
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Math.h"
-
 #include <algorithm>
 #include <cstdlib>
 #include <limits>
 #include <new>
+
+#include "dawn/common/Assert.h"
+#include "dawn/common/Math.h"
 
 // IndexLinkNode
 

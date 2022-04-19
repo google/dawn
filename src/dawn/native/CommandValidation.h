@@ -15,11 +15,11 @@
 #ifndef SRC_DAWN_NATIVE_COMMANDVALIDATION_H_
 #define SRC_DAWN_NATIVE_COMMANDVALIDATION_H_
 
+#include <vector>
+
 #include "dawn/native/CommandAllocator.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Texture.h"
-
-#include <vector>
 
 namespace dawn::native {
 

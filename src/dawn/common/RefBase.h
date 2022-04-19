@@ -15,11 +15,11 @@
 #ifndef SRC_DAWN_COMMON_REFBASE_H_
 #define SRC_DAWN_COMMON_REFBASE_H_
 
-#include "dawn/common/Assert.h"
-#include "dawn/common/Compiler.h"
-
 #include <type_traits>
 #include <utility>
+
+#include "dawn/common/Assert.h"
+#include "dawn/common/Compiler.h"
 
 // A common class for various smart-pointers acting on referenceable/releasable pointer-like
 // objects. Logic for each specialization can be customized using a Traits type that looks

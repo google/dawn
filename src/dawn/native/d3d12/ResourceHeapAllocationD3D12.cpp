@@ -14,10 +14,10 @@
 
 #include "dawn/native/d3d12/ResourceHeapAllocationD3D12.h"
 
+#include <utility>
+
 #include "dawn/native/d3d12/D3D12Error.h"
 #include "dawn/native/d3d12/HeapD3D12.h"
-
-#include <utility>
 
 namespace dawn::native::d3d12 {
     ResourceHeapAllocation::ResourceHeapAllocation(const AllocationInfo& info,

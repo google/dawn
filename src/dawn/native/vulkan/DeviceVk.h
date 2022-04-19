@@ -15,6 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_DEVICEVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_DEVICEVK_H_
 
+#include <memory>
+#include <queue>
+
 #include "dawn/native/dawn_platform.h"
 
 #include "dawn/common/SerialQueue.h"
@@ -28,9 +31,6 @@
 
 #include "dawn/native/vulkan/external_memory/MemoryService.h"
 #include "dawn/native/vulkan/external_semaphore/SemaphoreService.h"
-
-#include <memory>
-#include <queue>
 
 namespace dawn::native::vulkan {
 

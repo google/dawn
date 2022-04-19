@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <memory>
+
 #include "dawn/utils/BackendBinding.h"
 
 #include "dawn/common/Assert.h"
@@ -19,8 +21,6 @@
 
 // Include GLFW after VulkanBackend so that it declares the Vulkan-specific functions
 #include "GLFW/glfw3.h"
-
-#include <memory>
 
 namespace utils {
 

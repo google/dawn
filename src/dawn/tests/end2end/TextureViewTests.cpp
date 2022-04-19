@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <array>
+
 #include "dawn/tests/DawnTest.h"
 
 #include "dawn/common/Assert.h"
@@ -19,8 +21,6 @@
 #include "dawn/common/Math.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
-
-#include <array>
 
 constexpr static unsigned int kRTSize = 64;
 constexpr wgpu::TextureFormat kDefaultFormat = wgpu::TextureFormat::RGBA8Unorm;

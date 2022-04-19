@@ -15,11 +15,11 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_SWAPCHAINVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_SWAPCHAINVK_H_
 
+#include <vector>
+
 #include "dawn/native/SwapChain.h"
 
 #include "dawn/common/vulkan_platform.h"
-
-#include <vector>
 
 namespace dawn::native::vulkan {
 

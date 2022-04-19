@@ -15,11 +15,11 @@
 #ifndef SRC_DAWN_NATIVE_OBJECTBASE_H_
 #define SRC_DAWN_NATIVE_OBJECTBASE_H_
 
+#include <string>
+
 #include "dawn/common/LinkedList.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/Forward.h"
-
-#include <string>
 
 namespace dawn::native {
 

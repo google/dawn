@@ -15,10 +15,10 @@
 #ifndef SRC_DAWN_NATIVE_ERRORSCOPE_H_
 #define SRC_DAWN_NATIVE_ERRORSCOPE_H_
 
-#include "dawn/native/dawn_platform.h"
-
 #include <string>
 #include <vector>
+
+#include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 

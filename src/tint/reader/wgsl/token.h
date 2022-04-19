@@ -17,7 +17,8 @@
 
 #include <string>
 #include <string_view>
-#include <variant>  // NOLINT: cpplint doesn't recognise this
+// TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
+#include <variant>  // NOLINT(build/include_order))
 
 #include "src/tint/source.h"
 

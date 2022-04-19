@@ -22,10 +22,10 @@
 #    error "vulkan.h included before vulkan_platform.h"
 #endif
 
-#include "dawn/common/Platform.h"
-
 #include <cstddef>
 #include <cstdint>
+
+#include "dawn/common/Platform.h"
 
 // vulkan.h defines non-dispatchable handles to opaque pointers on 64bit architectures and uint64_t
 // on 32bit architectures. This causes a problem in 32bit where the handles cannot be used to

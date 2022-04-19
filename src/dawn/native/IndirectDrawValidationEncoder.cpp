@@ -14,6 +14,9 @@
 
 #include "dawn/native/IndirectDrawValidationEncoder.h"
 
+#include <cstdlib>
+#include <limits>
+
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
 #include "dawn/native/BindGroup.h"
@@ -25,9 +28,6 @@
 #include "dawn/native/InternalPipelineStore.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/utils/WGPUHelpers.h"
-
-#include <cstdlib>
-#include <limits>
 
 namespace dawn::native {
 

@@ -14,11 +14,11 @@
 
 #include "dawn/native/Sampler.h"
 
+#include <cmath>
+
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectContentHasher.h"
 #include "dawn/native/ValidationUtils_autogen.h"
-
-#include <cmath>
 
 namespace dawn::native {
 

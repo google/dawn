@@ -15,12 +15,12 @@
 #ifndef SRC_DAWN_NATIVE_EXTERNALTEXTURE_H_
 #define SRC_DAWN_NATIVE_EXTERNALTEXTURE_H_
 
+#include <array>
+
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/Subresource.h"
-
-#include <array>
 
 namespace dawn::native {
 
