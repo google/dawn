@@ -476,10 +476,10 @@ crbug.com/dawn/1364 webgpu:api,validation,createTexture:texture_usage:* [ Failur
 crbug.com/chromium/1315658 webgpu:api,validation,encoding,cmds,copyTextureToTexture:texture_format_compatibility:* [ Failure ]
 
 ################################################################################
-# crbug.com/dawn/1376 Loosen CreateRenderPipeline output validation when writeMask is 0
+# crbug.com/dawn/1325 render pass/bundle and render pipeline depth/stencil read only and write states validation
 # KEEP
 ################################################################################
-crbug.com/dawn/1376 webgpu:api,validation,attachment_compatibility:render_pass_or_bundle_and_pipeline,depth_stencil_read_only_write_state:* [ Failure ]
+crbug.com/dawn/1325 webgpu:api,validation,attachment_compatibility:render_pass_or_bundle_and_pipeline,depth_stencil_read_only_write_state:* [ Failure ]
 
 ################################################################################
 # untriaged failures
