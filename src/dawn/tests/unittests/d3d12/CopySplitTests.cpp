@@ -142,7 +142,7 @@ namespace {
     // Check that the union of the copy regions exactly covers the texture region
     void ValidateTextureBounds(const TextureSpec& textureSpec,
                                const TextureCopySubresource& copySplit) {
-        ASSERT_TRUE(copySplit.count > 0);
+        ASSERT_GT(copySplit.count, 0u);
 
         uint32_t minX = copySplit.copies[0].textureOffset.x;
         uint32_t minY = copySplit.copies[0].textureOffset.y;
@@ -190,7 +190,7 @@ namespace {
                               const BufferSpec& bufferSpec,
                               const TextureCopySubresource& copySplit,
                               wgpu::TextureDimension dimension) {
-        ASSERT_TRUE(copySplit.count > 0);
+        ASSERT_GT(copySplit.count, 0u);
 
         uint32_t texelsPerBlock = textureSpec.blockWidth * textureSpec.blockHeight;
         for (uint32_t i = 0; i < copySplit.count; ++i) {
