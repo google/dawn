@@ -2477,7 +2477,10 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     }
   }
 
-  if (!ValidateStructure(out)) {
+  auto stage = current_function_
+                   ? current_function_->Declaration()->PipelineStage()
+                   : ast::PipelineStage::kNone;
+  if (!ValidateStructure(out, stage)) {
     return nullptr;
   }
 

@@ -2043,7 +2043,8 @@ bool Resolver::ValidateAlias(const ast::Alias* alias) {
   return true;
 }
 
-bool Resolver::ValidateStructure(const sem::Struct* str) {
+bool Resolver::ValidateStructure(const sem::Struct* str,
+                                 ast::PipelineStage stage) {
   auto name = builder_->Symbols().NameFor(str->Declaration()->name);
   if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
     AddError("'" + name + "' is a builtin and cannot be redeclared as a struct",
@@ -2099,9 +2100,6 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
         return false;
       }
 
-      auto stage = current_function_
-                       ? current_function_->Declaration()->PipelineStage()
-                       : ast::PipelineStage::kNone;
       if (auto* invariant = attr->As<ast::InvariantAttribute>()) {
         invariant_attribute = invariant;
       } else if (auto* location = attr->As<ast::LocationAttribute>()) {

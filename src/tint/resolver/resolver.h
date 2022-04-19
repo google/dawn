@@ -283,7 +283,7 @@ class Resolver {
   bool ValidateReturn(const ast::ReturnStatement* ret);
   bool ValidateStatements(const ast::StatementList& stmts);
   bool ValidateStorageTexture(const ast::StorageTexture* t);
-  bool ValidateStructure(const sem::Struct* str);
+  bool ValidateStructure(const sem::Struct* str, ast::PipelineStage stage);
   bool ValidateStructureConstructorOrCast(const ast::CallExpression* ctor,
                                           const sem::Struct* struct_type);
   bool ValidateSwitch(const ast::SwitchStatement* s);
