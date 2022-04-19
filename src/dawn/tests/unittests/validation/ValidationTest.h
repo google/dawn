@@ -117,7 +117,7 @@ class ValidationTest : public testing::Test {
 
     struct DummyRenderPass : public wgpu::RenderPassDescriptor {
       public:
-        DummyRenderPass(const wgpu::Device& device);
+        explicit DummyRenderPass(const wgpu::Device& device);
         wgpu::Texture attachment;
         wgpu::TextureFormat attachmentFormat;
         uint32_t width;

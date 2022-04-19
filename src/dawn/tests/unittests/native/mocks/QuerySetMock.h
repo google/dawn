@@ -24,7 +24,7 @@ namespace dawn::native {
 
     class QuerySetMock : public QuerySetBase {
       public:
-        QuerySetMock(DeviceBase* device) : QuerySetBase(device) {
+        explicit QuerySetMock(DeviceBase* device) : QuerySetBase(device) {
             ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
                 this->QuerySetBase::DestroyImpl();
             });

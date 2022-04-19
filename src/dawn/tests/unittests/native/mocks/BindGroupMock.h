@@ -24,7 +24,7 @@ namespace dawn::native {
 
     class BindGroupMock : public BindGroupBase {
       public:
-        BindGroupMock(DeviceBase* device) : BindGroupBase(device) {
+        explicit BindGroupMock(DeviceBase* device) : BindGroupBase(device) {
             ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
                 this->BindGroupBase::DestroyImpl();
             });

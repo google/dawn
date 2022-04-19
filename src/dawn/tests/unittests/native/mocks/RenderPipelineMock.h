@@ -24,7 +24,7 @@ namespace dawn::native {
 
     class RenderPipelineMock : public RenderPipelineBase {
       public:
-        RenderPipelineMock(DeviceBase* device) : RenderPipelineBase(device) {
+        explicit RenderPipelineMock(DeviceBase* device) : RenderPipelineBase(device) {
             ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
                 this->RenderPipelineBase::DestroyImpl();
             });

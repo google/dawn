@@ -32,7 +32,7 @@ namespace dawn::native::vulkan {
 
     class ExternalSemaphoreOpaqueFD : public VulkanImageWrappingTestBackend::ExternalSemaphore {
       public:
-        ExternalSemaphoreOpaqueFD(int handle) : mHandle(handle) {
+        explicit ExternalSemaphoreOpaqueFD(int handle) : mHandle(handle) {
         }
         ~ExternalSemaphoreOpaqueFD() override {
             if (mHandle != -1) {
@@ -94,7 +94,8 @@ namespace dawn::native::vulkan {
 
     class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBackend {
       public:
-        VulkanImageWrappingTestBackendOpaqueFD(const wgpu::Device& device) : mDevice(device) {
+        explicit VulkanImageWrappingTestBackendOpaqueFD(const wgpu::Device& device)
+            : mDevice(device) {
             mDeviceVk = dawn::native::vulkan::ToBackend(dawn::native::FromAPI(device.Get()));
         }
 

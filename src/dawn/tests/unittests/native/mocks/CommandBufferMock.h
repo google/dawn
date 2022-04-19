@@ -24,7 +24,7 @@ namespace dawn::native {
 
     class CommandBufferMock : public CommandBufferBase {
       public:
-        CommandBufferMock(DeviceBase* device) : CommandBufferBase(device) {
+        explicit CommandBufferMock(DeviceBase* device) : CommandBufferBase(device) {
             ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
                 this->CommandBufferBase::DestroyImpl();
             });

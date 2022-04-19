@@ -273,7 +273,7 @@ class DawnTestBase {
     friend class DawnPerfTestBase;
 
   public:
-    DawnTestBase(const AdapterTestParam& param);
+    explicit DawnTestBase(const AdapterTestParam& param);
     virtual ~DawnTestBase();
 
     void SetUp();
@@ -327,7 +327,7 @@ class DawnTestBase {
     virtual std::unique_ptr<dawn::platform::Platform> CreateTestPlatform();
 
     struct PrintToStringParamName {
-        PrintToStringParamName(const char* test);
+        explicit PrintToStringParamName(const char* test);
         std::string SanitizeParamName(std::string paramName, size_t index) const;
 
         template <class ParamType>
@@ -750,7 +750,7 @@ namespace detail {
     template <typename T, typename U>
     class ExpectEq : public Expectation {
       public:
-        ExpectEq(T singleValue, T tolerance = {});
+        explicit ExpectEq(T singleValue, T tolerance = {});
         ExpectEq(const T* values, const unsigned int count, T tolerance = {});
 
         testing::AssertionResult Check(const void* data, size_t size) override;

@@ -71,7 +71,7 @@ inline testing::Matcher<MatcherLambdaArgument<Lambda>> MatchesLambda(Lambda lamb
 
 class StringMessageMatcher : public testing::MatcherInterface<const char*> {
   public:
-    explicit StringMessageMatcher() {
+    StringMessageMatcher() {
     }
 
     bool MatchAndExplain(const char* message,

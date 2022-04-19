@@ -76,7 +76,7 @@ class ExpectFloatWithTolerance : public detail::Expectation {
 // An expectation for float16 buffers that can correctly compare NaNs (all NaNs are equivalent).
 class ExpectFloat16 : public detail::Expectation {
   public:
-    ExpectFloat16(std::vector<uint16_t> expected) : mExpected(std::move(expected)) {
+    explicit ExpectFloat16(std::vector<uint16_t> expected) : mExpected(std::move(expected)) {
     }
 
     testing::AssertionResult Check(const void* data, size_t size) override {

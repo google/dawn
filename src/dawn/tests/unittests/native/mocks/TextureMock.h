@@ -37,7 +37,7 @@ namespace dawn::native {
 
     class TextureViewMock : public TextureViewBase {
       public:
-        TextureViewMock(TextureBase* texture) : TextureViewBase(texture) {
+        explicit TextureViewMock(TextureBase* texture) : TextureViewBase(texture) {
         }
         ~TextureViewMock() override = default;
 

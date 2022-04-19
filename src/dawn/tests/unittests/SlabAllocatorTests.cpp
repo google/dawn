@@ -20,7 +20,7 @@
 namespace {
 
     struct Foo : public PlacementAllocated {
-        Foo(int value) : value(value) {
+        explicit Foo(int value) : value(value) {
         }
 
         int value;

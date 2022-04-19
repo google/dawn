@@ -40,7 +40,7 @@ class OcclusionExpectation : public detail::Expectation {
 
     ~OcclusionExpectation() override = default;
 
-    OcclusionExpectation(Result expected) {
+    explicit OcclusionExpectation(Result expected) {
         mExpected = expected;
     }
 

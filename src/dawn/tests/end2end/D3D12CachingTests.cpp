@@ -74,7 +74,7 @@ class FakePersistentCache : public dawn::platform::CachingInterface {
 // Test platform that only supports caching.
 class DawnTestPlatform : public dawn::platform::Platform {
   public:
-    DawnTestPlatform(dawn::platform::CachingInterface* cachingInterface)
+    explicit DawnTestPlatform(dawn::platform::CachingInterface* cachingInterface)
         : mCachingInterface(cachingInterface) {
     }
     ~DawnTestPlatform() override = default;

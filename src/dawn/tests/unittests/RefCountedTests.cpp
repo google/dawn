@@ -22,10 +22,10 @@ class RCTest : public RefCounted {
     RCTest() : RefCounted() {
     }
 
-    RCTest(uint64_t payload) : RefCounted(payload) {
+    explicit RCTest(uint64_t payload) : RefCounted(payload) {
     }
 
-    RCTest(bool* deleted) : mDeleted(deleted) {
+    explicit RCTest(bool* deleted) : mDeleted(deleted) {
     }
 
     ~RCTest() override {

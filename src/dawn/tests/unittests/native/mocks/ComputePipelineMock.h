@@ -24,7 +24,7 @@ namespace dawn::native {
 
     class ComputePipelineMock : public ComputePipelineBase {
       public:
-        ComputePipelineMock(DeviceBase* device) : ComputePipelineBase(device) {
+        explicit ComputePipelineMock(DeviceBase* device) : ComputePipelineBase(device) {
             ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
                 this->ComputePipelineBase::DestroyImpl();
             });

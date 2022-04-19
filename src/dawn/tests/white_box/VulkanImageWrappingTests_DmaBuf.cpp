@@ -30,7 +30,7 @@ namespace dawn::native::vulkan {
 
     class ExternalSemaphoreDmaBuf : public VulkanImageWrappingTestBackend::ExternalSemaphore {
       public:
-        ExternalSemaphoreDmaBuf(int handle) : mHandle(handle) {
+        explicit ExternalSemaphoreDmaBuf(int handle) : mHandle(handle) {
         }
         ~ExternalSemaphoreDmaBuf() override {
             if (mHandle != -1) {
@@ -77,7 +77,7 @@ namespace dawn::native::vulkan {
 
     class VulkanImageWrappingTestBackendDmaBuf : public VulkanImageWrappingTestBackend {
       public:
-        VulkanImageWrappingTestBackendDmaBuf(const wgpu::Device& device) {
+        explicit VulkanImageWrappingTestBackendDmaBuf(const wgpu::Device& device) {
         }
 
         ~VulkanImageWrappingTestBackendDmaBuf() {

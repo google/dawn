@@ -90,7 +90,7 @@ struct FakeStorage {
 // a single range (and that each subresource was seen only once).
 struct RangeTracker {
     template <typename T>
-    RangeTracker(const SubresourceStorage<T>& s)
+    explicit RangeTracker(const SubresourceStorage<T>& s)
         : mTracked(s.GetAspectsForTesting(),
                    s.GetArrayLayerCountForTesting(),
                    s.GetMipLevelCountForTesting(),

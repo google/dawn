@@ -423,7 +423,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
         using StencilData = std::array<uint32_t, 4>;
 
       public:
-        ExtraStencilComponentsExpectation(uint32_t expected) : mExpected(expected) {
+        explicit ExtraStencilComponentsExpectation(uint32_t expected) : mExpected(expected) {
         }
 
         ~ExtraStencilComponentsExpectation() override = default;
