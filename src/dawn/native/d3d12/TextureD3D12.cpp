@@ -761,13 +761,27 @@ namespace dawn::native::d3d12 {
                                              StateAndDecay* state,
                                              D3D12_RESOURCE_STATES newState,
                                              ExecutionSerial pendingCommandSerial) const {
-        // Reuse the subresource(s) directly and avoid transition when it isn't needed, and
-        // return false.
-        if (state->lastState == newState) {
+        D3D12_RESOURCE_STATES lastState = state->lastState;
+
+        // If the transition is from-UAV-to-UAV, then a UAV barrier is needed.
+        // If one of the usages isn't UAV, then other barriers are used.
+        bool needsUAVBarrier = lastState == D3D12_RESOURCE_STATE_UNORDERED_ACCESS &&
+                               newState == D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+
+        if (needsUAVBarrier) {
+            D3D12_RESOURCE_BARRIER barrier;
+            barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+            barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+            barrier.UAV.pResource = GetD3D12Resource();
+            barriers->push_back(barrier);
             return;
         }
 
-        D3D12_RESOURCE_STATES lastState = state->lastState;
+        // Reuse the subresource(s) directly and avoid transition when it isn't needed, and
+        // return false.
+        if (lastState == newState) {
+            return;
+        }
 
         // The COMMON state represents a state where no write operations can be pending, and
         // where all pixels are uncompressed. This makes it possible to transition to and

@@ -573,8 +573,6 @@ crbug.com/dawn/0000 [ mac ] webgpu:api,validation,image_copy,layout_related:rows
 crbug.com/dawn/0000 [ mac ] webgpu:shader,execution,evaluation_order:assignment:name="ToArrayFromArray" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="bc7-rgba-unorm-srgb";dstFormat="bc7-rgba-unorm";dimension="2d" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="bc7-rgba-unorm-srgb";dstFormat="bc7-rgba-unorm-srgb";dimension="2d" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ win ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="dispatch";first={"op":"storage","in":"compute-pass-encoder"};second={"op":"storage","in":"compute-pass-encoder"} [ RetryOnFailure ]
-crbug.com/dawn/0000 [ win ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="pass";first={"op":"storage","in":"compute-pass-encoder"};second={"op":"storage","in":"compute-pass-encoder"} [ RetryOnFailure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,rendering,indirect_draw:basics:isIndexed=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,resource_init,buffer:index_buffer: [ RetryOnFailure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,vertex_state,correctness:setVertexBuffer_offset_and_attribute_offset:format="sint32x4" [ RetryOnFailure ]
