@@ -17,11 +17,9 @@
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
-constexpr static wgpu::Extent3D kCopySize = {1, 1, 2};
+constexpr static wgpu::Extent3D kCopySize = {1, 1};
 constexpr static uint64_t kOffset = 0;
 constexpr static uint64_t kBytesPerRow = 256;
-constexpr static uint64_t kRowsPerImagePadding = 1;
-constexpr static uint64_t kRowsPerImage = kRowsPerImagePadding + kCopySize.height;
 constexpr static wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
 constexpr static uint32_t kBytesPerBlock = 4;
 
@@ -40,7 +38,14 @@ namespace {
         return o;
     }
 
-    DAWN_TEST_PARAM_STRUCT(RequiredBufferSizeInCopyTestsParams, Type);
+    using TextureDimension = wgpu::TextureDimension;
+    using CopyDepth = uint32_t;
+    using ExtraRowsPerImage = uint64_t;
+    DAWN_TEST_PARAM_STRUCT(RequiredBufferSizeInCopyTestsParams,
+                           Type,
+                           TextureDimension,
+                           CopyDepth,
+                           ExtraRowsPerImage);
 }  // namespace
 
 // Tests in this file are used to expose an error on D3D12 about required minimum buffer size.
@@ -67,19 +72,24 @@ namespace {
 // It looks like D3D12 requires unnecessary buffer storage for rowsPerImagePadding in the last
 // image. It does respect bytesPerRowPadding in the last row and doesn't require storage for
 // that part, though.
+//
+// Further tests reveal that this incorrect calculation exist only when the texture dimension
+// is 3D, and there are rowsPerImage paddings, and there are multiple depth images.
 
 class RequiredBufferSizeInCopyTests
     : public DawnTestWithParams<RequiredBufferSizeInCopyTestsParams> {
   protected:
-    void DoTest(const uint64_t bufferSize) {
+    void DoTest(const uint64_t bufferSize,
+                const wgpu::Extent3D copySize,
+                const uint64_t rowsPerImage) {
         wgpu::BufferDescriptor descriptor;
         descriptor.size = bufferSize;
         descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
         wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
 
         wgpu::TextureDescriptor texDesc = {};
-        texDesc.dimension = wgpu::TextureDimension::e3D;
-        texDesc.size = kCopySize;
+        texDesc.dimension = GetParam().mTextureDimension;
+        texDesc.size = copySize;
         texDesc.format = kFormat;
         texDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
         wgpu::Texture texture = device.CreateTexture(&texDesc);
@@ -87,19 +97,19 @@ class RequiredBufferSizeInCopyTests
         wgpu::ImageCopyTexture imageCopyTexture =
             utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
         wgpu::ImageCopyBuffer imageCopyBuffer =
-            utils::CreateImageCopyBuffer(buffer, kOffset, kBytesPerRow, kRowsPerImage);
+            utils::CreateImageCopyBuffer(buffer, kOffset, kBytesPerRow, rowsPerImage);
 
         // Initialize copied data and set expected data for buffer and texture.
         ASSERT(sizeof(uint32_t) == kBytesPerBlock);
         uint32_t numOfBufferElements = bufferSize / kBytesPerBlock;
         std::vector<uint32_t> data(numOfBufferElements, 1);
         std::vector<uint32_t> expectedBufferData(numOfBufferElements, 0);
-        std::vector<uint32_t> expectedTextureData(kCopySize.depthOrArrayLayers, 0);
+        std::vector<uint32_t> expectedTextureData(copySize.depthOrArrayLayers, 0);
         // Initialize the first element on every image to be 0x80808080
-        uint64_t imageSize = kBytesPerRow * kRowsPerImage;
-        ASSERT(bufferSize >= (imageSize * (kCopySize.depthOrArrayLayers - 1) + kBytesPerBlock));
+        uint64_t imageSize = kBytesPerRow * rowsPerImage;
+        ASSERT(bufferSize >= (imageSize * (copySize.depthOrArrayLayers - 1) + kBytesPerBlock));
         uint32_t numOfImageElements = imageSize / kBytesPerBlock;
-        for (uint32_t i = 0; i < kCopySize.depthOrArrayLayers; ++i) {
+        for (uint32_t i = 0; i < copySize.depthOrArrayLayers; ++i) {
             data[i * numOfImageElements] = 0x80808080;
             expectedBufferData[i * numOfImageElements] = 0x80808080;
             expectedTextureData[i] = 0x80808080;
@@ -110,17 +120,17 @@ class RequiredBufferSizeInCopyTests
         switch (GetParam().mType) {
             case Type::T2BCopy: {
                 wgpu::TextureDataLayout textureDataLayout =
-                    utils::CreateTextureDataLayout(kOffset, kBytesPerRow, kRowsPerImage);
+                    utils::CreateTextureDataLayout(kOffset, kBytesPerRow, rowsPerImage);
 
                 queue.WriteTexture(&imageCopyTexture, data.data(), bufferSize, &textureDataLayout,
-                                   &kCopySize);
+                                   &copySize);
 
-                encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &kCopySize);
+                encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copySize);
                 break;
             }
             case Type::B2TCopy:
                 queue.WriteBuffer(buffer, 0, data.data(), bufferSize);
-                encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &kCopySize);
+                encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
                 break;
         }
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -132,7 +142,7 @@ class RequiredBufferSizeInCopyTests
                 EXPECT_BUFFER_U32_RANGE_EQ(expectedBufferData.data(), buffer, 0, bufferSize / 4);
                 break;
             case Type::B2TCopy:
-                EXPECT_TEXTURE_EQ(expectedTextureData.data(), texture, {0, 0, 0}, kCopySize);
+                EXPECT_TEXTURE_EQ(expectedTextureData.data(), texture, {0, 0, 0}, copySize);
                 break;
         }
     }
@@ -140,36 +150,63 @@ class RequiredBufferSizeInCopyTests
 
 // The buffer contains full data on the last image and has storage for all kinds of paddings.
 TEST_P(RequiredBufferSizeInCopyTests, AbundantBufferSize) {
-    uint64_t size = kOffset + kBytesPerRow * kRowsPerImage * kCopySize.depthOrArrayLayers;
-    DoTest(size);
+    wgpu::Extent3D copySize = kCopySize;
+    copySize.depthOrArrayLayers = GetParam().mCopyDepth;
+    const uint64_t extraRowsPerImage = GetParam().mExtraRowsPerImage;
+    const uint64_t rowsPerImage = extraRowsPerImage + copySize.height;
+
+    uint64_t size = kOffset + kBytesPerRow * rowsPerImage * copySize.depthOrArrayLayers;
+    DoTest(size, copySize, rowsPerImage);
 }
 
 // The buffer has storage for rowsPerImage paddings on the last image but not bytesPerRow
 // paddings on the last row, which is exactly what D3D12 requires. See the comments at the
 // beginning of class RequiredBufferSizeInCopyTests for details.
 TEST_P(RequiredBufferSizeInCopyTests, BufferSizeOnBoundary) {
-    uint64_t size = kOffset + kBytesPerRow * kRowsPerImage * (kCopySize.depthOrArrayLayers - 1) +
-                    kBytesPerRow * (kRowsPerImage - 1) + kBytesPerBlock * kCopySize.width;
-    DoTest(size);
+    wgpu::Extent3D copySize = kCopySize;
+    copySize.depthOrArrayLayers = GetParam().mCopyDepth;
+    const uint64_t extraRowsPerImage = GetParam().mExtraRowsPerImage;
+    // If there are no rowsPerImage paddings, buffer size required by D3D12 will be exactly the
+    // same with the minimum size required by WebGPU spec, which can be covered by tests below
+    // at MinimunBufferSize.
+    if (extraRowsPerImage > 0) {
+        const uint64_t rowsPerImage = extraRowsPerImage + copySize.height;
 
-    // TODO(crbug.com/dawn/1278, 1288, 1289): Required buffer size for copy is wrong on D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12());
-    size -= kBytesPerBlock;
-    DoTest(size);
+        uint64_t size = kOffset + kBytesPerRow * rowsPerImage * (copySize.depthOrArrayLayers - 1) +
+                        kBytesPerRow * (rowsPerImage - 1) + kBytesPerBlock * copySize.width;
+        DoTest(size, copySize, rowsPerImage);
+
+        // TODO(crbug.com/dawn/1278, 1288, 1289): Required buffer size for copy is wrong on D3D12.
+        bool mayNeedWorkaround = GetParam().mTextureDimension == wgpu::TextureDimension::e3D &&
+                                 extraRowsPerImage > 0 && copySize.depthOrArrayLayers > 1;
+        DAWN_SUPPRESS_TEST_IF(IsD3D12() && mayNeedWorkaround);
+        size -= kBytesPerBlock;
+        DoTest(size, copySize, rowsPerImage);
+    }
 }
 
 // The buffer doesn't have storage for any paddings on the last image. WebGPU spec doesn't require
 // storage for these paddings, and the copy operation will never access to these paddings. So it
 // should work.
 TEST_P(RequiredBufferSizeInCopyTests, MininumBufferSize) {
+    wgpu::Extent3D copySize = kCopySize;
+    copySize.depthOrArrayLayers = GetParam().mCopyDepth;
+    const uint64_t extraRowsPerImage = GetParam().mExtraRowsPerImage;
+    const uint64_t rowsPerImage = extraRowsPerImage + copySize.height;
+
     // TODO(crbug.com/dawn/1278, 1288, 1289): Required buffer size for copy is wrong on D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12());
+    bool mayNeedWorkaround = GetParam().mTextureDimension == wgpu::TextureDimension::e3D &&
+                             extraRowsPerImage > 0 && copySize.depthOrArrayLayers > 1;
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && mayNeedWorkaround);
     uint64_t size =
-        kOffset + utils::RequiredBytesInCopy(kBytesPerRow, kRowsPerImage, kCopySize, kFormat);
-    DoTest(size);
+        kOffset + utils::RequiredBytesInCopy(kBytesPerRow, rowsPerImage, copySize, kFormat);
+    DoTest(size, copySize, rowsPerImage);
 }
 
 DAWN_INSTANTIATE_TEST_P(RequiredBufferSizeInCopyTests,
                         {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
                          VulkanBackend()},
-                        {Type::T2BCopy, Type::B2TCopy});
+                        {Type::T2BCopy, Type::B2TCopy},
+                        {wgpu::TextureDimension::e3D, wgpu::TextureDimension::e2D},
+                        {2u, 1u},
+                        {1u, 0u});
