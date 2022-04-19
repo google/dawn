@@ -2143,17 +2143,17 @@ sem::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
   return result;
 }
 
-sem::Type* Resolver::TypeOf(const ast::Expression* expr) {
-  auto* sem = Sem(expr);
-  return sem ? const_cast<sem::Type*>(sem->Type()) : nullptr;
-}
-
-std::string Resolver::TypeNameOf(const sem::Type* ty) {
+std::string Resolver::TypeNameOf(const sem::Type* ty) const {
   return RawTypeNameOf(ty->UnwrapRef());
 }
 
-std::string Resolver::RawTypeNameOf(const sem::Type* ty) {
+std::string Resolver::RawTypeNameOf(const sem::Type* ty) const {
   return ty->FriendlyName(builder_->Symbols());
+}
+
+sem::Type* Resolver::TypeOf(const ast::Expression* expr) const {
+  auto* sem = Sem(expr);
+  return sem ? const_cast<sem::Type*>(sem->Type()) : nullptr;
 }
 
 sem::Type* Resolver::TypeOf(const ast::LiteralExpression* lit) {
@@ -2780,12 +2780,6 @@ SEM* Resolver::StatementScope(const ast::Statement* ast,
   }
 
   return sem;
-}
-
-std::string Resolver::VectorPretty(uint32_t size,
-                                   const sem::Type* element_type) {
-  sem::Vector vec_type(element_type, size);
-  return vec_type.FriendlyName(builder_->Symbols());
 }
 
 bool Resolver::Mark(const ast::Node* node) {

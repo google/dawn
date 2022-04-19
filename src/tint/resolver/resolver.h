@@ -154,8 +154,6 @@ class Resolver {
   /// @returns true on success, false on error
   bool ResolveInternal();
 
-  bool ValidatePipelineStages();
-
   /// Creates the nodes and adds them to the sem::Info mappings of the
   /// ProgramBuilder.
   void CreateSemanticNodes() const;
@@ -240,78 +238,84 @@ class Resolver {
 
   // AST and Type validation methods
   // Each return true on success, false on failure.
-  bool ValidateAlias(const ast::Alias*);
-  bool ValidateArray(const sem::Array* arr, const Source& source);
+  bool ValidatePipelineStages() const;
+  bool ValidateAlias(const ast::Alias*) const;
+  bool ValidateArray(const sem::Array* arr, const Source& source) const;
   bool ValidateArrayStrideAttribute(const ast::StrideAttribute* attr,
                                     uint32_t el_size,
                                     uint32_t el_align,
-                                    const Source& source);
-  bool ValidateAtomic(const ast::Atomic* a, const sem::Atomic* s);
-  bool ValidateAtomicVariable(const sem::Variable* var);
-  bool ValidateAssignment(const ast::Statement* a, const sem::Type* rhs_ty);
-  bool ValidateBitcast(const ast::BitcastExpression* cast, const sem::Type* to);
-  bool ValidateBreakStatement(const sem::Statement* stmt);
+                                    const Source& source) const;
+  bool ValidateAtomic(const ast::Atomic* a, const sem::Atomic* s) const;
+  bool ValidateAtomicVariable(const sem::Variable* var) const;
+  bool ValidateAssignment(const ast::Statement* a,
+                          const sem::Type* rhs_ty) const;
+  bool ValidateBitcast(const ast::BitcastExpression* cast,
+                       const sem::Type* to) const;
+  bool ValidateBreakStatement(const sem::Statement* stmt) const;
   bool ValidateBuiltinAttribute(const ast::BuiltinAttribute* attr,
                                 const sem::Type* storage_type,
                                 ast::PipelineStage stage,
-                                const bool is_input);
-  bool ValidateContinueStatement(const sem::Statement* stmt);
-  bool ValidateDiscardStatement(const sem::Statement* stmt);
-  bool ValidateElseStatement(const sem::ElseStatement* stmt);
-  bool ValidateEntryPoint(const sem::Function* func, ast::PipelineStage stage);
-  bool ValidateForLoopStatement(const sem::ForLoopStatement* stmt);
-  bool ValidateFallthroughStatement(const sem::Statement* stmt);
-  bool ValidateFunction(const sem::Function* func, ast::PipelineStage stage);
-  bool ValidateFunctionCall(const sem::Call* call);
-  bool ValidateGlobalVariable(const sem::Variable* var);
-  bool ValidateIfStatement(const sem::IfStatement* stmt);
+                                const bool is_input) const;
+  bool ValidateContinueStatement(const sem::Statement* stmt) const;
+  bool ValidateDiscardStatement(const sem::Statement* stmt) const;
+  bool ValidateElseStatement(const sem::ElseStatement* stmt) const;
+  bool ValidateEntryPoint(const sem::Function* func,
+                          ast::PipelineStage stage) const;
+  bool ValidateForLoopStatement(const sem::ForLoopStatement* stmt) const;
+  bool ValidateFallthroughStatement(const sem::Statement* stmt) const;
+  bool ValidateFunction(const sem::Function* func,
+                        ast::PipelineStage stage) const;
+  bool ValidateFunctionCall(const sem::Call* call) const;
+  bool ValidateGlobalVariable(const sem::Variable* var) const;
+  bool ValidateIfStatement(const sem::IfStatement* stmt) const;
   bool ValidateIncrementDecrementStatement(
-      const ast::IncrementDecrementStatement* stmt);
+      const ast::IncrementDecrementStatement* stmt) const;
   bool ValidateInterpolateAttribute(const ast::InterpolateAttribute* attr,
-                                    const sem::Type* storage_type);
-  bool ValidateBuiltinCall(const sem::Call* call);
+                                    const sem::Type* storage_type) const;
+  bool ValidateBuiltinCall(const sem::Call* call) const;
   bool ValidateLocationAttribute(const ast::LocationAttribute* location,
                                  const sem::Type* type,
                                  std::unordered_set<uint32_t>& locations,
                                  ast::PipelineStage stage,
                                  const Source& source,
-                                 const bool is_input = false);
-  bool ValidateLoopStatement(const sem::LoopStatement* stmt);
-  bool ValidateMatrix(const sem::Matrix* ty, const Source& source);
+                                 const bool is_input = false) const;
+  bool ValidateLoopStatement(const sem::LoopStatement* stmt) const;
+  bool ValidateMatrix(const sem::Matrix* ty, const Source& source) const;
   bool ValidateFunctionParameter(const ast::Function* func,
-                                 const sem::Variable* var);
-  bool ValidateParameter(const ast::Function* func, const sem::Variable* var);
+                                 const sem::Variable* var) const;
   bool ValidateReturn(const ast::ReturnStatement* ret,
                       const sem::Type* func_type,
-                      const sem::Type* ret_type);
-  bool ValidateStatements(const ast::StatementList& stmts);
-  bool ValidateStorageTexture(const ast::StorageTexture* t);
-  bool ValidateStructure(const sem::Struct* str, ast::PipelineStage stage);
+                      const sem::Type* ret_type) const;
+  bool ValidateStatements(const ast::StatementList& stmts) const;
+  bool ValidateStorageTexture(const ast::StorageTexture* t) const;
+  bool ValidateStructure(const sem::Struct* str,
+                         ast::PipelineStage stage) const;
   bool ValidateStructureConstructorOrCast(const ast::CallExpression* ctor,
-                                          const sem::Struct* struct_type);
+                                          const sem::Struct* struct_type) const;
   bool ValidateSwitch(const ast::SwitchStatement* s);
-  bool ValidateVariable(const sem::Variable* var);
+  bool ValidateVariable(const sem::Variable* var) const;
   bool ValidateVariableConstructorOrCast(const ast::Variable* var,
                                          ast::StorageClass storage_class,
                                          const sem::Type* storage_type,
-                                         const sem::Type* rhs_type);
-  bool ValidateVector(const sem::Vector* ty, const Source& source);
+                                         const sem::Type* rhs_type) const;
+  bool ValidateVector(const sem::Vector* ty, const Source& source) const;
   bool ValidateVectorConstructorOrCast(const ast::CallExpression* ctor,
-                                       const sem::Vector* vec_type);
+                                       const sem::Vector* vec_type) const;
   bool ValidateMatrixConstructorOrCast(const ast::CallExpression* ctor,
-                                       const sem::Matrix* matrix_type);
+                                       const sem::Matrix* matrix_type) const;
   bool ValidateScalarConstructorOrCast(const ast::CallExpression* ctor,
-                                       const sem::Type* type);
+                                       const sem::Type* type) const;
   bool ValidateArrayConstructorOrCast(const ast::CallExpression* ctor,
-                                      const sem::Array* arr_type);
-  bool ValidateTextureBuiltinFunction(const sem::Call* call);
-  bool ValidateNoDuplicateAttributes(const ast::AttributeList& attributes);
+                                      const sem::Array* arr_type) const;
+  bool ValidateTextureBuiltinFunction(const sem::Call* call) const;
+  bool ValidateNoDuplicateAttributes(
+      const ast::AttributeList& attributes) const;
   bool ValidateStorageClassLayout(const sem::Type* type,
                                   ast::StorageClass sc,
                                   Source source,
-                                  ValidTypeStorageLayouts& layout);
+                                  ValidTypeStorageLayouts& layouts) const;
   bool ValidateStorageClassLayout(const sem::Variable* var,
-                                  ValidTypeStorageLayouts& layout);
+                                  ValidTypeStorageLayouts& layouts) const;
 
   /// @returns true if the attribute list contains a
   /// ast::DisableValidationAttribute with the validation mode equal to
@@ -324,6 +328,13 @@ class Resolver {
   /// `validation`
   bool IsValidationEnabled(const ast::AttributeList& attributes,
                            ast::DisabledValidation validation) const;
+
+  /// Returns a human-readable string representation of the vector type name
+  /// with the given parameters.
+  /// @param size the vector dimension
+  /// @param element_type scalar vector sub-element type
+  /// @return pretty string representation
+  std::string VectorPretty(uint32_t size, const sem::Type* element_type) const;
 
   /// Resolves the WorkgroupSize for the given function, assigning it to
   /// current_function_
@@ -397,15 +408,15 @@ class Resolver {
 
   /// @returns the resolved type of the ast::Expression `expr`
   /// @param expr the expression
-  sem::Type* TypeOf(const ast::Expression* expr);
+  sem::Type* TypeOf(const ast::Expression* expr) const;
 
   /// @returns the type name of the given semantic type, unwrapping
   /// references.
-  std::string TypeNameOf(const sem::Type* ty);
+  std::string TypeNameOf(const sem::Type* ty) const;
 
   /// @returns the type name of the given semantic type, without unwrapping
   /// references.
-  std::string RawTypeNameOf(const sem::Type* ty);
+  std::string RawTypeNameOf(const sem::Type* ty) const;
 
   /// @returns the semantic type of the AST literal `lit`
   /// @param lit the literal
@@ -424,13 +435,6 @@ class Resolver {
   /// @returns `sem` if `callback` returns true, otherwise `nullptr`.
   template <typename SEM, typename F>
   SEM* StatementScope(const ast::Statement* ast, SEM* sem, F&& callback);
-
-  /// Returns a human-readable string representation of the vector type name
-  /// with the given parameters.
-  /// @param size the vector dimension
-  /// @param element_type scalar vector sub-element type
-  /// @return pretty string representation
-  std::string VectorPretty(uint32_t size, const sem::Type* element_type);
 
   /// Mark records that the given AST node has been visited, and asserts that
   /// the given node has not already been seen. Diamonds in the AST are
@@ -466,7 +470,7 @@ class Resolver {
   /// Sem is a helper for obtaining the semantic node for the given AST node.
   template <typename SEM = sem::Info::InferFromAST,
             typename AST_OR_TYPE = CastableBase>
-  auto* Sem(const AST_OR_TYPE* ast) {
+  auto* Sem(const AST_OR_TYPE* ast) const {
     using T = sem::Info::GetResultType<SEM, AST_OR_TYPE>;
     auto* sem = builder_->Sem().Get(ast);
     if (!sem) {
@@ -495,7 +499,7 @@ class Resolver {
   /// @returns the resolved symbol (function, type or variable) for the given
   /// ast::Identifier or ast::TypeName cast to the given semantic type.
   template <typename SEM = sem::Node>
-  SEM* ResolvedSymbol(const ast::Node* node) {
+  SEM* ResolvedSymbol(const ast::Node* node) const {
     auto* resolved = utils::Lookup(dependencies_.resolved_symbols, node);
     return resolved ? const_cast<SEM*>(builder_->Sem().Get<SEM>(resolved))
                     : nullptr;
