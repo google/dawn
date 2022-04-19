@@ -19,8 +19,8 @@
 namespace dawn::native {
 
     DynamicUploader::DynamicUploader(DeviceBase* device) : mDevice(device) {
-        mRingBuffers.emplace_back(
-            std::unique_ptr<RingBuffer>(new RingBuffer{nullptr, {kRingBufferSize}}));
+        mRingBuffers.emplace_back(std::unique_ptr<RingBuffer>(
+            new RingBuffer{nullptr, RingBufferAllocator(kRingBufferSize)}));
     }
 
     void DynamicUploader::ReleaseStagingBuffer(std::unique_ptr<StagingBufferBase> stagingBuffer) {
@@ -66,8 +66,8 @@ namespace dawn::native {
         // Upon failure, append a newly created ring buffer to fulfill the
         // request.
         if (startOffset == RingBufferAllocator::kInvalidOffset) {
-            mRingBuffers.emplace_back(
-                std::unique_ptr<RingBuffer>(new RingBuffer{nullptr, {kRingBufferSize}}));
+            mRingBuffers.emplace_back(std::unique_ptr<RingBuffer>(
+                new RingBuffer{nullptr, RingBufferAllocator(kRingBufferSize)}));
 
             targetRingBuffer = mRingBuffers.back().get();
             startOffset = targetRingBuffer->mAllocator.Allocate(allocationSize, serial);
