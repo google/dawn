@@ -448,7 +448,7 @@ crbug.com/dawn/0000 [ win ] webgpu:api,validation,createTexture:mipLevelCount,fo
 # shader execution failures
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 [ mac ] webgpu:shader,execution,expression,call,builtin,atan2:* [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,atan2:* [ Failure ]
 crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,call,builtin,countTrailingZeros:* [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,call,builtin,extractBits:* [ Failure ]
 crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,call,builtin,firstTrailingBit:* [ Failure ]
@@ -476,9 +476,16 @@ crbug.com/dawn/1364 webgpu:api,validation,createTexture:texture_usage:* [ Failur
 crbug.com/chromium/1315658 webgpu:api,validation,encoding,cmds,copyTextureToTexture:texture_format_compatibility:* [ Failure ]
 
 ################################################################################
+# crbug.com/dawn/1376 Loosen CreateRenderPipeline output validation when writeMask is 0
+# KEEP
+################################################################################
+crbug.com/dawn/1376 webgpu:api,validation,attachment_compatibility:render_pass_or_bundle_and_pipeline,depth_stencil_read_only_write_state:* [ Failure ]
+
+################################################################################
 # untriaged failures
 # KEEP
 ################################################################################
+crbug.com/dawn/0000 webgpu:api,validation,resource_usages,buffer,in_pass_encoder:subresources,buffer_usage_in_render_pass:* [ Failure ] # timeouts
 crbug.com/dawn/0000 [ linux ] webgpu:api,operation,command_buffer,basic:* [ Failure ]
 crbug.com/dawn/0000 [ linux ] webgpu:api,operation,command_buffer,copyBufferToBuffer:* [ Failure ]
 crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,robust_access:linear_memory:storageClass="workgroup";access="read";containerType="vector";isAtomic=false [ Failure ]
