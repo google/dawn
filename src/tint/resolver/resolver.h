@@ -271,6 +271,7 @@ class Resolver {
   bool ValidateLocationAttribute(const ast::LocationAttribute* location,
                                  const sem::Type* type,
                                  std::unordered_set<uint32_t>& locations,
+                                 ast::PipelineStage stage,
                                  const Source& source,
                                  const bool is_input = false);
   bool ValidateLoopStatement(const sem::LoopStatement* stmt);

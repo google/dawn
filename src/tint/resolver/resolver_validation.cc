@@ -1002,7 +1002,11 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func) {
         pipeline_io_attribute = attr;
 
         bool is_input = param_or_ret == ParamOrRetType::kParameter;
-        if (!ValidateLocationAttribute(location, ty, locations, source,
+
+        auto stage = current_function_
+                         ? current_function_->Declaration()->PipelineStage()
+                         : ast::PipelineStage::kNone;
+        if (!ValidateLocationAttribute(location, ty, locations, stage, source,
                                        is_input)) {
           return false;
         }
@@ -2099,8 +2103,11 @@ bool Resolver::ValidateStructure(const sem::Struct* str) {
         invariant_attribute = invariant;
       } else if (auto* location = attr->As<ast::LocationAttribute>()) {
         has_location = true;
+        auto stage = current_function_
+                         ? current_function_->Declaration()->PipelineStage()
+                         : ast::PipelineStage::kNone;
         if (!ValidateLocationAttribute(location, member->Type(), locations,
-                                       member->Declaration()->source)) {
+                                       stage, member->Declaration()->source)) {
           return false;
         }
       } else if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
@@ -2146,11 +2153,11 @@ bool Resolver::ValidateLocationAttribute(
     const ast::LocationAttribute* location,
     const sem::Type* type,
     std::unordered_set<uint32_t>& locations,
+    ast::PipelineStage stage,
     const Source& source,
     const bool is_input) {
   std::string inputs_or_output = is_input ? "inputs" : "output";
-  if (current_function_ && current_function_->Declaration()->PipelineStage() ==
-                               ast::PipelineStage::kCompute) {
+  if (stage == ast::PipelineStage::kCompute) {
     AddError("attribute is not valid for compute shader " + inputs_or_output,
              location->source);
     return false;
