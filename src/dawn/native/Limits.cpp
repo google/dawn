@@ -151,14 +151,14 @@ namespace dawn::native {
 
     Limits ReifyDefaultLimits(const Limits& limits) {
         Limits out;
-#define X(Class, limitName, base, ...)                                           \
-    if (IsLimitUndefined(limits.limitName) ||                                     \
-        CheckLimit<LimitClass::Class>::IsBetter(                       \
-            static_cast<decltype(limits.limitName)>(base), limits.limitName)) {   \
-        /* If the limit is undefined or the default is better, use the default */ \
-        out.limitName = base;                                                     \
-    } else {                                                                      \
-        out.limitName = limits.limitName;                                         \
+#define X(Class, limitName, base, ...)                                                         \
+    if (IsLimitUndefined(limits.limitName) ||                                                  \
+        CheckLimit<LimitClass::Class>::IsBetter(static_cast<decltype(limits.limitName)>(base), \
+                                                limits.limitName)) {                           \
+        /* If the limit is undefined or the default is better, use the default */              \
+        out.limitName = base;                                                                  \
+    } else {                                                                                   \
+        out.limitName = limits.limitName;                                                      \
     }
         LIMITS(X)
 #undef X
@@ -166,11 +166,11 @@ namespace dawn::native {
     }
 
     MaybeError ValidateLimits(const Limits& supportedLimits, const Limits& requiredLimits) {
-#define X(Class, limitName, ...)                                                  \
-    if (!IsLimitUndefined(requiredLimits.limitName)) {                             \
-        DAWN_TRY_CONTEXT(CheckLimit<LimitClass::Class>::Validate(       \
-                             supportedLimits.limitName, requiredLimits.limitName), \
-                         "validating " #limitName);                                \
+#define X(Class, limitName, ...)                                                            \
+    if (!IsLimitUndefined(requiredLimits.limitName)) {                                      \
+        DAWN_TRY_CONTEXT(CheckLimit<LimitClass::Class>::Validate(supportedLimits.limitName, \
+                                                                 requiredLimits.limitName), \
+                         "validating " #limitName);                                         \
     }
         LIMITS(X)
 #undef X
@@ -192,17 +192,17 @@ namespace dawn::native {
         }                                                            \
     }
 
-#define X_CHECK_BETTER_AND_CLAMP(Class, limitName, ...)                                       \
-    {                                                                                          \
-        constexpr std::array<decltype(Limits::limitName), kTierCount> tiers{__VA_ARGS__};      \
-        decltype(Limits::limitName) tierValue = tiers[i - 1];                                  \
-        if (CheckLimit<LimitClass::Class>::IsBetter(tierValue, limits.limitName)) { \
-            /* The tier is better. Go to the next tier. */                                     \
-            continue;                                                                          \
-        } else if (tierValue != limits.limitName) {                                            \
-            /* Better than the tier. Degrade |limits| to the tier. */                          \
-            limits.limitName = tiers[i - 1];                                                   \
-        }                                                                                      \
+#define X_CHECK_BETTER_AND_CLAMP(Class, limitName, ...)                                   \
+    {                                                                                     \
+        constexpr std::array<decltype(Limits::limitName), kTierCount> tiers{__VA_ARGS__}; \
+        decltype(Limits::limitName) tierValue = tiers[i - 1];                             \
+        if (CheckLimit<LimitClass::Class>::IsBetter(tierValue, limits.limitName)) {       \
+            /* The tier is better. Go to the next tier. */                                \
+            continue;                                                                     \
+        } else if (tierValue != limits.limitName) {                                       \
+            /* Better than the tier. Degrade |limits| to the tier. */                     \
+            limits.limitName = tiers[i - 1];                                              \
+        }                                                                                 \
     }
 
         LIMITS_EACH_GROUP(X_EACH_GROUP)

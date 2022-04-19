@@ -119,7 +119,7 @@ namespace wgpu::interop {
         // stringified values append to the error message.
         // If Result is a success, then a success Result is returned.
         template <typename... VALUES>
-        Result Append(VALUES&&... values) {
+        Result Append(VALUES && ... values) {
             if (*this) {
                 return *this;
             }

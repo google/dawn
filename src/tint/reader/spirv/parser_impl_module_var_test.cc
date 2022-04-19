@@ -1272,7 +1272,6 @@ TEST_F(SpvModuleScopeVarParserTest, DescriptorGroupDecoration_Valid) {
       << module_str;
 }
 
-
 TEST_F(SpvModuleScopeVarParserTest, BindingDecoration_Valid) {
   auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpDecorate %1 DescriptorSet 0 ; WGSL validation requires this already

@@ -271,18 +271,18 @@ TEST_F(WireErrorCallbackTests, PopErrorScopeAfterDisconnect) {
 
 // Empty stack (We are emulating the errors that would be callback-ed from native).
 TEST_F(WireErrorCallbackTests, PopErrorScopeEmptyStack) {
-        WGPUErrorCallback callback;
-        void* userdata;
-        EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _))
-            .WillOnce(DoAll(SaveArg<1>(&callback), SaveArg<2>(&userdata), Return(true)));
-        wgpuDevicePopErrorScope(device, ToMockDevicePopErrorScopeCallback, this);
-        FlushClient();
+    WGPUErrorCallback callback;
+    void* userdata;
+    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _, _))
+        .WillOnce(DoAll(SaveArg<1>(&callback), SaveArg<2>(&userdata), Return(true)));
+    wgpuDevicePopErrorScope(device, ToMockDevicePopErrorScopeCallback, this);
+    FlushClient();
 
-        EXPECT_CALL(*mockDevicePopErrorScopeCallback,
-                    Call(WGPUErrorType_Validation, StrEq("No error scopes to pop"), this))
-            .Times(1);
-        callback(WGPUErrorType_Validation, "No error scopes to pop", userdata);
-        FlushServer();
+    EXPECT_CALL(*mockDevicePopErrorScopeCallback,
+                Call(WGPUErrorType_Validation, StrEq("No error scopes to pop"), this))
+        .Times(1);
+    callback(WGPUErrorType_Validation, "No error scopes to pop", userdata);
+    FlushServer();
 }
 
 // Test the return wire for device lost callback

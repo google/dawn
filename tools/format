@@ -13,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-find src -name "*.h"  -exec clang-format -i {} \;
-find src -name "*.cc"  -exec clang-format -i {} \;
-find src/tint/cmd -name "*.h"  -exec clang-format -i {} \;
-find src/tint/cmd -name "*.cc"  -exec clang-format -i {} \;
+find src -name "*.h"  -exec clang_format.py -i {} \;
+find src -name "*.cc"  -exec clang_format.py -i {} \;
+find src -name "*.cpp"  -exec clang_format.py -i {} \;
+find src -name "*.m"  -exec clang_format.py -i {} \;
+find src -name "*.mm"  -exec clang_format.py -i {} \;
+find include -name "*.h"  -exec clang_format.py -i {} \;
