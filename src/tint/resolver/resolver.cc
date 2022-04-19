@@ -699,7 +699,10 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     return nullptr;
   }
 
-  if (!ValidateFunction(func)) {
+  auto stage = current_function_
+                   ? current_function_->Declaration()->PipelineStage()
+                   : ast::PipelineStage::kNone;
+  if (!ValidateFunction(func, stage)) {
     return nullptr;
   }
 

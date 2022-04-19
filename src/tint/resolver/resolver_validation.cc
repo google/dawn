@@ -832,7 +832,8 @@ bool Resolver::ValidateInterpolateAttribute(
   return true;
 }
 
-bool Resolver::ValidateFunction(const sem::Function* func) {
+bool Resolver::ValidateFunction(const sem::Function* func,
+                                ast::PipelineStage stage) {
   auto* decl = func->Declaration();
 
   auto name = builder_->Symbols().NameFor(decl->symbol);
@@ -917,9 +918,6 @@ bool Resolver::ValidateFunction(const sem::Function* func) {
   }
 
   if (decl->IsEntryPoint()) {
-    auto stage = current_function_
-                     ? current_function_->Declaration()->PipelineStage()
-                     : ast::PipelineStage::kNone;
     if (!ValidateEntryPoint(func, stage)) {
       return false;
     }
