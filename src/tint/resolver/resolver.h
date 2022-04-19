@@ -252,6 +252,7 @@ class Resolver {
   bool ValidateBreakStatement(const sem::Statement* stmt);
   bool ValidateBuiltinAttribute(const ast::BuiltinAttribute* attr,
                                 const sem::Type* storage_type,
+                                ast::PipelineStage stage,
                                 const bool is_input);
   bool ValidateContinueStatement(const sem::Statement* stmt);
   bool ValidateDiscardStatement(const sem::Statement* stmt);
