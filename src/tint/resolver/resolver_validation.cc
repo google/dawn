@@ -2182,10 +2182,8 @@ bool Resolver::ValidateLocationAttribute(
 }
 
 bool Resolver::ValidateReturn(const ast::ReturnStatement* ret,
-                              const sem::Type* func_type) {
-  auto* ret_type = ret->value ? TypeOf(ret->value)->UnwrapRef()
-                              : builder_->create<sem::Void>();
-
+                              const sem::Type* func_type,
+                              const sem::Type* ret_type) {
   if (func_type->UnwrapRef() != ret_type) {
     AddError(
         "return statement type must match its function "

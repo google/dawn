@@ -281,7 +281,8 @@ class Resolver {
                                  const sem::Variable* var);
   bool ValidateParameter(const ast::Function* func, const sem::Variable* var);
   bool ValidateReturn(const ast::ReturnStatement* ret,
-                      const sem::Type* func_type);
+                      const sem::Type* func_type,
+                      const sem::Type* ret_type);
   bool ValidateStatements(const ast::StatementList& stmts);
   bool ValidateStorageTexture(const ast::StorageTexture* t);
   bool ValidateStructure(const sem::Struct* str, ast::PipelineStage stage);

@@ -2507,7 +2507,9 @@ sem::Statement* Resolver::ReturnStatement(const ast::ReturnStatement* stmt) {
 
     // Validate after processing the return value expression so that its type
     // is available for validation.
-    return ValidateReturn(stmt, current_function_->ReturnType());
+    auto* ret_type = stmt->value ? TypeOf(stmt->value)->UnwrapRef()
+                                 : builder_->create<sem::Void>();
+    return ValidateReturn(stmt, current_function_->ReturnType(), ret_type);
   });
 }
 
