@@ -15,7 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_UTILS_WGPUHELPERS_H_
 #define SRC_DAWN_NATIVE_UTILS_WGPUHELPERS_H_
 
-#include <dawn/native/dawn_platform.h>
+#include "dawn/native/dawn_platform.h"
 
 #include <array>
 #include <initializer_list>

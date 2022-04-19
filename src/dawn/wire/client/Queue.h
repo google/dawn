@@ -15,7 +15,7 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_QUEUE_H_
 #define SRC_DAWN_WIRE_CLIENT_QUEUE_H_
 
-#include <dawn/webgpu.h>
+#include "dawn/webgpu.h"
 
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/client/ObjectBase.h"

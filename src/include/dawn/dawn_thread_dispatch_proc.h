@@ -15,6 +15,6 @@
 #ifndef SRC_INCLUDE_DAWN_DAWN_THREAD_DISPATCH_PROC_H_
 #define SRC_INCLUDE_DAWN_DAWN_THREAD_DISPATCH_PROC_H_
 
-#include <dawn/dawn_thread_dispatch_proc.h>
+#include "dawn/dawn_thread_dispatch_proc.h"
 
 #endif  // SRC_INCLUDE_DAWN_DAWN_THREAD_DISPATCH_PROC_H_

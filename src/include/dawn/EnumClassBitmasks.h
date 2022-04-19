@@ -15,6 +15,6 @@
 #ifndef SRC_INCLUDE_DAWN_ENUMCLASSBITMASKS_H_
 #define SRC_INCLUDE_DAWN_ENUMCLASSBITMASKS_H_
 
-#include <dawn/EnumClassBitmasks.h>
+#include "dawn/EnumClassBitmasks.h"
 
 #endif  // SRC_INCLUDE_DAWN_ENUMCLASSBITMASKS_H_

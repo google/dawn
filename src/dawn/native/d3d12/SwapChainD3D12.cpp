@@ -19,7 +19,7 @@
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/native/d3d12/TextureD3D12.h"
 
-#include <dawn/dawn_wsi.h>
+#include "dawn/dawn_wsi.h"
 
 #include <windows.ui.xaml.media.dxinterop.h>
 

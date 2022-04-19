@@ -15,6 +15,6 @@
 #ifndef SRC_INCLUDE_DAWN_WIRE_WIRESERVER_H_
 #define SRC_INCLUDE_DAWN_WIRE_WIRESERVER_H_
 
-#include <dawn/wire/WireServer.h>
+#include "dawn/wire/WireServer.h"
 
 #endif  // SRC_INCLUDE_DAWN_WIRE_WIRESERVER_H_

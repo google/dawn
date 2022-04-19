@@ -15,6 +15,6 @@
 #ifndef SRC_INCLUDE_DAWN_WIRE_DAWN_WIRE_EXPORT_H_
 #define SRC_INCLUDE_DAWN_WIRE_DAWN_WIRE_EXPORT_H_
 
-#include <dawn/wire/dawn_wire_export.h>
+#include "dawn/wire/dawn_wire_export.h"
 
 #endif  // SRC_INCLUDE_DAWN_WIRE_DAWN_WIRE_EXPORT_H_

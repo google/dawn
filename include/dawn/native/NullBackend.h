@@ -15,8 +15,8 @@
 #ifndef INCLUDE_DAWN_NATIVE_NULLBACKEND_H_
 #define INCLUDE_DAWN_NATIVE_NULLBACKEND_H_
 
-#include <dawn/dawn_wsi.h>
-#include <dawn/native/DawnNative.h>
+#include "dawn/dawn_wsi.h"
+#include "dawn/native/DawnNative.h"
 
 namespace dawn::native::null {
     DAWN_NATIVE_EXPORT DawnSwapChainImplementation CreateNativeSwapChainImpl();

@@ -15,7 +15,7 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_ADAPTER_H_
 #define SRC_DAWN_WIRE_CLIENT_ADAPTER_H_
 
-#include <dawn/webgpu.h>
+#include "dawn/webgpu.h"
 
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireCmd_autogen.h"

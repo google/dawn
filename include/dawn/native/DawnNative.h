@@ -15,12 +15,12 @@
 #ifndef INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_
 #define INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_
 
-#include <dawn/dawn_proc_table.h>
-#include <dawn/native/dawn_native_export.h>
-#include <dawn/webgpu.h>
-
 #include <string>
 #include <vector>
+
+#include "dawn/dawn_proc_table.h"
+#include "dawn/native/dawn_native_export.h"
+#include "dawn/webgpu.h"
 
 namespace dawn::platform {
     class Platform;

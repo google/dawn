@@ -15,6 +15,6 @@
 #ifndef SRC_INCLUDE_DAWN_NATIVE_OPENGLBACKEND_H_
 #define SRC_INCLUDE_DAWN_NATIVE_OPENGLBACKEND_H_
 
-#include <dawn/native/OpenGLBackend.h>
+#include "dawn/native/OpenGLBackend.h"
 
 #endif  // SRC_INCLUDE_DAWN_NATIVE_OPENGLBACKEND_H_

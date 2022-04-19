@@ -15,7 +15,7 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_OBJECTBASE_H_
 #define SRC_DAWN_WIRE_CLIENT_OBJECTBASE_H_
 
-#include <dawn/webgpu.h>
+#include "dawn/webgpu.h"
 
 #include "dawn/common/LinkedList.h"
 #include "dawn/wire/ObjectType_autogen.h"

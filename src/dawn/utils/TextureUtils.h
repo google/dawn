@@ -17,7 +17,7 @@
 
 #include <array>
 
-#include <dawn/webgpu_cpp.h>
+#include "dawn/webgpu_cpp.h"
 
 #include "dawn/common/Assert.h"
 

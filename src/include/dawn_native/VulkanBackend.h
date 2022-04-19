@@ -15,6 +15,6 @@
 #ifndef SRC_INCLUDE_DAWN_NATIVE_VULKANBACKEND_H_
 #define SRC_INCLUDE_DAWN_NATIVE_VULKANBACKEND_H_
 
-#include <dawn/native/VulkanBackend.h>
+#include "dawn/native/VulkanBackend.h"
 
 #endif  // SRC_INCLUDE_DAWN_NATIVE_VULKANBACKEND_H_

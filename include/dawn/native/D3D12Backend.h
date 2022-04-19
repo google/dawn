@@ -15,15 +15,15 @@
 #ifndef INCLUDE_DAWN_NATIVE_D3D12BACKEND_H_
 #define INCLUDE_DAWN_NATIVE_D3D12BACKEND_H_
 
-#include <dawn/dawn_wsi.h>
-#include <dawn/native/DawnNative.h>
-
 #include <DXGI1_4.h>
 #include <d3d12.h>
 #include <windows.h>
 #include <wrl/client.h>
 
 #include <memory>
+
+#include "dawn/dawn_wsi.h"
+#include "dawn/native/DawnNative.h"
 
 struct ID3D12Device;
 struct ID3D12Resource;

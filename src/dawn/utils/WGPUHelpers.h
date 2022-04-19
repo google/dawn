@@ -15,7 +15,7 @@
 #ifndef SRC_DAWN_UTILS_WGPUHELPERS_H_
 #define SRC_DAWN_UTILS_WGPUHELPERS_H_
 
-#include <dawn/webgpu_cpp.h>
+#include "dawn/webgpu_cpp.h"
 
 #include <array>
 #include <initializer_list>

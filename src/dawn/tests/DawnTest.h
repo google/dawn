@@ -27,9 +27,9 @@
 #include "dawn/webgpu_cpp.h"
 #include "dawn/webgpu_cpp_print.h"
 
-#include <dawn/platform/DawnPlatform.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "dawn/platform/DawnPlatform.h"
 
 #include <memory>
 #include <unordered_map>

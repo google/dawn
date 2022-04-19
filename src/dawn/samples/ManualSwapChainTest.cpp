@@ -58,10 +58,10 @@
 #include "dawn/utils/ScopedAutoreleasePool.h"
 #include "dawn/utils/WGPUHelpers.h"
 
-#include <dawn/dawn_proc.h>
-#include <dawn/native/DawnNative.h>
-#include <dawn/webgpu_cpp.h>
 #include "GLFW/glfw3.h"
+#include "dawn/dawn_proc.h"
+#include "dawn/native/DawnNative.h"
+#include "dawn/webgpu_cpp.h"
 
 #include <memory>
 #include <unordered_map>

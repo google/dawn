@@ -15,6 +15,6 @@
 #ifndef SRC_INCLUDE_DAWN_NATIVE_METALBACKEND_H_
 #define SRC_INCLUDE_DAWN_NATIVE_METALBACKEND_H_
 
-#include <dawn/native/MetalBackend.h>
+#include "dawn/native/MetalBackend.h"
 
 #endif  // SRC_INCLUDE_DAWN_NATIVE_METALBACKEND_H_

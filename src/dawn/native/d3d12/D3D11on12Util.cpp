@@ -22,7 +22,7 @@
 #include "dawn/native/d3d12/D3D12Error.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 
-#include <dawn/native/D3D12Backend.h>
+#include "dawn/native/D3D12Backend.h"
 
 namespace dawn::native::d3d12 {
 

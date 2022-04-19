@@ -15,8 +15,8 @@
 #ifndef INCLUDE_DAWN_NATIVE_METALBACKEND_H_
 #define INCLUDE_DAWN_NATIVE_METALBACKEND_H_
 
-#include <dawn/dawn_wsi.h>
-#include <dawn/native/DawnNative.h>
+#include "dawn/dawn_wsi.h"
+#include "dawn/native/DawnNative.h"
 
 // The specifics of the Metal backend expose types in function signatures that might not be
 // available in dependent's minimum supported SDK version. Suppress all availability errors using

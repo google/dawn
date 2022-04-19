@@ -16,9 +16,9 @@
 #define SRC_DAWN_NATIVE_DAWN_PLATFORM_H_
 
 // Use webgpu_cpp to have the enum and bitfield definitions
-#include <dawn/webgpu_cpp.h>
+#include "dawn/webgpu_cpp.h"
 
-#include <dawn/native/dawn_platform_autogen.h>
+#include "dawn/native/dawn_platform_autogen.h"
 
 namespace dawn::native {
 

@@ -15,7 +15,7 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_LIMITSANDFEATURES_H_
 #define SRC_DAWN_WIRE_CLIENT_LIMITSANDFEATURES_H_
 
-#include <dawn/webgpu.h>
+#include "dawn/webgpu.h"
 
 #include <unordered_set>
 

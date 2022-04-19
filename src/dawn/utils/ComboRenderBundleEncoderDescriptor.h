@@ -15,7 +15,7 @@
 #ifndef SRC_DAWN_UTILS_COMBORENDERBUNDLEENCODERDESCRIPTOR_H_
 #define SRC_DAWN_UTILS_COMBORENDERBUNDLEENCODERDESCRIPTOR_H_
 
-#include <dawn/webgpu_cpp.h>
+#include "dawn/webgpu_cpp.h"
 
 #include "dawn/common/Constants.h"
 

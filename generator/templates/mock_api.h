@@ -19,8 +19,8 @@
 
 {% set Prefix = metadata.proc_table_prefix %}
 {% set prefix = Prefix.lower() %}
-#include <dawn/{{prefix}}_proc_table.h>
-#include <dawn/{{api}}.h>
+#include "dawn/{{prefix}}_proc_table.h"
+#include "dawn/{{api}}.h"
 #include <gmock/gmock.h>
 
 #include <memory>
