@@ -50,13 +50,15 @@ namespace dawn::native::d3d12 {
         CommandRecordingContext* commandContext;
         DAWN_TRY_ASSIGN(commandContext, device->GetPendingCommandContext());
 
-        TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording,
-                           "CommandBufferD3D12::RecordCommands");
+        TRACE_EVENT_BEGIN1(GetDevice()->GetPlatform(), Recording,
+                           "CommandBufferD3D12::RecordCommands", "serial",
+                           uint64_t(GetDevice()->GetPendingCommandSerial()));
         for (uint32_t i = 0; i < commandCount; ++i) {
             DAWN_TRY(ToBackend(commands[i])->RecordCommands(commandContext));
         }
-        TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording,
-                         "CommandBufferD3D12::RecordCommands");
+        TRACE_EVENT_END1(GetDevice()->GetPlatform(), Recording,
+                         "CommandBufferD3D12::RecordCommands", "serial",
+                         uint64_t(GetDevice()->GetPendingCommandSerial()));
 
         DAWN_TRY(device->ExecutePendingCommandContext());
 

@@ -41,6 +41,8 @@
 #include "dawn/native/d3d12/StagingDescriptorAllocatorD3D12.h"
 #include "dawn/native/d3d12/SwapChainD3D12.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
+#include "dawn/platform/DawnPlatform.h"
+#include "dawn/platform/tracing/TraceEvent.h"
 
 #include <sstream>
 
@@ -338,6 +340,9 @@ namespace dawn::native::d3d12 {
 
     MaybeError Device::NextSerial() {
         IncrementLastSubmittedCommandSerial();
+
+        TRACE_EVENT1(GetPlatform(), General, "D3D12Device::SignalFence", "serial",
+                     uint64_t(GetLastSubmittedCommandSerial()));
 
         return CheckHRESULT(
             mCommandQueue->Signal(mFence.Get(), uint64_t(GetLastSubmittedCommandSerial())),

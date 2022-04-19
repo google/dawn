@@ -135,8 +135,10 @@ namespace dawn::native {
             SubmittedWorkDone(WGPUQueueWorkDoneCallback callback, void* userdata)
                 : mCallback(callback), mUserdata(userdata) {
             }
-            void Finish() override {
+            void Finish(dawn::platform::Platform* platform, ExecutionSerial serial) override {
                 ASSERT(mCallback != nullptr);
+                TRACE_EVENT1(platform, General, "Queue::SubmittedWorkDone::Finished", "serial",
+                             uint64_t(serial));
                 mCallback(WGPUQueueWorkDoneStatus_Success, mUserdata);
                 mCallback = nullptr;
             }
@@ -220,6 +222,9 @@ namespace dawn::native {
         // commands (this is non-observable outside of tests so it's ok to do deviate a bit from the
         // spec).
         TrackTask(std::move(task), GetDevice()->GetPendingCommandSerial());
+
+        TRACE_EVENT1(GetDevice()->GetPlatform(), General, "Queue::APIOnSubmittedWorkDone", "serial",
+                     uint64_t(GetDevice()->GetPendingCommandSerial()));
     }
 
     void QueueBase::TrackTask(std::unique_ptr<TaskInFlight> task, ExecutionSerial serial) {
@@ -233,6 +238,9 @@ namespace dawn::native {
         // To prevent the reentrant call from invalidating mTasksInFlight while in use by the first
         // call, we remove the tasks to finish from the queue, update mTasksInFlight, then run the
         // callbacks.
+        TRACE_EVENT1(GetDevice()->GetPlatform(), General, "Queue::Tick", "finishedSerial",
+                     uint64_t(finishedSerial));
+
         std::vector<std::unique_ptr<TaskInFlight>> tasks;
         for (auto& task : mTasksInFlight.IterateUpTo(finishedSerial)) {
             tasks.push_back(std::move(task));
@@ -240,7 +248,7 @@ namespace dawn::native {
         mTasksInFlight.ClearUpTo(finishedSerial);
 
         for (auto& task : tasks) {
-            task->Finish();
+            task->Finish(GetDevice()->GetPlatform(), finishedSerial);
         }
     }
 

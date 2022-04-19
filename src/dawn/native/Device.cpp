@@ -1158,6 +1158,10 @@ namespace dawn::native {
         if (IsLost() || ConsumedError(Tick())) {
             return false;
         }
+
+        TRACE_EVENT1(GetPlatform(), General, "DeviceBase::APITick::IsDeviceIdle", "isDeviceIdle",
+                     IsDeviceIdle());
+
         return !IsDeviceIdle();
     }
 
