@@ -35,7 +35,7 @@ class SerialStorage {
   public:
     class Iterator {
       public:
-        Iterator(StorageIterator start);
+        explicit Iterator(StorageIterator start);
         Iterator& operator++();
 
         bool operator==(const Iterator& other) const;
@@ -52,7 +52,7 @@ class SerialStorage {
 
     class ConstIterator {
       public:
-        ConstIterator(ConstStorageIterator start);
+        explicit ConstIterator(ConstStorageIterator start);
         ConstIterator& operator++();
 
         bool operator==(const ConstIterator& other) const;
@@ -198,12 +198,12 @@ SerialStorage<Derived>::BeginEnd::BeginEnd(typename SerialStorage<Derived>::Stor
 
 template <typename Derived>
 typename SerialStorage<Derived>::Iterator SerialStorage<Derived>::BeginEnd::begin() const {
-    return {mStartIt};
+    return SerialStorage::Iterator(mStartIt);
 }
 
 template <typename Derived>
 typename SerialStorage<Derived>::Iterator SerialStorage<Derived>::BeginEnd::end() const {
-    return {mEndIt};
+    return SerialStorage::Iterator(mEndIt);
 }
 
 // SerialStorage::Iterator
