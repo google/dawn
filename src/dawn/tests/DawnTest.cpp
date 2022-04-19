@@ -95,7 +95,7 @@ namespace {
             auto byteView = reinterpret_cast<const uint8_t*>(buffer + index);
             for (unsigned int b = 0; b < kBytes; ++b) {
                 char buf[4];
-                snprintf(buf, 4, "%02X ", byteView[b]);
+                snprintf(buf, sizeof(buf), "%02X ", byteView[b]);
                 result << buf;
             }
         }
