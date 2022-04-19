@@ -21,12 +21,18 @@
 #include "src/tint/program_builder.h"
 
 namespace tint::resolver {
+
+/// Helper class to retrieve sem information.
 class SemHelper {
  public:
+  /// Constructor
+  /// @param builder the program builder
   explicit SemHelper(ProgramBuilder* builder);
   ~SemHelper();
 
   /// Get is a helper for obtaining the semantic node for the given AST node.
+  /// @param ast the ast node to get the sem for
+  /// @returns the sem node for the provided |ast|
   template <typename SEM = sem::Info::InferFromAST,
             typename AST_OR_TYPE = CastableBase>
   auto* Get(const AST_OR_TYPE* ast) const {
@@ -51,10 +57,12 @@ class SemHelper {
 
   /// @returns the type name of the given semantic type, unwrapping
   /// references.
+  /// @param ty the type to look up
   std::string TypeNameOf(const sem::Type* ty) const;
 
   /// @returns the type name of the given semantic type, without unwrapping
   /// references.
+  /// @param ty the type to look up
   std::string RawTypeNameOf(const sem::Type* ty) const;
 
  private:
