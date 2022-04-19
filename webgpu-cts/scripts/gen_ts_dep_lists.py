@@ -68,12 +68,12 @@ if __name__ == '__main__':
             txt = f.readlines()
             if (txt != ts_sources):
                 raise RuntimeError(
-                    '%s is out of date. Please re-run //third_party/dawn/third_party/webgpu-cts/scripts/gen_ts_dep_lists.py\n'
+                    '%s is out of date. Please re-run //third_party/dawn/webgpu-cts/scripts/gen_ts_dep_lists.py\n'
                     % ts_sources_txt)
         with open(resource_files_txt, 'r') as f:
             if (f.readlines() != resource_files):
                 raise RuntimeError(
-                    '%s is out of date. Please re-run //third_party/dawn/third_party/webgpu-cts/scripts/gen_ts_dep_lists.py\n'
+                    '%s is out of date. Please re-run //third_party/dawn/webgpu-cts/scripts/gen_ts_dep_lists.py\n'
                     % resource_files_txt)
     else:
         with open(ts_sources_txt, 'w') as f:
