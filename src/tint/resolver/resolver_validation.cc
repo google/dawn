@@ -2181,9 +2181,8 @@ bool Resolver::ValidateLocationAttribute(
   return true;
 }
 
-bool Resolver::ValidateReturn(const ast::ReturnStatement* ret) {
-  auto* func_type = current_function_->ReturnType();
-
+bool Resolver::ValidateReturn(const ast::ReturnStatement* ret,
+                              const sem::Type* func_type) {
   auto* ret_type = ret->value ? TypeOf(ret->value)->UnwrapRef()
                               : builder_->create<sem::Void>();
 

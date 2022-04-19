@@ -2507,7 +2507,7 @@ sem::Statement* Resolver::ReturnStatement(const ast::ReturnStatement* stmt) {
 
     // Validate after processing the return value expression so that its type
     // is available for validation.
-    return ValidateReturn(stmt);
+    return ValidateReturn(stmt, current_function_->ReturnType());
   });
 }
 
