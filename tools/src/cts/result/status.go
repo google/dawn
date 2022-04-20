@@ -14,6 +14,8 @@
 
 package result
 
+import "dawn.googlesource.com/dawn/tools/src/container"
+
 // Status is an enumerator of test results
 type Status string
 
@@ -28,3 +30,12 @@ const (
 	Slow           = Status("Slow")
 	Unknown        = Status("Unknown")
 )
+
+// CommonStatus is a function that can be used by StatusTree.Reduce() to reduce
+// tree nodes with the same status
+func CommonStatus(statuses []Status) *Status {
+	if set := container.NewSet(statuses...); len(set) == 1 {
+		return &statuses[0]
+	}
+	return nil
+}

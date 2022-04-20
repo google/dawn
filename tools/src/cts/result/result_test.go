@@ -15,12 +15,14 @@
 package result_test
 
 import (
+	"bytes"
 	"fmt"
 	"testing"
 
 	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
+	"dawn.googlesource.com/dawn/tools/src/utils"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -304,16 +306,18 @@ func TestTransformTags(t *testing.T) {
 
 func TestReplaceDuplicates(t *testing.T) {
 	type Test struct {
-		results result.List
-		fn      func(result.List) result.Status
-		expect  result.List
+		location string
+		results  result.List
+		fn       func(result.Statuses) result.Status
+		expect   result.List
 	}
 	for _, test := range []Test{
 		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
 			results: result.List{
 				result.Result{Query: Q(`a`), Status: result.Pass},
 			},
-			fn: func(l result.List) result.Status {
+			fn: func(result.Statuses) result.Status {
 				return result.Abort
 			},
 			expect: result.List{
@@ -321,23 +325,25 @@ func TestReplaceDuplicates(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
 			results: result.List{
 				result.Result{Query: Q(`a`), Status: result.Pass},
 				result.Result{Query: Q(`a`), Status: result.Pass},
 			},
-			fn: func(l result.List) result.Status {
+			fn: func(result.Statuses) result.Status {
 				return result.Abort
 			},
 			expect: result.List{
-				result.Result{Query: Q(`a`), Status: result.Abort},
+				result.Result{Query: Q(`a`), Status: result.Pass},
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
 			results: result.List{
 				result.Result{Query: Q(`a`), Status: result.Pass},
 				result.Result{Query: Q(`b`), Status: result.Pass},
 			},
-			fn: func(l result.List) result.Status {
+			fn: func(result.Statuses) result.Status {
 				return result.Abort
 			},
 			expect: result.List{
@@ -346,16 +352,14 @@ func TestReplaceDuplicates(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
 			results: result.List{
 				result.Result{Query: Q(`a`), Status: result.Pass},
 				result.Result{Query: Q(`b`), Status: result.Pass},
 				result.Result{Query: Q(`a`), Status: result.Skip},
 			},
-			fn: func(got result.List) result.Status {
-				expect := result.List{
-					result.Result{Query: Q(`a`), Status: result.Pass},
-					result.Result{Query: Q(`a`), Status: result.Skip},
-				}
+			fn: func(got result.Statuses) result.Status {
+				expect := result.NewStatuses(result.Pass, result.Skip)
 				if diff := cmp.Diff(got, expect); diff != "" {
 					t.Errorf("function's parameter was not as expected:\n%v", diff)
 				}
@@ -369,7 +373,7 @@ func TestReplaceDuplicates(t *testing.T) {
 	} {
 		got := test.results.ReplaceDuplicates(test.fn)
 		if diff := cmp.Diff(got, test.expect); diff != "" {
-			t.Errorf("Results:\n%v\nReplaceDuplicates() was not as expected:\n%v", test.results, diff)
+			t.Errorf("\n%v ReplaceDuplicates() was not as expected:\n%v", test.location, diff)
 		}
 	}
 }
@@ -844,6 +848,325 @@ func TestStatuses(t *testing.T) {
 		got := test.results.Statuses()
 		if diff := cmp.Diff(got, test.expect); diff != "" {
 			t.Errorf("Results:\n%v\nStatuses() was not as expected:\n%v", test.results, diff)
+		}
+	}
+}
+
+func TestStatusTree(t *testing.T) {
+	type Node = query.TreeNode[result.Status]
+	type Children = query.TreeNodeChildren[result.Status]
+	type ChildKey = query.TreeNodeChildKey
+
+	pass := result.Pass
+
+	type Test struct {
+		results   result.List
+		expectErr error
+		expect    result.StatusTree
+	}
+	for _, test := range []Test{
+		{ //////////////////////////////////////////////////////////////////////
+			results: result.List{},
+			expect:  result.StatusTree{},
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			results: result.List{
+				{Query: Q(`suite:a:*`), Status: result.Pass},
+			},
+			expect: result.StatusTree{
+				TreeNode: Node{
+					Children: Children{
+						ChildKey{Name: `suite`, Target: query.Suite}: &Node{
+							Query: Q(`suite`),
+							Children: Children{
+								ChildKey{Name: `a`, Target: query.Files}: &Node{
+									Query: Q(`suite:a`),
+									Children: Children{
+										ChildKey{Name: `*`, Target: query.Tests}: &Node{
+											Query: Q(`suite:a:*`),
+											Data:  &pass,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			results: result.List{
+				{Query: Q(`suite:a:*`), Status: result.Pass},
+				{Query: Q(`suite:a:*`), Status: result.Failure},
+			},
+			expectErr: query.ErrDuplicateData{Query: Q(`suite:a:*`)},
+		},
+	} {
+		got, err := test.results.StatusTree()
+		if diff := cmp.Diff(err, test.expectErr); diff != "" {
+			t.Errorf("Results:\n%v\nStatusTree() error was not as expected:\n%v", test.results, diff)
+			continue
+		}
+		if diff := cmp.Diff(got, test.expect); diff != "" {
+			t.Errorf("Results:\n%v\nStatusTree() was not as expected:\n%v", test.results, diff)
+		}
+	}
+}
+
+func TestReadWrite(t *testing.T) {
+	in := result.List{
+		{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+		{Query: Q(`suite:b,*`), Tags: T(`y`), Status: result.Failure},
+		{Query: Q(`suite:a:b:*`), Tags: T(`x`, `y`), Status: result.Skip},
+		{Query: Q(`suite:a:c,*`), Tags: T(`y`, `x`), Status: result.Failure},
+		{Query: Q(`suite:a,b:c,*`), Tags: T(`y`, `x`), Status: result.Crash},
+		{Query: Q(`suite:a,b:c:*`), Status: result.Slow},
+	}
+	buf := &bytes.Buffer{}
+	if err := result.Write(buf, in); err != nil {
+		t.Fatalf("Write(): %v", err)
+	}
+	got, err := result.Read(buf)
+	if err != nil {
+		t.Fatalf("Read(): %v", err)
+	}
+	if diff := cmp.Diff(got, in); diff != "" {
+		t.Errorf("Read() was not as expected:\n%v", diff)
+	}
+}
+
+func TestMerge(t *testing.T) {
+	type Test struct {
+		location string
+		a, b     result.List
+		expect   result.List
+	}
+	for _, test := range []Test{
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			a:        result.List{},
+			b:        result.List{},
+			expect:   result.List{},
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			a: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+			},
+			b: result.List{},
+			expect: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+			},
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			a:        result.List{},
+			b: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+			},
+			expect: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+			},
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			a: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+			},
+			b: result.List{
+				{Query: Q(`suite:b:*`), Tags: T(`x`), Status: result.Pass},
+			},
+			expect: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+				{Query: Q(`suite:b:*`), Tags: T(`x`), Status: result.Pass},
+			},
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			a: result.List{
+				{Query: Q(`suite:b:*`), Tags: T(`x`), Status: result.Pass},
+			},
+			b: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+			},
+			expect: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+				{Query: Q(`suite:b:*`), Tags: T(`x`), Status: result.Pass},
+			},
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			a: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+			},
+			b: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`y`), Status: result.Pass},
+			},
+			expect: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+				{Query: Q(`suite:a:*`), Tags: T(`y`), Status: result.Pass},
+			},
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			a: result.List{
+				{Query: Q(`suite:a:*`), Status: result.Pass},
+			},
+			b: result.List{
+				{Query: Q(`suite:a:*`), Status: result.Pass},
+			},
+			expect: result.List{
+				{Query: Q(`suite:a:*`), Status: result.Pass},
+			},
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			a: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+			},
+			b: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+			},
+			expect: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+			},
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			a: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Crash},
+			},
+			b: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Crash},
+			},
+			expect: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Crash},
+			},
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			a: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+				{Query: Q(`suite:b:*`), Tags: T(`x`), Status: result.Pass},
+				{Query: Q(`suite:c:*`), Tags: T(`x`), Status: result.Failure},
+				{Query: Q(`suite:d:*`), Tags: T(`x`), Status: result.Failure},
+				{Query: Q(`suite:e:*`), Tags: T(`x`), Status: result.Crash},
+			},
+			b: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Failure},
+				{Query: Q(`suite:b:*`), Tags: T(`x`), Status: result.Pass},
+				{Query: Q(`suite:c:*`), Tags: T(`x`), Status: result.Pass},
+				{Query: Q(`suite:d:*`), Tags: T(`y`), Status: result.Pass},
+				{Query: Q(`suite:e:*`), Tags: T(`x`), Status: result.Pass},
+			},
+			expect: result.List{
+				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.RetryOnFailure},
+				{Query: Q(`suite:b:*`), Tags: T(`x`), Status: result.Pass},
+				{Query: Q(`suite:c:*`), Tags: T(`x`), Status: result.RetryOnFailure},
+				{Query: Q(`suite:d:*`), Tags: T(`x`), Status: result.Failure},
+				{Query: Q(`suite:d:*`), Tags: T(`y`), Status: result.Pass},
+				{Query: Q(`suite:e:*`), Tags: T(`x`), Status: result.Crash},
+			},
+		},
+	} {
+		got := result.Merge(test.a, test.b)
+		if diff := cmp.Diff(got, test.expect); diff != "" {
+			t.Errorf("%v\nStatusTree() was not as expected:\n%v", test.location, diff)
+		}
+	}
+}
+
+func TestDeduplicate(t *testing.T) {
+	type Test struct {
+		location string
+		statuses result.Statuses
+		expect   result.Status
+	}
+	for _, test := range []Test{
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			statuses: result.NewStatuses(result.Pass),
+			expect:   result.Pass,
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			statuses: result.NewStatuses(result.Abort),
+			expect:   result.Abort,
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			statuses: result.NewStatuses(result.Failure),
+			expect:   result.Failure,
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			statuses: result.NewStatuses(result.Skip),
+			expect:   result.Skip,
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			statuses: result.NewStatuses(result.Crash),
+			expect:   result.Crash,
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			statuses: result.NewStatuses(result.Slow),
+			expect:   result.Slow,
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			statuses: result.NewStatuses(result.Unknown),
+			expect:   result.Unknown,
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			statuses: result.NewStatuses(result.RetryOnFailure),
+			expect:   result.RetryOnFailure,
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			statuses: result.NewStatuses(result.Pass, result.Failure),
+			expect:   result.RetryOnFailure,
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			statuses: result.NewStatuses(result.Pass, result.Abort),
+			expect:   result.Abort,
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			statuses: result.NewStatuses(result.Pass, result.Skip),
+			expect:   result.RetryOnFailure,
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			statuses: result.NewStatuses(result.Pass, result.Crash),
+			expect:   result.Crash,
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			statuses: result.NewStatuses(result.Pass, result.Slow),
+			expect:   result.RetryOnFailure,
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			statuses: result.NewStatuses(result.Pass, result.Unknown),
+			expect:   result.Unknown,
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			statuses: result.NewStatuses(result.Pass, result.RetryOnFailure),
+			expect:   result.RetryOnFailure,
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			statuses: result.NewStatuses(result.Status("??"), result.Status("?!")),
+			expect:   result.Unknown,
+		},
+	} {
+		got := result.Deduplicate(test.statuses)
+		if diff := cmp.Diff(got, test.expect); diff != "" {
+			t.Errorf("\n%v Deduplicate() was not as expected:\n%v", test.location, diff)
 		}
 	}
 }

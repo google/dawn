@@ -16,7 +16,11 @@
 package result
 
 import (
+	"bufio"
 	"fmt"
+	"io"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -126,29 +130,41 @@ func (l List) TransformTags(f func(Tags) Tags) List {
 // ReplaceDuplicates returns a new list with duplicate test results replaced.
 // When a duplicate is found, the function f is called with the duplicate
 // results. The returned status will be used as the replaced result.
-func (l List) ReplaceDuplicates(f func(List) Status) List {
+func (l List) ReplaceDuplicates(f func(Statuses) Status) List {
 	type key struct {
 		query query.Query
 		tags  string
 	}
-	m := map[key]List{}
+	// Collect all duplicates
+	duplicates := map[key]Statuses{}
 	for _, r := range l {
 		k := key{r.Query, TagsToString(r.Tags)}
-		m[k] = append(m[k], r)
-	}
-	for key, results := range m {
-		if len(results) > 1 {
-			result := results[0]
-			result.Status = f(results)
-			m[key] = List{result}
+		if s, ok := duplicates[k]; ok {
+			s.Add(r.Status)
+		} else {
+			duplicates[k] = NewStatuses(r.Status)
 		}
 	}
-	out := make(List, 0, len(m))
+	// Resolve duplicates
+	merged := map[key]Status{}
+	for key, statuses := range duplicates {
+		if len(statuses) > 1 {
+			merged[key] = f(statuses)
+		} else {
+			merged[key] = statuses.One() // Only one status
+		}
+	}
+	// Rebuild list
+	out := make(List, 0, len(duplicates))
 	for _, r := range l {
 		k := key{r.Query, TagsToString(r.Tags)}
-		if unique, ok := m[k]; ok {
-			out = append(out, unique[0])
-			delete(m, k)
+		if status, ok := merged[k]; ok {
+			out = append(out, Result{
+				Query:  r.Query,
+				Tags:   r.Tags,
+				Status: status,
+			})
+			delete(merged, k) // Remove from map to prevent duplicates
 		}
 	}
 	return out
@@ -201,11 +217,125 @@ func (l List) FilterByTags(tags Tags) List {
 	})
 }
 
+// Statuses is a set of Status
+type Statuses = container.Set[Status]
+
+// NewStatuses returns a new status set with the provided statuses
+func NewStatuses(s ...Status) Statuses { return container.NewSet(s...) }
+
 // Statuses returns a set of all the statuses in the list
-func (l List) Statuses() container.Set[Status] {
-	set := container.NewSet[Status]()
+func (l List) Statuses() Statuses {
+	set := NewStatuses()
 	for _, r := range l {
 		set.Add(r.Status)
 	}
 	return set
+}
+
+// StatusTree is a query tree of statuses
+type StatusTree = query.Tree[Status]
+
+// StatusTree returns a query.Tree from the List, with the Status as the tree
+// node data.
+func (l List) StatusTree() (StatusTree, error) {
+	tree := StatusTree{}
+	for _, r := range l {
+		if err := tree.Add(r.Query, r.Status); err != nil {
+			return StatusTree{}, err
+		}
+	}
+	return tree, nil
+}
+
+// Load loads the result list from the file with the given path
+func Load(path string) (List, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	results, err := Read(file)
+	if err != nil {
+		return nil, fmt.Errorf("while reading '%v': %w", path, err)
+	}
+	return results, nil
+}
+
+// Save saves the result list to the file with the given path
+func Save(path string, results List) error {
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0777); err != nil {
+		return err
+	}
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	return Write(file, results)
+}
+
+// Read reads a result list from the given reader
+func Read(r io.Reader) (List, error) {
+	scanner := bufio.NewScanner(r)
+	l := List{}
+	for scanner.Scan() {
+		r, err := Parse(scanner.Text())
+		if err != nil {
+			return nil, err
+		}
+		l = append(l, r)
+	}
+	return l, nil
+}
+
+// Write writes a result list to the given writer
+func Write(w io.Writer, l List) error {
+	for _, r := range l {
+		if _, err := fmt.Fprintln(w, r); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Merge merges and sorts two results lists.
+// Duplicates are removed using the Deduplicate() function.
+func Merge(a, b List) List {
+	merged := make(List, 0, len(a)+len(b))
+	merged = append(merged, a...)
+	merged = append(merged, b...)
+	out := merged.ReplaceDuplicates(Deduplicate)
+	out.Sort()
+	return out
+}
+
+// Deduplicate is the standard algorithm used to de-duplicating mixed results.
+// This function is expected to be handed to List.ReplaceDuplicates().
+func Deduplicate(s Statuses) Status {
+	// If all results have the same status, then use that
+	if len(s) == 1 {
+		return s.One()
+	}
+
+	// Mixed statuses. Replace with something appropriate.
+	switch {
+	// Crash + * = Crash
+	case s.Contains(Crash):
+		return Crash
+	// Abort + * = Abort
+	case s.Contains(Abort):
+		return Abort
+	// Unknown + * = Unknown
+	case s.Contains(Unknown):
+		return Unknown
+	// RetryOnFailure + ~(Crash | Abort | Unknown) = RetryOnFailure
+	case s.Contains(RetryOnFailure):
+		return RetryOnFailure
+	// Pass + ~(Crash | Abort | Unknown | RetryOnFailure | Slow) = RetryOnFailure
+	case s.Contains(Pass):
+		return RetryOnFailure
+	}
+	return Unknown
 }
