@@ -41,6 +41,7 @@ namespace ityp {
         constexpr array() = default;
 
         template <typename... Values>
+        // NOLINTNEXTLINE(runtime/explicit)
         constexpr array(Values&&... values) : Base{std::forward<Values>(values)...} {
         }
 

@@ -39,6 +39,7 @@ namespace ityp {
         constexpr bitset() noexcept : Base() {
         }
 
+        // NOLINTNEXTLINE(runtime/explicit)
         constexpr bitset(uint64_t value) noexcept : Base(value) {
         }
 

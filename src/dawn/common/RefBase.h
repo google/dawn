@@ -44,6 +44,7 @@ class RefBase {
     }
 
     // Constructors from nullptr.
+    // NOLINTNEXTLINE(runtime/explicit)
     constexpr RefBase(std::nullptr_t) : RefBase() {
     }
 
@@ -53,6 +54,7 @@ class RefBase {
     }
 
     // Constructors from a value T.
+    // NOLINTNEXTLINE(runtime/explicit)
     RefBase(T value) : mValue(value) {
         Reference(value);
     }
