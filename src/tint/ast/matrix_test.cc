@@ -46,5 +46,10 @@ TEST_F(AstMatrixTest, FriendlyName) {
   EXPECT_EQ(m->FriendlyName(Symbols()), "mat2x3<i32>");
 }
 
+TEST_F(AstMatrixTest, FriendlyName_WithoutType) {
+  auto* m = create<Matrix>(nullptr, 3, 2);
+  EXPECT_EQ(m->FriendlyName(Symbols()), "mat2x3");
+}
+
 }  // namespace
 }  // namespace tint::ast

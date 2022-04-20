@@ -39,8 +39,10 @@ Matrix::~Matrix() = default;
 
 std::string Matrix::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
-  out << "mat" << columns << "x" << rows << "<" << type->FriendlyName(symbols)
-      << ">";
+  out << "mat" << columns << "x" << rows;
+  if (type) {
+    out << "<" << type->FriendlyName(symbols) << ">";
+  }
   return out.str();
 }
 
