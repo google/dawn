@@ -39,7 +39,7 @@ namespace ityp {
         constexpr bitset() noexcept : Base() {
         }
 
-        constexpr bitset(unsigned long long value) noexcept : Base(value) {
+        constexpr bitset(uint64_t value) noexcept : Base(value) {
         }
 
         constexpr bool operator[](Index i) const {
@@ -147,6 +147,7 @@ Index GetHighestBitIndexPlusOne(const ityp::bitset<Index, N>& bitset) {
 #if defined(DAWN_COMPILER_MSVC)
     if constexpr (N > 32) {
 #    if defined(DAWN_PLATFORM_64_BIT)
+        // NOLINTNEXTLINE(runtime/int)
         unsigned long firstBitIndex = 0ul;
         unsigned char ret = _BitScanReverse64(&firstBitIndex, bitset.to_ullong());
         if (ret == 0) {
@@ -165,6 +166,7 @@ Index GetHighestBitIndexPlusOne(const ityp::bitset<Index, N>& bitset) {
         UNREACHABLE();
 #    endif  // defined(DAWN_PLATFORM_64_BIT)
     } else {
+        // NOLINTNEXTLINE(runtime/int)
         unsigned long firstBitIndex = 0ul;
         unsigned char ret = _BitScanReverse(&firstBitIndex, bitset.to_ulong());
         if (ret == 0) {

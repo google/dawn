@@ -28,6 +28,7 @@
 uint32_t ScanForward(uint32_t bits) {
     ASSERT(bits != 0);
 #if defined(DAWN_COMPILER_MSVC)
+    // NOLINTNEXTLINE(runtime/int)
     unsigned long firstBitIndex = 0ul;
     unsigned char ret = _BitScanForward(&firstBitIndex, bits);
     ASSERT(ret != 0);
@@ -40,6 +41,7 @@ uint32_t ScanForward(uint32_t bits) {
 uint32_t Log2(uint32_t value) {
     ASSERT(value != 0);
 #if defined(DAWN_COMPILER_MSVC)
+    // NOLINTNEXTLINE(runtime/int)
     unsigned long firstBitIndex = 0ul;
     unsigned char ret = _BitScanReverse(&firstBitIndex, value);
     ASSERT(ret != 0);
@@ -53,11 +55,13 @@ uint32_t Log2(uint64_t value) {
     ASSERT(value != 0);
 #if defined(DAWN_COMPILER_MSVC)
 #    if defined(DAWN_PLATFORM_64_BIT)
+    // NOLINTNEXTLINE(runtime/int)
     unsigned long firstBitIndex = 0ul;
     unsigned char ret = _BitScanReverse64(&firstBitIndex, value);
     ASSERT(ret != 0);
     return firstBitIndex;
 #    else   // defined(DAWN_PLATFORM_64_BIT)
+    // NOLINTNEXTLINE(runtime/int)
     unsigned long firstBitIndex = 0ul;
     if (_BitScanReverse(&firstBitIndex, value >> 32)) {
         return firstBitIndex + 32;

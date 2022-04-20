@@ -761,7 +761,7 @@ namespace dawn::platform::TraceEvent {
     // Specify these values when the corresponding argument of addTraceEvent is not
     // used.
     const int zeroNumArgs = 0;
-    const unsigned long long noEventId = 0;
+    const uint64_t noEventId = 0;
 
     // TraceID encapsulates an ID that can either be an integer or pointer. Pointers
     // are mangled with the Process ID so that they are unlikely to collide when the
@@ -769,58 +769,47 @@ namespace dawn::platform::TraceEvent {
     class TraceID {
       public:
         explicit TraceID(const void* id, unsigned char* flags)
-            : m_data(static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(id))) {
+            : m_data(static_cast<uint64_t>(reinterpret_cast<uintptr_t>(id))) {
             *flags |= TRACE_EVENT_FLAG_MANGLE_ID;
         }
-        explicit TraceID(unsigned long long id, unsigned char* flags) : m_data(id) {
+        explicit TraceID(uint64_t id, unsigned char* flags) : m_data(id) {
             (void)flags;
         }
-        explicit TraceID(unsigned long id, unsigned char* flags) : m_data(id) {
+        explicit TraceID(uint32_t id, unsigned char* flags) : m_data(id) {
             (void)flags;
         }
-        explicit TraceID(unsigned int id, unsigned char* flags) : m_data(id) {
-            (void)flags;
-        }
-        explicit TraceID(unsigned short id, unsigned char* flags) : m_data(id) {
+        explicit TraceID(uint16_t id, unsigned char* flags) : m_data(id) {
             (void)flags;
         }
         explicit TraceID(unsigned char id, unsigned char* flags) : m_data(id) {
             (void)flags;
         }
-        explicit TraceID(long long id, unsigned char* flags)
-            : m_data(static_cast<unsigned long long>(id)) {
+        explicit TraceID(int64_t id, unsigned char* flags) : m_data(static_cast<uint64_t>(id)) {
             (void)flags;
         }
-        explicit TraceID(long id, unsigned char* flags)
-            : m_data(static_cast<unsigned long long>(id)) {
+        explicit TraceID(int32_t id, unsigned char* flags) : m_data(static_cast<uint64_t>(id)) {
             (void)flags;
         }
-        explicit TraceID(int id, unsigned char* flags)
-            : m_data(static_cast<unsigned long long>(id)) {
+        explicit TraceID(int16_t id, unsigned char* flags) : m_data(static_cast<uint64_t>(id)) {
             (void)flags;
         }
-        explicit TraceID(short id, unsigned char* flags)
-            : m_data(static_cast<unsigned long long>(id)) {
-            (void)flags;
-        }
-        explicit TraceID(signed char id, unsigned char* flags)
-            : m_data(static_cast<unsigned long long>(id)) {
+        explicit TraceID(signed char id, unsigned char* flags) : m_data(static_cast<uint64_t>(id)) {
             (void)flags;
         }
 
-        unsigned long long data() const {
+        uint64_t data() const {
             return m_data;
         }
 
       private:
-        unsigned long long m_data;
+        uint64_t m_data;
     };
 
-    // Simple union to store various types as unsigned long long.
+    // Simple union to store various types as uint64_t.
     union TraceValueUnion {
         bool m_bool;
-        unsigned long long m_uint;
-        long long m_int;
+        uint64_t m_uint;
+        int64_t m_int;
         double m_double;
         const void* m_pointer;
         const char* m_string;
@@ -853,17 +842,16 @@ namespace dawn::platform::TraceEvent {
 #define INTERNAL_DECLARE_SET_TRACE_VALUE_INT(actual_type, value_type_id)                      \
     static inline void setTraceValue(actual_type arg, unsigned char* type, uint64_t* value) { \
         *type = value_type_id;                                                                \
-        *value = static_cast<unsigned long long>(arg);                                        \
+        *value = static_cast<uint64_t>(arg);                                                  \
     }
 
-    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(unsigned long long, TRACE_VALUE_TYPE_UINT)
-    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(unsigned long, TRACE_VALUE_TYPE_UINT)
-    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(unsigned int, TRACE_VALUE_TYPE_UINT)
-    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(unsigned short, TRACE_VALUE_TYPE_UINT)
+    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(uint64_t, TRACE_VALUE_TYPE_UINT)
+    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(uint32_t, TRACE_VALUE_TYPE_UINT)
+    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(uint16_t, TRACE_VALUE_TYPE_UINT)
     INTERNAL_DECLARE_SET_TRACE_VALUE_INT(unsigned char, TRACE_VALUE_TYPE_UINT)
-    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(long long, TRACE_VALUE_TYPE_INT)
-    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(int, TRACE_VALUE_TYPE_INT)
-    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(short, TRACE_VALUE_TYPE_INT)
+    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(int64_t, TRACE_VALUE_TYPE_INT)
+    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(int32_t, TRACE_VALUE_TYPE_INT)
+    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(int16_t, TRACE_VALUE_TYPE_INT)
     INTERNAL_DECLARE_SET_TRACE_VALUE_INT(signed char, TRACE_VALUE_TYPE_INT)
     INTERNAL_DECLARE_SET_TRACE_VALUE(bool, m_bool, TRACE_VALUE_TYPE_BOOL)
     INTERNAL_DECLARE_SET_TRACE_VALUE(double, m_double, TRACE_VALUE_TYPE_DOUBLE)
@@ -893,7 +881,7 @@ namespace dawn::platform::TraceEvent {
         char phase,
         const unsigned char* categoryEnabled,
         const char* name,
-        unsigned long long id,
+        uint64_t id,
         unsigned char flags,
         int /*unused, helps avoid empty __VA_ARGS__*/) {
         return TRACE_EVENT_API_ADD_TRACE_EVENT(platform, phase, categoryEnabled, name, id,
@@ -906,7 +894,7 @@ namespace dawn::platform::TraceEvent {
         char phase,
         const unsigned char* categoryEnabled,
         const char* name,
-        unsigned long long id,
+        uint64_t id,
         unsigned char flags,
         int /*unused, helps avoid empty __VA_ARGS__*/,
         const char* arg1Name,
@@ -925,7 +913,7 @@ namespace dawn::platform::TraceEvent {
         char phase,
         const unsigned char* categoryEnabled,
         const char* name,
-        unsigned long long id,
+        uint64_t id,
         unsigned char flags,
         int /*unused, helps avoid empty __VA_ARGS__*/,
         const char* arg1Name,

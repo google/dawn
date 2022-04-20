@@ -1404,7 +1404,8 @@ namespace dawn::native::d3d12 {
             uint32_t height = renderPass->height;
             D3D12_VIEWPORT viewport = {
                 0.f, 0.f, static_cast<float>(width), static_cast<float>(height), 0.f, 1.f};
-            D3D12_RECT scissorRect = {0, 0, static_cast<long>(width), static_cast<long>(height)};
+            D3D12_RECT scissorRect = {0, 0, static_cast<int32_t>(width),
+                                      static_cast<int32_t>(height)};
             commandList->RSSetViewports(1, &viewport);
             commandList->RSSetScissorRects(1, &scissorRect);
 

@@ -50,7 +50,7 @@ namespace wgpu::binding {
         static Napi::Error New(Napi::Env env,
                                std::string name,
                                std::string message,
-                               unsigned short code = 0) {
+                               uint16_t code = 0) {
             auto err = Napi::Error::New(env);
             err.Set("name", name);
             err.Set("message", message.empty() ? name : message);

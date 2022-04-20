@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
         }
 
         fseek(file, 0, SEEK_END);
-        long tellFileSize = ftell(file);
+        int32_t tellFileSize = ftell(file);
         if (tellFileSize <= 0) {
             std::cerr << "Input file of incorrect size: " << filename << std::endl;
             return 1;

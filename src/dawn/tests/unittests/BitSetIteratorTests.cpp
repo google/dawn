@@ -27,18 +27,18 @@ class BitSetIteratorTest : public testing::Test {
 
 // Simple iterator test.
 TEST_F(BitSetIteratorTest, Iterator) {
-    std::set<unsigned long> originalValues;
+    std::set<uint32_t> originalValues;
     originalValues.insert(2);
     originalValues.insert(6);
     originalValues.insert(8);
     originalValues.insert(35);
 
-    for (unsigned long value : originalValues) {
+    for (uint32_t value : originalValues) {
         mStateBits.set(value);
     }
 
-    std::set<unsigned long> readValues;
-    for (unsigned long bit : IterateBitSet(mStateBits)) {
+    std::set<uint32_t> readValues;
+    for (uint32_t bit : IterateBitSet(mStateBits)) {
         EXPECT_EQ(1u, originalValues.count(bit));
         EXPECT_EQ(0u, readValues.count(bit));
         readValues.insert(bit);
@@ -52,7 +52,7 @@ TEST_F(BitSetIteratorTest, EmptySet) {
     // We don't use the FAIL gtest macro here since it returns immediately,
     // causing an unreachable code warning in MSVC
     bool sawBit = false;
-    for (unsigned long bit : IterateBitSet(mStateBits)) {
+    for (uint32_t bit : IterateBitSet(mStateBits)) {
         DAWN_UNUSED(bit);
         sawBit = true;
     }
@@ -73,9 +73,9 @@ TEST_F(BitSetIteratorTest, NonLValueBitset) {
     otherBits.set(3);
     otherBits.set(5);
 
-    std::set<unsigned long> seenBits;
+    std::set<uint32_t> seenBits;
 
-    for (unsigned long bit : IterateBitSet(mStateBits & otherBits)) {
+    for (uint32_t bit : IterateBitSet(mStateBits & otherBits)) {
         EXPECT_EQ(0u, seenBits.count(bit));
         seenBits.insert(bit);
         EXPECT_TRUE(mStateBits[bit]);
