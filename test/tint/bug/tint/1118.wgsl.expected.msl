@@ -151,3 +151,4 @@ fragment tint_symbol_3 tint_symbol(const constant Scene* tint_symbol_24 [[buffer
   wrapper_result.glFragColor_1 = inner_result.glFragColor_1;
   return wrapper_result;
 }
+
