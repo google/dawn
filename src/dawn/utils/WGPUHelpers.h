@@ -134,6 +134,7 @@ namespace utils {
                                                wgpu::ShaderStage entryVisibility,
                                                wgpu::ExternalTextureBindingLayout* bindingLayout);
 
+        // NOLINTNEXTLINE(runtime/explicit)
         BindingLayoutEntryInitializationHelper(const wgpu::BindGroupLayoutEntry& entry);
     };
 
