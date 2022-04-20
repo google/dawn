@@ -23,7 +23,7 @@
 #include "dawn/native/vulkan/VulkanError.h"
 #include "dawn/native/vulkan/external_memory/MemoryService.h"
 
-namespace dawn::native { namespace vulkan::external_memory {
+namespace dawn::native::vulkan::external_memory {
 
     namespace {
 
@@ -113,7 +113,7 @@ namespace dawn::native { namespace vulkan::external_memory {
             return false;
         }
 
-    }  // anonymous namespace
+    }  // namespace
 
     Service::Service(Device* device)
         : mDevice(device), mSupported(CheckSupport(device->GetDeviceInfo())) {
@@ -356,4 +356,4 @@ namespace dawn::native { namespace vulkan::external_memory {
         return image;
     }
 
-}}  // namespace dawn::native::vulkan::external_memory
+}  // namespace dawn::native::vulkan::external_memory

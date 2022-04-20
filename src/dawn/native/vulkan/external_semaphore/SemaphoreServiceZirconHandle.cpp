@@ -20,7 +20,7 @@
 #include "dawn/native/vulkan/VulkanError.h"
 #include "dawn/native/vulkan/external_semaphore/SemaphoreService.h"
 
-namespace dawn::native { namespace vulkan::external_semaphore {
+namespace dawn::native::vulkan::external_semaphore {
 
     Service::Service(Device* device)
         : mDevice(device),
@@ -134,4 +134,4 @@ namespace dawn::native { namespace vulkan::external_semaphore {
         return handle;
     }
 
-}}  // namespace dawn::native::vulkan::external_semaphore
+}  // namespace dawn::native::vulkan::external_semaphore

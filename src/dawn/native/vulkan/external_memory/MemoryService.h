@@ -25,7 +25,7 @@ namespace dawn::native::vulkan {
     struct VulkanDeviceInfo;
 }  // namespace dawn::native::vulkan
 
-namespace dawn::native { namespace vulkan::external_memory {
+namespace dawn::native::vulkan::external_memory {
 
     struct MemoryImportParams {
         VkDeviceSize allocationSize;
@@ -73,6 +73,6 @@ namespace dawn::native { namespace vulkan::external_memory {
         bool mSupported = false;
     };
 
-}}  // namespace dawn::native::vulkan::external_memory
+}  // namespace dawn::native::vulkan::external_memory
 
 #endif  // SRC_DAWN_NATIVE_VULKAN_EXTERNAL_MEMORY_MEMORYSERVICE_H_

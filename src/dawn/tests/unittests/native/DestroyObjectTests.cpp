@@ -763,4 +763,6 @@ namespace dawn::native { namespace {
         EXPECT_FALSE(textureView->IsAlive());
     }
 
+    // TODO(https://crbug.com/dawn/1381) Remove when namespaces are not indented.
+    // NOLINTNEXTLINE(readability/namespace)
 }}  // namespace dawn::native::

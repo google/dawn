@@ -15,7 +15,7 @@
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/external_memory/MemoryService.h"
 
-namespace dawn::native { namespace vulkan::external_memory {
+namespace dawn::native::vulkan::external_memory {
 
     Service::Service(Device* device) : mDevice(device) {
         DAWN_UNUSED(mDevice);
@@ -62,4 +62,4 @@ namespace dawn::native { namespace vulkan::external_memory {
         return DAWN_UNIMPLEMENTED_ERROR("Using null memory service to interop inside Vulkan");
     }
 
-}}  // namespace dawn::native::vulkan::external_memory
+}  // namespace dawn::native::vulkan::external_memory

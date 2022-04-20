@@ -25,7 +25,7 @@ namespace dawn::native::vulkan {
     class Device;
 }  // namespace dawn::native::vulkan
 
-namespace dawn::native { namespace vulkan::external_semaphore {
+namespace dawn::native::vulkan::external_semaphore {
 
     class Service {
       public:
@@ -55,6 +55,6 @@ namespace dawn::native { namespace vulkan::external_semaphore {
         bool mSupported = false;
     };
 
-}}  // namespace dawn::native::vulkan::external_semaphore
+}  // namespace dawn::native::vulkan::external_semaphore
 
 #endif  // SRC_DAWN_NATIVE_VULKAN_EXTERNAL_SEMAPHORE_SEMAPHORESERVICE_H_
