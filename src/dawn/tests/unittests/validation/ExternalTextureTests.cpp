@@ -72,6 +72,7 @@ namespace {
         {
             wgpu::TextureDescriptor textureDescriptor = CreateTextureDescriptor();
             textureDescriptor.dimension = wgpu::TextureDimension::e3D;
+            textureDescriptor.usage = wgpu::TextureUsage::TextureBinding;
             wgpu::Texture internalTexture = device.CreateTexture(&textureDescriptor);
 
             wgpu::ExternalTextureDescriptor externalDesc;

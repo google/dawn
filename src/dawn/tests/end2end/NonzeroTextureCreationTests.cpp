@@ -301,7 +301,7 @@ DAWN_INSTANTIATE_TEST_P(
     {wgpu::TextureAspect::All},
     {wgpu::TextureUsage(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc),
      wgpu::TextureUsage::CopySrc},
-    {wgpu::TextureDimension::e2D, wgpu::TextureDimension::e3D},
+    {wgpu::TextureDimension::e2D},
     {1u, 7u},          // depth or array layers
     {4u},              // mip count
     {0u, 1u, 2u, 3u},  // mip

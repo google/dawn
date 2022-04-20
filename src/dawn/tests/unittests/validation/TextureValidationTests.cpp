@@ -178,6 +178,7 @@ namespace {
     // Test the validation of the mip level count
     TEST_F(TextureValidationTest, MipLevelCount) {
         wgpu::TextureDescriptor defaultDescriptor = CreateDefaultTextureDescriptor();
+        defaultDescriptor.usage = wgpu::TextureUsage::TextureBinding;
 
         // mipLevelCount == 1 is allowed
         {
@@ -456,12 +457,13 @@ namespace {
     // Test the validation of 3D texture size
     TEST_F(TextureValidationTest, 3DTextureSize) {
         wgpu::TextureDescriptor defaultDescriptor = CreateDefaultTextureDescriptor();
+        defaultDescriptor.dimension = wgpu::TextureDimension::e3D;
+        defaultDescriptor.usage = wgpu::TextureUsage::TextureBinding;
         wgpu::Limits supportedLimits = GetSupportedLimits().limits;
 
         // Out-of-bound texture dimension is not allowed
         {
             wgpu::TextureDescriptor descriptor = defaultDescriptor;
-            descriptor.dimension = wgpu::TextureDimension::e3D;
 
             descriptor.size = {supportedLimits.maxTextureDimension3D + 1u, 1, 1};
             ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
@@ -476,7 +478,6 @@ namespace {
         // Zero-sized texture is not allowed
         {
             wgpu::TextureDescriptor descriptor = defaultDescriptor;
-            descriptor.dimension = wgpu::TextureDimension::e3D;
 
             descriptor.size = {0, 1, 1};
             ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
@@ -491,7 +492,6 @@ namespace {
         // Texture size less than max dimension is allowed
         {
             wgpu::TextureDescriptor descriptor = defaultDescriptor;
-            descriptor.dimension = wgpu::TextureDimension::e3D;
 
             descriptor.size = {supportedLimits.maxTextureDimension3D >> 1,
                                supportedLimits.maxTextureDimension3D >> 1,
@@ -502,7 +502,6 @@ namespace {
         // Texture size equal to max dimension is allowed
         {
             wgpu::TextureDescriptor descriptor = defaultDescriptor;
-            descriptor.dimension = wgpu::TextureDimension::e3D;
 
             descriptor.size = {supportedLimits.maxTextureDimension3D,
                                supportedLimits.maxTextureDimension3D,
@@ -618,6 +617,27 @@ namespace {
         for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
             descriptor.format = format;
             if (utils::TextureFormatSupportsStorageTexture(format)) {
+                device.CreateTexture(&descriptor);
+            } else {
+                ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+            }
+        }
+    }
+
+    // Test it is an error to create a RenderAttachment texture with the texture dimensions that
+    // doesn't support TextureUsage::RenderAttachment texture usages.
+    TEST_F(TextureValidationTest, TextureDimensionNotSupportRenderAttachment) {
+        wgpu::TextureDescriptor descriptor;
+        descriptor.size = {1, 1, 1};
+        descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+        descriptor.usage = wgpu::TextureUsage::RenderAttachment;
+
+        constexpr std::array<wgpu::TextureDimension, 3> kTextureDimensions = {
+            {wgpu::TextureDimension::e1D, wgpu::TextureDimension::e2D,
+             wgpu::TextureDimension::e3D}};
+        for (wgpu::TextureDimension dimension : kTextureDimensions) {
+            descriptor.dimension = dimension;
+            if (dimension == wgpu::TextureDimension::e2D) {
                 device.CreateTexture(&descriptor);
             } else {
                 ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));

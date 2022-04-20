@@ -464,12 +464,6 @@ crbug.com/dawn/0000 [ mac ] webgpu:api,operation,command_buffer,copyTextureToTex
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,* [ Failure ]
 
 ################################################################################
-# crbug.com/dawn/1364 Add validation that render attachments must be 2D (array) textures
-# KEEP
-################################################################################
-crbug.com/dawn/1364 webgpu:api,validation,createTexture:texture_usage:* [ Failure ]
-
-################################################################################
 # Triaged failures
 # KEEP
 ################################################################################

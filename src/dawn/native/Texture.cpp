@@ -310,6 +310,13 @@ namespace dawn::native {
                 usage, wgpu::TextureUsage::RenderAttachment, format->format);
 
             DAWN_INVALID_IF(
+                descriptor->dimension != wgpu::TextureDimension::e2D &&
+                    (usage & wgpu::TextureUsage::RenderAttachment),
+                "The texture usage (%s) includes %s, which is incompatible with the texture "
+                "dimension (%s).",
+                usage, wgpu::TextureUsage::RenderAttachment, descriptor->dimension);
+
+            DAWN_INVALID_IF(
                 !format->supportsStorageUsage && (usage & wgpu::TextureUsage::StorageBinding),
                 "The texture usage (%s) includes %s, which is incompatible with the format (%s).",
                 usage, wgpu::TextureUsage::StorageBinding, format->format);
