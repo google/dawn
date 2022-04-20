@@ -429,11 +429,12 @@ std::unique_ptr<dawn::native::Instance> DawnTestEnvironment::CreateInstanceAndDi
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
     mOpenGLWindow = glfwCreateWindow(400, 400, "Dawn OpenGL test window", nullptr, nullptr);
-
-    glfwMakeContextCurrent(mOpenGLWindow);
-    dawn::native::opengl::AdapterDiscoveryOptions adapterOptions;
-    adapterOptions.getProc = reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress);
-    instance->DiscoverAdapters(&adapterOptions);
+    if (mOpenGLWindow != nullptr) {
+        glfwMakeContextCurrent(mOpenGLWindow);
+        dawn::native::opengl::AdapterDiscoveryOptions adapterOptions;
+        adapterOptions.getProc = reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress);
+        instance->DiscoverAdapters(&adapterOptions);
+    }
 #endif  // DAWN_ENABLE_BACKEND_DESKTOP_GL
 
 #ifdef DAWN_ENABLE_BACKEND_OPENGLES
@@ -454,12 +455,13 @@ std::unique_ptr<dawn::native::Instance> DawnTestEnvironment::CreateInstanceAndDi
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
     mOpenGLESWindow = glfwCreateWindow(400, 400, "Dawn OpenGLES test window", nullptr, nullptr);
-
-    glfwMakeContextCurrent(mOpenGLESWindow);
-    dawn::native::opengl::AdapterDiscoveryOptionsES adapterOptionsES;
-    adapterOptionsES.getProc = reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress);
-    instance->DiscoverAdapters(&adapterOptionsES);
-    glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
+    if (mOpenGLESWindow != nullptr) {
+        glfwMakeContextCurrent(mOpenGLESWindow);
+        dawn::native::opengl::AdapterDiscoveryOptionsES adapterOptionsES;
+        adapterOptionsES.getProc = reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress);
+        instance->DiscoverAdapters(&adapterOptionsES);
+        glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
+    }
 #endif  // DAWN_ENABLE_BACKEND_OPENGLES
 
     return instance;
