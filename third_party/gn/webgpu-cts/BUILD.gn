@@ -88,7 +88,7 @@ copy("copy_resources") {
 action("verify_gen_ts_dep_list") {
   script = "${dawn_root}/webgpu-cts/scripts/gen_ts_dep_lists.py"
   inputs = [
-    # TODO(kainino): Make sure this gets retriggered when the CTS dep changes.
+    "../../../DEPS",
     "resource_files.txt",
     "ts_sources.txt",
   ]
