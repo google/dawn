@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include <cstring>
+#include <memory>
+#include <utility>
 
 #include "dawn/common/Alloc.h"
 #include "dawn/common/Assert.h"

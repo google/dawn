@@ -17,6 +17,7 @@
 #include <cassert>
 #include <limits>
 #include <memory>
+#include <utility>
 
 #include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/GPUBuffer.h"

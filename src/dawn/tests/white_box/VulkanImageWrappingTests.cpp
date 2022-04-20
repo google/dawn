@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/tests/white_box/VulkanImageWrappingTests.h"
+#include <utility>
 
 #include "dawn/common/Math.h"
 #include "dawn/native/vulkan/AdapterVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/tests/DawnTest.h"
+#include "dawn/tests/white_box/VulkanImageWrappingTests.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 

@@ -16,6 +16,7 @@
 #define SRC_DAWN_TESTS_PARAMGENERATOR_H_
 
 #include <tuple>
+#include <utility>
 #include <vector>
 
 // ParamStruct is a custom struct which ParamStruct will yield when iterating.

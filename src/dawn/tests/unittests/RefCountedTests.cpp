@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
 #include <thread>
+#include <utility>
 
 #include "dawn/common/RefCounted.h"
+#include "gtest/gtest.h"
 
 class RCTest : public RefCounted {
   public:

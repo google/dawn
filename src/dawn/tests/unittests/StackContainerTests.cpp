@@ -6,9 +6,9 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <vector>
 
 #include "gtest/gtest.h"
-
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/StackContainer.h"
 

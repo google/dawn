@@ -14,6 +14,8 @@
 
 #include "dawn/native/d3d12/PageableD3D12.h"
 
+#include <utility>
+
 namespace dawn::native::d3d12 {
     Pageable::Pageable(ComPtr<ID3D12Pageable> d3d12Pageable,
                        MemorySegment memorySegment,

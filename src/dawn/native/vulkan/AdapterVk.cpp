@@ -14,6 +14,9 @@
 
 #include "dawn/native/vulkan/AdapterVk.h"
 
+#include <algorithm>
+#include <string>
+
 #include "dawn/native/Limits.h"
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"

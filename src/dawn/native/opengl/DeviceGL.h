@@ -15,7 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_DEVICEGL_H_
 #define SRC_DAWN_NATIVE_OPENGL_DEVICEGL_H_
 
+#include <memory>
 #include <queue>
+#include <utility>
 
 #include "dawn/native/dawn_platform.h"
 

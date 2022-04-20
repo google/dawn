@@ -13,6 +13,9 @@
 // limitations under the License.
 
 #include "dawn/native/PooledResourceMemoryAllocator.h"
+
+#include <utility>
+
 #include "dawn/native/Device.h"
 
 namespace dawn::native {

@@ -14,6 +14,8 @@
 
 #include "dawn/native/d3d12/SamplerHeapCacheD3D12.h"
 
+#include <utility>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/HashUtils.h"
 #include "dawn/native/d3d12/BindGroupD3D12.h"

@@ -17,6 +17,7 @@
 
 #include <array>
 #include <bitset>
+#include <vector>
 
 #include "dawn/common/TypedInteger.h"
 #include "dawn/native/AttachmentState.h"

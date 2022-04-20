@@ -17,9 +17,10 @@
 
 #include <memory>
 #include <queue>
+#include <utility>
+#include <vector>
 
 #include "dawn/native/dawn_platform.h"
-
 #include "dawn/common/SerialQueue.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"

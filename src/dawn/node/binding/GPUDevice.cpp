@@ -15,6 +15,8 @@
 #include "src/dawn/node/binding/GPUDevice.h"
 
 #include <memory>
+#include <utility>
+#include <vector>
 
 #include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/Errors.h"

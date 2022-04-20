@@ -8,6 +8,7 @@
 #define SRC_DAWN_COMMON_STACKCONTAINER_H_
 
 #include <cstddef>
+#include <memory>
 #include <vector>
 
 #include "dawn/common/Compiler.h"

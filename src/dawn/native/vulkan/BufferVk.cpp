@@ -14,7 +14,10 @@
 
 #include "dawn/native/vulkan/BufferVk.h"
 
+#include <algorithm>
 #include <cstring>
+#include <limits>
+#include <utility>
 
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/vulkan/DeviceVk.h"

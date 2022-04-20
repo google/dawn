@@ -16,6 +16,7 @@
 #define SRC_DAWN_NATIVE_BINDINGINFO_H_
 
 #include <cstdint>
+#include <vector>
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/ityp_array.h"

@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#include <memory>
+#include <utility>
 
 #include "dawn/common/ConcurrentCache.h"
 #include "dawn/native/AsyncTask.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/utils/SystemUtils.h"
+#include "gtest/gtest.h"
 
 namespace {
     class SimpleCachedObject {

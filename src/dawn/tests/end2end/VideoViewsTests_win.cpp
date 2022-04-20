@@ -17,8 +17,11 @@
 #include <dxgi1_4.h>
 #include <wrl/client.h>
 
-#include "VideoViewsTests.h"
+#include <memory>
+#include <utility>
+#include <vector>
 
+#include "VideoViewsTests.h"
 #include "dawn/common/Assert.h"
 #include "dawn/native/D3D12Backend.h"
 

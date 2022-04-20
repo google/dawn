@@ -14,6 +14,8 @@
 
 #include "dawn/wire/client/Device.h"
 
+#include <utility>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/Log.h"
 #include "dawn/wire/client/ApiObjects_autogen.h"

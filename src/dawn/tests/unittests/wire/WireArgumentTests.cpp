@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include <array>
+#include <string>
 
 #include "dawn/tests/unittests/wire/WireTest.h"
-
 #include "dawn/common/Constants.h"
 
 using namespace testing;

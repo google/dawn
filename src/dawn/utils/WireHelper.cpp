@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/utils/WireHelper.h"
-
 #include <algorithm>
 #include <cstring>
 #include <fstream>
 #include <iomanip>
 #include <set>
 #include <sstream>
+#include <string>
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Log.h"
@@ -27,6 +26,7 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/utils/TerribleCommandBuffer.h"
+#include "dawn/utils/WireHelper.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
 

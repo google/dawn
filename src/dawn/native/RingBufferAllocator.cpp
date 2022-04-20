@@ -14,6 +14,8 @@
 
 #include "dawn/native/RingBufferAllocator.h"
 
+#include <utility>
+
 // Note: Current RingBufferAllocator implementation uses two indices (start and end) to implement a
 // circular queue. However, this approach defines a full queue when one element is still unused.
 //

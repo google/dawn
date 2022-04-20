@@ -51,8 +51,11 @@
 //    - TODO can't be tested yet: check cycling the same window over multiple devices.
 //    - TODO can't be tested yet: check cycling the same window over multiple formats.
 
+#include <algorithm>
 #include <memory>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include "GLFW/glfw3.h"
 #include "dawn/common/Assert.h"

@@ -14,6 +14,10 @@
 
 #include "dawn/native/opengl/BufferGL.h"
 
+#include <algorithm>
+#include <utility>
+#include <vector>
+
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/opengl/DeviceGL.h"
 

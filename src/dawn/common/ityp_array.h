@@ -17,7 +17,9 @@
 
 #include <array>
 #include <cstddef>
+#include <limits>
 #include <type_traits>
+#include <utility>
 
 #include "dawn/common/TypedInteger.h"
 #include "dawn/common/UnderlyingType.h"

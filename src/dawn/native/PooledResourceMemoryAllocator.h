@@ -16,6 +16,7 @@
 #define SRC_DAWN_NATIVE_POOLEDRESOURCEMEMORYALLOCATOR_H_
 
 #include <deque>
+#include <memory>
 
 #include "dawn/common/SerialQueue.h"
 #include "dawn/native/ResourceHeapAllocator.h"

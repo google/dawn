@@ -14,6 +14,8 @@
 
 #include "dawn/native/BuddyMemoryAllocator.h"
 
+#include <utility>
+
 #include "dawn/common/Math.h"
 #include "dawn/native/ResourceHeapAllocator.h"
 

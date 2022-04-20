@@ -16,6 +16,7 @@
 #define SRC_DAWN_NATIVE_BINDGROUP_H_
 
 #include <array>
+#include <vector>
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"

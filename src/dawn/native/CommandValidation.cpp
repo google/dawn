@@ -14,6 +14,10 @@
 
 #include "dawn/native/CommandValidation.h"
 
+#include <algorithm>
+#include <limits>
+#include <utility>
+
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/Buffer.h"

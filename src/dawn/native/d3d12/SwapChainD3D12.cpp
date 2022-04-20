@@ -16,6 +16,8 @@
 
 #include <windows.ui.xaml.media.dxinterop.h>
 
+#include <utility>
+
 #include "dawn/dawn_wsi.h"
 #include "dawn/native/Surface.h"
 #include "dawn/native/d3d12/D3D12Error.h"

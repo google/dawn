@@ -16,6 +16,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <limits>
 #include <utility>
 
 #include "dawn/common/Alloc.h"

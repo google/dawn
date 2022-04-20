@@ -16,6 +16,7 @@
 #define SRC_DAWN_NATIVE_D3D12_RESOURCEALLOCATORMANAGERD3D12_H_
 
 #include <array>
+#include <memory>
 
 #include "dawn/common/SerialQueue.h"
 #include "dawn/native/BuddyMemoryAllocator.h"

@@ -14,6 +14,8 @@
 
 #include "dawn/native/vulkan/SamplerVk.h"
 
+#include <algorithm>
+
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"

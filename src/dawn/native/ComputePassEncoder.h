@@ -15,6 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_COMPUTEPASSENCODER_H_
 #define SRC_DAWN_NATIVE_COMPUTEPASSENCODER_H_
 
+#include <utility>
+#include <vector>
+
 #include "dawn/native/CommandBufferStateTracker.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"

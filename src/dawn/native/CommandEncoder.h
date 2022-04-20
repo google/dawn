@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_COMMANDENCODER_H_
 #define SRC_DAWN_NATIVE_COMMANDENCODER_H_
 
+#include <set>
 #include <string>
 
 #include "dawn/native/dawn_platform.h"

@@ -14,6 +14,9 @@
 
 #include "dawn/native/CommandEncoder.h"
 
+#include <utility>
+#include <vector>
+
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Math.h"
 #include "dawn/native/BindGroup.h"

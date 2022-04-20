@@ -14,6 +14,9 @@
 
 #include "dawn/wire/client/Buffer.h"
 
+#include <limits>
+#include <utility>
+
 #include "dawn/wire/BufferConsumer_impl.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/client/Client.h"

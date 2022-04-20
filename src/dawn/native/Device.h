@@ -15,8 +15,11 @@
 #ifndef SRC_DAWN_NATIVE_DEVICE_H_
 #define SRC_DAWN_NATIVE_DEVICE_H_
 
+#include <memory>
 #include <mutex>
+#include <string>
 #include <utility>
+#include <vector>
 
 #include "dawn/native/CacheKey.h"
 #include "dawn/native/Commands.h"

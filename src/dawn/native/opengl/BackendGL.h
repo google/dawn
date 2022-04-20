@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_BACKENDGL_H_
 #define SRC_DAWN_NATIVE_OPENGL_BACKENDGL_H_
 
+#include <vector>
+
 #include "dawn/native/BackendConnection.h"
 
 namespace dawn::native::opengl {

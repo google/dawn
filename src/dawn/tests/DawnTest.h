@@ -16,7 +16,9 @@
 #define SRC_DAWN_TESTS_DAWNTEST_H_
 
 #include <memory>
+#include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "dawn/common/Log.h"

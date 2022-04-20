@@ -15,9 +15,10 @@
 #ifndef SRC_DAWN_NODE_BINDING_GPUSAMPLER_H_
 #define SRC_DAWN_NODE_BINDING_GPUSAMPLER_H_
 
+#include <string>
+
 #include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp.h"
-
 #include "src/dawn/node/interop/Napi.h"
 #include "src/dawn/node/interop/WebGPU.h"
 

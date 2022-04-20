@@ -15,8 +15,12 @@
 #include <fcntl.h>
 #include <gbm.h>
 
-#include "VideoViewsTests.h"
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
+#include "VideoViewsTests.h"
 #include "dawn/common/Assert.h"
 #include "dawn/native/VulkanBackend.h"
 

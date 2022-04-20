@@ -14,6 +14,8 @@
 
 #include "src/dawn/node/binding/GPURenderPipeline.h"
 
+#include <utility>
+
 #include "src/dawn/node/binding/GPUBindGroupLayout.h"
 #include "src/dawn/node/binding/GPUBuffer.h"
 #include "src/dawn/node/utils/Debug.h"

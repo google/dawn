@@ -16,6 +16,7 @@
 #define SRC_DAWN_WIRE_CHUNKEDCOMMANDHANDLER_H_
 
 #include <cstdint>
+#include <limits>
 #include <memory>
 
 #include "dawn/common/Assert.h"

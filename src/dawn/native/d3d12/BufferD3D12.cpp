@@ -14,6 +14,8 @@
 
 #include "dawn/native/d3d12/BufferD3D12.h"
 
+#include <algorithm>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"

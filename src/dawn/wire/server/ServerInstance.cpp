@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include <algorithm>
+#include <vector>
 
 #include "dawn/wire/server/Server.h"
-
 #include "dawn/wire/SupportedFeatures.h"
 
 namespace dawn::wire::server {

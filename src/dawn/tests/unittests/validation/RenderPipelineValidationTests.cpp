@@ -14,9 +14,10 @@
 
 #include <cmath>
 #include <sstream>
+#include <string>
+#include <vector>
 
 #include "dawn/tests/unittests/validation/ValidationTest.h"
-
 #include "dawn/common/Constants.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"

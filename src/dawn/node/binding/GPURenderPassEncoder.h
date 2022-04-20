@@ -15,9 +15,11 @@
 #ifndef SRC_DAWN_NODE_BINDING_GPURENDERPASSENCODER_H_
 #define SRC_DAWN_NODE_BINDING_GPURENDERPASSENCODER_H_
 
+#include <string>
+#include <vector>
+
 #include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp.h"
-
 #include "src/dawn/node/interop/Napi.h"
 #include "src/dawn/node/interop/WebGPU.h"
 

@@ -14,6 +14,8 @@
 
 #include "src/dawn/node/binding/GPUSampler.h"
 
+#include <utility>
+
 #include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/utils/Debug.h"
 

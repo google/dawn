@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#include <limits>
 
 #include "dawn/common/TypedInteger.h"
 #include "dawn/common/UnderlyingType.h"
+#include "gtest/gtest.h"
 
 class TypedIntegerTest : public testing::Test {
   protected:

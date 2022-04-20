@@ -14,6 +14,8 @@
 
 #include "dawn/native/CreatePipelineAsyncTask.h"
 
+#include <utility>
+
 #include "dawn/native/AsyncTask.h"
 #include "dawn/native/ComputePipeline.h"
 #include "dawn/native/Device.h"

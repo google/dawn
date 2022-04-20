@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/common/Math.h"
+#include "dawn/native/d3d12/StagingDescriptorAllocatorD3D12.h"
 
+#include <utility>
+
+#include "dawn/common/Math.h"
 #include "dawn/native/d3d12/D3D12Error.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
-#include "dawn/native/d3d12/StagingDescriptorAllocatorD3D12.h"
 
 namespace dawn::native::d3d12 {
 

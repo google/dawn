@@ -15,6 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_UTILSVULKAN_H_
 #define SRC_DAWN_NATIVE_VULKAN_UTILSVULKAN_H_
 
+#include <string>
+#include <vector>
+
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/dawn_platform.h"

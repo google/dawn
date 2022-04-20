@@ -14,6 +14,8 @@
 
 #include "dawn/native/vulkan/VulkanFunctions.h"
 
+#include <string>
+
 #include "dawn/common/DynamicLib.h"
 #include "dawn/native/vulkan/VulkanInfo.h"
 

@@ -14,6 +14,8 @@
 
 #include "src/dawn/node/binding/GPUComputePassEncoder.h"
 
+#include <utility>
+
 #include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/GPUBindGroup.h"
 #include "src/dawn/node/binding/GPUBuffer.h"

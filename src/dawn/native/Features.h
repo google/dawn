@@ -16,6 +16,7 @@
 #define SRC_DAWN_NATIVE_FEATURES_H_
 
 #include <bitset>
+#include <string>
 #include <unordered_map>
 #include <vector>
 

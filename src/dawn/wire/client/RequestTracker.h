@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <map>
+#include <utility>
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/NonCopyable.h"

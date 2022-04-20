@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gmock/gmock.h>
+#include <utility>
+#include <vector>
 
 #include "dawn/common/RefBase.h"
+#include "gmock/gmock.h"
 
 namespace {
     using Id = uint32_t;

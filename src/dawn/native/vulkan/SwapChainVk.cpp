@@ -15,6 +15,8 @@
 #include "dawn/native/vulkan/SwapChainVk.h"
 
 #include <algorithm>
+#include <limits>
+#include <utility>
 
 #include "dawn/common/Compiler.h"
 #include "dawn/native/Instance.h"

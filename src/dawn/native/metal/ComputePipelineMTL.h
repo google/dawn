@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_METAL_COMPUTEPIPELINEMTL_H_
 #define SRC_DAWN_NATIVE_METAL_COMPUTEPIPELINEMTL_H_
 
+#include <vector>
+
 #include "dawn/native/ComputePipeline.h"
 
 #include "dawn/common/NSRef.h"

@@ -17,6 +17,8 @@
 
 #include <array>
 #include <bitset>
+#include <string>
+#include <vector>
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/ityp_array.h"

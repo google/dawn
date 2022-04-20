@@ -17,8 +17,9 @@
 
 #include <vector>
 
+#include "dawn/common/SerialQueue.h"
 #include "dawn/native/Error.h"
-
+#include "dawn/native/IntegerTypes.h"
 #include "dawn/native/d3d12/CPUDescriptorHeapAllocationD3D12.h"
 
 // |StagingDescriptorAllocator| allocates a fixed-size block of descriptors from a CPU

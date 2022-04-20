@@ -13,6 +13,9 @@
 // limitations under the License.
 
 #include "dawn/native/DynamicUploader.h"
+
+#include <utility>
+
 #include "dawn/common/Math.h"
 #include "dawn/native/Device.h"
 

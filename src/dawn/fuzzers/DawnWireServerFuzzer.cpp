@@ -15,6 +15,7 @@
 #include "dawn/fuzzers/DawnWireServerFuzzer.h"
 
 #include <fstream>
+#include <memory>
 #include <vector>
 
 #include "dawn/common/Assert.h"

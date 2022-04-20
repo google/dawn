@@ -15,10 +15,11 @@
 #ifndef SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_DEVICEMOCK_H_
 #define SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_DEVICEMOCK_H_
 
-#include "gmock/gmock.h"
+#include <memory>
 
 #include "dawn/native/Device.h"
 #include "dawn/native/RenderPipeline.h"
+#include "gmock/gmock.h"
 
 namespace dawn::native {
 

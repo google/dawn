@@ -16,6 +16,9 @@
 
 #include <d3dcompiler.h>
 
+#include <memory>
+#include <utility>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/Log.h"
 #include "dawn/native/CreatePipelineAsyncTask.h"

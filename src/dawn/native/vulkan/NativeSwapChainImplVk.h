@@ -15,10 +15,11 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_NATIVESWAPCHAINIMPLVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_NATIVESWAPCHAINIMPLVK_H_
 
-#include "dawn/native/vulkan/VulkanInfo.h"
+#include <vector>
 
 #include "dawn/dawn_wsi.h"
 #include "dawn/native/dawn_platform.h"
+#include "dawn/native/vulkan/VulkanInfo.h"
 
 namespace dawn::native::vulkan {
 

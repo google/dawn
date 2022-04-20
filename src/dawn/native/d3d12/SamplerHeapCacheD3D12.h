@@ -16,6 +16,7 @@
 #define SRC_DAWN_NATIVE_D3D12_SAMPLERHEAPCACHED3D12_H_
 
 #include <unordered_set>
+#include <vector>
 
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/BindingInfo.h"

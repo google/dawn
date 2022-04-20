@@ -14,6 +14,9 @@
 
 #include "dawn/native/Adapter.h"
 
+#include <algorithm>
+#include <memory>
+
 #include "dawn/common/Constants.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Instance.h"

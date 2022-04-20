@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_TEXTURED3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_TEXTURED3D12_H_
 
+#include <vector>
+
 #include "dawn/native/Texture.h"
 
 #include "dawn/native/DawnNative.h"

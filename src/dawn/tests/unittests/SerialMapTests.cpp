@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#include <utility>
+#include <vector>
 
 #include "dawn/common/SerialMap.h"
 #include "dawn/common/TypedInteger.h"
+#include "gtest/gtest.h"
 
 using TestSerialMap = SerialMap<uint64_t, int>;
 

@@ -15,6 +15,7 @@
 #include "dawn/native/vulkan/BindGroupLayoutVk.h"
 
 #include <map>
+#include <utility>
 
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/ityp_vector.h"

@@ -14,6 +14,10 @@
 
 #include "dawn/native/vulkan/RenderPipelineVk.h"
 
+#include <memory>
+#include <utility>
+#include <vector>
+
 #include "dawn/native/CreatePipelineAsyncTask.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"

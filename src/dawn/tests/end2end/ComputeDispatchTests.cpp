@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include <initializer_list>
+#include <vector>
 
 #include "dawn/tests/DawnTest.h"
-
 #include "dawn/utils/WGPUHelpers.h"
 
 constexpr static std::initializer_list<uint32_t> kSentinelData{0, 0, 0};

@@ -17,7 +17,10 @@
 
 #include <algorithm>
 #include <map>
+#include <memory>
 #include <unordered_set>
+#include <utility>
+#include <vector>
 
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/WireServer.h"

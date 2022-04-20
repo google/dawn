@@ -14,6 +14,10 @@
 
 #include "dawn/native/Pipeline.h"
 
+#include <algorithm>
+#include <unordered_set>
+#include <utility>
+
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectBase.h"

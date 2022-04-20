@@ -14,7 +14,10 @@
 
 #include "dawn/native/d3d12/DeviceD3D12.h"
 
+#include <algorithm>
+#include <limits>
 #include <sstream>
+#include <utility>
 
 #include "dawn/common/GPUInfo.h"
 #include "dawn/native/DynamicUploader.h"

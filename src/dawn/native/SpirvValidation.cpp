@@ -15,7 +15,9 @@
 #include "dawn/native/SpirvValidation.h"
 
 #include <spirv-tools/libspirv.hpp>
+
 #include <sstream>
+#include <string>
 
 #include "dawn/native/Device.h"
 

@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_PLATFORM_WORKERTHREAD_H_
 #define SRC_DAWN_PLATFORM_WORKERTHREAD_H_
 
+#include <memory>
+
 #include "dawn/common/NonCopyable.h"
 #include "dawn/platform/DawnPlatform.h"
 

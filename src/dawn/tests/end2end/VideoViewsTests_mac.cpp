@@ -16,8 +16,11 @@
 #include <CoreVideo/CVPixelBuffer.h>
 #include <IOSurface/IOSurfaceRef.h>
 
-#include "VideoViewsTests.h"
+#include <memory>
+#include <utility>
+#include <vector>
 
+#include "VideoViewsTests.h"
 #include "dawn/common/Assert.h"
 #include "dawn/common/CoreFoundationRef.h"
 #include "dawn/native/MetalBackend.h"

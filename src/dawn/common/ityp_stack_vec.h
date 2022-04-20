@@ -15,6 +15,9 @@
 #ifndef SRC_DAWN_COMMON_ITYP_STACK_VEC_H_
 #define SRC_DAWN_COMMON_ITYP_STACK_VEC_H_
 
+#include <limits>
+#include <vector>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/StackContainer.h"
 #include "dawn/common/UnderlyingType.h"

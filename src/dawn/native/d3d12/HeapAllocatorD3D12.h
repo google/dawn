@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_HEAPALLOCATORD3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_HEAPALLOCATORD3D12_H_
 
+#include <memory>
+
 #include "dawn/native/D3D12Backend.h"
 #include "dawn/native/ResourceHeapAllocator.h"
 #include "dawn/native/d3d12/d3d12_platform.h"

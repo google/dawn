@@ -15,7 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_ERROR_H_
 #define SRC_DAWN_NATIVE_ERROR_H_
 
+#include <memory>
 #include <string>
+#include <utility>
 
 #include "absl/strings/str_format.h"
 #include "dawn/common/Result.h"

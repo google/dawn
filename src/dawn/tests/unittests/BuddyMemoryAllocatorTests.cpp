@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <memory>
 #include <set>
+#include <utility>
 #include <vector>
 
 #include "gtest/gtest.h"
-
 #include "dawn/native/BuddyMemoryAllocator.h"
 #include "dawn/native/PooledResourceMemoryAllocator.h"
 #include "dawn/native/ResourceHeapAllocator.h"

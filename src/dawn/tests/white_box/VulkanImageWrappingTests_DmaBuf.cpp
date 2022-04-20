@@ -12,12 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/tests/white_box/VulkanImageWrappingTests.h"
-
 #include <fcntl.h>
 #include <gbm.h>
 #include <gtest/gtest.h>
 #include <unistd.h>
+
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "dawn/tests/white_box/VulkanImageWrappingTests.h"
 
 namespace dawn::native::vulkan {
 

@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/tests/DawnTest.h"
+#include <vector>
 
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/dawn_platform.h"
+#include "dawn/tests/DawnTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
 class InternalStorageBufferBindingTests : public DawnTest {

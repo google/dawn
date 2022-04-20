@@ -13,9 +13,10 @@
 // limitations under the License.
 
 #include <array>
+#include <string>
+#include <vector>
 
 #include "dawn/tests/DawnTest.h"
-
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"

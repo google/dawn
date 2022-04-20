@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gmock/gmock-matchers.h>
-#include <gtest/gtest.h>
+#include <string>
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/SystemUtils.h"
+#include "gmock/gmock-matchers.h"
+#include "gtest/gtest.h"
 
 using ::testing::_;
 using ::testing::Pair;

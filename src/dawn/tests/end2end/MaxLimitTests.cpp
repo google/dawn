@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/tests/DawnTest.h"
+#include <algorithm>
+#include <limits>
+#include <string>
 
 #include "dawn/common/Math.h"
 #include "dawn/common/Platform.h"
+#include "dawn/tests/DawnTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
 class MaxLimitTests : public DawnTest {

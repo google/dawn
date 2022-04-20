@@ -16,6 +16,7 @@
 #define SRC_DAWN_NATIVE_D3D12_SHADERVISIBLEDESCRIPTORALLOCATORD3D12_H_
 
 #include <list>
+#include <memory>
 
 #include "dawn/native/Error.h"
 #include "dawn/native/RingBufferAllocator.h"

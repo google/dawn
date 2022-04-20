@@ -15,8 +15,9 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_BUFFER_H_
 #define SRC_DAWN_WIRE_CLIENT_BUFFER_H_
 
-#include "dawn/webgpu.h"
+#include <memory>
 
+#include "dawn/webgpu.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/client/ObjectBase.h"
 #include "dawn/wire/client/RequestTracker.h"

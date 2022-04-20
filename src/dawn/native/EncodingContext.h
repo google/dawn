@@ -15,7 +15,10 @@
 #ifndef SRC_DAWN_NATIVE_ENCODINGCONTEXT_H_
 #define SRC_DAWN_NATIVE_ENCODINGCONTEXT_H_
 
+#include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "dawn/native/CommandAllocator.h"
 #include "dawn/native/Error.h"

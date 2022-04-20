@@ -14,6 +14,10 @@
 
 #include "dawn/native/PipelineLayout.h"
 
+#include <algorithm>
+#include <map>
+#include <utility>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/ityp_stack_vec.h"

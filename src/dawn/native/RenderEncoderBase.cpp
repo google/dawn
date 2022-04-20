@@ -16,6 +16,7 @@
 
 #include <math.h>
 #include <cstring>
+#include <utility>
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/Log.h"

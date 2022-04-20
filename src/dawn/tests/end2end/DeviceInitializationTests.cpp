@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <memory>
+#include <vector>
+
 #include "dawn/dawn_proc.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/SystemUtils.h"

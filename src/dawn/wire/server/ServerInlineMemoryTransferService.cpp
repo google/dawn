@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <cstring>
+#include <memory>
 
 #include "dawn/common/Assert.h"
 #include "dawn/wire/WireServer.h"

@@ -17,6 +17,7 @@
 
 #include <array>
 #include <memory>
+#include <vector>
 
 #include "dawn/tests/DawnTest.h"
 

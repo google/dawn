@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
+
 #include "dawn/dawn_proc.h"
 #include "src/dawn/node/binding/Flags.h"
 #include "src/dawn/node/binding/GPU.h"

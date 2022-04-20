@@ -14,6 +14,9 @@
 
 #include "dawn/native/null/DeviceNull.h"
 
+#include <limits>
+#include <utility>
+
 #include "dawn/native/BackendConnection.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/ErrorData.h"

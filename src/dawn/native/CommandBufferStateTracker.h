@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_COMMANDBUFFERSTATETRACKER_H_
 #define SRC_DAWN_NATIVE_COMMANDBUFFERSTATETRACKER_H_
 
+#include <vector>
+
 #include "dawn/common/Constants.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"

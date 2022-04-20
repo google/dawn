@@ -16,6 +16,8 @@
 #define SRC_DAWN_NATIVE_PASSRESOURCEUSAGETRACKER_H_
 
 #include <map>
+#include <set>
+#include <vector>
 
 #include "dawn/native/PassResourceUsage.h"
 

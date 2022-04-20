@@ -14,13 +14,15 @@
 
 #include <unistd.h>
 
-#include "gtest/gtest.h"
-
-#include "dawn/tests/white_box/VulkanImageWrappingTests.h"
+#include <memory>
+#include <utility>
+#include <vector>
 
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
+#include "dawn/tests/white_box/VulkanImageWrappingTests.h"
+#include "gtest/gtest.h"
 
 namespace dawn::native::vulkan {
 

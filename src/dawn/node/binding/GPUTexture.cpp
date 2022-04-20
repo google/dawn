@@ -14,6 +14,8 @@
 
 #include "src/dawn/node/binding/GPUTexture.h"
 
+#include <utility>
+
 #include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/Errors.h"
 #include "src/dawn/node/binding/GPUTextureView.h"

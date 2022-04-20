@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/tests/DawnTest.h"
+#include <vector>
 
 #include "dawn/native/Buffer.h"
 #include "dawn/native/CommandEncoder.h"
 #include "dawn/native/QueryHelper.h"
+#include "dawn/tests/DawnTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace {

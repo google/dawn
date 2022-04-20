@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/tests/perf_tests/DawnPerfTest.h"
+#include <vector>
 
+#include "dawn/tests/perf_tests/DawnPerfTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace {

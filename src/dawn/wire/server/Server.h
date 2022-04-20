@@ -15,6 +15,9 @@
 #ifndef SRC_DAWN_WIRE_SERVER_SERVER_H_
 #define SRC_DAWN_WIRE_SERVER_SERVER_H_
 
+#include <memory>
+#include <utility>
+
 #include "dawn/wire/ChunkedCommandSerializer.h"
 #include "dawn/wire/server/ServerBase_autogen.h"
 

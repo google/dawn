@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_COMMON_ITYP_VECTOR_H_
 #define SRC_DAWN_COMMON_ITYP_VECTOR_H_
 
+#include <limits>
 #include <type_traits>
 #include <vector>
 

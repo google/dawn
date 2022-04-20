@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#include <utility>
 
 #include "dawn/webgpu_cpp.h"
+#include "gtest/gtest.h"
 
 class Object : public wgpu::ObjectBase<Object, int*> {
   public:

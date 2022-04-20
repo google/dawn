@@ -14,6 +14,9 @@
 
 #include "dawn/native/vulkan/BackendVk.h"
 
+#include <string>
+#include <utility>
+
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/SystemUtils.h"

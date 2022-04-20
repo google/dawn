@@ -17,6 +17,7 @@
 
 #include <optional>
 #include <string>
+#include <utility>
 
 #include "dawn/common/Platform.h"
 

@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/tests/DawnNativeTest.h"
+#include <utility>
+#include <vector>
 
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/ComputePassEncoder.h"
+#include "dawn/tests/DawnNativeTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
 class CommandBufferEncodingTests : public DawnNativeTest {

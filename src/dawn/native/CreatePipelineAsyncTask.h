@@ -15,6 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_CREATEPIPELINEASYNCTASK_H_
 #define SRC_DAWN_NATIVE_CREATEPIPELINEASYNCTASK_H_
 
+#include <memory>
+#include <string>
+
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/CallbackTaskManager.h"
 #include "dawn/native/Error.h"

@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#include <utility>
 
 #include "dawn/common/TypedInteger.h"
 #include "dawn/common/ityp_vector.h"
+#include "gtest/gtest.h"
 
 class ITypVectorTest : public testing::Test {
   protected:

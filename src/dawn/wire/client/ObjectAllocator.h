@@ -17,6 +17,7 @@
 
 #include <limits>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "dawn/common/Assert.h"

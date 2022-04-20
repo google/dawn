@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "DawnWireServerFuzzer.h"
+#include <vector>
 
+#include "DawnWireServerFuzzer.h"
 #include "dawn/common/Assert.h"
 #include "dawn/native/DawnNative.h"
 #include "testing/libfuzzer/libfuzzer_exports.h"

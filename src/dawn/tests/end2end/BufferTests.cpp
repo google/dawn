@@ -14,6 +14,8 @@
 
 #include <array>
 #include <cstring>
+#include <limits>
+#include <vector>
 
 #include "dawn/tests/DawnTest.h"
 

@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_QUEUE_H_
 #define SRC_DAWN_NATIVE_QUEUE_H_
 
+#include <memory>
+
 #include "dawn/common/SerialQueue.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"

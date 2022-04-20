@@ -15,9 +15,11 @@
 #ifndef SRC_DAWN_TESTS_UNITTESTS_VALIDATION_VALIDATIONTEST_H_
 #define SRC_DAWN_TESTS_UNITTESTS_VALIDATION_VALIDATIONTEST_H_
 
+#include <memory>
+#include <string>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
 #include "dawn/common/Log.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp.h"

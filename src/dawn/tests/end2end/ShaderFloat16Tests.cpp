@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <vector>
+
 #include "dawn/common/Math.h"
 #include "dawn/tests/DawnTest.h"
-
 #include "dawn/utils/WGPUHelpers.h"
 
 class ShaderFloat16Tests : public DawnTest {

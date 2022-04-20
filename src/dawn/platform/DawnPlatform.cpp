@@ -13,9 +13,11 @@
 // limitations under the License.
 
 #include "dawn/platform/DawnPlatform.h"
-#include "dawn/platform/WorkerThread.h"
+
+#include <memory>
 
 #include "dawn/common/Assert.h"
+#include "dawn/platform/WorkerThread.h"
 
 namespace dawn::platform {
 

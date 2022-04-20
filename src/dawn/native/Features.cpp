@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "dawn/native/Features.h"
+
 #include <array>
+#include <utility>
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/BitSetIterator.h"
-#include "dawn/native/Features.h"
 
 namespace dawn::native {
     namespace {

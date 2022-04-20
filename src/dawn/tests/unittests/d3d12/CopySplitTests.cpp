@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#include <algorithm>
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Constants.h"
@@ -22,6 +22,7 @@
 #include "dawn/native/d3d12/d3d12_platform.h"
 #include "dawn/utils/TestUtils.h"
 #include "dawn/webgpu_cpp_print.h"
+#include "gtest/gtest.h"
 
 using namespace dawn::native::d3d12;
 

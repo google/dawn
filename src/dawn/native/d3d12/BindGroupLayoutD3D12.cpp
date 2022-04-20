@@ -14,6 +14,8 @@
 
 #include "dawn/native/d3d12/BindGroupLayoutD3D12.h"
 
+#include <utility>
+
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/native/d3d12/BindGroupD3D12.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"

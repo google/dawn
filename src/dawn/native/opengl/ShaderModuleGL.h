@@ -15,6 +15,11 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_SHADERMODULEGL_H_
 #define SRC_DAWN_NATIVE_OPENGL_SHADERMODULEGL_H_
 
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 #include "dawn/native/ShaderModule.h"
 
 #include "dawn/native/opengl/opengl_platform.h"

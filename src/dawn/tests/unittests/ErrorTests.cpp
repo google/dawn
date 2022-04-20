@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#include <memory>
 
 #include "dawn/native/Error.h"
 #include "dawn/native/ErrorData.h"
+#include "gtest/gtest.h"
 
 using namespace dawn::native;
 

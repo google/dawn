@@ -14,6 +14,8 @@
 
 #include "dawn/native/CallbackTaskManager.h"
 
+#include <utility>
+
 namespace dawn::native {
 
     bool CallbackTaskManager::IsEmpty() {

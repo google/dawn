@@ -15,6 +15,7 @@
 #include "dawn/common/Log.h"
 
 #include <cstdio>
+#include <string>
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Platform.h"

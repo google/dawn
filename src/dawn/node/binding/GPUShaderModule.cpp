@@ -15,6 +15,8 @@
 #include "src/dawn/node/binding/GPUShaderModule.h"
 
 #include <memory>
+#include <utility>
+#include <vector>
 
 #include "src/dawn/node/utils/Debug.h"
 

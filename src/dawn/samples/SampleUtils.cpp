@@ -16,6 +16,9 @@
 
 #include <algorithm>
 #include <cstring>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include "GLFW/glfw3.h"
 #include "dawn/common/Assert.h"

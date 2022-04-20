@@ -14,6 +14,8 @@
 
 #include "dawn/native/ErrorScope.h"
 
+#include <utility>
+
 #include "dawn/common/Assert.h"
 
 namespace dawn::native {

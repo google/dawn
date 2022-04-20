@@ -15,6 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_METAL_SHADERMODULEMTL_H_
 #define SRC_DAWN_NATIVE_METAL_SHADERMODULEMTL_H_
 
+#include <string>
+#include <vector>
+
 #include "dawn/native/ShaderModule.h"
 
 #include "dawn/common/NSRef.h"

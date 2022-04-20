@@ -15,6 +15,9 @@
 #ifndef SRC_DAWN_TESTS_PERF_TESTS_DAWNPERFTEST_H_
 #define SRC_DAWN_TESTS_PERF_TESTS_DAWNPERFTEST_H_
 
+#include <memory>
+#include <string>
+
 #include "dawn/tests/DawnTest.h"
 
 namespace utils {

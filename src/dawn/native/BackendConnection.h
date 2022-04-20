@@ -16,6 +16,7 @@
 #define SRC_DAWN_NATIVE_BACKENDCONNECTION_H_
 
 #include <memory>
+#include <vector>
 
 #include "dawn/native/Adapter.h"
 #include "dawn/native/DawnNative.h"

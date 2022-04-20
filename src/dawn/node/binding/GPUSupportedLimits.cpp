@@ -14,6 +14,8 @@
 
 #include "src/dawn/node/binding/GPUSupportedLimits.h"
 
+#include <utility>
+
 namespace wgpu::binding {
 
     ////////////////////////////////////////////////////////////////////////////////

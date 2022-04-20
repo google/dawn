@@ -15,6 +15,8 @@
 #include "dawn/native/opengl/BackendGL.h"
 
 #include <cstring>
+#include <string>
+#include <utility>
 
 #include "dawn/common/GPUInfo.h"
 #include "dawn/common/Log.h"

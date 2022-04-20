@@ -16,10 +16,11 @@
 
 #include <algorithm>
 #include <functional>
+#include <limits>
 #include <set>
+#include <vector>
 
 #include "dawn/common/BitSetIterator.h"
-
 #include "dawn/native/ChainUtils_autogen.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectBase.h"

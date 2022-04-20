@@ -14,6 +14,9 @@
 
 #include "dawn/native/d3d12/TextureD3D12.h"
 
+#include <algorithm>
+#include <utility>
+
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
 #include "dawn/native/DynamicUploader.h"

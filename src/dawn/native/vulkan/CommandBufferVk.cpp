@@ -15,6 +15,7 @@
 #include "dawn/native/vulkan/CommandBufferVk.h"
 
 #include <algorithm>
+#include <vector>
 
 #include "dawn/native/BindGroupTracker.h"
 #include "dawn/native/CommandEncoder.h"

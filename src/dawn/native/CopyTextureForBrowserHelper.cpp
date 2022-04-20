@@ -15,6 +15,7 @@
 #include "dawn/native/CopyTextureForBrowserHelper.h"
 
 #include <unordered_set>
+#include <utility>
 
 #include "dawn/common/Log.h"
 #include "dawn/native/BindGroup.h"

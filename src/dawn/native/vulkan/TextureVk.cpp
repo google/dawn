@@ -14,6 +14,8 @@
 
 #include "dawn/native/vulkan/TextureVk.h"
 
+#include <utility>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/Math.h"
 #include "dawn/native/DynamicUploader.h"

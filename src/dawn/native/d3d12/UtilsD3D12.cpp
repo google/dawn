@@ -16,6 +16,8 @@
 
 #include <stringapiset.h>
 
+#include <utility>
+
 #include "dawn/common/Assert.h"
 #include "dawn/native/Format.h"
 #include "dawn/native/d3d12/BufferD3D12.h"

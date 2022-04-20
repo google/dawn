@@ -15,6 +15,7 @@
 #include "src/dawn/node/binding/GPUBuffer.h"
 
 #include <memory>
+#include <utility>
 
 #include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/Errors.h"

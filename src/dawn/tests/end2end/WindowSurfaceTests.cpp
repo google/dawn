@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <cstdlib>
+#include <memory>
 
 #include "dawn/common/Log.h"
 #include "dawn/common/Platform.h"
@@ -20,7 +21,6 @@
 #include "dawn/native/DawnNative.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/GLFWUtils.h"
-
 #include "gtest/gtest.h"
 
 // Include windows.h before GLFW so GLFW's APIENTRY macro doesn't conflict with windows.h's.

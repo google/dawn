@@ -14,6 +14,7 @@
 
 #include "dawn/native/QueryHelper.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "dawn/native/BindGroup.h"

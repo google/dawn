@@ -118,7 +118,7 @@ namespace detail {
         }
 
         constexpr TypedIntegerImpl& operator--() {
-            assert(this->mValue > std::numeric_limits<T>::min());
+            ASSERT(this->mValue > std::numeric_limits<T>::min());
             --this->mValue;
             return *this;
         }

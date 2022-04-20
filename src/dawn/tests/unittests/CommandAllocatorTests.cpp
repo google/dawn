@@ -13,9 +13,10 @@
 // limitations under the License.
 
 #include <limits>
+#include <utility>
+#include <vector>
 
 #include "gtest/gtest.h"
-
 #include "dawn/native/CommandAllocator.h"
 
 using namespace dawn::native;

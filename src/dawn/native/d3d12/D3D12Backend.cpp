@@ -17,6 +17,9 @@
 
 #include "dawn/native/D3D12Backend.h"
 
+#include <memory>
+#include <utility>
+
 #include "dawn/common/Log.h"
 #include "dawn/common/Math.h"
 #include "dawn/common/SwapChainUtils.h"

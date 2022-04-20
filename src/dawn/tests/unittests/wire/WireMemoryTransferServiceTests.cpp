@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/tests/unittests/wire/WireTest.h"
+#include <memory>
+#include <utility>
 
+#include "dawn/tests/unittests/wire/WireTest.h"
 #include "dawn/wire/client/ClientMemoryTransferService_mock.h"
 #include "dawn/wire/server/ServerMemoryTransferService_mock.h"
 

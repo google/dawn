@@ -13,12 +13,11 @@
 // limitations under the License.
 
 #include <cmath>
+#include <vector>
 
 #include "gtest/gtest.h"
-
 #include "dawn/EnumClassBitmasks.h"
 #include "dawn/common/Math.h"
-
 #include "dawn/webgpu_cpp.h"
 
 namespace wgpu {

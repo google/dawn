@@ -15,6 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_NULL_DEVICENULL_H_
 #define SRC_DAWN_NATIVE_NULL_DEVICENULL_H_
 
+#include <memory>
+#include <vector>
+
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/BindGroupLayout.h"

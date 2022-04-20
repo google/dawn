@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "dawn/native/d3d12/PipelineLayoutD3D12.h"
+
+#include <limits>
 #include <sstream>
 
 #include "dawn/common/Assert.h"

@@ -19,6 +19,7 @@
 #include <mutex>
 // TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
 #include <optional>  // NOLINT(build/include_order))
+#include <unordered_map>
 #include <utility>
 #include <vector>
 

@@ -14,6 +14,8 @@
 
 #include "dawn/native/ExternalTexture.h"
 
+#include <utility>
+
 #include "dawn/native/Buffer.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectType_autogen.h"

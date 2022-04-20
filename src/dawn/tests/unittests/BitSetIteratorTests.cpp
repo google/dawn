@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#include <set>
 
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/ityp_bitset.h"
+#include "gtest/gtest.h"
 
 // This is ANGLE's BitSetIterator_unittests.cpp file.
 

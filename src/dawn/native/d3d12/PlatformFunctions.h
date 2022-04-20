@@ -17,6 +17,8 @@
 
 #include <d3dcompiler.h>
 
+#include <string>
+
 #include "dawn/native/d3d12/d3d12_platform.h"
 
 #include "dawn/common/DynamicLib.h"

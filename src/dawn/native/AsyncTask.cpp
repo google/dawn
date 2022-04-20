@@ -14,6 +14,8 @@
 
 #include "dawn/native/AsyncTask.h"
 
+#include <utility>
+
 #include "dawn/platform/DawnPlatform.h"
 
 namespace dawn::native {

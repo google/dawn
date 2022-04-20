@@ -17,6 +17,9 @@
 
 #include <array>
 #include <bitset>
+#include <map>
+#include <string>
+#include <vector>
 
 #include "dawn/native/CachedObject.h"
 #include "dawn/native/Forward.h"

@@ -14,6 +14,8 @@
 
 #include "dawn/native/webgpu_absl_format.h"
 
+#include <string>
+
 #include "dawn/native/AttachmentState.h"
 #include "dawn/native/BindingInfo.h"
 #include "dawn/native/Device.h"

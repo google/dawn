@@ -14,8 +14,12 @@
 
 #include "dawn/native/IndirectDrawValidationEncoder.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <limits>
+#include <memory>
+#include <utility>
+#include <vector>
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"

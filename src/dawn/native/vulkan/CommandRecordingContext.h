@@ -14,8 +14,9 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_COMMANDRECORDINGCONTEXT_H_
 #define SRC_DAWN_NATIVE_VULKAN_COMMANDRECORDINGCONTEXT_H_
 
-#include "dawn/common/vulkan_platform.h"
+#include <vector>
 
+#include "dawn/common/vulkan_platform.h"
 #include "dawn/native/vulkan/BufferVk.h"
 
 namespace dawn::native::vulkan {

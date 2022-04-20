@@ -15,6 +15,7 @@
 #include <array>
 #include <cstring>
 #include <random>
+#include <vector>
 
 #include "dawn/samples/SampleUtils.h"
 

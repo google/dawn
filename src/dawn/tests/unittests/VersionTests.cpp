@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include <string>
 
 #include "dawn/common/Version_autogen.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 namespace dawn { namespace {
 

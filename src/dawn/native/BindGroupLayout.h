@@ -15,8 +15,10 @@
 #ifndef SRC_DAWN_NATIVE_BINDGROUPLAYOUT_H_
 #define SRC_DAWN_NATIVE_BINDGROUPLAYOUT_H_
 
+#include <algorithm>
 #include <bitset>
 #include <map>
+#include <string>
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"

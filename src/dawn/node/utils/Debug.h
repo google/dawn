@@ -20,6 +20,7 @@
 #include <optional>  // NOLINT(build/include_order)
 #include <sstream>
 #include <unordered_map>
+#include <utility>
 // TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
 #include <variant>  // NOLINT(build/include_order)
 #include <vector>

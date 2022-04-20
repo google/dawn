@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include <cmath>
+#include <limits>
 
 #include "dawn/tests/unittests/validation/ValidationTest.h"
-
 #include "dawn/utils/WGPUHelpers.h"
 
 class SetViewportTest : public ValidationTest {

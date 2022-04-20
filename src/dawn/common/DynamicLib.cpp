@@ -14,6 +14,8 @@
 
 #include "dawn/common/DynamicLib.h"
 
+#include <utility>
+
 #include "dawn/common/Platform.h"
 
 #if DAWN_PLATFORM_WINDOWS

@@ -15,9 +15,11 @@
 #ifndef SRC_DAWN_NODE_BINDING_GPUSHADERMODULE_H_
 #define SRC_DAWN_NODE_BINDING_GPUSHADERMODULE_H_
 
+#include <memory>
+#include <string>
+
 #include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp.h"
-
 #include "src/dawn/node/binding/AsyncRunner.h"
 #include "src/dawn/node/interop/Napi.h"
 #include "src/dawn/node/interop/WebGPU.h"

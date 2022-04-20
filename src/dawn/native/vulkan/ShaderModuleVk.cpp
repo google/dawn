@@ -16,6 +16,8 @@
 
 #include <spirv-tools/libspirv.hpp>
 
+#include <map>
+
 #include "dawn/native/SpirvValidation.h"
 #include "dawn/native/TintUtils.h"
 #include "dawn/native/vulkan/BindGroupLayoutVk.h"
@@ -26,7 +28,6 @@
 #include "dawn/native/vulkan/VulkanError.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
-
 #include "tint/tint.h"
 
 namespace dawn::native::vulkan {

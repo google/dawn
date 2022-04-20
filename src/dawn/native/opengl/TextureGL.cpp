@@ -14,6 +14,8 @@
 
 #include "dawn/native/opengl/TextureGL.h"
 
+#include <limits>
+
 #include "dawn/common/Assert.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"

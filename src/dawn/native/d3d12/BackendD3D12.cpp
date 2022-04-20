@@ -14,6 +14,8 @@
 
 #include "dawn/native/d3d12/BackendD3D12.h"
 
+#include <utility>
+
 #include "dawn/native/D3D12Backend.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/d3d12/AdapterD3D12.h"

@@ -14,11 +14,12 @@
 
 #include "dawn/native/d3d12/RenderPassBuilderD3D12.h"
 
+#include <algorithm>
+
 #include "dawn/native/Format.h"
 #include "dawn/native/d3d12/CommandBufferD3D12.h"
 #include "dawn/native/d3d12/Forward.h"
 #include "dawn/native/d3d12/TextureD3D12.h"
-
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native::d3d12 {

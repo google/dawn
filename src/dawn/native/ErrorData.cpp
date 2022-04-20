@@ -14,6 +14,8 @@
 
 #include "dawn/native/ErrorData.h"
 
+#include <utility>
+
 #include "dawn/native/Error.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/dawn_platform.h"

@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_BINDGROUPLAYOUTD3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_BINDGROUPLAYOUTD3D12_H_
 
+#include <vector>
+
 #include "dawn/native/BindGroupLayout.h"
 
 #include "dawn/common/SlabAllocator.h"

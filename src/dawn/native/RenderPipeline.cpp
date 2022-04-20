@@ -14,6 +14,7 @@
 
 #include "dawn/native/RenderPipeline.h"
 
+#include <algorithm>
 #include <cmath>
 #include <sstream>
 

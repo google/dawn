@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_UTILSD3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_UTILSD3D12_H_
 
+#include <string>
+
 #include "dawn/native/Commands.h"
 #include "dawn/native/d3d12/BufferD3D12.h"
 #include "dawn/native/d3d12/TextureCopySplitter.h"

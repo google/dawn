@@ -16,6 +16,7 @@
 
 #include <set>
 #include <sstream>
+#include <string>
 
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/native/BindGroupLayout.h"

@@ -15,6 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_DYNAMICUPLOADER_H_
 #define SRC_DAWN_NATIVE_DYNAMICUPLOADER_H_
 
+#include <memory>
+#include <vector>
+
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/RingBufferAllocator.h"

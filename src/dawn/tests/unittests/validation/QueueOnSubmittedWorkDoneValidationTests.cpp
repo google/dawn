@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gmock/gmock.h"
+#include <memory>
 
 #include "dawn/tests/unittests/validation/ValidationTest.h"
+#include "gmock/gmock.h"
 
 using namespace testing;
 

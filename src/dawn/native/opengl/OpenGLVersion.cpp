@@ -15,6 +15,7 @@
 #include "dawn/native/opengl/OpenGLVersion.h"
 
 #include <cctype>
+#include <string>
 #include <tuple>
 
 namespace dawn::native::opengl {

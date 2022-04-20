@@ -14,6 +14,8 @@
 
 #include "src/dawn/node/binding/GPURenderBundle.h"
 
+#include <utility>
+
 #include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/GPUBuffer.h"
 #include "src/dawn/node/binding/GPURenderPipeline.h"

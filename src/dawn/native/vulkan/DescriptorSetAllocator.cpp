@@ -14,6 +14,8 @@
 
 #include "dawn/native/vulkan/DescriptorSetAllocator.h"
 
+#include <utility>
+
 #include "dawn/native/vulkan/BindGroupLayoutVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"

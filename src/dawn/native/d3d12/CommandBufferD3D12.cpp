@@ -14,6 +14,10 @@
 
 #include "dawn/native/d3d12/CommandBufferD3D12.h"
 
+#include <algorithm>
+#include <utility>
+#include <vector>
+
 #include "dawn/native/BindGroupTracker.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/DynamicUploader.h"

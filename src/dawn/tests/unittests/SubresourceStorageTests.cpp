@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
-
-#include "dawn/native/SubresourceStorage.h"
+#include <vector>
 
 #include "dawn/common/Log.h"
+#include "dawn/native/SubresourceStorage.h"
+#include "gtest/gtest.h"
 
 using namespace dawn::native;
 

@@ -17,9 +17,9 @@
 
 #include <stdint.h>
 #include <memory>
+#include <utility>
 
 #include "dawn/webgpu_cpp.h"
-
 #include "src/dawn/node/interop/Napi.h"
 
 namespace wgpu::binding {

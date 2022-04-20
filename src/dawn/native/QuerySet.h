@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_QUERYSET_H_
 #define SRC_DAWN_NATIVE_QUERYSET_H_
 
+#include <vector>
+
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/ObjectBase.h"

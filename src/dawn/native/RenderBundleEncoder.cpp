@@ -14,6 +14,8 @@
 
 #include "dawn/native/RenderBundleEncoder.h"
 
+#include <utility>
+
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"

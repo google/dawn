@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_BACKENDVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_BACKENDVK_H_
 
+#include <vector>
+
 #include "dawn/native/BackendConnection.h"
 
 #include "dawn/common/DynamicLib.h"

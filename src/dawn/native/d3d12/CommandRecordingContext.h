@@ -15,6 +15,7 @@
 #define SRC_DAWN_NATIVE_D3D12_COMMANDRECORDINGCONTEXT_H_
 
 #include <set>
+#include <vector>
 
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"

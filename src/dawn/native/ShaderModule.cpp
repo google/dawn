@@ -14,6 +14,7 @@
 
 #include "dawn/native/ShaderModule.h"
 
+#include <algorithm>
 #include <sstream>
 
 #include "absl/strings/str_format.h"

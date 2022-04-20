@@ -14,6 +14,7 @@
 
 #include "dawn/native/Device.h"
 
+#include <algorithm>
 #include <array>
 #include <mutex>
 #include <unordered_set>

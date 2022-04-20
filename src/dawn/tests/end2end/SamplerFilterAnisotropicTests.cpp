@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include <cmath>
+#include <vector>
 
 #include "dawn/tests/DawnTest.h"
-
 #include "dawn/common/Assert.h"
 #include "dawn/common/Constants.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"

@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_OPENGLFUNCTIONS_H_
 #define SRC_DAWN_NATIVE_OPENGL_OPENGLFUNCTIONS_H_
 
+#include <string>
 #include <unordered_set>
 
 #include "dawn/native/opengl/OpenGLFunctionsBase_autogen.h"

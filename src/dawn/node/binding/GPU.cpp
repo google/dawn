@@ -14,7 +14,10 @@
 
 #include "src/dawn/node/binding/GPU.h"
 
+#include <algorithm>
 #include <cstdlib>
+#include <string>
+#include <utility>
 
 #include "src/dawn/node/binding/GPUAdapter.h"
 

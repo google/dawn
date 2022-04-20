@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/tests/DawnTest.h"
+#include <vector>
 
 #include "dawn/native/d3d12/BufferD3D12.h"
 #include "dawn/native/d3d12/TextureD3D12.h"
+#include "dawn/tests/DawnTest.h"
 
 using namespace dawn::native::d3d12;
 

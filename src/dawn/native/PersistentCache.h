@@ -15,7 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_PERSISTENTCACHE_H_
 #define SRC_DAWN_NATIVE_PERSISTENTCACHE_H_
 
+#include <memory>
 #include <mutex>
+#include <utility>
 #include <vector>
 
 #include "dawn/native/Error.h"

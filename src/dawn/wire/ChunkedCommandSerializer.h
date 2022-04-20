@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cstring>
 #include <memory>
+#include <utility>
 
 #include "dawn/common/Alloc.h"
 #include "dawn/common/Compiler.h"

@@ -14,6 +14,8 @@
 
 #include "dawn/native/d3d12/SamplerD3D12.h"
 
+#include <algorithm>
+
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
 

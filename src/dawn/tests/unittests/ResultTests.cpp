@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#include <memory>
+#include <utility>
+#include <vector>
 
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/Result.h"
+#include "gtest/gtest.h"
 
 namespace {
 

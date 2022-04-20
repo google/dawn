@@ -13,10 +13,12 @@
 // limitations under the License.
 
 #include <cmath>
+#include <limits>
 #include <type_traits>
+#include <utility>
+#include <vector>
 
 #include "dawn/tests/DawnTest.h"
-
 #include "dawn/common/Assert.h"
 #include "dawn/common/Math.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"

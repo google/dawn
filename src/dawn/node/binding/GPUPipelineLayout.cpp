@@ -14,6 +14,8 @@
 
 #include "src/dawn/node/binding/GPUPipelineLayout.h"
 
+#include <utility>
+
 #include "src/dawn/node/utils/Debug.h"
 
 namespace wgpu::binding {

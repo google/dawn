@@ -14,7 +14,9 @@
 
 #include "dawn/native/opengl/CommandBufferGL.h"
 
+#include <algorithm>
 #include <cstring>
+#include <vector>
 
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/BindGroupTracker.h"

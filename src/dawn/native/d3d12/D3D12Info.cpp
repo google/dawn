@@ -14,6 +14,8 @@
 
 #include "dawn/native/d3d12/D3D12Info.h"
 
+#include <utility>
+
 #include "dawn/common/GPUInfo.h"
 #include "dawn/native/d3d12/AdapterD3D12.h"
 #include "dawn/native/d3d12/BackendD3D12.h"

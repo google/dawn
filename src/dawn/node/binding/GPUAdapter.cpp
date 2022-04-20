@@ -15,6 +15,7 @@
 #include "src/dawn/node/binding/GPUAdapter.h"
 
 #include <unordered_set>
+#include <vector>
 
 #include "src/dawn/node/binding/Errors.h"
 #include "src/dawn/node/binding/Flags.h"

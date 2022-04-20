@@ -14,6 +14,9 @@
 
 #include "dawn/native/vulkan/QuerySetVk.h"
 
+#include <algorithm>
+#include <vector>
+
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"

@@ -14,6 +14,8 @@
 
 #include "dawn/native/d3d12/HeapD3D12.h"
 
+#include <utility>
+
 namespace dawn::native::d3d12 {
     Heap::Heap(ComPtr<ID3D12Pageable> d3d12Pageable, MemorySegment memorySegment, uint64_t size)
         : Pageable(std::move(d3d12Pageable), memorySegment, size) {

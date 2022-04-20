@@ -15,6 +15,7 @@
 #include "dawn/tests/perf_tests/DawnPerfTestPlatform.h"
 
 #include <algorithm>
+#include <utility>
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/HashUtils.h"

@@ -13,10 +13,10 @@
 // limitations under the License.
 
 #include <numeric>
+#include <string>
 #include <vector>
 
 #include "dawn/tests/DawnTest.h"
-
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 

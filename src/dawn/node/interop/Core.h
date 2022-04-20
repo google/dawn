@@ -19,17 +19,18 @@
 #define SRC_DAWN_NODE_INTEROP_CORE_H_
 
 #include <cstdint>
+#include <limits>
 // TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
 #include <optional>  // NOLINT(build/include_order)
 #include <string>
 #include <type_traits>
 #include <unordered_map>
+#include <utility>
 // TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
 #include <variant>  // NOLINT(build/include_order)
 #include <vector>
 
 #include "src/dawn/node/interop/Napi.h"
-
 #include "src/dawn/node/utils/Debug.h"
 
 #define ENABLE_INTEROP_LOGGING 0  // Enable for verbose interop logging

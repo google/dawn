@@ -5,10 +5,10 @@
 // This file is a copy of Chromium's /src/base/containers/linked_list_unittest.cc
 
 #include <list>
-
-#include "gtest/gtest.h"
+#include <utility>
 
 #include "dawn/common/LinkedList.h"
+#include "gtest/gtest.h"
 
 class Node : public LinkNode<Node> {
   public:

@@ -14,7 +14,9 @@
 
 #include "dawn/native/vulkan/ComputePipelineVk.h"
 
+#include <memory>
 #include <utility>
+#include <vector>
 
 #include "dawn/native/CreatePipelineAsyncTask.h"
 #include "dawn/native/vulkan/DeviceVk.h"

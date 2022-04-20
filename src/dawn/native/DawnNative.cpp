@@ -14,6 +14,8 @@
 
 #include "dawn/native/DawnNative.h"
 
+#include <vector>
+
 #include "dawn/common/Log.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Buffer.h"

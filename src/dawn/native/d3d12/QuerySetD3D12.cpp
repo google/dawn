@@ -14,6 +14,8 @@
 
 #include "dawn/native/d3d12/QuerySetD3D12.h"
 
+#include <algorithm>
+
 #include "dawn/native/d3d12/D3D12Error.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"

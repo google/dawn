@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <fstream>
 #include <limits>
+#include <vector>
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/Log.h"
