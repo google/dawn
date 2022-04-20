@@ -198,6 +198,18 @@ func (q Query) CaseParameters() CaseParameters {
 // Append returns the query with the additional strings appended to the target
 func (q Query) Append(t Target, n ...string) Query {
 	switch t {
+	case Suite:
+		switch len(n) {
+		case 0:
+			return q
+		case 1:
+			if q.Suite != "" {
+				panic("cannot append suite when query already contains suite")
+			}
+			return Query{Suite: n[0]}
+		default:
+			panic("cannot append more than one suite")
+		}
 	case Files:
 		return q.AppendFiles(n...)
 	case Tests:

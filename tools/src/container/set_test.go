@@ -15,6 +15,7 @@
 package container_test
 
 import (
+	"fmt"
 	"testing"
 
 	"dawn.googlesource.com/dawn/tools/src/container"
@@ -142,4 +143,20 @@ func TestSetRemoveAll(t *testing.T) {
 	s.RemoveAll(container.NewSet("c", "a"))
 	expectEq(t, "len(s)", len(s), 1)
 	expectEq(t, "s.List()", s.List(), []string{"b"})
+}
+
+func TestSetOne(t *testing.T) {
+	expectEq(t, "NewSet[string]().One()", container.NewSet[string]().One(), "")
+	expectEq(t, `NewSet("x").One()`, container.NewSet("x").One(), "x")
+	if got := container.NewSet("x", "y").One(); got != "x" && got != "y" {
+		t.Errorf(`NewSet("x", "y").One() returned "%v"`, got)
+	}
+}
+
+func TestFormat(t *testing.T) {
+	expectEq(t, "NewSet[string]()", fmt.Sprint(container.NewSet[string]()), "[]")
+	expectEq(t, `NewSet("x")`, fmt.Sprint(container.NewSet("x")), `[x]`)
+	expectEq(t, `NewSet(1)`, fmt.Sprint(container.NewSet(1)), `[1]`)
+	expectEq(t, `NewSet("y", "x")`, fmt.Sprint(container.NewSet("y", "x")), `[x, y]`)
+	expectEq(t, `NewSet(3, 1, 2)`, fmt.Sprint(container.NewSet(3, 1, 2)), `[1, 2, 3]`)
 }
