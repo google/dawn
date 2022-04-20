@@ -178,10 +178,6 @@ TEST_P(RequiredBufferSizeInCopyTests, BufferSizeOnBoundary) {
                         kBytesPerRow * (rowsPerImage - 1) + kBytesPerBlock * copySize.width;
         DoTest(size, copySize, rowsPerImage);
 
-        // TODO(crbug.com/dawn/1278, 1288, 1289): Required buffer size for copy is wrong on D3D12.
-        bool mayNeedWorkaround = GetParam().mTextureDimension == wgpu::TextureDimension::e3D &&
-                                 extraRowsPerImage > 0 && copySize.depthOrArrayLayers > 1;
-        DAWN_SUPPRESS_TEST_IF(IsD3D12() && mayNeedWorkaround);
         size -= kBytesPerBlock;
         DoTest(size, copySize, rowsPerImage);
     }
@@ -190,25 +186,22 @@ TEST_P(RequiredBufferSizeInCopyTests, BufferSizeOnBoundary) {
 // The buffer doesn't have storage for any paddings on the last image. WebGPU spec doesn't require
 // storage for these paddings, and the copy operation will never access to these paddings. So it
 // should work.
-TEST_P(RequiredBufferSizeInCopyTests, MininumBufferSize) {
+TEST_P(RequiredBufferSizeInCopyTests, MinimumBufferSize) {
     wgpu::Extent3D copySize = kCopySize;
     copySize.depthOrArrayLayers = GetParam().mCopyDepth;
     const uint64_t extraRowsPerImage = GetParam().mExtraRowsPerImage;
     const uint64_t rowsPerImage = extraRowsPerImage + copySize.height;
 
-    // TODO(crbug.com/dawn/1278, 1288, 1289): Required buffer size for copy is wrong on D3D12.
-    bool mayNeedWorkaround = GetParam().mTextureDimension == wgpu::TextureDimension::e3D &&
-                             extraRowsPerImage > 0 && copySize.depthOrArrayLayers > 1;
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && mayNeedWorkaround);
     uint64_t size =
         kOffset + utils::RequiredBytesInCopy(kBytesPerRow, rowsPerImage, copySize, kFormat);
     DoTest(size, copySize, rowsPerImage);
 }
 
-DAWN_INSTANTIATE_TEST_P(RequiredBufferSizeInCopyTests,
-                        {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
-                         VulkanBackend()},
-                        {Type::T2BCopy, Type::B2TCopy},
-                        {wgpu::TextureDimension::e3D, wgpu::TextureDimension::e2D},
-                        {2u, 1u},
-                        {1u, 0u});
+DAWN_INSTANTIATE_TEST_P(
+    RequiredBufferSizeInCopyTests,
+    {D3D12Backend(), D3D12Backend({"d3d12_split_buffer_texture_copy_for_rows_per_image_paddings"}),
+     MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+    {Type::T2BCopy, Type::B2TCopy},
+    {wgpu::TextureDimension::e3D, wgpu::TextureDimension::e2D},
+    {2u, 1u},
+    {1u, 0u});

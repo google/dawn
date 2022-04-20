@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "dawn/common/Assert.h"
+#include "dawn/native/CommandValidation.h"
 #include "dawn/native/Format.h"
 #include "dawn/native/d3d12/BufferD3D12.h"
 #include "dawn/native/d3d12/CommandRecordingContext.h"
@@ -26,6 +27,63 @@
 #include "dawn/native/d3d12/DeviceD3D12.h"
 
 namespace dawn::native::d3d12 {
+
+    namespace {
+
+        uint64_t RequiredCopySizeByD3D12(const uint32_t bytesPerRow,
+                                         const uint32_t rowsPerImage,
+                                         const Extent3D& copySize,
+                                         const TexelBlockInfo& blockInfo) {
+            uint64_t bytesPerImage = Safe32x32(bytesPerRow, rowsPerImage);
+
+            // Required copy size for B2T/T2B copy on D3D12 is smaller than (but very close to)
+            // depth * bytesPerImage. The latter is already checked at ComputeRequiredBytesInCopy()
+            // in CommandValidation.cpp.
+            uint64_t requiredCopySizeByD3D12 = bytesPerImage * (copySize.depthOrArrayLayers - 1);
+
+            // When calculating the required copy size for B2T/T2B copy, D3D12 doesn't respect
+            // rowsPerImage paddings on the last image for 3D texture, but it does respect
+            // bytesPerRow paddings on the last row.
+            ASSERT(blockInfo.width == 1);
+            ASSERT(blockInfo.height == 1);
+            uint64_t lastRowBytes = Safe32x32(blockInfo.byteSize, copySize.width);
+            ASSERT(rowsPerImage > copySize.height);
+            uint64_t lastImageBytesByD3D12 =
+                Safe32x32(bytesPerRow, rowsPerImage - 1) + lastRowBytes;
+
+            requiredCopySizeByD3D12 += lastImageBytesByD3D12;
+            return requiredCopySizeByD3D12;
+        }
+
+        // This function is used to access whether we need a workaround for D3D12's wrong algorithm
+        // of calculating required buffer size for B2T/T2B copy. The workaround is needed only when
+        //   - The corresponding toggle is enabled.
+        //   - It is a 3D texture (so the format is uncompressed).
+        //   - There are multiple depth images to be copied (copySize.depthOrArrayLayers > 1).
+        //   - It has rowsPerImage paddings (rowsPerImage > copySize.height).
+        //   - The buffer size doesn't meet D3D12's requirement.
+        bool NeedBufferSizeWorkaroundForBufferTextureCopyOnD3D12(const BufferCopy& bufferCopy,
+                                                                 const TextureCopy& textureCopy,
+                                                                 const Extent3D& copySize) {
+            TextureBase* texture = textureCopy.texture.Get();
+            Device* device = ToBackend(texture->GetDevice());
+
+            if (!device->IsToggleEnabled(
+                    Toggle::D3D12SplitBufferTextureCopyForRowsPerImagePaddings) ||
+                texture->GetDimension() != wgpu::TextureDimension::e3D ||
+                copySize.depthOrArrayLayers <= 1 || bufferCopy.rowsPerImage <= copySize.height) {
+                return false;
+            }
+
+            const TexelBlockInfo& blockInfo =
+                texture->GetFormat().GetAspectInfo(textureCopy.aspect).block;
+            uint64_t requiredCopySizeByD3D12 = RequiredCopySizeByD3D12(
+                bufferCopy.bytesPerRow, bufferCopy.rowsPerImage, copySize, blockInfo);
+            return bufferCopy.buffer->GetAllocatedSize() - bufferCopy.offset <
+                   requiredCopySizeByD3D12;
+        }
+
+    }  // anonymous namespace
 
     ResultOrError<std::wstring> ConvertStringToWstring(const char* str) {
         size_t len = strlen(str);
@@ -285,8 +343,36 @@ namespace dawn::native::d3d12 {
                                  const BufferCopy& bufferCopy,
                                  const TextureCopy& textureCopy,
                                  const Extent3D& copySize) {
-        RecordBufferTextureCopyWithBufferHandle(direction, commandList,
-                                                ToBackend(bufferCopy.buffer)->GetD3D12Resource(),
+        ID3D12Resource* bufferResource = ToBackend(bufferCopy.buffer)->GetD3D12Resource();
+
+        if (NeedBufferSizeWorkaroundForBufferTextureCopyOnD3D12(bufferCopy, textureCopy,
+                                                                copySize)) {
+            // Split the copy into two copies if the size of bufferCopy.buffer doesn't meet D3D12's
+            // requirement and a workaround is needed:
+            //   - The first copy will copy all depth images but the last depth image,
+            //   - The second copy will copy the last depth image.
+            Extent3D extentForAllButTheLastImage = copySize;
+            extentForAllButTheLastImage.depthOrArrayLayers -= 1;
+            RecordBufferTextureCopyWithBufferHandle(
+                direction, commandList, bufferResource, bufferCopy.offset, bufferCopy.bytesPerRow,
+                bufferCopy.rowsPerImage, textureCopy, extentForAllButTheLastImage);
+
+            Extent3D extentForTheLastImage = copySize;
+            extentForTheLastImage.depthOrArrayLayers = 1;
+
+            TextureCopy textureCopyForTheLastImage = textureCopy;
+            textureCopyForTheLastImage.origin.z += copySize.depthOrArrayLayers - 1;
+
+            uint64_t copiedBytes = bufferCopy.bytesPerRow * bufferCopy.rowsPerImage *
+                                   (copySize.depthOrArrayLayers - 1);
+            RecordBufferTextureCopyWithBufferHandle(
+                direction, commandList, bufferResource, bufferCopy.offset + copiedBytes,
+                bufferCopy.bytesPerRow, bufferCopy.rowsPerImage, textureCopyForTheLastImage,
+                extentForTheLastImage);
+            return;
+        }
+
+        RecordBufferTextureCopyWithBufferHandle(direction, commandList, bufferResource,
                                                 bufferCopy.offset, bufferCopy.bytesPerRow,
                                                 bufferCopy.rowsPerImage, textureCopy, copySize);
     }

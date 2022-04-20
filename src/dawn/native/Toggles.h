@@ -67,6 +67,7 @@ namespace dawn::native {
         RecordDetailedTimingInTraceEvents,
         DisableTimestampQueryConversion,
         VulkanUseZeroInitializeWorkgroupMemoryExtension,
+        D3D12SplitBufferTextureCopyForRowsPerImagePaddings,
 
         EnumCount,
         InvalidEnum = EnumCount,

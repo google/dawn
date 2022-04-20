@@ -259,6 +259,15 @@ namespace dawn::native {
               "Initialize workgroup memory with OpConstantNull on Vulkan when the Vulkan extension "
               "VK_KHR_zero_initialize_workgroup_memory is supported.",
               "https://crbug.com/dawn/1302"}},
+            {Toggle::D3D12SplitBufferTextureCopyForRowsPerImagePaddings,
+             {"d3d12_split_buffer_texture_copy_for_rows_per_image_paddings",
+              "D3D12 requires more buffer storage than it should when rowsPerImage is greater than "
+              "copyHeight, which means there are pure padding row(s) on each image. In this "
+              "situation, the buffer used for B2T/T2B copy might be big enough according to "
+              "WebGPU's spec but it doesn't meet D3D12's requirement, then we need to workaround "
+              "it via split the copy operation into two copies, in order to make B2T/T2B copy "
+              "being done correctly on D3D12.",
+              "https://crbug.com/dawn/1289"}},
 
             // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
         }};
