@@ -92,19 +92,19 @@ namespace dawn {
     }
 
     LogMessage DebugLog() {
-        return {LogSeverity::Debug};
+        return LogMessage(LogSeverity::Debug);
     }
 
     LogMessage InfoLog() {
-        return {LogSeverity::Info};
+        return LogMessage(LogSeverity::Info);
     }
 
     LogMessage WarningLog() {
-        return {LogSeverity::Warning};
+        return LogMessage(LogSeverity::Warning);
     }
 
     LogMessage ErrorLog() {
-        return {LogSeverity::Error};
+        return LogMessage(LogSeverity::Error);
     }
 
     LogMessage DebugLog(const char* file, const char* function, int line) {

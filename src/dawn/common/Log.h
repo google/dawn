@@ -59,7 +59,7 @@ namespace dawn {
     // Essentially an ostringstream that will print itself in its destructor.
     class LogMessage {
       public:
-        LogMessage(LogSeverity severity);
+        explicit LogMessage(LogSeverity severity);
         ~LogMessage();
 
         LogMessage(LogMessage&& other) = default;
