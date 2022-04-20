@@ -625,11 +625,11 @@ TEST_P(TextureFormatTest, RGBA8UnormSrgb) {
 
     std::vector<float> uncompressedData;
     for (size_t i = 0; i < textureData.size(); i += 4) {
-        uncompressedData.push_back(SRGBToLinear(textureData[i + 0] / float(maxValue)));
-        uncompressedData.push_back(SRGBToLinear(textureData[i + 1] / float(maxValue)));
-        uncompressedData.push_back(SRGBToLinear(textureData[i + 2] / float(maxValue)));
+        uncompressedData.push_back(SRGBToLinear(textureData[i + 0] / static_cast<float>(maxValue)));
+        uncompressedData.push_back(SRGBToLinear(textureData[i + 1] / static_cast<float>(maxValue)));
+        uncompressedData.push_back(SRGBToLinear(textureData[i + 2] / static_cast<float>(maxValue)));
         // Alpha is linear for sRGB formats
-        uncompressedData.push_back(textureData[i + 3] / float(maxValue));
+        uncompressedData.push_back(textureData[i + 3] / static_cast<float>(maxValue));
     }
 
     DoFloatFormatSamplingTest(
@@ -652,11 +652,11 @@ TEST_P(TextureFormatTest, BGRA8UnormSrgb) {
     std::vector<float> uncompressedData;
     for (size_t i = 0; i < textureData.size(); i += 4) {
         // Note that R and B are swapped
-        uncompressedData.push_back(SRGBToLinear(textureData[i + 2] / float(maxValue)));
-        uncompressedData.push_back(SRGBToLinear(textureData[i + 1] / float(maxValue)));
-        uncompressedData.push_back(SRGBToLinear(textureData[i + 0] / float(maxValue)));
+        uncompressedData.push_back(SRGBToLinear(textureData[i + 2] / static_cast<float>(maxValue)));
+        uncompressedData.push_back(SRGBToLinear(textureData[i + 1] / static_cast<float>(maxValue)));
+        uncompressedData.push_back(SRGBToLinear(textureData[i + 0] / static_cast<float>(maxValue)));
         // Alpha is linear for sRGB formats
-        uncompressedData.push_back(textureData[i + 3] / float(maxValue));
+        uncompressedData.push_back(textureData[i + 3] / static_cast<float>(maxValue));
     }
 
     DoFloatFormatSamplingTest(
@@ -755,7 +755,7 @@ TEST_P(TextureFormatTest, RGB9E5Ufloat) {
     // exponent (15).
 
     float smallestExponent = std::pow(2.0f, -24.0f);
-    float largestExponent = std::pow(2.0f, float(31 - 24));
+    float largestExponent = std::pow(2.0f, float{31 - 24});
 
     auto MakeRGB9E5 = [](uint32_t r, uint32_t g, uint32_t b, uint32_t e) {
         ASSERT((r & 0x1FF) == r);

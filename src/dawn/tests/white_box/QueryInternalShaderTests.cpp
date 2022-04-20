@@ -62,8 +62,8 @@ namespace {
                     continue;
                 }
 
-                float errorRate =
-                    abs(static_cast<int64_t>(mExpected[i] - actual[i])) / float(mExpected[i]);
+                float errorRate = abs(static_cast<int64_t>(mExpected[i] - actual[i])) /
+                                  static_cast<float>(mExpected[i]);
                 if (errorRate > kErrorToleranceRatio) {
                     return testing::AssertionFailure()
                            << "Expected data[" << i << "] to be " << mExpected[i] << ", actual "

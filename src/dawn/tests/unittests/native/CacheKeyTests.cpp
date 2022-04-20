@@ -144,8 +144,8 @@ namespace dawn::native {
 
         TEST(CacheKeySerializerTests, FloatingTypes) {
             // Using 0s to avoid dealing with implementation specific float details.
-            EXPECT_THAT(CacheKey().Record(float(0)), CacheKeyEq(CacheKey(sizeof(float), 0)));
-            EXPECT_THAT(CacheKey().Record(double(0)), CacheKeyEq(CacheKey(sizeof(double), 0)));
+            EXPECT_THAT(CacheKey().Record(float{0}), CacheKeyEq(CacheKey(sizeof(float), 0)));
+            EXPECT_THAT(CacheKey().Record(double{0}), CacheKeyEq(CacheKey(sizeof(double), 0)));
         }
 
         TEST(CacheKeySerializerTests, LiteralStrings) {

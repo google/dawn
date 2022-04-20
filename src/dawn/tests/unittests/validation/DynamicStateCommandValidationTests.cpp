@@ -79,19 +79,19 @@ TEST_F(SetViewportTest, ViewportLargerThanFramebuffer) {
 
     // Width is larger than the rendertarget's width
     TestViewportCall(false, 0.0, 0.0, kWidth + 1.0, kHeight, 0.0, 1.0);
-    TestViewportCall(false, 0.0, 0.0, nextafter(float(kWidth), 1000.0f), kHeight, 0.0, 1.0);
+    TestViewportCall(false, 0.0, 0.0, nextafter(float{kWidth}, 1000.0f), kHeight, 0.0, 1.0);
 
     // Height is larger than the rendertarget's height
     TestViewportCall(false, 0.0, 0.0, kWidth, kHeight + 1.0, 0.0, 1.0);
-    TestViewportCall(false, 0.0, 0.0, kWidth, nextafter(float(kHeight), 1000.0f), 0.0, 1.0);
+    TestViewportCall(false, 0.0, 0.0, kWidth, nextafter(float{kHeight}, 1000.0f), 0.0, 1.0);
 
     // x + width is larger than the rendertarget's width
     TestViewportCall(false, 2.0, 0.0, kWidth - 1.0, kHeight, 0.0, 1.0);
-    TestViewportCall(false, 1.0, 0.0, nextafter(float(kWidth - 1.0), 1000.0f), kHeight, 0.0, 1.0);
+    TestViewportCall(false, 1.0, 0.0, nextafter(float{kWidth - 1.0}, 1000.0f), kHeight, 0.0, 1.0);
 
     // Height is larger than the rendertarget's height
     TestViewportCall(false, 0.0, 2.0, kWidth, kHeight - 1.0, 0.0, 1.0);
-    TestViewportCall(false, 0.0, 1.0, kWidth, nextafter(float(kHeight - 1.0), 1000.0f), 0.0, 1.0);
+    TestViewportCall(false, 0.0, 1.0, kWidth, nextafter(float{kHeight - 1.0}, 1000.0f), 0.0, 1.0);
 }
 
 // Test to check that negative x in viewport is disallowed
