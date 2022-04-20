@@ -45,6 +45,8 @@ target_sources(dawn_native PRIVATE
     "BindGroupTracker.h"
     "BindingInfo.cpp"
     "BindingInfo.h"
+    "BlobCache.cpp"
+    "BlobCache.h"
     "BuddyAllocator.cpp"
     "BuddyAllocator.h"
     "BuddyMemoryAllocator.cpp"

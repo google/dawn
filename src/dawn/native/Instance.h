@@ -25,6 +25,7 @@
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BackendConnection.h"
+#include "dawn/native/BlobCache.h"
 #include "dawn/native/Features.h"
 #include "dawn/native/Toggles.h"
 #include "dawn/native/dawn_platform.h"
@@ -76,8 +77,11 @@ namespace dawn::native {
         void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
         bool IsBeginCaptureOnStartupEnabled() const;
 
+        // TODO(dawn:1374): SetPlatform should become a private helper, and a NOT thread-safe
+        // testing version exposed for special testing cases.
         void SetPlatform(dawn::platform::Platform* platform);
         dawn::platform::Platform* GetPlatform();
+        BlobCache* GetBlobCache();
 
         const std::vector<std::string>& GetRuntimeSearchPaths() const;
 
@@ -115,6 +119,7 @@ namespace dawn::native {
 
         dawn::platform::Platform* mPlatform = nullptr;
         std::unique_ptr<dawn::platform::Platform> mDefaultPlatform;
+        std::unique_ptr<BlobCache> mBlobCache;
 
         std::vector<std::unique_ptr<BackendConnection>> mBackends;
         std::vector<Ref<AdapterBase>> mAdapters;

@@ -42,18 +42,15 @@ namespace dawn::platform {
 }  // namespace dawn::platform
 
 namespace dawn::native {
-    class AdapterBase;
     class AsyncTaskManager;
     class AttachmentState;
     class AttachmentStateBlueprint;
-    class BindGroupLayoutBase;
+    class BlobCache;
     class CallbackTaskManager;
     class DynamicUploader;
     class ErrorScopeStack;
-    class ExternalTextureBase;
     class OwnedCompilationMessages;
     class PersistentCache;
-    class StagingBufferBase;
     struct CallbackTask;
     struct InternalPipelineStore;
     struct ShaderModuleParseResult;
@@ -279,7 +276,9 @@ namespace dawn::native {
 
         MaybeError ValidateIsAlive() const;
 
+        // TODO(dawn:549): Deprecate PersistentCache, once it's usage in D3D12 shaders is removed.
         PersistentCache* GetPersistentCache();
+        BlobCache* GetBlobCache();
 
         virtual ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(
             size_t size) = 0;
@@ -546,6 +545,7 @@ namespace dawn::native {
 
         std::unique_ptr<InternalPipelineStore> mInternalPipelineStore;
 
+        // TODO(dawn:549): Deprecate PersistentCache, once it's usage in D3D12 shaders is removed.
         std::unique_ptr<PersistentCache> mPersistentCache;
 
         std::unique_ptr<CallbackTaskManager> mCallbackTaskManager;

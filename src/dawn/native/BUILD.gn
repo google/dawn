@@ -202,6 +202,8 @@ source_set("sources") {
     "BindGroupTracker.h",
     "BindingInfo.cpp",
     "BindingInfo.h",
+    "BlobCache.cpp",
+    "BlobCache.h",
     "BuddyAllocator.cpp",
     "BuddyAllocator.h",
     "BuddyMemoryAllocator.cpp",
