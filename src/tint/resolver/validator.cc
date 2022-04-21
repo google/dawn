@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/resolver/resolver.h"
+#include "src/tint/resolver/validator.h"
 
 #include <algorithm>
 #include <limits>
@@ -149,8 +149,104 @@ void TraverseCallChain(diag::List& diagnostics,
 
 }  // namespace
 
-bool Resolver::ValidateAtomic(const ast::Atomic* a,
-                              const sem::Atomic* s) const {
+Validator::Validator(ProgramBuilder* builder, SemHelper& sem)
+    : symbols_(builder->Symbols()),
+      diagnostics_(builder->Diagnostics()),
+      sem_(sem) {}
+
+Validator::~Validator() = default;
+
+void Validator::AddError(const std::string& msg, const Source& source) const {
+  diagnostics_.add_error(diag::System::Resolver, msg, source);
+}
+
+void Validator::AddWarning(const std::string& msg, const Source& source) const {
+  diagnostics_.add_warning(diag::System::Resolver, msg, source);
+}
+
+void Validator::AddNote(const std::string& msg, const Source& source) const {
+  diagnostics_.add_note(diag::System::Resolver, msg, source);
+}
+
+// https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
+bool Validator::IsPlain(const sem::Type* type) const {
+  return type->is_scalar() ||
+         type->IsAnyOf<sem::Atomic, sem::Vector, sem::Matrix, sem::Array,
+                       sem::Struct>();
+}
+
+// https://gpuweb.github.io/gpuweb/wgsl/#fixed-footprint-types
+bool Validator::IsFixedFootprint(const sem::Type* type) const {
+  return Switch(
+      type,                                      //
+      [&](const sem::Vector*) { return true; },  //
+      [&](const sem::Matrix*) { return true; },  //
+      [&](const sem::Atomic*) { return true; },
+      [&](const sem::Array* arr) {
+        return !arr->IsRuntimeSized() && IsFixedFootprint(arr->ElemType());
+      },
+      [&](const sem::Struct* str) {
+        for (auto* member : str->Members()) {
+          if (!IsFixedFootprint(member->Type())) {
+            return false;
+          }
+        }
+        return true;
+      },
+      [&](Default) { return type->is_scalar(); });
+}
+
+// https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable-types
+bool Validator::IsHostShareable(const sem::Type* type) const {
+  if (type->IsAnyOf<sem::I32, sem::U32, sem::F32>()) {
+    return true;
+  }
+  return Switch(
+      type,  //
+      [&](const sem::Vector* vec) { return IsHostShareable(vec->type()); },
+      [&](const sem::Matrix* mat) { return IsHostShareable(mat->type()); },
+      [&](const sem::Array* arr) { return IsHostShareable(arr->ElemType()); },
+      [&](const sem::Struct* str) {
+        for (auto* member : str->Members()) {
+          if (!IsHostShareable(member->Type())) {
+            return false;
+          }
+        }
+        return true;
+      },
+      [&](const sem::Atomic* atomic) {
+        return IsHostShareable(atomic->Type());
+      });
+}
+
+// https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
+bool Validator::IsStorable(const sem::Type* type) const {
+  return IsPlain(type) || type->IsAnyOf<sem::Texture, sem::Sampler>();
+}
+
+const ast::Statement* Validator::ClosestContinuing(
+    bool stop_at_loop,
+    sem::Statement* current_statement) const {
+  for (const auto* s = current_statement; s != nullptr; s = s->Parent()) {
+    if (stop_at_loop && s->Is<sem::LoopStatement>()) {
+      break;
+    }
+    if (s->Is<sem::LoopContinuingBlockStatement>()) {
+      return s->Declaration();
+    }
+    if (auto* f = As<sem::ForLoopStatement>(s->Parent())) {
+      if (f->Declaration()->continuing == s->Declaration()) {
+        return s->Declaration();
+      }
+      if (stop_at_loop) {
+        break;
+      }
+    }
+  }
+  return nullptr;
+}
+
+bool Validator::Atomic(const ast::Atomic* a, const sem::Atomic* s) const {
   // https://gpuweb.github.io/gpuweb/wgsl/#atomic-types
   // T must be either u32 or i32.
   if (!s->Type()->IsAnyOf<sem::U32, sem::I32>()) {
@@ -161,7 +257,7 @@ bool Resolver::ValidateAtomic(const ast::Atomic* a,
   return true;
 }
 
-bool Resolver::ValidateStorageTexture(const ast::StorageTexture* t) const {
+bool Validator::StorageTexture(const ast::StorageTexture* t) const {
   switch (t->access) {
     case ast::Access::kWrite:
       break;
@@ -190,11 +286,10 @@ bool Resolver::ValidateStorageTexture(const ast::StorageTexture* t) const {
   return true;
 }
 
-bool Resolver::ValidateVariableConstructorOrCast(
-    const ast::Variable* var,
-    ast::StorageClass storage_class,
-    const sem::Type* storage_ty,
-    const sem::Type* rhs_ty) const {
+bool Validator::VariableConstructorOrCast(const ast::Variable* var,
+                                          ast::StorageClass storage_class,
+                                          const sem::Type* storage_ty,
+                                          const sem::Type* rhs_ty) const {
   auto* value_type = rhs_ty->UnwrapRef();  // Implicit load of RHS
 
   // Value type has to match storage type
@@ -229,11 +324,10 @@ bool Resolver::ValidateVariableConstructorOrCast(
   return true;
 }
 
-bool Resolver::ValidateStorageClassLayout(
-    const sem::Type* store_ty,
-    ast::StorageClass sc,
-    Source source,
-    ValidTypeStorageLayouts& layouts) const {
+bool Validator::StorageClassLayout(const sem::Type* store_ty,
+                                   ast::StorageClass sc,
+                                   Source source,
+                                   ValidTypeStorageLayouts& layouts) const {
   // https://gpuweb.github.io/gpuweb/wgsl/#storage-class-layout-constraints
 
   auto is_uniform_struct_or_array = [sc](const sem::Type* ty) {
@@ -255,7 +349,7 @@ bool Resolver::ValidateStorageClassLayout(
   };
 
   auto member_name_of = [this](const sem::StructMember* sm) {
-    return builder_->Symbols().NameFor(sm->Declaration()->symbol);
+    return symbols_.NameFor(sm->Declaration()->symbol);
   };
 
   // Cache result of type + storage class pair.
@@ -273,9 +367,9 @@ bool Resolver::ValidateStorageClassLayout(
       uint32_t required_align = required_alignment_of(m->Type());
 
       // Recurse into the member type.
-      if (!ValidateStorageClassLayout(
-              m->Type(), sc, m->Declaration()->type->source, layouts)) {
-        AddNote("see layout of struct:\n" + str->Layout(builder_->Symbols()),
+      if (!StorageClassLayout(m->Type(), sc, m->Declaration()->type->source,
+                              layouts)) {
+        AddNote("see layout of struct:\n" + str->Layout(symbols_),
                 str->Declaration()->source);
         return false;
       }
@@ -283,7 +377,7 @@ bool Resolver::ValidateStorageClassLayout(
       // Validate that member is at a valid byte offset
       if (m->Offset() % required_align != 0) {
         AddError("the offset of a struct member of type '" +
-                     m->Type()->UnwrapRef()->FriendlyName(builder_->Symbols()) +
+                     m->Type()->UnwrapRef()->FriendlyName(symbols_) +
                      "' in storage class '" + ast::ToString(sc) +
                      "' must be a multiple of " +
                      std::to_string(required_align) + " bytes, but '" +
@@ -293,13 +387,13 @@ bool Resolver::ValidateStorageClassLayout(
                      std::to_string(required_align) + ") on this member",
                  m->Declaration()->source);
 
-        AddNote("see layout of struct:\n" + str->Layout(builder_->Symbols()),
+        AddNote("see layout of struct:\n" + str->Layout(symbols_),
                 str->Declaration()->source);
 
         if (auto* member_str = m->Type()->As<sem::Struct>()) {
-          AddNote("and layout of struct member:\n" +
-                      member_str->Layout(builder_->Symbols()),
-                  member_str->Declaration()->source);
+          AddNote(
+              "and layout of struct member:\n" + member_str->Layout(symbols_),
+              member_str->Declaration()->source);
         }
 
         return false;
@@ -322,12 +416,12 @@ bool Resolver::ValidateStorageClassLayout(
                   "'. Consider setting @align(16) on this member",
               m->Declaration()->source);
 
-          AddNote("see layout of struct:\n" + str->Layout(builder_->Symbols()),
+          AddNote("see layout of struct:\n" + str->Layout(symbols_),
                   str->Declaration()->source);
 
           auto* prev_member_str = prev_member->Type()->As<sem::Struct>();
           AddNote("and layout of previous member struct:\n" +
-                      prev_member_str->Layout(builder_->Symbols()),
+                      prev_member_str->Layout(symbols_),
                   prev_member_str->Declaration()->source);
           return false;
         }
@@ -342,7 +436,7 @@ bool Resolver::ValidateStorageClassLayout(
     // TODO(crbug.com/tint/1388): Ideally we'd pass the source for nested
     // element type here, but we can't easily get that from the semantic node.
     // We should consider recursing through the AST type nodes instead.
-    if (!ValidateStorageClassLayout(arr->ElemType(), sc, source, layouts)) {
+    if (!StorageClassLayout(arr->ElemType(), sc, source, layouts)) {
       return false;
     }
 
@@ -384,12 +478,11 @@ bool Resolver::ValidateStorageClassLayout(
   return true;
 }
 
-bool Resolver::ValidateStorageClassLayout(
-    const sem::Variable* var,
-    ValidTypeStorageLayouts& layouts) const {
+bool Validator::StorageClassLayout(const sem::Variable* var,
+                                   ValidTypeStorageLayouts& layouts) const {
   if (auto* str = var->Type()->UnwrapRef()->As<sem::Struct>()) {
-    if (!ValidateStorageClassLayout(str, var->StorageClass(),
-                                    str->Declaration()->source, layouts)) {
+    if (!StorageClassLayout(str, var->StorageClass(),
+                            str->Declaration()->source, layouts)) {
       AddNote("see declaration of variable", var->Declaration()->source);
       return false;
     }
@@ -398,8 +491,8 @@ bool Resolver::ValidateStorageClassLayout(
     if (var->Declaration()->type) {
       source = var->Declaration()->type->source;
     }
-    if (!ValidateStorageClassLayout(var->Type()->UnwrapRef(),
-                                    var->StorageClass(), source, layouts)) {
+    if (!StorageClassLayout(var->Type()->UnwrapRef(), var->StorageClass(),
+                            source, layouts)) {
       return false;
     }
   }
@@ -407,9 +500,13 @@ bool Resolver::ValidateStorageClassLayout(
   return true;
 }
 
-bool Resolver::ValidateGlobalVariable(const sem::Variable* var) const {
+bool Validator::GlobalVariable(
+    const sem::Variable* var,
+    std::unordered_map<uint32_t, const sem::Variable*> constant_ids,
+    std::unordered_map<const sem::Type*, const Source&> atomic_composite_info)
+    const {
   auto* decl = var->Declaration();
-  if (!ValidateNoDuplicateAttributes(decl->attributes)) {
+  if (!NoDuplicateAttributes(decl->attributes)) {
     return false;
   }
 
@@ -417,8 +514,8 @@ bool Resolver::ValidateGlobalVariable(const sem::Variable* var) const {
     if (decl->is_const) {
       if (auto* id_attr = attr->As<ast::IdAttribute>()) {
         uint32_t id = id_attr->value;
-        auto it = constant_ids_.find(id);
-        if (it != constant_ids_.end() && it->second != var) {
+        auto it = constant_ids.find(id);
+        if (it != constant_ids.end() && it->second != var) {
           AddError("pipeline constant IDs must be unique", attr->source);
           AddNote("a pipeline constant with an ID of " + std::to_string(id) +
                       " was previously declared "
@@ -502,18 +599,21 @@ bool Resolver::ValidateGlobalVariable(const sem::Variable* var) const {
   }
 
   if (!decl->is_const) {
-    if (!ValidateAtomicVariable(var)) {
+    if (!AtomicVariable(var, atomic_composite_info)) {
       return false;
     }
   }
 
-  return ValidateVariable(var);
+  return Variable(var);
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#atomic-types
 // Atomic types may only be instantiated by variables in the workgroup storage
 // class or by storage buffer variables with a read_write access mode.
-bool Resolver::ValidateAtomicVariable(const sem::Variable* var) const {
+bool Validator::AtomicVariable(
+    const sem::Variable* var,
+    std::unordered_map<const sem::Type*, const Source&> atomic_composite_info)
+    const {
   auto sc = var->StorageClass();
   auto* decl = var->Declaration();
   auto access = var->Access();
@@ -529,8 +629,8 @@ bool Resolver::ValidateAtomicVariable(const sem::Variable* var) const {
       return false;
     }
   } else if (type->IsAnyOf<sem::Struct, sem::Array>()) {
-    auto found = atomic_composite_info_.find(type);
-    if (found != atomic_composite_info_.end()) {
+    auto found = atomic_composite_info.find(type);
+    if (found != atomic_composite_info.end()) {
       if (sc != ast::StorageClass::kStorage &&
           sc != ast::StorageClass::kWorkgroup) {
         AddError(
@@ -557,12 +657,12 @@ bool Resolver::ValidateAtomicVariable(const sem::Variable* var) const {
   return true;
 }
 
-bool Resolver::ValidateVariable(const sem::Variable* var) const {
+bool Validator::Variable(const sem::Variable* var) const {
   auto* decl = var->Declaration();
   auto* storage_ty = var->Type()->UnwrapRef();
 
   if (var->Is<sem::GlobalVariable>()) {
-    auto name = builder_->Symbols().NameFor(decl->symbol);
+    auto name = symbols_.NameFor(decl->symbol);
     if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
       auto* kind = var->Declaration()->is_const ? "let" : "var";
       AddError(
@@ -634,9 +734,9 @@ bool Resolver::ValidateVariable(const sem::Variable* var) const {
   return true;
 }
 
-bool Resolver::ValidateFunctionParameter(const ast::Function* func,
-                                         const sem::Variable* var) const {
-  if (!ValidateVariable(var)) {
+bool Validator::FunctionParameter(const ast::Function* func,
+                                  const sem::Variable* var) const {
+  if (!Variable(var)) {
     return false;
   }
 
@@ -697,10 +797,10 @@ bool Resolver::ValidateFunctionParameter(const ast::Function* func,
   return true;
 }
 
-bool Resolver::ValidateBuiltinAttribute(const ast::BuiltinAttribute* attr,
-                                        const sem::Type* storage_ty,
-                                        ast::PipelineStage stage,
-                                        const bool is_input) const {
+bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
+                                 const sem::Type* storage_ty,
+                                 ast::PipelineStage stage,
+                                 const bool is_input) const {
   auto* type = storage_ty->UnwrapRef();
   std::stringstream stage_name;
   stage_name << stage;
@@ -816,9 +916,8 @@ bool Resolver::ValidateBuiltinAttribute(const ast::BuiltinAttribute* attr,
   return true;
 }
 
-bool Resolver::ValidateInterpolateAttribute(
-    const ast::InterpolateAttribute* attr,
-    const sem::Type* storage_ty) const {
+bool Validator::InterpolateAttribute(const ast::InterpolateAttribute* attr,
+                                     const sem::Type* storage_ty) const {
   auto* type = storage_ty->UnwrapRef();
 
   if (type->is_integer_scalar_or_vector() &&
@@ -839,11 +938,11 @@ bool Resolver::ValidateInterpolateAttribute(
   return true;
 }
 
-bool Resolver::ValidateFunction(const sem::Function* func,
-                                ast::PipelineStage stage) const {
+bool Validator::Function(const sem::Function* func,
+                         ast::PipelineStage stage) const {
   auto* decl = func->Declaration();
 
-  auto name = builder_->Symbols().NameFor(decl->symbol);
+  auto name = symbols_.NameFor(decl->symbol);
   if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
     AddError(
         "'" + name + "' is a builtin and cannot be redeclared as a function",
@@ -873,7 +972,7 @@ bool Resolver::ValidateFunction(const sem::Function* func,
   }
 
   for (size_t i = 0; i < decl->params.size(); i++) {
-    if (!ValidateFunctionParameter(decl, func->Parameters()[i])) {
+    if (!FunctionParameter(decl, func->Parameters()[i])) {
       return false;
     }
   }
@@ -898,8 +997,7 @@ bool Resolver::ValidateFunction(const sem::Function* func,
                    decl->attributes,
                    ast::DisabledValidation::kFunctionHasNoBody)) {
       TINT_ICE(Resolver, diagnostics_)
-          << "Function " << builder_->Symbols().NameFor(decl->symbol)
-          << " has no body";
+          << "Function " << symbols_.NameFor(decl->symbol) << " has no body";
     }
 
     for (auto* attr : decl->return_type_attributes) {
@@ -925,7 +1023,7 @@ bool Resolver::ValidateFunction(const sem::Function* func,
   }
 
   if (decl->IsEntryPoint()) {
-    if (!ValidateEntryPoint(func, stage)) {
+    if (!EntryPoint(func, stage)) {
       return false;
     }
   }
@@ -945,8 +1043,8 @@ bool Resolver::ValidateFunction(const sem::Function* func,
   return true;
 }
 
-bool Resolver::ValidateEntryPoint(const sem::Function* func,
-                                  ast::PipelineStage stage) const {
+bool Validator::EntryPoint(const sem::Function* func,
+                           ast::PipelineStage stage) const {
   auto* decl = func->Declaration();
 
   // Use a lambda to validate the entry point attributes for a type.
@@ -994,7 +1092,7 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func,
           return false;
         }
 
-        if (!ValidateBuiltinAttribute(
+        if (!BuiltinAttribute(
                 builtin, ty, stage,
                 /* is_input */ param_or_ret == ParamOrRetType::kParameter)) {
           return false;
@@ -1011,14 +1109,14 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func,
 
         bool is_input = param_or_ret == ParamOrRetType::kParameter;
 
-        if (!ValidateLocationAttribute(location, ty, locations, stage, source,
-                                       is_input)) {
+        if (!LocationAttribute(location, ty, locations, stage, source,
+                               is_input)) {
           return false;
         }
       } else if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
         if (decl->PipelineStage() == ast::PipelineStage::kCompute) {
           is_invalid_compute_shader_attribute = true;
-        } else if (!ValidateInterpolateAttribute(interpolate, ty)) {
+        } else if (!InterpolateAttribute(interpolate, ty)) {
           return false;
         }
         interpolate_attribute = interpolate;
@@ -1122,7 +1220,7 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func,
                 member->Declaration()->source, param_or_ret,
                 /*is_struct_member*/ true)) {
           AddNote("while analysing entry point '" +
-                      builder_->Symbols().NameFor(decl->symbol) + "'",
+                      symbols_.NameFor(decl->symbol) + "'",
                   decl->source);
           return false;
         }
@@ -1206,7 +1304,7 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func,
       // variables in the resource interface of a given shader must not have
       // the same group and binding values, when considered as a pair of
       // values.
-      auto func_name = builder_->Symbols().NameFor(decl->symbol);
+      auto func_name = symbols_.NameFor(decl->symbol);
       AddError("entry point '" + func_name +
                    "' references multiple variables that use the "
                    "same resource binding @group(" +
@@ -1222,7 +1320,7 @@ bool Resolver::ValidateEntryPoint(const sem::Function* func,
   return true;
 }
 
-bool Resolver::ValidateStatements(const ast::StatementList& stmts) const {
+bool Validator::Statements(const ast::StatementList& stmts) const {
   for (auto* stmt : stmts) {
     if (!sem_.Get(stmt)->IsReachable()) {
       /// TODO(https://github.com/gpuweb/gpuweb/issues/2378): This may need to
@@ -1234,8 +1332,8 @@ bool Resolver::ValidateStatements(const ast::StatementList& stmts) const {
   return true;
 }
 
-bool Resolver::ValidateBitcast(const ast::BitcastExpression* cast,
-                               const sem::Type* to) const {
+bool Validator::Bitcast(const ast::BitcastExpression* cast,
+                        const sem::Type* to) const {
   auto* from = sem_.TypeOf(cast->expr)->UnwrapRef();
   if (!from->is_numeric_scalar_or_vector()) {
     AddError("'" + sem_.TypeNameOf(from) + "' cannot be bitcast",
@@ -1265,13 +1363,15 @@ bool Resolver::ValidateBitcast(const ast::BitcastExpression* cast,
   return true;
 }
 
-bool Resolver::ValidateBreakStatement(const sem::Statement* stmt) const {
+bool Validator::BreakStatement(const sem::Statement* stmt,
+                               sem::Statement* current_statement) const {
   if (!stmt->FindFirstParent<sem::LoopBlockStatement, sem::CaseStatement>()) {
     AddError("break statement must be in a loop or switch case",
              stmt->Declaration()->source);
     return false;
   }
-  if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ true)) {
+  if (auto* continuing =
+          ClosestContinuing(/*stop_at_loop*/ true, current_statement)) {
     auto fail = [&](const char* note_msg, const Source& note_src) {
       constexpr const char* kErrorMsg =
           "break statement in a continuing block must be the single statement "
@@ -1332,8 +1432,10 @@ bool Resolver::ValidateBreakStatement(const sem::Statement* stmt) const {
   return true;
 }
 
-bool Resolver::ValidateContinueStatement(const sem::Statement* stmt) const {
-  if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ true)) {
+bool Validator::ContinueStatement(const sem::Statement* stmt,
+                                  sem::Statement* current_statement) const {
+  if (auto* continuing =
+          ClosestContinuing(/*stop_at_loop*/ true, current_statement)) {
     AddError("continuing blocks must not contain a continue statement",
              stmt->Declaration()->source);
     if (continuing != stmt->Declaration() &&
@@ -1352,8 +1454,10 @@ bool Resolver::ValidateContinueStatement(const sem::Statement* stmt) const {
   return true;
 }
 
-bool Resolver::ValidateDiscardStatement(const sem::Statement* stmt) const {
-  if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ false)) {
+bool Validator::DiscardStatement(const sem::Statement* stmt,
+                                 sem::Statement* current_statement) const {
+  if (auto* continuing =
+          ClosestContinuing(/*stop_at_loop*/ false, current_statement)) {
     AddError("continuing blocks must not contain a discard statement",
              stmt->Declaration()->source);
     if (continuing != stmt->Declaration() &&
@@ -1365,7 +1469,7 @@ bool Resolver::ValidateDiscardStatement(const sem::Statement* stmt) const {
   return true;
 }
 
-bool Resolver::ValidateFallthroughStatement(const sem::Statement* stmt) const {
+bool Validator::FallthroughStatement(const sem::Statement* stmt) const {
   if (auto* block = As<sem::BlockStatement>(stmt->Parent())) {
     if (auto* c = As<sem::CaseStatement>(block->Parent())) {
       if (block->Declaration()->Last() == stmt->Declaration()) {
@@ -1388,7 +1492,7 @@ bool Resolver::ValidateFallthroughStatement(const sem::Statement* stmt) const {
   return false;
 }
 
-bool Resolver::ValidateElseStatement(const sem::ElseStatement* stmt) const {
+bool Validator::ElseStatement(const sem::ElseStatement* stmt) const {
   if (auto* cond = stmt->Condition()) {
     auto* cond_ty = cond->Type()->UnwrapRef();
     if (!cond_ty->Is<sem::Bool>()) {
@@ -1401,7 +1505,7 @@ bool Resolver::ValidateElseStatement(const sem::ElseStatement* stmt) const {
   return true;
 }
 
-bool Resolver::ValidateLoopStatement(const sem::LoopStatement* stmt) const {
+bool Validator::LoopStatement(const sem::LoopStatement* stmt) const {
   if (stmt->Behaviors().Empty()) {
     AddError("loop does not exit", stmt->Declaration()->source.Begin());
     return false;
@@ -1409,8 +1513,7 @@ bool Resolver::ValidateLoopStatement(const sem::LoopStatement* stmt) const {
   return true;
 }
 
-bool Resolver::ValidateForLoopStatement(
-    const sem::ForLoopStatement* stmt) const {
+bool Validator::ForLoopStatement(const sem::ForLoopStatement* stmt) const {
   if (stmt->Behaviors().Empty()) {
     AddError("for-loop does not exit", stmt->Declaration()->source.Begin());
     return false;
@@ -1427,7 +1530,7 @@ bool Resolver::ValidateForLoopStatement(
   return true;
 }
 
-bool Resolver::ValidateIfStatement(const sem::IfStatement* stmt) const {
+bool Validator::IfStatement(const sem::IfStatement* stmt) const {
   auto* cond_ty = stmt->Condition()->Type()->UnwrapRef();
   if (!cond_ty->Is<sem::Bool>()) {
     AddError(
@@ -1438,7 +1541,7 @@ bool Resolver::ValidateIfStatement(const sem::IfStatement* stmt) const {
   return true;
 }
 
-bool Resolver::ValidateBuiltinCall(const sem::Call* call) const {
+bool Validator::BuiltinCall(const sem::Call* call) const {
   if (call->Type()->Is<sem::Void>()) {
     bool is_call_statement = false;
     if (auto* call_stmt = As<ast::CallStatement>(call->Stmt()->Declaration())) {
@@ -1451,7 +1554,7 @@ bool Resolver::ValidateBuiltinCall(const sem::Call* call) const {
       // If the called function does not return a value, a function call
       // statement should be used instead.
       auto* ident = call->Declaration()->target.name;
-      auto name = builder_->Symbols().NameFor(ident->symbol);
+      auto name = symbols_.NameFor(ident->symbol);
       AddError("builtin '" + name + "' does not return a value",
                call->Declaration()->source);
       return false;
@@ -1461,7 +1564,7 @@ bool Resolver::ValidateBuiltinCall(const sem::Call* call) const {
   return true;
 }
 
-bool Resolver::ValidateTextureBuiltinFunction(const sem::Call* call) const {
+bool Validator::TextureBuiltinFunction(const sem::Call* call) const {
   auto* builtin = call->Target()->As<sem::Builtin>();
   if (!builtin) {
     return false;
@@ -1533,11 +1636,12 @@ bool Resolver::ValidateTextureBuiltinFunction(const sem::Call* call) const {
          check_arg_is_constexpr(sem::ParameterUsage::kComponent, 0, 3);
 }
 
-bool Resolver::ValidateFunctionCall(const sem::Call* call) const {
+bool Validator::FunctionCall(const sem::Call* call,
+                             sem::Statement* current_statement) const {
   auto* decl = call->Declaration();
   auto* target = call->Target()->As<sem::Function>();
   auto sym = decl->target.name->symbol;
-  auto name = builder_->Symbols().NameFor(sym);
+  auto name = symbols_.NameFor(sym);
 
   if (target->Declaration()->IsEntryPoint()) {
     // https://www.w3.org/TR/WGSL/#function-restriction
@@ -1575,7 +1679,7 @@ bool Resolver::ValidateFunctionCall(const sem::Call* call) const {
     if (param_type->Is<sem::Pointer>()) {
       auto is_valid = false;
       if (auto* ident_expr = arg_expr->As<ast::IdentifierExpression>()) {
-        auto* var = ResolvedSymbol<sem::Variable>(ident_expr);
+        auto* var = sem_.ResolvedSymbol<sem::Variable>(ident_expr);
         if (!var) {
           TINT_ICE(Resolver, diagnostics_) << "failed to resolve identifier";
           return false;
@@ -1587,7 +1691,7 @@ bool Resolver::ValidateFunctionCall(const sem::Call* call) const {
         if (unary->op == ast::UnaryOp::kAddressOf) {
           if (auto* ident_unary =
                   unary->expr->As<ast::IdentifierExpression>()) {
-            auto* var = ResolvedSymbol<sem::Variable>(ident_unary);
+            auto* var = sem_.ResolvedSymbol<sem::Variable>(ident_unary);
             if (!var) {
               TINT_ICE(Resolver, diagnostics_)
                   << "failed to resolve identifier";
@@ -1634,7 +1738,8 @@ bool Resolver::ValidateFunctionCall(const sem::Call* call) const {
   }
 
   if (call->Behaviors().Contains(sem::Behavior::kDiscard)) {
-    if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ false)) {
+    if (auto* continuing =
+            ClosestContinuing(/*stop_at_loop*/ false, current_statement)) {
       AddError(
           "cannot call a function that may discard inside a continuing block",
           call->Declaration()->source);
@@ -1649,7 +1754,7 @@ bool Resolver::ValidateFunctionCall(const sem::Call* call) const {
   return true;
 }
 
-bool Resolver::ValidateStructureConstructorOrCast(
+bool Validator::StructureConstructorOrCast(
     const ast::CallExpression* ctor,
     const sem::Struct* struct_type) const {
   if (!struct_type->IsConstructible()) {
@@ -1684,9 +1789,8 @@ bool Resolver::ValidateStructureConstructorOrCast(
   return true;
 }
 
-bool Resolver::ValidateArrayConstructorOrCast(
-    const ast::CallExpression* ctor,
-    const sem::Array* array_type) const {
+bool Validator::ArrayConstructorOrCast(const ast::CallExpression* ctor,
+                                       const sem::Array* array_type) const {
   auto& values = ctor->args;
   auto* elem_ty = array_type->ElemType();
   for (auto* value : values) {
@@ -1726,9 +1830,8 @@ bool Resolver::ValidateArrayConstructorOrCast(
   return true;
 }
 
-bool Resolver::ValidateVectorConstructorOrCast(
-    const ast::CallExpression* ctor,
-    const sem::Vector* vec_type) const {
+bool Validator::VectorConstructorOrCast(const ast::CallExpression* ctor,
+                                        const sem::Vector* vec_type) const {
   auto& values = ctor->args;
   auto* elem_ty = vec_type->type();
   size_t value_cardinality_sum = 0;
@@ -1790,8 +1893,7 @@ bool Resolver::ValidateVectorConstructorOrCast(
   return true;
 }
 
-bool Resolver::ValidateVector(const sem::Vector* ty,
-                              const Source& source) const {
+bool Validator::Vector(const sem::Vector* ty, const Source& source) const {
   if (!ty->type()->is_scalar()) {
     AddError("vector element type must be 'bool', 'f32', 'i32' or 'u32'",
              source);
@@ -1800,8 +1902,7 @@ bool Resolver::ValidateVector(const sem::Vector* ty,
   return true;
 }
 
-bool Resolver::ValidateMatrix(const sem::Matrix* ty,
-                              const Source& source) const {
+bool Validator::Matrix(const sem::Matrix* ty, const Source& source) const {
   if (!ty->is_float_matrix()) {
     AddError("matrix element type must be 'f32'", source);
     return false;
@@ -1809,16 +1910,15 @@ bool Resolver::ValidateMatrix(const sem::Matrix* ty,
   return true;
 }
 
-bool Resolver::ValidateMatrixConstructorOrCast(
-    const ast::CallExpression* ctor,
-    const sem::Matrix* matrix_ty) const {
+bool Validator::MatrixConstructorOrCast(const ast::CallExpression* ctor,
+                                        const sem::Matrix* matrix_ty) const {
   auto& values = ctor->args;
   // Zero Value expression
   if (values.empty()) {
     return true;
   }
 
-  if (!ValidateMatrix(matrix_ty, ctor->source)) {
+  if (!Matrix(matrix_ty, ctor->source)) {
     return false;
   }
 
@@ -1844,7 +1944,7 @@ bool Resolver::ValidateMatrixConstructorOrCast(
       if (i > 0) {
         ss << ", ";
       }
-      ss << arg_tys[i]->FriendlyName(builder_->Symbols());
+      ss << arg_tys[i]->FriendlyName(symbols_);
     }
     ss << ")" << std::endl << std::endl;
     ss << "3 candidates available:" << std::endl;
@@ -1885,8 +1985,8 @@ bool Resolver::ValidateMatrixConstructorOrCast(
   return true;
 }
 
-bool Resolver::ValidateScalarConstructorOrCast(const ast::CallExpression* ctor,
-                                               const sem::Type* ty) const {
+bool Validator::ScalarConstructorOrCast(const ast::CallExpression* ctor,
+                                        const sem::Type* ty) const {
   if (ctor->args.size() == 0) {
     return true;
   }
@@ -1921,7 +2021,8 @@ bool Resolver::ValidateScalarConstructorOrCast(const ast::CallExpression* ctor,
   return true;
 }
 
-bool Resolver::ValidatePipelineStages() const {
+bool Validator::PipelineStages(
+    const std::vector<sem::Function*>& entry_points) const {
   auto check_workgroup_storage = [&](const sem::Function* func,
                                      const sem::Function* entry_point) {
     auto stage = entry_point->Declaration()->PipelineStage();
@@ -1940,17 +2041,14 @@ bool Resolver::ValidatePipelineStages() const {
           }
           AddNote("variable is declared here", var->Declaration()->source);
           if (func != entry_point) {
-            TraverseCallChain(diagnostics_, entry_point, func,
-                              [&](const sem::Function* f) {
-                                AddNote("called by function '" +
-                                            builder_->Symbols().NameFor(
-                                                f->Declaration()->symbol) +
-                                            "'",
-                                        f->Declaration()->source);
-                              });
+            TraverseCallChain(
+                diagnostics_, entry_point, func, [&](const sem::Function* f) {
+                  AddNote("called by function '" +
+                              symbols_.NameFor(f->Declaration()->symbol) + "'",
+                          f->Declaration()->source);
+                });
             AddNote("called by entry point '" +
-                        builder_->Symbols().NameFor(
-                            entry_point->Declaration()->symbol) +
+                        symbols_.NameFor(entry_point->Declaration()->symbol) +
                         "'",
                     entry_point->Declaration()->source);
           }
@@ -1961,7 +2059,7 @@ bool Resolver::ValidatePipelineStages() const {
     return true;
   };
 
-  for (auto* entry_point : entry_points_) {
+  for (auto* entry_point : entry_points) {
     if (!check_workgroup_storage(entry_point, entry_point)) {
       return false;
     }
@@ -1985,15 +2083,12 @@ bool Resolver::ValidatePipelineStages() const {
         if (func != entry_point) {
           TraverseCallChain(
               diagnostics_, entry_point, func, [&](const sem::Function* f) {
-                AddNote(
-                    "called by function '" +
-                        builder_->Symbols().NameFor(f->Declaration()->symbol) +
-                        "'",
-                    f->Declaration()->source);
+                AddNote("called by function '" +
+                            symbols_.NameFor(f->Declaration()->symbol) + "'",
+                        f->Declaration()->source);
               });
           AddNote("called by entry point '" +
-                      builder_->Symbols().NameFor(
-                          entry_point->Declaration()->symbol) +
+                      symbols_.NameFor(entry_point->Declaration()->symbol) +
                       "'",
                   entry_point->Declaration()->source);
         }
@@ -2003,7 +2098,7 @@ bool Resolver::ValidatePipelineStages() const {
     return true;
   };
 
-  for (auto* entry_point : entry_points_) {
+  for (auto* entry_point : entry_points) {
     if (!check_builtin_calls(entry_point, entry_point)) {
       return false;
     }
@@ -2016,8 +2111,7 @@ bool Resolver::ValidatePipelineStages() const {
   return true;
 }
 
-bool Resolver::ValidateArray(const sem::Array* arr,
-                             const Source& source) const {
+bool Validator::Array(const sem::Array* arr, const Source& source) const {
   auto* el_ty = arr->ElemType();
 
   if (!IsFixedFootprint(el_ty)) {
@@ -2028,10 +2122,10 @@ bool Resolver::ValidateArray(const sem::Array* arr,
   return true;
 }
 
-bool Resolver::ValidateArrayStrideAttribute(const ast::StrideAttribute* attr,
-                                            uint32_t el_size,
-                                            uint32_t el_align,
-                                            const Source& source) const {
+bool Validator::ArrayStrideAttribute(const ast::StrideAttribute* attr,
+                                     uint32_t el_size,
+                                     uint32_t el_align,
+                                     const Source& source) const {
   auto stride = attr->stride;
   bool is_valid_stride =
       (stride >= el_size) && (stride >= el_align) && (stride % el_align == 0);
@@ -2050,8 +2144,8 @@ bool Resolver::ValidateArrayStrideAttribute(const ast::StrideAttribute* attr,
   return true;
 }
 
-bool Resolver::ValidateAlias(const ast::Alias* alias) const {
-  auto name = builder_->Symbols().NameFor(alias->name);
+bool Validator::Alias(const ast::Alias* alias) const {
+  auto name = symbols_.NameFor(alias->name);
   if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
     AddError("'" + name + "' is a builtin and cannot be redeclared as an alias",
              alias->source);
@@ -2061,9 +2155,9 @@ bool Resolver::ValidateAlias(const ast::Alias* alias) const {
   return true;
 }
 
-bool Resolver::ValidateStructure(const sem::Struct* str,
-                                 ast::PipelineStage stage) const {
-  auto name = builder_->Symbols().NameFor(str->Declaration()->name);
+bool Validator::Structure(const sem::Struct* str,
+                          ast::PipelineStage stage) const {
+  auto name = symbols_.NameFor(str->Declaration()->name);
   if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
     AddError("'" + name + "' is a builtin and cannot be redeclared as a struct",
              str->Declaration()->source);
@@ -2122,13 +2216,13 @@ bool Resolver::ValidateStructure(const sem::Struct* str,
         invariant_attribute = invariant;
       } else if (auto* location = attr->As<ast::LocationAttribute>()) {
         has_location = true;
-        if (!ValidateLocationAttribute(location, member->Type(), locations,
-                                       stage, member->Declaration()->source)) {
+        if (!LocationAttribute(location, member->Type(), locations, stage,
+                               member->Declaration()->source)) {
           return false;
         }
       } else if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
-        if (!ValidateBuiltinAttribute(builtin, member->Type(), stage,
-                                      /* is_input */ false)) {
+        if (!BuiltinAttribute(builtin, member->Type(), stage,
+                              /* is_input */ false)) {
           return false;
         }
         if (builtin->builtin == ast::Builtin::kPosition) {
@@ -2136,7 +2230,7 @@ bool Resolver::ValidateStructure(const sem::Struct* str,
         }
       } else if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
         interpolate_attribute = interpolate;
-        if (!ValidateInterpolateAttribute(interpolate, member->Type())) {
+        if (!InterpolateAttribute(interpolate, member->Type())) {
           return false;
         }
       }
@@ -2165,13 +2259,12 @@ bool Resolver::ValidateStructure(const sem::Struct* str,
   return true;
 }
 
-bool Resolver::ValidateLocationAttribute(
-    const ast::LocationAttribute* location,
-    const sem::Type* type,
-    std::unordered_set<uint32_t>& locations,
-    ast::PipelineStage stage,
-    const Source& source,
-    const bool is_input) const {
+bool Validator::LocationAttribute(const ast::LocationAttribute* location,
+                                  const sem::Type* type,
+                                  std::unordered_set<uint32_t>& locations,
+                                  ast::PipelineStage stage,
+                                  const Source& source,
+                                  const bool is_input) const {
   std::string inputs_or_output = is_input ? "inputs" : "output";
   if (stage == ast::PipelineStage::kCompute) {
     AddError("attribute is not valid for compute shader " + inputs_or_output,
@@ -2201,9 +2294,10 @@ bool Resolver::ValidateLocationAttribute(
   return true;
 }
 
-bool Resolver::ValidateReturn(const ast::ReturnStatement* ret,
-                              const sem::Type* func_type,
-                              const sem::Type* ret_type) const {
+bool Validator::Return(const ast::ReturnStatement* ret,
+                       const sem::Type* func_type,
+                       const sem::Type* ret_type,
+                       sem::Statement* current_statement) const {
   if (func_type->UnwrapRef() != ret_type) {
     AddError(
         "return statement type must match its function "
@@ -2215,7 +2309,8 @@ bool Resolver::ValidateReturn(const ast::ReturnStatement* ret,
   }
 
   auto* sem = sem_.Get(ret);
-  if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ false)) {
+  if (auto* continuing =
+          ClosestContinuing(/*stop_at_loop*/ false, current_statement)) {
     AddError("continuing blocks must not contain a return statement",
              ret->source);
     if (continuing != sem->Declaration() &&
@@ -2228,7 +2323,7 @@ bool Resolver::ValidateReturn(const ast::ReturnStatement* ret,
   return true;
 }
 
-bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
+bool Validator::SwitchStatement(const ast::SwitchStatement* s) {
   auto* cond_ty = sem_.TypeOf(s->condition)->UnwrapRef();
   if (!cond_ty->is_integer_scalar()) {
     AddError(
@@ -2284,8 +2379,8 @@ bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
   return true;
 }
 
-bool Resolver::ValidateAssignment(const ast::Statement* a,
-                                  const sem::Type* rhs_ty) const {
+bool Validator::Assignment(const ast::Statement* a,
+                           const sem::Type* rhs_ty) const {
   const ast::Expression* lhs;
   const ast::Expression* rhs;
   if (auto* assign = a->As<ast::AssignmentStatement>()) {
@@ -2317,19 +2412,17 @@ bool Resolver::ValidateAssignment(const ast::Statement* a,
   // https://gpuweb.github.io/gpuweb/wgsl/#assignment-statement
   auto const* lhs_ty = sem_.TypeOf(lhs);
 
-  if (auto* var = ResolvedSymbol<sem::Variable>(lhs)) {
+  if (auto* var = sem_.ResolvedSymbol<sem::Variable>(lhs)) {
     auto* decl = var->Declaration();
     if (var->Is<sem::Parameter>()) {
       AddError("cannot assign to function parameter", lhs->source);
-      AddNote("'" + builder_->Symbols().NameFor(decl->symbol) +
-                  "' is declared here:",
+      AddNote("'" + symbols_.NameFor(decl->symbol) + "' is declared here:",
               decl->source);
       return false;
     }
     if (decl->is_const) {
       AddError("cannot assign to const", lhs->source);
-      AddNote("'" + builder_->Symbols().NameFor(decl->symbol) +
-                  "' is declared here:",
+      AddNote("'" + symbols_.NameFor(decl->symbol) + "' is declared here:",
               decl->source);
       return false;
     }
@@ -2366,25 +2459,23 @@ bool Resolver::ValidateAssignment(const ast::Statement* a,
   return true;
 }
 
-bool Resolver::ValidateIncrementDecrementStatement(
+bool Validator::IncrementDecrementStatement(
     const ast::IncrementDecrementStatement* inc) const {
   const ast::Expression* lhs = inc->lhs;
 
   // https://gpuweb.github.io/gpuweb/wgsl/#increment-decrement
 
-  if (auto* var = ResolvedSymbol<sem::Variable>(lhs)) {
+  if (auto* var = sem_.ResolvedSymbol<sem::Variable>(lhs)) {
     auto* decl = var->Declaration();
     if (var->Is<sem::Parameter>()) {
       AddError("cannot modify function parameter", lhs->source);
-      AddNote("'" + builder_->Symbols().NameFor(decl->symbol) +
-                  "' is declared here:",
+      AddNote("'" + symbols_.NameFor(decl->symbol) + "' is declared here:",
               decl->source);
       return false;
     }
     if (decl->is_const) {
       AddError("cannot modify constant value", lhs->source);
-      AddNote("'" + builder_->Symbols().NameFor(decl->symbol) +
-                  "' is declared here:",
+      AddNote("'" + symbols_.NameFor(decl->symbol) + "' is declared here:",
               decl->source);
       return false;
     }
@@ -2415,7 +2506,7 @@ bool Resolver::ValidateIncrementDecrementStatement(
   return true;
 }
 
-bool Resolver::ValidateNoDuplicateAttributes(
+bool Validator::NoDuplicateAttributes(
     const ast::AttributeList& attributes) const {
   std::unordered_map<const TypeInfo*, Source> seen;
   for (auto* d : attributes) {
@@ -2429,8 +2520,8 @@ bool Resolver::ValidateNoDuplicateAttributes(
   return true;
 }
 
-bool Resolver::IsValidationDisabled(const ast::AttributeList& attributes,
-                                    ast::DisabledValidation validation) const {
+bool Validator::IsValidationDisabled(const ast::AttributeList& attributes,
+                                     ast::DisabledValidation validation) const {
   for (auto* attribute : attributes) {
     if (auto* dv = attribute->As<ast::DisableValidationAttribute>()) {
       if (dv->validation == validation) {
@@ -2441,15 +2532,15 @@ bool Resolver::IsValidationDisabled(const ast::AttributeList& attributes,
   return false;
 }
 
-bool Resolver::IsValidationEnabled(const ast::AttributeList& attributes,
-                                   ast::DisabledValidation validation) const {
+bool Validator::IsValidationEnabled(const ast::AttributeList& attributes,
+                                    ast::DisabledValidation validation) const {
   return !IsValidationDisabled(attributes, validation);
 }
 
-std::string Resolver::VectorPretty(uint32_t size,
-                                   const sem::Type* element_type) const {
+std::string Validator::VectorPretty(uint32_t size,
+                                    const sem::Type* element_type) const {
   sem::Vector vec_type(element_type, size);
-  return vec_type.FriendlyName(builder_->Symbols());
+  return vec_type.FriendlyName(symbols_);
 }
 
 }  // namespace tint::resolver

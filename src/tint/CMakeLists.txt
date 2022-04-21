@@ -256,10 +256,11 @@ set(TINT_LIB_SRCS
   resolver/dependency_graph.h
   resolver/resolver.cc
   resolver/resolver_constants.cc
-  resolver/resolver_validation.cc
   resolver/resolver.h
   resolver/sem_helper.cc
   resolver/sem_helper.h
+  resolver/validator.cc
+  resolver/validator.h
   scope_stack.h
   sem/array.cc
   sem/array.h

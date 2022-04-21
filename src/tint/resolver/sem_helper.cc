@@ -18,7 +18,8 @@
 
 namespace tint::resolver {
 
-SemHelper::SemHelper(ProgramBuilder* builder) : builder_(builder) {}
+SemHelper::SemHelper(ProgramBuilder* builder, DependencyGraph& dependencies)
+    : builder_(builder), dependencies_(dependencies) {}
 
 SemHelper::~SemHelper() = default;
 
