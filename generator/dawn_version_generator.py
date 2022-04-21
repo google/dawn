@@ -13,13 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os, subprocess, sys
+import os, subprocess, sys, shutil
 
 from generator_lib import Generator, run_generator, FileRender
 
-
 def get_git():
-    return "git.bat" if sys.platform == "win32" else "git"
+    # Will find git, git.exe, git.bat...
+    git_exec = shutil.which("git")
+    if not git_exec:
+        raise Exception("No git executable found")
+
+    return git_exec
 
 
 def get_gitHash(dawnDir):
@@ -61,10 +65,9 @@ def get_gitResolvedHead(dawnDir):
     result = subprocess.run(
         [get_git(), "rev-parse", "--symbolic-full-name", "HEAD"],
         stdout=subprocess.PIPE,
-        cwd=dawnDir,
-    )
+        cwd=dawnDir)
     if result.returncode != 0:
-        raise Exception("Failed to execute git rev-parse to resolve git head.")
+        raise Exception("Failed to execute git rev-parse to resolve git head:", result.stdout)
 
     resolved = os.path.join(dawnDir, ".git",
                             result.stdout.decode("utf-8").strip())
@@ -102,8 +105,7 @@ class DawnVersionGenerator(Generator):
         if gitExists(dawnDir):
             try:
                 return [get_gitHead(dawnDir)] + get_gitResolvedHead(dawnDir)
-            except Exception as e:
-                print(e)
+            except Exception:
                 return []
         return []
 
