@@ -164,6 +164,7 @@ namespace dawn::native {
         // Enable debug capture on Dawn startup
         void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
 
+        // TODO(dawn:1374) Deprecate this once it is passed via the descriptor.
         void SetPlatform(dawn::platform::Platform* platform);
 
         // Returns the underlying WGPUInstance object.

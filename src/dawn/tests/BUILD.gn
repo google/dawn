@@ -330,32 +330,76 @@ dawn_test("dawn_unittests") {
 }
 
 ###############################################################################
-# Dawn end2end tests targets
+# Dawn test infrastructure targets
 ###############################################################################
 
-source_set("end2end_tests_sources") {
-  configs += [ "${dawn_root}/src/dawn/common:internal_config" ]
+source_set("test_infra_sources") {
+  configs += [ "${dawn_root}/src/dawn/native:internal" ]
   testonly = true
 
   deps = [
-    ":gmock_and_gtest",
     "${dawn_root}/src/dawn:cpp",
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
-
-    # Statically linked because the end2end white_box tests use Dawn internals.
+    "${dawn_root}/src/dawn/native:sources",
     "${dawn_root}/src/dawn/native:static",
-    "${dawn_root}/src/dawn/platform:platform",
     "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn/wire",
   ]
 
+  public_deps = [ ":gmock_and_gtest" ]
+
+  if (dawn_supports_glfw_for_windowing || dawn_enable_opengl) {
+    assert(dawn_supports_glfw_for_windowing)
+    public_deps += [ "${dawn_root}/src/dawn/utils:glfw" ]
+  }
+
   sources = [
+    "DawnTest.cpp",
     "DawnTest.h",
     "MockCallback.h",
     "ParamGenerator.h",
     "ToggleParser.cpp",
     "ToggleParser.h",
+  ]
+}
+
+###############################################################################
+# Dawn end2end tests targets
+###############################################################################
+
+# Source code for mocks used for end2end testing are separated from the rest of
+# sources so that they aren't included in non-test builds.
+source_set("end2end_mocks_sources") {
+  configs += [ "${dawn_root}/src/dawn/native:internal" ]
+  testonly = true
+
+  deps = [
+    ":gmock_and_gtest",
+    "${dawn_root}/src/dawn/platform",
+  ]
+
+  sources = [
+    "end2end/mocks/CachingInterfaceMock.cpp",
+    "end2end/mocks/CachingInterfaceMock.h",
+  ]
+}
+
+source_set("end2end_tests_sources") {
+  testonly = true
+
+  deps = [
+    ":end2end_mocks_sources",
+    ":test_infra_sources",
+    "${dawn_root}/src/dawn:cpp",
+    "${dawn_root}/src/dawn:proc",
+    "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/dawn/native:headers",
+    "${dawn_root}/src/dawn/utils",
+    "${dawn_root}/src/dawn/wire",
+  ]
+
+  sources = [
     "end2end/AdapterDiscoveryTests.cpp",
     "end2end/BasicTests.cpp",
     "end2end/BindGroupTests.cpp",
@@ -461,17 +505,12 @@ source_set("end2end_tests_sources") {
     frameworks = [ "IOSurface.framework" ]
   }
 
-  if (dawn_enable_opengl) {
-    assert(dawn_supports_glfw_for_windowing)
-  }
-
   if (dawn_supports_glfw_for_windowing) {
     sources += [
       "end2end/SwapChainTests.cpp",
       "end2end/SwapChainValidationTests.cpp",
       "end2end/WindowSurfaceTests.cpp",
     ]
-    deps += [ "${dawn_root}/src/dawn/utils:glfw" ]
   }
 
   if (dawn_enable_d3d12 || (dawn_enable_vulkan && is_chromeos) ||
@@ -492,23 +531,19 @@ source_set("white_box_tests_sources") {
   testonly = true
 
   deps = [
-    ":gmock_and_gtest",
+    ":test_infra_sources",
     "${dawn_root}/src/dawn:cpp",
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
-    "${dawn_root}/src/dawn/native:sources",
 
-    # Statically linked because the end2end white_box tests use Dawn internals.
+    # Statically linked and with sources because the end2end white_box tests use Dawn internals.
+    "${dawn_root}/src/dawn/native:sources",
     "${dawn_root}/src/dawn/native:static",
     "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn/wire",
   ]
 
-  sources = [
-    "DawnTest.h",
-    "ParamGenerator.h",
-    "ToggleParser.h",
-  ]
+  sources = []
 
   if (dawn_enable_vulkan) {
     deps += [ "${dawn_vulkan_headers_dir}:vulkan_headers" ]
@@ -552,10 +587,6 @@ source_set("white_box_tests_sources") {
     sources += [ "white_box/MetalAutoreleasePoolTests.mm" ]
   }
 
-  if (dawn_enable_opengl) {
-    deps += [ "${dawn_root}/src/dawn/utils:glfw" ]
-  }
-
   if (dawn_enable_opengles && defined(dawn_angle_dir)) {
     sources += [ "white_box/EGLImageWrappingTests.cpp" ]
     deps += [ "${dawn_angle_dir}:libEGL" ]
@@ -567,22 +598,11 @@ source_set("white_box_tests_sources") {
 dawn_test("dawn_end2end_tests") {
   deps = [
     ":end2end_tests_sources",
-    ":gmock_and_gtest",
+    ":test_infra_sources",
     ":white_box_tests_sources",
-    "${dawn_root}/src/dawn:cpp",
-    "${dawn_root}/src/dawn:proc",
-    "${dawn_root}/src/dawn/common",
-    "${dawn_root}/src/dawn/native:static",
-    "${dawn_root}/src/dawn/platform:platform",
-    "${dawn_root}/src/dawn/utils",
-    "${dawn_root}/src/dawn/wire",
   ]
 
-  sources = [
-    "DawnTest.cpp",
-    "DawnTest.h",
-  ]
-
+  sources = []
   libs = []
 
   # When building inside Chromium, use their gtest main function because it is
@@ -591,10 +611,6 @@ dawn_test("dawn_end2end_tests") {
     deps += [ ":end2end_tests_main" ]
   } else {
     sources += [ "End2EndTestsMain.cpp" ]
-  }
-
-  if (dawn_enable_opengl) {
-    deps += [ "${dawn_root}/src/dawn/utils:glfw" ]
   }
 
   if (is_chromeos) {
@@ -608,22 +624,16 @@ dawn_test("dawn_end2end_tests") {
 
 dawn_test("dawn_perf_tests") {
   deps = [
-    ":gmock_and_gtest",
+    ":test_infra_sources",
     "${dawn_root}/src/dawn:cpp",
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
-    "${dawn_root}/src/dawn/native",
     "${dawn_root}/src/dawn/platform",
     "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn/wire",
   ]
 
   sources = [
-    "DawnTest.cpp",
-    "DawnTest.h",
-    "ParamGenerator.h",
-    "ToggleParser.cpp",
-    "ToggleParser.h",
     "perf_tests/BufferUploadPerf.cpp",
     "perf_tests/DawnPerfTest.cpp",
     "perf_tests/DawnPerfTest.h",
@@ -647,9 +657,5 @@ dawn_test("dawn_perf_tests") {
 
   if (dawn_enable_metal) {
     frameworks = [ "IOSurface.framework" ]
-  }
-
-  if (dawn_enable_opengl) {
-    deps += [ "${dawn_root}/src/dawn/utils:glfw" ]
   }
 }

@@ -77,9 +77,10 @@ namespace dawn::native {
         void EnableBeginCaptureOnStartup(bool beginCaptureOnStartup);
         bool IsBeginCaptureOnStartupEnabled() const;
 
-        // TODO(dawn:1374): SetPlatform should become a private helper, and a NOT thread-safe
-        // testing version exposed for special testing cases.
+        // TODO(dawn:1374): SetPlatform should become a private helper, and SetPlatformForTesting
+        // will become the NOT thread-safe testing version exposed for special testing cases.
         void SetPlatform(dawn::platform::Platform* platform);
+        void SetPlatformForTesting(dawn::platform::Platform* platform);
         dawn::platform::Platform* GetPlatform();
         BlobCache* GetBlobCache();
 

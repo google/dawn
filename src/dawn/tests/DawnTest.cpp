@@ -30,6 +30,8 @@
 #include "dawn/common/Platform.h"
 #include "dawn/common/SystemUtils.h"
 #include "dawn/dawn_proc.h"
+#include "dawn/native/Instance.h"
+#include "dawn/native/dawn_platform.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/PlatformDebugLogger.h"
 #include "dawn/utils/SystemUtils.h"
@@ -921,9 +923,11 @@ void DawnTestBase::SetUp() {
         mBackendAdapter = *it;
     }
 
-    // Setup the per-test platform. Tests can provide one by overloading CreateTestPlatform.
+    // Setup the per-test platform. Tests can provide one by overloading CreateTestPlatform. This is
+    // NOT a thread-safe operation and is allowed here for testing only.
     mTestPlatform = CreateTestPlatform();
-    gTestEnv->GetInstance()->SetPlatform(mTestPlatform.get());
+    dawn::native::FromAPI(gTestEnv->GetInstance()->Get())
+        ->SetPlatformForTesting(mTestPlatform.get());
 
     // Create the device from the adapter
     for (const char* forceEnabledWorkaround : mParam.forceEnabledWorkarounds) {

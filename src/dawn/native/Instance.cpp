@@ -422,15 +422,12 @@ namespace dawn::native {
         mBlobCache = std::make_unique<BlobCache>(GetCachingInterface(platform));
     }
 
-    dawn::platform::Platform* InstanceBase::GetPlatform() {
-        if (mPlatform != nullptr) {
-            return mPlatform;
-        }
+    void InstanceBase::SetPlatformForTesting(dawn::platform::Platform* platform) {
+        SetPlatform(platform);
+    }
 
-        if (mDefaultPlatform == nullptr) {
-            mDefaultPlatform = std::make_unique<dawn::platform::Platform>();
-        }
-        return mDefaultPlatform.get();
+    dawn::platform::Platform* InstanceBase::GetPlatform() {
+        return mPlatform;
     }
 
     BlobCache* InstanceBase::GetBlobCache() {
