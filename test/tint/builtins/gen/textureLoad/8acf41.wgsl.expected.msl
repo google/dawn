@@ -3,24 +3,18 @@
 using namespace metal;
 struct ExternalTextureParams {
   /* 0x0000 */ uint numPlanes;
-  /* 0x0004 */ float vr;
-  /* 0x0008 */ float ug;
-  /* 0x000c */ float vg;
-  /* 0x0010 */ float ub;
+  /* 0x0004 */ int8_t tint_pad[12];
+  /* 0x0010 */ float3x4 yuvToRgbConversionMatrix;
 };
 
 float4 textureLoadExternal(texture2d<float, access::sample> plane0, texture2d<float, access::sample> plane1, int2 coord, ExternalTextureParams params) {
+  float3 color = 0.0f;
   if ((params.numPlanes == 1u)) {
-    return plane0.read(uint2(coord), 0);
+    color = float4(plane0.read(uint2(coord), 0)).rgb;
+  } else {
+    color = (float4(plane0.read(uint2(coord), 0)[0], float4(plane1.read(uint2(coord), 0)).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  float const y = (plane0.read(uint2(coord), 0)[0] - 0.0625f);
-  float2 const uv = (float4(plane1.read(uint2(coord), 0)).rg - 0.5f);
-  float const u = uv[0];
-  float const v = uv[1];
-  float const r = ((1.164000034f * y) + (params.vr * v));
-  float const g = (((1.164000034f * y) - (params.ug * u)) - (params.vg * v));
-  float const b = ((1.164000034f * y) + (params.ub * u));
-  return float4(r, g, b, 1.0f);
+  return float4(color, 1.0f);
 }
 
 void textureLoad_8acf41(texture2d<float, access::sample> tint_symbol_1, texture2d<float, access::sample> tint_symbol_2, const constant ExternalTextureParams* const tint_symbol_3) {

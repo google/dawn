@@ -108,10 +108,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(1) var ext_tex_plane_1 : texture_2d<f32>;
@@ -151,10 +148,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(1) var ext_tex_plane_1 : texture_2d<f32>;
@@ -193,10 +187,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -208,17 +199,13 @@ struct ExternalTextureParams {
 @group(0) @binding(1) var ext_tex : texture_2d<f32>;
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureSampleLevel(plane0, smp, coord, 0.0);
+    color = textureSampleLevel(plane0, smp, coord, 0.0).rgb;
+  } else {
+    color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0).r, textureSampleLevel(plane1, smp, coord, 0.0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
-  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 @stage(fragment)
@@ -249,10 +236,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -260,17 +244,13 @@ struct ExternalTextureParams {
 @group(0) @binding(3) var<uniform> ext_tex_params : ExternalTextureParams;
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureSampleLevel(plane0, smp, coord, 0.0);
+    color = textureSampleLevel(plane0, smp, coord, 0.0).rgb;
+  } else {
+    color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0).r, textureSampleLevel(plane1, smp, coord, 0.0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
-  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 @stage(fragment)
@@ -304,10 +284,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(1) var ext_tex_plane_1 : texture_2d<f32>;
@@ -317,17 +294,13 @@ struct ExternalTextureParams {
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;
 
 fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<i32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureLoad(plane0, coord, 0);
+    color = textureLoad(plane0, coord, 0).rgb;
+  } else {
+    color = (vec4<f32>(textureLoad(plane0, coord, 0).r, textureLoad(plane1, coord, 0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureLoad(plane0, coord, 0).r - 0.0625);
-  let uv = (textureLoad(plane1, coord, 0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 @stage(fragment)
@@ -357,10 +330,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(1) var ext_tex_plane_1 : texture_2d<f32>;
@@ -368,17 +338,13 @@ struct ExternalTextureParams {
 @group(0) @binding(2) var<uniform> ext_tex_params : ExternalTextureParams;
 
 fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<i32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureLoad(plane0, coord, 0);
+    color = textureLoad(plane0, coord, 0).rgb;
+  } else {
+    color = (vec4<f32>(textureLoad(plane0, coord, 0).r, textureLoad(plane1, coord, 0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureLoad(plane0, coord, 0).r - 0.0625);
-  let uv = (textureLoad(plane1, coord, 0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 @stage(fragment)
@@ -412,10 +378,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -427,31 +390,23 @@ struct ExternalTextureParams {
 @group(0) @binding(1) var ext_tex : texture_2d<f32>;
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureSampleLevel(plane0, smp, coord, 0.0);
+    color = textureSampleLevel(plane0, smp, coord, 0.0).rgb;
+  } else {
+    color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0).r, textureSampleLevel(plane1, smp, coord, 0.0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
-  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<i32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureLoad(plane0, coord, 0);
+    color = textureLoad(plane0, coord, 0).rgb;
+  } else {
+    color = (vec4<f32>(textureLoad(plane0, coord, 0).r, textureLoad(plane1, coord, 0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureLoad(plane0, coord, 0).r - 0.0625);
-  let uv = (textureLoad(plane1, coord, 0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 @stage(fragment)
@@ -483,10 +438,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -494,31 +446,23 @@ struct ExternalTextureParams {
 @group(0) @binding(3) var<uniform> ext_tex_params : ExternalTextureParams;
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureSampleLevel(plane0, smp, coord, 0.0);
+    color = textureSampleLevel(plane0, smp, coord, 0.0).rgb;
+  } else {
+    color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0).r, textureSampleLevel(plane1, smp, coord, 0.0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
-  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<i32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureLoad(plane0, coord, 0);
+    color = textureLoad(plane0, coord, 0).rgb;
+  } else {
+    color = (vec4<f32>(textureLoad(plane0, coord, 0).r, textureLoad(plane1, coord, 0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureLoad(plane0, coord, 0).r - 0.0625);
-  let uv = (textureLoad(plane1, coord, 0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 @stage(fragment)
@@ -556,10 +500,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(4) var ext_tex_plane_1 : texture_2d<f32>;
@@ -589,17 +530,13 @@ struct ExternalTextureParams {
 @group(1) @binding(0) var ext_tex_3 : texture_2d<f32>;
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureSampleLevel(plane0, smp, coord, 0.0);
+    color = textureSampleLevel(plane0, smp, coord, 0.0).rgb;
+  } else {
+    color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0).r, textureSampleLevel(plane1, smp, coord, 0.0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
-  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 @stage(fragment)
@@ -640,10 +577,7 @@ fn main() {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -651,17 +585,13 @@ struct ExternalTextureParams {
 @group(0) @binding(3) var<uniform> ext_tex_params : ExternalTextureParams;
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureSampleLevel(plane0, smp, coord, 0.0);
+    color = textureSampleLevel(plane0, smp, coord, 0.0).rgb;
+  } else {
+    color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0).r, textureSampleLevel(plane1, smp, coord, 0.0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
-  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams, s : sampler) {
@@ -707,10 +637,7 @@ fn f(t : texture_external, s : sampler) {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -723,17 +650,13 @@ fn main() {
 }
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureSampleLevel(plane0, smp, coord, 0.0);
+    color = textureSampleLevel(plane0, smp, coord, 0.0).rgb;
+  } else {
+    color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0).r, textureSampleLevel(plane1, smp, coord, 0.0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
-  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams, s : sampler) {
@@ -773,10 +696,7 @@ fn main() {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -784,17 +704,13 @@ struct ExternalTextureParams {
 @group(0) @binding(3) var<uniform> ext_tex_params : ExternalTextureParams;
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureSampleLevel(plane0, smp, coord, 0.0);
+    color = textureSampleLevel(plane0, smp, coord, 0.0).rgb;
+  } else {
+    color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0).r, textureSampleLevel(plane1, smp, coord, 0.0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
-  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 fn f(s : sampler, t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams) {
@@ -841,10 +757,7 @@ fn main() {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(3) var ext_tex_plane_1 : texture_2d<f32>;
@@ -856,17 +769,13 @@ struct ExternalTextureParams {
 @group(0) @binding(6) var<uniform> ext_tex_params_1 : ExternalTextureParams;
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureSampleLevel(plane0, smp, coord, 0.0);
+    color = textureSampleLevel(plane0, smp, coord, 0.0).rgb;
+  } else {
+    color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0).r, textureSampleLevel(plane1, smp, coord, 0.0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
-  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 fn f(t : texture_2d<f32>, ext_tex_plane_1_2 : texture_2d<f32>, ext_tex_params_2 : ExternalTextureParams, s : sampler, t2 : texture_2d<f32>, ext_tex_plane_1_3 : texture_2d<f32>, ext_tex_params_3 : ExternalTextureParams) {
@@ -919,10 +828,7 @@ fn f(t : texture_external, s : sampler, t2 : texture_external) {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(3) var ext_tex_plane_1 : texture_2d<f32>;
@@ -939,17 +845,13 @@ fn main() {
 }
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureSampleLevel(plane0, smp, coord, 0.0);
+    color = textureSampleLevel(plane0, smp, coord, 0.0).rgb;
+  } else {
+    color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0).r, textureSampleLevel(plane1, smp, coord, 0.0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
-  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 fn f(t : texture_2d<f32>, ext_tex_plane_1_2 : texture_2d<f32>, ext_tex_params_2 : ExternalTextureParams, s : sampler, t2 : texture_2d<f32>, ext_tex_plane_1_3 : texture_2d<f32>, ext_tex_params_3 : ExternalTextureParams) {
@@ -997,10 +899,7 @@ fn main() {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -1008,17 +907,13 @@ struct ExternalTextureParams {
 @group(0) @binding(3) var<uniform> ext_tex_params : ExternalTextureParams;
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureSampleLevel(plane0, smp, coord, 0.0);
+    color = textureSampleLevel(plane0, smp, coord, 0.0).rgb;
+  } else {
+    color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0).r, textureSampleLevel(plane1, smp, coord, 0.0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
-  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 fn nested(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams, s : sampler) {
@@ -1072,10 +967,7 @@ fn main() {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -1083,17 +975,13 @@ struct ExternalTextureParams {
 @group(0) @binding(3) var<uniform> ext_tex_params : ExternalTextureParams;
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureSampleLevel(plane0, smp, coord, 0.0);
+    color = textureSampleLevel(plane0, smp, coord, 0.0).rgb;
+  } else {
+    color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0).r, textureSampleLevel(plane1, smp, coord, 0.0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
-  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 fn nested(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams, s : sampler) {
@@ -1135,10 +1023,7 @@ fn f(ext_tex : texture_external) -> vec2<i32> {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 fn f(ext_tex : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : ExternalTextureParams) -> vec2<i32> {
@@ -1174,10 +1059,7 @@ fn main() {
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -1187,17 +1069,13 @@ struct ExternalTextureParams {
 type ET = texture_external;
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureSampleLevel(plane0, smp, coord, 0.0);
+    color = textureSampleLevel(plane0, smp, coord, 0.0).rgb;
+  } else {
+    color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0).r, textureSampleLevel(plane1, smp, coord, 0.0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
-  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams, s : sampler) {
@@ -1243,10 +1121,7 @@ type ET = texture_external;
   auto* expect = R"(
 struct ExternalTextureParams {
   numPlanes : u32,
-  vr : f32,
-  ug : f32,
-  vg : f32,
-  ub : f32,
+  yuvToRgbConversionMatrix : mat3x4<f32>,
 }
 
 @group(0) @binding(2) var ext_tex_plane_1 : texture_2d<f32>;
@@ -1259,17 +1134,13 @@ fn main() {
 }
 
 fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp : sampler, coord : vec2<f32>, params : ExternalTextureParams) -> vec4<f32> {
+  var color : vec3<f32>;
   if ((params.numPlanes == 1u)) {
-    return textureSampleLevel(plane0, smp, coord, 0.0);
+    color = textureSampleLevel(plane0, smp, coord, 0.0).rgb;
+  } else {
+    color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0).r, textureSampleLevel(plane1, smp, coord, 0.0).rg, 1.0) * params.yuvToRgbConversionMatrix);
   }
-  let y = (textureSampleLevel(plane0, smp, coord, 0.0).r - 0.0625);
-  let uv = (textureSampleLevel(plane1, smp, coord, 0.0).rg - 0.5);
-  let u = uv.x;
-  let v = uv.y;
-  let r = ((1.164000034 * y) + (params.vr * v));
-  let g = (((1.164000034 * y) - (params.ug * u)) - (params.vg * v));
-  let b = ((1.164000034 * y) + (params.ub * u));
-  return vec4<f32>(r, g, b, 1.0);
+  return vec4<f32>(color, 1.0);
 }
 
 fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 : ExternalTextureParams, s : sampler) {

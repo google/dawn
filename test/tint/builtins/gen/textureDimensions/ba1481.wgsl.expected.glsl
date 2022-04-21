@@ -2,18 +2,12 @@
 
 struct ExternalTextureParams {
   uint numPlanes;
-  float vr;
-  float ug;
-  float vg;
-  float ub;
+  mat3x4 yuvToRgbConversionMatrix;
 };
 
 layout(binding = 2) uniform ExternalTextureParams_1 {
   uint numPlanes;
-  float vr;
-  float ug;
-  float vg;
-  float ub;
+  mat3x4 yuvToRgbConversionMatrix;
 } ext_tex_params;
 
 uniform highp sampler2D arg_0_1;
@@ -38,18 +32,12 @@ precision mediump float;
 
 struct ExternalTextureParams {
   uint numPlanes;
-  float vr;
-  float ug;
-  float vg;
-  float ub;
+  mat3x4 yuvToRgbConversionMatrix;
 };
 
 layout(binding = 2) uniform ExternalTextureParams_1 {
   uint numPlanes;
-  float vr;
-  float ug;
-  float vg;
-  float ub;
+  mat3x4 yuvToRgbConversionMatrix;
 } ext_tex_params;
 
 uniform highp sampler2D arg_0_1;
@@ -69,18 +57,12 @@ void main() {
 
 struct ExternalTextureParams {
   uint numPlanes;
-  float vr;
-  float ug;
-  float vg;
-  float ub;
+  mat3x4 yuvToRgbConversionMatrix;
 };
 
 layout(binding = 2) uniform ExternalTextureParams_1 {
   uint numPlanes;
-  float vr;
-  float ug;
-  float vg;
-  float ub;
+  mat3x4 yuvToRgbConversionMatrix;
 } ext_tex_params;
 
 uniform highp sampler2D arg_0_1;

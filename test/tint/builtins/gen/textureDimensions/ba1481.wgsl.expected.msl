@@ -3,10 +3,7 @@
 using namespace metal;
 struct ExternalTextureParams {
   uint numPlanes;
-  float vr;
-  float ug;
-  float vg;
-  float ub;
+  float3x4 yuvToRgbConversionMatrix;
 };
 
 void textureDimensions_ba1481(texture2d<float, access::sample> tint_symbol_1) {

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 43
+; Bound: 44
 ; Schema: 0
                OpCapability Shader
                OpCapability ImageQuery
@@ -16,10 +16,7 @@
                OpName %ext_tex_plane_1 "ext_tex_plane_1"
                OpName %ExternalTextureParams "ExternalTextureParams"
                OpMemberName %ExternalTextureParams 0 "numPlanes"
-               OpMemberName %ExternalTextureParams 1 "vr"
-               OpMemberName %ExternalTextureParams 2 "ug"
-               OpMemberName %ExternalTextureParams 3 "vg"
-               OpMemberName %ExternalTextureParams 4 "ub"
+               OpMemberName %ExternalTextureParams 1 "yuvToRgbConversionMatrix"
                OpName %ext_tex_params "ext_tex_params"
                OpName %arg_0 "arg_0"
                OpName %textureDimensions_ba1481 "textureDimensions_ba1481"
@@ -34,10 +31,9 @@
                OpDecorate %ext_tex_plane_1 Binding 1
                OpDecorate %ExternalTextureParams Block
                OpMemberDecorate %ExternalTextureParams 0 Offset 0
-               OpMemberDecorate %ExternalTextureParams 1 Offset 4
-               OpMemberDecorate %ExternalTextureParams 2 Offset 8
-               OpMemberDecorate %ExternalTextureParams 3 Offset 12
-               OpMemberDecorate %ExternalTextureParams 4 Offset 16
+               OpMemberDecorate %ExternalTextureParams 1 Offset 16
+               OpMemberDecorate %ExternalTextureParams 1 ColMajor
+               OpMemberDecorate %ExternalTextureParams 1 MatrixStride 16
                OpDecorate %ext_tex_params NonWritable
                OpDecorate %ext_tex_params DescriptorSet 1
                OpDecorate %ext_tex_params Binding 2
@@ -55,46 +51,47 @@
 %_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11
 %ext_tex_plane_1 = OpVariable %_ptr_UniformConstant_11 UniformConstant
        %uint = OpTypeInt 32 0
-%ExternalTextureParams = OpTypeStruct %uint %float %float %float %float
+%mat3v4float = OpTypeMatrix %v4float 3
+%ExternalTextureParams = OpTypeStruct %uint %mat3v4float
 %_ptr_Uniform_ExternalTextureParams = OpTypePointer Uniform %ExternalTextureParams
 %ext_tex_params = OpVariable %_ptr_Uniform_ExternalTextureParams Uniform
       %arg_0 = OpVariable %_ptr_UniformConstant_11 UniformConstant
        %void = OpTypeVoid
-         %17 = OpTypeFunction %void
+         %18 = OpTypeFunction %void
         %int = OpTypeInt 32 1
       %v2int = OpTypeVector %int 2
       %int_0 = OpConstant %int 0
 %_ptr_Function_v2int = OpTypePointer Function %v2int
-         %28 = OpConstantNull %v2int
-         %29 = OpTypeFunction %v4float
+         %29 = OpConstantNull %v2int
+         %30 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
-%textureDimensions_ba1481 = OpFunction %void None %17
-         %20 = OpLabel
-        %res = OpVariable %_ptr_Function_v2int Function %28
-         %24 = OpLoad %11 %arg_0
-         %21 = OpImageQuerySizeLod %v2int %24 %int_0
-               OpStore %res %21
+%textureDimensions_ba1481 = OpFunction %void None %18
+         %21 = OpLabel
+        %res = OpVariable %_ptr_Function_v2int Function %29
+         %25 = OpLoad %11 %arg_0
+         %22 = OpImageQuerySizeLod %v2int %25 %int_0
+               OpStore %res %22
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %29
-         %31 = OpLabel
-         %32 = OpFunctionCall %void %textureDimensions_ba1481
+%vertex_main_inner = OpFunction %v4float None %30
+         %32 = OpLabel
+         %33 = OpFunctionCall %void %textureDimensions_ba1481
                OpReturnValue %5
                OpFunctionEnd
-%vertex_main = OpFunction %void None %17
-         %34 = OpLabel
-         %35 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %35
+%vertex_main = OpFunction %void None %18
+         %35 = OpLabel
+         %36 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %36
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
-%fragment_main = OpFunction %void None %17
-         %38 = OpLabel
-         %39 = OpFunctionCall %void %textureDimensions_ba1481
+%fragment_main = OpFunction %void None %18
+         %39 = OpLabel
+         %40 = OpFunctionCall %void %textureDimensions_ba1481
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %17
-         %41 = OpLabel
-         %42 = OpFunctionCall %void %textureDimensions_ba1481
+%compute_main = OpFunction %void None %18
+         %42 = OpLabel
+         %43 = OpFunctionCall %void %textureDimensions_ba1481
                OpReturn
                OpFunctionEnd

@@ -239,9 +239,8 @@ struct MultiplanarExternalTexture::State {
   /// Creates the ExternalTextureParams struct.
   void createExtTexParamsStruct() {
     ast::StructMemberList member_list = {
-        b.Member("numPlanes", b.ty.u32()), b.Member("vr", b.ty.f32()),
-        b.Member("ug", b.ty.f32()), b.Member("vg", b.ty.f32()),
-        b.Member("ub", b.ty.f32())};
+        b.Member("numPlanes", b.ty.u32()),
+        b.Member("yuvToRgbConversionMatrix", b.ty.mat3x4(b.ty.f32()))};
 
     params_struct_sym = b.Symbols().New("ExternalTextureParams");
 
@@ -280,40 +279,26 @@ struct MultiplanarExternalTexture::State {
     }
 
     return {
-        // if (params.numPlanes == 1u) {
-        //    return singlePlaneCall
-        // }
+        // var color: vec3<f32>;
+        b.Decl(b.Var("color", b.ty.vec3(b.ty.f32()))),
+        // if ((params.numPlanes == 1u))
         b.If(b.create<ast::BinaryExpression>(
                  ast::BinaryOp::kEqual, b.MemberAccessor("params", "numPlanes"),
                  b.Expr(1u)),
-             b.Block(b.Return(single_plane_call))),
-        // let y = plane0Call.r - 0.0625;
-        b.Decl(b.Const("y", nullptr,
-                       b.Sub(b.MemberAccessor(plane_0_call, "r"), 0.0625f))),
-        // let uv = plane1Call.rg - 0.5;
-        b.Decl(b.Const("uv", nullptr,
-                       b.Sub(b.MemberAccessor(plane_1_call, "rg"), 0.5f))),
-        // let u = uv.x;
-        b.Decl(b.Const("u", nullptr, b.MemberAccessor("uv", "x"))),
-        // let v = uv.y;
-        b.Decl(b.Const("v", nullptr, b.MemberAccessor("uv", "y"))),
-        // let r = 1.164 * y + params.vr * v;
-        b.Decl(b.Const("r", nullptr,
-                       b.Add(b.Mul(1.164f, "y"),
-                             b.Mul(b.MemberAccessor("params", "vr"), "v")))),
-        // let g = 1.164 * y - params.ug * u - params.vg * v;
-        b.Decl(
-            b.Const("g", nullptr,
-                    b.Sub(b.Sub(b.Mul(1.164f, "y"),
-                                b.Mul(b.MemberAccessor("params", "ug"), "u")),
-                          b.Mul(b.MemberAccessor("params", "vg"), "v")))),
-        // let b = 1.164 * y + params.ub * u;
-        b.Decl(b.Const("b", nullptr,
-                       b.Add(b.Mul(1.164f, "y"),
-                             b.Mul(b.MemberAccessor("params", "ub"), "u")))),
-        // return vec4<f32>(r, g, b, 1.0);
-        b.Return(b.vec4<f32>("r", "g", "b", 1.0f)),
-    };
+             b.Block(
+                 // color = textureLoad(plane0, coord, 0).rgb;
+                 b.Assign("color", b.MemberAccessor(single_plane_call, "rgb"))),
+             b.Else(b.Block(
+                 // color = vec4<f32>(plane_0_call.r, plane_1_call.rg, 1.0) *
+                 //         params.yuvToRgbConversionMatrix;
+                 b.Assign("color",
+                          b.Mul(b.vec4<f32>(
+                                    b.MemberAccessor(plane_0_call, "r"),
+                                    b.MemberAccessor(plane_1_call, "rg"), 1.0f),
+                                b.MemberAccessor(
+                                    "params", "yuvToRgbConversionMatrix")))))),
+        // return vec4<f32>(color, 1.0f);
+        b.Return(b.vec4<f32>("color", 1.0f))};
   }
 
   /// Creates the textureSampleExternal function if needed and returns a call

@@ -144,26 +144,20 @@ namespace dawn::native {
 
         DAWN_TRY_ASSIGN(mParamsBuffer, device->CreateBuffer(&bufferDesc));
 
-        // Dawn & Tint's YUV to RGB conversion implementation was inspired by the conversions found
-        // in libYUV. If this implementation needs expanded to support more colorspaces, this file
-        // is an excellent reference: chromium/src/third_party/libyuv/source/row_common.cc.
-        //
-        // The conversion from YUV to RGB looks like this:
-        // r = Y * 1.164          + V * vr
-        // g = Y * 1.164 - U * ug - V * vg
-        // b = Y * 1.164 + U * ub
-        //
-        // By changing the values of vr, vg, ub, and ug we can change the destination color space.
+        // Dawn & Tint's YUV-to-RGB conversion implementation is a simple 3x4 matrix multiplication
+        // using a standard conversion matrix. These matrices can be found in
+        // chromium/src/third_party/skia/src/core/SkYUVMath.cpp
         ExternalTextureParams params;
         params.numPlanes = descriptor->plane1 == nullptr ? 1 : 2;
 
         switch (descriptor->colorSpace) {
             case wgpu::PredefinedColorSpace::Srgb:
-                // Numbers derived from ITU-R recommendation for limited range BT.709
-                params.vr = 1.793;
-                params.vg = 0.392;
-                params.ub = 0.813;
-                params.ug = 2.017;
+                // Conversion matrix for BT.709 limited range. Columns 1, 2 and 3 are copied
+                // directly from the corresponding matrix in SkYUVMath.cpp. Column 4 is the range
+                // bias (for RGB) found in column 5 of the same SkYUVMath.cpp matrix.
+                params.yuvToRgbConversion = {1.164384f, 0.0f,       1.792741f,  -0.972945f,
+                                             1.164384f, -0.213249f, -0.532909f, 0.301483f,
+                                             1.164384f, 2.112402f,  0.0f,       -1.133402f};
                 break;
             case wgpu::PredefinedColorSpace::Undefined:
                 break;
