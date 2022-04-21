@@ -108,6 +108,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> 
   auto* expect = R"(
 struct tint_symbol {
   first_vertex_index : u32,
+  first_instance_index : u32,
 }
 
 @binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
@@ -135,7 +136,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> 
   EXPECT_EQ(data->has_vertex_index, true);
   EXPECT_EQ(data->has_instance_index, false);
   EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_instance_offset, 0u);
+  EXPECT_EQ(data->first_instance_offset, 4u);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex_OutOfOrder) {
@@ -154,6 +155,7 @@ fn test(vert_idx : u32) -> u32 {
   auto* expect = R"(
 struct tint_symbol {
   first_vertex_index : u32,
+  first_instance_index : u32,
 }
 
 @binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
@@ -181,7 +183,7 @@ fn test(vert_idx : u32) -> u32 {
   EXPECT_EQ(data->has_vertex_index, true);
   EXPECT_EQ(data->has_instance_index, false);
   EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_instance_offset, 0u);
+  EXPECT_EQ(data->first_instance_offset, 4u);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
@@ -199,6 +201,7 @@ fn entry(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32
 
   auto* expect = R"(
 struct tint_symbol {
+  first_vertex_index : u32,
   first_instance_index : u32,
 }
 
@@ -227,7 +230,7 @@ fn entry(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32
   EXPECT_EQ(data->has_vertex_index, false);
   EXPECT_EQ(data->has_instance_index, true);
   EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_instance_offset, 0u);
+  EXPECT_EQ(data->first_instance_offset, 4u);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex_OutOfOrder) {
@@ -245,6 +248,7 @@ fn test(inst_idx : u32) -> u32 {
 
   auto* expect = R"(
 struct tint_symbol {
+  first_vertex_index : u32,
   first_instance_index : u32,
 }
 
@@ -273,7 +277,7 @@ fn test(inst_idx : u32) -> u32 {
   EXPECT_EQ(data->has_vertex_index, false);
   EXPECT_EQ(data->has_instance_index, true);
   EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_instance_offset, 0u);
+  EXPECT_EQ(data->first_instance_offset, 4u);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
@@ -414,6 +418,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> 
   auto* expect = R"(
 struct tint_symbol {
   first_vertex_index : u32,
+  first_instance_index : u32,
 }
 
 @binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
@@ -445,7 +450,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> 
   EXPECT_EQ(data->has_vertex_index, true);
   EXPECT_EQ(data->has_instance_index, false);
   EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_instance_offset, 0u);
+  EXPECT_EQ(data->first_instance_offset, 4u);
 }
 
 TEST_F(FirstIndexOffsetTest, NestedCalls_OutOfOrder) {
@@ -468,6 +473,7 @@ fn func1(vert_idx : u32) -> u32 {
   auto* expect = R"(
 struct tint_symbol {
   first_vertex_index : u32,
+  first_instance_index : u32,
 }
 
 @binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
@@ -499,7 +505,7 @@ fn func1(vert_idx : u32) -> u32 {
   EXPECT_EQ(data->has_vertex_index, true);
   EXPECT_EQ(data->has_instance_index, false);
   EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_instance_offset, 0u);
+  EXPECT_EQ(data->first_instance_offset, 4u);
 }
 
 TEST_F(FirstIndexOffsetTest, MultipleEntryPoints) {
