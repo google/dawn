@@ -17,10 +17,11 @@
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
 
-using namespace testing;
-using namespace dawn::wire;
+namespace dawn::wire { namespace {
 
-namespace {
+    using testing::Mock;
+    using testing::NotNull;
+    using testing::Return;
 
     class WireInjectInstanceTests : public WireTest {
       public:
@@ -116,4 +117,6 @@ namespace {
         }
     }
 
-}  // anonymous namespace
+    // TODO(https://crbug.com/dawn/1381) Remove when namespaces are not indented.
+    // NOLINTNEXTLINE(readability/namespace)
+}}  // namespace dawn::wire::

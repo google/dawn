@@ -18,7 +18,8 @@
 #include "gmock/gmock.h"
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 
-using namespace testing;
+using testing::_;
+using testing::InvokeWithoutArgs;
 
 class MockBufferMapAsyncCallback {
   public:

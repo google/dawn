@@ -45,7 +45,9 @@
 
 namespace {
 
-    using namespace testing;
+    using testing::_;
+    using testing::MockCallback;
+    using testing::SaveArg;
 
     class AdapterDiscoveryTests : public ::testing::Test {};
 

@@ -25,9 +25,13 @@
 
 namespace {
 
-    using namespace testing;
+    using testing::Contains;
+    using testing::MockCallback;
+    using testing::NotNull;
+    using testing::SaveArg;
+    using testing::StrEq;
 
-    class DeviceCreationTest : public Test {
+    class DeviceCreationTest : public testing::Test {
       protected:
         void SetUp() override {
             dawnProcSetProcs(&dawn::native::GetProcs());
@@ -83,7 +87,7 @@ namespace {
         EXPECT_NE(device, nullptr);
 
         auto toggles = dawn::native::GetTogglesUsed(device.Get());
-        EXPECT_THAT(toggles, testing::Contains(testing::StrEq(toggle)));
+        EXPECT_THAT(toggles, Contains(StrEq(toggle)));
     }
 
     TEST_F(DeviceCreationTest, CreateDeviceWithCacheSuccess) {

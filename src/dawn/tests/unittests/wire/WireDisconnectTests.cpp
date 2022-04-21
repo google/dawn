@@ -18,157 +18,167 @@
 #include "dawn/tests/MockCallback.h"
 #include "dawn/wire/WireClient.h"
 
-using namespace testing;
-using namespace dawn::wire;
+namespace dawn::wire {
 
-namespace {
+    using testing::_;
+    using testing::Exactly;
+    using testing::InvokeWithoutArgs;
+    using testing::MockCallback;
+    using testing::Return;
+    using testing::Sequence;
+    using testing::StrEq;
 
-    class WireDisconnectTests : public WireTest {};
+    namespace {
 
-}  // anonymous namespace
+        class WireDisconnectTests : public WireTest {};
 
-// Test that commands are not received if the client disconnects.
-TEST_F(WireDisconnectTests, CommandsAfterDisconnect) {
-    // Check that commands work at all.
-    wgpuDeviceCreateCommandEncoder(device, nullptr);
+    }  // anonymous namespace
 
-    WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
-    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
-        .WillOnce(Return(apiCmdBufEncoder));
-    FlushClient();
+    // Test that commands are not received if the client disconnects.
+    TEST_F(WireDisconnectTests, CommandsAfterDisconnect) {
+        // Check that commands work at all.
+        wgpuDeviceCreateCommandEncoder(device, nullptr);
 
-    // Disconnect.
-    GetWireClient()->Disconnect();
+        WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
+        EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
+            .WillOnce(Return(apiCmdBufEncoder));
+        FlushClient();
 
-    // Command is not received because client disconnected.
-    wgpuDeviceCreateCommandEncoder(device, nullptr);
-    EXPECT_CALL(api, DeviceCreateCommandEncoder(_, _)).Times(Exactly(0));
-    FlushClient();
-}
+        // Disconnect.
+        GetWireClient()->Disconnect();
 
-// Test that commands that are serialized before a disconnect but flushed
-// after are received.
-TEST_F(WireDisconnectTests, FlushAfterDisconnect) {
-    // Check that commands work at all.
-    wgpuDeviceCreateCommandEncoder(device, nullptr);
+        // Command is not received because client disconnected.
+        wgpuDeviceCreateCommandEncoder(device, nullptr);
+        EXPECT_CALL(api, DeviceCreateCommandEncoder(_, _)).Times(Exactly(0));
+        FlushClient();
+    }
 
-    // Disconnect.
-    GetWireClient()->Disconnect();
+    // Test that commands that are serialized before a disconnect but flushed
+    // after are received.
+    TEST_F(WireDisconnectTests, FlushAfterDisconnect) {
+        // Check that commands work at all.
+        wgpuDeviceCreateCommandEncoder(device, nullptr);
 
-    // Already-serialized commmands are still received.
-    WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
-    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
-        .WillOnce(Return(apiCmdBufEncoder));
-    FlushClient();
-}
+        // Disconnect.
+        GetWireClient()->Disconnect();
 
-// Check that disconnecting the wire client calls the device lost callback exacty once.
-TEST_F(WireDisconnectTests, CallsDeviceLostCallback) {
-    MockCallback<WGPUDeviceLostCallback> mockDeviceLostCallback;
-    wgpuDeviceSetDeviceLostCallback(device, mockDeviceLostCallback.Callback(),
-                                    mockDeviceLostCallback.MakeUserdata(this));
+        // Already-serialized commmands are still received.
+        WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
+        EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
+            .WillOnce(Return(apiCmdBufEncoder));
+        FlushClient();
+    }
 
-    // Disconnect the wire client. We should receive device lost only once.
-    EXPECT_CALL(mockDeviceLostCallback, Call(WGPUDeviceLostReason_Undefined, _, this))
-        .Times(Exactly(1));
-    GetWireClient()->Disconnect();
-    GetWireClient()->Disconnect();
-}
+    // Check that disconnecting the wire client calls the device lost callback exacty once.
+    TEST_F(WireDisconnectTests, CallsDeviceLostCallback) {
+        MockCallback<WGPUDeviceLostCallback> mockDeviceLostCallback;
+        wgpuDeviceSetDeviceLostCallback(device, mockDeviceLostCallback.Callback(),
+                                        mockDeviceLostCallback.MakeUserdata(this));
 
-// Check that disconnecting the wire client after a device loss does not trigger the callback again.
-TEST_F(WireDisconnectTests, ServerLostThenDisconnect) {
-    MockCallback<WGPUDeviceLostCallback> mockDeviceLostCallback;
-    wgpuDeviceSetDeviceLostCallback(device, mockDeviceLostCallback.Callback(),
-                                    mockDeviceLostCallback.MakeUserdata(this));
+        // Disconnect the wire client. We should receive device lost only once.
+        EXPECT_CALL(mockDeviceLostCallback, Call(WGPUDeviceLostReason_Undefined, _, this))
+            .Times(Exactly(1));
+        GetWireClient()->Disconnect();
+        GetWireClient()->Disconnect();
+    }
 
-    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Undefined,
-                                                "some reason");
+    // Check that disconnecting the wire client after a device loss does not trigger the callback
+    // again.
+    TEST_F(WireDisconnectTests, ServerLostThenDisconnect) {
+        MockCallback<WGPUDeviceLostCallback> mockDeviceLostCallback;
+        wgpuDeviceSetDeviceLostCallback(device, mockDeviceLostCallback.Callback(),
+                                        mockDeviceLostCallback.MakeUserdata(this));
 
-    // Flush the device lost return command.
-    EXPECT_CALL(mockDeviceLostCallback,
-                Call(WGPUDeviceLostReason_Undefined, StrEq("some reason"), this))
-        .Times(Exactly(1));
-    FlushServer();
+        api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Undefined,
+                                                    "some reason");
 
-    // Disconnect the client. We shouldn't see the lost callback again.
-    EXPECT_CALL(mockDeviceLostCallback, Call(_, _, _)).Times(Exactly(0));
-    GetWireClient()->Disconnect();
-}
+        // Flush the device lost return command.
+        EXPECT_CALL(mockDeviceLostCallback,
+                    Call(WGPUDeviceLostReason_Undefined, StrEq("some reason"), this))
+            .Times(Exactly(1));
+        FlushServer();
 
-// Check that disconnecting the wire client inside the device loss callback does not trigger the
-// callback again.
-TEST_F(WireDisconnectTests, ServerLostThenDisconnectInCallback) {
-    MockCallback<WGPUDeviceLostCallback> mockDeviceLostCallback;
-    wgpuDeviceSetDeviceLostCallback(device, mockDeviceLostCallback.Callback(),
-                                    mockDeviceLostCallback.MakeUserdata(this));
+        // Disconnect the client. We shouldn't see the lost callback again.
+        EXPECT_CALL(mockDeviceLostCallback, Call(_, _, _)).Times(Exactly(0));
+        GetWireClient()->Disconnect();
+    }
 
-    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Undefined,
-                                                "lost reason");
+    // Check that disconnecting the wire client inside the device loss callback does not trigger the
+    // callback again.
+    TEST_F(WireDisconnectTests, ServerLostThenDisconnectInCallback) {
+        MockCallback<WGPUDeviceLostCallback> mockDeviceLostCallback;
+        wgpuDeviceSetDeviceLostCallback(device, mockDeviceLostCallback.Callback(),
+                                        mockDeviceLostCallback.MakeUserdata(this));
 
-    // Disconnect the client inside the lost callback. We should see the callback
-    // only once.
-    EXPECT_CALL(mockDeviceLostCallback,
-                Call(WGPUDeviceLostReason_Undefined, StrEq("lost reason"), this))
-        .WillOnce(InvokeWithoutArgs([&]() {
-            EXPECT_CALL(mockDeviceLostCallback, Call(_, _, _)).Times(Exactly(0));
-            GetWireClient()->Disconnect();
-        }));
-    FlushServer();
-}
+        api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Undefined,
+                                                    "lost reason");
 
-// Check that a device loss after a disconnect does not trigger the callback again.
-TEST_F(WireDisconnectTests, DisconnectThenServerLost) {
-    MockCallback<WGPUDeviceLostCallback> mockDeviceLostCallback;
-    wgpuDeviceSetDeviceLostCallback(device, mockDeviceLostCallback.Callback(),
-                                    mockDeviceLostCallback.MakeUserdata(this));
+        // Disconnect the client inside the lost callback. We should see the callback
+        // only once.
+        EXPECT_CALL(mockDeviceLostCallback,
+                    Call(WGPUDeviceLostReason_Undefined, StrEq("lost reason"), this))
+            .WillOnce(InvokeWithoutArgs([&]() {
+                EXPECT_CALL(mockDeviceLostCallback, Call(_, _, _)).Times(Exactly(0));
+                GetWireClient()->Disconnect();
+            }));
+        FlushServer();
+    }
 
-    // Disconnect the client. We should see the callback once.
-    EXPECT_CALL(mockDeviceLostCallback, Call(WGPUDeviceLostReason_Undefined, _, this))
-        .Times(Exactly(1));
-    GetWireClient()->Disconnect();
+    // Check that a device loss after a disconnect does not trigger the callback again.
+    TEST_F(WireDisconnectTests, DisconnectThenServerLost) {
+        MockCallback<WGPUDeviceLostCallback> mockDeviceLostCallback;
+        wgpuDeviceSetDeviceLostCallback(device, mockDeviceLostCallback.Callback(),
+                                        mockDeviceLostCallback.MakeUserdata(this));
 
-    // Lose the device on the server. The client callback shouldn't be
-    // called again.
-    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Undefined,
-                                                "lost reason");
-    EXPECT_CALL(mockDeviceLostCallback, Call(_, _, _)).Times(Exactly(0));
-    FlushServer();
-}
+        // Disconnect the client. We should see the callback once.
+        EXPECT_CALL(mockDeviceLostCallback, Call(WGPUDeviceLostReason_Undefined, _, this))
+            .Times(Exactly(1));
+        GetWireClient()->Disconnect();
 
-// Test that client objects are all destroyed if the WireClient is destroyed.
-TEST_F(WireDisconnectTests, DeleteClientDestroysObjects) {
-    WGPUSamplerDescriptor desc = {};
-    wgpuDeviceCreateCommandEncoder(device, nullptr);
-    wgpuDeviceCreateSampler(device, &desc);
+        // Lose the device on the server. The client callback shouldn't be
+        // called again.
+        api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Undefined,
+                                                    "lost reason");
+        EXPECT_CALL(mockDeviceLostCallback, Call(_, _, _)).Times(Exactly(0));
+        FlushServer();
+    }
 
-    WGPUCommandEncoder apiCommandEncoder = api.GetNewCommandEncoder();
-    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
-        .WillOnce(Return(apiCommandEncoder));
+    // Test that client objects are all destroyed if the WireClient is destroyed.
+    TEST_F(WireDisconnectTests, DeleteClientDestroysObjects) {
+        WGPUSamplerDescriptor desc = {};
+        wgpuDeviceCreateCommandEncoder(device, nullptr);
+        wgpuDeviceCreateSampler(device, &desc);
 
-    WGPUSampler apiSampler = api.GetNewSampler();
-    EXPECT_CALL(api, DeviceCreateSampler(apiDevice, _)).WillOnce(Return(apiSampler));
+        WGPUCommandEncoder apiCommandEncoder = api.GetNewCommandEncoder();
+        EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
+            .WillOnce(Return(apiCommandEncoder));
 
-    FlushClient();
+        WGPUSampler apiSampler = api.GetNewSampler();
+        EXPECT_CALL(api, DeviceCreateSampler(apiDevice, _)).WillOnce(Return(apiSampler));
 
-    DeleteClient();
+        FlushClient();
 
-    // Expect release on all objects created by the client.
-    Sequence s1, s2, s3;
-    EXPECT_CALL(api, QueueRelease(apiQueue)).Times(1).InSequence(s1);
-    EXPECT_CALL(api, CommandEncoderRelease(apiCommandEncoder)).Times(1).InSequence(s2);
-    EXPECT_CALL(api, SamplerRelease(apiSampler)).Times(1).InSequence(s3);
-    EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr))
-        .Times(1)
-        .InSequence(s1, s2);
-    EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr))
-        .Times(1)
-        .InSequence(s1, s2);
-    EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, nullptr, nullptr))
-        .Times(1)
-        .InSequence(s1, s2);
-    EXPECT_CALL(api, DeviceRelease(apiDevice)).Times(1).InSequence(s1, s2, s3);
-    FlushClient();
+        DeleteClient();
 
-    // Signal that we already released and cleared callbacks for |apiDevice|
-    DefaultApiDeviceWasReleased();
-}
+        // Expect release on all objects created by the client.
+        Sequence s1, s2, s3;
+        EXPECT_CALL(api, QueueRelease(apiQueue)).Times(1).InSequence(s1);
+        EXPECT_CALL(api, CommandEncoderRelease(apiCommandEncoder)).Times(1).InSequence(s2);
+        EXPECT_CALL(api, SamplerRelease(apiSampler)).Times(1).InSequence(s3);
+        EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr))
+            .Times(1)
+            .InSequence(s1, s2);
+        EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr))
+            .Times(1)
+            .InSequence(s1, s2);
+        EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, nullptr, nullptr))
+            .Times(1)
+            .InSequence(s1, s2);
+        EXPECT_CALL(api, DeviceRelease(apiDevice)).Times(1).InSequence(s1, s2, s3);
+        FlushClient();
+
+        // Signal that we already released and cleared callbacks for |apiDevice|
+        DefaultApiDeviceWasReleased();
+    }
+
+}  // namespace dawn::wire

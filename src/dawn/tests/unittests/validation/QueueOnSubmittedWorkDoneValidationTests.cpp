@@ -17,8 +17,6 @@
 #include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "gmock/gmock.h"
 
-using namespace testing;
-
 class MockQueueWorkDoneCallback {
   public:
     MOCK_METHOD(void, Call, (WGPUQueueWorkDoneStatus status, void* userdata));

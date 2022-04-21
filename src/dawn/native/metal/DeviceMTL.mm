@@ -42,17 +42,17 @@
 
 namespace dawn::native::metal {
 
+    struct KalmanInfo {
+        float filterValue;  // The estimation value
+        float kalmanGain;   // The kalman gain
+        float R;            // The covariance of the observation noise
+        float P;            // The a posteriori estimate covariance
+    };
+
     namespace {
 
         // The time interval for each round of kalman filter
         static constexpr uint64_t kFilterIntervalInMs = static_cast<uint64_t>(NSEC_PER_SEC / 10);
-
-        struct KalmanInfo {
-            float filterValue;  // The estimation value
-            float kalmanGain;   // The kalman gain
-            float R;            // The covariance of the observation noise
-            float P;            // The a posteriori estimate covariance
-        };
 
         // A simplified kalman filter for estimating timestamp period based on measured values
         float KalmanFilter(KalmanInfo* info, float measuredValue) {

@@ -17,7 +17,7 @@
 #include "dawn/tests/DawnTest.h"
 #include "gmock/gmock.h"
 
-using namespace testing;
+using testing::InSequence;
 
 class MockMapCallback {
   public:
@@ -67,7 +67,7 @@ class QueueTimelineTests : public DawnTest {
 // when queue.OnSubmittedWorkDone is called after mMapReadBuffer.MapAsync. The callback order should
 // happen in the order the functions are called.
 TEST_P(QueueTimelineTests, MapRead_OnWorkDone) {
-    testing::InSequence sequence;
+    InSequence sequence;
     EXPECT_CALL(*mockMapCallback, Call(WGPUBufferMapAsyncStatus_Success, this)).Times(1);
     EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_Success, this)).Times(1);
 
@@ -83,7 +83,7 @@ TEST_P(QueueTimelineTests, MapRead_OnWorkDone) {
 // queue.Signal is called before mMapReadBuffer.MapAsync. The callback order should
 // happen in the order the functions are called.
 TEST_P(QueueTimelineTests, OnWorkDone_MapRead) {
-    testing::InSequence sequence;
+    InSequence sequence;
     EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_Success, this)).Times(1);
     EXPECT_CALL(*mockMapCallback, Call(WGPUBufferMapAsyncStatus_Success, this)).Times(1);
 

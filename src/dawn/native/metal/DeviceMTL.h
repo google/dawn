@@ -32,9 +32,7 @@
 
 namespace dawn::native::metal {
 
-    namespace {
-        struct KalmanInfo;
-    }
+    struct KalmanInfo;
 
     class Device final : public DeviceBase {
       public:

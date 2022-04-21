@@ -14,67 +14,71 @@
 
 #include "dawn/tests/unittests/wire/WireTest.h"
 
-using namespace testing;
-using namespace dawn::wire;
+namespace dawn::wire {
 
-class WireBasicTests : public WireTest {
-  public:
-    WireBasicTests() {
+    using testing::Return;
+
+    class WireBasicTests : public WireTest {
+      public:
+        WireBasicTests() {
+        }
+        ~WireBasicTests() override = default;
+    };
+
+    // One call gets forwarded correctly.
+    TEST_F(WireBasicTests, CallForwarded) {
+        wgpuDeviceCreateCommandEncoder(device, nullptr);
+
+        WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
+        EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
+            .WillOnce(Return(apiCmdBufEncoder));
+
+        FlushClient();
     }
-    ~WireBasicTests() override = default;
-};
 
-// One call gets forwarded correctly.
-TEST_F(WireBasicTests, CallForwarded) {
-    wgpuDeviceCreateCommandEncoder(device, nullptr);
+    // Test that calling methods on a new object works as expected.
+    TEST_F(WireBasicTests, CreateThenCall) {
+        WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
+        wgpuCommandEncoderFinish(encoder, nullptr);
 
-    WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
-    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
-        .WillOnce(Return(apiCmdBufEncoder));
+        WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
+        EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
+            .WillOnce(Return(apiCmdBufEncoder));
 
-    FlushClient();
-}
+        WGPUCommandBuffer apiCmdBuf = api.GetNewCommandBuffer();
+        EXPECT_CALL(api, CommandEncoderFinish(apiCmdBufEncoder, nullptr))
+            .WillOnce(Return(apiCmdBuf));
 
-// Test that calling methods on a new object works as expected.
-TEST_F(WireBasicTests, CreateThenCall) {
-    WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
-    wgpuCommandEncoderFinish(encoder, nullptr);
+        FlushClient();
+    }
 
-    WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
-    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
-        .WillOnce(Return(apiCmdBufEncoder));
+    // Test that client reference/release do not call the backend API.
+    TEST_F(WireBasicTests, RefCountKeptInClient) {
+        WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
 
-    WGPUCommandBuffer apiCmdBuf = api.GetNewCommandBuffer();
-    EXPECT_CALL(api, CommandEncoderFinish(apiCmdBufEncoder, nullptr)).WillOnce(Return(apiCmdBuf));
+        wgpuCommandEncoderReference(encoder);
+        wgpuCommandEncoderRelease(encoder);
 
-    FlushClient();
-}
+        WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
+        EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
+            .WillOnce(Return(apiCmdBufEncoder));
 
-// Test that client reference/release do not call the backend API.
-TEST_F(WireBasicTests, RefCountKeptInClient) {
-    WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
+        FlushClient();
+    }
 
-    wgpuCommandEncoderReference(encoder);
-    wgpuCommandEncoderRelease(encoder);
+    // Test that client reference/release do not call the backend API.
+    TEST_F(WireBasicTests, ReleaseCalledOnRefCount0) {
+        WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
 
-    WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
-    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
-        .WillOnce(Return(apiCmdBufEncoder));
+        wgpuCommandEncoderRelease(encoder);
 
-    FlushClient();
-}
+        WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
+        EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
+            .WillOnce(Return(apiCmdBufEncoder));
 
-// Test that client reference/release do not call the backend API.
-TEST_F(WireBasicTests, ReleaseCalledOnRefCount0) {
-    WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
+        EXPECT_CALL(api, CommandEncoderRelease(apiCmdBufEncoder));
 
-    wgpuCommandEncoderRelease(encoder);
+        FlushClient();
+    }
 
-    WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
-    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
-        .WillOnce(Return(apiCmdBufEncoder));
-
-    EXPECT_CALL(api, CommandEncoderRelease(apiCmdBufEncoder));
-
-    FlushClient();
-}
+}  // namespace dawn::wire

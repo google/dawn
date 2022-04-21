@@ -18,239 +18,253 @@
 #include "dawn/tests/unittests/wire/WireTest.h"
 #include "dawn/common/Constants.h"
 
-using namespace testing;
-using namespace dawn::wire;
+namespace dawn::wire {
 
-class WireArgumentTests : public WireTest {
-  public:
-    WireArgumentTests() {
-    }
-    ~WireArgumentTests() override = default;
-};
+    using testing::_;
+    using testing::Return;
+    using testing::Sequence;
 
-// Test that the wire is able to send numerical values
-TEST_F(WireArgumentTests, ValueArgument) {
-    WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
-    WGPUComputePassEncoder pass = wgpuCommandEncoderBeginComputePass(encoder, nullptr);
-    wgpuComputePassEncoderDispatch(pass, 1, 2, 3);
+    class WireArgumentTests : public WireTest {
+      public:
+        WireArgumentTests() {
+        }
+        ~WireArgumentTests() override = default;
+    };
 
-    WGPUCommandEncoder apiEncoder = api.GetNewCommandEncoder();
-    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr)).WillOnce(Return(apiEncoder));
+    // Test that the wire is able to send numerical values
+    TEST_F(WireArgumentTests, ValueArgument) {
+        WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
+        WGPUComputePassEncoder pass = wgpuCommandEncoderBeginComputePass(encoder, nullptr);
+        wgpuComputePassEncoderDispatch(pass, 1, 2, 3);
 
-    WGPUComputePassEncoder apiPass = api.GetNewComputePassEncoder();
-    EXPECT_CALL(api, CommandEncoderBeginComputePass(apiEncoder, nullptr)).WillOnce(Return(apiPass));
-
-    EXPECT_CALL(api, ComputePassEncoderDispatch(apiPass, 1, 2, 3)).Times(1);
-
-    FlushClient();
-}
-
-// Test that the wire is able to send arrays of numerical values
-TEST_F(WireArgumentTests, ValueArrayArgument) {
-    // Create a bindgroup.
-    WGPUBindGroupLayoutDescriptor bglDescriptor = {};
-    bglDescriptor.entryCount = 0;
-    bglDescriptor.entries = nullptr;
-
-    WGPUBindGroupLayout bgl = wgpuDeviceCreateBindGroupLayout(device, &bglDescriptor);
-    WGPUBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
-    EXPECT_CALL(api, DeviceCreateBindGroupLayout(apiDevice, _)).WillOnce(Return(apiBgl));
-
-    WGPUBindGroupDescriptor bindGroupDescriptor = {};
-    bindGroupDescriptor.layout = bgl;
-    bindGroupDescriptor.entryCount = 0;
-    bindGroupDescriptor.entries = nullptr;
-
-    WGPUBindGroup bindGroup = wgpuDeviceCreateBindGroup(device, &bindGroupDescriptor);
-    WGPUBindGroup apiBindGroup = api.GetNewBindGroup();
-    EXPECT_CALL(api, DeviceCreateBindGroup(apiDevice, _)).WillOnce(Return(apiBindGroup));
-
-    // Use the bindgroup in SetBindGroup that takes an array of value offsets.
-    WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
-    WGPUComputePassEncoder pass = wgpuCommandEncoderBeginComputePass(encoder, nullptr);
-
-    std::array<uint32_t, 4> testOffsets = {0, 42, 0xDEAD'BEEFu, 0xFFFF'FFFFu};
-    wgpuComputePassEncoderSetBindGroup(pass, 0, bindGroup, testOffsets.size(), testOffsets.data());
-
-    WGPUCommandEncoder apiEncoder = api.GetNewCommandEncoder();
-    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr)).WillOnce(Return(apiEncoder));
-
-    WGPUComputePassEncoder apiPass = api.GetNewComputePassEncoder();
-    EXPECT_CALL(api, CommandEncoderBeginComputePass(apiEncoder, nullptr)).WillOnce(Return(apiPass));
-
-    EXPECT_CALL(api, ComputePassEncoderSetBindGroup(
-                         apiPass, 0, apiBindGroup, testOffsets.size(),
-                         MatchesLambda([testOffsets](const uint32_t* offsets) -> bool {
-                             for (size_t i = 0; i < testOffsets.size(); i++) {
-                                 if (offsets[i] != testOffsets[i]) {
-                                     return false;
-                                 }
-                             }
-                             return true;
-                         })));
-
-    FlushClient();
-}
-
-// Test that the wire is able to send C strings
-TEST_F(WireArgumentTests, CStringArgument) {
-    // Create shader module
-    WGPUShaderModuleDescriptor vertexDescriptor = {};
-    WGPUShaderModule vsModule = wgpuDeviceCreateShaderModule(device, &vertexDescriptor);
-    WGPUShaderModule apiVsModule = api.GetNewShaderModule();
-    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiVsModule));
-
-    // Create the color state descriptor
-    WGPUBlendComponent blendComponent = {};
-    blendComponent.operation = WGPUBlendOperation_Add;
-    blendComponent.srcFactor = WGPUBlendFactor_One;
-    blendComponent.dstFactor = WGPUBlendFactor_One;
-    WGPUBlendState blendState = {};
-    blendState.alpha = blendComponent;
-    blendState.color = blendComponent;
-    WGPUColorTargetState colorTargetState = {};
-    colorTargetState.format = WGPUTextureFormat_RGBA8Unorm;
-    colorTargetState.blend = &blendState;
-    colorTargetState.writeMask = WGPUColorWriteMask_All;
-
-    // Create the depth-stencil state
-    WGPUStencilFaceState stencilFace = {};
-    stencilFace.compare = WGPUCompareFunction_Always;
-    stencilFace.failOp = WGPUStencilOperation_Keep;
-    stencilFace.depthFailOp = WGPUStencilOperation_Keep;
-    stencilFace.passOp = WGPUStencilOperation_Keep;
-
-    WGPUDepthStencilState depthStencilState = {};
-    depthStencilState.format = WGPUTextureFormat_Depth24PlusStencil8;
-    depthStencilState.depthWriteEnabled = false;
-    depthStencilState.depthCompare = WGPUCompareFunction_Always;
-    depthStencilState.stencilBack = stencilFace;
-    depthStencilState.stencilFront = stencilFace;
-    depthStencilState.stencilReadMask = 0xff;
-    depthStencilState.stencilWriteMask = 0xff;
-    depthStencilState.depthBias = 0;
-    depthStencilState.depthBiasSlopeScale = 0.0;
-    depthStencilState.depthBiasClamp = 0.0;
-
-    // Create the pipeline layout
-    WGPUPipelineLayoutDescriptor layoutDescriptor = {};
-    layoutDescriptor.bindGroupLayoutCount = 0;
-    layoutDescriptor.bindGroupLayouts = nullptr;
-    WGPUPipelineLayout layout = wgpuDeviceCreatePipelineLayout(device, &layoutDescriptor);
-    WGPUPipelineLayout apiLayout = api.GetNewPipelineLayout();
-    EXPECT_CALL(api, DeviceCreatePipelineLayout(apiDevice, _)).WillOnce(Return(apiLayout));
-
-    // Create pipeline
-    WGPURenderPipelineDescriptor pipelineDescriptor = {};
-
-    pipelineDescriptor.vertex.module = vsModule;
-    pipelineDescriptor.vertex.entryPoint = "main";
-    pipelineDescriptor.vertex.bufferCount = 0;
-    pipelineDescriptor.vertex.buffers = nullptr;
-
-    WGPUFragmentState fragment = {};
-    fragment.module = vsModule;
-    fragment.entryPoint = "main";
-    fragment.targetCount = 1;
-    fragment.targets = &colorTargetState;
-    pipelineDescriptor.fragment = &fragment;
-
-    pipelineDescriptor.multisample.count = 1;
-    pipelineDescriptor.multisample.mask = 0xFFFFFFFF;
-    pipelineDescriptor.multisample.alphaToCoverageEnabled = false;
-    pipelineDescriptor.layout = layout;
-    pipelineDescriptor.primitive.topology = WGPUPrimitiveTopology_TriangleList;
-    pipelineDescriptor.primitive.frontFace = WGPUFrontFace_CCW;
-    pipelineDescriptor.primitive.cullMode = WGPUCullMode_None;
-    pipelineDescriptor.depthStencil = &depthStencilState;
-
-    wgpuDeviceCreateRenderPipeline(device, &pipelineDescriptor);
-
-    WGPURenderPipeline apiPlaceholderPipeline = api.GetNewRenderPipeline();
-    EXPECT_CALL(api,
-                DeviceCreateRenderPipeline(
-                    apiDevice, MatchesLambda([](const WGPURenderPipelineDescriptor* desc) -> bool {
-                        return desc->vertex.entryPoint == std::string("main");
-                    })))
-        .WillOnce(Return(apiPlaceholderPipeline));
-
-    FlushClient();
-}
-
-// Test that the wire is able to send objects as value arguments
-TEST_F(WireArgumentTests, ObjectAsValueArgument) {
-    WGPUCommandEncoder cmdBufEncoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
-    WGPUCommandEncoder apiEncoder = api.GetNewCommandEncoder();
-    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr)).WillOnce(Return(apiEncoder));
-
-    WGPUBufferDescriptor descriptor = {};
-    descriptor.size = 8;
-    descriptor.usage =
-        static_cast<WGPUBufferUsage>(WGPUBufferUsage_CopySrc | WGPUBufferUsage_CopyDst);
-
-    WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
-    WGPUBuffer apiBuffer = api.GetNewBuffer();
-    EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _))
-        .WillOnce(Return(apiBuffer))
-        .RetiresOnSaturation();
-
-    wgpuCommandEncoderCopyBufferToBuffer(cmdBufEncoder, buffer, 0, buffer, 4, 4);
-    EXPECT_CALL(api, CommandEncoderCopyBufferToBuffer(apiEncoder, apiBuffer, 0, apiBuffer, 4, 4));
-
-    FlushClient();
-}
-
-// Test that the wire is able to send array of objects
-TEST_F(WireArgumentTests, ObjectsAsPointerArgument) {
-    WGPUCommandBuffer cmdBufs[2];
-    WGPUCommandBuffer apiCmdBufs[2];
-
-    // Create two command buffers we need to use a GMock sequence otherwise the order of the
-    // CreateCommandEncoder might be swapped since they are equivalent in term of matchers
-    Sequence s;
-    for (int i = 0; i < 2; ++i) {
-        WGPUCommandEncoder cmdBufEncoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
-        cmdBufs[i] = wgpuCommandEncoderFinish(cmdBufEncoder, nullptr);
-
-        WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
+        WGPUCommandEncoder apiEncoder = api.GetNewCommandEncoder();
         EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
-            .InSequence(s)
-            .WillOnce(Return(apiCmdBufEncoder));
+            .WillOnce(Return(apiEncoder));
 
-        apiCmdBufs[i] = api.GetNewCommandBuffer();
-        EXPECT_CALL(api, CommandEncoderFinish(apiCmdBufEncoder, nullptr))
-            .WillOnce(Return(apiCmdBufs[i]));
+        WGPUComputePassEncoder apiPass = api.GetNewComputePassEncoder();
+        EXPECT_CALL(api, CommandEncoderBeginComputePass(apiEncoder, nullptr))
+            .WillOnce(Return(apiPass));
+
+        EXPECT_CALL(api, ComputePassEncoderDispatch(apiPass, 1, 2, 3)).Times(1);
+
+        FlushClient();
     }
 
-    // Submit command buffer and check we got a call with both API-side command buffers
-    wgpuQueueSubmit(queue, 2, cmdBufs);
+    // Test that the wire is able to send arrays of numerical values
+    TEST_F(WireArgumentTests, ValueArrayArgument) {
+        // Create a bindgroup.
+        WGPUBindGroupLayoutDescriptor bglDescriptor = {};
+        bglDescriptor.entryCount = 0;
+        bglDescriptor.entries = nullptr;
 
-    EXPECT_CALL(
-        api, QueueSubmit(apiQueue, 2, MatchesLambda([=](const WGPUCommandBuffer* cmdBufs) -> bool {
-                             return cmdBufs[0] == apiCmdBufs[0] && cmdBufs[1] == apiCmdBufs[1];
-                         })));
+        WGPUBindGroupLayout bgl = wgpuDeviceCreateBindGroupLayout(device, &bglDescriptor);
+        WGPUBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
+        EXPECT_CALL(api, DeviceCreateBindGroupLayout(apiDevice, _)).WillOnce(Return(apiBgl));
 
-    FlushClient();
-}
+        WGPUBindGroupDescriptor bindGroupDescriptor = {};
+        bindGroupDescriptor.layout = bgl;
+        bindGroupDescriptor.entryCount = 0;
+        bindGroupDescriptor.entries = nullptr;
 
-// Test that the wire is able to send structures that contain pure values (non-objects)
-TEST_F(WireArgumentTests, StructureOfValuesArgument) {
-    WGPUSamplerDescriptor descriptor = {};
-    descriptor.magFilter = WGPUFilterMode_Linear;
-    descriptor.minFilter = WGPUFilterMode_Nearest;
-    descriptor.mipmapFilter = WGPUFilterMode_Linear;
-    descriptor.addressModeU = WGPUAddressMode_ClampToEdge;
-    descriptor.addressModeV = WGPUAddressMode_Repeat;
-    descriptor.addressModeW = WGPUAddressMode_MirrorRepeat;
-    descriptor.lodMinClamp = kLodMin;
-    descriptor.lodMaxClamp = kLodMax;
-    descriptor.compare = WGPUCompareFunction_Never;
+        WGPUBindGroup bindGroup = wgpuDeviceCreateBindGroup(device, &bindGroupDescriptor);
+        WGPUBindGroup apiBindGroup = api.GetNewBindGroup();
+        EXPECT_CALL(api, DeviceCreateBindGroup(apiDevice, _)).WillOnce(Return(apiBindGroup));
 
-    wgpuDeviceCreateSampler(device, &descriptor);
+        // Use the bindgroup in SetBindGroup that takes an array of value offsets.
+        WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
+        WGPUComputePassEncoder pass = wgpuCommandEncoderBeginComputePass(encoder, nullptr);
 
-    WGPUSampler apiPlaceholderSampler = api.GetNewSampler();
-    EXPECT_CALL(api, DeviceCreateSampler(
-                         apiDevice, MatchesLambda([](const WGPUSamplerDescriptor* desc) -> bool {
+        std::array<uint32_t, 4> testOffsets = {0, 42, 0xDEAD'BEEFu, 0xFFFF'FFFFu};
+        wgpuComputePassEncoderSetBindGroup(pass, 0, bindGroup, testOffsets.size(),
+                                           testOffsets.data());
+
+        WGPUCommandEncoder apiEncoder = api.GetNewCommandEncoder();
+        EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
+            .WillOnce(Return(apiEncoder));
+
+        WGPUComputePassEncoder apiPass = api.GetNewComputePassEncoder();
+        EXPECT_CALL(api, CommandEncoderBeginComputePass(apiEncoder, nullptr))
+            .WillOnce(Return(apiPass));
+
+        EXPECT_CALL(api, ComputePassEncoderSetBindGroup(
+                             apiPass, 0, apiBindGroup, testOffsets.size(),
+                             MatchesLambda([testOffsets](const uint32_t* offsets) -> bool {
+                                 for (size_t i = 0; i < testOffsets.size(); i++) {
+                                     if (offsets[i] != testOffsets[i]) {
+                                         return false;
+                                     }
+                                 }
+                                 return true;
+                             })));
+
+        FlushClient();
+    }
+
+    // Test that the wire is able to send C strings
+    TEST_F(WireArgumentTests, CStringArgument) {
+        // Create shader module
+        WGPUShaderModuleDescriptor vertexDescriptor = {};
+        WGPUShaderModule vsModule = wgpuDeviceCreateShaderModule(device, &vertexDescriptor);
+        WGPUShaderModule apiVsModule = api.GetNewShaderModule();
+        EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiVsModule));
+
+        // Create the color state descriptor
+        WGPUBlendComponent blendComponent = {};
+        blendComponent.operation = WGPUBlendOperation_Add;
+        blendComponent.srcFactor = WGPUBlendFactor_One;
+        blendComponent.dstFactor = WGPUBlendFactor_One;
+        WGPUBlendState blendState = {};
+        blendState.alpha = blendComponent;
+        blendState.color = blendComponent;
+        WGPUColorTargetState colorTargetState = {};
+        colorTargetState.format = WGPUTextureFormat_RGBA8Unorm;
+        colorTargetState.blend = &blendState;
+        colorTargetState.writeMask = WGPUColorWriteMask_All;
+
+        // Create the depth-stencil state
+        WGPUStencilFaceState stencilFace = {};
+        stencilFace.compare = WGPUCompareFunction_Always;
+        stencilFace.failOp = WGPUStencilOperation_Keep;
+        stencilFace.depthFailOp = WGPUStencilOperation_Keep;
+        stencilFace.passOp = WGPUStencilOperation_Keep;
+
+        WGPUDepthStencilState depthStencilState = {};
+        depthStencilState.format = WGPUTextureFormat_Depth24PlusStencil8;
+        depthStencilState.depthWriteEnabled = false;
+        depthStencilState.depthCompare = WGPUCompareFunction_Always;
+        depthStencilState.stencilBack = stencilFace;
+        depthStencilState.stencilFront = stencilFace;
+        depthStencilState.stencilReadMask = 0xff;
+        depthStencilState.stencilWriteMask = 0xff;
+        depthStencilState.depthBias = 0;
+        depthStencilState.depthBiasSlopeScale = 0.0;
+        depthStencilState.depthBiasClamp = 0.0;
+
+        // Create the pipeline layout
+        WGPUPipelineLayoutDescriptor layoutDescriptor = {};
+        layoutDescriptor.bindGroupLayoutCount = 0;
+        layoutDescriptor.bindGroupLayouts = nullptr;
+        WGPUPipelineLayout layout = wgpuDeviceCreatePipelineLayout(device, &layoutDescriptor);
+        WGPUPipelineLayout apiLayout = api.GetNewPipelineLayout();
+        EXPECT_CALL(api, DeviceCreatePipelineLayout(apiDevice, _)).WillOnce(Return(apiLayout));
+
+        // Create pipeline
+        WGPURenderPipelineDescriptor pipelineDescriptor = {};
+
+        pipelineDescriptor.vertex.module = vsModule;
+        pipelineDescriptor.vertex.entryPoint = "main";
+        pipelineDescriptor.vertex.bufferCount = 0;
+        pipelineDescriptor.vertex.buffers = nullptr;
+
+        WGPUFragmentState fragment = {};
+        fragment.module = vsModule;
+        fragment.entryPoint = "main";
+        fragment.targetCount = 1;
+        fragment.targets = &colorTargetState;
+        pipelineDescriptor.fragment = &fragment;
+
+        pipelineDescriptor.multisample.count = 1;
+        pipelineDescriptor.multisample.mask = 0xFFFFFFFF;
+        pipelineDescriptor.multisample.alphaToCoverageEnabled = false;
+        pipelineDescriptor.layout = layout;
+        pipelineDescriptor.primitive.topology = WGPUPrimitiveTopology_TriangleList;
+        pipelineDescriptor.primitive.frontFace = WGPUFrontFace_CCW;
+        pipelineDescriptor.primitive.cullMode = WGPUCullMode_None;
+        pipelineDescriptor.depthStencil = &depthStencilState;
+
+        wgpuDeviceCreateRenderPipeline(device, &pipelineDescriptor);
+
+        WGPURenderPipeline apiPlaceholderPipeline = api.GetNewRenderPipeline();
+        EXPECT_CALL(
+            api, DeviceCreateRenderPipeline(
+                     apiDevice, MatchesLambda([](const WGPURenderPipelineDescriptor* desc) -> bool {
+                         return desc->vertex.entryPoint == std::string("main");
+                     })))
+            .WillOnce(Return(apiPlaceholderPipeline));
+
+        FlushClient();
+    }
+
+    // Test that the wire is able to send objects as value arguments
+    TEST_F(WireArgumentTests, ObjectAsValueArgument) {
+        WGPUCommandEncoder cmdBufEncoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
+        WGPUCommandEncoder apiEncoder = api.GetNewCommandEncoder();
+        EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
+            .WillOnce(Return(apiEncoder));
+
+        WGPUBufferDescriptor descriptor = {};
+        descriptor.size = 8;
+        descriptor.usage =
+            static_cast<WGPUBufferUsage>(WGPUBufferUsage_CopySrc | WGPUBufferUsage_CopyDst);
+
+        WGPUBuffer buffer = wgpuDeviceCreateBuffer(device, &descriptor);
+        WGPUBuffer apiBuffer = api.GetNewBuffer();
+        EXPECT_CALL(api, DeviceCreateBuffer(apiDevice, _))
+            .WillOnce(Return(apiBuffer))
+            .RetiresOnSaturation();
+
+        wgpuCommandEncoderCopyBufferToBuffer(cmdBufEncoder, buffer, 0, buffer, 4, 4);
+        EXPECT_CALL(api,
+                    CommandEncoderCopyBufferToBuffer(apiEncoder, apiBuffer, 0, apiBuffer, 4, 4));
+
+        FlushClient();
+    }
+
+    // Test that the wire is able to send array of objects
+    TEST_F(WireArgumentTests, ObjectsAsPointerArgument) {
+        WGPUCommandBuffer cmdBufs[2];
+        WGPUCommandBuffer apiCmdBufs[2];
+
+        // Create two command buffers we need to use a GMock sequence otherwise the order of the
+        // CreateCommandEncoder might be swapped since they are equivalent in term of matchers
+        Sequence s;
+        for (int i = 0; i < 2; ++i) {
+            WGPUCommandEncoder cmdBufEncoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
+            cmdBufs[i] = wgpuCommandEncoderFinish(cmdBufEncoder, nullptr);
+
+            WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
+            EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
+                .InSequence(s)
+                .WillOnce(Return(apiCmdBufEncoder));
+
+            apiCmdBufs[i] = api.GetNewCommandBuffer();
+            EXPECT_CALL(api, CommandEncoderFinish(apiCmdBufEncoder, nullptr))
+                .WillOnce(Return(apiCmdBufs[i]));
+        }
+
+        // Submit command buffer and check we got a call with both API-side command buffers
+        wgpuQueueSubmit(queue, 2, cmdBufs);
+
+        EXPECT_CALL(
+            api,
+            QueueSubmit(apiQueue, 2, MatchesLambda([=](const WGPUCommandBuffer* cmdBufs) -> bool {
+                            return cmdBufs[0] == apiCmdBufs[0] && cmdBufs[1] == apiCmdBufs[1];
+                        })));
+
+        FlushClient();
+    }
+
+    // Test that the wire is able to send structures that contain pure values (non-objects)
+    TEST_F(WireArgumentTests, StructureOfValuesArgument) {
+        WGPUSamplerDescriptor descriptor = {};
+        descriptor.magFilter = WGPUFilterMode_Linear;
+        descriptor.minFilter = WGPUFilterMode_Nearest;
+        descriptor.mipmapFilter = WGPUFilterMode_Linear;
+        descriptor.addressModeU = WGPUAddressMode_ClampToEdge;
+        descriptor.addressModeV = WGPUAddressMode_Repeat;
+        descriptor.addressModeW = WGPUAddressMode_MirrorRepeat;
+        descriptor.lodMinClamp = kLodMin;
+        descriptor.lodMaxClamp = kLodMax;
+        descriptor.compare = WGPUCompareFunction_Never;
+
+        wgpuDeviceCreateSampler(device, &descriptor);
+
+        WGPUSampler apiPlaceholderSampler = api.GetNewSampler();
+        EXPECT_CALL(
+            api, DeviceCreateSampler(
+                     apiDevice,
+                     MatchesLambda(
+                         [](const WGPUSamplerDescriptor* desc) -> bool {
                              return desc->nextInChain == nullptr &&
                                     desc->magFilter == WGPUFilterMode_Linear &&
                                     desc->minFilter == WGPUFilterMode_Nearest &&
@@ -261,108 +275,111 @@ TEST_F(WireArgumentTests, StructureOfValuesArgument) {
                                     desc->compare == WGPUCompareFunction_Never &&
                                     desc->lodMinClamp == kLodMin && desc->lodMaxClamp == kLodMax;
                          })))
-        .WillOnce(Return(apiPlaceholderSampler));
+            .WillOnce(Return(apiPlaceholderSampler));
 
-    FlushClient();
-}
+        FlushClient();
+    }
 
-// Test that the wire is able to send structures that contain objects
-TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
-    WGPUBindGroupLayoutDescriptor bglDescriptor = {};
-    bglDescriptor.entryCount = 0;
-    bglDescriptor.entries = nullptr;
+    // Test that the wire is able to send structures that contain objects
+    TEST_F(WireArgumentTests, StructureOfObjectArrayArgument) {
+        WGPUBindGroupLayoutDescriptor bglDescriptor = {};
+        bglDescriptor.entryCount = 0;
+        bglDescriptor.entries = nullptr;
 
-    WGPUBindGroupLayout bgl = wgpuDeviceCreateBindGroupLayout(device, &bglDescriptor);
-    WGPUBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
-    EXPECT_CALL(api, DeviceCreateBindGroupLayout(apiDevice, _)).WillOnce(Return(apiBgl));
+        WGPUBindGroupLayout bgl = wgpuDeviceCreateBindGroupLayout(device, &bglDescriptor);
+        WGPUBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
+        EXPECT_CALL(api, DeviceCreateBindGroupLayout(apiDevice, _)).WillOnce(Return(apiBgl));
 
-    WGPUPipelineLayoutDescriptor descriptor = {};
-    descriptor.bindGroupLayoutCount = 1;
-    descriptor.bindGroupLayouts = &bgl;
+        WGPUPipelineLayoutDescriptor descriptor = {};
+        descriptor.bindGroupLayoutCount = 1;
+        descriptor.bindGroupLayouts = &bgl;
 
-    wgpuDeviceCreatePipelineLayout(device, &descriptor);
+        wgpuDeviceCreatePipelineLayout(device, &descriptor);
 
-    WGPUPipelineLayout apiPlaceholderLayout = api.GetNewPipelineLayout();
-    EXPECT_CALL(api, DeviceCreatePipelineLayout(
-                         apiDevice,
-                         MatchesLambda([apiBgl](const WGPUPipelineLayoutDescriptor* desc) -> bool {
-                             return desc->nextInChain == nullptr &&
-                                    desc->bindGroupLayoutCount == 1 &&
-                                    desc->bindGroupLayouts[0] == apiBgl;
-                         })))
-        .WillOnce(Return(apiPlaceholderLayout));
+        WGPUPipelineLayout apiPlaceholderLayout = api.GetNewPipelineLayout();
+        EXPECT_CALL(
+            api, DeviceCreatePipelineLayout(
+                     apiDevice,
+                     MatchesLambda([apiBgl](const WGPUPipelineLayoutDescriptor* desc) -> bool {
+                         return desc->nextInChain == nullptr && desc->bindGroupLayoutCount == 1 &&
+                                desc->bindGroupLayouts[0] == apiBgl;
+                     })))
+            .WillOnce(Return(apiPlaceholderLayout));
 
-    FlushClient();
-}
+        FlushClient();
+    }
 
-// Test that the wire is able to send structures that contain objects
-TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
-    static constexpr int NUM_BINDINGS = 3;
-    WGPUBindGroupLayoutEntry entries[NUM_BINDINGS]{
-        {nullptr,
-         0,
-         WGPUShaderStage_Vertex,
-         {},
-         {nullptr, WGPUSamplerBindingType_Filtering},
-         {},
-         {}},
-        {nullptr,
-         1,
-         WGPUShaderStage_Vertex,
-         {},
-         {},
-         {nullptr, WGPUTextureSampleType_Float, WGPUTextureViewDimension_2D, false},
-         {}},
-        {nullptr,
-         2,
-         static_cast<WGPUShaderStage>(WGPUShaderStage_Vertex | WGPUShaderStage_Fragment),
-         {nullptr, WGPUBufferBindingType_Uniform, false, 0},
-         {},
-         {},
-         {}},
-    };
-    WGPUBindGroupLayoutDescriptor bglDescriptor = {};
-    bglDescriptor.entryCount = NUM_BINDINGS;
-    bglDescriptor.entries = entries;
+    // Test that the wire is able to send structures that contain objects
+    TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
+        static constexpr int NUM_BINDINGS = 3;
+        WGPUBindGroupLayoutEntry entries[NUM_BINDINGS]{
+            {nullptr,
+             0,
+             WGPUShaderStage_Vertex,
+             {},
+             {nullptr, WGPUSamplerBindingType_Filtering},
+             {},
+             {}},
+            {nullptr,
+             1,
+             WGPUShaderStage_Vertex,
+             {},
+             {},
+             {nullptr, WGPUTextureSampleType_Float, WGPUTextureViewDimension_2D, false},
+             {}},
+            {nullptr,
+             2,
+             static_cast<WGPUShaderStage>(WGPUShaderStage_Vertex | WGPUShaderStage_Fragment),
+             {nullptr, WGPUBufferBindingType_Uniform, false, 0},
+             {},
+             {},
+             {}},
+        };
+        WGPUBindGroupLayoutDescriptor bglDescriptor = {};
+        bglDescriptor.entryCount = NUM_BINDINGS;
+        bglDescriptor.entries = entries;
 
-    wgpuDeviceCreateBindGroupLayout(device, &bglDescriptor);
-    WGPUBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
-    EXPECT_CALL(
-        api,
-        DeviceCreateBindGroupLayout(
-            apiDevice, MatchesLambda([entries](const WGPUBindGroupLayoutDescriptor* desc) -> bool {
-                for (int i = 0; i < NUM_BINDINGS; ++i) {
-                    const auto& a = desc->entries[i];
-                    const auto& b = entries[i];
-                    if (a.binding != b.binding || a.visibility != b.visibility ||
-                        a.buffer.type != b.buffer.type || a.sampler.type != b.sampler.type ||
-                        a.texture.sampleType != b.texture.sampleType) {
-                        return false;
-                    }
-                }
-                return desc->nextInChain == nullptr && desc->entryCount == 3;
-            })))
-        .WillOnce(Return(apiBgl));
+        wgpuDeviceCreateBindGroupLayout(device, &bglDescriptor);
+        WGPUBindGroupLayout apiBgl = api.GetNewBindGroupLayout();
+        EXPECT_CALL(api,
+                    DeviceCreateBindGroupLayout(
+                        apiDevice,
+                        MatchesLambda([entries](const WGPUBindGroupLayoutDescriptor* desc) -> bool {
+                            for (int i = 0; i < NUM_BINDINGS; ++i) {
+                                const auto& a = desc->entries[i];
+                                const auto& b = entries[i];
+                                if (a.binding != b.binding || a.visibility != b.visibility ||
+                                    a.buffer.type != b.buffer.type ||
+                                    a.sampler.type != b.sampler.type ||
+                                    a.texture.sampleType != b.texture.sampleType) {
+                                    return false;
+                                }
+                            }
+                            return desc->nextInChain == nullptr && desc->entryCount == 3;
+                        })))
+            .WillOnce(Return(apiBgl));
 
-    FlushClient();
-}
+        FlushClient();
+    }
 
-// Test passing nullptr instead of objects - array of objects version
-TEST_F(WireArgumentTests, DISABLED_NullptrInArray) {
-    WGPUBindGroupLayout nullBGL = nullptr;
+    // Test passing nullptr instead of objects - array of objects version
+    TEST_F(WireArgumentTests, DISABLED_NullptrInArray) {
+        WGPUBindGroupLayout nullBGL = nullptr;
 
-    WGPUPipelineLayoutDescriptor descriptor = {};
-    descriptor.bindGroupLayoutCount = 1;
-    descriptor.bindGroupLayouts = &nullBGL;
+        WGPUPipelineLayoutDescriptor descriptor = {};
+        descriptor.bindGroupLayoutCount = 1;
+        descriptor.bindGroupLayouts = &nullBGL;
 
-    wgpuDeviceCreatePipelineLayout(device, &descriptor);
-    EXPECT_CALL(api,
-                DeviceCreatePipelineLayout(
-                    apiDevice, MatchesLambda([](const WGPUPipelineLayoutDescriptor* desc) -> bool {
-                        return desc->nextInChain == nullptr && desc->bindGroupLayoutCount == 1 &&
-                               desc->bindGroupLayouts[0] == nullptr;
-                    })))
-        .WillOnce(Return(nullptr));
+        wgpuDeviceCreatePipelineLayout(device, &descriptor);
+        EXPECT_CALL(
+            api, DeviceCreatePipelineLayout(
+                     apiDevice, MatchesLambda([](const WGPUPipelineLayoutDescriptor* desc) -> bool {
+                         return desc->nextInChain == nullptr && desc->bindGroupLayoutCount == 1 &&
+                                desc->bindGroupLayouts[0] == nullptr;
+                     })))
+            .WillOnce(Return(nullptr));
 
-    FlushClient();
-}
+        FlushClient();
+    }
+
+}  // namespace dawn::wire

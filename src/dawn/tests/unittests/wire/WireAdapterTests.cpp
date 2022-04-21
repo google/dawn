@@ -23,10 +23,17 @@
 
 #include "webgpu/webgpu_cpp.h"
 
-namespace {
+namespace dawn::wire { namespace {
 
-    using namespace testing;
-    using namespace dawn::wire;
+    using testing::_;
+    using testing::Invoke;
+    using testing::InvokeWithoutArgs;
+    using testing::MockCallback;
+    using testing::NotNull;
+    using testing::Return;
+    using testing::SaveArg;
+    using testing::StrEq;
+    using testing::WithArg;
 
     class WireAdapterTests : public WireTest {
       protected:
@@ -328,4 +335,6 @@ namespace {
         GetWireClient()->Disconnect();
     }
 
-}  // anonymous namespace
+    // TODO(https://crbug.com/dawn/1381) Remove when namespaces are not indented.
+    // NOLINTNEXTLINE(readability/namespace)
+}}  // namespace dawn::wire::

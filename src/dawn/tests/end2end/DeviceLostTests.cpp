@@ -22,7 +22,9 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
-using namespace testing;
+using testing::_;
+using testing::Exactly;
+using testing::MockCallback;
 
 class MockDeviceLostCallback {
   public:

@@ -16,7 +16,12 @@
 
 #include "dawn/tests/MockCallback.h"
 
-using namespace testing;
+using testing::_;
+using testing::Invoke;
+using testing::MockCallback;
+using testing::NotNull;
+using testing::StrictMock;
+using testing::WithArg;
 
 class MultipleDeviceTest : public ValidationTest {};
 

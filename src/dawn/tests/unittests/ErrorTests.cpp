@@ -18,9 +18,7 @@
 #include "dawn/native/ErrorData.h"
 #include "gtest/gtest.h"
 
-using namespace dawn::native;
-
-namespace {
+namespace dawn::native { namespace {
 
     int placeholderSuccess = 0xbeef;
     const char* placeholderErrorMessage = "I am an error message :3";
@@ -360,4 +358,6 @@ namespace {
         ASSERT_EQ(errorData->GetMessage(), placeholderErrorMessage);
     }
 
-}  // anonymous namespace
+    // TODO(https://crbug.com/dawn/1381) Remove when namespaces are not indented.
+    // NOLINTNEXTLINE(readability/namespace)
+}}  // namespace dawn::native::
