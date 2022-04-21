@@ -188,10 +188,7 @@ namespace dawn::native {
         uint64_t indirectOffset;
     };
 
-    struct DrawIndexedIndirectCmd {
-        Ref<BufferBase> indirectBuffer;
-        uint64_t indirectOffset;
-    };
+    struct DrawIndexedIndirectCmd : DrawIndirectCmd {};
 
     struct EndComputePassCmd {
         std::vector<TimestampWrite> timestampWrites;

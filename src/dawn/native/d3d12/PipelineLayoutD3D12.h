@@ -56,6 +56,10 @@ namespace dawn::native::d3d12 {
 
         ID3D12CommandSignature* GetDispatchIndirectCommandSignatureWithNumWorkgroups();
 
+        ID3D12CommandSignature* GetDrawIndirectCommandSignatureWithInstanceVertexOffsets();
+
+        ID3D12CommandSignature* GetDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets();
+
         struct PerBindGroupDynamicStorageBufferLengthInfo {
             // First register offset for a bind group's dynamic storage buffer lengths.
             // This is the index into the array of root constants where this bind group's
@@ -95,6 +99,9 @@ namespace dawn::native::d3d12 {
         uint32_t mDynamicStorageBufferLengthsParameterIndex;
         ComPtr<ID3D12RootSignature> mRootSignature;
         ComPtr<ID3D12CommandSignature> mDispatchIndirectCommandSignatureWithNumWorkgroups;
+        ComPtr<ID3D12CommandSignature> mDrawIndirectCommandSignatureWithInstanceVertexOffsets;
+        ComPtr<ID3D12CommandSignature>
+            mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets;
     };
 
 }  // namespace dawn::native::d3d12

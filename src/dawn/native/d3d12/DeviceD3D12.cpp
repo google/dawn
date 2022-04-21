@@ -760,4 +760,14 @@ namespace dawn::native::d3d12 {
         SetDebugName(this, mD3d12Device.Get(), "Dawn_Device", GetLabel());
     }
 
+    bool Device::MayRequireDuplicationOfIndirectParameters() const {
+        return true;
+    }
+
+    bool Device::ShouldDuplicateParametersForDrawIndirect(
+        const RenderPipelineBase* renderPipelineBase) const {
+        return ToBackend(renderPipelineBase)->GetFirstOffsetInfo().usesVertexIndex ||
+               ToBackend(renderPipelineBase)->GetFirstOffsetInfo().usesInstanceIndex;
+    }
+
 }  // namespace dawn::native::d3d12

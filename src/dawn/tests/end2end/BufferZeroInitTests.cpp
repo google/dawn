@@ -1256,6 +1256,10 @@ TEST_P(BufferZeroInitTest, SetIndexBuffer) {
 // Test the buffer will be lazily initialized correctly when its first use is an indirect buffer for
 // DrawIndirect.
 TEST_P(BufferZeroInitTest, IndirectBufferForDrawIndirect) {
+    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
+    // the offset= that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
+
     // Bind the whole buffer as an indirect buffer.
     {
         constexpr uint64_t kOffset = 0u;
@@ -1274,7 +1278,7 @@ TEST_P(BufferZeroInitTest, IndirectBufferForDrawIndirect) {
 TEST_P(BufferZeroInitTest, IndirectBufferForDrawIndexedIndirect) {
     // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
     // the offset= that Tint/GLSL produces.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL());
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
     // Bind the whole buffer as an indirect buffer.
     {

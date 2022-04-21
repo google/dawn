@@ -89,6 +89,10 @@ class DrawIndirectTest : public DawnTest {
 
 // The basic triangle draw.
 TEST_P(DrawIndirectTest, Uint32) {
+    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
+    // the offsets that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
+
     RGBA8 filled(0, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
 
@@ -106,6 +110,10 @@ TEST_P(DrawIndirectTest, Uint32) {
 }
 
 TEST_P(DrawIndirectTest, IndirectOffset) {
+    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
+    // the offsets that Tint/GLSL produces.
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
+
     RGBA8 filled(0, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
 

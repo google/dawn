@@ -91,12 +91,14 @@ namespace dawn::native {
 
     void EncodingContext::WillBeginRenderPass() {
         ASSERT(mCurrentEncoder == mTopLevelEncoder);
-        if (mDevice->IsValidationEnabled()) {
-            // When validation is enabled, we are going to want to capture all commands encoded
-            // between and including BeginRenderPassCmd and EndRenderPassCmd, and defer their
-            // sequencing util after we have a chance to insert any necessary validation
-            // commands. To support this we commit any current commands now, so that the
-            // impending BeginRenderPassCmd starts in a fresh CommandAllocator.
+        if (mDevice->IsValidationEnabled() ||
+            mDevice->MayRequireDuplicationOfIndirectParameters()) {
+            // When validation is enabled or indirect parameters require duplication, we are going
+            // to want to capture all commands encoded between and including BeginRenderPassCmd and
+            // EndRenderPassCmd, and defer their sequencing util after we have a chance to insert
+            // any necessary validation or duplication commands. To support this we commit any
+            // current commands now, so that the impending BeginRenderPassCmd starts in a fresh
+            // CommandAllocator.
             CommitCommands(std::move(mPendingCommands));
         }
     }
@@ -118,7 +120,8 @@ namespace dawn::native {
 
         mCurrentEncoder = mTopLevelEncoder;
 
-        if (mDevice->IsValidationEnabled()) {
+        if (mDevice->IsValidationEnabled() ||
+            mDevice->MayRequireDuplicationOfIndirectParameters()) {
             // With validation enabled, commands were committed just before BeginRenderPassCmd was
             // encoded by our RenderPassEncoder (see WillBeginRenderPass above). This means
             // mPendingCommands contains only the commands from BeginRenderPassCmd to

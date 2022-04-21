@@ -128,18 +128,11 @@ void FirstIndexOffset::Run(CloneContext& ctx,
 
   if (has_vertex_index || has_instance_index) {
     // Add uniform buffer members and calculate byte offsets
-    uint32_t offset = 0;
     ast::StructMemberList members;
-    if (has_vertex_index) {
-      members.push_back(ctx.dst->Member(kFirstVertexName, ctx.dst->ty.u32()));
-      vertex_index_offset = offset;
-      offset += 4;
-    }
-    if (has_instance_index) {
-      members.push_back(ctx.dst->Member(kFirstInstanceName, ctx.dst->ty.u32()));
-      instance_index_offset = offset;
-      offset += 4;
-    }
+    members.push_back(ctx.dst->Member(kFirstVertexName, ctx.dst->ty.u32()));
+    vertex_index_offset = 0;
+    members.push_back(ctx.dst->Member(kFirstInstanceName, ctx.dst->ty.u32()));
+    instance_index_offset = 4;
     auto* struct_ = ctx.dst->Structure(ctx.dst->Sym(), std::move(members));
 
     // Create a global to hold the uniform buffer

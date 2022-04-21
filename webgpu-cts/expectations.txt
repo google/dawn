@@ -305,51 +305,6 @@ crbug.com/dawn/1345 webgpu:api,validation,createComputePipeline:entry_point_name
 crbug.com/dawn/1345 webgpu:api,validation,createComputePipeline:entry_point_name_must_match:isAsync=true;shaderModuleEntryPoint="s%C3%A9quen%C3%A7age";* [ Failure ]
 
 ################################################################################
-# windows draw failures
-# KEEP
-################################################################################
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=0;count=3;first_instance=0;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=0;index_buffer_offset=0;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=0;count=3;first_instance=0;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=0;index_buffer_offset=16;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=0;count=3;first_instance=0;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=0;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=0;count=3;first_instance=0;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=16;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=0;count=3;first_instance=0;instance_count=4;indexed=true;indirect=true;vertex_buffer_offset=0;index_buffer_offset=0;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=0;count=3;first_instance=0;instance_count=4;indexed=true;indirect=true;vertex_buffer_offset=0;index_buffer_offset=16;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=0;count=3;first_instance=0;instance_count=4;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=0;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=0;count=3;first_instance=0;instance_count=4;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=16;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=0;count=6;first_instance=0;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=0;index_buffer_offset=0;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=0;count=6;first_instance=0;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=0;index_buffer_offset=16;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=0;count=6;first_instance=0;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=0;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=0;count=6;first_instance=0;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=16;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=0;count=6;first_instance=0;instance_count=4;indexed=true;indirect=true;vertex_buffer_offset=0;index_buffer_offset=0;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=0;count=6;first_instance=0;instance_count=4;indexed=true;indirect=true;vertex_buffer_offset=0;index_buffer_offset=16;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=0;count=6;first_instance=0;instance_count=4;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=0;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=0;count=6;first_instance=0;instance_count=4;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=16;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=3;first_instance=0;instance_count=1;indexed=false;indirect=true;vertex_buffer_offset=0;index_buffer_offset="_undef_";base_vertex="_undef_" [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=3;first_instance=0;instance_count=1;indexed=false;indirect=true;vertex_buffer_offset=32;index_buffer_offset="_undef_";base_vertex="_undef_" [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=3;first_instance=0;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=0;index_buffer_offset=0;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=3;first_instance=0;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=0;index_buffer_offset=16;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=3;first_instance=0;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=0;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=3;first_instance=0;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=16;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=3;first_instance=0;instance_count=4;indexed=false;indirect=true;vertex_buffer_offset=0;index_buffer_offset="_undef_";base_vertex="_undef_" [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=3;first_instance=0;instance_count=4;indexed=false;indirect=true;vertex_buffer_offset=32;index_buffer_offset="_undef_";base_vertex="_undef_" [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=3;first_instance=0;instance_count=4;indexed=true;indirect=true;vertex_buffer_offset=0;index_buffer_offset=0;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=3;first_instance=0;instance_count=4;indexed=true;indirect=true;vertex_buffer_offset=0;index_buffer_offset=16;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=3;first_instance=0;instance_count=4;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=0;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=3;first_instance=0;instance_count=4;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=16;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=6;first_instance=0;instance_count=1;indexed=false;indirect=true;vertex_buffer_offset=0;index_buffer_offset="_undef_";base_vertex="_undef_" [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=6;first_instance=0;instance_count=1;indexed=false;indirect=true;vertex_buffer_offset=32;index_buffer_offset="_undef_";base_vertex="_undef_" [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=6;first_instance=0;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=0;index_buffer_offset=0;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=6;first_instance=0;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=0;index_buffer_offset=16;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=6;first_instance=0;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=0;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=6;first_instance=0;instance_count=1;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=16;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=6;first_instance=0;instance_count=4;indexed=false;indirect=true;vertex_buffer_offset=0;index_buffer_offset="_undef_";base_vertex="_undef_" [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=6;first_instance=0;instance_count=4;indexed=false;indirect=true;vertex_buffer_offset=32;index_buffer_offset="_undef_";base_vertex="_undef_" [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=6;first_instance=0;instance_count=4;indexed=true;indirect=true;vertex_buffer_offset=0;index_buffer_offset=0;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=6;first_instance=0;instance_count=4;indexed=true;indirect=true;vertex_buffer_offset=0;index_buffer_offset=16;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=6;first_instance=0;instance_count=4;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=0;base_vertex=9 [ Failure ]
-crbug.com/dawn/548 [ win ] webgpu:api,operation,rendering,draw:arguments:first=3;count=6;first_instance=0;instance_count=4;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=16;base_vertex=9 [ Failure ]
-
-################################################################################
 # external_texture failures
 # KEEP
 ################################################################################

@@ -43,6 +43,10 @@ namespace dawn::native::d3d12 {
         // Dawn API
         void SetLabelImpl() override;
 
+        ComPtr<ID3D12CommandSignature> GetDrawIndirectCommandSignature();
+
+        ComPtr<ID3D12CommandSignature> GetDrawIndexedIndirectCommandSignature();
+
       private:
         ~RenderPipeline() override;
 

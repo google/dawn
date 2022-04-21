@@ -172,9 +172,28 @@ namespace dawn::native {
                 }
 
                 DrawIndirectCmd* cmd = allocator->Allocate<DrawIndirectCmd>(Command::DrawIndirect);
-                cmd->indirectBuffer = indirectBuffer;
-                cmd->indirectOffset = indirectOffset;
 
+                bool duplicateBaseVertexInstance =
+                    GetDevice()->ShouldDuplicateParametersForDrawIndirect(
+                        mCommandBufferState.GetRenderPipeline());
+                if (IsValidationEnabled() || duplicateBaseVertexInstance) {
+                    // Later, EncodeIndirectDrawValidationCommands will allocate a scratch storage
+                    // buffer which will store the validated or duplicated indirect data. The buffer
+                    // and offset will be updated to point to it.
+                    // |EncodeIndirectDrawValidationCommands| is called at the end of encoding the
+                    // render pass, while the |cmd| pointer is still valid.
+                    cmd->indirectBuffer = nullptr;
+
+                    mIndirectDrawMetadata.AddIndirectDraw(indirectBuffer, indirectOffset,
+                                                          duplicateBaseVertexInstance, cmd);
+                } else {
+                    cmd->indirectBuffer = indirectBuffer;
+                    cmd->indirectOffset = indirectOffset;
+                }
+
+                // TODO(crbug.com/dawn/1166): Adding the indirectBuffer is needed for correct usage
+                // validation, but it will unnecessarily transition to indirectBuffer usage in the
+                // backend.
                 mUsageTracker.BufferUsedAs(indirectBuffer, wgpu::BufferUsage::Indirect);
 
                 return {};
@@ -204,10 +223,14 @@ namespace dawn::native {
 
                 DrawIndexedIndirectCmd* cmd =
                     allocator->Allocate<DrawIndexedIndirectCmd>(Command::DrawIndexedIndirect);
-                if (IsValidationEnabled()) {
+
+                bool duplicateBaseVertexInstance =
+                    GetDevice()->ShouldDuplicateParametersForDrawIndirect(
+                        mCommandBufferState.GetRenderPipeline());
+                if (IsValidationEnabled() || duplicateBaseVertexInstance) {
                     // Later, EncodeIndirectDrawValidationCommands will allocate a scratch storage
-                    // buffer which will store the validated indirect data. The buffer and offset
-                    // will be updated to point to it.
+                    // buffer which will store the validated or duplicated indirect data. The buffer
+                    // and offset will be updated to point to it.
                     // |EncodeIndirectDrawValidationCommands| is called at the end of encoding the
                     // render pass, while the |cmd| pointer is still valid.
                     cmd->indirectBuffer = nullptr;
@@ -215,7 +238,7 @@ namespace dawn::native {
                     mIndirectDrawMetadata.AddIndexedIndirectDraw(
                         mCommandBufferState.GetIndexFormat(),
                         mCommandBufferState.GetIndexBufferSize(), indirectBuffer, indirectOffset,
-                        cmd);
+                        duplicateBaseVertexInstance, cmd);
                 } else {
                     cmd->indirectBuffer = indirectBuffer;
                     cmd->indirectOffset = indirectOffset;

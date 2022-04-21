@@ -149,7 +149,12 @@ namespace dawn::native::d3d12 {
         bool ShouldDuplicateNumWorkgroupsForDispatchIndirect(
             ComputePipelineBase* computePipeline) const override;
 
-        // Dawn API
+        bool MayRequireDuplicationOfIndirectParameters() const override;
+
+        bool ShouldDuplicateParametersForDrawIndirect(
+            const RenderPipelineBase* renderPipelineBase) const override;
+
+        // Dawn APIs
         void SetLabelImpl() override;
 
       private:
