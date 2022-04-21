@@ -160,12 +160,6 @@ crbug.com/dawn/0000 [ win ] webgpu:shader,execution,robust_access:linear_memory:
 crbug.com/dawn/0000 [ mac ] webgpu:shader,execution,robust_access:linear_memory:* [ Failure ]
 
 ################################################################################
-# windows 3D texture failures
-# KEEP
-################################################################################
-crbug.com/dawn/1289 [ win ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow:* [ Failure ]
-
-################################################################################
 # stencil8 failures
 # KEEP
 ################################################################################
