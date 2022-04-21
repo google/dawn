@@ -648,14 +648,6 @@ DAWN_INSTANTIATE_TEST(VertexStateTest,
                       OpenGLESBackend(),
                       VulkanBackend());
 
-// TODO for the input state:
-//  - Add more vertex formats
-//  - Add checks that the stride is enough to contain all attributes
-//  - Add checks stride less than some limit
-//  - Add checks for alignement of vertex buffers and attributes if needed
-//  - Check for attribute narrowing
-//  - Check that the input state and the pipeline vertex input types match
-
 class OptionalVertexStateTest : public DawnTest {};
 
 // Test that vertex input is not required in render pipeline descriptor.

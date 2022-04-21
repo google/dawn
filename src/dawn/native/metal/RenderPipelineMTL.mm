@@ -327,8 +327,8 @@ namespace dawn::native::metal {
             AcquireNSRef([MTLRenderPipelineDescriptor new]);
         MTLRenderPipelineDescriptor* descriptorMTL = descriptorMTLRef.Get();
 
-        // TODO: MakeVertexDesc should be const in the future, so we don't need to call it here when
-        // vertex pulling is enabled
+        // TODO(dawn:1384): MakeVertexDesc should be const in the future, so we don't need to call
+        // it here when vertex pulling is enabled
         NSRef<MTLVertexDescriptor> vertexDesc = MakeVertexDesc();
 
         // Calling MakeVertexDesc first is important since it sets indices for packed bindings

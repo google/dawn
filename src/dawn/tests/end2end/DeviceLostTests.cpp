@@ -391,8 +391,8 @@ TEST_P(DeviceLostTest, GetMappedRange_MapAsyncWriting) {
     ASSERT_EQ(buffer.GetConstMappedRange(), rangeBeforeLoss);
 }
 
-// TODO mapasync read + resolve + loss getmappedrange != nullptr.
-// TODO mapasync write + resolve + loss getmappedrange != nullptr.
+// TODO(dawn:929): mapasync read + resolve + loss getmappedrange != nullptr.
+// TODO(dawn:929): mapasync write + resolve + loss getmappedrange != nullptr.
 
 // Test that Command Encoder Finish fails when device lost
 TEST_P(DeviceLostTest, CommandEncoderFinishFails) {

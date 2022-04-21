@@ -133,12 +133,4 @@ namespace {
         TestRenderPass(samplerView, renderView);
     }
 
-    // TODO (yunchao.he@intel.com):
-    //  * Add tests for compute, in which texture subresource is traced per dispatch.
-    //
-    //  * Add tests for multiple encoders upon the same resource simultaneously. This situation fits
-    //    some cases like VR, multi-threading, etc.
-    //
-    //  * Add tests for conflicts between usages in two render bundles used in the same pass.
-
 }  // anonymous namespace

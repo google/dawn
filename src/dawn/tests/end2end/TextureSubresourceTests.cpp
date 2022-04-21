@@ -188,14 +188,6 @@ TEST_P(TextureSubresourceTest, ArrayLayersTest) {
     EXPECT_TEXTURE_EQ(&bottomLeft, texture, {0, kSize - 1, 1}, {1, 1});
 }
 
-// TODO (yunchao.he@intel.com):
-// * add tests for storage texture and sampler across miplevel or
-// arraylayer dimensions in the same texture
-//
-// * add tests for copy operation upon texture subresource if needed
-//
-// * add tests for clear operation upon texture subresource if needed
-
 DAWN_INSTANTIATE_TEST(TextureSubresourceTest,
                       D3D12Backend(),
                       MetalBackend(),

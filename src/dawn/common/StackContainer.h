@@ -83,8 +83,6 @@ class StackAllocator : public std::allocator<T> {
     // For this constructor, we cannot share storage; there's
     // no guarantee that the Source buffer of Ts is large enough
     // for Us.
-    // TODO: If we were fancy pants, perhaps we could share storage
-    // iff sizeof(T) == sizeof(U).
     template <typename U, size_t other_capacity>
     StackAllocator(const StackAllocator<U, other_capacity>& other) : source_(nullptr) {
     }

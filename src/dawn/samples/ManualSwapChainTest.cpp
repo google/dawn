@@ -267,7 +267,7 @@ int main(int argc, const char* argv[]) {
     }
 
     // Choose an adapter we like.
-    // TODO: allow switching the window between devices.
+    // TODO(dawn:269): allow switching the window between devices.
     DawnProcTable procs = dawn::native::GetProcs();
     dawnProcSetProcs(&procs);
 

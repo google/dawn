@@ -317,7 +317,7 @@ namespace dawn::native::metal {
                 if (@available(macOS 10.12, iOS 13.0, *)) {
                     return MTLPixelFormatDepth16Unorm;
                 } else {
-                    // TODO (dawn:1181): Allow non-conformant implementation on macOS 10.11
+                    // TODO(dawn:1181): Allow non-conformant implementation on macOS 10.11
                     UNREACHABLE();
                 }
             case wgpu::TextureFormat::Stencil8:
@@ -654,8 +654,6 @@ namespace dawn::native::metal {
         // Metal only allows format reinterpretation to happen on swizzle pattern or conversion
         // between linear space and sRGB. For example, creating bgra8Unorm texture view on
         // rgba8Unorm texture or creating rgba8Unorm_srgb texture view on rgab8Unorm texture.
-        // TODO: add MTLTextureUsagePixelFormatView when needed when we support other format
-        // reinterpretation.
         mtlDesc.usage = MetalTextureUsage(GetFormat(), GetInternalUsage(), GetSampleCount());
         mtlDesc.pixelFormat = MetalPixelFormat(GetFormat().format);
         mtlDesc.mipmapLevelCount = GetNumMipLevels();

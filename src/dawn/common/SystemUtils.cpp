@@ -126,7 +126,7 @@ std::optional<std::string> GetExecutablePath() {
 }
 #elif defined(DAWN_PLATFORM_FUCHSIA)
 std::optional<std::string> GetExecutablePath() {
-    // TODO: Implement on Fuchsia
+    UNIMPLEMENTED();
     return {};
 }
 #elif defined(DAWN_PLATFORM_EMSCRIPTEN)

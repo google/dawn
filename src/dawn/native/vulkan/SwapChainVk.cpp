@@ -309,7 +309,7 @@ namespace dawn::native::vulkan {
 
         DAWN_TRY_ASSIGN(mConfig, ChooseConfig(surfaceInfo));
 
-        // TODO Choose config instead of hardcoding
+        // TODO(dawn:269): Choose config instead of hardcoding
         VkSwapchainCreateInfoKHR createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
         createInfo.pNext = nullptr;
@@ -514,7 +514,8 @@ namespace dawn::native::vulkan {
         CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
 
         if (mConfig.needsBlit) {
-            // TODO ditto same as present below: eagerly transition the blit texture to CopySrc.
+            // TODO(dawn:269): ditto same as present below: eagerly transition the blit texture to
+            // CopySrc.
             mBlitTexture->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopySrc,
                                              mBlitTexture->GetAllSubresources());
             mTexture->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst,
