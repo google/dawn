@@ -411,6 +411,12 @@ chromium_dawn_tryjob("linux")
 chromium_dawn_tryjob("mac")
 chromium_dawn_tryjob("win")
 
+luci.cq_tryjob_verifier(
+    cq_group = "Dawn-CQ",
+    builder = "chromium:try/dawn-try-win10-x86-rel",
+    includable_only = True,
+)
+
 # Views
 
 luci.milo(
