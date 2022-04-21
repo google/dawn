@@ -48,6 +48,9 @@ namespace dawn::native {
                          descriptor->compute.constants}}) {
         SetContentHash(ComputeContentHash());
         TrackInDevice();
+
+        // Initialize the cache key to include the cache type and device information.
+        GetCacheKey()->Record(CacheKey::Type::ComputePipeline, device->GetCacheKey());
     }
 
     ComputePipelineBase::ComputePipelineBase(DeviceBase* device) : PipelineBase(device) {
