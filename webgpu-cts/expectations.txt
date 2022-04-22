@@ -293,6 +293,7 @@ crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,call,builtin,extr
 crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,call,builtin,firstTrailingBit:* [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,call,builtin,insertBits:* [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,call,builtin,ldexp:* [ Failure ]
+crbug.com/tint/1500 [ nvidia release win ] webgpu:shader,execution,shader_io,compute_builtins:inputs:* [ Failure ]
 
 ################################################################################
 # webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed failures
