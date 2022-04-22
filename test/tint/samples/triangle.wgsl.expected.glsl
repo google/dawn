@@ -6,6 +6,7 @@ vec4 vtx_main(uint VertexIndex) {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   vec4 inner_result = vtx_main(uint(gl_VertexID));
   gl_Position = inner_result;
   gl_Position.y = -(gl_Position.y);

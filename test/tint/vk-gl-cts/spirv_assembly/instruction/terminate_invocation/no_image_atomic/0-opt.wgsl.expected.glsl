@@ -29,6 +29,7 @@ main_out tint_symbol_1(vec3 x_2_param, int x_3_param) {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   main_out inner_result = tint_symbol_1(x_2_param_1, x_3_param_1);
   x_4_1_1 = inner_result.x_4_1;
   gl_Position = inner_result.tint_symbol;

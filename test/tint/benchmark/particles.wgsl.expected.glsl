@@ -58,6 +58,7 @@ VertexOutput vs_main(VertexInput tint_symbol) {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   VertexInput tint_symbol_2 = VertexInput(position_1, color_1, quad_pos_1);
   VertexOutput inner_result = vs_main(tint_symbol_2);
   gl_Position = inner_result.position;

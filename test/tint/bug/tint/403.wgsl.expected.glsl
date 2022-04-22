@@ -29,6 +29,7 @@ vec4 tint_symbol(uint tint_symbol_1) {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   vec4 inner_result = tint_symbol(uint(gl_VertexID));
   gl_Position = inner_result;
   gl_Position.y = -(gl_Position.y);

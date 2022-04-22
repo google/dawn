@@ -20,6 +20,7 @@ vec4 tint_symbol(VertexInputs inputs) {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   VertexInputs tint_symbol_1 = VertexInputs(loc0_1, loc1_1, loc2_1, loc3_1);
   vec4 inner_result = tint_symbol(tint_symbol_1);
   gl_Position = inner_result;

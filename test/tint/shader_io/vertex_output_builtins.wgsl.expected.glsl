@@ -5,6 +5,7 @@ vec4 tint_symbol() {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   vec4 inner_result = tint_symbol();
   gl_Position = inner_result;
   gl_Position.y = -(gl_Position.y);

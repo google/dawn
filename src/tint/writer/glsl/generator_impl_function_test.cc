@@ -234,6 +234,7 @@ Interface vert_main() {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   Interface inner_result = vert_main();
   gl_Position = inner_result.pos;
   col1_1 = inner_result.col1;

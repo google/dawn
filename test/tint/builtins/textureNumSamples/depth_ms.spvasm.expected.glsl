@@ -33,6 +33,7 @@ vertex_main_out vertex_main() {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   vertex_main_out inner_result = vertex_main();
   gl_Position = inner_result.tint_symbol_1_1;
   gl_Position.y = -(gl_Position.y);

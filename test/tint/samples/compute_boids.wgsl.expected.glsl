@@ -29,6 +29,7 @@ vec4 vert_main(vec2 a_particlePos, vec2 a_particleVel, vec2 a_pos) {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   vec4 inner_result = vert_main(a_particlePos_1, a_particleVel_1, a_pos_1);
   gl_Position = inner_result;
   gl_Position.y = -(gl_Position.y);

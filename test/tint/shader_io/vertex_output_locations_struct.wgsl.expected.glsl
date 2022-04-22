@@ -18,6 +18,7 @@ VertexOutputs tint_symbol() {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   VertexOutputs inner_result = tint_symbol();
   loc0_1 = inner_result.loc0;
   loc1_1 = inner_result.loc1;

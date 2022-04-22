@@ -153,6 +153,7 @@ VertexOutput tint_symbol_1(vec3 a_Position, vec2 a_UV, vec4 a_Color, vec3 a_Norm
 }
 
 void main() {
+  gl_PointSize = 1.0;
   VertexOutput inner_result = tint_symbol_1(a_Position_1, a_UV_1, a_Color_1, a_Normal_1, a_PosMtxIdx_1);
   v_Color_1 = inner_result.v_Color;
   v_TexCoord_1 = inner_result.v_TexCoord;

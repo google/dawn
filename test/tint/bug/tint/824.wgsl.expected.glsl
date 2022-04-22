@@ -17,6 +17,7 @@ Output tint_symbol(uint VertexIndex, uint InstanceIndex) {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   Output inner_result = tint_symbol(uint(gl_VertexID), uint(gl_InstanceID));
   gl_Position = inner_result.Position;
   color_1 = inner_result.color;

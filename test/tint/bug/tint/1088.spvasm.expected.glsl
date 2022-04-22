@@ -66,6 +66,7 @@ main_out tint_symbol_1(vec3 position_param, vec2 uv_param, vec3 normal_param) {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   main_out inner_result = tint_symbol_1(position_param_1, uv_param_1, normal_param_1);
   gl_Position = inner_result.tint_symbol;
   vUV_1_1 = inner_result.vUV_1;

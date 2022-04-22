@@ -26,6 +26,7 @@ Out tint_symbol_1() {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   Out inner_result = tint_symbol_1();
   gl_Position = inner_result.pos;
   none_1 = inner_result.none;

@@ -2207,6 +2207,9 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
   // Emit original entry point function body
   {
     ScopedIndent si(this);
+    if (func->PipelineStage() == ast::PipelineStage::kVertex) {
+      line() << "gl_PointSize = 1.0;";
+    }
 
     if (!EmitStatements(func->body->statements)) {
       return false;

@@ -30,6 +30,7 @@ VertexOutputs vs_main(uint VertexIndex) {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   VertexOutputs inner_result = vs_main(uint(gl_VertexID));
   texcoords_1 = inner_result.texcoords;
   gl_Position = inner_result.position;

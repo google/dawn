@@ -10,6 +10,7 @@ Out tint_symbol() {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   Out inner_result = tint_symbol();
   gl_Position = inner_result.pos;
   gl_Position.y = -(gl_Position.y);

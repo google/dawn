@@ -18,6 +18,7 @@ Interface vert_main() {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   Interface inner_result = vert_main();
   i_1 = inner_result.i;
   u_1 = inner_result.u;

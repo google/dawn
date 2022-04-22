@@ -16,6 +16,7 @@ VertexOutput vert_main1() {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   VertexOutput inner_result = vert_main1();
   gl_Position = inner_result.pos;
   loc0_1 = inner_result.loc0;
@@ -41,6 +42,7 @@ VertexOutput vert_main2() {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   VertexOutput inner_result = vert_main2();
   gl_Position = inner_result.pos;
   loc0_1 = inner_result.loc0;

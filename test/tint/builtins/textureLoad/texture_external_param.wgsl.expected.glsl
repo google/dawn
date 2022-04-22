@@ -48,6 +48,7 @@ vec4 vertex_main() {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   vec4 inner_result = vertex_main();
   gl_Position = inner_result;
   gl_Position.y = -(gl_Position.y);

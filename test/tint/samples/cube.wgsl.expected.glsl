@@ -29,6 +29,7 @@ VertexOutput vtx_main(VertexInput tint_symbol) {
 }
 
 void main() {
+  gl_PointSize = 1.0;
   VertexInput tint_symbol_2 = VertexInput(cur_position_1, color_1);
   VertexOutput inner_result = vtx_main(tint_symbol_2);
   vtxFragColor_1 = inner_result.vtxFragColor;
