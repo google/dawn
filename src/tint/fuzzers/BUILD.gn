@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import("//build_overrides/build.gni")
+import("../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../tint_overrides_with_defaults.gni")
 
 # Fuzzers - Libfuzzer based fuzzing targets for Chromium
@@ -32,6 +33,8 @@ if (build_with_chromium) {
       rebase_path(fuzzer_corpus_wgsl_dir, root_build_dir),
     ]
     outputs = [ fuzzer_corpus_wgsl_stamp ]
+
+    deps = [ "${dawn_root}/generator:remove_stale_autogen_files" ]
   }
 
   tint_fuzzer_common_libfuzzer_options = [
