@@ -362,9 +362,4 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 ubuntu ] webgpu:a
 crbug.com/dawn/0000 [ bigsur dawn-backend-validation intel-0x3e9b ] webgpu:api,validation,image_copy,layout_related:required_bytes_in_copy:method="WriteTexture";format="bc2-rgba-unorm";dimension="2d" [ RetryOnFailure ]
 
 # New failures. Please triage:
-crbug.com/dawn/0000 [ amd-0x6821 monterey ] webgpu:api,validation,createView:array_layers:textureDimension="2d";viewDimension="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ bigsur intel-0x3e9b ] webgpu:api,validation,createView:array_layers:textureDimension="2d";viewDimension="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ intel-0x5912 ubuntu ] webgpu:api,validation,createView:array_layers:textureDimension="2d";viewDimension="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ intel-0x5912 win10 ] webgpu:api,validation,createView:array_layers:textureDimension="2d";viewDimension="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,validation,createView:array_layers:textureDimension="2d";viewDimension="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 win10 ] webgpu:api,validation,createView:array_layers:textureDimension="2d";viewDimension="_undef_" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,createView:array_layers:textureDimension="2d";viewDimension="_undef_" [ Failure ]
