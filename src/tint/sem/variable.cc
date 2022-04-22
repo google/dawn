@@ -82,6 +82,13 @@ VariableUser::VariableUser(const ast::IdentifierExpression* declaration,
            statement,
            variable->ConstantValue(),
            /* has_side_effects */ false),
-      variable_(variable) {}
+      variable_(variable) {
+  auto* type = variable->Type();
+  if (type->Is<sem::Pointer>() && variable->Constructor()) {
+    source_variable_ = variable->Constructor()->SourceVariable();
+  } else {
+    source_variable_ = variable;
+  }
+}
 
 }  // namespace tint::sem

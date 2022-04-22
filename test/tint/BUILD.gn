@@ -265,6 +265,7 @@ tint_unittests_source_set("tint_unittests_resolver_src") {
     "../../src/tint/resolver/resolver_test_helper.cc",
     "../../src/tint/resolver/resolver_test_helper.h",
     "../../src/tint/resolver/side_effects_test.cc",
+    "../../src/tint/resolver/source_variable_test.cc",
     "../../src/tint/resolver/storage_class_layout_validation_test.cc",
     "../../src/tint/resolver/storage_class_validation_test.cc",
     "../../src/tint/resolver/struct_layout_test.cc",
