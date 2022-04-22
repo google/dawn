@@ -864,70 +864,24 @@ void Inspector::GetOriginatingResources(
   utils::UniqueVector<const ast::CallExpression*> callsites;
 
   for (size_t i = 0; i < N; i++) {
-    auto*& expr = exprs[i];
-    // Resolve each of the expressions
-    while (true) {
-      if (auto* user = sem.Get<sem::VariableUser>(expr)) {
-        auto* var = user->Variable();
-
-        if (auto* global = tint::As<sem::GlobalVariable>(var)) {
-          // Found the global resource declaration.
-          globals[i] = global;
-          break;  // Done with this expression.
-        }
-
-        if (auto* local = tint::As<sem::LocalVariable>(var)) {
-          // Chase the variable
-          expr = local->Declaration()->constructor;
-          if (!expr) {
-            TINT_ICE(Inspector, diagnostics_)
-                << "resource variable had no initializer";
-            return;
-          }
-          continue;  // Continue chasing the expression in this function
-        }
-
-        if (auto* param = tint::As<sem::Parameter>(var)) {
-          // Gather each of the callers of this function
-          auto* func = tint::As<sem::Function>(param->Owner());
-          if (func->CallSites().empty()) {
-            // One or more of the expressions is a parameter, but this function
-            // is not called. Ignore.
-            return;
-          }
-          for (auto* call : func->CallSites()) {
-            callsites.add(call->Declaration());
-          }
-          // Need to evaluate each function call with the group of
-          // expressions, so move on to the next expression.
-          parameters[i] = param;
-          break;
-        }
-
-        TINT_ICE(Inspector, diagnostics_)
-            << "unexpected variable type " << var->TypeInfo().name;
+    const sem::Variable* source_var = sem.Get(exprs[i])->SourceVariable();
+    if (auto* global = source_var->As<sem::GlobalVariable>()) {
+      globals[i] = global;
+    } else if (auto* param = source_var->As<sem::Parameter>()) {
+      auto* func = tint::As<sem::Function>(param->Owner());
+      if (func->CallSites().empty()) {
+        // One or more of the expressions is a parameter, but this function
+        // is not called. Ignore.
+        return;
       }
-
-      if (auto* unary = tint::As<ast::UnaryOpExpression>(expr)) {
-        switch (unary->op) {
-          case ast::UnaryOp::kAddressOf:
-          case ast::UnaryOp::kIndirection:
-            // `*` and `&` are the only valid unary ops for a resource type,
-            // and must be balanced in order for the program to have passed
-            // validation. Just skip past these.
-            expr = unary->expr;
-            continue;
-          default: {
-            TINT_ICE(Inspector, diagnostics_)
-                << "unexpected unary op on resource: " << unary->op;
-            return;
-          }
-        }
+      for (auto* call : func->CallSites()) {
+        callsites.add(call->Declaration());
       }
-
+      parameters[i] = param;
+    } else {
       TINT_ICE(Inspector, diagnostics_)
           << "cannot resolve originating resource with expression type "
-          << expr->TypeInfo().name;
+          << exprs[i]->TypeInfo().name;
       return;
     }
   }
