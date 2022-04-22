@@ -68,40 +68,25 @@ class LocalizeStructArrayAssignment::State {
   std::pair<const sem::Type*, ast::StorageClass>
   GetOriginatingTypeAndStorageClass(
       const ast::AssignmentStatement* assign_stmt) {
-    // Get first IdentifierExpr from lhs of assignment, which should resolve to
-    // the pointer or reference of the originating variable of the assignment.
-    // TraverseExpressions traverses left to right, and this code depends on the
-    // fact that for an assignment statement, the variable will be the left-most
-    // expression.
-    // TODO(crbug.com/tint/1341): do this in the Resolver, setting the
-    // originating variable on sem::Expression.
-    const ast::IdentifierExpression* ident = nullptr;
-    ast::TraverseExpressions(assign_stmt->lhs, b.Diagnostics(),
-                             [&](const ast::IdentifierExpression* id) {
-                               ident = id;
-                               return ast::TraverseAction::Stop;
-                             });
-    auto* sem_var_user = ctx.src->Sem().Get<sem::VariableUser>(ident);
-    if (!sem_var_user) {
+    auto* source_var = ctx.src->Sem().Get(assign_stmt->lhs)->SourceVariable();
+    if (!source_var) {
       TINT_ICE(Transform, b.Diagnostics())
-          << "Expected to find variable of lhs of assignment statement";
+          << "Unable to determine originating variable for lhs of assignment "
+             "statement";
       return {};
     }
 
-    auto* var = sem_var_user->Variable();
-    if (auto* ptr = var->Type()->As<sem::Pointer>()) {
+    auto* type = source_var->Type();
+    if (auto* ref = type->As<sem::Reference>()) {
+      return {ref->StoreType(), ref->StorageClass()};
+    } else if (auto* ptr = type->As<sem::Pointer>()) {
       return {ptr->StoreType(), ptr->StorageClass()};
     }
 
-    auto* ref = var->Type()->As<sem::Reference>();
-    if (!ref) {
-      TINT_ICE(Transform, b.Diagnostics())
-          << "Expecting to find variable of type pointer or reference on lhs "
-             "of assignment statement";
-      return {};
-    }
-
-    return {ref->StoreType(), ref->StorageClass()};
+    TINT_ICE(Transform, b.Diagnostics())
+        << "Expecting to find variable of type pointer or reference on lhs "
+           "of assignment statement";
+    return {};
   }
 
  public:
