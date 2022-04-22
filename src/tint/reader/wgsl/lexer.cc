@@ -28,8 +28,7 @@ namespace {
 
 bool is_blankspace(char c) {
   // See https://www.w3.org/TR/WGSL/#blankspace.
-  return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' ||
-         c == '\r';
+  return c == ' ' || c == '\t' || c == '\v' || c == '\f' || c == '\r';
 }
 
 uint32_t dec_value(char c) {
@@ -54,12 +53,61 @@ uint32_t hex_value(char c) {
 
 }  // namespace
 
-Lexer::Lexer(const Source::File* file)
-    : file_(file),
-      len_(static_cast<uint32_t>(file->content.data.size())),
-      location_{1, 1} {}
+Lexer::Lexer(const Source::File* file) : file_(file), location_{1, 1} {}
 
 Lexer::~Lexer() = default;
+
+const std::string_view Lexer::line() const {
+  if (file_->content.lines.size() == 0) {
+    static const char* empty_string = "";
+    return empty_string;
+  }
+  return file_->content.lines[location_.line - 1];
+}
+
+size_t Lexer::pos() const {
+  return location_.column - 1;
+}
+
+size_t Lexer::length() const {
+  return line().size();
+}
+
+const char& Lexer::at(size_t pos) const {
+  auto l = line();
+  // Unlike for std::string, if pos == l.size(), indexing `l[pos]` is UB for
+  // std::string_view.
+  if (pos >= l.size()) {
+    static const char zero = 0;
+    return zero;
+  }
+  return l[pos];
+}
+
+std::string_view Lexer::substr(size_t offset, size_t count) {
+  return line().substr(offset, count);
+}
+
+void Lexer::advance(size_t offset) {
+  location_.column += offset;
+}
+
+void Lexer::set_pos(size_t pos) {
+  location_.column = pos + 1;
+}
+
+void Lexer::advance_line() {
+  location_.line++;
+  location_.column = 1;
+}
+
+bool Lexer::is_eof() const {
+  return location_.line >= file_->content.lines.size() && pos() >= length();
+}
+
+bool Lexer::is_eol() const {
+  return pos() >= length();
+}
 
 Token Lexer::next() {
   if (auto t = skip_blankspace_and_comments(); !t.IsUninitialized()) {
@@ -106,12 +154,8 @@ void Lexer::end_source(Source& src) const {
   src.range.end = location_;
 }
 
-bool Lexer::is_eof() const {
-  return pos_ >= len_;
-}
-
 bool Lexer::is_null() const {
-  return (pos_ < len_) && (file_->content.data[pos_] == 0);
+  return (pos() < length()) && (at(pos()) == 0);
 }
 
 bool Lexer::is_digit(char ch) const {
@@ -122,25 +166,26 @@ bool Lexer::is_hex(char ch) const {
   return std::isxdigit(static_cast<unsigned char>(ch));
 }
 
-bool Lexer::matches(size_t pos, std::string_view substr) {
-  if (pos >= len_)
+bool Lexer::matches(size_t pos, std::string_view sub_string) {
+  if (pos >= length())
     return false;
-  return file_->content.data_view.substr(pos, substr.size()) == substr;
+  return substr(pos, sub_string.size()) == sub_string;
 }
 
 Token Lexer::skip_blankspace_and_comments() {
   for (;;) {
-    auto pos = pos_;
-    while (!is_eof() && is_blankspace(file_->content.data[pos_])) {
-      if (matches(pos_, "\n")) {
-        pos_++;
-        location_.line++;
-        location_.column = 1;
+    auto loc = location_;
+    while (!is_eof()) {
+      if (is_eol()) {
+        advance_line();
         continue;
       }
 
-      pos_++;
-      location_.column++;
+      if (!is_blankspace(at(pos()))) {
+        break;
+      }
+
+      advance();
     }
 
     auto t = skip_comment();
@@ -150,7 +195,7 @@ Token Lexer::skip_blankspace_and_comments() {
 
     // If the cursor didn't advance we didn't remove any blankspace
     // so we're done.
-    if (pos == pos_)
+    if (loc == location_)
       break;
   }
   if (is_eof()) {
@@ -161,53 +206,46 @@ Token Lexer::skip_blankspace_and_comments() {
 }
 
 Token Lexer::skip_comment() {
-  if (matches(pos_, "//")) {
+  if (matches(pos(), "//")) {
     // Line comment: ignore everything until the end of input or a blankspace
     // character other than space or horizontal tab.
-    while (!is_eof() && !(is_blankspace(file_->content.data[pos_]) &&
-                          !matches(pos_, " ") && !matches(pos_, "\t"))) {
+    while (!is_eol() && !(is_blankspace(at(pos())) && !matches(pos(), " ") &&
+                          !matches(pos(), "\t"))) {
       if (is_null()) {
         return {Token::Type::kError, begin_source(), "null character found"};
       }
-      pos_++;
-      location_.column++;
+      advance();
     }
     return {};
   }
 
-  if (matches(pos_, "/*")) {
+  if (matches(pos(), "/*")) {
     // Block comment: ignore everything until the closing '*/' token.
 
     // Record source location of the initial '/*'
     auto source = begin_source();
     source.range.end.column += 1;
 
-    pos_ += 2;
-    location_.column += 2;
+    advance(2);
 
     int depth = 1;
     while (!is_eof() && depth > 0) {
-      if (matches(pos_, "/*")) {
+      if (matches(pos(), "/*")) {
         // Start of block comment: increase nesting depth.
-        pos_ += 2;
-        location_.column += 2;
+        advance(2);
         depth++;
-      } else if (matches(pos_, "*/")) {
+      } else if (matches(pos(), "*/")) {
         // End of block comment: decrease nesting depth.
-        pos_ += 2;
-        location_.column += 2;
+        advance(2);
         depth--;
-      } else if (matches(pos_, "\n")) {
+      } else if (is_eol()) {
         // Newline: skip and update source location.
-        pos_++;
-        location_.line++;
-        location_.column = 1;
+        advance_line();
       } else if (is_null()) {
         return {Token::Type::kError, begin_source(), "null character found"};
       } else {
         // Anything else: skip and update source location.
-        pos_++;
-        location_.column++;
+        advance();
       }
     }
     if (depth > 0) {
@@ -218,8 +256,8 @@ Token Lexer::skip_comment() {
 }
 
 Token Lexer::try_float() {
-  auto start = pos_;
-  auto end = pos_;
+  auto start = pos();
+  auto end = pos();
 
   auto source = begin_source();
   bool has_mantissa_digits = false;
@@ -227,18 +265,18 @@ Token Lexer::try_float() {
   if (matches(end, "-")) {
     end++;
   }
-  while (end < len_ && is_digit(file_->content.data[end])) {
+  while (end < length() && is_digit(at(end))) {
     has_mantissa_digits = true;
     end++;
   }
 
   bool has_point = false;
-  if (end < len_ && matches(end, ".")) {
+  if (end < length() && matches(end, ".")) {
     has_point = true;
     end++;
   }
 
-  while (end < len_ && is_digit(file_->content.data[end])) {
+  while (end < length() && is_digit(at(end))) {
     has_mantissa_digits = true;
     end++;
   }
@@ -249,27 +287,27 @@ Token Lexer::try_float() {
 
   // Parse the exponent if one exists
   bool has_exponent = false;
-  if (end < len_ && (matches(end, "e") || matches(end, "E"))) {
+  if (end < length() && (matches(end, "e") || matches(end, "E"))) {
     end++;
-    if (end < len_ && (matches(end, "+") || matches(end, "-"))) {
+    if (end < length() && (matches(end, "+") || matches(end, "-"))) {
       end++;
     }
 
-    while (end < len_ && isdigit(file_->content.data[end])) {
+    while (end < length() && isdigit(at(end))) {
       has_exponent = true;
       end++;
     }
 
     // If an 'e' or 'E' was present, then the number part must also be present.
     if (!has_exponent) {
-      const auto str = file_->content.data.substr(start, end - start);
+      const auto str = std::string{substr(start, end - start)};
       return {Token::Type::kError, source,
               "incomplete exponent for floating point literal: " + str};
     }
   }
 
   bool has_f_suffix = false;
-  if (end < len_ && matches(end, "f")) {
+  if (end < length() && matches(end, "f")) {
     end++;
     has_f_suffix = true;
   }
@@ -280,14 +318,12 @@ Token Lexer::try_float() {
   }
 
   // Save the error string, for use by diagnostics.
-  const auto str = file_->content.data.substr(start, end - start);
+  const auto str = std::string{substr(start, end - start)};
 
-  pos_ = end;
-  location_.column += (end - start);
-
+  advance(end - start);
   end_source(source);
 
-  auto res = strtod(file_->content.data.c_str() + start, nullptr);
+  auto res = strtod(&at(start), nullptr);
   // This errors out if a non-zero magnitude is too small to represent in a
   // float. It can't be represented faithfully in an f32.
   const auto magnitude = std::fabs(res);
@@ -322,8 +358,8 @@ Token Lexer::try_hex_float() {
   constexpr uint32_t kExponentLeftShift = kMantissaBits;
   constexpr uint32_t kSignBit = 31;
 
-  auto start = pos_;
-  auto end = pos_;
+  auto start = pos();
+  auto end = pos();
 
   auto source = begin_source();
 
@@ -378,7 +414,7 @@ Token Lexer::try_hex_float() {
 
   // Collect integer range (if any)
   auto integer_range = std::make_pair(end, end);
-  while (end < len_ && is_hex(file_->content.data[end])) {
+  while (end < length() && is_hex(at(end))) {
     integer_range.second = ++end;
   }
 
@@ -391,7 +427,7 @@ Token Lexer::try_hex_float() {
 
   // Collect fractional range (if any)
   auto fractional_range = std::make_pair(end, end);
-  while (end < len_ && is_hex(file_->content.data[end])) {
+  while (end < length() && is_hex(at(end))) {
     fractional_range.second = ++end;
   }
 
@@ -421,7 +457,7 @@ Token Lexer::try_hex_float() {
   // The magnitude is zero if and only if seen_prior_one_bits is false.
   bool seen_prior_one_bits = false;
   for (auto i = integer_range.first; i < integer_range.second; ++i) {
-    const auto nibble = hex_value(file_->content.data[i]);
+    const auto nibble = hex_value(at(i));
     if (nibble != 0) {
       has_zero_integer = false;
     }
@@ -447,7 +483,7 @@ Token Lexer::try_hex_float() {
   // Parse fractional part
   // [0-9a-fA-F]*
   for (auto i = fractional_range.first; i < fractional_range.second; ++i) {
-    auto nibble = hex_value(file_->content.data[i]);
+    auto nibble = hex_value(at(i));
     for (int32_t bit = 3; bit >= 0; --bit) {
       auto v = 1 & (nibble >> bit);
 
@@ -495,11 +531,10 @@ Token Lexer::try_hex_float() {
     // Allow overflow (in uint32_t) when the floating point value magnitude is
     // zero.
     bool has_exponent_digits = false;
-    while (end < len_ && isdigit(file_->content.data[end])) {
+    while (end < length() && isdigit(at(end))) {
       has_exponent_digits = true;
       auto prev_exponent = input_exponent;
-      input_exponent =
-          (input_exponent * 10) + dec_value(file_->content.data[end]);
+      input_exponent = (input_exponent * 10) + dec_value(at(end));
       // Check if we've overflowed input_exponent. This only matters when
       // the mantissa is non-zero.
       if (!is_zero && (prev_exponent > input_exponent)) {
@@ -512,7 +547,7 @@ Token Lexer::try_hex_float() {
     // Parse optional 'f' suffix.  For a hex float, it can only exist
     // when the exponent is present. Otherwise it will look like
     // one of the mantissa digits.
-    if (end < len_ && matches(end, "f")) {
+    if (end < length() && matches(end, "f")) {
       end++;
     }
 
@@ -522,8 +557,7 @@ Token Lexer::try_hex_float() {
     }
   }
 
-  pos_ = end;
-  location_.column += (end - start);
+  advance(end - start);
   end_source(source);
 
   if (is_zero) {
@@ -611,29 +645,26 @@ Token Lexer::build_token_from_int_if_possible(Source source,
                                               size_t start,
                                               size_t end,
                                               int32_t base) {
-  auto res = strtoll(file_->content.data.c_str() + start, nullptr, base);
-  if (matches(pos_, "u")) {
+  auto res = strtoll(&at(start), nullptr, base);
+  if (matches(pos(), "u")) {
     if (static_cast<uint64_t>(res) >
         static_cast<uint64_t>(std::numeric_limits<uint32_t>::max())) {
-      return {Token::Type::kError, source,
-              "u32 (" + file_->content.data.substr(start, end - start) +
-                  ") too large"};
+      return {
+          Token::Type::kError, source,
+          "u32 (" + std::string{substr(start, end - start)} + ") too large"};
     }
-    pos_ += 1;
-    location_.column += 1;
+    advance(1);
     end_source(source);
     return {source, static_cast<uint32_t>(res)};
   }
 
   if (res < static_cast<int64_t>(std::numeric_limits<int32_t>::min())) {
     return {Token::Type::kError, source,
-            "i32 (" + file_->content.data.substr(start, end - start) +
-                ") too small"};
+            "i32 (" + std::string{substr(start, end - start)} + ") too small"};
   }
   if (res > static_cast<int64_t>(std::numeric_limits<int32_t>::max())) {
     return {Token::Type::kError, source,
-            "i32 (" + file_->content.data.substr(start, end - start) +
-                ") too large"};
+            "i32 (" + std::string{substr(start, end - start)} + ") too large"};
   }
   end_source(source);
   return {source, static_cast<int32_t>(res)};
@@ -641,8 +672,8 @@ Token Lexer::build_token_from_int_if_possible(Source source,
 
 Token Lexer::try_hex_integer() {
   constexpr size_t kMaxDigits = 8;  // Valid for both 32-bit integer types
-  auto start = pos_;
-  auto end = pos_;
+  auto start = pos();
+  auto end = pos();
 
   auto source = begin_source();
 
@@ -657,14 +688,14 @@ Token Lexer::try_hex_integer() {
   }
 
   auto first = end;
-  while (!is_eof() && is_hex(file_->content.data[end])) {
+  while (!is_eol() && is_hex(at(end))) {
     end++;
 
     auto digits = end - first;
     if (digits > kMaxDigits) {
       return {Token::Type::kError, source,
               "integer literal (" +
-                  file_->content.data.substr(start, end - 1 - start) +
+                  std::string{substr(start, end - 1 - start)} +
                   "...) has too many digits"};
     }
   }
@@ -673,15 +704,14 @@ Token Lexer::try_hex_integer() {
             "integer or float hex literal has no significant digits"};
   }
 
-  pos_ = end;
-  location_.column += (end - start);
+  advance(end - start);
 
   return build_token_from_int_if_possible(source, start, end, 16);
 }
 
 Token Lexer::try_integer() {
   constexpr size_t kMaxDigits = 10;  // Valid for both 32-bit integer types
-  auto start = pos_;
+  auto start = pos();
   auto end = start;
 
   auto source = begin_source();
@@ -690,7 +720,7 @@ Token Lexer::try_integer() {
     end++;
   }
 
-  if (end >= len_ || !is_digit(file_->content.data[end])) {
+  if (end >= length() || !is_digit(at(end))) {
     return {};
   }
 
@@ -698,67 +728,62 @@ Token Lexer::try_integer() {
   // If the first digit is a zero this must only be zero as leading zeros
   // are not allowed.
   auto next = first + 1;
-  if (next < len_) {
-    if (file_->content.data[first] == '0' &&
-        is_digit(file_->content.data[next])) {
+  if (next < length()) {
+    if (at(first) == '0' && is_digit(at(next))) {
       return {Token::Type::kError, source,
               "integer literal (" +
-                  file_->content.data.substr(start, end - 1 - start) +
+                  std::string{substr(start, end - 1 - start)} +
                   "...) has leading 0s"};
     }
   }
 
-  while (end < len_ && is_digit(file_->content.data[end])) {
+  while (end < length() && is_digit(at(end))) {
     auto digits = end - first;
     if (digits > kMaxDigits) {
       return {Token::Type::kError, source,
               "integer literal (" +
-                  file_->content.data.substr(start, end - 1 - start) +
+                  std::string{substr(start, end - 1 - start)} +
                   "...) has too many digits"};
     }
 
     end++;
   }
 
-  pos_ = end;
-  location_.column += (end - start);
+  advance(end - start);
 
   return build_token_from_int_if_possible(source, start, end, 10);
 }
 
 Token Lexer::try_ident() {
   auto source = begin_source();
-  auto start = pos_;
+  auto start = pos();
 
   // This below assumes that the size of a single std::string element is 1 byte.
-  static_assert(sizeof(file_->content.data[0]) == sizeof(uint8_t),
+  static_assert(sizeof(at(0)) == sizeof(uint8_t),
                 "tint::reader::wgsl requires the size of a std::string element "
                 "to be a single byte");
 
   // Must begin with an XID_Source unicode character, or underscore
   {
-    auto* utf8 = reinterpret_cast<const uint8_t*>(&file_->content.data[pos_]);
-    auto [code_point, n] =
-        text::utf8::Decode(utf8, file_->content.data.size() - pos_);
+    auto* utf8 = reinterpret_cast<const uint8_t*>(&at(pos()));
+    auto [code_point, n] = text::utf8::Decode(utf8, length() - pos());
     if (n == 0) {
-      pos_++;  // Skip the bad byte.
+      advance();  // Skip the bad byte.
       return {Token::Type::kError, source, "invalid UTF-8"};
     }
     if (code_point != text::CodePoint('_') && !code_point.IsXIDStart()) {
       return {};
     }
     // Consume start codepoint
-    pos_ += n;
-    location_.column += n;
+    advance(n);
   }
 
-  while (!is_eof()) {
+  while (!is_eol()) {
     // Must continue with an XID_Continue unicode character
-    auto* utf8 = reinterpret_cast<const uint8_t*>(&file_->content.data[pos_]);
-    auto [code_point, n] =
-        text::utf8::Decode(utf8, file_->content.data.size() - pos_);
+    auto* utf8 = reinterpret_cast<const uint8_t*>(&at(pos()));
+    auto [code_point, n] = text::utf8::Decode(utf8, line().size() - pos());
     if (n == 0) {
-      pos_++;  // Skip the bad byte.
+      advance();  // Skip the bad byte.
       return {Token::Type::kError, source, "invalid UTF-8"};
     }
     if (!code_point.IsXIDContinue()) {
@@ -766,21 +791,19 @@ Token Lexer::try_ident() {
     }
 
     // Consume continuing codepoint
-    pos_ += n;
-    location_.column += n;
+    advance(n);
   }
 
-  if (file_->content.data[start] == '_') {
+  if (at(start) == '_') {
     // Check for an underscore on its own (special token), or a
     // double-underscore (not allowed).
-    if ((pos_ == start + 1) || (file_->content.data[start + 1] == '_')) {
-      location_.column -= (pos_ - start);
-      pos_ = start;
+    if ((pos() == start + 1) || (at(start + 1) == '_')) {
+      set_pos(start);
       return {};
     }
   }
 
-  auto str = file_->content.data_view.substr(start, pos_ - start);
+  auto str = substr(start, pos() - start);
   end_source(source);
 
   auto t = check_keyword(source, str);
@@ -795,182 +818,138 @@ Token Lexer::try_punctuation() {
   auto source = begin_source();
   auto type = Token::Type::kUninitialized;
 
-  if (matches(pos_, "@")) {
+  if (matches(pos(), "@")) {
     type = Token::Type::kAttr;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "(")) {
+    advance(1);
+  } else if (matches(pos(), "(")) {
     type = Token::Type::kParenLeft;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, ")")) {
+    advance(1);
+  } else if (matches(pos(), ")")) {
     type = Token::Type::kParenRight;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "[")) {
+    advance(1);
+  } else if (matches(pos(), "[")) {
     type = Token::Type::kBracketLeft;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "]")) {
+    advance(1);
+  } else if (matches(pos(), "]")) {
     type = Token::Type::kBracketRight;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "{")) {
+    advance(1);
+  } else if (matches(pos(), "{")) {
     type = Token::Type::kBraceLeft;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "}")) {
+    advance(1);
+  } else if (matches(pos(), "}")) {
     type = Token::Type::kBraceRight;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "&&")) {
+    advance(1);
+  } else if (matches(pos(), "&&")) {
     type = Token::Type::kAndAnd;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, "&=")) {
+    advance(2);
+  } else if (matches(pos(), "&=")) {
     type = Token::Type::kAndEqual;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, "&")) {
+    advance(2);
+  } else if (matches(pos(), "&")) {
     type = Token::Type::kAnd;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "/=")) {
+    advance(1);
+  } else if (matches(pos(), "/=")) {
     type = Token::Type::kDivisionEqual;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, "/")) {
+    advance(2);
+  } else if (matches(pos(), "/")) {
     type = Token::Type::kForwardSlash;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "!=")) {
+    advance(1);
+  } else if (matches(pos(), "!=")) {
     type = Token::Type::kNotEqual;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, "!")) {
+    advance(2);
+  } else if (matches(pos(), "!")) {
     type = Token::Type::kBang;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, ":")) {
+    advance(1);
+  } else if (matches(pos(), ":")) {
     type = Token::Type::kColon;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, ",")) {
+    advance(1);
+  } else if (matches(pos(), ",")) {
     type = Token::Type::kComma;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "==")) {
+    advance(1);
+  } else if (matches(pos(), "==")) {
     type = Token::Type::kEqualEqual;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, "=")) {
+    advance(2);
+  } else if (matches(pos(), "=")) {
     type = Token::Type::kEqual;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, ">=")) {
+    advance(1);
+  } else if (matches(pos(), ">=")) {
     type = Token::Type::kGreaterThanEqual;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, ">>")) {
+    advance(2);
+  } else if (matches(pos(), ">>")) {
     type = Token::Type::kShiftRight;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, ">")) {
+    advance(2);
+  } else if (matches(pos(), ">")) {
     type = Token::Type::kGreaterThan;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "<=")) {
+    advance(1);
+  } else if (matches(pos(), "<=")) {
     type = Token::Type::kLessThanEqual;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, "<<")) {
+    advance(2);
+  } else if (matches(pos(), "<<")) {
     type = Token::Type::kShiftLeft;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, "<")) {
+    advance(2);
+  } else if (matches(pos(), "<")) {
     type = Token::Type::kLessThan;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "%=")) {
+    advance(1);
+  } else if (matches(pos(), "%=")) {
     type = Token::Type::kModuloEqual;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, "%")) {
+    advance(2);
+  } else if (matches(pos(), "%")) {
     type = Token::Type::kMod;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "->")) {
+    advance(1);
+  } else if (matches(pos(), "->")) {
     type = Token::Type::kArrow;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, "--")) {
+    advance(2);
+  } else if (matches(pos(), "--")) {
     type = Token::Type::kMinusMinus;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, "-=")) {
+    advance(2);
+  } else if (matches(pos(), "-=")) {
     type = Token::Type::kMinusEqual;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, "-")) {
+    advance(2);
+  } else if (matches(pos(), "-")) {
     type = Token::Type::kMinus;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, ".")) {
+    advance(1);
+  } else if (matches(pos(), ".")) {
     type = Token::Type::kPeriod;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "++")) {
+    advance(1);
+  } else if (matches(pos(), "++")) {
     type = Token::Type::kPlusPlus;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, "+=")) {
+    advance(2);
+  } else if (matches(pos(), "+=")) {
     type = Token::Type::kPlusEqual;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, "+")) {
+    advance(2);
+  } else if (matches(pos(), "+")) {
     type = Token::Type::kPlus;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "||")) {
+    advance(1);
+  } else if (matches(pos(), "||")) {
     type = Token::Type::kOrOr;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, "|=")) {
+    advance(2);
+  } else if (matches(pos(), "|=")) {
     type = Token::Type::kOrEqual;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, "|")) {
+    advance(2);
+  } else if (matches(pos(), "|")) {
     type = Token::Type::kOr;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, ";")) {
+    advance(1);
+  } else if (matches(pos(), ";")) {
     type = Token::Type::kSemicolon;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "*=")) {
+    advance(1);
+  } else if (matches(pos(), "*=")) {
     type = Token::Type::kTimesEqual;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, "*")) {
+    advance(2);
+  } else if (matches(pos(), "*")) {
     type = Token::Type::kStar;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "~")) {
+    advance(1);
+  } else if (matches(pos(), "~")) {
     type = Token::Type::kTilde;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "_")) {
+    advance(1);
+  } else if (matches(pos(), "_")) {
     type = Token::Type::kUnderscore;
-    pos_ += 1;
-    location_.column += 1;
-  } else if (matches(pos_, "^=")) {
+    advance(1);
+  } else if (matches(pos(), "^=")) {
     type = Token::Type::kXorEqual;
-    pos_ += 2;
-    location_.column += 2;
-  } else if (matches(pos_, "^")) {
+    advance(2);
+  } else if (matches(pos(), "^")) {
     type = Token::Type::kXor;
-    pos_ += 1;
-    location_.column += 1;
+    advance(1);
   }
 
   end_source(source);
