@@ -78,6 +78,7 @@ def run():
 
         for candidate in get_all_files_in_dir(stale_dir):
             if not check_is_allowed(candidate, allowed_dirs):
+                print("Warning: remove_files.py removed " + candidate)
                 os.remove(candidate)
 
     # Finished! Write the stamp file so ninja knows to not run this again.
