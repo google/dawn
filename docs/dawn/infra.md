@@ -85,7 +85,7 @@ Using the [[chromium/tools/build]//scripts/slave/recipes/chromium_trybot.py](htt
 
 ## Bot Allocation
 
-Bots are physically allocated based on the configuration in [[chromium/infradata/config]//configs/chromium-swarm/starlark/bots/dawn.star](https://chrome-internal.googlesource.com/infradata/config/+/refs/heads/master/configs/chromium-swarm/starlark/bots/dawn.star) (Google only).
+Bots are physically allocated based on the configuration in [[chromium/infradata/config]//configs/chromium-swarm/starlark/bots/dawn.star](https://chrome-internal.googlesource.com/infradata/config/+/refs/heads/main/configs/chromium-swarm/starlark/bots/dawn.star) (Google only).
 
 `dawn/try` bots are using builderless configurations which means they use builderless GCEs shared with Chromium bots and don't need explicit allocation.
 

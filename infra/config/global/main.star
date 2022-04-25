@@ -128,7 +128,7 @@ def get_builder_executable():
     return luci.recipe(
         name = "dawn",
         cipd_package = "infra/recipe_bundles/chromium.googlesource.com/chromium/tools/build",
-        cipd_version = "refs/heads/master",
+        cipd_version = "refs/heads/main",
     )
 
 def get_presubmit_executable():
@@ -140,7 +140,7 @@ def get_presubmit_executable():
     return luci.recipe(
         name = "run_presubmit",
         cipd_package = "infra/recipe_bundles/chromium.googlesource.com/chromium/tools/build",
-        cipd_version = "refs/heads/master",
+        cipd_version = "refs/heads/main",
     )
 
 def get_os_from_arg(arg):
