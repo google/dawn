@@ -62,5 +62,42 @@ TEST_F(SourceFileContentTest, MoveCtor) {
   EXPECT_EQ(fc.lines[2], "line three");
 }
 
+// Line break code points
+#define kCR "\r"
+#define kLF "\n"
+#define kVTab "\x0B"
+#define kFF "\x0C"
+#define kNL "\xC2\x85"
+#define kLS "\xE2\x80\xA8"
+#define kPS "\xE2\x80\xA9"
+
+using LineBreakTest = testing::TestWithParam<const char*>;
+TEST_P(LineBreakTest, Single) {
+  std::string src = "line one";
+  src += GetParam();
+  src += "line two";
+
+  Source::FileContent fc(src);
+  EXPECT_EQ(fc.lines.size(), 2u);
+  EXPECT_EQ(fc.lines[0], "line one");
+  EXPECT_EQ(fc.lines[1], "line two");
+}
+TEST_P(LineBreakTest, Double) {
+  std::string src = "line one";
+  src += GetParam();
+  src += GetParam();
+  src += "line two";
+
+  Source::FileContent fc(src);
+  EXPECT_EQ(fc.lines.size(), 3u);
+  EXPECT_EQ(fc.lines[0], "line one");
+  EXPECT_EQ(fc.lines[1], "");
+  EXPECT_EQ(fc.lines[2], "line two");
+}
+INSTANTIATE_TEST_SUITE_P(
+    SourceFileContentTest,
+    LineBreakTest,
+    testing::Values(kVTab, kFF, kNL, kLS, kPS, kLF, kCR, kCR kLF));
+
 }  // namespace
 }  // namespace tint

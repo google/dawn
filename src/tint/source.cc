@@ -19,21 +19,82 @@
 #include <string_view>
 #include <utility>
 
+#include "src/tint/text/unicode.h"
+
 namespace tint {
 namespace {
+
+bool ParseLineBreak(std::string_view str,
+                    size_t i,
+                    bool* is_line_break,
+                    size_t* line_break_size) {
+  // See https://www.w3.org/TR/WGSL/#blankspace
+
+  auto* utf8 = reinterpret_cast<const uint8_t*>(&str[i]);
+  auto [cp, n] = text::utf8::Decode(utf8, str.size() - i);
+
+  if (n == 0) {
+    return false;
+  }
+
+  static const auto kLF = text::CodePoint(0x000A);    // line feed
+  static const auto kVTab = text::CodePoint(0x000B);  // vertical tab
+  static const auto kFF = text::CodePoint(0x000C);    // form feed
+  static const auto kNL = text::CodePoint(0x0085);    // next line
+  static const auto kCR = text::CodePoint(0x000D);    // carriage return
+  static const auto kLS = text::CodePoint(0x2028);    // line separator
+  static const auto kPS = text::CodePoint(0x2029);    // parargraph separator
+
+  if (cp == kLF || cp == kVTab || cp == kFF || cp == kNL || cp == kPS ||
+      cp == kLS) {
+    *is_line_break = true;
+    *line_break_size = n;
+    return true;
+  }
+
+  // Handle CRLF as one line break, and CR alone as one line break
+  if (cp == kCR) {
+    *is_line_break = true;
+    *line_break_size = n;
+
+    if (auto next_i = i + n; next_i < str.size()) {
+      auto* next_utf8 = reinterpret_cast<const uint8_t*>(&str[next_i]);
+      auto [next_cp, next_n] =
+          text::utf8::Decode(next_utf8, str.size() - next_i);
+
+      if (next_n == 0) {
+        return false;
+      }
+
+      if (next_cp == kLF) {
+        // CRLF as one break
+        *line_break_size = n + next_n;
+      }
+    }
+
+    return true;
+  }
+
+  *is_line_break = false;
+  return true;
+}
+
 std::vector<std::string_view> SplitLines(std::string_view str) {
   std::vector<std::string_view> lines;
 
   size_t lineStart = 0;
-  for (size_t i = 0; i < str.size(); ++i) {
-    if (str[i] == '\n') {
-      // Handle CRLF on Windows
-      size_t curr = i;
-      if (i > 0 && str[i - 1] == '\r') {
-        --curr;
-      }
-      lines.push_back(str.substr(lineStart, curr - lineStart));
-      lineStart = i + 1;
+  for (size_t i = 0; i < str.size();) {
+    bool is_line_break{};
+    size_t line_break_size{};
+    // We don't handle decode errors from ParseLineBreak. Instead, we rely on
+    // the Lexer to do so.
+    ParseLineBreak(str, i, &is_line_break, &line_break_size);
+    if (is_line_break) {
+      lines.push_back(str.substr(lineStart, i - lineStart));
+      i += line_break_size;
+      lineStart = i;
+    } else {
+      ++i;
     }
   }
   if (lineStart < str.size()) {
