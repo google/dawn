@@ -133,7 +133,7 @@ func (g Git) Clone(path, url string, opt *CloneOptions) (*Repository, error) {
 	if opt.Branch != "" {
 		args = append(args, "--branch", opt.Branch)
 	}
-	if _, err := r.run(opt.Timeout, args...); err != nil {
+	if _, err := r.run(nil, opt.Timeout, args...); err != nil {
 		return nil, err
 	}
 	return r, nil
@@ -166,10 +166,10 @@ func (r Repository) Fetch(ref string, opt *FetchOptions) (Hash, error) {
 	if opt.Remote == "" {
 		opt.Remote = "origin"
 	}
-	if _, err := r.run(opt.Timeout, "fetch", opt.Remote, ref); err != nil {
+	if _, err := r.run(nil, opt.Timeout, "fetch", opt.Remote, ref); err != nil {
 		return Hash{}, err
 	}
-	out, err := r.run(0, "rev-parse", "FETCH_HEAD")
+	out, err := r.run(nil, 0, "rev-parse", "FETCH_HEAD")
 	if err != nil {
 		return Hash{}, err
 	}
@@ -194,7 +194,7 @@ func (r Repository) Push(localRef, remoteRef string, opt *PushOptions) error {
 	if opt.Remote == "" {
 		opt.Remote = "origin"
 	}
-	url, err := r.run(opt.Timeout, "remote", "get-url", opt.Remote)
+	url, err := r.run(nil, opt.Timeout, "remote", "get-url", opt.Remote)
 	if err != nil {
 		return err
 	}
@@ -202,7 +202,7 @@ func (r Repository) Push(localRef, remoteRef string, opt *PushOptions) error {
 	if err != nil {
 		return err
 	}
-	if _, err := r.run(opt.Timeout, "push", url, localRef+":"+remoteRef); err != nil {
+	if _, err := r.run(nil, opt.Timeout, "push", url, localRef+":"+remoteRef); err != nil {
 		return err
 	}
 	return nil
@@ -221,7 +221,7 @@ func (r Repository) Add(path string, opt *AddOptions) error {
 	if opt == nil {
 		opt = &AddOptions{}
 	}
-	if _, err := r.run(opt.Timeout, "add", path); err != nil {
+	if _, err := r.run(nil, opt.Timeout, "add", path); err != nil {
 		return err
 	}
 	return nil
@@ -245,19 +245,27 @@ func (r Repository) Commit(msg string, opt *CommitOptions) (Hash, error) {
 	if opt == nil {
 		opt = &CommitOptions{}
 	}
+
 	args := []string{"commit"}
 	if opt.Amend {
 		args = append(args, "--amend")
 	} else {
 		args = append(args, "-m", msg)
 	}
+
+	var env []string
 	if opt.AuthorName != "" || opt.AuthorEmail != "" {
-		args = append(args, "--author", fmt.Sprintf("%v <%v>", opt.AuthorName, opt.AuthorEmail))
+		env = []string{
+			fmt.Sprintf("GIT_AUTHOR_NAME=%v", opt.AuthorName),
+			fmt.Sprintf("GIT_AUTHOR_EMAIL=%v", opt.AuthorEmail),
+			fmt.Sprintf("GIT_COMMITTER_NAME=%v", opt.AuthorName),
+			fmt.Sprintf("GIT_COMMITTER_EMAIL=%v", opt.AuthorEmail),
+		}
 	}
-	if _, err := r.run(opt.Timeout, args...); err != nil {
+	if _, err := r.run(env, opt.Timeout, "commit", "-m", msg); err != nil {
 		return Hash{}, err
 	}
-	out, err := r.run(0, "rev-parse", "HEAD")
+	out, err := r.run(nil, 0, "rev-parse", "HEAD")
 	if err != nil {
 		return Hash{}, err
 	}
@@ -275,7 +283,7 @@ func (r Repository) Checkout(ref string, opt *CheckoutOptions) error {
 	if opt == nil {
 		opt = &CheckoutOptions{}
 	}
-	if _, err := r.run(opt.Timeout, "checkout", ref); err != nil {
+	if _, err := r.run(nil, opt.Timeout, "checkout", ref); err != nil {
 		return err
 	}
 	return nil
@@ -287,8 +295,6 @@ type LogOptions struct {
 	From string
 	// The git reference to the newest commit in the range to query.
 	To string
-	// The maximum number of entries to return.
-	Count int
 	// Timeout for the operation
 	Timeout time.Duration
 }
@@ -317,10 +323,7 @@ func (r Repository) Log(opt *LogOptions) ([]CommitInfo, error) {
 		rng = opt.From + "^.." + rng
 	}
 	args = append(args, rng, "--pretty=format:ǁ%Hǀ%cIǀ%an <%ae>ǀ%sǀ%b")
-	if opt.Count != 0 {
-		args = append(args, fmt.Sprintf("-%d", opt.Count))
-	}
-	out, err := r.run(opt.Timeout, args...)
+	out, err := r.run(nil, opt.Timeout, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -338,7 +341,7 @@ func (r Repository) Config(opt *ConfigOptions) (map[string]string, error) {
 	if opt == nil {
 		opt = &ConfigOptions{}
 	}
-	text, err := r.run(opt.Timeout, "config", "-l")
+	text, err := r.run(nil, opt.Timeout, "config", "-l")
 	if err != nil {
 		return nil, err
 	}
@@ -354,20 +357,11 @@ func (r Repository) Config(opt *ConfigOptions) (map[string]string, error) {
 	return out, nil
 }
 
-func (r Repository) run(timeout time.Duration, args ...string) (string, error) {
-	return r.Git.run(r.Path, timeout, args...)
+func (r Repository) run(env []string, timeout time.Duration, args ...string) (string, error) {
+	return r.Git.run(r.Path, env, timeout, args...)
 }
 
-func (r Repository) runAll(timeout time.Duration, args ...[]string) error {
-	for _, a := range args {
-		if _, err := r.run(timeout, a...); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (g Git) run(dir string, timeout time.Duration, args ...string) (string, error) {
+func (g Git) run(dir string, env []string, timeout time.Duration, args ...string) (string, error) {
 	if timeout == 0 {
 		timeout = DefaultTimeout
 	}
@@ -375,6 +369,12 @@ func (g Git) run(dir string, timeout time.Duration, args ...string) (string, err
 	defer cancel()
 	cmd := exec.CommandContext(ctx, g.exe, args...)
 	cmd.Dir = dir
+	if env != nil {
+		// Godocs for exec.Cmd.Env:
+		// "If Env contains duplicate environment keys, only the last value in
+		// the slice for each duplicate key is used.
+		cmd.Env = append(os.Environ(), env...)
+	}
 	if g.LogAllActions {
 		fmt.Printf("%v> %v %v\n", dir, g.exe, strings.Join(args, " "))
 	}
