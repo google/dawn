@@ -947,6 +947,7 @@ func (r *runner) runTestcase(query string) result {
 		// Actual arguments begin here
 		"--gpu-provider", r.dawnNode,
 		"--verbose",
+		"--quiet",
 	}
 	for _, f := range r.flags {
 		args = append(args, "--gpu-provider-flag", f)
