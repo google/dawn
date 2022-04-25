@@ -766,8 +766,7 @@ namespace dawn::native::d3d12 {
 
     bool Device::ShouldDuplicateParametersForDrawIndirect(
         const RenderPipelineBase* renderPipelineBase) const {
-        return ToBackend(renderPipelineBase)->GetFirstOffsetInfo().usesVertexIndex ||
-               ToBackend(renderPipelineBase)->GetFirstOffsetInfo().usesInstanceIndex;
+        return ToBackend(renderPipelineBase)->UsesVertexOrInstanceIndex();
     }
 
 }  // namespace dawn::native::d3d12

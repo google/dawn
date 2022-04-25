@@ -145,8 +145,7 @@ namespace dawn::native::d3d12 {
                                     RenderPipeline* pipeline,
                                     uint32_t firstVertex,
                                     uint32_t firstInstance) {
-            const FirstOffsetInfo& firstOffsetInfo = pipeline->GetFirstOffsetInfo();
-            if (!firstOffsetInfo.usesVertexIndex && !firstOffsetInfo.usesInstanceIndex) {
+            if (!pipeline->UsesVertexOrInstanceIndex()) {
                 return;
             }
             std::array<uint32_t, 2> offsets{firstVertex, firstInstance};

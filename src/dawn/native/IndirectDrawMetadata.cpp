@@ -39,7 +39,7 @@ namespace dawn::native {
         uint32_t maxDrawCallsPerIndirectValidationBatch,
         uint64_t maxBatchOffsetRange,
         IndirectDraw draw) {
-        const uint64_t newOffset = draw.clientBufferOffset;
+        const uint64_t newOffset = draw.inputBufferOffset;
         auto it = mBatches.begin();
         while (it != mBatches.end()) {
             IndirectValidationBatch& batch = *it;
@@ -186,7 +186,7 @@ namespace dawn::native {
         }
 
         IndirectDraw draw{};
-        draw.clientBufferOffset = indirectOffset;
+        draw.inputBufferOffset = indirectOffset;
         draw.cmd = cmd;
         it->second.AddIndirectDraw(mMaxDrawCallsPerBatch, mMaxBatchOffsetRange, draw);
     }
@@ -205,23 +205,23 @@ namespace dawn::native {
         }
 
         IndirectDraw draw{};
-        draw.clientBufferOffset = indirectOffset;
+        draw.inputBufferOffset = indirectOffset;
         draw.cmd = cmd;
         it->second.AddIndirectDraw(mMaxDrawCallsPerBatch, mMaxBatchOffsetRange, draw);
     }
 
     bool IndirectDrawMetadata::IndexedIndirectConfig::operator<(
         const IndexedIndirectConfig& other) const {
-        return std::tie(clientIndirectBuffer, numIndexBufferElements, duplicateBaseVertexInstance,
-                        drawType) < std::tie(other.clientIndirectBuffer,
+        return std::tie(inputIndirectBuffer, numIndexBufferElements, duplicateBaseVertexInstance,
+                        drawType) < std::tie(other.inputIndirectBuffer,
                                              other.numIndexBufferElements,
                                              other.duplicateBaseVertexInstance, other.drawType);
     }
 
     bool IndirectDrawMetadata::IndexedIndirectConfig::operator==(
         const IndexedIndirectConfig& other) const {
-        return std::tie(clientIndirectBuffer, numIndexBufferElements, duplicateBaseVertexInstance,
-                        drawType) == std::tie(other.clientIndirectBuffer,
+        return std::tie(inputIndirectBuffer, numIndexBufferElements, duplicateBaseVertexInstance,
+                        drawType) == std::tie(other.inputIndirectBuffer,
                                               other.numIndexBufferElements,
                                               other.duplicateBaseVertexInstance, other.drawType);
     }

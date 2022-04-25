@@ -29,13 +29,6 @@ namespace dawn::native::d3d12 {
     class Device;
     class PipelineLayout;
 
-    struct FirstOffsetInfo {
-        bool usesVertexIndex;
-        uint32_t vertexIndexOffset;
-        bool usesInstanceIndex;
-        uint32_t instanceIndexOffset;
-    };
-
     // Manages a ref to one of the various representations of shader blobs and information used to
     // emulate vertex/instance index starts
     struct CompiledShader {
@@ -44,7 +37,7 @@ namespace dawn::native::d3d12 {
         ComPtr<IDxcBlob> compiledDXCShader;
         D3D12_SHADER_BYTECODE GetD3D12ShaderBytecode() const;
 
-        FirstOffsetInfo firstOffsetInfo;
+        bool usesVertexOrInstanceIndex;
     };
 
     class ShaderModule final : public ShaderModuleBase {

@@ -42,14 +42,8 @@ FirstIndexOffset::BindingPoint::BindingPoint(uint32_t b, uint32_t g)
     : binding(b), group(g) {}
 FirstIndexOffset::BindingPoint::~BindingPoint() = default;
 
-FirstIndexOffset::Data::Data(bool has_vtx_index,
-                             bool has_inst_index,
-                             uint32_t first_vtx_offset,
-                             uint32_t first_inst_offset)
-    : has_vertex_index(has_vtx_index),
-      has_instance_index(has_inst_index),
-      first_vertex_offset(first_vtx_offset),
-      first_instance_offset(first_inst_offset) {}
+FirstIndexOffset::Data::Data(bool has_vtx_or_inst_index)
+    : has_vertex_or_instance_index(has_vtx_or_inst_index) {}
 FirstIndexOffset::Data::Data(const Data&) = default;
 FirstIndexOffset::Data::~Data() = default;
 
@@ -80,8 +74,7 @@ void FirstIndexOffset::Run(CloneContext& ctx,
   std::unordered_map<const sem::Variable*, const char*> builtin_vars;
   std::unordered_map<const sem::StructMember*, const char*> builtin_members;
 
-  bool has_vertex_index = false;
-  bool has_instance_index = false;
+  bool has_vertex_or_instance_index = false;
 
   // Traverse the AST scanning for builtin accesses via variables (includes
   // parameters) or structure member accesses.
@@ -93,12 +86,12 @@ void FirstIndexOffset::Run(CloneContext& ctx,
           if (builtin == ast::Builtin::kVertexIndex) {
             auto* sem_var = ctx.src->Sem().Get(var);
             builtin_vars.emplace(sem_var, kFirstVertexName);
-            has_vertex_index = true;
+            has_vertex_or_instance_index = true;
           }
           if (builtin == ast::Builtin::kInstanceIndex) {
             auto* sem_var = ctx.src->Sem().Get(var);
             builtin_vars.emplace(sem_var, kFirstInstanceName);
-            has_instance_index = true;
+            has_vertex_or_instance_index = true;
           }
         }
       }
@@ -110,29 +103,23 @@ void FirstIndexOffset::Run(CloneContext& ctx,
           if (builtin == ast::Builtin::kVertexIndex) {
             auto* sem_mem = ctx.src->Sem().Get(member);
             builtin_members.emplace(sem_mem, kFirstVertexName);
-            has_vertex_index = true;
+            has_vertex_or_instance_index = true;
           }
           if (builtin == ast::Builtin::kInstanceIndex) {
             auto* sem_mem = ctx.src->Sem().Get(member);
             builtin_members.emplace(sem_mem, kFirstInstanceName);
-            has_instance_index = true;
+            has_vertex_or_instance_index = true;
           }
         }
       }
     }
   }
 
-  // Byte offsets on the uniform buffer
-  uint32_t vertex_index_offset = 0;
-  uint32_t instance_index_offset = 0;
-
-  if (has_vertex_index || has_instance_index) {
+  if (has_vertex_or_instance_index) {
     // Add uniform buffer members and calculate byte offsets
     ast::StructMemberList members;
     members.push_back(ctx.dst->Member(kFirstVertexName, ctx.dst->ty.u32()));
-    vertex_index_offset = 0;
     members.push_back(ctx.dst->Member(kFirstInstanceName, ctx.dst->ty.u32()));
-    instance_index_offset = 4;
     auto* struct_ = ctx.dst->Structure(ctx.dst->Sym(), std::move(members));
 
     // Create a global to hold the uniform buffer
@@ -172,8 +159,7 @@ void FirstIndexOffset::Run(CloneContext& ctx,
 
   ctx.Clone();
 
-  outputs.Add<Data>(has_vertex_index, has_instance_index, vertex_index_offset,
-                    instance_index_offset);
+  outputs.Add<Data>(has_vertex_or_instance_index);
 }
 
 }  // namespace tint::transform

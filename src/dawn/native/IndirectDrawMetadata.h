@@ -43,7 +43,7 @@ namespace dawn::native {
     class IndirectDrawMetadata : public NonCopyable {
       public:
         struct IndirectDraw {
-            uint64_t clientBufferOffset;
+            uint64_t inputBufferOffset;
             // This is a pointer to the command that should be populated with the validated
             // indirect scratch buffer. It is only valid up until the encoded command buffer
             // is submitted.
@@ -97,7 +97,7 @@ namespace dawn::native {
             Indexed,
         };
         struct IndexedIndirectConfig {
-            BufferBase* clientIndirectBuffer;
+            BufferBase* inputIndirectBuffer;
             uint64_t numIndexBufferElements;
             bool duplicateBaseVertexInstance;
             DrawType drawType;

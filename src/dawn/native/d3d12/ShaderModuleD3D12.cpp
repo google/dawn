@@ -793,15 +793,7 @@ namespace dawn::native::d3d12 {
             if (auto* data = transformOutputs.Get<tint::transform::FirstIndexOffset::Data>()) {
                 // TODO(dawn:549): Consider adding this information to the pipeline cache once we
                 // can store more than the shader blob in it.
-                compiledShader.firstOffsetInfo.usesVertexIndex = data->has_vertex_index;
-                if (compiledShader.firstOffsetInfo.usesVertexIndex) {
-                    compiledShader.firstOffsetInfo.vertexIndexOffset = data->first_vertex_offset;
-                }
-                compiledShader.firstOffsetInfo.usesInstanceIndex = data->has_instance_index;
-                if (compiledShader.firstOffsetInfo.usesInstanceIndex) {
-                    compiledShader.firstOffsetInfo.instanceIndexOffset =
-                        data->first_instance_offset;
-                }
+                compiledShader.usesVertexOrInstanceIndex = data->has_vertex_or_instance_index;
             }
         }
 

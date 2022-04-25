@@ -86,10 +86,7 @@ fn entry() -> @builtin(position) vec4<f32> {
   auto* data = got.data.Get<FirstIndexOffset::Data>();
 
   ASSERT_NE(data, nullptr);
-  EXPECT_EQ(data->has_vertex_index, false);
-  EXPECT_EQ(data->has_instance_index, false);
-  EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_instance_offset, 0u);
+  EXPECT_EQ(data->has_vertex_or_instance_index, false);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex) {
@@ -133,10 +130,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> 
   auto* data = got.data.Get<FirstIndexOffset::Data>();
 
   ASSERT_NE(data, nullptr);
-  EXPECT_EQ(data->has_vertex_index, true);
-  EXPECT_EQ(data->has_instance_index, false);
-  EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_instance_offset, 4u);
+  EXPECT_EQ(data->has_vertex_or_instance_index, true);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex_OutOfOrder) {
@@ -180,10 +174,7 @@ fn test(vert_idx : u32) -> u32 {
   auto* data = got.data.Get<FirstIndexOffset::Data>();
 
   ASSERT_NE(data, nullptr);
-  EXPECT_EQ(data->has_vertex_index, true);
-  EXPECT_EQ(data->has_instance_index, false);
-  EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_instance_offset, 4u);
+  EXPECT_EQ(data->has_vertex_or_instance_index, true);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
@@ -227,10 +218,7 @@ fn entry(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32
   auto* data = got.data.Get<FirstIndexOffset::Data>();
 
   ASSERT_NE(data, nullptr);
-  EXPECT_EQ(data->has_vertex_index, false);
-  EXPECT_EQ(data->has_instance_index, true);
-  EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_instance_offset, 4u);
+  EXPECT_EQ(data->has_vertex_or_instance_index, true);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex_OutOfOrder) {
@@ -274,10 +262,7 @@ fn test(inst_idx : u32) -> u32 {
   auto* data = got.data.Get<FirstIndexOffset::Data>();
 
   ASSERT_NE(data, nullptr);
-  EXPECT_EQ(data->has_vertex_index, false);
-  EXPECT_EQ(data->has_instance_index, true);
-  EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_instance_offset, 4u);
+  EXPECT_EQ(data->has_vertex_or_instance_index, true);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
@@ -333,10 +318,7 @@ fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
   auto* data = got.data.Get<FirstIndexOffset::Data>();
 
   ASSERT_NE(data, nullptr);
-  EXPECT_EQ(data->has_vertex_index, true);
-  EXPECT_EQ(data->has_instance_index, true);
-  EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_instance_offset, 4u);
+  EXPECT_EQ(data->has_vertex_or_instance_index, true);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex_OutOfOrder) {
@@ -392,10 +374,7 @@ fn test(instance_idx : u32, vert_idx : u32) -> u32 {
   auto* data = got.data.Get<FirstIndexOffset::Data>();
 
   ASSERT_NE(data, nullptr);
-  EXPECT_EQ(data->has_vertex_index, true);
-  EXPECT_EQ(data->has_instance_index, true);
-  EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_instance_offset, 4u);
+  EXPECT_EQ(data->has_vertex_or_instance_index, true);
 }
 
 TEST_F(FirstIndexOffsetTest, NestedCalls) {
@@ -447,10 +426,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> 
   auto* data = got.data.Get<FirstIndexOffset::Data>();
 
   ASSERT_NE(data, nullptr);
-  EXPECT_EQ(data->has_vertex_index, true);
-  EXPECT_EQ(data->has_instance_index, false);
-  EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_instance_offset, 4u);
+  EXPECT_EQ(data->has_vertex_or_instance_index, true);
 }
 
 TEST_F(FirstIndexOffsetTest, NestedCalls_OutOfOrder) {
@@ -502,10 +478,7 @@ fn func1(vert_idx : u32) -> u32 {
   auto* data = got.data.Get<FirstIndexOffset::Data>();
 
   ASSERT_NE(data, nullptr);
-  EXPECT_EQ(data->has_vertex_index, true);
-  EXPECT_EQ(data->has_instance_index, false);
-  EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_instance_offset, 4u);
+  EXPECT_EQ(data->has_vertex_or_instance_index, true);
 }
 
 TEST_F(FirstIndexOffsetTest, MultipleEntryPoints) {
@@ -573,10 +546,7 @@ fn entry_c(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f
   auto* data = got.data.Get<FirstIndexOffset::Data>();
 
   ASSERT_NE(data, nullptr);
-  EXPECT_EQ(data->has_vertex_index, true);
-  EXPECT_EQ(data->has_instance_index, true);
-  EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_instance_offset, 4u);
+  EXPECT_EQ(data->has_vertex_or_instance_index, true);
 }
 
 TEST_F(FirstIndexOffsetTest, MultipleEntryPoints_OutOfOrder) {
@@ -644,10 +614,7 @@ fn func(i : u32) -> u32 {
   auto* data = got.data.Get<FirstIndexOffset::Data>();
 
   ASSERT_NE(data, nullptr);
-  EXPECT_EQ(data->has_vertex_index, true);
-  EXPECT_EQ(data->has_instance_index, true);
-  EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_instance_offset, 4u);
+  EXPECT_EQ(data->has_vertex_or_instance_index, true);
 }
 
 }  // namespace

@@ -367,7 +367,8 @@ namespace dawn::native::d3d12 {
             *shaders[stage] = compiledShader[stage].GetD3D12ShaderBytecode();
         }
 
-        mFirstOffsetInfo = compiledShader[SingleShaderStage::Vertex].firstOffsetInfo;
+        mUsesVertexOrInstanceIndex =
+            compiledShader[SingleShaderStage::Vertex].usesVertexOrInstanceIndex;
 
         PipelineLayout* layout = ToBackend(GetLayout());
 
@@ -455,8 +456,8 @@ namespace dawn::native::d3d12 {
         return mPipelineState.Get();
     }
 
-    const FirstOffsetInfo& RenderPipeline::GetFirstOffsetInfo() const {
-        return mFirstOffsetInfo;
+    bool RenderPipeline::UsesVertexOrInstanceIndex() const {
+        return mUsesVertexOrInstanceIndex;
     }
 
     void RenderPipeline::SetLabelImpl() {
@@ -464,7 +465,7 @@ namespace dawn::native::d3d12 {
     }
 
     ComPtr<ID3D12CommandSignature> RenderPipeline::GetDrawIndirectCommandSignature() {
-        if (mFirstOffsetInfo.usesVertexIndex || mFirstOffsetInfo.usesInstanceIndex) {
+        if (mUsesVertexOrInstanceIndex) {
             return ToBackend(GetLayout())
                 ->GetDrawIndirectCommandSignatureWithInstanceVertexOffsets();
         }
@@ -473,7 +474,7 @@ namespace dawn::native::d3d12 {
     }
 
     ComPtr<ID3D12CommandSignature> RenderPipeline::GetDrawIndexedIndirectCommandSignature() {
-        if (mFirstOffsetInfo.usesVertexIndex || mFirstOffsetInfo.usesInstanceIndex) {
+        if (mUsesVertexOrInstanceIndex) {
             return ToBackend(GetLayout())
                 ->GetDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets();
         }
