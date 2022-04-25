@@ -1,11 +1,32 @@
 #include <metal_stdlib>
 
 using namespace metal;
+struct GammaTransferParams {
+  /* 0x0000 */ float G;
+  /* 0x0004 */ float A;
+  /* 0x0008 */ float B;
+  /* 0x000c */ float C;
+  /* 0x0010 */ float D;
+  /* 0x0014 */ float E;
+  /* 0x0018 */ float F;
+  /* 0x001c */ uint padding;
+};
+
 struct ExternalTextureParams {
   /* 0x0000 */ uint numPlanes;
   /* 0x0004 */ int8_t tint_pad[12];
   /* 0x0010 */ float3x4 yuvToRgbConversionMatrix;
+  /* 0x0040 */ GammaTransferParams gammaDecodeParams;
+  /* 0x0060 */ GammaTransferParams gammaEncodeParams;
+  /* 0x0080 */ float3x3 gamutConversionMatrix;
 };
+
+float3 gammaCorrection(float3 v, GammaTransferParams params) {
+  bool3 const cond = (fabs(v) < float3(params.D));
+  float3 const t = (sign(v) * ((params.C * fabs(v)) + params.F));
+  float3 const f = (sign(v) * (pow(((params.A * fabs(v)) + params.B), float3(params.G)) + params.E));
+  return select(f, t, cond);
+}
 
 float4 textureSampleExternal(texture2d<float, access::sample> plane0, texture2d<float, access::sample> plane1, sampler smp, float2 coord, ExternalTextureParams params) {
   float3 color = 0.0f;
@@ -14,6 +35,9 @@ float4 textureSampleExternal(texture2d<float, access::sample> plane0, texture2d<
   } else {
     color = (float4(plane0.sample(smp, coord, level(0.0f))[0], float4(plane1.sample(smp, coord, level(0.0f))).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
+  color = gammaCorrection(color, params.gammaDecodeParams);
+  color = (params.gamutConversionMatrix * color);
+  color = gammaCorrection(color, params.gammaEncodeParams);
   return float4(color, 1.0f);
 }
 

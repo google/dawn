@@ -1,9 +1,23 @@
 #include <metal_stdlib>
 
 using namespace metal;
+struct GammaTransferParams {
+  float G;
+  float A;
+  float B;
+  float C;
+  float D;
+  float E;
+  float F;
+  uint padding;
+};
+
 struct ExternalTextureParams {
   uint numPlanes;
   float3x4 yuvToRgbConversionMatrix;
+  GammaTransferParams gammaDecodeParams;
+  GammaTransferParams gammaEncodeParams;
+  float3x3 gamutConversionMatrix;
 };
 
 void textureDimensions_ba1481(texture2d<float, access::sample> tint_symbol_1) {
