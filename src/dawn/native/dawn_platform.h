@@ -38,6 +38,9 @@ namespace dawn::native {
     static constexpr wgpu::BufferUsage kReadOnlyStorageBuffer =
         static_cast<wgpu::BufferUsage>(0x80000000);
 
+    static constexpr wgpu::BufferUsage kAllInternalBufferUsages =
+        kInternalStorageBuffer | kReadOnlyStorageBuffer;
+
     // Extra texture usages
     // Add an extra texture usage (readonly render attachment usage) for render pass resource
     // tracking

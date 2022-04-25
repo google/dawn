@@ -225,6 +225,10 @@ namespace dawn::native {
         return mUsage;
     }
 
+    wgpu::BufferUsage BufferBase::GetUsageExternalOnly() const {
+        return GetUsage() & ~kAllInternalBufferUsages;
+    }
+
     MaybeError BufferBase::MapAtCreation() {
         DAWN_TRY(MapAtCreationInternal());
 

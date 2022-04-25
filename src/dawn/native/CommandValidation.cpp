@@ -97,9 +97,7 @@ namespace dawn::native {
                         "Write range (bufferOffset: %u, size: %u) does not fit in %s size (%u).",
                         bufferOffset, size, buffer, bufferSize);
 
-        DAWN_INVALID_IF(!(buffer->GetUsage() & wgpu::BufferUsage::CopyDst),
-                        "%s usage (%s) does not include %s.", buffer, buffer->GetUsage(),
-                        wgpu::BufferUsage::CopyDst);
+        DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::CopyDst));
 
         return {};
     }
@@ -485,8 +483,9 @@ namespace dawn::native {
 
     MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage) {
         ASSERT(wgpu::HasZeroOrOneBits(usage));
-        DAWN_INVALID_IF(!(buffer->GetUsage() & usage), "%s usage (%s) doesn't include %s.", buffer,
-                        buffer->GetUsage(), usage);
+        DAWN_INVALID_IF(!(buffer->GetUsageExternalOnly() & usage),
+                        "%s usage (%s) doesn't include %s.", buffer, buffer->GetUsageExternalOnly(),
+                        usage);
         return {};
     }
 
