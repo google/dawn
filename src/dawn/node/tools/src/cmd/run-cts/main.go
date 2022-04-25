@@ -806,7 +806,9 @@ func (r *runner) streamResults(wg *sync.WaitGroup, results chan result) {
 			buf := &bytes.Buffer{}
 			fmt.Fprint(buf, statusColor[res.status])
 			if res.message != "" {
-				fmt.Fprintf(buf, "%v - %v:\n%v", name, res.status, res.message)
+				fmt.Fprintf(buf, "%v - %v:\n", name, res.status)
+				fmt.Fprintf(buf, ansiReset)
+				fmt.Fprintf(buf, "%v", res.message)
 			} else {
 				fmt.Fprintf(buf, "%v - %v", name, res.status)
 			}
@@ -908,7 +910,7 @@ var statuses = []status{pass, warn, fail, skip, timeout}
 var statusColor = map[status]string{
 	pass:    green,
 	warn:    yellow,
-	skip:    blue,
+	skip:    cyan,
 	timeout: yellow,
 	fail:    red,
 }
