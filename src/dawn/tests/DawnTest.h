@@ -586,8 +586,8 @@ class DawnTestBase {
         size_t readbackSlot;
         uint64_t readbackOffset;
         uint64_t size;
-        uint32_t rowBytes;
-        uint32_t bytesPerRow;
+        uint32_t rowBytes = 0;
+        uint32_t bytesPerRow = 0;
         std::unique_ptr<detail::Expectation> expectation;
         // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=54316
         // Use unique_ptr because of missing move/copy constructors on std::basic_ostringstream

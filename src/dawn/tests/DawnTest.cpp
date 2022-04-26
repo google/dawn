@@ -1085,12 +1085,13 @@ std::ostringstream& DawnTestBase::AddBufferExpectation(const char* file,
                                                        uint64_t offset,
                                                        uint64_t size,
                                                        detail::Expectation* expectation) {
-    auto readback = ReserveReadback(size);
+    uint64_t alignedSize = Align(size, uint64_t(4));
+    auto readback = ReserveReadback(alignedSize);
 
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the buffer might have been modified.
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    encoder.CopyBufferToBuffer(buffer, offset, readback.buffer, readback.offset, size);
+    encoder.CopyBufferToBuffer(buffer, offset, readback.buffer, readback.offset, alignedSize);
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -1101,8 +1102,6 @@ std::ostringstream& DawnTestBase::AddBufferExpectation(const char* file,
     deferred.readbackSlot = readback.slot;
     deferred.readbackOffset = readback.offset;
     deferred.size = size;
-    deferred.rowBytes = size;
-    deferred.bytesPerRow = size;
     deferred.expectation.reset(expectation);
 
     mDeferredExpectations.push_back(std::move(deferred));
