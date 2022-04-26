@@ -80,8 +80,8 @@ func (p *Patchset) RegisterFlags(defaultHost, defaultProject string) {
 func LoadCredentials(url string) Credentials {
 	cookiesFile := os.Getenv("HOME") + "/.gitcookies"
 	if cookies, err := ioutil.ReadFile(cookiesFile); err == nil {
-		url := strings.TrimPrefix(url, "https://")
-		re := regexp.MustCompile(url + `\s+(?:FALSE|TRUE)[\s/]+(?:FALSE|TRUE)\s+[0-9]+\s+.\s+(.*)=(.*)`)
+		url := strings.TrimSuffix(strings.TrimPrefix(url, "https://"), "/")
+		re := regexp.MustCompile(url + `/?\s+(?:FALSE|TRUE)[\s/]+(?:FALSE|TRUE)\s+[0-9]+\s+.\s+(.*)=(.*)`)
 		match := re.FindStringSubmatch(string(cookies))
 		if len(match) == 3 {
 			return Credentials{match[1], match[2]}
