@@ -40,6 +40,9 @@ class TestHelper : public ProgramBuilder {
   /// @return a pointer to the Resolver
   Resolver* r() const { return resolver_.get(); }
 
+  /// @return a pointer to the validator
+  const Validator* v() const { return resolver_->GetValidatorForTesting(); }
+
   /// Returns the statement that holds the given expression.
   /// @param expr the ast::Expression
   /// @return the ast::Statement of the ast::Expression, or nullptr if the

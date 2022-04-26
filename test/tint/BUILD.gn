@@ -274,6 +274,7 @@ tint_unittests_source_set("tint_unittests_resolver_src") {
     "../../src/tint/resolver/type_constructor_validation_test.cc",
     "../../src/tint/resolver/type_validation_test.cc",
     "../../src/tint/resolver/validation_test.cc",
+    "../../src/tint/resolver/validator_is_storeable_test.cc",
     "../../src/tint/resolver/var_let_test.cc",
     "../../src/tint/resolver/var_let_validation_test.cc",
   ]

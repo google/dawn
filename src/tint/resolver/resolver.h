@@ -108,6 +108,9 @@ class Resolver {
     return validator_.IsHostShareable(type);
   }
 
+  /// @returns the validator for testing
+  const Validator* GetValidatorForTesting() const { return &validator_; }
+
  private:
   /// Describes the context in which a variable is declared
   enum class VariableKind { kParameter, kLocal, kGlobal };

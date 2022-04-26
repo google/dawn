@@ -15,13 +15,13 @@
 #include "src/tint/resolver/validator.h"
 
 #include "gmock/gmock.h"
-#include "src/tint/resolver/validator_test_helper.h"
+#include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/atomic_type.h"
 
 namespace tint::resolver {
 namespace {
 
-using ValidatorIsStorableTest = ValidatorTest;
+using ValidatorIsStorableTest = ResolverTest;
 
 TEST_F(ValidatorIsStorableTest, Void) {
   EXPECT_FALSE(v()->IsStorable(create<sem::Void>()));
