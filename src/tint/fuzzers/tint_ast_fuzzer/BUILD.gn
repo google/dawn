@@ -16,12 +16,14 @@ import("//build_overrides/build.gni")
 import("../../../../tint_overrides_with_defaults.gni")
 
 if (build_with_chromium) {
+  import("../../../../scripts/dawn_overrides_with_defaults.gni")
   import("//third_party/protobuf/proto_library.gni")
 
   proto_library("tint_ast_fuzzer_proto") {
     sources = [ "protobufs/tint_ast_fuzzer.proto" ]
     generate_python = false
     use_protobuf_full = true
+    deps = [ "${dawn_root}/generator:remove_stale_autogen_files" ]
   }
 
   source_set("tint_ast_fuzzer") {
