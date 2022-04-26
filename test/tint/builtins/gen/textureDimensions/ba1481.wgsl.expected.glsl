@@ -1,30 +1,13 @@
 #version 310 es
 
-struct GammaTransferParams {
-  float G;
-  float A;
-  float B;
-  float C;
-  float D;
-  float E;
-  float F;
-  uint padding;
-};
-
 struct ExternalTextureParams {
   uint numPlanes;
   mat3x4 yuvToRgbConversionMatrix;
-  GammaTransferParams gammaDecodeParams;
-  GammaTransferParams gammaEncodeParams;
-  mat3 gamutConversionMatrix;
 };
 
 layout(binding = 2) uniform ExternalTextureParams_1 {
   uint numPlanes;
   mat3x4 yuvToRgbConversionMatrix;
-  GammaTransferParams gammaDecodeParams;
-  GammaTransferParams gammaEncodeParams;
-  mat3 gamutConversionMatrix;
 } ext_tex_params;
 
 uniform highp sampler2D arg_0_1;
@@ -48,31 +31,14 @@ void main() {
 #version 310 es
 precision mediump float;
 
-struct GammaTransferParams {
-  float G;
-  float A;
-  float B;
-  float C;
-  float D;
-  float E;
-  float F;
-  uint padding;
-};
-
 struct ExternalTextureParams {
   uint numPlanes;
   mat3x4 yuvToRgbConversionMatrix;
-  GammaTransferParams gammaDecodeParams;
-  GammaTransferParams gammaEncodeParams;
-  mat3 gamutConversionMatrix;
 };
 
 layout(binding = 2) uniform ExternalTextureParams_1 {
   uint numPlanes;
   mat3x4 yuvToRgbConversionMatrix;
-  GammaTransferParams gammaDecodeParams;
-  GammaTransferParams gammaEncodeParams;
-  mat3 gamutConversionMatrix;
 } ext_tex_params;
 
 uniform highp sampler2D arg_0_1;
@@ -90,31 +56,14 @@ void main() {
 }
 #version 310 es
 
-struct GammaTransferParams {
-  float G;
-  float A;
-  float B;
-  float C;
-  float D;
-  float E;
-  float F;
-  uint padding;
-};
-
 struct ExternalTextureParams {
   uint numPlanes;
   mat3x4 yuvToRgbConversionMatrix;
-  GammaTransferParams gammaDecodeParams;
-  GammaTransferParams gammaEncodeParams;
-  mat3 gamutConversionMatrix;
 };
 
 layout(binding = 2) uniform ExternalTextureParams_1 {
   uint numPlanes;
   mat3x4 yuvToRgbConversionMatrix;
-  GammaTransferParams gammaDecodeParams;
-  GammaTransferParams gammaEncodeParams;
-  mat3 gamutConversionMatrix;
 } ext_tex_params;
 
 uniform highp sampler2D arg_0_1;

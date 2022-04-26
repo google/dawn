@@ -26,24 +26,10 @@ namespace dawn::native {
 
     class TextureViewBase;
 
-    struct GammaTransferParams {
-        float G = 0.0;
-        float A = 0.0;
-        float B = 0.0;
-        float C = 0.0;
-        float D = 0.0;
-        float E = 0.0;
-        float F = 0.0;
-        uint32_t padding = 0;
-    };
-
     struct ExternalTextureParams {
         uint32_t numPlanes;
         std::array<uint32_t, 3> padding;
-        std::array<float, 12> yuvToRgbConversionMatrix;
-        GammaTransferParams gammaDecodingParams = {};
-        GammaTransferParams gammaEncodingParams = {};
-        std::array<float, 12> gamutConversionMatrix = {};
+        std::array<float, 12> yuvToRgbConversion;
     };
 
     MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
