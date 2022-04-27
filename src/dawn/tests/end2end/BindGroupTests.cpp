@@ -1601,7 +1601,7 @@ TEST_P(BindGroupTests, CreateWithDestroyedResource) {
         wgpu::TextureDescriptor textureDesc;
         textureDesc.usage = wgpu::TextureUsage::TextureBinding;
         textureDesc.size = {1, 1, 1};
-        textureDesc.format = wgpu::TextureFormat::BGRA8Unorm;
+        textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
 
         // Create view, then destroy.
         {

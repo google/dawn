@@ -35,7 +35,7 @@ namespace dawn::native::opengl {
     };
 
     using GLFormatTable = ityp::array<FormatIndex, GLFormat, kKnownFormatCount>;
-    GLFormatTable BuildGLFormatTable();
+    GLFormatTable BuildGLFormatTable(GLenum internalFormatForBGRA);
 
 }  // namespace dawn::native::opengl
 

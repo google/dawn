@@ -119,6 +119,7 @@ namespace dawn::native::opengl {
             const RenderPipelineDescriptor* descriptor) override;
 
         void InitTogglesFromDriver();
+        GLenum GetBGRAInternalFormat() const;
         ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
         void DestroyImpl() override;
         MaybeError WaitForIdleForDestruction() override;

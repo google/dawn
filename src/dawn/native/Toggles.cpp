@@ -147,6 +147,10 @@ namespace dawn::native {
               "Disables reading from depth/stencil textures which is unsupported on some "
               "platforms.",
               "https://crbug.com/dawn/667"}},
+            {Toggle::DisableBGRARead,
+             {"disable_bgra_read",
+              "Disables reading from BGRA textures which is unsupported on some platforms.",
+              "https://crbug.com/dawn/1393"}},
             {Toggle::DisableSampleVariables,
              {"disable_sample_variables",
               "Disables gl_SampleMask and related functionality which is unsupported on some "

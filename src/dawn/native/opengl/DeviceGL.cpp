@@ -55,7 +55,7 @@ namespace dawn::native::opengl {
 
     MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
         InitTogglesFromDriver();
-        mFormatTable = BuildGLFormatTable();
+        mFormatTable = BuildGLFormatTable(GetBGRAInternalFormat());
 
         return DeviceBase::Initialize(AcquireRef(new Queue(this, &descriptor->defaultQueue)));
     }
@@ -73,6 +73,10 @@ namespace dawn::native::opengl {
 
         bool supportsDepthStencilRead =
             gl.IsAtLeastGL(3, 0) || gl.IsGLExtensionSupported("GL_NV_read_depth_stencil");
+
+        // Desktop GL supports BGRA textures via swizzling in the driver; ES requires an extension.
+        bool supportsBGRARead =
+            gl.GetVersion().IsDesktop() || gl.IsGLExtensionSupported("GL_EXT_read_format_bgra");
 
         bool supportsSampleVariables = gl.IsAtLeastGL(4, 0) || gl.IsAtLeastGLES(3, 2) ||
                                        gl.IsGLExtensionSupported("GL_OES_sample_variables");
@@ -97,6 +101,7 @@ namespace dawn::native::opengl {
         SetToggle(Toggle::DisableIndexedDrawBuffers, !supportsIndexedDrawBuffers);
         SetToggle(Toggle::DisableSnormRead, !supportsSnormRead);
         SetToggle(Toggle::DisableDepthStencilRead, !supportsDepthStencilRead);
+        SetToggle(Toggle::DisableBGRARead, !supportsBGRARead);
         SetToggle(Toggle::DisableSampleVariables, !supportsSampleVariables);
         SetToggle(Toggle::FlushBeforeClientWaitSync, gl.GetVersion().IsES());
         // For OpenGL ES, we must use a placeholder fragment shader for vertex-only render pipeline.
@@ -110,6 +115,16 @@ namespace dawn::native::opengl {
         const GLFormat& result = mFormatTable[format.GetIndex()];
         ASSERT(result.isSupportedOnBackend);
         return result;
+    }
+
+    GLenum Device::GetBGRAInternalFormat() const {
+        if (gl.IsGLExtensionSupported("GL_EXT_texture_format_BGRA8888") ||
+            gl.IsGLExtensionSupported("GL_APPLE_texture_format_BGRA8888")) {
+            return GL_BGRA8_EXT;
+        } else {
+            // Desktop GL will swizzle to/from RGBA8 for BGRA formats.
+            return GL_RGBA8;
+        }
     }
 
     ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(
