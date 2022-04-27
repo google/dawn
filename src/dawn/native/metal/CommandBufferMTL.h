@@ -53,15 +53,7 @@ namespace dawn::native::metal {
         using CommandBufferBase::CommandBufferBase;
 
         MaybeError EncodeComputePass(CommandRecordingContext* commandContext);
-        MaybeError EncodeRenderPass(CommandRecordingContext* commandContext,
-                                    MTLRenderPassDescriptor* mtlRenderPass,
-                                    uint32_t width,
-                                    uint32_t height);
-
-        MaybeError EncodeRenderPassInternal(CommandRecordingContext* commandContext,
-                                            MTLRenderPassDescriptor* mtlRenderPass,
-                                            uint32_t width,
-                                            uint32_t height);
+        MaybeError EncodeRenderPass(id<MTLRenderCommandEncoder> encoder);
     };
 
 }  // namespace dawn::native::metal

@@ -81,6 +81,27 @@ namespace dawn::native::metal {
                                  uint32_t sampleMask = 0xFFFFFFFF,
                                  const RenderPipeline* renderPipeline = nullptr);
 
+    // Allow use MTLStoreActionStoreAndMultismapleResolve because the logic in the backend is
+    // first to compute what the "best" Metal render pass descriptor is, then fix it up if we
+    // are not on macOS 10.12 (i.e. the EmulateStoreAndMSAAResolve toggle is on).
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability"
+    constexpr MTLStoreAction kMTLStoreActionStoreAndMultisampleResolve =
+        MTLStoreActionStoreAndMultisampleResolve;
+#pragma clang diagnostic pop
+
+    // Helper functions to encode Metal render passes that take care of multiple workarounds that
+    // happen at the render pass start and end. Because workarounds wrap the encoding of the render
+    // pass, the encoding must be entirely done by the `encodeInside` callback.
+    // At the end of this function, `commandContext` will have no encoder open.
+    using EncodeInsideRenderPass = std::function<MaybeError(id<MTLRenderCommandEncoder>)>;
+    MaybeError EncodeMetalRenderPass(Device* device,
+                                     CommandRecordingContext* commandContext,
+                                     MTLRenderPassDescriptor* mtlRenderPass,
+                                     uint32_t width,
+                                     uint32_t height,
+                                     EncodeInsideRenderPass encodeInside);
+
 }  // namespace dawn::native::metal
 
 #endif  // SRC_DAWN_NATIVE_METAL_UTILSMETAL_H_
