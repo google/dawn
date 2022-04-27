@@ -86,10 +86,62 @@ crbug.com/dawn/0000 webgpu:api,operation,command_buffer,image_copy:mip_levels:* 
 
 ################################################################################
 # webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero
-# Partial failures for all platforms
+# Spec / CTS bugs because depth24unorm-stencil8 depth-specific format is depth24plus
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:* [ Failure ]
+crbug.com/dawn/1388 [ linux ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth24unorm-stencil8" [ Failure ]
+crbug.com/dawn/1388 [ linux ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth24unorm-stencil8" [ Failure ]
+crbug.com/dawn/1388 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth24unorm-stencil8" [ Failure ]
+crbug.com/dawn/1388 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth24unorm-stencil8" [ Failure ]
+crbug.com/dawn/1388 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth24unorm-stencil8" [ Failure ]
+crbug.com/dawn/1388 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth24unorm-stencil8" [ Failure ]
+
+################################################################################
+# webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero
+# Unexpected failures on mac.
+# KEEP
+################################################################################
+crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth16unorm" [ Failure ]
+crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth16unorm" [ Failure ]
+crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth16unorm" [ Failure ]
+crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth32float-stencil8" [ Failure ]
+crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth32float-stencil8" [ Failure ]
+crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="depth32float-stencil8" [ Failure ]
+crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="depth24plus-stencil8" [ Failure ]
+crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="depth24unorm-stencil8" [ Failure ]
+crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
+crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
+crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="stencil8" [ Failure ]
+crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="r8unorm" [ Failure ]
+crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="r8unorm" [ Failure ]
+crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="r8unorm" [ Failure ]
+crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rg8unorm" [ Failure ]
+crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rg8unorm" [ Failure ]
+crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rg8unorm" [ Failure ]
+crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="r8unorm" [ Failure ]
+crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="r8unorm" [ Failure ]
+crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="Sample";format="r8unorm" [ Failure ]
+crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="rg8unorm" [ Failure ]
+crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rg8unorm" [ Failure ]
+crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="Sample";format="rg8unorm" [ Failure ]
+
+################################################################################
+# webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero
+# Unexpected failures on windows.
+# KEEP
+################################################################################
+crbug.com/dawn/0000 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth32float-stencil8" [ Failure ]
+crbug.com/dawn/0000 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth32float-stencil8" [ Failure ]
+crbug.com/dawn/0000 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";* [ Failure ]
+crbug.com/dawn/0000 [ win intel ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth16unorm" [ Failure ]
+crbug.com/dawn/0000 [ win intel ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rgba32float" [ Failure ]
+crbug.com/dawn/0000 [ win intel ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
+crbug.com/dawn/0000 [ win intel dawn-no-backend-validation ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
+crbug.com/dawn/0000 [ win intel ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rgba32float" [ Failure ]
+crbug.com/dawn/0000 [ win dawn-backend-validation ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
+crbug.com/dawn/0000 [ win dawn-backend-validation ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth24plus-stencil8" [ Failure ]
+crbug.com/dawn/0000 [ win dawn-backend-validation ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth24unorm-stencil8" [ Failure ]
+crbug.com/dawn/0000 [ win dawn-backend-validation ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth32float-stencil8" [ Failure ]
 
 ################################################################################
 # webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas
