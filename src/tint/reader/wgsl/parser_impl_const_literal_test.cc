@@ -42,15 +42,50 @@ float MakeFloat(int sign, int biased_exponent, int mantissa) {
 }
 
 TEST_F(ParserImplTest, ConstLiteral_Int) {
-  auto p = parser("-234");
-  auto c = p->const_literal();
-  EXPECT_TRUE(c.matched);
-  EXPECT_FALSE(c.errored);
-  EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(c.value, nullptr);
-  ASSERT_TRUE(c->Is<ast::SintLiteralExpression>());
-  EXPECT_EQ(c->As<ast::SintLiteralExpression>()->value, -234);
-  EXPECT_EQ(c->source.range, (Source::Range{{1u, 1u}, {1u, 5u}}));
+  {
+    auto p = parser("234");
+    auto c = p->const_literal();
+    EXPECT_TRUE(c.matched);
+    EXPECT_FALSE(c.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(c.value, nullptr);
+    ASSERT_TRUE(c->Is<ast::SintLiteralExpression>());
+    EXPECT_EQ(c->As<ast::SintLiteralExpression>()->value, 234);
+    EXPECT_EQ(c->source.range, (Source::Range{{1u, 1u}, {1u, 4u}}));
+  }
+  {
+    auto p = parser("234i");
+    auto c = p->const_literal();
+    EXPECT_TRUE(c.matched);
+    EXPECT_FALSE(c.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(c.value, nullptr);
+    ASSERT_TRUE(c->Is<ast::SintLiteralExpression>());
+    EXPECT_EQ(c->As<ast::SintLiteralExpression>()->value, 234);
+    EXPECT_EQ(c->source.range, (Source::Range{{1u, 1u}, {1u, 5u}}));
+  }
+  {
+    auto p = parser("-234");
+    auto c = p->const_literal();
+    EXPECT_TRUE(c.matched);
+    EXPECT_FALSE(c.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(c.value, nullptr);
+    ASSERT_TRUE(c->Is<ast::SintLiteralExpression>());
+    EXPECT_EQ(c->As<ast::SintLiteralExpression>()->value, -234);
+    EXPECT_EQ(c->source.range, (Source::Range{{1u, 1u}, {1u, 5u}}));
+  }
+  {
+    auto p = parser("-234i");
+    auto c = p->const_literal();
+    EXPECT_TRUE(c.matched);
+    EXPECT_FALSE(c.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(c.value, nullptr);
+    ASSERT_TRUE(c->Is<ast::SintLiteralExpression>());
+    EXPECT_EQ(c->As<ast::SintLiteralExpression>()->value, -234);
+    EXPECT_EQ(c->source.range, (Source::Range{{1u, 1u}, {1u, 6u}}));
+  }
 }
 
 TEST_F(ParserImplTest, ConstLiteral_Uint) {
@@ -63,6 +98,15 @@ TEST_F(ParserImplTest, ConstLiteral_Uint) {
   ASSERT_TRUE(c->Is<ast::UintLiteralExpression>());
   EXPECT_EQ(c->As<ast::UintLiteralExpression>()->value, 234u);
   EXPECT_EQ(c->source.range, (Source::Range{{1u, 1u}, {1u, 5u}}));
+}
+
+TEST_F(ParserImplTest, ConstLiteral_Uint_Negative) {
+  auto p = parser("-234u");
+  auto c = p->const_literal();
+  EXPECT_FALSE(c.matched);
+  EXPECT_TRUE(c.errored);
+  EXPECT_EQ(p->error(), "1:1: u32 (-234) must not be negative");
+  ASSERT_EQ(c.value, nullptr);
 }
 
 TEST_F(ParserImplTest, ConstLiteral_Float) {

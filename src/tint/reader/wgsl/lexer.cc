@@ -681,7 +681,13 @@ Token Lexer::build_token_from_int_if_possible(Source source,
                                               size_t end,
                                               int32_t base) {
   auto res = strtoll(&at(start), nullptr, base);
+
   if (matches(pos(), "u")) {
+    if (res < 0) {
+      return {Token::Type::kError, source,
+              "u32 (" + std::string{substr(start, end - start)} +
+                  ") must not be negative"};
+    }
     if (static_cast<uint64_t>(res) >
         static_cast<uint64_t>(std::numeric_limits<uint32_t>::max())) {
       return {
@@ -691,6 +697,10 @@ Token Lexer::build_token_from_int_if_possible(Source source,
     advance(1);
     end_source(source);
     return {source, static_cast<uint32_t>(res)};
+  }
+
+  if (matches(pos(), "i")) {
+    advance(1);
   }
 
   if (res < static_cast<int64_t>(std::numeric_limits<int32_t>::min())) {
