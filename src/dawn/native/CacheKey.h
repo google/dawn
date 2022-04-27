@@ -46,7 +46,7 @@ namespace dawn::native {
       public:
         using std::vector<uint8_t>::vector;
 
-        enum class Type { ComputePipeline, RenderPipeline };
+        enum class Type { ComputePipeline, RenderPipeline, Shader };
 
         template <typename T>
         CacheKey& Record(const T& t) {

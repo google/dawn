@@ -27,6 +27,12 @@ namespace {
 
 class D3D12CachingTests : public DawnTest {
   protected:
+    void SetUp() override {
+        DawnTest::SetUp();
+        // TODO(dawn:1341) Re-enable tests once shader caching is re-implemented.
+        DAWN_SKIP_TEST_IF_BASE(true, "suppressed", "TODO(dawn:1341)");
+    }
+
     std::unique_ptr<dawn::platform::Platform> CreateTestPlatform() override {
         return std::make_unique<DawnCachingMockPlatform>(&mMockCache);
     }

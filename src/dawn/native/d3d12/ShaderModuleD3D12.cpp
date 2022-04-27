@@ -28,6 +28,7 @@
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/WindowsUtils.h"
+#include "dawn/native/CacheKey.h"
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/TintUtils.h"
 #include "dawn/native/d3d12/BindGroupLayoutD3D12.h"
@@ -328,7 +329,8 @@ namespace dawn::native::d3d12 {
                 return std::move(request);
             }
 
-            ResultOrError<PersistentCacheKey> CreateCacheKey() const {
+            // TODO(dawn:1341): Move to use CacheKey instead of the vector.
+            ResultOrError<std::vector<uint8_t>> CreateCacheKey() const {
                 // Generate the WGSL from the Tint program so it's normalized.
                 // TODO(tint:1180): Consider using a binary serialization of the tint AST for a more
                 // compact representation.
@@ -344,7 +346,7 @@ namespace dawn::native::d3d12 {
 
                 // Prefix the key with the type to avoid collisions from another type that could
                 // have the same key.
-                stream << static_cast<uint32_t>(PersistentKeyType::Shader);
+                stream << static_cast<uint32_t>(CacheKey::Type::Shader);
                 stream << "\n";
 
                 stream << result.wgsl.length();
@@ -389,8 +391,8 @@ namespace dawn::native::d3d12 {
                 stream << ")";
                 stream << "\n";
 
-                return PersistentCacheKey(std::istreambuf_iterator<char>{stream},
-                                          std::istreambuf_iterator<char>{});
+                return std::vector<uint8_t>(std::istreambuf_iterator<char>{stream},
+                                            std::istreambuf_iterator<char>{});
             }
         };
 
@@ -803,36 +805,21 @@ namespace dawn::native::d3d12 {
                          programmableStage.entryPoint.c_str(), stage, layout, compileFlags, device,
                          program, GetEntryPoint(programmableStage.entryPoint), programmableStage));
 
-        PersistentCacheKey shaderCacheKey;
-        DAWN_TRY_ASSIGN(shaderCacheKey, request.CreateCacheKey());
-
-        DAWN_TRY_ASSIGN(
-            compiledShader.cachedShader,
-            device->GetPersistentCache()->GetOrCreate(
-                shaderCacheKey, [&](auto doCache) -> MaybeError {
-                    DAWN_TRY(CompileShader(
-                        device->GetPlatform(), device->GetFunctions(),
-                        device->IsToggleEnabled(Toggle::UseDXC) ? device->GetDxcLibrary().Get()
-                                                                : nullptr,
-                        device->IsToggleEnabled(Toggle::UseDXC) ? device->GetDxcCompiler().Get()
-                                                                : nullptr,
-                        std::move(request), device->IsToggleEnabled(Toggle::DumpShaders),
-                        [&](WGPULoggingType loggingType, const char* message) {
-                            GetDevice()->EmitLog(loggingType, message);
-                        },
-                        &compiledShader));
-                    const D3D12_SHADER_BYTECODE shader = compiledShader.GetD3D12ShaderBytecode();
-                    doCache(shader.pShaderBytecode, shader.BytecodeLength);
-                    return {};
-                }));
-
+        // TODO(dawn:1341): Add shader cache key generation and caching for the compiled shader.
+        DAWN_TRY(CompileShader(
+            device->GetPlatform(), device->GetFunctions(),
+            device->IsToggleEnabled(Toggle::UseDXC) ? device->GetDxcLibrary().Get() : nullptr,
+            device->IsToggleEnabled(Toggle::UseDXC) ? device->GetDxcCompiler().Get() : nullptr,
+            std::move(request), device->IsToggleEnabled(Toggle::DumpShaders),
+            [&](WGPULoggingType loggingType, const char* message) {
+                GetDevice()->EmitLog(loggingType, message);
+            },
+            &compiledShader));
         return std::move(compiledShader);
     }
 
     D3D12_SHADER_BYTECODE CompiledShader::GetD3D12ShaderBytecode() const {
-        if (cachedShader.buffer != nullptr) {
-            return {cachedShader.buffer.get(), cachedShader.bufferSize};
-        } else if (compiledFXCShader != nullptr) {
+        if (compiledFXCShader != nullptr) {
             return {compiledFXCShader->GetBufferPointer(), compiledFXCShader->GetBufferSize()};
         } else if (compiledDXCShader != nullptr) {
             return {compiledDXCShader->GetBufferPointer(), compiledDXCShader->GetBufferSize()};

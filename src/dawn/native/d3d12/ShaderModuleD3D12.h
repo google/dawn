@@ -15,7 +15,6 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_SHADERMODULED3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_SHADERMODULED3D12_H_
 
-#include "dawn/native/PersistentCache.h"
 #include "dawn/native/ShaderModule.h"
 
 #include "dawn/native/d3d12/d3d12_platform.h"
@@ -32,7 +31,6 @@ namespace dawn::native::d3d12 {
     // Manages a ref to one of the various representations of shader blobs and information used to
     // emulate vertex/instance index starts
     struct CompiledShader {
-        ScopedCachedBlob cachedShader;
         ComPtr<ID3DBlob> compiledFXCShader;
         ComPtr<IDxcBlob> compiledDXCShader;
         D3D12_SHADER_BYTECODE GetD3D12ShaderBytecode() const;

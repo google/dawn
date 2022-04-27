@@ -281,8 +281,6 @@ source_set("sources") {
     "PassResourceUsageTracker.h",
     "PerStage.cpp",
     "PerStage.h",
-    "PersistentCache.cpp",
-    "PersistentCache.h",
     "Pipeline.cpp",
     "Pipeline.h",
     "PipelineLayout.cpp",

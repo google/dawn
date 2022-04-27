@@ -40,7 +40,6 @@
 #include "dawn/native/Instance.h"
 #include "dawn/native/InternalPipelineStore.h"
 #include "dawn/native/ObjectType_autogen.h"
-#include "dawn/native/PersistentCache.h"
 #include "dawn/native/QuerySet.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/RenderBundleEncoder.h"
@@ -257,7 +256,6 @@ namespace dawn::native {
         mCallbackTaskManager = std::make_unique<CallbackTaskManager>();
         mDeprecationWarnings = std::make_unique<DeprecationWarnings>();
         mInternalPipelineStore = std::make_unique<InternalPipelineStore>(this);
-        mPersistentCache = std::make_unique<PersistentCache>(this);
 
         ASSERT(GetPlatform() != nullptr);
         mWorkerTaskPool = GetPlatform()->CreateWorkerTaskPool();
@@ -413,7 +411,6 @@ namespace dawn::native {
         mDynamicUploader = nullptr;
         mCallbackTaskManager = nullptr;
         mAsyncTaskManager = nullptr;
-        mPersistentCache = nullptr;
         mEmptyBindGroupLayout = nullptr;
         mInternalPipelineStore = nullptr;
         mExternalTexturePlaceholderView = nullptr;
@@ -572,11 +569,6 @@ namespace dawn::native {
         callback(static_cast<WGPUErrorType>(scope.GetErrorType()), scope.GetErrorMessage(),
                  userdata);
         return returnValue;
-    }
-
-    PersistentCache* DeviceBase::GetPersistentCache() {
-        ASSERT(mPersistentCache.get() != nullptr);
-        return mPersistentCache.get();
     }
 
     BlobCache* DeviceBase::GetBlobCache() {

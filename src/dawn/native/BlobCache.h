@@ -45,10 +45,6 @@ namespace dawn::native {
 
     // This class should always be thread-safe because it may be called asynchronously. Its purpose
     // is to wrap the CachingInterface provided via a platform.
-    // TODO(dawn:549): This is a "re-declaration" of the current PersistentCache since there are
-    //   some dependencies on that one for the semi-implemented D3D12 shader cache and some changes
-    //   introduced here are breaking. Eventually the goal is to unify the two, but for development
-    //   purposes, we are splitting these for now and will re-merge them in a later change.
     class BlobCache {
       public:
         explicit BlobCache(dawn::platform::CachingInterface* cachingInterface = nullptr);
