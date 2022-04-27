@@ -86,7 +86,7 @@ namespace dawn::wire::server {
         // Hide features the wire cannot support.
         auto it = std::partition(features.begin(), features.end(), IsFeatureSupported);
 
-        cmd.featuresCount = std::distance(features.begin(), it);
+        cmd.featuresCount = static_cast<uint32_t>(std::distance(features.begin(), it));
         cmd.features = features.data();
 
         mProcs.adapterGetProperties(adapter, &properties);

@@ -93,7 +93,7 @@ namespace dawn::wire::server {
             }
         }
 
-        cmd.featuresCount = features.size();
+        cmd.featuresCount = static_cast<uint32_t>(features.size());
         cmd.features = features.data();
 
         WGPUSupportedLimits limits = {};
