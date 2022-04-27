@@ -288,6 +288,11 @@ bool GeneratorImpl::Generate() {
           }
           return EmitFunction(func);
         },
+        [&](const ast::Enable*) {
+          // Currently we don't have to do anything for using a extension in
+          // HLSL
+          return true;
+        },
         [&](Default) {
           TINT_ICE(Writer, diagnostics_)
               << "unhandled module-scope declaration: "

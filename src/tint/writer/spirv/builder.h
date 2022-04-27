@@ -225,6 +225,11 @@ class Builder {
                                    ast::InterpolationType type,
                                    ast::InterpolationSampling sampling);
 
+  /// Generates a extension for the given extension kind. Emits an error and
+  /// returns false if the extension kind is not supported.
+  /// @param kind ExtensionKind of the extension to generate
+  /// @returns true on success.
+  bool GenerateExtension(ast::Enable::ExtensionKind kind);
   /// Generates a label for the given id. Emits an error and returns false if
   /// we're currently outside a function.
   /// @param id the id to use for the label

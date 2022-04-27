@@ -52,6 +52,10 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true on successful generation; false otherwise
   bool Generate();
 
+  /// Handles generating a enable directive
+  /// @param ext the extension kind in the enable directive to generate
+  /// @returns true if the enable directive was emitted
+  bool EmitEnableDirective(const ast::Enable::ExtensionKind ext);
   /// Handles generating a declared type
   /// @param ty the declared type to generate
   /// @returns true if the declared type was emitted

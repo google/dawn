@@ -250,6 +250,10 @@ bool GeneratorImpl::Generate() {
           }
           return EmitFunction(func);
         },
+        [&](const ast::Enable*) {
+          // Do nothing for enabling extension in MSL
+          return true;
+        },
         [&](Default) {
           // These are pushed into the entry point by sanitizer transforms.
           TINT_ICE(Writer, diagnostics_)

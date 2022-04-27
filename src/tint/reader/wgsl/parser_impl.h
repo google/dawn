@@ -380,9 +380,12 @@ class ParserImpl {
   void deprecated(const Source& source, const std::string& msg);
   /// Parses the `translation_unit` grammar element
   void translation_unit();
+  /// Parses the `enable_directive` grammar element, erroring on parse failure.
+  /// @return true on parse success, otherwise an error or no-match.
+  Maybe<bool> enable_directive();
   /// Parses the `global_decl` grammar element, erroring on parse failure.
-  /// @return true on parse success, otherwise an error.
-  Expect<bool> expect_global_decl();
+  /// @return true on parse success, otherwise an error or no-match.
+  Maybe<bool> global_decl();
   /// Parses a `global_variable_decl` grammar element with the initial
   /// `variable_attribute_list*` provided as `attrs`
   /// @returns the variable parsed or nullptr

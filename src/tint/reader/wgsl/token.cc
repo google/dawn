@@ -145,6 +145,8 @@ std::string_view Token::TypeToName(Type type) {
       return "default";
     case Token::Type::kElse:
       return "else";
+    case Token::Type::kEnable:
+      return "enable";
     case Token::Type::kF32:
       return "f32";
     case Token::Type::kFallthrough:

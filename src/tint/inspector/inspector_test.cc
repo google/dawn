@@ -145,6 +145,12 @@ class InspectorGetSamplerTextureUsesTest : public InspectorRunner,
 class InspectorGetWorkgroupStorageSizeTest : public InspectorBuilder,
                                              public testing::Test {};
 
+class InspectorGetUsedExtensionNamesTest : public InspectorRunner,
+                                           public testing::Test {};
+
+class InspectorGetEnableDirectivesTest : public InspectorRunner,
+                                         public testing::Test {};
+
 // This is a catch all for shaders that have demonstrated regressions/crashes in
 // the wild.
 class InspectorRegressionTest : public InspectorRunner, public testing::Test {};
@@ -3002,6 +3008,124 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, StructAlignment) {
 
   Inspector& inspector = Build();
   EXPECT_EQ(1024u, inspector.GetWorkgroupStorageSize("ep_func"));
+}
+
+// Test calling GetUsedExtensionNames on a empty shader.
+TEST_F(InspectorGetUsedExtensionNamesTest, Empty) {
+  std::string shader = "";
+
+  Inspector& inspector = Initialize(shader);
+
+  auto result = inspector.GetUsedExtensionNames();
+  EXPECT_EQ(result.size(), 0u);
+}
+
+// Test calling GetUsedExtensionNames on a shader with no extension.
+TEST_F(InspectorGetUsedExtensionNamesTest, None) {
+  std::string shader = R"(
+@stage(fragment)
+fn main() {
+})";
+
+  Inspector& inspector = Initialize(shader);
+
+  auto result = inspector.GetUsedExtensionNames();
+  EXPECT_EQ(result.size(), 0u);
+}
+
+// Test calling GetUsedExtensionNames on a shader with valid extension.
+TEST_F(InspectorGetUsedExtensionNamesTest, Simple) {
+  std::string shader = R"(
+enable InternalExtensionForTesting;
+
+@stage(fragment)
+fn main() {
+})";
+
+  Inspector& inspector = Initialize(shader);
+
+  auto result = inspector.GetUsedExtensionNames();
+  EXPECT_EQ(result.size(), 1u);
+  EXPECT_EQ(result[0], "InternalExtensionForTesting");
+}
+
+// Test calling GetUsedExtensionNames on a shader with a extension enabled for
+// multiple times.
+TEST_F(InspectorGetUsedExtensionNamesTest, Duplicated) {
+  std::string shader = R"(
+enable InternalExtensionForTesting;
+enable InternalExtensionForTesting;
+
+@stage(fragment)
+fn main() {
+})";
+
+  Inspector& inspector = Initialize(shader);
+
+  auto result = inspector.GetUsedExtensionNames();
+  EXPECT_EQ(result.size(), 1u);
+  EXPECT_EQ(result[0], "InternalExtensionForTesting");
+}
+
+// Test calling GetEnableDirectives on a empty shader.
+TEST_F(InspectorGetEnableDirectivesTest, Empty) {
+  std::string shader = "";
+
+  Inspector& inspector = Initialize(shader);
+
+  auto result = inspector.GetEnableDirectives();
+  EXPECT_EQ(result.size(), 0u);
+}
+
+// Test calling GetEnableDirectives on a shader with no extension.
+TEST_F(InspectorGetEnableDirectivesTest, None) {
+  std::string shader = R"(
+@stage(fragment)
+fn main() {
+})";
+
+  Inspector& inspector = Initialize(shader);
+
+  auto result = inspector.GetEnableDirectives();
+  EXPECT_EQ(result.size(), 0u);
+}
+
+// Test calling GetEnableDirectives on a shader with valid extension.
+TEST_F(InspectorGetEnableDirectivesTest, Simple) {
+  std::string shader = R"(
+enable InternalExtensionForTesting;
+
+@stage(fragment)
+fn main() {
+})";
+
+  Inspector& inspector = Initialize(shader);
+
+  auto result = inspector.GetEnableDirectives();
+  EXPECT_EQ(result.size(), 1u);
+  EXPECT_EQ(result[0].first, "InternalExtensionForTesting");
+  EXPECT_EQ(result[0].second.range, (Source::Range{{2, 8}, {2, 35}}));
+}
+
+// Test calling GetEnableDirectives on a shader with a extension enabled for
+// multiple times.
+TEST_F(InspectorGetEnableDirectivesTest, Duplicated) {
+  std::string shader = R"(
+enable InternalExtensionForTesting;
+
+enable InternalExtensionForTesting;
+@stage(fragment)
+fn main() {
+})";
+
+  Inspector& inspector = Initialize(shader);
+
+  auto result = inspector.GetEnableDirectives();
+  EXPECT_EQ(result.size(), 2u);
+  EXPECT_EQ(result[0].first, "InternalExtensionForTesting");
+  EXPECT_EQ(result[0].second.range, (Source::Range{{2, 8}, {2, 35}}));
+  EXPECT_EQ(result[1].first, "InternalExtensionForTesting");
+  EXPECT_EQ(result[1].second.range, (Source::Range{{4, 8}, {4, 35}}));
 }
 
 // Crash was occuring in ::GenerateSamplerTargets, when

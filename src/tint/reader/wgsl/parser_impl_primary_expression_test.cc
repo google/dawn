@@ -117,7 +117,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_Empty) {
   S()
   )");
 
-  p->expect_global_decl();
+  p->global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto e = p->primary_expression();
@@ -141,7 +141,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_NotEmpty) {
   S(1u, 2.0)
   )");
 
-  p->expect_global_decl();
+  p->global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto e = p->primary_expression();

@@ -83,6 +83,10 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true on successful generation; false otherwise
   bool Generate();
 
+  /// Record an extension directive within the generator
+  /// @param ext the extension to record
+  /// @returns true if the extension directive was recorded successfully
+  bool RecordExtension(const ast::Enable* ext);
   /// Handles an index accessor expression
   /// @param out the output of the expression stream
   /// @param expr the expression to emit

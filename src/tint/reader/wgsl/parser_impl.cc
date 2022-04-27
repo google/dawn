@@ -305,20 +305,91 @@ bool ParserImpl::Parse() {
 }
 
 // translation_unit
-//  : global_decl* EOF
+//  : enable_directive* global_decl* EOF
 void ParserImpl::translation_unit() {
+  bool after_global_decl = false;
   while (continue_parsing()) {
     auto p = peek();
     if (p.IsEof()) {
       break;
     }
-    expect_global_decl();
+
+    auto ed = enable_directive();
+    if (ed.matched) {
+      if (after_global_decl) {
+        add_error(p,
+                  "enable directives must come before all global declarations");
+      }
+    } else {
+      auto gd = global_decl();
+
+      if (gd.matched) {
+        after_global_decl = true;
+      }
+
+      if (!gd.matched && !gd.errored) {
+        add_error(p, "unexpected token");
+      }
+    }
+
     if (builder_.Diagnostics().error_count() >= max_errors_) {
       add_error(Source{{}, p.source().file},
                 "stopping after " + std::to_string(max_errors_) + " errors");
       break;
     }
   }
+}
+
+// enable_directive
+//  : enable name SEMICLON
+Maybe<bool> ParserImpl::enable_directive() {
+  auto decl = sync(Token::Type::kSemicolon, [&]() -> Maybe<bool> {
+    if (!match(Token::Type::kEnable)) {
+      return Failure::kNoMatch;
+    }
+
+    // Match the extension name.
+    Expect<std::string> name = {""};
+    auto t = peek();
+    if (t.IsIdentifier()) {
+      synchronized_ = true;
+      next();
+      name = {t.to_str(), t.source()};
+    } else if (handle_error(t)) {
+      // The token might itself be an error.
+      return Failure::kErrored;
+    } else {
+      // Failed to match an extension name.
+      synchronized_ = false;
+      return add_error(t.source(), "invalid extension name");
+    }
+
+    if (!expect("enable directive", Token::Type::kSemicolon)) {
+      return Failure::kErrored;
+    }
+
+    if (ast::Enable::NameToKind(name.value) !=
+        ast::Enable::ExtensionKind::kNotAnExtension) {
+      const ast::Enable* extension =
+          create<ast::Enable>(name.source, name.value);
+      builder_.AST().AddEnable(extension);
+    } else {
+      // Error if an unknown extension is used
+      return add_error(name.source,
+                       "unsupported extension: '" + name.value + "'");
+    }
+
+    return true;
+  });
+
+  if (decl.errored) {
+    return Failure::kErrored;
+  }
+  if (decl.matched) {
+    return true;
+  }
+
+  return Failure::kNoMatch;
 }
 
 // global_decl
@@ -328,7 +399,7 @@ void ParserImpl::translation_unit() {
 //  | type_alias SEMICOLON
 //  | struct_decl
 //  | function_decl
-Expect<bool> ParserImpl::expect_global_decl() {
+Maybe<bool> ParserImpl::global_decl() {
   if (match(Token::Type::kSemicolon) || match(Token::Type::kEOF))
     return true;
 
@@ -436,9 +507,9 @@ Expect<bool> ParserImpl::expect_global_decl() {
   }
 
   // Exhausted all attempts to make sense of where we're at.
-  // Spew a generic error.
+  // Return a no-match
 
-  return add_error(t, "unexpected token");
+  return Failure::kNoMatch;
 }
 
 // global_variable_decl

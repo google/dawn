@@ -112,6 +112,8 @@ set(TINT_LIB_SRCS
   ast/discard_statement.h
   ast/else_statement.cc
   ast/else_statement.h
+  ast/enable.cc
+  ast/enable.h
   ast/expression.cc
   ast/expression.h
   ast/external_texture.cc
@@ -675,6 +677,7 @@ if(TINT_BUILD_TESTS)
     ast/depth_texture_test.cc
     ast/discard_statement_test.cc
     ast/else_statement_test.cc
+    ast/enable_test.cc
     ast/external_texture_test.cc
     ast/f32_test.cc
     ast/fallthrough_statement_test.cc
@@ -892,6 +895,7 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/parser_impl_continue_stmt_test.cc
       reader/wgsl/parser_impl_continuing_stmt_test.cc
       reader/wgsl/parser_impl_depth_texture_type_test.cc
+      reader/wgsl/parser_impl_enable_directive_test.cc
       reader/wgsl/parser_impl_external_texture_type_test.cc
       reader/wgsl/parser_impl_elseif_stmt_test.cc
       reader/wgsl/parser_impl_equality_expression_test.cc
@@ -1006,6 +1010,7 @@ if(TINT_BUILD_TESTS)
       writer/wgsl/generator_impl_constructor_test.cc
       writer/wgsl/generator_impl_continue_test.cc
       writer/wgsl/generator_impl_discard_test.cc
+      writer/wgsl/generator_impl_enable_test.cc
       writer/wgsl/generator_impl_fallthrough_test.cc
       writer/wgsl/generator_impl_function_test.cc
       writer/wgsl/generator_impl_global_decl_test.cc

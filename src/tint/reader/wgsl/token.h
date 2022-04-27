@@ -156,6 +156,8 @@ class Token {
     kDefault,
     /// A 'else'
     kElse,
+    /// A 'enable'
+    kEnable,
     /// A 'f32'
     kF32,
     /// A 'fallthrough'

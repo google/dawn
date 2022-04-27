@@ -71,9 +71,20 @@ void Module::BinGlobalDeclaration(const tint::ast::Node* decl,
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, var, program_id);
         global_variables_.push_back(var);
       },
+      [&](const Enable* ext) {
+        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, ext, program_id);
+        extensions_.insert(ext->kind);
+      },
       [&](Default) {
         TINT_ICE(AST, diags) << "Unknown global declaration type";
       });
+}
+
+void Module::AddEnable(const ast::Enable* ext) {
+  TINT_ASSERT(AST, ext);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, ext, program_id);
+  global_declarations_.push_back(ext);
+  extensions_.insert(ext->kind);
 }
 
 void Module::AddGlobalVariable(const ast::Variable* var) {
@@ -111,6 +122,7 @@ void Module::Copy(CloneContext* ctx, const Module* src) {
   type_decls_.clear();
   functions_.clear();
   global_variables_.clear();
+  extensions_.clear();
 
   for (auto* decl : global_declarations_) {
     if (!decl) {

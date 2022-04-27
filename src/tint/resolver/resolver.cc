@@ -121,6 +121,10 @@ bool Resolver::ResolveInternal() {
   // Process all module-scope declarations in dependency order.
   for (auto* decl : dependencies_.ordered_globals) {
     Mark(decl);
+    // Enable directives don't have sem node.
+    if (decl->Is<ast::Enable>()) {
+      continue;
+    }
     if (!Switch(
             decl,  //
             [&](const ast::TypeDecl* td) { return TypeDecl(td); },

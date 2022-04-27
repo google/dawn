@@ -63,8 +63,20 @@ GeneratorImpl::GeneratorImpl(const Program* program) : TextGenerator(program) {}
 GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate() {
+  // Generate enable directives before any other global declarations.
+  for (auto ext : program_->AST().Extensions()) {
+    if (!EmitEnableDirective(ext)) {
+      return false;
+    }
+  }
+  if (!program_->AST().Extensions().empty()) {
+    line();
+  }
   // Generate global declarations in the order they appear in the module.
   for (auto* decl : program_->AST().GlobalDeclarations()) {
+    if (decl->Is<ast::Enable>()) {
+      continue;
+    }
     if (!Switch(
             decl,  //
             [&](const ast::TypeDecl* td) { return EmitTypeDecl(td); },
@@ -81,6 +93,16 @@ bool GeneratorImpl::Generate() {
     }
   }
 
+  return true;
+}
+
+bool GeneratorImpl::EmitEnableDirective(const ast::Enable::ExtensionKind ext) {
+  auto out = line();
+  auto extension = ast::Enable::KindToName(ext);
+  if (extension == "") {
+    return false;
+  }
+  out << "enable " << extension << ";";
   return true;
 }
 

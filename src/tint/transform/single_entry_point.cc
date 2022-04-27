@@ -93,6 +93,8 @@ void SingleEntryPoint::Run(CloneContext& ctx,
       if (sem.Get(func)->HasAncestorEntryPoint(entry_point->symbol)) {
         ctx.dst->AST().AddFunction(ctx.Clone(func));
       }
+    } else if (auto* ext = decl->As<ast::Enable>()) {
+      ctx.dst->AST().AddEnable(ctx.Clone(ext));
     } else {
       TINT_UNREACHABLE(Transform, ctx.dst->Diagnostics())
           << "unhandled global declaration: " << decl->TypeInfo().name;

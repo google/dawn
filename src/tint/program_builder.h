@@ -38,6 +38,7 @@
 #include "src/tint/ast/depth_texture.h"
 #include "src/tint/ast/disable_validation_attribute.h"
 #include "src/tint/ast/discard_statement.h"
+#include "src/tint/ast/enable.h"
 #include "src/tint/ast/external_texture.h"
 #include "src/tint/ast/f32.h"
 #include "src/tint/ast/fallthrough_statement.h"

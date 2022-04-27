@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 
+#include "src/tint/ast/enable.h"
 #include "src/tint/ast/function.h"
 #include "src/tint/ast/type.h"
 
@@ -51,6 +52,10 @@ class Module final : public Castable<Module, Node> {
     return global_declarations_;
   }
 
+  /// Add a enable directive to the Builder
+  /// @param ext the enable directive to add
+  void AddEnable(const Enable* ext);
+
   /// Add a global variable to the Builder
   /// @param var the variable to add
   void AddGlobalVariable(const Variable* var);
@@ -75,6 +80,9 @@ class Module final : public Castable<Module, Node> {
 
   /// @returns the global variables for the module
   VariableList& GlobalVariables() { return global_variables_; }
+
+  /// @returns the extension set for the module
+  const ExtensionSet& Extensions() const { return extensions_; }
 
   /// Adds a type declaration to the Builder.
   /// @param decl the type declaration to add
@@ -116,6 +124,7 @@ class Module final : public Castable<Module, Node> {
   std::vector<const TypeDecl*> type_decls_;
   FunctionList functions_;
   VariableList global_variables_;
+  ExtensionSet extensions_;
 };
 
 }  // namespace tint::ast

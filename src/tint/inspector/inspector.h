@@ -20,6 +20,7 @@
 #include <string>
 #include <tuple>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "src/tint/inspector/entry_point.h"
@@ -142,6 +143,18 @@ class Inspector {
   /// @returns the total size in bytes of all Workgroup storage-class storage
   /// referenced transitively by the entry point.
   uint32_t GetWorkgroupStorageSize(const std::string& entry_point);
+
+  /// @returns vector of all valid extension names used by the program. There
+  /// will be no duplicated names in the returned vector even if an extension
+  /// is enabled multiple times.
+  std::vector<std::string> GetUsedExtensionNames();
+
+  /// @returns vector of all enable directives used by the program, each
+  /// enable directive represented by a std::pair<std::string,
+  /// tint::Source::Range> for its extension name and its location of the
+  /// extension name. There may be multiple enable directives for a same
+  /// extension.
+  std::vector<std::pair<std::string, Source>> GetEnableDirectives();
 
  private:
   const Program* program_;

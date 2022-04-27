@@ -19,13 +19,13 @@ namespace {
 
 TEST_F(ParserImplTest, GlobalDecl_Semicolon) {
   auto p = parser(";");
-  p->expect_global_decl();
+  p->global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
   auto p = parser("var<private> a : vec2<i32> = vec2<i32>(1, 2);");
-  p->expect_global_decl();
+  p->global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto program = p->program();
@@ -37,21 +37,21 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Inferred_Invalid) {
   auto p = parser("var<private> a = vec2<i32>(1, 2);");
-  p->expect_global_decl();
+  p->global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:16: expected ':' for variable declaration");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_MissingSemicolon) {
   auto p = parser("var<private> a : vec2<i32>");
-  p->expect_global_decl();
+  p->global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:27: expected ';' for variable declaration");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConstant) {
   auto p = parser("let a : i32 = 2;");
-  p->expect_global_decl();
+  p->global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto program = p->program();
@@ -63,21 +63,21 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalConstant) {
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConstant_Invalid) {
   auto p = parser("let a : vec2<i32> 1.0;");
-  p->expect_global_decl();
+  p->global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:19: expected ';' for let declaration");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConstant_MissingSemicolon) {
   auto p = parser("let a : vec2<i32> = vec2<i32>(1, 2)");
-  p->expect_global_decl();
+  p->global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:36: expected ';' for let declaration");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
   auto p = parser("type A = i32;");
-  p->expect_global_decl();
+  p->global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto program = p->program();
@@ -93,8 +93,8 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias_StructIdent) {
   a : f32,
 }
 type B = A;)");
-  p->expect_global_decl();
-  p->expect_global_decl();
+  p->global_decl();
+  p->global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto program = p->program();
@@ -113,14 +113,14 @@ type B = A;)");
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_MissingSemicolon) {
   auto p = parser("type A = i32");
-  p->expect_global_decl();
+  p->global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:13: expected ';' for type alias");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function) {
   auto p = parser("fn main() { return; }");
-  p->expect_global_decl();
+  p->global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto program = p->program();
@@ -131,7 +131,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function) {
 
 TEST_F(ParserImplTest, GlobalDecl_Function_WithAttribute) {
   auto p = parser("@workgroup_size(2) fn main() { return; }");
-  p->expect_global_decl();
+  p->global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto program = p->program();
@@ -142,14 +142,14 @@ TEST_F(ParserImplTest, GlobalDecl_Function_WithAttribute) {
 
 TEST_F(ParserImplTest, GlobalDecl_Function_Invalid) {
   auto p = parser("fn main() -> { return; }");
-  p->expect_global_decl();
+  p->global_decl();
   ASSERT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:14: unable to determine function return type");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
   auto p = parser("struct A { b: i32, c: f32}");
-  p->expect_global_decl();
+  p->global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
   auto program = p->program();
@@ -165,10 +165,20 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Struct_Invalid) {
-  auto p = parser("A {}");
-  p->expect_global_decl();
-  ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:1: unexpected token");
+  {
+    auto p = parser("A {}");
+    auto decl = p->global_decl();
+    // global_decl will result in a no match.
+    ASSERT_FALSE(p->has_error()) << p->error();
+    ASSERT_TRUE(!decl.matched && !decl.errored);
+  }
+  {
+    auto p = parser("A {}");
+    p->translation_unit();
+    // translation_unit will result in a general error.
+    ASSERT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:1: unexpected token");
+  }
 }
 
 }  // namespace

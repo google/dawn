@@ -257,6 +257,10 @@ bool Builder::Build() {
                     {Operand::Int(SpvAddressingModelLogical),
                      Operand::Int(SpvMemoryModelGLSL450)});
 
+  for (auto ext : builder_.AST().Extensions()) {
+    GenerateExtension(ext);
+  }
+
   for (auto* var : builder_.AST().GlobalVariables()) {
     if (!GenerateGlobalVariable(var)) {
       return false;
@@ -338,6 +342,21 @@ void Builder::push_capability(uint32_t cap) {
     capabilities_.push_back(
         Instruction{spv::Op::OpCapability, {Operand::Int(cap)}});
   }
+}
+
+bool Builder::GenerateExtension(ast::Enable::ExtensionKind) {
+  /*
+  For each supported extension, push corresponding capability into the builder.
+  For example:
+    if (kind == ast::Extension::Kind::kF16) {
+      push_capability(SpvCapabilityFloat16);
+      push_capability(SpvCapabilityUniformAndStorageBuffer16BitAccess);
+      push_capability(SpvCapabilityStorageBuffer16BitAccess);
+      push_capability(SpvCapabilityStorageInputOutput16);
+    }
+  */
+
+  return true;
 }
 
 bool Builder::GenerateLabel(uint32_t id) {

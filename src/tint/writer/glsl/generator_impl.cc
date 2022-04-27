@@ -282,6 +282,11 @@ bool GeneratorImpl::Generate() {
           return false;
         }
       }
+    } else if (auto* ext = decl->As<ast::Enable>()) {
+      // Record the required extension for generating extension directive later
+      if (!RecordExtension(ext)) {
+        return false;
+      }
     } else {
       TINT_ICE(Writer, diagnostics_)
           << "unhandled module-scope declaration: " << decl->TypeInfo().name;
@@ -312,6 +317,21 @@ bool GeneratorImpl::Generate() {
     current_buffer_->Insert(helpers_, helpers_insertion_point, indent);
     helpers_insertion_point += helpers_.lines.size();
   }
+
+  return true;
+}
+
+bool GeneratorImpl::RecordExtension(const ast::Enable*) {
+  /*
+  Deal with extension node here, recording it within the generator for
+  later emition.
+  For example:
+  ```
+    if (ext->kind == ast::Enable::ExtensionKind::kF16) {
+    require_fp16_ = true;
+    }
+  ```
+  */
 
   return true;
 }
