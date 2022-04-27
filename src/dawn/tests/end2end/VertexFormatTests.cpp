@@ -51,10 +51,6 @@ class VertexFormatTest : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
-
-        // TODO(crbug.com/dawn/259): Failing because of a SPIRV-Cross issue.
-        DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
-
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
     }
 
