@@ -584,6 +584,22 @@ class Builder {
   uint32_t GenerateConstantVectorSplatIfNeeded(const sem::Vector* type,
                                                uint32_t value_id);
 
+  /// Registers the semantic variable to the given SPIR-V ID
+  /// @param var the semantic variable
+  /// @param id the generated SPIR-V identifier for the variable
+  void RegisterVariable(const sem::Variable* var, uint32_t id);
+
+  /// Looks up the SPIR-V ID for the variable, which must have been registered
+  /// with a call to RegisterVariable()
+  /// @returns the SPIR-V ID, or 0 if the variable was not found
+  uint32_t LookupVariableID(const sem::Variable* var);
+
+  /// Pushes a new scope
+  void PushScope();
+
+  /// Pops the top-most scope
+  void PopScope();
+
   ProgramBuilder builder_;
   std::string error_;
   uint32_t next_id_ = 1;
@@ -599,18 +615,23 @@ class Builder {
   InstructionList annotations_;
   std::vector<Function> functions_;
 
+  // Scope holds per-block information
+  struct Scope {
+    std::unordered_map<OperandListKey, uint32_t> type_ctor_to_id_;
+  };
+
+  std::unordered_map<const sem::Variable*, uint32_t> var_to_id_;
+  std::unordered_map<uint32_t, const sem::Variable*> id_to_var_;
   std::unordered_map<std::string, uint32_t> import_name_to_id_;
   std::unordered_map<Symbol, uint32_t> func_symbol_to_id_;
   std::unordered_map<sem::CallTargetSignature, uint32_t> func_sig_to_id_;
   std::unordered_map<const sem::Type*, uint32_t> type_to_id_;
   std::unordered_map<ScalarConstant, uint32_t> const_to_id_;
-  std::unordered_map<OperandListKey, uint32_t> type_constructor_to_id_;
   std::unordered_map<const sem::Type*, uint32_t> const_null_to_id_;
   std::unordered_map<uint64_t, uint32_t> const_splat_to_id_;
   std::unordered_map<const sem::Type*, uint32_t>
       texture_type_to_sampled_image_type_id_;
-  ScopeStack<uint32_t> scope_stack_;
-  std::unordered_map<uint32_t, const ast::Variable*> spirv_id_to_variable_;
+  std::vector<Scope> scope_stack_;
   std::vector<uint32_t> merge_stack_;
   std::vector<uint32_t> continue_stack_;
   std::unordered_set<uint32_t> capability_set_;

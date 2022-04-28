@@ -245,7 +245,7 @@ Builder::AccessorInfo::~AccessorInfo() {}
 
 Builder::Builder(const Program* program, bool zero_initialize_workgroup_memory)
     : builder_(ProgramBuilder::Wrap(program)),
-      scope_stack_({}),
+      scope_stack_{Scope{}},
       zero_initialize_workgroup_memory_(zero_initialize_workgroup_memory) {}
 
 Builder::~Builder() = default;
@@ -277,6 +277,30 @@ bool Builder::Build() {
   }
 
   return true;
+}
+
+void Builder::RegisterVariable(const sem::Variable* var, uint32_t id) {
+  var_to_id_.emplace(var, id);
+  id_to_var_.emplace(id, var);
+}
+
+uint32_t Builder::LookupVariableID(const sem::Variable* var) {
+  auto it = var_to_id_.find(var);
+  if (it == var_to_id_.end()) {
+    error_ = "unable to find ID for variable: " +
+             builder_.Symbols().NameFor(var->Declaration()->symbol);
+    return 0;
+  }
+  return it->second;
+}
+
+void Builder::PushScope() {
+  // Push a new scope, by copying the top-most stack
+  scope_stack_.push_back(scope_stack_.back());
+}
+
+void Builder::PopScope() {
+  scope_stack_.pop_back();
 }
 
 Operand Builder::result_op() {
@@ -441,7 +465,7 @@ bool Builder::GenerateEntryPoint(const ast::Function* func, uint32_t id) {
       continue;
     }
 
-    uint32_t var_id = scope_stack_.Get(var->Declaration()->symbol);
+    uint32_t var_id = LookupVariableID(var);
     if (var_id == 0) {
       error_ = "unable to find ID for global variable: " +
                builder_.Symbols().NameFor(var->Declaration()->symbol);
@@ -588,8 +612,8 @@ bool Builder::GenerateFunction(const ast::Function* func_ast) {
     return false;
   }
 
-  scope_stack_.Push();
-  TINT_DEFER(scope_stack_.Pop());
+  PushScope();
+  TINT_DEFER(PopScope());
 
   auto definition_inst = Instruction{
       spv::Op::OpFunction,
@@ -612,7 +636,7 @@ bool Builder::GenerateFunction(const ast::Function* func_ast) {
     params.push_back(Instruction{spv::Op::OpFunctionParameter,
                                  {Operand::Int(param_type_id), param_op}});
 
-    scope_stack_.Set(param->Declaration()->symbol, param_id);
+    RegisterVariable(param, param_id);
   }
 
   push_function(Function{definition_inst, result_op(), std::move(params)});
@@ -680,20 +704,21 @@ bool Builder::GenerateFunctionVariable(const ast::Variable* var) {
     }
   }
 
+  auto* sem = builder_.Sem().Get(var);
+
   if (var->is_const) {
     if (!var->constructor) {
       error_ = "missing constructor for constant";
       return false;
     }
-    scope_stack_.Set(var->symbol, init_id);
-    spirv_id_to_variable_[init_id] = var;
+    RegisterVariable(sem, init_id);
     return true;
   }
 
   auto result = result_op();
   auto var_id = result.to_i();
   auto sc = ast::StorageClass::kFunction;
-  auto* type = builder_.Sem().Get(var)->Type();
+  auto* type = sem->Type();
   auto type_id = GenerateTypeIfNeeded(type);
   if (type_id == 0) {
     return false;
@@ -719,8 +744,7 @@ bool Builder::GenerateFunctionVariable(const ast::Variable* var) {
     }
   }
 
-  scope_stack_.Set(var->symbol, var_id);
-  spirv_id_to_variable_[var_id] = var;
+  RegisterVariable(sem, var_id);
 
   return true;
 }
@@ -775,8 +799,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
                {Operand::Int(init_id),
                 Operand::String(builder_.Symbols().NameFor(var->symbol))});
 
-    scope_stack_.Set(var->symbol, init_id);
-    spirv_id_to_variable_[init_id] = var;
+    RegisterVariable(sem, init_id);
     return true;
   }
 
@@ -898,8 +921,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
     }
   }
 
-  scope_stack_.Set(var->symbol, var_id);
-  spirv_id_to_variable_[var_id] = var;
+  RegisterVariable(sem, var_id);
   return true;
 }
 
@@ -1174,12 +1196,13 @@ uint32_t Builder::GenerateAccessorExpression(const ast::Expression* expr) {
 
 uint32_t Builder::GenerateIdentifierExpression(
     const ast::IdentifierExpression* expr) {
-  uint32_t val = scope_stack_.Get(expr->symbol);
-  if (val == 0) {
-    error_ = "unable to find variable with identifier: " +
-             builder_.Symbols().NameFor(expr->symbol);
+  auto* sem = builder_.Sem().Get(expr);
+  if (auto* user = sem->As<sem::VariableUser>()) {
+    return LookupVariableID(user->Variable());
   }
-  return val;
+  error_ = "identifier '" + builder_.Symbols().NameFor(expr->symbol) +
+           "' does not resolve to a variable";
+  return 0;
 }
 
 uint32_t Builder::GenerateExpressionWithLoadIfNeeded(
@@ -1479,8 +1502,12 @@ uint32_t Builder::GenerateTypeConstructorOrConversion(
     }
   }
 
+  auto& stack = (result_is_spec_composite || result_is_constant_composite)
+                    ? scope_stack_[0]       // Global scope
+                    : scope_stack_.back();  // Lexical scope
+
   return utils::GetOrCreate(
-      type_constructor_to_id_, OperandListKey{ops}, [&]() -> uint32_t {
+      stack.type_ctor_to_id_, OperandListKey{ops}, [&]() -> uint32_t {
         auto result = result_op();
         ops[kOpsResultIdx] = result;
 
@@ -2193,8 +2220,8 @@ uint32_t Builder::GenerateBinaryExpression(const ast::BinaryExpression* expr) {
 }
 
 bool Builder::GenerateBlockStatement(const ast::BlockStatement* stmt) {
-  scope_stack_.Push();
-  TINT_DEFER(scope_stack_.Pop());
+  PushScope();
+  TINT_DEFER(PopScope());
   return GenerateBlockStatementWithoutScoping(stmt);
 }
 
@@ -3653,8 +3680,8 @@ bool Builder::GenerateLoopStatement(const ast::LoopStatement* stmt) {
   // We need variables from the body to be visible in the continuing block, so
   // manage scope outside of GenerateBlockStatement.
   {
-    scope_stack_.Push();
-    TINT_DEFER(scope_stack_.Pop());
+    PushScope();
+    TINT_DEFER(PopScope());
 
     if (!GenerateBlockStatementWithoutScoping(stmt->body)) {
       return false;

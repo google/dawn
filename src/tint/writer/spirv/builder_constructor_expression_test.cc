@@ -1850,5 +1850,99 @@ TEST_F(SpvBuilderConstructorTest,
   EXPECT_FALSE(b.has_error());
 }
 
+TEST_F(SpvBuilderConstructorTest, ConstantCompositeScoping) {
+  // if (true) {
+  //    let x = vec3<f32>(1.0, 2.0, 3.0);
+  // }
+  // let y = vec3<f32>(1.0, 2.0, 3.0); // Reuses the ID 'x'
+
+  WrapInFunction(
+      If(true, Block(Decl(Let("x", nullptr, vec3<f32>(1.f, 2.f, 3.f))))),
+      Decl(Let("y", nullptr, vec3<f32>(1.f, 2.f, 3.f))));
+
+  spirv::Builder& b = SanitizeAndBuild();
+  ASSERT_TRUE(b.Build());
+
+  EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
+OpMemoryModel Logical GLSL450
+OpEntryPoint GLCompute %3 "test_function"
+OpExecutionMode %3 LocalSize 1 1 1
+OpName %3 "test_function"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%5 = OpTypeBool
+%6 = OpConstantTrue %5
+%10 = OpTypeFloat 32
+%9 = OpTypeVector %10 3
+%11 = OpConstant %10 1
+%12 = OpConstant %10 2
+%13 = OpConstant %10 3
+%14 = OpConstantComposite %9 %11 %12 %13
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+OpSelectionMerge %7 None
+OpBranchConditional %6 %8 %7
+%8 = OpLabel
+OpBranch %7
+%7 = OpLabel
+OpReturn
+OpFunctionEnd
+)");
+  Validate(b);
+}
+
+// TODO(crbug.com/tint/1155) Implement when overrides are fully implemented.
+// TEST_F(SpvBuilderConstructorTest, SpecConstantCompositeScoping)
+
+TEST_F(SpvBuilderConstructorTest, CompositeConstructScoping) {
+  // var one = 1.0;
+  // if (true) {
+  //    let x = vec3<f32>(one, 2.0, 3.0);
+  // }
+  // let y = vec3<f32>(one, 2.0, 3.0); // Mustn't reuse the ID 'x'
+
+  WrapInFunction(
+      Decl(Var("one", nullptr, Expr(1.f))),
+      If(true, Block(Decl(Let("x", nullptr, vec3<f32>("one", 2.f, 3.f))))),
+      Decl(Let("y", nullptr, vec3<f32>("one", 2.f, 3.f))));
+
+  spirv::Builder& b = SanitizeAndBuild();
+  ASSERT_TRUE(b.Build());
+
+  EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
+OpMemoryModel Logical GLSL450
+OpEntryPoint GLCompute %3 "test_function"
+OpExecutionMode %3 LocalSize 1 1 1
+OpName %3 "test_function"
+OpName %7 "one"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%5 = OpTypeFloat 32
+%6 = OpConstant %5 1
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
+%10 = OpTypeBool
+%11 = OpConstantTrue %10
+%14 = OpTypeVector %5 3
+%16 = OpConstant %5 2
+%17 = OpConstant %5 3
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%7 = OpVariable %8 Function %9
+OpStore %7 %6
+OpSelectionMerge %12 None
+OpBranchConditional %11 %13 %12
+%13 = OpLabel
+%15 = OpLoad %5 %7
+%18 = OpCompositeConstruct %14 %15 %16 %17
+OpBranch %12
+%12 = OpLabel
+%19 = OpLoad %5 %7
+%20 = OpCompositeConstruct %14 %19 %16 %17
+OpReturn
+OpFunctionEnd
+)");
+  Validate(b);
+}
 }  // namespace
 }  // namespace tint::writer::spirv
