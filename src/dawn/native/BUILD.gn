@@ -19,15 +19,6 @@ import("${dawn_root}/generator/dawn_generator.gni")
 import("${dawn_root}/scripts/dawn_component.gni")
 import("${dawn_root}/scripts/dawn_features.gni")
 
-# Import mac_deployment_target
-if (is_mac) {
-  if (dawn_has_build) {
-    import("//build/config/mac/mac_sdk.gni")
-  } else {
-    mac_deployment_target = "10.11.0"
-  }
-}
-
 # The VVLs are an optional dependency, only use it if the path has been set.
 enable_vulkan_validation_layers = dawn_enable_vulkan_validation_layers &&
                                   dawn_vulkan_validation_layers_dir != ""
@@ -66,20 +57,6 @@ group("abseil") {
 
 config("internal") {
   configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
-
-  # Suppress warnings that Metal isn't in the deployment target of Chrome:
-  # initialization of the Metal backend is behind a IsMetalSupported check so
-  # Dawn won't call Metal functions on macOS 10.10.
-  # At the time this is written Chromium supports 10.10.0 and above, so if we
-  # aren't on 10.11 it means we are on 10.11 and above, and Metal is available.
-  # Skipping this check on 10.11 and above is important as it allows getting
-  # proper compilation warning when using 10.12 and above feature for example.
-  # TODO(crbug.com/1004024): Consider using API_AVAILABLE annotations on all
-  # metal code in dawn once crbug.com/1004024 is sorted out if Chromium still
-  # supports 10.10 then.
-  if (is_mac && mac_deployment_target == "10.10.0") {
-    cflags_objcc = [ "-Wno-unguarded-availability" ]
-  }
 }
 
 config("weak_framework") {
