@@ -53,6 +53,10 @@ namespace dawn::native {
         mDebugGroups.push_back(std::move(label));
     }
 
+    void ErrorData::AppendBackendMessage(std::string message) {
+        mBackendMessages.push_back(std::move(message));
+    }
+
     InternalErrorType ErrorData::GetType() const {
         return mType;
     }
@@ -73,6 +77,10 @@ namespace dawn::native {
         return mDebugGroups;
     }
 
+    const std::vector<std::string>& ErrorData::GetBackendMessages() const {
+        return mBackendMessages;
+    }
+
     std::string ErrorData::GetFormattedMessage() const {
         std::ostringstream ss;
         ss << mMessage << "\n";
@@ -83,7 +91,7 @@ namespace dawn::native {
             }
         }
 
-        // For non-validation errors, or erros that lack a context include the
+        // For non-validation errors, or errors that lack a context include the
         // stack trace for debugging purposes.
         if (mContexts.empty() || mType != InternalErrorType::Validation) {
             for (const auto& callsite : mBacktrace) {
@@ -96,6 +104,13 @@ namespace dawn::native {
             ss << "\nDebug group stack:\n";
             for (auto label : mDebugGroups) {
                 ss << " > \"" << label << "\"\n";
+            }
+        }
+
+        if (!mBackendMessages.empty()) {
+            ss << "\nBackend messages:\n";
+            for (auto message : mBackendMessages) {
+                ss << " * " << message << "\n";
             }
         }
 

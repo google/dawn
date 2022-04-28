@@ -380,6 +380,9 @@ namespace dawn::native {
         void APISetLabel(const char* label);
         void APIDestroy();
 
+        virtual void AppendDebugLayerMessages(ErrorData* error) {
+        }
+
       protected:
         // Constructor used only for mocking and testing.
         DeviceBase();

@@ -48,12 +48,14 @@ namespace dawn::native {
         void AppendBacktrace(const char* file, const char* function, int line);
         void AppendContext(std::string context);
         void AppendDebugGroup(std::string label);
+        void AppendBackendMessage(std::string message);
 
         InternalErrorType GetType() const;
         const std::string& GetMessage() const;
         const std::vector<BacktraceRecord>& GetBacktrace() const;
         const std::vector<std::string>& GetContexts() const;
         const std::vector<std::string>& GetDebugGroups() const;
+        const std::vector<std::string>& GetBackendMessages() const;
 
         std::string GetFormattedMessage() const;
 
@@ -63,6 +65,7 @@ namespace dawn::native {
         std::vector<BacktraceRecord> mBacktrace;
         std::vector<std::string> mContexts;
         std::vector<std::string> mDebugGroups;
+        std::vector<std::string> mBackendMessages;
     };
 
 }  // namespace dawn::native

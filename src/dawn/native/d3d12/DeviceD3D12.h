@@ -202,6 +202,7 @@ namespace dawn::native::d3d12 {
         MaybeError WaitForIdleForDestruction() override;
 
         MaybeError CheckDebugLayerAndGenerateErrors();
+        void AppendDebugLayerMessages(ErrorData* error) override;
 
         MaybeError ApplyUseDxcToggle();
 

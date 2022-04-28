@@ -497,6 +497,7 @@ namespace dawn::native {
 
     void DeviceBase::ConsumeError(std::unique_ptr<ErrorData> error) {
         ASSERT(error != nullptr);
+        AppendDebugLayerMessages(error.get());
         HandleError(error->GetType(), error->GetFormattedMessage().c_str());
     }
 
