@@ -15,8 +15,11 @@
 #ifndef SRC_TINT_WRITER_SPIRV_OPERAND_H_
 #define SRC_TINT_WRITER_SPIRV_OPERAND_H_
 
+#include <cstring>
 #include <string>
 #include <vector>
+
+#include "src/tint/utils/hash.h"
 
 namespace tint::writer::spirv {
 
@@ -53,16 +56,29 @@ class Operand {
   /// @returns a copy of this operand
   Operand& operator=(const Operand& b) = default;
 
-  /// Sets the float value
-  /// @param val the value to set
-  void set_float(float val) { float_val_ = val; }
-  /// Sets the int value
-  /// @param val the value to set
-  void set_int(uint32_t val) { int_val_ = val; }
-  /// Sets the string value
-  /// @param val the value to set
-  void set_string(const std::string& val) { str_val_ = val; }
+  /// Equality operator
+  /// @param other the RHS of the operator
+  /// @returns true if this operand is equal to other
+  bool operator==(const Operand& other) const {
+    if (kind_ == other.kind_) {
+      switch (kind_) {
+        case tint::writer::spirv::Operand::Kind::kFloat:
+          // Use memcmp to work around:
+          // error: comparing floating point with == or != is unsafe
+          // [-Werror,-Wfloat-equal]
+          return memcmp(&float_val_, &other.float_val_, sizeof(float_val_)) ==
+                 0;
+        case tint::writer::spirv::Operand::Kind::kInt:
+          return int_val_ == other.int_val_;
+        case tint::writer::spirv::Operand::Kind::kString:
+          return str_val_ == other.str_val_;
+      }
+    }
+    return false;
+  }
 
+  /// @returns the kind of the operand
+  Kind GetKind() const { return kind_; }
   /// @returns true if this is a float operand
   bool IsFloat() const { return kind_ == Kind::kFloat; }
   /// @returns true if this is an integer operand
@@ -90,6 +106,30 @@ class Operand {
 /// A list of operands
 using OperandList = std::vector<Operand>;
 
+using OperandListKey = utils::UnorderedKeyWrapper<OperandList>;
+
 }  // namespace tint::writer::spirv
 
+namespace std {
+
+/// Custom std::hash specialization for tint::writer::spirv::Operand
+template <>
+class hash<tint::writer::spirv::Operand> {
+ public:
+  /// @param o the Operand
+  /// @return the hash value
+  inline std::size_t operator()(const tint::writer::spirv::Operand& o) const {
+    switch (o.GetKind()) {
+      case tint::writer::spirv::Operand::Kind::kFloat:
+        return tint::utils::Hash(o.to_f());
+      case tint::writer::spirv::Operand::Kind::kInt:
+        return tint::utils::Hash(o.to_i());
+      case tint::writer::spirv::Operand::Kind::kString:
+        return tint::utils::Hash(o.to_s());
+    }
+    return 0;
+  }
+};
+
+}  // namespace std
 #endif  // SRC_TINT_WRITER_SPIRV_OPERAND_H_

@@ -15,6 +15,7 @@
 #include "src/tint/utils/hash.h"
 
 #include <string>
+#include <unordered_map>
 
 #include "gtest/gtest.h"
 
@@ -41,6 +42,31 @@ TEST(HashTests, Vector) {
             Hash(std::vector<int>({1, 2, 4})));
   EXPECT_NE(Hash(std::vector<int>({1, 2, 3})),
             Hash(std::vector<int>({1, 2, 3, 4})));
+}
+
+TEST(HashTests, UnorderedKeyWrapper) {
+  using W = UnorderedKeyWrapper<std::vector<int>>;
+
+  std::unordered_map<W, int> m;
+
+  m.emplace(W{{1, 2}}, -1);
+  EXPECT_EQ(m.size(), 1u);
+  EXPECT_EQ(m[W({1, 2})], -1);
+
+  m.emplace(W{{3, 2}}, 1);
+  EXPECT_EQ(m.size(), 2u);
+  EXPECT_EQ(m[W({3, 2})], 1);
+  EXPECT_EQ(m[W({1, 2})], -1);
+
+  m.emplace(W{{100}}, 100);
+  EXPECT_EQ(m.size(), 3u);
+  EXPECT_EQ(m[W({100})], 100);
+  EXPECT_EQ(m[W({3, 2})], 1);
+  EXPECT_EQ(m[W({1, 2})], -1);
+
+  // Reversed vector element order
+  EXPECT_EQ(m[W({2, 3})], 0);
+  EXPECT_EQ(m[W({2, 1})], 0);
 }
 
 }  // namespace

@@ -604,7 +604,7 @@ class Builder {
   std::unordered_map<sem::CallTargetSignature, uint32_t> func_sig_to_id_;
   std::unordered_map<const sem::Type*, uint32_t> type_to_id_;
   std::unordered_map<ScalarConstant, uint32_t> const_to_id_;
-  std::unordered_map<std::string, uint32_t> type_constructor_to_id_;
+  std::unordered_map<OperandListKey, uint32_t> type_constructor_to_id_;
   std::unordered_map<const sem::Type*, uint32_t> const_null_to_id_;
   std::unordered_map<uint64_t, uint32_t> const_splat_to_id_;
   std::unordered_map<const sem::Type*, uint32_t>

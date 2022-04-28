@@ -1346,9 +1346,6 @@ uint32_t Builder::GenerateTypeConstructorOrConversion(
     return GenerateConstantNullIfNeeded(result_type->UnwrapRef());
   }
 
-  std::ostringstream out;
-  out << "__const_" << result_type->FriendlyName(builder_.Symbols()) << "_";
-
   result_type = result_type->UnwrapRef();
   bool constructor_is_const = IsConstructorConst(call->Declaration());
   if (has_error()) {
@@ -1386,6 +1383,12 @@ uint32_t Builder::GenerateTypeConstructorOrConversion(
   }
 
   OperandList ops;
+  static constexpr size_t kOpsResultIdx = 1;
+  static constexpr size_t kOpsFirstValueIdx = 2;
+  ops.reserve(8);
+  ops.push_back(Operand::Int(type_id));
+  ops.push_back(Operand::Int(0));  // Placeholder for the result ID
+
   for (auto* e : args) {
     uint32_t id = 0;
     id = GenerateExpressionWithLoadIfNeeded(e);
@@ -1399,8 +1402,6 @@ uint32_t Builder::GenerateTypeConstructorOrConversion(
     // value type is a correctly sized vector so we can just use it directly.
     if (result_type == value_type || result_type->Is<sem::Matrix>() ||
         result_type->Is<sem::Array>() || result_type->Is<sem::Struct>()) {
-      out << "_" << id;
-
       ops.push_back(Operand::Int(id));
       continue;
     }
@@ -1410,7 +1411,6 @@ uint32_t Builder::GenerateTypeConstructorOrConversion(
     if (value_type->is_scalar() && result_type->is_scalar()) {
       id = GenerateCastOrCopyOrPassthrough(result_type, args[0]->Declaration(),
                                            global_var);
-      out << "_" << id;
       ops.push_back(Operand::Int(id));
       continue;
     }
@@ -1461,7 +1461,6 @@ uint32_t Builder::GenerateTypeConstructorOrConversion(
           result_is_spec_composite = true;
         }
 
-        out << "_" << extract_id;
         ops.push_back(Operand::Int(extract_id));
       }
     } else {
@@ -1476,33 +1475,27 @@ uint32_t Builder::GenerateTypeConstructorOrConversion(
       args[0]->Type()->UnwrapRef()->is_scalar()) {
     size_t vec_size = init_result_type->As<sem::Vector>()->Width();
     for (size_t i = 0; i < (vec_size - 1); ++i) {
-      ops.push_back(ops[0]);
+      ops.push_back(ops[kOpsFirstValueIdx]);
     }
   }
 
-  auto str = out.str();
-  auto val = type_constructor_to_id_.find(str);
-  if (val != type_constructor_to_id_.end()) {
-    return val->second;
-  }
+  return utils::GetOrCreate(
+      type_constructor_to_id_, OperandListKey{ops}, [&]() -> uint32_t {
+        auto result = result_op();
+        ops[kOpsResultIdx] = result;
 
-  auto result = result_op();
-  ops.insert(ops.begin(), result);
-  ops.insert(ops.begin(), Operand::Int(type_id));
+        if (result_is_spec_composite) {
+          push_type(spv::Op::OpSpecConstantComposite, ops);
+        } else if (result_is_constant_composite) {
+          push_type(spv::Op::OpConstantComposite, ops);
+        } else {
+          if (!push_function_inst(spv::Op::OpCompositeConstruct, ops)) {
+            return 0;
+          }
+        }
 
-  type_constructor_to_id_[str] = result.to_i();
-
-  if (result_is_spec_composite) {
-    push_type(spv::Op::OpSpecConstantComposite, ops);
-  } else if (result_is_constant_composite) {
-    push_type(spv::Op::OpConstantComposite, ops);
-  } else {
-    if (!push_function_inst(spv::Op::OpCompositeConstruct, ops)) {
-      return 0;
-    }
-  }
-
-  return result.to_i();
+        return result.to_i();
+      });
 }
 
 uint32_t Builder::GenerateCastOrCopyOrPassthrough(

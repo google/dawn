@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 73
+; Bound: 72
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -69,12 +69,11 @@
 %_ptr_Function_v3uint = OpTypePointer Function %v3uint
          %61 = OpConstantNull %v3uint
          %63 = OpConstantComposite %v3uint %uint_1 %uint_1 %uint_1
-         %65 = OpConstantComposite %v3bool %true %true %true
      %v4bool = OpTypeVector %bool 4
       %false = OpConstantFalse %bool
-         %69 = OpConstantComposite %v4bool %true %false %true %false
+         %68 = OpConstantComposite %v4bool %true %false %true %false
 %_ptr_Function_v4bool = OpTypePointer Function %v4bool
-         %72 = OpConstantNull %v4bool
+         %71 = OpConstantNull %v4bool
 %constant_with_non_constant = OpFunction %void None %1
           %4 = OpLabel
           %a = OpVariable %_ptr_Function_float Function %6
@@ -107,7 +106,7 @@
  %v3u32_var2 = OpVariable %_ptr_Function_v3uint Function %61
  %v3u32_var3 = OpVariable %_ptr_Function_v3uint Function %61
 %v3bool_var4 = OpVariable %_ptr_Function_v3bool Function %45
-%v4bool_var5 = OpVariable %_ptr_Function_v4bool Function %72
+%v4bool_var5 = OpVariable %_ptr_Function_v4bool Function %71
                OpStore %bool_var1 %true
                OpStore %bool_var2 %true
                OpStore %bool_var3 %true
@@ -127,7 +126,7 @@
                OpStore %v3u32_var1 %58
                OpStore %v3u32_var2 %58
                OpStore %v3u32_var3 %63
-               OpStore %v3bool_var4 %65
-               OpStore %v4bool_var5 %69
+               OpStore %v3bool_var4 %42
+               OpStore %v4bool_var5 %68
                OpReturn
                OpFunctionEnd

@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <cstdio>
 #include <functional>
+#include <utility>
 #include <vector>
 
 namespace tint::utils {
@@ -76,6 +77,53 @@ size_t Hash(const ARGS&... args) {
   return hash;
 }
 
+/// Wrapper for a hashable type enabling the wrapped value to be used as a key
+/// for an unordered_map or unordered_set.
+template <typename T>
+struct UnorderedKeyWrapper {
+  /// The wrapped value
+  const T value;
+  /// The hash of value
+  const size_t hash;
+
+  /// Constructor
+  /// @param v the value to wrap
+  explicit UnorderedKeyWrapper(const T& v) : value(v), hash(Hash(v)) {}
+
+  /// Move constructor
+  /// @param v the value to wrap
+  explicit UnorderedKeyWrapper(T&& v)
+      : value(std::move(v)), hash(Hash(value)) {}
+
+  /// @returns true if this wrapper comes before other
+  /// @param other the RHS of the operator
+  bool operator<(const UnorderedKeyWrapper& other) const {
+    return hash < other.hash;
+  }
+
+  /// @returns true if this wrapped value is equal to the other wrapped value
+  /// @param other the RHS of the operator
+  bool operator==(const UnorderedKeyWrapper& other) const {
+    return value == other.value;
+  }
+};
+
 }  // namespace tint::utils
+
+namespace std {
+
+/// Custom std::hash specialization for tint::utils::UnorderedKeyWrapper
+template <typename T>
+class hash<tint::utils::UnorderedKeyWrapper<T>> {
+ public:
+  /// @param w the UnorderedKeyWrapper
+  /// @return the hash value
+  inline std::size_t operator()(
+      const tint::utils::UnorderedKeyWrapper<T>& w) const {
+    return w.hash;
+  }
+};
+
+}  // namespace std
 
 #endif  // SRC_TINT_UTILS_HASH_H_

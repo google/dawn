@@ -19,21 +19,21 @@ namespace tint::writer::spirv {
 // static
 Operand Operand::Float(float val) {
   Operand o(Kind::kFloat);
-  o.set_float(val);
+  o.float_val_ = val;
   return o;
 }
 
 // static
 Operand Operand::Int(uint32_t val) {
   Operand o(Kind::kInt);
-  o.set_int(val);
+  o.int_val_ = val;
   return o;
 }
 
 // static
 Operand Operand::String(const std::string& val) {
   Operand o(Kind::kString);
-  o.set_string(val);
+  o.str_val_ = val;
   return o;
 }
 
