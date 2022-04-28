@@ -2496,7 +2496,7 @@ bool GeneratorImpl::EmitStorageClass(std::ostream& out, ast::StorageClass sc) {
   switch (sc) {
     case ast::StorageClass::kFunction:
     case ast::StorageClass::kPrivate:
-    case ast::StorageClass::kUniformConstant:
+    case ast::StorageClass::kHandle:
       out << "thread";
       return true;
     case ast::StorageClass::kWorkgroup:
@@ -2804,7 +2804,7 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var) {
 
   switch (var->StorageClass()) {
     case ast::StorageClass::kFunction:
-    case ast::StorageClass::kUniformConstant:
+    case ast::StorageClass::kHandle:
     case ast::StorageClass::kNone:
       break;
     case ast::StorageClass::kPrivate:

@@ -562,7 +562,7 @@ bool Validator::GlobalVariable(
   switch (var->StorageClass()) {
     case ast::StorageClass::kUniform:
     case ast::StorageClass::kStorage:
-    case ast::StorageClass::kUniformConstant: {
+    case ast::StorageClass::kHandle: {
       // https://gpuweb.github.io/gpuweb/wgsl/#resource-interface
       // Each resource variable must be declared with both group and binding
       // attributes.

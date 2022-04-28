@@ -30,8 +30,8 @@ const char* ToString(StorageClass sc) {
       return "uniform";
     case StorageClass::kWorkgroup:
       return "workgroup";
-    case StorageClass::kUniformConstant:
-      return "uniform_constant";
+    case StorageClass::kHandle:
+      return "handle";
     case StorageClass::kStorage:
       return "storage";
     case StorageClass::kPrivate:

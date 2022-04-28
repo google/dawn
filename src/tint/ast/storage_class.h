@@ -27,7 +27,7 @@ enum class StorageClass {
   kOutput,
   kUniform,
   kWorkgroup,
-  kUniformConstant,
+  kHandle,
   kStorage,
   kPrivate,
   kFunction

@@ -365,7 +365,7 @@ sem::Variable* Resolver::Variable(const ast::Variable* var,
       // If the store type is a texture type or a sampler type, then the
       // variable declaration must not have a storage class attribute. The
       // storage class will always be handle.
-      storage_class = ast::StorageClass::kUniformConstant;
+      storage_class = ast::StorageClass::kHandle;
     }
   }
 
@@ -472,7 +472,7 @@ ast::Access Resolver::DefaultAccessForStorageClass(
   switch (storage_class) {
     case ast::StorageClass::kStorage:
     case ast::StorageClass::kUniform:
-    case ast::StorageClass::kUniformConstant:
+    case ast::StorageClass::kHandle:
       return ast::Access::kRead;
     default:
       break;

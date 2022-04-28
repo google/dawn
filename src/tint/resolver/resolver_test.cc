@@ -1765,8 +1765,7 @@ TEST_F(ResolverTest, StorageClass_SetForSampler) {
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-  EXPECT_EQ(Sem().Get(var)->StorageClass(),
-            ast::StorageClass::kUniformConstant);
+  EXPECT_EQ(Sem().Get(var)->StorageClass(), ast::StorageClass::kHandle);
 }
 
 TEST_F(ResolverTest, StorageClass_SetForTexture) {
@@ -1779,8 +1778,7 @@ TEST_F(ResolverTest, StorageClass_SetForTexture) {
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-  EXPECT_EQ(Sem().Get(var)->StorageClass(),
-            ast::StorageClass::kUniformConstant);
+  EXPECT_EQ(Sem().Get(var)->StorageClass(), ast::StorageClass::kHandle);
 }
 
 TEST_F(ResolverTest, StorageClass_DoesNotSetOnConst) {

@@ -1494,7 +1494,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
       case ast::StorageClass::kInput:
       case ast::StorageClass::kOutput:
       case ast::StorageClass::kUniform:
-      case ast::StorageClass::kUniformConstant:
+      case ast::StorageClass::kHandle:
       case ast::StorageClass::kStorage:
       case ast::StorageClass::kWorkgroup:
       case ast::StorageClass::kPrivate:
@@ -1632,7 +1632,7 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
 
   // Handle variables (textures and samplers) are always in the handle
   // storage class, so we don't mention the storage class.
-  if (sc == ast::StorageClass::kUniformConstant) {
+  if (sc == ast::StorageClass::kHandle) {
     sc = ast::StorageClass::kNone;
   }
 
@@ -2535,8 +2535,7 @@ const Pointer* ParserImpl::GetTypeForHandleVar(
   }
 
   // Form the pointer type.
-  auto* result =
-      ty_.Pointer(ast_store_type, ast::StorageClass::kUniformConstant);
+  auto* result = ty_.Pointer(ast_store_type, ast::StorageClass::kHandle);
   // Remember it for later.
   handle_type_[&var] = result;
   return result;

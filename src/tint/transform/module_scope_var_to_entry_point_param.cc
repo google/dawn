@@ -165,7 +165,7 @@ struct ModuleScopeVarToEntryPointParam::State {
         if (sc != ast::StorageClass::kPrivate &&
             sc != ast::StorageClass::kStorage &&
             sc != ast::StorageClass::kUniform &&
-            sc != ast::StorageClass::kUniformConstant &&
+            sc != ast::StorageClass::kHandle &&
             sc != ast::StorageClass::kWorkgroup) {
           TINT_ICE(Transform, ctx.dst->Diagnostics())
               << "unhandled module-scope storage class (" << sc << ")";
