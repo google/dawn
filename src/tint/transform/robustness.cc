@@ -22,7 +22,7 @@
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/expression.h"
-#include "src/tint/sem/reference_type.h"
+#include "src/tint/sem/reference.h"
 #include "src/tint/sem/statement.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Robustness);

@@ -27,9 +27,9 @@
 #include "src/tint/ast/type_name.h"
 #include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/reader/spirv/function.h"
-#include "src/tint/sem/depth_texture_type.h"
-#include "src/tint/sem/multisampled_texture_type.h"
-#include "src/tint/sem/sampled_texture_type.h"
+#include "src/tint/sem/depth_texture.h"
+#include "src/tint/sem/multisampled_texture.h"
+#include "src/tint/sem/sampled_texture.h"
 #include "src/tint/utils/unique_vector.h"
 
 namespace tint::reader::spirv {
@@ -623,7 +623,7 @@ Source ParserImpl::GetSourceForInst(
   if (where == inst_source_.end()) {
     return {};
   }
-  return Source{where->second };
+  return Source{where->second};
 }
 
 bool ParserImpl::ParseInternalModuleExceptFunctions() {

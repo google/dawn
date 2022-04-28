@@ -18,12 +18,12 @@
 #include <string>
 
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/atomic_type.h"
+#include "src/tint/sem/atomic.h"
 #include "src/tint/sem/block_statement.h"
-#include "src/tint/sem/depth_multisampled_texture_type.h"
+#include "src/tint/sem/depth_multisampled_texture.h"
 #include "src/tint/sem/for_loop_statement.h"
-#include "src/tint/sem/reference_type.h"
-#include "src/tint/sem/sampler_type.h"
+#include "src/tint/sem/reference.h"
+#include "src/tint/sem/sampler.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Transform);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Data);

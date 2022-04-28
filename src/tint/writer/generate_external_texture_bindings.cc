@@ -21,7 +21,7 @@
 #include "src/tint/ast/external_texture.h"
 #include "src/tint/ast/module.h"
 #include "src/tint/program.h"
-#include "src/tint/sem/external_texture_type.h"
+#include "src/tint/sem/external_texture.h"
 #include "src/tint/sem/variable.h"
 
 namespace tint::writer {

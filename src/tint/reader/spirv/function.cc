@@ -34,8 +34,8 @@
 #include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/sem/builtin_type.h"
-#include "src/tint/sem/depth_texture_type.h"
-#include "src/tint/sem/sampled_texture_type.h"
+#include "src/tint/sem/depth_texture.h"
+#include "src/tint/sem/sampled_texture.h"
 
 // Terms:
 //    CFG: the control flow graph of the function, where basic blocks are the

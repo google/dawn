@@ -20,7 +20,7 @@
 #include "src/tint/ast/pipeline_stage.h"
 #include "src/tint/ast/storage_class.h"
 #include "src/tint/reader/spirv/fail_stream.h"
-#include "src/tint/sem/storage_texture_type.h"
+#include "src/tint/sem/storage_texture.h"
 
 namespace tint::reader::spirv {
 

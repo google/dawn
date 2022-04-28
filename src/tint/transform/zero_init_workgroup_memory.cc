@@ -22,7 +22,7 @@
 
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/atomic_type.h"
+#include "src/tint/sem/atomic.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/utils/map.h"

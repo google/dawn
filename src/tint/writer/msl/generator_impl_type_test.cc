@@ -16,12 +16,12 @@
 
 #include "gmock/gmock.h"
 
-#include "src/tint/sem/depth_multisampled_texture_type.h"
-#include "src/tint/sem/depth_texture_type.h"
-#include "src/tint/sem/multisampled_texture_type.h"
-#include "src/tint/sem/sampled_texture_type.h"
-#include "src/tint/sem/sampler_type.h"
-#include "src/tint/sem/storage_texture_type.h"
+#include "src/tint/sem/depth_multisampled_texture.h"
+#include "src/tint/sem/depth_texture.h"
+#include "src/tint/sem/multisampled_texture.h"
+#include "src/tint/sem/sampled_texture.h"
+#include "src/tint/sem/sampler.h"
+#include "src/tint/sem/storage_texture.h"
 #include "src/tint/writer/msl/test_helper.h"
 
 namespace tint::writer::msl {

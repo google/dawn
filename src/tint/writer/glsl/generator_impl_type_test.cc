@@ -15,11 +15,11 @@
 #include "gmock/gmock.h"
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/sem/depth_texture_type.h"
-#include "src/tint/sem/multisampled_texture_type.h"
-#include "src/tint/sem/sampled_texture_type.h"
-#include "src/tint/sem/sampler_type.h"
-#include "src/tint/sem/storage_texture_type.h"
+#include "src/tint/sem/depth_texture.h"
+#include "src/tint/sem/multisampled_texture.h"
+#include "src/tint/sem/sampled_texture.h"
+#include "src/tint/sem/sampler.h"
+#include "src/tint/sem/storage_texture.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
 namespace tint::writer::glsl {

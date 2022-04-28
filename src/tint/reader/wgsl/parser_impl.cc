@@ -37,10 +37,10 @@
 #include "src/tint/ast/vector.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/reader/wgsl/lexer.h"
-#include "src/tint/sem/depth_texture_type.h"
-#include "src/tint/sem/external_texture_type.h"
-#include "src/tint/sem/multisampled_texture_type.h"
-#include "src/tint/sem/sampled_texture_type.h"
+#include "src/tint/sem/depth_texture.h"
+#include "src/tint/sem/external_texture.h"
+#include "src/tint/sem/multisampled_texture.h"
+#include "src/tint/sem/sampled_texture.h"
 
 namespace tint::reader::wgsl {
 namespace {
@@ -610,29 +610,29 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl(bool allow_inferred) {
                      decl->type};
 }
 
-// texture_sampler_types
-//  : sampler_type
-//  | depth_texture_type
-//  | sampled_texture_type LESS_THAN type_decl GREATER_THAN
-//  | multisampled_texture_type LESS_THAN type_decl GREATER_THAN
-//  | storage_texture_type LESS_THAN texel_format
+// texture_samplers
+//  : sampler
+//  | depth_texture
+//  | sampled_texture LESS_THAN type_decl GREATER_THAN
+//  | multisampled_texture LESS_THAN type_decl GREATER_THAN
+//  | storage_texture LESS_THAN texel_format
 //                         COMMA access GREATER_THAN
-Maybe<const ast::Type*> ParserImpl::texture_sampler_types() {
-  auto type = sampler_type();
+Maybe<const ast::Type*> ParserImpl::texture_samplers() {
+  auto type = sampler();
   if (type.matched)
     return type;
 
-  type = depth_texture_type();
+  type = depth_texture();
   if (type.matched)
     return type;
 
-  type = external_texture_type();
+  type = external_texture();
   if (type.matched)
     return type.value;
 
   auto source_range = make_source_range();
 
-  auto dim = sampled_texture_type();
+  auto dim = sampled_texture();
   if (dim.matched) {
     const char* use = "sampled texture type";
 
@@ -643,7 +643,7 @@ Maybe<const ast::Type*> ParserImpl::texture_sampler_types() {
     return builder_.ty.sampled_texture(source_range, dim.value, subtype.value);
   }
 
-  auto ms_dim = multisampled_texture_type();
+  auto ms_dim = multisampled_texture();
   if (ms_dim.matched) {
     const char* use = "multisampled texture type";
 
@@ -655,7 +655,7 @@ Maybe<const ast::Type*> ParserImpl::texture_sampler_types() {
                                             subtype.value);
   }
 
-  auto storage = storage_texture_type();
+  auto storage = storage_texture();
   if (storage.matched) {
     const char* use = "storage texture type";
     using StorageTextureInfo =
@@ -689,10 +689,10 @@ Maybe<const ast::Type*> ParserImpl::texture_sampler_types() {
   return Failure::kNoMatch;
 }
 
-// sampler_type
+// sampler
 //  : SAMPLER
 //  | SAMPLER_COMPARISON
-Maybe<const ast::Type*> ParserImpl::sampler_type() {
+Maybe<const ast::Type*> ParserImpl::sampler() {
   Source source;
   if (match(Token::Type::kSampler, &source))
     return builder_.ty.sampler(source, ast::SamplerKind::kSampler);
@@ -703,14 +703,14 @@ Maybe<const ast::Type*> ParserImpl::sampler_type() {
   return Failure::kNoMatch;
 }
 
-// sampled_texture_type
+// sampled_texture
 //  : TEXTURE_SAMPLED_1D
 //  | TEXTURE_SAMPLED_2D
 //  | TEXTURE_SAMPLED_2D_ARRAY
 //  | TEXTURE_SAMPLED_3D
 //  | TEXTURE_SAMPLED_CUBE
 //  | TEXTURE_SAMPLED_CUBE_ARRAY
-Maybe<const ast::TextureDimension> ParserImpl::sampled_texture_type() {
+Maybe<const ast::TextureDimension> ParserImpl::sampled_texture() {
   if (match(Token::Type::kTextureSampled1d))
     return ast::TextureDimension::k1d;
 
@@ -732,9 +732,9 @@ Maybe<const ast::TextureDimension> ParserImpl::sampled_texture_type() {
   return Failure::kNoMatch;
 }
 
-// external_texture_type
+// external_texture
 //  : TEXTURE_EXTERNAL
-Maybe<const ast::Type*> ParserImpl::external_texture_type() {
+Maybe<const ast::Type*> ParserImpl::external_texture() {
   Source source;
   if (match(Token::Type::kTextureExternal, &source)) {
     return builder_.ty.external_texture(source);
@@ -743,21 +743,21 @@ Maybe<const ast::Type*> ParserImpl::external_texture_type() {
   return Failure::kNoMatch;
 }
 
-// multisampled_texture_type
+// multisampled_texture
 //  : TEXTURE_MULTISAMPLED_2D
-Maybe<const ast::TextureDimension> ParserImpl::multisampled_texture_type() {
+Maybe<const ast::TextureDimension> ParserImpl::multisampled_texture() {
   if (match(Token::Type::kTextureMultisampled2d))
     return ast::TextureDimension::k2d;
 
   return Failure::kNoMatch;
 }
 
-// storage_texture_type
+// storage_texture
 //  : TEXTURE_STORAGE_1D
 //  | TEXTURE_STORAGE_2D
 //  | TEXTURE_STORAGE_2D_ARRAY
 //  | TEXTURE_STORAGE_3D
-Maybe<const ast::TextureDimension> ParserImpl::storage_texture_type() {
+Maybe<const ast::TextureDimension> ParserImpl::storage_texture() {
   if (match(Token::Type::kTextureStorage1d))
     return ast::TextureDimension::k1d;
   if (match(Token::Type::kTextureStorage2d))
@@ -770,13 +770,13 @@ Maybe<const ast::TextureDimension> ParserImpl::storage_texture_type() {
   return Failure::kNoMatch;
 }
 
-// depth_texture_type
+// depth_texture
 //  : TEXTURE_DEPTH_2D
 //  | TEXTURE_DEPTH_2D_ARRAY
 //  | TEXTURE_DEPTH_CUBE
 //  | TEXTURE_DEPTH_CUBE_ARRAY
 //  | TEXTURE_DEPTH_MULTISAMPLED_2D
-Maybe<const ast::Type*> ParserImpl::depth_texture_type() {
+Maybe<const ast::Type*> ParserImpl::depth_texture() {
   Source source;
   if (match(Token::Type::kTextureDepth2d, &source)) {
     return builder_.ty.depth_texture(source, ast::TextureDimension::k2d);
@@ -989,7 +989,7 @@ Maybe<const ast::Alias*> ParserImpl::type_alias() {
 //   | MAT4x2 LESS_THAN type_decl GREATER_THAN
 //   | MAT4x3 LESS_THAN type_decl GREATER_THAN
 //   | MAT4x4 LESS_THAN type_decl GREATER_THAN
-//   | texture_sampler_types
+//   | texture_samplers
 Maybe<const ast::Type*> ParserImpl::type_decl() {
   auto t = peek();
   Source source;
@@ -1032,7 +1032,7 @@ Maybe<const ast::Type*> ParserImpl::type_decl() {
     return expect_type_decl_matrix(t);
   }
 
-  auto texture_or_sampler = texture_sampler_types();
+  auto texture_or_sampler = texture_samplers();
   if (texture_or_sampler.errored)
     return Failure::kErrored;
   if (texture_or_sampler.matched)

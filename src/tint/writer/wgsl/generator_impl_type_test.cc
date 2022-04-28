@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/depth_texture_type.h"
-#include "src/tint/sem/multisampled_texture_type.h"
-#include "src/tint/sem/sampled_texture_type.h"
+#include "src/tint/sem/depth_texture.h"
+#include "src/tint/sem/multisampled_texture.h"
+#include "src/tint/sem/sampled_texture.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
 namespace tint::writer::wgsl {

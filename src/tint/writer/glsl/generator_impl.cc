@@ -29,18 +29,18 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/debug.h"
 #include "src/tint/sem/array.h"
-#include "src/tint/sem/atomic_type.h"
+#include "src/tint/sem/atomic.h"
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/call.h"
-#include "src/tint/sem/depth_multisampled_texture_type.h"
-#include "src/tint/sem/depth_texture_type.h"
+#include "src/tint/sem/depth_multisampled_texture.h"
+#include "src/tint/sem/depth_texture.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
-#include "src/tint/sem/multisampled_texture_type.h"
-#include "src/tint/sem/sampled_texture_type.h"
+#include "src/tint/sem/multisampled_texture.h"
+#include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/statement.h"
-#include "src/tint/sem/storage_texture_type.h"
+#include "src/tint/sem/storage_texture.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/type_constructor.h"
 #include "src/tint/sem/type_conversion.h"
@@ -2679,9 +2679,10 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     if (storage && storage->access() != ast::Access::kRead) {
       out << "writeonly ";
     }
-    auto* subtype = sampled
-                        ? sampled->type()
-                        : storage ? storage->type() : ms ? ms->type() : nullptr;
+    auto* subtype = sampled   ? sampled->type()
+                    : storage ? storage->type()
+                    : ms      ? ms->type()
+                              : nullptr;
     if (!subtype || subtype->Is<sem::F32>()) {
     } else if (subtype->Is<sem::I32>()) {
       out << "i";

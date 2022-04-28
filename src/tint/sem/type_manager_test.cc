@@ -15,8 +15,8 @@
 #include "src/tint/sem/type_manager.h"
 
 #include "gtest/gtest.h"
-#include "src/tint/sem/i32_type.h"
-#include "src/tint/sem/u32_type.h"
+#include "src/tint/sem/i32.h"
+#include "src/tint/sem/u32.h"
 
 namespace tint::sem {
 namespace {

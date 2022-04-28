@@ -14,9 +14,9 @@
 
 #include "src/tint/ast/builtin_texture_helper_test.h"
 
-#include "src/tint/sem/depth_texture_type.h"
-#include "src/tint/sem/multisampled_texture_type.h"
-#include "src/tint/sem/sampled_texture_type.h"
+#include "src/tint/sem/depth_texture.h"
+#include "src/tint/sem/multisampled_texture.h"
+#include "src/tint/sem/sampled_texture.h"
 
 namespace tint::ast::builtin::test {
 

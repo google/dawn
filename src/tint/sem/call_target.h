@@ -18,7 +18,7 @@
 #include <vector>
 
 #include "src/tint/sem/node.h"
-#include "src/tint/sem/sampler_type.h"
+#include "src/tint/sem/sampler.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/utils/hash.h"
 

@@ -266,8 +266,8 @@ set(TINT_LIB_SRCS
   scope_stack.h
   sem/array.cc
   sem/array.h
-  sem/atomic_type.cc
-  sem/atomic_type.h
+  sem/atomic.cc
+  sem/atomic.h
   sem/behavior.cc
   sem/behavior.h
   sem/binding_point.h
@@ -283,8 +283,8 @@ set(TINT_LIB_SRCS
   sem/call.h
   sem/constant.cc
   sem/constant.h
-  sem/depth_multisampled_texture_type.cc
-  sem/depth_multisampled_texture_type.h
+  sem/depth_multisampled_texture.cc
+  sem/depth_multisampled_texture.h
   sem/expression.cc
   sem/expression.h
   sem/function.cc
@@ -392,40 +392,40 @@ set(TINT_LIB_SRCS
   transform/utils/get_insertion_point.h
   transform/utils/hoist_to_decl_before.cc
   transform/utils/hoist_to_decl_before.h
-  sem/bool_type.cc
-  sem/bool_type.h
-  sem/depth_texture_type.cc
-  sem/depth_texture_type.h
-  sem/external_texture_type.cc
-  sem/external_texture_type.h
-  sem/f32_type.cc
-  sem/f32_type.h
+  sem/bool.cc
+  sem/bool.h
+  sem/depth_texture.cc
+  sem/depth_texture.h
+  sem/external_texture.cc
+  sem/external_texture.h
+  sem/f32.cc
+  sem/f32.h
   sem/for_loop_statement.cc
   sem/for_loop_statement.h
-  sem/i32_type.cc
-  sem/i32_type.h
+  sem/i32.cc
+  sem/i32.h
   sem/if_statement.cc
   sem/if_statement.h
   sem/loop_statement.cc
   sem/loop_statement.h
-  sem/matrix_type.cc
-  sem/matrix_type.h
-  sem/multisampled_texture_type.cc
-  sem/multisampled_texture_type.h
-  sem/pointer_type.cc
-  sem/pointer_type.h
-  sem/reference_type.cc
-  sem/reference_type.h
-  sem/sampled_texture_type.cc
-  sem/sampled_texture_type.h
-  sem/sampler_type.cc
-  sem/sampler_type.h
-  sem/storage_texture_type.cc
-  sem/storage_texture_type.h
+  sem/matrix.cc
+  sem/matrix.h
+  sem/multisampled_texture.cc
+  sem/multisampled_texture.h
+  sem/pointer.cc
+  sem/pointer.h
+  sem/reference.cc
+  sem/reference.h
+  sem/sampled_texture.cc
+  sem/sampled_texture.h
+  sem/sampler.cc
+  sem/sampler.h
+  sem/storage_texture.cc
+  sem/storage_texture.h
   sem/switch_statement.cc
   sem/switch_statement.h
-  sem/texture_type.cc
-  sem/texture_type.h
+  sem/texture.cc
+  sem/texture.h
   sem/type_constructor.cc
   sem/type_constructor.h
   sem/type_conversion.cc
@@ -434,12 +434,12 @@ set(TINT_LIB_SRCS
   sem/type.h
   sem/type_manager.cc
   sem/type_manager.h
-  sem/u32_type.cc
-  sem/u32_type.h
-  sem/vector_type.cc
-  sem/vector_type.h
-  sem/void_type.cc
-  sem/void_type.h
+  sem/u32.cc
+  sem/u32.h
+  sem/vector.cc
+  sem/vector.h
+  sem/void.cc
+  sem/void.h
   utils/block_allocator.h
   utils/crc32.h
   utils/enum_set.h
@@ -779,27 +779,27 @@ if(TINT_BUILD_TESTS)
     resolver/var_let_test.cc
     resolver/var_let_validation_test.cc
     scope_stack_test.cc
-    sem/atomic_type_test.cc
-    sem/bool_type_test.cc
+    sem/atomic.cc
+    sem/bool_test.cc
     sem/builtin_test.cc
-    sem/depth_multisampled_texture_type_test.cc
-    sem/depth_texture_type_test.cc
-    sem/external_texture_type_test.cc
-    sem/f32_type_test.cc
-    sem/i32_type_test.cc
-    sem/matrix_type_test.cc
-    sem/multisampled_texture_type_test.cc
-    sem/pointer_type_test.cc
-    sem/reference_type_test.cc
-    sem/sampled_texture_type_test.cc
-    sem/sampler_type_test.cc
+    sem/depth_multisampled_texture_test.cc
+    sem/depth_texture_test.cc
+    sem/external_texture_test.cc
+    sem/f32_test.cc
+    sem/i32_test.cc
+    sem/matrix_test.cc
+    sem/multisampled_texture_test.cc
+    sem/pointer_test.cc
+    sem/reference_test.cc
+    sem/sampled_texture_test.cc
+    sem/sampler_test.cc
     sem/sem_array_test.cc
     sem/sem_struct_test.cc
-    sem/storage_texture_type_test.cc
-    sem/texture_type_test.cc
+    sem/storage_texture_test.cc
+    sem/texture_test.cc
     sem/type_manager_test.cc
-    sem/u32_type_test.cc
-    sem/vector_type_test.cc
+    sem/u32_test.cc
+    sem/vector_test.cc
     source_test.cc
     symbol_table_test.cc
     symbol_test.cc
@@ -894,9 +894,9 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/parser_impl_const_literal_test.cc
       reader/wgsl/parser_impl_continue_stmt_test.cc
       reader/wgsl/parser_impl_continuing_stmt_test.cc
-      reader/wgsl/parser_impl_depth_texture_type_test.cc
+      reader/wgsl/parser_impl_depth_texture_test.cc
       reader/wgsl/parser_impl_enable_directive_test.cc
-      reader/wgsl/parser_impl_external_texture_type_test.cc
+      reader/wgsl/parser_impl_external_texture_test.cc
       reader/wgsl/parser_impl_elseif_stmt_test.cc
       reader/wgsl/parser_impl_equality_expression_test.cc
       reader/wgsl/parser_impl_error_msg_test.cc
@@ -923,14 +923,14 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/parser_impl_primary_expression_test.cc
       reader/wgsl/parser_impl_relational_expression_test.cc
       reader/wgsl/parser_impl_reserved_keyword_test.cc
-      reader/wgsl/parser_impl_sampled_texture_type_test.cc
-      reader/wgsl/parser_impl_sampler_type_test.cc
+      reader/wgsl/parser_impl_sampled_texture_test.cc
+      reader/wgsl/parser_impl_sampler_test.cc
       reader/wgsl/parser_impl_shift_expression_test.cc
       reader/wgsl/parser_impl_singular_expression_test.cc
       reader/wgsl/parser_impl_statement_test.cc
       reader/wgsl/parser_impl_statements_test.cc
       reader/wgsl/parser_impl_storage_class_test.cc
-      reader/wgsl/parser_impl_storage_texture_type_test.cc
+      reader/wgsl/parser_impl_storage_texture_test.cc
       reader/wgsl/parser_impl_struct_body_decl_test.cc
       reader/wgsl/parser_impl_struct_decl_test.cc
       reader/wgsl/parser_impl_struct_attribute_decl_test.cc
@@ -943,7 +943,7 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/parser_impl_test_helper.cc
       reader/wgsl/parser_impl_test_helper.h
       reader/wgsl/parser_impl_texel_format_test.cc
-      reader/wgsl/parser_impl_texture_sampler_types_test.cc
+      reader/wgsl/parser_impl_texture_sampler_test.cc
       reader/wgsl/parser_impl_type_alias_test.cc
       reader/wgsl/parser_impl_type_decl_test.cc
       reader/wgsl/parser_impl_unary_expression_test.cc

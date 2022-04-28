@@ -16,14 +16,14 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/sem/atomic_type.h"
-#include "src/tint/sem/depth_multisampled_texture_type.h"
-#include "src/tint/sem/depth_texture_type.h"
-#include "src/tint/sem/external_texture_type.h"
-#include "src/tint/sem/multisampled_texture_type.h"
-#include "src/tint/sem/reference_type.h"
-#include "src/tint/sem/sampled_texture_type.h"
-#include "src/tint/sem/storage_texture_type.h"
+#include "src/tint/sem/atomic.h"
+#include "src/tint/sem/depth_multisampled_texture.h"
+#include "src/tint/sem/depth_texture.h"
+#include "src/tint/sem/external_texture.h"
+#include "src/tint/sem/multisampled_texture.h"
+#include "src/tint/sem/reference.h"
+#include "src/tint/sem/sampled_texture.h"
+#include "src/tint/sem/storage_texture.h"
 
 namespace tint {
 namespace {

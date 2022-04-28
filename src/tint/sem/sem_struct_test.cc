@@ -14,7 +14,7 @@
 
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/test_helper.h"
-#include "src/tint/sem/texture_type.h"
+#include "src/tint/sem/texture.h"
 
 namespace tint::sem {
 namespace {

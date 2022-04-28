@@ -17,7 +17,7 @@
 #include "src/tint/ast/matrix.h"
 #include "src/tint/ast/sampler.h"
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
-#include "src/tint/sem/sampled_texture_type.h"
+#include "src/tint/sem/sampled_texture.h"
 
 namespace tint::reader::wgsl {
 namespace {

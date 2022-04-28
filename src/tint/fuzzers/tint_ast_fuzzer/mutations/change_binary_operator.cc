@@ -16,7 +16,7 @@
 
 #include <utility>
 
-#include "src/tint/sem/reference_type.h"
+#include "src/tint/sem/reference.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 

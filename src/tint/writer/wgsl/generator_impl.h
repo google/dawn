@@ -34,7 +34,7 @@
 #include "src/tint/ast/switch_statement.h"
 #include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/program.h"
-#include "src/tint/sem/storage_texture_type.h"
+#include "src/tint/sem/storage_texture.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/writer/text_generator.h"
 

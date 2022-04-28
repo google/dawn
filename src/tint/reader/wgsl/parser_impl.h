@@ -27,7 +27,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/reader/wgsl/parser_impl_detail.h"
 #include "src/tint/reader/wgsl/token.h"
-#include "src/tint/sem/storage_texture_type.h"
+#include "src/tint/sem/storage_texture.h"
 
 namespace tint::ast {
 class BreakStatement;
@@ -437,29 +437,29 @@ class ParserImpl {
   /// @param attrs the list of attributes for the function declaration.
   /// @returns the parsed function, nullptr otherwise
   Maybe<const ast::Function*> function_decl(ast::AttributeList& attrs);
-  /// Parses a `texture_sampler_types` grammar element
+  /// Parses a `texture_samplers` grammar element
   /// @returns the parsed Type or nullptr if none matched.
-  Maybe<const ast::Type*> texture_sampler_types();
-  /// Parses a `sampler_type` grammar element
+  Maybe<const ast::Type*> texture_samplers();
+  /// Parses a `sampler` grammar element
   /// @returns the parsed Type or nullptr if none matched.
-  Maybe<const ast::Type*> sampler_type();
-  /// Parses a `multisampled_texture_type` grammar element
+  Maybe<const ast::Type*> sampler();
+  /// Parses a `multisampled_texture` grammar element
   /// @returns returns the multisample texture dimension or kNone if none
   /// matched.
-  Maybe<const ast::TextureDimension> multisampled_texture_type();
-  /// Parses a `sampled_texture_type` grammar element
+  Maybe<const ast::TextureDimension> multisampled_texture();
+  /// Parses a `sampled_texture` grammar element
   /// @returns returns the sample texture dimension or kNone if none matched.
-  Maybe<const ast::TextureDimension> sampled_texture_type();
-  /// Parses a `storage_texture_type` grammar element
+  Maybe<const ast::TextureDimension> sampled_texture();
+  /// Parses a `storage_texture` grammar element
   /// @returns returns the storage texture dimension.
   /// Returns kNone if none matched.
-  Maybe<const ast::TextureDimension> storage_texture_type();
-  /// Parses a `depth_texture_type` grammar element
+  Maybe<const ast::TextureDimension> storage_texture();
+  /// Parses a `depth_texture` grammar element
   /// @returns the parsed Type or nullptr if none matched.
-  Maybe<const ast::Type*> depth_texture_type();
+  Maybe<const ast::Type*> depth_texture();
   /// Parses a 'texture_external_type' grammar element
   /// @returns the parsed Type or nullptr if none matched
-  Maybe<const ast::Type*> external_texture_type();
+  Maybe<const ast::Type*> external_texture();
   /// Parses a `texel_format` grammar element
   /// @param use a description of what was being parsed if an error was raised
   /// @returns returns the texel format or kNone if none matched.

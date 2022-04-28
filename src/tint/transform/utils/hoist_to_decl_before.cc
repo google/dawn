@@ -20,7 +20,7 @@
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/for_loop_statement.h"
 #include "src/tint/sem/if_statement.h"
-#include "src/tint/sem/reference_type.h"
+#include "src/tint/sem/reference.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/utils/reverse.h"
 

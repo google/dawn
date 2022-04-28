@@ -14,16 +14,16 @@
 
 #include "src/tint/sem/type.h"
 
-#include "src/tint/sem/bool_type.h"
-#include "src/tint/sem/f32_type.h"
-#include "src/tint/sem/i32_type.h"
-#include "src/tint/sem/matrix_type.h"
-#include "src/tint/sem/pointer_type.h"
-#include "src/tint/sem/reference_type.h"
-#include "src/tint/sem/sampler_type.h"
-#include "src/tint/sem/texture_type.h"
-#include "src/tint/sem/u32_type.h"
-#include "src/tint/sem/vector_type.h"
+#include "src/tint/sem/bool.h"
+#include "src/tint/sem/f32.h"
+#include "src/tint/sem/i32.h"
+#include "src/tint/sem/matrix.h"
+#include "src/tint/sem/pointer.h"
+#include "src/tint/sem/reference.h"
+#include "src/tint/sem/sampler.h"
+#include "src/tint/sem/texture.h"
+#include "src/tint/sem/u32.h"
+#include "src/tint/sem/vector.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Type);
 

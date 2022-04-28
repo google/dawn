@@ -34,7 +34,7 @@
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/member_accessor_expression.h"
-#include "src/tint/sem/sampled_texture_type.h"
+#include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
 

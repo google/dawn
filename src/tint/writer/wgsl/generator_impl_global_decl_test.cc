@@ -14,7 +14,7 @@
 
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/ast/variable_decl_statement.h"
-#include "src/tint/sem/sampled_texture_type.h"
+#include "src/tint/sem/sampled_texture.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
 namespace tint::writer::wgsl {

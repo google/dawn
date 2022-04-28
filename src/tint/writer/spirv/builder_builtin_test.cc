@@ -14,7 +14,7 @@
 
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/sem/depth_texture_type.h"
+#include "src/tint/sem/depth_texture.h"
 #include "src/tint/utils/string.h"
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"

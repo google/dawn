@@ -36,7 +36,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/scope_stack.h"
 #include "src/tint/sem/builtin.h"
-#include "src/tint/sem/storage_texture_type.h"
+#include "src/tint/sem/storage_texture.h"
 #include "src/tint/writer/spirv/function.h"
 #include "src/tint/writer/spirv/scalar_constant.h"
 

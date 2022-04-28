@@ -15,12 +15,12 @@
 #include "src/tint/inspector/resource_binding.h"
 
 #include "src/tint/sem/array.h"
-#include "src/tint/sem/f32_type.h"
-#include "src/tint/sem/i32_type.h"
-#include "src/tint/sem/matrix_type.h"
+#include "src/tint/sem/f32.h"
+#include "src/tint/sem/i32.h"
+#include "src/tint/sem/matrix.h"
 #include "src/tint/sem/type.h"
-#include "src/tint/sem/u32_type.h"
-#include "src/tint/sem/vector_type.h"
+#include "src/tint/sem/u32.h"
+#include "src/tint/sem/vector.h"
 
 namespace tint::inspector {
 

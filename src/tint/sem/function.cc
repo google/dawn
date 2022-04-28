@@ -15,11 +15,11 @@
 #include "src/tint/sem/function.h"
 
 #include "src/tint/ast/function.h"
-#include "src/tint/sem/depth_texture_type.h"
-#include "src/tint/sem/external_texture_type.h"
-#include "src/tint/sem/multisampled_texture_type.h"
-#include "src/tint/sem/sampled_texture_type.h"
-#include "src/tint/sem/storage_texture_type.h"
+#include "src/tint/sem/depth_texture.h"
+#include "src/tint/sem/external_texture.h"
+#include "src/tint/sem/multisampled_texture.h"
+#include "src/tint/sem/sampled_texture.h"
+#include "src/tint/sem/storage_texture.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/utils/to_const_ptr_vec.h"
 
