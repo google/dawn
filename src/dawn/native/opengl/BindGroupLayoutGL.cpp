@@ -14,8 +14,6 @@
 
 #include "dawn/native/opengl/BindGroupLayoutGL.h"
 
-#include "dawn/native/opengl/BindGroupGL.h"
-
 namespace dawn::native::opengl {
 
     BindGroupLayout::BindGroupLayout(DeviceBase* device,

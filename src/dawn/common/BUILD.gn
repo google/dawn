@@ -204,6 +204,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
       "Math.h",
       "NSRef.h",
       "NonCopyable.h",
+      "Numeric.h",
       "PlacementAllocated.h",
       "Platform.h",
       "Preprocessor.h",

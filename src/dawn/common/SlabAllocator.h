@@ -19,6 +19,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "dawn/common/Numeric.h"
 #include "dawn/common/PlacementAllocated.h"
 
 // The SlabAllocator allocates objects out of one or more fixed-size contiguous "slabs" of memory.
@@ -165,8 +166,8 @@ template <typename T>
 class SlabAllocator : public SlabAllocatorImpl {
   public:
     SlabAllocator(size_t totalObjectBytes,
-                  uint32_t objectSize = sizeof(T),
-                  uint32_t objectAlignment = alignof(T))
+                  uint32_t objectSize = u32_sizeof<T>,
+                  uint32_t objectAlignment = u32_alignof<T>)
         : SlabAllocatorImpl(totalObjectBytes / objectSize, objectSize, objectAlignment) {
     }
 

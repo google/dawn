@@ -21,6 +21,7 @@
 
 #include "dawn/common/SlabAllocator.h"
 #include "dawn/common/vulkan_platform.h"
+#include "dawn/native/vulkan/BindGroupVk.h"
 
 namespace dawn::native {
     class CacheKey;
@@ -28,7 +29,6 @@ namespace dawn::native {
 
 namespace dawn::native::vulkan {
 
-    class BindGroup;
     struct DescriptorSetAllocation;
     class DescriptorSetAllocator;
     class Device;

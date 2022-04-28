@@ -20,7 +20,6 @@
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/ityp_vector.h"
 #include "dawn/native/CacheKey.h"
-#include "dawn/native/vulkan/BindGroupVk.h"
 #include "dawn/native/vulkan/DescriptorSetAllocator.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"

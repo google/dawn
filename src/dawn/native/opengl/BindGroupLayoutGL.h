@@ -17,10 +17,10 @@
 
 #include "dawn/common/SlabAllocator.h"
 #include "dawn/native/BindGroupLayout.h"
+#include "dawn/native/opengl/BindGroupGL.h"
 
 namespace dawn::native::opengl {
 
-    class BindGroup;
     class Device;
 
     class BindGroupLayout final : public BindGroupLayoutBase {

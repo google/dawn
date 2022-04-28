@@ -60,10 +60,10 @@ SlabAllocatorImpl::Index SlabAllocatorImpl::kInvalidIndex =
 SlabAllocatorImpl::SlabAllocatorImpl(Index blocksPerSlab,
                                      uint32_t objectSize,
                                      uint32_t objectAlignment)
-    : mAllocationAlignment(std::max(static_cast<uint32_t>(alignof(Slab)), objectAlignment)),
-      mSlabBlocksOffset(Align(sizeof(Slab), objectAlignment)),
+    : mAllocationAlignment(std::max(u32_alignof<Slab>, objectAlignment)),
+      mSlabBlocksOffset(Align(u32_sizeof<Slab>, objectAlignment)),
       mIndexLinkNodeOffset(Align(objectSize, alignof(IndexLinkNode))),
-      mBlockStride(Align(mIndexLinkNodeOffset + sizeof(IndexLinkNode), objectAlignment)),
+      mBlockStride(Align(mIndexLinkNodeOffset + u32_sizeof<IndexLinkNode>, objectAlignment)),
       mBlocksPerSlab(blocksPerSlab),
       mTotalAllocationSize(
           // required allocation size

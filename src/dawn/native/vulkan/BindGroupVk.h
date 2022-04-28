@@ -19,7 +19,6 @@
 
 #include "dawn/common/PlacementAllocated.h"
 #include "dawn/common/vulkan_platform.h"
-#include "dawn/native/vulkan/BindGroupLayoutVk.h"
 #include "dawn/native/vulkan/DescriptorSetAllocation.h"
 
 namespace dawn::native::vulkan {
