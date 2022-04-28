@@ -139,9 +139,7 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
 
     status "Running go tool unittests"
     show_cmds
-        pushd tools/src
-            go test ./...
-        popd
+        go test ./...
     hide_cmds
 
     cd ${BUILD_DIR}

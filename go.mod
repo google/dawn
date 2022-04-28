@@ -1,16 +1,20 @@
-module dawn.googlesource.com/dawn/tools/src
+module dawn.googlesource.com/dawn
 
 go 1.18
 
 require (
 	github.com/andygrunwald/go-gerrit v0.0.0-20220404064545-525eecd29744
+	github.com/ben-clayton/webidlparser v0.0.0-20210923100217-8ba896ded094
 	github.com/fatih/color v1.13.0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/google/go-cmp v0.5.6
+	github.com/mattn/go-colorable v0.1.9
+	github.com/mattn/go-isatty v0.0.14
 	github.com/sergi/go-diff v1.2.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	go.chromium.org/luci v0.0.0-20220412023008-ab2409fe739a
 	golang.org/x/net v0.0.0-20220403103023-749bd193bc2b
+	google.golang.org/protobuf v1.27.1
 )
 
 require (
@@ -25,9 +29,10 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/klauspost/compress v1.13.5 // indirect
-	github.com/mattn/go-colorable v0.1.9 // indirect
-	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/kr/pretty v0.3.0 // indirect
+	github.com/kr/text v0.2.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
+	github.com/rogpeppe/go-internal v1.8.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.10 // indirect
 	github.com/tklauser/numcpus v0.4.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
@@ -39,6 +44,5 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220216160803-4663080d8bc8 // indirect
 	google.golang.org/grpc v1.44.0 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
