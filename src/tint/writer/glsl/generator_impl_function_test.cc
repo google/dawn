@@ -206,9 +206,9 @@ TEST_F(GlslGeneratorImplTest_Function,
 
   Func("frag_main", {Param("inputs", ty.Of(interface_struct))}, ty.void_(),
        {
-           Decl(Const("r", ty.f32(), MemberAccessor("inputs", "col1"))),
-           Decl(Const("g", ty.f32(), MemberAccessor("inputs", "col2"))),
-           Decl(Const("p", ty.vec4<f32>(), MemberAccessor("inputs", "pos"))),
+           Decl(Let("r", ty.f32(), MemberAccessor("inputs", "col1"))),
+           Decl(Let("g", ty.f32(), MemberAccessor("inputs", "col2"))),
+           Decl(Let("p", ty.vec4<f32>(), MemberAccessor("inputs", "pos"))),
        },
        {Stage(ast::PipelineStage::kFragment)});
 

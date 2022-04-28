@@ -47,9 +47,9 @@ TEST_F(GlslUnaryOpTest, Complement) {
 
 TEST_F(GlslUnaryOpTest, Indirection) {
   Global("G", ty.f32(), ast::StorageClass::kPrivate);
-  auto* p = Const(
-      "expr", nullptr,
-      create<ast::UnaryOpExpression>(ast::UnaryOp::kAddressOf, Expr("G")));
+  auto* p =
+      Let("expr", nullptr,
+          create<ast::UnaryOpExpression>(ast::UnaryOp::kAddressOf, Expr("G")));
   auto* op =
       create<ast::UnaryOpExpression>(ast::UnaryOp::kIndirection, Expr("expr"));
   WrapInFunction(p, op);

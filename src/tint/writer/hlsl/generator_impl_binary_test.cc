@@ -555,7 +555,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_i32) {
   Func("fn", {}, ty.void_(),
        {
            Decl(Var("a", ty.i32())),
-           Decl(Const("r", nullptr, Op("a", 0))),
+           Decl(Let("r", nullptr, Op("a", 0))),
        });
 
   GeneratorImpl& gen = Build();
@@ -573,7 +573,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_u32) {
   Func("fn", {}, ty.void_(),
        {
            Decl(Var("a", ty.u32())),
-           Decl(Const("r", nullptr, Op("a", 0u))),
+           Decl(Let("r", nullptr, Op("a", 0u))),
        });
 
   GeneratorImpl& gen = Build();
@@ -591,7 +591,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_vec_by_vec_i32) {
   Func("fn", {}, ty.void_(),
        {
            Decl(Var("a", nullptr, vec4<i32>(100, 100, 100, 100))),
-           Decl(Const("r", nullptr, Op("a", vec4<i32>(50, 0, 25, 0)))),
+           Decl(Let("r", nullptr, Op("a", vec4<i32>(50, 0, 25, 0)))),
        });
 
   GeneratorImpl& gen = Build();
@@ -609,7 +609,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_vec_by_scalar_i32) {
   Func("fn", {}, ty.void_(),
        {
            Decl(Var("a", nullptr, vec4<i32>(100, 100, 100, 100))),
-           Decl(Const("r", nullptr, Op("a", 0))),
+           Decl(Let("r", nullptr, Op("a", 0))),
        });
 
   GeneratorImpl& gen = Build();
@@ -627,7 +627,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_i32) {
   Func("fn", {Param("b", ty.i32())}, ty.void_(),
        {
            Decl(Var("a", ty.i32())),
-           Decl(Const("r", nullptr, Op("a", "b"))),
+           Decl(Let("r", nullptr, Op("a", "b"))),
        });
 
   GeneratorImpl& gen = Build();
@@ -645,7 +645,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_u32) {
   Func("fn", {Param("b", ty.u32())}, ty.void_(),
        {
            Decl(Var("a", ty.u32())),
-           Decl(Const("r", nullptr, Op("a", "b"))),
+           Decl(Let("r", nullptr, Op("a", "b"))),
        });
 
   GeneratorImpl& gen = Build();
@@ -663,7 +663,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_vec_by_vec_i32) {
   Func("fn", {Param("b", ty.vec3<i32>())}, ty.void_(),
        {
            Decl(Var("a", ty.vec3<i32>())),
-           Decl(Const("r", nullptr, Op("a", "b"))),
+           Decl(Let("r", nullptr, Op("a", "b"))),
        });
 
   GeneratorImpl& gen = Build();
@@ -681,7 +681,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_vec_by_scalar_i32) {
   Func("fn", {Param("b", ty.i32())}, ty.void_(),
        {
            Decl(Var("a", ty.vec3<i32>())),
-           Decl(Const("r", nullptr, Op("a", "b"))),
+           Decl(Let("r", nullptr, Op("a", "b"))),
        });
 
   GeneratorImpl& gen = Build();
@@ -704,7 +704,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByExpression_i32) {
   Func("fn", {}, ty.void_(),
        {
            Decl(Var("a", ty.i32())),
-           Decl(Const("r", nullptr, Op("a", Call("zero")))),
+           Decl(Let("r", nullptr, Op("a", Call("zero")))),
        });
 
   GeneratorImpl& gen = Build();
@@ -735,7 +735,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByExpression_u32) {
   Func("fn", {}, ty.void_(),
        {
            Decl(Var("a", ty.u32())),
-           Decl(Const("r", nullptr, Op("a", Call("zero")))),
+           Decl(Let("r", nullptr, Op("a", Call("zero")))),
        });
 
   GeneratorImpl& gen = Build();
@@ -766,7 +766,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByExpression_vec_by_vec_i32) {
   Func("fn", {}, ty.void_(),
        {
            Decl(Var("a", ty.vec3<i32>())),
-           Decl(Const("r", nullptr, Op("a", Call("zero")))),
+           Decl(Let("r", nullptr, Op("a", Call("zero")))),
        });
 
   GeneratorImpl& gen = Build();
@@ -797,7 +797,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByExpression_vec_by_scalar_i32) {
   Func("fn", {}, ty.void_(),
        {
            Decl(Var("a", ty.vec3<i32>())),
-           Decl(Const("r", nullptr, Op("a", Call("zero")))),
+           Decl(Let("r", nullptr, Op("a", Call("zero")))),
        });
 
   GeneratorImpl& gen = Build();

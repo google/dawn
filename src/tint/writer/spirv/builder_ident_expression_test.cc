@@ -67,7 +67,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
 TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
 
-  auto* v = Const("var", ty.vec3<f32>(), init);
+  auto* v = Let("var", ty.vec3<f32>(), init);
 
   auto* expr = Expr("var");
   WrapInFunction(v, expr);

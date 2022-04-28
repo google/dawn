@@ -215,8 +215,8 @@ void CalculateArrayLength::Run(CloneContext& ctx,
                 }
                 uint32_t array_stride = array_type->Size();
                 auto* array_length_var = ctx.dst->Decl(
-                    ctx.dst->Const(name, ctx.dst->ty.u32(),
-                                   ctx.dst->Div(total_size, array_stride)));
+                    ctx.dst->Let(name, ctx.dst->ty.u32(),
+                                 ctx.dst->Div(total_size, array_stride)));
 
                 // Insert the array length calculations at the top of the block
                 ctx.InsertBefore(block->statements, block->statements[0],

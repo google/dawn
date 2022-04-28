@@ -185,14 +185,13 @@ TEST_F(MslGeneratorImplTest,
                          Construct(ty.vec4<f32>())))},
        {Stage(ast::PipelineStage::kVertex)});
 
-  Func("frag_main", {Param("colors", ty.Of(interface_struct))}, ty.void_(),
-       {
-           WrapInStatement(
-               Const("r", ty.f32(), MemberAccessor("colors", "col1"))),
-           WrapInStatement(
-               Const("g", ty.f32(), MemberAccessor("colors", "col2"))),
-       },
-       {Stage(ast::PipelineStage::kFragment)});
+  Func(
+      "frag_main", {Param("colors", ty.Of(interface_struct))}, ty.void_(),
+      {
+          WrapInStatement(Let("r", ty.f32(), MemberAccessor("colors", "col1"))),
+          WrapInStatement(Let("g", ty.f32(), MemberAccessor("colors", "col2"))),
+      },
+      {Stage(ast::PipelineStage::kFragment)});
 
   GeneratorImpl& gen = SanitizeAndBuild();
 

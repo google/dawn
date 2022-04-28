@@ -198,7 +198,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignThroughPointer_Pass) {
   // *b = 2;
   const auto func = ast::StorageClass::kFunction;
   auto* var_a = Var("a", ty.i32(), func, Expr(2));
-  auto* var_b = Const("b", ty.pointer<int>(func), AddressOf(Expr("a")));
+  auto* var_b = Let("b", ty.pointer<int>(func), AddressOf(Expr("a")));
   WrapInFunction(var_a, var_b, Assign(Source{{12, 34}}, Deref("b"), 2));
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -209,7 +209,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToConstant_Fail) {
   //  let a : i32 = 2;
   //  a = 2
   // }
-  auto* var = Const("a", ty.i32(), Expr(2));
+  auto* var = Let("a", ty.i32(), Expr(2));
   WrapInFunction(var, Assign(Expr(Source{{12, 34}}, "a"), 2));
 
   EXPECT_FALSE(r()->Resolve());

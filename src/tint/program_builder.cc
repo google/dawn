@@ -115,7 +115,7 @@ ProgramBuilder::TypesBuilder::TypesBuilder(ProgramBuilder* pb) : builder(pb) {}
 const ast::Statement* ProgramBuilder::WrapInStatement(
     const ast::Expression* expr) {
   // Create a temporary variable of inferred type from expr.
-  return Decl(Const(symbols_.New(), nullptr, expr));
+  return Decl(Let(symbols_.New(), nullptr, expr));
 }
 
 const ast::VariableDeclStatement* ProgramBuilder::WrapInStatement(

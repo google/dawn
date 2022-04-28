@@ -635,7 +635,7 @@ TEST_F(ResolverTest, Expr_Identifier_GlobalConstant) {
 
 TEST_F(ResolverTest, Expr_Identifier_FunctionVariable_Const) {
   auto* my_var_a = Expr("my_var");
-  auto* var = Const("my_var", ty.f32(), Construct(ty.f32()));
+  auto* var = Let("my_var", ty.f32(), Construct(ty.f32()));
   auto* decl = Decl(Var("b", ty.f32(), ast::StorageClass::kNone, my_var_a));
 
   Func("my_func", ast::VariableList{}, ty.void_(),
@@ -711,7 +711,7 @@ TEST_F(ResolverTest, Expr_Identifier_Function_Ptr) {
   auto* p = Expr("p");
   auto* v_decl = Decl(Var("v", ty.f32()));
   auto* p_decl = Decl(
-      Const("p", ty.pointer<f32>(ast::StorageClass::kFunction), AddressOf(v)));
+      Let("p", ty.pointer<f32>(ast::StorageClass::kFunction), AddressOf(v)));
   auto* assign = Assign(Deref(p), 1.23f);
   Func("my_func", ast::VariableList{}, ty.void_(),
        {
@@ -868,7 +868,7 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionVariable) {
 TEST_F(ResolverTest, Function_NotRegisterFunctionConstant) {
   auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
                     {
-                        Decl(Const("var", ty.f32(), Construct(ty.f32()))),
+                        Decl(Let("var", ty.f32(), Construct(ty.f32()))),
                     });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -881,7 +881,7 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionConstant) {
 }
 
 TEST_F(ResolverTest, Function_NotRegisterFunctionParams) {
-  auto* func = Func("my_func", {Const("var", ty.f32(), Construct(ty.f32()))},
+  auto* func = Func("my_func", {Let("var", ty.f32(), Construct(ty.f32()))},
                     ty.void_(), {});
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1782,7 +1782,7 @@ TEST_F(ResolverTest, StorageClass_SetForTexture) {
 }
 
 TEST_F(ResolverTest, StorageClass_DoesNotSetOnConst) {
-  auto* var = Const("var", ty.i32(), Construct(ty.i32()));
+  auto* var = Let("var", ty.i32(), Construct(ty.i32()));
   auto* stmt = Decl(var);
   Func("func", ast::VariableList{}, ty.void_(), {stmt}, ast::AttributeList{});
 

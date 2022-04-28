@@ -206,7 +206,7 @@ TEST_F(ResolverIndexAccessorTest, Array_Dynamic_I32) {
   // let a : array<f32, 3> = 0;
   // var idx : i32 = 0;
   // var f : f32 = a[idx];
-  auto* a = Const("a", ty.array<f32, 3>(), array<f32, 3>());
+  auto* a = Let("a", ty.array<f32, 3>(), array<f32, 3>());
   auto* idx = Var("idx", ty.i32(), Construct(ty.i32()));
   auto* f = Var("f", ty.f32(), IndexAccessor("a", Expr(Source{{12, 34}}, idx)));
   Func("my_func", ast::VariableList{}, ty.void_(),
@@ -224,7 +224,7 @@ TEST_F(ResolverIndexAccessorTest, Array_Dynamic_I32) {
 TEST_F(ResolverIndexAccessorTest, Array_Literal_F32) {
   // let a : array<f32, 3>;
   // var f : f32 = a[2.0f];
-  auto* a = Const("a", ty.array<f32, 3>(), array<f32, 3>());
+  auto* a = Let("a", ty.array<f32, 3>(), array<f32, 3>());
   auto* f =
       Var("a_2", ty.f32(), IndexAccessor("a", Expr(Source{{12, 34}}, 2.0f)));
   Func("my_func", ast::VariableList{}, ty.void_(),
@@ -241,7 +241,7 @@ TEST_F(ResolverIndexAccessorTest, Array_Literal_F32) {
 TEST_F(ResolverIndexAccessorTest, Array_Literal_I32) {
   // let a : array<f32, 3>;
   // var f : f32 = a[2];
-  auto* a = Const("a", ty.array<f32, 3>(), array<f32, 3>());
+  auto* a = Let("a", ty.array<f32, 3>(), array<f32, 3>());
   auto* f = Var("a_2", ty.f32(), IndexAccessor("a", 2));
   Func("my_func", ast::VariableList{}, ty.void_(),
        {
@@ -260,7 +260,7 @@ TEST_F(ResolverIndexAccessorTest, EXpr_Deref_FuncGoodParent) {
   // }
   auto* p =
       Param("p", ty.pointer(ty.vec4<f32>(), ast::StorageClass::kFunction));
-  auto* idx = Const("idx", ty.u32(), Construct(ty.u32()));
+  auto* idx = Let("idx", ty.u32(), Construct(ty.u32()));
   auto* star_p = Deref(p);
   auto* accessor_expr = IndexAccessor(Source{{12, 34}}, star_p, idx);
   auto* x = Var("x", ty.f32(), accessor_expr);
@@ -277,7 +277,7 @@ TEST_F(ResolverIndexAccessorTest, EXpr_Deref_FuncBadParent) {
   // }
   auto* p =
       Param("p", ty.pointer(ty.vec4<f32>(), ast::StorageClass::kFunction));
-  auto* idx = Const("idx", ty.u32(), Construct(ty.u32()));
+  auto* idx = Let("idx", ty.u32(), Construct(ty.u32()));
   auto* accessor_expr = IndexAccessor(Source{{12, 34}}, p, idx);
   auto* star_p = Deref(accessor_expr);
   auto* x = Var("x", ty.f32(), star_p);

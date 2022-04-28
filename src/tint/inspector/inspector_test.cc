@@ -1166,9 +1166,9 @@ TEST_F(InspectorGetStorageSizeTest, Simple_NonStruct) {
   AddStorageBuffer("rosb_var", ty.i32(), ast::Access::kRead, 1, 1);
   Func("ep_func", {}, ty.void_(),
        {
-           Decl(Const("ub", nullptr, Expr("ub_var"))),
-           Decl(Const("sb", nullptr, Expr("sb_var"))),
-           Decl(Const("rosb", nullptr, Expr("rosb_var"))),
+           Decl(Let("ub", nullptr, Expr("ub_var"))),
+           Decl(Let("sb", nullptr, Expr("sb_var"))),
+           Decl(Let("rosb", nullptr, Expr("rosb_var"))),
        },
        {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
@@ -1206,7 +1206,7 @@ TEST_F(InspectorGetStorageSizeTest, NonStructVec3) {
   AddUniformBuffer("ub_var", ty.vec3<f32>(), 0, 0);
   Func("ep_func", {}, ty.void_(),
        {
-           Decl(Const("ub", nullptr, Expr("ub_var"))),
+           Decl(Let("ub", nullptr, Expr("ub_var"))),
        },
        {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
@@ -1220,7 +1220,7 @@ TEST_F(InspectorGetStorageSizeTest, StructVec3) {
   AddUniformBuffer("ub_var", ty.Of(ub_struct_type), 0, 0);
   Func("ep_func", {}, ty.void_(),
        {
-           Decl(Const("ub", nullptr, Expr("ub_var"))),
+           Decl(Let("ub", nullptr, Expr("ub_var"))),
        },
        {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 

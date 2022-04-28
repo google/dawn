@@ -63,8 +63,8 @@ TEST_F(ResolverIncrementDecrementValidationTest, ThroughPointer) {
   // let b : ptr<function,i32> = &a;
   // *b++;
   auto* var_a = Var("a", ty.i32(), ast::StorageClass::kFunction);
-  auto* var_b = Const("b", ty.pointer<int>(ast::StorageClass::kFunction),
-                      AddressOf(Expr("a")));
+  auto* var_b = Let("b", ty.pointer<int>(ast::StorageClass::kFunction),
+                    AddressOf(Expr("a")));
   WrapInFunction(var_a, var_b, Increment(Source{{12, 34}}, Deref("b")));
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -147,7 +147,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, Literal) {
 TEST_F(ResolverIncrementDecrementValidationTest, Constant) {
   // let a = 1;
   // a++;
-  auto* a = Const(Source{{12, 34}}, "a", nullptr, Expr(1));
+  auto* a = Let(Source{{12, 34}}, "a", nullptr, Expr(1));
   WrapInFunction(a, Increment(Expr(Source{{56, 78}}, "a")));
 
   EXPECT_FALSE(r()->Resolve());

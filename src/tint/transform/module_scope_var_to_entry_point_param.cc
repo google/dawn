@@ -241,10 +241,10 @@ struct ModuleScopeVarToEntryPointParam::State {
             auto* member_ptr = ctx.dst->AddressOf(ctx.dst->MemberAccessor(
                 ctx.dst->Deref(workgroup_param()), member));
             auto* local_var =
-                ctx.dst->Const(new_var_symbol,
-                               ctx.dst->ty.pointer(
-                                   store_type(), ast::StorageClass::kWorkgroup),
-                               member_ptr);
+                ctx.dst->Let(new_var_symbol,
+                             ctx.dst->ty.pointer(store_type(),
+                                                 ast::StorageClass::kWorkgroup),
+                             member_ptr);
             ctx.InsertFront(func_ast->body->statements,
                             ctx.dst->Decl(local_var));
             is_pointer = true;

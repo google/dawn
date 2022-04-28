@@ -112,7 +112,7 @@ TEST_P(ResolverInferredTypeParamTest, LocalLet_Pass) {
 
   // let a = <type constructor>;
   auto* ctor_expr = params.create_value(*this, 0);
-  auto* var = Const("a", nullptr, ctor_expr);
+  auto* var = Let("a", nullptr, ctor_expr);
   WrapInFunction(var);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();

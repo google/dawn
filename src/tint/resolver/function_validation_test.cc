@@ -49,7 +49,7 @@ TEST_F(ResolverFunctionValidationTest, LocalConflictsWithParameter) {
   //   let common_name = 1;
   // }
   Func("func", {Param(Source{{12, 34}}, "common_name", ty.f32())}, ty.void_(),
-       {Decl(Const(Source{{56, 78}}, "common_name", nullptr, Expr(1)))});
+       {Decl(Let(Source{{56, 78}}, "common_name", nullptr, Expr(1)))});
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(), R"(56:78 error: redeclaration of 'common_name'
@@ -63,7 +63,7 @@ TEST_F(ResolverFunctionValidationTest, NestedLocalMayShadowParameter) {
   //   }
   // }
   Func("func", {Param(Source{{12, 34}}, "common_name", ty.f32())}, ty.void_(),
-       {Block(Decl(Const(Source{{56, 78}}, "common_name", nullptr, Expr(1))))});
+       {Block(Decl(Let(Source{{56, 78}}, "common_name", nullptr, Expr(1))))});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -419,7 +419,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionConstInitWithParam) {
   // }
 
   auto* bar = Param("bar", ty.f32());
-  auto* baz = Const("baz", ty.f32(), Expr("bar"));
+  auto* baz = Let("baz", ty.f32(), Expr("bar"));
 
   Func("foo", ast::VariableList{bar}, ty.void_(), ast::StatementList{Decl(baz)},
        ast::AttributeList{});

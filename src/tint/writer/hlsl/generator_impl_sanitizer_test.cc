@@ -104,8 +104,8 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_ViaLets) {
              create<ast::GroupAttribute>(2),
          });
 
-  auto* p = Const("p", nullptr, AddressOf("b"));
-  auto* p2 = Const("p2", nullptr, AddressOf(MemberAccessor(Deref(p), "a")));
+  auto* p = Let("p", nullptr, AddressOf("b"));
+  auto* p2 = Let("p2", nullptr, AddressOf(MemberAccessor(Deref(p), "a")));
 
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -259,7 +259,7 @@ TEST_F(HlslSanitizerTest, InlinePtrLetsBasic) {
   // let x : i32 = *p;
   auto* v = Var("v", ty.i32());
   auto* p =
-      Const("p", ty.pointer<i32>(ast::StorageClass::kFunction), AddressOf(v));
+      Let("p", ty.pointer<i32>(ast::StorageClass::kFunction), AddressOf(v));
   auto* x = Var("x", ty.i32(), ast::StorageClass::kNone, Deref(p));
 
   Func("main", ast::VariableList{}, ty.void_(),
@@ -293,16 +293,15 @@ TEST_F(HlslSanitizerTest, InlinePtrLetsComplexChain) {
   // let vp : ptr<function, vec4<f32>> = &(*mp)[2];
   // let v : vec4<f32> = *vp;
   auto* a = Var("a", ty.array(ty.mat4x4<f32>(), 4));
-  auto* ap = Const(
+  auto* ap = Let(
       "ap",
       ty.pointer(ty.array(ty.mat4x4<f32>(), 4), ast::StorageClass::kFunction),
       AddressOf(a));
   auto* mp =
-      Const("mp", ty.pointer(ty.mat4x4<f32>(), ast::StorageClass::kFunction),
-            AddressOf(IndexAccessor(Deref(ap), 3)));
-  auto* vp =
-      Const("vp", ty.pointer(ty.vec4<f32>(), ast::StorageClass::kFunction),
-            AddressOf(IndexAccessor(Deref(mp), 2)));
+      Let("mp", ty.pointer(ty.mat4x4<f32>(), ast::StorageClass::kFunction),
+          AddressOf(IndexAccessor(Deref(ap), 3)));
+  auto* vp = Let("vp", ty.pointer(ty.vec4<f32>(), ast::StorageClass::kFunction),
+                 AddressOf(IndexAccessor(Deref(mp), 2)));
   auto* v = Var("v", ty.vec4<f32>(), ast::StorageClass::kNone, Deref(vp));
 
   Func("main", ast::VariableList{}, ty.void_(),

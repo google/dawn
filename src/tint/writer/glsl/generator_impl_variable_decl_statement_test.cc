@@ -37,7 +37,7 @@ TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
 }
 
 TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
-  auto* var = Const("a", ty.f32(), Construct(ty.f32()));
+  auto* var = Let("a", ty.f32(), Construct(ty.f32()));
   auto* stmt = Decl(var);
   WrapInFunction(stmt);
 

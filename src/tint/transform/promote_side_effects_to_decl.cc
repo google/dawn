@@ -441,7 +441,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
         [&](const ast::Expression* e) -> const ast::Expression* {
       if (to_hoist.count(e)) {
         auto name = b.Symbols().New();
-        auto* v = b.Const(name, nullptr, ctx.Clone(e));
+        auto* v = b.Let(name, nullptr, ctx.Clone(e));
         auto* decl = b.Decl(v);
         curr_stmts->push_back(decl);
         return b.Expr(name);

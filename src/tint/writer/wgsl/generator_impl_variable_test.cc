@@ -114,7 +114,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
-  auto* v = Const("a", ty.f32(), Expr(1.0f));
+  auto* v = Let("a", ty.f32(), Expr(1.0f));
   WrapInFunction(Decl(v));
 
   GeneratorImpl& gen = Build();

@@ -371,7 +371,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FunctionConstant) {
   //   let size = 10;
   //   var a : array<f32, size>;
   // }
-  auto* size = Const("size", nullptr, Expr(10));
+  auto* size = Let("size", nullptr, Expr(10));
   auto* a = Var("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")));
   WrapInFunction(Block(Decl(size), Decl(a)));
   EXPECT_FALSE(r()->Resolve());
@@ -382,7 +382,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FunctionConstant) {
 
 TEST_F(ResolverTypeValidationTest, ArraySize_InvalidExpr) {
   // var a : array<f32, i32(4)>;
-  auto* size = Const("size", nullptr, Expr(10));
+  auto* size = Let("size", nullptr, Expr(10));
   auto* a =
       Var("a", ty.array(ty.f32(), Construct(Source{{12, 34}}, ty.i32(), 4)));
   WrapInFunction(Block(Decl(size), Decl(a)));

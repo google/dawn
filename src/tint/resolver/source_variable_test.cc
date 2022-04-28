@@ -92,7 +92,7 @@ TEST_F(ResolverSourceVariableTest, GlobalOverride) {
   EXPECT_EQ(Sem().Get(expr)->SourceVariable(), sem_a);
 }
 
-TEST_F(ResolverSourceVariableTest, GlobalLet) {
+TEST_F(ResolverSourceVariableTest, GlobalConst) {
   auto* a = GlobalConst("a", ty.f32(), Expr(1.f));
   auto* expr = Expr(a);
   WrapInFunction(expr);
@@ -115,7 +115,7 @@ TEST_F(ResolverSourceVariableTest, FunctionVar) {
 }
 
 TEST_F(ResolverSourceVariableTest, FunctionLet) {
-  auto* a = Const("a", ty.f32(), Expr(1.f));
+  auto* a = Let("a", ty.f32(), Expr(1.f));
   auto* expr = Expr(a);
   WrapInFunction(a, expr);
 
@@ -143,7 +143,7 @@ TEST_F(ResolverSourceVariableTest, PointerParameter) {
   // }
   auto* param = Param("a", ty.pointer(ty.f32(), ast::StorageClass::kFunction));
   auto* expr_param = Expr(param);
-  auto* let = Const("b", nullptr, expr_param);
+  auto* let = Let("b", nullptr, expr_param);
   auto* expr_let = Expr("b");
   Func("foo", {param}, ty.void_(),
        {WrapInStatement(let), WrapInStatement(expr_let)});
@@ -181,7 +181,7 @@ TEST_F(ResolverSourceVariableTest, LetCopyVar) {
   // }
   auto* a = Var("a", ty.f32(), ast::StorageClass::kNone);
   auto* expr_a = Expr(a);
-  auto* b = Const("b", ty.f32(), expr_a);
+  auto* b = Let("b", ty.f32(), expr_a);
   auto* expr_b = Expr(b);
   WrapInFunction(a, b, expr_b);
 
@@ -235,10 +235,10 @@ TEST_F(ResolverSourceVariableTest, ThroughPointers) {
   auto* address_of_1 = AddressOf(a);
   auto* deref_1 = Deref(address_of_1);
   auto* address_of_2 = AddressOf(deref_1);
-  auto* a_ptr1 = Const("a_ptr1", nullptr, address_of_2);
+  auto* a_ptr1 = Let("a_ptr1", nullptr, address_of_2);
   auto* deref_2 = Deref(a_ptr1);
   auto* address_of_3 = AddressOf(deref_2);
-  auto* a_ptr2 = Const("a_ptr2", nullptr, address_of_3);
+  auto* a_ptr2 = Let("a_ptr2", nullptr, address_of_3);
   WrapInFunction(a_ptr1, a_ptr2);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();

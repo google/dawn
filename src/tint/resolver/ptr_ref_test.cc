@@ -75,20 +75,20 @@ TEST_F(ResolverPtrRefTest, DefaultPtrStorageClass) {
                          });
 
   auto* function_ptr =
-      Const("f_ptr", ty.pointer(ty.i32(), ast::StorageClass::kFunction),
-            AddressOf(function));
+      Let("f_ptr", ty.pointer(ty.i32(), ast::StorageClass::kFunction),
+          AddressOf(function));
   auto* private_ptr =
-      Const("p_ptr", ty.pointer(ty.i32(), ast::StorageClass::kPrivate),
-            AddressOf(private_));
+      Let("p_ptr", ty.pointer(ty.i32(), ast::StorageClass::kPrivate),
+          AddressOf(private_));
   auto* workgroup_ptr =
-      Const("w_ptr", ty.pointer(ty.i32(), ast::StorageClass::kWorkgroup),
-            AddressOf(workgroup));
+      Let("w_ptr", ty.pointer(ty.i32(), ast::StorageClass::kWorkgroup),
+          AddressOf(workgroup));
   auto* uniform_ptr =
-      Const("ub_ptr", ty.pointer(ty.Of(buf), ast::StorageClass::kUniform),
-            AddressOf(uniform));
+      Let("ub_ptr", ty.pointer(ty.Of(buf), ast::StorageClass::kUniform),
+          AddressOf(uniform));
   auto* storage_ptr =
-      Const("sb_ptr", ty.pointer(ty.Of(buf), ast::StorageClass::kStorage),
-            AddressOf(storage));
+      Let("sb_ptr", ty.pointer(ty.Of(buf), ast::StorageClass::kStorage),
+          AddressOf(storage));
 
   WrapInFunction(function, function_ptr, private_ptr, workgroup_ptr,
                  uniform_ptr, storage_ptr);

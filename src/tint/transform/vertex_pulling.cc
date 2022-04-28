@@ -310,7 +310,7 @@ struct State {
 
       // let pulling_offset_n = <attribute_offset>
       stmts.emplace_back(ctx.dst->Decl(
-          ctx.dst->Const(buffer_array_base, nullptr, attribute_offset)));
+          ctx.dst->Let(buffer_array_base, nullptr, attribute_offset)));
 
       for (const VertexAttributeDescriptor& attribute_desc :
            buffer_layout.attributes) {

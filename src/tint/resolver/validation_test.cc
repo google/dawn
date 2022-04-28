@@ -1304,7 +1304,7 @@ TEST_F(ResolverTest, Expr_Constructor_Cast_Pointer) {
   auto* c =
       Construct(Source{{12, 34}}, ty.pointer<i32>(ast::StorageClass::kFunction),
                 ExprList(vf));
-  auto* ip = Const("ip", ty.pointer<i32>(ast::StorageClass::kFunction), c);
+  auto* ip = Let("ip", ty.pointer<i32>(ast::StorageClass::kFunction), c);
   WrapInFunction(Decl(vf), Decl(ip));
 
   EXPECT_FALSE(r()->Resolve());

@@ -40,7 +40,7 @@ TEST_F(ResolverPtrRefValidationTest, AddressOfLiteral) {
 TEST_F(ResolverPtrRefValidationTest, AddressOfLet) {
   // let l : i32 = 1;
   // &l
-  auto* l = Const("l", ty.i32(), Expr(1));
+  auto* l = Let("l", ty.i32(), Expr(1));
   auto* expr = AddressOf(Expr(Source{{12, 34}}, "l"));
 
   WrapInFunction(l, expr);
@@ -156,8 +156,8 @@ TEST_F(ResolverPtrRefValidationTest, InferredPtrAccessMismatch) {
   auto* expr =
       IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 4);
   auto* ptr =
-      Const(Source{{12, 34}}, "p", ty.pointer<i32>(ast::StorageClass::kStorage),
-            AddressOf(expr));
+      Let(Source{{12, 34}}, "p", ty.pointer<i32>(ast::StorageClass::kStorage),
+          AddressOf(expr));
 
   WrapInFunction(ptr);
 

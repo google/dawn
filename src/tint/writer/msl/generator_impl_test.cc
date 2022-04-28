@@ -138,7 +138,7 @@ vertex Out vert_main() {
 TEST_F(MslGeneratorImplTest, WorkgroupMatrix) {
   Global("m", ty.mat2x2<f32>(), ast::StorageClass::kWorkgroup);
   Func("comp_main", ast::VariableList{}, ty.void_(),
-       {Decl(Const("x", nullptr, Expr("m")))},
+       {Decl(Let("x", nullptr, Expr("m")))},
        {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
   GeneratorImpl& gen = SanitizeAndBuild();
@@ -176,7 +176,7 @@ kernel void comp_main(threadgroup tint_symbol_3* tint_symbol_2 [[threadgroup(0)]
 TEST_F(MslGeneratorImplTest, WorkgroupMatrixInArray) {
   Global("m", ty.array(ty.mat2x2<f32>(), 4), ast::StorageClass::kWorkgroup);
   Func("comp_main", ast::VariableList{}, ty.void_(),
-       {Decl(Const("x", nullptr, Expr("m")))},
+       {Decl(Let("x", nullptr, Expr("m")))},
        {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
   GeneratorImpl& gen = SanitizeAndBuild();
@@ -226,7 +226,7 @@ TEST_F(MslGeneratorImplTest, WorkgroupMatrixInStruct) {
                   });
   Global("s", ty.type_name("S2"), ast::StorageClass::kWorkgroup);
   Func("comp_main", ast::VariableList{}, ty.void_(),
-       {Decl(Const("x", nullptr, Expr("s")))},
+       {Decl(Let("x", nullptr, Expr("s")))},
        {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
   GeneratorImpl& gen = SanitizeAndBuild();
@@ -284,23 +284,23 @@ TEST_F(MslGeneratorImplTest, WorkgroupMatrix_Multiples) {
   Global("m9", ty.mat4x4<f32>(), ast::StorageClass::kWorkgroup);
   Func("main1", ast::VariableList{}, ty.void_(),
        {
-           Decl(Const("a1", nullptr, Expr("m1"))),
-           Decl(Const("a2", nullptr, Expr("m2"))),
-           Decl(Const("a3", nullptr, Expr("m3"))),
+           Decl(Let("a1", nullptr, Expr("m1"))),
+           Decl(Let("a2", nullptr, Expr("m2"))),
+           Decl(Let("a3", nullptr, Expr("m3"))),
        },
        {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
   Func("main2", ast::VariableList{}, ty.void_(),
        {
-           Decl(Const("a1", nullptr, Expr("m4"))),
-           Decl(Const("a2", nullptr, Expr("m5"))),
-           Decl(Const("a3", nullptr, Expr("m6"))),
+           Decl(Let("a1", nullptr, Expr("m4"))),
+           Decl(Let("a2", nullptr, Expr("m5"))),
+           Decl(Let("a3", nullptr, Expr("m6"))),
        },
        {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
   Func("main3", ast::VariableList{}, ty.void_(),
        {
-           Decl(Const("a1", nullptr, Expr("m7"))),
-           Decl(Const("a2", nullptr, Expr("m8"))),
-           Decl(Const("a3", nullptr, Expr("m9"))),
+           Decl(Let("a1", nullptr, Expr("m7"))),
+           Decl(Let("a2", nullptr, Expr("m8"))),
+           Decl(Let("a3", nullptr, Expr("m9"))),
        },
        {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
   Func("main4_no_usages", ast::VariableList{}, ty.void_(), {},

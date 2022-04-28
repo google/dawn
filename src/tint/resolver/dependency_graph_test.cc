@@ -53,7 +53,7 @@ using ResolverDependencyGraphTest =
 /// kinds of symbol declarations.
 enum class SymbolDeclKind {
   GlobalVar,
-  GlobalLet,
+  GlobalConst,
   Alias,
   Struct,
   Function,
@@ -65,7 +65,7 @@ enum class SymbolDeclKind {
 };
 
 static constexpr SymbolDeclKind kAllSymbolDeclKinds[] = {
-    SymbolDeclKind::GlobalVar,      SymbolDeclKind::GlobalLet,
+    SymbolDeclKind::GlobalVar,      SymbolDeclKind::GlobalConst,
     SymbolDeclKind::Alias,          SymbolDeclKind::Struct,
     SymbolDeclKind::Function,       SymbolDeclKind::Parameter,
     SymbolDeclKind::LocalVar,       SymbolDeclKind::LocalLet,
@@ -78,15 +78,16 @@ static constexpr SymbolDeclKind kTypeDeclKinds[] = {
 };
 
 static constexpr SymbolDeclKind kValueDeclKinds[] = {
-    SymbolDeclKind::GlobalVar,      SymbolDeclKind::GlobalLet,
+    SymbolDeclKind::GlobalVar,      SymbolDeclKind::GlobalConst,
     SymbolDeclKind::Parameter,      SymbolDeclKind::LocalVar,
     SymbolDeclKind::LocalLet,       SymbolDeclKind::NestedLocalVar,
     SymbolDeclKind::NestedLocalLet,
 };
 
 static constexpr SymbolDeclKind kGlobalDeclKinds[] = {
-    SymbolDeclKind::GlobalVar, SymbolDeclKind::GlobalLet, SymbolDeclKind::Alias,
-    SymbolDeclKind::Struct,    SymbolDeclKind::Function,
+    SymbolDeclKind::GlobalVar, SymbolDeclKind::GlobalConst,
+    SymbolDeclKind::Alias,     SymbolDeclKind::Struct,
+    SymbolDeclKind::Function,
 };
 
 static constexpr SymbolDeclKind kLocalDeclKinds[] = {
@@ -97,7 +98,7 @@ static constexpr SymbolDeclKind kLocalDeclKinds[] = {
 
 static constexpr SymbolDeclKind kGlobalValueDeclKinds[] = {
     SymbolDeclKind::GlobalVar,
-    SymbolDeclKind::GlobalLet,
+    SymbolDeclKind::GlobalConst,
 };
 
 static constexpr SymbolDeclKind kFuncDeclKinds[] = {
@@ -183,7 +184,7 @@ std::ostream& operator<<(std::ostream& out, SymbolDeclKind kind) {
   switch (kind) {
     case SymbolDeclKind::GlobalVar:
       return out << "global var";
-    case SymbolDeclKind::GlobalLet:
+    case SymbolDeclKind::GlobalConst:
       return out << "global let";
     case SymbolDeclKind::Alias:
       return out << "alias";
@@ -322,7 +323,7 @@ std::string DiagString(SymbolUseKind kind) {
 int ScopeDepth(SymbolDeclKind kind) {
   switch (kind) {
     case SymbolDeclKind::GlobalVar:
-    case SymbolDeclKind::GlobalLet:
+    case SymbolDeclKind::GlobalConst:
     case SymbolDeclKind::Alias:
     case SymbolDeclKind::Struct:
     case SymbolDeclKind::Function:
@@ -430,7 +431,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolDeclKind kind,
   switch (kind) {
     case SymbolDeclKind::GlobalVar:
       return b.Global(source, symbol, b.ty.i32(), ast::StorageClass::kPrivate);
-    case SymbolDeclKind::GlobalLet:
+    case SymbolDeclKind::GlobalConst:
       return b.GlobalConst(source, symbol, b.ty.i32(), b.Expr(1));
     case SymbolDeclKind::Alias:
       return b.Alias(source, symbol, b.ty.i32());
@@ -449,7 +450,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolDeclKind kind,
       return node;
     }
     case SymbolDeclKind::LocalLet: {
-      auto* node = b.Const(source, symbol, b.ty.i32(), b.Expr(1));
+      auto* node = b.Let(source, symbol, b.ty.i32(), b.Expr(1));
       statements.emplace_back(b.Decl(node));
       return node;
     }
@@ -459,7 +460,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolDeclKind kind,
       return node;
     }
     case SymbolDeclKind::NestedLocalLet: {
-      auto* node = b.Const(source, symbol, b.ty.i32(), b.Expr(1));
+      auto* node = b.Let(source, symbol, b.ty.i32(), b.Expr(1));
       nested_statements.emplace_back(b.Decl(node));
       return node;
     }
@@ -598,12 +599,12 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind,
     }
     case SymbolUseKind::LocalLetType: {
       auto* node = b.ty.type_name(source, symbol);
-      statements.emplace_back(b.Decl(b.Const(b.Sym(), node, b.Expr(1))));
+      statements.emplace_back(b.Decl(b.Let(b.Sym(), node, b.Expr(1))));
       return node;
     }
     case SymbolUseKind::LocalLetValue: {
       auto* node = b.Expr(source, symbol);
-      statements.emplace_back(b.Decl(b.Const(b.Sym(), b.ty.i32(), node)));
+      statements.emplace_back(b.Decl(b.Let(b.Sym(), b.ty.i32(), node)));
       return node;
     }
     case SymbolUseKind::NestedLocalVarType: {
@@ -618,13 +619,12 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind,
     }
     case SymbolUseKind::NestedLocalLetType: {
       auto* node = b.ty.type_name(source, symbol);
-      nested_statements.emplace_back(b.Decl(b.Const(b.Sym(), node, b.Expr(1))));
+      nested_statements.emplace_back(b.Decl(b.Let(b.Sym(), node, b.Expr(1))));
       return node;
     }
     case SymbolUseKind::NestedLocalLetValue: {
       auto* node = b.Expr(source, symbol);
-      nested_statements.emplace_back(
-          b.Decl(b.Const(b.Sym(), b.ty.i32(), node)));
+      nested_statements.emplace_back(b.Decl(b.Let(b.Sym(), b.ty.i32(), node)));
       return node;
     }
     case SymbolUseKind::WorkgroupSizeValue: {
@@ -788,7 +788,7 @@ TEST_F(ResolverDependencyGraphDeclSelfUse, GlobalVar) {
 12:34 note: var 'SYMBOL' references var 'SYMBOL' here)");
 }
 
-TEST_F(ResolverDependencyGraphDeclSelfUse, GlobalLet) {
+TEST_F(ResolverDependencyGraphDeclSelfUse, GlobalConst) {
   const Symbol symbol = Sym("SYMBOL");
   GlobalConst(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123));
   Build(R"(error: cyclic dependency found: 'SYMBOL' -> 'SYMBOL'
@@ -805,7 +805,7 @@ TEST_F(ResolverDependencyGraphDeclSelfUse, LocalVar) {
 TEST_F(ResolverDependencyGraphDeclSelfUse, LocalLet) {
   const Symbol symbol = Sym("SYMBOL");
   WrapInFunction(
-      Decl(Const(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123))));
+      Decl(Let(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123))));
   Build("12:34 error: unknown identifier: 'SYMBOL'");
 }
 
@@ -1180,15 +1180,13 @@ TEST_P(ResolverDependencyShadowTest, Test) {
   SymbolTestHelper helper(this);
   auto* outer = helper.Add(outer_kind, symbol, Source{{12, 34}});
   helper.Add(inner_kind, symbol, Source{{56, 78}});
-  auto* inner_var = helper.nested_statements.size()
-                        ? helper.nested_statements[0]
-                              ->As<ast::VariableDeclStatement>()
-                              ->variable
-                        : helper.statements.size()
-                              ? helper.statements[0]
-                                    ->As<ast::VariableDeclStatement>()
-                                    ->variable
-                              : helper.parameters[0];
+  auto* inner_var =
+      helper.nested_statements.size() ? helper.nested_statements[0]
+                                            ->As<ast::VariableDeclStatement>()
+                                            ->variable
+      : helper.statements.size()
+          ? helper.statements[0]->As<ast::VariableDeclStatement>()->variable
+          : helper.parameters[0];
   helper.Build();
 
   EXPECT_EQ(Build().shadows[inner_var], outer);
@@ -1255,7 +1253,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
        T,                  // Return type
        {
            Decl(Var(Sym(), T, V)),                    //
-           Decl(Const(Sym(), T, V)),                  //
+           Decl(Let(Sym(), T, V)),                    //
            CallStmt(Call(F, V)),                      //
            Block(                                     //
                Assign(V, V)),                         //
@@ -1317,7 +1315,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, InferredType) {
   Global("a", nullptr, Expr(1));
   GlobalConst("b", nullptr, Expr(1));
   WrapInFunction(Var("c", nullptr, Expr(1)),  //
-                 Const("d", nullptr, Expr(1)));
+                 Let("d", nullptr, Expr(1)));
   Build();
 }
 

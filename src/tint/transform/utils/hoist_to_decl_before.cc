@@ -211,7 +211,7 @@ class HoistToDeclBefore::State {
     auto name = b.Symbols().New(decl_name);
 
     // Construct the let/var that holds the hoisted expr
-    auto* v = as_const ? b.Const(name, nullptr, ctx.Clone(expr))
+    auto* v = as_const ? b.Let(name, nullptr, ctx.Clone(expr))
                        : b.Var(name, nullptr, ctx.Clone(expr));
     auto* decl = b.Decl(v);
 

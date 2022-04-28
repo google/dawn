@@ -1577,8 +1577,8 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets) {
              create<ast::GroupAttribute>(2),
          });
 
-  auto* p = Const("p", nullptr, AddressOf("b"));
-  auto* p2 = Const("p2", nullptr, AddressOf(MemberAccessor(Deref(p), "a")));
+  auto* p = Let("p", nullptr, AddressOf("b"));
+  auto* p2 = Let("p2", nullptr, AddressOf(MemberAccessor(Deref(p), "a")));
   auto* expr = Call("arrayLength", p2);
 
   Func("a_func", {}, ty.void_(),
@@ -1637,9 +1637,9 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
              create<ast::GroupAttribute>(2),
          });
 
-  auto* p = Const("p", nullptr, AddressOf(Deref(AddressOf("b"))));
-  auto* p2 = Const("p2", nullptr, AddressOf(Deref(p)));
-  auto* p3 = Const("p3", nullptr, AddressOf(MemberAccessor(Deref(p2), "a")));
+  auto* p = Let("p", nullptr, AddressOf(Deref(AddressOf("b"))));
+  auto* p2 = Let("p2", nullptr, AddressOf(Deref(p)));
+  auto* p3 = Let("p3", nullptr, AddressOf(MemberAccessor(Deref(p2), "a")));
   auto* expr = Call("arrayLength", AddressOf(Deref(p3)));
 
   Func("a_func", {}, ty.void_(),
@@ -1704,10 +1704,10 @@ TEST_F(BuiltinBuilderTest, Call_AtomicLoad) {
 
   Func("a_func", {}, ty.void_(),
        ast::StatementList{
-           Decl(Const("u", ty.u32(),
-                      Call("atomicLoad", AddressOf(MemberAccessor("b", "u"))))),
-           Decl(Const("i", ty.i32(),
-                      Call("atomicLoad", AddressOf(MemberAccessor("b", "i"))))),
+           Decl(Let("u", ty.u32(),
+                    Call("atomicLoad", AddressOf(MemberAccessor("b", "u"))))),
+           Decl(Let("i", ty.i32(),
+                    Call("atomicLoad", AddressOf(MemberAccessor("b", "i"))))),
        },
        ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
@@ -1845,9 +1845,9 @@ TEST_P(Builtin_Builtin_AtomicRMW_i32, Test) {
   Func("a_func", {}, ty.void_(),
        ast::StatementList{
            Decl(Var("v", nullptr, Expr(10))),
-           Decl(Const("x", ty.i32(),
-                      Call(GetParam().name, AddressOf(MemberAccessor("b", "v")),
-                           "v"))),
+           Decl(Let("x", ty.i32(),
+                    Call(GetParam().name, AddressOf(MemberAccessor("b", "v")),
+                         "v"))),
        },
        ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
@@ -1920,9 +1920,9 @@ TEST_P(Builtin_Builtin_AtomicRMW_u32, Test) {
   Func("a_func", {}, ty.void_(),
        ast::StatementList{
            Decl(Var("v", nullptr, Expr(10u))),
-           Decl(Const("x", ty.u32(),
-                      Call(GetParam().name, AddressOf(MemberAccessor("b", "v")),
-                           "v"))),
+           Decl(Let("x", ty.u32(),
+                    Call(GetParam().name, AddressOf(MemberAccessor("b", "v")),
+                         "v"))),
        },
        ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
@@ -1998,12 +1998,12 @@ TEST_F(BuiltinBuilderTest, Call_AtomicExchange) {
        ast::StatementList{
            Decl(Var("u", nullptr, Expr(10u))),
            Decl(Var("i", nullptr, Expr(10))),
-           Decl(Const("r", ty.u32(),
-                      Call("atomicExchange",
-                           AddressOf(MemberAccessor("b", "u")), "u"))),
-           Decl(Const("s", ty.i32(),
-                      Call("atomicExchange",
-                           AddressOf(MemberAccessor("b", "i")), "i"))),
+           Decl(Let("r", ty.u32(),
+                    Call("atomicExchange", AddressOf(MemberAccessor("b", "u")),
+                         "u"))),
+           Decl(Let("s", ty.i32(),
+                    Call("atomicExchange", AddressOf(MemberAccessor("b", "i")),
+                         "i"))),
        },
        ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
@@ -2074,12 +2074,12 @@ TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
 
   Func("a_func", {}, ty.void_(),
        ast::StatementList{
-           Decl(Const("u", ty.vec2<u32>(),
-                      Call("atomicCompareExchangeWeak",
-                           AddressOf(MemberAccessor("b", "u")), 10u, 20u))),
-           Decl(Const("i", ty.vec2<i32>(),
-                      Call("atomicCompareExchangeWeak",
-                           AddressOf(MemberAccessor("b", "i")), 10, 20))),
+           Decl(Let("u", ty.vec2<u32>(),
+                    Call("atomicCompareExchangeWeak",
+                         AddressOf(MemberAccessor("b", "u")), 10u, 20u))),
+           Decl(Let("i", ty.vec2<i32>(),
+                    Call("atomicCompareExchangeWeak",
+                         AddressOf(MemberAccessor("b", "i")), 10, 20))),
        },
        ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 

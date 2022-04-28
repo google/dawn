@@ -34,7 +34,7 @@ TEST_F(WgslGeneratorImplTest, IndexAccessor) {
 TEST_F(WgslGeneratorImplTest, IndexAccessor_OfDref) {
   Global("ary", ty.array<i32, 10>(), ast::StorageClass::kPrivate);
 
-  auto* p = Const("p", nullptr, AddressOf("ary"));
+  auto* p = Let("p", nullptr, AddressOf("ary"));
   auto* expr = IndexAccessor(Deref("p"), 5);
   WrapInFunction(p, expr);
 

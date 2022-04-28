@@ -122,8 +122,8 @@ TEST_F(MslSanitizerTest, Call_ArrayLength_ViaLets) {
              create<ast::GroupAttribute>(2),
          });
 
-  auto* p = Const("p", nullptr, AddressOf("b"));
-  auto* p2 = Const("p2", nullptr, AddressOf(MemberAccessor(Deref(p), "a")));
+  auto* p = Let("p", nullptr, AddressOf("b"));
+  auto* p2 = Let("p2", nullptr, AddressOf(MemberAccessor(Deref(p), "a")));
 
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{

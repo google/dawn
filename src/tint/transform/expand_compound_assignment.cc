@@ -83,7 +83,7 @@ class State {
     auto hoist_pointer_to = [&](const ast::Expression* expr) {
       auto name = b.Sym();
       auto* ptr = b.AddressOf(ctx.Clone(expr));
-      auto* decl = b.Decl(b.Const(name, nullptr, ptr));
+      auto* decl = b.Decl(b.Let(name, nullptr, ptr));
       hoist_to_decl_before.InsertBefore(ctx.src->Sem().Get(stmt), decl);
       return name;
     };
@@ -91,7 +91,7 @@ class State {
     // Helper function to hoist `expr` to a let declaration.
     auto hoist_expr_to_let = [&](const ast::Expression* expr) {
       auto name = b.Sym();
-      auto* decl = b.Decl(b.Const(name, nullptr, ctx.Clone(expr)));
+      auto* decl = b.Decl(b.Let(name, nullptr, ctx.Clone(expr)));
       hoist_to_decl_before.InsertBefore(ctx.src->Sem().Get(stmt), decl);
       return name;
     };

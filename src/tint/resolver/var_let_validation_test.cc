@@ -25,7 +25,7 @@ struct ResolverVarLetValidationTest : public resolver::TestHelper,
 
 TEST_F(ResolverVarLetValidationTest, LetNoInitializer) {
   // let a : i32;
-  WrapInFunction(Const(Source{{12, 34}}, "a", ty.i32(), nullptr));
+  WrapInFunction(Let(Source{{12, 34}}, "a", ty.i32(), nullptr));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
@@ -82,7 +82,7 @@ TEST_F(ResolverVarLetValidationTest, LetTypeNotConstructible) {
   auto* t1 =
       Global("t1", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
              GroupAndBinding(0, 0));
-  auto* t2 = Const(Source{{56, 78}}, "t2", nullptr, Expr(t1));
+  auto* t2 = Let(Source{{56, 78}}, "t2", nullptr, Expr(t1));
   WrapInFunction(t2);
 
   EXPECT_FALSE(r()->Resolve());
@@ -92,7 +92,7 @@ TEST_F(ResolverVarLetValidationTest, LetTypeNotConstructible) {
 
 TEST_F(ResolverVarLetValidationTest, LetConstructorWrongType) {
   // var v : i32 = 2u
-  WrapInFunction(Const(Source{{3, 3}}, "v", ty.i32(), Expr(2u)));
+  WrapInFunction(Let(Source{{3, 3}}, "v", ty.i32(), Expr(2u)));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
@@ -113,7 +113,7 @@ TEST_F(ResolverVarLetValidationTest, VarConstructorWrongType) {
 
 TEST_F(ResolverVarLetValidationTest, LetConstructorWrongTypeViaAlias) {
   auto* a = Alias("I32", ty.i32());
-  WrapInFunction(Const(Source{{3, 3}}, "v", ty.Of(a), Expr(2u)));
+  WrapInFunction(Let(Source{{3, 3}}, "v", ty.Of(a), Expr(2u)));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
@@ -138,7 +138,7 @@ TEST_F(ResolverVarLetValidationTest, LetOfPtrConstructedWithRef) {
   const auto priv = ast::StorageClass::kFunction;
   auto* var_a = Var("a", ty.f32(), priv);
   auto* var_b =
-      Const(Source{{12, 34}}, "b", ty.pointer<float>(priv), Expr("a"), {});
+      Let(Source{{12, 34}}, "b", ty.pointer<float>(priv), Expr("a"), {});
   WrapInFunction(var_a, var_b);
 
   ASSERT_FALSE(r()->Resolve());
@@ -151,8 +151,8 @@ TEST_F(ResolverVarLetValidationTest, LetOfPtrConstructedWithRef) {
 TEST_F(ResolverVarLetValidationTest, LocalLetRedeclared) {
   // let l : f32 = 1.;
   // let l : i32 = 0;
-  auto* l1 = Const("l", ty.f32(), Expr(1.f));
-  auto* l2 = Const(Source{{12, 34}}, "l", ty.i32(), Expr(0));
+  auto* l1 = Let("l", ty.f32(), Expr(1.f));
+  auto* l2 = Let(Source{{12, 34}}, "l", ty.i32(), Expr(0));
   WrapInFunction(l1, l2);
 
   EXPECT_FALSE(r()->Resolve());
@@ -235,10 +235,10 @@ TEST_F(ResolverVarLetValidationTest, InferredPtrStorageAccessMismatch) {
 
   auto* expr =
       IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 4);
-  auto* ptr = Const(
-      Source{{12, 34}}, "p",
-      ty.pointer<i32>(ast::StorageClass::kStorage, ast::Access::kReadWrite),
-      AddressOf(expr));
+  auto* ptr =
+      Let(Source{{12, 34}}, "p",
+          ty.pointer<i32>(ast::StorageClass::kStorage, ast::Access::kReadWrite),
+          AddressOf(expr));
 
   WrapInFunction(ptr);
 
@@ -309,8 +309,8 @@ TEST_F(ResolverVarLetValidationTest, InvalidStorageClassForInitializer) {
 
 TEST_F(ResolverVarLetValidationTest, VectorLetNoType) {
   // let a : mat3x3 = mat3x3<f32>();
-  WrapInFunction(Const("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3),
-                       vec3<f32>()));
+  WrapInFunction(
+      Let("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3), vec3<f32>()));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
@@ -326,9 +326,8 @@ TEST_F(ResolverVarLetValidationTest, VectorVarNoType) {
 
 TEST_F(ResolverVarLetValidationTest, MatrixLetNoType) {
   // let a : mat3x3 = mat3x3<f32>();
-  WrapInFunction(Const("a",
-                       create<ast::Matrix>(Source{{12, 34}}, nullptr, 3, 3),
-                       mat3x3<f32>()));
+  WrapInFunction(Let("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3, 3),
+                     mat3x3<f32>()));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");

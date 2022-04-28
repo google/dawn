@@ -52,7 +52,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest,
   // *b += 2;
   const auto func = ast::StorageClass::kFunction;
   auto* var_a = Var("a", ty.i32(), func, Expr(2));
-  auto* var_b = Const("b", ty.pointer<int>(func), AddressOf(Expr("a")));
+  auto* var_b = Let("b", ty.pointer<int>(func), AddressOf(Expr("a")));
   WrapInFunction(
       var_a, var_b,
       CompoundAssign(Source{{12, 34}}, Deref("b"), 2, ast::BinaryOp::kAdd));
@@ -262,7 +262,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, ReadOnlyBuffer) {
 TEST_F(ResolverCompoundAssignmentValidationTest, LhsConstant) {
   // let a = 1;
   // a += 1;
-  auto* a = Const(Source{{12, 34}}, "a", nullptr, Expr(1));
+  auto* a = Let(Source{{12, 34}}, "a", nullptr, Expr(1));
   WrapInFunction(
       a, CompoundAssign(Expr(Source{{56, 78}}, "a"), 1, ast::BinaryOp::kAdd));
 

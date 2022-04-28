@@ -59,48 +59,47 @@ struct BuiltinPolyfill::State {
     auto V = [&](uint32_t value) -> const ast::Expression* {
       return ScalarOrVector(width, value);
     };
-    b.Func(
-        name, {b.Param("v", T(ty))}, T(ty),
-        {
-            // var x = U(v);
-            b.Decl(b.Var("x", nullptr, b.Construct(U(), b.Expr("v")))),
-            // let b16 = select(0, 16, x <= 0x0000ffff);
-            b.Decl(b.Const("b16", nullptr,
-                           b.Call("select", V(0), V(16),
-                                  b.LessThanEqual("x", V(0x0000ffff))))),
-            // x = x << b16;
-            b.Assign("x", b.Shl("x", "b16")),
-            // let b8  = select(0, 8,  x <= 0x00ffffff);
-            b.Decl(b.Const("b8", nullptr,
-                           b.Call("select", V(0), V(8),
-                                  b.LessThanEqual("x", V(0x00ffffff))))),
-            // x = x << b8;
-            b.Assign("x", b.Shl("x", "b8")),
-            // let b4  = select(0, 4,  x <= 0x0fffffff);
-            b.Decl(b.Const("b4", nullptr,
-                           b.Call("select", V(0), V(4),
-                                  b.LessThanEqual("x", V(0x0fffffff))))),
-            // x = x << b4;
-            b.Assign("x", b.Shl("x", "b4")),
-            // let b2  = select(0, 2,  x <= 0x3fffffff);
-            b.Decl(b.Const("b2", nullptr,
-                           b.Call("select", V(0), V(2),
-                                  b.LessThanEqual("x", V(0x3fffffff))))),
-            // x = x << b2;
-            b.Assign("x", b.Shl("x", "b2")),
-            // let b1  = select(0, 1,  x <= 0x7fffffff);
-            b.Decl(b.Const("b1", nullptr,
-                           b.Call("select", V(0), V(1),
-                                  b.LessThanEqual("x", V(0x7fffffff))))),
-            // let is_zero  = select(0, 1, x == 0);
-            b.Decl(b.Const("is_zero", nullptr,
-                           b.Call("select", V(0), V(1), b.Equal("x", V(0))))),
-            // return R((b16 | b8 | b4 | b2 | b1) + zero);
-            b.Return(b.Construct(
-                T(ty),
-                b.Add(b.Or(b.Or(b.Or(b.Or("b16", "b8"), "b4"), "b2"), "b1"),
-                      "is_zero"))),
-        });
+    b.Func(name, {b.Param("v", T(ty))}, T(ty),
+           {
+               // var x = U(v);
+               b.Decl(b.Var("x", nullptr, b.Construct(U(), b.Expr("v")))),
+               // let b16 = select(0, 16, x <= 0x0000ffff);
+               b.Decl(b.Let("b16", nullptr,
+                            b.Call("select", V(0), V(16),
+                                   b.LessThanEqual("x", V(0x0000ffff))))),
+               // x = x << b16;
+               b.Assign("x", b.Shl("x", "b16")),
+               // let b8  = select(0, 8,  x <= 0x00ffffff);
+               b.Decl(b.Let("b8", nullptr,
+                            b.Call("select", V(0), V(8),
+                                   b.LessThanEqual("x", V(0x00ffffff))))),
+               // x = x << b8;
+               b.Assign("x", b.Shl("x", "b8")),
+               // let b4  = select(0, 4,  x <= 0x0fffffff);
+               b.Decl(b.Let("b4", nullptr,
+                            b.Call("select", V(0), V(4),
+                                   b.LessThanEqual("x", V(0x0fffffff))))),
+               // x = x << b4;
+               b.Assign("x", b.Shl("x", "b4")),
+               // let b2  = select(0, 2,  x <= 0x3fffffff);
+               b.Decl(b.Let("b2", nullptr,
+                            b.Call("select", V(0), V(2),
+                                   b.LessThanEqual("x", V(0x3fffffff))))),
+               // x = x << b2;
+               b.Assign("x", b.Shl("x", "b2")),
+               // let b1  = select(0, 1,  x <= 0x7fffffff);
+               b.Decl(b.Let("b1", nullptr,
+                            b.Call("select", V(0), V(1),
+                                   b.LessThanEqual("x", V(0x7fffffff))))),
+               // let is_zero  = select(0, 1, x == 0);
+               b.Decl(b.Let("is_zero", nullptr,
+                            b.Call("select", V(0), V(1), b.Equal("x", V(0))))),
+               // return R((b16 | b8 | b4 | b2 | b1) + zero);
+               b.Return(b.Construct(
+                   T(ty),
+                   b.Add(b.Or(b.Or(b.Or(b.Or("b16", "b8"), "b4"), "b2"), "b1"),
+                         "is_zero"))),
+           });
     return name;
   }
 
@@ -127,48 +126,47 @@ struct BuiltinPolyfill::State {
       }
       return b.Construct(b.ty.vec<bool>(width), value);
     };
-    b.Func(
-        name, {b.Param("v", T(ty))}, T(ty),
-        {
-            // var x = U(v);
-            b.Decl(b.Var("x", nullptr, b.Construct(U(), b.Expr("v")))),
-            // let b16 = select(16, 0, bool(x & 0x0000ffff));
-            b.Decl(b.Const(
-                "b16", nullptr,
-                b.Call("select", V(16), V(0), B(b.And("x", V(0x0000ffff)))))),
-            // x = x >> b16;
-            b.Assign("x", b.Shr("x", "b16")),
-            // let b8  = select(8,  0, bool(x & 0x000000ff));
-            b.Decl(b.Const(
-                "b8", nullptr,
-                b.Call("select", V(8), V(0), B(b.And("x", V(0x000000ff)))))),
-            // x = x >> b8;
-            b.Assign("x", b.Shr("x", "b8")),
-            // let b4  = select(4,  0, bool(x & 0x0000000f));
-            b.Decl(b.Const(
-                "b4", nullptr,
-                b.Call("select", V(4), V(0), B(b.And("x", V(0x0000000f)))))),
-            // x = x >> b4;
-            b.Assign("x", b.Shr("x", "b4")),
-            // let b2  = select(2,  0, bool(x & 0x00000003));
-            b.Decl(b.Const(
-                "b2", nullptr,
-                b.Call("select", V(2), V(0), B(b.And("x", V(0x00000003)))))),
-            // x = x >> b2;
-            b.Assign("x", b.Shr("x", "b2")),
-            // let b1  = select(1,  0, bool(x & 0x00000001));
-            b.Decl(b.Const(
-                "b1", nullptr,
-                b.Call("select", V(1), V(0), B(b.And("x", V(0x00000001)))))),
-            // let is_zero  = select(0, 1, x == 0);
-            b.Decl(b.Const("is_zero", nullptr,
-                           b.Call("select", V(0), V(1), b.Equal("x", V(0))))),
-            // return R((b16 | b8 | b4 | b2 | b1) + zero);
-            b.Return(b.Construct(
-                T(ty),
-                b.Add(b.Or(b.Or(b.Or(b.Or("b16", "b8"), "b4"), "b2"), "b1"),
-                      "is_zero"))),
-        });
+    b.Func(name, {b.Param("v", T(ty))}, T(ty),
+           {
+               // var x = U(v);
+               b.Decl(b.Var("x", nullptr, b.Construct(U(), b.Expr("v")))),
+               // let b16 = select(16, 0, bool(x & 0x0000ffff));
+               b.Decl(b.Let("b16", nullptr,
+                            b.Call("select", V(16), V(0),
+                                   B(b.And("x", V(0x0000ffff)))))),
+               // x = x >> b16;
+               b.Assign("x", b.Shr("x", "b16")),
+               // let b8  = select(8,  0, bool(x & 0x000000ff));
+               b.Decl(b.Let(
+                   "b8", nullptr,
+                   b.Call("select", V(8), V(0), B(b.And("x", V(0x000000ff)))))),
+               // x = x >> b8;
+               b.Assign("x", b.Shr("x", "b8")),
+               // let b4  = select(4,  0, bool(x & 0x0000000f));
+               b.Decl(b.Let(
+                   "b4", nullptr,
+                   b.Call("select", V(4), V(0), B(b.And("x", V(0x0000000f)))))),
+               // x = x >> b4;
+               b.Assign("x", b.Shr("x", "b4")),
+               // let b2  = select(2,  0, bool(x & 0x00000003));
+               b.Decl(b.Let(
+                   "b2", nullptr,
+                   b.Call("select", V(2), V(0), B(b.And("x", V(0x00000003)))))),
+               // x = x >> b2;
+               b.Assign("x", b.Shr("x", "b2")),
+               // let b1  = select(1,  0, bool(x & 0x00000001));
+               b.Decl(b.Let(
+                   "b1", nullptr,
+                   b.Call("select", V(1), V(0), B(b.And("x", V(0x00000001)))))),
+               // let is_zero  = select(0, 1, x == 0);
+               b.Decl(b.Let("is_zero", nullptr,
+                            b.Call("select", V(0), V(1), b.Equal("x", V(0))))),
+               // return R((b16 | b8 | b4 | b2 | b1) + zero);
+               b.Return(b.Construct(
+                   T(ty),
+                   b.Add(b.Or(b.Or(b.Or(b.Or("b16", "b8"), "b4"), "b2"), "b1"),
+                         "is_zero"))),
+           });
     return name;
   }
 
@@ -190,14 +188,14 @@ struct BuiltinPolyfill::State {
     };
 
     ast::StatementList body = {
-        b.Decl(b.Const("s", nullptr, b.Call("min", "offset", W))),
-        b.Decl(b.Const("e", nullptr, b.Call("min", W, b.Add("s", "count")))),
+        b.Decl(b.Let("s", nullptr, b.Call("min", "offset", W))),
+        b.Decl(b.Let("e", nullptr, b.Call("min", W, b.Add("s", "count")))),
     };
 
     switch (polyfill.extract_bits) {
       case Level::kFull:
-        body.emplace_back(b.Decl(b.Const("shl", nullptr, b.Sub(W, "e"))));
-        body.emplace_back(b.Decl(b.Const("shr", nullptr, b.Add("shl", "s"))));
+        body.emplace_back(b.Decl(b.Let("shl", nullptr, b.Sub(W, "e"))));
+        body.emplace_back(b.Decl(b.Let("shr", nullptr, b.Add("shl", "s"))));
         body.emplace_back(b.Return(b.Shr(b.Shl("v", vecN_u32(b.Expr("shl"))),
                                          vecN_u32(b.Expr("shr")))));
         break;
@@ -264,37 +262,37 @@ struct BuiltinPolyfill::State {
                // var x = select(U(v), ~U(v), v < 0); (signed)
                b.Decl(b.Var("x", nullptr, x)),
                // let b16 = select(0, 16, bool(x & 0xffff0000));
-               b.Decl(b.Const("b16", nullptr,
-                              b.Call("select", V(0), V(16),
-                                     B(b.And("x", V(0xffff0000)))))),
+               b.Decl(b.Let("b16", nullptr,
+                            b.Call("select", V(0), V(16),
+                                   B(b.And("x", V(0xffff0000)))))),
                // x = x >> b16;
                b.Assign("x", b.Shr("x", "b16")),
                // let b8  = select(0, 8,  bool(x & 0x0000ff00));
-               b.Decl(b.Const(
+               b.Decl(b.Let(
                    "b8", nullptr,
                    b.Call("select", V(0), V(8), B(b.And("x", V(0x0000ff00)))))),
                // x = x >> b8;
                b.Assign("x", b.Shr("x", "b8")),
                // let b4  = select(0, 4,  bool(x & 0x000000f0));
-               b.Decl(b.Const(
+               b.Decl(b.Let(
                    "b4", nullptr,
                    b.Call("select", V(0), V(4), B(b.And("x", V(0x000000f0)))))),
                // x = x >> b4;
                b.Assign("x", b.Shr("x", "b4")),
                // let b2  = select(0, 2,  bool(x & 0x0000000c));
-               b.Decl(b.Const(
+               b.Decl(b.Let(
                    "b2", nullptr,
                    b.Call("select", V(0), V(2), B(b.And("x", V(0x0000000c)))))),
                // x = x >> b2;
                b.Assign("x", b.Shr("x", "b2")),
                // let b1  = select(0, 1,  bool(x & 0x00000002));
-               b.Decl(b.Const(
+               b.Decl(b.Let(
                    "b1", nullptr,
                    b.Call("select", V(0), V(1), B(b.And("x", V(0x00000002)))))),
                // let is_zero  = select(0, 0xffffffff, x == 0);
-               b.Decl(b.Const("is_zero", nullptr,
-                              b.Call("select", V(0), V(0xffffffff),
-                                     b.Equal("x", V(0))))),
+               b.Decl(b.Let(
+                   "is_zero", nullptr,
+                   b.Call("select", V(0), V(0xffffffff), b.Equal("x", V(0))))),
                // return R(b16 | b8 | b4 | b2 | b1 | zero);
                b.Return(b.Construct(
                    T(ty),
@@ -332,37 +330,37 @@ struct BuiltinPolyfill::State {
                // var x = U(v);
                b.Decl(b.Var("x", nullptr, b.Construct(U(), b.Expr("v")))),
                // let b16 = select(16, 0, bool(x & 0x0000ffff));
-               b.Decl(b.Const("b16", nullptr,
-                              b.Call("select", V(16), V(0),
-                                     B(b.And("x", V(0x0000ffff)))))),
+               b.Decl(b.Let("b16", nullptr,
+                            b.Call("select", V(16), V(0),
+                                   B(b.And("x", V(0x0000ffff)))))),
                // x = x >> b16;
                b.Assign("x", b.Shr("x", "b16")),
                // let b8  = select(8,  0, bool(x & 0x000000ff));
-               b.Decl(b.Const(
+               b.Decl(b.Let(
                    "b8", nullptr,
                    b.Call("select", V(8), V(0), B(b.And("x", V(0x000000ff)))))),
                // x = x >> b8;
                b.Assign("x", b.Shr("x", "b8")),
                // let b4  = select(4,  0, bool(x & 0x0000000f));
-               b.Decl(b.Const(
+               b.Decl(b.Let(
                    "b4", nullptr,
                    b.Call("select", V(4), V(0), B(b.And("x", V(0x0000000f)))))),
                // x = x >> b4;
                b.Assign("x", b.Shr("x", "b4")),
                // let b2  = select(2,  0, bool(x & 0x00000003));
-               b.Decl(b.Const(
+               b.Decl(b.Let(
                    "b2", nullptr,
                    b.Call("select", V(2), V(0), B(b.And("x", V(0x00000003)))))),
                // x = x >> b2;
                b.Assign("x", b.Shr("x", "b2")),
                // let b1  = select(1,  0, bool(x & 0x00000001));
-               b.Decl(b.Const(
+               b.Decl(b.Let(
                    "b1", nullptr,
                    b.Call("select", V(1), V(0), B(b.And("x", V(0x00000001)))))),
                // let is_zero  = select(0, 0xffffffff, x == 0);
-               b.Decl(b.Const("is_zero", nullptr,
-                              b.Call("select", V(0), V(0xffffffff),
-                                     b.Equal("x", V(0))))),
+               b.Decl(b.Let(
+                   "is_zero", nullptr,
+                   b.Call("select", V(0), V(0xffffffff), b.Equal("x", V(0))))),
                // return R(b16 | b8 | b4 | b2 | b1 | is_zero);
                b.Return(b.Construct(
                    T(ty),
@@ -399,14 +397,14 @@ struct BuiltinPolyfill::State {
     };
 
     ast::StatementList body = {
-        b.Decl(b.Const("s", nullptr, b.Call("min", "offset", W))),
-        b.Decl(b.Const("e", nullptr, b.Call("min", W, b.Add("s", "count")))),
+        b.Decl(b.Let("s", nullptr, b.Call("min", "offset", W))),
+        b.Decl(b.Let("e", nullptr, b.Call("min", W, b.Add("s", "count")))),
     };
 
     switch (polyfill.insert_bits) {
       case Level::kFull:
         // let mask = ((1 << s) - 1) ^ ((1 << e) - 1)
-        body.emplace_back(b.Decl(b.Const(
+        body.emplace_back(b.Decl(b.Let(
             "mask", nullptr,
             b.Xor(b.Sub(b.Shl(1u, "s"), 1u), b.Sub(b.Shl(1u, "e"), 1u)))));
         // return ((n << s) & mask) | (v & ~mask)

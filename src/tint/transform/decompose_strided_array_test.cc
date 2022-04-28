@@ -80,8 +80,8 @@ TEST_F(DecomposeStridedArrayTest, PrivateDefaultStridedArray) {
   b.Global("arr", b.ty.array<f32, 4>(4), ast::StorageClass::kPrivate);
   b.Func("f", {}, b.ty.void_(),
          {
-             b.Decl(b.Const("a", b.ty.array<f32, 4>(4), b.Expr("arr"))),
-             b.Decl(b.Const("b", b.ty.f32(), b.IndexAccessor("arr", 1))),
+             b.Decl(b.Let("a", b.ty.array<f32, 4>(4), b.Expr("arr"))),
+             b.Decl(b.Let("b", b.ty.f32(), b.IndexAccessor("arr", 1))),
          },
          {
              b.Stage(ast::PipelineStage::kCompute),
@@ -117,8 +117,8 @@ TEST_F(DecomposeStridedArrayTest, PrivateStridedArray) {
   b.Global("arr", b.ty.array<f32, 4>(32), ast::StorageClass::kPrivate);
   b.Func("f", {}, b.ty.void_(),
          {
-             b.Decl(b.Const("a", b.ty.array<f32, 4>(32), b.Expr("arr"))),
-             b.Decl(b.Const("b", b.ty.f32(), b.IndexAccessor("arr", 1))),
+             b.Decl(b.Let("a", b.ty.array<f32, 4>(32), b.Expr("arr"))),
+             b.Decl(b.Let("b", b.ty.f32(), b.IndexAccessor("arr", 1))),
          },
          {
              b.Stage(ast::PipelineStage::kCompute),
@@ -163,10 +163,10 @@ TEST_F(DecomposeStridedArrayTest, ReadUniformStridedArray) {
            b.GroupAndBinding(0, 0));
   b.Func("f", {}, b.ty.void_(),
          {
-             b.Decl(b.Const("a", b.ty.array<f32, 4>(32),
-                            b.MemberAccessor("s", "a"))),
-             b.Decl(b.Const("b", b.ty.f32(),
-                            b.IndexAccessor(b.MemberAccessor("s", "a"), 1))),
+             b.Decl(b.Let("a", b.ty.array<f32, 4>(32),
+                          b.MemberAccessor("s", "a"))),
+             b.Decl(b.Let("b", b.ty.f32(),
+                          b.IndexAccessor(b.MemberAccessor("s", "a"), 1))),
          },
          {
              b.Stage(ast::PipelineStage::kCompute),
@@ -214,19 +214,19 @@ TEST_F(DecomposeStridedArrayTest, ReadUniformDefaultStridedArray) {
       b.Structure("S", {b.Member("a", b.ty.array(b.ty.vec4<f32>(), 4, 16))});
   b.Global("s", b.ty.Of(S), ast::StorageClass::kUniform,
            b.GroupAndBinding(0, 0));
-  b.Func("f", {}, b.ty.void_(),
-         {
-             b.Decl(b.Const("a", b.ty.array(b.ty.vec4<f32>(), 4, 16),
-                            b.MemberAccessor("s", "a"))),
-             b.Decl(b.Const(
-                 "b", b.ty.f32(),
-                 b.IndexAccessor(b.IndexAccessor(b.MemberAccessor("s", "a"), 1),
-                                 2))),
-         },
-         {
-             b.Stage(ast::PipelineStage::kCompute),
-             b.WorkgroupSize(1),
-         });
+  b.Func(
+      "f", {}, b.ty.void_(),
+      {
+          b.Decl(b.Let("a", b.ty.array(b.ty.vec4<f32>(), 4, 16),
+                       b.MemberAccessor("s", "a"))),
+          b.Decl(b.Let("b", b.ty.f32(),
+                       b.IndexAccessor(
+                           b.IndexAccessor(b.MemberAccessor("s", "a"), 1), 2))),
+      },
+      {
+          b.Stage(ast::PipelineStage::kCompute),
+          b.WorkgroupSize(1),
+      });
 
   auto* expect =
       R"(
@@ -266,10 +266,10 @@ TEST_F(DecomposeStridedArrayTest, ReadStorageStridedArray) {
            b.GroupAndBinding(0, 0));
   b.Func("f", {}, b.ty.void_(),
          {
-             b.Decl(b.Const("a", b.ty.array<f32, 4>(32),
-                            b.MemberAccessor("s", "a"))),
-             b.Decl(b.Const("b", b.ty.f32(),
-                            b.IndexAccessor(b.MemberAccessor("s", "a"), 1))),
+             b.Decl(b.Let("a", b.ty.array<f32, 4>(32),
+                          b.MemberAccessor("s", "a"))),
+             b.Decl(b.Let("b", b.ty.f32(),
+                          b.IndexAccessor(b.MemberAccessor("s", "a"), 1))),
          },
          {
              b.Stage(ast::PipelineStage::kCompute),
@@ -316,17 +316,17 @@ TEST_F(DecomposeStridedArrayTest, ReadStorageDefaultStridedArray) {
   auto* S = b.Structure("S", {b.Member("a", b.ty.array<f32, 4>(4))});
   b.Global("s", b.ty.Of(S), ast::StorageClass::kStorage,
            b.GroupAndBinding(0, 0));
-  b.Func("f", {}, b.ty.void_(),
-         {
-             b.Decl(b.Const("a", b.ty.array<f32, 4>(4),
-                            b.MemberAccessor("s", "a"))),
-             b.Decl(b.Const("b", b.ty.f32(),
-                            b.IndexAccessor(b.MemberAccessor("s", "a"), 1))),
-         },
-         {
-             b.Stage(ast::PipelineStage::kCompute),
-             b.WorkgroupSize(1),
-         });
+  b.Func(
+      "f", {}, b.ty.void_(),
+      {
+          b.Decl(b.Let("a", b.ty.array<f32, 4>(4), b.MemberAccessor("s", "a"))),
+          b.Decl(b.Let("b", b.ty.f32(),
+                       b.IndexAccessor(b.MemberAccessor("s", "a"), 1))),
+      },
+      {
+          b.Stage(ast::PipelineStage::kCompute),
+          b.WorkgroupSize(1),
+      });
 
   auto* expect = R"(
 struct S {
@@ -476,22 +476,22 @@ TEST_F(DecomposeStridedArrayTest, ReadWriteViaPointerLets) {
   auto* S = b.Structure("S", {b.Member("a", b.ty.array<f32, 4>(32))});
   b.Global("s", b.ty.Of(S), ast::StorageClass::kStorage,
            ast::Access::kReadWrite, b.GroupAndBinding(0, 0));
-  b.Func("f", {}, b.ty.void_(),
-         {
-             b.Decl(b.Const("a", nullptr,
-                            b.AddressOf(b.MemberAccessor("s", "a")))),
-             b.Decl(b.Const("b", nullptr,
-                            b.AddressOf(b.Deref(b.AddressOf(b.Deref("a")))))),
-             b.Decl(b.Const("c", nullptr, b.Deref("b"))),
-             b.Decl(b.Const("d", nullptr, b.IndexAccessor(b.Deref("b"), 1))),
-             b.Assign(b.Deref("b"), b.Construct(b.ty.array<f32, 4>(32), 1.0f,
-                                                2.0f, 3.0f, 4.0f)),
-             b.Assign(b.IndexAccessor(b.Deref("b"), 1), 5.0f),
-         },
-         {
-             b.Stage(ast::PipelineStage::kCompute),
-             b.WorkgroupSize(1),
-         });
+  b.Func(
+      "f", {}, b.ty.void_(),
+      {
+          b.Decl(b.Let("a", nullptr, b.AddressOf(b.MemberAccessor("s", "a")))),
+          b.Decl(b.Let("b", nullptr,
+                       b.AddressOf(b.Deref(b.AddressOf(b.Deref("a")))))),
+          b.Decl(b.Let("c", nullptr, b.Deref("b"))),
+          b.Decl(b.Let("d", nullptr, b.IndexAccessor(b.Deref("b"), 1))),
+          b.Assign(b.Deref("b"),
+                   b.Construct(b.ty.array<f32, 4>(32), 1.0f, 2.0f, 3.0f, 4.0f)),
+          b.Assign(b.IndexAccessor(b.Deref("b"), 1), 5.0f),
+      },
+      {
+          b.Stage(ast::PipelineStage::kCompute),
+          b.WorkgroupSize(1),
+      });
 
   auto* expect =
       R"(
@@ -544,10 +544,9 @@ TEST_F(DecomposeStridedArrayTest, PrivateAliasedStridedArray) {
   b.Func(
       "f", {}, b.ty.void_(),
       {
-          b.Decl(
-              b.Const("a", b.ty.type_name("ARR"), b.MemberAccessor("s", "a"))),
-          b.Decl(b.Const("b", b.ty.f32(),
-                         b.IndexAccessor(b.MemberAccessor("s", "a"), 1))),
+          b.Decl(b.Let("a", b.ty.type_name("ARR"), b.MemberAccessor("s", "a"))),
+          b.Decl(b.Let("b", b.ty.f32(),
+                       b.IndexAccessor(b.MemberAccessor("s", "a"), 1))),
           b.Assign(b.MemberAccessor("s", "a"),
                    b.Construct(b.ty.type_name("ARR"))),
           b.Assign(b.MemberAccessor("s", "a"),
@@ -618,26 +617,26 @@ TEST_F(DecomposeStridedArrayTest, PrivateNestedStridedArray) {
            ast::Access::kReadWrite, b.GroupAndBinding(0, 0));
   b.Func("f", {}, b.ty.void_(),
          {
-             b.Decl(b.Const("a", b.ty.type_name("ARR_B"),
-                            b.MemberAccessor("s", "a"))),
-             b.Decl(b.Const("b", b.ty.array(b.ty.type_name("ARR_A"), 3, 16),
-                            b.IndexAccessor(                 //
-                                b.MemberAccessor("s", "a"),  //
-                                3))),
-             b.Decl(b.Const("c", b.ty.type_name("ARR_A"),
-                            b.IndexAccessor(                     //
-                                b.IndexAccessor(                 //
-                                    b.MemberAccessor("s", "a"),  //
-                                    3),
-                                2))),
-             b.Decl(b.Const("d", b.ty.f32(),
-                            b.IndexAccessor(                         //
-                                b.IndexAccessor(                     //
-                                    b.IndexAccessor(                 //
-                                        b.MemberAccessor("s", "a"),  //
-                                        3),
-                                    2),
-                                1))),
+             b.Decl(b.Let("a", b.ty.type_name("ARR_B"),
+                          b.MemberAccessor("s", "a"))),
+             b.Decl(b.Let("b", b.ty.array(b.ty.type_name("ARR_A"), 3, 16),
+                          b.IndexAccessor(                 //
+                              b.MemberAccessor("s", "a"),  //
+                              3))),
+             b.Decl(b.Let("c", b.ty.type_name("ARR_A"),
+                          b.IndexAccessor(                     //
+                              b.IndexAccessor(                 //
+                                  b.MemberAccessor("s", "a"),  //
+                                  3),
+                              2))),
+             b.Decl(b.Let("d", b.ty.f32(),
+                          b.IndexAccessor(                         //
+                              b.IndexAccessor(                     //
+                                  b.IndexAccessor(                 //
+                                      b.MemberAccessor("s", "a"),  //
+                                      3),
+                                  2),
+                              1))),
              b.Assign(b.MemberAccessor("s", "a"),
                       b.Construct(b.ty.type_name("ARR_B"))),
              b.Assign(b.IndexAccessor(                         //

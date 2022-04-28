@@ -162,7 +162,7 @@ class LocalizeStructArrayAssignment::State {
       // the value twice e.g. let tint_symbol = &(s.a1);
       auto mem_access_ptr = b.Sym();
       s.insert_before_stmts.push_back(
-          b.Decl(b.Const(mem_access_ptr, nullptr, b.AddressOf(mem_access))));
+          b.Decl(b.Let(mem_access_ptr, nullptr, b.AddressOf(mem_access))));
 
       // Disable further transforms when cloning
       TINT_SCOPED_ASSIGNMENT(s.process_nested_nodes, false);

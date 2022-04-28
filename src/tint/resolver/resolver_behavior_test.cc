@@ -392,7 +392,7 @@ TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenEmptyBlock_ElseCallFuncMayDiscard) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtLetDecl) {
-  auto* stmt = Decl(Const("v", ty.i32(), Expr(1)));
+  auto* stmt = Decl(Let("v", ty.i32(), Expr(1)));
   WrapInFunction(stmt);
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -402,7 +402,7 @@ TEST_F(ResolverBehaviorTest, StmtLetDecl) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtLetDecl_RHSDiscardOrNext) {
-  auto* stmt = Decl(Const("lhs", ty.i32(), Call("DiscardOrNext")));
+  auto* stmt = Decl(Let("lhs", ty.i32(), Call("DiscardOrNext")));
   WrapInFunction(stmt);
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();

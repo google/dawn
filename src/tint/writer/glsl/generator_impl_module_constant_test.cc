@@ -21,7 +21,7 @@ namespace {
 using GlslGeneratorImplTest_ModuleConstant = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
-  auto* var = Const("pos", ty.array<f32, 3>(), array<f32, 3>(1.f, 2.f, 3.f));
+  auto* var = Let("pos", ty.array<f32, 3>(), array<f32, 3>(1.f, 2.f, 3.f));
   WrapInFunction(Decl(var));
 
   GeneratorImpl& gen = Build();

@@ -79,15 +79,14 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix) {
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kUniform,
            b.GroupAndBinding(0, 0));
-  b.Func(
-      "f", {}, b.ty.void_(),
-      {
-          b.Decl(b.Const("x", b.ty.mat2x2<f32>(), b.MemberAccessor("s", "m"))),
-      },
-      {
-          b.Stage(ast::PipelineStage::kCompute),
-          b.WorkgroupSize(1),
-      });
+  b.Func("f", {}, b.ty.void_(),
+         {
+             b.Decl(b.Let("x", b.ty.mat2x2<f32>(), b.MemberAccessor("s", "m"))),
+         },
+         {
+             b.Stage(ast::PipelineStage::kCompute),
+             b.WorkgroupSize(1),
+         });
 
   auto* expect = R"(
 struct S {
@@ -142,8 +141,8 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformColumn) {
            b.GroupAndBinding(0, 0));
   b.Func("f", {}, b.ty.void_(),
          {
-             b.Decl(b.Const("x", b.ty.vec2<f32>(),
-                            b.IndexAccessor(b.MemberAccessor("s", "m"), 1))),
+             b.Decl(b.Let("x", b.ty.vec2<f32>(),
+                          b.IndexAccessor(b.MemberAccessor("s", "m"), 1))),
          },
          {
              b.Stage(ast::PipelineStage::kCompute),
@@ -197,15 +196,14 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix_DefaultStride) {
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kUniform,
            b.GroupAndBinding(0, 0));
-  b.Func(
-      "f", {}, b.ty.void_(),
-      {
-          b.Decl(b.Const("x", b.ty.mat2x2<f32>(), b.MemberAccessor("s", "m"))),
-      },
-      {
-          b.Stage(ast::PipelineStage::kCompute),
-          b.WorkgroupSize(1),
-      });
+  b.Func("f", {}, b.ty.void_(),
+         {
+             b.Decl(b.Let("x", b.ty.mat2x2<f32>(), b.MemberAccessor("s", "m"))),
+         },
+         {
+             b.Stage(ast::PipelineStage::kCompute),
+             b.WorkgroupSize(1),
+         });
 
   auto* expect = R"(
 struct S {
@@ -255,15 +253,14 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageMatrix) {
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kStorage,
            ast::Access::kReadWrite, b.GroupAndBinding(0, 0));
-  b.Func(
-      "f", {}, b.ty.void_(),
-      {
-          b.Decl(b.Const("x", b.ty.mat2x2<f32>(), b.MemberAccessor("s", "m"))),
-      },
-      {
-          b.Stage(ast::PipelineStage::kCompute),
-          b.WorkgroupSize(1),
-      });
+  b.Func("f", {}, b.ty.void_(),
+         {
+             b.Decl(b.Let("x", b.ty.mat2x2<f32>(), b.MemberAccessor("s", "m"))),
+         },
+         {
+             b.Stage(ast::PipelineStage::kCompute),
+             b.WorkgroupSize(1),
+         });
 
   auto* expect = R"(
 struct S {
@@ -318,8 +315,8 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageColumn) {
            ast::Access::kReadWrite, b.GroupAndBinding(0, 0));
   b.Func("f", {}, b.ty.void_(),
          {
-             b.Decl(b.Const("x", b.ty.vec2<f32>(),
-                            b.IndexAccessor(b.MemberAccessor("s", "m"), 1))),
+             b.Decl(b.Let("x", b.ty.vec2<f32>(),
+                          b.IndexAccessor(b.MemberAccessor("s", "m"), 1))),
          },
          {
              b.Stage(ast::PipelineStage::kCompute),
@@ -501,13 +498,12 @@ TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
   b.Func(
       "f", {}, b.ty.void_(),
       {
-          b.Decl(
-              b.Const("a", nullptr, b.AddressOf(b.MemberAccessor("s", "m")))),
-          b.Decl(b.Const("b", nullptr,
-                         b.AddressOf(b.Deref(b.AddressOf(b.Deref("a")))))),
-          b.Decl(b.Const("x", nullptr, b.Deref("b"))),
-          b.Decl(b.Const("y", nullptr, b.IndexAccessor(b.Deref("b"), 1))),
-          b.Decl(b.Const("z", nullptr, b.IndexAccessor("x", 1))),
+          b.Decl(b.Let("a", nullptr, b.AddressOf(b.MemberAccessor("s", "m")))),
+          b.Decl(b.Let("b", nullptr,
+                       b.AddressOf(b.Deref(b.AddressOf(b.Deref("a")))))),
+          b.Decl(b.Let("x", nullptr, b.Deref("b"))),
+          b.Decl(b.Let("y", nullptr, b.IndexAccessor(b.Deref("b"), 1))),
+          b.Decl(b.Let("z", nullptr, b.IndexAccessor("x", 1))),
           b.Assign(b.Deref("b"), b.mat2x2<f32>(b.vec2<f32>(1.0f, 2.0f),
                                                b.vec2<f32>(3.0f, 4.0f))),
           b.Assign(b.IndexAccessor(b.Deref("b"), 1), b.vec2<f32>(5.0f, 6.0f)),
@@ -575,15 +571,14 @@ TEST_F(DecomposeStridedMatrixTest, ReadPrivateMatrix) {
               }),
       });
   b.Global("s", b.ty.Of(S), ast::StorageClass::kPrivate);
-  b.Func(
-      "f", {}, b.ty.void_(),
-      {
-          b.Decl(b.Const("x", b.ty.mat2x2<f32>(), b.MemberAccessor("s", "m"))),
-      },
-      {
-          b.Stage(ast::PipelineStage::kCompute),
-          b.WorkgroupSize(1),
-      });
+  b.Func("f", {}, b.ty.void_(),
+         {
+             b.Decl(b.Let("x", b.ty.mat2x2<f32>(), b.MemberAccessor("s", "m"))),
+         },
+         {
+             b.Stage(ast::PipelineStage::kCompute),
+             b.WorkgroupSize(1),
+         });
 
   auto* expect = R"(
 struct S {

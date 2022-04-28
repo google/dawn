@@ -1368,12 +1368,12 @@ class ProgramBuilder {
   /// @param type the variable type
   /// @param constructor constructor expression
   /// @param attributes optional variable attributes
-  /// @returns a constant `ast::Variable` with the given name and type
+  /// @returns an immutable `ast::Variable` with the given name and type
   template <typename NAME>
-  const ast::Variable* Const(NAME&& name,
-                             const ast::Type* type,
-                             const ast::Expression* constructor,
-                             ast::AttributeList attributes = {}) {
+  const ast::Variable* Let(NAME&& name,
+                           const ast::Type* type,
+                           const ast::Expression* constructor,
+                           ast::AttributeList attributes = {}) {
     return create<ast::Variable>(
         Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
         ast::Access::kUndefined, type, true /* is_const */,
@@ -1385,13 +1385,13 @@ class ProgramBuilder {
   /// @param type the variable type
   /// @param constructor constructor expression
   /// @param attributes optional variable attributes
-  /// @returns a constant `ast::Variable` with the given name and type
+  /// @returns an immutable `ast::Variable` with the given name and type
   template <typename NAME>
-  const ast::Variable* Const(const Source& source,
-                             NAME&& name,
-                             const ast::Type* type,
-                             const ast::Expression* constructor,
-                             ast::AttributeList attributes = {}) {
+  const ast::Variable* Let(const Source& source,
+                           NAME&& name,
+                           const ast::Type* type,
+                           const ast::Expression* constructor,
+                           ast::AttributeList attributes = {}) {
     return create<ast::Variable>(
         source, Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
         ast::Access::kUndefined, type, true /* is_const */,
@@ -1401,7 +1401,7 @@ class ProgramBuilder {
   /// @param name the parameter name
   /// @param type the parameter type
   /// @param attributes optional parameter attributes
-  /// @returns a constant `ast::Variable` with the given name and type
+  /// @returns an immutable `ast::Variable` with the given name and type
   template <typename NAME>
   const ast::Variable* Param(NAME&& name,
                              const ast::Type* type,
@@ -1416,7 +1416,7 @@ class ProgramBuilder {
   /// @param name the parameter name
   /// @param type the parameter type
   /// @param attributes optional parameter attributes
-  /// @returns a constant `ast::Variable` with the given name and type
+  /// @returns an immutable `ast::Variable` with the given name and type
   template <typename NAME>
   const ast::Variable* Param(const Source& source,
                              NAME&& name,
@@ -1488,8 +1488,8 @@ class ProgramBuilder {
                                    const ast::Type* type,
                                    const ast::Expression* constructor,
                                    ast::AttributeList attributes = {}) {
-    auto* var = Const(std::forward<NAME>(name), type, constructor,
-                      std::move(attributes));
+    auto* var =
+        Let(std::forward<NAME>(name), type, constructor, std::move(attributes));
     AST().AddGlobalVariable(var);
     return var;
   }
@@ -1508,8 +1508,8 @@ class ProgramBuilder {
                                    const ast::Type* type,
                                    const ast::Expression* constructor,
                                    ast::AttributeList attributes = {}) {
-    auto* var = Const(source, std::forward<NAME>(name), type, constructor,
-                      std::move(attributes));
+    auto* var = Let(source, std::forward<NAME>(name), type, constructor,
+                    std::move(attributes));
     AST().AddGlobalVariable(var);
     return var;
   }

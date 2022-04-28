@@ -351,7 +351,7 @@ struct ZeroInitWorkgroupMemory::State {
                     ast::BinaryOp::kModulo, iteration(), b.Expr(index.modulo))
               : iteration();
       auto* div = (index.division != 1u) ? b.Div(mod, index.division) : mod;
-      auto* decl = b.Decl(b.Const(name, b.ty.u32(), div));
+      auto* decl = b.Decl(b.Let(name, b.ty.u32(), div));
       stmts.emplace_back(decl);
     }
     return stmts;
