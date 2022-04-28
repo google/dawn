@@ -17,6 +17,7 @@
 #include "dawn/native/Toggles.h"
 #include "dawn/tests/DawnNativeTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/WGPUHelpers.h"
 #include "mocks/BindGroupLayoutMock.h"
 #include "mocks/BindGroupMock.h"
 #include "mocks/BufferMock.h"
@@ -761,6 +762,64 @@ namespace dawn::native { namespace {
         EXPECT_FALSE(swapChain->IsAlive());
         EXPECT_FALSE(texture->IsAlive());
         EXPECT_FALSE(textureView->IsAlive());
+    }
+
+    static constexpr std::string_view kComputeShader = R"(
+        @stage(compute) @workgroup_size(1) fn main() {}
+    )";
+
+    static constexpr std::string_view kVertexShader = R"(
+        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        }
+    )";
+
+    static constexpr std::string_view kFragmentShader = R"(
+        @stage(fragment) fn main() {}
+    )";
+
+    class DestroyObjectRegressionTests : public DawnNativeTest {};
+
+    // LastRefInCommand* tests are regression test(s) for https://crbug.com/chromium/1318792. The
+    // regression tests here are not exhuastive. In order to have an exhuastive test case for this
+    // class of failures, we should test every possible command with the commands holding the last
+    // references (or as last as possible) of their needed objects. For now, including simple cases
+    // including a stripped-down case from the original bug.
+
+    // Tests that when a RenderPipeline's last reference is held in a command in an unfinished
+    // CommandEncoder, that destroying the device still works as expected (and does not cause
+    // double-free).
+    TEST_F(DestroyObjectRegressionTests, LastRefInCommandRenderPipeline) {
+        utils::BasicRenderPass pass = utils::CreateBasicRenderPass(device, 1, 1);
+
+        utils::ComboRenderPassDescriptor passDesc{};
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder renderEncoder = encoder.BeginRenderPass(&pass.renderPassInfo);
+
+        utils::ComboRenderPipelineDescriptor pipelineDesc;
+        pipelineDesc.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
+        pipelineDesc.vertex.module = utils::CreateShaderModule(device, kVertexShader.data());
+        pipelineDesc.vertex.entryPoint = "main";
+        pipelineDesc.cFragment.module = utils::CreateShaderModule(device, kFragmentShader.data());
+        pipelineDesc.cFragment.entryPoint = "main";
+        renderEncoder.SetPipeline(device.CreateRenderPipeline(&pipelineDesc));
+
+        device.Destroy();
+    }
+
+    // Tests that when a ComputePipelines's last reference is held in a command in an unfinished
+    // CommandEncoder, that destroying the device still works as expected (and does not cause
+    // double-free).
+    TEST_F(DestroyObjectRegressionTests, LastRefInCommandComputePipeline) {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder computeEncoder = encoder.BeginComputePass();
+
+        wgpu::ComputePipelineDescriptor pipelineDesc;
+        pipelineDesc.compute.module = utils::CreateShaderModule(device, kComputeShader.data());
+        pipelineDesc.compute.entryPoint = "main";
+        computeEncoder.SetPipeline(device.CreateComputePipeline(&pipelineDesc));
+
+        device.Destroy();
     }
 
     // TODO(https://crbug.com/dawn/1381) Remove when namespaces are not indented.

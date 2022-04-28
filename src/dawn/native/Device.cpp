@@ -287,10 +287,10 @@ namespace dawn::native {
 
     void DeviceBase::DestroyObjects() {
         // List of object types in reverse "dependency" order so we can iterate and delete the
-        // objects safely starting at leaf objects. We define dependent here such that if B has
-        // a ref to A, then B depends on A. We therefore try to destroy B before destroying A. Note
-        // that this only considers the immediate frontend dependencies, while backend objects could
-        // add complications and extra dependencies.
+        // objects safely. We define dependent here such that if B has a ref to A, then B depends on
+        // A. We therefore try to destroy B before destroying A. Note that this only considers the
+        // immediate frontend dependencies, while backend objects could add complications and extra
+        // dependencies.
         //
         // Note that AttachmentState is not an ApiObject so it cannot be eagerly destroyed. However,
         // since AttachmentStates are cached by the device, objects that hold references to
@@ -330,8 +330,9 @@ namespace dawn::native {
             const std::lock_guard<std::mutex> lock(objList.mutex);
             objList.objects.MoveInto(&objects);
         }
-        for (LinkNode<ApiObjectBase>* node : objects) {
-            node->value()->Destroy();
+        while (!objects.empty()) {
+            // The destroy call should also remove the object from the list.
+            objects.head()->value()->Destroy();
         }
     }
 
