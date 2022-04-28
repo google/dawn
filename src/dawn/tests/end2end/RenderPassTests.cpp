@@ -163,10 +163,70 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8::kRed, renderTarget, kRTSize - 1, 1);
 }
 
+class RenderPassTest_RegressionDawn1071 : public RenderPassTest {};
+
 DAWN_INSTANTIATE_TEST(RenderPassTest,
                       D3D12Backend(),
                       D3D12Backend({}, {"use_d3d12_render_pass"}),
                       MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());
+
+// Test that clearing the lower mips of an R8Unorm texture works. This is a regression test for
+// dawn:1071 where Intel Metal devices fail to do that correctly, requiring a workaround.
+TEST_P(RenderPassTest_RegressionDawn1071, ClearLowestMipOfR8Unorm) {
+    const uint32_t kLastMipLevel = 2;
+
+    // Create the texture and buffer used for readback.
+    wgpu::TextureDescriptor texDesc;
+    texDesc.format = wgpu::TextureFormat::R8Unorm;
+    texDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+    texDesc.size = {32, 32};
+    texDesc.mipLevelCount = kLastMipLevel + 1;
+    wgpu::Texture tex = device.CreateTexture(&texDesc);
+
+    wgpu::BufferDescriptor bufDesc;
+    bufDesc.size = 4;
+    bufDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer buf = device.CreateBuffer(&bufDesc);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+    // Clear the texture with a render pass.
+    {
+        wgpu::TextureViewDescriptor viewDesc;
+        viewDesc.baseMipLevel = kLastMipLevel;
+
+        utils::ComboRenderPassDescriptor renderPass({tex.CreateView(&viewDesc)});
+        renderPass.cColorAttachments[0].clearValue = {1.0f, 0.0f, 0.0f, 1.0f};
+        renderPass.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+        renderPass.cColorAttachments[0].storeOp = wgpu::StoreOp::Store;
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        pass.End();
+    }
+
+    // Copy the texture in the buffer.
+    {
+        wgpu::Extent3D copySize = {1, 1};
+        wgpu::ImageCopyTexture src = utils::CreateImageCopyTexture(tex, kLastMipLevel);
+        wgpu::ImageCopyBuffer dst = utils::CreateImageCopyBuffer(buf);
+
+        encoder.CopyTextureToBuffer(&src, &dst, &copySize);
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // The content of the texture should be reflected in the buffer (prior to the workaround it
+    // would be 0s).
+    EXPECT_BUFFER_U8_EQ(255, buf, 0);
+}
+
+DAWN_INSTANTIATE_TEST(RenderPassTest_RegressionDawn1071,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      MetalBackend({"metal_render_r8_rg8_unorm_small_mip_to_temp_texture"}),
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());

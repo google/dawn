@@ -78,13 +78,6 @@ crbug.com/dawn/1111 [ intel-0x5912 ] webgpu:shader,execution,zero_init:compute,z
 crbug.com/dawn/1111 [ intel-0x5912 ] webgpu:shader,execution,zero_init:compute,zero_init:storageClass="workgroup";workgroupSize=[8,8,2];batch__=1 [ Failure ]
 
 ################################################################################
-# webgpu:api,operation,command_buffer,image_copy:mip_levels
-# Partial failures on all platforms
-# KEEP
-################################################################################
-crbug.com/dawn/0000 webgpu:api,operation,command_buffer,image_copy:mip_levels:* [ Failure ]
-
-################################################################################
 # webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero
 # Spec / CTS bugs because depth24unorm-stencil8 depth-specific format is depth24plus
 # KEEP
@@ -112,18 +105,6 @@ crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:unin
 crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
 crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
 crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="stencil8" [ Failure ]
-crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="r8unorm" [ Failure ]
-crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="r8unorm" [ Failure ]
-crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="r8unorm" [ Failure ]
-crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rg8unorm" [ Failure ]
-crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rg8unorm" [ Failure ]
-crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rg8unorm" [ Failure ]
-crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="r8unorm" [ Failure ]
-crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="r8unorm" [ Failure ]
-crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="Sample";format="r8unorm" [ Failure ]
-crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="rg8unorm" [ Failure ]
-crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rg8unorm" [ Failure ]
-crbug.com/dawn/1071 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="Sample";format="rg8unorm" [ Failure ]
 
 ################################################################################
 # webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero
@@ -355,18 +336,12 @@ crbug.com/dawn/1325 webgpu:api,validation,attachment_compatibility:render_pass_o
 ################################################################################
 crbug.com/dawn/0000 [ mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth32float" [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,render_pass,resolve:* [ Failure ]
-crbug.com/dawn/0000 [ mac ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="r8unorm";* [ Failure ]
-crbug.com/dawn/0000 [ mac ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rg8unorm";* [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,render_pipeline,pipeline_output_targets:color,component_count,blend:format="rg8unorm" [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=true;drawCallTestParameter="baseVertex";* [ Failure ]
 crbug.com/1236130 [ linux ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Skip ] # crashes (skip because there are very many)
 crbug.com/dawn/0000 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Failure ]
 crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Skip ] # crashes (skip because there are very many)
 crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ] # crashes (skip because there are very many)
-crbug.com/dawn/0000 [ mac ] worker_webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="r8unorm";storeOperation="discard" [ Failure ]
-crbug.com/dawn/0000 [ mac ] worker_webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="r8unorm";storeOperation="store" [ Failure ]
-crbug.com/dawn/0000 [ mac ] worker_webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rg8unorm";storeOperation="discard" [ Failure ]
-crbug.com/dawn/0000 [ mac ] worker_webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rg8unorm";storeOperation="store" [ Failure ]
 crbug.com/dawn/0000 [ mac ] worker_webgpu:api,operation,render_pass,storeOp:render_pass_store_op,depth_stencil_attachment_only:depthStencilFormat="stencil8";* [ Failure ]
 
 ################################################################################

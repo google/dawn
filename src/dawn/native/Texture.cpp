@@ -394,13 +394,6 @@ namespace dawn::native {
             "https://crbug.com/dawn/838: Stencil textures with more than one mip level are "
             "disabled on Metal.");
 
-        DAWN_INVALID_IF(
-            device->IsToggleEnabled(Toggle::DisableR8RG8Mipmaps) && descriptor->mipLevelCount > 1 &&
-                (descriptor->format == wgpu::TextureFormat::R8Unorm ||
-                 descriptor->format == wgpu::TextureFormat::RG8Unorm),
-            "https://crbug.com/dawn/1071: r8unorm and rg8unorm textures with more than one mip "
-            "level are disabled on Metal.");
-
         return {};
     }
 

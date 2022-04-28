@@ -102,6 +102,11 @@ namespace dawn::native::metal {
                                      uint32_t height,
                                      EncodeInsideRenderPass encodeInside);
 
+    MaybeError EncodeEmptyMetalRenderPass(Device* device,
+                                          CommandRecordingContext* commandContext,
+                                          MTLRenderPassDescriptor* mtlRenderPass,
+                                          Extent3D size);
+
 }  // namespace dawn::native::metal
 
 #endif  // SRC_DAWN_NATIVE_METAL_UTILSMETAL_H_

@@ -231,11 +231,6 @@ namespace dawn::native {
               "Enables calls to SetLabel to be forwarded to backend-specific APIs that label "
               "objects.",
               "https://crbug.com/dawn/840"}},
-            {Toggle::DisableR8RG8Mipmaps,
-             {"disable_r8_rg8_mipmaps",
-              "Disables mipmaps for r8unorm and rg8unorm textures, which are known on some drivers "
-              "to not clear correctly.",
-              "https://crbug.com/dawn/1071"}},
             {Toggle::UsePlaceholderFragmentInVertexOnlyPipeline,
              {"use_placeholder_fragment_in_vertex_only_pipeline",
               "Use a placeholder empty fragment shader in vertex only render pipeline. This toggle "
@@ -272,7 +267,14 @@ namespace dawn::native {
               "it via split the copy operation into two copies, in order to make B2T/T2B copy "
               "being done correctly on D3D12.",
               "https://crbug.com/dawn/1289"}},
-
+            {Toggle::MetalRenderR8RG8UnormSmallMipToTempTexture,
+             {"metal_render_r8_rg8_unorm_small_mip_to_temp_texture",
+              "Metal Intel devices have issues with r8unorm and rg8unorm textures where rendering "
+              "to small mips (level >= 2) doesn't work correctly. Workaround this issue by "
+              "detecting this case and rendering to a temporary texture instead (with copies "
+              "before "
+              "and after if needed).",
+              "https://crbug.com/dawn/1071"}},
             // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
         }};
     }  // anonymous namespace

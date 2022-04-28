@@ -13,15 +13,126 @@
 // limitations under the License.
 
 #include "dawn/native/metal/UtilsMetal.h"
+
+#include "dawn/common/Assert.h"
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/ShaderModule.h"
 
-#include "dawn/common/Assert.h"
-
 namespace dawn::native::metal {
 
     namespace {
+        // A helper struct to track state while doing workarounds for Metal render passes. It
+        // contains a temporary texture and information about the attachment it replaces.
+        // Helper methods encode copies between the two textures.
+        struct SavedMetalAttachment {
+            id<MTLTexture> texture = nil;
+            NSUInteger level;
+            NSUInteger slice;
+
+            NSPRef<id<MTLTexture>> temporary;
+
+            void CopyFromTemporaryToAttachment(CommandRecordingContext* commandContext) {
+                [commandContext->EnsureBlit()
+                      copyFromTexture:temporary.Get()
+                          sourceSlice:0
+                          sourceLevel:0
+                         sourceOrigin:MTLOriginMake(0, 0, 0)
+                           sourceSize:MTLSizeMake([temporary.Get() width], [temporary.Get() height],
+                                                  1)
+                            toTexture:texture
+                     destinationSlice:slice
+                     destinationLevel:level
+                    destinationOrigin:MTLOriginMake(0, 0, 0)];
+            }
+
+            void CopyFromAttachmentToTemporary(CommandRecordingContext* commandContext) {
+                [commandContext->EnsureBlit()
+                      copyFromTexture:texture
+                          sourceSlice:slice
+                          sourceLevel:level
+                         sourceOrigin:MTLOriginMake(0, 0, 0)
+                           sourceSize:MTLSizeMake([temporary.Get() width], [temporary.Get() height],
+                                                  1)
+                            toTexture:temporary.Get()
+                     destinationSlice:0
+                     destinationLevel:0
+                    destinationOrigin:MTLOriginMake(0, 0, 0)];
+            }
+        };
+
+        // Common code between both kinds of attachments swaps.
+        ResultOrError<SavedMetalAttachment> SaveAttachmentCreateTemporary(
+            Device* device,
+            id<MTLTexture> attachmentTexture,
+            NSUInteger attachmentLevel,
+            NSUInteger attachmentSlice) {
+            // Save the attachment.
+            SavedMetalAttachment result;
+            result.texture = attachmentTexture;
+            result.level = attachmentLevel;
+            result.slice = attachmentSlice;
+
+            // Create the temporary texture.
+            NSRef<MTLTextureDescriptor> mtlDescRef = AcquireNSRef([MTLTextureDescriptor new]);
+            MTLTextureDescriptor* mtlDesc = mtlDescRef.Get();
+
+            mtlDesc.textureType = MTLTextureType2D;
+            mtlDesc.usage = MTLTextureUsageRenderTarget;
+            mtlDesc.pixelFormat = [result.texture pixelFormat];
+            mtlDesc.width = std::max([result.texture width] >> attachmentLevel, NSUInteger(1));
+            mtlDesc.height = std::max([result.texture height] >> attachmentLevel, NSUInteger(1));
+            mtlDesc.depth = 1;
+            mtlDesc.mipmapLevelCount = 1;
+            mtlDesc.arrayLength = 1;
+            mtlDesc.storageMode = MTLStorageModePrivate;
+            mtlDesc.sampleCount = [result.texture sampleCount];
+
+            result.temporary =
+                AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc]);
+            if (result.temporary == nil) {
+                return DAWN_OUT_OF_MEMORY_ERROR("Allocation of temporary texture failed.");
+            }
+
+            return result;
+        }
+
+        // Patches the render pass attachment to replace it with a temporary texture. Returns a
+        // SavedMetalAttachment that can be used to easily copy between the original attachment and
+        // the temporary.
+        ResultOrError<SavedMetalAttachment> PatchAttachmentWithTemporary(
+            Device* device,
+            MTLRenderPassAttachmentDescriptor* attachment) {
+            SavedMetalAttachment result;
+            DAWN_TRY_ASSIGN(
+                result, SaveAttachmentCreateTemporary(device, attachment.texture, attachment.level,
+                                                      attachment.slice));
+
+            // Replace the attachment with the temporary
+            attachment.texture = result.temporary.Get();
+            attachment.level = 0;
+            attachment.slice = 0;
+
+            return result;
+        }
+
+        // Same as PatchAttachmentWithTemporary but for the resolve attachment.
+        ResultOrError<SavedMetalAttachment> PatchResolveAttachmentWithTemporary(
+            Device* device,
+            MTLRenderPassAttachmentDescriptor* attachment) {
+            SavedMetalAttachment result;
+            DAWN_TRY_ASSIGN(result, SaveAttachmentCreateTemporary(device, attachment.resolveTexture,
+                                                                  attachment.resolveLevel,
+                                                                  attachment.resolveSlice));
+
+            // Replace the resolve attachment with the tempoary.
+            attachment.resolveTexture = result.temporary.Get();
+            attachment.resolveLevel = 0;
+            attachment.resolveSlice = 0;
+
+            return result;
+        }
+
         // Helper function for Toggle EmulateStoreAndMSAAResolve
         void ResolveInAnotherRenderPass(
             CommandRecordingContext* commandContext,
@@ -51,52 +162,6 @@ namespace dawn::native::metal {
 
             commandContext->BeginRender(mtlRenderPassForResolve);
             commandContext->EndRender();
-        }
-
-        // Helper functions for Toggle AlwaysResolveIntoZeroLevelAndLayer
-        ResultOrError<NSPRef<id<MTLTexture>>> CreateResolveTextureForWorkaround(
-            Device* device,
-            MTLPixelFormat mtlFormat,
-            uint32_t width,
-            uint32_t height) {
-            NSRef<MTLTextureDescriptor> mtlDescRef = AcquireNSRef([MTLTextureDescriptor new]);
-            MTLTextureDescriptor* mtlDesc = mtlDescRef.Get();
-
-            mtlDesc.textureType = MTLTextureType2D;
-            mtlDesc.usage = MTLTextureUsageRenderTarget;
-            mtlDesc.pixelFormat = mtlFormat;
-            mtlDesc.width = width;
-            mtlDesc.height = height;
-            mtlDesc.depth = 1;
-            mtlDesc.mipmapLevelCount = 1;
-            mtlDesc.arrayLength = 1;
-            mtlDesc.storageMode = MTLStorageModePrivate;
-            mtlDesc.sampleCount = 1;
-
-            id<MTLTexture> texture = [device->GetMTLDevice() newTextureWithDescriptor:mtlDesc];
-            if (texture == nil) {
-                return DAWN_OUT_OF_MEMORY_ERROR("Allocation of temporary texture failed.");
-            }
-
-            return AcquireNSPRef(texture);
-        }
-
-        void CopyIntoTrueResolveTarget(CommandRecordingContext* commandContext,
-                                       id<MTLTexture> mtlTrueResolveTexture,
-                                       uint32_t trueResolveLevel,
-                                       uint32_t trueResolveSlice,
-                                       id<MTLTexture> temporaryResolveTexture,
-                                       uint32_t width,
-                                       uint32_t height) {
-            [commandContext->EnsureBlit() copyFromTexture:temporaryResolveTexture
-                                              sourceSlice:0
-                                              sourceLevel:0
-                                             sourceOrigin:MTLOriginMake(0, 0, 0)
-                                               sourceSize:MTLSizeMake(width, height, 1)
-                                                toTexture:mtlTrueResolveTexture
-                                         destinationSlice:trueResolveSlice
-                                         destinationLevel:trueResolveLevel
-                                        destinationOrigin:MTLOriginMake(0, 0, 0)];
         }
     }  // anonymous namespace
 
@@ -370,18 +435,16 @@ namespace dawn::native::metal {
                                      uint32_t width,
                                      uint32_t height,
                                      EncodeInsideRenderPass encodeInside) {
+        // This function handles multiple workarounds. Because some cases requires multiple
+        // workarounds to happen at the same time, it handles workarounds one by one and calls
+        // itself recursively to handle the next workaround if needed.
+
         // Handle Toggle AlwaysResolveIntoZeroLevelAndLayer. We must handle this before applying
         // the store + MSAA resolve workaround, otherwise this toggle will never be handled because
         // the resolve texture is removed when applying the store + MSAA resolve workaround.
         if (device->IsToggleEnabled(Toggle::AlwaysResolveIntoZeroLevelAndLayer)) {
-            std::array<id<MTLTexture>, kMaxColorAttachments> trueResolveTextures = {};
-            std::array<uint32_t, kMaxColorAttachments> trueResolveLevels = {};
-            std::array<uint32_t, kMaxColorAttachments> trueResolveSlices = {};
-
-            // Use temporary resolve texture on the resolve targets with non-zero resolveLevel or
-            // resolveSlice.
-            bool useTemporaryResolveTexture = false;
-            std::array<NSPRef<id<MTLTexture>>, kMaxColorAttachments> temporaryResolveTextures = {};
+            std::array<SavedMetalAttachment, kMaxColorAttachments> trueResolveAttachments = {};
+            bool workaroundUsed = false;
             for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
                 if (mtlRenderPass.colorAttachments[i].resolveTexture == nullptr) {
                     continue;
@@ -392,42 +455,80 @@ namespace dawn::native::metal {
                     continue;
                 }
 
-                trueResolveTextures[i] = mtlRenderPass.colorAttachments[i].resolveTexture;
-                trueResolveLevels[i] = mtlRenderPass.colorAttachments[i].resolveLevel;
-                trueResolveSlices[i] = mtlRenderPass.colorAttachments[i].resolveSlice;
-
-                const MTLPixelFormat mtlFormat = trueResolveTextures[i].pixelFormat;
-                DAWN_TRY_ASSIGN(temporaryResolveTextures[i], CreateResolveTextureForWorkaround(
-                                                                 device, mtlFormat, width, height));
-
-                mtlRenderPass.colorAttachments[i].resolveTexture =
-                    temporaryResolveTextures[i].Get();
-                mtlRenderPass.colorAttachments[i].resolveLevel = 0;
-                mtlRenderPass.colorAttachments[i].resolveSlice = 0;
-                useTemporaryResolveTexture = true;
+                DAWN_TRY_ASSIGN(
+                    trueResolveAttachments[i],
+                    PatchResolveAttachmentWithTemporary(device, mtlRenderPass.colorAttachments[i]));
+                workaroundUsed = true;
             }
 
             // If we need to use a temporary resolve texture we need to copy the result of MSAA
             // resolve back to the true resolve targets.
-            if (useTemporaryResolveTexture) {
+            if (workaroundUsed) {
                 DAWN_TRY(EncodeMetalRenderPass(device, commandContext, mtlRenderPass, width, height,
                                                std::move(encodeInside)));
 
                 for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
-                    if (trueResolveTextures[i] == nullptr) {
+                    if (trueResolveAttachments[i].texture == nullptr) {
                         continue;
                     }
 
-                    ASSERT(temporaryResolveTextures[i] != nullptr);
-                    CopyIntoTrueResolveTarget(commandContext, trueResolveTextures[i],
-                                              trueResolveLevels[i], trueResolveSlices[i],
-                                              temporaryResolveTextures[i].Get(), width, height);
+                    trueResolveAttachments[i].CopyFromTemporaryToAttachment(commandContext);
+                }
+                return {};
+            }
+        }
+
+        // Handles the workaround for r8unorm rg8unorm mipmap rendering being broken on some
+        // devices. Render to a temporary texture instead and then copy back to the attachment.
+        if (device->IsToggleEnabled(Toggle::MetalRenderR8RG8UnormSmallMipToTempTexture)) {
+            std::array<SavedMetalAttachment, kMaxColorAttachments> originalAttachments;
+            bool workaroundUsed = false;
+
+            for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
+                if (mtlRenderPass.colorAttachments[i].texture == nullptr) {
+                    continue;
+                }
+
+                if ([mtlRenderPass.colorAttachments[i].texture pixelFormat] !=
+                        MTLPixelFormatR8Unorm &&
+                    [mtlRenderPass.colorAttachments[i].texture pixelFormat] !=
+                        MTLPixelFormatRG8Unorm) {
+                    continue;
+                }
+
+                if (mtlRenderPass.colorAttachments[i].level < 2) {
+                    continue;
+                }
+
+                DAWN_TRY_ASSIGN(
+                    originalAttachments[i],
+                    PatchAttachmentWithTemporary(device, mtlRenderPass.colorAttachments[i]));
+                workaroundUsed = true;
+
+                if (mtlRenderPass.colorAttachments[i].loadAction == MTLLoadActionLoad) {
+                    originalAttachments[i].CopyFromAttachmentToTemporary(commandContext);
+                }
+            }
+
+            if (workaroundUsed) {
+                DAWN_TRY(EncodeMetalRenderPass(device, commandContext, mtlRenderPass, width, height,
+                                               std::move(encodeInside)));
+
+                for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
+                    if (originalAttachments[i].texture == nullptr) {
+                        continue;
+                    }
+
+                    originalAttachments[i].CopyFromTemporaryToAttachment(commandContext);
                 }
                 return {};
             }
         }
 
         // Handle Store + MSAA resolve workaround (Toggle EmulateStoreAndMSAAResolve).
+        // Done after the workarounds that modify the non-resolve attachments so that
+        // ResolveInAnotherRenderPass uses the temporary attachments if needed instead of the
+        // original ones.
         if (device->IsToggleEnabled(Toggle::EmulateStoreAndMSAAResolve)) {
             bool hasStoreAndMSAAResolve = false;
 
@@ -454,8 +555,19 @@ namespace dawn::native::metal {
             }
         }
 
+        // No (more) workarounds needed! We can finally encode the actual render pass.
+        commandContext->EndBlit();
         DAWN_TRY(encodeInside(commandContext->BeginRender(mtlRenderPass)));
         commandContext->EndRender();
         return {};
     }
+
+    MaybeError EncodeEmptyMetalRenderPass(Device* device,
+                                          CommandRecordingContext* commandContext,
+                                          MTLRenderPassDescriptor* mtlRenderPass,
+                                          Extent3D size) {
+        return EncodeMetalRenderPass(device, commandContext, mtlRenderPass, size.width, size.height,
+                                     [&](id<MTLRenderCommandEncoder>) -> MaybeError { return {}; });
+    }
+
 }  // namespace dawn::native::metal

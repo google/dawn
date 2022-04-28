@@ -875,8 +875,8 @@ namespace dawn::native::metal {
                             }
                         }
 
-                        commandContext->BeginRender(descriptor);
-                        commandContext->EndRender();
+                        DAWN_TRY(EncodeEmptyMetalRenderPass(device, commandContext, descriptor,
+                                                            GetMipLevelVirtualSize(level)));
                     }
                 }
             } else {
@@ -923,16 +923,18 @@ namespace dawn::native::metal {
 
                             if (attachment == kMaxColorAttachments) {
                                 attachment = 0;
-                                commandContext->BeginRender(descriptor.Get());
-                                commandContext->EndRender();
+                                DAWN_TRY(EncodeEmptyMetalRenderPass(device, commandContext,
+                                                                    descriptor.Get(),
+                                                                    GetMipLevelVirtualSize(level)));
                                 descriptor = nullptr;
                             }
                         }
                     }
 
                     if (descriptor != nullptr) {
-                        commandContext->BeginRender(descriptor.Get());
-                        commandContext->EndRender();
+                        DAWN_TRY(EncodeEmptyMetalRenderPass(device, commandContext,
+                                                            descriptor.Get(),
+                                                            GetMipLevelVirtualSize(level)));
                     }
                 }
             }

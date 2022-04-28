@@ -210,10 +210,10 @@ namespace dawn::native::metal {
             SetToggle(Toggle::MetalUseSharedModeForCounterSampleBuffer, useSharedMode);
         }
 
-        // TODO(crbug.com/dawn/1071): r8unorm and rg8unorm textures with multiple mip levels don't
-        // clear properly on Intel Macs.
+        // Rendering R8Unorm and RG8Unorm to small mip doesn't work properly on Intel.
+        // TODO(crbug.com/dawn/1071): Tighten the workaround when this issue is fixed.
         if (gpu_info::IsIntel(vendorId)) {
-            SetToggle(Toggle::DisableR8RG8Mipmaps, true);
+            SetToggle(Toggle::MetalRenderR8RG8UnormSmallMipToTempTexture, true);
         }
 
         // On some Intel GPU vertex only render pipeline get wrong depth result if no fragment
