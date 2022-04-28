@@ -22,6 +22,7 @@
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/Log.h"
+#include "dawn/common/Numeric.h"
 
 #include "spirv-tools/optimizer.hpp"
 
@@ -382,7 +383,7 @@ namespace utils {
 
         wgpu::BindGroupDescriptor descriptor;
         descriptor.layout = layout;
-        descriptor.entryCount = entries.size();
+        descriptor.entryCount = checked_cast<uint32_t>(entries.size());
         descriptor.entries = entries.data();
 
         return device.CreateBindGroup(&descriptor);
