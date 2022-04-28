@@ -21,4 +21,5 @@ void main() {
   main_1();
   return;
 }
+Internal compiler error: access violation. Attempted to read from address 0x0000000000000048
 

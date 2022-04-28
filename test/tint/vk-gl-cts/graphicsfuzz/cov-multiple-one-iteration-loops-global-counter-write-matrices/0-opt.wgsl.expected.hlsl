@@ -1,4 +1,4 @@
-SKIP: flaky test with FXC, often times out
+SKIP: test times out after 30s with FXC
 
 void set_scalar_float2x3(inout float2x3 mat, int col, int row, float val) {
   switch (col) {

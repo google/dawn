@@ -1,3 +1,1 @@
-SKIP: FAILED
-
-test timed out after 30s
+SKIP: test times out after 30s with FXC
