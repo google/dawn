@@ -950,10 +950,8 @@ bool Validator::Function(const sem::Function* func,
     return false;
   }
 
-  auto workgroup_attr_count = 0;
   for (auto* attr : decl->attributes) {
     if (attr->Is<ast::WorkgroupAttribute>()) {
-      workgroup_attr_count++;
       if (decl->PipelineStage() != ast::PipelineStage::kCompute) {
         AddError(
             "the workgroup_size attribute is only valid for compute stages",

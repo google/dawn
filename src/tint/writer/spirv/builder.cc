@@ -2262,14 +2262,12 @@ uint32_t Builder::GenerateFunctionCall(const sem::Call* call,
   }
   ops.push_back(Operand::Int(func_id));
 
-  size_t arg_idx = 0;
   for (auto* arg : expr->args) {
     auto id = GenerateExpressionWithLoadIfNeeded(arg);
     if (id == 0) {
       return 0;
     }
     ops.push_back(Operand::Int(id));
-    arg_idx++;
   }
 
   if (!push_function_inst(spv::Op::OpFunctionCall, std::move(ops))) {
