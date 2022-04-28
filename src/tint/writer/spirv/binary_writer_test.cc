@@ -35,7 +35,7 @@ TEST_F(BinaryWriterTest, Preamble) {
 TEST_F(BinaryWriterTest, Float) {
   spirv::Builder& b = Build();
 
-  b.push_annot(spv::Op::OpKill, {Operand::Float(2.4f)});
+  b.push_annot(spv::Op::OpKill, {Operand(2.4f)});
   BinaryWriter bw;
   bw.WriteBuilder(&b);
 
@@ -49,7 +49,7 @@ TEST_F(BinaryWriterTest, Float) {
 TEST_F(BinaryWriterTest, Int) {
   spirv::Builder& b = Build();
 
-  b.push_annot(spv::Op::OpKill, {Operand::Int(2)});
+  b.push_annot(spv::Op::OpKill, {Operand(2u)});
   BinaryWriter bw;
   bw.WriteBuilder(&b);
 
@@ -61,7 +61,7 @@ TEST_F(BinaryWriterTest, Int) {
 TEST_F(BinaryWriterTest, String) {
   spirv::Builder& b = Build();
 
-  b.push_annot(spv::Op::OpKill, {Operand::String("my_string")});
+  b.push_annot(spv::Op::OpKill, {Operand("my_string")});
   BinaryWriter bw;
   bw.WriteBuilder(&b);
 
@@ -86,7 +86,7 @@ TEST_F(BinaryWriterTest, String) {
 TEST_F(BinaryWriterTest, String_Multiple4Length) {
   spirv::Builder& b = Build();
 
-  b.push_annot(spv::Op::OpKill, {Operand::String("mystring")});
+  b.push_annot(spv::Op::OpKill, {Operand("mystring")});
   BinaryWriter bw;
   bw.WriteBuilder(&b);
 
@@ -109,8 +109,8 @@ TEST_F(BinaryWriterTest, String_Multiple4Length) {
 }
 
 TEST_F(BinaryWriterTest, TestInstructionWriter) {
-  Instruction i1{spv::Op::OpKill, {Operand::Int(2)}};
-  Instruction i2{spv::Op::OpKill, {Operand::Int(4)}};
+  Instruction i1{spv::Op::OpKill, {Operand(2u)}};
+  Instruction i2{spv::Op::OpKill, {Operand(4u)}};
 
   BinaryWriter bw;
   bw.WriteInstruction(i1);

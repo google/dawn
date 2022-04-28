@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/spirv/instruction.h"
 
+#include <string>
+
 #include "gtest/gtest.h"
 
 namespace tint::writer::spirv {
@@ -22,25 +24,25 @@ namespace {
 using InstructionTest = testing::Test;
 
 TEST_F(InstructionTest, Create) {
-  Instruction i(spv::Op::OpEntryPoint, {Operand::Float(1.2f), Operand::Int(1),
-                                        Operand::String("my_str")});
+  Instruction i(spv::Op::OpEntryPoint,
+                {Operand(1.2f), Operand(1u), Operand("my_str")});
   EXPECT_EQ(i.opcode(), spv::Op::OpEntryPoint);
   ASSERT_EQ(i.operands().size(), 3u);
 
   const auto& ops = i.operands();
-  EXPECT_TRUE(ops[0].IsFloat());
-  EXPECT_FLOAT_EQ(ops[0].to_f(), 1.2f);
+  ASSERT_TRUE(std::holds_alternative<float>(ops[0]));
+  EXPECT_FLOAT_EQ(std::get<float>(ops[0]), 1.2f);
 
-  EXPECT_TRUE(ops[1].IsInt());
-  EXPECT_EQ(ops[1].to_i(), 1u);
+  ASSERT_TRUE(std::holds_alternative<uint32_t>(ops[1]));
+  EXPECT_EQ(std::get<uint32_t>(ops[1]), 1u);
 
-  EXPECT_TRUE(ops[2].IsString());
-  EXPECT_EQ(ops[2].to_s(), "my_str");
+  ASSERT_TRUE(std::holds_alternative<std::string>(ops[2]));
+  EXPECT_EQ(std::get<std::string>(ops[2]), "my_str");
 }
 
 TEST_F(InstructionTest, Length) {
-  Instruction i(spv::Op::OpEntryPoint, {Operand::Float(1.2f), Operand::Int(1),
-                                        Operand::String("my_str")});
+  Instruction i(spv::Op::OpEntryPoint,
+                {Operand(1.2f), Operand(1u), Operand("my_str")});
   EXPECT_EQ(i.word_length(), 5u);
 }
 

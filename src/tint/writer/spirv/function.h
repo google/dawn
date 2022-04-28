@@ -48,7 +48,7 @@ class Function {
   const Instruction& declaration() const { return declaration_; }
 
   /// @returns the label ID for the function entry block
-  uint32_t label_id() const { return label_op_.to_i(); }
+  uint32_t label_id() const { return std::get<uint32_t>(label_op_); }
 
   /// Adds an instruction to the instruction list
   /// @param op the op to set

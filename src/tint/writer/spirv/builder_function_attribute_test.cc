@@ -79,7 +79,7 @@ TEST_P(Attribute_StageTest, Emit) {
   EXPECT_EQ(preamble[0].opcode(), spv::Op::OpEntryPoint);
 
   ASSERT_GE(preamble[0].operands().size(), 3u);
-  EXPECT_EQ(preamble[0].operands()[0].to_i(),
+  EXPECT_EQ(std::get<uint32_t>(preamble[0].operands()[0]),
             static_cast<uint32_t>(params.model));
 }
 INSTANTIATE_TEST_SUITE_P(

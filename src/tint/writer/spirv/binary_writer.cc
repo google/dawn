@@ -15,6 +15,7 @@
 #include "src/tint/writer/spirv/binary_writer.h"
 
 #include <cstring>
+#include <string>
 
 namespace tint::writer::spirv {
 namespace {
@@ -54,19 +55,22 @@ void BinaryWriter::process_instruction(const Instruction& inst) {
 }
 
 void BinaryWriter::process_op(const Operand& op) {
-  if (op.IsFloat()) {
+  if (auto* i = std::get_if<uint32_t>(&op)) {
+    out_.push_back(*i);
+    return;
+  }
+  if (auto* f = std::get_if<float>(&op)) {
     // Allocate space for the float
     out_.push_back(0);
-    auto f = op.to_f();
     uint8_t* ptr = reinterpret_cast<uint8_t*>(out_.data() + (out_.size() - 1));
-    memcpy(ptr, &f, 4);
-  } else if (op.IsInt()) {
-    out_.push_back(op.to_i());
-  } else {
+    memcpy(ptr, f, 4);
+    return;
+  }
+  if (auto* str = std::get_if<std::string>(&op)) {
     auto idx = out_.size();
-    const auto& str = op.to_s();
-    out_.resize(out_.size() + op.length(), 0);
-    memcpy(out_.data() + idx, str.c_str(), str.size() + 1);
+    out_.resize(out_.size() + OperandLength(op), 0);
+    memcpy(out_.data() + idx, str->c_str(), str->size() + 1);
+    return;
   }
 }
 

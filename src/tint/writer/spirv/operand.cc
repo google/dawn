@@ -16,46 +16,14 @@
 
 namespace tint::writer::spirv {
 
-// static
-Operand Operand::Float(float val) {
-  Operand o(Kind::kFloat);
-  o.float_val_ = val;
-  return o;
-}
-
-// static
-Operand Operand::Int(uint32_t val) {
-  Operand o(Kind::kInt);
-  o.int_val_ = val;
-  return o;
-}
-
-// static
-Operand Operand::String(const std::string& val) {
-  Operand o(Kind::kString);
-  o.str_val_ = val;
-  return o;
-}
-
-Operand::Operand(Kind kind) : kind_(kind) {}
-
-Operand::~Operand() = default;
-
-uint32_t Operand::length() const {
-  uint32_t val = 0;
-  switch (kind_) {
-    case Kind::kFloat:
-    case Kind::kInt:
-      val = 1;
-      break;
-    case Kind::kString:
-      // SPIR-V always nul-terminates strings. The length is rounded up to a
-      // multiple of 4 bytes with 0 bytes padding the end. Accounting for the
-      // nul terminator is why '+ 4u' is used here instead of '+ 3u'.
-      val = static_cast<uint32_t>((str_val_.length() + 4u) >> 2);
-      break;
+uint32_t OperandLength(const Operand& o) {
+  if (auto* str = std::get_if<std::string>(&o)) {
+    // SPIR-V always nul-terminates strings. The length is rounded up to a
+    // multiple of 4 bytes with 0 bytes padding the end. Accounting for the
+    // nul terminator is why '+ 4u' is used here instead of '+ 3u'.
+    return static_cast<uint32_t>((str->length() + 4u) >> 2);
   }
-  return val;
+  return 1;
 }
 
 }  // namespace tint::writer::spirv

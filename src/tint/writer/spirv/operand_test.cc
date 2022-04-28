@@ -22,41 +22,41 @@ namespace {
 using OperandTest = testing::Test;
 
 TEST_F(OperandTest, CreateFloat) {
-  auto o = Operand::Float(1.2f);
-  EXPECT_TRUE(o.IsFloat());
-  EXPECT_FLOAT_EQ(o.to_f(), 1.2f);
+  auto o = Operand(1.2f);
+  ASSERT_TRUE(std::holds_alternative<float>(o));
+  EXPECT_FLOAT_EQ(std::get<float>(o), 1.2f);
 }
 
 TEST_F(OperandTest, CreateInt) {
-  auto o = Operand::Int(1);
-  EXPECT_TRUE(o.IsInt());
-  EXPECT_EQ(o.to_i(), 1u);
+  auto o = Operand(1u);
+  ASSERT_TRUE(std::holds_alternative<uint32_t>(o));
+  EXPECT_EQ(std::get<uint32_t>(o), 1u);
 }
 
 TEST_F(OperandTest, CreateString) {
-  auto o = Operand::String("my string");
-  EXPECT_TRUE(o.IsString());
-  EXPECT_EQ(o.to_s(), "my string");
+  auto o = Operand("my string");
+  ASSERT_TRUE(std::holds_alternative<std::string>(o));
+  EXPECT_EQ(std::get<std::string>(o), "my string");
 }
 
 TEST_F(OperandTest, Length_Float) {
-  auto o = Operand::Float(1.2f);
-  EXPECT_EQ(o.length(), 1u);
+  auto o = Operand(1.2f);
+  EXPECT_EQ(OperandLength(o), 1u);
 }
 
 TEST_F(OperandTest, Length_Int) {
-  auto o = Operand::Int(1);
-  EXPECT_EQ(o.length(), 1u);
+  auto o = U32Operand(1);
+  EXPECT_EQ(OperandLength(o), 1u);
 }
 
 TEST_F(OperandTest, Length_String) {
-  auto o = Operand::String("my string");
-  EXPECT_EQ(o.length(), 3u);
+  auto o = Operand("my string");
+  EXPECT_EQ(OperandLength(o), 3u);
 }
 
 TEST_F(OperandTest, Length_String_Empty) {
-  auto o = Operand::String("");
-  EXPECT_EQ(o.length(), 1u);
+  auto o = Operand("");
+  EXPECT_EQ(OperandLength(o), 1u);
 }
 
 }  // namespace

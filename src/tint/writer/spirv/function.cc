@@ -17,8 +17,7 @@
 namespace tint::writer::spirv {
 
 Function::Function()
-    : declaration_(Instruction{spv::Op::OpNop, {}}),
-      label_op_(Operand::Int(0)) {}
+    : declaration_(Instruction{spv::Op::OpNop, {}}), label_op_(Operand(0u)) {}
 
 Function::Function(const Instruction& declaration,
                    const Operand& label_op,
