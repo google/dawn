@@ -440,8 +440,7 @@ TEST_P(CreatePipelineAsyncTest, DestroyDeviceBeforeCallbackOfCreateComputePipeli
             task->message = message;
         },
         &task);
-    ExpectDeviceDestruction();
-    device.Destroy();
+    DestroyDevice();
 }
 
 // Verify there is no error when the device is destroyed before the callback of
@@ -474,8 +473,7 @@ TEST_P(CreatePipelineAsyncTest, DestroyDeviceBeforeCallbackOfCreateRenderPipelin
             task->message = message;
         },
         &task);
-    ExpectDeviceDestruction();
-    device.Destroy();
+    DestroyDevice();
 }
 
 // Verify the code path of CreateComputePipelineAsync() to directly return the compute pipeline

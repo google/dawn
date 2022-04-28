@@ -222,7 +222,7 @@ TEST_P(SwapChainTests, SwitchingDevice) {
     // See https://github.com/KhronosGroup/Vulkan-ValidationLayers/issues/2256
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
 
-    wgpu::Device device2 = wgpu::Device::Acquire(GetAdapter().CreateDevice());
+    wgpu::Device device2 = CreateDevice();
 
     for (int i = 0; i < 3; i++) {
         wgpu::Device deviceToUse;

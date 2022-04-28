@@ -173,10 +173,7 @@ TEST_P(DestroyTest, DestroyDeviceBeforeSubmit) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     wgpu::CommandBuffer commands = CreateTriangleCommandBuffer();
 
-    // Tests normally don't expect a device lost error, but since we are destroying the device, we
-    // actually do, so we need to override the default device lost callback.
-    ExpectDeviceDestruction();
-    device.Destroy();
+    DestroyDevice();
     ASSERT_DEVICE_ERROR_MSG(queue.Submit(1, &commands), HasSubstr("[Device] is lost."));
 }
 
@@ -190,10 +187,7 @@ TEST_P(DestroyTest, DestroyDeviceLingeringBGL) {
         device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering}});
     utils::MakeBindGroup(device, layout, {{0, device.CreateSampler()}});
 
-    // Tests normally don't expect a device lost error, but since we are destroying the device, we
-    // actually do, so we need to override the default device lost callback.
-    ExpectDeviceDestruction();
-    device.Destroy();
+    DestroyDevice();
 }
 
 DAWN_INSTANTIATE_TEST(DestroyTest,
