@@ -72,7 +72,7 @@ func (r *ResultsDB) QueryTestResults(
 				TestIdRegexp: filterRegex,
 			},
 			ReadMask: &fieldmaskpb.FieldMask{Paths: []string{
-				"test_id", "status", "tags", "failure_reason",
+				"test_id", "status", "tags", "failure_reason", "duration",
 			}},
 			PageSize:  1000, // Maximum page size.
 			PageToken: pageToken,

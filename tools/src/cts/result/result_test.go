@@ -16,8 +16,8 @@ package result_test
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
+	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
@@ -40,25 +40,28 @@ func TestStringAndParse(t *testing.T) {
 	for _, test := range []Test{
 		{
 			result.Result{
-				Query:  Q(`a`),
-				Status: result.Failure,
+				Query:    Q(`a`),
+				Status:   result.Failure,
+				Duration: time.Second * 42,
 			},
-			`a Failure`,
+			`a Failure 42s`,
 		}, {
 			result.Result{
-				Query:  Q(`a:b,c,*`),
-				Tags:   T("x"),
-				Status: result.Pass,
+				Query:    Q(`a:b,c,*`),
+				Tags:     T("x"),
+				Status:   result.Pass,
+				Duration: time.Second * 42,
 			},
-			`a:b,c,* x Pass`,
+			`a:b,c,* x Pass 42s`,
 		},
 		{
 			result.Result{
-				Query:  Q(`a:b,c:d,*`),
-				Tags:   T("zzz", "x", "yy"),
-				Status: result.Failure,
+				Query:    Q(`a:b,c:d,*`),
+				Tags:     T("zzz", "x", "yy"),
+				Status:   result.Failure,
+				Duration: time.Second * 42,
 			},
-			`a:b,c:d,* x,yy,zzz Failure`,
+			`a:b,c:d,* x,yy,zzz Failure 42s`,
 		},
 	} {
 		if diff := cmp.Diff(test.result.String(), test.expect); diff != "" {
@@ -77,15 +80,20 @@ func TestStringAndParse(t *testing.T) {
 }
 
 func TestParseError(t *testing.T) {
-	for _, test := range []string{
-		``,
-		`a`,
-		`a b c d`,
+	for _, test := range []struct {
+		in, expect string
+	}{
+		{``, `unable to parse result ''`},
+		{`a`, `unable to parse result 'a'`},
+		{`a b c d`, `unable to parse result 'a b c d': time: invalid duration "d"`},
 	} {
-		_, err := result.Parse(test)
-		expect := fmt.Sprintf(`unable to parse result '%v'`, test)
-		if err == nil || err.Error() != expect {
-			t.Errorf("Parse('%v') returned '%v'", test, err)
+		_, err := result.Parse(test.in)
+		got := ""
+		if err != nil {
+			got = err.Error()
+		}
+		if diff := cmp.Diff(got, test.expect); diff != "" {
+			t.Errorf("Parse('%v'): %v", test, diff)
 			continue
 		}
 	}
@@ -315,26 +323,26 @@ func TestReplaceDuplicates(t *testing.T) {
 		{ //////////////////////////////////////////////////////////////////////
 			location: utils.ThisLine(),
 			results: result.List{
-				result.Result{Query: Q(`a`), Status: result.Pass},
+				result.Result{Query: Q(`a`), Status: result.Pass, Duration: 1},
 			},
 			fn: func(result.Statuses) result.Status {
 				return result.Abort
 			},
 			expect: result.List{
-				result.Result{Query: Q(`a`), Status: result.Pass},
+				result.Result{Query: Q(`a`), Status: result.Pass, Duration: 1},
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
 			location: utils.ThisLine(),
 			results: result.List{
-				result.Result{Query: Q(`a`), Status: result.Pass},
-				result.Result{Query: Q(`a`), Status: result.Pass},
+				result.Result{Query: Q(`a`), Status: result.Pass, Duration: 1},
+				result.Result{Query: Q(`a`), Status: result.Pass, Duration: 3},
 			},
 			fn: func(result.Statuses) result.Status {
 				return result.Abort
 			},
 			expect: result.List{
-				result.Result{Query: Q(`a`), Status: result.Pass},
+				result.Result{Query: Q(`a`), Status: result.Pass, Duration: 2},
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////

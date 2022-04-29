@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
@@ -30,9 +31,10 @@ import (
 
 // Result holds the result of a CTS test
 type Result struct {
-	Query  query.Query
-	Tags   Tags
-	Status Status
+	Query    query.Query
+	Tags     Tags
+	Status   Status
+	Duration time.Duration
 }
 
 // Format writes the Result to the fmt.State
@@ -41,9 +43,9 @@ type Result struct {
 // This matches the order in which results are sorted.
 func (r Result) Format(f fmt.State, verb rune) {
 	if len(r.Tags) > 0 {
-		fmt.Fprintf(f, "%v %v %v", r.Query, TagsToString(r.Tags), r.Status)
+		fmt.Fprintf(f, "%v %v %v %v", r.Query, TagsToString(r.Tags), r.Status, r.Duration)
 	} else {
-		fmt.Fprintf(f, "%v %v", r.Query, r.Status)
+		fmt.Fprintf(f, "%v %v %v", r.Query, r.Status, r.Duration)
 	}
 }
 
@@ -52,6 +54,34 @@ func (r Result) String() string {
 	sb := strings.Builder{}
 	fmt.Fprint(&sb, r)
 	return sb.String()
+}
+
+// Compare compares the relative order of r and o, returning:
+//  -1 if r should come before o
+//   1 if r should come after o
+//   0 if r and o are identical
+// Note: Result.Duration is not considered in comparison.
+func (r Result) Compare(o Result) int {
+	a, b := r, o
+	switch a.Query.Compare(b.Query) {
+	case -1:
+		return -1
+	case 1:
+		return 1
+	}
+	ta := strings.Join(a.Tags.List(), TagDelimiter)
+	tb := strings.Join(b.Tags.List(), TagDelimiter)
+	switch {
+	case ta < tb:
+		return -1
+	case ta > tb:
+		return 1
+	case a.Status < b.Status:
+		return -1
+	case a.Status > b.Status:
+		return 1
+	}
+	return 0
 }
 
 // Parse parses the result from a string of the form:
@@ -81,17 +111,29 @@ func Parse(in string) (Result, error) {
 	a := token()
 	b := token()
 	c := token()
-	if a == "" || b == "" || token() != "" {
+	d := token()
+	if a == "" || b == "" || c == "" || token() != "" {
 		return Result{}, fmt.Errorf("unable to parse result '%v'", in)
 	}
-	q := query.Parse(a)
-	if c == "" {
+
+	query := query.Parse(a)
+
+	if d == "" {
 		status := Status(b)
-		return Result{q, nil, status}, nil
+		duration, err := time.ParseDuration(c)
+		if err != nil {
+			return Result{}, fmt.Errorf("unable to parse result '%v': %w", in, err)
+		}
+		return Result{query, nil, status, duration}, nil
+	} else {
+		tags := StringToTags(b)
+		status := Status(c)
+		duration, err := time.ParseDuration(d)
+		if err != nil {
+			return Result{}, fmt.Errorf("unable to parse result '%v': %w", in, err)
+		}
+		return Result{query, tags, status, duration}, nil
 	}
-	tags := StringToTags(b)
-	status := Status(c)
-	return Result{q, tags, status}, nil
 }
 
 // List is a list of results
@@ -123,9 +165,10 @@ func (l List) TransformTags(f func(Tags) Tags) List {
 			cache[key] = tags
 		}
 		out = append(out, Result{
-			Query:  r.Query,
-			Tags:   tags,
-			Status: r.Status,
+			Query:    r.Query,
+			Tags:     tags,
+			Status:   r.Status,
+			Duration: r.Duration,
 		})
 	}
 	return out
@@ -134,39 +177,54 @@ func (l List) TransformTags(f func(Tags) Tags) List {
 // ReplaceDuplicates returns a new list with duplicate test results replaced.
 // When a duplicate is found, the function f is called with the duplicate
 // results. The returned status will be used as the replaced result.
+// Merged results will use the average (mean) duration of the duplicates.
 func (l List) ReplaceDuplicates(f func(Statuses) Status) List {
 	type key struct {
 		query query.Query
 		tags  string
 	}
 	// Collect all duplicates
-	duplicates := map[key]Statuses{}
-	for _, r := range l {
+	keyToIndices := map[key][]int{} // key to index
+	for i, r := range l {
 		k := key{r.Query, TagsToString(r.Tags)}
-		if s, ok := duplicates[k]; ok {
-			s.Add(r.Status)
-		} else {
-			duplicates[k] = NewStatuses(r.Status)
-		}
+		keyToIndices[k] = append(keyToIndices[k], i)
 	}
 	// Resolve duplicates
-	merged := map[key]Status{}
-	for key, statuses := range duplicates {
-		if len(statuses) > 1 {
-			merged[key] = f(statuses)
-		} else {
-			merged[key] = statuses.One() // Only one status
+	type StatusAndDuration struct {
+		Status   Status
+		Duration time.Duration
+	}
+	merged := map[key]StatusAndDuration{}
+	for key, indices := range keyToIndices {
+		statuses := NewStatuses()
+		duration := time.Duration(0)
+		for _, i := range indices {
+			r := l[i]
+			statuses.Add(r.Status)
+			duration += r.Duration
+		}
+		status := func() Status {
+			if len(statuses) > 1 {
+				return f(statuses)
+			}
+			return statuses.One()
+		}()
+		duration = duration / time.Duration(len(indices))
+		merged[key] = StatusAndDuration{
+			Status:   status,
+			Duration: duration,
 		}
 	}
 	// Rebuild list
-	out := make(List, 0, len(duplicates))
+	out := make(List, 0, len(keyToIndices))
 	for _, r := range l {
 		k := key{r.Query, TagsToString(r.Tags)}
-		if status, ok := merged[k]; ok {
+		if sd, ok := merged[k]; ok {
 			out = append(out, Result{
-				Query:  r.Query,
-				Tags:   r.Tags,
-				Status: status,
+				Query:    r.Query,
+				Tags:     r.Tags,
+				Status:   sd.Status,
+				Duration: sd.Duration,
 			})
 			delete(merged, k) // Remove from map to prevent duplicates
 		}
@@ -176,24 +234,7 @@ func (l List) ReplaceDuplicates(f func(Statuses) Status) List {
 
 // Sort sorts the list
 func (l List) Sort() {
-	sort.Slice(l, func(i, j int) bool {
-		a, b := l[i], l[j]
-		switch a.Query.Compare(b.Query) {
-		case -1:
-			return true
-		case 1:
-			return false
-		}
-		ta := strings.Join(a.Tags.List(), TagDelimiter)
-		tb := strings.Join(b.Tags.List(), TagDelimiter)
-		switch {
-		case ta < tb:
-			return true
-		case ta > tb:
-			return false
-		}
-		return a.Status < b.Status
-	})
+	sort.Slice(l, func(i, j int) bool { return l[i].Compare(l[j]) < 0 })
 }
 
 // Filter returns the results that match the given predicate
