@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: FAILED https://crbug.com/tint/1522
 
 struct BST {
   int data;

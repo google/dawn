@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: FAILED https://crbug.com/tint/1522
 
 vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-false-if-discard-loop/0.wgsl:46:11 warning: code is unreachable
           return;

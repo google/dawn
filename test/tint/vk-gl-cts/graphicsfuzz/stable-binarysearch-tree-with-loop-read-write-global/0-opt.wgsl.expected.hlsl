@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: FAILED https://crbug.com/tint/1522
 
 vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-with-loop-read-write-global/0-opt.wgsl:58:7 warning: code is unreachable
       return;

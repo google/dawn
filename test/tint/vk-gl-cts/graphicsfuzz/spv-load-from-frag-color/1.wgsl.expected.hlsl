@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: FAILED https://crbug.com/tint/1522
 
 vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:46:11 warning: code is unreachable
           return;

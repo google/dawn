@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: FAILED https://crbug.com/tint/1522
 
 vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-fragcoord-less-than-zero/0.wgsl:58:7 warning: code is unreachable
       return;
