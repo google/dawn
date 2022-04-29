@@ -32,9 +32,10 @@ function show_usage() {
 function generate() {
   CMD=$1
   pushd "$ROOT_DIR" > /dev/null
-  ${CMD}
-  rm -fr "out/active" || true
-  ln -s "$BUILD_DIR" "out/active"
+    mkdir -p "out/$BUILD_DIR"
+    rm -fr "out/active" || true
+    ln -s "$BUILD_DIR" "out/active"
+    ${CMD}
   popd > /dev/null
 }
 
@@ -42,10 +43,10 @@ case $BUILD_SYSTEM in
   "gn")
     case $BUILD_TYPE in
       "debug")
-        generate "gn gen out/${BUILD_DIR} --args=is_debug=true"
+        generate "gn gen out/active --args=is_debug=true"
       ;;
       "release")
-        generate "gn gen out/${BUILD_DIR}"
+        generate "gn gen out/active"
       ;;
       *)
         echo "invalid build type '${BUILD_TYPE}'"
@@ -54,12 +55,16 @@ case $BUILD_SYSTEM in
     esac
   ;;
   "cmake")
+    CMAKE_FLAGS=""
+    if [[ -x $(command -v ccache) ]]; then
+      CMAKE_FLAGS+="-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+    fi
     case $BUILD_TYPE in
       "debug")
-        generate "cmake -S . -B out/$BUILD_DIR -GNinja -DCMAKE_BUILD_TYPE=Debug"
+        generate "cmake -S . -B out/active -GNinja -DCMAKE_BUILD_TYPE=Debug ${CMAKE_FLAGS}"
       ;;
       "release")
-        generate "cmake -S . -B out/$BUILD_DIR -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo"
+        generate "cmake -S . -B out/active -GNinja -DCMAKE_BUILD_TYPE=RelWithDebInfo ${CMAKE_FLAGS}"
       ;;
       *)
         echo "invalid build type '${BUILD_TYPE}'"
