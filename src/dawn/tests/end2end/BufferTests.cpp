@@ -280,13 +280,13 @@ TEST_P(BufferMappingTests, MapWrite_TwicePreserve) {
 
     uint32_t data1 = 0x08090a0b;
     size_t offset1 = 8;
-    MapAsyncAndWait(buffer, wgpu::MapMode::Write, offset1, sizeof(data1));
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, offset1, wgpu::kWholeMapSize);
     memcpy(buffer.GetMappedRange(offset1), &data1, sizeof(data1));
     buffer.Unmap();
 
     uint32_t data2 = 0x00010203;
     size_t offset2 = 0;
-    MapAsyncAndWait(buffer, wgpu::MapMode::Write, offset2, sizeof(data2));
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, offset2, wgpu::kWholeMapSize);
     memcpy(buffer.GetMappedRange(offset2), &data2, sizeof(data2));
     buffer.Unmap();
 
@@ -301,7 +301,7 @@ TEST_P(BufferMappingTests, MapWrite_TwiceRangeOverlap) {
     uint32_t data1[] = {0x01234567, 0x89abcdef};
     size_t offset1 = 8;
     MapAsyncAndWait(buffer, wgpu::MapMode::Write, offset1, 8);
-    memcpy(buffer.GetMappedRange(offset1), data1, 8);
+    memcpy(buffer.GetMappedRange(offset1, 8), data1, 8);
     buffer.Unmap();
 
     EXPECT_BUFFER_U32_EQ(0x00000000, buffer, 0);
@@ -312,7 +312,7 @@ TEST_P(BufferMappingTests, MapWrite_TwiceRangeOverlap) {
     uint32_t data2[] = {0x01234567, 0x89abcdef, 0x55555555};
     size_t offset2 = 0;
     MapAsyncAndWait(buffer, wgpu::MapMode::Write, offset2, 12);
-    memcpy(buffer.GetMappedRange(offset2), data2, 12);
+    memcpy(buffer.GetMappedRange(offset2, 12), data2, 12);
     buffer.Unmap();
 
     EXPECT_BUFFER_U32_EQ(0x01234567, buffer, 0);
@@ -354,7 +354,7 @@ TEST_P(BufferMappingTests, MapWrite_Large) {
     EXPECT_EQ(nullptr, buffer.GetMappedRange(0));
     EXPECT_EQ(nullptr, buffer.GetMappedRange(8));
     EXPECT_EQ(nullptr, buffer.GetMappedRange(16, kByteSize - 8));
-    memcpy(buffer.GetMappedRange(16), myData.data(), kByteSize - 20);
+    memcpy(buffer.GetMappedRange(16, kByteSize - 20), myData.data(), kByteSize - 20);
     buffer.Unmap();
     EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), buffer, 16, kDataSize - 5);
 }

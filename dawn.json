@@ -413,7 +413,7 @@
                 "returns": "void *",
                 "args": [
                     {"name": "offset", "type": "size_t", "default": 0},
-                    {"name": "size", "type": "size_t", "default": 0}
+                    {"name": "size", "type": "size_t", "default": "WGPU_WHOLE_MAP_SIZE"}
                 ]
             },
             {
@@ -421,7 +421,7 @@
                 "returns": "void const *",
                 "args": [
                     {"name": "offset", "type": "size_t", "default": 0},
-                    {"name": "size", "type": "size_t", "default": 0}
+                    {"name": "size", "type": "size_t", "default": "WGPU_WHOLE_MAP_SIZE"}
                 ]
             },
             {
