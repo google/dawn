@@ -71,7 +71,7 @@ func (s Set[T]) Contains(item T) bool {
 	return found
 }
 
-// Contains returns true if the set contains all the items in o
+// ContainsAll returns true if the set contains all the items in o
 func (s Set[T]) ContainsAll(o Set[T]) bool {
 	for item := range o {
 		if !s.Contains(item) {
@@ -79,6 +79,16 @@ func (s Set[T]) ContainsAll(o Set[T]) bool {
 		}
 	}
 	return true
+}
+
+// ContainsAny returns true if the set contains any of the items in o
+func (s Set[T]) ContainsAny(o Set[T]) bool {
+	for item := range o {
+		if s.Contains(item) {
+			return true
+		}
+	}
+	return false
 }
 
 // Intersection returns true if the set contains all the items in o

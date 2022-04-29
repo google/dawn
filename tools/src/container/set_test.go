@@ -123,6 +123,39 @@ func TestSetContainsAll(t *testing.T) {
 	expectEq(t, `s.ContainsAll("c", "a", "b")`, s.ContainsAll(S("c", "a", "b")), true)
 }
 
+func TestSetContainsAny(t *testing.T) {
+	S := container.NewSet[string]
+
+	s := container.NewSet[string]()
+	s.Add("c")
+	expectEq(t, `s.ContainsAny("a")`, s.ContainsAny(S("a")), false)
+	expectEq(t, `s.ContainsAny("b")`, s.ContainsAny(S("b")), false)
+	expectEq(t, `s.ContainsAny("c")`, s.ContainsAny(S("c")), true)
+	expectEq(t, `s.ContainsAny("a", "b")`, s.ContainsAny(S("a", "b")), false)
+	expectEq(t, `s.ContainsAny("b", "c")`, s.ContainsAny(S("b", "c")), true)
+	expectEq(t, `s.ContainsAny("c", "a")`, s.ContainsAny(S("c", "a")), true)
+	expectEq(t, `s.ContainsAny("c", "a", "b")`, s.ContainsAny(S("c", "a", "b")), true)
+
+	s.Add("a")
+	expectEq(t, `s.ContainsAny("a")`, s.ContainsAny(S("a")), true)
+	expectEq(t, `s.ContainsAny("b")`, s.ContainsAny(S("b")), false)
+	expectEq(t, `s.ContainsAny("c")`, s.ContainsAny(S("c")), true)
+	expectEq(t, `s.ContainsAny("a", "b")`, s.ContainsAny(S("a", "b")), true)
+	expectEq(t, `s.ContainsAny("b", "c")`, s.ContainsAny(S("b", "c")), true)
+	expectEq(t, `s.ContainsAny("c", "a")`, s.ContainsAny(S("c", "a")), true)
+	expectEq(t, `s.ContainsAny("c", "a", "b")`, s.ContainsAny(S("c", "a", "b")), true)
+
+	s.Remove("c")
+	s.Add("b")
+	expectEq(t, `s.ContainsAny("a")`, s.ContainsAny(S("a")), true)
+	expectEq(t, `s.ContainsAny("b")`, s.ContainsAny(S("b")), true)
+	expectEq(t, `s.ContainsAny("c")`, s.ContainsAny(S("c")), false)
+	expectEq(t, `s.ContainsAny("a", "b")`, s.ContainsAny(S("a", "b")), true)
+	expectEq(t, `s.ContainsAny("b", "c")`, s.ContainsAny(S("b", "c")), true)
+	expectEq(t, `s.ContainsAny("c", "a")`, s.ContainsAny(S("c", "a")), true)
+	expectEq(t, `s.ContainsAny("c", "a", "b")`, s.ContainsAny(S("c", "a", "b")), true)
+}
+
 func TestSetIntersection(t *testing.T) {
 	a := container.NewSet(1, 3, 4, 6)
 	b := container.NewSet(2, 3, 4, 5)

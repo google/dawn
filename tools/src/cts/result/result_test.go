@@ -91,7 +91,7 @@ func TestParseError(t *testing.T) {
 	}
 }
 
-func TestUniqueTags(t *testing.T) {
+func TestVariants(t *testing.T) {
 	type Test struct {
 		results result.List
 		expect  []result.Tags
@@ -198,7 +198,7 @@ func TestUniqueTags(t *testing.T) {
 			},
 		},
 	} {
-		got := test.results.UniqueTags()
+		got := test.results.Variants()
 		if diff := cmp.Diff(got, test.expect); diff != "" {
 			t.Errorf("Results:\n%v\nUniqueTags() was not as expected:\n%v", test.results, diff)
 		}

@@ -97,9 +97,13 @@ func Parse(in string) (Result, error) {
 // List is a list of results
 type List []Result
 
-// Returns the list of unique tags across all results.
-func (l List) UniqueTags() []Tags {
-	tags := container.NewMap[string, Tags]()
+// Variant is a collection of tags that uniquely identify a test
+// configuration (e.g the combination of OS, GPU, validation-modes, etc).
+type Variant = Tags
+
+// Variants returns the list of unique tags (variants) across all results.
+func (l List) Variants() []Variant {
+	tags := container.NewMap[string, Variant]()
 	for _, r := range l {
 		tags.Add(TagsToString(r.Tags), r.Tags)
 	}
