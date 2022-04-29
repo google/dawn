@@ -11,6 +11,7 @@ require (
 	github.com/mattn/go-isatty v0.0.14
 	github.com/sergi/go-diff v1.2.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
+	github.com/tidwall/jsonc v0.3.2
 	go.chromium.org/luci v0.0.0-20220412023008-ab2409fe739a
 	golang.org/x/net v0.0.0-20220403103023-749bd193bc2b
 	google.golang.org/protobuf v1.28.0

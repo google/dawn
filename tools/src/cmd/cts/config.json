@@ -1,0 +1,54 @@
+{
+  "Test": {
+    "Prefix": "ninja://chrome/test:telemetry_gpu_integration_test/gpu_tests.webgpu_cts_integration_test.WebGpuCtsIntegrationTest.",
+    "SlowThreshold": 15000000000 // 15 seconds
+  },
+  "Gerrit": {
+    "Host": "https://dawn-review.googlesource.com",
+    "Project": "dawn"
+  },
+  "Git": {
+    "CTS": {
+      "Host": "chromium.googlesource.com",
+      "Project": "external/github.com/gpuweb/cts"
+    },
+    "Dawn": {
+      "Host": "dawn.googlesource.com",
+      "Project": "dawn"
+    }
+  },
+  "Builders": {
+    "Win": {
+      "Project": "chromium",
+      "Bucket": "try",
+      "Builder": "win-dawn-rel"
+    },
+    "Win10-x86": {
+      "Project": "chromium",
+      "Bucket": "try",
+      "Builder": "dawn-try-win10-x86-rel"
+    },
+    "Mac": {
+      "Project": "chromium",
+      "Bucket": "try",
+      "Builder": "mac-dawn-rel"
+    },
+    "Linux": {
+      "Project": "chromium",
+      "Bucket": "try",
+      "Builder": "linux-dawn-rel"
+    }
+  },
+  "TagAliases": [
+    [
+      // crbug.com/dawn/1387
+      "intel-0x5912",
+      "intel-0x3e92"
+    ]
+  ],
+  "Sheets": {
+    // Spreadsheet to export results data to
+    // https://docs.google.com/spreadsheets/d/1OFsh-r_njG5pKDwjL1HOvLJKDRC4FgO-LE9Kw7WPQcc
+    "ID": "1OFsh-r_njG5pKDwjL1HOvLJKDRC4FgO-LE9Kw7WPQcc"
+  }
+}
