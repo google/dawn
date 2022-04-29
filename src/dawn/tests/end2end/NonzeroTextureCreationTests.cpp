@@ -108,11 +108,22 @@ namespace {
                                   GetParam().mMipCount > 1 &&
                                   HasToggleEnabled("disable_r8_rg8_mipmaps"));
 
-            // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support
-            // reading from depth/stencil.
+            // TODO(crbug.com/dawn/667): ANGLE claims to support NV_read_stencil, but won't read
+            // correctly from a DEPTH32F_STENCIL8 texture.
             DAWN_SUPPRESS_TEST_IF(GetParam().mFormat == wgpu::TextureFormat::Depth24PlusStencil8 &&
                                   GetParam().mAspect == wgpu::TextureAspect::StencilOnly &&
-                                  HasToggleEnabled("disable_depth_stencil_read"));
+                                  IsANGLE());
+
+            // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support
+            // reading depth.
+            DAWN_TEST_UNSUPPORTED_IF(GetParam().mAspect == wgpu::TextureAspect::DepthOnly &&
+                                     HasToggleEnabled("disable_depth_read"));
+
+            // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support
+            // reading stencil.
+            DAWN_TEST_UNSUPPORTED_IF(GetParam().mAspect == wgpu::TextureAspect::StencilOnly &&
+                                     HasToggleEnabled("disable_stencil_read"));
+
             // GL may support the feature, but reading data back is not implemented.
             DAWN_TEST_UNSUPPORTED_IF(GetParam().mFormat == wgpu::TextureFormat::BC1RGBAUnorm &&
                                      (IsOpenGL() || IsOpenGLES()));
@@ -362,7 +373,7 @@ DAWN_INSTANTIATE_TEST_P(NonzeroDepthTextureCreationTests,
                          VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"},
                                        {"lazy_clear_resource_on_first_use"})},
                         {wgpu::TextureFormat::Depth32Float},
-                        {wgpu::TextureAspect::All},
+                        {wgpu::TextureAspect::DepthOnly},
                         {wgpu::TextureUsage(wgpu::TextureUsage::RenderAttachment |
                                             wgpu::TextureUsage::CopySrc),
                          wgpu::TextureUsage::CopySrc},

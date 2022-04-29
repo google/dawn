@@ -44,6 +44,8 @@ namespace dawn::native {
         DisableBaseInstance,
         DisableIndexedDrawBuffers,
         DisableSnormRead,
+        DisableDepthRead,
+        DisableStencilRead,
         DisableDepthStencilRead,
         DisableBGRARead,
         DisableSampleVariables,
