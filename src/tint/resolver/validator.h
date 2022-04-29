@@ -51,7 +51,6 @@ class Atomic;
 class BlockStatement;
 class Builtin;
 class CaseStatement;
-class ElseStatement;
 class ForLoopStatement;
 class IfStatement;
 class LoopStatement;
@@ -193,11 +192,6 @@ class Validator {
   /// @returns true on success, false otherwise
   bool DiscardStatement(const sem::Statement* stmt,
                         sem::Statement* current_statement) const;
-
-  /// Validates an else statement
-  /// @param stmt the else statement to validate
-  /// @returns true on success, false otherwise
-  bool ElseStatement(const sem::ElseStatement* stmt) const;
 
   /// Validates an entry point
   /// @param func the entry point function to validate

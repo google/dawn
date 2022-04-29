@@ -438,13 +438,11 @@ class Builder {
   /// Generates a conditional section merge block
   /// @param cond the condition
   /// @param true_body the statements making up the true block
-  /// @param cur_else_idx the index of the current else statement to process
-  /// @param else_stmts the list of all else statements
+  /// @param else_stmt the statement for the else block
   /// @returns true on success, false on failure
   bool GenerateConditionalBlock(const ast::Expression* cond,
                                 const ast::BlockStatement* true_body,
-                                size_t cur_else_idx,
-                                const ast::ElseStatementList& else_stmts);
+                                const ast::Statement* else_stmt);
   /// Generates a statement
   /// @param stmt the statement to generate
   /// @returns true if the statement was generated

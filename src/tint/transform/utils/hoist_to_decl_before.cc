@@ -39,25 +39,17 @@ class HoistToDeclBefore::State {
     ast::StatementList cont_decls;
   };
 
-  /// Holds information about 'if's with 'else-if' statements that need to be
-  /// decomposed into 'if {else}' so that declaration statements can be
-  /// inserted before the condition expression.
-  struct IfInfo {
-    /// Info for each else-if that needs decomposing
-    struct ElseIfInfo {
-      /// Decls to insert before condition
-      ast::StatementList cond_decls;
-    };
-
-    /// 'else if's that need to be decomposed to 'else { if }'
-    std::unordered_map<const sem::ElseStatement*, ElseIfInfo> else_ifs;
+  /// Info for each else-if that needs decomposing
+  struct ElseIfInfo {
+    /// Decls to insert before condition
+    ast::StatementList cond_decls;
   };
 
   /// For-loops that need to be decomposed to loops.
   std::unordered_map<const sem::ForLoopStatement*, LoopInfo> loops;
 
-  /// If statements with 'else if's that need to be decomposed to 'else {if}'
-  std::unordered_map<const sem::IfStatement*, IfInfo> ifs;
+  /// 'else if' statements that need to be decomposed to 'else {if}'
+  std::unordered_map<const ast::IfStatement*, ElseIfInfo> else_ifs;
 
   // Converts any for-loops marked for conversion to loops, inserting
   // registered declaration statements before the condition or continuing
@@ -118,78 +110,27 @@ class HoistToDeclBefore::State {
   }
 
   void ElseIfsToElseWithNestedIfs() {
-    if (ifs.empty()) {
-      return;
-    }
-
-    ctx.ReplaceAll([&](const ast::IfStatement* if_stmt)  //
-                   -> const ast::IfStatement* {
-      auto& sem = ctx.src->Sem();
-      auto* sem_if = sem.Get(if_stmt);
-      if (!sem_if) {
-        return nullptr;
-      }
-
-      auto it = ifs.find(sem_if);
-      if (it == ifs.end()) {
-        return nullptr;
-      }
-      auto& if_info = it->second;
-
-      // This if statement has "else if"s that need to be converted to "else
-      // { if }"s
-
-      ast::ElseStatementList next_else_stmts;
-      next_else_stmts.reserve(if_stmt->else_statements.size());
-
-      for (auto* else_stmt : utils::Reverse(if_stmt->else_statements)) {
-        if (else_stmt->condition == nullptr) {
-          // The last 'else', keep as is
-          next_else_stmts.insert(next_else_stmts.begin(), ctx.Clone(else_stmt));
-
-        } else {
-          auto* sem_else_if = sem.Get(else_stmt);
-
-          auto it2 = if_info.else_ifs.find(sem_else_if);
-          if (it2 == if_info.else_ifs.end()) {
-            // 'else if' we don't need to modify (no decls to insert), so
-            // keep as is
-            next_else_stmts.insert(next_else_stmts.begin(),
-                                   ctx.Clone(else_stmt));
-
-          } else {
-            // 'else if' we need to replace with 'else <decls> { if }'
-            auto& else_if_info = it2->second;
-
-            // Build the else body's statements, starting with let decls for
-            // the conditional expression
-            auto& body_stmts = else_if_info.cond_decls;
-
-            // Build nested if
-            auto* cond = ctx.Clone(else_stmt->condition);
-            auto* body = ctx.Clone(else_stmt->body);
-            body_stmts.emplace_back(b.If(cond, body, next_else_stmts));
-
-            // Build else
-            auto* else_with_nested_if = b.Else(b.Block(body_stmts));
-
-            // This will be used in parent if (either another nested if, or
-            // top-level if)
-            next_else_stmts = {else_with_nested_if};
+    // Decompose 'else-if' statements into 'else { if }' blocks.
+    ctx.ReplaceAll(
+        [&](const ast::IfStatement* else_if) -> const ast::Statement* {
+          if (!else_ifs.count(else_if)) {
+            return nullptr;
           }
-        }
-      }
+          auto& else_if_info = else_ifs[else_if];
 
-      // Build a new top-level if with new else statements
-      if (next_else_stmts.empty()) {
-        TINT_ICE(Transform, b.Diagnostics())
-            << "Expected else statements to insert into new if";
-      }
-      auto* cond = ctx.Clone(if_stmt->condition);
-      auto* body = ctx.Clone(if_stmt->body);
-      auto* new_if = b.If(cond, body, next_else_stmts);
-      return new_if;
-    });
+          // Build the else block's body statements, starting with let decls for
+          // the conditional expression.
+          auto& body_stmts = else_if_info.cond_decls;
+
+          // Move the 'else-if' into the new `else` block as a plain 'if'.
+          auto* cond = ctx.Clone(else_if->condition);
+          auto* body = ctx.Clone(else_if->body);
+          auto* new_if = b.If(cond, body, ctx.Clone(else_if->else_statement));
+          body_stmts.emplace_back(new_if);
+
+          // Replace the 'else-if' with the new 'else' block.
+          return b.Block(body_stmts);
+        });
   }
 
  public:
@@ -235,13 +176,14 @@ class HoistToDeclBefore::State {
                     const ast::Statement* stmt) {
     auto* ip = before_stmt->Declaration();
 
-    if (auto* else_if = before_stmt->As<sem::ElseStatement>()) {
+    auto* else_if = before_stmt->As<sem::IfStatement>();
+    if (else_if && else_if->Parent()->Is<sem::IfStatement>()) {
       // Insertion point is an 'else if' condition.
       // Need to convert 'else if' to 'else { if }'.
-      auto& if_info = ifs[else_if->Parent()->As<sem::IfStatement>()];
+      auto& else_if_info = else_ifs[else_if->Declaration()];
 
       // Index the map to convert this else if, even if `stmt` is nullptr.
-      auto& decls = if_info.else_ifs[else_if].cond_decls;
+      auto& decls = else_if_info.cond_decls;
       if (stmt) {
         decls.emplace_back(stmt);
       }

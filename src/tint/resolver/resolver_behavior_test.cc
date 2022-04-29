@@ -348,7 +348,7 @@ TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenDiscard) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenEmptyBlock_ElseDiscard) {
-  auto* stmt = If(true, Block(), Else(Block(Discard())));
+  auto* stmt = If(true, Block(), Block(Discard()));
   WrapInFunction(stmt);
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -359,7 +359,7 @@ TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenEmptyBlock_ElseDiscard) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenDiscard_ElseDiscard) {
-  auto* stmt = If(true, Block(Discard()), Else(Block(Discard())));
+  auto* stmt = If(true, Block(Discard()), Block(Discard()));
   WrapInFunction(stmt);
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -381,7 +381,7 @@ TEST_F(ResolverBehaviorTest, StmtIfCallFuncMayDiscard_ThenEmptyBlock) {
 
 TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenEmptyBlock_ElseCallFuncMayDiscard) {
   auto* stmt = If(true, Block(),  //
-                  Else(Equal(Call("DiscardOrNext"), 1), Block()));
+                  If(Equal(Call("DiscardOrNext"), 1), Block()));
   WrapInFunction(stmt);
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();

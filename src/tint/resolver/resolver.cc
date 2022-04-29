@@ -892,13 +892,6 @@ sem::Statement* Resolver::Statement(const ast::Statement* stmt) {
                  stmt->source);
         return nullptr;
       },
-      [&](const ast::ElseStatement*) {
-        TINT_ICE(Resolver, diagnostics_)
-            << "Resolver::Statement() encountered an Else statement. Else "
-               "statements are embedded in If statements, so should never be "
-               "encountered as top-level statements";
-        return nullptr;
-      },
       [&](Default) {
         AddError(
             "unknown statement type: " + std::string(stmt->TypeInfo().name),
@@ -946,17 +939,14 @@ sem::IfStatement* Resolver::IfStatement(const ast::IfStatement* stmt) {
     }
     sem->Behaviors().Add(body->Behaviors());
 
-    for (auto* else_stmt : stmt->else_statements) {
-      Mark(else_stmt);
-      auto* else_sem = ElseStatement(else_stmt);
+    if (stmt->else_statement) {
+      Mark(stmt->else_statement);
+      auto* else_sem = Statement(stmt->else_statement);
       if (!else_sem) {
         return false;
       }
       sem->Behaviors().Add(else_sem->Behaviors());
-    }
-
-    if (stmt->else_statements.empty() ||
-        stmt->else_statements.back()->condition != nullptr) {
+    } else {
       // https://www.w3.org/TR/WGSL/#behaviors-rules
       // if statements without an else branch are treated as if they had an
       // empty else branch (which adds Next to their behavior)
@@ -964,37 +954,6 @@ sem::IfStatement* Resolver::IfStatement(const ast::IfStatement* stmt) {
     }
 
     return validator_.IfStatement(sem);
-  });
-}
-
-sem::ElseStatement* Resolver::ElseStatement(const ast::ElseStatement* stmt) {
-  auto* sem = builder_->create<sem::ElseStatement>(
-      stmt, current_compound_statement_->As<sem::IfStatement>(),
-      current_function_);
-  return StatementScope(stmt, sem, [&] {
-    if (auto* cond_expr = stmt->condition) {
-      auto* cond = Expression(cond_expr);
-      if (!cond) {
-        return false;
-      }
-      sem->SetCondition(cond);
-      // https://www.w3.org/TR/WGSL/#behaviors-rules
-      // if statements with else if branches are treated as if they were nested
-      // simple if/else statements
-      sem->Behaviors() = cond->Behaviors();
-    }
-    sem->Behaviors().Remove(sem::Behavior::kNext);
-
-    Mark(stmt->body);
-    auto* body = builder_->create<sem::BlockStatement>(
-        stmt->body, current_compound_statement_, current_function_);
-    if (!StatementScope(stmt->body, body,
-                        [&] { return Statements(stmt->body->statements); })) {
-      return false;
-    }
-    sem->Behaviors().Add(body->Behaviors());
-
-    return validator_.ElseStatement(sem);
   });
 }
 

@@ -1729,58 +1729,33 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
 }
 
 // if_stmt
-//   : IF expression compound_stmt ( ELSE else_stmts ) ?
-Maybe<const ast::IfStatement*> ParserImpl::if_stmt() {
-  Source source;
-  if (!match(Token::Type::kIf, &source))
-    return Failure::kNoMatch;
-
-  auto condition = logical_or_expression();
-  if (condition.errored)
-    return Failure::kErrored;
-  if (!condition.matched) {
-    return add_error(peek(), "unable to parse condition expression");
-  }
-
-  auto body = expect_body_stmt();
-  if (body.errored)
-    return Failure::kErrored;
-
-  auto el = else_stmts();
-  if (el.errored) {
-    return Failure::kErrored;
-  }
-
-  return create<ast::IfStatement>(source, condition.value, body.value,
-                                  std::move(el.value));
-}
-
-// else_stmts
+//   : IF expression compound_stmt ( ELSE else_stmt ) ?
+// else_stmt
 //  : body_stmt
 //  | if_stmt
-Expect<ast::ElseStatementList> ParserImpl::else_stmts() {
-  ast::ElseStatementList stmts;
-  while (continue_parsing()) {
-    Source start;
+Maybe<const ast::IfStatement*> ParserImpl::if_stmt() {
+  // Parse if-else chains iteratively instead of recursively, to avoid
+  // stack-overflow for long chains of if-else statements.
 
-    bool else_if = false;
-    if (match(Token::Type::kElse, &start)) {
-      else_if = match(Token::Type::kIf);
-    } else {
-      break;
+  struct IfInfo {
+    Source source;
+    const ast::Expression* condition;
+    const ast::BlockStatement* body;
+  };
+
+  // Parse an if statement, capturing the source, condition, and body statement.
+  auto parse_if = [&]() -> Maybe<IfInfo> {
+    Source source;
+    if (!match(Token::Type::kIf, &source)) {
+      return Failure::kNoMatch;
     }
 
-    const ast::Expression* cond = nullptr;
-    if (else_if) {
-      auto condition = logical_or_expression();
-      if (condition.errored) {
-        return Failure::kErrored;
-      }
-      if (!condition.matched) {
-        return add_error(peek(), "unable to parse condition expression");
-      }
-
-      cond = condition.value;
+    auto condition = logical_or_expression();
+    if (condition.errored) {
+      return Failure::kErrored;
+    }
+    if (!condition.matched) {
+      return add_error(peek(), "unable to parse condition expression");
     }
 
     auto body = expect_body_stmt();
@@ -1788,11 +1763,52 @@ Expect<ast::ElseStatementList> ParserImpl::else_stmts() {
       return Failure::kErrored;
     }
 
-    Source source = make_source_range_from(start);
-    stmts.emplace_back(create<ast::ElseStatement>(source, cond, body.value));
+    return IfInfo{source, condition.value, body.value};
+  };
+
+  std::vector<IfInfo> statements;
+
+  // Parse the first if statement.
+  auto first_if = parse_if();
+  if (first_if.errored) {
+    return Failure::kErrored;
+  } else if (!first_if.matched) {
+    return Failure::kNoMatch;
+  }
+  statements.push_back(first_if.value);
+
+  // Parse the components of every "else {if}" in the chain.
+  const ast::Statement* last_stmt = nullptr;
+  while (continue_parsing()) {
+    if (!match(Token::Type::kElse)) {
+      break;
+    }
+
+    // Try to parse an "else if".
+    auto else_if = parse_if();
+    if (else_if.errored) {
+      return Failure::kErrored;
+    } else if (else_if.matched) {
+      statements.push_back(else_if.value);
+      continue;
+    }
+
+    // If it wasn't an "else if", it must just be an "else".
+    auto else_body = expect_body_stmt();
+    if (else_body.errored) {
+      return Failure::kErrored;
+    }
+    last_stmt = else_body.value;
+    break;
   }
 
-  return stmts;
+  // Now walk back through the statements to create their AST nodes.
+  for (auto itr = statements.rbegin(); itr != statements.rend(); itr++) {
+    last_stmt = create<ast::IfStatement>(itr->source, itr->condition, itr->body,
+                                         last_stmt);
+  }
+
+  return last_stmt->As<ast::IfStatement>();
 }
 
 // switch_stmt

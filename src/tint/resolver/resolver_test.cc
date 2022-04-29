@@ -160,7 +160,7 @@ TEST_F(ResolverTest, Stmt_If) {
   auto* else_body = Block(Assign(else_lhs, else_rhs));
 
   auto* else_cond = Expr(true);
-  auto* else_stmt = create<ast::ElseStatement>(else_cond, else_body);
+  auto* else_stmt = If(else_cond, else_body);
 
   auto* lhs = Expr("v");
   auto* rhs = Expr(2.3f);
@@ -168,8 +168,7 @@ TEST_F(ResolverTest, Stmt_If) {
   auto* assign = Assign(lhs, rhs);
   auto* body = Block(assign);
   auto* cond = Expr(true);
-  auto* stmt =
-      create<ast::IfStatement>(cond, body, ast::ElseStatementList{else_stmt});
+  auto* stmt = If(cond, body, else_stmt);
   WrapInFunction(v, stmt);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();

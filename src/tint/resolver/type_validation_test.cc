@@ -149,9 +149,7 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierInnerScope_Pass) {
 
   auto* var_a_float = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(3.1f));
 
-  auto* outer_body =
-      Block(create<ast::IfStatement>(cond, body, ast::ElseStatementList{}),
-            Decl(Source{{12, 34}}, var_a_float));
+  auto* outer_body = Block(If(cond, body), Decl(Source{{12, 34}}, var_a_float));
 
   WrapInFunction(outer_body);
 

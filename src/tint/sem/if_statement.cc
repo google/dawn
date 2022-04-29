@@ -17,7 +17,6 @@
 #include "src/tint/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::IfStatement);
-TINT_INSTANTIATE_TYPEINFO(tint::sem::ElseStatement);
 
 namespace tint::sem {
 
@@ -30,17 +29,6 @@ IfStatement::~IfStatement() = default;
 
 const ast::IfStatement* IfStatement::Declaration() const {
   return static_cast<const ast::IfStatement*>(Base::Declaration());
-}
-
-ElseStatement::ElseStatement(const ast::ElseStatement* declaration,
-                             const IfStatement* parent,
-                             const sem::Function* function)
-    : Base(declaration, parent, function) {}
-
-ElseStatement::~ElseStatement() = default;
-
-const ast::ElseStatement* ElseStatement::Declaration() const {
-  return static_cast<const ast::ElseStatement*>(Base::Declaration());
 }
 
 }  // namespace tint::sem

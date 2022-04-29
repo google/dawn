@@ -110,8 +110,6 @@ set(TINT_LIB_SRCS
   ast/depth_texture.h
   ast/discard_statement.cc
   ast/discard_statement.h
-  ast/else_statement.cc
-  ast/else_statement.h
   ast/enable.cc
   ast/enable.h
   ast/expression.cc
@@ -676,7 +674,6 @@ if(TINT_BUILD_TESTS)
     ast/depth_multisampled_texture_test.cc
     ast/depth_texture_test.cc
     ast/discard_statement_test.cc
-    ast/else_statement_test.cc
     ast/enable_test.cc
     ast/external_texture_test.cc
     ast/f32_test.cc
@@ -897,7 +894,6 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/parser_impl_depth_texture_test.cc
       reader/wgsl/parser_impl_enable_directive_test.cc
       reader/wgsl/parser_impl_external_texture_test.cc
-      reader/wgsl/parser_impl_elseif_stmt_test.cc
       reader/wgsl/parser_impl_equality_expression_test.cc
       reader/wgsl/parser_impl_error_msg_test.cc
       reader/wgsl/parser_impl_error_resync_test.cc

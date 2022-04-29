@@ -59,7 +59,6 @@ class Atomic;
 class BlockStatement;
 class Builtin;
 class CaseStatement;
-class ElseStatement;
 class ForLoopStatement;
 class IfStatement;
 class LoopStatement;
@@ -222,7 +221,6 @@ class Resolver {
       const ast::CompoundAssignmentStatement*);
   sem::Statement* ContinueStatement(const ast::ContinueStatement*);
   sem::Statement* DiscardStatement(const ast::DiscardStatement*);
-  sem::ElseStatement* ElseStatement(const ast::ElseStatement*);
   sem::Statement* FallthroughStatement(const ast::FallthroughStatement*);
   sem::ForLoopStatement* ForLoopStatement(const ast::ForLoopStatement*);
   sem::GlobalVariable* GlobalVariable(const ast::Variable*);

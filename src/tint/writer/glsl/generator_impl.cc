@@ -1842,36 +1842,20 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
     return false;
   }
 
-  for (auto* e : stmt->else_statements) {
-    if (e->condition) {
-      line() << "} else {";
-      increment_indent();
-
-      {
-        auto out = line();
-        out << "if (";
-        if (!EmitExpression(out, e->condition)) {
-          return false;
-        }
-        out << ") {";
+  if (stmt->else_statement) {
+    line() << "} else {";
+    if (auto* block = stmt->else_statement->As<ast::BlockStatement>()) {
+      if (!EmitStatementsWithIndent(block->statements)) {
+        return false;
       }
     } else {
-      line() << "} else {";
-    }
-
-    if (!EmitStatementsWithIndent(e->body->statements)) {
-      return false;
+      if (!EmitStatementsWithIndent({stmt->else_statement})) {
+        return false;
+      }
     }
   }
-
   line() << "}";
 
-  for (auto* e : stmt->else_statements) {
-    if (e->condition) {
-      decrement_indent();
-      line() << "}";
-    }
-  }
   return true;
 }
 

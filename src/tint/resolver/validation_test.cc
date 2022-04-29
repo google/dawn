@@ -124,16 +124,16 @@ TEST_F(ResolverValidationTest, Stmt_If_NonBool) {
             "12:34 error: if statement condition must be bool, got f32");
 }
 
-TEST_F(ResolverValidationTest, Stmt_Else_NonBool) {
-  // else (1.23f) {}
+TEST_F(ResolverValidationTest, Stmt_ElseIf_NonBool) {
+  // else if (1.23f) {}
 
   WrapInFunction(
-      If(Expr(true), Block(), Else(Expr(Source{{12, 34}}, 1.23f), Block())));
+      If(Expr(true), Block(), If(Expr(Source{{12, 34}}, 1.23f), Block())));
 
   EXPECT_FALSE(r()->Resolve());
 
   EXPECT_EQ(r()->error(),
-            "12:34 error: else statement condition must be bool, got f32");
+            "12:34 error: if statement condition must be bool, got f32");
 }
 
 TEST_F(ResolverValidationTest, Expr_ErrUnknownExprType) {
@@ -242,9 +242,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableInnerScope_Fail) {
   auto* lhs = Expr(Source{{12, 34}}, "a");
   auto* rhs = Expr(3.14f);
 
-  auto* outer_body =
-      Block(create<ast::IfStatement>(cond, body, ast::ElseStatementList{}),
-            Assign(lhs, rhs));
+  auto* outer_body = Block(If(cond, body), Assign(lhs, rhs));
 
   WrapInFunction(outer_body);
 
@@ -265,9 +263,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableOuterScope_Pass) {
   auto* cond = Expr(true);
   auto* body = Block(Assign(lhs, rhs));
 
-  auto* outer_body =
-      Block(Decl(var),
-            create<ast::IfStatement>(cond, body, ast::ElseStatementList{}));
+  auto* outer_body = Block(Decl(var), If(cond, body));
 
   WrapInFunction(outer_body);
 
@@ -1053,12 +1049,12 @@ TEST_F(ResolverValidationTest, Stmt_BreakInIfTrueInContinuing) {
 }
 
 TEST_F(ResolverValidationTest, Stmt_BreakInIfElseInContinuing) {
-  auto* cont = Block(                      // continuing {
-      If(true, Block(),                    //   if(true) {
-         Else(Block(                       //   } else {
-             Break(Source{{12, 34}})))));  //     break;
-                                           //   }
-                                           // }
+  auto* cont = Block(                     // continuing {
+      If(true, Block(),                   //   if(true) {
+         Block(                           //   } else {
+             Break(Source{{12, 34}}))));  //     break;
+                                          //   }
+                                          // }
   WrapInFunction(Loop(Block(), cont));
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -1114,13 +1110,13 @@ TEST_F(ResolverValidationTest, Stmt_BreakInIfTrueMultipleStmtsInContinuing) {
 }
 
 TEST_F(ResolverValidationTest, Stmt_BreakInIfElseMultipleStmtsInContinuing) {
-  auto* cont = Block(                             // continuing {
-      If(true, Block(),                           //   if(true) {
-         Else(Block(Source{{56, 78}},             //   } else {
-                    Assign(Phony(), 1),           //     _ = 1;
-                    Break(Source{{12, 34}})))));  //     break;
-                                                  //   }
-                                                  // }
+  auto* cont = Block(                       // continuing {
+      If(true, Block(),                     //   if(true) {
+         Block(Source{{56, 78}},            //   } else {
+               Assign(Phony(), 1),          //     _ = 1;
+               Break(Source{{12, 34}}))));  //     break;
+                                            //   }
+                                            // }
   WrapInFunction(Loop(Block(), cont));
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
@@ -1132,12 +1128,12 @@ TEST_F(ResolverValidationTest, Stmt_BreakInIfElseMultipleStmtsInContinuing) {
 }
 
 TEST_F(ResolverValidationTest, Stmt_BreakInIfElseIfInContinuing) {
-  auto* cont = Block(                             // continuing {
-      If(true, Block(),                           //   if(true) {
-         Else(Expr(Source{{56, 78}}, true),       //   } else if (true) {
-              Block(Break(Source{{12, 34}})))));  //     break;
-                                                  //   }
-                                                  // }
+  auto* cont = Block(                           // continuing {
+      If(true, Block(),                         //   if(true) {
+         If(Source{{56, 78}}, Expr(true),       //   } else if (true) {
+            Block(Break(Source{{12, 34}})))));  //     break;
+                                                //   }
+                                                // }
   WrapInFunction(Loop(Block(), cont));
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
@@ -1149,13 +1145,13 @@ TEST_F(ResolverValidationTest, Stmt_BreakInIfElseIfInContinuing) {
 }
 
 TEST_F(ResolverValidationTest, Stmt_BreakInIfNonEmptyElseInContinuing) {
-  auto* cont = Block(                        // continuing {
-      If(true,                               //   if(true) {
-         Block(Break(Source{{12, 34}})),     //     break;
-         Else(Block(Source{{56, 78}},        //   } else {
-                    Assign(Phony(), 1)))));  //     _ = 1;
-                                             //   }
-                                             // }
+  auto* cont = Block(                     // continuing {
+      If(true,                            //   if(true) {
+         Block(Break(Source{{12, 34}})),  //     break;
+         Block(Source{{56, 78}},          //   } else {
+               Assign(Phony(), 1))));     //     _ = 1;
+                                          //   }
+                                          // }
   WrapInFunction(Loop(Block(), cont));
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
@@ -1170,8 +1166,8 @@ TEST_F(ResolverValidationTest, Stmt_BreakInIfElseNonEmptyTrueInContinuing) {
   auto* cont = Block(                                  // continuing {
       If(true,                                         //   if(true) {
          Block(Source{{56, 78}}, Assign(Phony(), 1)),  //     _ = 1;
-         Else(Block(                                   //   } else {
-             Break(Source{{12, 34}})))));              //     break;
+         Block(                                        //   } else {
+             Break(Source{{12, 34}}))));               //     break;
                                                        //   }
                                                        // }
   WrapInFunction(Loop(Block(), cont));

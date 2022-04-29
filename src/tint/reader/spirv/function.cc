@@ -681,15 +681,15 @@ struct IfStatementBuilder final
   /// @param builder the program builder
   /// @returns the built ast::IfStatement
   const ast::IfStatement* Build(ProgramBuilder* builder) const override {
-    return builder->create<ast::IfStatement>(Source{}, cond, body, else_stmts);
+    return builder->create<ast::IfStatement>(Source{}, cond, body, else_stmt);
   }
 
   /// If-statement condition
   const ast::Expression* const cond;
   /// If-statement block body
   const ast::BlockStatement* body = nullptr;
-  /// Optional if-statement else statements
-  ast::ElseStatementList else_stmts;
+  /// Optional if-statement else statement
+  const ast::Statement* else_stmt = nullptr;
 };
 
 /// A StatementBuilder for ast::LoopStatement
@@ -2964,10 +2964,8 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
           // Only set the else-clause if there are statements to fill it.
           if (!stmts.empty()) {
             // The "else" consists of the statement list from the top of
-            // statements stack, without an elseif condition.
-            auto* else_body = create<ast::BlockStatement>(Source{}, stmts);
-            builder->else_stmts.emplace_back(
-                create<ast::ElseStatement>(Source{}, nullptr, else_body));
+            // statements stack, without an "else if" condition.
+            builder->else_stmt = create<ast::BlockStatement>(Source{}, stmts);
           }
         });
     if (false_is_break) {
@@ -3363,19 +3361,19 @@ const ast::Statement* FunctionEmitter::MakeSimpleIf(
   if ((then_stmt == nullptr) && (else_stmt == nullptr)) {
     return nullptr;
   }
-  ast::ElseStatementList else_stmts;
-  if (else_stmt != nullptr) {
-    ast::StatementList stmts{else_stmt};
-    else_stmts.emplace_back(create<ast::ElseStatement>(
-        Source{}, nullptr, create<ast::BlockStatement>(Source{}, stmts)));
-  }
   ast::StatementList if_stmts;
   if (then_stmt != nullptr) {
     if_stmts.emplace_back(then_stmt);
   }
   auto* if_block = create<ast::BlockStatement>(Source{}, if_stmts);
+
+  const ast::Statement* else_block = nullptr;
+  if (else_stmt) {
+    else_block = create<ast::BlockStatement>(ast::StatementList{else_stmt});
+  }
+
   auto* if_stmt =
-      create<ast::IfStatement>(Source{}, condition, if_block, else_stmts);
+      create<ast::IfStatement>(Source{}, condition, if_block, else_block);
 
   return if_stmt;
 }

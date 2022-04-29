@@ -3365,11 +3365,9 @@ uint32_t Builder::GenerateBitcastExpression(
   return result_id;
 }
 
-bool Builder::GenerateConditionalBlock(
-    const ast::Expression* cond,
-    const ast::BlockStatement* true_body,
-    size_t cur_else_idx,
-    const ast::ElseStatementList& else_stmts) {
+bool Builder::GenerateConditionalBlock(const ast::Expression* cond,
+                                       const ast::BlockStatement* true_body,
+                                       const ast::Statement* else_stmt) {
   auto cond_id = GenerateExpressionWithLoadIfNeeded(cond);
   if (cond_id == 0) {
     return false;
@@ -3389,8 +3387,7 @@ bool Builder::GenerateConditionalBlock(
 
   // if there are no more else statements we branch on false to the merge
   // block otherwise we branch to the false block
-  auto false_block_id =
-      cur_else_idx < else_stmts.size() ? next_id() : merge_block_id;
+  auto false_block_id = else_stmt ? next_id() : merge_block_id;
 
   if (!push_function_inst(spv::Op::OpBranchConditional,
                           {Operand(cond_id), Operand(true_block_id),
@@ -3418,15 +3415,15 @@ bool Builder::GenerateConditionalBlock(
       return false;
     }
 
-    auto* else_stmt = else_stmts[cur_else_idx];
     // Handle the else case by just outputting the statements.
-    if (!else_stmt->condition) {
-      if (!GenerateBlockStatement(else_stmt->body)) {
+    if (auto* block = else_stmt->As<ast::BlockStatement>()) {
+      if (!GenerateBlockStatement(block)) {
         return false;
       }
     } else {
-      if (!GenerateConditionalBlock(else_stmt->condition, else_stmt->body,
-                                    cur_else_idx + 1, else_stmts)) {
+      auto* elseif = else_stmt->As<ast::IfStatement>();
+      if (!GenerateConditionalBlock(elseif->condition, elseif->body,
+                                    elseif->else_statement)) {
         return false;
       }
     }
@@ -3460,7 +3457,7 @@ bool Builder::GenerateIfStatement(const ast::IfStatement* stmt) {
       return block && (block->statements.size() == 1) &&
              block->Last()->Is<ast::BreakStatement>();
     };
-    if (is_just_a_break(stmt->body) && stmt->else_statements.empty()) {
+    if (is_just_a_break(stmt->body) && stmt->else_statement == nullptr) {
       // It's a break-if.
       TINT_ASSERT(Writer, !backedge_stack_.empty());
       const auto cond_id = GenerateExpressionWithLoadIfNeeded(stmt->condition);
@@ -3473,9 +3470,8 @@ bool Builder::GenerateIfStatement(const ast::IfStatement* stmt) {
                     Operand(ci.loop_header_id)});
       return true;
     } else if (stmt->body->Empty()) {
-      const auto& es = stmt->else_statements;
-      if (es.size() == 1 && !es.back()->condition &&
-          is_just_a_break(es.back()->body)) {
+      auto* es_block = As<ast::BlockStatement>(stmt->else_statement);
+      if (es_block && is_just_a_break(es_block)) {
         // It's a break-unless.
         TINT_ASSERT(Writer, !backedge_stack_.empty());
         const auto cond_id =
@@ -3492,8 +3488,8 @@ bool Builder::GenerateIfStatement(const ast::IfStatement* stmt) {
     }
   }
 
-  if (!GenerateConditionalBlock(stmt->condition, stmt->body, 0,
-                                stmt->else_statements)) {
+  if (!GenerateConditionalBlock(stmt->condition, stmt->body,
+                                stmt->else_statement)) {
     return false;
   }
   return true;

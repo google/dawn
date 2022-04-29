@@ -1383,10 +1383,6 @@ bool Validator::BreakStatement(const sem::Statement* stmt,
     if (auto* block = stmt->Parent()->As<sem::BlockStatement>()) {
       auto* block_parent = block->Parent();
       auto* if_stmt = block_parent->As<sem::IfStatement>();
-      auto* el_stmt = block_parent->As<sem::ElseStatement>();
-      if (el_stmt) {
-        if_stmt = el_stmt->Parent();
-      }
       if (!if_stmt) {
         return fail("break statement is not directly in if statement block",
                     stmt->Declaration()->source);
@@ -1395,22 +1391,25 @@ bool Validator::BreakStatement(const sem::Statement* stmt,
         return fail("if statement block contains multiple statements",
                     block->Declaration()->source);
       }
-      for (auto* el : if_stmt->Declaration()->else_statements) {
-        if (el->condition) {
-          return fail("else has condition", el->condition->source);
+
+      if (if_stmt->Parent()->Is<sem::IfStatement>()) {
+        return fail("else has condition", if_stmt->Declaration()->source);
+      }
+
+      bool el_contains_break =
+          block->Declaration() == if_stmt->Declaration()->else_statement;
+      if (el_contains_break) {
+        if (auto* true_block = if_stmt->Declaration()->body;
+            !true_block->Empty()) {
+          return fail("non-empty true block", true_block->source);
         }
-        bool el_contains_break = el_stmt && el == el_stmt->Declaration();
-        if (el_contains_break) {
-          if (auto* true_block = if_stmt->Declaration()->body;
-              !true_block->Empty()) {
-            return fail("non-empty true block", true_block->source);
-          }
-        } else {
-          if (!el->body->Empty()) {
-            return fail("non-empty false block", el->body->source);
-          }
+      } else {
+        auto* else_stmt = if_stmt->Declaration()->else_statement;
+        if (else_stmt) {
+          return fail("non-empty false block", else_stmt->source);
         }
       }
+
       if (if_stmt->Parent()->Declaration() != continuing) {
         return fail(
             "if statement containing break statement is not directly in "
@@ -1488,19 +1487,6 @@ bool Validator::FallthroughStatement(const sem::Statement* stmt) const {
       "fallthrough must only be used as the last statement of a case block",
       stmt->Declaration()->source);
   return false;
-}
-
-bool Validator::ElseStatement(const sem::ElseStatement* stmt) const {
-  if (auto* cond = stmt->Condition()) {
-    auto* cond_ty = cond->Type()->UnwrapRef();
-    if (!cond_ty->Is<sem::Bool>()) {
-      AddError("else statement condition must be bool, got " +
-                   sem_.TypeNameOf(cond_ty),
-               stmt->Condition()->Declaration()->source);
-      return false;
-    }
-  }
-  return true;
 }
 
 bool Validator::LoopStatement(const sem::LoopStatement* stmt) const {

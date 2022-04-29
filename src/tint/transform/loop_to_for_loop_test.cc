@@ -302,5 +302,57 @@ fn f() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(LoopToForLoopTest, NoTransform_IfBreakWithElse) {
+  auto* src = R"(
+fn f() {
+  var i : i32;
+  i = 0;
+  loop {
+    if ((i > 15)) {
+      break;
+    } else {
+    }
+    _ = 123;
+
+    continuing {
+      i = (i + 1);
+    }
+  }
+}
+)";
+
+  auto* expect = src;
+
+  auto got = Run<LoopToForLoop>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(LoopToForLoopTest, NoTransform_IfBreakWithElseIf) {
+  auto* src = R"(
+fn f() {
+  var i : i32;
+  i = 0;
+  loop {
+    if ((i > 15)) {
+      break;
+    } else if (true) {
+    }
+    _ = 123;
+
+    continuing {
+      i = (i + 1);
+    }
+  }
+}
+)";
+
+  auto* expect = src;
+
+  auto got = Run<LoopToForLoop>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::transform

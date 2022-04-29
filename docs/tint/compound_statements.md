@@ -24,13 +24,11 @@ sem::IfStatement {
     sem::BlockStatement {
         statement_a
     }
-    sem::ElseStatement {
+    sem::IfStatement {
         condition_b
         sem::BlockStatement {
             statement_b
         }
-    }
-    sem::ElseStatement {
         sem::BlockStatement {
             statement_c
         }

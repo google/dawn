@@ -348,10 +348,9 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
   auto* expr = If(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,
                                                 Expr("a"), Expr("b")),
                   Block(Return(1)),
-                  Else(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
-                                                     Expr("b"), Expr("c")),
-                       Block(Return(2))),
-                  Else(Block(Return(3))));
+                  If(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
+                                                   Expr("b"), Expr("c")),
+                     Block(Return(2)), Block(Return(3))));
   Func("func", {}, ty.i32(), {WrapInStatement(expr)});
 
   GeneratorImpl& gen = Build();

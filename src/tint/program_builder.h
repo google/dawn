@@ -2190,56 +2190,34 @@ class ProgramBuilder {
         ast::StatementList{std::forward<STATEMENTS>(statements)...});
   }
 
-  /// Creates a ast::ElseStatement with input condition and body
-  /// @param condition the else condition expression
-  /// @param body the else body
-  /// @returns the else statement pointer
-  template <typename CONDITION>
-  const ast::ElseStatement* Else(CONDITION&& condition,
-                                 const ast::BlockStatement* body) {
-    return create<ast::ElseStatement>(Expr(std::forward<CONDITION>(condition)),
-                                      body);
-  }
-
-  /// Creates a ast::ElseStatement with no condition and body
-  /// @param body the else body
-  /// @returns the else statement pointer
-  const ast::ElseStatement* Else(const ast::BlockStatement* body) {
-    return create<ast::ElseStatement>(nullptr, body);
-  }
-
   /// Creates a ast::IfStatement with input condition, body, and optional
-  /// variadic else statements
+  /// else statement
   /// @param source the source information for the if statement
   /// @param condition the if statement condition expression
   /// @param body the if statement body
-  /// @param elseStatements optional variadic else statements
+  /// @param else_stmt optional else statement
   /// @returns the if statement pointer
-  template <typename CONDITION, typename... ELSE_STATEMENTS>
+  template <typename CONDITION>
   const ast::IfStatement* If(const Source& source,
                              CONDITION&& condition,
                              const ast::BlockStatement* body,
-                             ELSE_STATEMENTS&&... elseStatements) {
+                             const ast::Statement* else_stmt = nullptr) {
     return create<ast::IfStatement>(
-        source, Expr(std::forward<CONDITION>(condition)), body,
-        ast::ElseStatementList{
-            std::forward<ELSE_STATEMENTS>(elseStatements)...});
+        source, Expr(std::forward<CONDITION>(condition)), body, else_stmt);
   }
 
   /// Creates a ast::IfStatement with input condition, body, and optional
-  /// variadic else statements
+  /// else statement
   /// @param condition the if statement condition expression
   /// @param body the if statement body
-  /// @param elseStatements optional variadic else statements
+  /// @param else_stmt optional else statement
   /// @returns the if statement pointer
-  template <typename CONDITION, typename... ELSE_STATEMENTS>
+  template <typename CONDITION>
   const ast::IfStatement* If(CONDITION&& condition,
                              const ast::BlockStatement* body,
-                             ELSE_STATEMENTS&&... elseStatements) {
-    return create<ast::IfStatement>(
-        Expr(std::forward<CONDITION>(condition)), body,
-        ast::ElseStatementList{
-            std::forward<ELSE_STATEMENTS>(elseStatements)...});
+                             const ast::Statement* else_stmt = nullptr) {
+    return create<ast::IfStatement>(Expr(std::forward<CONDITION>(condition)),
+                                    body, else_stmt);
   }
 
   /// Creates a ast::AssignmentStatement with input lhs and rhs expressions

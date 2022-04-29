@@ -20,7 +20,6 @@
 // Forward declarations
 namespace tint::ast {
 class IfStatement;
-class ElseStatement;
 }  // namespace tint::ast
 namespace tint::sem {
 class Expression;
@@ -50,39 +49,6 @@ class IfStatement final : public Castable<IfStatement, CompoundStatement> {
 
   /// Sets the if-statement condition expression
   /// @param condition the if condition expression
-  void SetCondition(const Expression* condition) { condition_ = condition; }
-
- private:
-  const Expression* condition_ = nullptr;
-};
-
-/// Holds semantic information about an else statement
-class ElseStatement final : public Castable<ElseStatement, CompoundStatement> {
- public:
-  /// Constructor
-  /// @param declaration the AST node for this else statement
-  /// @param parent the owning statement
-  /// @param function the owning function
-  ElseStatement(const ast::ElseStatement* declaration,
-                const IfStatement* parent,
-                const sem::Function* function);
-
-  /// Destructor
-  ~ElseStatement() override;
-
-  /// @returns the AST node
-  const ast::ElseStatement* Declaration() const;
-
-  /// @returns the else-statement condition expression
-  const Expression* Condition() const { return condition_; }
-
-  /// @return the statement that encloses this statement
-  const IfStatement* Parent() const {
-    return static_cast<const IfStatement*>(Statement::Parent());
-  }
-
-  /// Sets the else-statement condition expression
-  /// @param condition the else condition expression
   void SetCondition(const Expression* condition) { condition_ = condition; }
 
  private:

@@ -83,14 +83,14 @@ void LoopToForLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
     if (!if_stmt) {
       return nullptr;
     }
+    auto* else_stmt = tint::As<ast::BlockStatement>(if_stmt->else_statement);
 
     bool negate_condition = false;
     if (IsBlockWithSingleBreak(if_stmt->body) &&
-        if_stmt->else_statements.empty()) {
+        if_stmt->else_statement == nullptr) {
       negate_condition = true;
-    } else if (if_stmt->body->Empty() && if_stmt->else_statements.size() == 1 &&
-               if_stmt->else_statements[0]->condition == nullptr &&
-               IsBlockWithSingleBreak(if_stmt->else_statements[0]->body)) {
+    } else if (if_stmt->body->Empty() && else_stmt &&
+               IsBlockWithSingleBreak(else_stmt)) {
       negate_condition = false;
     } else {
       return nullptr;

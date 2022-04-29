@@ -232,8 +232,8 @@ TEST_F(ResolverCompoundStatementTest, If) {
   auto* cond_b = Expr(true);
   auto* stmt_b = Ignore(1);
   auto* stmt_c = Ignore(1);
-  auto* if_stmt = If(cond_a, Block(stmt_a), Else(cond_b, Block(stmt_b)),
-                     Else(nullptr, Block(stmt_c)));
+  auto* if_stmt =
+      If(cond_a, Block(stmt_a), If(cond_b, Block(stmt_b), Block(stmt_c)));
   WrapInFunction(if_stmt);
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -268,8 +268,8 @@ TEST_F(ResolverCompoundStatementTest, If) {
     ASSERT_NE(e, nullptr);
     auto* s = e->Stmt();
     ASSERT_NE(s, nullptr);
-    EXPECT_TRUE(s->Is<sem::ElseStatement>());
-    EXPECT_EQ(s->Parent(), s->FindFirstParent<sem::IfStatement>());
+    EXPECT_TRUE(s->Is<sem::IfStatement>());
+    EXPECT_EQ(s->Parent(), s->Parent()->FindFirstParent<sem::IfStatement>());
     EXPECT_EQ(s->Parent()->Parent(),
               s->FindFirstParent<sem::FunctionBlockStatement>());
     EXPECT_EQ(s->Parent()->Parent(), s->Block());
@@ -279,9 +279,10 @@ TEST_F(ResolverCompoundStatementTest, If) {
     ASSERT_NE(s, nullptr);
     EXPECT_EQ(s->Parent(), s->FindFirstParent<sem::BlockStatement>());
     EXPECT_EQ(s->Parent(), s->Block());
-    EXPECT_EQ(s->Parent()->Parent(), s->FindFirstParent<sem::ElseStatement>());
+    auto* elseif = s->FindFirstParent<sem::IfStatement>();
+    EXPECT_EQ(s->Parent()->Parent(), elseif);
     EXPECT_EQ(s->Parent()->Parent()->Parent(),
-              s->FindFirstParent<sem::IfStatement>());
+              elseif->Parent()->FindFirstParent<sem::IfStatement>());
     EXPECT_EQ(s->Parent()->Parent()->Parent()->Parent(),
               s->FindFirstParent<sem::FunctionBlockStatement>());
   }
@@ -290,9 +291,10 @@ TEST_F(ResolverCompoundStatementTest, If) {
     ASSERT_NE(s, nullptr);
     EXPECT_EQ(s->Parent(), s->FindFirstParent<sem::BlockStatement>());
     EXPECT_EQ(s->Parent(), s->Block());
-    EXPECT_EQ(s->Parent()->Parent(), s->FindFirstParent<sem::ElseStatement>());
+    auto* elseif = s->FindFirstParent<sem::IfStatement>();
+    EXPECT_EQ(s->Parent()->Parent(), elseif);
     EXPECT_EQ(s->Parent()->Parent()->Parent(),
-              s->FindFirstParent<sem::IfStatement>());
+              elseif->Parent()->FindFirstParent<sem::IfStatement>());
     EXPECT_EQ(s->Parent()->Parent()->Parent()->Parent(),
               s->FindFirstParent<sem::FunctionBlockStatement>());
   }

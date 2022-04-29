@@ -393,9 +393,6 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
           [&](const ast::CallStatement* s) {  //
             ProcessStatement(s->expr);
           },
-          [&](const ast::ElseStatement* s) {  //
-            ProcessStatement(s->condition);
-          },
           [&](const ast::ForLoopStatement* s) {
             ProcessStatement(s->condition);
           },
@@ -591,18 +588,6 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
           }
           ast::StatementList stmts;
           ctx.Replace(s->expr, Decompose(s->expr, &stmts));
-          InsertBefore(stmts, s);
-          return ctx.CloneWithoutTransform(s);
-        },
-        [&](const ast::ElseStatement* s) -> const ast::Statement* {
-          if (!s->condition || !sem.Get(s->condition)->HasSideEffects()) {
-            return nullptr;
-          }
-          // NOTE: We shouldn't reach here as else-if with side-effect
-          // conditions are simplified to else { if } by
-          // SimplifySideEffectStatements.
-          ast::StatementList stmts;
-          ctx.Replace(s->condition, Decompose(s->condition, &stmts));
           InsertBefore(stmts, s);
           return ctx.CloneWithoutTransform(s);
         },

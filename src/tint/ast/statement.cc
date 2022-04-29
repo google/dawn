@@ -58,9 +58,6 @@ const char* Statement::Name() const {
   if (Is<DiscardStatement>()) {
     return "discard statement";
   }
-  if (Is<ElseStatement>()) {
-    return "else statement";
-  }
   if (Is<FallthroughStatement>()) {
     return "fallthrough statement";
   }

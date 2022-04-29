@@ -47,9 +47,7 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
 
   auto* cond = Expr("cond");
   auto* body = Block(Return());
-  auto* i = If(
-      cond, body,
-      ast::ElseStatementList{create<ast::ElseStatement>(else_cond, else_body)});
+  auto* i = If(cond, body, If(else_cond, else_body));
   WrapInFunction(i);
 
   GeneratorImpl& gen = Build();
@@ -72,9 +70,7 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElse) {
 
   auto* cond = Expr("cond");
   auto* body = Block(Return());
-  auto* i = If(
-      cond, body,
-      ast::ElseStatementList{create<ast::ElseStatement>(nullptr, else_body)});
+  auto* i = If(cond, body, else_body);
   WrapInFunction(i);
 
   GeneratorImpl& gen = Build();
@@ -102,11 +98,7 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
 
   auto* cond = Expr("cond");
   auto* body = Block(Return());
-  auto* i = If(cond, body,
-               ast::ElseStatementList{
-                   create<ast::ElseStatement>(else_cond, else_body),
-                   create<ast::ElseStatement>(nullptr, else_body_2),
-               });
+  auto* i = If(cond, body, If(else_cond, else_body, else_body_2));
   WrapInFunction(i);
 
   GeneratorImpl& gen = Build();

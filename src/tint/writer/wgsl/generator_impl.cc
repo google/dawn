@@ -1075,20 +1075,27 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
     return false;
   }
 
-  for (auto* e : stmt->else_statements) {
-    if (e->condition) {
-      auto out = line();
-      out << "} else if (";
-      if (!EmitExpression(out, e->condition)) {
+  const ast::Statement* e = stmt->else_statement;
+  while (e) {
+    if (auto* elseif = e->As<ast::IfStatement>()) {
+      {
+        auto out = line();
+        out << "} else if (";
+        if (!EmitExpression(out, elseif->condition)) {
+          return false;
+        }
+        out << ") {";
+      }
+      if (!EmitStatementsWithIndent(elseif->body->statements)) {
         return false;
       }
-      out << ") {";
+      e = elseif->else_statement;
     } else {
       line() << "} else {";
-    }
-
-    if (!EmitStatementsWithIndent(e->body->statements)) {
-      return false;
+      if (!EmitStatementsWithIndent(e->As<ast::BlockStatement>()->statements)) {
+        return false;
+      }
+      break;
     }
   }
 

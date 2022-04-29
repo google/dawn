@@ -205,9 +205,7 @@ TEST_F(ResolverVarLetValidationTest, VarRedeclaredInIfBlock) {
   auto* cond = Expr(true);
   auto* body = Block(Decl(var));
 
-  auto* outer_body =
-      Block(Decl(var_a_float),
-            create<ast::IfStatement>(cond, body, ast::ElseStatementList{}));
+  auto* outer_body = Block(Decl(var_a_float), If(cond, body));
 
   WrapInFunction(outer_body);
 

@@ -222,8 +222,6 @@ libtint_source_set("libtint_core_all_src") {
     "ast/disable_validation_attribute.h",
     "ast/discard_statement.cc",
     "ast/discard_statement.h",
-    "ast/else_statement.cc",
-    "ast/else_statement.h",
     "ast/enable.cc",
     "ast/enable.h",
     "ast/expression.cc",

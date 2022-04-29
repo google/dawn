@@ -29,7 +29,7 @@ TEST_F(ParserImplTest, IfStmt) {
   ASSERT_NE(e->condition, nullptr);
   ASSERT_TRUE(e->condition->Is<ast::BinaryExpression>());
   EXPECT_EQ(e->body->statements.size(), 2u);
-  EXPECT_EQ(e->else_statements.size(), 0u);
+  EXPECT_EQ(e->else_statement, nullptr);
 }
 
 TEST_F(ParserImplTest, IfStmt_WithElse) {
@@ -45,14 +45,14 @@ TEST_F(ParserImplTest, IfStmt_WithElse) {
   ASSERT_TRUE(e->condition->Is<ast::BinaryExpression>());
   EXPECT_EQ(e->body->statements.size(), 2u);
 
-  ASSERT_EQ(e->else_statements.size(), 2u);
-  ASSERT_NE(e->else_statements[0]->condition, nullptr);
-  ASSERT_TRUE(
-      e->else_statements[0]->condition->Is<ast::IdentifierExpression>());
-  EXPECT_EQ(e->else_statements[0]->body->statements.size(), 1u);
+  auto* elseif = As<ast::IfStatement>(e->else_statement);
+  ASSERT_NE(elseif, nullptr);
+  ASSERT_TRUE(elseif->condition->Is<ast::IdentifierExpression>());
+  EXPECT_EQ(elseif->body->statements.size(), 1u);
 
-  ASSERT_EQ(e->else_statements[1]->condition, nullptr);
-  EXPECT_EQ(e->else_statements[1]->body->statements.size(), 0u);
+  auto* el = As<ast::BlockStatement>(elseif->else_statement);
+  ASSERT_NE(el, nullptr);
+  EXPECT_EQ(el->statements.size(), 0u);
 }
 
 TEST_F(ParserImplTest, IfStmt_WithElse_WithParens) {
@@ -68,14 +68,14 @@ TEST_F(ParserImplTest, IfStmt_WithElse_WithParens) {
   ASSERT_TRUE(e->condition->Is<ast::BinaryExpression>());
   EXPECT_EQ(e->body->statements.size(), 2u);
 
-  ASSERT_EQ(e->else_statements.size(), 2u);
-  ASSERT_NE(e->else_statements[0]->condition, nullptr);
-  ASSERT_TRUE(
-      e->else_statements[0]->condition->Is<ast::IdentifierExpression>());
-  EXPECT_EQ(e->else_statements[0]->body->statements.size(), 1u);
+  auto* elseif = As<ast::IfStatement>(e->else_statement);
+  ASSERT_NE(elseif, nullptr);
+  ASSERT_TRUE(elseif->condition->Is<ast::IdentifierExpression>());
+  EXPECT_EQ(elseif->body->statements.size(), 1u);
 
-  ASSERT_EQ(e->else_statements[1]->condition, nullptr);
-  EXPECT_EQ(e->else_statements[1]->body->statements.size(), 0u);
+  auto* el = As<ast::BlockStatement>(elseif->else_statement);
+  ASSERT_NE(el, nullptr);
+  EXPECT_EQ(el->statements.size(), 0u);
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidCondition) {

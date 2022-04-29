@@ -248,9 +248,8 @@ class DependencyScanner {
         [&](const ast::IfStatement* i) {
           TraverseExpression(i->condition);
           TraverseStatement(i->body);
-          for (auto* e : i->else_statements) {
-            TraverseExpression(e->condition);
-            TraverseStatement(e->body);
+          if (i->else_statement) {
+            TraverseStatement(i->else_statement);
           }
         },
         [&](const ast::ReturnStatement* r) {  //

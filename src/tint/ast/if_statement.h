@@ -17,7 +17,8 @@
 
 #include <utility>
 
-#include "src/tint/ast/else_statement.h"
+#include "src/tint/ast/block_statement.h"
+#include "src/tint/ast/expression.h"
 
 namespace tint::ast {
 
@@ -29,12 +30,12 @@ class IfStatement final : public Castable<IfStatement, Statement> {
   /// @param src the source of this node
   /// @param condition the if condition
   /// @param body the if body
-  /// @param else_stmts the else statements
+  /// @param else_stmt the else statement, or nullptr
   IfStatement(ProgramID pid,
               const Source& src,
               const Expression* condition,
               const BlockStatement* body,
-              ElseStatementList else_stmts);
+              const Statement* else_stmt);
   /// Move constructor
   IfStatement(IfStatement&&);
   ~IfStatement() override;
@@ -51,8 +52,8 @@ class IfStatement final : public Castable<IfStatement, Statement> {
   /// The if body
   const BlockStatement* const body;
 
-  /// The else statements
-  const ElseStatementList else_statements;
+  /// The optional else statement, or nullptr
+  const Statement* else_statement;
 };
 
 }  // namespace tint::ast

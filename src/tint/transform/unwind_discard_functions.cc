@@ -43,15 +43,6 @@ class State {
   Symbol module_discard_var_name;   // Use ModuleDiscardVarName() to read
   Symbol module_discard_func_name;  // Use ModuleDiscardFuncName() to read
 
-  // If `block`'s parent is of type TO, returns pointer to it.
-  template <typename TO>
-  const TO* ParentAs(const ast::BlockStatement* block) {
-    if (auto* sem_block = sem.Get(block)) {
-      return As<TO>(sem_block->Parent());
-    }
-    return nullptr;
-  }
-
   // Returns true if `sem_expr` contains a call expression that may
   // (transitively) execute a discard statement.
   bool MayDiscard(const sem::Expression* sem_expr) {
@@ -265,14 +256,6 @@ class State {
           }
           return TryInsertAfter(s, sem_expr);
         },
-        [&](const ast::ElseStatement* s) -> const ast::Statement* {
-          if (MayDiscard(sem.Get(s->condition))) {
-            TINT_ICE(Transform, b.Diagnostics())
-                << "Unexpected ElseIf condition that may discard. Make sure "
-                   "transform::PromoteSideEffectsToDecl was run first.";
-          }
-          return nullptr;
-        },
         [&](const ast::ForLoopStatement* s) -> const ast::Statement* {
           if (MayDiscard(sem.Get(s->condition))) {
             TINT_ICE(Transform, b.Diagnostics())
@@ -326,20 +309,6 @@ class State {
   void Run() {
     ctx.ReplaceAll(
         [&](const ast::BlockStatement* block) -> const ast::Statement* {
-          // If this block is for an else-if statement, process the else-if now
-          // before processing its block statements.
-          // NOTE: we can't replace else statements at this point - this would
-          // need to be done when replacing the parent if-statement. However, in
-          // this transform, we don't ever expect to need to do this as else-ifs
-          // are converted to else { if } by PromoteSideEffectsToDecl, so this
-          // is only for validation.
-          if (auto* sem_else = ParentAs<sem::ElseStatement>(block)) {
-            if (auto* new_stmt = Statement(sem_else->Declaration())) {
-              TINT_ASSERT(Transform, new_stmt == nullptr);
-              return nullptr;
-            }
-          }
-
           // Iterate block statements and replace them as needed.
           for (auto* stmt : block->statements) {
             if (auto* new_stmt = Statement(stmt)) {

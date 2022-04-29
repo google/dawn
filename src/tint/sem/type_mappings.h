@@ -22,7 +22,6 @@ namespace tint::ast {
 class Array;
 class CallExpression;
 class Expression;
-class ElseStatement;
 class ForLoopStatement;
 class Function;
 class IfStatement;
@@ -39,7 +38,6 @@ namespace tint::sem {
 class Array;
 class Call;
 class Expression;
-class ElseStatement;
 class ForLoopStatement;
 class Function;
 class IfStatement;
@@ -63,7 +61,6 @@ struct TypeMappings {
   Array* operator()(ast::Array*);
   Call* operator()(ast::CallExpression*);
   Expression* operator()(ast::Expression*);
-  ElseStatement* operator()(ast::ElseStatement*);
   ForLoopStatement* operator()(ast::ForLoopStatement*);
   Function* operator()(ast::Function*);
   IfStatement* operator()(ast::IfStatement*);
