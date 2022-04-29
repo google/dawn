@@ -191,10 +191,15 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTexture) {
         RGBA8 rgba;
     };
 
-    std::array<ConversionExpectation, 4> expectations = {{{0.0, .5, .5, RGBA8::kBlack},
-                                                          {0.2126, 0.4172, 1.0, RGBA8::kRed},
-                                                          {0.7152, 0.1402, 0.0175, RGBA8::kGreen},
-                                                          {0.0722, 1.0, 0.4937, RGBA8::kBlue}}};
+    // Conversion expectations for BT.709 YUV source and sRGB destination.
+    std::array<ConversionExpectation, 7> expectations = {
+        {{0.0, .5, .5, RGBA8::kBlack},
+         {0.2126, 0.4172, 1.0, RGBA8::kRed},
+         {0.7152, 0.1402, 0.0175, RGBA8::kGreen},
+         {0.0722, 1.0, 0.4937, RGBA8::kBlue},
+         {0.6382, 0.3232, 0.6644, {246, 169, 90, 255}},
+         {0.5423, 0.5323, 0.4222, {120, 162, 169, 255}},
+         {0.2345, 0.4383, 0.6342, {126, 53, 33, 255}}}};
 
     for (ConversionExpectation expectation : expectations) {
         // Initialize the texture planes with YUV data

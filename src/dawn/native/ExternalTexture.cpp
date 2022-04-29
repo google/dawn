@@ -150,16 +150,38 @@ namespace dawn::native {
         ExternalTextureParams params;
         params.numPlanes = descriptor->plane1 == nullptr ? 1 : 2;
 
+        // TODO(dawn:1082): Make this field configurable from outside of Dawn.
+        // Conversion matrix for BT.709 limited range. Columns 1, 2 and 3 are copied
+        // directly from the corresponding matrix in SkYUVMath.cpp. Column 4 is the range
+        // bias (for RGB) found in column 5 of the same SkYUVMath.cpp matrix.
+        params.yuvToRgbConversionMatrix = {1.164384f, 0.0f,       1.792741f,  -0.972945f,
+                                           1.164384f, -0.213249f, -0.532909f, 0.301483f,
+                                           1.164384f, 2.112402f,  0.0f,       -1.133402f};
+
+        // TODO(dawn:1082): Make this field configurable from outside of Dawn.
+        // Use an identity matrix when converting BT.709 to sRGB because they shared the
+        // same primaries.
+        params.gamutConversionMatrix = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+                                        0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f};
+
         switch (descriptor->colorSpace) {
-            case wgpu::PredefinedColorSpace::Srgb:
-                // Conversion matrix for BT.709 limited range. Columns 1, 2 and 3 are copied
-                // directly from the corresponding matrix in SkYUVMath.cpp. Column 4 is the range
-                // bias (for RGB) found in column 5 of the same SkYUVMath.cpp matrix.
-                params.yuvToRgbConversion = {1.164384f, 0.0f,       1.792741f,  -0.972945f,
-                                             1.164384f, -0.213249f, -0.532909f, 0.301483f,
-                                             1.164384f, 2.112402f,  0.0f,       -1.133402f};
-                break;
             case wgpu::PredefinedColorSpace::Undefined:
+                // Undefined color space should eventually produce an error. For now, these
+                // constants will effectively perform no gamma correction so tests can continue
+                // passing.
+                params.gammaDecodingParams = {1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0};
+                params.gammaEncodingParams = {1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0};
+                break;
+            case wgpu::PredefinedColorSpace::Srgb:
+                // TODO(dawn:1082): Make this field configurable from outside of Dawn.
+                // These are the inverted parameters as specified by Rec. ITU-R BT.1886 for BT.709
+                params.gammaDecodingParams = {2.2, 1.0 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081,
+                                              0.0, 0.0};
+
+                // Constants for sRGB transfer function pulled from
+                // https://en.wikipedia.org/wiki/SRGB
+                params.gammaEncodingParams = {
+                    1 / 2.4, 1.137119 /*1.055^2.4*/, 0.0, 12.92, 0.0031308, -0.055, 0.0};
                 break;
         }
 

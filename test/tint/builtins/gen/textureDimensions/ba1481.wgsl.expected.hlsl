@@ -1,6 +1,6 @@
 Texture2D<float4> ext_tex_plane_1 : register(t1, space1);
 cbuffer cbuffer_ext_tex_params : register(b2, space1) {
-  uint4 ext_tex_params[4];
+  uint4 ext_tex_params[11];
 };
 Texture2D<float4> arg_0 : register(t0, space1);
 
