@@ -58,7 +58,7 @@ TEST_P(ComputeStorageBufferBarrierTests, AddIncrement) {
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
     for (uint32_t i = 0; i < kIterations; ++i) {
-        pass.Dispatch(kNumValues);
+        pass.DispatchWorkgroups(kNumValues);
     }
     pass.End();
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -121,9 +121,9 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
 
     for (uint32_t i = 0; i < kIterations / 2; ++i) {
         pass.SetBindGroup(0, bindGroups[0]);
-        pass.Dispatch(kNumValues);
+        pass.DispatchWorkgroups(kNumValues);
         pass.SetBindGroup(0, bindGroups[1]);
-        pass.Dispatch(kNumValues);
+        pass.DispatchWorkgroups(kNumValues);
     }
     pass.End();
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -187,9 +187,9 @@ TEST_P(ComputeStorageBufferBarrierTests, StorageAndReadonlyStoragePingPongInOneP
 
     for (uint32_t i = 0; i < kIterations / 2; ++i) {
         pass.SetBindGroup(0, bindGroups[0]);
-        pass.Dispatch(kNumValues);
+        pass.DispatchWorkgroups(kNumValues);
         pass.SetBindGroup(0, bindGroups[1]);
-        pass.Dispatch(kNumValues);
+        pass.DispatchWorkgroups(kNumValues);
     }
     pass.End();
     wgpu::CommandBuffer commands = encoder.Finish();
@@ -256,7 +256,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroups[b]);
-        pass.Dispatch(kNumValues / 4);
+        pass.DispatchWorkgroups(kNumValues / 4);
         pass.End();
     }
 
@@ -323,7 +323,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
     for (uint32_t i = 0, b = 0; i < kIterations; ++i, b = 1 - b) {
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroups[b]);
-        pass.Dispatch(kNumValues / 4);
+        pass.DispatchWorkgroups(kNumValues / 4);
     }
     pass.End();
 
@@ -389,7 +389,7 @@ TEST_P(ComputeStorageBufferBarrierTests, IndirectBufferCorrectBarrier) {
 
     pass.SetPipeline(step2Pipeline);
     pass.SetBindGroup(0, step2Group);
-    pass.Dispatch(1);
+    pass.DispatchWorkgroups(1);
 
     //  3 - Use the indirect buffer in a Dispatch while also reading its data.
     wgpu::Buffer resultBuffer = utils::CreateBufferFromData<uint32_t>(
@@ -399,7 +399,7 @@ TEST_P(ComputeStorageBufferBarrierTests, IndirectBufferCorrectBarrier) {
 
     pass.SetPipeline(step3Pipeline);
     pass.SetBindGroup(0, step3Group);
-    pass.DispatchIndirect(buf, 0);
+    pass.DispatchWorkgroupsIndirect(buf, 0);
 
     pass.End();
     wgpu::CommandBuffer commands = encoder.Finish();

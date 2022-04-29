@@ -208,7 +208,7 @@ namespace dawn::native {
         Ref<ComputePassEncoder> pass = encoder->BeginComputePass();
         pass->APISetPipeline(pipeline);
         pass->APISetBindGroup(0, bindGroup.Get());
-        pass->APIDispatch(
+        pass->APIDispatchWorkgroups(
             static_cast<uint32_t>((timestamps->GetSize() / sizeof(uint64_t) + 7) / 8));
         pass->APIEnd();
 

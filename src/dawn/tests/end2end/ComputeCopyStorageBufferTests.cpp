@@ -74,7 +74,7 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
-        pass.Dispatch(kInstances);
+        pass.DispatchWorkgroups(kInstances);
         pass.End();
 
         commands = encoder.Finish();

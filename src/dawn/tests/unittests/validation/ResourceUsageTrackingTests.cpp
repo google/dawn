@@ -172,7 +172,7 @@ namespace {
                 wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
                 pass.SetPipeline(cp);
                 pass.SetBindGroup(0, bg);
-                pass.Dispatch(1);
+                pass.DispatchWorkgroups(1);
                 pass.End();
                 ASSERT_DEVICE_ERROR(encoder.Finish());
             }
@@ -213,7 +213,7 @@ namespace {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetPipeline(cp);
             pass.SetBindGroup(0, bg);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
             pass.End();
             encoder.Finish();
         }
@@ -365,11 +365,11 @@ namespace {
 
             pass.SetPipeline(cp0);
             pass.SetBindGroup(0, bg0);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
 
             pass.SetPipeline(cp1);
             pass.SetBindGroup(0, bg1);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
 
             pass.End();
             encoder.Finish();
@@ -430,7 +430,7 @@ namespace {
 
             pass.SetBindGroup(0, readBG);
             pass.SetBindGroup(1, writeBG);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
 
             pass.End();
             ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -474,7 +474,7 @@ namespace {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetBindGroup(0, bg1);
             pass.SetPipeline(cp);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
             pass.End();
 
             encoder.Finish();
@@ -621,7 +621,7 @@ namespace {
                 pass.SetBindGroup(1, readBG0);
                 pass.SetBindGroup(1, readBG1);
                 pass.SetPipeline(cp);
-                pass.Dispatch(1);
+                pass.DispatchWorkgroups(1);
                 pass.End();
                 encoder.Finish();
             }
@@ -635,7 +635,7 @@ namespace {
                 pass.SetBindGroup(1, readBG1);
                 pass.SetBindGroup(1, readBG0);
                 pass.SetPipeline(cp);
-                pass.Dispatch(1);
+                pass.DispatchWorkgroups(1);
                 pass.End();
                 ASSERT_DEVICE_ERROR(encoder.Finish());
             }
@@ -682,7 +682,7 @@ namespace {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetPipeline(cp);
             pass.SetBindGroup(0, bg);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
             pass.End();
             ASSERT_DEVICE_ERROR(encoder.Finish());
         }
@@ -732,7 +732,7 @@ namespace {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetPipeline(cp);
             pass.SetBindGroup(0, bg);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
             pass.End();
             ASSERT_DEVICE_ERROR(encoder.Finish());
         }
@@ -811,7 +811,7 @@ namespace {
             pass.SetBindGroup(0, bg0);
             pass.SetBindGroup(1, bg1);
             pass.SetPipeline(cp);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
             pass.End();
             encoder.Finish();
         }
@@ -877,7 +877,7 @@ namespace {
                 wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
                 pass.SetPipeline(cp);
                 pass.SetBindGroup(0, bg);
-                pass.Dispatch(1);
+                pass.DispatchWorkgroups(1);
                 pass.End();
                 ASSERT_DEVICE_ERROR(encoder.Finish());
             }
@@ -996,7 +996,7 @@ namespace {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetPipeline(cp);
             pass.SetBindGroup(0, bg);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
             pass.End();
             encoder.Finish();
         }
@@ -1228,11 +1228,11 @@ namespace {
 
             pass.SetPipeline(readCp);
             pass.SetBindGroup(0, readBG);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
 
             pass.SetPipeline(writeCp);
             pass.SetBindGroup(0, writeBG);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
 
             pass.End();
             encoder.Finish();
@@ -1298,7 +1298,7 @@ namespace {
 
             pass.SetBindGroup(0, readBG);
             pass.SetBindGroup(1, writeBG);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
 
             pass.End();
             ASSERT_DEVICE_ERROR(encoder.Finish());
@@ -1344,7 +1344,7 @@ namespace {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetBindGroup(0, bg);
             pass.SetPipeline(cp);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
             pass.End();
             encoder.Finish();
         }
@@ -1430,7 +1430,7 @@ namespace {
                 pass.SetBindGroup(1, readBG0);
                 pass.SetBindGroup(1, readBG1);
                 pass.SetPipeline(cp);
-                pass.Dispatch(1);
+                pass.DispatchWorkgroups(1);
                 pass.End();
                 encoder.Finish();
             }
@@ -1445,7 +1445,7 @@ namespace {
                 pass.SetBindGroup(1, readBG1);
                 pass.SetBindGroup(1, readBG0);
                 pass.SetPipeline(cp);
-                pass.Dispatch(1);
+                pass.DispatchWorkgroups(1);
                 pass.End();
                 ASSERT_DEVICE_ERROR(encoder.Finish());
             }
@@ -1497,7 +1497,7 @@ namespace {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetPipeline(cp);
             pass.SetBindGroup(0, bg);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
             pass.End();
             ASSERT_DEVICE_ERROR(encoder.Finish());
         }
@@ -1551,7 +1551,7 @@ namespace {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetPipeline(cp);
             pass.SetBindGroup(0, bg);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
             pass.End();
             ASSERT_DEVICE_ERROR(encoder.Finish());
         }
@@ -1618,7 +1618,7 @@ namespace {
             pass.SetBindGroup(0, readBG);
             pass.SetBindGroup(1, writeBG);
             pass.SetPipeline(cp);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
             pass.End();
             encoder.Finish();
         }
@@ -1673,7 +1673,7 @@ namespace {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetPipeline(readCp);
             pass.SetBindGroup(0, readBG);
-            pass.DispatchIndirect(buffer, 0);
+            pass.DispatchWorkgroupsIndirect(buffer, 0);
             pass.End();
             encoder.Finish();
         }
@@ -1684,7 +1684,7 @@ namespace {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetPipeline(writeCp);
             pass.SetBindGroup(0, writeBG);
-            pass.DispatchIndirect(buffer, 0);
+            pass.DispatchWorkgroupsIndirect(buffer, 0);
             pass.End();
             ASSERT_DEVICE_ERROR(encoder.Finish());
         }

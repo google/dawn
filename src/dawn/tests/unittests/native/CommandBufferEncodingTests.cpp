@@ -105,7 +105,7 @@ namespace dawn::native {
         pass.SetBindGroup(1, dynamicBG, 1, &dynamicOffset);
         EXPECT_EQ(ToAPI(stateTracker->GetComputePipeline()), pipeline0.Get());
 
-        pass.DispatchIndirect(indirectBuffer, 0);
+        pass.DispatchWorkgroupsIndirect(indirectBuffer, 0);
 
         // Expect restored state.
         EXPECT_EQ(ToAPI(stateTracker->GetComputePipeline()), pipeline0.Get());
@@ -118,7 +118,7 @@ namespace dawn::native {
         // Dispatch again to check that the restored state can be used.
         // Also pass an indirect offset which should get replaced with the offset
         // into the scratch indirect buffer (0).
-        pass.DispatchIndirect(indirectBuffer, 4);
+        pass.DispatchWorkgroupsIndirect(indirectBuffer, 4);
 
         // Expect restored state.
         EXPECT_EQ(ToAPI(stateTracker->GetComputePipeline()), pipeline0.Get());
@@ -135,7 +135,7 @@ namespace dawn::native {
         EXPECT_EQ(ToAPI(stateTracker->GetComputePipeline()), pipeline1.Get());
         EXPECT_EQ(ToAPI(stateTracker->GetPipelineLayout()), pl1.Get());
 
-        pass.DispatchIndirect(indirectBuffer, 0);
+        pass.DispatchWorkgroupsIndirect(indirectBuffer, 0);
 
         // Expect restored state.
         EXPECT_EQ(ToAPI(stateTracker->GetComputePipeline()), pipeline1.Get());

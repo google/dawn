@@ -91,7 +91,7 @@ struct Buf {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
-        pass.Dispatch(1);
+        pass.DispatchWorkgroups(1);
         pass.End();
 
         commands = encoder.Finish();
@@ -456,7 +456,7 @@ struct Buf {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
-        pass.Dispatch(1);
+        pass.DispatchWorkgroups(1);
         pass.End();
 
         commands = encoder.Finish();
@@ -512,7 +512,7 @@ struct Buf {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
-        pass.Dispatch(1);
+        pass.DispatchWorkgroups(1);
         pass.End();
 
         commands = encoder.Finish();
@@ -564,7 +564,7 @@ struct Buf {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
         pass.SetBindGroup(0, bindGroup);
-        pass.Dispatch(1);
+        pass.DispatchWorkgroups(1);
         pass.End();
 
         commands = encoder.Finish();
@@ -651,15 +651,15 @@ struct Buf {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline1);
         pass.SetBindGroup(0, bindGroup1);
-        pass.Dispatch(1);
+        pass.DispatchWorkgroups(1);
 
         pass.SetPipeline(pipeline2);
         pass.SetBindGroup(0, bindGroup2);
-        pass.Dispatch(1);
+        pass.DispatchWorkgroups(1);
 
         pass.SetPipeline(pipeline3);
         pass.SetBindGroup(0, bindGroup3);
-        pass.Dispatch(1);
+        pass.DispatchWorkgroups(1);
 
         pass.End();
 

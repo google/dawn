@@ -475,8 +475,8 @@ class CopyTextureForBrowserTests : public Parent {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
-            pass.Dispatch(dstSpec.textureSize.width,
-                          dstSpec.textureSize.height);  // Verify dst texture content
+            pass.DispatchWorkgroups(dstSpec.textureSize.width,
+                                    dstSpec.textureSize.height);  // Verify dst texture content
             pass.End();
 
             testCommands = encoder.Finish();

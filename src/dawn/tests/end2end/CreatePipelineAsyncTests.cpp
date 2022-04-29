@@ -53,7 +53,7 @@ class CreatePipelineAsyncTest : public DawnTest {
             pass.SetBindGroup(0, bindGroup);
             pass.SetPipeline(currentTask->computePipeline);
 
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
             pass.End();
 
             commands = encoder.Finish();

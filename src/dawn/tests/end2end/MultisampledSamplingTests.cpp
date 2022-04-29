@@ -215,7 +215,7 @@ TEST_P(MultisampledSamplingTest, SamplePositions) {
                        {{0, colorView},
                         {1, depthView},
                         {2, outputBuffer, alignedResultSize * sampleOffset, kResultSize}}));
-            computePassEncoder.Dispatch(1);
+            computePassEncoder.DispatchWorkgroups(1);
             computePassEncoder.End();
         }
     }

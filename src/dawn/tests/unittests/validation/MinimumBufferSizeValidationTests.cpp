@@ -289,7 +289,7 @@ class MinBufferSizeTestsBase : public ValidationTest {
         for (size_t i = 0; i < bindGroups.size(); ++i) {
             computePassEncoder.SetBindGroup(i, bindGroups[i]);
         }
-        computePassEncoder.Dispatch(1);
+        computePassEncoder.DispatchWorkgroups(1);
         computePassEncoder.End();
         if (!expectation) {
             ASSERT_DEVICE_ERROR(commandEncoder.Finish());

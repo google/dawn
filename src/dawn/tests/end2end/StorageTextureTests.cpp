@@ -515,7 +515,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         wgpu::ComputePassEncoder computeEncoder = encoder.BeginComputePass();
         computeEncoder.SetBindGroup(0, bindGroup);
         computeEncoder.SetPipeline(pipeline);
-        computeEncoder.Dispatch(1);
+        computeEncoder.DispatchWorkgroups(1);
         computeEncoder.End();
 
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
@@ -567,7 +567,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         wgpu::ComputePassEncoder computePassEncoder = encoder.BeginComputePass();
         computePassEncoder.SetBindGroup(0, bindGroup);
         computePassEncoder.SetPipeline(pipeline);
-        computePassEncoder.Dispatch(1);
+        computePassEncoder.DispatchWorkgroups(1);
         computePassEncoder.End();
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
@@ -591,7 +591,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         wgpu::ComputePassEncoder computePassEncoder = encoder.BeginComputePass();
         computePassEncoder.SetBindGroup(0, bindGroup);
         computePassEncoder.SetPipeline(pipeline);
-        computePassEncoder.Dispatch(1);
+        computePassEncoder.DispatchWorkgroups(1);
         computePassEncoder.End();
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
@@ -833,11 +833,11 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
 
     // After the first dispatch the value in storageTexture2 should be 1u.
     pass.SetBindGroup(0, bindGroupA);
-    pass.Dispatch(1);
+    pass.DispatchWorkgroups(1);
 
     // After the second dispatch the value in storageTexture1 should be 2u;
     pass.SetBindGroup(0, bindGroupB);
-    pass.Dispatch(1);
+    pass.DispatchWorkgroups(1);
 
     pass.End();
 

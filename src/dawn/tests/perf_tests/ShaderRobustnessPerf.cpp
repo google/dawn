@@ -482,8 +482,8 @@ void ShaderRobustnessPerf::Step() {
         pass.SetPipeline(mPipeline);
         pass.SetBindGroup(0, mBindGroup);
         for (unsigned int i = 0; i < kNumIterations; ++i) {
-            pass.Dispatch(ceil(static_cast<float>(mDimBOuter) / float{kTileSize}),
-                          ceil(static_cast<float>(mDimAOuter) / float{kTileSize}), 1);
+            pass.DispatchWorkgroups(ceil(static_cast<float>(mDimBOuter) / float{kTileSize}),
+                                    ceil(static_cast<float>(mDimAOuter) / float{kTileSize}), 1);
         }
         pass.End();
 

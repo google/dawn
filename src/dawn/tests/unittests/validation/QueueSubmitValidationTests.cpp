@@ -276,7 +276,7 @@ namespace {
             pass.SetBindGroup(1, unusedBG);
             pass.SetBindGroup(1, usedBG);
             pass.SetPipeline(pipeline);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
             pass.End();
             wgpu::CommandBuffer commands = encoder.Finish();
 
@@ -349,7 +349,7 @@ namespace {
             pass.SetBindGroup(2, unusedBG);
             pass.SetBindGroup(2, usedBG);
             pass.SetPipeline(pipeline);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
             pass.End();
             wgpu::CommandBuffer commands = encoder.Finish();
 

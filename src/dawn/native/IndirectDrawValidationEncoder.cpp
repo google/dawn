@@ -441,7 +441,7 @@ namespace dawn::native {
                 const uint32_t numDrawsRoundedUp =
                     (batch.batchInfo->numDraws + kWorkgroupSize - 1) / kWorkgroupSize;
                 passEncoder->APISetBindGroup(0, bindGroup.Get());
-                passEncoder->APIDispatch(numDrawsRoundedUp);
+                passEncoder->APIDispatchWorkgroups(numDrawsRoundedUp);
             }
 
             passEncoder->APIEnd();

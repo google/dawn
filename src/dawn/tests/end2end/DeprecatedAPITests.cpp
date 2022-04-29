@@ -139,6 +139,35 @@ TEST_P(DeprecationTests, EndPass) {
     }
 }
 
+// Test that dispatch() and dispatchIndirect() is deprecated.
+TEST_P(DeprecationTests, Dispatch) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+            @stage(compute) @workgroup_size(1, 1, 1)
+            fn main() {
+            })");
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = module;
+    csDesc.compute.entryPoint = "main";
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    std::array<uint32_t, 3> indirectBufferData = {1, 0, 0};
+
+    wgpu::Buffer indirectBuffer = utils::CreateBufferFromData(
+        device, &indirectBufferData[0], indirectBufferData.size() * sizeof(uint32_t),
+        wgpu::BufferUsage::Indirect);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+
+    EXPECT_DEPRECATION_WARNING(pass.Dispatch(1));
+
+    EXPECT_DEPRECATION_WARNING(pass.DispatchIndirect(indirectBuffer, 0));
+
+    pass.End();
+}
+
 DAWN_INSTANTIATE_TEST(DeprecationTests,
                       D3D12Backend(),
                       MetalBackend(),

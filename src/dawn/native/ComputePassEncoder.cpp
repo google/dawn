@@ -186,6 +186,14 @@ namespace dawn::native {
     void ComputePassEncoder::APIDispatch(uint32_t workgroupCountX,
                                          uint32_t workgroupCountY,
                                          uint32_t workgroupCountZ) {
+        GetDevice()->EmitDeprecationWarning(
+            "dispatch() has been deprecated. Use dispatchWorkgroups() instead.");
+        APIDispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);
+    }
+
+    void ComputePassEncoder::APIDispatchWorkgroups(uint32_t workgroupCountX,
+                                                   uint32_t workgroupCountY,
+                                                   uint32_t workgroupCountZ) {
         mEncodingContext->TryEncode(
             this,
             [&](CommandAllocator* allocator) -> MaybeError {
@@ -222,7 +230,7 @@ namespace dawn::native {
 
                 return {};
             },
-            "encoding %s.Dispatch(%u, %u, %u).", this, workgroupCountX, workgroupCountY,
+            "encoding %s.DispatchWorkgroups(%u, %u, %u).", this, workgroupCountX, workgroupCountY,
             workgroupCountZ);
     }
 
@@ -308,7 +316,7 @@ namespace dawn::native {
         // Issue commands to validate the indirect buffer.
         APISetPipeline(validationPipeline.Get());
         APISetBindGroup(0, validationBindGroup.Get());
-        APIDispatch(1);
+        APIDispatchWorkgroups(1);
 
         // Restore the state.
         RestoreCommandBufferState(std::move(previousState));
@@ -319,6 +327,13 @@ namespace dawn::native {
 
     void ComputePassEncoder::APIDispatchIndirect(BufferBase* indirectBuffer,
                                                  uint64_t indirectOffset) {
+        GetDevice()->EmitDeprecationWarning(
+            "dispatchIndirect() has been deprecated. Use dispatchWorkgroupsIndirect() instead.");
+        APIDispatchWorkgroupsIndirect(indirectBuffer, indirectOffset);
+    }
+
+    void ComputePassEncoder::APIDispatchWorkgroupsIndirect(BufferBase* indirectBuffer,
+                                                           uint64_t indirectOffset) {
         mEncodingContext->TryEncode(
             this,
             [&](CommandAllocator* allocator) -> MaybeError {
@@ -381,7 +396,8 @@ namespace dawn::native {
                 dispatch->indirectOffset = indirectOffset;
                 return {};
             },
-            "encoding %s.DispatchIndirect(%s, %u).", this, indirectBuffer, indirectOffset);
+            "encoding %s.DispatchWorkgroupsIndirect(%s, %u).", this, indirectBuffer,
+            indirectOffset);
     }
 
     void ComputePassEncoder::APISetPipeline(ComputePipelineBase* pipeline) {

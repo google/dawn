@@ -385,7 +385,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
                 wgpu::ComputePassEncoder pass = commandEncoder.BeginComputePass();
                 pass.SetPipeline(pipeline);
                 pass.SetBindGroup(0, bindGroup);
-                pass.Dispatch(1);
+                pass.DispatchWorkgroups(1);
                 pass.End();
             }
 
@@ -583,7 +583,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
                 wgpu::ComputePassEncoder pass = commandEncoder.BeginComputePass();
                 pass.SetPipeline(pipeline);
                 pass.SetBindGroup(0, bindGroup);
-                pass.Dispatch(1);
+                pass.DispatchWorkgroups(1);
                 pass.End();
             }
 
@@ -723,7 +723,7 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
             wgpu::ComputePassEncoder pass = commandEncoder.BeginComputePass();
             pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
-            pass.Dispatch(1);
+            pass.DispatchWorkgroups(1);
             pass.End();
         }
 

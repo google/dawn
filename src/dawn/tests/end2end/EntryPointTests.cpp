@@ -119,7 +119,7 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(write1);
         pass.SetBindGroup(0, group);
-        pass.Dispatch(1);
+        pass.DispatchWorkgroups(1);
         pass.End();
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
@@ -133,7 +133,7 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(write42);
         pass.SetBindGroup(0, group);
-        pass.Dispatch(42);
+        pass.DispatchWorkgroups(42);
         pass.End();
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);

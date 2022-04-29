@@ -100,7 +100,7 @@ class ComputeDispatchTests : public DawnTest {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetPipeline(pipeline);
             pass.SetBindGroup(0, bindGroup);
-            pass.Dispatch(x, y, z);
+            pass.DispatchWorkgroups(x, y, z);
             pass.End();
 
             commands = encoder.Finish();
@@ -159,7 +159,7 @@ class ComputeDispatchTests : public DawnTest {
             wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
             pass.SetPipeline(computePipelineForTest);
             pass.SetBindGroup(0, bindGroup);
-            pass.DispatchIndirect(indirectBuffer, indirectOffset);
+            pass.DispatchWorkgroupsIndirect(indirectBuffer, indirectOffset);
             pass.End();
 
             commands = encoder.Finish();

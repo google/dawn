@@ -796,6 +796,15 @@
             },
             {
                 "name": "dispatch",
+                "tags": ["deprecated"],
+                "args": [
+                    {"name": "workgroupCountX", "type": "uint32_t"},
+                    {"name": "workgroupCountY", "type": "uint32_t", "default": "1"},
+                    {"name": "workgroupCountZ", "type": "uint32_t", "default": "1"}
+                ]
+            },
+            {
+                "name": "dispatch workgroups",
                 "args": [
                     {"name": "workgroupCountX", "type": "uint32_t"},
                     {"name": "workgroupCountY", "type": "uint32_t", "default": "1"},
@@ -804,6 +813,14 @@
             },
             {
                 "name": "dispatch indirect",
+                "tags": ["deprecated"],
+                "args": [
+                  {"name": "indirect buffer", "type": "buffer"},
+                  {"name": "indirect offset", "type": "uint64_t"}
+                ]
+            },
+            {
+                "name": "dispatch workgroups indirect",
                 "args": [
                   {"name": "indirect buffer", "type": "buffer"},
                   {"name": "indirect offset", "type": "uint64_t"}

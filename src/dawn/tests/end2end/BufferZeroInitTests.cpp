@@ -190,7 +190,7 @@ class BufferZeroInitTest : public DawnTest {
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
         computePass.SetBindGroup(0, bindGroup);
         computePass.SetPipeline(pipeline);
-        computePass.Dispatch(1u);
+        computePass.DispatchWorkgroups(1u);
         computePass.End();
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
 
@@ -458,7 +458,7 @@ class BufferZeroInitTest : public DawnTest {
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
         computePass.SetBindGroup(0, bindGroup);
         computePass.SetPipeline(pipeline);
-        computePass.DispatchIndirect(indirectBuffer, indirectBufferOffset);
+        computePass.DispatchWorkgroupsIndirect(indirectBuffer, indirectBufferOffset);
         computePass.End();
 
         ExpectLazyClearSubmitAndCheckOutputs(encoder, indirectBuffer, bufferSize, outputTexture);
