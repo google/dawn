@@ -262,6 +262,12 @@ set(TINT_LIB_SRCS
   resolver/validator.cc
   resolver/validator.h
   scope_stack.h
+  sem/abstract_float.cc
+  sem/abstract_float.h
+  sem/abstract_int.cc
+  sem/abstract_int.h
+  sem/abstract_numeric.cc
+  sem/abstract_numeric.h
   sem/array.cc
   sem/array.h
   sem/atomic.cc
