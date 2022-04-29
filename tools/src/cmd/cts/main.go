@@ -29,6 +29,7 @@ import (
 
 	// Register sub-commands
 	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/format"
+	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/merge"
 	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/results"
 	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/time"
 )
