@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: FAILED - see https://github.com/microsoft/DirectXShaderCompiler/issues/4422
 
 cbuffer cbuffer_x_5 : register(b0, space0) {
   uint4 x_5[1];

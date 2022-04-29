@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: FAILED - see https://github.com/microsoft/DirectXShaderCompiler/issues/4422SKIP: FAILED - see https://github.com/microsoft/DirectXShaderCompiler/issues/4422
 
 static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
 

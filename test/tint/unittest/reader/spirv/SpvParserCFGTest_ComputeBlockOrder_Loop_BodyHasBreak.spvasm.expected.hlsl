@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: FAILED - see https://github.com/microsoft/DirectXShaderCompiler/issues/4422
 
 static uint var_1 = 0u;
 

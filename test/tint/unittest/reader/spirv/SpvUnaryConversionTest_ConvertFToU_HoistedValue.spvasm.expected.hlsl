@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: FAILED - see https://github.com/microsoft/DirectXShaderCompiler/issues/4422
 
 void main_1() {
   [loop] while (true) {
