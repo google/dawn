@@ -782,6 +782,96 @@ func TestFilterByTags(t *testing.T) {
 	}
 }
 
+func TestFilterByVariant(t *testing.T) {
+	type Test struct {
+		results result.List
+		tags    result.Tags
+		expect  result.List
+	}
+	for _, test := range []Test{
+		{ //////////////////////////////////////////////////////////////////////
+			results: result.List{
+				result.Result{
+					Query:  Q(`a`),
+					Status: result.Pass,
+					Tags:   result.NewTags("x"),
+				},
+				result.Result{
+					Query:  Q(`b`),
+					Status: result.Failure,
+					Tags:   result.NewTags("y"),
+				},
+				result.Result{
+					Query:  Q(`c`),
+					Status: result.Pass,
+					Tags:   result.NewTags("x", "y"),
+				},
+			},
+			tags: result.NewTags("x", "y"),
+			expect: result.List{
+				result.Result{
+					Query:  Q(`c`),
+					Status: result.Pass,
+					Tags:   result.NewTags("x", "y"),
+				},
+			},
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			results: result.List{
+				result.Result{
+					Query:  Q(`a`),
+					Status: result.Pass,
+					Tags:   result.NewTags("x"),
+				},
+				result.Result{
+					Query:  Q(`b`),
+					Status: result.Failure,
+					Tags:   result.NewTags("y"),
+				},
+				result.Result{
+					Query:  Q(`c`),
+					Status: result.Pass,
+					Tags:   result.NewTags("x", "y"),
+				},
+			},
+			tags: result.NewTags("x"),
+			expect: result.List{
+				result.Result{
+					Query:  Q(`a`),
+					Status: result.Pass,
+					Tags:   result.NewTags("x"),
+				},
+			},
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			results: result.List{
+				result.Result{
+					Query:  Q(`a`),
+					Status: result.Pass,
+					Tags:   result.NewTags("x"),
+				},
+				result.Result{
+					Query:  Q(`b`),
+					Status: result.Failure,
+					Tags:   result.NewTags("y"),
+				},
+				result.Result{
+					Query:  Q(`c`),
+					Status: result.Pass,
+					Tags:   result.NewTags("x", "y"),
+				},
+			},
+			tags:   result.NewTags("q"),
+			expect: result.List{},
+		},
+	} {
+		got := test.results.FilterByVariant(test.tags)
+		if diff := cmp.Diff(got, test.expect); diff != "" {
+			t.Errorf("Results:\n%v\nFilterByVariant(%v) was not as expected:\n%v", test.results, test.tags, diff)
+		}
+	}
+}
+
 func TestStatuses(t *testing.T) {
 	type Test struct {
 		results result.List

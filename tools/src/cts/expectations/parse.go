@@ -15,7 +15,6 @@
 package expectations
 
 import (
-	"fmt"
 	"strings"
 
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
@@ -25,19 +24,6 @@ const (
 	tagHeaderStart = `BEGIN TAG HEADER`
 	tagHeaderEnd   = `END TAG HEADER`
 )
-
-// SyntaxError is the error type returned by Parse() when a syntax error is
-// encountered.
-type SyntaxError struct {
-	Line    int // 1-based
-	Column  int // 1-based
-	Message string
-}
-
-// Error implements the 'error' interface.
-func (e SyntaxError) Error() string {
-	return fmt.Sprintf("%v:%v: %v", e.Line, e.Column, e.Message)
-}
 
 // Parse parses an expectations file, returning the Content
 func Parse(body string) (Content, error) {
@@ -130,11 +116,11 @@ func Parse(body string) (Content, error) {
 		// syntaxErr is a helper for returning a SyntaxError with the current
 		// line and column index.
 		syntaxErr := func(at Token, msg string) error {
-			column := at.start + 1
-			if column == 1 {
-				column = len(l) + 1
+			columnIdx := at.start + 1
+			if columnIdx == 1 {
+				columnIdx = len(l) + 1
 			}
-			return SyntaxError{lineIdx, column, msg}
+			return Diagnostic{Error, lineIdx, columnIdx, msg}
 		}
 
 		// peek returns the next token without consuming it.

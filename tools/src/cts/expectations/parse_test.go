@@ -432,27 +432,27 @@ crbug.com/456 [ Mac ] ghi_jkl [ PASS ]
 		{
 			name:      "err missing tag ']'",
 			in:        `[`,
-			expectErr: "1:2: expected ']' for tags",
+			expectErr: "1:2 error: expected ']' for tags",
 		}, /////////////////////////////////////////////////////////////////////
 		{
 			name:      "err missing test query",
 			in:        `[ a ]`,
-			expectErr: "1:6: expected test query",
+			expectErr: "1:6 error: expected test query",
 		}, /////////////////////////////////////////////////////////////////////
 		{
 			name:      "err missing status EOL",
 			in:        `[ a ] b`,
-			expectErr: "1:8: expected status",
+			expectErr: "1:8 error: expected status",
 		}, /////////////////////////////////////////////////////////////////////
 		{
 			name:      "err missing status comment",
 			in:        `[ a ] b # c`,
-			expectErr: "1:9: expected status",
+			expectErr: "1:9 error: expected status",
 		}, /////////////////////////////////////////////////////////////////////
 		{
 			name:      "err missing status ']'",
 			in:        `[ a ] b [ c`,
-			expectErr: "1:12: expected ']' for status",
+			expectErr: "1:12 error: expected ']' for status",
 		},
 	} {
 
