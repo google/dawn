@@ -3,10 +3,9 @@ module dawn.googlesource.com/dawn
 go 1.18
 
 require (
-	github.com/andygrunwald/go-gerrit v0.0.0-20220404064545-525eecd29744
+	github.com/andygrunwald/go-gerrit v0.0.0-20220427111355-d3e91fbf2db5
 	github.com/ben-clayton/webidlparser v0.0.0-20210923100217-8ba896ded094
 	github.com/fatih/color v1.13.0
-	github.com/go-git/go-git/v5 v5.4.2
 	github.com/google/go-cmp v0.5.6
 	github.com/mattn/go-colorable v0.1.9
 	github.com/mattn/go-isatty v0.0.14
@@ -14,19 +13,15 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	go.chromium.org/luci v0.0.0-20220412023008-ab2409fe739a
 	golang.org/x/net v0.0.0-20220403103023-749bd193bc2b
-	google.golang.org/protobuf v1.27.1
+	google.golang.org/protobuf v1.28.0
 )
 
 require (
 	cloud.google.com/go v0.99.0 // indirect
-	github.com/acomagu/bufpipe v1.0.3 // indirect
-	github.com/go-git/gcfg v1.5.0 // indirect
-	github.com/go-git/go-billy/v5 v5.3.1 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
-	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/klauspost/compress v1.13.5 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
@@ -44,5 +39,4 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220216160803-4663080d8bc8 // indirect
 	google.golang.org/grpc v1.44.0 // indirect
-	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
