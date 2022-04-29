@@ -657,8 +657,9 @@ namespace dawn::native {
             case wgpu::BufferBindingType::ReadOnlyStorage:
                 return true;
             case wgpu::BufferBindingType::Undefined:
-                UNREACHABLE();
+                break;
         }
+        UNREACHABLE();
     }
 
     std::string BindGroupLayoutBase::EntriesToString() const {

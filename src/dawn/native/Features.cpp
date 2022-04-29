@@ -156,8 +156,9 @@ namespace dawn::native {
                     return wgpu::FeatureName::DawnNative;
 
                 case Feature::EnumCount:
-                    UNREACHABLE();
+                    break;
             }
+            UNREACHABLE();
         }
 
     }  // anonymous namespace

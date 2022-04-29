@@ -111,8 +111,9 @@ namespace dawn::native {
                     return textureDimension == wgpu::TextureDimension::e1D;
 
                 case wgpu::TextureViewDimension::Undefined:
-                    UNREACHABLE();
+                    break;
             }
+            UNREACHABLE();
         }
 
         bool IsArrayLayerValidForTextureViewDimension(
@@ -132,8 +133,9 @@ namespace dawn::native {
                     return textureViewArrayLayer == 1u;
 
                 case wgpu::TextureViewDimension::Undefined:
-                    UNREACHABLE();
+                    break;
             }
+            UNREACHABLE();
         }
 
         MaybeError ValidateSampleCount(const TextureDescriptor* descriptor,

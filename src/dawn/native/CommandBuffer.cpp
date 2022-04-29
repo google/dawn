@@ -85,6 +85,8 @@ namespace dawn::native {
                 return extent.width == copySize.width && extent.height == copySize.height &&
                        extent.depthOrArrayLayers == copySize.depthOrArrayLayers;
         }
+
+        UNREACHABLE();
     }
 
     SubresourceRange GetSubresourcesAffectedByCopy(const TextureCopy& copy,
@@ -100,6 +102,8 @@ namespace dawn::native {
             case wgpu::TextureDimension::e3D:
                 return {copy.aspect, {0, 1}, {copy.mipLevel, 1}};
         }
+
+        UNREACHABLE();
     }
 
     void LazyClearRenderPassAttachments(BeginRenderPassCmd* renderPass) {

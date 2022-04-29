@@ -54,8 +54,9 @@ namespace dawn::native::vulkan {
                     return VK_IMAGE_VIEW_TYPE_3D;
 
                 case wgpu::TextureViewDimension::Undefined:
-                    UNREACHABLE();
+                    break;
             }
+            UNREACHABLE();
         }
 
         // Computes which vulkan access type could be required for the given Dawn usage.
