@@ -1465,7 +1465,6 @@
     },
     "load op": {
         "category": "enum",
-        "emscripten_no_enum_table": true,
         "values": [
             {"value": 0, "name": "undefined", "jsrepr": "undefined"},
             {"value": 1, "name": "clear"},
