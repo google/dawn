@@ -23,13 +23,12 @@
 
 namespace dawn::native {
 
-    void AddFatalDawnFailure(const char* expression, const ErrorData* error) {
-        const auto& backtrace = error->GetBacktrace();
-        GTEST_MESSAGE_AT_(
-            backtrace.at(0).file, backtrace.at(0).line,
-            absl::StrCat(expression, " returned error: ", error->GetMessage()).c_str(),
-            ::testing::TestPartResult::kFatalFailure);
-    }
+void AddFatalDawnFailure(const char* expression, const ErrorData* error) {
+    const auto& backtrace = error->GetBacktrace();
+    GTEST_MESSAGE_AT_(backtrace.at(0).file, backtrace.at(0).line,
+                      absl::StrCat(expression, " returned error: ", error->GetMessage()).c_str(),
+                      ::testing::TestPartResult::kFatalFailure);
+}
 
 }  // namespace dawn::native
 
@@ -67,8 +66,7 @@ void DawnNativeTest::SetUp() {
     device.SetUncapturedErrorCallback(DawnNativeTest::OnDeviceError, nullptr);
 }
 
-void DawnNativeTest::TearDown() {
-}
+void DawnNativeTest::TearDown() {}
 
 WGPUDevice DawnNativeTest::CreateTestDevice() {
     // Disabled disallowing unsafe APIs so we can test them.

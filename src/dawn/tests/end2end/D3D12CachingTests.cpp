@@ -22,7 +22,7 @@
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace {
-    using ::testing::NiceMock;
+using ::testing::NiceMock;
 }  // namespace
 
 class D3D12CachingTests : public DawnTest {

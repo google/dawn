@@ -99,10 +99,8 @@ class LinkedList;
 template <typename T>
 class LinkNode {
   public:
-    LinkNode() : previous_(nullptr), next_(nullptr) {
-    }
-    LinkNode(LinkNode<T>* previous, LinkNode<T>* next) : previous_(previous), next_(next) {
-    }
+    LinkNode() : previous_(nullptr), next_(nullptr) {}
+    LinkNode(LinkNode<T>* previous, LinkNode<T>* next) : previous_(previous), next_(next) {}
 
     LinkNode(LinkNode<T>&& rhs) {
         next_ = rhs.next_;
@@ -154,22 +152,14 @@ class LinkNode {
         return true;
     }
 
-    LinkNode<T>* previous() const {
-        return previous_;
-    }
+    LinkNode<T>* previous() const { return previous_; }
 
-    LinkNode<T>* next() const {
-        return next_;
-    }
+    LinkNode<T>* next() const { return next_; }
 
     // Cast from the node-type to the value type.
-    const T* value() const {
-        return static_cast<const T*>(this);
-    }
+    const T* value() const { return static_cast<const T*>(this); }
 
-    T* value() {
-        return static_cast<T*>(this);
-    }
+    T* value() { return static_cast<T*>(this); }
 
   private:
     friend class LinkedList<T>;
@@ -183,8 +173,7 @@ class LinkedList {
     // The "root" node is self-referential, and forms the basis of a circular
     // list (root_.next() will point back to the start of the list,
     // and root_->previous() wraps around to the end of the list).
-    LinkedList() : root_(&root_, &root_) {
-    }
+    LinkedList() : root_(&root_, &root_) {}
 
     ~LinkedList() {
         // If any LinkNodes still exist in the LinkedList, there will be outstanding references to
@@ -194,9 +183,7 @@ class LinkedList {
     }
 
     // Appends |e| to the end of the linked list.
-    void Append(LinkNode<T>* e) {
-        e->InsertBefore(&root_);
-    }
+    void Append(LinkNode<T>* e) { e->InsertBefore(&root_); }
 
     // Moves all elements (in order) of the list and appends them into |l| leaving the list empty.
     void MoveInto(LinkedList<T>* l) {
@@ -212,21 +199,13 @@ class LinkedList {
         root_.previous_ = &root_;
     }
 
-    LinkNode<T>* head() const {
-        return root_.next();
-    }
+    LinkNode<T>* head() const { return root_.next(); }
 
-    LinkNode<T>* tail() const {
-        return root_.previous();
-    }
+    LinkNode<T>* tail() const { return root_.previous(); }
 
-    const LinkNode<T>* end() const {
-        return &root_;
-    }
+    const LinkNode<T>* end() const { return &root_; }
 
-    bool empty() const {
-        return head() == end();
-    }
+    bool empty() const { return head() == end(); }
 
   private:
     LinkNode<T> root_;
@@ -235,8 +214,7 @@ class LinkedList {
 template <typename T>
 class LinkedListIterator {
   public:
-    explicit LinkedListIterator(LinkNode<T>* node) : current_(node), next_(node->next()) {
-    }
+    explicit LinkedListIterator(LinkNode<T>* node) : current_(node), next_(node->next()) {}
 
     // We keep an early reference to the next node in the list so that even if the current element
     // is modified or removed from the list, we have a valid next node.
@@ -246,13 +224,9 @@ class LinkedListIterator {
         return *this;
     }
 
-    bool operator!=(const LinkedListIterator<T>& other) const {
-        return current_ != other.current_;
-    }
+    bool operator!=(const LinkedListIterator<T>& other) const { return current_ != other.current_; }
 
-    LinkNode<T>* operator*() const {
-        return current_;
-    }
+    LinkNode<T>* operator*() const { return current_; }
 
   private:
     LinkNode<T>* current_;

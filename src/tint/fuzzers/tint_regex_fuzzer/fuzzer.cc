@@ -31,121 +31,120 @@ namespace {
 CliParams cli_params{};
 
 enum class MutationKind {
-  kSwapIntervals,
-  kDeleteInterval,
-  kDuplicateInterval,
-  kReplaceIdentifier,
-  kReplaceLiteral,
-  kInsertReturnStatement,
-  kNumMutationKinds
+    kSwapIntervals,
+    kDeleteInterval,
+    kDuplicateInterval,
+    kReplaceIdentifier,
+    kReplaceLiteral,
+    kInsertReturnStatement,
+    kNumMutationKinds
 };
 
 extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
-  // Parse CLI parameters. `ParseCliParams` will call `exit` if some parameter
-  // is invalid.
-  cli_params = ParseCliParams(argc, *argv);
-  // For some fuzz targets it is desirable to force the values of certain CLI
-  // parameters after parsing.
-  OverrideCliParams(cli_params);
-  return 0;
+    // Parse CLI parameters. `ParseCliParams` will call `exit` if some parameter
+    // is invalid.
+    cli_params = ParseCliParams(argc, *argv);
+    // For some fuzz targets it is desirable to force the values of certain CLI
+    // parameters after parsing.
+    OverrideCliParams(cli_params);
+    return 0;
 }
 
 extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
                                           size_t size,
                                           size_t max_size,
                                           unsigned seed) {
-  std::string wgsl_code(data, data + size);
-  const std::vector<std::string> delimiters{";"};
-  RandomGenerator generator(seed);
+    std::string wgsl_code(data, data + size);
+    const std::vector<std::string> delimiters{";"};
+    RandomGenerator generator(seed);
 
-  std::string delimiter =
-      delimiters[generator.GetUInt32(static_cast<uint32_t>(delimiters.size()))];
+    std::string delimiter =
+        delimiters[generator.GetUInt32(static_cast<uint32_t>(delimiters.size()))];
 
-  MutationKind mutation_kind = static_cast<MutationKind>(generator.GetUInt32(
-      static_cast<uint32_t>(MutationKind::kNumMutationKinds)));
+    MutationKind mutation_kind = static_cast<MutationKind>(
+        generator.GetUInt32(static_cast<uint32_t>(MutationKind::kNumMutationKinds)));
 
-  switch (mutation_kind) {
-    case MutationKind::kSwapIntervals:
-      if (!SwapRandomIntervals(delimiter, wgsl_code, generator)) {
+    switch (mutation_kind) {
+        case MutationKind::kSwapIntervals:
+            if (!SwapRandomIntervals(delimiter, wgsl_code, generator)) {
+                return 0;
+            }
+            break;
+
+        case MutationKind::kDeleteInterval:
+            if (!DeleteRandomInterval(delimiter, wgsl_code, generator)) {
+                return 0;
+            }
+            break;
+
+        case MutationKind::kDuplicateInterval:
+            if (!DuplicateRandomInterval(delimiter, wgsl_code, generator)) {
+                return 0;
+            }
+            break;
+
+        case MutationKind::kReplaceIdentifier:
+            if (!ReplaceRandomIdentifier(wgsl_code, generator)) {
+                return 0;
+            }
+            break;
+
+        case MutationKind::kReplaceLiteral:
+            if (!ReplaceRandomIntLiteral(wgsl_code, generator)) {
+                return 0;
+            }
+            break;
+
+        case MutationKind::kInsertReturnStatement:
+            if (!InsertReturnStatement(wgsl_code, generator)) {
+                return 0;
+            }
+            break;
+
+        default:
+            assert(false && "Unreachable");
+            return 0;
+    }
+
+    if (wgsl_code.size() > max_size) {
         return 0;
-      }
-      break;
+    }
 
-    case MutationKind::kDeleteInterval:
-      if (!DeleteRandomInterval(delimiter, wgsl_code, generator)) {
-        return 0;
-      }
-      break;
-
-    case MutationKind::kDuplicateInterval:
-      if (!DuplicateRandomInterval(delimiter, wgsl_code, generator)) {
-        return 0;
-      }
-      break;
-
-    case MutationKind::kReplaceIdentifier:
-      if (!ReplaceRandomIdentifier(wgsl_code, generator)) {
-        return 0;
-      }
-      break;
-
-    case MutationKind::kReplaceLiteral:
-      if (!ReplaceRandomIntLiteral(wgsl_code, generator)) {
-        return 0;
-      }
-      break;
-
-    case MutationKind::kInsertReturnStatement:
-      if (!InsertReturnStatement(wgsl_code, generator)) {
-        return 0;
-      }
-      break;
-
-    default:
-      assert(false && "Unreachable");
-      return 0;
-  }
-
-  if (wgsl_code.size() > max_size) {
-    return 0;
-  }
-
-  memcpy(data, wgsl_code.c_str(), wgsl_code.size());
-  return wgsl_code.size();
+    memcpy(data, wgsl_code.c_str(), wgsl_code.size());
+    return wgsl_code.size();
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-  if (size == 0) {
-    return 0;
-  }
-
-  struct Target {
-    FuzzingTarget fuzzing_target;
-    OutputFormat output_format;
-    const char* name;
-  };
-
-  Target targets[] = {{FuzzingTarget::kWgsl, OutputFormat::kWGSL, "WGSL"},
-                      {FuzzingTarget::kHlsl, OutputFormat::kHLSL, "HLSL"},
-                      {FuzzingTarget::kMsl, OutputFormat::kMSL, "MSL"},
-                      {FuzzingTarget::kSpv, OutputFormat::kSpv, "SPV"}};
-
-  for (auto target : targets) {
-    if ((target.fuzzing_target & cli_params.fuzzing_target) !=
-        target.fuzzing_target) {
-      continue;
+    if (size == 0) {
+        return 0;
     }
 
-    TransformBuilder tb(data, size);
-    tb.AddTransform<tint::transform::Robustness>();
+    struct Target {
+        FuzzingTarget fuzzing_target;
+        OutputFormat output_format;
+        const char* name;
+    };
 
-    CommonFuzzer fuzzer(InputFormat::kWGSL, target.output_format);
-    fuzzer.SetTransformManager(tb.manager(), tb.data_map());
+    Target targets[] = {{FuzzingTarget::kWgsl, OutputFormat::kWGSL, "WGSL"},
+                        {FuzzingTarget::kHlsl, OutputFormat::kHLSL, "HLSL"},
+                        {FuzzingTarget::kMsl, OutputFormat::kMSL, "MSL"},
+                        {FuzzingTarget::kSpv, OutputFormat::kSpv, "SPV"}};
 
-    fuzzer.Run(data, size);
-  }
+    for (auto target : targets) {
+        if ((target.fuzzing_target & cli_params.fuzzing_target) != target.fuzzing_target) {
+            continue;
+        }
 
-  return 0;
+        TransformBuilder tb(data, size);
+        tb.AddTransform<tint::transform::Robustness>();
+
+        CommonFuzzer fuzzer(InputFormat::kWGSL, target.output_format);
+        fuzzer.SetTransformManager(tb.manager(), tb.data_map());
+
+        fuzzer.Run(data, size);
+    }
+
+    return 0;
 }
 
 }  // namespace

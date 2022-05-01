@@ -22,38 +22,37 @@
 namespace tint::ast {
 
 /// A compound assignment statement
-class CompoundAssignmentStatement final
-    : public Castable<CompoundAssignmentStatement, Statement> {
- public:
-  /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the compound assignment statement source
-  /// @param lhs the left side of the expression
-  /// @param rhs the right side of the expression
-  /// @param op the binary operator
-  CompoundAssignmentStatement(ProgramID program_id,
-                              const Source& source,
-                              const Expression* lhs,
-                              const Expression* rhs,
-                              BinaryOp op);
-  /// Move constructor
-  CompoundAssignmentStatement(CompoundAssignmentStatement&&);
-  ~CompoundAssignmentStatement() override;
+class CompoundAssignmentStatement final : public Castable<CompoundAssignmentStatement, Statement> {
+  public:
+    /// Constructor
+    /// @param program_id the identifier of the program that owns this node
+    /// @param source the compound assignment statement source
+    /// @param lhs the left side of the expression
+    /// @param rhs the right side of the expression
+    /// @param op the binary operator
+    CompoundAssignmentStatement(ProgramID program_id,
+                                const Source& source,
+                                const Expression* lhs,
+                                const Expression* rhs,
+                                BinaryOp op);
+    /// Move constructor
+    CompoundAssignmentStatement(CompoundAssignmentStatement&&);
+    ~CompoundAssignmentStatement() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const CompoundAssignmentStatement* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const CompoundAssignmentStatement* Clone(CloneContext* ctx) const override;
 
-  /// left side expression
-  const Expression* const lhs;
+    /// left side expression
+    const Expression* const lhs;
 
-  /// right side expression
-  const Expression* const rhs;
+    /// right side expression
+    const Expression* const rhs;
 
-  /// the binary operator
-  const BinaryOp op;
+    /// the binary operator
+    const BinaryOp op;
 };
 
 }  // namespace tint::ast

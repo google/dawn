@@ -23,35 +23,35 @@ namespace tint::fuzzers {
 
 /// Standard MT based random number generation
 class MersenneTwisterEngine : public RandomGeneratorEngine {
- public:
-  /// @brief Initializes using provided seed
-  /// @param seed - seed value to use
-  explicit MersenneTwisterEngine(uint64_t seed);
-  ~MersenneTwisterEngine() override = default;
+  public:
+    /// @brief Initializes using provided seed
+    /// @param seed - seed value to use
+    explicit MersenneTwisterEngine(uint64_t seed);
+    ~MersenneTwisterEngine() override = default;
 
-  /// Generate random uint32_t value from uniform distribution.
-  /// @param lower - lower bound of integer generated
-  /// @param upper - upper bound of integer generated
-  /// @returns i, where lower <= i < upper
-  uint32_t RandomUInt32(uint32_t lower, uint32_t upper) override;
+    /// Generate random uint32_t value from uniform distribution.
+    /// @param lower - lower bound of integer generated
+    /// @param upper - upper bound of integer generated
+    /// @returns i, where lower <= i < upper
+    uint32_t RandomUInt32(uint32_t lower, uint32_t upper) override;
 
-  /// Get random uint64_t value from uniform distribution.
-  /// @param lower - lower bound of integer generated
-  /// @param upper - upper bound of integer generated
-  /// @returns i, where lower <= i < upper
-  uint64_t RandomUInt64(uint64_t lower, uint64_t upper) override;
+    /// Get random uint64_t value from uniform distribution.
+    /// @param lower - lower bound of integer generated
+    /// @param upper - upper bound of integer generated
+    /// @returns i, where lower <= i < upper
+    uint64_t RandomUInt64(uint64_t lower, uint64_t upper) override;
 
-  /// Get N bytes of pseudo-random data
-  /// @param dest - memory location to store data
-  /// @param n - number of bytes of data to generate
-  void RandomNBytes(uint8_t* dest, size_t n) override;
+    /// Get N bytes of pseudo-random data
+    /// @param dest - memory location to store data
+    /// @param n - number of bytes of data to generate
+    void RandomNBytes(uint8_t* dest, size_t n) override;
 
- private:
-  // Disallow copy & assign
-  MersenneTwisterEngine(const MersenneTwisterEngine&) = delete;
-  MersenneTwisterEngine& operator=(const MersenneTwisterEngine&) = delete;
+  private:
+    // Disallow copy & assign
+    MersenneTwisterEngine(const MersenneTwisterEngine&) = delete;
+    MersenneTwisterEngine& operator=(const MersenneTwisterEngine&) = delete;
 
-  std::mt19937_64 engine_;
+    std::mt19937_64 engine_;
 };  // class MersenneTwisterEngine
 
 }  // namespace tint::fuzzers

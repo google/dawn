@@ -26,18 +26,18 @@ namespace detail {
 /// See https://en.cppreference.com/w/cpp/language/range-for
 template <typename T>
 struct ReverseIterable {
-  /// The wrapped iterable object.
-  T& iterable;
+    /// The wrapped iterable object.
+    T& iterable;
 };
 
 template <typename T>
 auto begin(ReverseIterable<T> r_it) {
-  return std::rbegin(r_it.iterable);
+    return std::rbegin(r_it.iterable);
 }
 
 template <typename T>
 auto end(ReverseIterable<T> r_it) {
-  return std::rend(r_it.iterable);
+    return std::rend(r_it.iterable);
 }
 }  // namespace detail
 
@@ -54,7 +54,7 @@ auto end(ReverseIterable<T> r_it) {
 /// ```
 template <typename T>
 detail::ReverseIterable<T> Reverse(T&& iterable) {
-  return {iterable};
+    return {iterable};
 }
 
 }  // namespace tint::utils

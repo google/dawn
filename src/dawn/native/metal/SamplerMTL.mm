@@ -19,88 +19,87 @@
 
 namespace dawn::native::metal {
 
-    namespace {
-        MTLSamplerMinMagFilter FilterModeToMinMagFilter(wgpu::FilterMode mode) {
-            switch (mode) {
-                case wgpu::FilterMode::Nearest:
-                    return MTLSamplerMinMagFilterNearest;
-                case wgpu::FilterMode::Linear:
-                    return MTLSamplerMinMagFilterLinear;
-            }
-        }
+namespace {
+MTLSamplerMinMagFilter FilterModeToMinMagFilter(wgpu::FilterMode mode) {
+    switch (mode) {
+        case wgpu::FilterMode::Nearest:
+            return MTLSamplerMinMagFilterNearest;
+        case wgpu::FilterMode::Linear:
+            return MTLSamplerMinMagFilterLinear;
+    }
+}
 
-        MTLSamplerMipFilter FilterModeToMipFilter(wgpu::FilterMode mode) {
-            switch (mode) {
-                case wgpu::FilterMode::Nearest:
-                    return MTLSamplerMipFilterNearest;
-                case wgpu::FilterMode::Linear:
-                    return MTLSamplerMipFilterLinear;
-            }
-        }
+MTLSamplerMipFilter FilterModeToMipFilter(wgpu::FilterMode mode) {
+    switch (mode) {
+        case wgpu::FilterMode::Nearest:
+            return MTLSamplerMipFilterNearest;
+        case wgpu::FilterMode::Linear:
+            return MTLSamplerMipFilterLinear;
+    }
+}
 
-        MTLSamplerAddressMode AddressMode(wgpu::AddressMode mode) {
-            switch (mode) {
-                case wgpu::AddressMode::Repeat:
-                    return MTLSamplerAddressModeRepeat;
-                case wgpu::AddressMode::MirrorRepeat:
-                    return MTLSamplerAddressModeMirrorRepeat;
-                case wgpu::AddressMode::ClampToEdge:
-                    return MTLSamplerAddressModeClampToEdge;
-            }
-        }
+MTLSamplerAddressMode AddressMode(wgpu::AddressMode mode) {
+    switch (mode) {
+        case wgpu::AddressMode::Repeat:
+            return MTLSamplerAddressModeRepeat;
+        case wgpu::AddressMode::MirrorRepeat:
+            return MTLSamplerAddressModeMirrorRepeat;
+        case wgpu::AddressMode::ClampToEdge:
+            return MTLSamplerAddressModeClampToEdge;
+    }
+}
+}  // namespace
+
+// static
+ResultOrError<Ref<Sampler>> Sampler::Create(Device* device, const SamplerDescriptor* descriptor) {
+    DAWN_INVALID_IF(
+        descriptor->compare != wgpu::CompareFunction::Undefined &&
+            device->IsToggleEnabled(Toggle::MetalDisableSamplerCompare),
+        "Sampler compare function (%s) not supported. Compare functions are disabled with the "
+        "Metal backend.",
+        descriptor->compare);
+
+    Ref<Sampler> sampler = AcquireRef(new Sampler(device, descriptor));
+    DAWN_TRY(sampler->Initialize(descriptor));
+    return sampler;
+}
+
+MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {
+    NSRef<MTLSamplerDescriptor> mtlDescRef = AcquireNSRef([MTLSamplerDescriptor new]);
+    MTLSamplerDescriptor* mtlDesc = mtlDescRef.Get();
+
+    mtlDesc.minFilter = FilterModeToMinMagFilter(descriptor->minFilter);
+    mtlDesc.magFilter = FilterModeToMinMagFilter(descriptor->magFilter);
+    mtlDesc.mipFilter = FilterModeToMipFilter(descriptor->mipmapFilter);
+
+    mtlDesc.sAddressMode = AddressMode(descriptor->addressModeU);
+    mtlDesc.tAddressMode = AddressMode(descriptor->addressModeV);
+    mtlDesc.rAddressMode = AddressMode(descriptor->addressModeW);
+
+    mtlDesc.lodMinClamp = descriptor->lodMinClamp;
+    mtlDesc.lodMaxClamp = descriptor->lodMaxClamp;
+    // https://developer.apple.com/documentation/metal/mtlsamplerdescriptor/1516164-maxanisotropy
+    mtlDesc.maxAnisotropy = std::min<uint16_t>(GetMaxAnisotropy(), 16u);
+
+    if (descriptor->compare != wgpu::CompareFunction::Undefined) {
+        // Sampler compare is unsupported before A9, which we validate in
+        // Sampler::Create.
+        mtlDesc.compareFunction = ToMetalCompareFunction(descriptor->compare);
+        // The value is default-initialized in the else-case, and we don't set it or the
+        // Metal debug device errors.
     }
 
-    // static
-    ResultOrError<Ref<Sampler>> Sampler::Create(Device* device,
-                                                const SamplerDescriptor* descriptor) {
-        DAWN_INVALID_IF(
-            descriptor->compare != wgpu::CompareFunction::Undefined &&
-                device->IsToggleEnabled(Toggle::MetalDisableSamplerCompare),
-            "Sampler compare function (%s) not supported. Compare functions are disabled with the "
-            "Metal backend.",
-            descriptor->compare);
+    mMtlSamplerState = AcquireNSPRef(
+        [ToBackend(GetDevice())->GetMTLDevice() newSamplerStateWithDescriptor:mtlDesc]);
 
-        Ref<Sampler> sampler = AcquireRef(new Sampler(device, descriptor));
-        DAWN_TRY(sampler->Initialize(descriptor));
-        return sampler;
+    if (mMtlSamplerState == nil) {
+        return DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate sampler.");
     }
+    return {};
+}
 
-    MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {
-        NSRef<MTLSamplerDescriptor> mtlDescRef = AcquireNSRef([MTLSamplerDescriptor new]);
-        MTLSamplerDescriptor* mtlDesc = mtlDescRef.Get();
-
-        mtlDesc.minFilter = FilterModeToMinMagFilter(descriptor->minFilter);
-        mtlDesc.magFilter = FilterModeToMinMagFilter(descriptor->magFilter);
-        mtlDesc.mipFilter = FilterModeToMipFilter(descriptor->mipmapFilter);
-
-        mtlDesc.sAddressMode = AddressMode(descriptor->addressModeU);
-        mtlDesc.tAddressMode = AddressMode(descriptor->addressModeV);
-        mtlDesc.rAddressMode = AddressMode(descriptor->addressModeW);
-
-        mtlDesc.lodMinClamp = descriptor->lodMinClamp;
-        mtlDesc.lodMaxClamp = descriptor->lodMaxClamp;
-        // https://developer.apple.com/documentation/metal/mtlsamplerdescriptor/1516164-maxanisotropy
-        mtlDesc.maxAnisotropy = std::min<uint16_t>(GetMaxAnisotropy(), 16u);
-
-        if (descriptor->compare != wgpu::CompareFunction::Undefined) {
-            // Sampler compare is unsupported before A9, which we validate in
-            // Sampler::Create.
-            mtlDesc.compareFunction = ToMetalCompareFunction(descriptor->compare);
-            // The value is default-initialized in the else-case, and we don't set it or the
-            // Metal debug device errors.
-        }
-
-        mMtlSamplerState = AcquireNSPRef(
-            [ToBackend(GetDevice())->GetMTLDevice() newSamplerStateWithDescriptor:mtlDesc]);
-
-        if (mMtlSamplerState == nil) {
-            return DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate sampler.");
-        }
-        return {};
-    }
-
-    id<MTLSamplerState> Sampler::GetMTLSamplerState() {
-        return mMtlSamplerState.Get();
-    }
+id<MTLSamplerState> Sampler::GetMTLSamplerState() {
+    return mMtlSamplerState.Get();
+}
 
 }  // namespace dawn::native::metal

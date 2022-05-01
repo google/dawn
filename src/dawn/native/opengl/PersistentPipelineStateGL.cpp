@@ -18,41 +18,41 @@
 
 namespace dawn::native::opengl {
 
-    void PersistentPipelineState::SetDefaultState(const OpenGLFunctions& gl) {
-        CallGLStencilFunc(gl);
+void PersistentPipelineState::SetDefaultState(const OpenGLFunctions& gl) {
+    CallGLStencilFunc(gl);
+}
+
+void PersistentPipelineState::SetStencilFuncsAndMask(const OpenGLFunctions& gl,
+                                                     GLenum stencilBackCompareFunction,
+                                                     GLenum stencilFrontCompareFunction,
+                                                     uint32_t stencilReadMask) {
+    if (mStencilBackCompareFunction == stencilBackCompareFunction &&
+        mStencilFrontCompareFunction == stencilFrontCompareFunction &&
+        mStencilReadMask == stencilReadMask) {
+        return;
     }
 
-    void PersistentPipelineState::SetStencilFuncsAndMask(const OpenGLFunctions& gl,
-                                                         GLenum stencilBackCompareFunction,
-                                                         GLenum stencilFrontCompareFunction,
-                                                         uint32_t stencilReadMask) {
-        if (mStencilBackCompareFunction == stencilBackCompareFunction &&
-            mStencilFrontCompareFunction == stencilFrontCompareFunction &&
-            mStencilReadMask == stencilReadMask) {
-            return;
-        }
+    mStencilBackCompareFunction = stencilBackCompareFunction;
+    mStencilFrontCompareFunction = stencilFrontCompareFunction;
+    mStencilReadMask = stencilReadMask;
+    CallGLStencilFunc(gl);
+}
 
-        mStencilBackCompareFunction = stencilBackCompareFunction;
-        mStencilFrontCompareFunction = stencilFrontCompareFunction;
-        mStencilReadMask = stencilReadMask;
-        CallGLStencilFunc(gl);
+void PersistentPipelineState::SetStencilReference(const OpenGLFunctions& gl,
+                                                  uint32_t stencilReference) {
+    if (mStencilReference == stencilReference) {
+        return;
     }
 
-    void PersistentPipelineState::SetStencilReference(const OpenGLFunctions& gl,
-                                                      uint32_t stencilReference) {
-        if (mStencilReference == stencilReference) {
-            return;
-        }
+    mStencilReference = stencilReference;
+    CallGLStencilFunc(gl);
+}
 
-        mStencilReference = stencilReference;
-        CallGLStencilFunc(gl);
-    }
-
-    void PersistentPipelineState::CallGLStencilFunc(const OpenGLFunctions& gl) {
-        gl.StencilFuncSeparate(GL_BACK, mStencilBackCompareFunction, mStencilReference,
-                               mStencilReadMask);
-        gl.StencilFuncSeparate(GL_FRONT, mStencilFrontCompareFunction, mStencilReference,
-                               mStencilReadMask);
-    }
+void PersistentPipelineState::CallGLStencilFunc(const OpenGLFunctions& gl) {
+    gl.StencilFuncSeparate(GL_BACK, mStencilBackCompareFunction, mStencilReference,
+                           mStencilReadMask);
+    gl.StencilFuncSeparate(GL_FRONT, mStencilFrontCompareFunction, mStencilReference,
+                           mStencilReadMask);
+}
 
 }  // namespace dawn::native::opengl

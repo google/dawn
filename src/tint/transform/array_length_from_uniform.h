@@ -52,71 +52,67 @@ namespace tint::transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * SimplifyPointers
-class ArrayLengthFromUniform final
-    : public Castable<ArrayLengthFromUniform, Transform> {
- public:
-  /// Constructor
-  ArrayLengthFromUniform();
-  /// Destructor
-  ~ArrayLengthFromUniform() override;
-
-  /// Configuration options for the ArrayLengthFromUniform transform.
-  struct Config final : public Castable<Data, transform::Data> {
+class ArrayLengthFromUniform final : public Castable<ArrayLengthFromUniform, Transform> {
+  public:
     /// Constructor
-    /// @param ubo_bp the binding point to use for the generated uniform buffer.
-    explicit Config(sem::BindingPoint ubo_bp);
-
-    /// Copy constructor
-    Config(const Config&);
-
-    /// Copy assignment
-    /// @return this Config
-    Config& operator=(const Config&);
-
+    ArrayLengthFromUniform();
     /// Destructor
-    ~Config() override;
+    ~ArrayLengthFromUniform() override;
 
-    /// The binding point to use for the generated uniform buffer.
-    sem::BindingPoint ubo_binding;
+    /// Configuration options for the ArrayLengthFromUniform transform.
+    struct Config final : public Castable<Data, transform::Data> {
+        /// Constructor
+        /// @param ubo_bp the binding point to use for the generated uniform buffer.
+        explicit Config(sem::BindingPoint ubo_bp);
 
-    /// The mapping from binding point to the index for the buffer size lookup.
-    std::unordered_map<sem::BindingPoint, uint32_t> bindpoint_to_size_index;
-  };
+        /// Copy constructor
+        Config(const Config&);
 
-  /// Information produced about what the transform did.
-  /// If there were no calls to the arrayLength() builtin, then no Result will
-  /// be emitted.
-  struct Result final : public Castable<Result, transform::Data> {
-    /// Constructor
-    /// @param used_size_indices Indices into the UBO that are statically used.
-    explicit Result(std::unordered_set<uint32_t> used_size_indices);
+        /// Copy assignment
+        /// @return this Config
+        Config& operator=(const Config&);
 
-    /// Copy constructor
-    Result(const Result&);
+        /// Destructor
+        ~Config() override;
 
-    /// Destructor
-    ~Result() override;
+        /// The binding point to use for the generated uniform buffer.
+        sem::BindingPoint ubo_binding;
 
-    /// Indices into the UBO that are statically used.
-    std::unordered_set<uint32_t> used_size_indices;
-  };
+        /// The mapping from binding point to the index for the buffer size lookup.
+        std::unordered_map<sem::BindingPoint, uint32_t> bindpoint_to_size_index;
+    };
 
-  /// @param program the program to inspect
-  /// @param data optional extra transform-specific input data
-  /// @returns true if this transform should be run for the given program
-  bool ShouldRun(const Program* program,
-                 const DataMap& data = {}) const override;
+    /// Information produced about what the transform did.
+    /// If there were no calls to the arrayLength() builtin, then no Result will
+    /// be emitted.
+    struct Result final : public Castable<Result, transform::Data> {
+        /// Constructor
+        /// @param used_size_indices Indices into the UBO that are statically used.
+        explicit Result(std::unordered_set<uint32_t> used_size_indices);
 
- protected:
-  /// Runs the transform using the CloneContext built for transforming a
-  /// program. Run() is responsible for calling Clone() on the CloneContext.
-  /// @param ctx the CloneContext primed with the input program and
-  /// ProgramBuilder
-  /// @param inputs optional extra transform-specific input data
-  /// @param outputs optional extra transform-specific output data
-  void Run(CloneContext& ctx,
-           const DataMap& inputs,
-           DataMap& outputs) const override;
+        /// Copy constructor
+        Result(const Result&);
+
+        /// Destructor
+        ~Result() override;
+
+        /// Indices into the UBO that are statically used.
+        std::unordered_set<uint32_t> used_size_indices;
+    };
+
+    /// @param program the program to inspect
+    /// @param data optional extra transform-specific input data
+    /// @returns true if this transform should be run for the given program
+    bool ShouldRun(const Program* program, const DataMap& data = {}) const override;
+
+  protected:
+    /// Runs the transform using the CloneContext built for transforming a
+    /// program. Run() is responsible for calling Clone() on the CloneContext.
+    /// @param ctx the CloneContext primed with the input program and
+    /// ProgramBuilder
+    /// @param inputs optional extra transform-specific input data
+    /// @param outputs optional extra transform-specific output data
+    void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) const override;
 };
 
 }  // namespace tint::transform

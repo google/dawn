@@ -20,25 +20,25 @@ namespace tint::utils {
 namespace {
 
 TEST(ScopedAssignmentTest, Scopes) {
-  int i = 0;
-  EXPECT_EQ(i, 0);
-  {
+    int i = 0;
     EXPECT_EQ(i, 0);
-    TINT_SCOPED_ASSIGNMENT(i, 1);
-    EXPECT_EQ(i, 1);
     {
-      EXPECT_EQ(i, 1);
-      TINT_SCOPED_ASSIGNMENT(i, 2);
-      EXPECT_EQ(i, 2);
+        EXPECT_EQ(i, 0);
+        TINT_SCOPED_ASSIGNMENT(i, 1);
+        EXPECT_EQ(i, 1);
+        {
+            EXPECT_EQ(i, 1);
+            TINT_SCOPED_ASSIGNMENT(i, 2);
+            EXPECT_EQ(i, 2);
+        }
+        {
+            EXPECT_EQ(i, 1);
+            TINT_SCOPED_ASSIGNMENT(i, 3);
+            EXPECT_EQ(i, 3);
+        }
+        EXPECT_EQ(i, 1);
     }
-    {
-      EXPECT_EQ(i, 1);
-      TINT_SCOPED_ASSIGNMENT(i, 3);
-      EXPECT_EQ(i, 3);
-    }
-    EXPECT_EQ(i, 1);
-  }
-  EXPECT_EQ(i, 0);
+    EXPECT_EQ(i, 0);
 }
 
 }  // namespace

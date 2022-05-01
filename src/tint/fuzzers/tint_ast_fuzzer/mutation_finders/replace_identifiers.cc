@@ -29,47 +29,46 @@ MutationList MutationFinderReplaceIdentifiers::FindMutations(
     const tint::Program& program,
     NodeIdMap* node_id_map,
     ProbabilityContext* probability_context) const {
-  MutationList result;
+    MutationList result;
 
-  // Go through each variable in the AST and for each user of that variable, try
-  // to replace it with some other variable usage.
+    // Go through each variable in the AST and for each user of that variable, try
+    // to replace it with some other variable usage.
 
-  for (const auto* node : program.SemNodes().Objects()) {
-    const auto* sem_variable = tint::As<sem::Variable>(node);
-    if (!sem_variable) {
-      continue;
+    for (const auto* node : program.SemNodes().Objects()) {
+        const auto* sem_variable = tint::As<sem::Variable>(node);
+        if (!sem_variable) {
+            continue;
+        }
+
+        // Iterate over all users of `sem_variable`.
+        for (const auto* user : sem_variable->Users()) {
+            // Get all variables that can be used to replace the `user` of
+            // `sem_variable`.
+            auto candidate_variables =
+                util::GetAllVarsInScope(program, user->Stmt(), [user](const sem::Variable* var) {
+                    return var != user->Variable() && var->Type() == user->Type();
+                });
+
+            if (candidate_variables.empty()) {
+                // No suitable replacements have been found.
+                continue;
+            }
+
+            const auto* replacement =
+                candidate_variables[probability_context->GetRandomIndex(candidate_variables)];
+
+            result.push_back(std::make_unique<MutationReplaceIdentifier>(
+                node_id_map->GetId(user->Declaration()),
+                node_id_map->GetId(replacement->Declaration())));
+        }
     }
 
-    // Iterate over all users of `sem_variable`.
-    for (const auto* user : sem_variable->Users()) {
-      // Get all variables that can be used to replace the `user` of
-      // `sem_variable`.
-      auto candidate_variables = util::GetAllVarsInScope(
-          program, user->Stmt(), [user](const sem::Variable* var) {
-            return var != user->Variable() && var->Type() == user->Type();
-          });
-
-      if (candidate_variables.empty()) {
-        // No suitable replacements have been found.
-        continue;
-      }
-
-      const auto* replacement =
-          candidate_variables[probability_context->GetRandomIndex(
-              candidate_variables)];
-
-      result.push_back(std::make_unique<MutationReplaceIdentifier>(
-          node_id_map->GetId(user->Declaration()),
-          node_id_map->GetId(replacement->Declaration())));
-    }
-  }
-
-  return result;
+    return result;
 }
 
 uint32_t MutationFinderReplaceIdentifiers::GetChanceOfApplyingMutation(
     ProbabilityContext* probability_context) const {
-  return probability_context->GetChanceOfReplacingIdentifiers();
+    return probability_context->GetChanceOfReplacingIdentifiers();
 }
 
 }  // namespace tint::fuzzers::ast_fuzzer

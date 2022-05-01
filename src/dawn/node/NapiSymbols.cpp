@@ -22,7 +22,7 @@
 // which we can use to produce weak-symbol stubs.
 
 #ifdef _WIN32
-#    error "NapiSymbols.cpp is not used on Windows"
+#error "NapiSymbols.cpp is not used on Windows"
 #endif
 
 #define NAPI_SYMBOL(NAME)                                                              \

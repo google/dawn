@@ -19,14 +19,14 @@
 #include "dawn/common/Platform.h"
 
 #if DAWN_PLATFORM_WINDOWS
-#    include "dawn/common/windows_with_undefs.h"
-#    if DAWN_PLATFORM_WINUWP
-#        include "dawn/common/WindowsUtils.h"
-#    endif
+#include "dawn/common/windows_with_undefs.h"
+#if DAWN_PLATFORM_WINUWP
+#include "dawn/common/WindowsUtils.h"
+#endif
 #elif DAWN_PLATFORM_POSIX
-#    include <dlfcn.h>
+#include <dlfcn.h>
 #else
-#    error "Unsupported platform for DynamicLib"
+#error "Unsupported platform for DynamicLib"
 #endif
 
 DynamicLib::~DynamicLib() {
@@ -48,11 +48,11 @@ bool DynamicLib::Valid() const {
 
 bool DynamicLib::Open(const std::string& filename, std::string* error) {
 #if DAWN_PLATFORM_WINDOWS
-#    if DAWN_PLATFORM_WINUWP
+#if DAWN_PLATFORM_WINUWP
     mHandle = LoadPackagedLibrary(UTF8ToWStr(filename.c_str()).c_str(), 0);
-#    else
+#else
     mHandle = LoadLibraryA(filename.c_str());
-#    endif
+#endif
     if (mHandle == nullptr && error != nullptr) {
         *error = "Windows Error: " + std::to_string(GetLastError());
     }
@@ -63,7 +63,7 @@ bool DynamicLib::Open(const std::string& filename, std::string* error) {
         *error = dlerror();
     }
 #else
-#    error "Unsupported platform for DynamicLib"
+#error "Unsupported platform for DynamicLib"
 #endif
 
     return mHandle != nullptr;
@@ -79,7 +79,7 @@ void DynamicLib::Close() {
 #elif DAWN_PLATFORM_POSIX
     dlclose(mHandle);
 #else
-#    error "Unsupported platform for DynamicLib"
+#error "Unsupported platform for DynamicLib"
 #endif
 
     mHandle = nullptr;
@@ -101,7 +101,7 @@ void* DynamicLib::GetProc(const std::string& procName, std::string* error) const
         *error = dlerror();
     }
 #else
-#    error "Unsupported platform for DynamicLib"
+#error "Unsupported platform for DynamicLib"
 #endif
 
     return proc;

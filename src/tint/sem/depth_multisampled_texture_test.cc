@@ -26,36 +26,36 @@ namespace {
 using DepthMultisampledTextureTest = TestHelper;
 
 TEST_F(DepthMultisampledTextureTest, Creation) {
-  auto* a = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
-  auto* b = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
+    auto* a = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
+    auto* b = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
 
-  EXPECT_EQ(a, b);
+    EXPECT_EQ(a, b);
 }
 
 TEST_F(DepthMultisampledTextureTest, Hash) {
-  auto* a = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
-  auto* b = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
+    auto* a = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
+    auto* b = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
 
-  EXPECT_EQ(a->Hash(), b->Hash());
+    EXPECT_EQ(a->Hash(), b->Hash());
 }
 
 TEST_F(DepthMultisampledTextureTest, Equals) {
-  auto* a = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
-  auto* b = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
+    auto* a = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
+    auto* b = create<DepthMultisampledTexture>(ast::TextureDimension::k2d);
 
-  EXPECT_TRUE(a->Equals(*a));
-  EXPECT_TRUE(a->Equals(*b));
-  EXPECT_FALSE(a->Equals(Void{}));
+    EXPECT_TRUE(a->Equals(*a));
+    EXPECT_TRUE(a->Equals(*b));
+    EXPECT_FALSE(a->Equals(Void{}));
 }
 
 TEST_F(DepthMultisampledTextureTest, Dim) {
-  DepthMultisampledTexture d(ast::TextureDimension::k2d);
-  EXPECT_EQ(d.dim(), ast::TextureDimension::k2d);
+    DepthMultisampledTexture d(ast::TextureDimension::k2d);
+    EXPECT_EQ(d.dim(), ast::TextureDimension::k2d);
 }
 
 TEST_F(DepthMultisampledTextureTest, FriendlyName) {
-  DepthMultisampledTexture d(ast::TextureDimension::k2d);
-  EXPECT_EQ(d.FriendlyName(Symbols()), "texture_depth_multisampled_2d");
+    DepthMultisampledTexture d(ast::TextureDimension::k2d);
+    EXPECT_EQ(d.FriendlyName(Symbols()), "texture_depth_multisampled_2d");
 }
 
 }  // namespace

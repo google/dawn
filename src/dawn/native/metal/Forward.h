@@ -19,49 +19,49 @@
 
 namespace dawn::native::metal {
 
-    class Adapter;
-    class BindGroup;
-    class BindGroupLayout;
-    class Buffer;
-    class CommandBuffer;
-    class ComputePipeline;
-    class Device;
-    class Framebuffer;
-    class PipelineLayout;
-    class QuerySet;
-    class Queue;
-    class RenderPipeline;
-    class Sampler;
-    class ShaderModule;
-    class StagingBuffer;
-    class SwapChain;
-    class Texture;
-    class TextureView;
+class Adapter;
+class BindGroup;
+class BindGroupLayout;
+class Buffer;
+class CommandBuffer;
+class ComputePipeline;
+class Device;
+class Framebuffer;
+class PipelineLayout;
+class QuerySet;
+class Queue;
+class RenderPipeline;
+class Sampler;
+class ShaderModule;
+class StagingBuffer;
+class SwapChain;
+class Texture;
+class TextureView;
 
-    struct MetalBackendTraits {
-        using AdapterType = Adapter;
-        using BindGroupType = BindGroup;
-        using BindGroupLayoutType = BindGroupLayout;
-        using BufferType = Buffer;
-        using CommandBufferType = CommandBuffer;
-        using ComputePipelineType = ComputePipeline;
-        using DeviceType = Device;
-        using PipelineLayoutType = PipelineLayout;
-        using QuerySetType = QuerySet;
-        using QueueType = Queue;
-        using RenderPipelineType = RenderPipeline;
-        using SamplerType = Sampler;
-        using ShaderModuleType = ShaderModule;
-        using StagingBufferType = StagingBuffer;
-        using SwapChainType = SwapChain;
-        using TextureType = Texture;
-        using TextureViewType = TextureView;
-    };
+struct MetalBackendTraits {
+    using AdapterType = Adapter;
+    using BindGroupType = BindGroup;
+    using BindGroupLayoutType = BindGroupLayout;
+    using BufferType = Buffer;
+    using CommandBufferType = CommandBuffer;
+    using ComputePipelineType = ComputePipeline;
+    using DeviceType = Device;
+    using PipelineLayoutType = PipelineLayout;
+    using QuerySetType = QuerySet;
+    using QueueType = Queue;
+    using RenderPipelineType = RenderPipeline;
+    using SamplerType = Sampler;
+    using ShaderModuleType = ShaderModule;
+    using StagingBufferType = StagingBuffer;
+    using SwapChainType = SwapChain;
+    using TextureType = Texture;
+    using TextureViewType = TextureView;
+};
 
-    template <typename T>
-    auto ToBackend(T&& common) -> decltype(ToBackendBase<MetalBackendTraits>(common)) {
-        return ToBackendBase<MetalBackendTraits>(common);
-    }
+template <typename T>
+auto ToBackend(T&& common) -> decltype(ToBackendBase<MetalBackendTraits>(common)) {
+    return ToBackendBase<MetalBackendTraits>(common);
+}
 
 }  // namespace dawn::native::metal
 

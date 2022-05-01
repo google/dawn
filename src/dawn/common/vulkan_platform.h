@@ -16,10 +16,10 @@
 #define SRC_DAWN_COMMON_VULKAN_PLATFORM_H_
 
 #if !defined(DAWN_ENABLE_BACKEND_VULKAN)
-#    error "vulkan_platform.h included without the Vulkan backend enabled"
+#error "vulkan_platform.h included without the Vulkan backend enabled"
 #endif
 #if defined(VULKAN_CORE_H_)
-#    error "vulkan.h included before vulkan_platform.h"
+#error "vulkan.h included before vulkan_platform.h"
 #endif
 
 #include <cstddef>
@@ -36,7 +36,7 @@
 // (like vulkan.h on 64 bit) but makes sure the types are different on 32 bit architectures.
 
 #if defined(DAWN_PLATFORM_64_BIT)
-#    define DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(object) using object = struct object##_T*;
+#define DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(object) using object = struct object##_T*;
 // This function is needed because MSVC doesn't accept reinterpret_cast from uint64_t from uint64_t
 // TODO(cwallez@chromium.org): Remove this once we rework vulkan_platform.h
 template <typename T>
@@ -44,13 +44,13 @@ T NativeNonDispatachableHandleFromU64(uint64_t u64) {
     return reinterpret_cast<T>(u64);
 }
 #elif defined(DAWN_PLATFORM_32_BIT)
-#    define DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(object) using object = uint64_t;
+#define DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(object) using object = uint64_t;
 template <typename T>
 T NativeNonDispatachableHandleFromU64(uint64_t u64) {
     return u64;
 }
 #else
-#    error "Unsupported platform"
+#error "Unsupported platform"
 #endif
 
 // Define a placeholder Vulkan handle for use before we include vulkan.h
@@ -67,89 +67,73 @@ DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(VkSomeHandle)
 
 namespace dawn::native::vulkan {
 
-    namespace detail {
-        template <typename T>
-        struct WrapperStruct {
-            T member;
-        };
+namespace detail {
+template <typename T>
+struct WrapperStruct {
+    T member;
+};
 
-        template <typename T>
-        static constexpr size_t AlignOfInStruct = alignof(WrapperStruct<T>);
+template <typename T>
+static constexpr size_t AlignOfInStruct = alignof(WrapperStruct<T>);
 
-        static constexpr size_t kNativeVkHandleAlignment = AlignOfInStruct<VkSomeHandle>;
-        static constexpr size_t kUint64Alignment = AlignOfInStruct<uint64_t>;
+static constexpr size_t kNativeVkHandleAlignment = AlignOfInStruct<VkSomeHandle>;
+static constexpr size_t kUint64Alignment = AlignOfInStruct<uint64_t>;
 
-        // Simple handle types that supports "nullptr_t" as a 0 value.
-        template <typename Tag, typename HandleType>
-        class alignas(detail::kNativeVkHandleAlignment) VkHandle {
-          public:
-            // Default constructor and assigning of VK_NULL_HANDLE
-            VkHandle() = default;
-            VkHandle(std::nullptr_t) {
-            }
+// Simple handle types that supports "nullptr_t" as a 0 value.
+template <typename Tag, typename HandleType>
+class alignas(detail::kNativeVkHandleAlignment) VkHandle {
+  public:
+    // Default constructor and assigning of VK_NULL_HANDLE
+    VkHandle() = default;
+    VkHandle(std::nullptr_t) {}
 
-            // Use default copy constructor/assignment
-            VkHandle(const VkHandle<Tag, HandleType>& other) = default;
-            VkHandle& operator=(const VkHandle<Tag, HandleType>&) = default;
+    // Use default copy constructor/assignment
+    VkHandle(const VkHandle<Tag, HandleType>& other) = default;
+    VkHandle& operator=(const VkHandle<Tag, HandleType>&) = default;
 
-            // Comparisons between handles
-            bool operator==(VkHandle<Tag, HandleType> other) const {
-                return mHandle == other.mHandle;
-            }
-            bool operator!=(VkHandle<Tag, HandleType> other) const {
-                return mHandle != other.mHandle;
-            }
+    // Comparisons between handles
+    bool operator==(VkHandle<Tag, HandleType> other) const { return mHandle == other.mHandle; }
+    bool operator!=(VkHandle<Tag, HandleType> other) const { return mHandle != other.mHandle; }
 
-            // Comparisons between handles and VK_NULL_HANDLE
-            bool operator==(std::nullptr_t) const {
-                return mHandle == 0;
-            }
-            bool operator!=(std::nullptr_t) const {
-                return mHandle != 0;
-            }
+    // Comparisons between handles and VK_NULL_HANDLE
+    bool operator==(std::nullptr_t) const { return mHandle == 0; }
+    bool operator!=(std::nullptr_t) const { return mHandle != 0; }
 
-            // Implicit conversion to real Vulkan types.
-            operator HandleType() const {
-                return GetHandle();
-            }
+    // Implicit conversion to real Vulkan types.
+    operator HandleType() const { return GetHandle(); }
 
-            HandleType GetHandle() const {
-                return mHandle;
-            }
+    HandleType GetHandle() const { return mHandle; }
 
-            HandleType& operator*() {
-                return mHandle;
-            }
+    HandleType& operator*() { return mHandle; }
 
-            static VkHandle<Tag, HandleType> CreateFromHandle(HandleType handle) {
-                return VkHandle{handle};
-            }
-
-          private:
-            explicit VkHandle(HandleType handle) : mHandle(handle) {
-            }
-
-            HandleType mHandle = 0;
-        };
-    }  // namespace detail
-
-    static constexpr std::nullptr_t VK_NULL_HANDLE = nullptr;
-
-    template <typename Tag, typename HandleType>
-    HandleType* AsVkArray(detail::VkHandle<Tag, HandleType>* handle) {
-        return reinterpret_cast<HandleType*>(handle);
+    static VkHandle<Tag, HandleType> CreateFromHandle(HandleType handle) {
+        return VkHandle{handle};
     }
+
+  private:
+    explicit VkHandle(HandleType handle) : mHandle(handle) {}
+
+    HandleType mHandle = 0;
+};
+}  // namespace detail
+
+static constexpr std::nullptr_t VK_NULL_HANDLE = nullptr;
+
+template <typename Tag, typename HandleType>
+HandleType* AsVkArray(detail::VkHandle<Tag, HandleType>* handle) {
+    return reinterpret_cast<HandleType*>(handle);
+}
 
 }  // namespace dawn::native::vulkan
 
-#define VK_DEFINE_NON_DISPATCHABLE_HANDLE(object)                           \
-    DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(object)                      \
-    namespace dawn::native::vulkan {                                        \
-        using object = detail::VkHandle<struct VkTag##object, ::object>;    \
-        static_assert(sizeof(object) == sizeof(uint64_t));                  \
-        static_assert(alignof(object) == detail::kUint64Alignment);         \
-        static_assert(sizeof(object) == sizeof(::object));                  \
-        static_assert(alignof(object) == detail::kNativeVkHandleAlignment); \
+#define VK_DEFINE_NON_DISPATCHABLE_HANDLE(object)                       \
+    DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(object)                  \
+    namespace dawn::native::vulkan {                                    \
+    using object = detail::VkHandle<struct VkTag##object, ::object>;    \
+    static_assert(sizeof(object) == sizeof(uint64_t));                  \
+    static_assert(alignof(object) == detail::kUint64Alignment);         \
+    static_assert(sizeof(object) == sizeof(::object));                  \
+    static_assert(alignof(object) == detail::kNativeVkHandleAlignment); \
     }  // namespace dawn::native::vulkan
 
 // Import additional parts of Vulkan that are supported on our architecture and preemptively include
@@ -157,36 +141,36 @@ namespace dawn::native::vulkan {
 // defines are defined already in the Vulkan-Header BUILD.gn, but are needed when building with
 // CMake, hence they cannot be removed at the moment.
 #if defined(DAWN_PLATFORM_WINDOWS)
-#    ifndef VK_USE_PLATFORM_WIN32_KHR
-#        define VK_USE_PLATFORM_WIN32_KHR
-#    endif
-#    include "dawn/common/windows_with_undefs.h"
+#ifndef VK_USE_PLATFORM_WIN32_KHR
+#define VK_USE_PLATFORM_WIN32_KHR
+#endif
+#include "dawn/common/windows_with_undefs.h"
 #endif  // DAWN_PLATFORM_WINDOWS
 
 #if defined(DAWN_USE_X11)
-#    define VK_USE_PLATFORM_XLIB_KHR
-#    ifndef VK_USE_PLATFORM_XCB_KHR
-#        define VK_USE_PLATFORM_XCB_KHR
-#    endif
-#    include "dawn/common/xlib_with_undefs.h"
+#define VK_USE_PLATFORM_XLIB_KHR
+#ifndef VK_USE_PLATFORM_XCB_KHR
+#define VK_USE_PLATFORM_XCB_KHR
+#endif
+#include "dawn/common/xlib_with_undefs.h"
 #endif  // defined(DAWN_USE_X11)
 
 #if defined(DAWN_ENABLE_BACKEND_METAL)
-#    ifndef VK_USE_PLATFORM_METAL_EXT
-#        define VK_USE_PLATFORM_METAL_EXT
-#    endif
+#ifndef VK_USE_PLATFORM_METAL_EXT
+#define VK_USE_PLATFORM_METAL_EXT
+#endif
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
 #if defined(DAWN_PLATFORM_ANDROID)
-#    ifndef VK_USE_PLATFORM_ANDROID_KHR
-#        define VK_USE_PLATFORM_ANDROID_KHR
-#    endif
+#ifndef VK_USE_PLATFORM_ANDROID_KHR
+#define VK_USE_PLATFORM_ANDROID_KHR
+#endif
 #endif  // defined(DAWN_PLATFORM_ANDROID)
 
 #if defined(DAWN_PLATFORM_FUCHSIA)
-#    ifndef VK_USE_PLATFORM_FUCHSIA
-#        define VK_USE_PLATFORM_FUCHSIA
-#    endif
+#ifndef VK_USE_PLATFORM_FUCHSIA
+#define VK_USE_PLATFORM_FUCHSIA
+#endif
 #endif  // defined(DAWN_PLATFORM_FUCHSIA)
 
 // The actual inclusion of vulkan.h!
@@ -200,7 +184,7 @@ static constexpr std::nullptr_t VK_NULL_HANDLE = nullptr;
 #elif defined(DAWN_PLATFORM_32_BIT)
 static constexpr uint64_t VK_NULL_HANDLE = 0;
 #else
-#    error "Unsupported platform"
+#error "Unsupported platform"
 #endif
 
 #endif  // SRC_DAWN_COMMON_VULKAN_PLATFORM_H_

@@ -26,76 +26,75 @@
 
 namespace dawn::native::d3d12 {
 
-    class TextureView;
+class TextureView;
 
-    // RenderPassBuilder stores parameters related to render pass load and store operations.
-    // When the D3D12 render pass API is available, the needed descriptors can be fetched
-    // directly from the RenderPassBuilder. When the D3D12 render pass API is not available, the
-    // descriptors are still fetched and any information necessary to emulate the load and store
-    // operations is extracted from the descriptors.
-    class RenderPassBuilder {
-      public:
-        explicit RenderPassBuilder(bool hasUAV);
+// RenderPassBuilder stores parameters related to render pass load and store operations.
+// When the D3D12 render pass API is available, the needed descriptors can be fetched
+// directly from the RenderPassBuilder. When the D3D12 render pass API is not available, the
+// descriptors are still fetched and any information necessary to emulate the load and store
+// operations is extracted from the descriptors.
+class RenderPassBuilder {
+  public:
+    explicit RenderPassBuilder(bool hasUAV);
 
-        // Returns the highest color attachment index + 1. If there is no color attachment, returns
-        // 0. Range: [0, kMaxColorAttachments + 1)
-        ColorAttachmentIndex GetHighestColorAttachmentIndexPlusOne() const;
+    // Returns the highest color attachment index + 1. If there is no color attachment, returns
+    // 0. Range: [0, kMaxColorAttachments + 1)
+    ColorAttachmentIndex GetHighestColorAttachmentIndexPlusOne() const;
 
-        // Returns descriptors that are fed directly to BeginRenderPass, or are used as parameter
-        // storage if D3D12 render pass API is unavailable.
-        ityp::span<ColorAttachmentIndex, const D3D12_RENDER_PASS_RENDER_TARGET_DESC>
-        GetRenderPassRenderTargetDescriptors() const;
-        const D3D12_RENDER_PASS_DEPTH_STENCIL_DESC* GetRenderPassDepthStencilDescriptor() const;
+    // Returns descriptors that are fed directly to BeginRenderPass, or are used as parameter
+    // storage if D3D12 render pass API is unavailable.
+    ityp::span<ColorAttachmentIndex, const D3D12_RENDER_PASS_RENDER_TARGET_DESC>
+    GetRenderPassRenderTargetDescriptors() const;
+    const D3D12_RENDER_PASS_DEPTH_STENCIL_DESC* GetRenderPassDepthStencilDescriptor() const;
 
-        D3D12_RENDER_PASS_FLAGS GetRenderPassFlags() const;
+    D3D12_RENDER_PASS_FLAGS GetRenderPassFlags() const;
 
-        // Returns attachment RTVs to use with OMSetRenderTargets.
-        const D3D12_CPU_DESCRIPTOR_HANDLE* GetRenderTargetViews() const;
+    // Returns attachment RTVs to use with OMSetRenderTargets.
+    const D3D12_CPU_DESCRIPTOR_HANDLE* GetRenderTargetViews() const;
 
-        bool HasDepthOrStencil() const;
+    bool HasDepthOrStencil() const;
 
-        // Functions that set the appropriate values in the render pass descriptors.
-        void SetDepthAccess(wgpu::LoadOp loadOp,
-                            wgpu::StoreOp storeOp,
-                            float clearDepth,
-                            DXGI_FORMAT format);
-        void SetDepthNoAccess();
-        void SetDepthStencilNoAccess();
-        void SetRenderTargetBeginningAccess(ColorAttachmentIndex attachment,
-                                            wgpu::LoadOp loadOp,
-                                            dawn::native::Color clearColor,
-                                            DXGI_FORMAT format);
-        void SetRenderTargetEndingAccess(ColorAttachmentIndex attachment, wgpu::StoreOp storeOp);
-        void SetRenderTargetEndingAccessResolve(ColorAttachmentIndex attachment,
-                                                wgpu::StoreOp storeOp,
-                                                TextureView* resolveSource,
-                                                TextureView* resolveDestination);
-        void SetStencilAccess(wgpu::LoadOp loadOp,
-                              wgpu::StoreOp storeOp,
-                              uint8_t clearStencil,
-                              DXGI_FORMAT format);
-        void SetStencilNoAccess();
+    // Functions that set the appropriate values in the render pass descriptors.
+    void SetDepthAccess(wgpu::LoadOp loadOp,
+                        wgpu::StoreOp storeOp,
+                        float clearDepth,
+                        DXGI_FORMAT format);
+    void SetDepthNoAccess();
+    void SetDepthStencilNoAccess();
+    void SetRenderTargetBeginningAccess(ColorAttachmentIndex attachment,
+                                        wgpu::LoadOp loadOp,
+                                        dawn::native::Color clearColor,
+                                        DXGI_FORMAT format);
+    void SetRenderTargetEndingAccess(ColorAttachmentIndex attachment, wgpu::StoreOp storeOp);
+    void SetRenderTargetEndingAccessResolve(ColorAttachmentIndex attachment,
+                                            wgpu::StoreOp storeOp,
+                                            TextureView* resolveSource,
+                                            TextureView* resolveDestination);
+    void SetStencilAccess(wgpu::LoadOp loadOp,
+                          wgpu::StoreOp storeOp,
+                          uint8_t clearStencil,
+                          DXGI_FORMAT format);
+    void SetStencilNoAccess();
 
-        void SetRenderTargetView(ColorAttachmentIndex attachmentIndex,
-                                 D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor,
-                                 bool isNullRTV);
-        void SetDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor);
+    void SetRenderTargetView(ColorAttachmentIndex attachmentIndex,
+                             D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor,
+                             bool isNullRTV);
+    void SetDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor);
 
-      private:
-        ColorAttachmentIndex mHighestColorAttachmentIndexPlusOne{uint8_t(0)};
-        bool mHasDepthOrStencil = false;
-        D3D12_RENDER_PASS_FLAGS mRenderPassFlags = D3D12_RENDER_PASS_FLAG_NONE;
-        D3D12_RENDER_PASS_DEPTH_STENCIL_DESC mRenderPassDepthStencilDesc;
-        ityp::
-            array<ColorAttachmentIndex, D3D12_RENDER_PASS_RENDER_TARGET_DESC, kMaxColorAttachments>
-                mRenderPassRenderTargetDescriptors;
-        ityp::array<ColorAttachmentIndex, D3D12_CPU_DESCRIPTOR_HANDLE, kMaxColorAttachments>
-            mRenderTargetViews;
-        ityp::array<ColorAttachmentIndex,
-                    D3D12_RENDER_PASS_ENDING_ACCESS_RESOLVE_SUBRESOURCE_PARAMETERS,
-                    kMaxColorAttachments>
-            mSubresourceParams;
-    };
+  private:
+    ColorAttachmentIndex mHighestColorAttachmentIndexPlusOne{uint8_t(0)};
+    bool mHasDepthOrStencil = false;
+    D3D12_RENDER_PASS_FLAGS mRenderPassFlags = D3D12_RENDER_PASS_FLAG_NONE;
+    D3D12_RENDER_PASS_DEPTH_STENCIL_DESC mRenderPassDepthStencilDesc;
+    ityp::array<ColorAttachmentIndex, D3D12_RENDER_PASS_RENDER_TARGET_DESC, kMaxColorAttachments>
+        mRenderPassRenderTargetDescriptors;
+    ityp::array<ColorAttachmentIndex, D3D12_CPU_DESCRIPTOR_HANDLE, kMaxColorAttachments>
+        mRenderTargetViews;
+    ityp::array<ColorAttachmentIndex,
+                D3D12_RENDER_PASS_ENDING_ACCESS_RESOLVE_SUBRESOURCE_PARAMETERS,
+                kMaxColorAttachments>
+        mSubresourceParams;
+};
 }  // namespace dawn::native::d3d12
 
 #endif  // SRC_DAWN_NATIVE_D3D12_RENDERPASSBUILDERD3D12_H_

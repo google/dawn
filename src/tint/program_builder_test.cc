@@ -22,50 +22,50 @@ namespace {
 using ProgramBuilderTest = testing::Test;
 
 TEST_F(ProgramBuilderTest, IDsAreUnique) {
-  Program program_a(ProgramBuilder{});
-  Program program_b(ProgramBuilder{});
-  Program program_c(ProgramBuilder{});
-  EXPECT_NE(program_a.ID(), program_b.ID());
-  EXPECT_NE(program_b.ID(), program_c.ID());
-  EXPECT_NE(program_c.ID(), program_a.ID());
+    Program program_a(ProgramBuilder{});
+    Program program_b(ProgramBuilder{});
+    Program program_c(ProgramBuilder{});
+    EXPECT_NE(program_a.ID(), program_b.ID());
+    EXPECT_NE(program_b.ID(), program_c.ID());
+    EXPECT_NE(program_c.ID(), program_a.ID());
 }
 
 TEST_F(ProgramBuilderTest, WrapDoesntAffectInner) {
-  Program inner([] {
-    ProgramBuilder builder;
-    auto* ty = builder.ty.f32();
-    builder.Func("a", {}, ty, {}, {});
-    return builder;
-  }());
+    Program inner([] {
+        ProgramBuilder builder;
+        auto* ty = builder.ty.f32();
+        builder.Func("a", {}, ty, {}, {});
+        return builder;
+    }());
 
-  ASSERT_EQ(inner.AST().Functions().size(), 1u);
-  ASSERT_TRUE(inner.Symbols().Get("a").IsValid());
-  ASSERT_FALSE(inner.Symbols().Get("b").IsValid());
+    ASSERT_EQ(inner.AST().Functions().size(), 1u);
+    ASSERT_TRUE(inner.Symbols().Get("a").IsValid());
+    ASSERT_FALSE(inner.Symbols().Get("b").IsValid());
 
-  ProgramBuilder outer = ProgramBuilder::Wrap(&inner);
+    ProgramBuilder outer = ProgramBuilder::Wrap(&inner);
 
-  ASSERT_EQ(inner.AST().Functions().size(), 1u);
-  ASSERT_EQ(outer.AST().Functions().size(), 1u);
-  EXPECT_EQ(inner.AST().Functions()[0], outer.AST().Functions()[0]);
-  EXPECT_TRUE(inner.Symbols().Get("a").IsValid());
-  EXPECT_EQ(inner.Symbols().Get("a"), outer.Symbols().Get("a"));
-  EXPECT_TRUE(inner.Symbols().Get("a").IsValid());
-  EXPECT_TRUE(outer.Symbols().Get("a").IsValid());
-  EXPECT_FALSE(inner.Symbols().Get("b").IsValid());
-  EXPECT_FALSE(outer.Symbols().Get("b").IsValid());
+    ASSERT_EQ(inner.AST().Functions().size(), 1u);
+    ASSERT_EQ(outer.AST().Functions().size(), 1u);
+    EXPECT_EQ(inner.AST().Functions()[0], outer.AST().Functions()[0]);
+    EXPECT_TRUE(inner.Symbols().Get("a").IsValid());
+    EXPECT_EQ(inner.Symbols().Get("a"), outer.Symbols().Get("a"));
+    EXPECT_TRUE(inner.Symbols().Get("a").IsValid());
+    EXPECT_TRUE(outer.Symbols().Get("a").IsValid());
+    EXPECT_FALSE(inner.Symbols().Get("b").IsValid());
+    EXPECT_FALSE(outer.Symbols().Get("b").IsValid());
 
-  auto* ty = outer.ty.f32();
-  outer.Func("b", {}, ty, {}, {});
+    auto* ty = outer.ty.f32();
+    outer.Func("b", {}, ty, {}, {});
 
-  ASSERT_EQ(inner.AST().Functions().size(), 1u);
-  ASSERT_EQ(outer.AST().Functions().size(), 2u);
-  EXPECT_EQ(inner.AST().Functions()[0], outer.AST().Functions()[0]);
-  EXPECT_EQ(outer.AST().Functions()[1]->symbol, outer.Symbols().Get("b"));
-  EXPECT_EQ(inner.Symbols().Get("a"), outer.Symbols().Get("a"));
-  EXPECT_TRUE(inner.Symbols().Get("a").IsValid());
-  EXPECT_TRUE(outer.Symbols().Get("a").IsValid());
-  EXPECT_FALSE(inner.Symbols().Get("b").IsValid());
-  EXPECT_TRUE(outer.Symbols().Get("b").IsValid());
+    ASSERT_EQ(inner.AST().Functions().size(), 1u);
+    ASSERT_EQ(outer.AST().Functions().size(), 2u);
+    EXPECT_EQ(inner.AST().Functions()[0], outer.AST().Functions()[0]);
+    EXPECT_EQ(outer.AST().Functions()[1]->symbol, outer.Symbols().Get("b"));
+    EXPECT_EQ(inner.Symbols().Get("a"), outer.Symbols().Get("a"));
+    EXPECT_TRUE(inner.Symbols().Get("a").IsValid());
+    EXPECT_TRUE(outer.Symbols().Get("a").IsValid());
+    EXPECT_FALSE(inner.Symbols().Get("b").IsValid());
+    EXPECT_TRUE(outer.Symbols().Get("b").IsValid());
 }
 
 }  // namespace

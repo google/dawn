@@ -20,28 +20,28 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitAlias_F32) {
-  auto* alias = Alias("a", ty.f32());
+    auto* alias = Alias("a", ty.f32());
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitTypeDecl(alias)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(type a = f32;
+    ASSERT_TRUE(gen.EmitTypeDecl(alias)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(type a = f32;
 )");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitTypeDecl_Struct) {
-  auto* s = Structure("A", {
-                               Member("a", ty.f32()),
-                               Member("b", ty.i32()),
-                           });
+    auto* s = Structure("A", {
+                                 Member("a", ty.f32()),
+                                 Member("b", ty.i32()),
+                             });
 
-  auto* alias = Alias("B", ty.Of(s));
+    auto* alias = Alias("B", ty.Of(s));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitTypeDecl(s)) << gen.error();
-  ASSERT_TRUE(gen.EmitTypeDecl(alias)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(struct A {
+    ASSERT_TRUE(gen.EmitTypeDecl(s)) << gen.error();
+    ASSERT_TRUE(gen.EmitTypeDecl(alias)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(struct A {
   a : f32,
   b : i32,
 }
@@ -50,17 +50,17 @@ type B = A;
 }
 
 TEST_F(WgslGeneratorImplTest, EmitAlias_ToStruct) {
-  auto* s = Structure("A", {
-                               Member("a", ty.f32()),
-                               Member("b", ty.i32()),
-                           });
+    auto* s = Structure("A", {
+                                 Member("a", ty.f32()),
+                                 Member("b", ty.i32()),
+                             });
 
-  auto* alias = Alias("B", ty.Of(s));
+    auto* alias = Alias("B", ty.Of(s));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitTypeDecl(alias)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(type B = A;
+    ASSERT_TRUE(gen.EmitTypeDecl(alias)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(type B = A;
 )");
 }
 

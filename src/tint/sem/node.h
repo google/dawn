@@ -21,15 +21,15 @@ namespace tint::sem {
 
 /// Node is the base class for all semantic nodes
 class Node : public Castable<Node> {
- public:
-  /// Constructor
-  Node();
+  public:
+    /// Constructor
+    Node();
 
-  /// Copy constructor
-  Node(const Node&);
+    /// Copy constructor
+    Node(const Node&);
 
-  /// Destructor
-  ~Node() override;
+    /// Destructor
+    ~Node() override;
 };
 
 }  // namespace tint::sem

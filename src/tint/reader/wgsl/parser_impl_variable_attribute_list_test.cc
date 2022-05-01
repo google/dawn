@@ -18,43 +18,42 @@ namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, AttributeList_Parses) {
-  auto p = parser(R"(@location(4) @builtin(position))");
-  auto attrs = p->attribute_list();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_FALSE(attrs.errored);
-  ASSERT_TRUE(attrs.matched);
-  ASSERT_EQ(attrs.value.size(), 2u);
+    auto p = parser(R"(@location(4) @builtin(position))");
+    auto attrs = p->attribute_list();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    ASSERT_FALSE(attrs.errored);
+    ASSERT_TRUE(attrs.matched);
+    ASSERT_EQ(attrs.value.size(), 2u);
 
-  auto* attr_0 = attrs.value[0]->As<ast::Attribute>();
-  auto* attr_1 = attrs.value[1]->As<ast::Attribute>();
-  ASSERT_NE(attr_0, nullptr);
-  ASSERT_NE(attr_1, nullptr);
+    auto* attr_0 = attrs.value[0]->As<ast::Attribute>();
+    auto* attr_1 = attrs.value[1]->As<ast::Attribute>();
+    ASSERT_NE(attr_0, nullptr);
+    ASSERT_NE(attr_1, nullptr);
 
-  ASSERT_TRUE(attr_0->Is<ast::LocationAttribute>());
-  EXPECT_EQ(attr_0->As<ast::LocationAttribute>()->value, 4u);
-  ASSERT_TRUE(attr_1->Is<ast::BuiltinAttribute>());
-  EXPECT_EQ(attr_1->As<ast::BuiltinAttribute>()->builtin,
-            ast::Builtin::kPosition);
+    ASSERT_TRUE(attr_0->Is<ast::LocationAttribute>());
+    EXPECT_EQ(attr_0->As<ast::LocationAttribute>()->value, 4u);
+    ASSERT_TRUE(attr_1->Is<ast::BuiltinAttribute>());
+    EXPECT_EQ(attr_1->As<ast::BuiltinAttribute>()->builtin, ast::Builtin::kPosition);
 }
 
 TEST_F(ParserImplTest, AttributeList_Invalid) {
-  auto p = parser(R"(@invalid)");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_TRUE(attrs.value.empty());
-  EXPECT_EQ(p->error(), R"(1:2: expected attribute)");
+    auto p = parser(R"(@invalid)");
+    auto attrs = p->attribute_list();
+    EXPECT_TRUE(p->has_error());
+    EXPECT_TRUE(attrs.errored);
+    EXPECT_FALSE(attrs.matched);
+    EXPECT_TRUE(attrs.value.empty());
+    EXPECT_EQ(p->error(), R"(1:2: expected attribute)");
 }
 
 TEST_F(ParserImplTest, AttributeList_InvalidValue) {
-  auto p = parser("@builtin(invalid)");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_TRUE(attrs.value.empty());
-  EXPECT_EQ(p->error(), "1:10: invalid value for builtin attribute");
+    auto p = parser("@builtin(invalid)");
+    auto attrs = p->attribute_list();
+    EXPECT_TRUE(p->has_error());
+    EXPECT_TRUE(attrs.errored);
+    EXPECT_FALSE(attrs.matched);
+    EXPECT_TRUE(attrs.value.empty());
+    EXPECT_EQ(p->error(), "1:10: invalid value for builtin attribute");
 }
 
 }  // namespace

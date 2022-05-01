@@ -20,20 +20,20 @@ namespace {
 using IdentifierExpressionTest = TestHelper;
 
 TEST_F(IdentifierExpressionTest, Creation) {
-  EXPECT_NE(Phony(), nullptr);
+    EXPECT_NE(Phony(), nullptr);
 }
 
 TEST_F(IdentifierExpressionTest, Creation_WithSource) {
-  auto* p = Phony(Source{{20, 2}});
+    auto* p = Phony(Source{{20, 2}});
 
-  auto src = p->source;
-  EXPECT_EQ(src.range.begin.line, 20u);
-  EXPECT_EQ(src.range.begin.column, 2u);
+    auto src = p->source;
+    EXPECT_EQ(src.range.begin.line, 20u);
+    EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(IdentifierExpressionTest, IsPhony) {
-  auto* p = Phony();
-  EXPECT_TRUE(p->Is<PhonyExpression>());
+    auto* p = Phony();
+    EXPECT_TRUE(p->Is<PhonyExpression>());
 }
 
 }  // namespace

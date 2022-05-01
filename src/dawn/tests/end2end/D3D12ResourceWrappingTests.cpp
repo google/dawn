@@ -30,127 +30,127 @@ using Microsoft::WRL::ComPtr;
 
 namespace {
 
-    using dawn::native::d3d12::kDXGIKeyedMutexAcquireReleaseKey;
+using dawn::native::d3d12::kDXGIKeyedMutexAcquireReleaseKey;
 
-    class D3D12ResourceTestBase : public DawnTest {
-      protected:
-        std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-            return {wgpu::FeatureName::DawnInternalUsages};
+class D3D12ResourceTestBase : public DawnTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::DawnInternalUsages};
+    }
+
+  public:
+    void SetUp() override {
+        DawnTest::SetUp();
+        if (UsesWire()) {
+            return;
         }
 
-      public:
-        void SetUp() override {
-            DawnTest::SetUp();
-            if (UsesWire()) {
-                return;
-            }
+        // Create the D3D11 device/contexts that will be used in subsequent tests
+        ComPtr<ID3D12Device> d3d12Device = dawn::native::d3d12::GetD3D12Device(device.Get());
 
-            // Create the D3D11 device/contexts that will be used in subsequent tests
-            ComPtr<ID3D12Device> d3d12Device = dawn::native::d3d12::GetD3D12Device(device.Get());
+        const LUID adapterLuid = d3d12Device->GetAdapterLuid();
 
-            const LUID adapterLuid = d3d12Device->GetAdapterLuid();
+        ComPtr<IDXGIFactory4> dxgiFactory;
+        HRESULT hr = ::CreateDXGIFactory2(0, IID_PPV_ARGS(&dxgiFactory));
+        ASSERT_EQ(hr, S_OK);
 
-            ComPtr<IDXGIFactory4> dxgiFactory;
-            HRESULT hr = ::CreateDXGIFactory2(0, IID_PPV_ARGS(&dxgiFactory));
-            ASSERT_EQ(hr, S_OK);
+        ComPtr<IDXGIAdapter> dxgiAdapter;
+        hr = dxgiFactory->EnumAdapterByLuid(adapterLuid, IID_PPV_ARGS(&dxgiAdapter));
+        ASSERT_EQ(hr, S_OK);
 
-            ComPtr<IDXGIAdapter> dxgiAdapter;
-            hr = dxgiFactory->EnumAdapterByLuid(adapterLuid, IID_PPV_ARGS(&dxgiAdapter));
-            ASSERT_EQ(hr, S_OK);
+        ComPtr<ID3D11Device> d3d11Device;
+        D3D_FEATURE_LEVEL d3dFeatureLevel;
+        ComPtr<ID3D11DeviceContext> d3d11DeviceContext;
+        hr = ::D3D11CreateDevice(dxgiAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, 0, nullptr, 0,
+                                 D3D11_SDK_VERSION, &d3d11Device, &d3dFeatureLevel,
+                                 &d3d11DeviceContext);
+        ASSERT_EQ(hr, S_OK);
 
-            ComPtr<ID3D11Device> d3d11Device;
-            D3D_FEATURE_LEVEL d3dFeatureLevel;
-            ComPtr<ID3D11DeviceContext> d3d11DeviceContext;
-            hr = ::D3D11CreateDevice(dxgiAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, 0,
-                                     nullptr, 0, D3D11_SDK_VERSION, &d3d11Device, &d3dFeatureLevel,
-                                     &d3d11DeviceContext);
-            ASSERT_EQ(hr, S_OK);
+        mD3d11Device = std::move(d3d11Device);
+        mD3d11DeviceContext = std::move(d3d11DeviceContext);
 
-            mD3d11Device = std::move(d3d11Device);
-            mD3d11DeviceContext = std::move(d3d11DeviceContext);
+        baseDawnDescriptor.dimension = wgpu::TextureDimension::e2D;
+        baseDawnDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+        baseDawnDescriptor.size = {kTestWidth, kTestHeight, 1};
+        baseDawnDescriptor.sampleCount = 1;
+        baseDawnDescriptor.mipLevelCount = 1;
+        baseDawnDescriptor.usage =
+            wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc |
+            wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopyDst;
 
-            baseDawnDescriptor.dimension = wgpu::TextureDimension::e2D;
-            baseDawnDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
-            baseDawnDescriptor.size = {kTestWidth, kTestHeight, 1};
-            baseDawnDescriptor.sampleCount = 1;
-            baseDawnDescriptor.mipLevelCount = 1;
-            baseDawnDescriptor.usage =
-                wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc |
-                wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopyDst;
+        baseD3dDescriptor.Width = kTestWidth;
+        baseD3dDescriptor.Height = kTestHeight;
+        baseD3dDescriptor.MipLevels = 1;
+        baseD3dDescriptor.ArraySize = 1;
+        baseD3dDescriptor.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        baseD3dDescriptor.SampleDesc.Count = 1;
+        baseD3dDescriptor.SampleDesc.Quality = 0;
+        baseD3dDescriptor.Usage = D3D11_USAGE_DEFAULT;
+        baseD3dDescriptor.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+        baseD3dDescriptor.CPUAccessFlags = 0;
+        baseD3dDescriptor.MiscFlags =
+            D3D11_RESOURCE_MISC_SHARED_NTHANDLE | D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX;
+    }
 
-            baseD3dDescriptor.Width = kTestWidth;
-            baseD3dDescriptor.Height = kTestHeight;
-            baseD3dDescriptor.MipLevels = 1;
-            baseD3dDescriptor.ArraySize = 1;
-            baseD3dDescriptor.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-            baseD3dDescriptor.SampleDesc.Count = 1;
-            baseD3dDescriptor.SampleDesc.Quality = 0;
-            baseD3dDescriptor.Usage = D3D11_USAGE_DEFAULT;
-            baseD3dDescriptor.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
-            baseD3dDescriptor.CPUAccessFlags = 0;
-            baseD3dDescriptor.MiscFlags =
-                D3D11_RESOURCE_MISC_SHARED_NTHANDLE | D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX;
+  protected:
+    void WrapSharedHandle(
+        const wgpu::TextureDescriptor* dawnDesc,
+        const D3D11_TEXTURE2D_DESC* baseD3dDescriptor,
+        wgpu::Texture* dawnTexture,
+        ID3D11Texture2D** d3d11TextureOut,
+        std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI>* externalImageOut = nullptr) const {
+        ComPtr<ID3D11Texture2D> d3d11Texture;
+        HRESULT hr = mD3d11Device->CreateTexture2D(baseD3dDescriptor, nullptr, &d3d11Texture);
+        ASSERT_EQ(hr, S_OK);
+
+        ComPtr<IDXGIResource1> dxgiResource;
+        hr = d3d11Texture.As(&dxgiResource);
+        ASSERT_EQ(hr, S_OK);
+
+        HANDLE sharedHandle;
+        hr = dxgiResource->CreateSharedHandle(
+            nullptr, DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE, nullptr,
+            &sharedHandle);
+        ASSERT_EQ(hr, S_OK);
+
+        dawn::native::d3d12::ExternalImageDescriptorDXGISharedHandle externalImageDesc;
+        externalImageDesc.cTextureDescriptor =
+            reinterpret_cast<const WGPUTextureDescriptor*>(dawnDesc);
+        externalImageDesc.sharedHandle = sharedHandle;
+
+        std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage =
+            dawn::native::d3d12::ExternalImageDXGI::Create(device.Get(), &externalImageDesc);
+
+        // Now that we've created all of our resources, we can close the handle
+        // since we no longer need it.
+        ::CloseHandle(sharedHandle);
+
+        // Cannot access a non-existent external image (ex. validation error).
+        if (externalImage == nullptr) {
+            return;
         }
 
-      protected:
-        void WrapSharedHandle(const wgpu::TextureDescriptor* dawnDesc,
-                              const D3D11_TEXTURE2D_DESC* baseD3dDescriptor,
-                              wgpu::Texture* dawnTexture,
-                              ID3D11Texture2D** d3d11TextureOut,
-                              std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI>*
-                                  externalImageOut = nullptr) const {
-            ComPtr<ID3D11Texture2D> d3d11Texture;
-            HRESULT hr = mD3d11Device->CreateTexture2D(baseD3dDescriptor, nullptr, &d3d11Texture);
-            ASSERT_EQ(hr, S_OK);
+        dawn::native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
+        externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(dawnDesc->usage);
 
-            ComPtr<IDXGIResource1> dxgiResource;
-            hr = d3d11Texture.As(&dxgiResource);
-            ASSERT_EQ(hr, S_OK);
+        *dawnTexture = wgpu::Texture::Acquire(
+            externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
+        *d3d11TextureOut = d3d11Texture.Detach();
 
-            HANDLE sharedHandle;
-            hr = dxgiResource->CreateSharedHandle(
-                nullptr, DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE, nullptr,
-                &sharedHandle);
-            ASSERT_EQ(hr, S_OK);
-
-            dawn::native::d3d12::ExternalImageDescriptorDXGISharedHandle externalImageDesc;
-            externalImageDesc.cTextureDescriptor =
-                reinterpret_cast<const WGPUTextureDescriptor*>(dawnDesc);
-            externalImageDesc.sharedHandle = sharedHandle;
-
-            std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage =
-                dawn::native::d3d12::ExternalImageDXGI::Create(device.Get(), &externalImageDesc);
-
-            // Now that we've created all of our resources, we can close the handle
-            // since we no longer need it.
-            ::CloseHandle(sharedHandle);
-
-            // Cannot access a non-existent external image (ex. validation error).
-            if (externalImage == nullptr) {
-                return;
-            }
-
-            dawn::native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
-            externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(dawnDesc->usage);
-
-            *dawnTexture = wgpu::Texture::Acquire(
-                externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
-            *d3d11TextureOut = d3d11Texture.Detach();
-
-            if (externalImageOut != nullptr) {
-                *externalImageOut = std::move(externalImage);
-            }
+        if (externalImageOut != nullptr) {
+            *externalImageOut = std::move(externalImage);
         }
+    }
 
-        static constexpr size_t kTestWidth = 10;
-        static constexpr size_t kTestHeight = 10;
+    static constexpr size_t kTestWidth = 10;
+    static constexpr size_t kTestHeight = 10;
 
-        ComPtr<ID3D11Device> mD3d11Device;
-        ComPtr<ID3D11DeviceContext> mD3d11DeviceContext;
+    ComPtr<ID3D11Device> mD3d11Device;
+    ComPtr<ID3D11DeviceContext> mD3d11DeviceContext;
 
-        D3D11_TEXTURE2D_DESC baseD3dDescriptor;
-        wgpu::TextureDescriptor baseDawnDescriptor;
-    };
+    D3D11_TEXTURE2D_DESC baseD3dDescriptor;
+    wgpu::TextureDescriptor baseDawnDescriptor;
+};
 
 }  // anonymous namespace
 

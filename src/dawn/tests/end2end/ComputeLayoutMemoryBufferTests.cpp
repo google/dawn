@@ -18,59 +18,57 @@
 #include <string>
 #include <vector>
 
-#include "dawn/tests/DawnTest.h"
 #include "dawn/common/Math.h"
+#include "dawn/tests/DawnTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace {
 
-    // Helper for replacing all occurrences of substr in str with replacement
-    std::string ReplaceAll(std::string str,
-                           const std::string& substr,
-                           const std::string& replacement) {
-        size_t pos = 0;
-        while ((pos = str.find(substr, pos)) != std::string::npos) {
-            str.replace(pos, substr.length(), replacement);
-            pos += replacement.length();
-        }
-        return str;
+// Helper for replacing all occurrences of substr in str with replacement
+std::string ReplaceAll(std::string str, const std::string& substr, const std::string& replacement) {
+    size_t pos = 0;
+    while ((pos = str.find(substr, pos)) != std::string::npos) {
+        str.replace(pos, substr.length(), replacement);
+        pos += replacement.length();
     }
+    return str;
+}
 
-    // DataMatcherCallback is the callback function by DataMatcher.
-    // It is called for each contiguous sequence of bytes that should be checked
-    // for equality.
-    // offset and size are in units of bytes.
-    using DataMatcherCallback = std::function<void(uint32_t offset, uint32_t size)>;
+// DataMatcherCallback is the callback function by DataMatcher.
+// It is called for each contiguous sequence of bytes that should be checked
+// for equality.
+// offset and size are in units of bytes.
+using DataMatcherCallback = std::function<void(uint32_t offset, uint32_t size)>;
 
-    // DataMatcher is a function pointer to a data matching function.
-    // size is the total number of bytes being considered for matching.
-    // The callback may be called once or multiple times, and may only consider
-    // part of the interval [0, size)
-    using DataMatcher = void (*)(uint32_t size, DataMatcherCallback);
+// DataMatcher is a function pointer to a data matching function.
+// size is the total number of bytes being considered for matching.
+// The callback may be called once or multiple times, and may only consider
+// part of the interval [0, size)
+using DataMatcher = void (*)(uint32_t size, DataMatcherCallback);
 
-    // FullDataMatcher is a DataMatcher that calls callback with the interval
-    // [0, size)
-    void FullDataMatcher(uint32_t size, DataMatcherCallback callback) {
-        callback(0, size);
+// FullDataMatcher is a DataMatcher that calls callback with the interval
+// [0, size)
+void FullDataMatcher(uint32_t size, DataMatcherCallback callback) {
+    callback(0, size);
+}
+
+// StridedDataMatcher is a DataMatcher that calls callback with the strided
+// intervals of length BYTES_TO_MATCH, skipping BYTES_TO_SKIP.
+// For example: StridedDataMatcher<2, 4>(18, callback) will call callback
+// with the intervals: [0, 2), [6, 8), [12, 14)
+template <int BYTES_TO_MATCH, int BYTES_TO_SKIP>
+void StridedDataMatcher(uint32_t size, DataMatcherCallback callback) {
+    uint32_t offset = 0;
+    while (offset < size) {
+        callback(offset, BYTES_TO_MATCH);
+        offset += BYTES_TO_MATCH + BYTES_TO_SKIP;
     }
+}
 
-    // StridedDataMatcher is a DataMatcher that calls callback with the strided
-    // intervals of length BYTES_TO_MATCH, skipping BYTES_TO_SKIP.
-    // For example: StridedDataMatcher<2, 4>(18, callback) will call callback
-    // with the intervals: [0, 2), [6, 8), [12, 14)
-    template <int BYTES_TO_MATCH, int BYTES_TO_SKIP>
-    void StridedDataMatcher(uint32_t size, DataMatcherCallback callback) {
-        uint32_t offset = 0;
-        while (offset < size) {
-            callback(offset, BYTES_TO_MATCH);
-            offset += BYTES_TO_MATCH + BYTES_TO_SKIP;
-        }
-    }
-
-    // Align returns the WGSL decoration for an explicit structure field alignment
-    std::string AlignDeco(uint32_t value) {
-        return "@align(" + std::to_string(value) + ") ";
-    }
+// Align returns the WGSL decoration for an explicit structure field alignment
+std::string AlignDeco(uint32_t value) {
+    return "@align(" + std::to_string(value) + ") ";
+}
 
 }  // namespace
 
@@ -135,9 +133,7 @@ DAWN_TEST_PARAM_STRUCT(ComputeLayoutMemoryBufferTestParams, StorageClass, Field)
 
 class ComputeLayoutMemoryBufferTests
     : public DawnTestWithParams<ComputeLayoutMemoryBufferTestParams> {
-    void SetUp() override {
-        DawnTestBase::SetUp();
-    }
+    void SetUp() override { DawnTestBase::SetUp(); }
 };
 
 TEST_P(ComputeLayoutMemoryBufferTests, Fields) {
@@ -345,164 +341,153 @@ fn main() {
 
 namespace {
 
-    auto GenerateParams() {
-        auto params = MakeParamGenerator<ComputeLayoutMemoryBufferTestParams>(
-            {
-                D3D12Backend(), MetalBackend(), VulkanBackend(),
-                // TODO(crbug.com/dawn/942)
-                // There was a compiler error: Buffer block cannot be expressed as any of std430,
-                // std140, scalar, even with enhanced layouts. You can try flattening this block to
-                // support a more flexible layout.
-                // OpenGLBackend(),
-                // OpenGLESBackend(),
-            },
-            {StorageClass::Storage, StorageClass::Uniform},
-            {
-                // See https://www.w3.org/TR/WGSL/#alignment-and-size
-                // Scalar types with no custom alignment or size
-                Field{"i32", /* align */ 4, /* size */ 4},
-                Field{"u32", /* align */ 4, /* size */ 4},
-                Field{"f32", /* align */ 4, /* size */ 4},
+auto GenerateParams() {
+    auto params = MakeParamGenerator<ComputeLayoutMemoryBufferTestParams>(
+        {
+            D3D12Backend(), MetalBackend(), VulkanBackend(),
+            // TODO(crbug.com/dawn/942)
+            // There was a compiler error: Buffer block cannot be expressed as any of std430,
+            // std140, scalar, even with enhanced layouts. You can try flattening this block to
+            // support a more flexible layout.
+            // OpenGLBackend(),
+            // OpenGLESBackend(),
+        },
+        {StorageClass::Storage, StorageClass::Uniform},
+        {
+            // See https://www.w3.org/TR/WGSL/#alignment-and-size
+            // Scalar types with no custom alignment or size
+            Field{"i32", /* align */ 4, /* size */ 4},
+            Field{"u32", /* align */ 4, /* size */ 4},
+            Field{"f32", /* align */ 4, /* size */ 4},
 
-                // Scalar types with custom alignment
-                Field{"i32", /* align */ 16, /* size */ 4},
-                Field{"u32", /* align */ 16, /* size */ 4},
-                Field{"f32", /* align */ 16, /* size */ 4},
+            // Scalar types with custom alignment
+            Field{"i32", /* align */ 16, /* size */ 4},
+            Field{"u32", /* align */ 16, /* size */ 4},
+            Field{"f32", /* align */ 16, /* size */ 4},
 
-                // Scalar types with custom size
-                Field{"i32", /* align */ 4, /* size */ 4}.PaddedSize(24),
-                Field{"u32", /* align */ 4, /* size */ 4}.PaddedSize(24),
-                Field{"f32", /* align */ 4, /* size */ 4}.PaddedSize(24),
+            // Scalar types with custom size
+            Field{"i32", /* align */ 4, /* size */ 4}.PaddedSize(24),
+            Field{"u32", /* align */ 4, /* size */ 4}.PaddedSize(24),
+            Field{"f32", /* align */ 4, /* size */ 4}.PaddedSize(24),
 
-                // Vector types with no custom alignment or size
-                Field{"vec2<i32>", /* align */ 8, /* size */ 8},
-                Field{"vec2<u32>", /* align */ 8, /* size */ 8},
-                Field{"vec2<f32>", /* align */ 8, /* size */ 8},
-                Field{"vec3<i32>", /* align */ 16, /* size */ 12},
-                Field{"vec3<u32>", /* align */ 16, /* size */ 12},
-                Field{"vec3<f32>", /* align */ 16, /* size */ 12},
-                Field{"vec4<i32>", /* align */ 16, /* size */ 16},
-                Field{"vec4<u32>", /* align */ 16, /* size */ 16},
-                Field{"vec4<f32>", /* align */ 16, /* size */ 16},
+            // Vector types with no custom alignment or size
+            Field{"vec2<i32>", /* align */ 8, /* size */ 8},
+            Field{"vec2<u32>", /* align */ 8, /* size */ 8},
+            Field{"vec2<f32>", /* align */ 8, /* size */ 8},
+            Field{"vec3<i32>", /* align */ 16, /* size */ 12},
+            Field{"vec3<u32>", /* align */ 16, /* size */ 12},
+            Field{"vec3<f32>", /* align */ 16, /* size */ 12},
+            Field{"vec4<i32>", /* align */ 16, /* size */ 16},
+            Field{"vec4<u32>", /* align */ 16, /* size */ 16},
+            Field{"vec4<f32>", /* align */ 16, /* size */ 16},
 
-                // Vector types with custom alignment
-                Field{"vec2<i32>", /* align */ 32, /* size */ 8},
-                Field{"vec2<u32>", /* align */ 32, /* size */ 8},
-                Field{"vec2<f32>", /* align */ 32, /* size */ 8},
-                Field{"vec3<i32>", /* align */ 32, /* size */ 12},
-                Field{"vec3<u32>", /* align */ 32, /* size */ 12},
-                Field{"vec3<f32>", /* align */ 32, /* size */ 12},
-                Field{"vec4<i32>", /* align */ 32, /* size */ 16},
-                Field{"vec4<u32>", /* align */ 32, /* size */ 16},
-                Field{"vec4<f32>", /* align */ 32, /* size */ 16},
+            // Vector types with custom alignment
+            Field{"vec2<i32>", /* align */ 32, /* size */ 8},
+            Field{"vec2<u32>", /* align */ 32, /* size */ 8},
+            Field{"vec2<f32>", /* align */ 32, /* size */ 8},
+            Field{"vec3<i32>", /* align */ 32, /* size */ 12},
+            Field{"vec3<u32>", /* align */ 32, /* size */ 12},
+            Field{"vec3<f32>", /* align */ 32, /* size */ 12},
+            Field{"vec4<i32>", /* align */ 32, /* size */ 16},
+            Field{"vec4<u32>", /* align */ 32, /* size */ 16},
+            Field{"vec4<f32>", /* align */ 32, /* size */ 16},
 
-                // Vector types with custom size
-                Field{"vec2<i32>", /* align */ 8, /* size */ 8}.PaddedSize(24),
-                Field{"vec2<u32>", /* align */ 8, /* size */ 8}.PaddedSize(24),
-                Field{"vec2<f32>", /* align */ 8, /* size */ 8}.PaddedSize(24),
-                Field{"vec3<i32>", /* align */ 16, /* size */ 12}.PaddedSize(24),
-                Field{"vec3<u32>", /* align */ 16, /* size */ 12}.PaddedSize(24),
-                Field{"vec3<f32>", /* align */ 16, /* size */ 12}.PaddedSize(24),
-                Field{"vec4<i32>", /* align */ 16, /* size */ 16}.PaddedSize(24),
-                Field{"vec4<u32>", /* align */ 16, /* size */ 16}.PaddedSize(24),
-                Field{"vec4<f32>", /* align */ 16, /* size */ 16}.PaddedSize(24),
+            // Vector types with custom size
+            Field{"vec2<i32>", /* align */ 8, /* size */ 8}.PaddedSize(24),
+            Field{"vec2<u32>", /* align */ 8, /* size */ 8}.PaddedSize(24),
+            Field{"vec2<f32>", /* align */ 8, /* size */ 8}.PaddedSize(24),
+            Field{"vec3<i32>", /* align */ 16, /* size */ 12}.PaddedSize(24),
+            Field{"vec3<u32>", /* align */ 16, /* size */ 12}.PaddedSize(24),
+            Field{"vec3<f32>", /* align */ 16, /* size */ 12}.PaddedSize(24),
+            Field{"vec4<i32>", /* align */ 16, /* size */ 16}.PaddedSize(24),
+            Field{"vec4<u32>", /* align */ 16, /* size */ 16}.PaddedSize(24),
+            Field{"vec4<f32>", /* align */ 16, /* size */ 16}.PaddedSize(24),
 
-                // Matrix types with no custom alignment or size
-                Field{"mat2x2<f32>", /* align */ 8, /* size */ 16},
-                Field{"mat3x2<f32>", /* align */ 8, /* size */ 24},
-                Field{"mat4x2<f32>", /* align */ 8, /* size */ 32},
-                Field{"mat2x3<f32>", /* align */ 16, /* size */ 32}.Strided<12, 4>(),
-                Field{"mat3x3<f32>", /* align */ 16, /* size */ 48}.Strided<12, 4>(),
-                Field{"mat4x3<f32>", /* align */ 16, /* size */ 64}.Strided<12, 4>(),
-                Field{"mat2x4<f32>", /* align */ 16, /* size */ 32},
-                Field{"mat3x4<f32>", /* align */ 16, /* size */ 48},
-                Field{"mat4x4<f32>", /* align */ 16, /* size */ 64},
+            // Matrix types with no custom alignment or size
+            Field{"mat2x2<f32>", /* align */ 8, /* size */ 16},
+            Field{"mat3x2<f32>", /* align */ 8, /* size */ 24},
+            Field{"mat4x2<f32>", /* align */ 8, /* size */ 32},
+            Field{"mat2x3<f32>", /* align */ 16, /* size */ 32}.Strided<12, 4>(),
+            Field{"mat3x3<f32>", /* align */ 16, /* size */ 48}.Strided<12, 4>(),
+            Field{"mat4x3<f32>", /* align */ 16, /* size */ 64}.Strided<12, 4>(),
+            Field{"mat2x4<f32>", /* align */ 16, /* size */ 32},
+            Field{"mat3x4<f32>", /* align */ 16, /* size */ 48},
+            Field{"mat4x4<f32>", /* align */ 16, /* size */ 64},
 
-                // Matrix types with custom alignment
-                Field{"mat2x2<f32>", /* align */ 32, /* size */ 16},
-                Field{"mat3x2<f32>", /* align */ 32, /* size */ 24},
-                Field{"mat4x2<f32>", /* align */ 32, /* size */ 32},
-                Field{"mat2x3<f32>", /* align */ 32, /* size */ 32}.Strided<12, 4>(),
-                Field{"mat3x3<f32>", /* align */ 32, /* size */ 48}.Strided<12, 4>(),
-                Field{"mat4x3<f32>", /* align */ 32, /* size */ 64}.Strided<12, 4>(),
-                Field{"mat2x4<f32>", /* align */ 32, /* size */ 32},
-                Field{"mat3x4<f32>", /* align */ 32, /* size */ 48},
-                Field{"mat4x4<f32>", /* align */ 32, /* size */ 64},
+            // Matrix types with custom alignment
+            Field{"mat2x2<f32>", /* align */ 32, /* size */ 16},
+            Field{"mat3x2<f32>", /* align */ 32, /* size */ 24},
+            Field{"mat4x2<f32>", /* align */ 32, /* size */ 32},
+            Field{"mat2x3<f32>", /* align */ 32, /* size */ 32}.Strided<12, 4>(),
+            Field{"mat3x3<f32>", /* align */ 32, /* size */ 48}.Strided<12, 4>(),
+            Field{"mat4x3<f32>", /* align */ 32, /* size */ 64}.Strided<12, 4>(),
+            Field{"mat2x4<f32>", /* align */ 32, /* size */ 32},
+            Field{"mat3x4<f32>", /* align */ 32, /* size */ 48},
+            Field{"mat4x4<f32>", /* align */ 32, /* size */ 64},
 
-                // Matrix types with custom size
-                Field{"mat2x2<f32>", /* align */ 8, /* size */ 16}.PaddedSize(128),
-                Field{"mat3x2<f32>", /* align */ 8, /* size */ 24}.PaddedSize(128),
-                Field{"mat4x2<f32>", /* align */ 8, /* size */ 32}.PaddedSize(128),
-                Field{"mat2x3<f32>", /* align */ 16, /* size */ 32}
-                    .PaddedSize(128)
-                    .Strided<12, 4>(),
-                Field{"mat3x3<f32>", /* align */ 16, /* size */ 48}
-                    .PaddedSize(128)
-                    .Strided<12, 4>(),
-                Field{"mat4x3<f32>", /* align */ 16, /* size */ 64}
-                    .PaddedSize(128)
-                    .Strided<12, 4>(),
-                Field{"mat2x4<f32>", /* align */ 16, /* size */ 32}.PaddedSize(128),
-                Field{"mat3x4<f32>", /* align */ 16, /* size */ 48}.PaddedSize(128),
-                Field{"mat4x4<f32>", /* align */ 16, /* size */ 64}.PaddedSize(128),
+            // Matrix types with custom size
+            Field{"mat2x2<f32>", /* align */ 8, /* size */ 16}.PaddedSize(128),
+            Field{"mat3x2<f32>", /* align */ 8, /* size */ 24}.PaddedSize(128),
+            Field{"mat4x2<f32>", /* align */ 8, /* size */ 32}.PaddedSize(128),
+            Field{"mat2x3<f32>", /* align */ 16, /* size */ 32}.PaddedSize(128).Strided<12, 4>(),
+            Field{"mat3x3<f32>", /* align */ 16, /* size */ 48}.PaddedSize(128).Strided<12, 4>(),
+            Field{"mat4x3<f32>", /* align */ 16, /* size */ 64}.PaddedSize(128).Strided<12, 4>(),
+            Field{"mat2x4<f32>", /* align */ 16, /* size */ 32}.PaddedSize(128),
+            Field{"mat3x4<f32>", /* align */ 16, /* size */ 48}.PaddedSize(128),
+            Field{"mat4x4<f32>", /* align */ 16, /* size */ 64}.PaddedSize(128),
 
-                // Array types with no custom alignment or size.
-                // Note: The use of StorageBufferOnly() is due to UBOs requiring 16 byte alignment
-                // of array elements. See https://www.w3.org/TR/WGSL/#storage-class-constraints
-                Field{"array<u32, 1>", /* align */ 4, /* size */ 4}.StorageBufferOnly(),
-                Field{"array<u32, 2>", /* align */ 4, /* size */ 8}.StorageBufferOnly(),
-                Field{"array<u32, 3>", /* align */ 4, /* size */ 12}.StorageBufferOnly(),
-                Field{"array<u32, 4>", /* align */ 4, /* size */ 16}.StorageBufferOnly(),
-                Field{"array<vec4<u32>, 1>", /* align */ 16, /* size */ 16},
-                Field{"array<vec4<u32>, 2>", /* align */ 16, /* size */ 32},
-                Field{"array<vec4<u32>, 3>", /* align */ 16, /* size */ 48},
-                Field{"array<vec4<u32>, 4>", /* align */ 16, /* size */ 64},
-                Field{"array<vec3<u32>, 4>", /* align */ 16, /* size */ 64}.Strided<12, 4>(),
+            // Array types with no custom alignment or size.
+            // Note: The use of StorageBufferOnly() is due to UBOs requiring 16 byte alignment
+            // of array elements. See https://www.w3.org/TR/WGSL/#storage-class-constraints
+            Field{"array<u32, 1>", /* align */ 4, /* size */ 4}.StorageBufferOnly(),
+            Field{"array<u32, 2>", /* align */ 4, /* size */ 8}.StorageBufferOnly(),
+            Field{"array<u32, 3>", /* align */ 4, /* size */ 12}.StorageBufferOnly(),
+            Field{"array<u32, 4>", /* align */ 4, /* size */ 16}.StorageBufferOnly(),
+            Field{"array<vec4<u32>, 1>", /* align */ 16, /* size */ 16},
+            Field{"array<vec4<u32>, 2>", /* align */ 16, /* size */ 32},
+            Field{"array<vec4<u32>, 3>", /* align */ 16, /* size */ 48},
+            Field{"array<vec4<u32>, 4>", /* align */ 16, /* size */ 64},
+            Field{"array<vec3<u32>, 4>", /* align */ 16, /* size */ 64}.Strided<12, 4>(),
 
-                // Array types with custom alignment
-                Field{"array<u32, 1>", /* align */ 32, /* size */ 4}.StorageBufferOnly(),
-                Field{"array<u32, 2>", /* align */ 32, /* size */ 8}.StorageBufferOnly(),
-                Field{"array<u32, 3>", /* align */ 32, /* size */ 12}.StorageBufferOnly(),
-                Field{"array<u32, 4>", /* align */ 32, /* size */ 16}.StorageBufferOnly(),
-                Field{"array<vec4<u32>, 1>", /* align */ 32, /* size */ 16},
-                Field{"array<vec4<u32>, 2>", /* align */ 32, /* size */ 32},
-                Field{"array<vec4<u32>, 3>", /* align */ 32, /* size */ 48},
-                Field{"array<vec4<u32>, 4>", /* align */ 32, /* size */ 64},
-                Field{"array<vec3<u32>, 4>", /* align */ 32, /* size */ 64}.Strided<12, 4>(),
+            // Array types with custom alignment
+            Field{"array<u32, 1>", /* align */ 32, /* size */ 4}.StorageBufferOnly(),
+            Field{"array<u32, 2>", /* align */ 32, /* size */ 8}.StorageBufferOnly(),
+            Field{"array<u32, 3>", /* align */ 32, /* size */ 12}.StorageBufferOnly(),
+            Field{"array<u32, 4>", /* align */ 32, /* size */ 16}.StorageBufferOnly(),
+            Field{"array<vec4<u32>, 1>", /* align */ 32, /* size */ 16},
+            Field{"array<vec4<u32>, 2>", /* align */ 32, /* size */ 32},
+            Field{"array<vec4<u32>, 3>", /* align */ 32, /* size */ 48},
+            Field{"array<vec4<u32>, 4>", /* align */ 32, /* size */ 64},
+            Field{"array<vec3<u32>, 4>", /* align */ 32, /* size */ 64}.Strided<12, 4>(),
 
-                // Array types with custom size
-                Field{"array<u32, 1>", /* align */ 4, /* size */ 4}
-                    .PaddedSize(128)
-                    .StorageBufferOnly(),
-                Field{"array<u32, 2>", /* align */ 4, /* size */ 8}
-                    .PaddedSize(128)
-                    .StorageBufferOnly(),
-                Field{"array<u32, 3>", /* align */ 4, /* size */ 12}
-                    .PaddedSize(128)
-                    .StorageBufferOnly(),
-                Field{"array<u32, 4>", /* align */ 4, /* size */ 16}
-                    .PaddedSize(128)
-                    .StorageBufferOnly(),
-                Field{"array<vec3<u32>, 4>", /* align */ 16, /* size */ 64}
-                    .PaddedSize(128)
-                    .Strided<12, 4>(),
-            });
+            // Array types with custom size
+            Field{"array<u32, 1>", /* align */ 4, /* size */ 4}.PaddedSize(128).StorageBufferOnly(),
+            Field{"array<u32, 2>", /* align */ 4, /* size */ 8}.PaddedSize(128).StorageBufferOnly(),
+            Field{"array<u32, 3>", /* align */ 4, /* size */ 12}
+                .PaddedSize(128)
+                .StorageBufferOnly(),
+            Field{"array<u32, 4>", /* align */ 4, /* size */ 16}
+                .PaddedSize(128)
+                .StorageBufferOnly(),
+            Field{"array<vec3<u32>, 4>", /* align */ 16, /* size */ 64}
+                .PaddedSize(128)
+                .Strided<12, 4>(),
+        });
 
-        std::vector<ComputeLayoutMemoryBufferTestParams> filtered;
-        for (auto param : params) {
-            if (param.mStorageClass != StorageClass::Storage && param.mField.storage_buffer_only) {
-                continue;
-            }
-            filtered.emplace_back(param);
+    std::vector<ComputeLayoutMemoryBufferTestParams> filtered;
+    for (auto param : params) {
+        if (param.mStorageClass != StorageClass::Storage && param.mField.storage_buffer_only) {
+            continue;
         }
-        return filtered;
+        filtered.emplace_back(param);
     }
+    return filtered;
+}
 
-    INSTANTIATE_TEST_SUITE_P(
-        ,
-        ComputeLayoutMemoryBufferTests,
-        ::testing::ValuesIn(GenerateParams()),
-        DawnTestBase::PrintToStringParamName("ComputeLayoutMemoryBufferTests"));
-    GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ComputeLayoutMemoryBufferTests);
+INSTANTIATE_TEST_SUITE_P(,
+                         ComputeLayoutMemoryBufferTests,
+                         ::testing::ValuesIn(GenerateParams()),
+                         DawnTestBase::PrintToStringParamName("ComputeLayoutMemoryBufferTests"));
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(ComputeLayoutMemoryBufferTests);
 
 }  // namespace

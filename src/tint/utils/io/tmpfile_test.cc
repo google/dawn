@@ -22,66 +22,66 @@ namespace tint::utils {
 namespace {
 
 TEST(TmpFileTest, WriteReadAppendDelete) {
-  std::string path;
-  {
-    TmpFile tmp;
-    if (!tmp) {
-      GTEST_SKIP() << "Unable to create a temporary file";
-    }
-
-    path = tmp.Path();
-
-    // Write a string to the temporary file
-    tmp << "hello world\n";
-
-    // Check the content of the file
+    std::string path;
     {
-      std::ifstream file(path);
-      ASSERT_TRUE(file);
-      std::string line;
-      EXPECT_TRUE(std::getline(file, line));
-      EXPECT_EQ(line, "hello world");
-      EXPECT_FALSE(std::getline(file, line));
+        TmpFile tmp;
+        if (!tmp) {
+            GTEST_SKIP() << "Unable to create a temporary file";
+        }
+
+        path = tmp.Path();
+
+        // Write a string to the temporary file
+        tmp << "hello world\n";
+
+        // Check the content of the file
+        {
+            std::ifstream file(path);
+            ASSERT_TRUE(file);
+            std::string line;
+            EXPECT_TRUE(std::getline(file, line));
+            EXPECT_EQ(line, "hello world");
+            EXPECT_FALSE(std::getline(file, line));
+        }
+
+        // Write some more content to the file
+        tmp << 42;
+
+        // Check the content of the file again
+        {
+            std::ifstream file(path);
+            ASSERT_TRUE(file);
+            std::string line;
+            EXPECT_TRUE(std::getline(file, line));
+            EXPECT_EQ(line, "hello world");
+            EXPECT_TRUE(std::getline(file, line));
+            EXPECT_EQ(line, "42");
+            EXPECT_FALSE(std::getline(file, line));
+        }
     }
 
-    // Write some more content to the file
-    tmp << 42;
-
-    // Check the content of the file again
-    {
-      std::ifstream file(path);
-      ASSERT_TRUE(file);
-      std::string line;
-      EXPECT_TRUE(std::getline(file, line));
-      EXPECT_EQ(line, "hello world");
-      EXPECT_TRUE(std::getline(file, line));
-      EXPECT_EQ(line, "42");
-      EXPECT_FALSE(std::getline(file, line));
-    }
-  }
-
-  // Check the file has been deleted when it fell out of scope
-  std::ifstream file(path);
-  ASSERT_FALSE(file);
+    // Check the file has been deleted when it fell out of scope
+    std::ifstream file(path);
+    ASSERT_FALSE(file);
 }
 
 TEST(TmpFileTest, FileExtension) {
-  const std::string kExt = ".foo";
-  std::string path;
-  {
-    TmpFile tmp(kExt);
-    if (!tmp) {
-      GTEST_SKIP() << "Unable create a temporary file";
+    const std::string kExt = ".foo";
+    std::string path;
+    {
+        TmpFile tmp(kExt);
+        if (!tmp) {
+            GTEST_SKIP() << "Unable create a temporary file";
+        }
+        path = tmp.Path();
     }
-    path = tmp.Path();
-  }
 
-  ASSERT_GT(path.length(), kExt.length());
-  EXPECT_EQ(kExt, path.substr(path.length() - kExt.length()));
+    ASSERT_GT(path.length(), kExt.length());
+    EXPECT_EQ(kExt, path.substr(path.length() - kExt.length()));
 
-  // Check the file has been deleted when it fell out of scope
-  std::ifstream file(path);
-  ASSERT_FALSE(file);
+    // Check the file has been deleted when it fell out of scope
+    std::ifstream file(path);
+    ASSERT_FALSE(file);
 }
 
 }  // namespace

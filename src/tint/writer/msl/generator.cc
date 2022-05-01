@@ -30,29 +30,28 @@ Result::~Result() = default;
 Result::Result(const Result&) = default;
 
 Result Generate(const Program* program, const Options& options) {
-  Result result;
+    Result result;
 
-  // Sanitize the program.
-  auto sanitized_result = Sanitize(program, options);
-  if (!sanitized_result.program.IsValid()) {
-    result.success = false;
-    result.error = sanitized_result.program.Diagnostics().str();
+    // Sanitize the program.
+    auto sanitized_result = Sanitize(program, options);
+    if (!sanitized_result.program.IsValid()) {
+        result.success = false;
+        result.error = sanitized_result.program.Diagnostics().str();
+        return result;
+    }
+    result.needs_storage_buffer_sizes = sanitized_result.needs_storage_buffer_sizes;
+    result.used_array_length_from_uniform_indices =
+        std::move(sanitized_result.used_array_length_from_uniform_indices);
+
+    // Generate the MSL code.
+    auto impl = std::make_unique<GeneratorImpl>(&sanitized_result.program);
+    result.success = impl->Generate();
+    result.error = impl->error();
+    result.msl = impl->result();
+    result.has_invariant_attribute = impl->HasInvariant();
+    result.workgroup_allocations = impl->DynamicWorkgroupAllocations();
+
     return result;
-  }
-  result.needs_storage_buffer_sizes =
-      sanitized_result.needs_storage_buffer_sizes;
-  result.used_array_length_from_uniform_indices =
-      std::move(sanitized_result.used_array_length_from_uniform_indices);
-
-  // Generate the MSL code.
-  auto impl = std::make_unique<GeneratorImpl>(&sanitized_result.program);
-  result.success = impl->Generate();
-  result.error = impl->error();
-  result.msl = impl->result();
-  result.has_invariant_attribute = impl->HasInvariant();
-  result.workgroup_allocations = impl->DynamicWorkgroupAllocations();
-
-  return result;
 }
 
 }  // namespace tint::writer::msl

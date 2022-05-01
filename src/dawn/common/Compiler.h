@@ -29,50 +29,50 @@
 
 // Clang and GCC, check for __clang__ too to catch clang-cl masquarading as MSVC
 #if defined(__GNUC__) || defined(__clang__)
-#    if defined(__clang__)
-#        define DAWN_COMPILER_CLANG
-#    else
-#        define DAWN_COMPILER_GCC
-#    endif
+#if defined(__clang__)
+#define DAWN_COMPILER_CLANG
+#else
+#define DAWN_COMPILER_GCC
+#endif
 
-#    if defined(__i386__) || defined(__x86_64__)
-#        define DAWN_BREAKPOINT() __asm__ __volatile__("int $3\n\t")
-#    else
+#if defined(__i386__) || defined(__x86_64__)
+#define DAWN_BREAKPOINT() __asm__ __volatile__("int $3\n\t")
+#else
 // TODO(cwallez@chromium.org): Implement breakpoint on all supported architectures
-#        define DAWN_BREAKPOINT()
-#    endif
+#define DAWN_BREAKPOINT()
+#endif
 
-#    define DAWN_BUILTIN_UNREACHABLE() __builtin_unreachable()
-#    define DAWN_LIKELY(x) __builtin_expect(!!(x), 1)
-#    define DAWN_UNLIKELY(x) __builtin_expect(!!(x), 0)
+#define DAWN_BUILTIN_UNREACHABLE() __builtin_unreachable()
+#define DAWN_LIKELY(x) __builtin_expect(!!(x), 1)
+#define DAWN_UNLIKELY(x) __builtin_expect(!!(x), 0)
 
-#    if !defined(__has_cpp_attribute)
-#        define __has_cpp_attribute(name) 0
-#    endif
+#if !defined(__has_cpp_attribute)
+#define __has_cpp_attribute(name) 0
+#endif
 
-#    define DAWN_DECLARE_UNUSED __attribute__((unused))
-#    if defined(NDEBUG)
-#        define DAWN_FORCE_INLINE inline __attribute__((always_inline))
-#    endif
-#    define DAWN_NOINLINE __attribute__((noinline))
+#define DAWN_DECLARE_UNUSED __attribute__((unused))
+#if defined(NDEBUG)
+#define DAWN_FORCE_INLINE inline __attribute__((always_inline))
+#endif
+#define DAWN_NOINLINE __attribute__((noinline))
 
 // MSVC
 #elif defined(_MSC_VER)
-#    define DAWN_COMPILER_MSVC
+#define DAWN_COMPILER_MSVC
 
 extern void __cdecl __debugbreak(void);
-#    define DAWN_BREAKPOINT() __debugbreak()
+#define DAWN_BREAKPOINT() __debugbreak()
 
-#    define DAWN_BUILTIN_UNREACHABLE() __assume(false)
+#define DAWN_BUILTIN_UNREACHABLE() __assume(false)
 
-#    define DAWN_DECLARE_UNUSED
-#    if defined(NDEBUG)
-#        define DAWN_FORCE_INLINE __forceinline
-#    endif
-#    define DAWN_NOINLINE __declspec(noinline)
+#define DAWN_DECLARE_UNUSED
+#if defined(NDEBUG)
+#define DAWN_FORCE_INLINE __forceinline
+#endif
+#define DAWN_NOINLINE __declspec(noinline)
 
 #else
-#    error "Unsupported compiler"
+#error "Unsupported compiler"
 #endif
 
 // It seems that (void) EXPR works on all compilers to silence the unused variable warning.
@@ -82,16 +82,16 @@ extern void __cdecl __debugbreak(void);
 
 // Add noop replacements for macros for features that aren't supported by the compiler.
 #if !defined(DAWN_LIKELY)
-#    define DAWN_LIKELY(X) X
+#define DAWN_LIKELY(X) X
 #endif
 #if !defined(DAWN_UNLIKELY)
-#    define DAWN_UNLIKELY(X) X
+#define DAWN_UNLIKELY(X) X
 #endif
 #if !defined(DAWN_FORCE_INLINE)
-#    define DAWN_FORCE_INLINE inline
+#define DAWN_FORCE_INLINE inline
 #endif
 #if !defined(DAWN_NOINLINE)
-#    define DAWN_NOINLINE
+#define DAWN_NOINLINE
 #endif
 
 #endif  // SRC_DAWN_COMMON_COMPILER_H_

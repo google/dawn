@@ -24,68 +24,66 @@
 
 namespace dawn::native::vulkan {
 
-    class Adapter;
-    class Backend;
-    struct VulkanFunctions;
+class Adapter;
+class Backend;
+struct VulkanFunctions;
 
-    // Global information - gathered before the instance is created
-    struct VulkanGlobalKnobs {
-        VulkanLayerSet layers;
-        ityp::array<VulkanLayer, InstanceExtSet, static_cast<uint32_t>(VulkanLayer::EnumCount)>
-            layerExtensions;
+// Global information - gathered before the instance is created
+struct VulkanGlobalKnobs {
+    VulkanLayerSet layers;
+    ityp::array<VulkanLayer, InstanceExtSet, static_cast<uint32_t>(VulkanLayer::EnumCount)>
+        layerExtensions;
 
-        // During information gathering `extensions` only contains the instance's extensions but
-        // during the instance creation logic it becomes the OR of the instance's extensions and
-        // the selected layers' extensions.
-        InstanceExtSet extensions;
-        bool HasExt(InstanceExt ext) const;
-    };
+    // During information gathering `extensions` only contains the instance's extensions but
+    // during the instance creation logic it becomes the OR of the instance's extensions and
+    // the selected layers' extensions.
+    InstanceExtSet extensions;
+    bool HasExt(InstanceExt ext) const;
+};
 
-    struct VulkanGlobalInfo : VulkanGlobalKnobs {
-        uint32_t apiVersion;
-    };
+struct VulkanGlobalInfo : VulkanGlobalKnobs {
+    uint32_t apiVersion;
+};
 
-    // Device information - gathered before the device is created.
-    struct VulkanDeviceKnobs {
-        VkPhysicalDeviceFeatures features;
-        VkPhysicalDeviceShaderFloat16Int8FeaturesKHR shaderFloat16Int8Features;
-        VkPhysicalDevice16BitStorageFeaturesKHR _16BitStorageFeatures;
-        VkPhysicalDeviceSubgroupSizeControlFeaturesEXT subgroupSizeControlFeatures;
-        VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR
-            zeroInitializeWorkgroupMemoryFeatures;
+// Device information - gathered before the device is created.
+struct VulkanDeviceKnobs {
+    VkPhysicalDeviceFeatures features;
+    VkPhysicalDeviceShaderFloat16Int8FeaturesKHR shaderFloat16Int8Features;
+    VkPhysicalDevice16BitStorageFeaturesKHR _16BitStorageFeatures;
+    VkPhysicalDeviceSubgroupSizeControlFeaturesEXT subgroupSizeControlFeatures;
+    VkPhysicalDeviceZeroInitializeWorkgroupMemoryFeaturesKHR zeroInitializeWorkgroupMemoryFeatures;
 
-        bool HasExt(DeviceExt ext) const;
-        DeviceExtSet extensions;
-    };
+    bool HasExt(DeviceExt ext) const;
+    DeviceExtSet extensions;
+};
 
-    struct VulkanDeviceInfo : VulkanDeviceKnobs {
-        VkPhysicalDeviceProperties properties;
-        VkPhysicalDeviceDriverProperties driverProperties;
-        VkPhysicalDeviceSubgroupSizeControlPropertiesEXT subgroupSizeControlProperties;
+struct VulkanDeviceInfo : VulkanDeviceKnobs {
+    VkPhysicalDeviceProperties properties;
+    VkPhysicalDeviceDriverProperties driverProperties;
+    VkPhysicalDeviceSubgroupSizeControlPropertiesEXT subgroupSizeControlProperties;
 
-        std::vector<VkQueueFamilyProperties> queueFamilies;
+    std::vector<VkQueueFamilyProperties> queueFamilies;
 
-        std::vector<VkMemoryType> memoryTypes;
-        std::vector<VkMemoryHeap> memoryHeaps;
+    std::vector<VkMemoryType> memoryTypes;
+    std::vector<VkMemoryHeap> memoryHeaps;
 
-        std::vector<VkLayerProperties> layers;
-        // TODO(cwallez@chromium.org): layer instance extensions
-    };
+    std::vector<VkLayerProperties> layers;
+    // TODO(cwallez@chromium.org): layer instance extensions
+};
 
-    struct VulkanSurfaceInfo {
-        VkSurfaceCapabilitiesKHR capabilities;
-        std::vector<VkSurfaceFormatKHR> formats;
-        std::vector<VkPresentModeKHR> presentModes;
-        std::vector<bool> supportedQueueFamilies;
-    };
+struct VulkanSurfaceInfo {
+    VkSurfaceCapabilitiesKHR capabilities;
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> presentModes;
+    std::vector<bool> supportedQueueFamilies;
+};
 
-    ResultOrError<VulkanGlobalInfo> GatherGlobalInfo(const VulkanFunctions& vkFunctions);
-    ResultOrError<std::vector<VkPhysicalDevice>> GatherPhysicalDevices(
-        VkInstance instance,
-        const VulkanFunctions& vkFunctions);
-    ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const Adapter& adapter);
-    ResultOrError<VulkanSurfaceInfo> GatherSurfaceInfo(const Adapter& adapter,
-                                                       VkSurfaceKHR surface);
+ResultOrError<VulkanGlobalInfo> GatherGlobalInfo(const VulkanFunctions& vkFunctions);
+ResultOrError<std::vector<VkPhysicalDevice>> GatherPhysicalDevices(
+    VkInstance instance,
+    const VulkanFunctions& vkFunctions);
+ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const Adapter& adapter);
+ResultOrError<VulkanSurfaceInfo> GatherSurfaceInfo(const Adapter& adapter, VkSurfaceKHR surface);
 }  // namespace dawn::native::vulkan
 
 #endif  // SRC_DAWN_NATIVE_VULKAN_VULKANINFO_H_

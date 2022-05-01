@@ -78,7 +78,7 @@ static wgpu::BackendType backendType = wgpu::BackendType::OpenGLES;
 #elif defined(DAWN_ENABLE_BACKEND_DESKTOP_GL)
 static wgpu::BackendType backendType = wgpu::BackendType::OpenGL;
 #else
-#    error
+#error
 #endif
 
 static CmdBufType cmdBufType = CmdBufType::Terrible;

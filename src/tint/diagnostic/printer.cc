@@ -22,11 +22,11 @@ StringPrinter::StringPrinter() = default;
 StringPrinter::~StringPrinter() = default;
 
 std::string StringPrinter::str() const {
-  return stream.str();
+    return stream.str();
 }
 
 void StringPrinter::write(const std::string& str, const Style&) {
-  stream << str;
+    stream << str;
 }
 
 }  // namespace tint::diag

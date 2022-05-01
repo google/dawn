@@ -20,12 +20,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Alias);
 
 namespace tint::ast {
 
-Alias::Alias(ProgramID pid,
-             const Source& src,
-             const Symbol& n,
-             const Type* subtype)
+Alias::Alias(ProgramID pid, const Source& src, const Symbol& n, const Type* subtype)
     : Base(pid, src, n), type(subtype) {
-  TINT_ASSERT(AST, type);
+    TINT_ASSERT(AST, type);
 }
 
 Alias::Alias(Alias&&) = default;
@@ -33,11 +30,11 @@ Alias::Alias(Alias&&) = default;
 Alias::~Alias() = default;
 
 const Alias* Alias::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  auto sym = ctx->Clone(name);
-  auto* ty = ctx->Clone(type);
-  return ctx->dst->create<Alias>(src, sym, ty);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    auto sym = ctx->Clone(name);
+    auto* ty = ctx->Clone(type);
+    return ctx->dst->create<Alias>(src, sym, ty);
 }
 
 }  // namespace tint::ast

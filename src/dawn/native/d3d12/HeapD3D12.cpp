@@ -17,17 +17,17 @@
 #include <utility>
 
 namespace dawn::native::d3d12 {
-    Heap::Heap(ComPtr<ID3D12Pageable> d3d12Pageable, MemorySegment memorySegment, uint64_t size)
-        : Pageable(std::move(d3d12Pageable), memorySegment, size) {
-        mD3d12Pageable.As(&mD3d12Heap);
-    }
+Heap::Heap(ComPtr<ID3D12Pageable> d3d12Pageable, MemorySegment memorySegment, uint64_t size)
+    : Pageable(std::move(d3d12Pageable), memorySegment, size) {
+    mD3d12Pageable.As(&mD3d12Heap);
+}
 
-    // This function should only be used when mD3D12Pageable was initialized from a
-    // ID3D12Pageable that was initially created as an ID3D12Heap (i.e. SubAllocation). If the
-    // ID3D12Pageable was initially created as an ID3D12Resource (i.e. DirectAllocation), then
-    // use GetD3D12Pageable().
-    ID3D12Heap* Heap::GetD3D12Heap() const {
-        return mD3d12Heap.Get();
-    }
+// This function should only be used when mD3D12Pageable was initialized from a
+// ID3D12Pageable that was initially created as an ID3D12Heap (i.e. SubAllocation). If the
+// ID3D12Pageable was initially created as an ID3D12Resource (i.e. DirectAllocation), then
+// use GetD3D12Pageable().
+ID3D12Heap* Heap::GetD3D12Heap() const {
+    return mD3d12Heap.Get();
+}
 
 }  // namespace dawn::native::d3d12

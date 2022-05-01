@@ -24,25 +24,23 @@ namespace tint::sem {
 
 /// Mapping of a sampler to a texture it samples.
 struct SamplerTexturePair {
-  /// group & binding values for a sampler.
-  BindingPoint sampler_binding_point;
-  /// group & binding values for a texture samepled by the sampler.
-  BindingPoint texture_binding_point;
+    /// group & binding values for a sampler.
+    BindingPoint sampler_binding_point;
+    /// group & binding values for a texture samepled by the sampler.
+    BindingPoint texture_binding_point;
 
-  /// Equality operator
-  /// @param rhs the SamplerTexturePair to compare against
-  /// @returns true if this SamplerTexturePair is equal to `rhs`
-  inline bool operator==(const SamplerTexturePair& rhs) const {
-    return sampler_binding_point == rhs.sampler_binding_point &&
-           texture_binding_point == rhs.texture_binding_point;
-  }
+    /// Equality operator
+    /// @param rhs the SamplerTexturePair to compare against
+    /// @returns true if this SamplerTexturePair is equal to `rhs`
+    inline bool operator==(const SamplerTexturePair& rhs) const {
+        return sampler_binding_point == rhs.sampler_binding_point &&
+               texture_binding_point == rhs.texture_binding_point;
+    }
 
-  /// Inequality operator
-  /// @param rhs the SamplerTexturePair to compare against
-  /// @returns true if this SamplerTexturePair is not equal to `rhs`
-  inline bool operator!=(const SamplerTexturePair& rhs) const {
-    return !(*this == rhs);
-  }
+    /// Inequality operator
+    /// @param rhs the SamplerTexturePair to compare against
+    /// @returns true if this SamplerTexturePair is not equal to `rhs`
+    inline bool operator!=(const SamplerTexturePair& rhs) const { return !(*this == rhs); }
 };
 
 }  // namespace tint::sem
@@ -54,14 +52,12 @@ namespace std {
 /// std::unordered_set.
 template <>
 class hash<tint::sem::SamplerTexturePair> {
- public:
-  /// @param stp the texture pair to create a hash for
-  /// @return the hash value
-  inline std::size_t operator()(
-      const tint::sem::SamplerTexturePair& stp) const {
-    return tint::utils::Hash(stp.sampler_binding_point,
-                             stp.texture_binding_point);
-  }
+  public:
+    /// @param stp the texture pair to create a hash for
+    /// @return the hash value
+    inline std::size_t operator()(const tint::sem::SamplerTexturePair& stp) const {
+        return tint::utils::Hash(stp.sampler_binding_point, stp.texture_binding_point);
+    }
 };
 
 }  // namespace std

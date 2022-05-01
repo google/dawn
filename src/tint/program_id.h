@@ -34,33 +34,33 @@ namespace tint {
 /// owned exclusively by that Program and have accidentally not leaked from
 /// another Program.
 class ProgramID {
- public:
-  /// Constructor
-  ProgramID();
+  public:
+    /// Constructor
+    ProgramID();
 
-  /// @returns a new. globally unique ProgramID
-  static ProgramID New();
+    /// @returns a new. globally unique ProgramID
+    static ProgramID New();
 
-  /// Equality operator
-  /// @param rhs the other ProgramID
-  /// @returns true if the ProgramIDs are equal
-  bool operator==(const ProgramID& rhs) const { return val == rhs.val; }
+    /// Equality operator
+    /// @param rhs the other ProgramID
+    /// @returns true if the ProgramIDs are equal
+    bool operator==(const ProgramID& rhs) const { return val == rhs.val; }
 
-  /// Inequality operator
-  /// @param rhs the other ProgramID
-  /// @returns true if the ProgramIDs are not equal
-  bool operator!=(const ProgramID& rhs) const { return val != rhs.val; }
+    /// Inequality operator
+    /// @param rhs the other ProgramID
+    /// @returns true if the ProgramIDs are not equal
+    bool operator!=(const ProgramID& rhs) const { return val != rhs.val; }
 
-  /// @returns the numerical identifier value
-  uint32_t Value() const { return val; }
+    /// @returns the numerical identifier value
+    uint32_t Value() const { return val; }
 
-  /// @returns true if this ProgramID is valid
-  operator bool() const { return val != 0; }
+    /// @returns true if this ProgramID is valid
+    operator bool() const { return val != 0; }
 
- private:
-  explicit ProgramID(uint32_t);
+  private:
+    explicit ProgramID(uint32_t);
 
-  uint32_t val = 0;
+    uint32_t val = 0;
 };
 
 /// A simple pass-through function for ProgramID. Intended to be overloaded for
@@ -68,7 +68,7 @@ class ProgramID {
 /// @param id a ProgramID
 /// @returns id. Simple pass-through function
 inline ProgramID ProgramIDOf(ProgramID id) {
-  return id;
+    return id;
 }
 
 /// Writes the ProgramID to the std::ostream.
@@ -76,8 +76,8 @@ inline ProgramID ProgramIDOf(ProgramID id) {
 /// @param id the program identifier to write
 /// @returns out so calls can be chained
 inline std::ostream& operator<<(std::ostream& out, ProgramID id) {
-  out << "Program<" << id.Value() << ">";
-  return out;
+    out << "Program<" << id.Value() << ">";
+    return out;
 }
 
 namespace detail {
@@ -102,23 +102,21 @@ void AssertProgramIDsEqual(ProgramID a,
 /// that the program identifiers for A and B are equal, if both A and B have
 /// valid program identifiers.
 #if TINT_CHECK_FOR_CROSS_PROGRAM_LEAKS
-#define TINT_ASSERT_PROGRAM_IDS_EQUAL(system, a, b)                          \
-  detail::AssertProgramIDsEqual(                                             \
-      ProgramIDOf(a), ProgramIDOf(b), false, tint::diag::System::system,     \
-      "TINT_ASSERT_PROGRAM_IDS_EQUAL(" #system "," #a ", " #b ")", __FILE__, \
-      __LINE__)
-#define TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(system, a, b)                 \
-  detail::AssertProgramIDsEqual(                                             \
-      ProgramIDOf(a), ProgramIDOf(b), true, tint::diag::System::system,      \
-      "TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(" #system ", " #a ", " #b ")", \
-      __FILE__, __LINE__)
+#define TINT_ASSERT_PROGRAM_IDS_EQUAL(system, a, b)                        \
+    detail::AssertProgramIDsEqual(                                         \
+        ProgramIDOf(a), ProgramIDOf(b), false, tint::diag::System::system, \
+        "TINT_ASSERT_PROGRAM_IDS_EQUAL(" #system "," #a ", " #b ")", __FILE__, __LINE__)
+#define TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(system, a, b)              \
+    detail::AssertProgramIDsEqual(                                        \
+        ProgramIDOf(a), ProgramIDOf(b), true, tint::diag::System::system, \
+        "TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(" #system ", " #a ", " #b ")", __FILE__, __LINE__)
 #else
 #define TINT_ASSERT_PROGRAM_IDS_EQUAL(a, b) \
-  do {                                      \
-  } while (false)
+    do {                                    \
+    } while (false)
 #define TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(a, b) \
-  do {                                               \
-  } while (false)
+    do {                                             \
+    } while (false)
 #endif
 
 }  // namespace tint

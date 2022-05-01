@@ -24,8 +24,7 @@ namespace tint::transform::utils {
 
 /// InsertionPoint is a pair of the block (`first`) within which, and the
 /// statement (`second`) before or after which to insert.
-using InsertionPoint =
-    std::pair<const sem::BlockStatement*, const ast::Statement*>;
+using InsertionPoint = std::pair<const sem::BlockStatement*, const ast::Statement*>;
 
 /// For the input statement, returns the block and statement within that
 /// block to insert before/after. If `stmt` is a for-loop continue statement,

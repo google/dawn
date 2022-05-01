@@ -24,26 +24,26 @@
 
 namespace dawn::native::opengl {
 
-    class Device;
+class Device;
 
-    class PipelineLayout final : public PipelineLayoutBase {
-      public:
-        PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor);
+class PipelineLayout final : public PipelineLayoutBase {
+  public:
+    PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor);
 
-        using BindingIndexInfo =
-            ityp::array<BindGroupIndex, ityp::vector<BindingIndex, GLuint>, kMaxBindGroups>;
-        const BindingIndexInfo& GetBindingIndexInfo() const;
+    using BindingIndexInfo =
+        ityp::array<BindGroupIndex, ityp::vector<BindingIndex, GLuint>, kMaxBindGroups>;
+    const BindingIndexInfo& GetBindingIndexInfo() const;
 
-        GLuint GetTextureUnitsUsed() const;
-        size_t GetNumSamplers() const;
-        size_t GetNumSampledTextures() const;
+    GLuint GetTextureUnitsUsed() const;
+    size_t GetNumSamplers() const;
+    size_t GetNumSampledTextures() const;
 
-      private:
-        ~PipelineLayout() override = default;
-        BindingIndexInfo mIndexInfo;
-        size_t mNumSamplers;
-        size_t mNumSampledTextures;
-    };
+  private:
+    ~PipelineLayout() override = default;
+    BindingIndexInfo mIndexInfo;
+    size_t mNumSamplers;
+    size_t mNumSampledTextures;
+};
 
 }  // namespace dawn::native::opengl
 

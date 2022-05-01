@@ -20,15 +20,15 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitIdentifierExpression_Single) {
-  Global("glsl", ty.f32(), ast::StorageClass::kPrivate);
-  auto* i = Expr("glsl");
-  WrapInFunction(i);
+    Global("glsl", ty.f32(), ast::StorageClass::kPrivate);
+    auto* i = Expr("glsl");
+    WrapInFunction(i);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, i)) << gen.error();
-  EXPECT_EQ(out.str(), "glsl");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, i)) << gen.error();
+    EXPECT_EQ(out.str(), "glsl");
 }
 
 }  // namespace

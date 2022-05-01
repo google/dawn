@@ -20,21 +20,20 @@ namespace tint {
 namespace {
 
 TEST(DebugTest, Unreachable) {
-  EXPECT_FATAL_FAILURE(
-      {
-        diag::List diagnostics;
-        TINT_UNREACHABLE(Test, diagnostics);
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            diag::List diagnostics;
+            TINT_UNREACHABLE(Test, diagnostics);
+        },
+        "internal compiler error");
 }
 
 TEST(DebugTest, AssertTrue) {
-  TINT_ASSERT(Test, true);
+    TINT_ASSERT(Test, true);
 }
 
 TEST(DebugTest, AssertFalse) {
-  EXPECT_FATAL_FAILURE({ TINT_ASSERT(Test, false); },
-                       "internal compiler error");
+    EXPECT_FATAL_FAILURE({ TINT_ASSERT(Test, false); }, "internal compiler error");
 }
 
 }  // namespace

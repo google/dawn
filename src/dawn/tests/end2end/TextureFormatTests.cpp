@@ -18,9 +18,9 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/tests/DawnTest.h"
 #include "dawn/common/Assert.h"
 #include "dawn/common/Math.h"
+#include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
@@ -30,8 +30,7 @@
 class ExpectFloatWithTolerance : public detail::Expectation {
   public:
     ExpectFloatWithTolerance(std::vector<float> expected, float tolerance)
-        : mExpected(std::move(expected)), mTolerance(tolerance) {
-    }
+        : mExpected(std::move(expected)), mTolerance(tolerance) {}
 
     testing::AssertionResult Check(const void* data, size_t size) override {
         ASSERT(size == sizeof(float) * mExpected.size());
@@ -78,8 +77,7 @@ class ExpectFloatWithTolerance : public detail::Expectation {
 // An expectation for float16 buffers that can correctly compare NaNs (all NaNs are equivalent).
 class ExpectFloat16 : public detail::Expectation {
   public:
-    explicit ExpectFloat16(std::vector<uint16_t> expected) : mExpected(std::move(expected)) {
-    }
+    explicit ExpectFloat16(std::vector<uint16_t> expected) : mExpected(std::move(expected)) {}
 
     testing::AssertionResult Check(const void* data, size_t size) override {
         ASSERT(size == sizeof(uint16_t) * mExpected.size());

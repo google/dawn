@@ -25,16 +25,16 @@ namespace {
 using AddSpirvBlockAttributeTest = TransformTest;
 
 TEST_F(AddSpirvBlockAttributeTest, EmptyModule) {
-  auto* src = "";
-  auto* expect = "";
+    auto* src = "";
+    auto* expect = "";
 
-  auto got = Run<AddSpirvBlockAttribute>(src);
+    auto got = Run<AddSpirvBlockAttribute>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(AddSpirvBlockAttributeTest, Noop_UsedForPrivateVar) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   f : f32,
 }
@@ -46,15 +46,15 @@ fn main() {
   p.f = 1.0;
 }
 )";
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<AddSpirvBlockAttribute>(src);
+    auto got = Run<AddSpirvBlockAttribute>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(AddSpirvBlockAttributeTest, Noop_UsedForShaderIO) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   @location(0)
   f : f32,
@@ -65,15 +65,15 @@ fn main() -> S {
   return S();
 }
 )";
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<AddSpirvBlockAttribute>(src);
+    auto got = Run<AddSpirvBlockAttribute>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(AddSpirvBlockAttributeTest, BasicScalar) {
-  auto* src = R"(
+    auto* src = R"(
 @group(0) @binding(0)
 var<uniform> u : f32;
 
@@ -82,7 +82,7 @@ fn main() {
   let f = u;
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(spirv_block)
 struct u_block {
   inner : f32,
@@ -96,13 +96,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<AddSpirvBlockAttribute>(src);
+    auto got = Run<AddSpirvBlockAttribute>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(AddSpirvBlockAttributeTest, BasicArray) {
-  auto* src = R"(
+    auto* src = R"(
 @group(0) @binding(0)
 var<uniform> u : array<vec4<f32>, 4u>;
 
@@ -111,7 +111,7 @@ fn main() {
   let a = u;
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(spirv_block)
 struct u_block {
   inner : array<vec4<f32>, 4u>,
@@ -125,13 +125,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<AddSpirvBlockAttribute>(src);
+    auto got = Run<AddSpirvBlockAttribute>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(AddSpirvBlockAttributeTest, BasicArray_Alias) {
-  auto* src = R"(
+    auto* src = R"(
 type Numbers = array<vec4<f32>, 4u>;
 
 @group(0) @binding(0)
@@ -142,7 +142,7 @@ fn main() {
   let a = u;
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 type Numbers = array<vec4<f32>, 4u>;
 
 @internal(spirv_block)
@@ -158,13 +158,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<AddSpirvBlockAttribute>(src);
+    auto got = Run<AddSpirvBlockAttribute>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(AddSpirvBlockAttributeTest, BasicStruct) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   f : f32,
 };
@@ -177,7 +177,7 @@ fn main() {
   let f = u.f;
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(spirv_block)
 struct S {
   f : f32,
@@ -191,13 +191,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<AddSpirvBlockAttribute>(src);
+    auto got = Run<AddSpirvBlockAttribute>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(AddSpirvBlockAttributeTest, Nested_OuterBuffer_InnerNotBuffer) {
-  auto* src = R"(
+    auto* src = R"(
 struct Inner {
   f : f32,
 };
@@ -214,7 +214,7 @@ fn main() {
   let f = u.i.f;
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct Inner {
   f : f32,
 }
@@ -232,13 +232,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<AddSpirvBlockAttribute>(src);
+    auto got = Run<AddSpirvBlockAttribute>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(AddSpirvBlockAttributeTest, Nested_OuterBuffer_InnerBuffer) {
-  auto* src = R"(
+    auto* src = R"(
 struct Inner {
   f : f32,
 };
@@ -259,7 +259,7 @@ fn main() {
   let f1 = u1.f;
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct Inner {
   f : f32,
 }
@@ -285,13 +285,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<AddSpirvBlockAttribute>(src);
+    auto got = Run<AddSpirvBlockAttribute>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(AddSpirvBlockAttributeTest, Nested_OuterNotBuffer_InnerBuffer) {
-  auto* src = R"(
+    auto* src = R"(
 struct Inner {
   f : f32,
 };
@@ -311,7 +311,7 @@ fn main() {
   let f1 = u.f;
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct Inner {
   f : f32,
 }
@@ -336,13 +336,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<AddSpirvBlockAttribute>(src);
+    auto got = Run<AddSpirvBlockAttribute>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(AddSpirvBlockAttributeTest, Nested_InnerUsedForMultipleBuffers) {
-  auto* src = R"(
+    auto* src = R"(
 struct Inner {
   f : f32,
 };
@@ -367,7 +367,7 @@ fn main() {
   let f2 = u2.f;
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct Inner {
   f : f32,
 }
@@ -396,13 +396,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<AddSpirvBlockAttribute>(src);
+    auto got = Run<AddSpirvBlockAttribute>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(AddSpirvBlockAttributeTest, StructInArray) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   f : f32,
 };
@@ -416,7 +416,7 @@ fn main() {
   let a = array<S, 4>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct S {
   f : f32,
 }
@@ -435,13 +435,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<AddSpirvBlockAttribute>(src);
+    auto got = Run<AddSpirvBlockAttribute>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(AddSpirvBlockAttributeTest, StructInArray_MultipleBuffers) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   f : f32,
 };
@@ -459,7 +459,7 @@ fn main() {
   let a = array<S, 4>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct S {
   f : f32,
 }
@@ -481,13 +481,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<AddSpirvBlockAttribute>(src);
+    auto got = Run<AddSpirvBlockAttribute>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(AddSpirvBlockAttributeTest, Aliases_Nested_OuterBuffer_InnerBuffer) {
-  auto* src = R"(
+    auto* src = R"(
 struct Inner {
   f : f32,
 };
@@ -512,7 +512,7 @@ fn main() {
   let f1 = u1.f;
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct Inner {
   f : f32,
 }
@@ -542,14 +542,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<AddSpirvBlockAttribute>(src);
+    auto got = Run<AddSpirvBlockAttribute>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(AddSpirvBlockAttributeTest,
-       Aliases_Nested_OuterBuffer_InnerBuffer_OutOfOrder) {
-  auto* src = R"(
+TEST_F(AddSpirvBlockAttributeTest, Aliases_Nested_OuterBuffer_InnerBuffer_OutOfOrder) {
+    auto* src = R"(
 @stage(fragment)
 fn main() {
   let f0 = u0.i.f;
@@ -574,7 +573,7 @@ struct Inner {
   f : f32,
 };
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(fragment)
 fn main() {
   let f0 = u0.i.f;
@@ -604,9 +603,9 @@ struct Inner {
 }
 )";
 
-  auto got = Run<AddSpirvBlockAttribute>(src);
+    auto got = Run<AddSpirvBlockAttribute>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

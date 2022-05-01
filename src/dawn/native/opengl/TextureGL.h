@@ -21,57 +21,54 @@
 
 namespace dawn::native::opengl {
 
-    class Device;
-    struct GLFormat;
+class Device;
+struct GLFormat;
 
-    class Texture final : public TextureBase {
-      public:
-        Texture(Device* device, const TextureDescriptor* descriptor);
-        Texture(Device* device,
-                const TextureDescriptor* descriptor,
-                GLuint handle,
-                TextureState state);
+class Texture final : public TextureBase {
+  public:
+    Texture(Device* device, const TextureDescriptor* descriptor);
+    Texture(Device* device, const TextureDescriptor* descriptor, GLuint handle, TextureState state);
 
-        GLuint GetHandle() const;
-        GLenum GetGLTarget() const;
-        const GLFormat& GetGLFormat() const;
-        uint32_t GetGenID() const;
-        void Touch();
+    GLuint GetHandle() const;
+    GLenum GetGLTarget() const;
+    const GLFormat& GetGLFormat() const;
+    uint32_t GetGenID() const;
+    void Touch();
 
-        void EnsureSubresourceContentInitialized(const SubresourceRange& range);
+    void EnsureSubresourceContentInitialized(const SubresourceRange& range);
 
-      private:
-        ~Texture() override;
+  private:
+    ~Texture() override;
 
-        void DestroyImpl() override;
-        MaybeError ClearTexture(const SubresourceRange& range, TextureBase::ClearValue clearValue);
+    void DestroyImpl() override;
+    MaybeError ClearTexture(const SubresourceRange& range, TextureBase::ClearValue clearValue);
 
-        GLuint mHandle;
-        GLenum mTarget;
-        uint32_t mGenID = 0;
-    };
+    GLuint mHandle;
+    GLenum mTarget;
+    uint32_t mGenID = 0;
+};
 
-    class TextureView final : public TextureViewBase {
-      public:
-        TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor);
+class TextureView final : public TextureViewBase {
+  public:
+    TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor);
 
-        GLuint GetHandle() const;
-        GLenum GetGLTarget() const;
-        void BindToFramebuffer(GLenum target, GLenum attachment);
-        void CopyIfNeeded();
+    GLuint GetHandle() const;
+    GLenum GetGLTarget() const;
+    void BindToFramebuffer(GLenum target, GLenum attachment);
+    void CopyIfNeeded();
 
-      private:
-        ~TextureView() override;
-        void DestroyImpl() override;
-        GLenum GetInternalFormat() const;
+  private:
+    ~TextureView() override;
+    void DestroyImpl() override;
+    GLenum GetInternalFormat() const;
 
-        // TODO(crbug.com/dawn/1355): Delete this handle on texture destroy.
-        GLuint mHandle;
-        GLenum mTarget;
-        bool mOwnsHandle;
-        bool mUseCopy = false;
-        uint32_t mGenID = 0;
-    };
+    // TODO(crbug.com/dawn/1355): Delete this handle on texture destroy.
+    GLuint mHandle;
+    GLenum mTarget;
+    bool mOwnsHandle;
+    bool mUseCopy = false;
+    uint32_t mGenID = 0;
+};
 
 }  // namespace dawn::native::opengl
 

@@ -21,26 +21,26 @@
 
 namespace dawn::native::vulkan {
 
-    class Device;
+class Device;
 
-    class QuerySet final : public QuerySetBase {
-      public:
-        static ResultOrError<Ref<QuerySet>> Create(Device* device,
-                                                   const QuerySetDescriptor* descriptor);
+class QuerySet final : public QuerySetBase {
+  public:
+    static ResultOrError<Ref<QuerySet>> Create(Device* device,
+                                               const QuerySetDescriptor* descriptor);
 
-        VkQueryPool GetHandle() const;
+    VkQueryPool GetHandle() const;
 
-      private:
-        ~QuerySet() override;
-        using QuerySetBase::QuerySetBase;
-        MaybeError Initialize();
+  private:
+    ~QuerySet() override;
+    using QuerySetBase::QuerySetBase;
+    MaybeError Initialize();
 
-        // Dawn API
-        void DestroyImpl() override;
-        void SetLabelImpl() override;
+    // Dawn API
+    void DestroyImpl() override;
+    void SetLabelImpl() override;
 
-        VkQueryPool mHandle = VK_NULL_HANDLE;
-    };
+    VkQueryPool mHandle = VK_NULL_HANDLE;
+};
 
 }  // namespace dawn::native::vulkan
 

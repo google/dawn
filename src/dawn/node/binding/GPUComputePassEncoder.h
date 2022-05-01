@@ -25,47 +25,44 @@
 
 namespace wgpu::binding {
 
-    // GPUComputePassEncoder is an implementation of interop::GPUComputePassEncoder that wraps a
-    // wgpu::ComputePassEncoder.
-    class GPUComputePassEncoder final : public interop::GPUComputePassEncoder {
-      public:
-        explicit GPUComputePassEncoder(wgpu::ComputePassEncoder enc);
+// GPUComputePassEncoder is an implementation of interop::GPUComputePassEncoder that wraps a
+// wgpu::ComputePassEncoder.
+class GPUComputePassEncoder final : public interop::GPUComputePassEncoder {
+  public:
+    explicit GPUComputePassEncoder(wgpu::ComputePassEncoder enc);
 
-        // Implicit cast operator to Dawn GPU object
-        inline operator const wgpu::ComputePassEncoder&() const {
-            return enc_;
-        }
+    // Implicit cast operator to Dawn GPU object
+    inline operator const wgpu::ComputePassEncoder&() const { return enc_; }
 
-        // interop::GPUComputePassEncoder interface compliance
-        void setPipeline(Napi::Env,
-                         interop::Interface<interop::GPUComputePipeline> pipeline) override;
-        void dispatch(Napi::Env,
-                      interop::GPUSize32 workgroupCountX,
-                      interop::GPUSize32 workgroupCountY,
-                      interop::GPUSize32 workgroupCountZ) override;
-        void dispatchIndirect(Napi::Env,
-                              interop::Interface<interop::GPUBuffer> indirectBuffer,
-                              interop::GPUSize64 indirectOffset) override;
-        void end(Napi::Env) override;
-        void setBindGroup(Napi::Env,
-                          interop::GPUIndex32 index,
-                          interop::Interface<interop::GPUBindGroup> bindGroup,
-                          std::vector<interop::GPUBufferDynamicOffset> dynamicOffsets) override;
-        void setBindGroup(Napi::Env,
-                          interop::GPUIndex32 index,
-                          interop::Interface<interop::GPUBindGroup> bindGroup,
-                          interop::Uint32Array dynamicOffsetsData,
-                          interop::GPUSize64 dynamicOffsetsDataStart,
-                          interop::GPUSize32 dynamicOffsetsDataLength) override;
-        void pushDebugGroup(Napi::Env, std::string groupLabel) override;
-        void popDebugGroup(Napi::Env) override;
-        void insertDebugMarker(Napi::Env, std::string markerLabel) override;
-        std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
-        void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
+    // interop::GPUComputePassEncoder interface compliance
+    void setPipeline(Napi::Env, interop::Interface<interop::GPUComputePipeline> pipeline) override;
+    void dispatch(Napi::Env,
+                  interop::GPUSize32 workgroupCountX,
+                  interop::GPUSize32 workgroupCountY,
+                  interop::GPUSize32 workgroupCountZ) override;
+    void dispatchIndirect(Napi::Env,
+                          interop::Interface<interop::GPUBuffer> indirectBuffer,
+                          interop::GPUSize64 indirectOffset) override;
+    void end(Napi::Env) override;
+    void setBindGroup(Napi::Env,
+                      interop::GPUIndex32 index,
+                      interop::Interface<interop::GPUBindGroup> bindGroup,
+                      std::vector<interop::GPUBufferDynamicOffset> dynamicOffsets) override;
+    void setBindGroup(Napi::Env,
+                      interop::GPUIndex32 index,
+                      interop::Interface<interop::GPUBindGroup> bindGroup,
+                      interop::Uint32Array dynamicOffsetsData,
+                      interop::GPUSize64 dynamicOffsetsDataStart,
+                      interop::GPUSize32 dynamicOffsetsDataLength) override;
+    void pushDebugGroup(Napi::Env, std::string groupLabel) override;
+    void popDebugGroup(Napi::Env) override;
+    void insertDebugMarker(Napi::Env, std::string markerLabel) override;
+    std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
+    void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
 
-      private:
-        wgpu::ComputePassEncoder enc_;
-    };
+  private:
+    wgpu::ComputePassEncoder enc_;
+};
 
 }  // namespace wgpu::binding
 

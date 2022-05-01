@@ -18,7 +18,7 @@
 namespace tint::fuzzers::ast_fuzzer {
 
 void OverrideCliParams(CliParams& /*unused*/) {
-  // Leave the CLI parameters unchanged.
+    // Leave the CLI parameters unchanged.
 }
 
 }  // namespace tint::fuzzers::ast_fuzzer

@@ -18,30 +18,29 @@
 
 namespace dawn::native {
 
-    ScratchBuffer::ScratchBuffer(DeviceBase* device, wgpu::BufferUsage usage)
-        : mDevice(device), mUsage(usage) {
-    }
+ScratchBuffer::ScratchBuffer(DeviceBase* device, wgpu::BufferUsage usage)
+    : mDevice(device), mUsage(usage) {}
 
-    ScratchBuffer::~ScratchBuffer() = default;
+ScratchBuffer::~ScratchBuffer() = default;
 
-    void ScratchBuffer::Reset() {
-        mBuffer = nullptr;
-    }
+void ScratchBuffer::Reset() {
+    mBuffer = nullptr;
+}
 
-    MaybeError ScratchBuffer::EnsureCapacity(uint64_t capacity) {
-        if (!mBuffer.Get() || mBuffer->GetSize() < capacity) {
-            BufferDescriptor descriptor;
-            descriptor.size = capacity;
-            descriptor.usage = mUsage;
-            DAWN_TRY_ASSIGN(mBuffer, mDevice->CreateBuffer(&descriptor));
-            mBuffer->SetIsDataInitialized();
-        }
-        return {};
+MaybeError ScratchBuffer::EnsureCapacity(uint64_t capacity) {
+    if (!mBuffer.Get() || mBuffer->GetSize() < capacity) {
+        BufferDescriptor descriptor;
+        descriptor.size = capacity;
+        descriptor.usage = mUsage;
+        DAWN_TRY_ASSIGN(mBuffer, mDevice->CreateBuffer(&descriptor));
+        mBuffer->SetIsDataInitialized();
     }
+    return {};
+}
 
-    BufferBase* ScratchBuffer::GetBuffer() const {
-        ASSERT(mBuffer.Get() != nullptr);
-        return mBuffer.Get();
-    }
+BufferBase* ScratchBuffer::GetBuffer() const {
+    ASSERT(mBuffer.Get() != nullptr);
+    return mBuffer.Get();
+}
 
 }  // namespace dawn::native

@@ -24,27 +24,25 @@ namespace tint::ast {
 
 /// A workgroup attribute
 class StageAttribute final : public Castable<StageAttribute, Attribute> {
- public:
-  /// constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param stage the pipeline stage
-  /// @param source the source of this attribute
-  StageAttribute(ProgramID program_id,
-                 const Source& source,
-                 PipelineStage stage);
-  ~StageAttribute() override;
+  public:
+    /// constructor
+    /// @param program_id the identifier of the program that owns this node
+    /// @param stage the pipeline stage
+    /// @param source the source of this attribute
+    StageAttribute(ProgramID program_id, const Source& source, PipelineStage stage);
+    ~StageAttribute() override;
 
-  /// @returns the WGSL name for the attribute
-  std::string Name() const override;
+    /// @returns the WGSL name for the attribute
+    std::string Name() const override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const StageAttribute* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const StageAttribute* Clone(CloneContext* ctx) const override;
 
-  /// The pipeline stage
-  const PipelineStage stage;
+    /// The pipeline stage
+    const PipelineStage stage;
 };
 
 }  // namespace tint::ast

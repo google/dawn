@@ -21,43 +21,40 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::CallTarget);
 
 namespace tint::sem {
 
-CallTarget::CallTarget(const sem::Type* return_type,
-                       const ParameterList& parameters)
+CallTarget::CallTarget(const sem::Type* return_type, const ParameterList& parameters)
     : signature_{return_type, parameters} {
-  TINT_ASSERT(Semantic, return_type);
+    TINT_ASSERT(Semantic, return_type);
 }
 
 CallTarget::CallTarget(const CallTarget&) = default;
 CallTarget::~CallTarget() = default;
 
-CallTargetSignature::CallTargetSignature(const sem::Type* ret_ty,
-                                         const ParameterList& params)
+CallTargetSignature::CallTargetSignature(const sem::Type* ret_ty, const ParameterList& params)
     : return_type(ret_ty), parameters(params) {}
 CallTargetSignature::CallTargetSignature(const CallTargetSignature&) = default;
 CallTargetSignature::~CallTargetSignature() = default;
 
 int CallTargetSignature::IndexOf(ParameterUsage usage) const {
-  for (size_t i = 0; i < parameters.size(); i++) {
-    if (parameters[i]->Usage() == usage) {
-      return static_cast<int>(i);
+    for (size_t i = 0; i < parameters.size(); i++) {
+        if (parameters[i]->Usage() == usage) {
+            return static_cast<int>(i);
+        }
     }
-  }
-  return -1;
+    return -1;
 }
 
 bool CallTargetSignature::operator==(const CallTargetSignature& other) const {
-  if (return_type != other.return_type ||
-      parameters.size() != other.parameters.size()) {
-    return false;
-  }
-  for (size_t i = 0; i < parameters.size(); i++) {
-    auto* a = parameters[i];
-    auto* b = other.parameters[i];
-    if (a->Type() != b->Type() || a->Usage() != b->Usage()) {
-      return false;
+    if (return_type != other.return_type || parameters.size() != other.parameters.size()) {
+        return false;
     }
-  }
-  return true;
+    for (size_t i = 0; i < parameters.size(); i++) {
+        auto* a = parameters[i];
+        auto* b = other.parameters[i];
+        if (a->Type() != b->Type() || a->Usage() != b->Usage()) {
+            return false;
+        }
+    }
+    return true;
 }
 
 }  // namespace tint::sem
@@ -66,11 +63,11 @@ namespace std {
 
 std::size_t hash<tint::sem::CallTargetSignature>::operator()(
     const tint::sem::CallTargetSignature& sig) const {
-  size_t hash = tint::utils::Hash(sig.parameters.size());
-  for (auto* p : sig.parameters) {
-    tint::utils::HashCombine(&hash, p->Type(), p->Usage());
-  }
-  return tint::utils::Hash(hash, sig.return_type);
+    size_t hash = tint::utils::Hash(sig.parameters.size());
+    for (auto* p : sig.parameters) {
+        tint::utils::HashCombine(&hash, p->Type(), p->Usage());
+    }
+    return tint::utils::Hash(hash, sig.return_type);
 }
 
 }  // namespace std

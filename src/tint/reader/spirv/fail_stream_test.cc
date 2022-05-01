@@ -24,45 +24,45 @@ using ::testing::Eq;
 using FailStreamTest = ::testing::Test;
 
 TEST_F(FailStreamTest, ConversionToBoolIsSameAsStatusMethod) {
-  bool flag = true;
-  FailStream fs(&flag, nullptr);
+    bool flag = true;
+    FailStream fs(&flag, nullptr);
 
-  EXPECT_TRUE(fs.status());
-  EXPECT_TRUE(bool(fs));  // NOLINT
-  flag = false;
-  EXPECT_FALSE(fs.status());
-  EXPECT_FALSE(bool(fs));  // NOLINT
-  flag = true;
-  EXPECT_TRUE(fs.status());
-  EXPECT_TRUE(bool(fs));  // NOLINT
+    EXPECT_TRUE(fs.status());
+    EXPECT_TRUE(bool(fs));  // NOLINT
+    flag = false;
+    EXPECT_FALSE(fs.status());
+    EXPECT_FALSE(bool(fs));  // NOLINT
+    flag = true;
+    EXPECT_TRUE(fs.status());
+    EXPECT_TRUE(bool(fs));  // NOLINT
 }
 
 TEST_F(FailStreamTest, FailMethodChangesStatusToFalse) {
-  bool flag = true;
-  FailStream fs(&flag, nullptr);
-  EXPECT_TRUE(flag);
-  EXPECT_TRUE(bool(fs));  // NOLINT
-  fs.Fail();
-  EXPECT_FALSE(flag);
-  EXPECT_FALSE(bool(fs));  // NOLINT
+    bool flag = true;
+    FailStream fs(&flag, nullptr);
+    EXPECT_TRUE(flag);
+    EXPECT_TRUE(bool(fs));  // NOLINT
+    fs.Fail();
+    EXPECT_FALSE(flag);
+    EXPECT_FALSE(bool(fs));  // NOLINT
 }
 
 TEST_F(FailStreamTest, FailMethodReturnsSelf) {
-  bool flag = true;
-  FailStream fs(&flag, nullptr);
-  FailStream& result = fs.Fail();
-  EXPECT_THAT(&result, Eq(&fs));
+    bool flag = true;
+    FailStream fs(&flag, nullptr);
+    FailStream& result = fs.Fail();
+    EXPECT_THAT(&result, Eq(&fs));
 }
 
 TEST_F(FailStreamTest, ShiftOperatorAccumulatesValues) {
-  bool flag = true;
-  std::stringstream ss;
-  FailStream fs(&flag, &ss);
+    bool flag = true;
+    std::stringstream ss;
+    FailStream fs(&flag, &ss);
 
-  ss << "prefix ";
-  fs << "cat " << 42;
+    ss << "prefix ";
+    fs << "cat " << 42;
 
-  EXPECT_THAT(ss.str(), Eq("prefix cat 42"));
+    EXPECT_THAT(ss.str(), Eq("prefix cat 42"));
 }
 
 }  // namespace

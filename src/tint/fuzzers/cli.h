@@ -22,10 +22,10 @@ namespace tint::fuzzers {
 /// CLI parameters accepted by the fuzzer. Type -tint_help in the CLI to see the
 /// help message
 struct CliParams {
-  /// Log contents of input shader
-  bool dump_input = false;
-  /// Throw error if shader becomes invalid during run
-  bool enforce_validity = false;
+    /// Log contents of input shader
+    bool dump_input = false;
+    /// Throw error if shader becomes invalid during run
+    bool enforce_validity = false;
 };
 
 /// @brief Parses CLI parameters.

@@ -25,106 +25,100 @@
 
 namespace wgpu::binding {
 
-    ////////////////////////////////////////////////////////////////////////////////
-    // wgpu::bindings::GPUComputePassEncoder
-    ////////////////////////////////////////////////////////////////////////////////
-    GPUComputePassEncoder::GPUComputePassEncoder(wgpu::ComputePassEncoder enc)
-        : enc_(std::move(enc)) {
+////////////////////////////////////////////////////////////////////////////////
+// wgpu::bindings::GPUComputePassEncoder
+////////////////////////////////////////////////////////////////////////////////
+GPUComputePassEncoder::GPUComputePassEncoder(wgpu::ComputePassEncoder enc) : enc_(std::move(enc)) {}
+
+void GPUComputePassEncoder::setPipeline(Napi::Env,
+                                        interop::Interface<interop::GPUComputePipeline> pipeline) {
+    enc_.SetPipeline(*pipeline.As<GPUComputePipeline>());
+}
+
+void GPUComputePassEncoder::dispatch(Napi::Env,
+                                     interop::GPUSize32 workgroupCountX,
+                                     interop::GPUSize32 workgroupCountY,
+                                     interop::GPUSize32 workgroupCountZ) {
+    enc_.Dispatch(workgroupCountX, workgroupCountY, workgroupCountZ);
+}
+
+void GPUComputePassEncoder::dispatchIndirect(Napi::Env,
+                                             interop::Interface<interop::GPUBuffer> indirectBuffer,
+                                             interop::GPUSize64 indirectOffset) {
+    enc_.DispatchIndirect(*indirectBuffer.As<GPUBuffer>(), indirectOffset);
+}
+
+void GPUComputePassEncoder::end(Napi::Env) {
+    enc_.End();
+}
+
+void GPUComputePassEncoder::setBindGroup(
+    Napi::Env env,
+    interop::GPUIndex32 index,
+    interop::Interface<interop::GPUBindGroup> bindGroup,
+    std::vector<interop::GPUBufferDynamicOffset> dynamicOffsets) {
+    Converter conv(env);
+
+    wgpu::BindGroup bg{};
+    uint32_t* offsets = nullptr;
+    uint32_t num_offsets = 0;
+    if (!conv(bg, bindGroup) || !conv(offsets, num_offsets, dynamicOffsets)) {
+        return;
     }
 
-    void GPUComputePassEncoder::setPipeline(
-        Napi::Env,
-        interop::Interface<interop::GPUComputePipeline> pipeline) {
-        enc_.SetPipeline(*pipeline.As<GPUComputePipeline>());
+    enc_.SetBindGroup(index, bg, num_offsets, offsets);
+}
+
+void GPUComputePassEncoder::setBindGroup(Napi::Env env,
+                                         interop::GPUIndex32 index,
+                                         interop::Interface<interop::GPUBindGroup> bindGroup,
+                                         interop::Uint32Array dynamicOffsetsData,
+                                         interop::GPUSize64 dynamicOffsetsDataStart,
+                                         interop::GPUSize32 dynamicOffsetsDataLength) {
+    Converter conv(env);
+
+    wgpu::BindGroup bg{};
+    if (!conv(bg, bindGroup)) {
+        return;
     }
 
-    void GPUComputePassEncoder::dispatch(Napi::Env,
-                                         interop::GPUSize32 workgroupCountX,
-                                         interop::GPUSize32 workgroupCountY,
-                                         interop::GPUSize32 workgroupCountZ) {
-        enc_.Dispatch(workgroupCountX, workgroupCountY, workgroupCountZ);
+    if (dynamicOffsetsDataStart > dynamicOffsetsData.ElementLength()) {
+        Napi::RangeError::New(env, "dynamicOffsetsDataStart is out of bound of dynamicOffsetData")
+            .ThrowAsJavaScriptException();
+        return;
     }
 
-    void GPUComputePassEncoder::dispatchIndirect(
-        Napi::Env,
-        interop::Interface<interop::GPUBuffer> indirectBuffer,
-        interop::GPUSize64 indirectOffset) {
-        enc_.DispatchIndirect(*indirectBuffer.As<GPUBuffer>(), indirectOffset);
+    if (dynamicOffsetsDataLength > dynamicOffsetsData.ElementLength() - dynamicOffsetsDataStart) {
+        Napi::RangeError::New(env,
+                              "dynamicOffsetsDataLength + dynamicOffsetsDataStart is out of "
+                              "bound of dynamicOffsetData")
+            .ThrowAsJavaScriptException();
+        return;
     }
 
-    void GPUComputePassEncoder::end(Napi::Env) {
-        enc_.End();
-    }
+    enc_.SetBindGroup(index, bg, dynamicOffsetsDataLength,
+                      dynamicOffsetsData.Data() + dynamicOffsetsDataStart);
+}
 
-    void GPUComputePassEncoder::setBindGroup(
-        Napi::Env env,
-        interop::GPUIndex32 index,
-        interop::Interface<interop::GPUBindGroup> bindGroup,
-        std::vector<interop::GPUBufferDynamicOffset> dynamicOffsets) {
-        Converter conv(env);
+void GPUComputePassEncoder::pushDebugGroup(Napi::Env, std::string groupLabel) {
+    enc_.PushDebugGroup(groupLabel.c_str());
+}
 
-        wgpu::BindGroup bg{};
-        uint32_t* offsets = nullptr;
-        uint32_t num_offsets = 0;
-        if (!conv(bg, bindGroup) || !conv(offsets, num_offsets, dynamicOffsets)) {
-            return;
-        }
+void GPUComputePassEncoder::popDebugGroup(Napi::Env) {
+    enc_.PopDebugGroup();
+}
 
-        enc_.SetBindGroup(index, bg, num_offsets, offsets);
-    }
+void GPUComputePassEncoder::insertDebugMarker(Napi::Env, std::string markerLabel) {
+    enc_.InsertDebugMarker(markerLabel.c_str());
+}
 
-    void GPUComputePassEncoder::setBindGroup(Napi::Env env,
-                                             interop::GPUIndex32 index,
-                                             interop::Interface<interop::GPUBindGroup> bindGroup,
-                                             interop::Uint32Array dynamicOffsetsData,
-                                             interop::GPUSize64 dynamicOffsetsDataStart,
-                                             interop::GPUSize32 dynamicOffsetsDataLength) {
-        Converter conv(env);
+std::variant<std::string, interop::UndefinedType> GPUComputePassEncoder::getLabel(Napi::Env) {
+    UNIMPLEMENTED();
+}
 
-        wgpu::BindGroup bg{};
-        if (!conv(bg, bindGroup)) {
-            return;
-        }
-
-        if (dynamicOffsetsDataStart > dynamicOffsetsData.ElementLength()) {
-            Napi::RangeError::New(env,
-                                  "dynamicOffsetsDataStart is out of bound of dynamicOffsetData")
-                .ThrowAsJavaScriptException();
-            return;
-        }
-
-        if (dynamicOffsetsDataLength >
-            dynamicOffsetsData.ElementLength() - dynamicOffsetsDataStart) {
-            Napi::RangeError::New(env,
-                                  "dynamicOffsetsDataLength + dynamicOffsetsDataStart is out of "
-                                  "bound of dynamicOffsetData")
-                .ThrowAsJavaScriptException();
-            return;
-        }
-
-        enc_.SetBindGroup(index, bg, dynamicOffsetsDataLength,
-                          dynamicOffsetsData.Data() + dynamicOffsetsDataStart);
-    }
-
-    void GPUComputePassEncoder::pushDebugGroup(Napi::Env, std::string groupLabel) {
-        enc_.PushDebugGroup(groupLabel.c_str());
-    }
-
-    void GPUComputePassEncoder::popDebugGroup(Napi::Env) {
-        enc_.PopDebugGroup();
-    }
-
-    void GPUComputePassEncoder::insertDebugMarker(Napi::Env, std::string markerLabel) {
-        enc_.InsertDebugMarker(markerLabel.c_str());
-    }
-
-    std::variant<std::string, interop::UndefinedType> GPUComputePassEncoder::getLabel(Napi::Env) {
-        UNIMPLEMENTED();
-    }
-
-    void GPUComputePassEncoder::setLabel(Napi::Env,
-                                         std::variant<std::string, interop::UndefinedType> value) {
-        UNIMPLEMENTED();
-    }
+void GPUComputePassEncoder::setLabel(Napi::Env,
+                                     std::variant<std::string, interop::UndefinedType> value) {
+    UNIMPLEMENTED();
+}
 
 }  // namespace wgpu::binding

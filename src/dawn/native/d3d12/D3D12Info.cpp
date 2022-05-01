@@ -24,101 +24,101 @@
 
 namespace dawn::native::d3d12 {
 
-    ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const Adapter& adapter) {
-        D3D12DeviceInfo info = {};
+ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const Adapter& adapter) {
+    D3D12DeviceInfo info = {};
 
-        // Newer builds replace D3D_FEATURE_DATA_ARCHITECTURE with
-        // D3D_FEATURE_DATA_ARCHITECTURE1. However, D3D_FEATURE_DATA_ARCHITECTURE can be used
-        // for backwards compat.
-        // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ne-d3d12-d3d12_feature
-        D3D12_FEATURE_DATA_ARCHITECTURE arch = {};
-        DAWN_TRY(CheckHRESULT(adapter.GetDevice()->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE,
-                                                                       &arch, sizeof(arch)),
-                              "ID3D12Device::CheckFeatureSupport"));
+    // Newer builds replace D3D_FEATURE_DATA_ARCHITECTURE with
+    // D3D_FEATURE_DATA_ARCHITECTURE1. However, D3D_FEATURE_DATA_ARCHITECTURE can be used
+    // for backwards compat.
+    // https://docs.microsoft.com/en-us/windows/desktop/api/d3d12/ne-d3d12-d3d12_feature
+    D3D12_FEATURE_DATA_ARCHITECTURE arch = {};
+    DAWN_TRY(CheckHRESULT(
+        adapter.GetDevice()->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &arch, sizeof(arch)),
+        "ID3D12Device::CheckFeatureSupport"));
 
-        info.isUMA = arch.UMA;
+    info.isUMA = arch.UMA;
 
-        D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
-        DAWN_TRY(CheckHRESULT(adapter.GetDevice()->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS,
-                                                                       &options, sizeof(options)),
-                              "ID3D12Device::CheckFeatureSupport"));
+    D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
+    DAWN_TRY(CheckHRESULT(adapter.GetDevice()->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS,
+                                                                   &options, sizeof(options)),
+                          "ID3D12Device::CheckFeatureSupport"));
 
-        info.resourceHeapTier = options.ResourceHeapTier;
+    info.resourceHeapTier = options.ResourceHeapTier;
 
-        // Windows builds 1809 and above can use the D3D12 render pass API. If we query
-        // CheckFeatureSupport for D3D12_FEATURE_D3D12_OPTIONS5 successfully, then we can use
-        // the render pass API.
-        info.supportsRenderPass = false;
-        D3D12_FEATURE_DATA_D3D12_OPTIONS5 featureOptions5 = {};
-        if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
-                D3D12_FEATURE_D3D12_OPTIONS5, &featureOptions5, sizeof(featureOptions5)))) {
-            // Performance regressions been observed when using a render pass on Intel graphics
-            // with RENDER_PASS_TIER_1 available, so fall back to a software emulated render
-            // pass on these platforms.
-            if (featureOptions5.RenderPassesTier < D3D12_RENDER_PASS_TIER_1 ||
-                !gpu_info::IsIntel(adapter.GetVendorId())) {
-                info.supportsRenderPass = true;
-            }
+    // Windows builds 1809 and above can use the D3D12 render pass API. If we query
+    // CheckFeatureSupport for D3D12_FEATURE_D3D12_OPTIONS5 successfully, then we can use
+    // the render pass API.
+    info.supportsRenderPass = false;
+    D3D12_FEATURE_DATA_D3D12_OPTIONS5 featureOptions5 = {};
+    if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
+            D3D12_FEATURE_D3D12_OPTIONS5, &featureOptions5, sizeof(featureOptions5)))) {
+        // Performance regressions been observed when using a render pass on Intel graphics
+        // with RENDER_PASS_TIER_1 available, so fall back to a software emulated render
+        // pass on these platforms.
+        if (featureOptions5.RenderPassesTier < D3D12_RENDER_PASS_TIER_1 ||
+            !gpu_info::IsIntel(adapter.GetVendorId())) {
+            info.supportsRenderPass = true;
         }
-
-        // Used to share resources cross-API. If we query CheckFeatureSupport for
-        // D3D12_FEATURE_D3D12_OPTIONS4 successfully, then we can use cross-API sharing.
-        info.supportsSharedResourceCapabilityTier1 = false;
-        D3D12_FEATURE_DATA_D3D12_OPTIONS4 featureOptions4 = {};
-        if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
-                D3D12_FEATURE_D3D12_OPTIONS4, &featureOptions4, sizeof(featureOptions4)))) {
-            // Tier 1 support additionally enables the NV12 format. Since only the NV12 format
-            // is used by Dawn, check for Tier 1.
-            if (featureOptions4.SharedResourceCompatibilityTier >=
-                D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_1) {
-                info.supportsSharedResourceCapabilityTier1 = true;
-            }
-        }
-
-        D3D12_FEATURE_DATA_SHADER_MODEL knownShaderModels[] = {{D3D_SHADER_MODEL_6_2},
-                                                               {D3D_SHADER_MODEL_6_1},
-                                                               {D3D_SHADER_MODEL_6_0},
-                                                               {D3D_SHADER_MODEL_5_1}};
-        uint32_t driverShaderModel = 0;
-        for (D3D12_FEATURE_DATA_SHADER_MODEL shaderModel : knownShaderModels) {
-            if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
-                    D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel)))) {
-                driverShaderModel = shaderModel.HighestShaderModel;
-                break;
-            }
-        }
-
-        if (driverShaderModel < D3D_SHADER_MODEL_5_1) {
-            return DAWN_INTERNAL_ERROR("Driver doesn't support Shader Model 5.1 or higher");
-        }
-
-        // D3D_SHADER_MODEL is encoded as 0xMm with M the major version and m the minor version
-        ASSERT(driverShaderModel <= 0xFF);
-        uint32_t shaderModelMajor = (driverShaderModel & 0xF0) >> 4;
-        uint32_t shaderModelMinor = (driverShaderModel & 0xF);
-
-        ASSERT(shaderModelMajor < 10);
-        ASSERT(shaderModelMinor < 10);
-        info.shaderModel = 10 * shaderModelMajor + shaderModelMinor;
-
-        // Profiles are always <stage>s_<minor>_<major> so we build the s_<minor>_major and add
-        // it to each of the stage's suffix.
-        std::wstring profileSuffix = L"s_M_n";
-        profileSuffix[2] = wchar_t('0' + shaderModelMajor);
-        profileSuffix[4] = wchar_t('0' + shaderModelMinor);
-
-        info.shaderProfiles[SingleShaderStage::Vertex] = L"v" + profileSuffix;
-        info.shaderProfiles[SingleShaderStage::Fragment] = L"p" + profileSuffix;
-        info.shaderProfiles[SingleShaderStage::Compute] = L"c" + profileSuffix;
-
-        D3D12_FEATURE_DATA_D3D12_OPTIONS4 featureData4 = {};
-        if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
-                D3D12_FEATURE_D3D12_OPTIONS4, &featureData4, sizeof(featureData4)))) {
-            info.supportsShaderFloat16 = driverShaderModel >= D3D_SHADER_MODEL_6_2 &&
-                                         featureData4.Native16BitShaderOpsSupported;
-        }
-
-        return std::move(info);
     }
+
+    // Used to share resources cross-API. If we query CheckFeatureSupport for
+    // D3D12_FEATURE_D3D12_OPTIONS4 successfully, then we can use cross-API sharing.
+    info.supportsSharedResourceCapabilityTier1 = false;
+    D3D12_FEATURE_DATA_D3D12_OPTIONS4 featureOptions4 = {};
+    if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
+            D3D12_FEATURE_D3D12_OPTIONS4, &featureOptions4, sizeof(featureOptions4)))) {
+        // Tier 1 support additionally enables the NV12 format. Since only the NV12 format
+        // is used by Dawn, check for Tier 1.
+        if (featureOptions4.SharedResourceCompatibilityTier >=
+            D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_1) {
+            info.supportsSharedResourceCapabilityTier1 = true;
+        }
+    }
+
+    D3D12_FEATURE_DATA_SHADER_MODEL knownShaderModels[] = {{D3D_SHADER_MODEL_6_2},
+                                                           {D3D_SHADER_MODEL_6_1},
+                                                           {D3D_SHADER_MODEL_6_0},
+                                                           {D3D_SHADER_MODEL_5_1}};
+    uint32_t driverShaderModel = 0;
+    for (D3D12_FEATURE_DATA_SHADER_MODEL shaderModel : knownShaderModels) {
+        if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
+                D3D12_FEATURE_SHADER_MODEL, &shaderModel, sizeof(shaderModel)))) {
+            driverShaderModel = shaderModel.HighestShaderModel;
+            break;
+        }
+    }
+
+    if (driverShaderModel < D3D_SHADER_MODEL_5_1) {
+        return DAWN_INTERNAL_ERROR("Driver doesn't support Shader Model 5.1 or higher");
+    }
+
+    // D3D_SHADER_MODEL is encoded as 0xMm with M the major version and m the minor version
+    ASSERT(driverShaderModel <= 0xFF);
+    uint32_t shaderModelMajor = (driverShaderModel & 0xF0) >> 4;
+    uint32_t shaderModelMinor = (driverShaderModel & 0xF);
+
+    ASSERT(shaderModelMajor < 10);
+    ASSERT(shaderModelMinor < 10);
+    info.shaderModel = 10 * shaderModelMajor + shaderModelMinor;
+
+    // Profiles are always <stage>s_<minor>_<major> so we build the s_<minor>_major and add
+    // it to each of the stage's suffix.
+    std::wstring profileSuffix = L"s_M_n";
+    profileSuffix[2] = wchar_t('0' + shaderModelMajor);
+    profileSuffix[4] = wchar_t('0' + shaderModelMinor);
+
+    info.shaderProfiles[SingleShaderStage::Vertex] = L"v" + profileSuffix;
+    info.shaderProfiles[SingleShaderStage::Fragment] = L"p" + profileSuffix;
+    info.shaderProfiles[SingleShaderStage::Compute] = L"c" + profileSuffix;
+
+    D3D12_FEATURE_DATA_D3D12_OPTIONS4 featureData4 = {};
+    if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS4,
+                                                           &featureData4, sizeof(featureData4)))) {
+        info.supportsShaderFloat16 =
+            driverShaderModel >= D3D_SHADER_MODEL_6_2 && featureData4.Native16BitShaderOpsSupported;
+    }
+
+    return std::move(info);
+}
 
 }  // namespace dawn::native::d3d12

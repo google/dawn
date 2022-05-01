@@ -17,67 +17,66 @@
 
 namespace dawn::wire {
 
-    WireServer::WireServer(const WireServerDescriptor& descriptor)
-        : mImpl(new server::Server(*descriptor.procs,
-                                   descriptor.serializer,
-                                   descriptor.memoryTransferService)) {
-    }
+WireServer::WireServer(const WireServerDescriptor& descriptor)
+    : mImpl(new server::Server(*descriptor.procs,
+                               descriptor.serializer,
+                               descriptor.memoryTransferService)) {}
 
-    WireServer::~WireServer() {
-        mImpl.reset();
-    }
+WireServer::~WireServer() {
+    mImpl.reset();
+}
 
-    const volatile char* WireServer::HandleCommands(const volatile char* commands, size_t size) {
-        return mImpl->HandleCommands(commands, size);
-    }
+const volatile char* WireServer::HandleCommands(const volatile char* commands, size_t size) {
+    return mImpl->HandleCommands(commands, size);
+}
 
-    bool WireServer::InjectTexture(WGPUTexture texture,
-                                   uint32_t id,
-                                   uint32_t generation,
-                                   uint32_t deviceId,
-                                   uint32_t deviceGeneration) {
-        return mImpl->InjectTexture(texture, id, generation, deviceId, deviceGeneration);
-    }
+bool WireServer::InjectTexture(WGPUTexture texture,
+                               uint32_t id,
+                               uint32_t generation,
+                               uint32_t deviceId,
+                               uint32_t deviceGeneration) {
+    return mImpl->InjectTexture(texture, id, generation, deviceId, deviceGeneration);
+}
 
-    bool WireServer::InjectSwapChain(WGPUSwapChain swapchain,
-                                     uint32_t id,
-                                     uint32_t generation,
-                                     uint32_t deviceId,
-                                     uint32_t deviceGeneration) {
-        return mImpl->InjectSwapChain(swapchain, id, generation, deviceId, deviceGeneration);
-    }
+bool WireServer::InjectSwapChain(WGPUSwapChain swapchain,
+                                 uint32_t id,
+                                 uint32_t generation,
+                                 uint32_t deviceId,
+                                 uint32_t deviceGeneration) {
+    return mImpl->InjectSwapChain(swapchain, id, generation, deviceId, deviceGeneration);
+}
 
-    bool WireServer::InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation) {
-        return mImpl->InjectDevice(device, id, generation);
-    }
+bool WireServer::InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation) {
+    return mImpl->InjectDevice(device, id, generation);
+}
 
-    bool WireServer::InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generation) {
-        return mImpl->InjectInstance(instance, id, generation);
-    }
+bool WireServer::InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generation) {
+    return mImpl->InjectInstance(instance, id, generation);
+}
 
-    WGPUDevice WireServer::GetDevice(uint32_t id, uint32_t generation) {
-        return mImpl->GetDevice(id, generation);
-    }
+WGPUDevice WireServer::GetDevice(uint32_t id, uint32_t generation) {
+    return mImpl->GetDevice(id, generation);
+}
 
-    namespace server {
-        MemoryTransferService::MemoryTransferService() = default;
+namespace server {
+MemoryTransferService::MemoryTransferService() = default;
 
-        MemoryTransferService::~MemoryTransferService() = default;
+MemoryTransferService::~MemoryTransferService() = default;
 
-        MemoryTransferService::ReadHandle::ReadHandle() = default;
+MemoryTransferService::ReadHandle::ReadHandle() = default;
 
-        MemoryTransferService::ReadHandle::~ReadHandle() = default;
+MemoryTransferService::ReadHandle::~ReadHandle() = default;
 
-        MemoryTransferService::WriteHandle::WriteHandle() = default;
+MemoryTransferService::WriteHandle::WriteHandle() = default;
 
-        MemoryTransferService::WriteHandle::~WriteHandle() = default;
+MemoryTransferService::WriteHandle::~WriteHandle() = default;
 
-        void MemoryTransferService::WriteHandle::SetTarget(void* data) {
-            mTargetData = data;
-        }
-        void MemoryTransferService::WriteHandle::SetDataLength(size_t dataLength) {
-            mDataLength = dataLength;
-        }
-    }  // namespace server
+void MemoryTransferService::WriteHandle::SetTarget(void* data) {
+    mTargetData = data;
+}
+void MemoryTransferService::WriteHandle::SetDataLength(size_t dataLength) {
+    mDataLength = dataLength;
+}
+}  // namespace server
 
 }  // namespace dawn::wire

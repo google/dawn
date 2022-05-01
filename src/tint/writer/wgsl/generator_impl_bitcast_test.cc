@@ -20,14 +20,14 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Bitcast) {
-  auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr(1));
-  WrapInFunction(bitcast);
+    auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr(1));
+    WrapInFunction(bitcast);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
-  EXPECT_EQ(out.str(), "bitcast<f32>(1)");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
+    EXPECT_EQ(out.str(), "bitcast<f32>(1)");
 }
 
 }  // namespace

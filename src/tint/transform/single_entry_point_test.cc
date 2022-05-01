@@ -24,84 +24,83 @@ namespace {
 using SingleEntryPointTest = TransformTest;
 
 TEST_F(SingleEntryPointTest, Error_MissingTransformData) {
-  auto* src = "";
+    auto* src = "";
 
-  auto* expect =
-      "error: missing transform data for tint::transform::SingleEntryPoint";
+    auto* expect = "error: missing transform data for tint::transform::SingleEntryPoint";
 
-  auto got = Run<SingleEntryPoint>(src);
+    auto got = Run<SingleEntryPoint>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SingleEntryPointTest, Error_NoEntryPoints) {
-  auto* src = "";
+    auto* src = "";
 
-  auto* expect = "error: entry point 'main' not found";
+    auto* expect = "error: entry point 'main' not found";
 
-  DataMap data;
-  data.Add<SingleEntryPoint::Config>("main");
-  auto got = Run<SingleEntryPoint>(src, data);
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>("main");
+    auto got = Run<SingleEntryPoint>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SingleEntryPointTest, Error_InvalidEntryPoint) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn main() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
 )";
 
-  auto* expect = "error: entry point '_' not found";
+    auto* expect = "error: entry point '_' not found";
 
-  SingleEntryPoint::Config cfg("_");
+    SingleEntryPoint::Config cfg("_");
 
-  DataMap data;
-  data.Add<SingleEntryPoint::Config>(cfg);
-  auto got = Run<SingleEntryPoint>(src, data);
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SingleEntryPointTest, Error_NotAnEntryPoint) {
-  auto* src = R"(
+    auto* src = R"(
 fn foo() {}
 
 @stage(fragment)
 fn main() {}
 )";
 
-  auto* expect = "error: entry point 'foo' not found";
+    auto* expect = "error: entry point 'foo' not found";
 
-  SingleEntryPoint::Config cfg("foo");
+    SingleEntryPoint::Config cfg("foo");
 
-  DataMap data;
-  data.Add<SingleEntryPoint::Config>(cfg);
-  auto got = Run<SingleEntryPoint>(src, data);
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SingleEntryPointTest, SingleEntryPoint) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main() {
 }
 )";
 
-  SingleEntryPoint::Config cfg("main");
+    SingleEntryPoint::Config cfg("main");
 
-  DataMap data;
-  data.Add<SingleEntryPoint::Config>(cfg);
-  auto got = Run<SingleEntryPoint>(src, data);
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
 
-  EXPECT_EQ(src, str(got));
+    EXPECT_EQ(src, str(got));
 }
 
 TEST_F(SingleEntryPointTest, MultipleEntryPoints) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn vert_main() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
@@ -120,23 +119,23 @@ fn comp_main2() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(compute) @workgroup_size(1)
 fn comp_main1() {
 }
 )";
 
-  SingleEntryPoint::Config cfg("comp_main1");
+    SingleEntryPoint::Config cfg("comp_main1");
 
-  DataMap data;
-  data.Add<SingleEntryPoint::Config>(cfg);
-  auto got = Run<SingleEntryPoint>(src, data);
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SingleEntryPointTest, GlobalVariables) {
-  auto* src = R"(
+    auto* src = R"(
 var<private> a : f32;
 
 var<private> b : f32;
@@ -167,7 +166,7 @@ fn comp_main2() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> c : f32;
 
 @stage(compute) @workgroup_size(1)
@@ -176,17 +175,17 @@ fn comp_main1() {
 }
 )";
 
-  SingleEntryPoint::Config cfg("comp_main1");
+    SingleEntryPoint::Config cfg("comp_main1");
 
-  DataMap data;
-  data.Add<SingleEntryPoint::Config>(cfg);
-  auto got = Run<SingleEntryPoint>(src, data);
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SingleEntryPointTest, GlobalConstants) {
-  auto* src = R"(
+    auto* src = R"(
 let a : f32 = 1.0;
 
 let b : f32 = 1.0;
@@ -217,7 +216,7 @@ fn comp_main2() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 let c : f32 = 1.0;
 
 @stage(compute) @workgroup_size(1)
@@ -226,17 +225,17 @@ fn comp_main1() {
 }
 )";
 
-  SingleEntryPoint::Config cfg("comp_main1");
+    SingleEntryPoint::Config cfg("comp_main1");
 
-  DataMap data;
-  data.Add<SingleEntryPoint::Config>(cfg);
-  auto got = Run<SingleEntryPoint>(src, data);
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SingleEntryPointTest, WorkgroupSizeLetPreserved) {
-  auto* src = R"(
+    auto* src = R"(
 let size : i32 = 1;
 
 @stage(compute) @workgroup_size(size)
@@ -244,19 +243,19 @@ fn main() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  SingleEntryPoint::Config cfg("main");
+    SingleEntryPoint::Config cfg("main");
 
-  DataMap data;
-  data.Add<SingleEntryPoint::Config>(cfg);
-  auto got = Run<SingleEntryPoint>(src, data);
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SingleEntryPointTest, OverridableConstants) {
-  auto* src = R"(
+    auto* src = R"(
 @id(1001) override c1 : u32 = 1u;
           override c2 : u32 = 1u;
 @id(0)    override c3 : u32 = 1u;
@@ -288,9 +287,9 @@ fn comp_main5() {
 }
 )";
 
-  {
-    SingleEntryPoint::Config cfg("comp_main1");
-    auto* expect = R"(
+    {
+        SingleEntryPoint::Config cfg("comp_main1");
+        auto* expect = R"(
 @id(1001) override c1 : u32 = 1u;
 
 @stage(compute) @workgroup_size(1)
@@ -298,17 +297,17 @@ fn comp_main1() {
   let local_d = c1;
 }
 )";
-    DataMap data;
-    data.Add<SingleEntryPoint::Config>(cfg);
-    auto got = Run<SingleEntryPoint>(src, data);
-    EXPECT_EQ(expect, str(got));
-  }
+        DataMap data;
+        data.Add<SingleEntryPoint::Config>(cfg);
+        auto got = Run<SingleEntryPoint>(src, data);
+        EXPECT_EQ(expect, str(got));
+    }
 
-  {
-    SingleEntryPoint::Config cfg("comp_main2");
-    // The decorator is replaced with the one with explicit id
-    // And should not be affected by other constants stripped away
-    auto* expect = R"(
+    {
+        SingleEntryPoint::Config cfg("comp_main2");
+        // The decorator is replaced with the one with explicit id
+        // And should not be affected by other constants stripped away
+        auto* expect = R"(
 @id(1) override c2 : u32 = 1u;
 
 @stage(compute) @workgroup_size(1)
@@ -316,15 +315,15 @@ fn comp_main2() {
   let local_d = c2;
 }
 )";
-    DataMap data;
-    data.Add<SingleEntryPoint::Config>(cfg);
-    auto got = Run<SingleEntryPoint>(src, data);
-    EXPECT_EQ(expect, str(got));
-  }
+        DataMap data;
+        data.Add<SingleEntryPoint::Config>(cfg);
+        auto got = Run<SingleEntryPoint>(src, data);
+        EXPECT_EQ(expect, str(got));
+    }
 
-  {
-    SingleEntryPoint::Config cfg("comp_main3");
-    auto* expect = R"(
+    {
+        SingleEntryPoint::Config cfg("comp_main3");
+        auto* expect = R"(
 @id(0) override c3 : u32 = 1u;
 
 @stage(compute) @workgroup_size(1)
@@ -332,15 +331,15 @@ fn comp_main3() {
   let local_d = c3;
 }
 )";
-    DataMap data;
-    data.Add<SingleEntryPoint::Config>(cfg);
-    auto got = Run<SingleEntryPoint>(src, data);
-    EXPECT_EQ(expect, str(got));
-  }
+        DataMap data;
+        data.Add<SingleEntryPoint::Config>(cfg);
+        auto got = Run<SingleEntryPoint>(src, data);
+        EXPECT_EQ(expect, str(got));
+    }
 
-  {
-    SingleEntryPoint::Config cfg("comp_main4");
-    auto* expect = R"(
+    {
+        SingleEntryPoint::Config cfg("comp_main4");
+        auto* expect = R"(
 @id(9999) override c4 : u32 = 1u;
 
 @stage(compute) @workgroup_size(1)
@@ -348,29 +347,29 @@ fn comp_main4() {
   let local_d = c4;
 }
 )";
-    DataMap data;
-    data.Add<SingleEntryPoint::Config>(cfg);
-    auto got = Run<SingleEntryPoint>(src, data);
-    EXPECT_EQ(expect, str(got));
-  }
+        DataMap data;
+        data.Add<SingleEntryPoint::Config>(cfg);
+        auto got = Run<SingleEntryPoint>(src, data);
+        EXPECT_EQ(expect, str(got));
+    }
 
-  {
-    SingleEntryPoint::Config cfg("comp_main5");
-    auto* expect = R"(
+    {
+        SingleEntryPoint::Config cfg("comp_main5");
+        auto* expect = R"(
 @stage(compute) @workgroup_size(1)
 fn comp_main5() {
   let local_d = 1u;
 }
 )";
-    DataMap data;
-    data.Add<SingleEntryPoint::Config>(cfg);
-    auto got = Run<SingleEntryPoint>(src, data);
-    EXPECT_EQ(expect, str(got));
-  }
+        DataMap data;
+        data.Add<SingleEntryPoint::Config>(cfg);
+        auto got = Run<SingleEntryPoint>(src, data);
+        EXPECT_EQ(expect, str(got));
+    }
 }
 
 TEST_F(SingleEntryPointTest, CalledFunctions) {
-  auto* src = R"(
+    auto* src = R"(
 fn inner1() {
 }
 
@@ -401,7 +400,7 @@ fn comp_main2() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn inner1() {
 }
 
@@ -419,17 +418,17 @@ fn comp_main1() {
 }
 )";
 
-  SingleEntryPoint::Config cfg("comp_main1");
+    SingleEntryPoint::Config cfg("comp_main1");
 
-  DataMap data;
-  data.Add<SingleEntryPoint::Config>(cfg);
-  auto got = Run<SingleEntryPoint>(src, data);
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SingleEntryPointTest, GlobalsReferencedByCalledFunctions) {
-  auto* src = R"(
+    auto* src = R"(
 var<private> inner1_var : f32;
 
 var<private> inner2_var : f32;
@@ -475,7 +474,7 @@ fn comp_main2() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> inner1_var : f32;
 
 var<private> inner_shared_var : f32;
@@ -502,13 +501,13 @@ fn comp_main1() {
 }
 )";
 
-  SingleEntryPoint::Config cfg("comp_main1");
+    SingleEntryPoint::Config cfg("comp_main1");
 
-  DataMap data;
-  data.Add<SingleEntryPoint::Config>(cfg);
-  auto got = Run<SingleEntryPoint>(src, data);
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

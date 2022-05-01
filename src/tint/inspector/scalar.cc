@@ -19,55 +19,55 @@ namespace tint::inspector {
 Scalar::Scalar() : type_(kNull) {}
 
 Scalar::Scalar(bool val) : type_(kBool) {
-  value_.b = val;
+    value_.b = val;
 }
 
 Scalar::Scalar(uint32_t val) : type_(kU32) {
-  value_.u = val;
+    value_.u = val;
 }
 
 Scalar::Scalar(int32_t val) : type_(kI32) {
-  value_.i = val;
+    value_.i = val;
 }
 
 Scalar::Scalar(float val) : type_(kFloat) {
-  value_.f = val;
+    value_.f = val;
 }
 
 bool Scalar::IsNull() const {
-  return type_ == kNull;
+    return type_ == kNull;
 }
 
 bool Scalar::IsBool() const {
-  return type_ == kBool;
+    return type_ == kBool;
 }
 
 bool Scalar::IsU32() const {
-  return type_ == kU32;
+    return type_ == kU32;
 }
 
 bool Scalar::IsI32() const {
-  return type_ == kI32;
+    return type_ == kI32;
 }
 
 bool Scalar::IsFloat() const {
-  return type_ == kFloat;
+    return type_ == kFloat;
 }
 
 bool Scalar::AsBool() const {
-  return value_.b;
+    return value_.b;
 }
 
 uint32_t Scalar::AsU32() const {
-  return value_.u;
+    return value_.u;
 }
 
 int32_t Scalar::AsI32() const {
-  return value_.i;
+    return value_.i;
 }
 
 float Scalar::AsFloat() const {
-  return value_.f;
+    return value_.f;
 }
 
 }  // namespace tint::inspector

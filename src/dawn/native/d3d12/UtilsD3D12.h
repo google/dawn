@@ -26,50 +26,47 @@
 
 namespace dawn::native::d3d12 {
 
-    ResultOrError<std::wstring> ConvertStringToWstring(const char* str);
+ResultOrError<std::wstring> ConvertStringToWstring(const char* str);
 
-    D3D12_COMPARISON_FUNC ToD3D12ComparisonFunc(wgpu::CompareFunction func);
+D3D12_COMPARISON_FUNC ToD3D12ComparisonFunc(wgpu::CompareFunction func);
 
-    D3D12_TEXTURE_COPY_LOCATION ComputeTextureCopyLocationForTexture(const Texture* texture,
-                                                                     uint32_t level,
-                                                                     uint32_t layer,
-                                                                     Aspect aspect);
+D3D12_TEXTURE_COPY_LOCATION ComputeTextureCopyLocationForTexture(const Texture* texture,
+                                                                 uint32_t level,
+                                                                 uint32_t layer,
+                                                                 Aspect aspect);
 
-    D3D12_TEXTURE_COPY_LOCATION ComputeBufferLocationForCopyTextureRegion(
-        const Texture* texture,
-        ID3D12Resource* bufferResource,
-        const Extent3D& bufferSize,
-        const uint64_t offset,
-        const uint32_t rowPitch,
-        Aspect aspect);
-    D3D12_BOX ComputeD3D12BoxFromOffsetAndSize(const Origin3D& offset, const Extent3D& copySize);
+D3D12_TEXTURE_COPY_LOCATION ComputeBufferLocationForCopyTextureRegion(
+    const Texture* texture,
+    ID3D12Resource* bufferResource,
+    const Extent3D& bufferSize,
+    const uint64_t offset,
+    const uint32_t rowPitch,
+    Aspect aspect);
+D3D12_BOX ComputeD3D12BoxFromOffsetAndSize(const Origin3D& offset, const Extent3D& copySize);
 
-    bool IsTypeless(DXGI_FORMAT format);
+bool IsTypeless(DXGI_FORMAT format);
 
-    enum class BufferTextureCopyDirection {
-        B2T,
-        T2B,
-    };
+enum class BufferTextureCopyDirection {
+    B2T,
+    T2B,
+};
 
-    void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection direction,
-                                                 ID3D12GraphicsCommandList* commandList,
-                                                 ID3D12Resource* bufferResource,
-                                                 const uint64_t offset,
-                                                 const uint32_t bytesPerRow,
-                                                 const uint32_t rowsPerImage,
-                                                 const TextureCopy& textureCopy,
-                                                 const Extent3D& copySize);
+void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection direction,
+                                             ID3D12GraphicsCommandList* commandList,
+                                             ID3D12Resource* bufferResource,
+                                             const uint64_t offset,
+                                             const uint32_t bytesPerRow,
+                                             const uint32_t rowsPerImage,
+                                             const TextureCopy& textureCopy,
+                                             const Extent3D& copySize);
 
-    void RecordBufferTextureCopy(BufferTextureCopyDirection direction,
-                                 ID3D12GraphicsCommandList* commandList,
-                                 const BufferCopy& bufferCopy,
-                                 const TextureCopy& textureCopy,
-                                 const Extent3D& copySize);
+void RecordBufferTextureCopy(BufferTextureCopyDirection direction,
+                             ID3D12GraphicsCommandList* commandList,
+                             const BufferCopy& bufferCopy,
+                             const TextureCopy& textureCopy,
+                             const Extent3D& copySize);
 
-    void SetDebugName(Device* device,
-                      ID3D12Object* object,
-                      const char* prefix,
-                      std::string label = "");
+void SetDebugName(Device* device, ID3D12Object* object, const char* prefix, std::string label = "");
 
 }  // namespace dawn::native::d3d12
 

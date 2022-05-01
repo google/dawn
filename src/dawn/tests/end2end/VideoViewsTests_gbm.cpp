@@ -27,16 +27,15 @@
 // "linux-chromeos-rel"'s gbm.h is too old to compile, missing this change at least:
 // https://chromium-review.googlesource.com/c/chromiumos/platform/minigbm/+/1963001/10/gbm.h#244
 #ifndef MINIGBM
-#    define GBM_BO_USE_TEXTURING (1 << 5)
-#    define GBM_BO_USE_SW_WRITE_RARELY (1 << 12)
-#    define GBM_BO_USE_HW_VIDEO_DECODER (1 << 13)
+#define GBM_BO_USE_TEXTURING (1 << 5)
+#define GBM_BO_USE_SW_WRITE_RARELY (1 << 12)
+#define GBM_BO_USE_HW_VIDEO_DECODER (1 << 13)
 #endif
 
 class PlatformTextureGbm : public VideoViewsTestBackend::PlatformTexture {
   public:
     PlatformTextureGbm(wgpu::Texture&& texture, gbm_bo* gbmBo)
-        : PlatformTexture(std::move(texture)), mGbmBo(gbmBo) {
-    }
+        : PlatformTexture(std::move(texture)), mGbmBo(gbmBo) {}
     ~PlatformTextureGbm() override = default;
 
     // TODO(chromium:1258986): Add DISJOINT vkImage support for multi-plannar formats.
@@ -52,9 +51,7 @@ class PlatformTextureGbm : public VideoViewsTestBackend::PlatformTexture {
         return true;
     }
 
-    gbm_bo* GetGbmBo() {
-        return mGbmBo;
-    }
+    gbm_bo* GetGbmBo() { return mGbmBo; }
 
   private:
     gbm_bo* mGbmBo = nullptr;
@@ -67,9 +64,7 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
         mGbmDevice = CreateGbmDevice();
     }
 
-    void OnTearDown() override {
-        gbm_device_destroy(mGbmDevice);
-    }
+    void OnTearDown() override { gbm_device_destroy(mGbmDevice); }
 
   private:
     gbm_device* CreateGbmDevice() {

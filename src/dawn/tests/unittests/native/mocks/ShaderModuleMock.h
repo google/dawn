@@ -25,16 +25,16 @@
 
 namespace dawn::native {
 
-    class ShaderModuleMock : public ShaderModuleBase {
-      public:
-        explicit ShaderModuleMock(DeviceBase* device);
-        ~ShaderModuleMock() override = default;
+class ShaderModuleMock : public ShaderModuleBase {
+  public:
+    explicit ShaderModuleMock(DeviceBase* device);
+    ~ShaderModuleMock() override = default;
 
-        MOCK_METHOD(void, DestroyImpl, (), (override));
+    MOCK_METHOD(void, DestroyImpl, (), (override));
 
-        // Creates a shader module mock based on the wgsl source.
-        static ResultOrError<Ref<ShaderModuleMock>> Create(DeviceBase* device, const char* source);
-    };
+    // Creates a shader module mock based on the wgsl source.
+    static ResultOrError<Ref<ShaderModuleMock>> Create(DeviceBase* device, const char* source);
+};
 
 }  // namespace dawn::native
 

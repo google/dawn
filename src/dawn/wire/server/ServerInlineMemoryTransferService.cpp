@@ -21,75 +21,70 @@
 
 namespace dawn::wire::server {
 
-    class InlineMemoryTransferService : public MemoryTransferService {
+class InlineMemoryTransferService : public MemoryTransferService {
+  public:
+    class ReadHandleImpl : public ReadHandle {
       public:
-        class ReadHandleImpl : public ReadHandle {
-          public:
-            ReadHandleImpl() {
-            }
-            ~ReadHandleImpl() override = default;
+        ReadHandleImpl() {}
+        ~ReadHandleImpl() override = default;
 
-            size_t SizeOfSerializeDataUpdate(size_t offset, size_t size) override {
-                return size;
-            }
+        size_t SizeOfSerializeDataUpdate(size_t offset, size_t size) override { return size; }
 
-            void SerializeDataUpdate(const void* data,
-                                     size_t offset,
-                                     size_t size,
-                                     void* serializePointer) override {
-                if (size > 0) {
-                    ASSERT(data != nullptr);
-                    ASSERT(serializePointer != nullptr);
-                    memcpy(serializePointer, data, size);
-                }
+        void SerializeDataUpdate(const void* data,
+                                 size_t offset,
+                                 size_t size,
+                                 void* serializePointer) override {
+            if (size > 0) {
+                ASSERT(data != nullptr);
+                ASSERT(serializePointer != nullptr);
+                memcpy(serializePointer, data, size);
             }
-        };
-
-        class WriteHandleImpl : public WriteHandle {
-          public:
-            WriteHandleImpl() {
-            }
-            ~WriteHandleImpl() override = default;
-
-            bool DeserializeDataUpdate(const void* deserializePointer,
-                                       size_t deserializeSize,
-                                       size_t offset,
-                                       size_t size) override {
-                if (deserializeSize != size || mTargetData == nullptr ||
-                    deserializePointer == nullptr) {
-                    return false;
-                }
-                if ((offset >= mDataLength && offset > 0) || size > mDataLength - offset) {
-                    return false;
-                }
-                memcpy(static_cast<uint8_t*>(mTargetData) + offset, deserializePointer, size);
-                return true;
-            }
-        };
-
-        InlineMemoryTransferService() {
         }
-        ~InlineMemoryTransferService() override = default;
+    };
 
-        bool DeserializeReadHandle(const void* deserializePointer,
+    class WriteHandleImpl : public WriteHandle {
+      public:
+        WriteHandleImpl() {}
+        ~WriteHandleImpl() override = default;
+
+        bool DeserializeDataUpdate(const void* deserializePointer,
                                    size_t deserializeSize,
-                                   ReadHandle** readHandle) override {
-            ASSERT(readHandle != nullptr);
-            *readHandle = new ReadHandleImpl();
-            return true;
-        }
-
-        bool DeserializeWriteHandle(const void* deserializePointer,
-                                    size_t deserializeSize,
-                                    WriteHandle** writeHandle) override {
-            ASSERT(writeHandle != nullptr);
-            *writeHandle = new WriteHandleImpl();
+                                   size_t offset,
+                                   size_t size) override {
+            if (deserializeSize != size || mTargetData == nullptr ||
+                deserializePointer == nullptr) {
+                return false;
+            }
+            if ((offset >= mDataLength && offset > 0) || size > mDataLength - offset) {
+                return false;
+            }
+            memcpy(static_cast<uint8_t*>(mTargetData) + offset, deserializePointer, size);
             return true;
         }
     };
 
-    std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService() {
-        return std::make_unique<InlineMemoryTransferService>();
+    InlineMemoryTransferService() {}
+    ~InlineMemoryTransferService() override = default;
+
+    bool DeserializeReadHandle(const void* deserializePointer,
+                               size_t deserializeSize,
+                               ReadHandle** readHandle) override {
+        ASSERT(readHandle != nullptr);
+        *readHandle = new ReadHandleImpl();
+        return true;
     }
+
+    bool DeserializeWriteHandle(const void* deserializePointer,
+                                size_t deserializeSize,
+                                WriteHandle** writeHandle) override {
+        ASSERT(writeHandle != nullptr);
+        *writeHandle = new WriteHandleImpl();
+        return true;
+    }
+};
+
+std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService() {
+    return std::make_unique<InlineMemoryTransferService>();
+}
 
 }  // namespace dawn::wire::server

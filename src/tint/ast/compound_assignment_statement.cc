@@ -26,24 +26,22 @@ CompoundAssignmentStatement::CompoundAssignmentStatement(ProgramID pid,
                                                          const Expression* r,
                                                          BinaryOp o)
     : Base(pid, src), lhs(l), rhs(r), op(o) {
-  TINT_ASSERT(AST, lhs);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, lhs, program_id);
-  TINT_ASSERT(AST, rhs);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, rhs, program_id);
+    TINT_ASSERT(AST, lhs);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, lhs, program_id);
+    TINT_ASSERT(AST, rhs);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, rhs, program_id);
 }
 
-CompoundAssignmentStatement::CompoundAssignmentStatement(
-    CompoundAssignmentStatement&&) = default;
+CompoundAssignmentStatement::CompoundAssignmentStatement(CompoundAssignmentStatement&&) = default;
 
 CompoundAssignmentStatement::~CompoundAssignmentStatement() = default;
 
-const CompoundAssignmentStatement* CompoundAssignmentStatement::Clone(
-    CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  auto* l = ctx->Clone(lhs);
-  auto* r = ctx->Clone(rhs);
-  return ctx->dst->create<CompoundAssignmentStatement>(src, l, r, op);
+const CompoundAssignmentStatement* CompoundAssignmentStatement::Clone(CloneContext* ctx) const {
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    auto* l = ctx->Clone(lhs);
+    auto* r = ctx->Clone(rhs);
+    return ctx->dst->create<CompoundAssignmentStatement>(src, l, r, op);
 }
 
 }  // namespace tint::ast

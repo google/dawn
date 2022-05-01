@@ -26,49 +26,48 @@ class SwitchStatement;
 namespace tint::sem {
 
 /// Holds semantic information about an switch statement
-class SwitchStatement final
-    : public Castable<SwitchStatement, CompoundStatement> {
- public:
-  /// Constructor
-  /// @param declaration the AST node for this switch statement
-  /// @param parent the owning statement
-  /// @param function the owning function
-  SwitchStatement(const ast::SwitchStatement* declaration,
-                  const CompoundStatement* parent,
-                  const sem::Function* function);
+class SwitchStatement final : public Castable<SwitchStatement, CompoundStatement> {
+  public:
+    /// Constructor
+    /// @param declaration the AST node for this switch statement
+    /// @param parent the owning statement
+    /// @param function the owning function
+    SwitchStatement(const ast::SwitchStatement* declaration,
+                    const CompoundStatement* parent,
+                    const sem::Function* function);
 
-  /// Destructor
-  ~SwitchStatement() override;
+    /// Destructor
+    ~SwitchStatement() override;
 
-  /// @return the AST node for this statement
-  const ast::SwitchStatement* Declaration() const;
+    /// @return the AST node for this statement
+    const ast::SwitchStatement* Declaration() const;
 };
 
 /// Holds semantic information about a switch case statement
 class CaseStatement final : public Castable<CaseStatement, CompoundStatement> {
- public:
-  /// Constructor
-  /// @param declaration the AST node for this case statement
-  /// @param parent the owning statement
-  /// @param function the owning function
-  CaseStatement(const ast::CaseStatement* declaration,
-                const CompoundStatement* parent,
-                const sem::Function* function);
+  public:
+    /// Constructor
+    /// @param declaration the AST node for this case statement
+    /// @param parent the owning statement
+    /// @param function the owning function
+    CaseStatement(const ast::CaseStatement* declaration,
+                  const CompoundStatement* parent,
+                  const sem::Function* function);
 
-  /// Destructor
-  ~CaseStatement() override;
+    /// Destructor
+    ~CaseStatement() override;
 
-  /// @return the AST node for this statement
-  const ast::CaseStatement* Declaration() const;
+    /// @return the AST node for this statement
+    const ast::CaseStatement* Declaration() const;
 
-  /// @param body the case body block statement
-  void SetBlock(const BlockStatement* body) { body_ = body; }
+    /// @param body the case body block statement
+    void SetBlock(const BlockStatement* body) { body_ = body; }
 
-  /// @returns the case body block statement
-  const BlockStatement* Body() const { return body_; }
+    /// @returns the case body block statement
+    const BlockStatement* Body() const { return body_; }
 
- private:
-  const BlockStatement* body_ = nullptr;
+  private:
+    const BlockStatement* body_ = nullptr;
 };
 
 }  // namespace tint::sem

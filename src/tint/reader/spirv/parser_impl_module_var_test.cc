@@ -29,21 +29,21 @@ using ::testing::HasSubstr;
 using ::testing::Not;
 
 std::string Preamble() {
-  return R"(
+    return R"(
    OpCapability Shader
    OpMemoryModel Logical Simple
 )";
 }
 
 std::string FragMain() {
-  return R"(
+    return R"(
    OpEntryPoint Fragment %main "main"
    OpExecutionMode %main OriginUpperLeft
 )";
 }
 
 std::string MainBody() {
-  return R"(
+    return R"(
    %main = OpFunction %void None %voidfn
    %main_entry = OpLabel
    OpReturn
@@ -52,7 +52,7 @@ std::string MainBody() {
 }
 
 std::string CommonCapabilities() {
-  return R"(
+    return R"(
     OpCapability Shader
     OpCapability SampleRateShading
     OpMemoryModel Logical Simple
@@ -60,7 +60,7 @@ std::string CommonCapabilities() {
 }
 
 std::string CommonTypes() {
-  return R"(
+    return R"(
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
 
@@ -95,14 +95,14 @@ std::string CommonTypes() {
 }
 
 std::string StructTypes() {
-  return R"(
+    return R"(
     %strct = OpTypeStruct %uint %float %arr2uint
 )";
 }
 
 // Returns layout annotations for types in StructTypes()
 std::string CommonLayout() {
-  return R"(
+    return R"(
     OpMemberDecorate %strct 0 Offset 0
     OpMemberDecorate %strct 1 Offset 4
     OpMemberDecorate %strct 2 Offset 8
@@ -111,50 +111,49 @@ std::string CommonLayout() {
 }
 
 TEST_F(SpvModuleScopeVarParserTest, NoVar) {
-  auto assembly = Preamble() + FragMain() + CommonTypes() + MainBody();
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_TRUE(p->BuildAndParseInternalModule()) << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_ast = test::ToString(p->program());
-  EXPECT_THAT(module_ast, Not(HasSubstr("Variable"))) << module_ast;
+    auto assembly = Preamble() + FragMain() + CommonTypes() + MainBody();
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_TRUE(p->BuildAndParseInternalModule()) << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_ast = test::ToString(p->program());
+    EXPECT_THAT(module_ast, Not(HasSubstr("Variable"))) << module_ast;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BadStorageClass_NotAWebGPUStorageClass) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
     %float = OpTypeFloat 32
     %ptr = OpTypePointer CrossWorkgroup %float
     %52 = OpVariable %ptr CrossWorkgroup
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
   )" + MainBody()));
-  EXPECT_TRUE(p->BuildInternalModule());
-  // Normally we should run ParserImpl::RegisterTypes before emitting
-  // variables. But defensive coding in EmitModuleScopeVariables lets
-  // us catch this error.
-  EXPECT_FALSE(p->EmitModuleScopeVariables()) << p->error();
-  EXPECT_THAT(p->error(), HasSubstr("unknown SPIR-V storage class: 5"));
+    EXPECT_TRUE(p->BuildInternalModule());
+    // Normally we should run ParserImpl::RegisterTypes before emitting
+    // variables. But defensive coding in EmitModuleScopeVariables lets
+    // us catch this error.
+    EXPECT_FALSE(p->EmitModuleScopeVariables()) << p->error();
+    EXPECT_THAT(p->error(), HasSubstr("unknown SPIR-V storage class: 5"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BadStorageClass_Function) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
     %float = OpTypeFloat 32
     %ptr = OpTypePointer Function %float
     %52 = OpVariable %ptr Function
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
   )" + MainBody()));
-  EXPECT_TRUE(p->BuildInternalModule());
-  // Normally we should run ParserImpl::RegisterTypes before emitting
-  // variables. But defensive coding in EmitModuleScopeVariables lets
-  // us catch this error.
-  EXPECT_FALSE(p->EmitModuleScopeVariables()) << p->error();
-  EXPECT_THAT(p->error(),
-              HasSubstr("invalid SPIR-V storage class 7 for module scope "
-                        "variable: %52 = OpVariable %3 Function"));
+    EXPECT_TRUE(p->BuildInternalModule());
+    // Normally we should run ParserImpl::RegisterTypes before emitting
+    // variables. But defensive coding in EmitModuleScopeVariables lets
+    // us catch this error.
+    EXPECT_FALSE(p->EmitModuleScopeVariables()) << p->error();
+    EXPECT_THAT(p->error(), HasSubstr("invalid SPIR-V storage class 7 for module scope "
+                                      "variable: %52 = OpVariable %3 Function"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BadPointerType) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
     %float = OpTypeFloat 32
     %fn_ty = OpTypeFunction %float
     %3 = OpTypePointer Private %fn_ty
@@ -162,17 +161,17 @@ TEST_F(SpvModuleScopeVarParserTest, BadPointerType) {
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
   )" + MainBody()));
-  EXPECT_TRUE(p->BuildInternalModule());
-  // Normally we should run ParserImpl::RegisterTypes before emitting
-  // variables. But defensive coding in EmitModuleScopeVariables lets
-  // us catch this error.
-  EXPECT_FALSE(p->EmitModuleScopeVariables());
-  EXPECT_THAT(p->error(), HasSubstr("internal error: failed to register Tint "
-                                    "AST type for SPIR-V type with ID: 3"));
+    EXPECT_TRUE(p->BuildInternalModule());
+    // Normally we should run ParserImpl::RegisterTypes before emitting
+    // variables. But defensive coding in EmitModuleScopeVariables lets
+    // us catch this error.
+    EXPECT_FALSE(p->EmitModuleScopeVariables());
+    EXPECT_THAT(p->error(), HasSubstr("internal error: failed to register Tint "
+                                      "AST type for SPIR-V type with ID: 3"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, NonPointerType) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
     %float = OpTypeFloat 32
     %5 = OpTypeFunction %float
     %3 = OpTypePointer Private %5
@@ -180,15 +179,13 @@ TEST_F(SpvModuleScopeVarParserTest, NonPointerType) {
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
   )" + MainBody()));
-  EXPECT_TRUE(p->BuildInternalModule());
-  EXPECT_FALSE(p->RegisterTypes());
-  EXPECT_THAT(
-      p->error(),
-      HasSubstr("SPIR-V pointer type with ID 3 has invalid pointee type 5"));
+    EXPECT_TRUE(p->BuildInternalModule());
+    EXPECT_FALSE(p->RegisterTypes());
+    EXPECT_THAT(p->error(), HasSubstr("SPIR-V pointer type with ID 3 has invalid pointee type 5"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, AnonWorkgroupVar) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
     %float = OpTypeFloat 32
     %ptr = OpTypePointer Workgroup %float
     %52 = OpVariable %ptr Workgroup
@@ -196,14 +193,14 @@ TEST_F(SpvModuleScopeVarParserTest, AnonWorkgroupVar) {
     %voidfn = OpTypeFunction %void
   )" + MainBody()));
 
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("var<workgroup> x_52 : f32;"));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<workgroup> x_52 : f32;"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, NamedWorkgroupVar) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
     OpName %52 "the_counter"
     %float = OpTypeFloat 32
     %ptr = OpTypePointer Workgroup %float
@@ -212,14 +209,14 @@ TEST_F(SpvModuleScopeVarParserTest, NamedWorkgroupVar) {
     %voidfn = OpTypeFunction %void
   )" + MainBody()));
 
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("var<workgroup> the_counter : f32;"));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<workgroup> the_counter : f32;"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, PrivateVar) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
     OpName %52 "my_own_private_idaho"
     %float = OpTypeFloat 32
     %ptr = OpTypePointer Private %float
@@ -228,19 +225,18 @@ TEST_F(SpvModuleScopeVarParserTest, PrivateVar) {
     %voidfn = OpTypeFunction %void
   )" + MainBody()));
 
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str,
-              HasSubstr("var<private> my_own_private_idaho : f32;"));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> my_own_private_idaho : f32;"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BuiltinVertexIndex) {
-  // This is the simple case for the vertex_index builtin,
-  // where the SPIR-V uses the same store type as in WGSL.
-  // See later for tests where the SPIR-V store type is signed
-  // integer, as in GLSL.
-  auto p = parser(test::Assemble(Preamble() + R"(
+    // This is the simple case for the vertex_index builtin,
+    // where the SPIR-V uses the same store type as in WGSL.
+    // See later for tests where the SPIR-V store type is signed
+    // integer, as in GLSL.
+    auto p = parser(test::Assemble(Preamble() + R"(
     OpEntryPoint Vertex %main "main" %52 %position
     OpName %position "position"
     OpDecorate %position BuiltIn Position
@@ -256,14 +252,14 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinVertexIndex) {
     %position = OpVariable %posty Output
   )" + MainBody()));
 
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("var<private> x_52 : u32;"));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_52 : u32;"));
 }
 
 std::string PerVertexPreamble() {
-  return R"(
+    return R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Vertex %main "main" %1
@@ -287,10 +283,9 @@ std::string PerVertexPreamble() {
 )";
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       BuiltinPosition_StoreWholeStruct_NotSupported) {
-  // Glslang does not generate this code pattern.
-  const std::string assembly = PerVertexPreamble() + R"(
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_StoreWholeStruct_NotSupported) {
+    // Glslang does not generate this code pattern.
+    const std::string assembly = PerVertexPreamble() + R"(
   %nil = OpConstantNull %10 ; the whole struct
 
   %main = OpFunction %void None %voidfn
@@ -299,48 +294,45 @@ TEST_F(SpvModuleScopeVarParserTest,
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_FALSE(p->BuildAndParseInternalModule()) << assembly;
-  EXPECT_THAT(p->error(), Eq("storing to the whole per-vertex structure is not "
-                             "supported: OpStore %1 %13"))
-      << p->error();
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_FALSE(p->BuildAndParseInternalModule()) << assembly;
+    EXPECT_THAT(p->error(), Eq("storing to the whole per-vertex structure is not "
+                               "supported: OpStore %1 %13"))
+        << p->error();
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       BuiltinPosition_IntermediateWholeStruct_NotSupported) {
-  const std::string assembly = PerVertexPreamble() + R"(
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_IntermediateWholeStruct_NotSupported) {
+    const std::string assembly = PerVertexPreamble() + R"(
   %main = OpFunction %void None %voidfn
   %entry = OpLabel
   %1000 = OpUndef %10
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_FALSE(p->BuildAndParseInternalModule()) << assembly;
-  EXPECT_THAT(p->error(), Eq("operations producing a per-vertex structure are "
-                             "not supported: %1000 = OpUndef %10"))
-      << p->error();
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_FALSE(p->BuildAndParseInternalModule()) << assembly;
+    EXPECT_THAT(p->error(), Eq("operations producing a per-vertex structure are "
+                               "not supported: %1000 = OpUndef %10"))
+        << p->error();
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       BuiltinPosition_IntermediatePtrWholeStruct_NotSupported) {
-  const std::string assembly = PerVertexPreamble() + R"(
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_IntermediatePtrWholeStruct_NotSupported) {
+    const std::string assembly = PerVertexPreamble() + R"(
   %main = OpFunction %void None %voidfn
   %entry = OpLabel
   %1000 = OpCopyObject %11 %1
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_FALSE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->error(),
-              Eq("operations producing a pointer to a per-vertex structure are "
-                 "not supported: %1000 = OpCopyObject %11 %1"))
-      << p->error();
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_FALSE(p->BuildAndParseInternalModule());
+    EXPECT_THAT(p->error(), Eq("operations producing a pointer to a per-vertex structure are "
+                               "not supported: %1000 = OpCopyObject %11 %1"))
+        << p->error();
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_StorePosition) {
-  const std::string assembly = PerVertexPreamble() + R"(
+    const std::string assembly = PerVertexPreamble() + R"(
   %ptr_v4float = OpTypePointer Output %12
   %nil = OpConstantNull %12
 
@@ -351,17 +343,15 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_StorePosition) {
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("gl_Position = vec4<f32>();"))
-      << module_str;
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("gl_Position = vec4<f32>();")) << module_str;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       BuiltinPosition_StorePosition_PerVertexStructOutOfOrderDecl) {
-  const std::string assembly = R"(
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_StorePosition_PerVertexStructOutOfOrderDecl) {
+    const std::string assembly = R"(
   OpCapability Shader
   OpMemoryModel Logical Simple
   OpEntryPoint Vertex %main "main" %1
@@ -395,17 +385,15 @@ TEST_F(SpvModuleScopeVarParserTest,
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("gl_Position = vec4<f32>();"))
-      << module_str;
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("gl_Position = vec4<f32>();")) << module_str;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       BuiltinPosition_StorePositionMember_OneAccessChain) {
-  const std::string assembly = PerVertexPreamble() + R"(
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_StorePositionMember_OneAccessChain) {
+    const std::string assembly = PerVertexPreamble() + R"(
   %ptr_float = OpTypePointer Output %float
   %nil = OpConstantNull %float
 
@@ -416,17 +404,16 @@ TEST_F(SpvModuleScopeVarParserTest,
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("gl_Position.y = 0.0;")) << module_str;
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("gl_Position.y = 0.0;")) << module_str;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       BuiltinPosition_StorePositionMember_TwoAccessChain) {
-  // The algorithm is smart enough to collapse it down.
-  const std::string assembly = PerVertexPreamble() + R"(
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_StorePositionMember_TwoAccessChain) {
+    // The algorithm is smart enough to collapse it down.
+    const std::string assembly = PerVertexPreamble() + R"(
   %ptr = OpTypePointer Output %12
   %ptr_float = OpTypePointer Output %float
   %nil = OpConstantNull %float
@@ -439,15 +426,15 @@ TEST_F(SpvModuleScopeVarParserTest,
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("gl_Position.y = 0.0;")) << module_str;
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("gl_Position.y = 0.0;")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Write1_IsErased) {
-  const std::string assembly = PerVertexPreamble() + R"(
+    const std::string assembly = PerVertexPreamble() + R"(
   %ptr = OpTypePointer Output %float
   %one = OpConstant %float 1.0
 
@@ -458,11 +445,11 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Write1_IsErased) {
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_EQ(module_str, R"(var<private> gl_Position : vec4<f32>;
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_EQ(module_str, R"(var<private> gl_Position : vec4<f32>;
 
 fn main_1() {
   return;
@@ -482,7 +469,7 @@ fn main() -> main_out {
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_WriteNon1_IsError) {
-  const std::string assembly = PerVertexPreamble() + R"(
+    const std::string assembly = PerVertexPreamble() + R"(
   %ptr = OpTypePointer Output %float
   %999 = OpConstant %float 2.0
 
@@ -493,15 +480,14 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_WriteNon1_IsError) {
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_FALSE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->error(),
-              HasSubstr("cannot store a value other than constant 1.0 to "
-                        "PointSize builtin: OpStore %100 %999"));
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_FALSE(p->BuildAndParseInternalModule());
+    EXPECT_THAT(p->error(), HasSubstr("cannot store a value other than constant 1.0 to "
+                                      "PointSize builtin: OpStore %100 %999"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_ReadReplaced) {
-  const std::string assembly = PerVertexPreamble() + R"(
+    const std::string assembly = PerVertexPreamble() + R"(
   %ptr = OpTypePointer Output %float
   %nil = OpConstantNull %12
   %private_ptr = OpTypePointer Private %float
@@ -515,11 +501,11 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_ReadReplaced) {
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_EQ(module_str, R"(var<private> x_900 : f32;
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_EQ(module_str, R"(var<private> x_900 : f32;
 
 var<private> gl_Position : vec4<f32>;
 
@@ -541,9 +527,8 @@ fn main() -> main_out {
 )") << module_str;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       BuiltinPointSize_WriteViaCopyObjectPriorAccess_Unsupported) {
-  const std::string assembly = PerVertexPreamble() + R"(
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_WriteViaCopyObjectPriorAccess_Unsupported) {
+    const std::string assembly = PerVertexPreamble() + R"(
   %ptr = OpTypePointer Output %float
   %nil = OpConstantNull %12
 
@@ -555,17 +540,15 @@ TEST_F(SpvModuleScopeVarParserTest,
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_FALSE(p->BuildAndParseInternalModule()) << p->error();
-  EXPECT_THAT(
-      p->error(),
-      HasSubstr("operations producing a pointer to a per-vertex structure are "
-                "not supported: %20 = OpCopyObject %11 %1"));
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_FALSE(p->BuildAndParseInternalModule()) << p->error();
+    EXPECT_THAT(p->error(),
+                HasSubstr("operations producing a pointer to a per-vertex structure are "
+                          "not supported: %20 = OpCopyObject %11 %1"));
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       BuiltinPointSize_WriteViaCopyObjectPostAccessChainErased) {
-  const std::string assembly = PerVertexPreamble() + R"(
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_WriteViaCopyObjectPostAccessChainErased) {
+    const std::string assembly = PerVertexPreamble() + R"(
   %ptr = OpTypePointer Output %float
   %one = OpConstant %float 1.0
 
@@ -577,11 +560,11 @@ TEST_F(SpvModuleScopeVarParserTest,
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_EQ(module_str, R"(var<private> gl_Position : vec4<f32>;
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_EQ(module_str, R"(var<private> gl_Position : vec4<f32>;
 
 fn main_1() {
   return;
@@ -601,15 +584,15 @@ fn main() -> main_out {
 }
 
 std::string LoosePointSizePreamble(std::string stage = "Vertex") {
-  return R"(
+    return R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint )" +
-         stage + R"( %500 "main" %1
+           stage + R"( %500 "main" %1
 )" + (stage == "Vertex" ? " %2 " : "") +
-         +(stage == "Fragment" ? "OpExecutionMode %500 OriginUpperLeft" : "") +
-         +(stage == "Vertex" ? " OpDecorate %2 BuiltIn Position " : "") +
-         R"(
+           +(stage == "Fragment" ? "OpExecutionMode %500 OriginUpperLeft" : "") +
+           +(stage == "Vertex" ? " OpDecorate %2 BuiltIn Position " : "") +
+           R"(
     OpDecorate %1 BuiltIn PointSize
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
@@ -626,7 +609,7 @@ std::string LoosePointSizePreamble(std::string stage = "Vertex") {
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Loose_Write1_IsErased) {
-  const std::string assembly = LoosePointSizePreamble() + R"(
+    const std::string assembly = LoosePointSizePreamble() + R"(
   %ptr = OpTypePointer Output %float
   %one = OpConstant %float 1.0
 
@@ -636,11 +619,11 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Loose_Write1_IsErased) {
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_EQ(module_str, R"(var<private> x_2 : vec4<f32>;
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_EQ(module_str, R"(var<private> x_2 : vec4<f32>;
 
 fn main_1() {
   return;
@@ -660,7 +643,7 @@ fn main() -> main_out {
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Loose_WriteNon1_IsError) {
-  const std::string assembly = LoosePointSizePreamble() + R"(
+    const std::string assembly = LoosePointSizePreamble() + R"(
   %ptr = OpTypePointer Output %float
   %999 = OpConstant %float 2.0
 
@@ -670,16 +653,14 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Loose_WriteNon1_IsError) {
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_FALSE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->error(),
-              HasSubstr("cannot store a value other than constant 1.0 to "
-                        "PointSize builtin: OpStore %1 %999"));
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_FALSE(p->BuildAndParseInternalModule());
+    EXPECT_THAT(p->error(), HasSubstr("cannot store a value other than constant 1.0 to "
+                                      "PointSize builtin: OpStore %1 %999"));
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       BuiltinPointSize_Loose_ReadReplaced_Vertex) {
-  const std::string assembly = LoosePointSizePreamble() + R"(
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Loose_ReadReplaced_Vertex) {
+    const std::string assembly = LoosePointSizePreamble() + R"(
   %ptr = OpTypePointer Private %float
   %900 = OpVariable %ptr Private
 
@@ -690,12 +671,12 @@ TEST_F(SpvModuleScopeVarParserTest,
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_EQ(module_str, R"(var<private> x_2 : vec4<f32>;
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_EQ(module_str, R"(var<private> x_2 : vec4<f32>;
 
 var<private> x_900 : f32;
 
@@ -717,9 +698,8 @@ fn main() -> main_out {
 )") << module_str;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       BuiltinPointSize_Loose_ReadReplaced_Fragment) {
-  const std::string assembly = LoosePointSizePreamble("Fragment") + R"(
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Loose_ReadReplaced_Fragment) {
+    const std::string assembly = LoosePointSizePreamble("Fragment") + R"(
   %ptr = OpTypePointer Private %float
   %900 = OpVariable %ptr Private
 
@@ -730,18 +710,17 @@ TEST_F(SpvModuleScopeVarParserTest,
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  // This example is invalid because you PointSize is not valid in Vulkan
-  // Fragment shaders.
-  EXPECT_FALSE(p->Parse());
-  EXPECT_FALSE(p->success());
-  EXPECT_THAT(p->error(), HasSubstr("VUID-PointSize-PointSize-04314"));
+    // This example is invalid because you PointSize is not valid in Vulkan
+    // Fragment shaders.
+    EXPECT_FALSE(p->Parse());
+    EXPECT_FALSE(p->success());
+    EXPECT_THAT(p->error(), HasSubstr("VUID-PointSize-PointSize-04314"));
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       BuiltinPointSize_Loose_WriteViaCopyObjectPriorAccess_Erased) {
-  const std::string assembly = LoosePointSizePreamble() + R"(
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Loose_WriteViaCopyObjectPriorAccess_Erased) {
+    const std::string assembly = LoosePointSizePreamble() + R"(
   %one = OpConstant %float 1.0
 
   %500 = OpFunction %void None %voidfn
@@ -752,11 +731,11 @@ TEST_F(SpvModuleScopeVarParserTest,
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_EQ(module_str, R"(var<private> x_2 : vec4<f32>;
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_EQ(module_str, R"(var<private> x_2 : vec4<f32>;
 
 fn main_1() {
   return;
@@ -777,7 +756,7 @@ fn main() -> main_out {
 
 TEST_F(SpvModuleScopeVarParserTest,
        BuiltinPointSize_Loose_WriteViaCopyObjectPostAccessChainErased) {
-  const std::string assembly = LoosePointSizePreamble() + R"(
+    const std::string assembly = LoosePointSizePreamble() + R"(
   %one = OpConstant %float 1.0
 
   %500 = OpFunction %void None %voidfn
@@ -788,11 +767,11 @@ TEST_F(SpvModuleScopeVarParserTest,
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
-  EXPECT_TRUE(p->error().empty()) << p->error();
-  const auto module_str = test::ToString(p->program());
-  EXPECT_EQ(module_str, R"(var<private> x_2 : vec4<f32>;
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
+    EXPECT_TRUE(p->error().empty()) << p->error();
+    const auto module_str = test::ToString(p->program());
+    EXPECT_EQ(module_str, R"(var<private> x_2 : vec4<f32>;
 
 fn main_1() {
   return;
@@ -812,7 +791,7 @@ fn main() -> main_out {
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BuiltinClipDistance_NotSupported) {
-  const std::string assembly = PerVertexPreamble() + R"(
+    const std::string assembly = PerVertexPreamble() + R"(
   %ptr_float = OpTypePointer Output %float
   %nil = OpConstantNull %float
   %uint_2 = OpConstant %uint 2
@@ -825,15 +804,15 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinClipDistance_NotSupported) {
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_FALSE(p->BuildAndParseInternalModule());
-  EXPECT_EQ(p->error(),
-            "accessing per-vertex member 2 is not supported. Only Position is "
-            "supported, and PointSize is ignored");
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_FALSE(p->BuildAndParseInternalModule());
+    EXPECT_EQ(p->error(),
+              "accessing per-vertex member 2 is not supported. Only Position is "
+              "supported, and PointSize is ignored");
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BuiltinCullDistance_NotSupported) {
-  const std::string assembly = PerVertexPreamble() + R"(
+    const std::string assembly = PerVertexPreamble() + R"(
   %ptr_float = OpTypePointer Output %float
   %nil = OpConstantNull %float
   %uint_3 = OpConstant %uint 3
@@ -846,15 +825,15 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinCullDistance_NotSupported) {
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_FALSE(p->BuildAndParseInternalModule());
-  EXPECT_EQ(p->error(),
-            "accessing per-vertex member 3 is not supported. Only Position is "
-            "supported, and PointSize is ignored");
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_FALSE(p->BuildAndParseInternalModule());
+    EXPECT_EQ(p->error(),
+              "accessing per-vertex member 3 is not supported. Only Position is "
+              "supported, and PointSize is ignored");
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BuiltinPerVertex_MemberIndex_NotConstant) {
-  const std::string assembly = PerVertexPreamble() + R"(
+    const std::string assembly = PerVertexPreamble() + R"(
   %ptr_float = OpTypePointer Output %float
   %nil = OpConstantNull %float
 
@@ -866,16 +845,14 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPerVertex_MemberIndex_NotConstant) {
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_FALSE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->error(),
-              Eq("first index of access chain into per-vertex structure is not "
-                 "a constant: %100 = OpAccessChain %13 %1 %16"));
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_FALSE(p->BuildAndParseInternalModule());
+    EXPECT_THAT(p->error(), Eq("first index of access chain into per-vertex structure is not "
+                               "a constant: %100 = OpAccessChain %13 %1 %16"));
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       BuiltinPerVertex_MemberIndex_NotConstantInteger) {
-  const std::string assembly = PerVertexPreamble() + R"(
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPerVertex_MemberIndex_NotConstantInteger) {
+    const std::string assembly = PerVertexPreamble() + R"(
   %ptr_float = OpTypePointer Output %float
   %nil = OpConstantNull %float
 
@@ -887,25 +864,24 @@ TEST_F(SpvModuleScopeVarParserTest,
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_FALSE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->error(),
-              Eq("first index of access chain into per-vertex structure is not "
-                 "a constant integer: %100 = OpAccessChain %13 %1 %14"));
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_FALSE(p->BuildAndParseInternalModule());
+    EXPECT_THAT(p->error(), Eq("first index of access chain into per-vertex structure is not "
+                               "a constant integer: %100 = OpAccessChain %13 %1 %14"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarInitializers) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %1 = OpVariable %ptr_bool Private %true
      %2 = OpVariable %ptr_bool Private %false
      %3 = OpVariable %ptr_int Private %int_m1
      %4 = OpVariable %ptr_uint Private %uint_1
      %5 = OpVariable %ptr_float Private %float_1p5
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr(R"(var<private> x_1 : bool = true;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr(R"(var<private> x_1 : bool = true;
 
 var<private> x_2 : bool = false;
 
@@ -918,7 +894,7 @@ var<private> x_5 : f32 = 1.5;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarNullInitializers) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %null_bool = OpConstantNull %bool
      %null_int = OpConstantNull %int
      %null_uint = OpConstantNull %uint
@@ -929,10 +905,10 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarNullInitializers) {
      %3 = OpVariable %ptr_uint Private %null_uint
      %4 = OpVariable %ptr_float Private %null_float
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr(R"(var<private> x_1 : bool = false;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr(R"(var<private> x_1 : bool = false;
 
 var<private> x_2 : i32 = 0;
 
@@ -943,7 +919,7 @@ var<private> x_4 : f32 = 0.0;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarUndefInitializers) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %undef_bool = OpUndef %bool
      %undef_int = OpUndef %int
      %undef_uint = OpUndef %uint
@@ -954,10 +930,10 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarUndefInitializers) {
      %3 = OpVariable %ptr_uint Private %undef_uint
      %4 = OpVariable %ptr_float Private %undef_float
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr(R"(var<private> x_1 : bool = false;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr(R"(var<private> x_1 : bool = false;
 
 var<private> x_2 : i32 = 0;
 
@@ -966,143 +942,133 @@ var<private> x_3 : u32 = 0u;
 var<private> x_4 : f32 = 0.0;
 )"));
 
-  // This example module emits ok, but is not valid SPIR-V in the first place.
-  p->DeliberatelyInvalidSpirv();
+    // This example module emits ok, but is not valid SPIR-V in the first place.
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2float
      %two = OpConstant %float 2.0
      %const = OpConstantComposite %v2float %float_1p5 %two
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(
-      module_str,
-      HasSubstr("var<private> x_200 : vec2<f32> = vec2<f32>(1.5, 2.0);"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : vec2<f32> = vec2<f32>(1.5, 2.0);"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorBoolNullInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2bool
      %const = OpConstantNull %v2bool
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str,
-              HasSubstr("var<private> x_200 : vec2<bool> = vec2<bool>();"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : vec2<bool> = vec2<bool>();"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorBoolUndefInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2bool
      %const = OpUndef %v2bool
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str,
-              HasSubstr("var<private> x_200 : vec2<bool> = vec2<bool>();"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : vec2<bool> = vec2<bool>();"));
 
-  // This example module emits ok, but is not valid SPIR-V in the first place.
-  p->DeliberatelyInvalidSpirv();
+    // This example module emits ok, but is not valid SPIR-V in the first place.
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorUintNullInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2uint
      %const = OpConstantNull %v2uint
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str,
-              HasSubstr("var<private> x_200 : vec2<u32> = vec2<u32>();"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : vec2<u32> = vec2<u32>();"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorUintUndefInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2uint
      %const = OpUndef %v2uint
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str,
-              HasSubstr("var<private> x_200 : vec2<u32> = vec2<u32>();"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : vec2<u32> = vec2<u32>();"));
 
-  // This example module emits ok, but is not valid SPIR-V in the first place.
-  p->DeliberatelyInvalidSpirv();
+    // This example module emits ok, but is not valid SPIR-V in the first place.
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorIntNullInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2int
      %const = OpConstantNull %v2int
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str,
-              HasSubstr("var<private> x_200 : vec2<i32> = vec2<i32>();"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : vec2<i32> = vec2<i32>();"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorIntUndefInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2int
      %const = OpUndef %v2int
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str,
-              HasSubstr("var<private> x_200 : vec2<i32> = vec2<i32>();"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : vec2<i32> = vec2<i32>();"));
 
-  // This example module emits ok, but is not valid SPIR-V in the first place.
-  p->DeliberatelyInvalidSpirv();
+    // This example module emits ok, but is not valid SPIR-V in the first place.
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorFloatNullInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2float
      %const = OpConstantNull %v2float
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str,
-              HasSubstr("var<private> x_200 : vec2<f32> = vec2<f32>();"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : vec2<f32> = vec2<f32>();"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorFloatUndefInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %ptr = OpTypePointer Private %v2float
      %const = OpUndef %v2float
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str,
-              HasSubstr("var<private> x_200 : vec2<f32> = vec2<f32>();"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : vec2<f32> = vec2<f32>();"));
 
-  // This example module emits ok, but is not valid SPIR-V in the first place.
-  p->DeliberatelyInvalidSpirv();
+    // This example module emits ok, but is not valid SPIR-V in the first place.
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvModuleScopeVarParserTest, MatrixInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %ptr = OpTypePointer Private %m3v2float
      %two = OpConstant %float 2.0
      %three = OpConstant %float 3.0
@@ -1113,201 +1079,179 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixInitializer) {
      %const = OpConstantComposite %m3v2float %v0 %v1 %v2
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str,
-              HasSubstr("var<private> x_200 : mat3x2<f32> = mat3x2<f32>("
-                        "vec2<f32>(1.5, 2.0), "
-                        "vec2<f32>(2.0, 3.0), "
-                        "vec2<f32>(3.0, 4.0));"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : mat3x2<f32> = mat3x2<f32>("
+                                      "vec2<f32>(1.5, 2.0), "
+                                      "vec2<f32>(2.0, 3.0), "
+                                      "vec2<f32>(3.0, 4.0));"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, MatrixNullInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %ptr = OpTypePointer Private %m3v2float
      %const = OpConstantNull %m3v2float
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str,
-              HasSubstr("var<private> x_200 : mat3x2<f32> = mat3x2<f32>();"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : mat3x2<f32> = mat3x2<f32>();"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, MatrixUndefInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %ptr = OpTypePointer Private %m3v2float
      %const = OpUndef %m3v2float
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str,
-              HasSubstr("var<private> x_200 : mat3x2<f32> = mat3x2<f32>();"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : mat3x2<f32> = mat3x2<f32>();"));
 
-  // This example module emits ok, but is not valid SPIR-V in the first place.
-  p->DeliberatelyInvalidSpirv();
+    // This example module emits ok, but is not valid SPIR-V in the first place.
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ArrayInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %ptr = OpTypePointer Private %arr2uint
      %two = OpConstant %uint 2
      %const = OpConstantComposite %arr2uint %uint_1 %two
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(
-      module_str,
-      HasSubstr(
-          "var<private> x_200 : array<u32, 2u> = array<u32, 2u>(1u, 2u);"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str,
+                HasSubstr("var<private> x_200 : array<u32, 2u> = array<u32, 2u>(1u, 2u);"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ArrayNullInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %ptr = OpTypePointer Private %arr2uint
      %const = OpConstantNull %arr2uint
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(
-      module_str,
-      HasSubstr("var<private> x_200 : array<u32, 2u> = array<u32, 2u>();"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : array<u32, 2u> = array<u32, 2u>();"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ArrayUndefInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + R"(
      %ptr = OpTypePointer Private %arr2uint
      %const = OpUndef %arr2uint
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(
-      module_str,
-      HasSubstr("var<private> x_200 : array<u32, 2u> = array<u32, 2u>();"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : array<u32, 2u> = array<u32, 2u>();"));
 
-  // This example module emits ok, but is not valid SPIR-V in the first place.
-  p->DeliberatelyInvalidSpirv();
+    // This example module emits ok, but is not valid SPIR-V in the first place.
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvModuleScopeVarParserTest, StructInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() +
-                                 StructTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + StructTypes() + R"(
      %ptr = OpTypePointer Private %strct
      %two = OpConstant %uint 2
      %arrconst = OpConstantComposite %arr2uint %uint_1 %two
      %const = OpConstantComposite %strct %uint_1 %float_1p5 %arrconst
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(
-      module_str,
-      HasSubstr("var<private> x_200 : S = S(1u, 1.5, array<u32, 2u>(1u, 2u));"))
-      << module_str;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str,
+                HasSubstr("var<private> x_200 : S = S(1u, 1.5, array<u32, 2u>(1u, 2u));"))
+        << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, StructNullInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() +
-                                 StructTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + StructTypes() + R"(
      %ptr = OpTypePointer Private %strct
      %const = OpConstantNull %strct
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(
-      module_str,
-      HasSubstr("var<private> x_200 : S = S(0u, 0.0, array<u32, 2u>());"))
-      << module_str;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : S = S(0u, 0.0, array<u32, 2u>());"))
+        << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, StructUndefInitializer) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() +
-                                 StructTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonTypes() + StructTypes() + R"(
      %ptr = OpTypePointer Private %strct
      %const = OpUndef %strct
      %200 = OpVariable %ptr Private %const
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
 
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(
-      module_str,
-      HasSubstr("var<private> x_200 : S = S(0u, 0.0, array<u32, 2u>());"))
-      << module_str;
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : S = S(0u, 0.0, array<u32, 2u>());"))
+        << module_str;
 
-  // This example module emits ok, but is not valid SPIR-V in the first place.
-  p->DeliberatelyInvalidSpirv();
+    // This example module emits ok, but is not valid SPIR-V in the first place.
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvModuleScopeVarParserTest, DescriptorGroupDecoration_Valid) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + CommonLayout() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + CommonLayout() + R"(
      OpDecorate %1 DescriptorSet 3
      OpDecorate %1 Binding 9 ; Required to pass WGSL validation
      OpDecorate %strct Block
 )" + CommonTypes() + StructTypes() +
-                                 R"(
+                                   R"(
      %ptr_sb_strct = OpTypePointer StorageBuffer %strct
      %1 = OpVariable %ptr_sb_strct StorageBuffer
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(
-      module_str,
-      HasSubstr("@group(3) @binding(9) var<storage, read_write> x_1 : S;"))
-      << module_str;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("@group(3) @binding(9) var<storage, read_write> x_1 : S;"))
+        << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BindingDecoration_Valid) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpDecorate %1 DescriptorSet 0 ; WGSL validation requires this already
      OpDecorate %1 Binding 3
      OpDecorate %strct Block
 )" + CommonLayout() + CommonTypes() +
-                                 StructTypes() +
-                                 R"(
+                                   StructTypes() +
+                                   R"(
      %ptr_sb_strct = OpTypePointer StorageBuffer %strct
      %1 = OpVariable %ptr_sb_strct StorageBuffer
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(
-      module_str,
-      HasSubstr("@group(0) @binding(3) var<storage, read_write> x_1 : S;"))
-      << module_str;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("@group(0) @binding(3) var<storage, read_write> x_1 : S;"))
+        << module_str;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       StructMember_NonReadableDecoration_Dropped) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+TEST_F(SpvModuleScopeVarParserTest, StructMember_NonReadableDecoration_Dropped) {
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpDecorate %1 DescriptorSet 0
      OpDecorate %1 Binding 0
      OpDecorate %strct Block
      OpMemberDecorate %strct 0 NonReadable
 )" + CommonLayout() + CommonTypes() +
-                                 StructTypes() + R"(
+                                   StructTypes() + R"(
      %ptr_sb_strct = OpTypePointer StorageBuffer %strct
      %1 = OpVariable %ptr_sb_strct StorageBuffer
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr(R"(type Arr = @stride(4) array<u32, 2u>;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr(R"(type Arr = @stride(4) array<u32, 2u>;
 
 struct S {
   field0 : u32,
@@ -1320,7 +1264,7 @@ struct S {
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpName %myvar "myvar"
      OpDecorate %myvar DescriptorSet 0
      OpDecorate %myvar Binding 0
@@ -1338,10 +1282,10 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr(R"(struct S {
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   field0 : mat3x2<f32>,
 }
 
@@ -1350,7 +1294,7 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
 }
 
 TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Natural_Dropped) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpName %myvar "myvar"
      OpDecorate %myvar DescriptorSet 0
      OpDecorate %myvar Binding 0
@@ -1367,10 +1311,10 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Natural_Dropped) {
      %ptr_sb_s = OpTypePointer StorageBuffer %s
      %myvar = OpVariable %ptr_sb_s StorageBuffer
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr(R"(struct S {
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   field0 : mat3x2<f32>,
 }
 
@@ -1379,7 +1323,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Natural_Dropped) {
 }
 
 TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpName %myvar "myvar"
      OpDecorate %myvar DescriptorSet 0
      OpDecorate %myvar Binding 0
@@ -1396,10 +1340,10 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration) {
      %ptr_sb_s = OpTypePointer StorageBuffer %s
      %myvar = OpVariable %ptr_sb_s StorageBuffer
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr(R"(struct S {
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   @stride(64) @internal(disable_validation__ignore_stride)
   field0 : mat3x2<f32>,
 }
@@ -1409,7 +1353,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration) {
 }
 
 TEST_F(SpvModuleScopeVarParserTest, RowMajorDecoration_IsError) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpName %myvar "myvar"
      OpDecorate %s Block
      OpMemberDecorate %s 0 RowMajor
@@ -1424,16 +1368,16 @@ TEST_F(SpvModuleScopeVarParserTest, RowMajorDecoration_IsError) {
      %ptr_sb_s = OpTypePointer StorageBuffer %s
      %myvar = OpVariable %ptr_sb_s StorageBuffer
   )" + MainBody()));
-  EXPECT_FALSE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_THAT(
-      p->error(),
-      Eq(R"(WGSL does not support row-major matrices: can't translate member 0 of %3 = OpTypeStruct %8)"))
-      << p->error();
+    EXPECT_FALSE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_THAT(
+        p->error(),
+        Eq(R"(WGSL does not support row-major matrices: can't translate member 0 of %3 = OpTypeStruct %8)"))
+        << p->error();
 }
 
 TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
-  // Variable should have access(read)
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    // Variable should have access(read)
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpDecorate %s Block
      OpDecorate %1 DescriptorSet 0
      OpDecorate %1 Binding 0
@@ -1449,10 +1393,10 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
      %ptr_sb_s = OpTypePointer StorageBuffer %s
      %1 = OpVariable %ptr_sb_s StorageBuffer
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr(R"(struct S {
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   field0 : f32,
   field1 : f32,
 }
@@ -1462,8 +1406,8 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
 }
 
 TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_NotAllMembers) {
-  // Variable should have access(read_write)
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    // Variable should have access(read_write)
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpDecorate %1 DescriptorSet 0
      OpDecorate %1 Binding 0
      OpDecorate %s Block
@@ -1478,10 +1422,10 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_NotAllMembers) {
      %ptr_sb_s = OpTypePointer StorageBuffer %s
      %1 = OpVariable %ptr_sb_s StorageBuffer
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr(R"(struct S {
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   field0 : f32,
   field1 : f32,
 }
@@ -1490,11 +1434,10 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_NotAllMembers) {
 )")) << module_str;
 }
 
-TEST_F(
-    SpvModuleScopeVarParserTest,
-    StorageBuffer_NonWritable_NotAllMembers_DuplicatedOnSameMember) {  // NOLINT
-  // Variable should have access(read_write)
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+TEST_F(SpvModuleScopeVarParserTest,
+       StorageBuffer_NonWritable_NotAllMembers_DuplicatedOnSameMember) {  // NOLINT
+    // Variable should have access(read_write)
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpDecorate %s Block
      OpDecorate %1 DescriptorSet 0
      OpDecorate %1 Binding 0
@@ -1510,10 +1453,10 @@ TEST_F(
      %ptr_sb_s = OpTypePointer StorageBuffer %s
      %1 = OpVariable %ptr_sb_s StorageBuffer
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr(R"(struct S {
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   field0 : f32,
   field1 : f32,
 }
@@ -1523,36 +1466,35 @@ TEST_F(
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_Id_TooBig) {
-  // Override IDs must be between 0 and 65535
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    // Override IDs must be between 0 and 65535
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpDecorate %1 SpecId 65536
      %bool = OpTypeBool
      %1 = OpSpecConstantTrue %bool
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
   )" + MainBody()));
-  EXPECT_FALSE(p->Parse());
-  EXPECT_EQ(p->error(),
-            "SpecId too large. WGSL override IDs must be between 0 and 65535: "
-            "ID %1 has SpecId 65536");
+    EXPECT_FALSE(p->Parse());
+    EXPECT_EQ(p->error(),
+              "SpecId too large. WGSL override IDs must be between 0 and 65535: "
+              "ID %1 has SpecId 65536");
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       ScalarSpecConstant_DeclareConst_Id_MaxValid) {
-  // Override IDs must be between 0 and 65535
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_Id_MaxValid) {
+    // Override IDs must be between 0 and 65535
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpDecorate %1 SpecId 65535
      %bool = OpTypeBool
      %1 = OpSpecConstantTrue %bool
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
   )" + MainBody()));
-  EXPECT_TRUE(p->Parse());
-  EXPECT_EQ(p->error(), "");
+    EXPECT_TRUE(p->Parse());
+    EXPECT_EQ(p->error(), "");
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_True) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpName %c "myconst"
      OpDecorate %c SpecId 12
      %bool = OpTypeBool
@@ -1560,15 +1502,14 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_True) {
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : bool = true;"))
-      << module_str;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : bool = true;")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_False) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpName %c "myconst"
      OpDecorate %c SpecId 12
      %bool = OpTypeBool
@@ -1576,15 +1517,14 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_False) {
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : bool = false;"))
-      << module_str;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : bool = false;")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_U32) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpName %c "myconst"
      OpDecorate %c SpecId 12
      %uint = OpTypeInt 32 0
@@ -1592,15 +1532,14 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_U32) {
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : u32 = 42u;"))
-      << module_str;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : u32 = 42u;")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_I32) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpName %c "myconst"
      OpDecorate %c SpecId 12
      %int = OpTypeInt 32 1
@@ -1608,15 +1547,14 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_I32) {
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : i32 = 42;"))
-      << module_str;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : i32 = 42;")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_F32) {
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpName %c "myconst"
      OpDecorate %c SpecId 12
      %float = OpTypeFloat 32
@@ -1624,32 +1562,29 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_F32) {
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : f32 = 2.5;"))
-      << module_str;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : f32 = 2.5;")) << module_str;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       ScalarSpecConstant_DeclareConst_F32_WithoutSpecId) {
-  // When we don't have a spec ID, declare an undecorated module-scope constant.
-  auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_F32_WithoutSpecId) {
+    // When we don't have a spec ID, declare an undecorated module-scope constant.
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpName %c "myconst"
      %float = OpTypeFloat 32
      %c = OpSpecConstant %float 2.5
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr("override myconst : f32 = 2.5;"))
-      << module_str;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr("override myconst : f32 = 2.5;")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_UsedInFunction) {
-  const auto assembly = Preamble() + FragMain() + R"(
+    const auto assembly = Preamble() + FragMain() + R"(
      OpName %c "myconst"
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
@@ -1662,22 +1597,22 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_UsedInFunction) {
      OpReturnValue %1
      OpFunctionEnd
   )" + MainBody();
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_TRUE(p->error().empty());
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    EXPECT_TRUE(p->error().empty());
 
-  Program program = p->program();
-  const auto got = test::ToString(program, fe.ast_body());
+    Program program = p->program();
+    const auto got = test::ToString(program, fe.ast_body());
 
-  EXPECT_THAT(got, HasSubstr("return (myconst + myconst);")) << got;
+    EXPECT_THAT(got, HasSubstr("return (myconst + myconst);")) << got;
 }
 
 // Returns the start of a shader for testing SampleId,
 // parameterized by store type of %int or %uint
 std::string SampleIdPreamble(std::string store_type) {
-  return R"(
+    return R"(
     OpCapability Shader
     OpCapability SampleRateShading
     OpMemoryModel Logical Simple
@@ -1690,25 +1625,25 @@ std::string SampleIdPreamble(std::string store_type) {
     %uint = OpTypeInt 32 0
     %int = OpTypeInt 32 1
     %ptr_ty = OpTypePointer Input )" +
-         store_type + R"(
+           store_type + R"(
     %1 = OpVariable %ptr_ty Input
 )";
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_Direct) {
-  const std::string assembly = SampleIdPreamble("%int") + R"(
+    const std::string assembly = SampleIdPreamble("%int") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %2 = OpLoad %int %1
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected =
-      R"(var<private> x_1 : i32;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected =
+        R"(var<private> x_1 : i32;
 
 fn main_1() {
   let x_2 : i32 = x_1;
@@ -1721,11 +1656,11 @@ fn main(@builtin(sample_index) x_1_param : u32) {
   main_1();
 }
 )";
-  EXPECT_EQ(module_str, expected) << module_str;
+    EXPECT_EQ(module_str, expected) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_CopyObject) {
-  const std::string assembly = SampleIdPreamble("%int") + R"(
+    const std::string assembly = SampleIdPreamble("%int") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %copy_ptr = OpCopyObject %ptr_ty %1
@@ -1733,12 +1668,12 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_CopyObject) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected =
-      R"(Module{
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected =
+        R"(Module{
   Variable{
     x_1
     private
@@ -1809,7 +1744,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_CopyObject) {
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_AccessChain) {
-  const std::string assembly = SampleIdPreamble("%int") + R"(
+    const std::string assembly = SampleIdPreamble("%int") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %copy_ptr = OpAccessChain %ptr_ty %1
@@ -1817,11 +1752,11 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_Load_AccessChain) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : i32;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : i32;
 
 fn main_1() {
   let x_2 : i32 = x_1;
@@ -1834,11 +1769,11 @@ fn main(@builtin(sample_index) x_1_param : u32) {
   main_1();
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_FunctParam) {
-  const std::string assembly = SampleIdPreamble("%int") + R"(
+    const std::string assembly = SampleIdPreamble("%int") + R"(
     %helper_ty = OpTypeFunction %int %ptr_ty
     %helper = OpFunction %int None %helper_ty
     %param = OpFunctionParameter %ptr_ty
@@ -1853,29 +1788,28 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_FunctParam) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  // This example is invalid because you can't pass pointer-to-Input
-  // as a function parameter.
-  EXPECT_FALSE(p->Parse());
-  EXPECT_FALSE(p->success());
-  EXPECT_THAT(p->error(),
-              HasSubstr("Invalid storage class for pointer operand 1"));
+    // This example is invalid because you can't pass pointer-to-Input
+    // as a function parameter.
+    EXPECT_FALSE(p->Parse());
+    EXPECT_FALSE(p->success());
+    EXPECT_THAT(p->error(), HasSubstr("Invalid storage class for pointer operand 1"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_Direct) {
-  const std::string assembly = SampleIdPreamble("%uint") + R"(
+    const std::string assembly = SampleIdPreamble("%uint") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %2 = OpLoad %uint %1
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : u32;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : u32;
 
 fn main_1() {
   let x_2 : u32 = x_1;
@@ -1888,11 +1822,11 @@ fn main(@builtin(sample_index) x_1_param : u32) {
   main_1();
 }
 )";
-  EXPECT_EQ(module_str, expected) << module_str;
+    EXPECT_EQ(module_str, expected) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_CopyObject) {
-  const std::string assembly = SampleIdPreamble("%uint") + R"(
+    const std::string assembly = SampleIdPreamble("%uint") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %copy_ptr = OpCopyObject %ptr_ty %1
@@ -1900,11 +1834,11 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_CopyObject) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : u32;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : u32;
 
 fn main_1() {
   let x_11 : ptr<private, u32> = &(x_1);
@@ -1918,11 +1852,11 @@ fn main(@builtin(sample_index) x_1_param : u32) {
   main_1();
 }
 )";
-  EXPECT_EQ(module_str, expected) << module_str;
+    EXPECT_EQ(module_str, expected) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_AccessChain) {
-  const std::string assembly = SampleIdPreamble("%uint") + R"(
+    const std::string assembly = SampleIdPreamble("%uint") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %copy_ptr = OpAccessChain %ptr_ty %1
@@ -1930,11 +1864,11 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_AccessChain) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : u32;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : u32;
 
 fn main_1() {
   let x_2 : u32 = x_1;
@@ -1947,11 +1881,11 @@ fn main(@builtin(sample_index) x_1_param : u32) {
   main_1();
 }
 )";
-  EXPECT_EQ(module_str, expected) << module_str;
+    EXPECT_EQ(module_str, expected) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_FunctParam) {
-  const std::string assembly = SampleIdPreamble("%uint") + R"(
+    const std::string assembly = SampleIdPreamble("%uint") + R"(
     %helper_ty = OpTypeFunction %uint %ptr_ty
     %helper = OpFunction %uint None %helper_ty
     %param = OpFunctionParameter %ptr_ty
@@ -1966,32 +1900,31 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_FunctParam) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  // This example is invalid because you can't pass pointer-to-Input
-  // as a function parameter.
-  EXPECT_FALSE(p->Parse());
-  EXPECT_THAT(p->error(),
-              HasSubstr("Invalid storage class for pointer operand 1"));
+    auto p = parser(test::Assemble(assembly));
+    // This example is invalid because you can't pass pointer-to-Input
+    // as a function parameter.
+    EXPECT_FALSE(p->Parse());
+    EXPECT_THAT(p->error(), HasSubstr("Invalid storage class for pointer operand 1"));
 }
 
 // Returns the start of a shader for testing SampleMask
 // parameterized by store type.
 std::string SampleMaskPreamble(std::string store_type, uint32_t stride = 0u) {
-  return std::string(R"(
+    return std::string(R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Fragment %main "main" %1
     OpExecutionMode %main OriginUpperLeft
     OpDecorate %1 BuiltIn SampleMask
 )") +
-         (stride > 0u ? R"(
+           (stride > 0u ? R"(
     OpDecorate %uarr1 ArrayStride 4
     OpDecorate %uarr2 ArrayStride 4
     OpDecorate %iarr1 ArrayStride 4
     OpDecorate %iarr2 ArrayStride 4
 )"
-                      : "") +
-         R"(
+                        : "") +
+           R"(
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
     %float = OpTypeFloat 32
@@ -2010,14 +1943,14 @@ std::string SampleMaskPreamble(std::string store_type, uint32_t stride = 0u) {
     %iptr_out_ty = OpTypePointer Output %int
     %uptr_out_ty = OpTypePointer Output %uint
     %in_ty = OpTypePointer Input )" +
-         store_type + R"(
+           store_type + R"(
     %out_ty = OpTypePointer Output )" +
-         store_type + R"(
+           store_type + R"(
 )";
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_ArraySize2_Error) {
-  const std::string assembly = SampleMaskPreamble("%uarr2") + R"(
+    const std::string assembly = SampleMaskPreamble("%uarr2") + R"(
     %1 = OpVariable %in_ty Input
 
     %main = OpFunction %void None %voidfn
@@ -2027,16 +1960,15 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_ArraySize2_Error) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_FALSE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->error(),
-              HasSubstr("WGSL supports a sample mask of at most 32 bits. "
-                        "SampleMask must be an array of 1 element"))
-      << p->error() << assembly;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_FALSE(p->BuildAndParseInternalModule());
+    EXPECT_THAT(p->error(), HasSubstr("WGSL supports a sample mask of at most 32 bits. "
+                                      "SampleMask must be an array of 1 element"))
+        << p->error() << assembly;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_Direct) {
-  const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
+    const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
     %1 = OpVariable %in_ty Input
 
     %main = OpFunction %void None %voidfn
@@ -2046,11 +1978,11 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_Direct) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
 
 fn main_1() {
   let x_3 : u32 = x_1[0];
@@ -2063,11 +1995,11 @@ fn main(@builtin(sample_mask) x_1_param : u32) {
   main_1();
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_CopyObject) {
-  const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
+    const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
     %1 = OpVariable %in_ty Input
 
     %main = OpFunction %void None %voidfn
@@ -2078,11 +2010,11 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_CopyObject) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
 
 fn main_1() {
   let x_4 : u32 = x_1[0];
@@ -2095,11 +2027,11 @@ fn main(@builtin(sample_mask) x_1_param : u32) {
   main_1();
 }
 )";
-  EXPECT_EQ(module_str, expected) << module_str;
+    EXPECT_EQ(module_str, expected) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_AccessChain) {
-  const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
+    const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
     %1 = OpVariable %in_ty Input
 
     %main = OpFunction %void None %voidfn
@@ -2110,11 +2042,11 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_AccessChain) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
 
 fn main_1() {
   let x_4 : u32 = x_1[0];
@@ -2127,11 +2059,11 @@ fn main(@builtin(sample_mask) x_1_param : u32) {
   main_1();
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_Direct) {
-  const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
+    const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
     %1 = OpVariable %in_ty Input
 
     %main = OpFunction %void None %voidfn
@@ -2141,11 +2073,11 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_Direct) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
 
 fn main_1() {
   let x_3 : i32 = x_1[0];
@@ -2158,11 +2090,11 @@ fn main(@builtin(sample_mask) x_1_param : u32) {
   main_1();
 }
 )";
-  EXPECT_EQ(module_str, expected) << module_str;
+    EXPECT_EQ(module_str, expected) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_CopyObject) {
-  const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
+    const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
     %1 = OpVariable %in_ty Input
 
     %main = OpFunction %void None %voidfn
@@ -2173,11 +2105,11 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_CopyObject) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
 
 fn main_1() {
   let x_4 : i32 = x_1[0];
@@ -2190,11 +2122,11 @@ fn main(@builtin(sample_mask) x_1_param : u32) {
   main_1();
 }
 )";
-  EXPECT_EQ(module_str, expected) << module_str;
+    EXPECT_EQ(module_str, expected) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_AccessChain) {
-  const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
+    const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
     %1 = OpVariable %in_ty Input
 
     %main = OpFunction %void None %voidfn
@@ -2205,11 +2137,11 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_AccessChain) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
 
 fn main_1() {
   let x_4 : i32 = x_1[0];
@@ -2222,11 +2154,11 @@ fn main(@builtin(sample_mask) x_1_param : u32) {
   main_1();
 }
 )";
-  EXPECT_EQ(module_str, expected) << module_str;
+    EXPECT_EQ(module_str, expected) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_ArraySize2_Error) {
-  const std::string assembly = SampleMaskPreamble("%uarr2") + R"(
+    const std::string assembly = SampleMaskPreamble("%uarr2") + R"(
     %1 = OpVariable %out_ty Output
 
     %main = OpFunction %void None %voidfn
@@ -2236,16 +2168,15 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_ArraySize2_Error) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_FALSE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->error(),
-              HasSubstr("WGSL supports a sample mask of at most 32 bits. "
-                        "SampleMask must be an array of 1 element"))
-      << p->error() << assembly;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_FALSE(p->BuildAndParseInternalModule());
+    EXPECT_THAT(p->error(), HasSubstr("WGSL supports a sample mask of at most 32 bits. "
+                                      "SampleMask must be an array of 1 element"))
+        << p->error() << assembly;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_Direct) {
-  const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
+    const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
     %1 = OpVariable %out_ty Output
 
     %main = OpFunction %void None %voidfn
@@ -2255,11 +2186,11 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_Direct) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
 
 fn main_1() {
   x_1[0] = 0u;
@@ -2277,11 +2208,11 @@ fn main() -> main_out {
   return main_out(x_1[0]);
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_CopyObject) {
-  const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
+    const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
     %1 = OpVariable %out_ty Output
 
     %main = OpFunction %void None %voidfn
@@ -2292,11 +2223,11 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_CopyObject) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
 
 fn main_1() {
   x_1[0] = 0u;
@@ -2314,11 +2245,11 @@ fn main() -> main_out {
   return main_out(x_1[0]);
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_AccessChain) {
-  const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
+    const std::string assembly = SampleMaskPreamble("%uarr1") + R"(
     %1 = OpVariable %out_ty Output
 
     %main = OpFunction %void None %voidfn
@@ -2329,11 +2260,11 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_AccessChain) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
 
 fn main_1() {
   x_1[0] = 0u;
@@ -2351,11 +2282,11 @@ fn main() -> main_out {
   return main_out(x_1[0]);
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_Direct) {
-  const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
+    const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
     %1 = OpVariable %out_ty Output
 
     %main = OpFunction %void None %voidfn
@@ -2365,11 +2296,11 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_Direct) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
 
 fn main_1() {
   x_1[0] = 12;
@@ -2387,11 +2318,11 @@ fn main() -> main_out {
   return main_out(bitcast<u32>(x_1[0]));
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_CopyObject) {
-  const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
+    const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
     %1 = OpVariable %out_ty Output
 
     %main = OpFunction %void None %voidfn
@@ -2402,11 +2333,11 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_CopyObject) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
 
 fn main_1() {
   x_1[0] = 12;
@@ -2424,11 +2355,11 @@ fn main() -> main_out {
   return main_out(bitcast<u32>(x_1[0]));
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_AccessChain) {
-  const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
+    const std::string assembly = SampleMaskPreamble("%iarr1") + R"(
     %1 = OpVariable %out_ty Output
 
     %main = OpFunction %void None %voidfn
@@ -2439,11 +2370,11 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_AccessChain) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
 
 fn main_1() {
   x_1[0] = 12;
@@ -2461,11 +2392,11 @@ fn main() -> main_out {
   return main_out(bitcast<u32>(x_1[0]));
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_WithStride) {
-  const std::string assembly = SampleMaskPreamble("%uarr1", 4u) + R"(
+    const std::string assembly = SampleMaskPreamble("%uarr1", 4u) + R"(
     %1 = OpVariable %in_ty Input
 
     %main = OpFunction %void None %voidfn
@@ -2475,11 +2406,11 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_WithStride) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(type Arr = @stride(4) array<u32, 1u>;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(type Arr = @stride(4) array<u32, 1u>;
 
 type Arr_1 = @stride(4) array<u32, 2u>;
 
@@ -2500,11 +2431,11 @@ fn main(@builtin(sample_mask) x_1_param : u32) {
   main_1();
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_WithStride) {
-  const std::string assembly = SampleMaskPreamble("%uarr1", 4u) + R"(
+    const std::string assembly = SampleMaskPreamble("%uarr1", 4u) + R"(
     %1 = OpVariable %out_ty Output
 
     %main = OpFunction %void None %voidfn
@@ -2514,11 +2445,11 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_WithStride) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(type Arr = @stride(4) array<u32, 1u>;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(type Arr = @stride(4) array<u32, 1u>;
 
 type Arr_1 = @stride(4) array<u32, 2u>;
 
@@ -2544,13 +2475,13 @@ fn main() -> main_out {
   return main_out(x_1[0]);
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 // Returns the start of a shader for testing VertexIndex,
 // parameterized by store type of %int or %uint
 std::string VertexIndexPreamble(std::string store_type) {
-  return R"(
+    return R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Vertex %main "main" %position %1
@@ -2562,7 +2493,7 @@ std::string VertexIndexPreamble(std::string store_type) {
     %uint = OpTypeInt 32 0
     %int = OpTypeInt 32 1
     %ptr_ty = OpTypePointer Input )" +
-         store_type + R"(
+           store_type + R"(
     %1 = OpVariable %ptr_ty Input
     %v4float = OpTypeVector %float 4
     %posty = OpTypePointer Output %v4float
@@ -2571,18 +2502,18 @@ std::string VertexIndexPreamble(std::string store_type) {
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_Direct) {
-  const std::string assembly = VertexIndexPreamble("%int") + R"(
+    const std::string assembly = VertexIndexPreamble("%int") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %2 = OpLoad %int %1
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : i32;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : i32;
 
 var<private> x_4 : vec4<f32>;
 
@@ -2603,11 +2534,11 @@ fn main(@builtin(vertex_index) x_1_param : u32) -> main_out {
   return main_out(x_4);
 }
 )";
-  EXPECT_EQ(module_str, expected) << module_str;
+    EXPECT_EQ(module_str, expected) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_CopyObject) {
-  const std::string assembly = VertexIndexPreamble("%int") + R"(
+    const std::string assembly = VertexIndexPreamble("%int") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %copy_ptr = OpCopyObject %ptr_ty %1
@@ -2615,11 +2546,11 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_CopyObject) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : i32;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : i32;
 
 var<private> x_4 : vec4<f32>;
 
@@ -2641,11 +2572,11 @@ fn main(@builtin(vertex_index) x_1_param : u32) -> main_out {
   return main_out(x_4);
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_AccessChain) {
-  const std::string assembly = VertexIndexPreamble("%int") + R"(
+    const std::string assembly = VertexIndexPreamble("%int") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %copy_ptr = OpAccessChain %ptr_ty %1
@@ -2653,11 +2584,11 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_AccessChain) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : i32;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : i32;
 
 var<private> x_4 : vec4<f32>;
 
@@ -2678,22 +2609,22 @@ fn main(@builtin(vertex_index) x_1_param : u32) -> main_out {
   return main_out(x_4);
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_Direct) {
-  const std::string assembly = VertexIndexPreamble("%uint") + R"(
+    const std::string assembly = VertexIndexPreamble("%uint") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %2 = OpLoad %uint %1
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : u32;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : u32;
 
 var<private> x_4 : vec4<f32>;
 
@@ -2714,11 +2645,11 @@ fn main(@builtin(vertex_index) x_1_param : u32) -> main_out {
   return main_out(x_4);
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_CopyObject) {
-  const std::string assembly = VertexIndexPreamble("%uint") + R"(
+    const std::string assembly = VertexIndexPreamble("%uint") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %copy_ptr = OpCopyObject %ptr_ty %1
@@ -2726,11 +2657,11 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_CopyObject) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : u32;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : u32;
 
 var<private> x_4 : vec4<f32>;
 
@@ -2752,11 +2683,11 @@ fn main(@builtin(vertex_index) x_1_param : u32) -> main_out {
   return main_out(x_4);
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_AccessChain) {
-  const std::string assembly = VertexIndexPreamble("%uint") + R"(
+    const std::string assembly = VertexIndexPreamble("%uint") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %copy_ptr = OpAccessChain %ptr_ty %1
@@ -2764,11 +2695,11 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_AccessChain) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : u32;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : u32;
 
 var<private> x_4 : vec4<f32>;
 
@@ -2789,11 +2720,11 @@ fn main(@builtin(vertex_index) x_1_param : u32) -> main_out {
   return main_out(x_4);
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_FunctParam) {
-  const std::string assembly = VertexIndexPreamble("%uint") + R"(
+    const std::string assembly = VertexIndexPreamble("%uint") + R"(
     %helper_ty = OpTypeFunction %uint %ptr_ty
     %helper = OpFunction %uint None %helper_ty
     %param = OpFunctionParameter %ptr_ty
@@ -2808,19 +2739,18 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_FunctParam) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  // This example is invalid because you can't pass pointer-to-Input
-  // as a function parameter.
-  EXPECT_FALSE(p->Parse());
-  EXPECT_THAT(p->error(),
-              HasSubstr("Invalid storage class for pointer operand 1"));
+    // This example is invalid because you can't pass pointer-to-Input
+    // as a function parameter.
+    EXPECT_FALSE(p->Parse());
+    EXPECT_THAT(p->error(), HasSubstr("Invalid storage class for pointer operand 1"));
 }
 
 // Returns the start of a shader for testing InstanceIndex,
 // parameterized by store type of %int or %uint
 std::string InstanceIndexPreamble(std::string store_type) {
-  return R"(
+    return R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Vertex %main "main" %position %1
@@ -2833,7 +2763,7 @@ std::string InstanceIndexPreamble(std::string store_type) {
     %uint = OpTypeInt 32 0
     %int = OpTypeInt 32 1
     %ptr_ty = OpTypePointer Input )" +
-         store_type + R"(
+           store_type + R"(
     %1 = OpVariable %ptr_ty Input
     %v4float = OpTypeVector %float 4
     %posty = OpTypePointer Output %v4float
@@ -2842,18 +2772,18 @@ std::string InstanceIndexPreamble(std::string store_type) {
 }
 
 TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_Direct) {
-  const std::string assembly = InstanceIndexPreamble("%int") + R"(
+    const std::string assembly = InstanceIndexPreamble("%int") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %2 = OpLoad %int %1
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : i32;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : i32;
 
 var<private> position : vec4<f32>;
 
@@ -2874,11 +2804,11 @@ fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   return main_out(position);
 }
 )";
-  EXPECT_EQ(module_str, expected) << module_str;
+    EXPECT_EQ(module_str, expected) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_CopyObject) {
-  const std::string assembly = InstanceIndexPreamble("%int") + R"(
+    const std::string assembly = InstanceIndexPreamble("%int") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %copy_ptr = OpCopyObject %ptr_ty %1
@@ -2886,11 +2816,11 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_CopyObject) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : i32;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : i32;
 
 var<private> position : vec4<f32>;
 
@@ -2912,11 +2842,11 @@ fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   return main_out(position);
 }
 )";
-  EXPECT_EQ(module_str, expected) << module_str;
+    EXPECT_EQ(module_str, expected) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_AccessChain) {
-  const std::string assembly = InstanceIndexPreamble("%int") + R"(
+    const std::string assembly = InstanceIndexPreamble("%int") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %copy_ptr = OpAccessChain %ptr_ty %1
@@ -2924,11 +2854,11 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_Load_AccessChain) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : i32;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : i32;
 
 var<private> position : vec4<f32>;
 
@@ -2949,11 +2879,11 @@ fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   return main_out(position);
 }
 )";
-  EXPECT_EQ(module_str, expected) << module_str;
+    EXPECT_EQ(module_str, expected) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_FunctParam) {
-  const std::string assembly = InstanceIndexPreamble("%int") + R"(
+    const std::string assembly = InstanceIndexPreamble("%int") + R"(
     %helper_ty = OpTypeFunction %int %ptr_ty
     %helper = OpFunction %int None %helper_ty
     %param = OpFunctionParameter %ptr_ty
@@ -2968,27 +2898,26 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_I32_FunctParam) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  // This example is invalid because you can't pass pointer-to-Input
-  // as a function parameter.
-  EXPECT_FALSE(p->Parse());
-  EXPECT_THAT(p->error(),
-              HasSubstr("Invalid storage class for pointer operand 1"));
+    auto p = parser(test::Assemble(assembly));
+    // This example is invalid because you can't pass pointer-to-Input
+    // as a function parameter.
+    EXPECT_FALSE(p->Parse());
+    EXPECT_THAT(p->error(), HasSubstr("Invalid storage class for pointer operand 1"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_Direct) {
-  const std::string assembly = InstanceIndexPreamble("%uint") + R"(
+    const std::string assembly = InstanceIndexPreamble("%uint") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %2 = OpLoad %uint %1
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : u32;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : u32;
 
 var<private> position : vec4<f32>;
 
@@ -3009,11 +2938,11 @@ fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   return main_out(position);
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_CopyObject) {
-  const std::string assembly = InstanceIndexPreamble("%uint") + R"(
+    const std::string assembly = InstanceIndexPreamble("%uint") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %copy_ptr = OpCopyObject %ptr_ty %1
@@ -3021,11 +2950,11 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_CopyObject) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : u32;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : u32;
 
 var<private> position : vec4<f32>;
 
@@ -3047,11 +2976,11 @@ fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   return main_out(position);
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_AccessChain) {
-  const std::string assembly = InstanceIndexPreamble("%uint") + R"(
+    const std::string assembly = InstanceIndexPreamble("%uint") + R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %copy_ptr = OpAccessChain %ptr_ty %1
@@ -3059,11 +2988,11 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_AccessChain) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : u32;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : u32;
 
 var<private> position : vec4<f32>;
 
@@ -3084,11 +3013,11 @@ fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   return main_out(position);
 }
 )";
-  EXPECT_EQ(module_str, expected);
+    EXPECT_EQ(module_str, expected);
 }
 
 TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_FunctParam) {
-  const std::string assembly = InstanceIndexPreamble("%uint") + R"(
+    const std::string assembly = InstanceIndexPreamble("%uint") + R"(
     %helper_ty = OpTypeFunction %uint %ptr_ty
     %helper = OpFunction %uint None %helper_ty
     %param = OpFunctionParameter %ptr_ty
@@ -3103,25 +3032,23 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_FunctParam) {
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  // This example is invalid because you can't pass pointer-to-Input
-  // as a function parameter.
-  EXPECT_FALSE(p->Parse());
-  EXPECT_THAT(p->error(),
-              HasSubstr("Invalid storage class for pointer operand 1"));
+    auto p = parser(test::Assemble(assembly));
+    // This example is invalid because you can't pass pointer-to-Input
+    // as a function parameter.
+    EXPECT_FALSE(p->Parse());
+    EXPECT_THAT(p->error(), HasSubstr("Invalid storage class for pointer operand 1"));
 }
 
 // Returns the start of a shader for testing LocalInvocationIndex,
 // parameterized by store type of %int or %uint
-std::string ComputeBuiltinInputPreamble(std::string builtin,
-                                        std::string store_type) {
-  return R"(
+std::string ComputeBuiltinInputPreamble(std::string builtin, std::string store_type) {
+    return R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint GLCompute %main "main" %1
     OpExecutionMode %main LocalSize 1 1 1
     OpDecorate %1 BuiltIn )" +
-         builtin + R"(
+           builtin + R"(
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
     %float = OpTypeFloat 32
@@ -3130,93 +3057,92 @@ std::string ComputeBuiltinInputPreamble(std::string builtin,
     %v3uint = OpTypeVector %uint 3
     %v3int = OpTypeVector %int 3
     %ptr_ty = OpTypePointer Input )" +
-         store_type + R"(
+           store_type + R"(
     %1 = OpVariable %ptr_ty Input
 )";
 }
 
 struct ComputeBuiltinInputCase {
-  std::string spirv_builtin;
-  std::string spirv_store_type;
-  std::string wgsl_builtin;
+    std::string spirv_builtin;
+    std::string spirv_store_type;
+    std::string wgsl_builtin;
 };
 inline std::ostream& operator<<(std::ostream& o, ComputeBuiltinInputCase c) {
-  return o << "ComputeBuiltinInputCase(" << c.spirv_builtin << " "
-           << c.spirv_store_type << " " << c.wgsl_builtin << ")";
+    return o << "ComputeBuiltinInputCase(" << c.spirv_builtin << " " << c.spirv_store_type << " "
+             << c.wgsl_builtin << ")";
 }
 
 std::string WgslType(std::string spirv_type) {
-  if (spirv_type == "%uint") {
-    return "u32";
-  }
-  if (spirv_type == "%int") {
-    return "i32";
-  }
-  if (spirv_type == "%v3uint") {
-    return "vec3<u32>";
-  }
-  if (spirv_type == "%v3int") {
-    return "vec3<i32>";
-  }
-  return "error";
+    if (spirv_type == "%uint") {
+        return "u32";
+    }
+    if (spirv_type == "%int") {
+        return "i32";
+    }
+    if (spirv_type == "%v3uint") {
+        return "vec3<u32>";
+    }
+    if (spirv_type == "%v3int") {
+        return "vec3<i32>";
+    }
+    return "error";
 }
 
 std::string UnsignedWgslType(std::string wgsl_type) {
-  if (wgsl_type == "u32") {
-    return "u32";
-  }
-  if (wgsl_type == "i32") {
-    return "u32";
-  }
-  if (wgsl_type == "vec3<u32>") {
-    return "vec3<u32>";
-  }
-  if (wgsl_type == "vec3<i32>") {
-    return "vec3<u32>";
-  }
-  return "error";
+    if (wgsl_type == "u32") {
+        return "u32";
+    }
+    if (wgsl_type == "i32") {
+        return "u32";
+    }
+    if (wgsl_type == "vec3<u32>") {
+        return "vec3<u32>";
+    }
+    if (wgsl_type == "vec3<i32>") {
+        return "vec3<u32>";
+    }
+    return "error";
 }
 
 std::string SignedWgslType(std::string wgsl_type) {
-  if (wgsl_type == "u32") {
-    return "i32";
-  }
-  if (wgsl_type == "i32") {
-    return "i32";
-  }
-  if (wgsl_type == "vec3<u32>") {
-    return "vec3<i32>";
-  }
-  if (wgsl_type == "vec3<i32>") {
-    return "vec3<i32>";
-  }
-  return "error";
+    if (wgsl_type == "u32") {
+        return "i32";
+    }
+    if (wgsl_type == "i32") {
+        return "i32";
+    }
+    if (wgsl_type == "vec3<u32>") {
+        return "vec3<i32>";
+    }
+    if (wgsl_type == "vec3<i32>") {
+        return "vec3<i32>";
+    }
+    return "error";
 }
 
 using SpvModuleScopeVarParserTest_ComputeBuiltin =
     SpvParserTestBase<::testing::TestWithParam<ComputeBuiltinInputCase>>;
 
 TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_Direct) {
-  const auto wgsl_type = WgslType(GetParam().spirv_store_type);
-  const auto wgsl_builtin = GetParam().wgsl_builtin;
-  const auto unsigned_wgsl_type = UnsignedWgslType(wgsl_type);
-  const auto signed_wgsl_type = SignedWgslType(wgsl_type);
-  const std::string assembly =
-      ComputeBuiltinInputPreamble(GetParam().spirv_builtin,
-                                  GetParam().spirv_store_type) +
-      R"(
+    const auto wgsl_type = WgslType(GetParam().spirv_store_type);
+    const auto wgsl_builtin = GetParam().wgsl_builtin;
+    const auto unsigned_wgsl_type = UnsignedWgslType(wgsl_type);
+    const auto signed_wgsl_type = SignedWgslType(wgsl_type);
+    const std::string assembly =
+        ComputeBuiltinInputPreamble(GetParam().spirv_builtin, GetParam().spirv_store_type) +
+        R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %2 = OpLoad )" +
-      GetParam().spirv_store_type + R"( %1
+        GetParam().spirv_store_type + R"( %1
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  std::string expected = R"(var<private> x_1 : ${wgsl_type};
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    std::string expected = R"(var<private> x_1 : ${wgsl_type};
 
 fn main_1() {
   let x_2 : ${wgsl_type} = x_1;
@@ -3230,41 +3156,38 @@ fn main(@builtin(${wgsl_builtin}) x_1_param : ${unsigned_wgsl_type}) {
 }
 )";
 
-  expected = utils::ReplaceAll(expected, "${wgsl_type}", wgsl_type);
-  expected =
-      utils::ReplaceAll(expected, "${unsigned_wgsl_type}", unsigned_wgsl_type);
-  expected = utils::ReplaceAll(expected, "${wgsl_builtin}", wgsl_builtin);
-  expected =
-      utils::ReplaceAll(expected, "${assignment_value}",
-                        (wgsl_type == unsigned_wgsl_type)
-                            ? "x_1_param"
-                            : "bitcast<" + signed_wgsl_type + ">(x_1_param)");
+    expected = utils::ReplaceAll(expected, "${wgsl_type}", wgsl_type);
+    expected = utils::ReplaceAll(expected, "${unsigned_wgsl_type}", unsigned_wgsl_type);
+    expected = utils::ReplaceAll(expected, "${wgsl_builtin}", wgsl_builtin);
+    expected = utils::ReplaceAll(expected, "${assignment_value}",
+                                 (wgsl_type == unsigned_wgsl_type)
+                                     ? "x_1_param"
+                                     : "bitcast<" + signed_wgsl_type + ">(x_1_param)");
 
-  EXPECT_EQ(module_str, expected) << module_str;
+    EXPECT_EQ(module_str, expected) << module_str;
 }
 
 TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_CopyObject) {
-  const auto wgsl_type = WgslType(GetParam().spirv_store_type);
-  const auto wgsl_builtin = GetParam().wgsl_builtin;
-  const auto unsigned_wgsl_type = UnsignedWgslType(wgsl_type);
-  const auto signed_wgsl_type = SignedWgslType(wgsl_type);
-  const std::string assembly =
-      ComputeBuiltinInputPreamble(GetParam().spirv_builtin,
-                                  GetParam().spirv_store_type) +
-      R"(
+    const auto wgsl_type = WgslType(GetParam().spirv_store_type);
+    const auto wgsl_builtin = GetParam().wgsl_builtin;
+    const auto unsigned_wgsl_type = UnsignedWgslType(wgsl_type);
+    const auto signed_wgsl_type = SignedWgslType(wgsl_type);
+    const std::string assembly =
+        ComputeBuiltinInputPreamble(GetParam().spirv_builtin, GetParam().spirv_store_type) +
+        R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %13 = OpCopyObject %ptr_ty %1
     %2 = OpLoad )" +
-      GetParam().spirv_store_type + R"( %13
+        GetParam().spirv_store_type + R"( %13
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  std::string expected = R"(var<private> x_1 : ${wgsl_type};
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    std::string expected = R"(var<private> x_1 : ${wgsl_type};
 
 fn main_1() {
   let x_13 : ptr<private, ${wgsl_type}> = &(x_1);
@@ -3279,41 +3202,38 @@ fn main(@builtin(${wgsl_builtin}) x_1_param : ${unsigned_wgsl_type}) {
 }
 )";
 
-  expected = utils::ReplaceAll(expected, "${wgsl_type}", wgsl_type);
-  expected =
-      utils::ReplaceAll(expected, "${unsigned_wgsl_type}", unsigned_wgsl_type);
-  expected = utils::ReplaceAll(expected, "${wgsl_builtin}", wgsl_builtin);
-  expected =
-      utils::ReplaceAll(expected, "${assignment_value}",
-                        (wgsl_type == unsigned_wgsl_type)
-                            ? "x_1_param"
-                            : "bitcast<" + signed_wgsl_type + ">(x_1_param)");
+    expected = utils::ReplaceAll(expected, "${wgsl_type}", wgsl_type);
+    expected = utils::ReplaceAll(expected, "${unsigned_wgsl_type}", unsigned_wgsl_type);
+    expected = utils::ReplaceAll(expected, "${wgsl_builtin}", wgsl_builtin);
+    expected = utils::ReplaceAll(expected, "${assignment_value}",
+                                 (wgsl_type == unsigned_wgsl_type)
+                                     ? "x_1_param"
+                                     : "bitcast<" + signed_wgsl_type + ">(x_1_param)");
 
-  EXPECT_EQ(module_str, expected) << module_str;
+    EXPECT_EQ(module_str, expected) << module_str;
 }
 
 TEST_P(SpvModuleScopeVarParserTest_ComputeBuiltin, Load_AccessChain) {
-  const auto wgsl_type = WgslType(GetParam().spirv_store_type);
-  const auto wgsl_builtin = GetParam().wgsl_builtin;
-  const auto unsigned_wgsl_type = UnsignedWgslType(wgsl_type);
-  const auto signed_wgsl_type = SignedWgslType(wgsl_type);
-  const std::string assembly =
-      ComputeBuiltinInputPreamble(GetParam().spirv_builtin,
-                                  GetParam().spirv_store_type) +
-      R"(
+    const auto wgsl_type = WgslType(GetParam().spirv_store_type);
+    const auto wgsl_builtin = GetParam().wgsl_builtin;
+    const auto unsigned_wgsl_type = UnsignedWgslType(wgsl_type);
+    const auto signed_wgsl_type = SignedWgslType(wgsl_type);
+    const std::string assembly =
+        ComputeBuiltinInputPreamble(GetParam().spirv_builtin, GetParam().spirv_store_type) +
+        R"(
     %main = OpFunction %void None %voidfn
     %entry = OpLabel
     %13 = OpAccessChain %ptr_ty %1
     %2 = OpLoad )" +
-      GetParam().spirv_store_type + R"( %13
+        GetParam().spirv_store_type + R"( %13
     OpReturn
     OpFunctionEnd
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto module_str = test::ToString(p->program());
-  std::string expected = R"(var<private> x_1 : ${wgsl_type};
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    std::string expected = R"(var<private> x_1 : ${wgsl_type};
 
 fn main_1() {
   let x_2 : ${wgsl_type} = x_1;
@@ -3327,31 +3247,28 @@ fn main(@builtin(${wgsl_builtin}) x_1_param : ${unsigned_wgsl_type}) {
 }
 )";
 
-  expected = utils::ReplaceAll(expected, "${wgsl_type}", wgsl_type);
-  expected =
-      utils::ReplaceAll(expected, "${unsigned_wgsl_type}", unsigned_wgsl_type);
-  expected = utils::ReplaceAll(expected, "${wgsl_builtin}", wgsl_builtin);
-  expected =
-      utils::ReplaceAll(expected, "${assignment_value}",
-                        (wgsl_type == unsigned_wgsl_type)
-                            ? "x_1_param"
-                            : "bitcast<" + signed_wgsl_type + ">(x_1_param)");
+    expected = utils::ReplaceAll(expected, "${wgsl_type}", wgsl_type);
+    expected = utils::ReplaceAll(expected, "${unsigned_wgsl_type}", unsigned_wgsl_type);
+    expected = utils::ReplaceAll(expected, "${wgsl_builtin}", wgsl_builtin);
+    expected = utils::ReplaceAll(expected, "${assignment_value}",
+                                 (wgsl_type == unsigned_wgsl_type)
+                                     ? "x_1_param"
+                                     : "bitcast<" + signed_wgsl_type + ">(x_1_param)");
 
-  EXPECT_EQ(module_str, expected) << module_str;
+    EXPECT_EQ(module_str, expected) << module_str;
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    Samples,
-    SpvModuleScopeVarParserTest_ComputeBuiltin,
-    ::testing::ValuesIn(std::vector<ComputeBuiltinInputCase>{
-        {"LocalInvocationIndex", "%uint", "local_invocation_index"},
-        {"LocalInvocationIndex", "%int", "local_invocation_index"},
-        {"LocalInvocationId", "%v3uint", "local_invocation_id"},
-        {"LocalInvocationId", "%v3int", "local_invocation_id"},
-        {"GlobalInvocationId", "%v3uint", "global_invocation_id"},
-        {"GlobalInvocationId", "%v3int", "global_invocation_id"},
-        {"WorkgroupId", "%v3uint", "workgroup_id"},
-        {"WorkgroupId", "%v3int", "workgroup_id"}}));
+INSTANTIATE_TEST_SUITE_P(Samples,
+                         SpvModuleScopeVarParserTest_ComputeBuiltin,
+                         ::testing::ValuesIn(std::vector<ComputeBuiltinInputCase>{
+                             {"LocalInvocationIndex", "%uint", "local_invocation_index"},
+                             {"LocalInvocationIndex", "%int", "local_invocation_index"},
+                             {"LocalInvocationId", "%v3uint", "local_invocation_id"},
+                             {"LocalInvocationId", "%v3int", "local_invocation_id"},
+                             {"GlobalInvocationId", "%v3uint", "global_invocation_id"},
+                             {"GlobalInvocationId", "%v3int", "global_invocation_id"},
+                             {"WorkgroupId", "%v3uint", "workgroup_id"},
+                             {"WorkgroupId", "%v3int", "workgroup_id"}}));
 
 // TODO(dneto): crbug.com/tint/752
 // NumWorkgroups support is blocked by crbug.com/tint/752
@@ -3360,8 +3277,8 @@ INSTANTIATE_TEST_SUITE_P(
 //        {"NumWorkgroups", "%int", "num_workgroups"}
 
 TEST_F(SpvModuleScopeVarParserTest, RegisterInputOutputVars) {
-  const std::string assembly =
-      R"(
+    const std::string assembly =
+        R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Fragment %1000 "w1000"
@@ -3382,7 +3299,7 @@ TEST_F(SpvModuleScopeVarParserTest, RegisterInputOutputVars) {
     OpDecorate %15 Location 5
 
 )" + CommonTypes() +
-      R"(
+        R"(
 
     %ptr_in_uint = OpTypePointer Input %uint
     %ptr_out_uint = OpTypePointer Output %uint
@@ -3443,84 +3360,81 @@ TEST_F(SpvModuleScopeVarParserTest, RegisterInputOutputVars) {
     OpFunctionEnd
 
  )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
 
-  const auto& info_1000 = p->GetEntryPointInfo(1000);
-  EXPECT_EQ(1u, info_1000.size());
-  EXPECT_TRUE(info_1000[0].inputs.empty());
-  EXPECT_TRUE(info_1000[0].outputs.empty());
+    const auto& info_1000 = p->GetEntryPointInfo(1000);
+    EXPECT_EQ(1u, info_1000.size());
+    EXPECT_TRUE(info_1000[0].inputs.empty());
+    EXPECT_TRUE(info_1000[0].outputs.empty());
 
-  const auto& info_1100 = p->GetEntryPointInfo(1100);
-  EXPECT_EQ(1u, info_1100.size());
-  EXPECT_THAT(info_1100[0].inputs, ElementsAre(1));
-  EXPECT_TRUE(info_1100[0].outputs.empty());
+    const auto& info_1100 = p->GetEntryPointInfo(1100);
+    EXPECT_EQ(1u, info_1100.size());
+    EXPECT_THAT(info_1100[0].inputs, ElementsAre(1));
+    EXPECT_TRUE(info_1100[0].outputs.empty());
 
-  const auto& info_1200 = p->GetEntryPointInfo(1200);
-  EXPECT_EQ(1u, info_1200.size());
-  EXPECT_THAT(info_1200[0].inputs, ElementsAre(2));
-  EXPECT_THAT(info_1200[0].outputs, ElementsAre(15));
+    const auto& info_1200 = p->GetEntryPointInfo(1200);
+    EXPECT_EQ(1u, info_1200.size());
+    EXPECT_THAT(info_1200[0].inputs, ElementsAre(2));
+    EXPECT_THAT(info_1200[0].outputs, ElementsAre(15));
 
-  const auto& info_1300 = p->GetEntryPointInfo(1300);
-  EXPECT_EQ(1u, info_1300.size());
-  EXPECT_THAT(info_1300[0].inputs, ElementsAre(1, 2));
-  EXPECT_THAT(info_1300[0].outputs, ElementsAre(15));
+    const auto& info_1300 = p->GetEntryPointInfo(1300);
+    EXPECT_EQ(1u, info_1300.size());
+    EXPECT_THAT(info_1300[0].inputs, ElementsAre(1, 2));
+    EXPECT_THAT(info_1300[0].outputs, ElementsAre(15));
 
-  // Validation incorrectly reports an overlap for the duplicated variable %1 on
-  // shader %1300
-  p->SkipDumpingPending(
-      "https://github.com/KhronosGroup/SPIRV-Tools/issues/4403");
+    // Validation incorrectly reports an overlap for the duplicated variable %1 on
+    // shader %1300
+    p->SkipDumpingPending("https://github.com/KhronosGroup/SPIRV-Tools/issues/4403");
 }
 
 TEST_F(SpvModuleScopeVarParserTest, InputVarsConvertedToPrivate) {
-  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
+    const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %ptr_in_uint = OpTypePointer Input %uint
      %1 = OpVariable %ptr_in_uint Input
   )" + MainBody();
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected = "var<private> x_1 : u32;";
-  EXPECT_THAT(got, HasSubstr(expected)) << got;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected = "var<private> x_1 : u32;";
+    EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, OutputVarsConvertedToPrivate) {
-  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
+    const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %ptr_out_uint = OpTypePointer Output %uint
      %1 = OpVariable %ptr_out_uint Output
   )" + MainBody();
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected = "var<private> x_1 : u32;";
-  EXPECT_THAT(got, HasSubstr(expected)) << got;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected = "var<private> x_1 : u32;";
+    EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       OutputVarsConvertedToPrivate_WithInitializer) {
-  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
+TEST_F(SpvModuleScopeVarParserTest, OutputVarsConvertedToPrivate_WithInitializer) {
+    const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %ptr_out_uint = OpTypePointer Output %uint
      %1 = OpVariable %ptr_out_uint Output %uint_1
   )" + MainBody();
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected = "var<private> x_1 : u32 = 1u;";
-  EXPECT_THAT(got, HasSubstr(expected)) << got;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected = "var<private> x_1 : u32 = 1u;";
+    EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       Builtin_Output_Initializer_SameSignednessAsWGSL) {
-  // Only outputs can have initializers.
-  // WGSL sample_mask store type is u32.
-  const auto assembly = Preamble() + FragMain() + R"(
+TEST_F(SpvModuleScopeVarParserTest, Builtin_Output_Initializer_SameSignednessAsWGSL) {
+    // Only outputs can have initializers.
+    // WGSL sample_mask store type is u32.
+    const auto assembly = Preamble() + FragMain() + R"(
      OpDecorate %1 BuiltIn SampleMask
 )" + CommonTypes() + R"(
      %arr_ty = OpTypeArray %uint %uint_1
@@ -3528,21 +3442,19 @@ TEST_F(SpvModuleScopeVarParserTest,
      %arr_init = OpConstantComposite %arr_ty %uint_2
      %1 = OpVariable %ptr_ty Output %arr_init
   )" + MainBody();
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected =
-      "var<private> x_1 : array<u32, 1u> = array<u32, 1u>(2u);";
-  EXPECT_THAT(got, HasSubstr(expected)) << got;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected = "var<private> x_1 : array<u32, 1u> = array<u32, 1u>(2u);";
+    EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       Builtin_Output_Initializer_OppositeSignednessAsWGSL) {
-  // Only outputs can have initializers.
-  // WGSL sample_mask store type is u32.  Use i32 in SPIR-V
-  const auto assembly = Preamble() + FragMain() + R"(
+TEST_F(SpvModuleScopeVarParserTest, Builtin_Output_Initializer_OppositeSignednessAsWGSL) {
+    // Only outputs can have initializers.
+    // WGSL sample_mask store type is u32.  Use i32 in SPIR-V
+    const auto assembly = Preamble() + FragMain() + R"(
      OpDecorate %1 BuiltIn SampleMask
 )" + CommonTypes() + R"(
      %arr_ty = OpTypeArray %int %uint_1
@@ -3550,52 +3462,51 @@ TEST_F(SpvModuleScopeVarParserTest,
      %arr_init = OpConstantComposite %arr_ty %int_14
      %1 = OpVariable %ptr_ty Output %arr_init
   )" + MainBody();
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected =
-      "var<private> x_1 : array<i32, 1u> = array<i32, 1u>(14);";
-  EXPECT_THAT(got, HasSubstr(expected)) << got;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected = "var<private> x_1 : array<i32, 1u> = array<i32, 1u>(14);";
+    EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, Builtin_Input_SameSignednessAsWGSL) {
-  // WGSL vertex_index store type is u32.
-  const auto assembly = Preamble() + FragMain() + R"(
+    // WGSL vertex_index store type is u32.
+    const auto assembly = Preamble() + FragMain() + R"(
      OpDecorate %1 BuiltIn VertexIndex
 )" + CommonTypes() + R"(
      %ptr_ty = OpTypePointer Input %uint
      %1 = OpVariable %ptr_ty Input
   )" + MainBody();
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected = "var<private> x_1 : u32;";
-  EXPECT_THAT(got, HasSubstr(expected)) << got;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected = "var<private> x_1 : u32;";
+    EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, Builtin_Input_OppositeSignednessAsWGSL) {
-  // WGSL vertex_index store type is u32.  Use i32 in SPIR-V.
-  const auto assembly = Preamble() + FragMain() + R"(
+    // WGSL vertex_index store type is u32.  Use i32 in SPIR-V.
+    const auto assembly = Preamble() + FragMain() + R"(
      OpDecorate %1 BuiltIn VertexIndex
 )" + CommonTypes() + R"(
      %ptr_ty = OpTypePointer Input %int
      %1 = OpVariable %ptr_ty Input
   )" + MainBody();
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected = "var<private> x_1 : i32;";
-  EXPECT_THAT(got, HasSubstr(expected)) << got;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected = "var<private> x_1 : i32;";
+    EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_IOLocations) {
-  const auto assembly = CommonCapabilities() + R"(
+    const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Fragment %main "main" %1 %2 %3 %4
      OpExecutionMode %main OriginUpperLeft
      OpDecorate %1 Location 0
@@ -3603,7 +3514,7 @@ TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_IOLocations) {
      OpDecorate %3 Location 30
      OpDecorate %4 Location 6
 )" + CommonTypes() +
-                        R"(
+                          R"(
      %ptr_in_uint = OpTypePointer Input %uint
      %ptr_out_uint = OpTypePointer Output %uint
      %1 = OpVariable %ptr_in_uint Input
@@ -3616,13 +3527,13 @@ TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_IOLocations) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected =
-      R"(var<private> x_1 : u32;
+    ASSERT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected =
+        R"(var<private> x_1 : u32;
 
 var<private> x_2 : u32;
 
@@ -3649,19 +3560,18 @@ fn main(@location(0) @interpolate(flat) x_1_param : u32, @location(30) @interpol
   return main_out(x_2, x_4);
 }
 )";
-  EXPECT_THAT(got, HasSubstr(expected)) << got;
+    EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       EntryPointWrapping_BuiltinVar_Input_SameSignedness) {
-  // instance_index is u32 in WGSL. Use uint in SPIR-V.
-  // No bitcasts are used for parameter formation or return value.
-  const auto assembly = CommonCapabilities() + R"(
+TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_BuiltinVar_Input_SameSignedness) {
+    // instance_index is u32 in WGSL. Use uint in SPIR-V.
+    // No bitcasts are used for parameter formation or return value.
+    const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Vertex %main "main" %1 %position
      OpDecorate %position BuiltIn Position
      OpDecorate %1 BuiltIn InstanceIndex
 )" + CommonTypes() +
-                        R"(
+                          R"(
      %ptr_in_uint = OpTypePointer Input %uint
      %1 = OpVariable %ptr_in_uint Input
      %posty = OpTypePointer Output %v4float
@@ -3674,12 +3584,12 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : u32;
+    ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : u32;
 
 var<private> x_4 : vec4<f32>;
 
@@ -3700,18 +3610,17 @@ fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   return main_out(x_4);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       EntryPointWrapping_BuiltinVar_Input_OppositeSignedness) {
-  // instance_index is u32 in WGSL. Use int in SPIR-V.
-  const auto assembly = CommonCapabilities() + R"(
+TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_BuiltinVar_Input_OppositeSignedness) {
+    // instance_index is u32 in WGSL. Use int in SPIR-V.
+    const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Vertex %main "main" %position %1
      OpDecorate %position BuiltIn Position
      OpDecorate %1 BuiltIn InstanceIndex
 )" + CommonTypes() +
-                        R"(
+                          R"(
      %ptr_in_int = OpTypePointer Input %int
      %1 = OpVariable %ptr_in_int Input
      %posty = OpTypePointer Output %v4float
@@ -3724,12 +3633,12 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : i32;
+    ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : i32;
 
 var<private> x_4 : vec4<f32>;
 
@@ -3750,20 +3659,19 @@ fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   return main_out(x_4);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
 // SampleMask is an array in Vulkan SPIR-V, but a scalar in WGSL.
-TEST_F(SpvModuleScopeVarParserTest,
-       EntryPointWrapping_BuiltinVar_SampleMask_In_Unsigned) {
-  // SampleMask is u32 in WGSL.
-  // Use unsigned array element in Vulkan.
-  const auto assembly = CommonCapabilities() + R"(
+TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_BuiltinVar_SampleMask_In_Unsigned) {
+    // SampleMask is u32 in WGSL.
+    // Use unsigned array element in Vulkan.
+    const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Fragment %main "main" %1
      OpExecutionMode %main OriginUpperLeft
      OpDecorate %1 BuiltIn SampleMask
 )" + CommonTypes() +
-                        R"(
+                          R"(
      %arr = OpTypeArray %uint %uint_1
      %ptr_ty = OpTypePointer Input %arr
      %1 = OpVariable %ptr_ty Input
@@ -3773,12 +3681,12 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
+    ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
 
 fn main_1() {
   return;
@@ -3790,19 +3698,18 @@ fn main(@builtin(sample_mask) x_1_param : u32) {
   main_1();
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       EntryPointWrapping_BuiltinVar_SampleMask_In_Signed) {
-  // SampleMask is u32 in WGSL.
-  // Use signed array element in Vulkan.
-  const auto assembly = CommonCapabilities() + R"(
+TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_BuiltinVar_SampleMask_In_Signed) {
+    // SampleMask is u32 in WGSL.
+    // Use signed array element in Vulkan.
+    const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Fragment %main "main" %1
      OpExecutionMode %main OriginUpperLeft
      OpDecorate %1 BuiltIn SampleMask
 )" + CommonTypes() +
-                        R"(
+                          R"(
      %arr = OpTypeArray %int %uint_1
      %ptr_ty = OpTypePointer Input %arr
      %1 = OpVariable %ptr_ty Input
@@ -3812,12 +3719,12 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
+    ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
 
 fn main_1() {
   return;
@@ -3829,19 +3736,19 @@ fn main(@builtin(sample_mask) x_1_param : u32) {
   main_1();
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
 TEST_F(SpvModuleScopeVarParserTest,
        EntryPointWrapping_BuiltinVar_SampleMask_Out_Unsigned_Initializer) {
-  // SampleMask is u32 in WGSL.
-  // Use unsigned array element in Vulkan.
-  const auto assembly = CommonCapabilities() + R"(
+    // SampleMask is u32 in WGSL.
+    // Use unsigned array element in Vulkan.
+    const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Fragment %main "main" %1
      OpExecutionMode %main OriginUpperLeft
      OpDecorate %1 BuiltIn SampleMask
 )" + CommonTypes() +
-                        R"(
+                          R"(
      %arr = OpTypeArray %uint %uint_1
      %ptr_ty = OpTypePointer Output %arr
      %zero = OpConstantNull %arr
@@ -3852,13 +3759,13 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected =
-      R"(var<private> x_1 : array<u32, 1u> = array<u32, 1u>();
+    ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected =
+        R"(var<private> x_1 : array<u32, 1u> = array<u32, 1u>();
 
 fn main_1() {
   return;
@@ -3875,19 +3782,19 @@ fn main() -> main_out {
   return main_out(x_1[0]);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
 TEST_F(SpvModuleScopeVarParserTest,
        EntryPointWrapping_BuiltinVar_SampleMask_Out_Signed_Initializer) {
-  // SampleMask is u32 in WGSL.
-  // Use signed array element in Vulkan.
-  const auto assembly = CommonCapabilities() + R"(
+    // SampleMask is u32 in WGSL.
+    // Use signed array element in Vulkan.
+    const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Fragment %main "main" %1
      OpExecutionMode %main OriginUpperLeft
      OpDecorate %1 BuiltIn SampleMask
 )" + CommonTypes() +
-                        R"(
+                          R"(
      %arr = OpTypeArray %int %uint_1
      %ptr_ty = OpTypePointer Output %arr
      %zero = OpConstantNull %arr
@@ -3898,13 +3805,13 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected =
-      R"(var<private> x_1 : array<i32, 1u> = array<i32, 1u>();
+    ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected =
+        R"(var<private> x_1 : array<i32, 1u> = array<i32, 1u>();
 
 fn main_1() {
   return;
@@ -3921,20 +3828,19 @@ fn main() -> main_out {
   return main_out(bitcast<u32>(x_1[0]));
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       EntryPointWrapping_BuiltinVar_FragDepth_Out_Initializer) {
-  // FragDepth does not require conversion, because it's f32.
-  // The member of the return type is just the identifier corresponding
-  // to the module-scope private variable.
-  const auto assembly = CommonCapabilities() + R"(
+TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_BuiltinVar_FragDepth_Out_Initializer) {
+    // FragDepth does not require conversion, because it's f32.
+    // The member of the return type is just the identifier corresponding
+    // to the module-scope private variable.
+    const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Fragment %main "main" %1
      OpExecutionMode %main OriginUpperLeft
      OpDecorate %1 BuiltIn FragDepth
 )" + CommonTypes() +
-                        R"(
+                          R"(
      %ptr_ty = OpTypePointer Output %float
      %1 = OpVariable %ptr_ty Output %float_0
 
@@ -3943,12 +3849,12 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : f32 = 0.0;
+    ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : f32 = 0.0;
 
 fn main_1() {
   return;
@@ -3965,24 +3871,24 @@ fn main() -> main_out {
   return main_out(x_1);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_BuiltIn_Position) {
-  // In Vulkan SPIR-V, Position is the first member of gl_PerVertex
-  const std::string assembly = PerVertexPreamble() + R"(
+    // In Vulkan SPIR-V, Position is the first member of gl_PerVertex
+    const std::string assembly = PerVertexPreamble() + R"(
   %main = OpFunction %void None %voidfn
   %entry = OpLabel
   OpReturn
   OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
+    ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
 
-  const auto got = test::ToString(p->program());
-  const std::string expected = R"(var<private> gl_Position : vec4<f32>;
+    const auto got = test::ToString(p->program());
+    const std::string expected = R"(var<private> gl_Position : vec4<f32>;
 
 fn main_1() {
   return;
@@ -3999,12 +3905,11 @@ fn main() -> main_out {
   return main_out(gl_Position);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       BuiltinPosition_BuiltIn_Position_Initializer) {
-  const std::string assembly = R"(
+TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_BuiltIn_Position_Initializer) {
+    const std::string assembly = R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Vertex %main "main" %1
@@ -4045,14 +3950,14 @@ TEST_F(SpvModuleScopeVarParserTest,
     OpReturn
     OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
+    ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
 
-  const auto got = test::ToString(p->program());
-  const std::string expected =
-      R"(var<private> gl_Position : vec4<f32> = vec4<f32>(1.0, 2.0, 3.0, 4.0);
+    const auto got = test::ToString(p->program());
+    const std::string expected =
+        R"(var<private> gl_Position : vec4<f32> = vec4<f32>(1.0, 2.0, 3.0, 4.0);
 
 fn main_1() {
   return;
@@ -4069,11 +3974,11 @@ fn main() -> main_out {
   return main_out(gl_Position);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, Input_FlattenArray_OneLevel) {
-  const std::string assembly = R"(
+    const std::string assembly = R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Vertex %main "main" %1 %2
@@ -4101,13 +4006,13 @@ TEST_F(SpvModuleScopeVarParserTest, Input_FlattenArray_OneLevel) {
     OpReturn
     OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
+    ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
 
-  const auto got = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : array<f32, 3u>;
+    const auto got = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : array<f32, 3u>;
 
 var<private> x_2 : vec4<f32>;
 
@@ -4129,11 +4034,11 @@ fn main(@location(4) x_1_param : f32, @location(5) x_1_param_1 : f32, @location(
   return main_out(x_2);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, Input_FlattenMatrix) {
-  const std::string assembly = R"(
+    const std::string assembly = R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Vertex %main "main" %1 %2
@@ -4159,13 +4064,13 @@ TEST_F(SpvModuleScopeVarParserTest, Input_FlattenMatrix) {
     OpReturn
     OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
+    ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
 
-  const auto got = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : mat2x4<f32>;
+    const auto got = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : mat2x4<f32>;
 
 var<private> x_2 : vec4<f32>;
 
@@ -4186,11 +4091,11 @@ fn main(@location(9) x_1_param : vec4<f32>, @location(10) x_1_param_1 : vec4<f32
   return main_out(x_2);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, Input_FlattenStruct_LocOnVariable) {
-  const std::string assembly = R"(
+    const std::string assembly = R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Vertex %main "main" %1 %2
@@ -4221,13 +4126,13 @@ TEST_F(SpvModuleScopeVarParserTest, Input_FlattenStruct_LocOnVariable) {
     OpReturn
     OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
+    ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
 
-  const auto got = test::ToString(p->program());
-  const std::string expected = R"(struct Communicators {
+    const auto got = test::ToString(p->program());
+    const std::string expected = R"(struct Communicators {
   alice : f32,
   bob : vec4<f32>,
 }
@@ -4253,11 +4158,11 @@ fn main(@location(9) x_1_param : f32, @location(10) x_1_param_1 : vec4<f32>) -> 
   return main_out(x_2);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, Input_FlattenNested) {
-  const std::string assembly = R"(
+    const std::string assembly = R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Vertex %main "main" %1 %2
@@ -4285,13 +4190,13 @@ TEST_F(SpvModuleScopeVarParserTest, Input_FlattenNested) {
     OpReturn
     OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
+    ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
 
-  const auto got = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : array<mat2x4<f32>, 2u>;
+    const auto got = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : array<mat2x4<f32>, 2u>;
 
 var<private> x_2 : vec4<f32>;
 
@@ -4314,11 +4219,11 @@ fn main(@location(7) x_1_param : vec4<f32>, @location(8) x_1_param_1 : vec4<f32>
   return main_out(x_2);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, Output_FlattenArray_OneLevel) {
-  const std::string assembly = R"(
+    const std::string assembly = R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Vertex %main "main" %1 %2
@@ -4346,13 +4251,13 @@ TEST_F(SpvModuleScopeVarParserTest, Output_FlattenArray_OneLevel) {
     OpReturn
     OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
+    ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
 
-  const auto got = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : array<f32, 3u>;
+    const auto got = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : array<f32, 3u>;
 
 var<private> x_2 : vec4<f32>;
 
@@ -4377,11 +4282,11 @@ fn main() -> main_out {
   return main_out(x_1[0], x_1[1], x_1[2], x_2);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, Output_FlattenMatrix) {
-  const std::string assembly = R"(
+    const std::string assembly = R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Vertex %main "main" %1 %2
@@ -4407,13 +4312,13 @@ TEST_F(SpvModuleScopeVarParserTest, Output_FlattenMatrix) {
     OpReturn
     OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
+    ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
 
-  const auto got = test::ToString(p->program());
-  const std::string expected = R"(var<private> x_1 : mat2x4<f32>;
+    const auto got = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : mat2x4<f32>;
 
 var<private> x_2 : vec4<f32>;
 
@@ -4436,11 +4341,11 @@ fn main() -> main_out {
   return main_out(x_1[0], x_1[1], x_2);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, Output_FlattenStruct_LocOnVariable) {
-  const std::string assembly = R"(
+    const std::string assembly = R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Vertex %main "main" %1 %2
@@ -4471,13 +4376,13 @@ TEST_F(SpvModuleScopeVarParserTest, Output_FlattenStruct_LocOnVariable) {
     OpReturn
     OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
+    ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
 
-  const auto got = test::ToString(p->program());
-  const std::string expected = R"(struct Communicators {
+    const auto got = test::ToString(p->program());
+    const std::string expected = R"(struct Communicators {
   alice : f32,
   bob : vec4<f32>,
 }
@@ -4505,12 +4410,12 @@ fn main() -> main_out {
   return main_out(x_1.alice, x_1.bob, x_2);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, FlattenStruct_LocOnMembers) {
-  // Block-decorated struct may have its members decorated with Location.
-  const std::string assembly = R"(
+    // Block-decorated struct may have its members decorated with Location.
+    const std::string assembly = R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Vertex %main "main" %1 %2 %3
@@ -4544,13 +4449,13 @@ TEST_F(SpvModuleScopeVarParserTest, FlattenStruct_LocOnMembers) {
     OpReturn
     OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->Parse()) << p->error() << assembly;
-  EXPECT_TRUE(p->error().empty());
+    ASSERT_TRUE(p->Parse()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
 
-  const auto got = test::ToString(p->program());
-  const std::string expected = R"(struct Communicators {
+    const auto got = test::ToString(p->program());
+    const std::string expected = R"(struct Communicators {
   alice : f32,
   bob : vec4<f32>,
 }
@@ -4582,12 +4487,11 @@ fn main(@location(9) x_1_param : f32, @location(11) x_1_param_1 : vec4<f32>) -> 
   return main_out(x_2, x_3.alice, x_3.bob);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       EntryPointWrapping_Interpolation_Flat_Vertex_In) {
-  const auto assembly = CommonCapabilities() + R"(
+TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_Interpolation_Flat_Vertex_In) {
+    const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Vertex %main "main" %1 %2 %3 %4 %5 %6 %10
      OpDecorate %1 Location 1
      OpDecorate %2 Location 2
@@ -4603,7 +4507,7 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpDecorate %6 Flat
      OpDecorate %10 BuiltIn Position
 )" + CommonTypes() +
-                        R"(
+                          R"(
      %ptr_in_uint = OpTypePointer Input %uint
      %ptr_in_v2uint = OpTypePointer Input %v2uint
      %ptr_in_int = OpTypePointer Input %int
@@ -4625,13 +4529,13 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected =
-      R"(var<private> x_1 : u32;
+    ASSERT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected =
+        R"(var<private> x_1 : u32;
 
 var<private> x_2 : vec2<u32>;
 
@@ -4666,12 +4570,11 @@ fn main(@location(1) @interpolate(flat) x_1_param : u32, @location(2) @interpola
   return main_out(x_10);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       EntryPointWrapping_Interpolation_Flat_Vertex_Output) {
-  const auto assembly = CommonCapabilities() + R"(
+TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_Interpolation_Flat_Vertex_Output) {
+    const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Vertex %main "main" %1 %2 %3 %4 %5 %6 %10
      OpDecorate %1 Location 1
      OpDecorate %2 Location 2
@@ -4687,7 +4590,7 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpDecorate %6 Flat
      OpDecorate %10 BuiltIn Position
 )" + CommonTypes() +
-                        R"(
+                          R"(
      %ptr_out_uint = OpTypePointer Output %uint
      %ptr_out_v2uint = OpTypePointer Output %v2uint
      %ptr_out_int = OpTypePointer Output %int
@@ -4709,13 +4612,13 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected =
-      R"(var<private> x_1 : u32;
+    ASSERT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected =
+        R"(var<private> x_1 : u32;
 
 var<private> x_2 : vec2<u32>;
 
@@ -4756,12 +4659,11 @@ fn main() -> main_out {
   return main_out(x_1, x_2, x_3, x_4, x_5, x_6, x_10);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       EntryPointWrapping_Flatten_Interpolation_Flat_Fragment_In) {
-  const auto assembly = CommonCapabilities() + R"(
+TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_Flatten_Interpolation_Flat_Fragment_In) {
+    const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Fragment %main "main" %1 %2
      OpExecutionMode %main OriginUpperLeft
      OpDecorate %1 Location 1
@@ -4769,7 +4671,7 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpDecorate %1 Flat
      OpDecorate %2 Flat
 )" + CommonTypes() +
-                        R"(
+                          R"(
      %arr = OpTypeArray %float %uint_2
      %strct = OpTypeStruct %float %float
      %ptr_in_arr = OpTypePointer Input %arr
@@ -4782,13 +4684,13 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected =
-      R"(struct S {
+    ASSERT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected =
+        R"(struct S {
   field0 : f32,
   field1 : f32,
 }
@@ -4810,12 +4712,11 @@ fn main(@location(1) @interpolate(flat) x_1_param : f32, @location(2) @interpola
   main_1();
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       EntryPointWrapping_Interpolation_Floating_Fragment_In) {
-  const auto assembly = CommonCapabilities() + R"(
+TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_Interpolation_Floating_Fragment_In) {
+    const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Fragment %main "main" %1 %2 %3 %4 %5 %6
      OpExecutionMode %main OriginUpperLeft
      OpDecorate %1 Location 1
@@ -4840,7 +4741,7 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpDecorate %6 Sample
 
 )" + CommonTypes() +
-                        R"(
+                          R"(
      %ptr_in_float = OpTypePointer Input %float
      %1 = OpVariable %ptr_in_float Input
      %2 = OpVariable %ptr_in_float Input
@@ -4854,13 +4755,13 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected =
-      R"(var<private> x_1 : f32;
+    ASSERT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected =
+        R"(var<private> x_1 : f32;
 
 var<private> x_2 : f32;
 
@@ -4887,12 +4788,11 @@ fn main(@location(1) x_1_param : f32, @location(2) @interpolate(perspective, cen
   main_1();
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       EntryPointWrapping_Flatten_Interpolation_Floating_Fragment_In) {
-  const auto assembly = CommonCapabilities() + R"(
+TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_Flatten_Interpolation_Floating_Fragment_In) {
+    const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Fragment %main "main" %1
      OpExecutionMode %main OriginUpperLeft
      OpDecorate %1 Location 1
@@ -4912,7 +4812,7 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpMemberDecorate %10 5 Sample
 
 )" + CommonTypes() +
-                        R"(
+                          R"(
 
      %10 = OpTypeStruct %float %float %float %float %float %float
      %ptr_in_strct = OpTypePointer Input %10
@@ -4923,13 +4823,13 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected =
-      R"(struct S {
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected =
+        R"(struct S {
   field0 : f32,
   field1 : f32,
   field2 : f32,
@@ -4955,12 +4855,11 @@ fn main(@location(1) x_1_param : f32, @location(2) @interpolate(perspective, cen
   main_1();
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       EntryPointWrapping_Interpolation_Floating_Fragment_Out) {
-  const auto assembly = CommonCapabilities() + R"(
+TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_Interpolation_Floating_Fragment_Out) {
+    const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Fragment %main "main" %1 %2 %3 %4 %5 %6
      OpExecutionMode %main OriginUpperLeft
      OpDecorate %1 Location 1
@@ -4985,7 +4884,7 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpDecorate %6 Sample
 
 )" + CommonTypes() +
-                        R"(
+                          R"(
      %ptr_out_float = OpTypePointer Output %float
      %1 = OpVariable %ptr_out_float Output
      %2 = OpVariable %ptr_out_float Output
@@ -4999,13 +4898,13 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected =
-      R"(var<private> x_1 : f32;
+    ASSERT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected =
+        R"(var<private> x_1 : f32;
 
 var<private> x_2 : f32;
 
@@ -5042,12 +4941,12 @@ fn main() -> main_out {
   return main_out(x_1, x_2, x_3, x_4, x_5, x_6);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
 TEST_F(SpvModuleScopeVarParserTest,
        EntryPointWrapping_Flatten_Interpolation_Floating_Fragment_Out) {
-  const auto assembly = CommonCapabilities() + R"(
+    const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Fragment %main "main" %1
      OpExecutionMode %main OriginUpperLeft
 
@@ -5068,7 +4967,7 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpMemberDecorate %10 5 Sample
 
 )" + CommonTypes() +
-                        R"(
+                          R"(
 
      %10 = OpTypeStruct %float %float %float %float %float %float
      %ptr_in_strct = OpTypePointer Output %10
@@ -5079,13 +4978,13 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected =
-      R"(struct S {
+    ASSERT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected =
+        R"(struct S {
   field0 : f32,
   field1 : f32,
   field2 : f32,
@@ -5121,15 +5020,14 @@ fn main() -> main_out {
   return main_out(x_1.field0, x_1.field1, x_1.field2, x_1.field3, x_1.field4, x_1.field5);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       EntryPointWrapping_Interpolation_Default_Vertex_Output) {
-  // Integral types default to @interpolate(flat).
-  // Floating types default to @interpolate(perspective, center), which is the
-  // same as WGSL and therefore dropped.
-  const auto assembly = CommonCapabilities() + R"(
+TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_Interpolation_Default_Vertex_Output) {
+    // Integral types default to @interpolate(flat).
+    // Floating types default to @interpolate(perspective, center), which is the
+    // same as WGSL and therefore dropped.
+    const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Vertex %main "main" %1 %2 %3 %4 %5 %6 %10
      OpDecorate %1 Location 1
      OpDecorate %2 Location 2
@@ -5139,7 +5037,7 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpDecorate %6 Location 6
      OpDecorate %10 BuiltIn Position
 )" + CommonTypes() +
-                        R"(
+                          R"(
      %ptr_out_uint = OpTypePointer Output %uint
      %ptr_out_v2uint = OpTypePointer Output %v2uint
      %ptr_out_int = OpTypePointer Output %int
@@ -5161,13 +5059,13 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected =
-      R"(var<private> x_1 : u32;
+    ASSERT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected =
+        R"(var<private> x_1 : u32;
 
 var<private> x_2 : vec2<u32>;
 
@@ -5208,15 +5106,14 @@ fn main() -> main_out {
   return main_out(x_1, x_2, x_3, x_4, x_5, x_6, x_10);
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
-TEST_F(SpvModuleScopeVarParserTest,
-       EntryPointWrapping_Interpolation_Default_Fragment_In) {
-  // Integral types default to @interpolate(flat).
-  // Floating types default to @interpolate(perspective, center), which is the
-  // same as WGSL and therefore dropped.
-  const auto assembly = CommonCapabilities() + R"(
+TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_Interpolation_Default_Fragment_In) {
+    // Integral types default to @interpolate(flat).
+    // Floating types default to @interpolate(perspective, center), which is the
+    // same as WGSL and therefore dropped.
+    const auto assembly = CommonCapabilities() + R"(
      OpEntryPoint Fragment %main "main" %1 %2 %3 %4 %5 %6
      OpDecorate %1 Location 1
      OpDecorate %2 Location 2
@@ -5225,7 +5122,7 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpDecorate %5 Location 5
      OpDecorate %6 Location 6
 )" + CommonTypes() +
-                        R"(
+                          R"(
      %ptr_in_uint = OpTypePointer Input %uint
      %ptr_in_v2uint = OpTypePointer Input %v2uint
      %ptr_in_int = OpTypePointer Input %int
@@ -5244,13 +5141,13 @@ TEST_F(SpvModuleScopeVarParserTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
+    auto p = parser(test::Assemble(assembly));
 
-  ASSERT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_TRUE(p->error().empty());
-  const auto got = test::ToString(p->program());
-  const std::string expected =
-      R"(var<private> x_1 : u32;
+    ASSERT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_TRUE(p->error().empty());
+    const auto got = test::ToString(p->program());
+    const std::string expected =
+        R"(var<private> x_1 : u32;
 
 var<private> x_2 : vec2<u32>;
 
@@ -5277,7 +5174,7 @@ fn main(@location(1) @interpolate(flat) x_1_param : u32, @location(2) @interpola
   main_1();
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
 }  // namespace

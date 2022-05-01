@@ -14,77 +14,70 @@
 
 #include <mutex>
 
-#include "dawn/native/ObjectBase.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/ObjectBase.h"
 
 namespace dawn::native {
 
-    static constexpr uint64_t kErrorPayload = 0;
-    static constexpr uint64_t kNotErrorPayload = 1;
+static constexpr uint64_t kErrorPayload = 0;
+static constexpr uint64_t kNotErrorPayload = 1;
 
-    ObjectBase::ObjectBase(DeviceBase* device) : RefCounted(kNotErrorPayload), mDevice(device) {
-    }
+ObjectBase::ObjectBase(DeviceBase* device) : RefCounted(kNotErrorPayload), mDevice(device) {}
 
-    ObjectBase::ObjectBase(DeviceBase* device, ErrorTag)
-        : RefCounted(kErrorPayload), mDevice(device) {
-    }
+ObjectBase::ObjectBase(DeviceBase* device, ErrorTag) : RefCounted(kErrorPayload), mDevice(device) {}
 
-    DeviceBase* ObjectBase::GetDevice() const {
-        return mDevice;
-    }
+DeviceBase* ObjectBase::GetDevice() const {
+    return mDevice;
+}
 
-    bool ObjectBase::IsError() const {
-        return GetRefCountPayload() == kErrorPayload;
-    }
+bool ObjectBase::IsError() const {
+    return GetRefCountPayload() == kErrorPayload;
+}
 
-    ApiObjectBase::ApiObjectBase(DeviceBase* device, const char* label) : ObjectBase(device) {
-        if (label) {
-            mLabel = label;
-        }
-    }
-
-    ApiObjectBase::ApiObjectBase(DeviceBase* device, ErrorTag tag) : ObjectBase(device, tag) {
-    }
-
-    ApiObjectBase::ApiObjectBase(DeviceBase* device, LabelNotImplementedTag tag)
-        : ObjectBase(device) {
-    }
-
-    ApiObjectBase::~ApiObjectBase() {
-        ASSERT(!IsAlive());
-    }
-
-    void ApiObjectBase::APISetLabel(const char* label) {
+ApiObjectBase::ApiObjectBase(DeviceBase* device, const char* label) : ObjectBase(device) {
+    if (label) {
         mLabel = label;
-        SetLabelImpl();
     }
+}
 
-    const std::string& ApiObjectBase::GetLabel() const {
-        return mLabel;
-    }
+ApiObjectBase::ApiObjectBase(DeviceBase* device, ErrorTag tag) : ObjectBase(device, tag) {}
 
-    void ApiObjectBase::SetLabelImpl() {
-    }
+ApiObjectBase::ApiObjectBase(DeviceBase* device, LabelNotImplementedTag tag) : ObjectBase(device) {}
 
-    bool ApiObjectBase::IsAlive() const {
-        return IsInList();
-    }
+ApiObjectBase::~ApiObjectBase() {
+    ASSERT(!IsAlive());
+}
 
-    void ApiObjectBase::DeleteThis() {
-        Destroy();
-        RefCounted::DeleteThis();
-    }
+void ApiObjectBase::APISetLabel(const char* label) {
+    mLabel = label;
+    SetLabelImpl();
+}
 
-    void ApiObjectBase::TrackInDevice() {
-        ASSERT(GetDevice() != nullptr);
-        GetDevice()->TrackObject(this);
-    }
+const std::string& ApiObjectBase::GetLabel() const {
+    return mLabel;
+}
 
-    void ApiObjectBase::Destroy() {
-        const std::lock_guard<std::mutex> lock(*GetDevice()->GetObjectListMutex(GetType()));
-        if (RemoveFromList()) {
-            DestroyImpl();
-        }
+void ApiObjectBase::SetLabelImpl() {}
+
+bool ApiObjectBase::IsAlive() const {
+    return IsInList();
+}
+
+void ApiObjectBase::DeleteThis() {
+    Destroy();
+    RefCounted::DeleteThis();
+}
+
+void ApiObjectBase::TrackInDevice() {
+    ASSERT(GetDevice() != nullptr);
+    GetDevice()->TrackObject(this);
+}
+
+void ApiObjectBase::Destroy() {
+    const std::lock_guard<std::mutex> lock(*GetDevice()->GetObjectListMutex(GetType()));
+    if (RemoveFromList()) {
+        DestroyImpl();
     }
+}
 
 }  // namespace dawn::native

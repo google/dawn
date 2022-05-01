@@ -58,13 +58,13 @@ using u32 = builder::u32;
 using ResolverCallTest = ResolverTest;
 
 struct Params {
-  builder::ast_expr_func_ptr create_value;
-  builder::ast_type_func_ptr create_type;
+    builder::ast_expr_func_ptr create_value;
+    builder::ast_type_func_ptr create_type;
 };
 
 template <typename T>
 constexpr Params ParamsFor() {
-  return Params{DataType<T>::Expr, DataType<T>::AST};
+    return Params{DataType<T>::Expr, DataType<T>::AST};
 }
 
 static constexpr Params all_param_types[] = {
@@ -82,34 +82,34 @@ static constexpr Params all_param_types[] = {
 };
 
 TEST_F(ResolverCallTest, Valid) {
-  ast::VariableList params;
-  ast::ExpressionList args;
-  for (auto& p : all_param_types) {
-    params.push_back(Param(Sym(), p.create_type(*this)));
-    args.push_back(p.create_value(*this, 0));
-  }
+    ast::VariableList params;
+    ast::ExpressionList args;
+    for (auto& p : all_param_types) {
+        params.push_back(Param(Sym(), p.create_type(*this)));
+        args.push_back(p.create_value(*this, 0));
+    }
 
-  auto* func = Func("foo", std::move(params), ty.f32(), {Return(1.23f)});
-  auto* call_expr = Call("foo", std::move(args));
-  WrapInFunction(call_expr);
+    auto* func = Func("foo", std::move(params), ty.f32(), {Return(1.23f)});
+    auto* call_expr = Call("foo", std::move(args));
+    WrapInFunction(call_expr);
 
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* call = Sem().Get(call_expr);
-  EXPECT_NE(call, nullptr);
-  EXPECT_EQ(call->Target(), Sem().Get(func));
+    auto* call = Sem().Get(call_expr);
+    EXPECT_NE(call, nullptr);
+    EXPECT_EQ(call->Target(), Sem().Get(func));
 }
 
 TEST_F(ResolverCallTest, OutOfOrder) {
-  auto* call_expr = Call("b");
-  Func("a", {}, ty.void_(), {CallStmt(call_expr)});
-  auto* b = Func("b", {}, ty.void_(), {});
+    auto* call_expr = Call("b");
+    Func("a", {}, ty.void_(), {CallStmt(call_expr)});
+    auto* b = Func("b", {}, ty.void_(), {});
 
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* call = Sem().Get(call_expr);
-  EXPECT_NE(call, nullptr);
-  EXPECT_EQ(call->Target(), Sem().Get(b));
+    auto* call = Sem().Get(call_expr);
+    EXPECT_NE(call, nullptr);
+    EXPECT_EQ(call->Target(), Sem().Get(b));
 }
 
 }  // namespace

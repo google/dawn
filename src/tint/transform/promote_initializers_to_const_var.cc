@@ -27,57 +27,55 @@ PromoteInitializersToConstVar::PromoteInitializersToConstVar() = default;
 
 PromoteInitializersToConstVar::~PromoteInitializersToConstVar() = default;
 
-void PromoteInitializersToConstVar::Run(CloneContext& ctx,
-                                        const DataMap&,
-                                        DataMap&) const {
-  HoistToDeclBefore hoist_to_decl_before(ctx);
+void PromoteInitializersToConstVar::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
+    HoistToDeclBefore hoist_to_decl_before(ctx);
 
-  // Hoists array and structure initializers to a constant variable, declared
-  // just before the statement of usage.
-  auto type_ctor_to_let = [&](const ast::CallExpression* expr) {
-    auto* ctor = ctx.src->Sem().Get(expr);
-    if (!ctor->Target()->Is<sem::TypeConstructor>()) {
-      return true;
+    // Hoists array and structure initializers to a constant variable, declared
+    // just before the statement of usage.
+    auto type_ctor_to_let = [&](const ast::CallExpression* expr) {
+        auto* ctor = ctx.src->Sem().Get(expr);
+        if (!ctor->Target()->Is<sem::TypeConstructor>()) {
+            return true;
+        }
+        auto* sem_stmt = ctor->Stmt();
+        if (!sem_stmt) {
+            // Expression is outside of a statement. This usually means the
+            // expression is part of a global (module-scope) constant declaration.
+            // These must be constexpr, and so cannot contain the type of
+            // expressions that must be sanitized.
+            return true;
+        }
+
+        auto* stmt = sem_stmt->Declaration();
+
+        if (auto* src_var_decl = stmt->As<ast::VariableDeclStatement>()) {
+            if (src_var_decl->variable->constructor == expr) {
+                // This statement is just a variable declaration with the
+                // initializer as the constructor value. This is what we're
+                // attempting to transform to, and so ignore.
+                return true;
+            }
+        }
+
+        auto* src_ty = ctor->Type();
+        if (!src_ty->IsAnyOf<sem::Array, sem::Struct>()) {
+            // We only care about array and struct initializers
+            return true;
+        }
+
+        return hoist_to_decl_before.Add(ctor, expr, true);
+    };
+
+    for (auto* node : ctx.src->ASTNodes().Objects()) {
+        if (auto* call_expr = node->As<ast::CallExpression>()) {
+            if (!type_ctor_to_let(call_expr)) {
+                return;
+            }
+        }
     }
-    auto* sem_stmt = ctor->Stmt();
-    if (!sem_stmt) {
-      // Expression is outside of a statement. This usually means the
-      // expression is part of a global (module-scope) constant declaration.
-      // These must be constexpr, and so cannot contain the type of
-      // expressions that must be sanitized.
-      return true;
-    }
 
-    auto* stmt = sem_stmt->Declaration();
-
-    if (auto* src_var_decl = stmt->As<ast::VariableDeclStatement>()) {
-      if (src_var_decl->variable->constructor == expr) {
-        // This statement is just a variable declaration with the
-        // initializer as the constructor value. This is what we're
-        // attempting to transform to, and so ignore.
-        return true;
-      }
-    }
-
-    auto* src_ty = ctor->Type();
-    if (!src_ty->IsAnyOf<sem::Array, sem::Struct>()) {
-      // We only care about array and struct initializers
-      return true;
-    }
-
-    return hoist_to_decl_before.Add(ctor, expr, true);
-  };
-
-  for (auto* node : ctx.src->ASTNodes().Objects()) {
-    if (auto* call_expr = node->As<ast::CallExpression>()) {
-      if (!type_ctor_to_let(call_expr)) {
-        return;
-      }
-    }
-  }
-
-  hoist_to_decl_before.Apply();
-  ctx.Clone();
+    hoist_to_decl_before.Apply();
+    ctx.Clone();
 }
 
 }  // namespace tint::transform

@@ -20,26 +20,26 @@
 
 namespace dawn::native::d3d12 {
 
-    class Device;
+class Device;
 
-    class QuerySet : public QuerySetBase {
-      public:
-        static ResultOrError<Ref<QuerySet>> Create(Device* device,
-                                                   const QuerySetDescriptor* descriptor);
+class QuerySet : public QuerySetBase {
+  public:
+    static ResultOrError<Ref<QuerySet>> Create(Device* device,
+                                               const QuerySetDescriptor* descriptor);
 
-        ID3D12QueryHeap* GetQueryHeap() const;
+    ID3D12QueryHeap* GetQueryHeap() const;
 
-      private:
-        ~QuerySet() override;
-        using QuerySetBase::QuerySetBase;
-        MaybeError Initialize();
+  private:
+    ~QuerySet() override;
+    using QuerySetBase::QuerySetBase;
+    MaybeError Initialize();
 
-        // Dawn API
-        void DestroyImpl() override;
-        void SetLabelImpl() override;
+    // Dawn API
+    void DestroyImpl() override;
+    void SetLabelImpl() override;
 
-        ComPtr<ID3D12QueryHeap> mQueryHeap;
-    };
+    ComPtr<ID3D12QueryHeap> mQueryHeap;
+};
 
 }  // namespace dawn::native::d3d12
 

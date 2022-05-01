@@ -58,178 +58,173 @@ const char* kWGSLReservedWords[] = {
 }  // namespace
 
 Namer::Namer(const FailStream& fail_stream) : fail_stream_(fail_stream) {
-  for (const auto* reserved : kWGSLReservedWords) {
-    name_to_id_[std::string(reserved)] = 0;
-  }
+    for (const auto* reserved : kWGSLReservedWords) {
+        name_to_id_[std::string(reserved)] = 0;
+    }
 }
 
 Namer::~Namer() = default;
 
 std::string Namer::Sanitize(const std::string& suggested_name) {
-  if (suggested_name.empty()) {
-    return "empty";
-  }
-  // Otherwise, replace invalid characters by '_'.
-  std::string result;
-  std::string invalid_as_first_char = "_0123456789";
-  std::string valid =
-      "abcdefghijklmnopqrstuvwxyz"
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-      "_0123456789";
-  // If the first character is invalid for starting a WGSL identifier, then
-  // prefix the result with "x".
-  if ((std::string::npos != invalid_as_first_char.find(suggested_name[0])) ||
-      (std::string::npos == valid.find(suggested_name[0]))) {
-    result = "x";
-  }
-  std::transform(suggested_name.begin(), suggested_name.end(),
-                 std::back_inserter(result), [&valid](const char c) {
-                   return (std::string::npos == valid.find(c)) ? '_' : c;
-                 });
-  return result;
+    if (suggested_name.empty()) {
+        return "empty";
+    }
+    // Otherwise, replace invalid characters by '_'.
+    std::string result;
+    std::string invalid_as_first_char = "_0123456789";
+    std::string valid =
+        "abcdefghijklmnopqrstuvwxyz"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "_0123456789";
+    // If the first character is invalid for starting a WGSL identifier, then
+    // prefix the result with "x".
+    if ((std::string::npos != invalid_as_first_char.find(suggested_name[0])) ||
+        (std::string::npos == valid.find(suggested_name[0]))) {
+        result = "x";
+    }
+    std::transform(
+        suggested_name.begin(), suggested_name.end(), std::back_inserter(result),
+        [&valid](const char c) { return (std::string::npos == valid.find(c)) ? '_' : c; });
+    return result;
 }
 
-std::string Namer::GetMemberName(uint32_t struct_id,
-                                 uint32_t member_index) const {
-  std::string result;
-  auto where = struct_member_names_.find(struct_id);
-  if (where != struct_member_names_.end()) {
-    auto& member_names = where->second;
-    if (member_index < member_names.size()) {
-      result = member_names[member_index];
+std::string Namer::GetMemberName(uint32_t struct_id, uint32_t member_index) const {
+    std::string result;
+    auto where = struct_member_names_.find(struct_id);
+    if (where != struct_member_names_.end()) {
+        auto& member_names = where->second;
+        if (member_index < member_names.size()) {
+            result = member_names[member_index];
+        }
     }
-  }
-  return result;
+    return result;
 }
 
 std::string Namer::FindUnusedDerivedName(const std::string& base_name) {
-  // Ensure uniqueness among names.
-  std::string derived_name;
-  uint32_t& i = next_unusued_derived_name_id_[base_name];
-  while (i != 0xffffffff) {
-    std::stringstream new_name_stream;
-    new_name_stream << base_name;
-    if (i > 0) {
-      new_name_stream << "_" << i;
+    // Ensure uniqueness among names.
+    std::string derived_name;
+    uint32_t& i = next_unusued_derived_name_id_[base_name];
+    while (i != 0xffffffff) {
+        std::stringstream new_name_stream;
+        new_name_stream << base_name;
+        if (i > 0) {
+            new_name_stream << "_" << i;
+        }
+        derived_name = new_name_stream.str();
+        if (!IsRegistered(derived_name)) {
+            return derived_name;
+        }
+        i++;
     }
-    derived_name = new_name_stream.str();
-    if (!IsRegistered(derived_name)) {
-      return derived_name;
-    }
-    i++;
-  }
-  TINT_ASSERT(Reader, false /* FindUnusedDerivedName() overflowed u32 */);
-  return "<u32 overflow>";
+    TINT_ASSERT(Reader, false /* FindUnusedDerivedName() overflowed u32 */);
+    return "<u32 overflow>";
 }
 
 std::string Namer::MakeDerivedName(const std::string& base_name) {
-  auto result = FindUnusedDerivedName(base_name);
-  const bool registered = RegisterWithoutId(result);
-  TINT_ASSERT(Reader, registered);
-  return result;
+    auto result = FindUnusedDerivedName(base_name);
+    const bool registered = RegisterWithoutId(result);
+    TINT_ASSERT(Reader, registered);
+    return result;
 }
 
 bool Namer::Register(uint32_t id, const std::string& name) {
-  if (HasName(id)) {
-    return Fail() << "internal error: ID " << id
-                  << " already has registered name: " << id_to_name_[id];
-  }
-  if (!RegisterWithoutId(name)) {
-    return false;
-  }
-  id_to_name_[id] = name;
-  name_to_id_[name] = id;
-  return true;
+    if (HasName(id)) {
+        return Fail() << "internal error: ID " << id
+                      << " already has registered name: " << id_to_name_[id];
+    }
+    if (!RegisterWithoutId(name)) {
+        return false;
+    }
+    id_to_name_[id] = name;
+    name_to_id_[name] = id;
+    return true;
 }
 
 bool Namer::RegisterWithoutId(const std::string& name) {
-  if (IsRegistered(name)) {
-    return Fail() << "internal error: name already registered: " << name;
-  }
-  name_to_id_[name] = 0;
-  return true;
+    if (IsRegistered(name)) {
+        return Fail() << "internal error: name already registered: " << name;
+    }
+    name_to_id_[name] = 0;
+    return true;
 }
 
-bool Namer::SuggestSanitizedName(uint32_t id,
-                                 const std::string& suggested_name) {
-  if (HasName(id)) {
-    return false;
-  }
+bool Namer::SuggestSanitizedName(uint32_t id, const std::string& suggested_name) {
+    if (HasName(id)) {
+        return false;
+    }
 
-  return Register(id, FindUnusedDerivedName(Sanitize(suggested_name)));
+    return Register(id, FindUnusedDerivedName(Sanitize(suggested_name)));
 }
 
 bool Namer::SuggestSanitizedMemberName(uint32_t struct_id,
                                        uint32_t member_index,
                                        const std::string& suggested_name) {
-  // Creates an empty vector the first time we visit this struct.
-  auto& name_vector = struct_member_names_[struct_id];
-  // Resizing will set new entries to the empty string.
-  name_vector.resize(std::max(name_vector.size(), size_t(member_index + 1)));
-  auto& entry = name_vector[member_index];
-  if (entry.empty()) {
-    entry = Sanitize(suggested_name);
-    return true;
-  }
-  return false;
+    // Creates an empty vector the first time we visit this struct.
+    auto& name_vector = struct_member_names_[struct_id];
+    // Resizing will set new entries to the empty string.
+    name_vector.resize(std::max(name_vector.size(), size_t(member_index + 1)));
+    auto& entry = name_vector[member_index];
+    if (entry.empty()) {
+        entry = Sanitize(suggested_name);
+        return true;
+    }
+    return false;
 }
 
-void Namer::ResolveMemberNamesForStruct(uint32_t struct_id,
-                                        uint32_t num_members) {
-  auto& name_vector = struct_member_names_[struct_id];
-  // Resizing will set new entries to the empty string.
-  // It would have been an error if the client had registered a name for
-  // an out-of-bounds member index, so toss those away.
-  name_vector.resize(num_members);
+void Namer::ResolveMemberNamesForStruct(uint32_t struct_id, uint32_t num_members) {
+    auto& name_vector = struct_member_names_[struct_id];
+    // Resizing will set new entries to the empty string.
+    // It would have been an error if the client had registered a name for
+    // an out-of-bounds member index, so toss those away.
+    name_vector.resize(num_members);
 
-  std::unordered_set<std::string> used_names;
+    std::unordered_set<std::string> used_names;
 
-  // Returns a name, based on the suggestion, which does not equal
-  // any name in the used_names set.
-  auto disambiguate_name =
-      [&used_names](const std::string& suggestion) -> std::string {
-    if (used_names.find(suggestion) == used_names.end()) {
-      // There is no collision.
-      return suggestion;
+    // Returns a name, based on the suggestion, which does not equal
+    // any name in the used_names set.
+    auto disambiguate_name = [&used_names](const std::string& suggestion) -> std::string {
+        if (used_names.find(suggestion) == used_names.end()) {
+            // There is no collision.
+            return suggestion;
+        }
+
+        uint32_t i = 1;
+        std::string new_name;
+        do {
+            std::stringstream new_name_stream;
+            new_name_stream << suggestion << "_" << i;
+            new_name = new_name_stream.str();
+            ++i;
+        } while (used_names.find(new_name) != used_names.end());
+        return new_name;
+    };
+
+    // First ensure uniqueness among names for which we have already taken
+    // suggestions.
+    for (auto& name : name_vector) {
+        if (!name.empty()) {
+            // This modifies the names in-place, i.e. update the name_vector
+            // entries.
+            name = disambiguate_name(name);
+            used_names.insert(name);
+        }
     }
 
-    uint32_t i = 1;
-    std::string new_name;
-    do {
-      std::stringstream new_name_stream;
-      new_name_stream << suggestion << "_" << i;
-      new_name = new_name_stream.str();
-      ++i;
-    } while (used_names.find(new_name) != used_names.end());
-    return new_name;
-  };
-
-  // First ensure uniqueness among names for which we have already taken
-  // suggestions.
-  for (auto& name : name_vector) {
-    if (!name.empty()) {
-      // This modifies the names in-place, i.e. update the name_vector
-      // entries.
-      name = disambiguate_name(name);
-      used_names.insert(name);
+    // Now ensure uniqueness among the rest.  Doing this in a second pass
+    // allows us to preserve suggestions as much as possible.  Otherwise
+    // a generated name such as 'field1' might collide with a user-suggested
+    // name of 'field1' attached to a later member.
+    uint32_t index = 0;
+    for (auto& name : name_vector) {
+        if (name.empty()) {
+            std::stringstream suggestion;
+            suggestion << "field" << index;
+            // Again, modify the name-vector in-place.
+            name = disambiguate_name(suggestion.str());
+            used_names.insert(name);
+        }
+        index++;
     }
-  }
-
-  // Now ensure uniqueness among the rest.  Doing this in a second pass
-  // allows us to preserve suggestions as much as possible.  Otherwise
-  // a generated name such as 'field1' might collide with a user-suggested
-  // name of 'field1' attached to a later member.
-  uint32_t index = 0;
-  for (auto& name : name_vector) {
-    if (name.empty()) {
-      std::stringstream suggestion;
-      suggestion << "field" << index;
-      // Again, modify the name-vector in-place.
-      name = disambiguate_name(suggestion.str());
-      used_names.insert(name);
-    }
-    index++;
-  }
 }
 
 }  // namespace tint::reader::spirv

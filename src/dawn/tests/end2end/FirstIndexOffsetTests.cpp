@@ -40,10 +40,10 @@ bool IsIndirectDraw(DrawMode mode) {
 }
 
 namespace dawn {
-    template <>
-    struct IsDawnBitmask<CheckIndex> {
-        static constexpr bool enable = true;
-    };
+template <>
+struct IsDawnBitmask<CheckIndex> {
+    static constexpr bool enable = true;
+};
 }  // namespace dawn
 
 class FirstIndexOffsetTests : public DawnTest {

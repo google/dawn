@@ -21,16 +21,15 @@
 
 namespace {
 
-    struct Foo : public PlacementAllocated {
-        explicit Foo(int value) : value(value) {
-        }
+struct Foo : public PlacementAllocated {
+    explicit Foo(int value) : value(value) {}
 
-        int value;
-    };
+    int value;
+};
 
-    struct alignas(256) AlignedFoo : public Foo {
-        using Foo::Foo;
-    };
+struct alignas(256) AlignedFoo : public Foo {
+    using Foo::Foo;
+};
 
 }  // namespace
 

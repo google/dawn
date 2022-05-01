@@ -20,44 +20,42 @@
 
 namespace dawn::native {
 
-    PooledResourceMemoryAllocator::PooledResourceMemoryAllocator(
-        ResourceHeapAllocator* heapAllocator)
-        : mHeapAllocator(heapAllocator) {
+PooledResourceMemoryAllocator::PooledResourceMemoryAllocator(ResourceHeapAllocator* heapAllocator)
+    : mHeapAllocator(heapAllocator) {}
+
+void PooledResourceMemoryAllocator::DestroyPool() {
+    for (auto& resourceHeap : mPool) {
+        ASSERT(resourceHeap != nullptr);
+        mHeapAllocator->DeallocateResourceHeap(std::move(resourceHeap));
     }
 
-    void PooledResourceMemoryAllocator::DestroyPool() {
-        for (auto& resourceHeap : mPool) {
-            ASSERT(resourceHeap != nullptr);
-            mHeapAllocator->DeallocateResourceHeap(std::move(resourceHeap));
-        }
+    mPool.clear();
+}
 
-        mPool.clear();
+ResultOrError<std::unique_ptr<ResourceHeapBase>>
+PooledResourceMemoryAllocator::AllocateResourceHeap(uint64_t size) {
+    // Pooled memory is LIFO because memory can be evicted by LRU. However, this means
+    // pooling is disabled in-frame when the memory is still pending. For high in-frame
+    // memory users, FIFO might be preferable when memory consumption is a higher priority.
+    std::unique_ptr<ResourceHeapBase> memory;
+    if (!mPool.empty()) {
+        memory = std::move(mPool.front());
+        mPool.pop_front();
     }
 
-    ResultOrError<std::unique_ptr<ResourceHeapBase>>
-    PooledResourceMemoryAllocator::AllocateResourceHeap(uint64_t size) {
-        // Pooled memory is LIFO because memory can be evicted by LRU. However, this means
-        // pooling is disabled in-frame when the memory is still pending. For high in-frame
-        // memory users, FIFO might be preferable when memory consumption is a higher priority.
-        std::unique_ptr<ResourceHeapBase> memory;
-        if (!mPool.empty()) {
-            memory = std::move(mPool.front());
-            mPool.pop_front();
-        }
-
-        if (memory == nullptr) {
-            DAWN_TRY_ASSIGN(memory, mHeapAllocator->AllocateResourceHeap(size));
-        }
-
-        return std::move(memory);
+    if (memory == nullptr) {
+        DAWN_TRY_ASSIGN(memory, mHeapAllocator->AllocateResourceHeap(size));
     }
 
-    void PooledResourceMemoryAllocator::DeallocateResourceHeap(
-        std::unique_ptr<ResourceHeapBase> allocation) {
-        mPool.push_front(std::move(allocation));
-    }
+    return std::move(memory);
+}
 
-    uint64_t PooledResourceMemoryAllocator::GetPoolSizeForTesting() const {
-        return mPool.size();
-    }
+void PooledResourceMemoryAllocator::DeallocateResourceHeap(
+    std::unique_ptr<ResourceHeapBase> allocation) {
+    mPool.push_front(std::move(allocation));
+}
+
+uint64_t PooledResourceMemoryAllocator::GetPoolSizeForTesting() const {
+    return mPool.size();
+}
 }  // namespace dawn::native

@@ -22,11 +22,11 @@ namespace {
 using ParserTest = testing::Test;
 
 TEST_F(ParserTest, DataEmpty) {
-  std::vector<uint32_t> data;
-  auto program = Parse(data);
-  auto errs = diag::Formatter().format(program.Diagnostics());
-  ASSERT_FALSE(program.IsValid()) << errs;
-  EXPECT_EQ(errs, "error: line:0: Invalid SPIR-V magic number.\n");
+    std::vector<uint32_t> data;
+    auto program = Parse(data);
+    auto errs = diag::Formatter().format(program.Diagnostics());
+    ASSERT_FALSE(program.IsValid()) << errs;
+    EXPECT_EQ(errs, "error: line:0: Invalid SPIR-V magic number.\n");
 }
 
 // TODO(dneto): uint32 vec, valid SPIR-V

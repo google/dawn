@@ -22,17 +22,17 @@
 
 namespace detail {
 
-    template <typename T>
-    inline constexpr uint32_t u32_sizeof() {
-        static_assert(sizeof(T) <= std::numeric_limits<uint32_t>::max());
-        return uint32_t(sizeof(T));
-    }
+template <typename T>
+inline constexpr uint32_t u32_sizeof() {
+    static_assert(sizeof(T) <= std::numeric_limits<uint32_t>::max());
+    return uint32_t(sizeof(T));
+}
 
-    template <typename T>
-    inline constexpr uint32_t u32_alignof() {
-        static_assert(alignof(T) <= std::numeric_limits<uint32_t>::max());
-        return uint32_t(alignof(T));
-    }
+template <typename T>
+inline constexpr uint32_t u32_alignof() {
+    static_assert(alignof(T) <= std::numeric_limits<uint32_t>::max());
+    return uint32_t(alignof(T));
+}
 
 }  // namespace detail
 

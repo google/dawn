@@ -18,8 +18,7 @@
 
 namespace tint {
 
-SymbolTable::SymbolTable(tint::ProgramID program_id)
-    : program_id_(program_id) {}
+SymbolTable::SymbolTable(tint::ProgramID program_id) : program_id_(program_id) {}
 
 SymbolTable::SymbolTable(const SymbolTable&) = default;
 
@@ -32,54 +31,54 @@ SymbolTable& SymbolTable::operator=(const SymbolTable& other) = default;
 SymbolTable& SymbolTable::operator=(SymbolTable&&) = default;
 
 Symbol SymbolTable::Register(const std::string& name) {
-  TINT_ASSERT(Symbol, !name.empty());
+    TINT_ASSERT(Symbol, !name.empty());
 
-  auto it = name_to_symbol_.find(name);
-  if (it != name_to_symbol_.end())
-    return it->second;
+    auto it = name_to_symbol_.find(name);
+    if (it != name_to_symbol_.end())
+        return it->second;
 
 #if TINT_SYMBOL_STORE_DEBUG_NAME
-  Symbol sym(next_symbol_, program_id_, name);
+    Symbol sym(next_symbol_, program_id_, name);
 #else
-  Symbol sym(next_symbol_, program_id_);
+    Symbol sym(next_symbol_, program_id_);
 #endif
-  ++next_symbol_;
+    ++next_symbol_;
 
-  name_to_symbol_[name] = sym;
-  symbol_to_name_[sym] = name;
+    name_to_symbol_[name] = sym;
+    symbol_to_name_[sym] = name;
 
-  return sym;
+    return sym;
 }
 
 Symbol SymbolTable::Get(const std::string& name) const {
-  auto it = name_to_symbol_.find(name);
-  return it != name_to_symbol_.end() ? it->second : Symbol();
+    auto it = name_to_symbol_.find(name);
+    return it != name_to_symbol_.end() ? it->second : Symbol();
 }
 
 std::string SymbolTable::NameFor(const Symbol symbol) const {
-  TINT_ASSERT_PROGRAM_IDS_EQUAL(Symbol, program_id_, symbol);
-  auto it = symbol_to_name_.find(symbol);
-  if (it == symbol_to_name_.end()) {
-    return symbol.to_str();
-  }
+    TINT_ASSERT_PROGRAM_IDS_EQUAL(Symbol, program_id_, symbol);
+    auto it = symbol_to_name_.find(symbol);
+    if (it == symbol_to_name_.end()) {
+        return symbol.to_str();
+    }
 
-  return it->second;
+    return it->second;
 }
 
 Symbol SymbolTable::New(std::string prefix /* = "" */) {
-  if (prefix.empty()) {
-    prefix = "tint_symbol";
-  }
-  auto it = name_to_symbol_.find(prefix);
-  if (it == name_to_symbol_.end()) {
-    return Register(prefix);
-  }
-  std::string name;
-  size_t i = 1;
-  do {
-    name = prefix + "_" + std::to_string(i++);
-  } while (name_to_symbol_.count(name));
-  return Register(name);
+    if (prefix.empty()) {
+        prefix = "tint_symbol";
+    }
+    auto it = name_to_symbol_.find(prefix);
+    if (it == name_to_symbol_.end()) {
+        return Register(prefix);
+    }
+    std::string name;
+    size_t i = 1;
+    do {
+        name = prefix + "_" + std::to_string(i++);
+    } while (name_to_symbol_.count(name));
+    return Register(name);
 }
 
 }  // namespace tint

@@ -22,33 +22,34 @@ typedef void* EGLImage;
 
 namespace dawn::native::opengl {
 
-    struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public AdapterDiscoveryOptionsBase {
-        AdapterDiscoveryOptions();
+struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public AdapterDiscoveryOptionsBase {
+    AdapterDiscoveryOptions();
 
-        void* (*getProc)(const char*);
-    };
+    void* (*getProc)(const char*);
+};
 
-    struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptionsES : public AdapterDiscoveryOptionsBase {
-        AdapterDiscoveryOptionsES();
+struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptionsES : public AdapterDiscoveryOptionsBase {
+    AdapterDiscoveryOptionsES();
 
-        void* (*getProc)(const char*);
-    };
+    void* (*getProc)(const char*);
+};
 
-    using PresentCallback = void (*)(void*);
-    DAWN_NATIVE_EXPORT DawnSwapChainImplementation
-    CreateNativeSwapChainImpl(WGPUDevice device, PresentCallback present, void* presentUserdata);
-    DAWN_NATIVE_EXPORT WGPUTextureFormat
-    GetNativeSwapChainPreferredFormat(const DawnSwapChainImplementation* swapChain);
+using PresentCallback = void (*)(void*);
+DAWN_NATIVE_EXPORT DawnSwapChainImplementation CreateNativeSwapChainImpl(WGPUDevice device,
+                                                                         PresentCallback present,
+                                                                         void* presentUserdata);
+DAWN_NATIVE_EXPORT WGPUTextureFormat
+GetNativeSwapChainPreferredFormat(const DawnSwapChainImplementation* swapChain);
 
-    struct DAWN_NATIVE_EXPORT ExternalImageDescriptorEGLImage : ExternalImageDescriptor {
-      public:
-        ExternalImageDescriptorEGLImage();
+struct DAWN_NATIVE_EXPORT ExternalImageDescriptorEGLImage : ExternalImageDescriptor {
+  public:
+    ExternalImageDescriptorEGLImage();
 
-        ::EGLImage image;
-    };
+    ::EGLImage image;
+};
 
-    DAWN_NATIVE_EXPORT WGPUTexture
-    WrapExternalEGLImage(WGPUDevice device, const ExternalImageDescriptorEGLImage* descriptor);
+DAWN_NATIVE_EXPORT WGPUTexture
+WrapExternalEGLImage(WGPUDevice device, const ExternalImageDescriptorEGLImage* descriptor);
 
 }  // namespace dawn::native::opengl
 

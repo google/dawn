@@ -21,14 +21,14 @@
 
 namespace dawn::native::metal {
 
-    class Backend : public BackendConnection {
-      public:
-        explicit Backend(InstanceBase* instance);
+class Backend : public BackendConnection {
+  public:
+    explicit Backend(InstanceBase* instance);
 
-        std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters() override;
-        ResultOrError<std::vector<Ref<AdapterBase>>> DiscoverAdapters(
-            const AdapterDiscoveryOptionsBase* optionsBase) override;
-    };
+    std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters() override;
+    ResultOrError<std::vector<Ref<AdapterBase>>> DiscoverAdapters(
+        const AdapterDiscoveryOptionsBase* optionsBase) override;
+};
 
 }  // namespace dawn::native::metal
 

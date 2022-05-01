@@ -24,38 +24,37 @@ namespace tint::utils {
 /// Defer executes a function or function like object when it is destructed.
 template <typename F>
 class Defer {
- public:
-  /// Constructor
-  /// @param f the function to call when the Defer is destructed
-  explicit Defer(F&& f) : f_(std::move(f)) {}
+  public:
+    /// Constructor
+    /// @param f the function to call when the Defer is destructed
+    explicit Defer(F&& f) : f_(std::move(f)) {}
 
-  /// Move constructor
-  Defer(Defer&&) = default;
+    /// Move constructor
+    Defer(Defer&&) = default;
 
-  /// Destructor
-  /// Calls the deferred function
-  ~Defer() { f_(); }
+    /// Destructor
+    /// Calls the deferred function
+    ~Defer() { f_(); }
 
- private:
-  Defer(const Defer&) = delete;
-  Defer& operator=(const Defer&) = delete;
+  private:
+    Defer(const Defer&) = delete;
+    Defer& operator=(const Defer&) = delete;
 
-  F f_;
+    F f_;
 };
 
 /// Constructor
 /// @param f the function to call when the Defer is destructed
 template <typename F>
 inline Defer<F> MakeDefer(F&& f) {
-  return Defer<F>(std::forward<F>(f));
+    return Defer<F>(std::forward<F>(f));
 }
 
 }  // namespace tint::utils
 
 /// TINT_DEFER(S) executes the statement(s) `S` when exiting the current lexical
 /// scope.
-#define TINT_DEFER(S)                          \
-  auto TINT_CONCAT(tint_defer_, __COUNTER__) = \
-      ::tint::utils::MakeDefer([&] { S; })
+#define TINT_DEFER(S) \
+    auto TINT_CONCAT(tint_defer_, __COUNTER__) = ::tint::utils::MakeDefer([&] { S; })
 
 #endif  // SRC_TINT_UTILS_DEFER_H_

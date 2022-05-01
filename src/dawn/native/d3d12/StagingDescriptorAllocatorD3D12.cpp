@@ -22,133 +22,132 @@
 
 namespace dawn::native::d3d12 {
 
-    StagingDescriptorAllocator::StagingDescriptorAllocator(Device* device,
-                                                           uint32_t descriptorCount,
-                                                           uint32_t heapSize,
-                                                           D3D12_DESCRIPTOR_HEAP_TYPE heapType)
-        : mDevice(device),
-          mSizeIncrement(device->GetD3D12Device()->GetDescriptorHandleIncrementSize(heapType)),
-          mBlockSize(descriptorCount * mSizeIncrement),
-          mHeapSize(RoundUp(heapSize, descriptorCount)),
-          mHeapType(heapType) {
-        ASSERT(descriptorCount <= heapSize);
+StagingDescriptorAllocator::StagingDescriptorAllocator(Device* device,
+                                                       uint32_t descriptorCount,
+                                                       uint32_t heapSize,
+                                                       D3D12_DESCRIPTOR_HEAP_TYPE heapType)
+    : mDevice(device),
+      mSizeIncrement(device->GetD3D12Device()->GetDescriptorHandleIncrementSize(heapType)),
+      mBlockSize(descriptorCount * mSizeIncrement),
+      mHeapSize(RoundUp(heapSize, descriptorCount)),
+      mHeapType(heapType) {
+    ASSERT(descriptorCount <= heapSize);
+}
+
+StagingDescriptorAllocator::~StagingDescriptorAllocator() {
+    const Index freeBlockIndicesSize = GetFreeBlockIndicesSize();
+    for (auto& buffer : mPool) {
+        ASSERT(buffer.freeBlockIndices.size() == freeBlockIndicesSize);
+    }
+    ASSERT(mAvailableHeaps.size() == mPool.size());
+}
+
+ResultOrError<CPUDescriptorHeapAllocation> StagingDescriptorAllocator::AllocateCPUDescriptors() {
+    if (mAvailableHeaps.empty()) {
+        DAWN_TRY(AllocateCPUHeap());
     }
 
-    StagingDescriptorAllocator::~StagingDescriptorAllocator() {
-        const Index freeBlockIndicesSize = GetFreeBlockIndicesSize();
-        for (auto& buffer : mPool) {
-            ASSERT(buffer.freeBlockIndices.size() == freeBlockIndicesSize);
-        }
-        ASSERT(mAvailableHeaps.size() == mPool.size());
+    ASSERT(!mAvailableHeaps.empty());
+
+    const uint32_t heapIndex = mAvailableHeaps.back();
+    NonShaderVisibleBuffer& buffer = mPool[heapIndex];
+
+    ASSERT(!buffer.freeBlockIndices.empty());
+
+    const Index blockIndex = buffer.freeBlockIndices.back();
+
+    buffer.freeBlockIndices.pop_back();
+
+    if (buffer.freeBlockIndices.empty()) {
+        mAvailableHeaps.pop_back();
     }
 
-    ResultOrError<CPUDescriptorHeapAllocation>
-    StagingDescriptorAllocator::AllocateCPUDescriptors() {
-        if (mAvailableHeaps.empty()) {
-            DAWN_TRY(AllocateCPUHeap());
-        }
+    const D3D12_CPU_DESCRIPTOR_HANDLE baseCPUDescriptor = {
+        buffer.heap->GetCPUDescriptorHandleForHeapStart().ptr + (blockIndex * mBlockSize)};
 
-        ASSERT(!mAvailableHeaps.empty());
+    return CPUDescriptorHeapAllocation{baseCPUDescriptor, heapIndex};
+}
 
-        const uint32_t heapIndex = mAvailableHeaps.back();
-        NonShaderVisibleBuffer& buffer = mPool[heapIndex];
+MaybeError StagingDescriptorAllocator::AllocateCPUHeap() {
+    D3D12_DESCRIPTOR_HEAP_DESC heapDescriptor;
+    heapDescriptor.Type = mHeapType;
+    heapDescriptor.NumDescriptors = mHeapSize;
+    heapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+    heapDescriptor.NodeMask = 0;
 
-        ASSERT(!buffer.freeBlockIndices.empty());
+    ComPtr<ID3D12DescriptorHeap> heap;
+    DAWN_TRY(CheckHRESULT(
+        mDevice->GetD3D12Device()->CreateDescriptorHeap(&heapDescriptor, IID_PPV_ARGS(&heap)),
+        "ID3D12Device::CreateDescriptorHeap"));
 
-        const Index blockIndex = buffer.freeBlockIndices.back();
+    NonShaderVisibleBuffer newBuffer;
+    newBuffer.heap = std::move(heap);
 
-        buffer.freeBlockIndices.pop_back();
+    const Index freeBlockIndicesSize = GetFreeBlockIndicesSize();
+    newBuffer.freeBlockIndices.reserve(freeBlockIndicesSize);
 
-        if (buffer.freeBlockIndices.empty()) {
-            mAvailableHeaps.pop_back();
-        }
-
-        const D3D12_CPU_DESCRIPTOR_HANDLE baseCPUDescriptor = {
-            buffer.heap->GetCPUDescriptorHandleForHeapStart().ptr + (blockIndex * mBlockSize)};
-
-        return CPUDescriptorHeapAllocation{baseCPUDescriptor, heapIndex};
+    for (Index blockIndex = 0; blockIndex < freeBlockIndicesSize; blockIndex++) {
+        newBuffer.freeBlockIndices.push_back(blockIndex);
     }
 
-    MaybeError StagingDescriptorAllocator::AllocateCPUHeap() {
-        D3D12_DESCRIPTOR_HEAP_DESC heapDescriptor;
-        heapDescriptor.Type = mHeapType;
-        heapDescriptor.NumDescriptors = mHeapSize;
-        heapDescriptor.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-        heapDescriptor.NodeMask = 0;
+    mAvailableHeaps.push_back(mPool.size());
+    mPool.emplace_back(std::move(newBuffer));
 
-        ComPtr<ID3D12DescriptorHeap> heap;
-        DAWN_TRY(CheckHRESULT(
-            mDevice->GetD3D12Device()->CreateDescriptorHeap(&heapDescriptor, IID_PPV_ARGS(&heap)),
-            "ID3D12Device::CreateDescriptorHeap"));
+    return {};
+}
 
-        NonShaderVisibleBuffer newBuffer;
-        newBuffer.heap = std::move(heap);
+void StagingDescriptorAllocator::Deallocate(CPUDescriptorHeapAllocation* allocation) {
+    ASSERT(allocation->IsValid());
 
-        const Index freeBlockIndicesSize = GetFreeBlockIndicesSize();
-        newBuffer.freeBlockIndices.reserve(freeBlockIndicesSize);
+    const uint32_t heapIndex = allocation->GetHeapIndex();
 
-        for (Index blockIndex = 0; blockIndex < freeBlockIndicesSize; blockIndex++) {
-            newBuffer.freeBlockIndices.push_back(blockIndex);
-        }
+    ASSERT(heapIndex < mPool.size());
 
-        mAvailableHeaps.push_back(mPool.size());
-        mPool.emplace_back(std::move(newBuffer));
-
-        return {};
+    // Insert the deallocated block back into the free-list. Order does not matter. However,
+    // having blocks be non-contigious could slow down future allocations due to poor cache
+    // locality.
+    // TODO(dawn:155): Consider more optimization.
+    std::vector<Index>& freeBlockIndices = mPool[heapIndex].freeBlockIndices;
+    if (freeBlockIndices.empty()) {
+        mAvailableHeaps.emplace_back(heapIndex);
     }
 
-    void StagingDescriptorAllocator::Deallocate(CPUDescriptorHeapAllocation* allocation) {
-        ASSERT(allocation->IsValid());
+    const D3D12_CPU_DESCRIPTOR_HANDLE heapStart =
+        mPool[heapIndex].heap->GetCPUDescriptorHandleForHeapStart();
 
-        const uint32_t heapIndex = allocation->GetHeapIndex();
+    const D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor = allocation->OffsetFrom(0, 0);
 
-        ASSERT(heapIndex < mPool.size());
+    const Index blockIndex = (baseDescriptor.ptr - heapStart.ptr) / mBlockSize;
 
-        // Insert the deallocated block back into the free-list. Order does not matter. However,
-        // having blocks be non-contigious could slow down future allocations due to poor cache
-        // locality.
-        // TODO(dawn:155): Consider more optimization.
-        std::vector<Index>& freeBlockIndices = mPool[heapIndex].freeBlockIndices;
-        if (freeBlockIndices.empty()) {
-            mAvailableHeaps.emplace_back(heapIndex);
-        }
+    freeBlockIndices.emplace_back(blockIndex);
 
-        const D3D12_CPU_DESCRIPTOR_HANDLE heapStart =
-            mPool[heapIndex].heap->GetCPUDescriptorHandleForHeapStart();
+    // Invalidate the handle in case the developer accidentally uses it again.
+    allocation->Invalidate();
+}
 
-        const D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor = allocation->OffsetFrom(0, 0);
+uint32_t StagingDescriptorAllocator::GetSizeIncrement() const {
+    return mSizeIncrement;
+}
 
-        const Index blockIndex = (baseDescriptor.ptr - heapStart.ptr) / mBlockSize;
+StagingDescriptorAllocator::Index StagingDescriptorAllocator::GetFreeBlockIndicesSize() const {
+    return ((mHeapSize * mSizeIncrement) / mBlockSize);
+}
 
-        freeBlockIndices.emplace_back(blockIndex);
+ResultOrError<CPUDescriptorHeapAllocation>
+StagingDescriptorAllocator::AllocateTransientCPUDescriptors() {
+    CPUDescriptorHeapAllocation allocation;
+    DAWN_TRY_ASSIGN(allocation, AllocateCPUDescriptors());
+    mAllocationsToDelete.Enqueue(allocation, mDevice->GetPendingCommandSerial());
+    return allocation;
+}
 
-        // Invalidate the handle in case the developer accidentally uses it again.
-        allocation->Invalidate();
+void StagingDescriptorAllocator::Tick(ExecutionSerial completedSerial) {
+    for (CPUDescriptorHeapAllocation& allocation :
+         mAllocationsToDelete.IterateUpTo(completedSerial)) {
+        Deallocate(&allocation);
     }
 
-    uint32_t StagingDescriptorAllocator::GetSizeIncrement() const {
-        return mSizeIncrement;
-    }
-
-    StagingDescriptorAllocator::Index StagingDescriptorAllocator::GetFreeBlockIndicesSize() const {
-        return ((mHeapSize * mSizeIncrement) / mBlockSize);
-    }
-
-    ResultOrError<CPUDescriptorHeapAllocation>
-    StagingDescriptorAllocator::AllocateTransientCPUDescriptors() {
-        CPUDescriptorHeapAllocation allocation;
-        DAWN_TRY_ASSIGN(allocation, AllocateCPUDescriptors());
-        mAllocationsToDelete.Enqueue(allocation, mDevice->GetPendingCommandSerial());
-        return allocation;
-    }
-
-    void StagingDescriptorAllocator::Tick(ExecutionSerial completedSerial) {
-        for (CPUDescriptorHeapAllocation& allocation :
-             mAllocationsToDelete.IterateUpTo(completedSerial)) {
-            Deallocate(&allocation);
-        }
-
-        mAllocationsToDelete.ClearUpTo(completedSerial);
-    }
+    mAllocationsToDelete.ClearUpTo(completedSerial);
+}
 
 }  // namespace dawn::native::d3d12

@@ -22,27 +22,26 @@
 namespace tint::ast {
 
 /// A signed int literal
-class SintLiteralExpression final
-    : public Castable<SintLiteralExpression, IntLiteralExpression> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param value the signed int literals value
-  SintLiteralExpression(ProgramID pid, const Source& src, int32_t value);
-  ~SintLiteralExpression() override;
+class SintLiteralExpression final : public Castable<SintLiteralExpression, IntLiteralExpression> {
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param value the signed int literals value
+    SintLiteralExpression(ProgramID pid, const Source& src, int32_t value);
+    ~SintLiteralExpression() override;
 
-  /// @returns the literal value as a u32
-  uint32_t ValueAsU32() const override;
+    /// @returns the literal value as a u32
+    uint32_t ValueAsU32() const override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const SintLiteralExpression* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const SintLiteralExpression* Clone(CloneContext* ctx) const override;
 
-  /// The int literal value
-  const int32_t value;
+    /// The int literal value
+    const int32_t value;
 };
 
 }  // namespace tint::ast

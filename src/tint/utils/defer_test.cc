@@ -20,22 +20,22 @@ namespace tint::utils {
 namespace {
 
 TEST(DeferTest, Basic) {
-  bool deferCalled = false;
-  { TINT_DEFER(deferCalled = true); }
-  ASSERT_TRUE(deferCalled);
+    bool deferCalled = false;
+    { TINT_DEFER(deferCalled = true); }
+    ASSERT_TRUE(deferCalled);
 }
 
 TEST(DeferTest, DeferOrder) {
-  int counter = 0;
-  int a = 0, b = 0, c = 0;
-  {
-    TINT_DEFER(a = ++counter);
-    TINT_DEFER(b = ++counter);
-    TINT_DEFER(c = ++counter);
-  }
-  ASSERT_EQ(a, 3);
-  ASSERT_EQ(b, 2);
-  ASSERT_EQ(c, 1);
+    int counter = 0;
+    int a = 0, b = 0, c = 0;
+    {
+        TINT_DEFER(a = ++counter);
+        TINT_DEFER(b = ++counter);
+        TINT_DEFER(c = ++counter);
+    }
+    ASSERT_EQ(a, 3);
+    ASSERT_EQ(b, 2);
+    ASSERT_EQ(c, 1);
 }
 
 }  // namespace

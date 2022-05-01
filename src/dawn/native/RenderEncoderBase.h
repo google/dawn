@@ -24,63 +24,63 @@
 
 namespace dawn::native {
 
-    class RenderEncoderBase : public ProgrammableEncoder {
-      public:
-        RenderEncoderBase(DeviceBase* device,
-                          const char* label,
-                          EncodingContext* encodingContext,
-                          Ref<AttachmentState> attachmentState,
-                          bool depthReadOnly,
-                          bool stencilReadOnly);
+class RenderEncoderBase : public ProgrammableEncoder {
+  public:
+    RenderEncoderBase(DeviceBase* device,
+                      const char* label,
+                      EncodingContext* encodingContext,
+                      Ref<AttachmentState> attachmentState,
+                      bool depthReadOnly,
+                      bool stencilReadOnly);
 
-        void APIDraw(uint32_t vertexCount,
-                     uint32_t instanceCount = 1,
-                     uint32_t firstVertex = 0,
-                     uint32_t firstInstance = 0);
-        void APIDrawIndexed(uint32_t vertexCount,
-                            uint32_t instanceCount,
-                            uint32_t firstIndex,
-                            int32_t baseVertex,
-                            uint32_t firstInstance);
+    void APIDraw(uint32_t vertexCount,
+                 uint32_t instanceCount = 1,
+                 uint32_t firstVertex = 0,
+                 uint32_t firstInstance = 0);
+    void APIDrawIndexed(uint32_t vertexCount,
+                        uint32_t instanceCount,
+                        uint32_t firstIndex,
+                        int32_t baseVertex,
+                        uint32_t firstInstance);
 
-        void APIDrawIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
-        void APIDrawIndexedIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
+    void APIDrawIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
+    void APIDrawIndexedIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
 
-        void APISetPipeline(RenderPipelineBase* pipeline);
+    void APISetPipeline(RenderPipelineBase* pipeline);
 
-        void APISetVertexBuffer(uint32_t slot, BufferBase* buffer, uint64_t offset, uint64_t size);
-        void APISetIndexBuffer(BufferBase* buffer,
-                               wgpu::IndexFormat format,
-                               uint64_t offset,
-                               uint64_t size);
+    void APISetVertexBuffer(uint32_t slot, BufferBase* buffer, uint64_t offset, uint64_t size);
+    void APISetIndexBuffer(BufferBase* buffer,
+                           wgpu::IndexFormat format,
+                           uint64_t offset,
+                           uint64_t size);
 
-        void APISetBindGroup(uint32_t groupIndex,
-                             BindGroupBase* group,
-                             uint32_t dynamicOffsetCount = 0,
-                             const uint32_t* dynamicOffsets = nullptr);
+    void APISetBindGroup(uint32_t groupIndex,
+                         BindGroupBase* group,
+                         uint32_t dynamicOffsetCount = 0,
+                         const uint32_t* dynamicOffsets = nullptr);
 
-        const AttachmentState* GetAttachmentState() const;
-        bool IsDepthReadOnly() const;
-        bool IsStencilReadOnly() const;
-        Ref<AttachmentState> AcquireAttachmentState();
+    const AttachmentState* GetAttachmentState() const;
+    bool IsDepthReadOnly() const;
+    bool IsStencilReadOnly() const;
+    Ref<AttachmentState> AcquireAttachmentState();
 
-      protected:
-        // Construct an "error" render encoder base.
-        RenderEncoderBase(DeviceBase* device, EncodingContext* encodingContext, ErrorTag errorTag);
+  protected:
+    // Construct an "error" render encoder base.
+    RenderEncoderBase(DeviceBase* device, EncodingContext* encodingContext, ErrorTag errorTag);
 
-        void DestroyImpl() override;
+    void DestroyImpl() override;
 
-        CommandBufferStateTracker mCommandBufferState;
-        RenderPassResourceUsageTracker mUsageTracker;
-        IndirectDrawMetadata mIndirectDrawMetadata;
+    CommandBufferStateTracker mCommandBufferState;
+    RenderPassResourceUsageTracker mUsageTracker;
+    IndirectDrawMetadata mIndirectDrawMetadata;
 
-      private:
-        Ref<AttachmentState> mAttachmentState;
-        const bool mDisableBaseVertex;
-        const bool mDisableBaseInstance;
-        bool mDepthReadOnly = false;
-        bool mStencilReadOnly = false;
-    };
+  private:
+    Ref<AttachmentState> mAttachmentState;
+    const bool mDisableBaseVertex;
+    const bool mDisableBaseInstance;
+    bool mDepthReadOnly = false;
+    bool mStencilReadOnly = false;
+};
 
 }  // namespace dawn::native
 

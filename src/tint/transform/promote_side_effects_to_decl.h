@@ -23,21 +23,20 @@ namespace tint::transform {
 /// declarations before the statement of usage with the goal of ensuring
 /// left-to-right order of evaluation, while respecting short-circuit
 /// evaluation.
-class PromoteSideEffectsToDecl
-    : public Castable<PromoteSideEffectsToDecl, Transform> {
- public:
-  /// Constructor
-  PromoteSideEffectsToDecl();
+class PromoteSideEffectsToDecl : public Castable<PromoteSideEffectsToDecl, Transform> {
+  public:
+    /// Constructor
+    PromoteSideEffectsToDecl();
 
-  /// Destructor
-  ~PromoteSideEffectsToDecl() override;
+    /// Destructor
+    ~PromoteSideEffectsToDecl() override;
 
- protected:
-  /// Runs the transform on `program`, returning the transformation result.
-  /// @param program the source program to transform
-  /// @param data optional extra transform-specific data
-  /// @returns the transformation result
-  Output Run(const Program* program, const DataMap& data = {}) const override;
+  protected:
+    /// Runs the transform on `program`, returning the transformation result.
+    /// @param program the source program to transform
+    /// @param data optional extra transform-specific data
+    /// @returns the transformation result
+    Output Run(const Program* program, const DataMap& data = {}) const override;
 };
 
 }  // namespace tint::transform

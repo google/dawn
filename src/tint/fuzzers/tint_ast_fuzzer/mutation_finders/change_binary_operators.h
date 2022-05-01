@@ -24,13 +24,11 @@ namespace tint::fuzzers::ast_fuzzer {
 /// Concretely, for each binary expression in the module, tries to replace it
 /// with a different, type-compatible operator.
 class MutationFinderChangeBinaryOperators : public MutationFinder {
- public:
-  MutationList FindMutations(
-      const tint::Program& program,
-      NodeIdMap* node_id_map,
-      ProbabilityContext* probability_context) const override;
-  uint32_t GetChanceOfApplyingMutation(
-      ProbabilityContext* probability_context) const override;
+  public:
+    MutationList FindMutations(const tint::Program& program,
+                               NodeIdMap* node_id_map,
+                               ProbabilityContext* probability_context) const override;
+    uint32_t GetChanceOfApplyingMutation(ProbabilityContext* probability_context) const override;
 };
 
 }  // namespace tint::fuzzers::ast_fuzzer

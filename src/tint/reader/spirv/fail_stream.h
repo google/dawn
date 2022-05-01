@@ -23,46 +23,45 @@ namespace tint::reader::spirv {
 /// and can be used to record failure by writing the false value
 /// to given a pointer-to-bool.
 class FailStream {
- public:
-  /// Creates a new fail stream
-  /// @param status_ptr where we will write false to indicate failure. Assumed
-  /// to be a valid pointer to bool.
-  /// @param out output stream where a message should be written to explain
-  /// the failure
-  FailStream(bool* status_ptr, std::ostream* out)
-      : status_ptr_(status_ptr), out_(out) {}
-  /// Copy constructor
-  /// @param other the fail stream to clone
-  FailStream(const FailStream& other) = default;
+  public:
+    /// Creates a new fail stream
+    /// @param status_ptr where we will write false to indicate failure. Assumed
+    /// to be a valid pointer to bool.
+    /// @param out output stream where a message should be written to explain
+    /// the failure
+    FailStream(bool* status_ptr, std::ostream* out) : status_ptr_(status_ptr), out_(out) {}
+    /// Copy constructor
+    /// @param other the fail stream to clone
+    FailStream(const FailStream& other) = default;
 
-  /// Converts to a boolean status. A true result indicates success,
-  /// and a false result indicates failure.
-  /// @returns the status
-  operator bool() const { return *status_ptr_; }
-  /// Returns the current status value.  This can be more readable
-  /// the conversion operator.
-  /// @returns the status
-  bool status() const { return *status_ptr_; }
+    /// Converts to a boolean status. A true result indicates success,
+    /// and a false result indicates failure.
+    /// @returns the status
+    operator bool() const { return *status_ptr_; }
+    /// Returns the current status value.  This can be more readable
+    /// the conversion operator.
+    /// @returns the status
+    bool status() const { return *status_ptr_; }
 
-  /// Records failure.
-  /// @returns a FailStream
-  FailStream& Fail() {
-    *status_ptr_ = false;
-    return *this;
-  }
+    /// Records failure.
+    /// @returns a FailStream
+    FailStream& Fail() {
+        *status_ptr_ = false;
+        return *this;
+    }
 
-  /// Appends the given value to the message output stream.
-  /// @param val the value to write to the output stream.
-  /// @returns this object
-  template <typename T>
-  FailStream& operator<<(const T& val) {
-    *out_ << val;
-    return *this;
-  }
+    /// Appends the given value to the message output stream.
+    /// @param val the value to write to the output stream.
+    /// @returns this object
+    template <typename T>
+    FailStream& operator<<(const T& val) {
+        *out_ << val;
+        return *this;
+    }
 
- private:
-  bool* status_ptr_;
-  std::ostream* out_;
+  private:
+    bool* status_ptr_;
+    std::ostream* out_;
 };
 
 }  // namespace tint::reader::spirv

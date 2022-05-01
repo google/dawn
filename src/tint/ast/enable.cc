@@ -22,26 +22,26 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Enable);
 namespace tint::ast {
 
 Enable::ExtensionKind Enable::NameToKind(const std::string& name) {
-  // The reserved internal extension name for testing
-  if (name == "InternalExtensionForTesting") {
-    return Enable::ExtensionKind::kInternalExtensionForTesting;
-  }
+    // The reserved internal extension name for testing
+    if (name == "InternalExtensionForTesting") {
+        return Enable::ExtensionKind::kInternalExtensionForTesting;
+    }
 
-  return Enable::ExtensionKind::kNotAnExtension;
+    return Enable::ExtensionKind::kNotAnExtension;
 }
 
 std::string Enable::KindToName(ExtensionKind kind) {
-  switch (kind) {
-    // The reserved internal extension for testing
-    case ExtensionKind::kInternalExtensionForTesting:
-      return "InternalExtensionForTesting";
-    case ExtensionKind::kNotAnExtension:
-      // Return an empty string for kNotAnExtension
-      return {};
-      // No default case, as this switch must cover all ExtensionKind values.
-  }
-  // This return shall never get hit.
-  return {};
+    switch (kind) {
+        // The reserved internal extension for testing
+        case ExtensionKind::kInternalExtensionForTesting:
+            return "InternalExtensionForTesting";
+        case ExtensionKind::kNotAnExtension:
+            // Return an empty string for kNotAnExtension
+            return {};
+            // No default case, as this switch must cover all ExtensionKind values.
+    }
+    // This return shall never get hit.
+    return {};
 }
 
 Enable::Enable(ProgramID pid, const Source& src, const std::string& ext_name)
@@ -52,7 +52,7 @@ Enable::Enable(Enable&&) = default;
 Enable::~Enable() = default;
 
 const Enable* Enable::Clone(CloneContext* ctx) const {
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<Enable>(src, name);
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<Enable>(src, name);
 }
 }  // namespace tint::ast

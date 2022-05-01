@@ -22,17 +22,15 @@
 
 namespace dawn::native {
 
-    class QuerySetMock : public QuerySetBase {
-      public:
-        explicit QuerySetMock(DeviceBase* device) : QuerySetBase(device) {
-            ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
-                this->QuerySetBase::DestroyImpl();
-            });
-        }
-        ~QuerySetMock() override = default;
+class QuerySetMock : public QuerySetBase {
+  public:
+    explicit QuerySetMock(DeviceBase* device) : QuerySetBase(device) {
+        ON_CALL(*this, DestroyImpl).WillByDefault([this]() { this->QuerySetBase::DestroyImpl(); });
+    }
+    ~QuerySetMock() override = default;
 
-        MOCK_METHOD(void, DestroyImpl, (), (override));
-    };
+    MOCK_METHOD(void, DestroyImpl, (), (override));
+};
 
 }  // namespace dawn::native
 

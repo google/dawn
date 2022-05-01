@@ -20,32 +20,32 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor) {
-  auto* s = Structure("Data", {Member("mem", ty.f32())});
-  Global("str", ty.Of(s), ast::StorageClass::kPrivate);
+    auto* s = Structure("Data", {Member("mem", ty.f32())});
+    Global("str", ty.Of(s), ast::StorageClass::kPrivate);
 
-  auto* expr = MemberAccessor("str", "mem");
-  WrapInFunction(expr);
+    auto* expr = MemberAccessor("str", "mem");
+    WrapInFunction(expr);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-  EXPECT_EQ(out.str(), "str.mem");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "str.mem");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor_OfDref) {
-  auto* s = Structure("Data", {Member("mem", ty.f32())});
-  Global("str", ty.Of(s), ast::StorageClass::kPrivate);
+    auto* s = Structure("Data", {Member("mem", ty.f32())});
+    Global("str", ty.Of(s), ast::StorageClass::kPrivate);
 
-  auto* p = Let("p", nullptr, AddressOf("str"));
-  auto* expr = MemberAccessor(Deref("p"), "mem");
-  WrapInFunction(p, expr);
+    auto* p = Let("p", nullptr, AddressOf("str"));
+    auto* expr = MemberAccessor(Deref("p"), "mem");
+    WrapInFunction(p, expr);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-  EXPECT_EQ(out.str(), "(*(p)).mem");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "(*(p)).mem");
 }
 
 }  // namespace

@@ -22,41 +22,41 @@ namespace {
 using SymbolTableTest = testing::Test;
 
 TEST_F(SymbolTableTest, GeneratesSymbolForName) {
-  auto program_id = ProgramID::New();
-  SymbolTable s{program_id};
-  EXPECT_EQ(Symbol(1, program_id), s.Register("name"));
-  EXPECT_EQ(Symbol(2, program_id), s.Register("another_name"));
+    auto program_id = ProgramID::New();
+    SymbolTable s{program_id};
+    EXPECT_EQ(Symbol(1, program_id), s.Register("name"));
+    EXPECT_EQ(Symbol(2, program_id), s.Register("another_name"));
 }
 
 TEST_F(SymbolTableTest, DeduplicatesNames) {
-  auto program_id = ProgramID::New();
-  SymbolTable s{program_id};
-  EXPECT_EQ(Symbol(1, program_id), s.Register("name"));
-  EXPECT_EQ(Symbol(2, program_id), s.Register("another_name"));
-  EXPECT_EQ(Symbol(1, program_id), s.Register("name"));
+    auto program_id = ProgramID::New();
+    SymbolTable s{program_id};
+    EXPECT_EQ(Symbol(1, program_id), s.Register("name"));
+    EXPECT_EQ(Symbol(2, program_id), s.Register("another_name"));
+    EXPECT_EQ(Symbol(1, program_id), s.Register("name"));
 }
 
 TEST_F(SymbolTableTest, ReturnsNameForSymbol) {
-  auto program_id = ProgramID::New();
-  SymbolTable s{program_id};
-  auto sym = s.Register("name");
-  EXPECT_EQ("name", s.NameFor(sym));
+    auto program_id = ProgramID::New();
+    SymbolTable s{program_id};
+    auto sym = s.Register("name");
+    EXPECT_EQ("name", s.NameFor(sym));
 }
 
 TEST_F(SymbolTableTest, ReturnsBlankForMissingSymbol) {
-  auto program_id = ProgramID::New();
-  SymbolTable s{program_id};
-  EXPECT_EQ("$2", s.NameFor(Symbol(2, program_id)));
+    auto program_id = ProgramID::New();
+    SymbolTable s{program_id};
+    EXPECT_EQ("$2", s.NameFor(Symbol(2, program_id)));
 }
 
 TEST_F(SymbolTableTest, AssertsForBlankString) {
-  EXPECT_FATAL_FAILURE(
-      {
-        auto program_id = ProgramID::New();
-        SymbolTable s{program_id};
-        s.Register("");
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            auto program_id = ProgramID::New();
+            SymbolTable s{program_id};
+            s.Register("");
+        },
+        "internal compiler error");
 }
 
 }  // namespace

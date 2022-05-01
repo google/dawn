@@ -29,30 +29,30 @@ namespace tint::sem {
 
 /// Holds semantic information about an if statement
 class IfStatement final : public Castable<IfStatement, CompoundStatement> {
- public:
-  /// Constructor
-  /// @param declaration the AST node for this if statement
-  /// @param parent the owning statement
-  /// @param function the owning function
-  IfStatement(const ast::IfStatement* declaration,
-              const CompoundStatement* parent,
-              const sem::Function* function);
+  public:
+    /// Constructor
+    /// @param declaration the AST node for this if statement
+    /// @param parent the owning statement
+    /// @param function the owning function
+    IfStatement(const ast::IfStatement* declaration,
+                const CompoundStatement* parent,
+                const sem::Function* function);
 
-  /// Destructor
-  ~IfStatement() override;
+    /// Destructor
+    ~IfStatement() override;
 
-  /// @returns the AST node
-  const ast::IfStatement* Declaration() const;
+    /// @returns the AST node
+    const ast::IfStatement* Declaration() const;
 
-  /// @returns the if-statement condition expression
-  const Expression* Condition() const { return condition_; }
+    /// @returns the if-statement condition expression
+    const Expression* Condition() const { return condition_; }
 
-  /// Sets the if-statement condition expression
-  /// @param condition the if condition expression
-  void SetCondition(const Expression* condition) { condition_ = condition; }
+    /// Sets the if-statement condition expression
+    /// @param condition the if condition expression
+    void SetCondition(const Expression* condition) { condition_ = condition; }
 
- private:
-  const Expression* condition_ = nullptr;
+  private:
+    const Expression* condition_ = nullptr;
 };
 
 }  // namespace tint::sem

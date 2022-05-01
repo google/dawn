@@ -65,7 +65,7 @@ struct DawnWSIContextD3D12 {
 #endif
 
 #if defined(DAWN_ENABLE_BACKEND_METAL) && defined(__OBJC__)
-#    import <Metal/Metal.h>
+#import <Metal/Metal.h>
 
 struct DawnWSIContextMetal {
     id<MTLDevice> device = nil;

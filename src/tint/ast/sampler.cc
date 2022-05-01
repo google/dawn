@@ -21,31 +21,30 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Sampler);
 namespace tint::ast {
 
 std::ostream& operator<<(std::ostream& out, SamplerKind kind) {
-  switch (kind) {
-    case SamplerKind::kSampler:
-      out << "sampler";
-      break;
-    case SamplerKind::kComparisonSampler:
-      out << "comparison_sampler";
-      break;
-  }
-  return out;
+    switch (kind) {
+        case SamplerKind::kSampler:
+            out << "sampler";
+            break;
+        case SamplerKind::kComparisonSampler:
+            out << "comparison_sampler";
+            break;
+    }
+    return out;
 }
 
-Sampler::Sampler(ProgramID pid, const Source& src, SamplerKind k)
-    : Base(pid, src), kind(k) {}
+Sampler::Sampler(ProgramID pid, const Source& src, SamplerKind k) : Base(pid, src), kind(k) {}
 
 Sampler::Sampler(Sampler&&) = default;
 
 Sampler::~Sampler() = default;
 
 std::string Sampler::FriendlyName(const SymbolTable&) const {
-  return kind == SamplerKind::kSampler ? "sampler" : "sampler_comparison";
+    return kind == SamplerKind::kSampler ? "sampler" : "sampler_comparison";
 }
 
 const Sampler* Sampler::Clone(CloneContext* ctx) const {
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<Sampler>(src, kind);
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<Sampler>(src, kind);
 }
 
 }  // namespace tint::ast

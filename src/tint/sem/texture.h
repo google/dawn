@@ -22,19 +22,19 @@ namespace tint::sem {
 
 /// A texture type.
 class Texture : public Castable<Texture, Type> {
- public:
-  /// Constructor
-  /// @param dim the dimensionality of the texture
-  explicit Texture(ast::TextureDimension dim);
-  /// Move constructor
-  Texture(Texture&&);
-  ~Texture() override;
+  public:
+    /// Constructor
+    /// @param dim the dimensionality of the texture
+    explicit Texture(ast::TextureDimension dim);
+    /// Move constructor
+    Texture(Texture&&);
+    ~Texture() override;
 
-  /// @returns the texture dimension
-  ast::TextureDimension dim() const { return dim_; }
+    /// @returns the texture dimension
+    ast::TextureDimension dim() const { return dim_; }
 
- private:
-  ast::TextureDimension const dim_;
+  private:
+    ast::TextureDimension const dim_;
 };
 
 }  // namespace tint::sem

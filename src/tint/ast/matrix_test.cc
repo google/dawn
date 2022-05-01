@@ -33,22 +33,22 @@ namespace {
 using AstMatrixTest = TestHelper;
 
 TEST_F(AstMatrixTest, Creation) {
-  auto* i32 = create<I32>();
-  auto* m = create<Matrix>(i32, 2, 4);
-  EXPECT_EQ(m->type, i32);
-  EXPECT_EQ(m->rows, 2u);
-  EXPECT_EQ(m->columns, 4u);
+    auto* i32 = create<I32>();
+    auto* m = create<Matrix>(i32, 2, 4);
+    EXPECT_EQ(m->type, i32);
+    EXPECT_EQ(m->rows, 2u);
+    EXPECT_EQ(m->columns, 4u);
 }
 
 TEST_F(AstMatrixTest, FriendlyName) {
-  auto* i32 = create<I32>();
-  auto* m = create<Matrix>(i32, 3, 2);
-  EXPECT_EQ(m->FriendlyName(Symbols()), "mat2x3<i32>");
+    auto* i32 = create<I32>();
+    auto* m = create<Matrix>(i32, 3, 2);
+    EXPECT_EQ(m->FriendlyName(Symbols()), "mat2x3<i32>");
 }
 
 TEST_F(AstMatrixTest, FriendlyName_WithoutType) {
-  auto* m = create<Matrix>(nullptr, 3, 2);
-  EXPECT_EQ(m->FriendlyName(Symbols()), "mat2x3");
+    auto* m = create<Matrix>(nullptr, 3, 2);
+    EXPECT_EQ(m->FriendlyName(Symbols()), "mat2x3");
 }
 
 }  // namespace

@@ -21,23 +21,23 @@ namespace tint::ast {
 
 /// The builtin identifiers
 enum class Builtin {
-  kNone = -1,
-  kPosition,
-  kVertexIndex,
-  kInstanceIndex,
-  kFrontFacing,
-  kFragDepth,
-  kLocalInvocationId,
-  kLocalInvocationIndex,
-  kGlobalInvocationId,
-  kWorkgroupId,
-  kNumWorkgroups,
-  kSampleIndex,
-  kSampleMask,
+    kNone = -1,
+    kPosition,
+    kVertexIndex,
+    kInstanceIndex,
+    kFrontFacing,
+    kFragDepth,
+    kLocalInvocationId,
+    kLocalInvocationIndex,
+    kGlobalInvocationId,
+    kWorkgroupId,
+    kNumWorkgroups,
+    kSampleIndex,
+    kSampleMask,
 
-  // Below are not currently WGSL builtins, but are included in this enum as
-  // they are used by certain backends.
-  kPointSize,
+    // Below are not currently WGSL builtins, but are included in this enum as
+    // they are used by certain backends.
+    kPointSize,
 };
 
 /// @param out the std::ostream to write to

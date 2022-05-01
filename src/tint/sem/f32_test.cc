@@ -21,27 +21,27 @@ namespace {
 using F32Test = TestHelper;
 
 TEST_F(F32Test, Creation) {
-  auto* a = create<F32>();
-  auto* b = create<F32>();
-  EXPECT_EQ(a, b);
+    auto* a = create<F32>();
+    auto* b = create<F32>();
+    EXPECT_EQ(a, b);
 }
 
 TEST_F(F32Test, Hash) {
-  auto* a = create<F32>();
-  auto* b = create<F32>();
-  EXPECT_EQ(a->Hash(), b->Hash());
+    auto* a = create<F32>();
+    auto* b = create<F32>();
+    EXPECT_EQ(a->Hash(), b->Hash());
 }
 
 TEST_F(F32Test, Equals) {
-  auto* a = create<F32>();
-  auto* b = create<F32>();
-  EXPECT_TRUE(a->Equals(*b));
-  EXPECT_FALSE(a->Equals(Void{}));
+    auto* a = create<F32>();
+    auto* b = create<F32>();
+    EXPECT_TRUE(a->Equals(*b));
+    EXPECT_FALSE(a->Equals(Void{}));
 }
 
 TEST_F(F32Test, FriendlyName) {
-  F32 f;
-  EXPECT_EQ(f.FriendlyName(Symbols()), "f32");
+    F32 f;
+    EXPECT_EQ(f.FriendlyName(Symbols()), "f32");
 }
 
 }  // namespace

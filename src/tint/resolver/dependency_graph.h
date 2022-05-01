@@ -26,37 +26,37 @@ namespace tint::resolver {
 /// DependencyGraph holds information about module-scope declaration dependency
 /// analysis and symbol resolutions.
 struct DependencyGraph {
-  /// Constructor
-  DependencyGraph();
-  /// Move-constructor
-  DependencyGraph(DependencyGraph&&);
-  /// Destructor
-  ~DependencyGraph();
+    /// Constructor
+    DependencyGraph();
+    /// Move-constructor
+    DependencyGraph(DependencyGraph&&);
+    /// Destructor
+    ~DependencyGraph();
 
-  /// Build() performs symbol resolution and dependency analysis on `module`,
-  /// populating `output` with the resulting dependency graph.
-  /// @param module the AST module to analyse
-  /// @param symbols the symbol table
-  /// @param diagnostics the diagnostic list to populate with errors / warnings
-  /// @param output the resulting DependencyGraph
-  /// @returns true on success, false on error
-  static bool Build(const ast::Module& module,
-                    const SymbolTable& symbols,
-                    diag::List& diagnostics,
-                    DependencyGraph& output);
+    /// Build() performs symbol resolution and dependency analysis on `module`,
+    /// populating `output` with the resulting dependency graph.
+    /// @param module the AST module to analyse
+    /// @param symbols the symbol table
+    /// @param diagnostics the diagnostic list to populate with errors / warnings
+    /// @param output the resulting DependencyGraph
+    /// @returns true on success, false on error
+    static bool Build(const ast::Module& module,
+                      const SymbolTable& symbols,
+                      diag::List& diagnostics,
+                      DependencyGraph& output);
 
-  /// All globals in dependency-sorted order.
-  std::vector<const ast::Node*> ordered_globals;
+    /// All globals in dependency-sorted order.
+    std::vector<const ast::Node*> ordered_globals;
 
-  /// Map of ast::IdentifierExpression or ast::TypeName to a type, function, or
-  /// variable that declares the symbol.
-  std::unordered_map<const ast::Node*, const ast::Node*> resolved_symbols;
+    /// Map of ast::IdentifierExpression or ast::TypeName to a type, function, or
+    /// variable that declares the symbol.
+    std::unordered_map<const ast::Node*, const ast::Node*> resolved_symbols;
 
-  /// Map of ast::Variable to a type, function, or variable that is shadowed by
-  /// the variable key. A declaration (X) shadows another (Y) if X and Y use
-  /// the same symbol, and X is declared in a sub-scope of the scope that
-  /// declares Y.
-  std::unordered_map<const ast::Variable*, const ast::Node*> shadows;
+    /// Map of ast::Variable to a type, function, or variable that is shadowed by
+    /// the variable key. A declaration (X) shadows another (Y) if X and Y use
+    /// the same symbol, and X is declared in a sub-scope of the scope that
+    /// declares Y.
+    std::unordered_map<const ast::Variable*, const ast::Node*> shadows;
 };
 
 }  // namespace tint::resolver

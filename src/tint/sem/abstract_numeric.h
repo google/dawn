@@ -24,22 +24,22 @@ namespace tint::sem {
 /// The base class for abstract-int and abstract-float types.
 /// @see https://www.w3.org/TR/WGSL/#types-for-creation-time-constants
 class AbstractNumeric : public Castable<AbstractNumeric, Type> {
- public:
-  /// Constructor
-  AbstractNumeric();
+  public:
+    /// Constructor
+    AbstractNumeric();
 
-  /// Move constructor
-  AbstractNumeric(AbstractNumeric&&);
-  ~AbstractNumeric() override;
+    /// Move constructor
+    AbstractNumeric(AbstractNumeric&&);
+    ~AbstractNumeric() override;
 
-  /// @returns 0, as the type is abstract.
-  uint32_t Size() const override;
+    /// @returns 0, as the type is abstract.
+    uint32_t Size() const override;
 
-  /// @returns 0, as the type is abstract.
-  uint32_t Align() const override;
+    /// @returns 0, as the type is abstract.
+    uint32_t Align() const override;
 
-  /// @returns 0, as the type is abstract.
-  bool IsConstructible() const override;
+    /// @returns 0, as the type is abstract.
+    bool IsConstructible() const override;
 };
 
 }  // namespace tint::sem

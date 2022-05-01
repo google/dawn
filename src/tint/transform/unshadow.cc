@@ -30,60 +30,60 @@ namespace tint::transform {
 
 /// The PIMPL state for the Unshadow transform
 struct Unshadow::State {
-  /// The clone context
-  CloneContext& ctx;
+    /// The clone context
+    CloneContext& ctx;
 
-  /// Constructor
-  /// @param context the clone context
-  explicit State(CloneContext& context) : ctx(context) {}
+    /// Constructor
+    /// @param context the clone context
+    explicit State(CloneContext& context) : ctx(context) {}
 
-  /// Performs the transformation
-  void Run() {
-    auto& sem = ctx.src->Sem();
+    /// Performs the transformation
+    void Run() {
+        auto& sem = ctx.src->Sem();
 
-    // Maps a variable to its new name.
-    std::unordered_map<const sem::Variable*, Symbol> renamed_to;
+        // Maps a variable to its new name.
+        std::unordered_map<const sem::Variable*, Symbol> renamed_to;
 
-    auto rename = [&](const sem::Variable* var) -> const ast::Variable* {
-      auto* decl = var->Declaration();
-      auto name = ctx.src->Symbols().NameFor(decl->symbol);
-      auto symbol = ctx.dst->Symbols().New(name);
-      renamed_to.emplace(var, symbol);
+        auto rename = [&](const sem::Variable* var) -> const ast::Variable* {
+            auto* decl = var->Declaration();
+            auto name = ctx.src->Symbols().NameFor(decl->symbol);
+            auto symbol = ctx.dst->Symbols().New(name);
+            renamed_to.emplace(var, symbol);
 
-      auto source = ctx.Clone(decl->source);
-      auto* type = ctx.Clone(decl->type);
-      auto* constructor = ctx.Clone(decl->constructor);
-      auto attributes = ctx.Clone(decl->attributes);
-      return ctx.dst->create<ast::Variable>(
-          source, symbol, decl->declared_storage_class, decl->declared_access,
-          type, decl->is_const, decl->is_overridable, constructor, attributes);
-    };
+            auto source = ctx.Clone(decl->source);
+            auto* type = ctx.Clone(decl->type);
+            auto* constructor = ctx.Clone(decl->constructor);
+            auto attributes = ctx.Clone(decl->attributes);
+            return ctx.dst->create<ast::Variable>(source, symbol, decl->declared_storage_class,
+                                                  decl->declared_access, type, decl->is_const,
+                                                  decl->is_overridable, constructor, attributes);
+        };
 
-    ctx.ReplaceAll([&](const ast::Variable* var) -> const ast::Variable* {
-      if (auto* local = sem.Get<sem::LocalVariable>(var)) {
-        if (local->Shadows()) {
-          return rename(local);
-        }
-      }
-      if (auto* param = sem.Get<sem::Parameter>(var)) {
-        if (param->Shadows()) {
-          return rename(param);
-        }
-      }
-      return nullptr;
-    });
-    ctx.ReplaceAll([&](const ast::IdentifierExpression* ident)
-                       -> const tint::ast::IdentifierExpression* {
-      if (auto* user = sem.Get<sem::VariableUser>(ident)) {
-        auto it = renamed_to.find(user->Variable());
-        if (it != renamed_to.end()) {
-          return ctx.dst->Expr(it->second);
-        }
-      }
-      return nullptr;
-    });
-    ctx.Clone();
-  }
+        ctx.ReplaceAll([&](const ast::Variable* var) -> const ast::Variable* {
+            if (auto* local = sem.Get<sem::LocalVariable>(var)) {
+                if (local->Shadows()) {
+                    return rename(local);
+                }
+            }
+            if (auto* param = sem.Get<sem::Parameter>(var)) {
+                if (param->Shadows()) {
+                    return rename(param);
+                }
+            }
+            return nullptr;
+        });
+        ctx.ReplaceAll(
+            [&](const ast::IdentifierExpression* ident) -> const tint::ast::IdentifierExpression* {
+                if (auto* user = sem.Get<sem::VariableUser>(ident)) {
+                    auto it = renamed_to.find(user->Variable());
+                    if (it != renamed_to.end()) {
+                        return ctx.dst->Expr(it->second);
+                    }
+                }
+                return nullptr;
+            });
+        ctx.Clone();
+    }
 };
 
 Unshadow::Unshadow() = default;
@@ -91,7 +91,7 @@ Unshadow::Unshadow() = default;
 Unshadow::~Unshadow() = default;
 
 void Unshadow::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-  State(ctx).Run();
+    State(ctx).Run();
 }
 
 }  // namespace tint::transform

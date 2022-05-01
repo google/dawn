@@ -21,28 +21,25 @@
 namespace tint::ast {
 
 /// A variable declaration statement
-class VariableDeclStatement final
-    : public Castable<VariableDeclStatement, Statement> {
- public:
-  /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the variable statement source
-  /// @param variable the variable
-  VariableDeclStatement(ProgramID program_id,
-                        const Source& source,
-                        const Variable* variable);
-  /// Move constructor
-  VariableDeclStatement(VariableDeclStatement&&);
-  ~VariableDeclStatement() override;
+class VariableDeclStatement final : public Castable<VariableDeclStatement, Statement> {
+  public:
+    /// Constructor
+    /// @param program_id the identifier of the program that owns this node
+    /// @param source the variable statement source
+    /// @param variable the variable
+    VariableDeclStatement(ProgramID program_id, const Source& source, const Variable* variable);
+    /// Move constructor
+    VariableDeclStatement(VariableDeclStatement&&);
+    ~VariableDeclStatement() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const VariableDeclStatement* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const VariableDeclStatement* Clone(CloneContext* ctx) const override;
 
-  /// The variable
-  const Variable* const variable;
+    /// The variable
+    const Variable* const variable;
 };
 
 }  // namespace tint::ast

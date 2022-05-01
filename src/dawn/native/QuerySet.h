@@ -25,49 +25,49 @@
 
 namespace dawn::native {
 
-    MaybeError ValidateQuerySetDescriptor(DeviceBase* device, const QuerySetDescriptor* descriptor);
+MaybeError ValidateQuerySetDescriptor(DeviceBase* device, const QuerySetDescriptor* descriptor);
 
-    class QuerySetBase : public ApiObjectBase {
-      public:
-        QuerySetBase(DeviceBase* device, const QuerySetDescriptor* descriptor);
+class QuerySetBase : public ApiObjectBase {
+  public:
+    QuerySetBase(DeviceBase* device, const QuerySetDescriptor* descriptor);
 
-        static QuerySetBase* MakeError(DeviceBase* device);
+    static QuerySetBase* MakeError(DeviceBase* device);
 
-        ObjectType GetType() const override;
+    ObjectType GetType() const override;
 
-        wgpu::QueryType GetQueryType() const;
-        uint32_t GetQueryCount() const;
-        const std::vector<wgpu::PipelineStatisticName>& GetPipelineStatistics() const;
+    wgpu::QueryType GetQueryType() const;
+    uint32_t GetQueryCount() const;
+    const std::vector<wgpu::PipelineStatisticName>& GetPipelineStatistics() const;
 
-        const std::vector<bool>& GetQueryAvailability() const;
-        void SetQueryAvailability(uint32_t index, bool available);
+    const std::vector<bool>& GetQueryAvailability() const;
+    void SetQueryAvailability(uint32_t index, bool available);
 
-        MaybeError ValidateCanUseInSubmitNow() const;
+    MaybeError ValidateCanUseInSubmitNow() const;
 
-        void APIDestroy();
+    void APIDestroy();
 
-      protected:
-        QuerySetBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+  protected:
+    QuerySetBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        // Constructor used only for mocking and testing.
-        explicit QuerySetBase(DeviceBase* device);
-        void DestroyImpl() override;
+    // Constructor used only for mocking and testing.
+    explicit QuerySetBase(DeviceBase* device);
+    void DestroyImpl() override;
 
-        ~QuerySetBase() override;
+    ~QuerySetBase() override;
 
-      private:
-        MaybeError ValidateDestroy() const;
+  private:
+    MaybeError ValidateDestroy() const;
 
-        wgpu::QueryType mQueryType;
-        uint32_t mQueryCount;
-        std::vector<wgpu::PipelineStatisticName> mPipelineStatistics;
+    wgpu::QueryType mQueryType;
+    uint32_t mQueryCount;
+    std::vector<wgpu::PipelineStatisticName> mPipelineStatistics;
 
-        enum class QuerySetState { Unavailable, Available, Destroyed };
-        QuerySetState mState = QuerySetState::Unavailable;
+    enum class QuerySetState { Unavailable, Available, Destroyed };
+    QuerySetState mState = QuerySetState::Unavailable;
 
-        // Indicates the available queries on the query set for resolving
-        std::vector<bool> mQueryAvailability;
-    };
+    // Indicates the available queries on the query set for resolving
+    std::vector<bool> mQueryAvailability;
+};
 
 }  // namespace dawn::native
 

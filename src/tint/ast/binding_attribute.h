@@ -23,25 +23,25 @@ namespace tint::ast {
 
 /// A binding attribute
 class BindingAttribute final : public Castable<BindingAttribute, Attribute> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param value the binding value
-  BindingAttribute(ProgramID pid, const Source& src, uint32_t value);
-  ~BindingAttribute() override;
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param value the binding value
+    BindingAttribute(ProgramID pid, const Source& src, uint32_t value);
+    ~BindingAttribute() override;
 
-  /// @returns the WGSL name for the attribute
-  std::string Name() const override;
+    /// @returns the WGSL name for the attribute
+    std::string Name() const override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const BindingAttribute* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const BindingAttribute* Clone(CloneContext* ctx) const override;
 
-  /// the binding value
-  const uint32_t value;
+    /// the binding value
+    const uint32_t value;
 };
 
 }  // namespace tint::ast

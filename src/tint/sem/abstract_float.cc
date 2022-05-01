@@ -26,15 +26,15 @@ AbstractFloat::AbstractFloat(AbstractFloat&&) = default;
 AbstractFloat::~AbstractFloat() = default;
 
 size_t AbstractFloat::Hash() const {
-  return utils::Hash(TypeInfo::Of<AbstractFloat>().full_hashcode);
+    return utils::Hash(TypeInfo::Of<AbstractFloat>().full_hashcode);
 }
 
 bool AbstractFloat::Equals(const sem::Type& other) const {
-  return other.Is<AbstractFloat>();
+    return other.Is<AbstractFloat>();
 }
 
 std::string AbstractFloat::FriendlyName(const SymbolTable&) const {
-  return "AbstractFloat";
+    return "AbstractFloat";
 }
 
 }  // namespace tint::sem

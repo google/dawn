@@ -28,48 +28,47 @@
 
 namespace dawn::native::vulkan {
 
-    struct ExternalImageDescriptorVkForTesting;
-    struct ExternalImageExportInfoVkForTesting;
+struct ExternalImageDescriptorVkForTesting;
+struct ExternalImageExportInfoVkForTesting;
 
-    class VulkanImageWrappingTestBackend {
+class VulkanImageWrappingTestBackend {
+  public:
+    static std::unique_ptr<VulkanImageWrappingTestBackend> Create(const wgpu::Device& device);
+    virtual ~VulkanImageWrappingTestBackend() = default;
+
+    class ExternalTexture : NonCopyable {
       public:
-        static std::unique_ptr<VulkanImageWrappingTestBackend> Create(const wgpu::Device& device);
-        virtual ~VulkanImageWrappingTestBackend() = default;
-
-        class ExternalTexture : NonCopyable {
-          public:
-            virtual ~ExternalTexture() = default;
-        };
-        class ExternalSemaphore : NonCopyable {
-          public:
-            virtual ~ExternalSemaphore() = default;
-        };
-
-        virtual std::unique_ptr<ExternalTexture> CreateTexture(uint32_t width,
-                                                               uint32_t height,
-                                                               wgpu::TextureFormat format,
-                                                               wgpu::TextureUsage usage) = 0;
-        virtual wgpu::Texture WrapImage(
-            const wgpu::Device& device,
-            const ExternalTexture* texture,
-            const ExternalImageDescriptorVkForTesting& descriptor,
-            std::vector<std::unique_ptr<ExternalSemaphore>> semaphores) = 0;
-
-        virtual bool ExportImage(const wgpu::Texture& texture,
-                                 VkImageLayout layout,
-                                 ExternalImageExportInfoVkForTesting* exportInfo) = 0;
+        virtual ~ExternalTexture() = default;
+    };
+    class ExternalSemaphore : NonCopyable {
+      public:
+        virtual ~ExternalSemaphore() = default;
     };
 
-    struct ExternalImageDescriptorVkForTesting : public ExternalImageDescriptorVk {
-      public:
-        ExternalImageDescriptorVkForTesting();
-    };
+    virtual std::unique_ptr<ExternalTexture> CreateTexture(uint32_t width,
+                                                           uint32_t height,
+                                                           wgpu::TextureFormat format,
+                                                           wgpu::TextureUsage usage) = 0;
+    virtual wgpu::Texture WrapImage(const wgpu::Device& device,
+                                    const ExternalTexture* texture,
+                                    const ExternalImageDescriptorVkForTesting& descriptor,
+                                    std::vector<std::unique_ptr<ExternalSemaphore>> semaphores) = 0;
 
-    struct ExternalImageExportInfoVkForTesting : public ExternalImageExportInfoVk {
-      public:
-        ExternalImageExportInfoVkForTesting();
-        std::vector<std::unique_ptr<VulkanImageWrappingTestBackend::ExternalSemaphore>> semaphores;
-    };
+    virtual bool ExportImage(const wgpu::Texture& texture,
+                             VkImageLayout layout,
+                             ExternalImageExportInfoVkForTesting* exportInfo) = 0;
+};
+
+struct ExternalImageDescriptorVkForTesting : public ExternalImageDescriptorVk {
+  public:
+    ExternalImageDescriptorVkForTesting();
+};
+
+struct ExternalImageExportInfoVkForTesting : public ExternalImageExportInfoVk {
+  public:
+    ExternalImageExportInfoVkForTesting();
+    std::vector<std::unique_ptr<VulkanImageWrappingTestBackend::ExternalSemaphore>> semaphores;
+};
 
 }  // namespace dawn::native::vulkan
 

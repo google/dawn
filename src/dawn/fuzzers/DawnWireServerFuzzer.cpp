@@ -29,39 +29,37 @@
 
 namespace {
 
-    class DevNull : public dawn::wire::CommandSerializer {
-      public:
-        size_t GetMaximumAllocationSize() const override {
-            // Some fuzzer bots have a 2GB allocation limit. Pick a value reasonably below that.
-            return 1024 * 1024 * 1024;
-        }
-        void* GetCmdSpace(size_t size) override {
-            if (size > buf.size()) {
-                buf.resize(size);
-            }
-            return buf.data();
-        }
-        bool Flush() override {
-            return true;
-        }
-
-      private:
-        std::vector<char> buf;
-    };
-
-    std::unique_ptr<dawn::native::Instance> sInstance;
-    WGPUProcDeviceCreateSwapChain sOriginalDeviceCreateSwapChain = nullptr;
-
-    bool sCommandsComplete = false;
-
-    WGPUSwapChain ErrorDeviceCreateSwapChain(WGPUDevice device,
-                                             WGPUSurface surface,
-                                             const WGPUSwapChainDescriptor*) {
-        WGPUSwapChainDescriptor desc = {};
-        // A 0 implementation will trigger a swapchain creation error.
-        desc.implementation = 0;
-        return sOriginalDeviceCreateSwapChain(device, surface, &desc);
+class DevNull : public dawn::wire::CommandSerializer {
+  public:
+    size_t GetMaximumAllocationSize() const override {
+        // Some fuzzer bots have a 2GB allocation limit. Pick a value reasonably below that.
+        return 1024 * 1024 * 1024;
     }
+    void* GetCmdSpace(size_t size) override {
+        if (size > buf.size()) {
+            buf.resize(size);
+        }
+        return buf.data();
+    }
+    bool Flush() override { return true; }
+
+  private:
+    std::vector<char> buf;
+};
+
+std::unique_ptr<dawn::native::Instance> sInstance;
+WGPUProcDeviceCreateSwapChain sOriginalDeviceCreateSwapChain = nullptr;
+
+bool sCommandsComplete = false;
+
+WGPUSwapChain ErrorDeviceCreateSwapChain(WGPUDevice device,
+                                         WGPUSurface surface,
+                                         const WGPUSwapChainDescriptor*) {
+    WGPUSwapChainDescriptor desc = {};
+    // A 0 implementation will trigger a swapchain creation error.
+    desc.implementation = 0;
+    return sOriginalDeviceCreateSwapChain(device, surface, &desc);
+}
 
 }  // namespace
 

@@ -17,66 +17,65 @@
 
 namespace dawn::wire {
 
-    WireClient::WireClient(const WireClientDescriptor& descriptor)
-        : mImpl(new client::Client(descriptor.serializer, descriptor.memoryTransferService)) {
-    }
+WireClient::WireClient(const WireClientDescriptor& descriptor)
+    : mImpl(new client::Client(descriptor.serializer, descriptor.memoryTransferService)) {}
 
-    WireClient::~WireClient() {
-        mImpl.reset();
-    }
+WireClient::~WireClient() {
+    mImpl.reset();
+}
 
-    const volatile char* WireClient::HandleCommands(const volatile char* commands, size_t size) {
-        return mImpl->HandleCommands(commands, size);
-    }
+const volatile char* WireClient::HandleCommands(const volatile char* commands, size_t size) {
+    return mImpl->HandleCommands(commands, size);
+}
 
-    ReservedTexture WireClient::ReserveTexture(WGPUDevice device) {
-        return mImpl->ReserveTexture(device);
-    }
+ReservedTexture WireClient::ReserveTexture(WGPUDevice device) {
+    return mImpl->ReserveTexture(device);
+}
 
-    ReservedSwapChain WireClient::ReserveSwapChain(WGPUDevice device) {
-        return mImpl->ReserveSwapChain(device);
-    }
+ReservedSwapChain WireClient::ReserveSwapChain(WGPUDevice device) {
+    return mImpl->ReserveSwapChain(device);
+}
 
-    ReservedDevice WireClient::ReserveDevice() {
-        return mImpl->ReserveDevice();
-    }
+ReservedDevice WireClient::ReserveDevice() {
+    return mImpl->ReserveDevice();
+}
 
-    ReservedInstance WireClient::ReserveInstance() {
-        return mImpl->ReserveInstance();
-    }
+ReservedInstance WireClient::ReserveInstance() {
+    return mImpl->ReserveInstance();
+}
 
-    void WireClient::ReclaimTextureReservation(const ReservedTexture& reservation) {
-        mImpl->ReclaimTextureReservation(reservation);
-    }
+void WireClient::ReclaimTextureReservation(const ReservedTexture& reservation) {
+    mImpl->ReclaimTextureReservation(reservation);
+}
 
-    void WireClient::ReclaimSwapChainReservation(const ReservedSwapChain& reservation) {
-        mImpl->ReclaimSwapChainReservation(reservation);
-    }
+void WireClient::ReclaimSwapChainReservation(const ReservedSwapChain& reservation) {
+    mImpl->ReclaimSwapChainReservation(reservation);
+}
 
-    void WireClient::ReclaimDeviceReservation(const ReservedDevice& reservation) {
-        mImpl->ReclaimDeviceReservation(reservation);
-    }
+void WireClient::ReclaimDeviceReservation(const ReservedDevice& reservation) {
+    mImpl->ReclaimDeviceReservation(reservation);
+}
 
-    void WireClient::ReclaimInstanceReservation(const ReservedInstance& reservation) {
-        mImpl->ReclaimInstanceReservation(reservation);
-    }
+void WireClient::ReclaimInstanceReservation(const ReservedInstance& reservation) {
+    mImpl->ReclaimInstanceReservation(reservation);
+}
 
-    void WireClient::Disconnect() {
-        mImpl->Disconnect();
-    }
+void WireClient::Disconnect() {
+    mImpl->Disconnect();
+}
 
-    namespace client {
-        MemoryTransferService::MemoryTransferService() = default;
+namespace client {
+MemoryTransferService::MemoryTransferService() = default;
 
-        MemoryTransferService::~MemoryTransferService() = default;
+MemoryTransferService::~MemoryTransferService() = default;
 
-        MemoryTransferService::ReadHandle::ReadHandle() = default;
+MemoryTransferService::ReadHandle::ReadHandle() = default;
 
-        MemoryTransferService::ReadHandle::~ReadHandle() = default;
+MemoryTransferService::ReadHandle::~ReadHandle() = default;
 
-        MemoryTransferService::WriteHandle::WriteHandle() = default;
+MemoryTransferService::WriteHandle::WriteHandle() = default;
 
-        MemoryTransferService::WriteHandle::~WriteHandle() = default;
-    }  // namespace client
+MemoryTransferService::WriteHandle::~WriteHandle() = default;
+}  // namespace client
 
 }  // namespace dawn::wire

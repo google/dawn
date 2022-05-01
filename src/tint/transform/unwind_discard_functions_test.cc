@@ -22,31 +22,31 @@ namespace {
 using UnwindDiscardFunctionsTest = TransformTest;
 
 TEST_F(UnwindDiscardFunctionsTest, EmptyModule) {
-  auto* src = "";
-  auto* expect = src;
+    auto* src = "";
+    auto* expect = src;
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, ShouldRun_NoDiscardFunc) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
 }
 )";
 
-  EXPECT_FALSE(ShouldRun<UnwindDiscardFunctions>(src));
+    EXPECT_FALSE(ShouldRun<UnwindDiscardFunctions>(src));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, SingleDiscardFunc_NoCall) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   discard;
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() {
@@ -55,14 +55,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, MultipleDiscardFuncs_NoCall) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   discard;
   let marker1 = 0;
@@ -73,7 +73,7 @@ fn g() {
   let marker1 = 0;
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() {
@@ -89,14 +89,14 @@ fn g() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, Call_VoidReturn) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   discard;
   let marker1 = 0;
@@ -109,7 +109,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() {
@@ -134,14 +134,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, Call_NonVoidReturn) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   x : i32,
   y : i32,
@@ -164,7 +164,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct S {
   x : i32,
   y : i32,
@@ -199,14 +199,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, Call_Nested) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() -> i32 {
   let marker1 = 0;
   if (true) {
@@ -238,7 +238,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() -> i32 {
@@ -288,14 +288,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, Call_Multiple) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   discard;
   let marker1 = 0;
@@ -323,7 +323,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() {
@@ -373,14 +373,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, Call_DiscardFuncDeclaredBelow) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(fragment)
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   f();
@@ -393,7 +393,7 @@ fn f() {
   let marker1 = 0;
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 fn tint_discard_func() {
   discard;
 }
@@ -418,14 +418,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, If) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() -> i32 {
   if (true) {
     discard;
@@ -441,7 +441,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() -> i32 {
@@ -470,14 +470,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, ElseIf) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() -> i32 {
   if (true) {
     discard;
@@ -497,7 +497,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() -> i32 {
@@ -532,14 +532,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, ForLoop_Init_Assignment) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() -> i32 {
   if (true) {
     discard;
@@ -558,7 +558,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() -> i32 {
@@ -590,14 +590,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, ForLoop_Init_Call) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() -> i32 {
   if (true) {
     discard;
@@ -615,7 +615,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() -> i32 {
@@ -646,14 +646,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, ForLoop_Init_VariableDecl) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() -> i32 {
   if (true) {
     discard;
@@ -671,7 +671,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() -> i32 {
@@ -702,14 +702,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, ForLoop_Cond) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() -> i32 {
   if (true) {
     discard;
@@ -727,7 +727,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() -> i32 {
@@ -763,14 +763,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, ForLoop_Cont) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() -> i32 {
   if (true) {
     discard;
@@ -788,20 +788,20 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect =
-      R"(test:12:12 error: cannot call a function that may discard inside a continuing block
+    auto* expect =
+        R"(test:12:12 error: cannot call a function that may discard inside a continuing block
   for (; ; f()) {
            ^
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, Switch) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() -> i32 {
   if (true) {
     discard;
@@ -828,7 +828,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() -> i32 {
@@ -868,14 +868,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, Return) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   x : i32,
   y : i32,
@@ -900,7 +900,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct S {
   x : i32,
   y : i32,
@@ -941,14 +941,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, VariableDecl) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() -> i32 {
   if (true) {
     discard;
@@ -963,7 +963,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() -> i32 {
@@ -990,14 +990,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, Assignment_RightDiscard) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() -> i32 {
   if (true) {
     discard;
@@ -1013,7 +1013,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() -> i32 {
@@ -1041,14 +1041,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, Assignment_LeftDiscard) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() -> i32 {
   if (true) {
     discard;
@@ -1064,7 +1064,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() -> i32 {
@@ -1093,14 +1093,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, Assignment_BothDiscard) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() -> i32 {
   if (true) {
     discard;
@@ -1123,7 +1123,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() -> i32 {
@@ -1165,14 +1165,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, Binary_Arith_MultipleDiscardFuncs) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() -> i32 {
   if (true) {
     discard;
@@ -1202,7 +1202,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() -> i32 {
@@ -1257,14 +1257,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, Binary_Logical_MultipleDiscardFuncs) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() -> i32 {
   if (true) {
     discard;
@@ -1294,7 +1294,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard : bool = false;
 
 fn f() -> i32 {
@@ -1357,14 +1357,14 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(UnwindDiscardFunctionsTest, EnsureNoSymbolCollision) {
-  auto* src = R"(
+    auto* src = R"(
 var<private> tint_discard_func : i32;
 var<private> tint_discard : i32;
 
@@ -1380,7 +1380,7 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   return vec4<f32>();
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> tint_discard_func : i32;
 
 var<private> tint_discard : i32;
@@ -1409,10 +1409,10 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

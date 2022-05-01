@@ -24,23 +24,19 @@ namespace tint::fuzzers::ast_fuzzer {
 
 Mutation::~Mutation() = default;
 
-std::unique_ptr<Mutation> Mutation::FromMessage(
-    const protobufs::Mutation& message) {
-  switch (message.mutation_case()) {
-    case protobufs::Mutation::kReplaceIdentifier:
-      return std::make_unique<MutationReplaceIdentifier>(
-          message.replace_identifier());
-    case protobufs::Mutation::kChangeBinaryOperator:
-      return std::make_unique<MutationChangeBinaryOperator>(
-          message.change_binary_operator());
-    case protobufs::Mutation::kWrapUnaryOperator:
-      return std::make_unique<MutationWrapUnaryOperator>(
-          message.wrap_unary_operator());
-    case protobufs::Mutation::MUTATION_NOT_SET:
-      assert(false && "Mutation is not set");
-      break;
-  }
-  return nullptr;
+std::unique_ptr<Mutation> Mutation::FromMessage(const protobufs::Mutation& message) {
+    switch (message.mutation_case()) {
+        case protobufs::Mutation::kReplaceIdentifier:
+            return std::make_unique<MutationReplaceIdentifier>(message.replace_identifier());
+        case protobufs::Mutation::kChangeBinaryOperator:
+            return std::make_unique<MutationChangeBinaryOperator>(message.change_binary_operator());
+        case protobufs::Mutation::kWrapUnaryOperator:
+            return std::make_unique<MutationWrapUnaryOperator>(message.wrap_unary_operator());
+        case protobufs::Mutation::MUTATION_NOT_SET:
+            assert(false && "Mutation is not set");
+            break;
+    }
+    return nullptr;
 }
 
 }  // namespace tint::fuzzers::ast_fuzzer

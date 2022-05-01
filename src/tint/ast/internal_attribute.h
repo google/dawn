@@ -25,20 +25,20 @@ namespace tint::ast {
 /// These attributes are not produced by generators, but instead are usually
 /// created by transforms for consumption by a particular backend.
 class InternalAttribute : public Castable<InternalAttribute, Attribute> {
- public:
-  /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  explicit InternalAttribute(ProgramID program_id);
+  public:
+    /// Constructor
+    /// @param program_id the identifier of the program that owns this node
+    explicit InternalAttribute(ProgramID program_id);
 
-  /// Destructor
-  ~InternalAttribute() override;
+    /// Destructor
+    ~InternalAttribute() override;
 
-  /// @return a short description of the internal attribute which will be
-  /// displayed in WGSL as `@internal(<name>)` (but is not parsable).
-  virtual std::string InternalName() const = 0;
+    /// @return a short description of the internal attribute which will be
+    /// displayed in WGSL as `@internal(<name>)` (but is not parsable).
+    virtual std::string InternalName() const = 0;
 
-  /// @returns the WGSL name for the attribute
-  std::string Name() const override;
+    /// @returns the WGSL name for the attribute
+    std::string Name() const override;
 };
 
 }  // namespace tint::ast

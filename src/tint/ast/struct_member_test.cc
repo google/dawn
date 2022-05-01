@@ -21,75 +21,74 @@ namespace {
 using StructMemberTest = TestHelper;
 
 TEST_F(StructMemberTest, Creation) {
-  auto* st = Member("a", ty.i32(), {MemberSize(4)});
-  EXPECT_EQ(st->symbol, Symbol(1, ID()));
-  EXPECT_TRUE(st->type->Is<ast::I32>());
-  EXPECT_EQ(st->attributes.size(), 1u);
-  EXPECT_TRUE(st->attributes[0]->Is<StructMemberSizeAttribute>());
-  EXPECT_EQ(st->source.range.begin.line, 0u);
-  EXPECT_EQ(st->source.range.begin.column, 0u);
-  EXPECT_EQ(st->source.range.end.line, 0u);
-  EXPECT_EQ(st->source.range.end.column, 0u);
+    auto* st = Member("a", ty.i32(), {MemberSize(4)});
+    EXPECT_EQ(st->symbol, Symbol(1, ID()));
+    EXPECT_TRUE(st->type->Is<ast::I32>());
+    EXPECT_EQ(st->attributes.size(), 1u);
+    EXPECT_TRUE(st->attributes[0]->Is<StructMemberSizeAttribute>());
+    EXPECT_EQ(st->source.range.begin.line, 0u);
+    EXPECT_EQ(st->source.range.begin.column, 0u);
+    EXPECT_EQ(st->source.range.end.line, 0u);
+    EXPECT_EQ(st->source.range.end.column, 0u);
 }
 
 TEST_F(StructMemberTest, CreationWithSource) {
-  auto* st = Member(
-      Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
-      "a", ty.i32());
-  EXPECT_EQ(st->symbol, Symbol(1, ID()));
-  EXPECT_TRUE(st->type->Is<ast::I32>());
-  EXPECT_EQ(st->attributes.size(), 0u);
-  EXPECT_EQ(st->source.range.begin.line, 27u);
-  EXPECT_EQ(st->source.range.begin.column, 4u);
-  EXPECT_EQ(st->source.range.end.line, 27u);
-  EXPECT_EQ(st->source.range.end.column, 8u);
+    auto* st = Member(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}}, "a",
+                      ty.i32());
+    EXPECT_EQ(st->symbol, Symbol(1, ID()));
+    EXPECT_TRUE(st->type->Is<ast::I32>());
+    EXPECT_EQ(st->attributes.size(), 0u);
+    EXPECT_EQ(st->source.range.begin.line, 27u);
+    EXPECT_EQ(st->source.range.begin.column, 4u);
+    EXPECT_EQ(st->source.range.end.line, 27u);
+    EXPECT_EQ(st->source.range.end.column, 8u);
 }
 
 TEST_F(StructMemberTest, Assert_Empty_Symbol) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b;
-        b.Member("", b.ty.i32());
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.Member("", b.ty.i32());
+        },
+        "internal compiler error");
 }
 
 TEST_F(StructMemberTest, Assert_Null_Type) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b;
-        b.Member("a", nullptr);
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.Member("a", nullptr);
+        },
+        "internal compiler error");
 }
 
 TEST_F(StructMemberTest, Assert_Null_Attribute) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b;
-        b.Member("a", b.ty.i32(), {b.MemberSize(4), nullptr});
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.Member("a", b.ty.i32(), {b.MemberSize(4), nullptr});
+        },
+        "internal compiler error");
 }
 
 TEST_F(StructMemberTest, Assert_DifferentProgramID_Symbol) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b1;
-        ProgramBuilder b2;
-        b1.Member(b2.Sym("a"), b1.ty.i32(), {b1.MemberSize(4)});
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b1;
+            ProgramBuilder b2;
+            b1.Member(b2.Sym("a"), b1.ty.i32(), {b1.MemberSize(4)});
+        },
+        "internal compiler error");
 }
 
 TEST_F(StructMemberTest, Assert_DifferentProgramID_Attribute) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b1;
-        ProgramBuilder b2;
-        b1.Member("a", b1.ty.i32(), {b2.MemberSize(4)});
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b1;
+            ProgramBuilder b2;
+            b1.Member("a", b1.ty.i32(), {b2.MemberSize(4)});
+        },
+        "internal compiler error");
 }
 
 }  // namespace

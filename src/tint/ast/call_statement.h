@@ -22,24 +22,24 @@ namespace tint::ast {
 
 /// A call expression
 class CallStatement final : public Castable<CallStatement, Statement> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node for the statement
-  /// @param call the function
-  CallStatement(ProgramID pid, const Source& src, const CallExpression* call);
-  /// Move constructor
-  CallStatement(CallStatement&&);
-  ~CallStatement() override;
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node for the statement
+    /// @param call the function
+    CallStatement(ProgramID pid, const Source& src, const CallExpression* call);
+    /// Move constructor
+    CallStatement(CallStatement&&);
+    ~CallStatement() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const CallStatement* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const CallStatement* Clone(CloneContext* ctx) const override;
 
-  /// The call expression
-  const CallExpression* const expr;
+    /// The call expression
+    const CallExpression* const expr;
 };
 
 }  // namespace tint::ast

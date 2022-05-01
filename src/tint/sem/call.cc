@@ -27,11 +27,7 @@ Call::Call(const ast::CallExpression* declaration,
            const Statement* statement,
            Constant constant,
            bool has_side_effects)
-    : Base(declaration,
-           target->ReturnType(),
-           statement,
-           std::move(constant),
-           has_side_effects),
+    : Base(declaration, target->ReturnType(), statement, std::move(constant), has_side_effects),
       target_(target),
       arguments_(std::move(arguments)) {}
 

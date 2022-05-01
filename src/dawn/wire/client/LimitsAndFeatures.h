@@ -21,19 +21,19 @@
 
 namespace dawn::wire::client {
 
-    class LimitsAndFeatures {
-      public:
-        bool GetLimits(WGPUSupportedLimits* limits) const;
-        bool HasFeature(WGPUFeatureName feature) const;
-        size_t EnumerateFeatures(WGPUFeatureName* features) const;
+class LimitsAndFeatures {
+  public:
+    bool GetLimits(WGPUSupportedLimits* limits) const;
+    bool HasFeature(WGPUFeatureName feature) const;
+    size_t EnumerateFeatures(WGPUFeatureName* features) const;
 
-        void SetLimits(const WGPUSupportedLimits* limits);
-        void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
+    void SetLimits(const WGPUSupportedLimits* limits);
+    void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
 
-      private:
-        WGPUSupportedLimits mLimits;
-        std::unordered_set<WGPUFeatureName> mFeatures;
-    };
+  private:
+    WGPUSupportedLimits mLimits;
+    std::unordered_set<WGPUFeatureName> mFeatures;
+};
 
 }  // namespace dawn::wire::client
 

@@ -22,35 +22,35 @@
 
 namespace dawn::native {
 
-    class ErrorScope {
-      public:
-        wgpu::ErrorType GetErrorType() const;
-        const char* GetErrorMessage() const;
+class ErrorScope {
+  public:
+    wgpu::ErrorType GetErrorType() const;
+    const char* GetErrorMessage() const;
 
-      private:
-        friend class ErrorScopeStack;
-        explicit ErrorScope(wgpu::ErrorFilter errorFilter);
+  private:
+    friend class ErrorScopeStack;
+    explicit ErrorScope(wgpu::ErrorFilter errorFilter);
 
-        wgpu::ErrorType mMatchedErrorType;
-        wgpu::ErrorType mCapturedError = wgpu::ErrorType::NoError;
-        std::string mErrorMessage = "";
-    };
+    wgpu::ErrorType mMatchedErrorType;
+    wgpu::ErrorType mCapturedError = wgpu::ErrorType::NoError;
+    std::string mErrorMessage = "";
+};
 
-    class ErrorScopeStack {
-      public:
-        void Push(wgpu::ErrorFilter errorFilter);
-        ErrorScope Pop();
+class ErrorScopeStack {
+  public:
+    void Push(wgpu::ErrorFilter errorFilter);
+    ErrorScope Pop();
 
-        bool Empty() const;
+    bool Empty() const;
 
-        // Pass an error to the scopes in the stack. Returns true if one of the scopes
-        // captured the error. Returns false if the error should be forwarded to the
-        // uncaptured error callback.
-        bool HandleError(wgpu::ErrorType type, const char* message);
+    // Pass an error to the scopes in the stack. Returns true if one of the scopes
+    // captured the error. Returns false if the error should be forwarded to the
+    // uncaptured error callback.
+    bool HandleError(wgpu::ErrorType type, const char* message);
 
-      private:
-        std::vector<ErrorScope> mScopes;
-    };
+  private:
+    std::vector<ErrorScope> mScopes;
+};
 
 }  // namespace dawn::native
 

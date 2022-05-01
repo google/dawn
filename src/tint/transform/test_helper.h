@@ -31,115 +31,112 @@ namespace tint::transform {
 /// @returns the output program as a WGSL string, or an error string if the
 /// program is not valid.
 inline std::string str(const Program& program) {
-  diag::Formatter::Style style;
-  style.print_newline_at_end = false;
+    diag::Formatter::Style style;
+    style.print_newline_at_end = false;
 
-  if (!program.IsValid()) {
-    return diag::Formatter(style).format(program.Diagnostics());
-  }
+    if (!program.IsValid()) {
+        return diag::Formatter(style).format(program.Diagnostics());
+    }
 
-  writer::wgsl::Options options;
-  auto result = writer::wgsl::Generate(&program, options);
-  if (!result.success) {
-    return "WGSL writer failed:\n" + result.error;
-  }
+    writer::wgsl::Options options;
+    auto result = writer::wgsl::Generate(&program, options);
+    if (!result.success) {
+        return "WGSL writer failed:\n" + result.error;
+    }
 
-  auto res = result.wgsl;
-  if (res.empty()) {
-    return res;
-  }
-  // The WGSL sometimes has two trailing newlines. Strip them
-  while (res.back() == '\n') {
-    res.pop_back();
-  }
-  if (res.empty()) {
-    return res;
-  }
-  return "\n" + res + "\n";
+    auto res = result.wgsl;
+    if (res.empty()) {
+        return res;
+    }
+    // The WGSL sometimes has two trailing newlines. Strip them
+    while (res.back() == '\n') {
+        res.pop_back();
+    }
+    if (res.empty()) {
+        return res;
+    }
+    return "\n" + res + "\n";
 }
 
 /// Helper class for testing transforms
 template <typename BASE>
 class TransformTestBase : public BASE {
- public:
-  /// Transforms and returns the WGSL source `in`, transformed using
-  /// `transform`.
-  /// @param transform the transform to apply
-  /// @param in the input WGSL source
-  /// @param data the optional DataMap to pass to Transform::Run()
-  /// @return the transformed output
-  Output Run(std::string in,
-             std::unique_ptr<transform::Transform> transform,
-             const DataMap& data = {}) {
-    std::vector<std::unique_ptr<transform::Transform>> transforms;
-    transforms.emplace_back(std::move(transform));
-    return Run(std::move(in), std::move(transforms), data);
-  }
-
-  /// Transforms and returns the WGSL source `in`, transformed using
-  /// a transform of type `TRANSFORM`.
-  /// @param in the input WGSL source
-  /// @param data the optional DataMap to pass to Transform::Run()
-  /// @return the transformed output
-  template <typename... TRANSFORMS>
-  Output Run(std::string in, const DataMap& data = {}) {
-    auto file = std::make_unique<Source::File>("test", in);
-    auto program = reader::wgsl::Parse(file.get());
-
-    // Keep this pointer alive after Transform() returns
-    files_.emplace_back(std::move(file));
-
-    return Run<TRANSFORMS...>(std::move(program), data);
-  }
-
-  /// Transforms and returns program `program`, transformed using a transform of
-  /// type `TRANSFORM`.
-  /// @param program the input Program
-  /// @param data the optional DataMap to pass to Transform::Run()
-  /// @return the transformed output
-  template <typename... TRANSFORMS>
-  Output Run(Program&& program, const DataMap& data = {}) {
-    if (!program.IsValid()) {
-      return Output(std::move(program));
+  public:
+    /// Transforms and returns the WGSL source `in`, transformed using
+    /// `transform`.
+    /// @param transform the transform to apply
+    /// @param in the input WGSL source
+    /// @param data the optional DataMap to pass to Transform::Run()
+    /// @return the transformed output
+    Output Run(std::string in,
+               std::unique_ptr<transform::Transform> transform,
+               const DataMap& data = {}) {
+        std::vector<std::unique_ptr<transform::Transform>> transforms;
+        transforms.emplace_back(std::move(transform));
+        return Run(std::move(in), std::move(transforms), data);
     }
 
-    Manager manager;
-    for (auto* transform_ptr :
-         std::initializer_list<Transform*>{new TRANSFORMS()...}) {
-      manager.append(std::unique_ptr<Transform>(transform_ptr));
+    /// Transforms and returns the WGSL source `in`, transformed using
+    /// a transform of type `TRANSFORM`.
+    /// @param in the input WGSL source
+    /// @param data the optional DataMap to pass to Transform::Run()
+    /// @return the transformed output
+    template <typename... TRANSFORMS>
+    Output Run(std::string in, const DataMap& data = {}) {
+        auto file = std::make_unique<Source::File>("test", in);
+        auto program = reader::wgsl::Parse(file.get());
+
+        // Keep this pointer alive after Transform() returns
+        files_.emplace_back(std::move(file));
+
+        return Run<TRANSFORMS...>(std::move(program), data);
     }
-    return manager.Run(&program, data);
-  }
 
-  /// @param program the input program
-  /// @param data the optional DataMap to pass to Transform::Run()
-  /// @return true if the transform should be run for the given input.
-  template <typename TRANSFORM>
-  bool ShouldRun(Program&& program, const DataMap& data = {}) {
-    EXPECT_TRUE(program.IsValid()) << program.Diagnostics().str();
-    const Transform& t = TRANSFORM();
-    return t.ShouldRun(&program, data);
-  }
+    /// Transforms and returns program `program`, transformed using a transform of
+    /// type `TRANSFORM`.
+    /// @param program the input Program
+    /// @param data the optional DataMap to pass to Transform::Run()
+    /// @return the transformed output
+    template <typename... TRANSFORMS>
+    Output Run(Program&& program, const DataMap& data = {}) {
+        if (!program.IsValid()) {
+            return Output(std::move(program));
+        }
 
-  /// @param in the input WGSL source
-  /// @param data the optional DataMap to pass to Transform::Run()
-  /// @return true if the transform should be run for the given input.
-  template <typename TRANSFORM>
-  bool ShouldRun(std::string in, const DataMap& data = {}) {
-    auto file = std::make_unique<Source::File>("test", in);
-    auto program = reader::wgsl::Parse(file.get());
-    return ShouldRun<TRANSFORM>(std::move(program), data);
-  }
+        Manager manager;
+        for (auto* transform_ptr : std::initializer_list<Transform*>{new TRANSFORMS()...}) {
+            manager.append(std::unique_ptr<Transform>(transform_ptr));
+        }
+        return manager.Run(&program, data);
+    }
 
-  /// @param output the output of the transform
-  /// @returns the output program as a WGSL string, or an error string if the
-  /// program is not valid.
-  std::string str(const Output& output) {
-    return transform::str(output.program);
-  }
+    /// @param program the input program
+    /// @param data the optional DataMap to pass to Transform::Run()
+    /// @return true if the transform should be run for the given input.
+    template <typename TRANSFORM>
+    bool ShouldRun(Program&& program, const DataMap& data = {}) {
+        EXPECT_TRUE(program.IsValid()) << program.Diagnostics().str();
+        const Transform& t = TRANSFORM();
+        return t.ShouldRun(&program, data);
+    }
 
- private:
-  std::vector<std::unique_ptr<Source::File>> files_;
+    /// @param in the input WGSL source
+    /// @param data the optional DataMap to pass to Transform::Run()
+    /// @return true if the transform should be run for the given input.
+    template <typename TRANSFORM>
+    bool ShouldRun(std::string in, const DataMap& data = {}) {
+        auto file = std::make_unique<Source::File>("test", in);
+        auto program = reader::wgsl::Parse(file.get());
+        return ShouldRun<TRANSFORM>(std::move(program), data);
+    }
+
+    /// @param output the output of the transform
+    /// @returns the output program as a WGSL string, or an error string if the
+    /// program is not valid.
+    std::string str(const Output& output) { return transform::str(output.program); }
+
+  private:
+    std::vector<std::unique_ptr<Source::File>> files_;
 };
 
 using TransformTest = TransformTestBase<testing::Test>;

@@ -23,67 +23,67 @@
 
 namespace dawn::native::vulkan {
 
-    // static
-    ResultOrError<Ref<PipelineLayout>> PipelineLayout::Create(
-        Device* device,
-        const PipelineLayoutDescriptor* descriptor) {
-        Ref<PipelineLayout> layout = AcquireRef(new PipelineLayout(device, descriptor));
-        DAWN_TRY(layout->Initialize());
-        return layout;
+// static
+ResultOrError<Ref<PipelineLayout>> PipelineLayout::Create(
+    Device* device,
+    const PipelineLayoutDescriptor* descriptor) {
+    Ref<PipelineLayout> layout = AcquireRef(new PipelineLayout(device, descriptor));
+    DAWN_TRY(layout->Initialize());
+    return layout;
+}
+
+MaybeError PipelineLayout::Initialize() {
+    // Compute the array of VkDescriptorSetLayouts that will be chained in the create info.
+    // TODO(crbug.com/dawn/277) Vulkan doesn't allow holes in this array, should we expose
+    // this constraints at the Dawn level?
+    uint32_t numSetLayouts = 0;
+    std::array<VkDescriptorSetLayout, kMaxBindGroups> setLayouts;
+    std::array<const CachedObject*, kMaxBindGroups> cachedObjects;
+    for (BindGroupIndex setIndex : IterateBitSet(GetBindGroupLayoutsMask())) {
+        const BindGroupLayoutBase* bindGroupLayout = GetBindGroupLayout(setIndex);
+        setLayouts[numSetLayouts] = ToBackend(bindGroupLayout)->GetHandle();
+        cachedObjects[numSetLayouts] = bindGroupLayout;
+        numSetLayouts++;
     }
 
-    MaybeError PipelineLayout::Initialize() {
-        // Compute the array of VkDescriptorSetLayouts that will be chained in the create info.
-        // TODO(crbug.com/dawn/277) Vulkan doesn't allow holes in this array, should we expose
-        // this constraints at the Dawn level?
-        uint32_t numSetLayouts = 0;
-        std::array<VkDescriptorSetLayout, kMaxBindGroups> setLayouts;
-        std::array<const CachedObject*, kMaxBindGroups> cachedObjects;
-        for (BindGroupIndex setIndex : IterateBitSet(GetBindGroupLayoutsMask())) {
-            const BindGroupLayoutBase* bindGroupLayout = GetBindGroupLayout(setIndex);
-            setLayouts[numSetLayouts] = ToBackend(bindGroupLayout)->GetHandle();
-            cachedObjects[numSetLayouts] = bindGroupLayout;
-            numSetLayouts++;
-        }
+    VkPipelineLayoutCreateInfo createInfo;
+    createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    createInfo.pNext = nullptr;
+    createInfo.flags = 0;
+    createInfo.setLayoutCount = numSetLayouts;
+    createInfo.pSetLayouts = AsVkArray(setLayouts.data());
+    createInfo.pushConstantRangeCount = 0;
+    createInfo.pPushConstantRanges = nullptr;
 
-        VkPipelineLayoutCreateInfo createInfo;
-        createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        createInfo.pNext = nullptr;
-        createInfo.flags = 0;
-        createInfo.setLayoutCount = numSetLayouts;
-        createInfo.pSetLayouts = AsVkArray(setLayouts.data());
-        createInfo.pushConstantRangeCount = 0;
-        createInfo.pPushConstantRanges = nullptr;
+    // Record cache key information now since the createInfo is not stored.
+    GetCacheKey()->RecordIterable(cachedObjects.data(), numSetLayouts).Record(createInfo);
 
-        // Record cache key information now since the createInfo is not stored.
-        GetCacheKey()->RecordIterable(cachedObjects.data(), numSetLayouts).Record(createInfo);
+    Device* device = ToBackend(GetDevice());
+    DAWN_TRY(CheckVkSuccess(
+        device->fn.CreatePipelineLayout(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
+        "CreatePipelineLayout"));
 
-        Device* device = ToBackend(GetDevice());
-        DAWN_TRY(CheckVkSuccess(
-            device->fn.CreatePipelineLayout(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
-            "CreatePipelineLayout"));
+    SetLabelImpl();
 
-        SetLabelImpl();
+    return {};
+}
 
-        return {};
+PipelineLayout::~PipelineLayout() = default;
+
+void PipelineLayout::DestroyImpl() {
+    PipelineLayoutBase::DestroyImpl();
+    if (mHandle != VK_NULL_HANDLE) {
+        ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
+        mHandle = VK_NULL_HANDLE;
     }
+}
 
-    PipelineLayout::~PipelineLayout() = default;
+VkPipelineLayout PipelineLayout::GetHandle() const {
+    return mHandle;
+}
 
-    void PipelineLayout::DestroyImpl() {
-        PipelineLayoutBase::DestroyImpl();
-        if (mHandle != VK_NULL_HANDLE) {
-            ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
-            mHandle = VK_NULL_HANDLE;
-        }
-    }
-
-    VkPipelineLayout PipelineLayout::GetHandle() const {
-        return mHandle;
-    }
-
-    void PipelineLayout::SetLabelImpl() {
-        SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_PipelineLayout", GetLabel());
-    }
+void PipelineLayout::SetLabelImpl() {
+    SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_PipelineLayout", GetLabel());
+}
 
 }  // namespace dawn::native::vulkan

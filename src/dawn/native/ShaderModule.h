@@ -40,277 +40,276 @@
 
 namespace tint {
 
-    class Program;
+class Program;
 
-    namespace transform {
-        class DataMap;
-        class Manager;
-        class Transform;
-        class VertexPulling;
-    }  // namespace transform
+namespace transform {
+class DataMap;
+class Manager;
+class Transform;
+class VertexPulling;
+}  // namespace transform
 
 }  // namespace tint
 
 namespace dawn::native {
 
-    struct EntryPointMetadata;
+struct EntryPointMetadata;
 
-    // Base component type of an inter-stage variable
-    enum class InterStageComponentType {
-        Sint,
-        Uint,
-        Float,
+// Base component type of an inter-stage variable
+enum class InterStageComponentType {
+    Sint,
+    Uint,
+    Float,
+};
+
+enum class InterpolationType {
+    Perspective,
+    Linear,
+    Flat,
+};
+
+enum class InterpolationSampling {
+    None,
+    Center,
+    Centroid,
+    Sample,
+};
+
+using PipelineLayoutEntryPointPair = std::pair<PipelineLayoutBase*, std::string>;
+struct PipelineLayoutEntryPointPairHashFunc {
+    size_t operator()(const PipelineLayoutEntryPointPair& pair) const;
+};
+
+// A map from name to EntryPointMetadata.
+using EntryPointMetadataTable =
+    std::unordered_map<std::string, std::unique_ptr<EntryPointMetadata>>;
+
+// Source for a tint program
+class TintSource;
+
+struct ShaderModuleParseResult {
+    ShaderModuleParseResult();
+    ~ShaderModuleParseResult();
+    ShaderModuleParseResult(ShaderModuleParseResult&& rhs);
+    ShaderModuleParseResult& operator=(ShaderModuleParseResult&& rhs);
+
+    bool HasParsedShader() const;
+
+    std::unique_ptr<tint::Program> tintProgram;
+    std::unique_ptr<TintSource> tintSource;
+};
+
+MaybeError ValidateShaderModuleDescriptor(DeviceBase* device,
+                                          const ShaderModuleDescriptor* descriptor,
+                                          ShaderModuleParseResult* parseResult,
+                                          OwnedCompilationMessages* outMessages);
+MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
+                                                   const EntryPointMetadata& entryPoint,
+                                                   const PipelineLayoutBase* layout);
+
+RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata& entryPoint,
+                                                        const PipelineLayoutBase* layout);
+ResultOrError<tint::Program> RunTransforms(tint::transform::Transform* transform,
+                                           const tint::Program* program,
+                                           const tint::transform::DataMap& inputs,
+                                           tint::transform::DataMap* outputs,
+                                           OwnedCompilationMessages* messages);
+
+/// Creates and adds the tint::transform::VertexPulling::Config to transformInputs.
+void AddVertexPullingTransformConfig(const RenderPipelineBase& renderPipeline,
+                                     const std::string& entryPoint,
+                                     BindGroupIndex pullingBufferBindingSet,
+                                     tint::transform::DataMap* transformInputs);
+
+// Mirrors wgpu::SamplerBindingLayout but instead stores a single boolean
+// for isComparison instead of a wgpu::SamplerBindingType enum.
+struct ShaderSamplerBindingInfo {
+    bool isComparison;
+};
+
+// Mirrors wgpu::TextureBindingLayout but instead has a set of compatible sampleTypes
+// instead of a single enum.
+struct ShaderTextureBindingInfo {
+    SampleTypeBit compatibleSampleTypes;
+    wgpu::TextureViewDimension viewDimension;
+    bool multisampled;
+};
+
+// Per-binding shader metadata contains some SPIRV specific information in addition to
+// most of the frontend per-binding information.
+struct ShaderBindingInfo {
+    // The SPIRV ID of the resource.
+    uint32_t id;
+    uint32_t base_type_id;
+
+    BindingNumber binding;
+    BindingInfoType bindingType;
+
+    BufferBindingLayout buffer;
+    ShaderSamplerBindingInfo sampler;
+    ShaderTextureBindingInfo texture;
+    StorageTextureBindingLayout storageTexture;
+};
+
+using BindingGroupInfoMap = std::map<BindingNumber, ShaderBindingInfo>;
+using BindingInfoArray = ityp::array<BindGroupIndex, BindingGroupInfoMap, kMaxBindGroups>;
+
+// The WebGPU overridable constants only support these scalar types
+union OverridableConstantScalar {
+    // Use int32_t for boolean to initialize the full 32bit
+    int32_t b;
+    float f32;
+    int32_t i32;
+    uint32_t u32;
+};
+
+// Contains all the reflection data for a valid (ShaderModule, entryPoint, stage). They are
+// stored in the ShaderModuleBase and destroyed only when the shader program is destroyed so
+// pointers to EntryPointMetadata are safe to store as long as you also keep a Ref to the
+// ShaderModuleBase.
+struct EntryPointMetadata {
+    // It is valid for a shader to contain entry points that go over limits. To keep this
+    // structure with packed arrays and bitsets, we still validate against limits when
+    // doing reflection, but store the errors in this vector, for later use if the application
+    // tries to use the entry point.
+    std::vector<std::string> infringedLimitErrors;
+
+    // bindings[G][B] is the reflection data for the binding defined with
+    // @group(G) @binding(B) in WGSL / SPIRV.
+    BindingInfoArray bindings;
+
+    struct SamplerTexturePair {
+        BindingSlot sampler;
+        BindingSlot texture;
     };
+    std::vector<SamplerTexturePair> samplerTexturePairs;
 
-    enum class InterpolationType {
-        Perspective,
-        Linear,
-        Flat,
+    // The set of vertex attributes this entryPoint uses.
+    ityp::array<VertexAttributeLocation, VertexFormatBaseType, kMaxVertexAttributes>
+        vertexInputBaseTypes;
+    ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> usedVertexInputs;
+
+    // An array to record the basic types (float, int and uint) of the fragment shader outputs.
+    struct FragmentOutputVariableInfo {
+        wgpu::TextureComponentType baseType;
+        uint8_t componentCount;
     };
+    ityp::array<ColorAttachmentIndex, FragmentOutputVariableInfo, kMaxColorAttachments>
+        fragmentOutputVariables;
+    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> fragmentOutputsWritten;
 
-    enum class InterpolationSampling {
-        None,
-        Center,
-        Centroid,
-        Sample,
+    struct InterStageVariableInfo {
+        InterStageComponentType baseType;
+        uint32_t componentCount;
+        InterpolationType interpolationType;
+        InterpolationSampling interpolationSampling;
     };
+    // Now that we only support vertex and fragment stages, there can't be both inter-stage
+    // inputs and outputs in one shader stage.
+    std::bitset<kMaxInterStageShaderVariables> usedInterStageVariables;
+    std::array<InterStageVariableInfo, kMaxInterStageShaderVariables> interStageVariables;
 
-    using PipelineLayoutEntryPointPair = std::pair<PipelineLayoutBase*, std::string>;
-    struct PipelineLayoutEntryPointPairHashFunc {
-        size_t operator()(const PipelineLayoutEntryPointPair& pair) const;
-    };
+    // The local workgroup size declared for a compute entry point (or 0s otehrwise).
+    Origin3D localWorkgroupSize;
 
-    // A map from name to EntryPointMetadata.
-    using EntryPointMetadataTable =
-        std::unordered_map<std::string, std::unique_ptr<EntryPointMetadata>>;
+    // The shader stage for this binding.
+    SingleShaderStage stage;
 
-    // Source for a tint program
-    class TintSource;
-
-    struct ShaderModuleParseResult {
-        ShaderModuleParseResult();
-        ~ShaderModuleParseResult();
-        ShaderModuleParseResult(ShaderModuleParseResult&& rhs);
-        ShaderModuleParseResult& operator=(ShaderModuleParseResult&& rhs);
-
-        bool HasParsedShader() const;
-
-        std::unique_ptr<tint::Program> tintProgram;
-        std::unique_ptr<TintSource> tintSource;
-    };
-
-    MaybeError ValidateShaderModuleDescriptor(DeviceBase* device,
-                                              const ShaderModuleDescriptor* descriptor,
-                                              ShaderModuleParseResult* parseResult,
-                                              OwnedCompilationMessages* outMessages);
-    MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
-                                                       const EntryPointMetadata& entryPoint,
-                                                       const PipelineLayoutBase* layout);
-
-    RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata& entryPoint,
-                                                            const PipelineLayoutBase* layout);
-    ResultOrError<tint::Program> RunTransforms(tint::transform::Transform* transform,
-                                               const tint::Program* program,
-                                               const tint::transform::DataMap& inputs,
-                                               tint::transform::DataMap* outputs,
-                                               OwnedCompilationMessages* messages);
-
-    /// Creates and adds the tint::transform::VertexPulling::Config to transformInputs.
-    void AddVertexPullingTransformConfig(const RenderPipelineBase& renderPipeline,
-                                         const std::string& entryPoint,
-                                         BindGroupIndex pullingBufferBindingSet,
-                                         tint::transform::DataMap* transformInputs);
-
-    // Mirrors wgpu::SamplerBindingLayout but instead stores a single boolean
-    // for isComparison instead of a wgpu::SamplerBindingType enum.
-    struct ShaderSamplerBindingInfo {
-        bool isComparison;
-    };
-
-    // Mirrors wgpu::TextureBindingLayout but instead has a set of compatible sampleTypes
-    // instead of a single enum.
-    struct ShaderTextureBindingInfo {
-        SampleTypeBit compatibleSampleTypes;
-        wgpu::TextureViewDimension viewDimension;
-        bool multisampled;
-    };
-
-    // Per-binding shader metadata contains some SPIRV specific information in addition to
-    // most of the frontend per-binding information.
-    struct ShaderBindingInfo {
-        // The SPIRV ID of the resource.
+    struct OverridableConstant {
         uint32_t id;
-        uint32_t base_type_id;
+        // Match tint::inspector::OverridableConstant::Type
+        // Bool is defined as a macro on linux X11 and cannot compile
+        enum class Type { Boolean, Float32, Uint32, Int32 } type;
 
-        BindingNumber binding;
-        BindingInfoType bindingType;
+        // If the constant doesn't not have an initializer in the shader
+        // Then it is required for the pipeline stage to have a constant record to initialize a
+        // value
+        bool isInitialized;
 
-        BufferBindingLayout buffer;
-        ShaderSamplerBindingInfo sampler;
-        ShaderTextureBindingInfo texture;
-        StorageTextureBindingLayout storageTexture;
+        // Store the default initialized value in shader
+        // This is used by metal backend as the function_constant does not have dafault values
+        // Initialized when isInitialized == true
+        OverridableConstantScalar defaultValue;
     };
 
-    using BindingGroupInfoMap = std::map<BindingNumber, ShaderBindingInfo>;
-    using BindingInfoArray = ityp::array<BindGroupIndex, BindingGroupInfoMap, kMaxBindGroups>;
+    using OverridableConstantsMap = std::unordered_map<std::string, OverridableConstant>;
 
-    // The WebGPU overridable constants only support these scalar types
-    union OverridableConstantScalar {
-        // Use int32_t for boolean to initialize the full 32bit
-        int32_t b;
-        float f32;
-        int32_t i32;
-        uint32_t u32;
+    // Map identifier to overridable constant
+    // Identifier is unique: either the variable name or the numeric ID if specified
+    OverridableConstantsMap overridableConstants;
+
+    // Overridable constants that are not initialized in shaders
+    // They need value initialization from pipeline stage or it is a validation error
+    std::unordered_set<std::string> uninitializedOverridableConstants;
+
+    // Store constants with shader initialized values as well
+    // This is used by metal backend to set values with default initializers that are not
+    // overridden
+    std::unordered_set<std::string> initializedOverridableConstants;
+
+    bool usesNumWorkgroups = false;
+};
+
+class ShaderModuleBase : public ApiObjectBase, public CachedObject {
+  public:
+    ShaderModuleBase(DeviceBase* device,
+                     const ShaderModuleDescriptor* descriptor,
+                     ApiObjectBase::UntrackedByDeviceTag tag);
+    ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor);
+    ~ShaderModuleBase() override;
+
+    static Ref<ShaderModuleBase> MakeError(DeviceBase* device);
+
+    ObjectType GetType() const override;
+
+    // Return true iff the program has an entrypoint called `entryPoint`.
+    bool HasEntryPoint(const std::string& entryPoint) const;
+
+    // Return the metadata for the given `entryPoint`. HasEntryPoint with the same argument
+    // must be true.
+    const EntryPointMetadata& GetEntryPoint(const std::string& entryPoint) const;
+
+    // Functions necessary for the unordered_set<ShaderModuleBase*>-based cache.
+    size_t ComputeContentHash() override;
+
+    struct EqualityFunc {
+        bool operator()(const ShaderModuleBase* a, const ShaderModuleBase* b) const;
     };
 
-    // Contains all the reflection data for a valid (ShaderModule, entryPoint, stage). They are
-    // stored in the ShaderModuleBase and destroyed only when the shader program is destroyed so
-    // pointers to EntryPointMetadata are safe to store as long as you also keep a Ref to the
-    // ShaderModuleBase.
-    struct EntryPointMetadata {
-        // It is valid for a shader to contain entry points that go over limits. To keep this
-        // structure with packed arrays and bitsets, we still validate against limits when
-        // doing reflection, but store the errors in this vector, for later use if the application
-        // tries to use the entry point.
-        std::vector<std::string> infringedLimitErrors;
+    const tint::Program* GetTintProgram() const;
 
-        // bindings[G][B] is the reflection data for the binding defined with
-        // @group(G) @binding(B) in WGSL / SPIRV.
-        BindingInfoArray bindings;
+    void APIGetCompilationInfo(wgpu::CompilationInfoCallback callback, void* userdata);
 
-        struct SamplerTexturePair {
-            BindingSlot sampler;
-            BindingSlot texture;
-        };
-        std::vector<SamplerTexturePair> samplerTexturePairs;
+    void InjectCompilationMessages(std::unique_ptr<OwnedCompilationMessages> compilationMessages);
 
-        // The set of vertex attributes this entryPoint uses.
-        ityp::array<VertexAttributeLocation, VertexFormatBaseType, kMaxVertexAttributes>
-            vertexInputBaseTypes;
-        ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> usedVertexInputs;
+    OwnedCompilationMessages* GetCompilationMessages() const;
 
-        // An array to record the basic types (float, int and uint) of the fragment shader outputs.
-        struct FragmentOutputVariableInfo {
-            wgpu::TextureComponentType baseType;
-            uint8_t componentCount;
-        };
-        ityp::array<ColorAttachmentIndex, FragmentOutputVariableInfo, kMaxColorAttachments>
-            fragmentOutputVariables;
-        ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> fragmentOutputsWritten;
+  protected:
+    // Constructor used only for mocking and testing.
+    explicit ShaderModuleBase(DeviceBase* device);
+    void DestroyImpl() override;
 
-        struct InterStageVariableInfo {
-            InterStageComponentType baseType;
-            uint32_t componentCount;
-            InterpolationType interpolationType;
-            InterpolationSampling interpolationSampling;
-        };
-        // Now that we only support vertex and fragment stages, there can't be both inter-stage
-        // inputs and outputs in one shader stage.
-        std::bitset<kMaxInterStageShaderVariables> usedInterStageVariables;
-        std::array<InterStageVariableInfo, kMaxInterStageShaderVariables> interStageVariables;
+    MaybeError InitializeBase(ShaderModuleParseResult* parseResult);
 
-        // The local workgroup size declared for a compute entry point (or 0s otehrwise).
-        Origin3D localWorkgroupSize;
+    static void AddExternalTextureTransform(const PipelineLayoutBase* layout,
+                                            tint::transform::Manager* transformManager,
+                                            tint::transform::DataMap* transformInputs);
 
-        // The shader stage for this binding.
-        SingleShaderStage stage;
+  private:
+    ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        struct OverridableConstant {
-            uint32_t id;
-            // Match tint::inspector::OverridableConstant::Type
-            // Bool is defined as a macro on linux X11 and cannot compile
-            enum class Type { Boolean, Float32, Uint32, Int32 } type;
+    // The original data in the descriptor for caching.
+    enum class Type { Undefined, Spirv, Wgsl };
+    Type mType;
+    std::vector<uint32_t> mOriginalSpirv;
+    std::string mWgsl;
 
-            // If the constant doesn't not have an initializer in the shader
-            // Then it is required for the pipeline stage to have a constant record to initialize a
-            // value
-            bool isInitialized;
+    EntryPointMetadataTable mEntryPoints;
+    std::unique_ptr<tint::Program> mTintProgram;
+    std::unique_ptr<TintSource> mTintSource;  // Keep the tint::Source::File alive
 
-            // Store the default initialized value in shader
-            // This is used by metal backend as the function_constant does not have dafault values
-            // Initialized when isInitialized == true
-            OverridableConstantScalar defaultValue;
-        };
-
-        using OverridableConstantsMap = std::unordered_map<std::string, OverridableConstant>;
-
-        // Map identifier to overridable constant
-        // Identifier is unique: either the variable name or the numeric ID if specified
-        OverridableConstantsMap overridableConstants;
-
-        // Overridable constants that are not initialized in shaders
-        // They need value initialization from pipeline stage or it is a validation error
-        std::unordered_set<std::string> uninitializedOverridableConstants;
-
-        // Store constants with shader initialized values as well
-        // This is used by metal backend to set values with default initializers that are not
-        // overridden
-        std::unordered_set<std::string> initializedOverridableConstants;
-
-        bool usesNumWorkgroups = false;
-    };
-
-    class ShaderModuleBase : public ApiObjectBase, public CachedObject {
-      public:
-        ShaderModuleBase(DeviceBase* device,
-                         const ShaderModuleDescriptor* descriptor,
-                         ApiObjectBase::UntrackedByDeviceTag tag);
-        ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor);
-        ~ShaderModuleBase() override;
-
-        static Ref<ShaderModuleBase> MakeError(DeviceBase* device);
-
-        ObjectType GetType() const override;
-
-        // Return true iff the program has an entrypoint called `entryPoint`.
-        bool HasEntryPoint(const std::string& entryPoint) const;
-
-        // Return the metadata for the given `entryPoint`. HasEntryPoint with the same argument
-        // must be true.
-        const EntryPointMetadata& GetEntryPoint(const std::string& entryPoint) const;
-
-        // Functions necessary for the unordered_set<ShaderModuleBase*>-based cache.
-        size_t ComputeContentHash() override;
-
-        struct EqualityFunc {
-            bool operator()(const ShaderModuleBase* a, const ShaderModuleBase* b) const;
-        };
-
-        const tint::Program* GetTintProgram() const;
-
-        void APIGetCompilationInfo(wgpu::CompilationInfoCallback callback, void* userdata);
-
-        void InjectCompilationMessages(
-            std::unique_ptr<OwnedCompilationMessages> compilationMessages);
-
-        OwnedCompilationMessages* GetCompilationMessages() const;
-
-      protected:
-        // Constructor used only for mocking and testing.
-        explicit ShaderModuleBase(DeviceBase* device);
-        void DestroyImpl() override;
-
-        MaybeError InitializeBase(ShaderModuleParseResult* parseResult);
-
-        static void AddExternalTextureTransform(const PipelineLayoutBase* layout,
-                                                tint::transform::Manager* transformManager,
-                                                tint::transform::DataMap* transformInputs);
-
-      private:
-        ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag);
-
-        // The original data in the descriptor for caching.
-        enum class Type { Undefined, Spirv, Wgsl };
-        Type mType;
-        std::vector<uint32_t> mOriginalSpirv;
-        std::string mWgsl;
-
-        EntryPointMetadataTable mEntryPoints;
-        std::unique_ptr<tint::Program> mTintProgram;
-        std::unique_ptr<TintSource> mTintSource;  // Keep the tint::Source::File alive
-
-        std::unique_ptr<OwnedCompilationMessages> mCompilationMessages;
-    };
+    std::unique_ptr<OwnedCompilationMessages> mCompilationMessages;
+};
 
 }  // namespace dawn::native
 

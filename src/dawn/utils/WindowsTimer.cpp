@@ -18,72 +18,71 @@
 
 namespace utils {
 
-    class WindowsTimer : public Timer {
-      public:
-        WindowsTimer() : Timer(), mRunning(false), mFrequency(0) {
-        }
+class WindowsTimer : public Timer {
+  public:
+    WindowsTimer() : Timer(), mRunning(false), mFrequency(0) {}
 
-        ~WindowsTimer() override = default;
+    ~WindowsTimer() override = default;
 
-        void Start() override {
-            LARGE_INTEGER curTime;
-            QueryPerformanceCounter(&curTime);
-            mStartTime = curTime.QuadPart;
+    void Start() override {
+        LARGE_INTEGER curTime;
+        QueryPerformanceCounter(&curTime);
+        mStartTime = curTime.QuadPart;
 
-            // Cache the frequency
-            GetFrequency();
+        // Cache the frequency
+        GetFrequency();
 
-            mRunning = true;
-        }
-
-        void Stop() override {
-            LARGE_INTEGER curTime;
-            QueryPerformanceCounter(&curTime);
-            mStopTime = curTime.QuadPart;
-
-            mRunning = false;
-        }
-
-        double GetElapsedTime() const override {
-            LONGLONG endTime;
-            if (mRunning) {
-                LARGE_INTEGER curTime;
-                QueryPerformanceCounter(&curTime);
-                endTime = curTime.QuadPart;
-            } else {
-                endTime = mStopTime;
-            }
-
-            return static_cast<double>(endTime - mStartTime) / mFrequency;
-        }
-
-        double GetAbsoluteTime() override {
-            LARGE_INTEGER curTime;
-            QueryPerformanceCounter(&curTime);
-
-            return static_cast<double>(curTime.QuadPart) / GetFrequency();
-        }
-
-      private:
-        LONGLONG GetFrequency() {
-            if (mFrequency == 0) {
-                LARGE_INTEGER frequency = {};
-                QueryPerformanceFrequency(&frequency);
-
-                mFrequency = frequency.QuadPart;
-            }
-
-            return mFrequency;
-        }
-
-        bool mRunning;
-        LONGLONG mStartTime;
-        LONGLONG mStopTime;
-        LONGLONG mFrequency;
-    };
-
-    Timer* CreateTimer() {
-        return new WindowsTimer();
+        mRunning = true;
     }
+
+    void Stop() override {
+        LARGE_INTEGER curTime;
+        QueryPerformanceCounter(&curTime);
+        mStopTime = curTime.QuadPart;
+
+        mRunning = false;
+    }
+
+    double GetElapsedTime() const override {
+        LONGLONG endTime;
+        if (mRunning) {
+            LARGE_INTEGER curTime;
+            QueryPerformanceCounter(&curTime);
+            endTime = curTime.QuadPart;
+        } else {
+            endTime = mStopTime;
+        }
+
+        return static_cast<double>(endTime - mStartTime) / mFrequency;
+    }
+
+    double GetAbsoluteTime() override {
+        LARGE_INTEGER curTime;
+        QueryPerformanceCounter(&curTime);
+
+        return static_cast<double>(curTime.QuadPart) / GetFrequency();
+    }
+
+  private:
+    LONGLONG GetFrequency() {
+        if (mFrequency == 0) {
+            LARGE_INTEGER frequency = {};
+            QueryPerformanceFrequency(&frequency);
+
+            mFrequency = frequency.QuadPart;
+        }
+
+        return mFrequency;
+    }
+
+    bool mRunning;
+    LONGLONG mStartTime;
+    LONGLONG mStopTime;
+    LONGLONG mFrequency;
+};
+
+Timer* CreateTimer() {
+    return new WindowsTimer();
+}
 
 }  // namespace utils

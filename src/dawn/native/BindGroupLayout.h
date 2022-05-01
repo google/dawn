@@ -34,138 +34,136 @@
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
-    // TODO(dawn:1082): Minor optimization to use BindingIndex instead of BindingNumber
-    struct ExternalTextureBindingExpansion {
-        BindingNumber plane0;
-        BindingNumber plane1;
-        BindingNumber params;
+// TODO(dawn:1082): Minor optimization to use BindingIndex instead of BindingNumber
+struct ExternalTextureBindingExpansion {
+    BindingNumber plane0;
+    BindingNumber plane1;
+    BindingNumber params;
+};
+
+using ExternalTextureBindingExpansionMap = std::map<BindingNumber, ExternalTextureBindingExpansion>;
+
+MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
+                                             const BindGroupLayoutDescriptor* descriptor,
+                                             bool allowInternalBinding = false);
+
+// Bindings are specified as a |BindingNumber| in the BindGroupLayoutDescriptor.
+// These numbers may be arbitrary and sparse. Internally, Dawn packs these numbers
+// into a packed range of |BindingIndex| integers.
+class BindGroupLayoutBase : public ApiObjectBase, public CachedObject {
+  public:
+    BindGroupLayoutBase(DeviceBase* device,
+                        const BindGroupLayoutDescriptor* descriptor,
+                        PipelineCompatibilityToken pipelineCompatibilityToken,
+                        ApiObjectBase::UntrackedByDeviceTag tag);
+    BindGroupLayoutBase(DeviceBase* device,
+                        const BindGroupLayoutDescriptor* descriptor,
+                        PipelineCompatibilityToken pipelineCompatibilityToken);
+    ~BindGroupLayoutBase() override;
+
+    static BindGroupLayoutBase* MakeError(DeviceBase* device);
+
+    ObjectType GetType() const override;
+
+    // A map from the BindingNumber to its packed BindingIndex.
+    using BindingMap = std::map<BindingNumber, BindingIndex>;
+
+    const BindingInfo& GetBindingInfo(BindingIndex bindingIndex) const {
+        ASSERT(!IsError());
+        ASSERT(bindingIndex < mBindingInfo.size());
+        return mBindingInfo[bindingIndex];
+    }
+    const BindingMap& GetBindingMap() const;
+    bool HasBinding(BindingNumber bindingNumber) const;
+    BindingIndex GetBindingIndex(BindingNumber bindingNumber) const;
+
+    // Functions necessary for the unordered_set<BGLBase*>-based cache.
+    size_t ComputeContentHash() override;
+
+    struct EqualityFunc {
+        bool operator()(const BindGroupLayoutBase* a, const BindGroupLayoutBase* b) const;
     };
 
-    using ExternalTextureBindingExpansionMap =
-        std::map<BindingNumber, ExternalTextureBindingExpansion>;
+    BindingIndex GetBindingCount() const;
+    // Returns |BindingIndex| because buffers are packed at the front.
+    BindingIndex GetBufferCount() const;
+    // Returns |BindingIndex| because dynamic buffers are packed at the front.
+    BindingIndex GetDynamicBufferCount() const;
+    uint32_t GetUnverifiedBufferCount() const;
 
-    MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
-                                                 const BindGroupLayoutDescriptor* descriptor,
-                                                 bool allowInternalBinding = false);
+    // Used to get counts and validate them in pipeline layout creation. Other getters
+    // should be used to get typed integer counts.
+    const BindingCounts& GetBindingCountInfo() const;
 
-    // Bindings are specified as a |BindingNumber| in the BindGroupLayoutDescriptor.
-    // These numbers may be arbitrary and sparse. Internally, Dawn packs these numbers
-    // into a packed range of |BindingIndex| integers.
-    class BindGroupLayoutBase : public ApiObjectBase, public CachedObject {
-      public:
-        BindGroupLayoutBase(DeviceBase* device,
-                            const BindGroupLayoutDescriptor* descriptor,
-                            PipelineCompatibilityToken pipelineCompatibilityToken,
-                            ApiObjectBase::UntrackedByDeviceTag tag);
-        BindGroupLayoutBase(DeviceBase* device,
-                            const BindGroupLayoutDescriptor* descriptor,
-                            PipelineCompatibilityToken pipelineCompatibilityToken);
-        ~BindGroupLayoutBase() override;
+    uint32_t GetExternalTextureBindingCount() const;
 
-        static BindGroupLayoutBase* MakeError(DeviceBase* device);
+    // Used to specify unpacked external texture binding slots when transforming shader modules.
+    const ExternalTextureBindingExpansionMap& GetExternalTextureBindingExpansionMap() const;
 
-        ObjectType GetType() const override;
+    uint32_t GetUnexpandedBindingCount() const;
 
-        // A map from the BindingNumber to its packed BindingIndex.
-        using BindingMap = std::map<BindingNumber, BindingIndex>;
+    // Tests that the BindingInfo of two bind groups are equal,
+    // ignoring their compatibility groups.
+    bool IsLayoutEqual(const BindGroupLayoutBase* other,
+                       bool excludePipelineCompatibiltyToken = false) const;
+    PipelineCompatibilityToken GetPipelineCompatibilityToken() const;
 
-        const BindingInfo& GetBindingInfo(BindingIndex bindingIndex) const {
-            ASSERT(!IsError());
-            ASSERT(bindingIndex < mBindingInfo.size());
-            return mBindingInfo[bindingIndex];
-        }
-        const BindingMap& GetBindingMap() const;
-        bool HasBinding(BindingNumber bindingNumber) const;
-        BindingIndex GetBindingIndex(BindingNumber bindingNumber) const;
-
-        // Functions necessary for the unordered_set<BGLBase*>-based cache.
-        size_t ComputeContentHash() override;
-
-        struct EqualityFunc {
-            bool operator()(const BindGroupLayoutBase* a, const BindGroupLayoutBase* b) const;
-        };
-
-        BindingIndex GetBindingCount() const;
-        // Returns |BindingIndex| because buffers are packed at the front.
-        BindingIndex GetBufferCount() const;
-        // Returns |BindingIndex| because dynamic buffers are packed at the front.
-        BindingIndex GetDynamicBufferCount() const;
-        uint32_t GetUnverifiedBufferCount() const;
-
-        // Used to get counts and validate them in pipeline layout creation. Other getters
-        // should be used to get typed integer counts.
-        const BindingCounts& GetBindingCountInfo() const;
-
-        uint32_t GetExternalTextureBindingCount() const;
-
-        // Used to specify unpacked external texture binding slots when transforming shader modules.
-        const ExternalTextureBindingExpansionMap& GetExternalTextureBindingExpansionMap() const;
-
-        uint32_t GetUnexpandedBindingCount() const;
-
-        // Tests that the BindingInfo of two bind groups are equal,
-        // ignoring their compatibility groups.
-        bool IsLayoutEqual(const BindGroupLayoutBase* other,
-                           bool excludePipelineCompatibiltyToken = false) const;
-        PipelineCompatibilityToken GetPipelineCompatibilityToken() const;
-
-        struct BufferBindingData {
-            uint64_t offset;
-            uint64_t size;
-        };
-
-        struct BindingDataPointers {
-            ityp::span<BindingIndex, BufferBindingData> const bufferData = {};
-            ityp::span<BindingIndex, Ref<ObjectBase>> const bindings = {};
-            ityp::span<uint32_t, uint64_t> const unverifiedBufferSizes = {};
-        };
-
-        // Compute the amount of space / alignment required to store bindings for a bind group of
-        // this layout.
-        size_t GetBindingDataSize() const;
-        static constexpr size_t GetBindingDataAlignment() {
-            static_assert(alignof(Ref<ObjectBase>) <= alignof(BufferBindingData));
-            return alignof(BufferBindingData);
-        }
-
-        BindingDataPointers ComputeBindingDataPointers(void* dataStart) const;
-
-        bool IsStorageBufferBinding(BindingIndex bindingIndex) const;
-
-        // Returns a detailed string representation of the layout entries for use in error messages.
-        std::string EntriesToString() const;
-
-      protected:
-        // Constructor used only for mocking and testing.
-        explicit BindGroupLayoutBase(DeviceBase* device);
-        void DestroyImpl() override;
-
-        template <typename BindGroup>
-        SlabAllocator<BindGroup> MakeFrontendBindGroupAllocator(size_t size) {
-            return SlabAllocator<BindGroup>(
-                size,  // bytes
-                Align(sizeof(BindGroup), GetBindingDataAlignment()) + GetBindingDataSize(),  // size
-                std::max(alignof(BindGroup), GetBindingDataAlignment())  // alignment
-            );
-        }
-
-      private:
-        BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag);
-
-        BindingCounts mBindingCounts = {};
-        ityp::vector<BindingIndex, BindingInfo> mBindingInfo;
-
-        // Map from BindGroupLayoutEntry.binding to packed indices.
-        BindingMap mBindingMap;
-
-        ExternalTextureBindingExpansionMap mExternalTextureBindingExpansionMap;
-
-        // Non-0 if this BindGroupLayout was created as part of a default PipelineLayout.
-        const PipelineCompatibilityToken mPipelineCompatibilityToken =
-            PipelineCompatibilityToken(0);
-
-        uint32_t mUnexpandedBindingCount;
+    struct BufferBindingData {
+        uint64_t offset;
+        uint64_t size;
     };
+
+    struct BindingDataPointers {
+        ityp::span<BindingIndex, BufferBindingData> const bufferData = {};
+        ityp::span<BindingIndex, Ref<ObjectBase>> const bindings = {};
+        ityp::span<uint32_t, uint64_t> const unverifiedBufferSizes = {};
+    };
+
+    // Compute the amount of space / alignment required to store bindings for a bind group of
+    // this layout.
+    size_t GetBindingDataSize() const;
+    static constexpr size_t GetBindingDataAlignment() {
+        static_assert(alignof(Ref<ObjectBase>) <= alignof(BufferBindingData));
+        return alignof(BufferBindingData);
+    }
+
+    BindingDataPointers ComputeBindingDataPointers(void* dataStart) const;
+
+    bool IsStorageBufferBinding(BindingIndex bindingIndex) const;
+
+    // Returns a detailed string representation of the layout entries for use in error messages.
+    std::string EntriesToString() const;
+
+  protected:
+    // Constructor used only for mocking and testing.
+    explicit BindGroupLayoutBase(DeviceBase* device);
+    void DestroyImpl() override;
+
+    template <typename BindGroup>
+    SlabAllocator<BindGroup> MakeFrontendBindGroupAllocator(size_t size) {
+        return SlabAllocator<BindGroup>(
+            size,                                                                        // bytes
+            Align(sizeof(BindGroup), GetBindingDataAlignment()) + GetBindingDataSize(),  // size
+            std::max(alignof(BindGroup), GetBindingDataAlignment())  // alignment
+        );
+    }
+
+  private:
+    BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+
+    BindingCounts mBindingCounts = {};
+    ityp::vector<BindingIndex, BindingInfo> mBindingInfo;
+
+    // Map from BindGroupLayoutEntry.binding to packed indices.
+    BindingMap mBindingMap;
+
+    ExternalTextureBindingExpansionMap mExternalTextureBindingExpansionMap;
+
+    // Non-0 if this BindGroupLayout was created as part of a default PipelineLayout.
+    const PipelineCompatibilityToken mPipelineCompatibilityToken = PipelineCompatibilityToken(0);
+
+    uint32_t mUnexpandedBindingCount;
+};
 
 }  // namespace dawn::native
 

@@ -24,17 +24,16 @@ namespace tint::ast {
 
 namespace {
 // Returns the string representation of an array size expression.
-std::string SizeExprToString(const Expression* size,
-                             const SymbolTable& symbols) {
-  if (auto* ident = size->As<IdentifierExpression>()) {
-    return symbols.NameFor(ident->symbol);
-  }
-  if (auto* literal = size->As<IntLiteralExpression>()) {
-    return std::to_string(literal->ValueAsU32());
-  }
-  // This will never be exposed to the user as the Resolver will reject this
-  // expression for array size.
-  return "<invalid>";
+std::string SizeExprToString(const Expression* size, const SymbolTable& symbols) {
+    if (auto* ident = size->As<IdentifierExpression>()) {
+        return symbols.NameFor(ident->symbol);
+    }
+    if (auto* literal = size->As<IntLiteralExpression>()) {
+        return std::to_string(literal->ValueAsU32());
+    }
+    // This will never be exposed to the user as the Resolver will reject this
+    // expression for array size.
+    return "<invalid>";
 }
 }  // namespace
 
@@ -50,27 +49,27 @@ Array::Array(Array&&) = default;
 Array::~Array() = default;
 
 std::string Array::FriendlyName(const SymbolTable& symbols) const {
-  std::ostringstream out;
-  for (auto* attr : attributes) {
-    if (auto* stride = attr->As<ast::StrideAttribute>()) {
-      out << "@stride(" << stride->stride << ") ";
+    std::ostringstream out;
+    for (auto* attr : attributes) {
+        if (auto* stride = attr->As<ast::StrideAttribute>()) {
+            out << "@stride(" << stride->stride << ") ";
+        }
     }
-  }
-  out << "array<" << type->FriendlyName(symbols);
-  if (!IsRuntimeArray()) {
-    out << ", " << SizeExprToString(count, symbols);
-  }
-  out << ">";
-  return out.str();
+    out << "array<" << type->FriendlyName(symbols);
+    if (!IsRuntimeArray()) {
+        out << ", " << SizeExprToString(count, symbols);
+    }
+    out << ">";
+    return out.str();
 }
 
 const Array* Array::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  auto* ty = ctx->Clone(type);
-  auto* cnt = ctx->Clone(count);
-  auto attrs = ctx->Clone(attributes);
-  return ctx->dst->create<Array>(src, ty, cnt, attrs);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    auto* ty = ctx->Clone(type);
+    auto* cnt = ctx->Clone(count);
+    auto attrs = ctx->Clone(attributes);
+    return ctx->dst->create<Array>(src, ty, cnt, attrs);
 }
 
 }  // namespace tint::ast

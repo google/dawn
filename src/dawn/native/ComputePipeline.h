@@ -21,34 +21,34 @@
 
 namespace dawn::native {
 
-    class DeviceBase;
-    struct EntryPointMetadata;
+class DeviceBase;
+struct EntryPointMetadata;
 
-    MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
-                                                 const ComputePipelineDescriptor* descriptor);
+MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
+                                             const ComputePipelineDescriptor* descriptor);
 
-    class ComputePipelineBase : public PipelineBase {
-      public:
-        ComputePipelineBase(DeviceBase* device, const ComputePipelineDescriptor* descriptor);
-        ~ComputePipelineBase() override;
+class ComputePipelineBase : public PipelineBase {
+  public:
+    ComputePipelineBase(DeviceBase* device, const ComputePipelineDescriptor* descriptor);
+    ~ComputePipelineBase() override;
 
-        static ComputePipelineBase* MakeError(DeviceBase* device);
+    static ComputePipelineBase* MakeError(DeviceBase* device);
 
-        ObjectType GetType() const override;
+    ObjectType GetType() const override;
 
-        // Functors necessary for the unordered_set<ComputePipelineBase*>-based cache.
-        struct EqualityFunc {
-            bool operator()(const ComputePipelineBase* a, const ComputePipelineBase* b) const;
-        };
-
-      protected:
-        // Constructor used only for mocking and testing.
-        explicit ComputePipelineBase(DeviceBase* device);
-        void DestroyImpl() override;
-
-      private:
-        ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+    // Functors necessary for the unordered_set<ComputePipelineBase*>-based cache.
+    struct EqualityFunc {
+        bool operator()(const ComputePipelineBase* a, const ComputePipelineBase* b) const;
     };
+
+  protected:
+    // Constructor used only for mocking and testing.
+    explicit ComputePipelineBase(DeviceBase* device);
+    void DestroyImpl() override;
+
+  private:
+    ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+};
 
 }  // namespace dawn::native
 

@@ -24,34 +24,33 @@
 
 namespace utils {
 
-    class VulkanBinding : public BackendBinding {
-      public:
-        VulkanBinding(GLFWwindow* window, WGPUDevice device) : BackendBinding(window, device) {
-        }
+class VulkanBinding : public BackendBinding {
+  public:
+    VulkanBinding(GLFWwindow* window, WGPUDevice device) : BackendBinding(window, device) {}
 
-        uint64_t GetSwapChainImplementation() override {
-            if (mSwapchainImpl.userData == nullptr) {
-                VkSurfaceKHR surface = VK_NULL_HANDLE;
-                if (glfwCreateWindowSurface(dawn::native::vulkan::GetInstance(mDevice), mWindow,
-                                            nullptr, &surface) != VK_SUCCESS) {
-                    ASSERT(false);
-                }
-
-                mSwapchainImpl = dawn::native::vulkan::CreateNativeSwapChainImpl(mDevice, surface);
+    uint64_t GetSwapChainImplementation() override {
+        if (mSwapchainImpl.userData == nullptr) {
+            VkSurfaceKHR surface = VK_NULL_HANDLE;
+            if (glfwCreateWindowSurface(dawn::native::vulkan::GetInstance(mDevice), mWindow,
+                                        nullptr, &surface) != VK_SUCCESS) {
+                ASSERT(false);
             }
-            return reinterpret_cast<uint64_t>(&mSwapchainImpl);
-        }
-        WGPUTextureFormat GetPreferredSwapChainTextureFormat() override {
-            ASSERT(mSwapchainImpl.userData != nullptr);
-            return dawn::native::vulkan::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
-        }
 
-      private:
-        DawnSwapChainImplementation mSwapchainImpl = {};
-    };
-
-    BackendBinding* CreateVulkanBinding(GLFWwindow* window, WGPUDevice device) {
-        return new VulkanBinding(window, device);
+            mSwapchainImpl = dawn::native::vulkan::CreateNativeSwapChainImpl(mDevice, surface);
+        }
+        return reinterpret_cast<uint64_t>(&mSwapchainImpl);
     }
+    WGPUTextureFormat GetPreferredSwapChainTextureFormat() override {
+        ASSERT(mSwapchainImpl.userData != nullptr);
+        return dawn::native::vulkan::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
+    }
+
+  private:
+    DawnSwapChainImplementation mSwapchainImpl = {};
+};
+
+BackendBinding* CreateVulkanBinding(GLFWwindow* window, WGPUDevice device) {
+    return new VulkanBinding(window, device);
+}
 
 }  // namespace utils

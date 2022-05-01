@@ -18,42 +18,40 @@
 
 namespace utils {
 
-    TerribleCommandBuffer::TerribleCommandBuffer() {
-    }
+TerribleCommandBuffer::TerribleCommandBuffer() {}
 
-    TerribleCommandBuffer::TerribleCommandBuffer(dawn::wire::CommandHandler* handler)
-        : mHandler(handler) {
-    }
+TerribleCommandBuffer::TerribleCommandBuffer(dawn::wire::CommandHandler* handler)
+    : mHandler(handler) {}
 
-    void TerribleCommandBuffer::SetHandler(dawn::wire::CommandHandler* handler) {
-        mHandler = handler;
-    }
+void TerribleCommandBuffer::SetHandler(dawn::wire::CommandHandler* handler) {
+    mHandler = handler;
+}
 
-    size_t TerribleCommandBuffer::GetMaximumAllocationSize() const {
-        return sizeof(mBuffer);
-    }
+size_t TerribleCommandBuffer::GetMaximumAllocationSize() const {
+    return sizeof(mBuffer);
+}
 
-    void* TerribleCommandBuffer::GetCmdSpace(size_t size) {
-        // Note: This returns non-null even if size is zero.
-        if (size > sizeof(mBuffer)) {
+void* TerribleCommandBuffer::GetCmdSpace(size_t size) {
+    // Note: This returns non-null even if size is zero.
+    if (size > sizeof(mBuffer)) {
+        return nullptr;
+    }
+    char* result = &mBuffer[mOffset];
+    if (sizeof(mBuffer) - size < mOffset) {
+        if (!Flush()) {
             return nullptr;
         }
-        char* result = &mBuffer[mOffset];
-        if (sizeof(mBuffer) - size < mOffset) {
-            if (!Flush()) {
-                return nullptr;
-            }
-            return GetCmdSpace(size);
-        }
-
-        mOffset += size;
-        return result;
+        return GetCmdSpace(size);
     }
 
-    bool TerribleCommandBuffer::Flush() {
-        bool success = mHandler->HandleCommands(mBuffer, mOffset) != nullptr;
-        mOffset = 0;
-        return success;
-    }
+    mOffset += size;
+    return result;
+}
+
+bool TerribleCommandBuffer::Flush() {
+    bool success = mHandler->HandleCommands(mBuffer, mOffset) != nullptr;
+    mOffset = 0;
+    return success;
+}
 
 }  // namespace utils

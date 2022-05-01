@@ -21,139 +21,137 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
-  auto* init = vec3<f32>(1.f, 1.f, 3.f);
+    auto* init = vec3<f32>(1.f, 1.f, 3.f);
 
-  auto* v = GlobalConst("var", ty.vec3<f32>(), init);
+    auto* v = GlobalConst("var", ty.vec3<f32>(), init);
 
-  auto* expr = Expr("var");
-  WrapInFunction(expr);
+    auto* expr = Expr("var");
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
 %4 = OpConstant %2 3
 %5 = OpConstantComposite %1 %3 %3 %4
 )");
 
-  EXPECT_EQ(b.GenerateIdentifierExpression(expr), 5u);
+    EXPECT_EQ(b.GenerateIdentifierExpression(expr), 5u);
 }
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kPrivate);
+    auto* v = Global("var", ty.f32(), ast::StorageClass::kPrivate);
 
-  auto* expr = Expr("var");
-  WrapInFunction(expr);
+    auto* expr = Expr("var");
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
+    b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
 )");
 
-  EXPECT_EQ(b.GenerateIdentifierExpression(expr), 1u);
+    EXPECT_EQ(b.GenerateIdentifierExpression(expr), 1u);
 }
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
-  auto* init = vec3<f32>(1.f, 1.f, 3.f);
+    auto* init = vec3<f32>(1.f, 1.f, 3.f);
 
-  auto* v = Let("var", ty.vec3<f32>(), init);
+    auto* v = Let("var", ty.vec3<f32>(), init);
 
-  auto* expr = Expr("var");
-  WrapInFunction(v, expr);
+    auto* expr = Expr("var");
+    WrapInFunction(v, expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
-  ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
 %3 = OpConstant %2 1
 %4 = OpConstant %2 3
 %5 = OpConstantComposite %1 %3 %3 %4
 )");
 
-  EXPECT_EQ(b.GenerateIdentifierExpression(expr), 5u);
+    EXPECT_EQ(b.GenerateIdentifierExpression(expr), 5u);
 }
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
-  auto* v = Var("var", ty.f32(), ast::StorageClass::kFunction);
-  auto* expr = Expr("var");
-  WrapInFunction(v, expr);
+    auto* v = Var("var", ty.f32(), ast::StorageClass::kFunction);
+    auto* expr = Expr("var");
+    WrapInFunction(v, expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
+    b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
 )");
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Function %3
 %4 = OpConstantNull %3
 )");
 
-  const auto& func = b.functions()[0];
-  EXPECT_EQ(DumpInstructions(func.variables()),
-            R"(%1 = OpVariable %2 Function %4
+    const auto& func = b.functions()[0];
+    EXPECT_EQ(DumpInstructions(func.variables()),
+              R"(%1 = OpVariable %2 Function %4
 )");
 
-  EXPECT_EQ(b.GenerateIdentifierExpression(expr), 1u);
+    EXPECT_EQ(b.GenerateIdentifierExpression(expr), 1u);
 }
 
 TEST_F(BuilderTest, IdentifierExpression_Load) {
-  auto* var = Global("var", ty.i32(), ast::StorageClass::kPrivate);
+    auto* var = Global("var", ty.i32(), ast::StorageClass::kPrivate);
 
-  auto* expr = Add("var", "var");
-  WrapInFunction(expr);
+    auto* expr = Add("var", "var");
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    b.push_function(Function{});
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateBinaryExpression(expr->As<ast::BinaryExpression>()), 7u)
-      << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
+    EXPECT_EQ(b.GenerateBinaryExpression(expr->As<ast::BinaryExpression>()), 7u) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%5 = OpLoad %3 %1
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%5 = OpLoad %3 %1
 %6 = OpLoad %3 %1
 %7 = OpIAdd %3 %5 %6
 )");
 }
 
 TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
-  auto* var = GlobalConst("var", ty.i32(), Expr(2));
+    auto* var = GlobalConst("var", ty.i32(), Expr(2));
 
-  auto* expr = Add("var", "var");
-  WrapInFunction(expr);
+    auto* expr = Add("var", "var");
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    b.push_function(Function{});
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_EQ(b.GenerateBinaryExpression(expr->As<ast::BinaryExpression>()), 3u)
-      << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
+    EXPECT_EQ(b.GenerateBinaryExpression(expr->As<ast::BinaryExpression>()), 3u) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
 %2 = OpConstant %1 2
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%3 = OpIAdd %1 %2 %2
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%3 = OpIAdd %1 %2 %2
 )");
 }
 

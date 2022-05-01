@@ -20,25 +20,25 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Scalar) {
-  auto* cast = Construct<f32>(1);
-  WrapInFunction(cast);
+    auto* cast = Construct<f32>(1);
+    WrapInFunction(cast);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
-  EXPECT_EQ(out.str(), "f32(1)");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
+    EXPECT_EQ(out.str(), "f32(1)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Vector) {
-  auto* cast = vec3<f32>(vec3<i32>(1, 2, 3));
-  WrapInFunction(cast);
+    auto* cast = vec3<f32>(vec3<i32>(1, 2, 3));
+    WrapInFunction(cast);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
-  EXPECT_EQ(out.str(), "vec3<f32>(vec3<i32>(1, 2, 3))");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
+    EXPECT_EQ(out.str(), "vec3<f32>(vec3<i32>(1, 2, 3))");
 }
 
 }  // namespace

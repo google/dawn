@@ -20,7 +20,7 @@
 namespace tint::fuzzers::spvtools_fuzzer {
 
 void OverrideCliParams(FuzzerCliParams& /*unused*/) {
-  // Leave the CLI parameters unchanged.
+    // Leave the CLI parameters unchanged.
 }
 
 }  // namespace tint::fuzzers::spvtools_fuzzer

@@ -20,50 +20,50 @@
 
 namespace dawn::native {
 
-    static constexpr std::array<VertexFormatInfo, 31> sVertexFormatTable = {{
-        //
-        {wgpu::VertexFormat::Undefined, 0, 0, 0, VertexFormatBaseType::Float},
+static constexpr std::array<VertexFormatInfo, 31> sVertexFormatTable = {{
+    //
+    {wgpu::VertexFormat::Undefined, 0, 0, 0, VertexFormatBaseType::Float},
 
-        {wgpu::VertexFormat::Uint8x2, 2, 2, 1, VertexFormatBaseType::Uint},
-        {wgpu::VertexFormat::Uint8x4, 4, 4, 1, VertexFormatBaseType::Uint},
-        {wgpu::VertexFormat::Sint8x2, 2, 2, 1, VertexFormatBaseType::Sint},
-        {wgpu::VertexFormat::Sint8x4, 4, 4, 1, VertexFormatBaseType::Sint},
-        {wgpu::VertexFormat::Unorm8x2, 2, 2, 1, VertexFormatBaseType::Float},
-        {wgpu::VertexFormat::Unorm8x4, 4, 4, 1, VertexFormatBaseType::Float},
-        {wgpu::VertexFormat::Snorm8x2, 2, 2, 1, VertexFormatBaseType::Float},
-        {wgpu::VertexFormat::Snorm8x4, 4, 4, 1, VertexFormatBaseType::Float},
+    {wgpu::VertexFormat::Uint8x2, 2, 2, 1, VertexFormatBaseType::Uint},
+    {wgpu::VertexFormat::Uint8x4, 4, 4, 1, VertexFormatBaseType::Uint},
+    {wgpu::VertexFormat::Sint8x2, 2, 2, 1, VertexFormatBaseType::Sint},
+    {wgpu::VertexFormat::Sint8x4, 4, 4, 1, VertexFormatBaseType::Sint},
+    {wgpu::VertexFormat::Unorm8x2, 2, 2, 1, VertexFormatBaseType::Float},
+    {wgpu::VertexFormat::Unorm8x4, 4, 4, 1, VertexFormatBaseType::Float},
+    {wgpu::VertexFormat::Snorm8x2, 2, 2, 1, VertexFormatBaseType::Float},
+    {wgpu::VertexFormat::Snorm8x4, 4, 4, 1, VertexFormatBaseType::Float},
 
-        {wgpu::VertexFormat::Uint16x2, 4, 2, 2, VertexFormatBaseType::Uint},
-        {wgpu::VertexFormat::Uint16x4, 8, 4, 2, VertexFormatBaseType::Uint},
-        {wgpu::VertexFormat::Sint16x2, 4, 2, 2, VertexFormatBaseType::Sint},
-        {wgpu::VertexFormat::Sint16x4, 8, 4, 2, VertexFormatBaseType::Sint},
-        {wgpu::VertexFormat::Unorm16x2, 4, 2, 2, VertexFormatBaseType::Float},
-        {wgpu::VertexFormat::Unorm16x4, 8, 4, 2, VertexFormatBaseType::Float},
-        {wgpu::VertexFormat::Snorm16x2, 4, 2, 2, VertexFormatBaseType::Float},
-        {wgpu::VertexFormat::Snorm16x4, 8, 4, 2, VertexFormatBaseType::Float},
-        {wgpu::VertexFormat::Float16x2, 4, 2, 2, VertexFormatBaseType::Float},
-        {wgpu::VertexFormat::Float16x4, 8, 4, 2, VertexFormatBaseType::Float},
+    {wgpu::VertexFormat::Uint16x2, 4, 2, 2, VertexFormatBaseType::Uint},
+    {wgpu::VertexFormat::Uint16x4, 8, 4, 2, VertexFormatBaseType::Uint},
+    {wgpu::VertexFormat::Sint16x2, 4, 2, 2, VertexFormatBaseType::Sint},
+    {wgpu::VertexFormat::Sint16x4, 8, 4, 2, VertexFormatBaseType::Sint},
+    {wgpu::VertexFormat::Unorm16x2, 4, 2, 2, VertexFormatBaseType::Float},
+    {wgpu::VertexFormat::Unorm16x4, 8, 4, 2, VertexFormatBaseType::Float},
+    {wgpu::VertexFormat::Snorm16x2, 4, 2, 2, VertexFormatBaseType::Float},
+    {wgpu::VertexFormat::Snorm16x4, 8, 4, 2, VertexFormatBaseType::Float},
+    {wgpu::VertexFormat::Float16x2, 4, 2, 2, VertexFormatBaseType::Float},
+    {wgpu::VertexFormat::Float16x4, 8, 4, 2, VertexFormatBaseType::Float},
 
-        {wgpu::VertexFormat::Float32, 4, 1, 4, VertexFormatBaseType::Float},
-        {wgpu::VertexFormat::Float32x2, 8, 2, 4, VertexFormatBaseType::Float},
-        {wgpu::VertexFormat::Float32x3, 12, 3, 4, VertexFormatBaseType::Float},
-        {wgpu::VertexFormat::Float32x4, 16, 4, 4, VertexFormatBaseType::Float},
-        {wgpu::VertexFormat::Uint32, 4, 1, 4, VertexFormatBaseType::Uint},
-        {wgpu::VertexFormat::Uint32x2, 8, 2, 4, VertexFormatBaseType::Uint},
-        {wgpu::VertexFormat::Uint32x3, 12, 3, 4, VertexFormatBaseType::Uint},
-        {wgpu::VertexFormat::Uint32x4, 16, 4, 4, VertexFormatBaseType::Uint},
-        {wgpu::VertexFormat::Sint32, 4, 1, 4, VertexFormatBaseType::Sint},
-        {wgpu::VertexFormat::Sint32x2, 8, 2, 4, VertexFormatBaseType::Sint},
-        {wgpu::VertexFormat::Sint32x3, 12, 3, 4, VertexFormatBaseType::Sint},
-        {wgpu::VertexFormat::Sint32x4, 16, 4, 4, VertexFormatBaseType::Sint},
-        //
-    }};
+    {wgpu::VertexFormat::Float32, 4, 1, 4, VertexFormatBaseType::Float},
+    {wgpu::VertexFormat::Float32x2, 8, 2, 4, VertexFormatBaseType::Float},
+    {wgpu::VertexFormat::Float32x3, 12, 3, 4, VertexFormatBaseType::Float},
+    {wgpu::VertexFormat::Float32x4, 16, 4, 4, VertexFormatBaseType::Float},
+    {wgpu::VertexFormat::Uint32, 4, 1, 4, VertexFormatBaseType::Uint},
+    {wgpu::VertexFormat::Uint32x2, 8, 2, 4, VertexFormatBaseType::Uint},
+    {wgpu::VertexFormat::Uint32x3, 12, 3, 4, VertexFormatBaseType::Uint},
+    {wgpu::VertexFormat::Uint32x4, 16, 4, 4, VertexFormatBaseType::Uint},
+    {wgpu::VertexFormat::Sint32, 4, 1, 4, VertexFormatBaseType::Sint},
+    {wgpu::VertexFormat::Sint32x2, 8, 2, 4, VertexFormatBaseType::Sint},
+    {wgpu::VertexFormat::Sint32x3, 12, 3, 4, VertexFormatBaseType::Sint},
+    {wgpu::VertexFormat::Sint32x4, 16, 4, 4, VertexFormatBaseType::Sint},
+    //
+}};
 
-    const VertexFormatInfo& GetVertexFormatInfo(wgpu::VertexFormat format) {
-        ASSERT(format != wgpu::VertexFormat::Undefined);
-        ASSERT(static_cast<uint32_t>(format) < sVertexFormatTable.size());
-        ASSERT(sVertexFormatTable[static_cast<uint32_t>(format)].format == format);
-        return sVertexFormatTable[static_cast<uint32_t>(format)];
-    }
+const VertexFormatInfo& GetVertexFormatInfo(wgpu::VertexFormat format) {
+    ASSERT(format != wgpu::VertexFormat::Undefined);
+    ASSERT(static_cast<uint32_t>(format) < sVertexFormatTable.size());
+    ASSERT(sVertexFormatTable[static_cast<uint32_t>(format)].format == format);
+    return sVertexFormatTable[static_cast<uint32_t>(format)];
+}
 
 }  // namespace dawn::native

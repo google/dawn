@@ -27,46 +27,45 @@ namespace tint::reader::wgsl {
 
 /// WGSL Parser test class
 class ParserImplTest : public testing::Test, public ProgramBuilder {
- public:
-  /// Constructor
-  ParserImplTest();
-  ~ParserImplTest() override;
+  public:
+    /// Constructor
+    ParserImplTest();
+    ~ParserImplTest() override;
 
-  /// Retrieves the parser from the helper
-  /// @param str the string to parse
-  /// @returns the parser implementation
-  std::unique_ptr<ParserImpl> parser(const std::string& str) {
-    auto file = std::make_unique<Source::File>("test.wgsl", str);
-    auto impl = std::make_unique<ParserImpl>(file.get());
-    files_.emplace_back(std::move(file));
-    return impl;
-  }
+    /// Retrieves the parser from the helper
+    /// @param str the string to parse
+    /// @returns the parser implementation
+    std::unique_ptr<ParserImpl> parser(const std::string& str) {
+        auto file = std::make_unique<Source::File>("test.wgsl", str);
+        auto impl = std::make_unique<ParserImpl>(file.get());
+        files_.emplace_back(std::move(file));
+        return impl;
+    }
 
- private:
-  std::vector<std::unique_ptr<Source::File>> files_;
+  private:
+    std::vector<std::unique_ptr<Source::File>> files_;
 };
 
 /// WGSL Parser test class with param
 template <typename T>
-class ParserImplTestWithParam : public testing::TestWithParam<T>,
-                                public ProgramBuilder {
- public:
-  /// Constructor
-  ParserImplTestWithParam() = default;
-  ~ParserImplTestWithParam() override = default;
+class ParserImplTestWithParam : public testing::TestWithParam<T>, public ProgramBuilder {
+  public:
+    /// Constructor
+    ParserImplTestWithParam() = default;
+    ~ParserImplTestWithParam() override = default;
 
-  /// Retrieves the parser from the helper
-  /// @param str the string to parse
-  /// @returns the parser implementation
-  std::unique_ptr<ParserImpl> parser(const std::string& str) {
-    auto file = std::make_unique<Source::File>("test.wgsl", str);
-    auto impl = std::make_unique<ParserImpl>(file.get());
-    files_.emplace_back(std::move(file));
-    return impl;
-  }
+    /// Retrieves the parser from the helper
+    /// @param str the string to parse
+    /// @returns the parser implementation
+    std::unique_ptr<ParserImpl> parser(const std::string& str) {
+        auto file = std::make_unique<Source::File>("test.wgsl", str);
+        auto impl = std::make_unique<ParserImpl>(file.get());
+        files_.emplace_back(std::move(file));
+        return impl;
+    }
 
- private:
-  std::vector<std::unique_ptr<Source::File>> files_;
+  private:
+    std::vector<std::unique_ptr<Source::File>> files_;
 };
 
 }  // namespace tint::reader::wgsl

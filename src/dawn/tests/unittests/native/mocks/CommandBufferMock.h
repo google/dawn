@@ -22,17 +22,17 @@
 
 namespace dawn::native {
 
-    class CommandBufferMock : public CommandBufferBase {
-      public:
-        explicit CommandBufferMock(DeviceBase* device) : CommandBufferBase(device) {
-            ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
-                this->CommandBufferBase::DestroyImpl();
-            });
-        }
-        ~CommandBufferMock() override = default;
+class CommandBufferMock : public CommandBufferBase {
+  public:
+    explicit CommandBufferMock(DeviceBase* device) : CommandBufferBase(device) {
+        ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
+            this->CommandBufferBase::DestroyImpl();
+        });
+    }
+    ~CommandBufferMock() override = default;
 
-        MOCK_METHOD(void, DestroyImpl, (), (override));
-    };
+    MOCK_METHOD(void, DestroyImpl, (), (override));
+};
 
 }  // namespace dawn::native
 

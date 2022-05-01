@@ -18,92 +18,92 @@
 
 namespace dawn::native::vulkan {
 
-    const char* VkResultAsString(::VkResult result) {
-        // Convert to a int32_t to silence and MSVC warning that the fake errors don't appear in
-        // the original VkResult enum.
-        int32_t code = static_cast<int32_t>(result);
+const char* VkResultAsString(::VkResult result) {
+    // Convert to a int32_t to silence and MSVC warning that the fake errors don't appear in
+    // the original VkResult enum.
+    int32_t code = static_cast<int32_t>(result);
 
-        switch (code) {
-            case VK_SUCCESS:
-                return "VK_SUCCESS";
-            case VK_NOT_READY:
-                return "VK_NOT_READY";
-            case VK_TIMEOUT:
-                return "VK_TIMEOUT";
-            case VK_EVENT_SET:
-                return "VK_EVENT_SET";
-            case VK_EVENT_RESET:
-                return "VK_EVENT_RESET";
-            case VK_INCOMPLETE:
-                return "VK_INCOMPLETE";
-            case VK_ERROR_OUT_OF_HOST_MEMORY:
-                return "VK_ERROR_OUT_OF_HOST_MEMORY";
-            case VK_ERROR_OUT_OF_DEVICE_MEMORY:
-                return "VK_ERROR_OUT_OF_DEVICE_MEMORY";
-            case VK_ERROR_INITIALIZATION_FAILED:
-                return "VK_ERROR_INITIALIZATION_FAILED";
-            case VK_ERROR_DEVICE_LOST:
-                return "VK_ERROR_DEVICE_LOST";
-            case VK_ERROR_MEMORY_MAP_FAILED:
-                return "VK_ERROR_MEMORY_MAP_FAILED";
-            case VK_ERROR_LAYER_NOT_PRESENT:
-                return "VK_ERROR_LAYER_NOT_PRESENT";
-            case VK_ERROR_EXTENSION_NOT_PRESENT:
-                return "VK_ERROR_EXTENSION_NOT_PRESENT";
-            case VK_ERROR_FEATURE_NOT_PRESENT:
-                return "VK_ERROR_FEATURE_NOT_PRESENT";
-            case VK_ERROR_INCOMPATIBLE_DRIVER:
-                return "VK_ERROR_INCOMPATIBLE_DRIVER";
-            case VK_ERROR_TOO_MANY_OBJECTS:
-                return "VK_ERROR_TOO_MANY_OBJECTS";
-            case VK_ERROR_FORMAT_NOT_SUPPORTED:
-                return "VK_ERROR_FORMAT_NOT_SUPPORTED";
-            case VK_ERROR_FRAGMENTED_POOL:
-                return "VK_ERROR_FRAGMENTED_POOL";
+    switch (code) {
+        case VK_SUCCESS:
+            return "VK_SUCCESS";
+        case VK_NOT_READY:
+            return "VK_NOT_READY";
+        case VK_TIMEOUT:
+            return "VK_TIMEOUT";
+        case VK_EVENT_SET:
+            return "VK_EVENT_SET";
+        case VK_EVENT_RESET:
+            return "VK_EVENT_RESET";
+        case VK_INCOMPLETE:
+            return "VK_INCOMPLETE";
+        case VK_ERROR_OUT_OF_HOST_MEMORY:
+            return "VK_ERROR_OUT_OF_HOST_MEMORY";
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+            return "VK_ERROR_OUT_OF_DEVICE_MEMORY";
+        case VK_ERROR_INITIALIZATION_FAILED:
+            return "VK_ERROR_INITIALIZATION_FAILED";
+        case VK_ERROR_DEVICE_LOST:
+            return "VK_ERROR_DEVICE_LOST";
+        case VK_ERROR_MEMORY_MAP_FAILED:
+            return "VK_ERROR_MEMORY_MAP_FAILED";
+        case VK_ERROR_LAYER_NOT_PRESENT:
+            return "VK_ERROR_LAYER_NOT_PRESENT";
+        case VK_ERROR_EXTENSION_NOT_PRESENT:
+            return "VK_ERROR_EXTENSION_NOT_PRESENT";
+        case VK_ERROR_FEATURE_NOT_PRESENT:
+            return "VK_ERROR_FEATURE_NOT_PRESENT";
+        case VK_ERROR_INCOMPATIBLE_DRIVER:
+            return "VK_ERROR_INCOMPATIBLE_DRIVER";
+        case VK_ERROR_TOO_MANY_OBJECTS:
+            return "VK_ERROR_TOO_MANY_OBJECTS";
+        case VK_ERROR_FORMAT_NOT_SUPPORTED:
+            return "VK_ERROR_FORMAT_NOT_SUPPORTED";
+        case VK_ERROR_FRAGMENTED_POOL:
+            return "VK_ERROR_FRAGMENTED_POOL";
 
-            case VK_ERROR_SURFACE_LOST_KHR:
-                return "VK_ERROR_SURFACE_LOST_KHR";
-            case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR:
-                return "VK_ERROR_NATIVE_WINDOW_IN_USE_KHR";
+        case VK_ERROR_SURFACE_LOST_KHR:
+            return "VK_ERROR_SURFACE_LOST_KHR";
+        case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR:
+            return "VK_ERROR_NATIVE_WINDOW_IN_USE_KHR";
 
-            case VK_FAKE_DEVICE_OOM_FOR_TESTING:
-                return "VK_FAKE_DEVICE_OOM_FOR_TESTING";
-            case VK_FAKE_ERROR_FOR_TESTING:
-                return "VK_FAKE_ERROR_FOR_TESTING";
-            default:
-                return "<Unknown VkResult>";
-        }
+        case VK_FAKE_DEVICE_OOM_FOR_TESTING:
+            return "VK_FAKE_DEVICE_OOM_FOR_TESTING";
+        case VK_FAKE_ERROR_FOR_TESTING:
+            return "VK_FAKE_ERROR_FOR_TESTING";
+        default:
+            return "<Unknown VkResult>";
+    }
+}
+
+MaybeError CheckVkSuccessImpl(VkResult result, const char* context) {
+    if (DAWN_LIKELY(result == VK_SUCCESS)) {
+        return {};
     }
 
-    MaybeError CheckVkSuccessImpl(VkResult result, const char* context) {
-        if (DAWN_LIKELY(result == VK_SUCCESS)) {
-            return {};
-        }
+    std::string message = std::string(context) + " failed with " + VkResultAsString(result);
 
-        std::string message = std::string(context) + " failed with " + VkResultAsString(result);
+    if (result == VK_ERROR_DEVICE_LOST) {
+        return DAWN_DEVICE_LOST_ERROR(message);
+    } else {
+        return DAWN_INTERNAL_ERROR(message);
+    }
+}
 
-        if (result == VK_ERROR_DEVICE_LOST) {
-            return DAWN_DEVICE_LOST_ERROR(message);
-        } else {
-            return DAWN_INTERNAL_ERROR(message);
-        }
+MaybeError CheckVkOOMThenSuccessImpl(VkResult result, const char* context) {
+    if (DAWN_LIKELY(result == VK_SUCCESS)) {
+        return {};
     }
 
-    MaybeError CheckVkOOMThenSuccessImpl(VkResult result, const char* context) {
-        if (DAWN_LIKELY(result == VK_SUCCESS)) {
-            return {};
-        }
+    std::string message = std::string(context) + " failed with " + VkResultAsString(result);
 
-        std::string message = std::string(context) + " failed with " + VkResultAsString(result);
-
-        if (result == VK_ERROR_OUT_OF_DEVICE_MEMORY || result == VK_ERROR_OUT_OF_HOST_MEMORY ||
-            result == VK_FAKE_DEVICE_OOM_FOR_TESTING) {
-            return DAWN_OUT_OF_MEMORY_ERROR(message);
-        } else if (result == VK_ERROR_DEVICE_LOST) {
-            return DAWN_DEVICE_LOST_ERROR(message);
-        } else {
-            return DAWN_INTERNAL_ERROR(message);
-        }
+    if (result == VK_ERROR_OUT_OF_DEVICE_MEMORY || result == VK_ERROR_OUT_OF_HOST_MEMORY ||
+        result == VK_FAKE_DEVICE_OOM_FOR_TESTING) {
+        return DAWN_OUT_OF_MEMORY_ERROR(message);
+    } else if (result == VK_ERROR_DEVICE_LOST) {
+        return DAWN_DEVICE_LOST_ERROR(message);
+    } else {
+        return DAWN_INTERNAL_ERROR(message);
     }
+}
 
 }  // namespace dawn::native::vulkan

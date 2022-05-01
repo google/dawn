@@ -23,29 +23,29 @@ namespace tint::ast {
 
 /// A named type (i.e. struct or alias)
 class TypeName final : public Castable<TypeName, Type> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param name the type name
-  TypeName(ProgramID pid, const Source& src, Symbol name);
-  /// Move constructor
-  TypeName(TypeName&&);
-  /// Destructor
-  ~TypeName() override;
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param name the type name
+    TypeName(ProgramID pid, const Source& src, Symbol name);
+    /// Move constructor
+    TypeName(TypeName&&);
+    /// Destructor
+    ~TypeName() override;
 
-  /// @param symbols the program's symbol table
-  /// @returns the name for this type that closely resembles how it would be
-  /// declared in WGSL.
-  std::string FriendlyName(const SymbolTable& symbols) const override;
+    /// @param symbols the program's symbol table
+    /// @returns the name for this type that closely resembles how it would be
+    /// declared in WGSL.
+    std::string FriendlyName(const SymbolTable& symbols) const override;
 
-  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned type
-  const TypeName* Clone(CloneContext* ctx) const override;
+    /// Clones this type and all transitive types using the `CloneContext` `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned type
+    const TypeName* Clone(CloneContext* ctx) const override;
 
-  /// The type name
-  Symbol name;
+    /// The type name
+    Symbol name;
 };
 
 }  // namespace tint::ast

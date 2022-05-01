@@ -19,20 +19,20 @@
 
 namespace dawn::native {
 
-    // EnumClassBitmmasks is a helper in the dawn:: namespace.
-    // Re-export it in the dawn_native namespace.
-    DAWN_IMPORT_BITMASK_OPERATORS
+// EnumClassBitmmasks is a helper in the dawn:: namespace.
+// Re-export it in the dawn_native namespace.
+DAWN_IMPORT_BITMASK_OPERATORS
 
-    // Specify this for usage with EnumMaskIterator
-    template <typename T>
-    struct EnumBitmaskSize {
-        static constexpr unsigned value = 0;
-    };
+// Specify this for usage with EnumMaskIterator
+template <typename T>
+struct EnumBitmaskSize {
+    static constexpr unsigned value = 0;
+};
 
-    template <typename T>
-    constexpr bool HasOneBit(T value) {
-        return HasZeroOrOneBits(value) && value != T(0);
-    }
+template <typename T>
+constexpr bool HasOneBit(T value) {
+    return HasZeroOrOneBits(value) && value != T(0);
+}
 
 }  // namespace dawn::native
 

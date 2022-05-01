@@ -26,31 +26,30 @@
 
 namespace utils {
 
-    class OpenGLBinding : public BackendBinding {
-      public:
-        OpenGLBinding(GLFWwindow* window, WGPUDevice device) : BackendBinding(window, device) {
+class OpenGLBinding : public BackendBinding {
+  public:
+    OpenGLBinding(GLFWwindow* window, WGPUDevice device) : BackendBinding(window, device) {}
+
+    uint64_t GetSwapChainImplementation() override {
+        if (mSwapchainImpl.userData == nullptr) {
+            mSwapchainImpl = dawn::native::opengl::CreateNativeSwapChainImpl(
+                mDevice,
+                [](void* userdata) { glfwSwapBuffers(static_cast<GLFWwindow*>(userdata)); },
+                mWindow);
         }
-
-        uint64_t GetSwapChainImplementation() override {
-            if (mSwapchainImpl.userData == nullptr) {
-                mSwapchainImpl = dawn::native::opengl::CreateNativeSwapChainImpl(
-                    mDevice,
-                    [](void* userdata) { glfwSwapBuffers(static_cast<GLFWwindow*>(userdata)); },
-                    mWindow);
-            }
-            return reinterpret_cast<uint64_t>(&mSwapchainImpl);
-        }
-
-        WGPUTextureFormat GetPreferredSwapChainTextureFormat() override {
-            return dawn::native::opengl::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
-        }
-
-      private:
-        DawnSwapChainImplementation mSwapchainImpl = {};
-    };
-
-    BackendBinding* CreateOpenGLBinding(GLFWwindow* window, WGPUDevice device) {
-        return new OpenGLBinding(window, device);
+        return reinterpret_cast<uint64_t>(&mSwapchainImpl);
     }
+
+    WGPUTextureFormat GetPreferredSwapChainTextureFormat() override {
+        return dawn::native::opengl::GetNativeSwapChainPreferredFormat(&mSwapchainImpl);
+    }
+
+  private:
+    DawnSwapChainImplementation mSwapchainImpl = {};
+};
+
+BackendBinding* CreateOpenGLBinding(GLFWwindow* window, WGPUDevice device) {
+    return new OpenGLBinding(window, device);
+}
 
 }  // namespace utils

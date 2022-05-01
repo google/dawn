@@ -23,10 +23,10 @@ namespace tint::ast {
 
 /// The different kinds of samplers
 enum class SamplerKind {
-  /// A regular sampler
-  kSampler,
-  /// A comparison sampler
-  kComparisonSampler
+    /// A regular sampler
+    kSampler,
+    /// A comparison sampler
+    kComparisonSampler
 };
 
 /// @param out the std::ostream to write to
@@ -36,31 +36,31 @@ std::ostream& operator<<(std::ostream& out, SamplerKind kind);
 
 /// A sampler type.
 class Sampler final : public Castable<Sampler, Type> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param kind the kind of sampler
-  Sampler(ProgramID pid, const Source& src, SamplerKind kind);
-  /// Move constructor
-  Sampler(Sampler&&);
-  ~Sampler() override;
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param kind the kind of sampler
+    Sampler(ProgramID pid, const Source& src, SamplerKind kind);
+    /// Move constructor
+    Sampler(Sampler&&);
+    ~Sampler() override;
 
-  /// @returns true if this is a comparison sampler
-  bool IsComparison() const { return kind == SamplerKind::kComparisonSampler; }
+    /// @returns true if this is a comparison sampler
+    bool IsComparison() const { return kind == SamplerKind::kComparisonSampler; }
 
-  /// @param symbols the program's symbol table
-  /// @returns the name for this type that closely resembles how it would be
-  /// declared in WGSL.
-  std::string FriendlyName(const SymbolTable& symbols) const override;
+    /// @param symbols the program's symbol table
+    /// @returns the name for this type that closely resembles how it would be
+    /// declared in WGSL.
+    std::string FriendlyName(const SymbolTable& symbols) const override;
 
-  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned type
-  const Sampler* Clone(CloneContext* ctx) const override;
+    /// Clones this type and all transitive types using the `CloneContext` `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned type
+    const Sampler* Clone(CloneContext* ctx) const override;
 
-  /// The sampler type
-  const SamplerKind kind;
+    /// The sampler type
+    const SamplerKind kind;
 };
 
 }  // namespace tint::ast

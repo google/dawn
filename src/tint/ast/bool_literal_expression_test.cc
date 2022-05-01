@@ -20,15 +20,15 @@ namespace {
 using BoolLiteralExpressionTest = TestHelper;
 
 TEST_F(BoolLiteralExpressionTest, True) {
-  auto* b = create<BoolLiteralExpression>(true);
-  ASSERT_TRUE(b->Is<BoolLiteralExpression>());
-  ASSERT_TRUE(b->value);
+    auto* b = create<BoolLiteralExpression>(true);
+    ASSERT_TRUE(b->Is<BoolLiteralExpression>());
+    ASSERT_TRUE(b->value);
 }
 
 TEST_F(BoolLiteralExpressionTest, False) {
-  auto* b = create<BoolLiteralExpression>(false);
-  ASSERT_TRUE(b->Is<BoolLiteralExpression>());
-  ASSERT_FALSE(b->value);
+    auto* b = create<BoolLiteralExpression>(false);
+    ASSERT_TRUE(b->Is<BoolLiteralExpression>());
+    ASSERT_FALSE(b->value);
 }
 
 }  // namespace

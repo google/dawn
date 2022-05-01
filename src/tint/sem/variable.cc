@@ -68,9 +68,7 @@ Parameter::Parameter(const ast::Variable* declaration,
                      ast::StorageClass storage_class,
                      ast::Access access,
                      const ParameterUsage usage /* = ParameterUsage::kNone */)
-    : Base(declaration, type, storage_class, access, Constant{}),
-      index_(index),
-      usage_(usage) {}
+    : Base(declaration, type, storage_class, access, Constant{}), index_(index), usage_(usage) {}
 
 Parameter::~Parameter() = default;
 
@@ -83,12 +81,12 @@ VariableUser::VariableUser(const ast::IdentifierExpression* declaration,
            variable->ConstantValue(),
            /* has_side_effects */ false),
       variable_(variable) {
-  auto* type = variable->Type();
-  if (type->Is<sem::Pointer>() && variable->Constructor()) {
-    source_variable_ = variable->Constructor()->SourceVariable();
-  } else {
-    source_variable_ = variable;
-  }
+    auto* type = variable->Type();
+    if (type->Is<sem::Pointer>() && variable->Constructor()) {
+        source_variable_ = variable->Constructor()->SourceVariable();
+    } else {
+        source_variable_ = variable;
+    }
 }
 
 }  // namespace tint::sem

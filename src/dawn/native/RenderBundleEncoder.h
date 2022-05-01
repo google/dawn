@@ -23,33 +23,32 @@
 
 namespace dawn::native {
 
-    MaybeError ValidateRenderBundleEncoderDescriptor(
-        const DeviceBase* device,
-        const RenderBundleEncoderDescriptor* descriptor);
+MaybeError ValidateRenderBundleEncoderDescriptor(const DeviceBase* device,
+                                                 const RenderBundleEncoderDescriptor* descriptor);
 
-    class RenderBundleEncoder final : public RenderEncoderBase {
-      public:
-        static Ref<RenderBundleEncoder> Create(DeviceBase* device,
-                                               const RenderBundleEncoderDescriptor* descriptor);
-        static RenderBundleEncoder* MakeError(DeviceBase* device);
+class RenderBundleEncoder final : public RenderEncoderBase {
+  public:
+    static Ref<RenderBundleEncoder> Create(DeviceBase* device,
+                                           const RenderBundleEncoderDescriptor* descriptor);
+    static RenderBundleEncoder* MakeError(DeviceBase* device);
 
-        ObjectType GetType() const override;
+    ObjectType GetType() const override;
 
-        RenderBundleBase* APIFinish(const RenderBundleDescriptor* descriptor);
+    RenderBundleBase* APIFinish(const RenderBundleDescriptor* descriptor);
 
-        CommandIterator AcquireCommands();
+    CommandIterator AcquireCommands();
 
-      private:
-        RenderBundleEncoder(DeviceBase* device, const RenderBundleEncoderDescriptor* descriptor);
-        RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag);
+  private:
+    RenderBundleEncoder(DeviceBase* device, const RenderBundleEncoderDescriptor* descriptor);
+    RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag);
 
-        void DestroyImpl() override;
+    void DestroyImpl() override;
 
-        ResultOrError<RenderBundleBase*> FinishImpl(const RenderBundleDescriptor* descriptor);
-        MaybeError ValidateFinish(const RenderPassResourceUsage& usages) const;
+    ResultOrError<RenderBundleBase*> FinishImpl(const RenderBundleDescriptor* descriptor);
+    MaybeError ValidateFinish(const RenderPassResourceUsage& usages) const;
 
-        EncodingContext mBundleEncodingContext;
-    };
+    EncodingContext mBundleEncodingContext;
+};
 
 }  // namespace dawn::native
 

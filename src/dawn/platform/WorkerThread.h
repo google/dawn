@@ -22,12 +22,12 @@
 
 namespace dawn::platform {
 
-    class AsyncWorkerThreadPool : public dawn::platform::WorkerTaskPool, public NonCopyable {
-      public:
-        std::unique_ptr<dawn::platform::WaitableEvent> PostWorkerTask(
-            dawn::platform::PostWorkerTaskCallback callback,
-            void* userdata) override;
-    };
+class AsyncWorkerThreadPool : public dawn::platform::WorkerTaskPool, public NonCopyable {
+  public:
+    std::unique_ptr<dawn::platform::WaitableEvent> PostWorkerTask(
+        dawn::platform::PostWorkerTaskCallback callback,
+        void* userdata) override;
+};
 
 }  // namespace dawn::platform
 

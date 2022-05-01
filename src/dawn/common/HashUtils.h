@@ -50,7 +50,7 @@ void HashCombine(size_t* hash, const T& value) {
 #elif defined(DAWN_PLATFORM_32_BIT)
     const size_t offset = 0x9e3779b9;
 #else
-#    error "Unsupported platform"
+#error "Unsupported platform"
 #endif
     *hash ^= Hash(value) + offset + (*hash << 6) + (*hash >> 2);
 }
@@ -89,13 +89,13 @@ size_t Hash(const std::bitset<N>& value) {
 #endif
 
 namespace std {
-    template <typename Index, size_t N>
-    struct hash<ityp::bitset<Index, N>> {
-      public:
-        size_t operator()(const ityp::bitset<Index, N>& value) const {
-            return Hash(static_cast<const std::bitset<N>&>(value));
-        }
-    };
+template <typename Index, size_t N>
+struct hash<ityp::bitset<Index, N>> {
+  public:
+    size_t operator()(const ityp::bitset<Index, N>& value) const {
+        return Hash(static_cast<const std::bitset<N>&>(value));
+    }
+};
 }  // namespace std
 
 #endif  // SRC_DAWN_COMMON_HASHUTILS_H_

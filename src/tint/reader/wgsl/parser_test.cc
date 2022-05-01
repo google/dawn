@@ -24,37 +24,37 @@ namespace {
 using ParserTest = testing::Test;
 
 TEST_F(ParserTest, Empty) {
-  Source::File file("test.wgsl", "");
-  auto program = Parse(&file);
-  auto errs = diag::Formatter().format(program.Diagnostics());
-  ASSERT_TRUE(program.IsValid()) << errs;
+    Source::File file("test.wgsl", "");
+    auto program = Parse(&file);
+    auto errs = diag::Formatter().format(program.Diagnostics());
+    ASSERT_TRUE(program.IsValid()) << errs;
 }
 
 TEST_F(ParserTest, Parses) {
-  Source::File file("test.wgsl", R"(
+    Source::File file("test.wgsl", R"(
 @stage(fragment)
 fn main() -> @location(0) vec4<f32> {
   return vec4<f32>(.4, .2, .3, 1.);
 }
 )");
-  auto program = Parse(&file);
-  auto errs = diag::Formatter().format(program.Diagnostics());
-  ASSERT_TRUE(program.IsValid()) << errs;
+    auto program = Parse(&file);
+    auto errs = diag::Formatter().format(program.Diagnostics());
+    ASSERT_TRUE(program.IsValid()) << errs;
 
-  ASSERT_EQ(1u, program.AST().Functions().size());
+    ASSERT_EQ(1u, program.AST().Functions().size());
 }
 
 TEST_F(ParserTest, HandlesError) {
-  Source::File file("test.wgsl", R"(
+    Source::File file("test.wgsl", R"(
 fn main() ->  {  // missing return type
   return;
 })");
 
-  auto program = Parse(&file);
-  auto errs = diag::Formatter().format(program.Diagnostics());
-  ASSERT_FALSE(program.IsValid()) << errs;
-  EXPECT_EQ(errs,
-            R"(test.wgsl:2:15 error: unable to determine function return type
+    auto program = Parse(&file);
+    auto errs = diag::Formatter().format(program.Diagnostics());
+    ASSERT_FALSE(program.IsValid()) << errs;
+    EXPECT_EQ(errs,
+              R"(test.wgsl:2:15 error: unable to determine function return type
 fn main() ->  {  // missing return type
               ^
 

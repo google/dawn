@@ -29,45 +29,45 @@ namespace tint::ast {
 
 /// An array type. If size is zero then it is a runtime array.
 class Array final : public Castable<Array, Type> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param subtype the type of the array elements
-  /// @param count the number of elements in the array. nullptr represents a
-  /// runtime-sized array.
-  /// @param attributes the array attributes
-  Array(ProgramID pid,
-        const Source& src,
-        const Type* subtype,
-        const Expression* count,
-        AttributeList attributes);
-  /// Move constructor
-  Array(Array&&);
-  ~Array() override;
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param subtype the type of the array elements
+    /// @param count the number of elements in the array. nullptr represents a
+    /// runtime-sized array.
+    /// @param attributes the array attributes
+    Array(ProgramID pid,
+          const Source& src,
+          const Type* subtype,
+          const Expression* count,
+          AttributeList attributes);
+    /// Move constructor
+    Array(Array&&);
+    ~Array() override;
 
-  /// @returns true if this is a runtime array.
-  /// i.e. the size is determined at runtime
-  bool IsRuntimeArray() const { return count == nullptr; }
+    /// @returns true if this is a runtime array.
+    /// i.e. the size is determined at runtime
+    bool IsRuntimeArray() const { return count == nullptr; }
 
-  /// @param symbols the program's symbol table
-  /// @returns the name for this type that closely resembles how it would be
-  /// declared in WGSL.
-  std::string FriendlyName(const SymbolTable& symbols) const override;
+    /// @param symbols the program's symbol table
+    /// @returns the name for this type that closely resembles how it would be
+    /// declared in WGSL.
+    std::string FriendlyName(const SymbolTable& symbols) const override;
 
-  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned type
-  const Array* Clone(CloneContext* ctx) const override;
+    /// Clones this type and all transitive types using the `CloneContext` `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned type
+    const Array* Clone(CloneContext* ctx) const override;
 
-  /// the array element type
-  const Type* const type;
+    /// the array element type
+    const Type* const type;
 
-  /// the array size in elements, or nullptr for a runtime array
-  const Expression* const count;
+    /// the array size in elements, or nullptr for a runtime array
+    const Expression* const count;
 
-  /// the array attributes
-  const AttributeList attributes;
+    /// the array attributes
+    const AttributeList attributes;
 };
 
 }  // namespace tint::ast

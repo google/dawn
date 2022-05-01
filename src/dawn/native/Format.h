@@ -44,129 +44,129 @@
 
 namespace dawn::native {
 
-    enum class Aspect : uint8_t;
-    class DeviceBase;
+enum class Aspect : uint8_t;
+class DeviceBase;
 
-    // This mirrors wgpu::TextureSampleType as a bitmask instead.
-    enum class SampleTypeBit : uint8_t {
-        None = 0x0,
-        Float = 0x1,
-        UnfilterableFloat = 0x2,
-        Depth = 0x4,
-        Sint = 0x8,
-        Uint = 0x10,
-    };
+// This mirrors wgpu::TextureSampleType as a bitmask instead.
+enum class SampleTypeBit : uint8_t {
+    None = 0x0,
+    Float = 0x1,
+    UnfilterableFloat = 0x2,
+    Depth = 0x4,
+    Sint = 0x8,
+    Uint = 0x10,
+};
 
-    // Converts an wgpu::TextureComponentType to its bitmask representation.
-    SampleTypeBit ToSampleTypeBit(wgpu::TextureComponentType type);
-    // Converts an wgpu::TextureSampleType to its bitmask representation.
-    SampleTypeBit SampleTypeToSampleTypeBit(wgpu::TextureSampleType sampleType);
+// Converts an wgpu::TextureComponentType to its bitmask representation.
+SampleTypeBit ToSampleTypeBit(wgpu::TextureComponentType type);
+// Converts an wgpu::TextureSampleType to its bitmask representation.
+SampleTypeBit SampleTypeToSampleTypeBit(wgpu::TextureSampleType sampleType);
 
-    struct TexelBlockInfo {
-        uint32_t byteSize;
-        uint32_t width;
-        uint32_t height;
-    };
+struct TexelBlockInfo {
+    uint32_t byteSize;
+    uint32_t width;
+    uint32_t height;
+};
 
-    struct AspectInfo {
-        TexelBlockInfo block;
-        // TODO(crbug.com/dawn/367): Replace TextureComponentType with TextureSampleType, or make it
-        // an internal Dawn enum.
-        wgpu::TextureComponentType baseType;
-        SampleTypeBit supportedSampleTypes;
-        wgpu::TextureFormat format = wgpu::TextureFormat::Undefined;
-    };
+struct AspectInfo {
+    TexelBlockInfo block;
+    // TODO(crbug.com/dawn/367): Replace TextureComponentType with TextureSampleType, or make it
+    // an internal Dawn enum.
+    wgpu::TextureComponentType baseType;
+    SampleTypeBit supportedSampleTypes;
+    wgpu::TextureFormat format = wgpu::TextureFormat::Undefined;
+};
 
-    // The number of formats Dawn knows about. Asserts in BuildFormatTable ensure that this is the
-    // exact number of known format.
-    static constexpr uint32_t kKnownFormatCount = 96;
+// The number of formats Dawn knows about. Asserts in BuildFormatTable ensure that this is the
+// exact number of known format.
+static constexpr uint32_t kKnownFormatCount = 96;
 
-    using FormatIndex = TypedInteger<struct FormatIndexT, uint32_t>;
+using FormatIndex = TypedInteger<struct FormatIndexT, uint32_t>;
 
-    struct Format;
-    using FormatTable = ityp::array<FormatIndex, Format, kKnownFormatCount>;
+struct Format;
+using FormatTable = ityp::array<FormatIndex, Format, kKnownFormatCount>;
 
-    // A wgpu::TextureFormat along with all the information about it necessary for validation.
-    struct Format {
-        wgpu::TextureFormat format;
+// A wgpu::TextureFormat along with all the information about it necessary for validation.
+struct Format {
+    wgpu::TextureFormat format;
 
-        // TODO(crbug.com/dawn/1332): These members could be stored in a Format capability matrix.
-        bool isRenderable;
-        bool isCompressed;
-        // A format can be known but not supported because it is part of a disabled extension.
-        bool isSupported;
-        bool supportsStorageUsage;
-        bool supportsMultisample;
-        bool supportsResolveTarget;
-        Aspect aspects;
-        // Only used for renderable color formats, number of color channels.
-        uint8_t componentCount;
+    // TODO(crbug.com/dawn/1332): These members could be stored in a Format capability matrix.
+    bool isRenderable;
+    bool isCompressed;
+    // A format can be known but not supported because it is part of a disabled extension.
+    bool isSupported;
+    bool supportsStorageUsage;
+    bool supportsMultisample;
+    bool supportsResolveTarget;
+    Aspect aspects;
+    // Only used for renderable color formats, number of color channels.
+    uint8_t componentCount;
 
-        bool IsColor() const;
-        bool HasDepth() const;
-        bool HasStencil() const;
-        bool HasDepthOrStencil() const;
+    bool IsColor() const;
+    bool HasDepth() const;
+    bool HasStencil() const;
+    bool HasDepthOrStencil() const;
 
-        // IsMultiPlanar() returns true if the format allows selecting a plane index. This is only
-        // allowed by multi-planar formats (ex. NV12).
-        bool IsMultiPlanar() const;
+    // IsMultiPlanar() returns true if the format allows selecting a plane index. This is only
+    // allowed by multi-planar formats (ex. NV12).
+    bool IsMultiPlanar() const;
 
-        const AspectInfo& GetAspectInfo(wgpu::TextureAspect aspect) const;
-        const AspectInfo& GetAspectInfo(Aspect aspect) const;
+    const AspectInfo& GetAspectInfo(wgpu::TextureAspect aspect) const;
+    const AspectInfo& GetAspectInfo(Aspect aspect) const;
 
-        // The index of the format in the list of all known formats: a unique number for each format
-        // in [0, kKnownFormatCount)
-        FormatIndex GetIndex() const;
+    // The index of the format in the list of all known formats: a unique number for each format
+    // in [0, kKnownFormatCount)
+    FormatIndex GetIndex() const;
 
-        // baseFormat represents the memory layout of the format.
-        // If two formats has the same baseFormat, they could copy to and be viewed as the other
-        // format. Currently two formats have the same baseFormat if they differ only in sRGB-ness.
-        wgpu::TextureFormat baseFormat;
+    // baseFormat represents the memory layout of the format.
+    // If two formats has the same baseFormat, they could copy to and be viewed as the other
+    // format. Currently two formats have the same baseFormat if they differ only in sRGB-ness.
+    wgpu::TextureFormat baseFormat;
 
-        // Returns true if the formats are copy compatible.
-        // Currently means they differ only in sRGB-ness.
-        bool CopyCompatibleWith(const Format& format) const;
+    // Returns true if the formats are copy compatible.
+    // Currently means they differ only in sRGB-ness.
+    bool CopyCompatibleWith(const Format& format) const;
 
-        // Returns true if the formats are texture view format compatible.
-        // Currently means they differ only in sRGB-ness.
-        bool ViewCompatibleWith(const Format& format) const;
+    // Returns true if the formats are texture view format compatible.
+    // Currently means they differ only in sRGB-ness.
+    bool ViewCompatibleWith(const Format& format) const;
 
-      private:
-        // Used to store the aspectInfo for one or more planes. For single plane "color" formats,
-        // only the first aspect info or aspectInfo[0] is valid. For depth-stencil, the first aspect
-        // info is depth and the second aspect info is stencil. For multi-planar formats,
-        // aspectInfo[i] is the ith plane.
-        std::array<AspectInfo, kMaxPlanesPerFormat> aspectInfo;
+  private:
+    // Used to store the aspectInfo for one or more planes. For single plane "color" formats,
+    // only the first aspect info or aspectInfo[0] is valid. For depth-stencil, the first aspect
+    // info is depth and the second aspect info is stencil. For multi-planar formats,
+    // aspectInfo[i] is the ith plane.
+    std::array<AspectInfo, kMaxPlanesPerFormat> aspectInfo;
 
-        friend FormatTable BuildFormatTable(const DeviceBase* device);
-    };
+    friend FormatTable BuildFormatTable(const DeviceBase* device);
+};
 
-    class FormatSet : public ityp::bitset<FormatIndex, kKnownFormatCount> {
-        using Base = ityp::bitset<FormatIndex, kKnownFormatCount>;
+class FormatSet : public ityp::bitset<FormatIndex, kKnownFormatCount> {
+    using Base = ityp::bitset<FormatIndex, kKnownFormatCount>;
 
-      public:
-        using Base::Base;
-        using Base::operator[];
+  public:
+    using Base::Base;
+    using Base::operator[];
 
-        bool operator[](const Format& format) const;
-        typename Base::reference operator[](const Format& format);
-    };
+    bool operator[](const Format& format) const;
+    typename Base::reference operator[](const Format& format);
+};
 
-    // Implementation details of the format table in the device.
+// Implementation details of the format table in the device.
 
-    // Returns the index of a format in the FormatTable.
-    FormatIndex ComputeFormatIndex(wgpu::TextureFormat format);
-    // Builds the format table with the extensions enabled on the device.
-    FormatTable BuildFormatTable(const DeviceBase* device);
+// Returns the index of a format in the FormatTable.
+FormatIndex ComputeFormatIndex(wgpu::TextureFormat format);
+// Builds the format table with the extensions enabled on the device.
+FormatTable BuildFormatTable(const DeviceBase* device);
 
 }  // namespace dawn::native
 
 namespace dawn {
 
-    template <>
-    struct IsDawnBitmask<dawn::native::SampleTypeBit> {
-        static constexpr bool enable = true;
-    };
+template <>
+struct IsDawnBitmask<dawn::native::SampleTypeBit> {
+    static constexpr bool enable = true;
+};
 
 }  // namespace dawn
 

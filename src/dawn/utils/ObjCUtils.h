@@ -21,8 +21,8 @@
 
 namespace utils {
 
-    // The returned CALayer is autoreleased.
-    void* CreatePlaceholderCALayer();
+// The returned CALayer is autoreleased.
+void* CreatePlaceholderCALayer();
 
 }  // namespace utils
 

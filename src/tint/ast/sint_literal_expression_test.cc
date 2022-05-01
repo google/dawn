@@ -20,9 +20,9 @@ namespace {
 using SintLiteralExpressionTest = TestHelper;
 
 TEST_F(SintLiteralExpressionTest, Value) {
-  auto* i = create<SintLiteralExpression>(47);
-  ASSERT_TRUE(i->Is<SintLiteralExpression>());
-  EXPECT_EQ(i->value, 47);
+    auto* i = create<SintLiteralExpression>(47);
+    ASSERT_TRUE(i->Is<SintLiteralExpression>());
+    EXPECT_EQ(i->value, 47);
 }
 
 }  // namespace

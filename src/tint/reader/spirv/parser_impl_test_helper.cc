@@ -20,60 +20,57 @@ namespace tint::reader::spirv::test {
 // Default to not dumping the SPIR-V assembly.
 bool ParserImplWrapperForTest::dump_successfully_converted_spirv_ = false;
 
-ParserImplWrapperForTest::ParserImplWrapperForTest(
-    const std::vector<uint32_t>& input)
+ParserImplWrapperForTest::ParserImplWrapperForTest(const std::vector<uint32_t>& input)
     : impl_(input) {}
 
 ParserImplWrapperForTest::~ParserImplWrapperForTest() {
-  if (dump_successfully_converted_spirv_ && !skip_dumping_spirv_ &&
-      !impl_.spv_binary().empty() && impl_.success()) {
-    std::string disassembly = Disassemble(impl_.spv_binary());
-    std::cout << "BEGIN ConvertedOk:\n"
-              << disassembly << "\nEND ConvertedOk" << std::endl;
-  }
+    if (dump_successfully_converted_spirv_ && !skip_dumping_spirv_ && !impl_.spv_binary().empty() &&
+        impl_.success()) {
+        std::string disassembly = Disassemble(impl_.spv_binary());
+        std::cout << "BEGIN ConvertedOk:\n" << disassembly << "\nEND ConvertedOk" << std::endl;
+    }
 }
 
 std::string ToString(const Program& program) {
-  writer::wgsl::GeneratorImpl writer(&program);
-  if (!writer.Generate()) {
-    return "WGSL writer error: " + writer.error();
-  }
-  return writer.result();
+    writer::wgsl::GeneratorImpl writer(&program);
+    if (!writer.Generate()) {
+        return "WGSL writer error: " + writer.error();
+    }
+    return writer.result();
 }
 
 std::string ToString(const Program& program, const ast::StatementList& stmts) {
-  writer::wgsl::GeneratorImpl writer(&program);
-  for (const auto* stmt : stmts) {
-    if (!writer.EmitStatement(stmt)) {
-      return "WGSL writer error: " + writer.error();
+    writer::wgsl::GeneratorImpl writer(&program);
+    for (const auto* stmt : stmts) {
+        if (!writer.EmitStatement(stmt)) {
+            return "WGSL writer error: " + writer.error();
+        }
     }
-  }
-  return writer.result();
+    return writer.result();
 }
 
 std::string ToString(const Program& program, const ast::Node* node) {
-  writer::wgsl::GeneratorImpl writer(&program);
-  if (auto* expr = node->As<ast::Expression>()) {
-    std::stringstream out;
-    if (!writer.EmitExpression(out, expr)) {
-      return "WGSL writer error: " + writer.error();
+    writer::wgsl::GeneratorImpl writer(&program);
+    if (auto* expr = node->As<ast::Expression>()) {
+        std::stringstream out;
+        if (!writer.EmitExpression(out, expr)) {
+            return "WGSL writer error: " + writer.error();
+        }
+        return out.str();
+    } else if (auto* stmt = node->As<ast::Statement>()) {
+        if (!writer.EmitStatement(stmt)) {
+            return "WGSL writer error: " + writer.error();
+        }
+    } else if (auto* ty = node->As<ast::Type>()) {
+        std::stringstream out;
+        if (!writer.EmitType(out, ty)) {
+            return "WGSL writer error: " + writer.error();
+        }
+        return out.str();
+    } else {
+        return "<unhandled AST node type " + std::string(node->TypeInfo().name) + ">";
     }
-    return out.str();
-  } else if (auto* stmt = node->As<ast::Statement>()) {
-    if (!writer.EmitStatement(stmt)) {
-      return "WGSL writer error: " + writer.error();
-    }
-  } else if (auto* ty = node->As<ast::Type>()) {
-    std::stringstream out;
-    if (!writer.EmitType(out, ty)) {
-      return "WGSL writer error: " + writer.error();
-    }
-    return out.str();
-  } else {
-    return "<unhandled AST node type " + std::string(node->TypeInfo().name) +
-           ">";
-  }
-  return writer.result();
+    return writer.result();
 }
 
 }  // namespace tint::reader::spirv::test

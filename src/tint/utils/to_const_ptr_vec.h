@@ -24,12 +24,12 @@ namespace tint::utils {
 /// @returns a vector of `const T*` with the content of `in`.
 template <typename T>
 std::vector<const T*> ToConstPtrVec(const std::vector<T*>& in) {
-  std::vector<const T*> out;
-  out.reserve(in.size());
-  for (auto* ptr : in) {
-    out.emplace_back(ptr);
-  }
-  return out;
+    std::vector<const T*> out;
+    out.reserve(in.size());
+    for (auto* ptr : in) {
+        out.emplace_back(ptr);
+    }
+    return out;
 }
 
 }  // namespace tint::utils

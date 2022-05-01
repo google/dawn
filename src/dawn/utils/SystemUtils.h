@@ -17,7 +17,7 @@
 
 namespace utils {
 
-    void USleep(unsigned int usecs);
+void USleep(unsigned int usecs);
 }
 
 #endif  // SRC_DAWN_UTILS_SYSTEMUTILS_H_

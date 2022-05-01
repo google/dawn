@@ -16,23 +16,22 @@
 
 namespace dawn::wire {
 
-    ChunkedCommandSerializer::ChunkedCommandSerializer(CommandSerializer* serializer)
-        : mSerializer(serializer), mMaxAllocationSize(serializer->GetMaximumAllocationSize()) {
-    }
+ChunkedCommandSerializer::ChunkedCommandSerializer(CommandSerializer* serializer)
+    : mSerializer(serializer), mMaxAllocationSize(serializer->GetMaximumAllocationSize()) {}
 
-    void ChunkedCommandSerializer::SerializeChunkedCommand(const char* allocatedBuffer,
-                                                           size_t remainingSize) {
-        while (remainingSize > 0) {
-            size_t chunkSize = std::min(remainingSize, mMaxAllocationSize);
-            void* dst = mSerializer->GetCmdSpace(chunkSize);
-            if (dst == nullptr) {
-                return;
-            }
-            memcpy(dst, allocatedBuffer, chunkSize);
-
-            allocatedBuffer += chunkSize;
-            remainingSize -= chunkSize;
+void ChunkedCommandSerializer::SerializeChunkedCommand(const char* allocatedBuffer,
+                                                       size_t remainingSize) {
+    while (remainingSize > 0) {
+        size_t chunkSize = std::min(remainingSize, mMaxAllocationSize);
+        void* dst = mSerializer->GetCmdSpace(chunkSize);
+        if (dst == nullptr) {
+            return;
         }
+        memcpy(dst, allocatedBuffer, chunkSize);
+
+        allocatedBuffer += chunkSize;
+        remainingSize -= chunkSize;
     }
+}
 
 }  // namespace dawn::wire

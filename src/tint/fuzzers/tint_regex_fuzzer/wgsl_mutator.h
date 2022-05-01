@@ -35,8 +35,7 @@ std::vector<size_t> FindDelimiterIndices(const std::string& delimiter,
 /// @param wgsl_code - the WGSL-like string where the identifiers will be found.
 /// @return a vector with the positions and the length of all the
 /// identifiers in wgsl_code.
-std::vector<std::pair<size_t, size_t>> GetIdentifiers(
-    const std::string& wgsl_code);
+std::vector<std::pair<size_t, size_t>> GetIdentifiers(const std::string& wgsl_code);
 
 /// A function that returns returns the starting position
 /// and the length of all the integer literals in a WGSL-like string.
@@ -44,8 +43,7 @@ std::vector<std::pair<size_t, size_t>> GetIdentifiers(
 /// will be found.
 /// @return a vector with the starting positions and the length
 /// of all the integer literals.
-std::vector<std::pair<size_t, size_t>> GetIntLiterals(
-    const std::string& wgsl_code);
+std::vector<std::pair<size_t, size_t>> GetIntLiterals(const std::string& wgsl_code);
 
 /// Finds a possible closing brace corresponding to the opening
 /// brace at position opening_bracket_pos.
@@ -53,8 +51,7 @@ std::vector<std::pair<size_t, size_t>> GetIntLiterals(
 /// @param wgsl_code - the WGSL-like string where the closing brace.
 /// @return the position of the closing bracket or 0 if there is no closing
 /// brace.
-size_t FindClosingBrace(size_t opening_bracket_pos,
-                        const std::string& wgsl_code);
+size_t FindClosingBrace(size_t opening_bracket_pos, const std::string& wgsl_code);
 
 /// Returns the starting_position of the bodies of the functions
 /// that follow the regular expression: fn.*?->.*?\\{, which searches for the
@@ -92,10 +89,7 @@ void DeleteInterval(size_t idx1, size_t reg_len, std::string& wgsl_code);
 /// @param reg1_len - length of the region.
 /// @param idx2 - the position where the region will be inserted.
 /// @param wgsl_code - the string where the swap will occur.
-void DuplicateInterval(size_t idx1,
-                       size_t reg1_len,
-                       size_t idx2,
-                       std::string& wgsl_code);
+void DuplicateInterval(size_t idx1, size_t reg1_len, size_t idx2, std::string& wgsl_code);
 
 /// Replaces a region of a WGSL-like string of length id2_len starting
 /// at position idx2 with a region of length id1_len starting at
@@ -159,16 +153,14 @@ bool DuplicateRandomInterval(const std::string& delimiter,
 /// @param wgsl_code - WGSL-like string where the replacement will occur.
 /// @param generator - the random number generator.
 /// @return true if a replacement happened or false otherwise.
-bool ReplaceRandomIdentifier(std::string& wgsl_code,
-                             RandomGenerator& generator);
+bool ReplaceRandomIdentifier(std::string& wgsl_code, RandomGenerator& generator);
 
 /// Replaces the value of a randomly-chosen integer with one of
 /// the values in the set {INT_MAX, INT_MIN, 0, -1}.
 /// @param wgsl_code - WGSL-like string where the replacement will occur.
 /// @param generator - the random number generator.
 /// @return true if a replacement happened or false otherwise.
-bool ReplaceRandomIntLiteral(std::string& wgsl_code,
-                             RandomGenerator& generator);
+bool ReplaceRandomIntLiteral(std::string& wgsl_code, RandomGenerator& generator);
 
 /// Inserts a return statement in a randomly chosen function of a
 /// WGSL-like string. The return value is a randomly-chosen identifier

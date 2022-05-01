@@ -30,23 +30,23 @@ namespace tint {
 
 /// BuiltinTable is a lookup table of all the WGSL builtin functions
 class BuiltinTable {
- public:
-  /// @param builder the program builder
-  /// @return a pointer to a newly created BuiltinTable
-  static std::unique_ptr<BuiltinTable> Create(ProgramBuilder& builder);
+  public:
+    /// @param builder the program builder
+    /// @return a pointer to a newly created BuiltinTable
+    static std::unique_ptr<BuiltinTable> Create(ProgramBuilder& builder);
 
-  /// Destructor
-  virtual ~BuiltinTable();
+    /// Destructor
+    virtual ~BuiltinTable();
 
-  /// Lookup looks for the builtin overload with the given signature, raising
-  /// an error diagnostic if the builtin was not found.
-  /// @param type the builtin type
-  /// @param args the argument types passed to the builtin function
-  /// @param source the source of the builtin call
-  /// @return the semantic builtin if found, otherwise nullptr
-  virtual const sem::Builtin* Lookup(sem::BuiltinType type,
-                                     const std::vector<const sem::Type*>& args,
-                                     const Source& source) = 0;
+    /// Lookup looks for the builtin overload with the given signature, raising
+    /// an error diagnostic if the builtin was not found.
+    /// @param type the builtin type
+    /// @param args the argument types passed to the builtin function
+    /// @param source the source of the builtin call
+    /// @return the semantic builtin if found, otherwise nullptr
+    virtual const sem::Builtin* Lookup(sem::BuiltinType type,
+                                       const std::vector<const sem::Type*>& args,
+                                       const Source& source) = 0;
 };
 
 }  // namespace tint

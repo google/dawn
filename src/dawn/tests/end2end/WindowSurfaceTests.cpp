@@ -25,17 +25,17 @@
 
 // Include windows.h before GLFW so GLFW's APIENTRY macro doesn't conflict with windows.h's.
 #if defined(DAWN_PLATFORM_WINDOWS)
-#    include "dawn/common/windows_with_undefs.h"
+#include "dawn/common/windows_with_undefs.h"
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
 
 #include "GLFW/glfw3.h"
 
 #if defined(DAWN_USE_X11)
-#    include "dawn/common/xlib_with_undefs.h"
+#include "dawn/common/xlib_with_undefs.h"
 #endif  // defined(DAWN_USE_X11)
 
 #if defined(DAWN_ENABLE_BACKEND_METAL)
-#    include "dawn/utils/ObjCUtils.h"
+#include "dawn/utils/ObjCUtils.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
 #include "GLFW/glfw3native.h"

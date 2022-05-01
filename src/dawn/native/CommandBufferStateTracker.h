@@ -26,62 +26,62 @@
 
 namespace dawn::native {
 
-    class CommandBufferStateTracker {
-      public:
-        // Non-state-modifying validation functions
-        MaybeError ValidateCanDispatch();
-        MaybeError ValidateCanDraw();
-        MaybeError ValidateCanDrawIndexed();
-        MaybeError ValidateBufferInRangeForVertexBuffer(uint32_t vertexCount, uint32_t firstVertex);
-        MaybeError ValidateBufferInRangeForInstanceBuffer(uint32_t instanceCount,
-                                                          uint32_t firstInstance);
-        MaybeError ValidateIndexBufferInRange(uint32_t indexCount, uint32_t firstIndex);
+class CommandBufferStateTracker {
+  public:
+    // Non-state-modifying validation functions
+    MaybeError ValidateCanDispatch();
+    MaybeError ValidateCanDraw();
+    MaybeError ValidateCanDrawIndexed();
+    MaybeError ValidateBufferInRangeForVertexBuffer(uint32_t vertexCount, uint32_t firstVertex);
+    MaybeError ValidateBufferInRangeForInstanceBuffer(uint32_t instanceCount,
+                                                      uint32_t firstInstance);
+    MaybeError ValidateIndexBufferInRange(uint32_t indexCount, uint32_t firstIndex);
 
-        // State-modifying methods
-        void SetComputePipeline(ComputePipelineBase* pipeline);
-        void SetRenderPipeline(RenderPipelineBase* pipeline);
-        void SetBindGroup(BindGroupIndex index,
-                          BindGroupBase* bindgroup,
-                          uint32_t dynamicOffsetCount,
-                          const uint32_t* dynamicOffsets);
-        void SetIndexBuffer(wgpu::IndexFormat format, uint64_t size);
-        void SetVertexBuffer(VertexBufferSlot slot, uint64_t size);
+    // State-modifying methods
+    void SetComputePipeline(ComputePipelineBase* pipeline);
+    void SetRenderPipeline(RenderPipelineBase* pipeline);
+    void SetBindGroup(BindGroupIndex index,
+                      BindGroupBase* bindgroup,
+                      uint32_t dynamicOffsetCount,
+                      const uint32_t* dynamicOffsets);
+    void SetIndexBuffer(wgpu::IndexFormat format, uint64_t size);
+    void SetVertexBuffer(VertexBufferSlot slot, uint64_t size);
 
-        static constexpr size_t kNumAspects = 4;
-        using ValidationAspects = std::bitset<kNumAspects>;
+    static constexpr size_t kNumAspects = 4;
+    using ValidationAspects = std::bitset<kNumAspects>;
 
-        BindGroupBase* GetBindGroup(BindGroupIndex index) const;
-        const std::vector<uint32_t>& GetDynamicOffsets(BindGroupIndex index) const;
-        bool HasPipeline() const;
-        RenderPipelineBase* GetRenderPipeline() const;
-        ComputePipelineBase* GetComputePipeline() const;
-        PipelineLayoutBase* GetPipelineLayout() const;
-        wgpu::IndexFormat GetIndexFormat() const;
-        uint64_t GetIndexBufferSize() const;
+    BindGroupBase* GetBindGroup(BindGroupIndex index) const;
+    const std::vector<uint32_t>& GetDynamicOffsets(BindGroupIndex index) const;
+    bool HasPipeline() const;
+    RenderPipelineBase* GetRenderPipeline() const;
+    ComputePipelineBase* GetComputePipeline() const;
+    PipelineLayoutBase* GetPipelineLayout() const;
+    wgpu::IndexFormat GetIndexFormat() const;
+    uint64_t GetIndexBufferSize() const;
 
-      private:
-        MaybeError ValidateOperation(ValidationAspects requiredAspects);
-        void RecomputeLazyAspects(ValidationAspects aspects);
-        MaybeError CheckMissingAspects(ValidationAspects aspects);
+  private:
+    MaybeError ValidateOperation(ValidationAspects requiredAspects);
+    void RecomputeLazyAspects(ValidationAspects aspects);
+    MaybeError CheckMissingAspects(ValidationAspects aspects);
 
-        void SetPipelineCommon(PipelineBase* pipeline);
+    void SetPipelineCommon(PipelineBase* pipeline);
 
-        ValidationAspects mAspects;
+    ValidationAspects mAspects;
 
-        ityp::array<BindGroupIndex, BindGroupBase*, kMaxBindGroups> mBindgroups = {};
-        ityp::array<BindGroupIndex, std::vector<uint32_t>, kMaxBindGroups> mDynamicOffsets = {};
-        ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsed;
-        bool mIndexBufferSet = false;
-        wgpu::IndexFormat mIndexFormat;
-        uint64_t mIndexBufferSize = 0;
+    ityp::array<BindGroupIndex, BindGroupBase*, kMaxBindGroups> mBindgroups = {};
+    ityp::array<BindGroupIndex, std::vector<uint32_t>, kMaxBindGroups> mDynamicOffsets = {};
+    ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsed;
+    bool mIndexBufferSet = false;
+    wgpu::IndexFormat mIndexFormat;
+    uint64_t mIndexBufferSize = 0;
 
-        ityp::array<VertexBufferSlot, uint64_t, kMaxVertexBuffers> mVertexBufferSizes = {};
+    ityp::array<VertexBufferSlot, uint64_t, kMaxVertexBuffers> mVertexBufferSizes = {};
 
-        PipelineLayoutBase* mLastPipelineLayout = nullptr;
-        PipelineBase* mLastPipeline = nullptr;
+    PipelineLayoutBase* mLastPipelineLayout = nullptr;
+    PipelineBase* mLastPipeline = nullptr;
 
-        const RequiredBufferSizes* mMinBufferSizes = nullptr;
-    };
+    const RequiredBufferSizes* mMinBufferSizes = nullptr;
+};
 
 }  // namespace dawn::native
 

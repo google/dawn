@@ -22,20 +22,20 @@ namespace {
 using AstDepthTextureTest = TestHelper;
 
 TEST_F(AstDepthTextureTest, IsTexture) {
-  Texture* ty = create<DepthTexture>(TextureDimension::kCube);
-  EXPECT_TRUE(ty->Is<DepthTexture>());
-  EXPECT_FALSE(ty->Is<SampledTexture>());
-  EXPECT_FALSE(ty->Is<StorageTexture>());
+    Texture* ty = create<DepthTexture>(TextureDimension::kCube);
+    EXPECT_TRUE(ty->Is<DepthTexture>());
+    EXPECT_FALSE(ty->Is<SampledTexture>());
+    EXPECT_FALSE(ty->Is<StorageTexture>());
 }
 
 TEST_F(AstDepthTextureTest, Dim) {
-  auto* d = create<DepthTexture>(TextureDimension::kCube);
-  EXPECT_EQ(d->dim, TextureDimension::kCube);
+    auto* d = create<DepthTexture>(TextureDimension::kCube);
+    EXPECT_EQ(d->dim, TextureDimension::kCube);
 }
 
 TEST_F(AstDepthTextureTest, FriendlyName) {
-  auto* d = create<DepthTexture>(TextureDimension::kCube);
-  EXPECT_EQ(d->FriendlyName(Symbols()), "texture_depth_cube");
+    auto* d = create<DepthTexture>(TextureDimension::kCube);
+    EXPECT_EQ(d->FriendlyName(Symbols()), "texture_depth_cube");
 }
 
 }  // namespace

@@ -24,55 +24,52 @@
 
 namespace wgpu::binding {
 
-    // AsyncRunner is used to poll a wgpu::Device with calls to Tick() while there are asynchronous
-    // tasks in flight.
-    class AsyncRunner {
-      public:
-        AsyncRunner(Napi::Env env, wgpu::Device device);
+// AsyncRunner is used to poll a wgpu::Device with calls to Tick() while there are asynchronous
+// tasks in flight.
+class AsyncRunner {
+  public:
+    AsyncRunner(Napi::Env env, wgpu::Device device);
 
-        // Begin() should be called when a new asynchronous task is started.
-        // If the number of executing asynchronous tasks transitions from 0 to 1, then a function
-        // will be scheduled on the main JavaScript thread to call wgpu::Device::Tick() whenever the
-        // thread is idle. This will be repeatedly called until the number of executing asynchronous
-        // tasks reaches 0 again.
-        void Begin();
+    // Begin() should be called when a new asynchronous task is started.
+    // If the number of executing asynchronous tasks transitions from 0 to 1, then a function
+    // will be scheduled on the main JavaScript thread to call wgpu::Device::Tick() whenever the
+    // thread is idle. This will be repeatedly called until the number of executing asynchronous
+    // tasks reaches 0 again.
+    void Begin();
 
-        // End() should be called once the asynchronous task has finished.
-        // Every call to Begin() should eventually result in a call to End().
-        void End();
+    // End() should be called once the asynchronous task has finished.
+    // Every call to Begin() should eventually result in a call to End().
+    void End();
 
-      private:
-        void QueueTick();
-        Napi::Env env_;
-        wgpu::Device const device_;
-        uint64_t count_ = 0;
-        bool tick_queued_ = false;
-    };
+  private:
+    void QueueTick();
+    Napi::Env env_;
+    wgpu::Device const device_;
+    uint64_t count_ = 0;
+    bool tick_queued_ = false;
+};
 
-    // AsyncTask is a RAII helper for calling AsyncRunner::Begin() on construction, and
-    // AsyncRunner::End() on destruction.
-    class AsyncTask {
-      public:
-        inline AsyncTask(AsyncTask&&) = default;
+// AsyncTask is a RAII helper for calling AsyncRunner::Begin() on construction, and
+// AsyncRunner::End() on destruction.
+class AsyncTask {
+  public:
+    inline AsyncTask(AsyncTask&&) = default;
 
-        // Constructor.
-        // Calls AsyncRunner::Begin()
-        explicit inline AsyncTask(std::shared_ptr<AsyncRunner> runner)
-            : runner_(std::move(runner)) {
-            runner_->Begin();
-        }
+    // Constructor.
+    // Calls AsyncRunner::Begin()
+    explicit inline AsyncTask(std::shared_ptr<AsyncRunner> runner) : runner_(std::move(runner)) {
+        runner_->Begin();
+    }
 
-        // Destructor.
-        // Calls AsyncRunner::End()
-        inline ~AsyncTask() {
-            runner_->End();
-        }
+    // Destructor.
+    // Calls AsyncRunner::End()
+    inline ~AsyncTask() { runner_->End(); }
 
-      private:
-        AsyncTask(const AsyncTask&) = delete;
-        AsyncTask& operator=(const AsyncTask&) = delete;
-        std::shared_ptr<AsyncRunner> runner_;
-    };
+  private:
+    AsyncTask(const AsyncTask&) = delete;
+    AsyncTask& operator=(const AsyncTask&) = delete;
+    std::shared_ptr<AsyncRunner> runner_;
+};
 
 }  // namespace wgpu::binding
 

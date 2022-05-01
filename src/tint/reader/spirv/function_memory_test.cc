@@ -26,7 +26,7 @@ using ::testing::HasSubstr;
 using SpvParserMemoryTest = SpvParserTest;
 
 std::string Preamble() {
-  return R"(
+    return R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Fragment %100 "main"
@@ -35,7 +35,7 @@ std::string Preamble() {
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_StoreBoolConst) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %ty = OpTypeBool
@@ -52,18 +52,18 @@ TEST_F(SpvParserMemoryTest, EmitStatement_StoreBoolConst) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(x_1 = true;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(x_1 = true;
 x_1 = false;
 x_1 = false;
 )"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_StoreUintConst) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %ty = OpTypeInt 32 0
@@ -78,17 +78,17 @@ TEST_F(SpvParserMemoryTest, EmitStatement_StoreUintConst) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody());
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(x_1 = 42u;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody());
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(x_1 = 42u;
 x_1 = 0u;
 )"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_StoreIntConst) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %ty = OpTypeInt 32 1
@@ -103,17 +103,17 @@ TEST_F(SpvParserMemoryTest, EmitStatement_StoreIntConst) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody());
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(x_1 = 42;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody());
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(x_1 = 42;
 x_1 = 0;
 )"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_StoreFloatConst) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %ty = OpTypeFloat 32
@@ -128,17 +128,17 @@ TEST_F(SpvParserMemoryTest, EmitStatement_StoreFloatConst) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody());
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(x_1 = 42.0;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody());
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(x_1 = 42.0;
 x_1 = 0.0;
 )"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_LoadBool) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %ty = OpTypeBool
@@ -153,16 +153,15 @@ TEST_F(SpvParserMemoryTest, EmitStatement_LoadBool) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_2 : bool = x_1;"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_2 : bool = x_1;"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_LoadScalar) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %ty = OpTypeInt 32 0
@@ -176,18 +175,17 @@ TEST_F(SpvParserMemoryTest, EmitStatement_LoadScalar) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr(R"(let x_2 : u32 = x_1;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(let x_2 : u32 = x_1;
 let x_3 : u32 = x_1;
 )"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_UseLoadedScalarTwice) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %ty = OpTypeInt 32 0
@@ -202,19 +200,18 @@ TEST_F(SpvParserMemoryTest, EmitStatement_UseLoadedScalarTwice) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr(R"(let x_2 : u32 = x_1;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(let x_2 : u32 = x_1;
 x_1 = x_2;
 x_1 = x_2;
 )"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_StoreToModuleScopeVar) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %ty = OpTypeInt 32 0
@@ -227,16 +224,15 @@ TEST_F(SpvParserMemoryTest, EmitStatement_StoreToModuleScopeVar) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody());
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("x_1 = 42u;"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody());
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("x_1 = 42u;"));
 }
 
-TEST_F(SpvParserMemoryTest,
-       EmitStatement_CopyMemory_Scalar_Function_To_Private) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+TEST_F(SpvParserMemoryTest, EmitStatement_CopyMemory_Scalar_Function_To_Private) {
+    auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %ty = OpTypeInt 32 0
@@ -251,17 +247,17 @@ TEST_F(SpvParserMemoryTest,
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody());
-  auto ast_body = fe.ast_body();
-  const auto got = test::ToString(p->program(), ast_body);
-  const auto* expected = "x_2 = x_1;";
-  EXPECT_THAT(got, HasSubstr(expected));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody());
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    const auto* expected = "x_2 = x_1;";
+    EXPECT_THAT(got, HasSubstr(expected));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_BaseIsNotPointer) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %10 = OpTypeInt 32 0
@@ -274,12 +270,12 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_BaseIsNotPointer) {
      OpStore %1 %val
      OpReturn
   )"));
-  EXPECT_FALSE(p->BuildAndParseInternalModuleExceptFunctions());
-  EXPECT_THAT(p->error(), Eq("variable with ID 20 has non-pointer type 10"));
+    EXPECT_FALSE(p->BuildAndParseInternalModuleExceptFunctions());
+    EXPECT_THAT(p->error(), Eq("variable with ID 20 has non-pointer type 10"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_VectorSwizzle) {
-  const std::string assembly = Preamble() + R"(
+    const std::string assembly = Preamble() + R"(
      OpName %1 "myvar"
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
@@ -297,18 +293,16 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_VectorSwizzle) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody());
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("myvar.z = 42u;"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody());
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("myvar.z = 42u;"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_VectorConstOutOfBounds) {
-  const std::string assembly = Preamble() + R"(
+    const std::string assembly = Preamble() + R"(
      OpName %1 "myvar"
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
@@ -326,17 +320,16 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_VectorConstOutOfBounds) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(), Eq("Access chain %2 index %42 value 42 is out of "
-                             "bounds for vector of 4 elements"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_FALSE(fe.EmitBody());
+    EXPECT_THAT(p->error(), Eq("Access chain %2 index %42 value 42 is out of "
+                               "bounds for vector of 4 elements"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_VectorNonConstIndex) {
-  const std::string assembly = Preamble() + R"(
+    const std::string assembly = Preamble() + R"(
      OpName %1 "myvar"
      OpName %13 "a_dynamic_index"
      %void = OpTypeVoid
@@ -359,21 +352,18 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_VectorNonConstIndex) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody());
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("myvar[a_dynamic_index] = 42u;"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody());
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("myvar[a_dynamic_index] = 42u;"));
 }
 
-TEST_F(SpvParserMemoryTest,
-       EmitStatement_AccessChain_VectorComponent_MultiUse) {
-  // WGSL does not support pointer-to-vector-component, so test that we sink
-  // these pointers into the point of use.
-  const std::string assembly = Preamble() + R"(
+TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_VectorComponent_MultiUse) {
+    // WGSL does not support pointer-to-vector-component, so test that we sink
+    // these pointers into the point of use.
+    const std::string assembly = Preamble() + R"(
      OpName %1 "myvar"
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
@@ -393,23 +383,21 @@ TEST_F(SpvParserMemoryTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  auto wgsl = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(wgsl, Not(HasSubstr("&")));
-  EXPECT_THAT(wgsl, HasSubstr(" = myvar.z;"));
-  EXPECT_THAT(wgsl, HasSubstr("myvar.z = "));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    auto wgsl = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(wgsl, Not(HasSubstr("&")));
+    EXPECT_THAT(wgsl, HasSubstr(" = myvar.z;"));
+    EXPECT_THAT(wgsl, HasSubstr("myvar.z = "));
 }
 
-TEST_F(SpvParserMemoryTest,
-       EmitStatement_AccessChain_VectorComponent_MultiUse_NonConstIndex) {
-  // WGSL does not support pointer-to-vector-component, so test that we sink
-  // these pointers into the point of use.
-  const std::string assembly = Preamble() + R"(
+TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_VectorComponent_MultiUse_NonConstIndex) {
+    // WGSL does not support pointer-to-vector-component, so test that we sink
+    // these pointers into the point of use.
+    const std::string assembly = Preamble() + R"(
      OpName %1 "myvar"
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
@@ -431,23 +419,21 @@ TEST_F(SpvParserMemoryTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  auto wgsl = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(wgsl, Not(HasSubstr("&")));
-  EXPECT_THAT(wgsl, HasSubstr(" = myvar[x_12];"));
-  EXPECT_THAT(wgsl, HasSubstr("myvar[x_12] = "));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    auto wgsl = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(wgsl, Not(HasSubstr("&")));
+    EXPECT_THAT(wgsl, HasSubstr(" = myvar[x_12];"));
+    EXPECT_THAT(wgsl, HasSubstr("myvar[x_12] = "));
 }
 
-TEST_F(SpvParserMemoryTest,
-       EmitStatement_AccessChain_VectorComponent_SinkThroughChain) {
-  // Test that we can sink a pointer-to-vector-component through a chain of
-  // instructions that propagate it.
-  const std::string assembly = Preamble() + R"(
+TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_VectorComponent_SinkThroughChain) {
+    // Test that we can sink a pointer-to-vector-component through a chain of
+    // instructions that propagate it.
+    const std::string assembly = Preamble() + R"(
      OpName %1 "myvar"
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
@@ -470,20 +456,19 @@ TEST_F(SpvParserMemoryTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  auto wgsl = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(wgsl, Not(HasSubstr("&")));
-  EXPECT_THAT(wgsl, HasSubstr(" = myvar.z;"));
-  EXPECT_THAT(wgsl, HasSubstr("myvar.z = "));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    auto wgsl = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(wgsl, Not(HasSubstr("&")));
+    EXPECT_THAT(wgsl, HasSubstr(" = myvar.z;"));
+    EXPECT_THAT(wgsl, HasSubstr("myvar.z = "));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Matrix) {
-  const std::string assembly = Preamble() + R"(
+    const std::string assembly = Preamble() + R"(
      OpName %1 "myvar"
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
@@ -505,18 +490,17 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Matrix) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody());
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("myvar[2u] = vec4<f32>(42.0, 42.0, 42.0, 42.0);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody());
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("myvar[2u] = vec4<f32>(42.0, 42.0, 42.0, 42.0);"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Array) {
-  const std::string assembly = Preamble() + R"(
+    const std::string assembly = Preamble() + R"(
      OpName %1 "myvar"
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
@@ -538,18 +522,17 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Array) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody());
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("myvar[2u] = vec4<f32>(42.0, 42.0, 42.0, 42.0);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody());
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("myvar[2u] = vec4<f32>(42.0, 42.0, 42.0, 42.0);"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Struct) {
-  const std::string assembly = Preamble() + R"(
+    const std::string assembly = Preamble() + R"(
      OpName %1 "myvar"
      OpMemberName %strct 1 "age"
      %void = OpTypeVoid
@@ -570,23 +553,20 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Struct) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody());
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("myvar.age = 42.0;"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody());
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("myvar.age = 42.0;"));
 }
 
-TEST_F(SpvParserMemoryTest,
-       EmitStatement_AccessChain_Struct_DifferOnlyMemberName) {
-  // The spirv-opt internal representation will map both structs to the
-  // same canonicalized type, because it doesn't care about member names.
-  // But we care about member names when producing a member-access expression.
-  // crbug.com/tint/213
-  const std::string assembly = Preamble() + R"(
+TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Struct_DifferOnlyMemberName) {
+    // The spirv-opt internal representation will map both structs to the
+    // same canonicalized type, because it doesn't care about member names.
+    // But we care about member names when producing a member-access expression.
+    // crbug.com/tint/213
+    const std::string assembly = Preamble() + R"(
      OpName %1 "myvar"
      OpName %10 "myvar2"
      OpMemberName %strct 1 "age"
@@ -615,20 +595,18 @@ TEST_F(SpvParserMemoryTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody());
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr(R"(myvar.age = 42.0;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody());
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(myvar.age = 42.0;
 myvar2.ancientness = 420.0;
 )"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_StructNonConstIndex) {
-  const std::string assembly = Preamble() + R"(
+    const std::string assembly = Preamble() + R"(
      OpName %1 "myvar"
      OpMemberName %55 1 "age"
      %void = OpTypeVoid
@@ -652,17 +630,16 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_StructNonConstIndex) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(), Eq("Access chain %2 index %10 is a non-constant "
-                             "index into a structure %55"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_FALSE(fe.EmitBody());
+    EXPECT_THAT(p->error(), Eq("Access chain %2 index %10 is a non-constant "
+                               "index into a structure %55"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_StructConstOutOfBounds) {
-  const std::string assembly = Preamble() + R"(
+    const std::string assembly = Preamble() + R"(
      OpName %1 "myvar"
      OpMemberName %55 1 "age"
      %void = OpTypeVoid
@@ -683,17 +660,16 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_StructConstOutOfBounds) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(), Eq("Access chain %2 index value 99 is out of bounds "
-                             "for structure %55 having 2 members"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_FALSE(fe.EmitBody());
+    EXPECT_THAT(p->error(), Eq("Access chain %2 index value 99 is out of bounds "
+                               "for structure %55 having 2 members"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Struct_RuntimeArray) {
-  const std::string assembly = Preamble() + R"(
+    const std::string assembly = Preamble() + R"(
      OpName %1 "myvar"
      OpMemberName %strct 1 "age"
 
@@ -724,18 +700,16 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Struct_RuntimeArray) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody());
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("myvar.age[2u] = 42.0;"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody());
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("myvar.age[2u] = 42.0;"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Compound_Matrix_Vector) {
-  const std::string assembly = Preamble() + R"(
+    const std::string assembly = Preamble() + R"(
      OpName %1 "myvar"
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
@@ -757,18 +731,16 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Compound_Matrix_Vector) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody());
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("myvar[2u].w = 42.0;"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody());
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("myvar[2u].w = 42.0;"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_InvalidPointeeType) {
-  const std::string assembly = Preamble() + R"(
+    const std::string assembly = Preamble() + R"(
      OpName %1 "myvar"
      %55 = OpTypeVoid
      %voidfn = OpTypeFunction %55
@@ -785,20 +757,18 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_InvalidPointeeType) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(),
-              HasSubstr("Access chain with unknown or invalid pointee type "
-                        "%60: %60 = OpTypePointer Private %55"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_FALSE(fe.EmitBody());
+    EXPECT_THAT(p->error(), HasSubstr("Access chain with unknown or invalid pointee type "
+                                      "%60: %60 = OpTypePointer Private %55"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_DereferenceBase) {
-  // The base operand to OpAccessChain may have to be dereferenced first.
-  // crbug.com/tint/737
-  const std::string assembly = Preamble() + R"(
+    // The base operand to OpAccessChain may have to be dereferenced first.
+    // crbug.com/tint/737
+    const std::string assembly = Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
 
@@ -825,10 +795,10 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_DereferenceBase) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule());
-  const auto got = test::ToString(p->program());
-  const std::string expected = R"(fn x_200(x_1 : ptr<private, vec2<u32>>) {
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule());
+    const auto got = test::ToString(p->program());
+    const std::string expected = R"(fn x_200(x_1 : ptr<private, vec2<u32>>) {
   let x_3 : u32 = (*(x_1)).x;
   return;
 }
@@ -842,16 +812,15 @@ fn main() {
   main_1();
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
-TEST_F(SpvParserMemoryTest,
-       EmitStatement_AccessChain_InferFunctionStorageClass) {
-  // An access chain can have no indices. When the base is a Function variable,
-  // the reference type has no explicit storage class in the AST representation.
-  // But the pointer type for the let declaration must have an explicit
-  // 'function' storage class. From crbug.com/tint/807
-  const std::string assembly = R"(
+TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_InferFunctionStorageClass) {
+    // An access chain can have no indices. When the base is a Function variable,
+    // the reference type has no explicit storage class in the AST representation.
+    // But the pointer type for the let declaration must have an explicit
+    // 'function' storage class. From crbug.com/tint/807
+    const std::string assembly = R"(
 OpCapability Shader
 OpMemoryModel Logical Simple
 OpEntryPoint Fragment %main "main"
@@ -869,10 +838,10 @@ OpExecutionMode %main OriginUpperLeft
           OpReturn
           OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly;
-  const auto got = test::ToString(p->program());
-  const std::string expected = R"(fn main_1() {
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly;
+    const auto got = test::ToString(p->program());
+    const std::string expected = R"(fn main_1() {
   var x_1 : u32;
   let x_2 : ptr<function, u32> = &(x_1);
   return;
@@ -883,11 +852,11 @@ fn main() {
   main_1();
 }
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
 std::string OldStorageBufferPreamble() {
-  return Preamble() + R"(
+    return Preamble() + R"(
      OpName %myvar "myvar"
 
      OpDecorate %myvar DescriptorSet 0
@@ -915,21 +884,20 @@ std::string OldStorageBufferPreamble() {
 }
 
 TEST_F(SpvParserMemoryTest, RemapStorageBuffer_TypesAndVarDeclarations) {
-  // Enusure we get the right module-scope declaration.  This tests translation
-  // of the structure type, arrays of the structure, pointers to them, and
-  // OpVariable of these.
-  const auto assembly = OldStorageBufferPreamble() + R"(
+    // Enusure we get the right module-scope declaration.  This tests translation
+    // of the structure type, arrays of the structure, pointers to them, and
+    // OpVariable of these.
+    const auto assembly = OldStorageBufferPreamble() + R"(
   ; The preamble declared %100 to be an entry point, so supply it.
   %100 = OpFunction %void None %voidfn
   %entry = OpLabel
   OpReturn
   OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  const auto module_str = test::ToString(p->program());
-  EXPECT_THAT(module_str, HasSubstr(R"(type RTArr = @stride(4) array<u32>;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr(R"(type RTArr = @stride(4) array<u32>;
 
 struct S {
   field0 : u32,
@@ -941,7 +909,7 @@ struct S {
 }
 
 TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughAccessChain_NonCascaded) {
-  const auto assembly = OldStorageBufferPreamble() + R"(
+    const auto assembly = OldStorageBufferPreamble() + R"(
   %100 = OpFunction %void None %voidfn
   %entry = OpLabel
 
@@ -956,21 +924,20 @@ TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughAccessChain_NonCascaded) {
   OpReturn
   OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto got = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(got, HasSubstr(R"(myvar.field0 = 0u;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(got, HasSubstr(R"(myvar.field0 = 0u;
 myvar.field1[1u] = 0u;
 )"));
 }
 
-TEST_F(SpvParserMemoryTest,
-       RemapStorageBuffer_ThroughAccessChain_NonCascaded_InBoundsAccessChain) {
-  // Like the previous test, but using OpInBoundsAccessChain.
-  const auto assembly = OldStorageBufferPreamble() + R"(
+TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughAccessChain_NonCascaded_InBoundsAccessChain) {
+    // Like the previous test, but using OpInBoundsAccessChain.
+    const auto assembly = OldStorageBufferPreamble() + R"(
   %100 = OpFunction %void None %voidfn
   %entry = OpLabel
 
@@ -985,20 +952,20 @@ TEST_F(SpvParserMemoryTest,
   OpReturn
   OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto got = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(got, HasSubstr(R"(myvar.field0 = 0u;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(got, HasSubstr(R"(myvar.field0 = 0u;
 myvar.field1[1u] = 0u;
 )")) << got
      << p->error();
 }
 
 TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughAccessChain_Cascaded) {
-  const auto assembly = OldStorageBufferPreamble() + R"(
+    const auto assembly = OldStorageBufferPreamble() + R"(
   %ptr_rtarr = OpTypePointer Uniform %arr
   %100 = OpFunction %void None %voidfn
   %entry = OpLabel
@@ -1012,23 +979,21 @@ TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughAccessChain_Cascaded) {
   OpReturn
   OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("myvar.field1[1u] = 0u;"))
-      << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("myvar.field1[1u] = 0u;"))
+        << p->error();
 }
 
-TEST_F(SpvParserMemoryTest,
-       RemapStorageBuffer_ThroughCopyObject_WithoutHoisting) {
-  // Generates a const declaration directly.
-  // We have to do a bunch of storage class tracking for locally
-  // defined values in order to get the right pointer-to-storage-buffer
-  // value type for the const declration.
-  const auto assembly = OldStorageBufferPreamble() + R"(
+TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughCopyObject_WithoutHoisting) {
+    // Generates a const declaration directly.
+    // We have to do a bunch of storage class tracking for locally
+    // defined values in order to get the right pointer-to-storage-buffer
+    // value type for the const declration.
+    const auto assembly = OldStorageBufferPreamble() + R"(
   %100 = OpFunction %void None %voidfn
   %entry = OpLabel
 
@@ -1039,28 +1004,27 @@ TEST_F(SpvParserMemoryTest,
   OpReturn
   OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr(R"(let x_2 : ptr<storage, u32> = &(myvar.field1[1u]);
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr(R"(let x_2 : ptr<storage, u32> = &(myvar.field1[1u]);
 *(x_2) = 0u;
 )")) << p->error();
 
-  p->SkipDumpingPending(
-      "crbug.com/tint/1041 track access mode in spirv-reader parser type");
+    p->SkipDumpingPending("crbug.com/tint/1041 track access mode in spirv-reader parser type");
 }
 
 TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughCopyObject_WithHoisting) {
-  // TODO(dneto): Hoisting non-storable values (pointers) is not yet supported.
-  // It's debatable whether this test should run at all.
-  // crbug.com/tint/98
+    // TODO(dneto): Hoisting non-storable values (pointers) is not yet supported.
+    // It's debatable whether this test should run at all.
+    // crbug.com/tint/98
 
-  // Like the previous test, but the declaration for the copy-object
-  // has its declaration hoisted.
-  const auto assembly = OldStorageBufferPreamble() + R"(
+    // Like the previous test, but the declaration for the copy-object
+    // has its declaration hoisted.
+    const auto assembly = OldStorageBufferPreamble() + R"(
   %bool = OpTypeBool
   %cond = OpConstantTrue %bool
 
@@ -1085,13 +1049,13 @@ TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughCopyObject_WithHoisting) {
 
   OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_EQ(test::ToString(p->program(), ast_body),
-            R"(var x_2 : ptr<storage, u32>;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_EQ(test::ToString(p->program(), ast_body),
+              R"(var x_2 : ptr<storage, u32>;
 if (true) {
   x_2 = &(myvar.field1[1u]);
 } else {
@@ -1100,19 +1064,18 @@ if (true) {
 x_2 = 0u;
 return;
 )") << p->error();
-  p->SkipDumpingPending("crbug.com/tint/98");
+    p->SkipDumpingPending("crbug.com/tint/98");
 }
 
 TEST_F(SpvParserMemoryTest, DISABLED_RemapStorageBuffer_ThroughFunctionCall) {
-  // WGSL does not support pointer-to-storage-buffer as function parameter
+    // WGSL does not support pointer-to-storage-buffer as function parameter
 }
-TEST_F(SpvParserMemoryTest,
-       DISABLED_RemapStorageBuffer_ThroughFunctionParameter) {
-  // WGSL does not support pointer-to-storage-buffer as function parameter
+TEST_F(SpvParserMemoryTest, DISABLED_RemapStorageBuffer_ThroughFunctionParameter) {
+    // WGSL does not support pointer-to-storage-buffer as function parameter
 }
 
 std::string RuntimeArrayPreamble() {
-  return R"(
+    return R"(
      OpCapability Shader
      OpMemoryModel Logical Simple
      OpEntryPoint Fragment %100 "main"
@@ -1147,7 +1110,7 @@ std::string RuntimeArrayPreamble() {
 }
 
 TEST_F(SpvParserMemoryTest, ArrayLength_FromVar) {
-  const auto assembly = RuntimeArrayPreamble() + R"(
+    const auto assembly = RuntimeArrayPreamble() + R"(
 
   %100 = OpFunction %void None %voidfn
 
@@ -1156,19 +1119,17 @@ TEST_F(SpvParserMemoryTest, ArrayLength_FromVar) {
   OpReturn
   OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body_str = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body_str,
-              HasSubstr("let x_1 : u32 = arrayLength(&(myvar.rtarr));"))
-      << body_str;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body_str = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body_str, HasSubstr("let x_1 : u32 = arrayLength(&(myvar.rtarr));")) << body_str;
 }
 
 TEST_F(SpvParserMemoryTest, ArrayLength_FromCopyObject) {
-  const auto assembly = RuntimeArrayPreamble() + R"(
+    const auto assembly = RuntimeArrayPreamble() + R"(
 
   %100 = OpFunction %void None %voidfn
 
@@ -1178,22 +1139,21 @@ TEST_F(SpvParserMemoryTest, ArrayLength_FromCopyObject) {
   OpReturn
   OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body_str = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body_str, HasSubstr(R"(let x_2 : ptr<storage, S> = &(myvar);
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body_str = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body_str, HasSubstr(R"(let x_2 : ptr<storage, S> = &(myvar);
 let x_1 : u32 = arrayLength(&((*(x_2)).rtarr));
 )")) << body_str;
 
-  p->SkipDumpingPending(
-      "crbug.com/tint/1041 track access mode in spirv-reader parser type");
+    p->SkipDumpingPending("crbug.com/tint/1041 track access mode in spirv-reader parser type");
 }
 
 TEST_F(SpvParserMemoryTest, ArrayLength_FromAccessChain) {
-  const auto assembly = RuntimeArrayPreamble() + R"(
+    const auto assembly = RuntimeArrayPreamble() + R"(
 
   %100 = OpFunction %void None %voidfn
 
@@ -1203,19 +1163,17 @@ TEST_F(SpvParserMemoryTest, ArrayLength_FromAccessChain) {
   OpReturn
   OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body_str = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body_str,
-              HasSubstr("let x_1 : u32 = arrayLength(&(myvar.rtarr));"))
-      << body_str;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body_str = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body_str, HasSubstr("let x_1 : u32 = arrayLength(&(myvar.rtarr));")) << body_str;
 }
 
 std::string InvalidPointerPreamble() {
-  return R"(
+    return R"(
 OpCapability Shader
 OpMemoryModel Logical Simple
 OpEntryPoint Fragment %main "main"
@@ -1230,7 +1188,7 @@ OpExecutionMode %main OriginUpperLeft
 }
 
 TEST_F(SpvParserMemoryTest, InvalidPointer_Undef_ModuleScope_IsError) {
-  const std::string assembly = InvalidPointerPreamble() + R"(
+    const std::string assembly = InvalidPointerPreamble() + R"(
  %ptr = OpUndef %ptr_ty
 
   %main = OpFunction %void None %voidfn
@@ -1245,13 +1203,13 @@ TEST_F(SpvParserMemoryTest, InvalidPointer_Undef_ModuleScope_IsError) {
           OpReturn
           OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_FALSE(p->BuildAndParseInternalModule()) << assembly;
-  EXPECT_EQ(p->error(), "undef pointer is not valid: %9 = OpUndef %6");
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_FALSE(p->BuildAndParseInternalModule()) << assembly;
+    EXPECT_EQ(p->error(), "undef pointer is not valid: %9 = OpUndef %6");
 }
 
 TEST_F(SpvParserMemoryTest, InvalidPointer_Undef_FunctionScope_IsError) {
-  const std::string assembly = InvalidPointerPreamble() + R"(
+    const std::string assembly = InvalidPointerPreamble() + R"(
 
   %main = OpFunction %void None %voidfn
  %entry = OpLabel
@@ -1259,15 +1217,15 @@ TEST_F(SpvParserMemoryTest, InvalidPointer_Undef_FunctionScope_IsError) {
           OpReturn
           OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_FALSE(p->BuildAndParseInternalModule()) << assembly;
-  EXPECT_EQ(p->error(), "undef pointer is not valid: %7 = OpUndef %3");
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_FALSE(p->BuildAndParseInternalModule()) << assembly;
+    EXPECT_EQ(p->error(), "undef pointer is not valid: %7 = OpUndef %3");
 }
 
 TEST_F(SpvParserMemoryTest, InvalidPointer_ConstantNull_IsError) {
-  // OpConstantNull on logical pointer requires variable-pointers, which
-  // is not (yet) supported by WGSL features.
-  const std::string assembly = InvalidPointerPreamble() + R"(
+    // OpConstantNull on logical pointer requires variable-pointers, which
+    // is not (yet) supported by WGSL features.
+    const std::string assembly = InvalidPointerPreamble() + R"(
  %ptr = OpConstantNull %ptr_ty
 
   %main = OpFunction %void None %voidfn
@@ -1282,9 +1240,9 @@ TEST_F(SpvParserMemoryTest, InvalidPointer_ConstantNull_IsError) {
           OpReturn
           OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_FALSE(p->BuildAndParseInternalModule());
-  EXPECT_EQ(p->error(), "null pointer is not valid: %9 = OpConstantNull %6");
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_FALSE(p->BuildAndParseInternalModule());
+    EXPECT_EQ(p->error(), "null pointer is not valid: %9 = OpConstantNull %6");
 }
 
 }  // namespace

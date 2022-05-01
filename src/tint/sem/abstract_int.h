@@ -24,24 +24,24 @@ namespace tint::sem {
 /// An abstract-int type.
 /// @see https://www.w3.org/TR/WGSL/#abstractint
 class AbstractInt final : public Castable<AbstractInt, AbstractNumeric> {
- public:
-  /// Constructor
-  AbstractInt();
+  public:
+    /// Constructor
+    AbstractInt();
 
-  /// Move constructor
-  AbstractInt(AbstractInt&&);
-  ~AbstractInt() override;
+    /// Move constructor
+    AbstractInt(AbstractInt&&);
+    ~AbstractInt() override;
 
-  /// @returns a hash of the type.
-  size_t Hash() const override;
+    /// @returns a hash of the type.
+    size_t Hash() const override;
 
-  /// @param other the other type to compare against
-  /// @returns true if the this type is equal to the given type
-  bool Equals(const Type& other) const override;
+    /// @param other the other type to compare against
+    /// @returns true if the this type is equal to the given type
+    bool Equals(const Type& other) const override;
 
-  /// @param symbols the program's symbol table
-  /// @returns the name for this type when printed in diagnostics.
-  std::string FriendlyName(const SymbolTable& symbols) const override;
+    /// @param symbols the program's symbol table
+    /// @returns the name for this type when printed in diagnostics.
+    std::string FriendlyName(const SymbolTable& symbols) const override;
 };
 
 }  // namespace tint::sem

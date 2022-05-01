@@ -41,302 +41,297 @@
 
 namespace dawn::native::null {
 
-    class Adapter;
-    class BindGroup;
-    class BindGroupLayout;
-    class Buffer;
-    class CommandBuffer;
-    class ComputePipeline;
-    class Device;
-    using PipelineLayout = PipelineLayoutBase;
-    class QuerySet;
-    class Queue;
-    class RenderPipeline;
-    using Sampler = SamplerBase;
-    class ShaderModule;
-    class SwapChain;
-    using Texture = TextureBase;
-    using TextureView = TextureViewBase;
+class Adapter;
+class BindGroup;
+class BindGroupLayout;
+class Buffer;
+class CommandBuffer;
+class ComputePipeline;
+class Device;
+using PipelineLayout = PipelineLayoutBase;
+class QuerySet;
+class Queue;
+class RenderPipeline;
+using Sampler = SamplerBase;
+class ShaderModule;
+class SwapChain;
+using Texture = TextureBase;
+using TextureView = TextureViewBase;
 
-    struct NullBackendTraits {
-        using AdapterType = Adapter;
-        using BindGroupType = BindGroup;
-        using BindGroupLayoutType = BindGroupLayout;
-        using BufferType = Buffer;
-        using CommandBufferType = CommandBuffer;
-        using ComputePipelineType = ComputePipeline;
-        using DeviceType = Device;
-        using PipelineLayoutType = PipelineLayout;
-        using QuerySetType = QuerySet;
-        using QueueType = Queue;
-        using RenderPipelineType = RenderPipeline;
-        using SamplerType = Sampler;
-        using ShaderModuleType = ShaderModule;
-        using SwapChainType = SwapChain;
-        using TextureType = Texture;
-        using TextureViewType = TextureView;
-    };
+struct NullBackendTraits {
+    using AdapterType = Adapter;
+    using BindGroupType = BindGroup;
+    using BindGroupLayoutType = BindGroupLayout;
+    using BufferType = Buffer;
+    using CommandBufferType = CommandBuffer;
+    using ComputePipelineType = ComputePipeline;
+    using DeviceType = Device;
+    using PipelineLayoutType = PipelineLayout;
+    using QuerySetType = QuerySet;
+    using QueueType = Queue;
+    using RenderPipelineType = RenderPipeline;
+    using SamplerType = Sampler;
+    using ShaderModuleType = ShaderModule;
+    using SwapChainType = SwapChain;
+    using TextureType = Texture;
+    using TextureViewType = TextureView;
+};
 
-    template <typename T>
-    auto ToBackend(T&& common) -> decltype(ToBackendBase<NullBackendTraits>(common)) {
-        return ToBackendBase<NullBackendTraits>(common);
-    }
+template <typename T>
+auto ToBackend(T&& common) -> decltype(ToBackendBase<NullBackendTraits>(common)) {
+    return ToBackendBase<NullBackendTraits>(common);
+}
 
-    struct PendingOperation {
-        virtual ~PendingOperation() = default;
-        virtual void Execute() = 0;
-    };
+struct PendingOperation {
+    virtual ~PendingOperation() = default;
+    virtual void Execute() = 0;
+};
 
-    class Device final : public DeviceBase {
-      public:
-        static ResultOrError<Ref<Device>> Create(Adapter* adapter,
-                                                 const DeviceDescriptor* descriptor);
-        ~Device() override;
+class Device final : public DeviceBase {
+  public:
+    static ResultOrError<Ref<Device>> Create(Adapter* adapter, const DeviceDescriptor* descriptor);
+    ~Device() override;
 
-        MaybeError Initialize(const DeviceDescriptor* descriptor);
+    MaybeError Initialize(const DeviceDescriptor* descriptor);
 
-        ResultOrError<Ref<CommandBufferBase>> CreateCommandBuffer(
-            CommandEncoder* encoder,
-            const CommandBufferDescriptor* descriptor) override;
+    ResultOrError<Ref<CommandBufferBase>> CreateCommandBuffer(
+        CommandEncoder* encoder,
+        const CommandBufferDescriptor* descriptor) override;
 
-        MaybeError TickImpl() override;
+    MaybeError TickImpl() override;
 
-        void AddPendingOperation(std::unique_ptr<PendingOperation> operation);
-        MaybeError SubmitPendingOperations();
+    void AddPendingOperation(std::unique_ptr<PendingOperation> operation);
+    MaybeError SubmitPendingOperations();
 
-        ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
-        MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,
-                                           uint64_t sourceOffset,
-                                           BufferBase* destination,
-                                           uint64_t destinationOffset,
-                                           uint64_t size) override;
-        MaybeError CopyFromStagingToTexture(const StagingBufferBase* source,
-                                            const TextureDataLayout& src,
-                                            TextureCopy* dst,
-                                            const Extent3D& copySizePixels) override;
+    ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
+    MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,
+                                       uint64_t sourceOffset,
+                                       BufferBase* destination,
+                                       uint64_t destinationOffset,
+                                       uint64_t size) override;
+    MaybeError CopyFromStagingToTexture(const StagingBufferBase* source,
+                                        const TextureDataLayout& src,
+                                        TextureCopy* dst,
+                                        const Extent3D& copySizePixels) override;
 
-        MaybeError IncrementMemoryUsage(uint64_t bytes);
-        void DecrementMemoryUsage(uint64_t bytes);
+    MaybeError IncrementMemoryUsage(uint64_t bytes);
+    void DecrementMemoryUsage(uint64_t bytes);
 
-        uint32_t GetOptimalBytesPerRowAlignment() const override;
-        uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;
+    uint32_t GetOptimalBytesPerRowAlignment() const override;
+    uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;
 
-        float GetTimestampPeriodInNS() const override;
+    float GetTimestampPeriodInNS() const override;
 
-      private:
-        using DeviceBase::DeviceBase;
+  private:
+    using DeviceBase::DeviceBase;
 
-        ResultOrError<Ref<BindGroupBase>> CreateBindGroupImpl(
-            const BindGroupDescriptor* descriptor) override;
-        ResultOrError<Ref<BindGroupLayoutBase>> CreateBindGroupLayoutImpl(
-            const BindGroupLayoutDescriptor* descriptor,
-            PipelineCompatibilityToken pipelineCompatibilityToken) override;
-        ResultOrError<Ref<BufferBase>> CreateBufferImpl(
-            const BufferDescriptor* descriptor) override;
-        Ref<ComputePipelineBase> CreateUninitializedComputePipelineImpl(
-            const ComputePipelineDescriptor* descriptor) override;
-        ResultOrError<Ref<PipelineLayoutBase>> CreatePipelineLayoutImpl(
-            const PipelineLayoutDescriptor* descriptor) override;
-        ResultOrError<Ref<QuerySetBase>> CreateQuerySetImpl(
-            const QuerySetDescriptor* descriptor) override;
-        Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
-            const RenderPipelineDescriptor* descriptor) override;
-        ResultOrError<Ref<SamplerBase>> CreateSamplerImpl(
-            const SamplerDescriptor* descriptor) override;
-        ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleImpl(
-            const ShaderModuleDescriptor* descriptor,
-            ShaderModuleParseResult* parseResult) override;
-        ResultOrError<Ref<SwapChainBase>> CreateSwapChainImpl(
-            const SwapChainDescriptor* descriptor) override;
-        ResultOrError<Ref<NewSwapChainBase>> CreateSwapChainImpl(
-            Surface* surface,
-            NewSwapChainBase* previousSwapChain,
-            const SwapChainDescriptor* descriptor) override;
-        ResultOrError<Ref<TextureBase>> CreateTextureImpl(
-            const TextureDescriptor* descriptor) override;
-        ResultOrError<Ref<TextureViewBase>> CreateTextureViewImpl(
-            TextureBase* texture,
-            const TextureViewDescriptor* descriptor) override;
+    ResultOrError<Ref<BindGroupBase>> CreateBindGroupImpl(
+        const BindGroupDescriptor* descriptor) override;
+    ResultOrError<Ref<BindGroupLayoutBase>> CreateBindGroupLayoutImpl(
+        const BindGroupLayoutDescriptor* descriptor,
+        PipelineCompatibilityToken pipelineCompatibilityToken) override;
+    ResultOrError<Ref<BufferBase>> CreateBufferImpl(const BufferDescriptor* descriptor) override;
+    Ref<ComputePipelineBase> CreateUninitializedComputePipelineImpl(
+        const ComputePipelineDescriptor* descriptor) override;
+    ResultOrError<Ref<PipelineLayoutBase>> CreatePipelineLayoutImpl(
+        const PipelineLayoutDescriptor* descriptor) override;
+    ResultOrError<Ref<QuerySetBase>> CreateQuerySetImpl(
+        const QuerySetDescriptor* descriptor) override;
+    Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
+        const RenderPipelineDescriptor* descriptor) override;
+    ResultOrError<Ref<SamplerBase>> CreateSamplerImpl(const SamplerDescriptor* descriptor) override;
+    ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleImpl(
+        const ShaderModuleDescriptor* descriptor,
+        ShaderModuleParseResult* parseResult) override;
+    ResultOrError<Ref<SwapChainBase>> CreateSwapChainImpl(
+        const SwapChainDescriptor* descriptor) override;
+    ResultOrError<Ref<NewSwapChainBase>> CreateSwapChainImpl(
+        Surface* surface,
+        NewSwapChainBase* previousSwapChain,
+        const SwapChainDescriptor* descriptor) override;
+    ResultOrError<Ref<TextureBase>> CreateTextureImpl(const TextureDescriptor* descriptor) override;
+    ResultOrError<Ref<TextureViewBase>> CreateTextureViewImpl(
+        TextureBase* texture,
+        const TextureViewDescriptor* descriptor) override;
 
-        ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
+    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
 
-        void DestroyImpl() override;
-        MaybeError WaitForIdleForDestruction() override;
+    void DestroyImpl() override;
+    MaybeError WaitForIdleForDestruction() override;
 
-        std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
+    std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
 
-        static constexpr uint64_t kMaxMemoryUsage = 512 * 1024 * 1024;
-        size_t mMemoryUsage = 0;
-    };
+    static constexpr uint64_t kMaxMemoryUsage = 512 * 1024 * 1024;
+    size_t mMemoryUsage = 0;
+};
 
-    class Adapter : public AdapterBase {
-      public:
-        explicit Adapter(InstanceBase* instance);
-        ~Adapter() override;
+class Adapter : public AdapterBase {
+  public:
+    explicit Adapter(InstanceBase* instance);
+    ~Adapter() override;
 
-        // AdapterBase Implementation
-        bool SupportsExternalImages() const override;
+    // AdapterBase Implementation
+    bool SupportsExternalImages() const override;
 
-        // Used for the tests that intend to use an adapter without all features enabled.
-        void SetSupportedFeatures(const std::vector<wgpu::FeatureName>& requiredFeatures);
+    // Used for the tests that intend to use an adapter without all features enabled.
+    void SetSupportedFeatures(const std::vector<wgpu::FeatureName>& requiredFeatures);
 
-      private:
-        MaybeError InitializeImpl() override;
-        MaybeError InitializeSupportedFeaturesImpl() override;
-        MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override;
+  private:
+    MaybeError InitializeImpl() override;
+    MaybeError InitializeSupportedFeaturesImpl() override;
+    MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override;
 
-        ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(
-            const DeviceDescriptor* descriptor) override;
-    };
+    ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(const DeviceDescriptor* descriptor) override;
+};
 
-    // Helper class so |BindGroup| can allocate memory for its binding data,
-    // before calling the BindGroupBase base class constructor.
-    class BindGroupDataHolder {
-      protected:
-        explicit BindGroupDataHolder(size_t size);
-        ~BindGroupDataHolder();
+// Helper class so |BindGroup| can allocate memory for its binding data,
+// before calling the BindGroupBase base class constructor.
+class BindGroupDataHolder {
+  protected:
+    explicit BindGroupDataHolder(size_t size);
+    ~BindGroupDataHolder();
 
-        void* mBindingDataAllocation;
-    };
+    void* mBindingDataAllocation;
+};
 
-    // We don't have the complexity of placement-allocation of bind group data in
-    // the Null backend. This class, keeps the binding data in a separate allocation for simplicity.
-    class BindGroup final : private BindGroupDataHolder, public BindGroupBase {
-      public:
-        BindGroup(DeviceBase* device, const BindGroupDescriptor* descriptor);
+// We don't have the complexity of placement-allocation of bind group data in
+// the Null backend. This class, keeps the binding data in a separate allocation for simplicity.
+class BindGroup final : private BindGroupDataHolder, public BindGroupBase {
+  public:
+    BindGroup(DeviceBase* device, const BindGroupDescriptor* descriptor);
 
-      private:
-        ~BindGroup() override = default;
-    };
+  private:
+    ~BindGroup() override = default;
+};
 
-    class BindGroupLayout final : public BindGroupLayoutBase {
-      public:
-        BindGroupLayout(DeviceBase* device,
-                        const BindGroupLayoutDescriptor* descriptor,
-                        PipelineCompatibilityToken pipelineCompatibilityToken);
+class BindGroupLayout final : public BindGroupLayoutBase {
+  public:
+    BindGroupLayout(DeviceBase* device,
+                    const BindGroupLayoutDescriptor* descriptor,
+                    PipelineCompatibilityToken pipelineCompatibilityToken);
 
-      private:
-        ~BindGroupLayout() override = default;
-    };
+  private:
+    ~BindGroupLayout() override = default;
+};
 
-    class Buffer final : public BufferBase {
-      public:
-        Buffer(Device* device, const BufferDescriptor* descriptor);
+class Buffer final : public BufferBase {
+  public:
+    Buffer(Device* device, const BufferDescriptor* descriptor);
 
-        void CopyFromStaging(StagingBufferBase* staging,
-                             uint64_t sourceOffset,
-                             uint64_t destinationOffset,
-                             uint64_t size);
+    void CopyFromStaging(StagingBufferBase* staging,
+                         uint64_t sourceOffset,
+                         uint64_t destinationOffset,
+                         uint64_t size);
 
-        void DoWriteBuffer(uint64_t bufferOffset, const void* data, size_t size);
+    void DoWriteBuffer(uint64_t bufferOffset, const void* data, size_t size);
 
-      private:
-        MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
-        void UnmapImpl() override;
-        void DestroyImpl() override;
-        bool IsCPUWritableAtCreation() const override;
-        MaybeError MapAtCreationImpl() override;
-        void* GetMappedPointerImpl() override;
+  private:
+    MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
+    void UnmapImpl() override;
+    void DestroyImpl() override;
+    bool IsCPUWritableAtCreation() const override;
+    MaybeError MapAtCreationImpl() override;
+    void* GetMappedPointerImpl() override;
 
-        std::unique_ptr<uint8_t[]> mBackingData;
-    };
+    std::unique_ptr<uint8_t[]> mBackingData;
+};
 
-    class CommandBuffer final : public CommandBufferBase {
-      public:
-        CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
-    };
+class CommandBuffer final : public CommandBufferBase {
+  public:
+    CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
+};
 
-    class QuerySet final : public QuerySetBase {
-      public:
-        QuerySet(Device* device, const QuerySetDescriptor* descriptor);
-    };
+class QuerySet final : public QuerySetBase {
+  public:
+    QuerySet(Device* device, const QuerySetDescriptor* descriptor);
+};
 
-    class Queue final : public QueueBase {
-      public:
-        Queue(Device* device, const QueueDescriptor* descriptor);
+class Queue final : public QueueBase {
+  public:
+    Queue(Device* device, const QueueDescriptor* descriptor);
 
-      private:
-        ~Queue() override;
-        MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
-        MaybeError WriteBufferImpl(BufferBase* buffer,
-                                   uint64_t bufferOffset,
-                                   const void* data,
-                                   size_t size) override;
-    };
+  private:
+    ~Queue() override;
+    MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
+    MaybeError WriteBufferImpl(BufferBase* buffer,
+                               uint64_t bufferOffset,
+                               const void* data,
+                               size_t size) override;
+};
 
-    class ComputePipeline final : public ComputePipelineBase {
-      public:
-        using ComputePipelineBase::ComputePipelineBase;
+class ComputePipeline final : public ComputePipelineBase {
+  public:
+    using ComputePipelineBase::ComputePipelineBase;
 
-        MaybeError Initialize() override;
-    };
+    MaybeError Initialize() override;
+};
 
-    class RenderPipeline final : public RenderPipelineBase {
-      public:
-        using RenderPipelineBase::RenderPipelineBase;
+class RenderPipeline final : public RenderPipelineBase {
+  public:
+    using RenderPipelineBase::RenderPipelineBase;
 
-        MaybeError Initialize() override;
-    };
+    MaybeError Initialize() override;
+};
 
-    class ShaderModule final : public ShaderModuleBase {
-      public:
-        using ShaderModuleBase::ShaderModuleBase;
+class ShaderModule final : public ShaderModuleBase {
+  public:
+    using ShaderModuleBase::ShaderModuleBase;
 
-        MaybeError Initialize(ShaderModuleParseResult* parseResult);
-    };
+    MaybeError Initialize(ShaderModuleParseResult* parseResult);
+};
 
-    class SwapChain final : public NewSwapChainBase {
-      public:
-        static ResultOrError<Ref<SwapChain>> Create(Device* device,
-                                                    Surface* surface,
-                                                    NewSwapChainBase* previousSwapChain,
-                                                    const SwapChainDescriptor* descriptor);
-        ~SwapChain() override;
+class SwapChain final : public NewSwapChainBase {
+  public:
+    static ResultOrError<Ref<SwapChain>> Create(Device* device,
+                                                Surface* surface,
+                                                NewSwapChainBase* previousSwapChain,
+                                                const SwapChainDescriptor* descriptor);
+    ~SwapChain() override;
 
-      private:
-        using NewSwapChainBase::NewSwapChainBase;
-        MaybeError Initialize(NewSwapChainBase* previousSwapChain);
+  private:
+    using NewSwapChainBase::NewSwapChainBase;
+    MaybeError Initialize(NewSwapChainBase* previousSwapChain);
 
-        Ref<Texture> mTexture;
+    Ref<Texture> mTexture;
 
-        MaybeError PresentImpl() override;
-        ResultOrError<Ref<TextureViewBase>> GetCurrentTextureViewImpl() override;
-        void DetachFromSurfaceImpl() override;
-    };
+    MaybeError PresentImpl() override;
+    ResultOrError<Ref<TextureViewBase>> GetCurrentTextureViewImpl() override;
+    void DetachFromSurfaceImpl() override;
+};
 
-    class OldSwapChain final : public OldSwapChainBase {
-      public:
-        OldSwapChain(Device* device, const SwapChainDescriptor* descriptor);
+class OldSwapChain final : public OldSwapChainBase {
+  public:
+    OldSwapChain(Device* device, const SwapChainDescriptor* descriptor);
 
-      protected:
-        ~OldSwapChain() override;
-        TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
-        MaybeError OnBeforePresent(TextureViewBase*) override;
-    };
+  protected:
+    ~OldSwapChain() override;
+    TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
+    MaybeError OnBeforePresent(TextureViewBase*) override;
+};
 
-    class NativeSwapChainImpl {
-      public:
-        using WSIContext = struct {};
-        void Init(WSIContext* context);
-        DawnSwapChainError Configure(WGPUTextureFormat format,
-                                     WGPUTextureUsage,
-                                     uint32_t width,
-                                     uint32_t height);
-        DawnSwapChainError GetNextTexture(DawnSwapChainNextTexture* nextTexture);
-        DawnSwapChainError Present();
-        wgpu::TextureFormat GetPreferredFormat() const;
-    };
+class NativeSwapChainImpl {
+  public:
+    using WSIContext = struct {};
+    void Init(WSIContext* context);
+    DawnSwapChainError Configure(WGPUTextureFormat format,
+                                 WGPUTextureUsage,
+                                 uint32_t width,
+                                 uint32_t height);
+    DawnSwapChainError GetNextTexture(DawnSwapChainNextTexture* nextTexture);
+    DawnSwapChainError Present();
+    wgpu::TextureFormat GetPreferredFormat() const;
+};
 
-    class StagingBuffer : public StagingBufferBase {
-      public:
-        StagingBuffer(size_t size, Device* device);
-        ~StagingBuffer() override;
-        MaybeError Initialize() override;
+class StagingBuffer : public StagingBufferBase {
+  public:
+    StagingBuffer(size_t size, Device* device);
+    ~StagingBuffer() override;
+    MaybeError Initialize() override;
 
-      private:
-        Device* mDevice;
-        std::unique_ptr<uint8_t[]> mBuffer;
-    };
+  private:
+    Device* mDevice;
+    std::unique_ptr<uint8_t[]> mBuffer;
+};
 
 }  // namespace dawn::native::null
 

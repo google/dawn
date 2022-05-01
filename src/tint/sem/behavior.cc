@@ -17,21 +17,21 @@
 namespace tint::sem {
 
 std::ostream& operator<<(std::ostream& out, Behavior behavior) {
-  switch (behavior) {
-    case Behavior::kReturn:
-      return out << "Return";
-    case Behavior::kDiscard:
-      return out << "Discard";
-    case Behavior::kBreak:
-      return out << "Break";
-    case Behavior::kContinue:
-      return out << "Continue";
-    case Behavior::kFallthrough:
-      return out << "Fallthrough";
-    case Behavior::kNext:
-      return out << "Next";
-  }
-  return out << "<unknown>";
+    switch (behavior) {
+        case Behavior::kReturn:
+            return out << "Return";
+        case Behavior::kDiscard:
+            return out << "Discard";
+        case Behavior::kBreak:
+            return out << "Break";
+        case Behavior::kContinue:
+            return out << "Continue";
+        case Behavior::kFallthrough:
+            return out << "Fallthrough";
+        case Behavior::kNext:
+            return out << "Next";
+    }
+    return out << "<unknown>";
 }
 
 }  // namespace tint::sem

@@ -20,33 +20,32 @@
 namespace tint::ast {
 
 /// An index accessor expression
-class IndexAccessorExpression final
-    : public Castable<IndexAccessorExpression, Expression> {
- public:
-  /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the index accessor source
-  /// @param obj the object
-  /// @param idx the index expression
-  IndexAccessorExpression(ProgramID program_id,
-                          const Source& source,
-                          const Expression* obj,
-                          const Expression* idx);
-  /// Move constructor
-  IndexAccessorExpression(IndexAccessorExpression&&);
-  ~IndexAccessorExpression() override;
+class IndexAccessorExpression final : public Castable<IndexAccessorExpression, Expression> {
+  public:
+    /// Constructor
+    /// @param program_id the identifier of the program that owns this node
+    /// @param source the index accessor source
+    /// @param obj the object
+    /// @param idx the index expression
+    IndexAccessorExpression(ProgramID program_id,
+                            const Source& source,
+                            const Expression* obj,
+                            const Expression* idx);
+    /// Move constructor
+    IndexAccessorExpression(IndexAccessorExpression&&);
+    ~IndexAccessorExpression() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const IndexAccessorExpression* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const IndexAccessorExpression* Clone(CloneContext* ctx) const override;
 
-  /// the array, vector or matrix
-  const Expression* const object;
+    /// the array, vector or matrix
+    const Expression* const object;
 
-  /// the index expression
-  const Expression* const index;
+    /// the index expression
+    const Expression* const index;
 };
 
 }  // namespace tint::ast

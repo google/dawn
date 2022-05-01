@@ -20,23 +20,23 @@
 
 namespace dawn::native {
 
-    struct CombinedLimits {
-        Limits v1;
-    };
+struct CombinedLimits {
+    Limits v1;
+};
 
-    // Populate |limits| with the default limits.
-    void GetDefaultLimits(Limits* limits);
+// Populate |limits| with the default limits.
+void GetDefaultLimits(Limits* limits);
 
-    // Returns a copy of |limits| where all undefined values are replaced
-    // with their defaults. Also clamps to the defaults if the provided limits
-    // are worse.
-    Limits ReifyDefaultLimits(const Limits& limits);
+// Returns a copy of |limits| where all undefined values are replaced
+// with their defaults. Also clamps to the defaults if the provided limits
+// are worse.
+Limits ReifyDefaultLimits(const Limits& limits);
 
-    // Validate that |requiredLimits| are no better than |supportedLimits|.
-    MaybeError ValidateLimits(const Limits& supportedLimits, const Limits& requiredLimits);
+// Validate that |requiredLimits| are no better than |supportedLimits|.
+MaybeError ValidateLimits(const Limits& supportedLimits, const Limits& requiredLimits);
 
-    // Returns a copy of |limits| where limit tiers are applied.
-    Limits ApplyLimitTiers(Limits limits);
+// Returns a copy of |limits| where limit tiers are applied.
+Limits ApplyLimitTiers(Limits limits);
 
 }  // namespace dawn::native
 

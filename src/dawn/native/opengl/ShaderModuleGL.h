@@ -26,50 +26,49 @@
 
 namespace dawn::native::opengl {
 
-    class Device;
-    class PipelineLayout;
+class Device;
+class PipelineLayout;
 
-    std::string GetBindingName(BindGroupIndex group, BindingNumber bindingNumber);
+std::string GetBindingName(BindGroupIndex group, BindingNumber bindingNumber);
 
-    struct BindingLocation {
-        BindGroupIndex group;
-        BindingNumber binding;
-    };
-    bool operator<(const BindingLocation& a, const BindingLocation& b);
+struct BindingLocation {
+    BindGroupIndex group;
+    BindingNumber binding;
+};
+bool operator<(const BindingLocation& a, const BindingLocation& b);
 
-    struct CombinedSampler {
-        BindingLocation samplerLocation;
-        BindingLocation textureLocation;
-        // OpenGL requires a sampler with texelFetch. If this is true, the developer did not provide
-        // one and Dawn should bind a placeholder non-filtering sampler. |samplerLocation| is
-        // unused.
-        bool usePlaceholderSampler;
-        std::string GetName() const;
-    };
-    bool operator<(const CombinedSampler& a, const CombinedSampler& b);
+struct CombinedSampler {
+    BindingLocation samplerLocation;
+    BindingLocation textureLocation;
+    // OpenGL requires a sampler with texelFetch. If this is true, the developer did not provide
+    // one and Dawn should bind a placeholder non-filtering sampler. |samplerLocation| is
+    // unused.
+    bool usePlaceholderSampler;
+    std::string GetName() const;
+};
+bool operator<(const CombinedSampler& a, const CombinedSampler& b);
 
-    using CombinedSamplerInfo = std::vector<CombinedSampler>;
+using CombinedSamplerInfo = std::vector<CombinedSampler>;
 
-    using BindingInfoArrayTable =
-        std::unordered_map<std::string, std::unique_ptr<BindingInfoArray>>;
+using BindingInfoArrayTable = std::unordered_map<std::string, std::unique_ptr<BindingInfoArray>>;
 
-    class ShaderModule final : public ShaderModuleBase {
-      public:
-        static ResultOrError<Ref<ShaderModule>> Create(Device* device,
-                                                       const ShaderModuleDescriptor* descriptor,
-                                                       ShaderModuleParseResult* parseResult);
+class ShaderModule final : public ShaderModuleBase {
+  public:
+    static ResultOrError<Ref<ShaderModule>> Create(Device* device,
+                                                   const ShaderModuleDescriptor* descriptor,
+                                                   ShaderModuleParseResult* parseResult);
 
-        ResultOrError<std::string> TranslateToGLSL(const char* entryPointName,
-                                                   SingleShaderStage stage,
-                                                   CombinedSamplerInfo* combinedSamplers,
-                                                   const PipelineLayout* layout,
-                                                   bool* needsPlaceholderSampler) const;
+    ResultOrError<std::string> TranslateToGLSL(const char* entryPointName,
+                                               SingleShaderStage stage,
+                                               CombinedSamplerInfo* combinedSamplers,
+                                               const PipelineLayout* layout,
+                                               bool* needsPlaceholderSampler) const;
 
-      private:
-        ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
-        ~ShaderModule() override = default;
-        MaybeError Initialize(ShaderModuleParseResult* parseResult);
-    };
+  private:
+    ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
+    ~ShaderModule() override = default;
+    MaybeError Initialize(ShaderModuleParseResult* parseResult);
+};
 
 }  // namespace dawn::native::opengl
 

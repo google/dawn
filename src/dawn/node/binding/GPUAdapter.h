@@ -23,26 +23,26 @@
 #include "src/dawn/node/interop/WebGPU.h"
 
 namespace wgpu::binding {
-    class Flags;
+class Flags;
 
-    // GPUAdapter is an implementation of interop::GPUAdapter that wraps a dawn::native::Adapter.
-    class GPUAdapter final : public interop::GPUAdapter {
-      public:
-        GPUAdapter(dawn::native::Adapter a, const Flags& flags);
+// GPUAdapter is an implementation of interop::GPUAdapter that wraps a dawn::native::Adapter.
+class GPUAdapter final : public interop::GPUAdapter {
+  public:
+    GPUAdapter(dawn::native::Adapter a, const Flags& flags);
 
-        // interop::GPUAdapter interface compliance
-        std::string getName(Napi::Env) override;
-        interop::Interface<interop::GPUSupportedFeatures> getFeatures(Napi::Env) override;
-        interop::Interface<interop::GPUSupportedLimits> getLimits(Napi::Env) override;
-        bool getIsFallbackAdapter(Napi::Env) override;
-        interop::Promise<interop::Interface<interop::GPUDevice>> requestDevice(
-            Napi::Env env,
-            interop::GPUDeviceDescriptor descriptor) override;
+    // interop::GPUAdapter interface compliance
+    std::string getName(Napi::Env) override;
+    interop::Interface<interop::GPUSupportedFeatures> getFeatures(Napi::Env) override;
+    interop::Interface<interop::GPUSupportedLimits> getLimits(Napi::Env) override;
+    bool getIsFallbackAdapter(Napi::Env) override;
+    interop::Promise<interop::Interface<interop::GPUDevice>> requestDevice(
+        Napi::Env env,
+        interop::GPUDeviceDescriptor descriptor) override;
 
-      private:
-        dawn::native::Adapter adapter_;
-        const Flags& flags_;
-    };
+  private:
+    dawn::native::Adapter adapter_;
+    const Flags& flags_;
+};
 
 }  // namespace wgpu::binding
 

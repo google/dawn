@@ -27,82 +27,81 @@
 
 namespace dawn::native::d3d12 {
 
-    Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
-        Device* device,
-        const ComputePipelineDescriptor* descriptor) {
-        return AcquireRef(new ComputePipeline(device, descriptor));
+Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
+    Device* device,
+    const ComputePipelineDescriptor* descriptor) {
+    return AcquireRef(new ComputePipeline(device, descriptor));
+}
+
+MaybeError ComputePipeline::Initialize() {
+    Device* device = ToBackend(GetDevice());
+    uint32_t compileFlags = 0;
+
+    if (!device->IsToggleEnabled(Toggle::UseDXC) &&
+        !device->IsToggleEnabled(Toggle::FxcOptimizations)) {
+        compileFlags |= D3DCOMPILE_OPTIMIZATION_LEVEL0;
     }
 
-    MaybeError ComputePipeline::Initialize() {
-        Device* device = ToBackend(GetDevice());
-        uint32_t compileFlags = 0;
-
-        if (!device->IsToggleEnabled(Toggle::UseDXC) &&
-            !device->IsToggleEnabled(Toggle::FxcOptimizations)) {
-            compileFlags |= D3DCOMPILE_OPTIMIZATION_LEVEL0;
-        }
-
-        if (device->IsToggleEnabled(Toggle::EmitHLSLDebugSymbols)) {
-            compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-        }
-
-        // SPRIV-cross does matrix multiplication expecting row major matrices
-        compileFlags |= D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
-
-        const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
-        ShaderModule* module = ToBackend(computeStage.module.Get());
-
-        D3D12_COMPUTE_PIPELINE_STATE_DESC d3dDesc = {};
-        d3dDesc.pRootSignature = ToBackend(GetLayout())->GetRootSignature();
-
-        CompiledShader compiledShader;
-        DAWN_TRY_ASSIGN(compiledShader, module->Compile(computeStage, SingleShaderStage::Compute,
-                                                        ToBackend(GetLayout()), compileFlags));
-        d3dDesc.CS = compiledShader.GetD3D12ShaderBytecode();
-        auto* d3d12Device = device->GetD3D12Device();
-        DAWN_TRY(CheckHRESULT(
-            d3d12Device->CreateComputePipelineState(&d3dDesc, IID_PPV_ARGS(&mPipelineState)),
-            "D3D12 creating pipeline state"));
-
-        SetLabelImpl();
-
-        return {};
+    if (device->IsToggleEnabled(Toggle::EmitHLSLDebugSymbols)) {
+        compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
     }
 
-    ComputePipeline::~ComputePipeline() = default;
+    // SPRIV-cross does matrix multiplication expecting row major matrices
+    compileFlags |= D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
 
-    void ComputePipeline::DestroyImpl() {
-        ComputePipelineBase::DestroyImpl();
-        ToBackend(GetDevice())->ReferenceUntilUnused(mPipelineState);
-    }
+    const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
+    ShaderModule* module = ToBackend(computeStage.module.Get());
 
-    ID3D12PipelineState* ComputePipeline::GetPipelineState() const {
-        return mPipelineState.Get();
-    }
+    D3D12_COMPUTE_PIPELINE_STATE_DESC d3dDesc = {};
+    d3dDesc.pRootSignature = ToBackend(GetLayout())->GetRootSignature();
 
-    void ComputePipeline::SetLabelImpl() {
-        SetDebugName(ToBackend(GetDevice()), GetPipelineState(), "Dawn_ComputePipeline",
-                     GetLabel());
-    }
+    CompiledShader compiledShader;
+    DAWN_TRY_ASSIGN(compiledShader, module->Compile(computeStage, SingleShaderStage::Compute,
+                                                    ToBackend(GetLayout()), compileFlags));
+    d3dDesc.CS = compiledShader.GetD3D12ShaderBytecode();
+    auto* d3d12Device = device->GetD3D12Device();
+    DAWN_TRY(CheckHRESULT(
+        d3d12Device->CreateComputePipelineState(&d3dDesc, IID_PPV_ARGS(&mPipelineState)),
+        "D3D12 creating pipeline state"));
 
-    void ComputePipeline::InitializeAsync(Ref<ComputePipelineBase> computePipeline,
-                                          WGPUCreateComputePipelineAsyncCallback callback,
-                                          void* userdata) {
-        std::unique_ptr<CreateComputePipelineAsyncTask> asyncTask =
-            std::make_unique<CreateComputePipelineAsyncTask>(std::move(computePipeline), callback,
-                                                             userdata);
-        CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
-    }
+    SetLabelImpl();
 
-    bool ComputePipeline::UsesNumWorkgroups() const {
-        return GetStage(SingleShaderStage::Compute).metadata->usesNumWorkgroups;
-    }
+    return {};
+}
 
-    ComPtr<ID3D12CommandSignature> ComputePipeline::GetDispatchIndirectCommandSignature() {
-        if (UsesNumWorkgroups()) {
-            return ToBackend(GetLayout())->GetDispatchIndirectCommandSignatureWithNumWorkgroups();
-        }
-        return ToBackend(GetDevice())->GetDispatchIndirectSignature();
+ComputePipeline::~ComputePipeline() = default;
+
+void ComputePipeline::DestroyImpl() {
+    ComputePipelineBase::DestroyImpl();
+    ToBackend(GetDevice())->ReferenceUntilUnused(mPipelineState);
+}
+
+ID3D12PipelineState* ComputePipeline::GetPipelineState() const {
+    return mPipelineState.Get();
+}
+
+void ComputePipeline::SetLabelImpl() {
+    SetDebugName(ToBackend(GetDevice()), GetPipelineState(), "Dawn_ComputePipeline", GetLabel());
+}
+
+void ComputePipeline::InitializeAsync(Ref<ComputePipelineBase> computePipeline,
+                                      WGPUCreateComputePipelineAsyncCallback callback,
+                                      void* userdata) {
+    std::unique_ptr<CreateComputePipelineAsyncTask> asyncTask =
+        std::make_unique<CreateComputePipelineAsyncTask>(std::move(computePipeline), callback,
+                                                         userdata);
+    CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
+}
+
+bool ComputePipeline::UsesNumWorkgroups() const {
+    return GetStage(SingleShaderStage::Compute).metadata->usesNumWorkgroups;
+}
+
+ComPtr<ID3D12CommandSignature> ComputePipeline::GetDispatchIndirectCommandSignature() {
+    if (UsesNumWorkgroups()) {
+        return ToBackend(GetLayout())->GetDispatchIndirectCommandSignatureWithNumWorkgroups();
     }
+    return ToBackend(GetDevice())->GetDispatchIndirectSignature();
+}
 
 }  // namespace dawn::native::d3d12

@@ -30,76 +30,74 @@
 
 namespace dawn::native::vulkan {
 
-    class Device;
+class Device;
 
-    // This is a key to query the RenderPassCache, it can be sparse meaning that only the
-    // information for bits set in colorMask or hasDepthStencil need to be provided and the rest can
-    // be uninintialized.
-    struct RenderPassCacheQuery {
-        // Use these helpers to build the query, they make sure all relevant data is initialized and
-        // masks set.
-        void SetColor(ColorAttachmentIndex index,
-                      wgpu::TextureFormat format,
-                      wgpu::LoadOp loadOp,
-                      wgpu::StoreOp storeOp,
-                      bool hasResolveTarget);
-        void SetDepthStencil(wgpu::TextureFormat format,
-                             wgpu::LoadOp depthLoadOp,
-                             wgpu::StoreOp depthStoreOp,
-                             wgpu::LoadOp stencilLoadOp,
-                             wgpu::StoreOp stencilStoreOp,
-                             bool readOnly);
-        void SetSampleCount(uint32_t sampleCount);
+// This is a key to query the RenderPassCache, it can be sparse meaning that only the
+// information for bits set in colorMask or hasDepthStencil need to be provided and the rest can
+// be uninintialized.
+struct RenderPassCacheQuery {
+    // Use these helpers to build the query, they make sure all relevant data is initialized and
+    // masks set.
+    void SetColor(ColorAttachmentIndex index,
+                  wgpu::TextureFormat format,
+                  wgpu::LoadOp loadOp,
+                  wgpu::StoreOp storeOp,
+                  bool hasResolveTarget);
+    void SetDepthStencil(wgpu::TextureFormat format,
+                         wgpu::LoadOp depthLoadOp,
+                         wgpu::StoreOp depthStoreOp,
+                         wgpu::LoadOp stencilLoadOp,
+                         wgpu::StoreOp stencilStoreOp,
+                         bool readOnly);
+    void SetSampleCount(uint32_t sampleCount);
 
-        ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> colorMask;
-        ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> resolveTargetMask;
-        ityp::array<ColorAttachmentIndex, wgpu::TextureFormat, kMaxColorAttachments> colorFormats;
-        ityp::array<ColorAttachmentIndex, wgpu::LoadOp, kMaxColorAttachments> colorLoadOp;
-        ityp::array<ColorAttachmentIndex, wgpu::StoreOp, kMaxColorAttachments> colorStoreOp;
+    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> colorMask;
+    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> resolveTargetMask;
+    ityp::array<ColorAttachmentIndex, wgpu::TextureFormat, kMaxColorAttachments> colorFormats;
+    ityp::array<ColorAttachmentIndex, wgpu::LoadOp, kMaxColorAttachments> colorLoadOp;
+    ityp::array<ColorAttachmentIndex, wgpu::StoreOp, kMaxColorAttachments> colorStoreOp;
 
-        bool hasDepthStencil = false;
-        wgpu::TextureFormat depthStencilFormat;
-        wgpu::LoadOp depthLoadOp;
-        wgpu::StoreOp depthStoreOp;
-        wgpu::LoadOp stencilLoadOp;
-        wgpu::StoreOp stencilStoreOp;
-        bool readOnlyDepthStencil;
+    bool hasDepthStencil = false;
+    wgpu::TextureFormat depthStencilFormat;
+    wgpu::LoadOp depthLoadOp;
+    wgpu::StoreOp depthStoreOp;
+    wgpu::LoadOp stencilLoadOp;
+    wgpu::StoreOp stencilStoreOp;
+    bool readOnlyDepthStencil;
 
-        uint32_t sampleCount;
+    uint32_t sampleCount;
+};
+
+// Caches VkRenderPasses so that we don't create duplicate ones for every RenderPipeline or
+// render pass. We always arrange the order of attachments in "color-depthstencil-resolve" order
+// when creating render pass and framebuffer so that we can always make sure the order of
+// attachments in the rendering pipeline matches the one of the framebuffer.
+// All the operations on RenderPassCache are guaranteed to be thread-safe.
+// TODO(cwallez@chromium.org): Make it an LRU cache somehow?
+class RenderPassCache {
+  public:
+    explicit RenderPassCache(Device* device);
+    ~RenderPassCache();
+
+    ResultOrError<VkRenderPass> GetRenderPass(const RenderPassCacheQuery& query);
+
+  private:
+    // Does the actual VkRenderPass creation on a cache miss.
+    ResultOrError<VkRenderPass> CreateRenderPassForQuery(const RenderPassCacheQuery& query) const;
+
+    // Implements the functors necessary for to use RenderPassCacheQueries as unordered_map
+    // keys.
+    struct CacheFuncs {
+        size_t operator()(const RenderPassCacheQuery& query) const;
+        bool operator()(const RenderPassCacheQuery& a, const RenderPassCacheQuery& b) const;
     };
+    using Cache = std::unordered_map<RenderPassCacheQuery, VkRenderPass, CacheFuncs, CacheFuncs>;
 
-    // Caches VkRenderPasses so that we don't create duplicate ones for every RenderPipeline or
-    // render pass. We always arrange the order of attachments in "color-depthstencil-resolve" order
-    // when creating render pass and framebuffer so that we can always make sure the order of
-    // attachments in the rendering pipeline matches the one of the framebuffer.
-    // All the operations on RenderPassCache are guaranteed to be thread-safe.
-    // TODO(cwallez@chromium.org): Make it an LRU cache somehow?
-    class RenderPassCache {
-      public:
-        explicit RenderPassCache(Device* device);
-        ~RenderPassCache();
+    Device* mDevice = nullptr;
 
-        ResultOrError<VkRenderPass> GetRenderPass(const RenderPassCacheQuery& query);
-
-      private:
-        // Does the actual VkRenderPass creation on a cache miss.
-        ResultOrError<VkRenderPass> CreateRenderPassForQuery(
-            const RenderPassCacheQuery& query) const;
-
-        // Implements the functors necessary for to use RenderPassCacheQueries as unordered_map
-        // keys.
-        struct CacheFuncs {
-            size_t operator()(const RenderPassCacheQuery& query) const;
-            bool operator()(const RenderPassCacheQuery& a, const RenderPassCacheQuery& b) const;
-        };
-        using Cache =
-            std::unordered_map<RenderPassCacheQuery, VkRenderPass, CacheFuncs, CacheFuncs>;
-
-        Device* mDevice = nullptr;
-
-        std::mutex mMutex;
-        Cache mCache;
-    };
+    std::mutex mMutex;
+    Cache mCache;
+};
 
 }  // namespace dawn::native::vulkan
 

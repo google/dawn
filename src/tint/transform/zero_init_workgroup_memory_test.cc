@@ -24,53 +24,53 @@ namespace {
 using ZeroInitWorkgroupMemoryTest = TransformTest;
 
 TEST_F(ZeroInitWorkgroupMemoryTest, ShouldRunEmptyModule) {
-  auto* src = R"()";
+    auto* src = R"()";
 
-  EXPECT_FALSE(ShouldRun<ZeroInitWorkgroupMemory>(src));
+    EXPECT_FALSE(ShouldRun<ZeroInitWorkgroupMemory>(src));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, ShouldRunHasNoWorkgroupVars) {
-  auto* src = R"(
+    auto* src = R"(
 var<private> v : i32;
 )";
 
-  EXPECT_FALSE(ShouldRun<ZeroInitWorkgroupMemory>(src));
+    EXPECT_FALSE(ShouldRun<ZeroInitWorkgroupMemory>(src));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, ShouldRunHasWorkgroupVars) {
-  auto* src = R"(
+    auto* src = R"(
 var<workgroup> a : i32;
 )";
 
-  EXPECT_TRUE(ShouldRun<ZeroInitWorkgroupMemory>(src));
+    EXPECT_TRUE(ShouldRun<ZeroInitWorkgroupMemory>(src));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, EmptyModule) {
-  auto* src = "";
-  auto* expect = src;
+    auto* src = "";
+    auto* expect = src;
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, NoWorkgroupVars) {
-  auto* src = R"(
+    auto* src = R"(
 var<private> v : i32;
 
 fn f() {
   v = 1;
 }
 )";
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, UnreferencedWorkgroupVars) {
-  auto* src = R"(
+    auto* src = R"(
 var<workgroup> a : i32;
 
 var<workgroup> b : i32;
@@ -85,15 +85,15 @@ fn unreferenced() {
 fn f() {
 }
 )";
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, UnreferencedWorkgroupVars_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn f() {
 }
@@ -108,15 +108,15 @@ var<workgroup> b : i32;
 
 var<workgroup> c : i32;
 )";
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, SingleWorkgroupVar_ExistingLocalIndex) {
-  auto* src = R"(
+    auto* src = R"(
 var<workgroup> v : i32;
 
 @stage(compute) @workgroup_size(1)
@@ -124,7 +124,7 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
   _ = v; // Initialization should be inserted above this statement
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<workgroup> v : i32;
 
 @stage(compute) @workgroup_size(1)
@@ -137,14 +137,13 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ZeroInitWorkgroupMemoryTest,
-       SingleWorkgroupVar_ExistingLocalIndex_OutOfOrder) {
-  auto* src = R"(
+TEST_F(ZeroInitWorkgroupMemoryTest, SingleWorkgroupVar_ExistingLocalIndex_OutOfOrder) {
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   _ = v; // Initialization should be inserted above this statement
@@ -152,7 +151,7 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 
 var<workgroup> v : i32;
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(compute) @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   {
@@ -165,14 +164,13 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 var<workgroup> v : i32;
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ZeroInitWorkgroupMemoryTest,
-       SingleWorkgroupVar_ExistingLocalIndexInStruct) {
-  auto* src = R"(
+TEST_F(ZeroInitWorkgroupMemoryTest, SingleWorkgroupVar_ExistingLocalIndexInStruct) {
+    auto* src = R"(
 var<workgroup> v : i32;
 
 struct Params {
@@ -184,7 +182,7 @@ fn f(params : Params) {
   _ = v; // Initialization should be inserted above this statement
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<workgroup> v : i32;
 
 struct Params {
@@ -202,14 +200,13 @@ fn f(params : Params) {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ZeroInitWorkgroupMemoryTest,
-       SingleWorkgroupVar_ExistingLocalIndexInStruct_OutOfOrder) {
-  auto* src = R"(
+TEST_F(ZeroInitWorkgroupMemoryTest, SingleWorkgroupVar_ExistingLocalIndexInStruct_OutOfOrder) {
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn f(params : Params) {
   _ = v; // Initialization should be inserted above this statement
@@ -221,7 +218,7 @@ struct Params {
 
 var<workgroup> v : i32;
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(compute) @workgroup_size(1)
 fn f(params : Params) {
   {
@@ -239,13 +236,13 @@ struct Params {
 var<workgroup> v : i32;
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, SingleWorkgroupVar_InjectedLocalIndex) {
-  auto* src = R"(
+    auto* src = R"(
 var<workgroup> v : i32;
 
 @stage(compute) @workgroup_size(1)
@@ -253,7 +250,7 @@ fn f() {
   _ = v; // Initialization should be inserted above this statement
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<workgroup> v : i32;
 
 @stage(compute) @workgroup_size(1)
@@ -266,14 +263,13 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ZeroInitWorkgroupMemoryTest,
-       SingleWorkgroupVar_InjectedLocalIndex_OutOfOrder) {
-  auto* src = R"(
+TEST_F(ZeroInitWorkgroupMemoryTest, SingleWorkgroupVar_InjectedLocalIndex_OutOfOrder) {
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn f() {
   _ = v; // Initialization should be inserted above this statement
@@ -281,7 +277,7 @@ fn f() {
 
 var<workgroup> v : i32;
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(compute) @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
   {
@@ -294,14 +290,13 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
 var<workgroup> v : i32;
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ZeroInitWorkgroupMemoryTest,
-       MultipleWorkgroupVar_ExistingLocalIndex_Size1) {
-  auto* src = R"(
+TEST_F(ZeroInitWorkgroupMemoryTest, MultipleWorkgroupVar_ExistingLocalIndex_Size1) {
+    auto* src = R"(
 struct S {
   x : i32,
   y : array<i32, 8>,
@@ -320,7 +315,7 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
   _ = c;
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct S {
   x : i32,
   y : array<i32, 8>,
@@ -358,14 +353,13 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ZeroInitWorkgroupMemoryTest,
-       MultipleWorkgroupVar_ExistingLocalIndex_Size1_OutOfOrder) {
-  auto* src = R"(
+TEST_F(ZeroInitWorkgroupMemoryTest, MultipleWorkgroupVar_ExistingLocalIndex_Size1_OutOfOrder) {
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   _ = a; // Initialization should be inserted above this statement
@@ -384,7 +378,7 @@ struct S {
   y : array<i32, 8>,
 };
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(compute) @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   {
@@ -422,14 +416,13 @@ struct S {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ZeroInitWorkgroupMemoryTest,
-       MultipleWorkgroupVar_ExistingLocalIndex_Size_2_3) {
-  auto* src = R"(
+TEST_F(ZeroInitWorkgroupMemoryTest, MultipleWorkgroupVar_ExistingLocalIndex_Size_2_3) {
+    auto* src = R"(
 struct S {
   x : i32,
   y : array<i32, 8>,
@@ -448,7 +441,7 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
   _ = c;
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct S {
   x : i32,
   y : array<i32, 8>,
@@ -486,14 +479,13 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ZeroInitWorkgroupMemoryTest,
-       MultipleWorkgroupVar_ExistingLocalIndex_Size_2_3_X) {
-  auto* src = R"(
+TEST_F(ZeroInitWorkgroupMemoryTest, MultipleWorkgroupVar_ExistingLocalIndex_Size_2_3_X) {
+    auto* src = R"(
 struct S {
   x : i32,
   y : array<i32, 8>,
@@ -514,8 +506,8 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
   _ = c;
 }
 )";
-  auto* expect =
-      R"(
+    auto* expect =
+        R"(
 struct S {
   x : i32,
   y : array<i32, 8>,
@@ -555,14 +547,13 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ZeroInitWorkgroupMemoryTest,
-       MultipleWorkgroupVar_ExistingLocalIndex_Size_5u_X_10u) {
-  auto* src = R"(
+TEST_F(ZeroInitWorkgroupMemoryTest, MultipleWorkgroupVar_ExistingLocalIndex_Size_5u_X_10u) {
+    auto* src = R"(
 struct S {
   x : array<array<i32, 8>, 10>,
   y : array<i32, 8>,
@@ -584,8 +575,8 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
   _ = c;
 }
 )";
-  auto* expect =
-      R"(
+    auto* expect =
+        R"(
 struct S {
   x : array<array<i32, 8>, 10>,
   y : array<i32, 8>,
@@ -645,13 +636,13 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, MultipleWorkgroupVar_InjectedLocalIndex) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   x : i32,
   y : array<i32, 8>,
@@ -670,7 +661,7 @@ fn f(@builtin(local_invocation_id) local_invocation_id : vec3<u32>) {
   _ = c;
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct S {
   x : i32,
   y : array<i32, 8>,
@@ -708,14 +699,13 @@ fn f(@builtin(local_invocation_id) local_invocation_id : vec3<u32>, @builtin(loc
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ZeroInitWorkgroupMemoryTest,
-       MultipleWorkgroupVar_InjectedLocalIndex_OutOfOrder) {
-  auto* src = R"(
+TEST_F(ZeroInitWorkgroupMemoryTest, MultipleWorkgroupVar_InjectedLocalIndex_OutOfOrder) {
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn f(@builtin(local_invocation_id) local_invocation_id : vec3<u32>) {
   _ = a; // Initialization should be inserted above this statement
@@ -734,7 +724,7 @@ struct S {
   y : array<i32, 8>,
 };
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(compute) @workgroup_size(1)
 fn f(@builtin(local_invocation_id) local_invocation_id : vec3<u32>, @builtin(local_invocation_index) local_invocation_index : u32) {
   {
@@ -772,13 +762,13 @@ struct S {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, MultipleWorkgroupVar_MultipleEntryPoints) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   x : i32,
   y : array<i32, 8>,
@@ -807,7 +797,7 @@ fn f3() {
   _ = a;
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct S {
   x : i32,
   y : array<i32, 8>,
@@ -871,14 +861,13 @@ fn f3(@builtin(local_invocation_index) local_invocation_index_2 : u32) {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ZeroInitWorkgroupMemoryTest,
-       MultipleWorkgroupVar_MultipleEntryPoints_OutOfOrder) {
-  auto* src = R"(
+TEST_F(ZeroInitWorkgroupMemoryTest, MultipleWorkgroupVar_MultipleEntryPoints_OutOfOrder) {
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn f1() {
   _ = a; // Initialization should be inserted above this statement
@@ -907,7 +896,7 @@ struct S {
   y : array<i32, 8>,
 };
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(compute) @workgroup_size(1)
 fn f1(@builtin(local_invocation_index) local_invocation_index : u32) {
   {
@@ -971,13 +960,13 @@ struct S {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, TransitiveUsage) {
-  auto* src = R"(
+    auto* src = R"(
 var<workgroup> v : i32;
 
 fn use_v() {
@@ -993,7 +982,7 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
   call_use_v(); // Initialization should be inserted above this statement
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<workgroup> v : i32;
 
 fn use_v() {
@@ -1014,13 +1003,13 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, TransitiveUsage_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   call_use_v(); // Initialization should be inserted above this statement
@@ -1036,7 +1025,7 @@ fn use_v() {
 
 var<workgroup> v : i32;
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(compute) @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   {
@@ -1057,13 +1046,13 @@ fn use_v() {
 var<workgroup> v : i32;
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupAtomics) {
-  auto* src = R"(
+    auto* src = R"(
 var<workgroup> i : atomic<i32>;
 var<workgroup> u : atomic<u32>;
 
@@ -1073,7 +1062,7 @@ fn f() {
   atomicLoad(&(u));
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<workgroup> i : atomic<i32>;
 
 var<workgroup> u : atomic<u32>;
@@ -1090,13 +1079,13 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupAtomics_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn f() {
   atomicLoad(&(i)); // Initialization should be inserted above this statement
@@ -1106,7 +1095,7 @@ fn f() {
 var<workgroup> i : atomic<i32>;
 var<workgroup> u : atomic<u32>;
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(compute) @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
   {
@@ -1123,13 +1112,13 @@ var<workgroup> i : atomic<i32>;
 var<workgroup> u : atomic<u32>;
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupStructOfAtomics) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   a : i32,
   i : atomic<i32>,
@@ -1145,7 +1134,7 @@ fn f() {
   _ = w.a; // Initialization should be inserted above this statement
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct S {
   a : i32,
   i : atomic<i32>,
@@ -1170,13 +1159,13 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupStructOfAtomics_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn f() {
   _ = w.a; // Initialization should be inserted above this statement
@@ -1192,7 +1181,7 @@ struct S {
   c : u32,
 };
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(compute) @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
   {
@@ -1217,13 +1206,13 @@ struct S {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupArrayOfAtomics) {
-  auto* src = R"(
+    auto* src = R"(
 var<workgroup> w : array<atomic<u32>, 4>;
 
 @stage(compute) @workgroup_size(1)
@@ -1231,7 +1220,7 @@ fn f() {
   atomicLoad(&w[0]); // Initialization should be inserted above this statement
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 var<workgroup> w : array<atomic<u32>, 4>;
 
 @stage(compute) @workgroup_size(1)
@@ -1245,13 +1234,13 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupArrayOfAtomics_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn f() {
   atomicLoad(&w[0]); // Initialization should be inserted above this statement
@@ -1259,7 +1248,7 @@ fn f() {
 
 var<workgroup> w : array<atomic<u32>, 4>;
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(compute) @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
   for(var idx : u32 = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
@@ -1273,13 +1262,13 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
 var<workgroup> w : array<atomic<u32>, 4>;
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupArrayOfStructOfAtomics) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   a : i32,
   i : atomic<i32>,
@@ -1295,7 +1284,7 @@ fn f() {
   _ = w[0].a; // Initialization should be inserted above this statement
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct S {
   a : i32,
   i : atomic<i32>,
@@ -1321,14 +1310,13 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ZeroInitWorkgroupMemoryTest,
-       WorkgroupArrayOfStructOfAtomics_OutOfOrder) {
-  auto* src = R"(
+TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupArrayOfStructOfAtomics_OutOfOrder) {
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn f() {
   _ = w[0].a; // Initialization should be inserted above this statement
@@ -1344,7 +1332,7 @@ struct S {
   c : u32,
 };
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(compute) @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
   for(var idx : u32 = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
@@ -1370,9 +1358,9 @@ struct S {
 }
 )";
 
-  auto got = Run<ZeroInitWorkgroupMemory>(src);
+    auto got = Run<ZeroInitWorkgroupMemory>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

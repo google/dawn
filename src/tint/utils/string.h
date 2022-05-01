@@ -26,12 +26,12 @@ namespace tint::utils {
 inline std::string ReplaceAll(std::string str,
                               const std::string& substr,
                               const std::string& replacement) {
-  size_t pos = 0;
-  while ((pos = str.find(substr, pos)) != std::string::npos) {
-    str.replace(pos, substr.length(), replacement);
-    pos += replacement.length();
-  }
-  return str;
+    size_t pos = 0;
+    while ((pos = str.find(substr, pos)) != std::string::npos) {
+        str.replace(pos, substr.length(), replacement);
+        pos += replacement.length();
+    }
+    return str;
 }
 
 }  // namespace tint::utils

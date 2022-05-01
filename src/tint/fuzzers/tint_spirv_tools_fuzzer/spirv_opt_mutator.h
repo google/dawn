@@ -31,60 +31,60 @@ namespace tint::fuzzers::spvtools_fuzzer {
 /// to the `Mutate` method the mutator selects `opt_batch_size` random
 /// optimization passes (with substitutions) and applies them to the binary.
 class SpirvOptMutator : public Mutator {
- public:
-  /// Constructor.
-  /// @param target_env - target environment for the `binary`.
-  /// @param seed - seed for the RNG.
-  /// @param binary - SPIR-V binary. Must be valid.
-  /// @param validate_after_each_opt - whether to validate the binary after each
-  ///     optimization pass.
-  /// @param opt_batch_size - the maximum number of optimization passes that
-  ///     will be applied in a single call to `Mutate`. If it's equal to 0 then
-  ///     all available optimization passes are applied.
-  SpirvOptMutator(spv_target_env target_env,
-                  uint32_t seed,
-                  std::vector<uint32_t> binary,
-                  bool validate_after_each_opt,
-                  uint32_t opt_batch_size);
+  public:
+    /// Constructor.
+    /// @param target_env - target environment for the `binary`.
+    /// @param seed - seed for the RNG.
+    /// @param binary - SPIR-V binary. Must be valid.
+    /// @param validate_after_each_opt - whether to validate the binary after each
+    ///     optimization pass.
+    /// @param opt_batch_size - the maximum number of optimization passes that
+    ///     will be applied in a single call to `Mutate`. If it's equal to 0 then
+    ///     all available optimization passes are applied.
+    SpirvOptMutator(spv_target_env target_env,
+                    uint32_t seed,
+                    std::vector<uint32_t> binary,
+                    bool validate_after_each_opt,
+                    uint32_t opt_batch_size);
 
-  Result Mutate() override;
-  std::vector<uint32_t> GetBinary() const override;
-  void LogErrors(const std::string* path, uint32_t count) const override;
-  std::string GetErrors() const override;
+    Result Mutate() override;
+    std::vector<uint32_t> GetBinary() const override;
+    void LogErrors(const std::string* path, uint32_t count) const override;
+    std::string GetErrors() const override;
 
- private:
-  // Number of times this mutator was executed.
-  uint32_t num_executions_;
+  private:
+    // Number of times this mutator was executed.
+    uint32_t num_executions_;
 
-  // Whether the last execution left it in a valid state.
-  bool is_valid_;
+    // Whether the last execution left it in a valid state.
+    bool is_valid_;
 
-  // Target environment for the SPIR-V binary.
-  const spv_target_env target_env_;
+    // Target environment for the SPIR-V binary.
+    const spv_target_env target_env_;
 
-  // The original SPIR-V binary. Useful for debugging.
-  const std::vector<uint32_t> original_binary_;
+    // The original SPIR-V binary. Useful for debugging.
+    const std::vector<uint32_t> original_binary_;
 
-  // The seed for the RNG. Useful for debugging.
-  const uint32_t seed_;
+    // The seed for the RNG. Useful for debugging.
+    const uint32_t seed_;
 
-  // All the optimization passes available.
-  const std::vector<std::string> opt_passes_;
+    // All the optimization passes available.
+    const std::vector<std::string> opt_passes_;
 
-  // The result of the optimization.
-  std::vector<uint32_t> optimized_binary_;
+    // The result of the optimization.
+    std::vector<uint32_t> optimized_binary_;
 
-  // Whether we need to validate the binary after each optimization pass.
-  const bool validate_after_each_opt_;
+    // Whether we need to validate the binary after each optimization pass.
+    const bool validate_after_each_opt_;
 
-  // The number of optimization passes to apply at once.
-  const uint32_t opt_batch_size_;
+    // The number of optimization passes to apply at once.
+    const uint32_t opt_batch_size_;
 
-  // All the errors produced by the optimizer.
-  std::stringstream errors_;
+    // All the errors produced by the optimizer.
+    std::stringstream errors_;
 
-  // The random number generator initialized with `seed_`.
-  RandomGenerator generator_;
+    // The random number generator initialized with `seed_`.
+    RandomGenerator generator_;
 };
 
 }  // namespace tint::fuzzers::spvtools_fuzzer

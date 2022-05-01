@@ -20,9 +20,9 @@
 namespace tint::fuzzers {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-  tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kSpv, OutputFormat::kNone);
-  fuzzer.SetDumpInput(GetCliParams().dump_input);
-  return fuzzer.Run(data, size);
+    tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kSpv, OutputFormat::kNone);
+    fuzzer.SetDumpInput(GetCliParams().dump_input);
+    return fuzzer.Run(data, size);
 }
 
 }  // namespace tint::fuzzers

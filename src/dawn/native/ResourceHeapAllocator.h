@@ -22,15 +22,15 @@
 
 namespace dawn::native {
 
-    // Interface for backend allocators that create memory heaps resoruces can be suballocated in.
-    class ResourceHeapAllocator {
-      public:
-        virtual ~ResourceHeapAllocator() = default;
+// Interface for backend allocators that create memory heaps resoruces can be suballocated in.
+class ResourceHeapAllocator {
+  public:
+    virtual ~ResourceHeapAllocator() = default;
 
-        virtual ResultOrError<std::unique_ptr<ResourceHeapBase>> AllocateResourceHeap(
-            uint64_t size) = 0;
-        virtual void DeallocateResourceHeap(std::unique_ptr<ResourceHeapBase> allocation) = 0;
-    };
+    virtual ResultOrError<std::unique_ptr<ResourceHeapBase>> AllocateResourceHeap(
+        uint64_t size) = 0;
+    virtual void DeallocateResourceHeap(std::unique_ptr<ResourceHeapBase> allocation) = 0;
+};
 
 }  // namespace dawn::native
 

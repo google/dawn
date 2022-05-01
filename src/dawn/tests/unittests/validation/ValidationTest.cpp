@@ -26,9 +26,10 @@
 
 namespace {
 
-    bool gUseWire = false;
-    std::string gWireTraceDir = "";
-    std::unique_ptr<ToggleParser> gToggleParser = nullptr;
+bool gUseWire = false;
+// NOLINTNEXTLINE(runtime/string)
+std::string gWireTraceDir = "";
+std::unique_ptr<ToggleParser> gToggleParser = nullptr;
 
 }  // namespace
 
@@ -79,8 +80,7 @@ void InitDawnValidationTestEnvironment(int argc, char** argv) {
 }
 
 ValidationTest::ValidationTest()
-    : mWireHelper(utils::CreateWireHelper(gUseWire, gWireTraceDir.c_str())) {
-}
+    : mWireHelper(utils::CreateWireHelper(gUseWire, gWireTraceDir.c_str())) {}
 
 void ValidationTest::SetUp() {
     instance = std::make_unique<dawn::native::Instance>();

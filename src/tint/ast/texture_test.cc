@@ -33,23 +33,23 @@ namespace {
 using AstTextureTypeTest = TestHelper;
 
 TEST_F(AstTextureTypeTest, IsTextureArray) {
-  EXPECT_EQ(false, IsTextureArray(TextureDimension::kNone));
-  EXPECT_EQ(false, IsTextureArray(TextureDimension::k1d));
-  EXPECT_EQ(false, IsTextureArray(TextureDimension::k2d));
-  EXPECT_EQ(true, IsTextureArray(TextureDimension::k2dArray));
-  EXPECT_EQ(false, IsTextureArray(TextureDimension::k3d));
-  EXPECT_EQ(false, IsTextureArray(TextureDimension::kCube));
-  EXPECT_EQ(true, IsTextureArray(TextureDimension::kCubeArray));
+    EXPECT_EQ(false, IsTextureArray(TextureDimension::kNone));
+    EXPECT_EQ(false, IsTextureArray(TextureDimension::k1d));
+    EXPECT_EQ(false, IsTextureArray(TextureDimension::k2d));
+    EXPECT_EQ(true, IsTextureArray(TextureDimension::k2dArray));
+    EXPECT_EQ(false, IsTextureArray(TextureDimension::k3d));
+    EXPECT_EQ(false, IsTextureArray(TextureDimension::kCube));
+    EXPECT_EQ(true, IsTextureArray(TextureDimension::kCubeArray));
 }
 
 TEST_F(AstTextureTypeTest, NumCoordinateAxes) {
-  EXPECT_EQ(0, NumCoordinateAxes(TextureDimension::kNone));
-  EXPECT_EQ(1, NumCoordinateAxes(TextureDimension::k1d));
-  EXPECT_EQ(2, NumCoordinateAxes(TextureDimension::k2d));
-  EXPECT_EQ(2, NumCoordinateAxes(TextureDimension::k2dArray));
-  EXPECT_EQ(3, NumCoordinateAxes(TextureDimension::k3d));
-  EXPECT_EQ(3, NumCoordinateAxes(TextureDimension::kCube));
-  EXPECT_EQ(3, NumCoordinateAxes(TextureDimension::kCubeArray));
+    EXPECT_EQ(0, NumCoordinateAxes(TextureDimension::kNone));
+    EXPECT_EQ(1, NumCoordinateAxes(TextureDimension::k1d));
+    EXPECT_EQ(2, NumCoordinateAxes(TextureDimension::k2d));
+    EXPECT_EQ(2, NumCoordinateAxes(TextureDimension::k2dArray));
+    EXPECT_EQ(3, NumCoordinateAxes(TextureDimension::k3d));
+    EXPECT_EQ(3, NumCoordinateAxes(TextureDimension::kCube));
+    EXPECT_EQ(3, NumCoordinateAxes(TextureDimension::kCubeArray));
 }
 
 }  // namespace

@@ -17,34 +17,34 @@
 
 namespace dawn::native::vulkan::external_semaphore {
 
-    Service::Service(Device* device) : mDevice(device) {
-        DAWN_UNUSED(mDevice);
-        DAWN_UNUSED(mSupported);
-    }
+Service::Service(Device* device) : mDevice(device) {
+    DAWN_UNUSED(mDevice);
+    DAWN_UNUSED(mSupported);
+}
 
-    Service::~Service() = default;
+Service::~Service() = default;
 
-    // static
-    bool Service::CheckSupport(const VulkanDeviceInfo& deviceInfo,
-                               VkPhysicalDevice physicalDevice,
-                               const VulkanFunctions& fn) {
-        return false;
-    }
+// static
+bool Service::CheckSupport(const VulkanDeviceInfo& deviceInfo,
+                           VkPhysicalDevice physicalDevice,
+                           const VulkanFunctions& fn) {
+    return false;
+}
 
-    bool Service::Supported() {
-        return false;
-    }
+bool Service::Supported() {
+    return false;
+}
 
-    ResultOrError<VkSemaphore> Service::ImportSemaphore(ExternalSemaphoreHandle handle) {
-        return DAWN_UNIMPLEMENTED_ERROR("Using null semaphore service to interop inside Vulkan");
-    }
+ResultOrError<VkSemaphore> Service::ImportSemaphore(ExternalSemaphoreHandle handle) {
+    return DAWN_UNIMPLEMENTED_ERROR("Using null semaphore service to interop inside Vulkan");
+}
 
-    ResultOrError<VkSemaphore> Service::CreateExportableSemaphore() {
-        return DAWN_UNIMPLEMENTED_ERROR("Using null semaphore service to interop inside Vulkan");
-    }
+ResultOrError<VkSemaphore> Service::CreateExportableSemaphore() {
+    return DAWN_UNIMPLEMENTED_ERROR("Using null semaphore service to interop inside Vulkan");
+}
 
-    ResultOrError<ExternalSemaphoreHandle> Service::ExportSemaphore(VkSemaphore semaphore) {
-        return DAWN_UNIMPLEMENTED_ERROR("Using null semaphore service to interop inside Vulkan");
-    }
+ResultOrError<ExternalSemaphoreHandle> Service::ExportSemaphore(VkSemaphore semaphore) {
+    return DAWN_UNIMPLEMENTED_ERROR("Using null semaphore service to interop inside Vulkan");
+}
 
 }  // namespace dawn::native::vulkan::external_semaphore

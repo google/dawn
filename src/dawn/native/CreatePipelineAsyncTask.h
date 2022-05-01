@@ -25,86 +25,86 @@
 
 namespace dawn::native {
 
-    class ComputePipelineBase;
-    class DeviceBase;
-    class PipelineLayoutBase;
-    class RenderPipelineBase;
-    class ShaderModuleBase;
-    struct FlatComputePipelineDescriptor;
+class ComputePipelineBase;
+class DeviceBase;
+class PipelineLayoutBase;
+class RenderPipelineBase;
+class ShaderModuleBase;
+struct FlatComputePipelineDescriptor;
 
-    struct CreatePipelineAsyncCallbackTaskBase : CallbackTask {
-        CreatePipelineAsyncCallbackTaskBase(std::string errorMessage, void* userData);
+struct CreatePipelineAsyncCallbackTaskBase : CallbackTask {
+    CreatePipelineAsyncCallbackTaskBase(std::string errorMessage, void* userData);
 
-      protected:
-        std::string mErrorMessage;
-        void* mUserData;
-    };
+  protected:
+    std::string mErrorMessage;
+    void* mUserData;
+};
 
-    struct CreateComputePipelineAsyncCallbackTask : CreatePipelineAsyncCallbackTaskBase {
-        CreateComputePipelineAsyncCallbackTask(Ref<ComputePipelineBase> pipeline,
-                                               std::string errorMessage,
-                                               WGPUCreateComputePipelineAsyncCallback callback,
-                                               void* userdata);
+struct CreateComputePipelineAsyncCallbackTask : CreatePipelineAsyncCallbackTaskBase {
+    CreateComputePipelineAsyncCallbackTask(Ref<ComputePipelineBase> pipeline,
+                                           std::string errorMessage,
+                                           WGPUCreateComputePipelineAsyncCallback callback,
+                                           void* userdata);
 
-        void Finish() override;
-        void HandleShutDown() final;
-        void HandleDeviceLoss() final;
+    void Finish() override;
+    void HandleShutDown() final;
+    void HandleDeviceLoss() final;
 
-      protected:
-        Ref<ComputePipelineBase> mPipeline;
-        WGPUCreateComputePipelineAsyncCallback mCreateComputePipelineAsyncCallback;
-    };
+  protected:
+    Ref<ComputePipelineBase> mPipeline;
+    WGPUCreateComputePipelineAsyncCallback mCreateComputePipelineAsyncCallback;
+};
 
-    struct CreateRenderPipelineAsyncCallbackTask : CreatePipelineAsyncCallbackTaskBase {
-        CreateRenderPipelineAsyncCallbackTask(Ref<RenderPipelineBase> pipeline,
-                                              std::string errorMessage,
-                                              WGPUCreateRenderPipelineAsyncCallback callback,
-                                              void* userdata);
+struct CreateRenderPipelineAsyncCallbackTask : CreatePipelineAsyncCallbackTaskBase {
+    CreateRenderPipelineAsyncCallbackTask(Ref<RenderPipelineBase> pipeline,
+                                          std::string errorMessage,
+                                          WGPUCreateRenderPipelineAsyncCallback callback,
+                                          void* userdata);
 
-        void Finish() override;
-        void HandleShutDown() final;
-        void HandleDeviceLoss() final;
+    void Finish() override;
+    void HandleShutDown() final;
+    void HandleDeviceLoss() final;
 
-      protected:
-        Ref<RenderPipelineBase> mPipeline;
-        WGPUCreateRenderPipelineAsyncCallback mCreateRenderPipelineAsyncCallback;
-    };
+  protected:
+    Ref<RenderPipelineBase> mPipeline;
+    WGPUCreateRenderPipelineAsyncCallback mCreateRenderPipelineAsyncCallback;
+};
 
-    // CreateComputePipelineAsyncTask defines all the inputs and outputs of
-    // CreateComputePipelineAsync() tasks, which are the same among all the backends.
-    class CreateComputePipelineAsyncTask {
-      public:
-        CreateComputePipelineAsyncTask(Ref<ComputePipelineBase> nonInitializedComputePipeline,
-                                       WGPUCreateComputePipelineAsyncCallback callback,
-                                       void* userdata);
+// CreateComputePipelineAsyncTask defines all the inputs and outputs of
+// CreateComputePipelineAsync() tasks, which are the same among all the backends.
+class CreateComputePipelineAsyncTask {
+  public:
+    CreateComputePipelineAsyncTask(Ref<ComputePipelineBase> nonInitializedComputePipeline,
+                                   WGPUCreateComputePipelineAsyncCallback callback,
+                                   void* userdata);
 
-        void Run();
+    void Run();
 
-        static void RunAsync(std::unique_ptr<CreateComputePipelineAsyncTask> task);
+    static void RunAsync(std::unique_ptr<CreateComputePipelineAsyncTask> task);
 
-      private:
-        Ref<ComputePipelineBase> mComputePipeline;
-        WGPUCreateComputePipelineAsyncCallback mCallback;
-        void* mUserdata;
-    };
+  private:
+    Ref<ComputePipelineBase> mComputePipeline;
+    WGPUCreateComputePipelineAsyncCallback mCallback;
+    void* mUserdata;
+};
 
-    // CreateRenderPipelineAsyncTask defines all the inputs and outputs of
-    // CreateRenderPipelineAsync() tasks, which are the same among all the backends.
-    class CreateRenderPipelineAsyncTask {
-      public:
-        CreateRenderPipelineAsyncTask(Ref<RenderPipelineBase> nonInitializedRenderPipeline,
-                                      WGPUCreateRenderPipelineAsyncCallback callback,
-                                      void* userdata);
+// CreateRenderPipelineAsyncTask defines all the inputs and outputs of
+// CreateRenderPipelineAsync() tasks, which are the same among all the backends.
+class CreateRenderPipelineAsyncTask {
+  public:
+    CreateRenderPipelineAsyncTask(Ref<RenderPipelineBase> nonInitializedRenderPipeline,
+                                  WGPUCreateRenderPipelineAsyncCallback callback,
+                                  void* userdata);
 
-        void Run();
+    void Run();
 
-        static void RunAsync(std::unique_ptr<CreateRenderPipelineAsyncTask> task);
+    static void RunAsync(std::unique_ptr<CreateRenderPipelineAsyncTask> task);
 
-      private:
-        Ref<RenderPipelineBase> mRenderPipeline;
-        WGPUCreateRenderPipelineAsyncCallback mCallback;
-        void* mUserdata;
-    };
+  private:
+    Ref<RenderPipelineBase> mRenderPipeline;
+    WGPUCreateRenderPipelineAsyncCallback mCallback;
+    void* mUserdata;
+};
 
 }  // namespace dawn::native
 

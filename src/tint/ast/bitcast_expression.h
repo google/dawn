@@ -26,30 +26,30 @@ namespace tint::ast {
 
 /// A bitcast expression
 class BitcastExpression final : public Castable<BitcastExpression, Expression> {
- public:
-  /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the bitcast expression source
-  /// @param type the type
-  /// @param expr the expr
-  BitcastExpression(ProgramID program_id,
-                    const Source& source,
-                    const Type* type,
-                    const Expression* expr);
-  /// Move constructor
-  BitcastExpression(BitcastExpression&&);
-  ~BitcastExpression() override;
+  public:
+    /// Constructor
+    /// @param program_id the identifier of the program that owns this node
+    /// @param source the bitcast expression source
+    /// @param type the type
+    /// @param expr the expr
+    BitcastExpression(ProgramID program_id,
+                      const Source& source,
+                      const Type* type,
+                      const Expression* expr);
+    /// Move constructor
+    BitcastExpression(BitcastExpression&&);
+    ~BitcastExpression() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const BitcastExpression* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const BitcastExpression* Clone(CloneContext* ctx) const override;
 
-  /// the target cast type
-  const Type* const type;
-  /// the expression
-  const Expression* const expr;
+    /// the target cast type
+    const Type* const type;
+    /// the expression
+    const Expression* const expr;
 };
 
 }  // namespace tint::ast

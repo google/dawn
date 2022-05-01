@@ -22,15 +22,15 @@ Result::~Result() = default;
 Result::Result(const Result&) = default;
 
 Result Generate(const Program* program, const Options&) {
-  Result result;
+    Result result;
 
-  // Generate the WGSL code.
-  auto impl = std::make_unique<GeneratorImpl>(program);
-  result.success = impl->Generate();
-  result.error = impl->error();
-  result.wgsl = impl->result();
+    // Generate the WGSL code.
+    auto impl = std::make_unique<GeneratorImpl>(program);
+    result.success = impl->Generate();
+    result.error = impl->error();
+    result.wgsl = impl->result();
 
-  return result;
+    return result;
 }
 
 }  // namespace tint::writer::wgsl

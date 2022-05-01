@@ -23,11 +23,11 @@ namespace tint::writer {
 
 /// Class to generate text source
 class Text : public Writer {
- public:
-  ~Text() override;
+  public:
+    ~Text() override;
 
-  /// @returns the result data
-  virtual std::string result() const = 0;
+    /// @returns the result data
+    virtual std::string result() const = 0;
 };
 
 }  // namespace tint::writer

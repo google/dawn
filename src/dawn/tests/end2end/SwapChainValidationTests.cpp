@@ -70,9 +70,7 @@ class SwapChainValidationTests : public DawnTest {
     wgpu::SwapChainDescriptor badDescriptor;
 
     // Checks that a RenderAttachment view is an error by trying to create a render pass on it.
-    void CheckTextureViewIsError(wgpu::TextureView view) {
-        CheckTextureView(view, true, false);
-    }
+    void CheckTextureViewIsError(wgpu::TextureView view) { CheckTextureView(view, true, false); }
 
     // Checks that a RenderAttachment view is an error by trying to submit a render pass on it.
     void CheckTextureViewIsDestroyed(wgpu::TextureView view) {
@@ -80,9 +78,7 @@ class SwapChainValidationTests : public DawnTest {
     }
 
     // Checks that a RenderAttachment view is valid by submitting a render pass on it.
-    void CheckTextureViewIsValid(wgpu::TextureView view) {
-        CheckTextureView(view, false, false);
-    }
+    void CheckTextureViewIsValid(wgpu::TextureView view) { CheckTextureView(view, false, false); }
 
   private:
     void CheckTextureView(wgpu::TextureView view, bool errorAtFinish, bool errorAtSubmit) {

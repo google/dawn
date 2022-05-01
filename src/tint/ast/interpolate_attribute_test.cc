@@ -22,10 +22,10 @@ namespace {
 using InterpolateAttributeTest = TestHelper;
 
 TEST_F(InterpolateAttributeTest, Creation) {
-  auto* d = create<InterpolateAttribute>(InterpolationType::kLinear,
-                                         InterpolationSampling::kCenter);
-  EXPECT_EQ(InterpolationType::kLinear, d->type);
-  EXPECT_EQ(InterpolationSampling::kCenter, d->sampling);
+    auto* d =
+        create<InterpolateAttribute>(InterpolationType::kLinear, InterpolationSampling::kCenter);
+    EXPECT_EQ(InterpolationType::kLinear, d->type);
+    EXPECT_EQ(InterpolationSampling::kCenter, d->sampling);
 }
 
 }  // namespace

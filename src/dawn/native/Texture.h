@@ -29,134 +29,132 @@
 
 namespace dawn::native {
 
-    MaybeError ValidateTextureDescriptor(const DeviceBase* device,
-                                         const TextureDescriptor* descriptor);
-    MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
-                                             const TextureBase* texture,
-                                             const TextureViewDescriptor* descriptor);
-    ResultOrError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
-        const TextureBase* texture,
-        const TextureViewDescriptor* descriptor);
+MaybeError ValidateTextureDescriptor(const DeviceBase* device, const TextureDescriptor* descriptor);
+MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
+                                         const TextureBase* texture,
+                                         const TextureViewDescriptor* descriptor);
+ResultOrError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
+    const TextureBase* texture,
+    const TextureViewDescriptor* descriptor);
 
-    bool IsValidSampleCount(uint32_t sampleCount);
+bool IsValidSampleCount(uint32_t sampleCount);
 
-    static constexpr wgpu::TextureUsage kReadOnlyTextureUsages =
-        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding |
-        kReadOnlyRenderAttachment;
+static constexpr wgpu::TextureUsage kReadOnlyTextureUsages =
+    wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding | kReadOnlyRenderAttachment;
 
-    class TextureBase : public ApiObjectBase {
-      public:
-        enum class TextureState { OwnedInternal, OwnedExternal, Destroyed };
-        enum class ClearValue { Zero, NonZero };
-        TextureBase(DeviceBase* device, const TextureDescriptor* descriptor, TextureState state);
+class TextureBase : public ApiObjectBase {
+  public:
+    enum class TextureState { OwnedInternal, OwnedExternal, Destroyed };
+    enum class ClearValue { Zero, NonZero };
+    TextureBase(DeviceBase* device, const TextureDescriptor* descriptor, TextureState state);
 
-        static TextureBase* MakeError(DeviceBase* device);
+    static TextureBase* MakeError(DeviceBase* device);
 
-        ObjectType GetType() const override;
+    ObjectType GetType() const override;
 
-        wgpu::TextureDimension GetDimension() const;
-        const Format& GetFormat() const;
-        const FormatSet& GetViewFormats() const;
-        const Extent3D& GetSize() const;
-        uint32_t GetWidth() const;
-        uint32_t GetHeight() const;
-        uint32_t GetDepth() const;
-        uint32_t GetArrayLayers() const;
-        uint32_t GetNumMipLevels() const;
-        SubresourceRange GetAllSubresources() const;
-        uint32_t GetSampleCount() const;
-        uint32_t GetSubresourceCount() const;
+    wgpu::TextureDimension GetDimension() const;
+    const Format& GetFormat() const;
+    const FormatSet& GetViewFormats() const;
+    const Extent3D& GetSize() const;
+    uint32_t GetWidth() const;
+    uint32_t GetHeight() const;
+    uint32_t GetDepth() const;
+    uint32_t GetArrayLayers() const;
+    uint32_t GetNumMipLevels() const;
+    SubresourceRange GetAllSubresources() const;
+    uint32_t GetSampleCount() const;
+    uint32_t GetSubresourceCount() const;
 
-        // |GetUsage| returns the usage with which the texture was created using the base WebGPU
-        // API. The dawn-internal-usages extension may add additional usages. |GetInternalUsage|
-        // returns the union of base usage and the usages added by the extension.
-        wgpu::TextureUsage GetUsage() const;
-        wgpu::TextureUsage GetInternalUsage() const;
+    // |GetUsage| returns the usage with which the texture was created using the base WebGPU
+    // API. The dawn-internal-usages extension may add additional usages. |GetInternalUsage|
+    // returns the union of base usage and the usages added by the extension.
+    wgpu::TextureUsage GetUsage() const;
+    wgpu::TextureUsage GetInternalUsage() const;
 
-        TextureState GetTextureState() const;
-        uint32_t GetSubresourceIndex(uint32_t mipLevel, uint32_t arraySlice, Aspect aspect) const;
-        bool IsSubresourceContentInitialized(const SubresourceRange& range) const;
-        void SetIsSubresourceContentInitialized(bool isInitialized, const SubresourceRange& range);
+    TextureState GetTextureState() const;
+    uint32_t GetSubresourceIndex(uint32_t mipLevel, uint32_t arraySlice, Aspect aspect) const;
+    bool IsSubresourceContentInitialized(const SubresourceRange& range) const;
+    void SetIsSubresourceContentInitialized(bool isInitialized, const SubresourceRange& range);
 
-        MaybeError ValidateCanUseInSubmitNow() const;
+    MaybeError ValidateCanUseInSubmitNow() const;
 
-        bool IsMultisampledTexture() const;
+    bool IsMultisampledTexture() const;
 
-        // For a texture with non-block-compressed texture format, its physical size is always equal
-        // to its virtual size. For a texture with block compressed texture format, the physical
-        // size is the one with paddings if necessary, which is always a multiple of the block size
-        // and used in texture copying. The virtual size is the one without paddings, which is not
-        // required to be a multiple of the block size and used in texture sampling.
-        Extent3D GetMipLevelPhysicalSize(uint32_t level) const;
-        Extent3D GetMipLevelVirtualSize(uint32_t level) const;
-        Extent3D ClampToMipLevelVirtualSize(uint32_t level,
-                                            const Origin3D& origin,
-                                            const Extent3D& extent) const;
+    // For a texture with non-block-compressed texture format, its physical size is always equal
+    // to its virtual size. For a texture with block compressed texture format, the physical
+    // size is the one with paddings if necessary, which is always a multiple of the block size
+    // and used in texture copying. The virtual size is the one without paddings, which is not
+    // required to be a multiple of the block size and used in texture sampling.
+    Extent3D GetMipLevelPhysicalSize(uint32_t level) const;
+    Extent3D GetMipLevelVirtualSize(uint32_t level) const;
+    Extent3D ClampToMipLevelVirtualSize(uint32_t level,
+                                        const Origin3D& origin,
+                                        const Extent3D& extent) const;
 
-        ResultOrError<Ref<TextureViewBase>> CreateView(
-            const TextureViewDescriptor* descriptor = nullptr);
+    ResultOrError<Ref<TextureViewBase>> CreateView(
+        const TextureViewDescriptor* descriptor = nullptr);
 
-        // Dawn API
-        TextureViewBase* APICreateView(const TextureViewDescriptor* descriptor = nullptr);
-        void APIDestroy();
+    // Dawn API
+    TextureViewBase* APICreateView(const TextureViewDescriptor* descriptor = nullptr);
+    void APIDestroy();
 
-      protected:
-        // Constructor used only for mocking and testing.
-        TextureBase(DeviceBase* device, TextureState state);
-        void DestroyImpl() override;
+  protected:
+    // Constructor used only for mocking and testing.
+    TextureBase(DeviceBase* device, TextureState state);
+    void DestroyImpl() override;
 
-      private:
-        TextureBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+  private:
+    TextureBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        MaybeError ValidateDestroy() const;
-        wgpu::TextureDimension mDimension;
-        const Format& mFormat;
-        FormatSet mViewFormats;
-        Extent3D mSize;
-        uint32_t mMipLevelCount;
-        uint32_t mSampleCount;
-        wgpu::TextureUsage mUsage = wgpu::TextureUsage::None;
-        wgpu::TextureUsage mInternalUsage = wgpu::TextureUsage::None;
-        TextureState mState;
+    MaybeError ValidateDestroy() const;
+    wgpu::TextureDimension mDimension;
+    const Format& mFormat;
+    FormatSet mViewFormats;
+    Extent3D mSize;
+    uint32_t mMipLevelCount;
+    uint32_t mSampleCount;
+    wgpu::TextureUsage mUsage = wgpu::TextureUsage::None;
+    wgpu::TextureUsage mInternalUsage = wgpu::TextureUsage::None;
+    TextureState mState;
 
-        // TODO(crbug.com/dawn/845): Use a more optimized data structure to save space
-        std::vector<bool> mIsSubresourceContentInitializedAtIndex;
-    };
+    // TODO(crbug.com/dawn/845): Use a more optimized data structure to save space
+    std::vector<bool> mIsSubresourceContentInitializedAtIndex;
+};
 
-    class TextureViewBase : public ApiObjectBase {
-      public:
-        TextureViewBase(TextureBase* texture, const TextureViewDescriptor* descriptor);
+class TextureViewBase : public ApiObjectBase {
+  public:
+    TextureViewBase(TextureBase* texture, const TextureViewDescriptor* descriptor);
 
-        static TextureViewBase* MakeError(DeviceBase* device);
+    static TextureViewBase* MakeError(DeviceBase* device);
 
-        ObjectType GetType() const override;
+    ObjectType GetType() const override;
 
-        const TextureBase* GetTexture() const;
-        TextureBase* GetTexture();
+    const TextureBase* GetTexture() const;
+    TextureBase* GetTexture();
 
-        Aspect GetAspects() const;
-        const Format& GetFormat() const;
-        wgpu::TextureViewDimension GetDimension() const;
-        uint32_t GetBaseMipLevel() const;
-        uint32_t GetLevelCount() const;
-        uint32_t GetBaseArrayLayer() const;
-        uint32_t GetLayerCount() const;
-        const SubresourceRange& GetSubresourceRange() const;
+    Aspect GetAspects() const;
+    const Format& GetFormat() const;
+    wgpu::TextureViewDimension GetDimension() const;
+    uint32_t GetBaseMipLevel() const;
+    uint32_t GetLevelCount() const;
+    uint32_t GetBaseArrayLayer() const;
+    uint32_t GetLayerCount() const;
+    const SubresourceRange& GetSubresourceRange() const;
 
-      protected:
-        // Constructor used only for mocking and testing.
-        explicit TextureViewBase(TextureBase* texture);
-        void DestroyImpl() override;
+  protected:
+    // Constructor used only for mocking and testing.
+    explicit TextureViewBase(TextureBase* texture);
+    void DestroyImpl() override;
 
-      private:
-        TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+  private:
+    TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        Ref<TextureBase> mTexture;
+    Ref<TextureBase> mTexture;
 
-        const Format& mFormat;
-        wgpu::TextureViewDimension mDimension;
-        SubresourceRange mRange;
-    };
+    const Format& mFormat;
+    wgpu::TextureViewDimension mDimension;
+    SubresourceRange mRange;
+};
 
 }  // namespace dawn::native
 

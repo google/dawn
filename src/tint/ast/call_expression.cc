@@ -22,14 +22,14 @@ namespace tint::ast {
 
 namespace {
 CallExpression::Target ToTarget(const IdentifierExpression* name) {
-  CallExpression::Target target;
-  target.name = name;
-  return target;
+    CallExpression::Target target;
+    target.name = name;
+    return target;
 }
 CallExpression::Target ToTarget(const Type* type) {
-  CallExpression::Target target;
-  target.type = type;
-  return target;
+    CallExpression::Target target;
+    target.type = type;
+    return target;
 }
 }  // namespace
 
@@ -38,25 +38,22 @@ CallExpression::CallExpression(ProgramID pid,
                                const IdentifierExpression* name,
                                ExpressionList a)
     : Base(pid, src), target(ToTarget(name)), args(a) {
-  TINT_ASSERT(AST, name);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, name, program_id);
-  for (auto* arg : args) {
-    TINT_ASSERT(AST, arg);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, arg, program_id);
-  }
+    TINT_ASSERT(AST, name);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, name, program_id);
+    for (auto* arg : args) {
+        TINT_ASSERT(AST, arg);
+        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, arg, program_id);
+    }
 }
 
-CallExpression::CallExpression(ProgramID pid,
-                               const Source& src,
-                               const Type* type,
-                               ExpressionList a)
+CallExpression::CallExpression(ProgramID pid, const Source& src, const Type* type, ExpressionList a)
     : Base(pid, src), target(ToTarget(type)), args(a) {
-  TINT_ASSERT(AST, type);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id);
-  for (auto* arg : args) {
-    TINT_ASSERT(AST, arg);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, arg, program_id);
-  }
+    TINT_ASSERT(AST, type);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id);
+    for (auto* arg : args) {
+        TINT_ASSERT(AST, arg);
+        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, arg, program_id);
+    }
 }
 
 CallExpression::CallExpression(CallExpression&&) = default;
@@ -64,13 +61,11 @@ CallExpression::CallExpression(CallExpression&&) = default;
 CallExpression::~CallExpression() = default;
 
 const CallExpression* CallExpression::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  auto p = ctx->Clone(args);
-  return target.name
-             ? ctx->dst->create<CallExpression>(src, ctx->Clone(target.name), p)
-             : ctx->dst->create<CallExpression>(src, ctx->Clone(target.type),
-                                                p);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    auto p = ctx->Clone(args);
+    return target.name ? ctx->dst->create<CallExpression>(src, ctx->Clone(target.name), p)
+                       : ctx->dst->create<CallExpression>(src, ctx->Clone(target.type), p);
 }
 
 }  // namespace tint::ast

@@ -18,32 +18,32 @@
 
 namespace dawn::wire::server {
 
-    bool Server::DoShaderModuleGetCompilationInfo(ObjectId shaderModuleId, uint64_t requestSerial) {
-        auto* shaderModule = ShaderModuleObjects().Get(shaderModuleId);
-        if (shaderModule == nullptr) {
-            return false;
-        }
-
-        auto userdata = MakeUserdata<ShaderModuleGetCompilationInfoUserdata>();
-        userdata->shaderModule = ObjectHandle{shaderModuleId, shaderModule->generation};
-        userdata->requestSerial = requestSerial;
-
-        mProcs.shaderModuleGetCompilationInfo(
-            shaderModule->handle, ForwardToServer<&Server::OnShaderModuleGetCompilationInfo>,
-            userdata.release());
-        return true;
+bool Server::DoShaderModuleGetCompilationInfo(ObjectId shaderModuleId, uint64_t requestSerial) {
+    auto* shaderModule = ShaderModuleObjects().Get(shaderModuleId);
+    if (shaderModule == nullptr) {
+        return false;
     }
 
-    void Server::OnShaderModuleGetCompilationInfo(ShaderModuleGetCompilationInfoUserdata* data,
-                                                  WGPUCompilationInfoRequestStatus status,
-                                                  const WGPUCompilationInfo* info) {
-        ReturnShaderModuleGetCompilationInfoCallbackCmd cmd;
-        cmd.shaderModule = data->shaderModule;
-        cmd.requestSerial = data->requestSerial;
-        cmd.status = status;
-        cmd.info = info;
+    auto userdata = MakeUserdata<ShaderModuleGetCompilationInfoUserdata>();
+    userdata->shaderModule = ObjectHandle{shaderModuleId, shaderModule->generation};
+    userdata->requestSerial = requestSerial;
 
-        SerializeCommand(cmd);
-    }
+    mProcs.shaderModuleGetCompilationInfo(
+        shaderModule->handle, ForwardToServer<&Server::OnShaderModuleGetCompilationInfo>,
+        userdata.release());
+    return true;
+}
+
+void Server::OnShaderModuleGetCompilationInfo(ShaderModuleGetCompilationInfoUserdata* data,
+                                              WGPUCompilationInfoRequestStatus status,
+                                              const WGPUCompilationInfo* info) {
+    ReturnShaderModuleGetCompilationInfoCallbackCmd cmd;
+    cmd.shaderModule = data->shaderModule;
+    cmd.requestSerial = data->requestSerial;
+    cmd.status = status;
+    cmd.info = info;
+
+    SerializeCommand(cmd);
+}
 
 }  // namespace dawn::wire::server

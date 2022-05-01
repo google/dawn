@@ -41,9 +41,7 @@ class OcclusionExpectation : public detail::Expectation {
 
     ~OcclusionExpectation() override = default;
 
-    explicit OcclusionExpectation(Result expected) {
-        mExpected = expected;
-    }
+    explicit OcclusionExpectation(Result expected) { mExpected = expected; }
 
     testing::AssertionResult Check(const void* data, size_t size) override {
         ASSERT(size % sizeof(uint64_t) == 0);

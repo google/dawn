@@ -23,20 +23,20 @@
 
 namespace dawn::native::metal {
 
-    class Device;
+class Device;
 
-    class StagingBuffer : public StagingBufferBase {
-      public:
-        StagingBuffer(size_t size, Device* device);
+class StagingBuffer : public StagingBufferBase {
+  public:
+    StagingBuffer(size_t size, Device* device);
 
-        id<MTLBuffer> GetBufferHandle() const;
+    id<MTLBuffer> GetBufferHandle() const;
 
-        MaybeError Initialize() override;
+    MaybeError Initialize() override;
 
-      private:
-        Device* mDevice;
-        NSPRef<id<MTLBuffer>> mBuffer;
-    };
+  private:
+    Device* mDevice;
+    NSPRef<id<MTLBuffer>> mBuffer;
+};
 }  // namespace dawn::native::metal
 
 #endif  // SRC_DAWN_NATIVE_METAL_STAGINGBUFFERMTL_H_

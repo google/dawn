@@ -19,93 +19,93 @@
 
 namespace dawn::wire::server {
 
-    bool Server::DoAdapterRequestDevice(ObjectId adapterId,
-                                        uint64_t requestSerial,
-                                        ObjectHandle deviceHandle,
-                                        const WGPUDeviceDescriptor* descriptor) {
-        auto* adapter = AdapterObjects().Get(adapterId);
-        if (adapter == nullptr) {
-            return false;
-        }
-
-        auto* resultData = DeviceObjects().Allocate(deviceHandle.id, AllocationState::Reserved);
-        if (resultData == nullptr) {
-            return false;
-        }
-
-        resultData->generation = deviceHandle.generation;
-
-        auto userdata = MakeUserdata<RequestDeviceUserdata>();
-        userdata->adapter = ObjectHandle{adapterId, adapter->generation};
-        userdata->requestSerial = requestSerial;
-        userdata->deviceObjectId = deviceHandle.id;
-
-        mProcs.adapterRequestDevice(adapter->handle, descriptor,
-                                    ForwardToServer<&Server::OnRequestDeviceCallback>,
-                                    userdata.release());
-        return true;
+bool Server::DoAdapterRequestDevice(ObjectId adapterId,
+                                    uint64_t requestSerial,
+                                    ObjectHandle deviceHandle,
+                                    const WGPUDeviceDescriptor* descriptor) {
+    auto* adapter = AdapterObjects().Get(adapterId);
+    if (adapter == nullptr) {
+        return false;
     }
 
-    void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
-                                         WGPURequestDeviceStatus status,
-                                         WGPUDevice device,
-                                         const char* message) {
-        auto* deviceObject = DeviceObjects().Get(data->deviceObjectId, AllocationState::Reserved);
-        // Should be impossible to fail. ObjectIds can't be freed by a destroy command until
-        // they move from Reserved to Allocated, or if they are destroyed here.
-        ASSERT(deviceObject != nullptr);
+    auto* resultData = DeviceObjects().Allocate(deviceHandle.id, AllocationState::Reserved);
+    if (resultData == nullptr) {
+        return false;
+    }
 
-        ReturnAdapterRequestDeviceCallbackCmd cmd = {};
-        cmd.adapter = data->adapter;
-        cmd.requestSerial = data->requestSerial;
-        cmd.status = status;
-        cmd.message = message;
+    resultData->generation = deviceHandle.generation;
 
-        if (status != WGPURequestDeviceStatus_Success) {
+    auto userdata = MakeUserdata<RequestDeviceUserdata>();
+    userdata->adapter = ObjectHandle{adapterId, adapter->generation};
+    userdata->requestSerial = requestSerial;
+    userdata->deviceObjectId = deviceHandle.id;
+
+    mProcs.adapterRequestDevice(adapter->handle, descriptor,
+                                ForwardToServer<&Server::OnRequestDeviceCallback>,
+                                userdata.release());
+    return true;
+}
+
+void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
+                                     WGPURequestDeviceStatus status,
+                                     WGPUDevice device,
+                                     const char* message) {
+    auto* deviceObject = DeviceObjects().Get(data->deviceObjectId, AllocationState::Reserved);
+    // Should be impossible to fail. ObjectIds can't be freed by a destroy command until
+    // they move from Reserved to Allocated, or if they are destroyed here.
+    ASSERT(deviceObject != nullptr);
+
+    ReturnAdapterRequestDeviceCallbackCmd cmd = {};
+    cmd.adapter = data->adapter;
+    cmd.requestSerial = data->requestSerial;
+    cmd.status = status;
+    cmd.message = message;
+
+    if (status != WGPURequestDeviceStatus_Success) {
+        // Free the ObjectId which will make it unusable.
+        DeviceObjects().Free(data->deviceObjectId);
+        ASSERT(device == nullptr);
+        SerializeCommand(cmd);
+        return;
+    }
+
+    std::vector<WGPUFeatureName> features;
+
+    size_t featuresCount = mProcs.deviceEnumerateFeatures(device, nullptr);
+    features.resize(featuresCount);
+    mProcs.deviceEnumerateFeatures(device, features.data());
+
+    // The client should only be able to request supported features, so all enumerated
+    // features that were enabled must also be supported by the wire.
+    // Note: We fail the callback here, instead of immediately upon receiving
+    // the request to preserve callback ordering.
+    for (WGPUFeatureName f : features) {
+        if (!IsFeatureSupported(f)) {
+            // Release the device.
+            mProcs.deviceRelease(device);
             // Free the ObjectId which will make it unusable.
             DeviceObjects().Free(data->deviceObjectId);
-            ASSERT(device == nullptr);
+
+            cmd.status = WGPURequestDeviceStatus_Error;
+            cmd.message = "Requested feature not supported.";
             SerializeCommand(cmd);
             return;
         }
-
-        std::vector<WGPUFeatureName> features;
-
-        size_t featuresCount = mProcs.deviceEnumerateFeatures(device, nullptr);
-        features.resize(featuresCount);
-        mProcs.deviceEnumerateFeatures(device, features.data());
-
-        // The client should only be able to request supported features, so all enumerated
-        // features that were enabled must also be supported by the wire.
-        // Note: We fail the callback here, instead of immediately upon receiving
-        // the request to preserve callback ordering.
-        for (WGPUFeatureName f : features) {
-            if (!IsFeatureSupported(f)) {
-                // Release the device.
-                mProcs.deviceRelease(device);
-                // Free the ObjectId which will make it unusable.
-                DeviceObjects().Free(data->deviceObjectId);
-
-                cmd.status = WGPURequestDeviceStatus_Error;
-                cmd.message = "Requested feature not supported.";
-                SerializeCommand(cmd);
-                return;
-            }
-        }
-
-        cmd.featuresCount = static_cast<uint32_t>(features.size());
-        cmd.features = features.data();
-
-        WGPUSupportedLimits limits = {};
-        mProcs.deviceGetLimits(device, &limits);
-        cmd.limits = &limits;
-
-        // Assign the handle and allocated status if the device is created successfully.
-        deviceObject->state = AllocationState::Allocated;
-        deviceObject->handle = device;
-        SetForwardingDeviceCallbacks(deviceObject);
-
-        SerializeCommand(cmd);
     }
+
+    cmd.featuresCount = static_cast<uint32_t>(features.size());
+    cmd.features = features.data();
+
+    WGPUSupportedLimits limits = {};
+    mProcs.deviceGetLimits(device, &limits);
+    cmd.limits = &limits;
+
+    // Assign the handle and allocated status if the device is created successfully.
+    deviceObject->state = AllocationState::Allocated;
+    deviceObject->handle = device;
+    SetForwardingDeviceCallbacks(deviceObject);
+
+    SerializeCommand(cmd);
+}
 
 }  // namespace dawn::wire::server

@@ -18,84 +18,84 @@
 
 namespace dawn::wire::client {
 
-    Instance::~Instance() {
-        mRequestAdapterRequests.CloseAll([](RequestAdapterData* request) {
-            request->callback(WGPURequestAdapterStatus_Unknown, nullptr,
-                              "Instance destroyed before callback", request->userdata);
-        });
+Instance::~Instance() {
+    mRequestAdapterRequests.CloseAll([](RequestAdapterData* request) {
+        request->callback(WGPURequestAdapterStatus_Unknown, nullptr,
+                          "Instance destroyed before callback", request->userdata);
+    });
+}
+
+void Instance::CancelCallbacksForDisconnect() {
+    mRequestAdapterRequests.CloseAll([](RequestAdapterData* request) {
+        request->callback(WGPURequestAdapterStatus_Unknown, nullptr, "GPU connection lost",
+                          request->userdata);
+    });
+}
+
+void Instance::RequestAdapter(const WGPURequestAdapterOptions* options,
+                              WGPURequestAdapterCallback callback,
+                              void* userdata) {
+    if (client->IsDisconnected()) {
+        callback(WGPURequestAdapterStatus_Error, nullptr, "GPU connection lost", userdata);
+        return;
     }
 
-    void Instance::CancelCallbacksForDisconnect() {
-        mRequestAdapterRequests.CloseAll([](RequestAdapterData* request) {
-            request->callback(WGPURequestAdapterStatus_Unknown, nullptr, "GPU connection lost",
-                              request->userdata);
-        });
-    }
+    auto* allocation = client->AdapterAllocator().New(client);
+    uint64_t serial = mRequestAdapterRequests.Add({callback, allocation->object->id, userdata});
 
-    void Instance::RequestAdapter(const WGPURequestAdapterOptions* options,
-                                  WGPURequestAdapterCallback callback,
-                                  void* userdata) {
-        if (client->IsDisconnected()) {
-            callback(WGPURequestAdapterStatus_Error, nullptr, "GPU connection lost", userdata);
-            return;
-        }
+    InstanceRequestAdapterCmd cmd;
+    cmd.instanceId = this->id;
+    cmd.requestSerial = serial;
+    cmd.adapterObjectHandle = ObjectHandle(allocation->object->id, allocation->generation);
+    cmd.options = options;
 
-        auto* allocation = client->AdapterAllocator().New(client);
-        uint64_t serial = mRequestAdapterRequests.Add({callback, allocation->object->id, userdata});
+    client->SerializeCommand(cmd);
+}
 
-        InstanceRequestAdapterCmd cmd;
-        cmd.instanceId = this->id;
-        cmd.requestSerial = serial;
-        cmd.adapterObjectHandle = ObjectHandle(allocation->object->id, allocation->generation);
-        cmd.options = options;
-
-        client->SerializeCommand(cmd);
-    }
-
-    bool Client::DoInstanceRequestAdapterCallback(Instance* instance,
-                                                  uint64_t requestSerial,
-                                                  WGPURequestAdapterStatus status,
-                                                  const char* message,
-                                                  const WGPUAdapterProperties* properties,
-                                                  const WGPUSupportedLimits* limits,
-                                                  uint32_t featuresCount,
-                                                  const WGPUFeatureName* features) {
-        // May have been deleted or recreated so this isn't an error.
-        if (instance == nullptr) {
-            return true;
-        }
-        return instance->OnRequestAdapterCallback(requestSerial, status, message, properties,
-                                                  limits, featuresCount, features);
-    }
-
-    bool Instance::OnRequestAdapterCallback(uint64_t requestSerial,
-                                            WGPURequestAdapterStatus status,
-                                            const char* message,
-                                            const WGPUAdapterProperties* properties,
-                                            const WGPUSupportedLimits* limits,
-                                            uint32_t featuresCount,
-                                            const WGPUFeatureName* features) {
-        RequestAdapterData request;
-        if (!mRequestAdapterRequests.Acquire(requestSerial, &request)) {
-            return false;
-        }
-
-        Adapter* adapter = client->AdapterAllocator().GetObject(request.adapterObjectId);
-
-        // If the return status is a failure we should give a null adapter to the callback and
-        // free the allocation.
-        if (status != WGPURequestAdapterStatus_Success) {
-            client->AdapterAllocator().Free(adapter);
-            request.callback(status, nullptr, message, request.userdata);
-            return true;
-        }
-
-        adapter->SetProperties(properties);
-        adapter->SetLimits(limits);
-        adapter->SetFeatures(features, featuresCount);
-
-        request.callback(status, ToAPI(adapter), message, request.userdata);
+bool Client::DoInstanceRequestAdapterCallback(Instance* instance,
+                                              uint64_t requestSerial,
+                                              WGPURequestAdapterStatus status,
+                                              const char* message,
+                                              const WGPUAdapterProperties* properties,
+                                              const WGPUSupportedLimits* limits,
+                                              uint32_t featuresCount,
+                                              const WGPUFeatureName* features) {
+    // May have been deleted or recreated so this isn't an error.
+    if (instance == nullptr) {
         return true;
     }
+    return instance->OnRequestAdapterCallback(requestSerial, status, message, properties, limits,
+                                              featuresCount, features);
+}
+
+bool Instance::OnRequestAdapterCallback(uint64_t requestSerial,
+                                        WGPURequestAdapterStatus status,
+                                        const char* message,
+                                        const WGPUAdapterProperties* properties,
+                                        const WGPUSupportedLimits* limits,
+                                        uint32_t featuresCount,
+                                        const WGPUFeatureName* features) {
+    RequestAdapterData request;
+    if (!mRequestAdapterRequests.Acquire(requestSerial, &request)) {
+        return false;
+    }
+
+    Adapter* adapter = client->AdapterAllocator().GetObject(request.adapterObjectId);
+
+    // If the return status is a failure we should give a null adapter to the callback and
+    // free the allocation.
+    if (status != WGPURequestAdapterStatus_Success) {
+        client->AdapterAllocator().Free(adapter);
+        request.callback(status, nullptr, message, request.userdata);
+        return true;
+    }
+
+    adapter->SetProperties(properties);
+    adapter->SetLimits(limits);
+    adapter->SetFeatures(features, featuresCount);
+
+    request.callback(status, ToAPI(adapter), message, request.userdata);
+    return true;
+}
 
 }  // namespace dawn::wire::client

@@ -18,87 +18,85 @@ namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, StructBodyDecl_Parses) {
-  auto p = parser("{a : i32}");
+    auto p = parser("{a : i32}");
 
-  auto& builder = p->builder();
+    auto& builder = p->builder();
 
-  auto m = p->expect_struct_body_decl();
-  ASSERT_FALSE(p->has_error());
-  ASSERT_FALSE(m.errored);
-  ASSERT_EQ(m.value.size(), 1u);
+    auto m = p->expect_struct_body_decl();
+    ASSERT_FALSE(p->has_error());
+    ASSERT_FALSE(m.errored);
+    ASSERT_EQ(m.value.size(), 1u);
 
-  const auto* mem = m.value[0];
-  EXPECT_EQ(mem->symbol, builder.Symbols().Get("a"));
-  EXPECT_TRUE(mem->type->Is<ast::I32>());
-  EXPECT_EQ(mem->attributes.size(), 0u);
+    const auto* mem = m.value[0];
+    EXPECT_EQ(mem->symbol, builder.Symbols().Get("a"));
+    EXPECT_TRUE(mem->type->Is<ast::I32>());
+    EXPECT_EQ(mem->attributes.size(), 0u);
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_Parses_TrailingComma) {
-  auto p = parser("{a : i32,}");
+    auto p = parser("{a : i32,}");
 
-  auto& builder = p->builder();
+    auto& builder = p->builder();
 
-  auto m = p->expect_struct_body_decl();
-  ASSERT_FALSE(p->has_error());
-  ASSERT_FALSE(m.errored);
-  ASSERT_EQ(m.value.size(), 1u);
+    auto m = p->expect_struct_body_decl();
+    ASSERT_FALSE(p->has_error());
+    ASSERT_FALSE(m.errored);
+    ASSERT_EQ(m.value.size(), 1u);
 
-  const auto* mem = m.value[0];
-  EXPECT_EQ(mem->symbol, builder.Symbols().Get("a"));
-  EXPECT_TRUE(mem->type->Is<ast::I32>());
-  EXPECT_EQ(mem->attributes.size(), 0u);
+    const auto* mem = m.value[0];
+    EXPECT_EQ(mem->symbol, builder.Symbols().Get("a"));
+    EXPECT_TRUE(mem->type->Is<ast::I32>());
+    EXPECT_EQ(mem->attributes.size(), 0u);
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_ParsesEmpty) {
-  auto p = parser("{}");
-  auto m = p->expect_struct_body_decl();
-  ASSERT_FALSE(p->has_error());
-  ASSERT_FALSE(m.errored);
-  ASSERT_EQ(m.value.size(), 0u);
+    auto p = parser("{}");
+    auto m = p->expect_struct_body_decl();
+    ASSERT_FALSE(p->has_error());
+    ASSERT_FALSE(m.errored);
+    ASSERT_EQ(m.value.size(), 0u);
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_InvalidAlign) {
-  auto p = parser(R"(
+    auto p = parser(R"(
 {
   @align(nan) a : i32,
 })");
-  auto m = p->expect_struct_body_decl();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(m.errored);
-  EXPECT_EQ(p->error(),
-            "3:10: expected signed integer literal for align attribute");
+    auto m = p->expect_struct_body_decl();
+    ASSERT_TRUE(p->has_error());
+    ASSERT_TRUE(m.errored);
+    EXPECT_EQ(p->error(), "3:10: expected signed integer literal for align attribute");
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_InvalidSize) {
-  auto p = parser(R"(
+    auto p = parser(R"(
 {
   @size(nan) a : i32,
 })");
-  auto m = p->expect_struct_body_decl();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(m.errored);
-  EXPECT_EQ(p->error(),
-            "3:9: expected signed integer literal for size attribute");
+    auto m = p->expect_struct_body_decl();
+    ASSERT_TRUE(p->has_error());
+    ASSERT_TRUE(m.errored);
+    EXPECT_EQ(p->error(), "3:9: expected signed integer literal for size attribute");
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_MissingClosingBracket) {
-  auto p = parser("{a : i32,");
-  auto m = p->expect_struct_body_decl();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(m.errored);
-  EXPECT_EQ(p->error(), "1:10: expected '}' for struct declaration");
+    auto p = parser("{a : i32,");
+    auto m = p->expect_struct_body_decl();
+    ASSERT_TRUE(p->has_error());
+    ASSERT_TRUE(m.errored);
+    EXPECT_EQ(p->error(), "1:10: expected '}' for struct declaration");
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_InvalidToken) {
-  auto p = parser(R"(
+    auto p = parser(R"(
 {
   a : i32,
   1.23
 } )");
-  auto m = p->expect_struct_body_decl();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(m.errored);
-  EXPECT_EQ(p->error(), "4:3: expected '}' for struct declaration");
+    auto m = p->expect_struct_body_decl();
+    ASSERT_TRUE(p->has_error());
+    ASSERT_TRUE(m.errored);
+    EXPECT_EQ(p->error(), "4:3: expected '}' for struct declaration");
 }
 
 }  // namespace

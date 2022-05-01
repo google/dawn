@@ -27,27 +27,27 @@ Bool::Bool(Bool&&) = default;
 Bool::~Bool() = default;
 
 size_t Bool::Hash() const {
-  return static_cast<size_t>(TypeInfo::Of<Bool>().full_hashcode);
+    return static_cast<size_t>(TypeInfo::Of<Bool>().full_hashcode);
 }
 
 bool Bool::Equals(const Type& other) const {
-  return other.Is<Bool>();
+    return other.Is<Bool>();
 }
 
 std::string Bool::FriendlyName(const SymbolTable&) const {
-  return "bool";
+    return "bool";
 }
 
 bool Bool::IsConstructible() const {
-  return true;
+    return true;
 }
 
 uint32_t Bool::Size() const {
-  return 4;
+    return 4;
 }
 
 uint32_t Bool::Align() const {
-  return 4;
+    return 4;
 }
 
 }  // namespace tint::sem

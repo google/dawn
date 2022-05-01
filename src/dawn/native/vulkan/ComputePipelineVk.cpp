@@ -28,98 +28,97 @@
 
 namespace dawn::native::vulkan {
 
-    // static
-    Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
-        Device* device,
-        const ComputePipelineDescriptor* descriptor) {
-        return AcquireRef(new ComputePipeline(device, descriptor));
+// static
+Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
+    Device* device,
+    const ComputePipelineDescriptor* descriptor) {
+    return AcquireRef(new ComputePipeline(device, descriptor));
+}
+
+MaybeError ComputePipeline::Initialize() {
+    VkComputePipelineCreateInfo createInfo;
+    createInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+    createInfo.pNext = nullptr;
+    createInfo.flags = 0;
+    createInfo.layout = ToBackend(GetLayout())->GetHandle();
+    createInfo.basePipelineHandle = ::VK_NULL_HANDLE;
+    createInfo.basePipelineIndex = -1;
+
+    createInfo.stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    createInfo.stage.pNext = nullptr;
+    createInfo.stage.flags = 0;
+    createInfo.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+    // Generate a new VkShaderModule with BindingRemapper tint transform for each pipeline
+    const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
+    ShaderModule* module = ToBackend(computeStage.module.Get());
+    PipelineLayout* layout = ToBackend(GetLayout());
+    const ShaderModule::Spirv* spirv;
+    DAWN_TRY_ASSIGN((std::tie(createInfo.stage.module, spirv)),
+                    module->GetHandleAndSpirv(computeStage.entryPoint.c_str(), layout));
+
+    createInfo.stage.pName = computeStage.entryPoint.c_str();
+
+    std::vector<OverridableConstantScalar> specializationDataEntries;
+    std::vector<VkSpecializationMapEntry> specializationMapEntries;
+    VkSpecializationInfo specializationInfo{};
+    createInfo.stage.pSpecializationInfo = GetVkSpecializationInfo(
+        computeStage, &specializationInfo, &specializationDataEntries, &specializationMapEntries);
+
+    Device* device = ToBackend(GetDevice());
+
+    PNextChainBuilder stageExtChain(&createInfo.stage);
+
+    VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT subgroupSizeInfo = {};
+    uint32_t computeSubgroupSize = device->GetComputeSubgroupSize();
+    if (computeSubgroupSize != 0u) {
+        ASSERT(device->GetDeviceInfo().HasExt(DeviceExt::SubgroupSizeControl));
+        subgroupSizeInfo.requiredSubgroupSize = computeSubgroupSize;
+        stageExtChain.Add(
+            &subgroupSizeInfo,
+            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO_EXT);
     }
 
-    MaybeError ComputePipeline::Initialize() {
-        VkComputePipelineCreateInfo createInfo;
-        createInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
-        createInfo.pNext = nullptr;
-        createInfo.flags = 0;
-        createInfo.layout = ToBackend(GetLayout())->GetHandle();
-        createInfo.basePipelineHandle = ::VK_NULL_HANDLE;
-        createInfo.basePipelineIndex = -1;
+    // Record cache key information now since the createInfo is not stored.
+    GetCacheKey()
+        ->Record(createInfo, static_cast<const ComputePipeline*>(this)->GetLayout())
+        .RecordIterable(*spirv);
 
-        createInfo.stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        createInfo.stage.pNext = nullptr;
-        createInfo.stage.flags = 0;
-        createInfo.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-        // Generate a new VkShaderModule with BindingRemapper tint transform for each pipeline
-        const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
-        ShaderModule* module = ToBackend(computeStage.module.Get());
-        PipelineLayout* layout = ToBackend(GetLayout());
-        const ShaderModule::Spirv* spirv;
-        DAWN_TRY_ASSIGN((std::tie(createInfo.stage.module, spirv)),
-                        module->GetHandleAndSpirv(computeStage.entryPoint.c_str(), layout));
+    DAWN_TRY(
+        CheckVkSuccess(device->fn.CreateComputePipelines(device->GetVkDevice(), ::VK_NULL_HANDLE, 1,
+                                                         &createInfo, nullptr, &*mHandle),
+                       "CreateComputePipeline"));
 
-        createInfo.stage.pName = computeStage.entryPoint.c_str();
+    SetLabelImpl();
 
-        std::vector<OverridableConstantScalar> specializationDataEntries;
-        std::vector<VkSpecializationMapEntry> specializationMapEntries;
-        VkSpecializationInfo specializationInfo{};
-        createInfo.stage.pSpecializationInfo =
-            GetVkSpecializationInfo(computeStage, &specializationInfo, &specializationDataEntries,
-                                    &specializationMapEntries);
+    return {};
+}
 
-        Device* device = ToBackend(GetDevice());
+void ComputePipeline::SetLabelImpl() {
+    SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_ComputePipeline", GetLabel());
+}
 
-        PNextChainBuilder stageExtChain(&createInfo.stage);
+ComputePipeline::~ComputePipeline() = default;
 
-        VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT subgroupSizeInfo = {};
-        uint32_t computeSubgroupSize = device->GetComputeSubgroupSize();
-        if (computeSubgroupSize != 0u) {
-            ASSERT(device->GetDeviceInfo().HasExt(DeviceExt::SubgroupSizeControl));
-            subgroupSizeInfo.requiredSubgroupSize = computeSubgroupSize;
-            stageExtChain.Add(
-                &subgroupSizeInfo,
-                VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_REQUIRED_SUBGROUP_SIZE_CREATE_INFO_EXT);
-        }
+void ComputePipeline::DestroyImpl() {
+    ComputePipelineBase::DestroyImpl();
 
-        // Record cache key information now since the createInfo is not stored.
-        GetCacheKey()
-            ->Record(createInfo, static_cast<const ComputePipeline*>(this)->GetLayout())
-            .RecordIterable(*spirv);
-
-        DAWN_TRY(CheckVkSuccess(
-            device->fn.CreateComputePipelines(device->GetVkDevice(), ::VK_NULL_HANDLE, 1,
-                                              &createInfo, nullptr, &*mHandle),
-            "CreateComputePipeline"));
-
-        SetLabelImpl();
-
-        return {};
+    if (mHandle != VK_NULL_HANDLE) {
+        ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
+        mHandle = VK_NULL_HANDLE;
     }
+}
 
-    void ComputePipeline::SetLabelImpl() {
-        SetDebugName(ToBackend(GetDevice()), mHandle, "Dawn_ComputePipeline", GetLabel());
-    }
+VkPipeline ComputePipeline::GetHandle() const {
+    return mHandle;
+}
 
-    ComputePipeline::~ComputePipeline() = default;
-
-    void ComputePipeline::DestroyImpl() {
-        ComputePipelineBase::DestroyImpl();
-
-        if (mHandle != VK_NULL_HANDLE) {
-            ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
-            mHandle = VK_NULL_HANDLE;
-        }
-    }
-
-    VkPipeline ComputePipeline::GetHandle() const {
-        return mHandle;
-    }
-
-    void ComputePipeline::InitializeAsync(Ref<ComputePipelineBase> computePipeline,
-                                          WGPUCreateComputePipelineAsyncCallback callback,
-                                          void* userdata) {
-        std::unique_ptr<CreateComputePipelineAsyncTask> asyncTask =
-            std::make_unique<CreateComputePipelineAsyncTask>(std::move(computePipeline), callback,
-                                                             userdata);
-        CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
-    }
+void ComputePipeline::InitializeAsync(Ref<ComputePipelineBase> computePipeline,
+                                      WGPUCreateComputePipelineAsyncCallback callback,
+                                      void* userdata) {
+    std::unique_ptr<CreateComputePipelineAsyncTask> asyncTask =
+        std::make_unique<CreateComputePipelineAsyncTask>(std::move(computePipeline), callback,
+                                                         userdata);
+    CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
+}
 
 }  // namespace dawn::native::vulkan

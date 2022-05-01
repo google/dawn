@@ -26,43 +26,41 @@ namespace {
 using NumWorkgroupsFromUniformTest = TransformTest;
 
 TEST_F(NumWorkgroupsFromUniformTest, ShouldRunEmptyModule) {
-  auto* src = R"()";
+    auto* src = R"()";
 
-  EXPECT_FALSE(ShouldRun<NumWorkgroupsFromUniform>(src));
+    EXPECT_FALSE(ShouldRun<NumWorkgroupsFromUniform>(src));
 }
 
 TEST_F(NumWorkgroupsFromUniformTest, ShouldRunHasNumWorkgroups) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
 }
 )";
 
-  EXPECT_TRUE(ShouldRun<NumWorkgroupsFromUniform>(src));
+    EXPECT_TRUE(ShouldRun<NumWorkgroupsFromUniform>(src));
 }
 
 TEST_F(NumWorkgroupsFromUniformTest, Error_MissingTransformData) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
 }
 )";
 
-  auto* expect =
-      "error: missing transform data for "
-      "tint::transform::NumWorkgroupsFromUniform";
+    auto* expect =
+        "error: missing transform data for "
+        "tint::transform::NumWorkgroupsFromUniform";
 
-  DataMap data;
-  data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-  auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(
-      src, data);
+    DataMap data;
+    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+    auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(NumWorkgroupsFromUniformTest, Basic) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
   let groups_x = num_wgs.x;
@@ -71,7 +69,7 @@ fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_symbol_2 {
   num_workgroups : vec3<u32>,
 }
@@ -90,17 +88,15 @@ fn main() {
 }
 )";
 
-  DataMap data;
-  data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-  data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
-  auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(
-      src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(NumWorkgroupsFromUniformTest, StructOnlyMember) {
-  auto* src = R"(
+    auto* src = R"(
 struct Builtins {
   @builtin(num_workgroups) num_wgs : vec3<u32>,
 };
@@ -113,7 +109,7 @@ fn main(in : Builtins) {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_symbol_2 {
   num_workgroups : vec3<u32>,
 }
@@ -136,17 +132,15 @@ fn main() {
 }
 )";
 
-  DataMap data;
-  data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-  data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
-  auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(
-      src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(NumWorkgroupsFromUniformTest, StructOnlyMember_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main(in : Builtins) {
   let groups_x = in.num_wgs.x;
@@ -159,7 +153,7 @@ struct Builtins {
 };
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_symbol_2 {
   num_workgroups : vec3<u32>,
 }
@@ -182,17 +176,15 @@ struct Builtins {
 }
 )";
 
-  DataMap data;
-  data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-  data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
-  auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(
-      src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(NumWorkgroupsFromUniformTest, StructMultipleMembers) {
-  auto* src = R"(
+    auto* src = R"(
 struct Builtins {
   @builtin(global_invocation_id) gid : vec3<u32>,
   @builtin(num_workgroups) num_wgs : vec3<u32>,
@@ -207,7 +199,7 @@ fn main(in : Builtins) {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_symbol_2 {
   num_workgroups : vec3<u32>,
 }
@@ -239,17 +231,15 @@ fn main(tint_symbol : tint_symbol_1) {
 }
 )";
 
-  DataMap data;
-  data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-  data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
-  auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(
-      src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(NumWorkgroupsFromUniformTest, StructMultipleMembers_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main(in : Builtins) {
   let groups_x = in.num_wgs.x;
@@ -265,7 +255,7 @@ struct Builtins {
 
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_symbol_2 {
   num_workgroups : vec3<u32>,
 }
@@ -297,17 +287,15 @@ struct Builtins {
 }
 )";
 
-  DataMap data;
-  data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-  data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
-  auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(
-      src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(NumWorkgroupsFromUniformTest, MultipleEntryPoints) {
-  auto* src = R"(
+    auto* src = R"(
 struct Builtins1 {
   @builtin(num_workgroups) num_wgs : vec3<u32>,
 };
@@ -340,7 +328,7 @@ fn main3(@builtin(num_workgroups) num_wgs : vec3<u32>) {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_symbol_6 {
   num_workgroups : vec3<u32>,
 }
@@ -398,17 +386,15 @@ fn main3() {
 }
 )";
 
-  DataMap data;
-  data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-  data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
-  auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(
-      src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(NumWorkgroupsFromUniformTest, NoUsages) {
-  auto* src = R"(
+    auto* src = R"(
 struct Builtins {
   @builtin(global_invocation_id) gid : vec3<u32>,
   @builtin(workgroup_id) wgid : vec3<u32>,
@@ -419,7 +405,7 @@ fn main(in : Builtins) {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct Builtins {
   gid : vec3<u32>,
   wgid : vec3<u32>,
@@ -441,13 +427,11 @@ fn main(tint_symbol : tint_symbol_1) {
 }
 )";
 
-  DataMap data;
-  data.Add<CanonicalizeEntryPointIO::Config>(
-      CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-  data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
-  auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(
-      src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

@@ -21,9 +21,9 @@
 namespace tint::reader::wgsl {
 
 Program Parse(Source::File const* file) {
-  ParserImpl parser(file);
-  parser.Parse();
-  return Program(std::move(parser.builder()));
+    ParserImpl parser(file);
+    parser.Parse();
+    return Program(std::move(parser.builder()));
 }
 
 }  // namespace tint::reader::wgsl

@@ -18,28 +18,27 @@
 
 namespace dawn::native::opengl {
 
-    // static
-    Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
-        Device* device,
-        const ComputePipelineDescriptor* descriptor) {
-        return AcquireRef(new ComputePipeline(device, descriptor));
-    }
+// static
+Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
+    Device* device,
+    const ComputePipelineDescriptor* descriptor) {
+    return AcquireRef(new ComputePipeline(device, descriptor));
+}
 
-    ComputePipeline::~ComputePipeline() = default;
+ComputePipeline::~ComputePipeline() = default;
 
-    void ComputePipeline::DestroyImpl() {
-        ComputePipelineBase::DestroyImpl();
-        DeleteProgram(ToBackend(GetDevice())->gl);
-    }
+void ComputePipeline::DestroyImpl() {
+    ComputePipelineBase::DestroyImpl();
+    DeleteProgram(ToBackend(GetDevice())->gl);
+}
 
-    MaybeError ComputePipeline::Initialize() {
-        DAWN_TRY(
-            InitializeBase(ToBackend(GetDevice())->gl, ToBackend(GetLayout()), GetAllStages()));
-        return {};
-    }
+MaybeError ComputePipeline::Initialize() {
+    DAWN_TRY(InitializeBase(ToBackend(GetDevice())->gl, ToBackend(GetLayout()), GetAllStages()));
+    return {};
+}
 
-    void ComputePipeline::ApplyNow() {
-        PipelineGL::ApplyNow(ToBackend(GetDevice())->gl);
-    }
+void ComputePipeline::ApplyNow() {
+    PipelineGL::ApplyNow(ToBackend(GetDevice())->gl);
+}
 
 }  // namespace dawn::native::opengl

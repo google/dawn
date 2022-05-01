@@ -32,11 +32,11 @@ namespace tint::utils {
 template <typename IN, typename TRANSFORMER>
 auto Transform(const std::vector<IN>& in, TRANSFORMER&& transform)
     -> std::vector<decltype(transform(in[0]))> {
-  std::vector<decltype(transform(in[0]))> result(in.size());
-  for (size_t i = 0; i < result.size(); ++i) {
-    result[i] = transform(in[i]);
-  }
-  return result;
+    std::vector<decltype(transform(in[0]))> result(in.size());
+    for (size_t i = 0; i < result.size(); ++i) {
+        result[i] = transform(in[i]);
+    }
+    return result;
 }
 
 /// Transform performs an element-wise transformation of a vector.
@@ -48,11 +48,11 @@ auto Transform(const std::vector<IN>& in, TRANSFORMER&& transform)
 template <typename IN, typename TRANSFORMER>
 auto Transform(const std::vector<IN>& in, TRANSFORMER&& transform)
     -> std::vector<decltype(transform(in[0], 1u))> {
-  std::vector<decltype(transform(in[0], 1u))> result(in.size());
-  for (size_t i = 0; i < result.size(); ++i) {
-    result[i] = transform(in[i], i);
-  }
-  return result;
+    std::vector<decltype(transform(in[0], 1u))> result(in.size());
+    for (size_t i = 0; i < result.size(); ++i) {
+        result[i] = transform(in[i], i);
+    }
+    return result;
 }
 
 }  // namespace tint::utils

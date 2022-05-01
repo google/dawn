@@ -23,35 +23,34 @@ namespace {
 using GlslGeneratorImplTest_StorageBuffer = TestHelper;
 
 void TestAlign(ProgramBuilder* ctx) {
-  // struct Nephews {
-  //   @align(256) huey  : f32;
-  //   @align(256) dewey : f32;
-  //   @align(256) louie : f32;
-  // };
-  // @group(0) @binding(0) var<storage, read_write> nephews : Nephews;
-  auto* nephews = ctx->Structure(
-      "Nephews",
-      {
-          ctx->Member("huey", ctx->ty.f32(), {ctx->MemberAlign(256)}),
-          ctx->Member("dewey", ctx->ty.f32(), {ctx->MemberAlign(256)}),
-          ctx->Member("louie", ctx->ty.f32(), {ctx->MemberAlign(256)}),
-      });
-  ctx->Global("nephews", ctx->ty.Of(nephews), ast::StorageClass::kStorage,
-              ast::AttributeList{
-                  ctx->create<ast::BindingAttribute>(0),
-                  ctx->create<ast::GroupAttribute>(0),
-              });
+    // struct Nephews {
+    //   @align(256) huey  : f32;
+    //   @align(256) dewey : f32;
+    //   @align(256) louie : f32;
+    // };
+    // @group(0) @binding(0) var<storage, read_write> nephews : Nephews;
+    auto* nephews =
+        ctx->Structure("Nephews", {
+                                      ctx->Member("huey", ctx->ty.f32(), {ctx->MemberAlign(256)}),
+                                      ctx->Member("dewey", ctx->ty.f32(), {ctx->MemberAlign(256)}),
+                                      ctx->Member("louie", ctx->ty.f32(), {ctx->MemberAlign(256)}),
+                                  });
+    ctx->Global("nephews", ctx->ty.Of(nephews), ast::StorageClass::kStorage,
+                ast::AttributeList{
+                    ctx->create<ast::BindingAttribute>(0),
+                    ctx->create<ast::GroupAttribute>(0),
+                });
 }
 
 TEST_F(GlslGeneratorImplTest_StorageBuffer, Align) {
-  TestAlign(this);
+    TestAlign(this);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  // TODO(crbug.com/tint/1421) offsets do not currently work on GLSL ES.
-  // They will likely require manual padding.
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#version 310 es
+    // TODO(crbug.com/tint/1421) offsets do not currently work on GLSL ES.
+    // They will likely require manual padding.
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 310 es
 
 struct Nephews {
   float huey;
@@ -68,12 +67,12 @@ layout(binding = 0, std430) buffer Nephews_1 {
 }
 
 TEST_F(GlslGeneratorImplTest_StorageBuffer, Align_Desktop) {
-  TestAlign(this);
+    TestAlign(this);
 
-  GeneratorImpl& gen = Build(Version(Version::Standard::kDesktop, 4, 4));
+    GeneratorImpl& gen = Build(Version(Version::Standard::kDesktop, 4, 4));
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#version 440
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 440
 
 struct Nephews {
   float huey;

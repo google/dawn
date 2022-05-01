@@ -22,99 +22,98 @@
 
 namespace dawn::native {
 
-    std::unique_ptr<ErrorData> ErrorData::Create(InternalErrorType type,
-                                                 std::string message,
-                                                 const char* file,
-                                                 const char* function,
-                                                 int line) {
-        std::unique_ptr<ErrorData> error = std::make_unique<ErrorData>(type, message);
-        error->AppendBacktrace(file, function, line);
-        return error;
-    }
+std::unique_ptr<ErrorData> ErrorData::Create(InternalErrorType type,
+                                             std::string message,
+                                             const char* file,
+                                             const char* function,
+                                             int line) {
+    std::unique_ptr<ErrorData> error = std::make_unique<ErrorData>(type, message);
+    error->AppendBacktrace(file, function, line);
+    return error;
+}
 
-    ErrorData::ErrorData(InternalErrorType type, std::string message)
-        : mType(type), mMessage(std::move(message)) {
-    }
+ErrorData::ErrorData(InternalErrorType type, std::string message)
+    : mType(type), mMessage(std::move(message)) {}
 
-    void ErrorData::AppendBacktrace(const char* file, const char* function, int line) {
-        BacktraceRecord record;
-        record.file = file;
-        record.function = function;
-        record.line = line;
+void ErrorData::AppendBacktrace(const char* file, const char* function, int line) {
+    BacktraceRecord record;
+    record.file = file;
+    record.function = function;
+    record.line = line;
 
-        mBacktrace.push_back(std::move(record));
-    }
+    mBacktrace.push_back(std::move(record));
+}
 
-    void ErrorData::AppendContext(std::string context) {
-        mContexts.push_back(std::move(context));
-    }
+void ErrorData::AppendContext(std::string context) {
+    mContexts.push_back(std::move(context));
+}
 
-    void ErrorData::AppendDebugGroup(std::string label) {
-        mDebugGroups.push_back(std::move(label));
-    }
+void ErrorData::AppendDebugGroup(std::string label) {
+    mDebugGroups.push_back(std::move(label));
+}
 
-    void ErrorData::AppendBackendMessage(std::string message) {
-        mBackendMessages.push_back(std::move(message));
-    }
+void ErrorData::AppendBackendMessage(std::string message) {
+    mBackendMessages.push_back(std::move(message));
+}
 
-    InternalErrorType ErrorData::GetType() const {
-        return mType;
-    }
+InternalErrorType ErrorData::GetType() const {
+    return mType;
+}
 
-    const std::string& ErrorData::GetMessage() const {
-        return mMessage;
-    }
+const std::string& ErrorData::GetMessage() const {
+    return mMessage;
+}
 
-    const std::vector<ErrorData::BacktraceRecord>& ErrorData::GetBacktrace() const {
-        return mBacktrace;
-    }
+const std::vector<ErrorData::BacktraceRecord>& ErrorData::GetBacktrace() const {
+    return mBacktrace;
+}
 
-    const std::vector<std::string>& ErrorData::GetContexts() const {
-        return mContexts;
-    }
+const std::vector<std::string>& ErrorData::GetContexts() const {
+    return mContexts;
+}
 
-    const std::vector<std::string>& ErrorData::GetDebugGroups() const {
-        return mDebugGroups;
-    }
+const std::vector<std::string>& ErrorData::GetDebugGroups() const {
+    return mDebugGroups;
+}
 
-    const std::vector<std::string>& ErrorData::GetBackendMessages() const {
-        return mBackendMessages;
-    }
+const std::vector<std::string>& ErrorData::GetBackendMessages() const {
+    return mBackendMessages;
+}
 
-    std::string ErrorData::GetFormattedMessage() const {
-        std::ostringstream ss;
-        ss << mMessage << "\n";
+std::string ErrorData::GetFormattedMessage() const {
+    std::ostringstream ss;
+    ss << mMessage << "\n";
 
-        if (!mContexts.empty()) {
-            for (auto context : mContexts) {
-                ss << " - While " << context << "\n";
-            }
+    if (!mContexts.empty()) {
+        for (auto context : mContexts) {
+            ss << " - While " << context << "\n";
         }
-
-        // For non-validation errors, or errors that lack a context include the
-        // stack trace for debugging purposes.
-        if (mContexts.empty() || mType != InternalErrorType::Validation) {
-            for (const auto& callsite : mBacktrace) {
-                ss << "    at " << callsite.function << " (" << callsite.file << ":"
-                   << callsite.line << ")\n";
-            }
-        }
-
-        if (!mDebugGroups.empty()) {
-            ss << "\nDebug group stack:\n";
-            for (auto label : mDebugGroups) {
-                ss << " > \"" << label << "\"\n";
-            }
-        }
-
-        if (!mBackendMessages.empty()) {
-            ss << "\nBackend messages:\n";
-            for (auto message : mBackendMessages) {
-                ss << " * " << message << "\n";
-            }
-        }
-
-        return ss.str();
     }
+
+    // For non-validation errors, or errors that lack a context include the
+    // stack trace for debugging purposes.
+    if (mContexts.empty() || mType != InternalErrorType::Validation) {
+        for (const auto& callsite : mBacktrace) {
+            ss << "    at " << callsite.function << " (" << callsite.file << ":" << callsite.line
+               << ")\n";
+        }
+    }
+
+    if (!mDebugGroups.empty()) {
+        ss << "\nDebug group stack:\n";
+        for (auto label : mDebugGroups) {
+            ss << " > \"" << label << "\"\n";
+        }
+    }
+
+    if (!mBackendMessages.empty()) {
+        ss << "\nBackend messages:\n";
+        for (auto message : mBackendMessages) {
+            ss << " * " << message << "\n";
+        }
+    }
+
+    return ss.str();
+}
 
 }  // namespace dawn::native

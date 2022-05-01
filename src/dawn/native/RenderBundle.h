@@ -30,43 +30,43 @@
 
 namespace dawn::native {
 
-    struct RenderBundleDescriptor;
-    class RenderBundleEncoder;
+struct RenderBundleDescriptor;
+class RenderBundleEncoder;
 
-    class RenderBundleBase final : public ApiObjectBase {
-      public:
-        RenderBundleBase(RenderBundleEncoder* encoder,
-                         const RenderBundleDescriptor* descriptor,
-                         Ref<AttachmentState> attachmentState,
-                         bool depthReadOnly,
-                         bool stencilReadOnly,
-                         RenderPassResourceUsage resourceUsage,
-                         IndirectDrawMetadata indirectDrawMetadata);
+class RenderBundleBase final : public ApiObjectBase {
+  public:
+    RenderBundleBase(RenderBundleEncoder* encoder,
+                     const RenderBundleDescriptor* descriptor,
+                     Ref<AttachmentState> attachmentState,
+                     bool depthReadOnly,
+                     bool stencilReadOnly,
+                     RenderPassResourceUsage resourceUsage,
+                     IndirectDrawMetadata indirectDrawMetadata);
 
-        static RenderBundleBase* MakeError(DeviceBase* device);
+    static RenderBundleBase* MakeError(DeviceBase* device);
 
-        ObjectType GetType() const override;
+    ObjectType GetType() const override;
 
-        CommandIterator* GetCommands();
+    CommandIterator* GetCommands();
 
-        const AttachmentState* GetAttachmentState() const;
-        bool IsDepthReadOnly() const;
-        bool IsStencilReadOnly() const;
-        const RenderPassResourceUsage& GetResourceUsage() const;
-        const IndirectDrawMetadata& GetIndirectDrawMetadata();
+    const AttachmentState* GetAttachmentState() const;
+    bool IsDepthReadOnly() const;
+    bool IsStencilReadOnly() const;
+    const RenderPassResourceUsage& GetResourceUsage() const;
+    const IndirectDrawMetadata& GetIndirectDrawMetadata();
 
-      private:
-        RenderBundleBase(DeviceBase* device, ErrorTag errorTag);
+  private:
+    RenderBundleBase(DeviceBase* device, ErrorTag errorTag);
 
-        void DestroyImpl() override;
+    void DestroyImpl() override;
 
-        CommandIterator mCommands;
-        IndirectDrawMetadata mIndirectDrawMetadata;
-        Ref<AttachmentState> mAttachmentState;
-        bool mDepthReadOnly;
-        bool mStencilReadOnly;
-        RenderPassResourceUsage mResourceUsage;
-    };
+    CommandIterator mCommands;
+    IndirectDrawMetadata mIndirectDrawMetadata;
+    Ref<AttachmentState> mAttachmentState;
+    bool mDepthReadOnly;
+    bool mStencilReadOnly;
+    RenderPassResourceUsage mResourceUsage;
+};
 
 }  // namespace dawn::native
 

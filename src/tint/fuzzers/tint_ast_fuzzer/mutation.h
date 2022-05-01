@@ -33,46 +33,44 @@ namespace tint::fuzzers::ast_fuzzer {
 /// - `Apply` - applies the mutation.
 /// - `ToMessage` - converts the mutation data into a protobuf message.
 class Mutation {
- public:
-  /// Virtual destructor.
-  virtual ~Mutation();
+  public:
+    /// Virtual destructor.
+    virtual ~Mutation();
 
-  /// @brief Determines whether this mutation is applicable to the `program`.
-  ///
-  /// @param program - the program this mutation will be applied to. The program
-  ///     must be valid.
-  /// @param node_id_map - the map from `tint::ast::` nodes to their ids.
-  /// @return `true` if `Apply` method can be called without breaking the
-  ///     semantics of the `program`.
-  /// @return `false` otherwise.
-  virtual bool IsApplicable(const tint::Program& program,
-                            const NodeIdMap& node_id_map) const = 0;
+    /// @brief Determines whether this mutation is applicable to the `program`.
+    ///
+    /// @param program - the program this mutation will be applied to. The program
+    ///     must be valid.
+    /// @param node_id_map - the map from `tint::ast::` nodes to their ids.
+    /// @return `true` if `Apply` method can be called without breaking the
+    ///     semantics of the `program`.
+    /// @return `false` otherwise.
+    virtual bool IsApplicable(const tint::Program& program, const NodeIdMap& node_id_map) const = 0;
 
-  /// @brief Applies this mutation to the `clone_context`.
-  ///
-  /// Precondition: `IsApplicable` must return `true` when invoked on the same
-  /// `node_id_map` and `clone_context->src` instance of `tint::Program`. A new
-  /// `tint::Program` that arises in `clone_context` must be valid.
-  ///
-  /// @param node_id_map - the map from `tint::ast::` nodes to their ids.
-  /// @param clone_context - the context that will clone the program with some
-  ///     changes introduced by this mutation.
-  /// @param new_node_id_map - this map will store ids for the mutated and
-  ///     cloned program. This argument cannot be a `nullptr` nor can it point
-  ///     to the same object as `node_id_map`.
-  virtual void Apply(const NodeIdMap& node_id_map,
-                     tint::CloneContext* clone_context,
-                     NodeIdMap* new_node_id_map) const = 0;
+    /// @brief Applies this mutation to the `clone_context`.
+    ///
+    /// Precondition: `IsApplicable` must return `true` when invoked on the same
+    /// `node_id_map` and `clone_context->src` instance of `tint::Program`. A new
+    /// `tint::Program` that arises in `clone_context` must be valid.
+    ///
+    /// @param node_id_map - the map from `tint::ast::` nodes to their ids.
+    /// @param clone_context - the context that will clone the program with some
+    ///     changes introduced by this mutation.
+    /// @param new_node_id_map - this map will store ids for the mutated and
+    ///     cloned program. This argument cannot be a `nullptr` nor can it point
+    ///     to the same object as `node_id_map`.
+    virtual void Apply(const NodeIdMap& node_id_map,
+                       tint::CloneContext* clone_context,
+                       NodeIdMap* new_node_id_map) const = 0;
 
-  /// @return a protobuf message for this mutation.
-  virtual protobufs::Mutation ToMessage() const = 0;
+    /// @return a protobuf message for this mutation.
+    virtual protobufs::Mutation ToMessage() const = 0;
 
-  /// @brief Converts a protobuf message into the mutation instance.
-  ///
-  /// @param message - a protobuf message.
-  /// @return the instance of this class.
-  static std::unique_ptr<Mutation> FromMessage(
-      const protobufs::Mutation& message);
+    /// @brief Converts a protobuf message into the mutation instance.
+    ///
+    /// @param message - a protobuf message.
+    /// @return the instance of this class.
+    static std::unique_ptr<Mutation> FromMessage(const protobufs::Mutation& message);
 };
 
 using MutationList = std::vector<std::unique_ptr<Mutation>>;

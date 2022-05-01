@@ -23,12 +23,12 @@ namespace {
 using TextureTypeDimTest = TestParamHelper<ast::TextureDimension>;
 
 TEST_P(TextureTypeDimTest, DimMustMatch) {
-  // Check that the dim() query returns the right dimensionality.
-  F32 f32;
-  // TextureType is an abstract class, so use concrete class
-  // SampledTexture in its stead.
-  SampledTexture st(GetParam(), &f32);
-  EXPECT_EQ(st.dim(), GetParam());
+    // Check that the dim() query returns the right dimensionality.
+    F32 f32;
+    // TextureType is an abstract class, so use concrete class
+    // SampledTexture in its stead.
+    SampledTexture st(GetParam(), &f32);
+    EXPECT_EQ(st.dim(), GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(Dimensions,

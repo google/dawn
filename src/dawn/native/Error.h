@@ -26,47 +26,47 @@
 
 namespace dawn::native {
 
-    enum class InternalErrorType : uint32_t { Validation, DeviceLost, Internal, OutOfMemory };
+enum class InternalErrorType : uint32_t { Validation, DeviceLost, Internal, OutOfMemory };
 
-    // MaybeError and ResultOrError are meant to be used as return value for function that are not
-    // expected to, but might fail. The handling of error is potentially much slower than successes.
-    using MaybeError = Result<void, ErrorData>;
+// MaybeError and ResultOrError are meant to be used as return value for function that are not
+// expected to, but might fail. The handling of error is potentially much slower than successes.
+using MaybeError = Result<void, ErrorData>;
 
-    template <typename T>
-    using ResultOrError = Result<T, ErrorData>;
+template <typename T>
+using ResultOrError = Result<T, ErrorData>;
 
-    // Returning a success is done like so:
-    //   return {}; // for Error
-    //   return SomethingOfTypeT; // for ResultOrError<T>
-    //
-    // Returning an error is done via:
-    //   return DAWN_MAKE_ERROR(errorType, "My error message");
-    //
-    // but shorthand version for specific error types are preferred:
-    //   return DAWN_VALIDATION_ERROR("My error message");
-    //
-    // There are different types of errors that should be used for different purpose:
-    //
-    //   - Validation: these are errors that show the user did something bad, which causes the
-    //     whole call to be a no-op. It's most commonly found in the frontend but there can be some
-    //     backend specific validation in non-conformant backends too.
-    //
-    //   - Out of memory: creation of a Buffer or Texture failed because there isn't enough memory.
-    //     This is similar to validation errors in that the call becomes a no-op and returns an
-    //     error object, but is reported separated from validation to the user.
-    //
-    //   - Device loss: the backend driver reported that the GPU has been lost, which means all
-    //     previous commands magically disappeared and the only thing left to do is clean up.
-    //     Note: Device loss should be used rarely and in most case you want to use Internal
-    //     instead.
-    //
-    //   - Internal: something happened that the backend didn't expect, and it doesn't know
-    //     how to recover from that situation. This causes the device to be lost, but is separate
-    //     from device loss, because the GPU execution is still happening so we need to clean up
-    //     more gracefully.
-    //
-    //   - Unimplemented: same as Internal except it puts "unimplemented" in the error message for
-    //     more clarity.
+// Returning a success is done like so:
+//   return {}; // for Error
+//   return SomethingOfTypeT; // for ResultOrError<T>
+//
+// Returning an error is done via:
+//   return DAWN_MAKE_ERROR(errorType, "My error message");
+//
+// but shorthand version for specific error types are preferred:
+//   return DAWN_VALIDATION_ERROR("My error message");
+//
+// There are different types of errors that should be used for different purpose:
+//
+//   - Validation: these are errors that show the user did something bad, which causes the
+//     whole call to be a no-op. It's most commonly found in the frontend but there can be some
+//     backend specific validation in non-conformant backends too.
+//
+//   - Out of memory: creation of a Buffer or Texture failed because there isn't enough memory.
+//     This is similar to validation errors in that the call becomes a no-op and returns an
+//     error object, but is reported separated from validation to the user.
+//
+//   - Device loss: the backend driver reported that the GPU has been lost, which means all
+//     previous commands magically disappeared and the only thing left to do is clean up.
+//     Note: Device loss should be used rarely and in most case you want to use Internal
+//     instead.
+//
+//   - Internal: something happened that the backend didn't expect, and it doesn't know
+//     how to recover from that situation. This causes the device to be lost, but is separate
+//     from device loss, because the GPU execution is still happening so we need to clean up
+//     more gracefully.
+//
+//   - Unimplemented: same as Internal except it puts "unimplemented" in the error message for
+//     more clarity.
 
 #define DAWN_MAKE_ERROR(TYPE, MESSAGE) \
     ::dawn::native::ErrorData::Create(TYPE, MESSAGE, __FILE__, __func__, __LINE__)
@@ -108,9 +108,9 @@ namespace dawn::native {
 #define DAWN_CONCAT2(x, y) DAWN_CONCAT1(x, y)
 #define DAWN_LOCAL_VAR DAWN_CONCAT2(_localVar, __LINE__)
 
-    // When Errors aren't handled explicitly, calls to functions returning errors should be
-    // wrapped in an DAWN_TRY. It will return the error if any, otherwise keep executing
-    // the current function.
+// When Errors aren't handled explicitly, calls to functions returning errors should be
+// wrapped in an DAWN_TRY. It will return the error if any, otherwise keep executing
+// the current function.
 #define DAWN_TRY(EXPR) DAWN_TRY_WITH_CLEANUP(EXPR, {})
 
 #define DAWN_TRY_CONTEXT(EXPR, ...) \
@@ -129,39 +129,39 @@ namespace dawn::native {
     for (;;)                                                                                  \
     break
 
-    // DAWN_TRY_ASSIGN is the same as DAWN_TRY for ResultOrError and assigns the success value, if
-    // any, to VAR.
+// DAWN_TRY_ASSIGN is the same as DAWN_TRY for ResultOrError and assigns the success value, if
+// any, to VAR.
 #define DAWN_TRY_ASSIGN(VAR, EXPR) DAWN_TRY_ASSIGN_WITH_CLEANUP(VAR, EXPR, {})
 #define DAWN_TRY_ASSIGN_CONTEXT(VAR, EXPR, ...) \
     DAWN_TRY_ASSIGN_WITH_CLEANUP(VAR, EXPR, { error->AppendContext(absl::StrFormat(__VA_ARGS__)); })
 
-    // Argument helpers are used to determine which macro implementations should be called when
-    // overloading with different number of variables.
+// Argument helpers are used to determine which macro implementations should be called when
+// overloading with different number of variables.
 #define DAWN_ERROR_UNIMPLEMENTED_MACRO_(...) UNREACHABLE()
 #define DAWN_ERROR_GET_5TH_ARG_HELPER_(_1, _2, _3, _4, NAME, ...) NAME
 #define DAWN_ERROR_GET_5TH_ARG_(args) DAWN_ERROR_GET_5TH_ARG_HELPER_ args
 
-    // DAWN_TRY_ASSIGN_WITH_CLEANUP is overloaded with 2 version so that users can override the
-    // return value of the macro when necessary. This is particularly useful if the function
-    // calling the macro may want to return void instead of the error, i.e. in a test where we may
-    // just want to assert and fail if the assign cannot go through. In both the cleanup and return
-    // clauses, users can use the `error` variable to access the pointer to the acquired error.
-    //
-    // Example usages:
-    //     3 Argument Case:
-    //          Result res;
-    //          DAWN_TRY_ASSIGN_WITH_CLEANUP(
-    //              res, GetResultOrErrorFunction(), { AddAdditionalErrorInformation(error.get()); }
-    //          );
-    //
-    //     4 Argument Case:
-    //          bool FunctionThatReturnsBool() {
-    //              DAWN_TRY_ASSIGN_WITH_CLEANUP(
-    //                  res, GetResultOrErrorFunction(),
-    //                  { AddAdditionalErrorInformation(error.get()); },
-    //                  false
-    //              );
-    //          }
+// DAWN_TRY_ASSIGN_WITH_CLEANUP is overloaded with 2 version so that users can override the
+// return value of the macro when necessary. This is particularly useful if the function
+// calling the macro may want to return void instead of the error, i.e. in a test where we may
+// just want to assert and fail if the assign cannot go through. In both the cleanup and return
+// clauses, users can use the `error` variable to access the pointer to the acquired error.
+//
+// Example usages:
+//     3 Argument Case:
+//          Result res;
+//          DAWN_TRY_ASSIGN_WITH_CLEANUP(
+//              res, GetResultOrErrorFunction(), { AddAdditionalErrorInformation(error.get()); }
+//          );
+//
+//     4 Argument Case:
+//          bool FunctionThatReturnsBool() {
+//              DAWN_TRY_ASSIGN_WITH_CLEANUP(
+//                  res, GetResultOrErrorFunction(),
+//                  { AddAdditionalErrorInformation(error.get()); },
+//                  false
+//              );
+//          }
 #define DAWN_TRY_ASSIGN_WITH_CLEANUP(...)                                       \
     DAWN_ERROR_GET_5TH_ARG_((__VA_ARGS__, DAWN_TRY_ASSIGN_WITH_CLEANUP_IMPL_4_, \
                              DAWN_TRY_ASSIGN_WITH_CLEANUP_IMPL_3_,              \
@@ -185,11 +185,11 @@ namespace dawn::native {
     for (;;)                                                                  \
     break
 
-    // Assert that errors are device loss so that we can continue with destruction
-    void IgnoreErrors(MaybeError maybeError);
+// Assert that errors are device loss so that we can continue with destruction
+void IgnoreErrors(MaybeError maybeError);
 
-    wgpu::ErrorType ToWGPUErrorType(InternalErrorType type);
-    InternalErrorType FromWGPUErrorType(wgpu::ErrorType type);
+wgpu::ErrorType ToWGPUErrorType(InternalErrorType type);
+InternalErrorType FromWGPUErrorType(wgpu::ErrorType type);
 
 }  // namespace dawn::native
 

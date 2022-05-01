@@ -30,21 +30,21 @@ namespace tint::sem {
 /// Module holds the top-level semantic types, functions and global variables
 /// used by a Program.
 class Module final : public Castable<Module, Node> {
- public:
-  /// Constructor
-  /// @param dep_ordered_decls the dependency-ordered module-scope declarations
-  explicit Module(std::vector<const ast::Node*> dep_ordered_decls);
+  public:
+    /// Constructor
+    /// @param dep_ordered_decls the dependency-ordered module-scope declarations
+    explicit Module(std::vector<const ast::Node*> dep_ordered_decls);
 
-  /// Destructor
-  ~Module() override;
+    /// Destructor
+    ~Module() override;
 
-  /// @returns the dependency-ordered global declarations for the module
-  const std::vector<const ast::Node*>& DependencyOrderedDeclarations() const {
-    return dep_ordered_decls_;
-  }
+    /// @returns the dependency-ordered global declarations for the module
+    const std::vector<const ast::Node*>& DependencyOrderedDeclarations() const {
+        return dep_ordered_decls_;
+    }
 
- private:
-  const std::vector<const ast::Node*> dep_ordered_decls_;
+  private:
+    const std::vector<const ast::Node*> dep_ordered_decls_;
 };
 
 }  // namespace tint::sem

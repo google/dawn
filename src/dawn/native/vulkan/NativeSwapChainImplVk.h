@@ -23,49 +23,49 @@
 
 namespace dawn::native::vulkan {
 
-    class Device;
+class Device;
 
-    class NativeSwapChainImpl {
-      public:
-        using WSIContext = DawnWSIContextVulkan;
+class NativeSwapChainImpl {
+  public:
+    using WSIContext = DawnWSIContextVulkan;
 
-        NativeSwapChainImpl(Device* device, VkSurfaceKHR surface);
-        ~NativeSwapChainImpl();
+    NativeSwapChainImpl(Device* device, VkSurfaceKHR surface);
+    ~NativeSwapChainImpl();
 
-        void Init(DawnWSIContextVulkan* context);
-        DawnSwapChainError Configure(WGPUTextureFormat format,
-                                     WGPUTextureUsage,
-                                     uint32_t width,
-                                     uint32_t height);
-        DawnSwapChainError GetNextTexture(DawnSwapChainNextTexture* nextTexture);
-        DawnSwapChainError Present();
+    void Init(DawnWSIContextVulkan* context);
+    DawnSwapChainError Configure(WGPUTextureFormat format,
+                                 WGPUTextureUsage,
+                                 uint32_t width,
+                                 uint32_t height);
+    DawnSwapChainError GetNextTexture(DawnSwapChainNextTexture* nextTexture);
+    DawnSwapChainError Present();
 
-        wgpu::TextureFormat GetPreferredFormat() const;
+    wgpu::TextureFormat GetPreferredFormat() const;
 
-        struct ChosenConfig {
-            VkFormat nativeFormat;
-            wgpu::TextureFormat format;
-            VkColorSpaceKHR colorSpace;
-            VkSurfaceTransformFlagBitsKHR preTransform;
-            uint32_t minImageCount;
-            VkPresentModeKHR presentMode;
-            VkCompositeAlphaFlagBitsKHR compositeAlpha;
-        };
-
-      private:
-        void UpdateSurfaceConfig();
-
-        VkSurfaceKHR mSurface = VK_NULL_HANDLE;
-        VkSwapchainKHR mSwapChain = VK_NULL_HANDLE;
-        std::vector<VkImage> mSwapChainImages;
-        uint32_t mLastImageIndex = 0;
-
-        VulkanSurfaceInfo mInfo;
-
-        ChosenConfig mConfig;
-
-        Device* mDevice = nullptr;
+    struct ChosenConfig {
+        VkFormat nativeFormat;
+        wgpu::TextureFormat format;
+        VkColorSpaceKHR colorSpace;
+        VkSurfaceTransformFlagBitsKHR preTransform;
+        uint32_t minImageCount;
+        VkPresentModeKHR presentMode;
+        VkCompositeAlphaFlagBitsKHR compositeAlpha;
     };
+
+  private:
+    void UpdateSurfaceConfig();
+
+    VkSurfaceKHR mSurface = VK_NULL_HANDLE;
+    VkSwapchainKHR mSwapChain = VK_NULL_HANDLE;
+    std::vector<VkImage> mSwapChainImages;
+    uint32_t mLastImageIndex = 0;
+
+    VulkanSurfaceInfo mInfo;
+
+    ChosenConfig mConfig;
+
+    Device* mDevice = nullptr;
+};
 
 }  // namespace dawn::native::vulkan
 

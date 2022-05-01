@@ -23,77 +23,72 @@ namespace {
 using CompoundAssignmentStatementTest = TestHelper;
 
 TEST_F(CompoundAssignmentStatementTest, Creation) {
-  auto* lhs = Expr("lhs");
-  auto* rhs = Expr("rhs");
-  auto op = BinaryOp::kAdd;
+    auto* lhs = Expr("lhs");
+    auto* rhs = Expr("rhs");
+    auto op = BinaryOp::kAdd;
 
-  auto* stmt = create<CompoundAssignmentStatement>(lhs, rhs, op);
-  EXPECT_EQ(stmt->lhs, lhs);
-  EXPECT_EQ(stmt->rhs, rhs);
-  EXPECT_EQ(stmt->op, op);
+    auto* stmt = create<CompoundAssignmentStatement>(lhs, rhs, op);
+    EXPECT_EQ(stmt->lhs, lhs);
+    EXPECT_EQ(stmt->rhs, rhs);
+    EXPECT_EQ(stmt->op, op);
 }
 
 TEST_F(CompoundAssignmentStatementTest, CreationWithSource) {
-  auto* lhs = Expr("lhs");
-  auto* rhs = Expr("rhs");
-  auto op = BinaryOp::kMultiply;
+    auto* lhs = Expr("lhs");
+    auto* rhs = Expr("rhs");
+    auto op = BinaryOp::kMultiply;
 
-  auto* stmt = create<CompoundAssignmentStatement>(
-      Source{Source::Location{20, 2}}, lhs, rhs, op);
-  auto src = stmt->source;
-  EXPECT_EQ(src.range.begin.line, 20u);
-  EXPECT_EQ(src.range.begin.column, 2u);
+    auto* stmt = create<CompoundAssignmentStatement>(Source{Source::Location{20, 2}}, lhs, rhs, op);
+    auto src = stmt->source;
+    EXPECT_EQ(src.range.begin.line, 20u);
+    EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(CompoundAssignmentStatementTest, IsCompoundAssign) {
-  auto* lhs = Expr("lhs");
-  auto* rhs = Expr("rhs");
-  auto op = BinaryOp::kSubtract;
+    auto* lhs = Expr("lhs");
+    auto* rhs = Expr("rhs");
+    auto op = BinaryOp::kSubtract;
 
-  auto* stmt = create<CompoundAssignmentStatement>(lhs, rhs, op);
-  EXPECT_TRUE(stmt->Is<CompoundAssignmentStatement>());
+    auto* stmt = create<CompoundAssignmentStatement>(lhs, rhs, op);
+    EXPECT_TRUE(stmt->Is<CompoundAssignmentStatement>());
 }
 
 TEST_F(CompoundAssignmentStatementTest, Assert_Null_LHS) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b;
-        b.create<CompoundAssignmentStatement>(nullptr, b.Expr(1),
-                                              BinaryOp::kAdd);
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.create<CompoundAssignmentStatement>(nullptr, b.Expr(1), BinaryOp::kAdd);
+        },
+        "internal compiler error");
 }
 
 TEST_F(CompoundAssignmentStatementTest, Assert_Null_RHS) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b;
-        b.create<CompoundAssignmentStatement>(b.Expr(1), nullptr,
-                                              BinaryOp::kAdd);
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.create<CompoundAssignmentStatement>(b.Expr(1), nullptr, BinaryOp::kAdd);
+        },
+        "internal compiler error");
 }
 
 TEST_F(CompoundAssignmentStatementTest, Assert_DifferentProgramID_LHS) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b1;
-        ProgramBuilder b2;
-        b1.create<CompoundAssignmentStatement>(b2.Expr("lhs"), b1.Expr("rhs"),
-                                               BinaryOp::kAdd);
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b1;
+            ProgramBuilder b2;
+            b1.create<CompoundAssignmentStatement>(b2.Expr("lhs"), b1.Expr("rhs"), BinaryOp::kAdd);
+        },
+        "internal compiler error");
 }
 
 TEST_F(CompoundAssignmentStatementTest, Assert_DifferentProgramID_RHS) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b1;
-        ProgramBuilder b2;
-        b1.create<CompoundAssignmentStatement>(b1.Expr("lhs"), b2.Expr("rhs"),
-                                               BinaryOp::kAdd);
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b1;
+            ProgramBuilder b2;
+            b1.create<CompoundAssignmentStatement>(b1.Expr("lhs"), b2.Expr("rhs"), BinaryOp::kAdd);
+        },
+        "internal compiler error");
 }
 
 }  // namespace

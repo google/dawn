@@ -20,17 +20,16 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::ContinueStatement);
 
 namespace tint::ast {
 
-ContinueStatement::ContinueStatement(ProgramID pid, const Source& src)
-    : Base(pid, src) {}
+ContinueStatement::ContinueStatement(ProgramID pid, const Source& src) : Base(pid, src) {}
 
 ContinueStatement::ContinueStatement(ContinueStatement&&) = default;
 
 ContinueStatement::~ContinueStatement() = default;
 
 const ContinueStatement* ContinueStatement::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<ContinueStatement>(src);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<ContinueStatement>(src);
 }
 
 }  // namespace tint::ast

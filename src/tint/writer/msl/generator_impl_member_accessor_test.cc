@@ -20,40 +20,40 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor) {
-  Global("str", ty.Of(Structure("my_str", {Member("mem", ty.f32())})),
-         ast::StorageClass::kPrivate);
-  auto* expr = MemberAccessor("str", "mem");
-  WrapInFunction(expr);
+    Global("str", ty.Of(Structure("my_str", {Member("mem", ty.f32())})),
+           ast::StorageClass::kPrivate);
+    auto* expr = MemberAccessor("str", "mem");
+    WrapInFunction(expr);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-  EXPECT_EQ(out.str(), "str.mem");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "str.mem");
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_xyz) {
-  Global("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    Global("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
 
-  auto* expr = MemberAccessor("my_vec", "xyz");
-  WrapInFunction(expr);
+    auto* expr = MemberAccessor("my_vec", "xyz");
+    WrapInFunction(expr);
 
-  GeneratorImpl& gen = Build();
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-  EXPECT_EQ(out.str(), "float4(my_vec).xyz");
+    GeneratorImpl& gen = Build();
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "float4(my_vec).xyz");
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_gbr) {
-  Global("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    Global("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
 
-  auto* expr = MemberAccessor("my_vec", "gbr");
-  WrapInFunction(expr);
+    auto* expr = MemberAccessor("my_vec", "gbr");
+    WrapInFunction(expr);
 
-  GeneratorImpl& gen = Build();
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-  EXPECT_EQ(out.str(), "float4(my_vec).gbr");
+    GeneratorImpl& gen = Build();
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "float4(my_vec).gbr");
 }
 
 }  // namespace

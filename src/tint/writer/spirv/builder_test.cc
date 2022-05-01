@@ -21,23 +21,23 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, TracksIdBounds) {
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  for (size_t i = 0; i < 5; i++) {
-    EXPECT_EQ(b.next_id(), i + 1);
-  }
+    for (size_t i = 0; i < 5; i++) {
+        EXPECT_EQ(b.next_id(), i + 1);
+    }
 
-  EXPECT_EQ(6u, b.id_bound());
+    EXPECT_EQ(6u, b.id_bound());
 }
 
 TEST_F(BuilderTest, Capabilities_Dedup) {
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_capability(SpvCapabilityShader);
-  b.push_capability(SpvCapabilityShader);
-  b.push_capability(SpvCapabilityShader);
+    b.push_capability(SpvCapabilityShader);
+    b.push_capability(SpvCapabilityShader);
+    b.push_capability(SpvCapabilityShader);
 
-  EXPECT_EQ(DumpInstructions(b.capabilities()), "OpCapability Shader\n");
+    EXPECT_EQ(DumpInstructions(b.capabilities()), "OpCapability Shader\n");
 }
 
 }  // namespace

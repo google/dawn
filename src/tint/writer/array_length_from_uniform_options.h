@@ -24,28 +24,27 @@ namespace tint::writer {
 /// Options used to specify a mapping of binding points to indices into a UBO
 /// from which to load buffer sizes.
 struct ArrayLengthFromUniformOptions {
-  /// Constructor
-  ArrayLengthFromUniformOptions();
-  /// Destructor
-  ~ArrayLengthFromUniformOptions();
-  /// Copy constructor
-  ArrayLengthFromUniformOptions(const ArrayLengthFromUniformOptions&);
-  /// Copy assignment
-  /// @returns this ArrayLengthFromUniformOptions
-  ArrayLengthFromUniformOptions& operator=(
-      const ArrayLengthFromUniformOptions&);
-  /// Move constructor
-  ArrayLengthFromUniformOptions(ArrayLengthFromUniformOptions&&);
+    /// Constructor
+    ArrayLengthFromUniformOptions();
+    /// Destructor
+    ~ArrayLengthFromUniformOptions();
+    /// Copy constructor
+    ArrayLengthFromUniformOptions(const ArrayLengthFromUniformOptions&);
+    /// Copy assignment
+    /// @returns this ArrayLengthFromUniformOptions
+    ArrayLengthFromUniformOptions& operator=(const ArrayLengthFromUniformOptions&);
+    /// Move constructor
+    ArrayLengthFromUniformOptions(ArrayLengthFromUniformOptions&&);
 
-  /// The binding point to use to generate a uniform buffer from which to read
-  /// buffer sizes.
-  sem::BindingPoint ubo_binding;
-  /// The mapping from storage buffer binding points to the index into the
-  /// uniform buffer where the length of the buffer is stored.
-  std::unordered_map<sem::BindingPoint, uint32_t> bindpoint_to_size_index;
+    /// The binding point to use to generate a uniform buffer from which to read
+    /// buffer sizes.
+    sem::BindingPoint ubo_binding;
+    /// The mapping from storage buffer binding points to the index into the
+    /// uniform buffer where the length of the buffer is stored.
+    std::unordered_map<sem::BindingPoint, uint32_t> bindpoint_to_size_index;
 
-  // NOTE: Update src/tint/fuzzers/data_builder.h when adding or changing any
-  // struct members.
+    // NOTE: Update src/tint/fuzzers/data_builder.h when adding or changing any
+    // struct members.
 };
 
 }  // namespace tint::writer

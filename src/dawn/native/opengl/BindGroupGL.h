@@ -20,21 +20,21 @@
 
 namespace dawn::native::opengl {
 
-    class Device;
+class Device;
 
-    MaybeError ValidateGLBindGroupDescriptor(const BindGroupDescriptor* descriptor);
+MaybeError ValidateGLBindGroupDescriptor(const BindGroupDescriptor* descriptor);
 
-    class BindGroup final : public BindGroupBase, public PlacementAllocated {
-      public:
-        static Ref<BindGroup> Create(Device* device, const BindGroupDescriptor* descriptor);
+class BindGroup final : public BindGroupBase, public PlacementAllocated {
+  public:
+    static Ref<BindGroup> Create(Device* device, const BindGroupDescriptor* descriptor);
 
-        BindGroup(Device* device, const BindGroupDescriptor* descriptor);
+    BindGroup(Device* device, const BindGroupDescriptor* descriptor);
 
-      private:
-        ~BindGroup() override;
+  private:
+    ~BindGroup() override;
 
-        void DestroyImpl() override;
-    };
+    void DestroyImpl() override;
+};
 
 }  // namespace dawn::native::opengl
 

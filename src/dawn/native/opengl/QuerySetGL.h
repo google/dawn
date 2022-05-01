@@ -19,15 +19,15 @@
 
 namespace dawn::native::opengl {
 
-    class Device;
+class Device;
 
-    class QuerySet final : public QuerySetBase {
-      public:
-        QuerySet(Device* device, const QuerySetDescriptor* descriptor);
+class QuerySet final : public QuerySetBase {
+  public:
+    QuerySet(Device* device, const QuerySetDescriptor* descriptor);
 
-      private:
-        ~QuerySet() override;
-    };
+  private:
+    ~QuerySet() override;
+};
 
 }  // namespace dawn::native::opengl
 

@@ -20,24 +20,24 @@
 #include "dawn/wire/WireCmd_autogen.h"
 
 namespace dawn::wire {
-    // A really really simple implementation of the DeserializeAllocator. It's main feature
-    // is that it has some inline storage so as to avoid allocations for the majority of
-    // commands.
-    class WireDeserializeAllocator : public DeserializeAllocator {
-      public:
-        WireDeserializeAllocator();
-        virtual ~WireDeserializeAllocator();
+// A really really simple implementation of the DeserializeAllocator. It's main feature
+// is that it has some inline storage so as to avoid allocations for the majority of
+// commands.
+class WireDeserializeAllocator : public DeserializeAllocator {
+  public:
+    WireDeserializeAllocator();
+    virtual ~WireDeserializeAllocator();
 
-        void* GetSpace(size_t size) override;
+    void* GetSpace(size_t size) override;
 
-        void Reset();
+    void Reset();
 
-      private:
-        size_t mRemainingSize = 0;
-        char* mCurrentBuffer = nullptr;
-        char mStaticBuffer[2048];
-        std::vector<char*> mAllocations;
-    };
+  private:
+    size_t mRemainingSize = 0;
+    char* mCurrentBuffer = nullptr;
+    char mStaticBuffer[2048];
+    std::vector<char*> mAllocations;
+};
 }  // namespace dawn::wire
 
 #endif  // SRC_DAWN_WIRE_WIREDESERIALIZEALLOCATOR_H_

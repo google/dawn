@@ -32,7 +32,7 @@ Expression::Expression(const ast::Expression* declaration,
       statement_(statement),
       constant_(std::move(constant)),
       has_side_effects_(has_side_effects) {
-  TINT_ASSERT(Semantic, type_);
+    TINT_ASSERT(Semantic, type_);
 }
 
 Expression::~Expression() = default;

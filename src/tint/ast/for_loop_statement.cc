@@ -26,17 +26,13 @@ ForLoopStatement::ForLoopStatement(ProgramID pid,
                                    const Expression* cond,
                                    const Statement* cont,
                                    const BlockStatement* b)
-    : Base(pid, src),
-      initializer(init),
-      condition(cond),
-      continuing(cont),
-      body(b) {
-  TINT_ASSERT(AST, body);
+    : Base(pid, src), initializer(init), condition(cond), continuing(cont), body(b) {
+    TINT_ASSERT(AST, body);
 
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, initializer, program_id);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, condition, program_id);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, continuing, program_id);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, initializer, program_id);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, condition, program_id);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, continuing, program_id);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
 }
 
 ForLoopStatement::ForLoopStatement(ForLoopStatement&&) = default;
@@ -44,14 +40,14 @@ ForLoopStatement::ForLoopStatement(ForLoopStatement&&) = default;
 ForLoopStatement::~ForLoopStatement() = default;
 
 const ForLoopStatement* ForLoopStatement::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
 
-  auto* init = ctx->Clone(initializer);
-  auto* cond = ctx->Clone(condition);
-  auto* cont = ctx->Clone(continuing);
-  auto* b = ctx->Clone(body);
-  return ctx->dst->create<ForLoopStatement>(src, init, cond, cont, b);
+    auto* init = ctx->Clone(initializer);
+    auto* cond = ctx->Clone(condition);
+    auto* cont = ctx->Clone(continuing);
+    auto* b = ctx->Clone(body);
+    return ctx->dst->create<ForLoopStatement>(src, init, cond, cont, b);
 }
 
 }  // namespace tint::ast

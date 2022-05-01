@@ -21,56 +21,56 @@ namespace tint::inspector {
 
 /// Contains a literal scalar value
 class Scalar {
- public:
-  /// Null Constructor
-  Scalar();
-  /// @param val literal scalar value to contain
-  explicit Scalar(bool val);
-  /// @param val literal scalar value to contain
-  explicit Scalar(uint32_t val);
-  /// @param val literal scalar value to contain
-  explicit Scalar(int32_t val);
-  /// @param val literal scalar value to contain
-  explicit Scalar(float val);
+  public:
+    /// Null Constructor
+    Scalar();
+    /// @param val literal scalar value to contain
+    explicit Scalar(bool val);
+    /// @param val literal scalar value to contain
+    explicit Scalar(uint32_t val);
+    /// @param val literal scalar value to contain
+    explicit Scalar(int32_t val);
+    /// @param val literal scalar value to contain
+    explicit Scalar(float val);
 
-  /// @returns true if this is a null
-  bool IsNull() const;
-  /// @returns true if this is a bool
-  bool IsBool() const;
-  /// @returns true if this is a unsigned integer.
-  bool IsU32() const;
-  /// @returns true if this is a signed integer.
-  bool IsI32() const;
-  /// @returns true if this is a float.
-  bool IsFloat() const;
+    /// @returns true if this is a null
+    bool IsNull() const;
+    /// @returns true if this is a bool
+    bool IsBool() const;
+    /// @returns true if this is a unsigned integer.
+    bool IsU32() const;
+    /// @returns true if this is a signed integer.
+    bool IsI32() const;
+    /// @returns true if this is a float.
+    bool IsFloat() const;
 
-  /// @returns scalar value if bool, otherwise undefined behaviour.
-  bool AsBool() const;
-  /// @returns scalar value if unsigned integer, otherwise undefined behaviour.
-  uint32_t AsU32() const;
-  /// @returns scalar value if signed integer, otherwise undefined behaviour.
-  int32_t AsI32() const;
-  /// @returns scalar value if float, otherwise undefined behaviour.
-  float AsFloat() const;
+    /// @returns scalar value if bool, otherwise undefined behaviour.
+    bool AsBool() const;
+    /// @returns scalar value if unsigned integer, otherwise undefined behaviour.
+    uint32_t AsU32() const;
+    /// @returns scalar value if signed integer, otherwise undefined behaviour.
+    int32_t AsI32() const;
+    /// @returns scalar value if float, otherwise undefined behaviour.
+    float AsFloat() const;
 
- private:
-  typedef enum {
-    kNull,
-    kBool,
-    kU32,
-    kI32,
-    kFloat,
-  } Type;
+  private:
+    typedef enum {
+        kNull,
+        kBool,
+        kU32,
+        kI32,
+        kFloat,
+    } Type;
 
-  typedef union {
-    bool b;
-    uint32_t u;
-    int32_t i;
-    float f;
-  } Value;
+    typedef union {
+        bool b;
+        uint32_t u;
+        int32_t i;
+        float f;
+    } Value;
 
-  Type type_;
-  Value value_;
+    Type type_;
+    Value value_;
 };
 
 }  // namespace tint::inspector

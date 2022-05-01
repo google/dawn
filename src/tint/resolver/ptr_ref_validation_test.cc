@@ -22,150 +22,140 @@
 namespace tint::resolver {
 namespace {
 
-struct ResolverPtrRefValidationTest : public resolver::TestHelper,
-                                      public testing::Test {};
+struct ResolverPtrRefValidationTest : public resolver::TestHelper, public testing::Test {};
 
 TEST_F(ResolverPtrRefValidationTest, AddressOfLiteral) {
-  // &1
+    // &1
 
-  auto* expr = AddressOf(Expr(Source{{12, 34}}, 1));
+    auto* expr = AddressOf(Expr(Source{{12, 34}}, 1));
 
-  WrapInFunction(expr);
+    WrapInFunction(expr);
 
-  EXPECT_FALSE(r()->Resolve());
+    EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(), "12:34 error: cannot take the address of expression");
+    EXPECT_EQ(r()->error(), "12:34 error: cannot take the address of expression");
 }
 
 TEST_F(ResolverPtrRefValidationTest, AddressOfLet) {
-  // let l : i32 = 1;
-  // &l
-  auto* l = Let("l", ty.i32(), Expr(1));
-  auto* expr = AddressOf(Expr(Source{{12, 34}}, "l"));
+    // let l : i32 = 1;
+    // &l
+    auto* l = Let("l", ty.i32(), Expr(1));
+    auto* expr = AddressOf(Expr(Source{{12, 34}}, "l"));
 
-  WrapInFunction(l, expr);
+    WrapInFunction(l, expr);
 
-  EXPECT_FALSE(r()->Resolve());
+    EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(), "12:34 error: cannot take the address of expression");
+    EXPECT_EQ(r()->error(), "12:34 error: cannot take the address of expression");
 }
 
 TEST_F(ResolverPtrRefValidationTest, AddressOfHandle) {
-  // @group(0) @binding(0) var t: texture_3d<f32>;
-  // &t
-  Global("t", ty.sampled_texture(ast::TextureDimension::k3d, ty.f32()),
-         GroupAndBinding(0u, 0u));
-  auto* expr = AddressOf(Expr(Source{{12, 34}}, "t"));
-  WrapInFunction(expr);
+    // @group(0) @binding(0) var t: texture_3d<f32>;
+    // &t
+    Global("t", ty.sampled_texture(ast::TextureDimension::k3d, ty.f32()), GroupAndBinding(0u, 0u));
+    auto* expr = AddressOf(Expr(Source{{12, 34}}, "t"));
+    WrapInFunction(expr);
 
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: cannot take the address of expression in handle "
-            "storage class");
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: cannot take the address of expression in handle "
+              "storage class");
 }
 
 TEST_F(ResolverPtrRefValidationTest, AddressOfVectorComponent_MemberAccessor) {
-  // var v : vec4<i32>;
-  // &v.y
-  auto* v = Var("v", ty.vec4<i32>());
-  auto* expr = AddressOf(MemberAccessor(Source{{12, 34}}, "v", "y"));
+    // var v : vec4<i32>;
+    // &v.y
+    auto* v = Var("v", ty.vec4<i32>());
+    auto* expr = AddressOf(MemberAccessor(Source{{12, 34}}, "v", "y"));
 
-  WrapInFunction(v, expr);
+    WrapInFunction(v, expr);
 
-  EXPECT_FALSE(r()->Resolve());
+    EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(),
-            "12:34 error: cannot take the address of a vector component");
+    EXPECT_EQ(r()->error(), "12:34 error: cannot take the address of a vector component");
 }
 
 TEST_F(ResolverPtrRefValidationTest, AddressOfVectorComponent_IndexAccessor) {
-  // var v : vec4<i32>;
-  // &v[2]
-  auto* v = Var("v", ty.vec4<i32>());
-  auto* expr = AddressOf(IndexAccessor(Source{{12, 34}}, "v", 2));
+    // var v : vec4<i32>;
+    // &v[2]
+    auto* v = Var("v", ty.vec4<i32>());
+    auto* expr = AddressOf(IndexAccessor(Source{{12, 34}}, "v", 2));
 
-  WrapInFunction(v, expr);
+    WrapInFunction(v, expr);
 
-  EXPECT_FALSE(r()->Resolve());
+    EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(),
-            "12:34 error: cannot take the address of a vector component");
+    EXPECT_EQ(r()->error(), "12:34 error: cannot take the address of a vector component");
 }
 
 TEST_F(ResolverPtrRefValidationTest, IndirectOfAddressOfHandle) {
-  // @group(0) @binding(0) var t: texture_3d<f32>;
-  // *&t
-  Global("t", ty.sampled_texture(ast::TextureDimension::k3d, ty.f32()),
-         GroupAndBinding(0u, 0u));
-  auto* expr = Deref(AddressOf(Expr(Source{{12, 34}}, "t")));
-  WrapInFunction(expr);
+    // @group(0) @binding(0) var t: texture_3d<f32>;
+    // *&t
+    Global("t", ty.sampled_texture(ast::TextureDimension::k3d, ty.f32()), GroupAndBinding(0u, 0u));
+    auto* expr = Deref(AddressOf(Expr(Source{{12, 34}}, "t")));
+    WrapInFunction(expr);
 
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: cannot take the address of expression in handle "
-            "storage class");
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: cannot take the address of expression in handle "
+              "storage class");
 }
 
 TEST_F(ResolverPtrRefValidationTest, DerefOfLiteral) {
-  // *1
+    // *1
 
-  auto* expr = Deref(Expr(Source{{12, 34}}, 1));
+    auto* expr = Deref(Expr(Source{{12, 34}}, 1));
 
-  WrapInFunction(expr);
+    WrapInFunction(expr);
 
-  EXPECT_FALSE(r()->Resolve());
+    EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(),
-            "12:34 error: cannot dereference expression of type 'i32'");
+    EXPECT_EQ(r()->error(), "12:34 error: cannot dereference expression of type 'i32'");
 }
 
 TEST_F(ResolverPtrRefValidationTest, DerefOfVar) {
-  // var v : i32 = 1;
-  // *1
-  auto* v = Var("v", ty.i32());
-  auto* expr = Deref(Expr(Source{{12, 34}}, "v"));
+    // var v : i32 = 1;
+    // *1
+    auto* v = Var("v", ty.i32());
+    auto* expr = Deref(Expr(Source{{12, 34}}, "v"));
 
-  WrapInFunction(v, expr);
+    WrapInFunction(v, expr);
 
-  EXPECT_FALSE(r()->Resolve());
+    EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(),
-            "12:34 error: cannot dereference expression of type 'i32'");
+    EXPECT_EQ(r()->error(), "12:34 error: cannot dereference expression of type 'i32'");
 }
 
 TEST_F(ResolverPtrRefValidationTest, InferredPtrAccessMismatch) {
-  // struct Inner {
-  //    arr: array<i32, 4>;
-  // }
-  // struct S {
-  //    inner: Inner;
-  // }
-  // @group(0) @binding(0) var<storage, read_write> s : S;
-  // fn f() {
-  //   let p : pointer<storage, i32> = &s.inner.arr[2];
-  // }
-  auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
-  auto* buf = Structure("S", {Member("inner", ty.Of(inner))});
-  auto* storage = Global("s", ty.Of(buf), ast::StorageClass::kStorage,
-                         ast::Access::kReadWrite,
-                         ast::AttributeList{
-                             create<ast::BindingAttribute>(0),
-                             create<ast::GroupAttribute>(0),
-                         });
+    // struct Inner {
+    //    arr: array<i32, 4>;
+    // }
+    // struct S {
+    //    inner: Inner;
+    // }
+    // @group(0) @binding(0) var<storage, read_write> s : S;
+    // fn f() {
+    //   let p : pointer<storage, i32> = &s.inner.arr[2];
+    // }
+    auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
+    auto* buf = Structure("S", {Member("inner", ty.Of(inner))});
+    auto* storage = Global("s", ty.Of(buf), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+                           ast::AttributeList{
+                               create<ast::BindingAttribute>(0),
+                               create<ast::GroupAttribute>(0),
+                           });
 
-  auto* expr =
-      IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 4);
-  auto* ptr =
-      Let(Source{{12, 34}}, "p", ty.pointer<i32>(ast::StorageClass::kStorage),
-          AddressOf(expr));
+    auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 4);
+    auto* ptr =
+        Let(Source{{12, 34}}, "p", ty.pointer<i32>(ast::StorageClass::kStorage), AddressOf(expr));
 
-  WrapInFunction(ptr);
+    WrapInFunction(ptr);
 
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: cannot initialize let of type "
-            "'ptr<storage, i32, read>' with value of type "
-            "'ptr<storage, i32, read_write>'");
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: cannot initialize let of type "
+              "'ptr<storage, i32, read>' with value of type "
+              "'ptr<storage, i32, read_write>'");
 }
 
 }  // namespace

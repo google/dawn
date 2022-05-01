@@ -20,21 +20,20 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::TypeName);
 
 namespace tint::ast {
 
-TypeName::TypeName(ProgramID pid, const Source& src, Symbol n)
-    : Base(pid, src), name(n) {}
+TypeName::TypeName(ProgramID pid, const Source& src, Symbol n) : Base(pid, src), name(n) {}
 
 TypeName::~TypeName() = default;
 
 TypeName::TypeName(TypeName&&) = default;
 
 std::string TypeName::FriendlyName(const SymbolTable& symbols) const {
-  return symbols.NameFor(name);
+    return symbols.NameFor(name);
 }
 
 const TypeName* TypeName::Clone(CloneContext* ctx) const {
-  auto src = ctx->Clone(source);
-  auto n = ctx->Clone(name);
-  return ctx->dst->create<TypeName>(src, n);
+    auto src = ctx->Clone(source);
+    auto n = ctx->Clone(name);
+    return ctx->dst->create<TypeName>(src, n);
 }
 
 }  // namespace tint::ast

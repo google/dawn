@@ -20,64 +20,64 @@
 namespace tint::fuzzers {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-  {
-    TransformBuilder tb(data, size);
-    tb.AddTransform<ShuffleTransform>();
-    tb.AddPlatformIndependentPasses();
+    {
+        TransformBuilder tb(data, size);
+        tb.AddTransform<ShuffleTransform>();
+        tb.AddPlatformIndependentPasses();
 
-    fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
-    fuzzer.SetTransformManager(tb.manager(), tb.data_map());
-    fuzzer.SetDumpInput(GetCliParams().dump_input);
-    fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
+        fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
+        fuzzer.SetTransformManager(tb.manager(), tb.data_map());
+        fuzzer.SetDumpInput(GetCliParams().dump_input);
+        fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
 
-    fuzzer.Run(data, size);
-  }
+        fuzzer.Run(data, size);
+    }
 
 #if TINT_BUILD_HLSL_WRITER
-  {
-    TransformBuilder tb(data, size);
-    tb.AddTransform<ShuffleTransform>();
-    tb.AddPlatformIndependentPasses();
+    {
+        TransformBuilder tb(data, size);
+        tb.AddTransform<ShuffleTransform>();
+        tb.AddPlatformIndependentPasses();
 
-    fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kHLSL);
-    fuzzer.SetTransformManager(tb.manager(), tb.data_map());
-    fuzzer.SetDumpInput(GetCliParams().dump_input);
-    fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
+        fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kHLSL);
+        fuzzer.SetTransformManager(tb.manager(), tb.data_map());
+        fuzzer.SetDumpInput(GetCliParams().dump_input);
+        fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
 
-    fuzzer.Run(data, size);
-  }
+        fuzzer.Run(data, size);
+    }
 #endif  // TINT_BUILD_HLSL_WRITER
 
 #if TINT_BUILD_MSL_WRITER
-  {
-    TransformBuilder tb(data, size);
-    tb.AddTransform<ShuffleTransform>();
-    tb.AddPlatformIndependentPasses();
+    {
+        TransformBuilder tb(data, size);
+        tb.AddTransform<ShuffleTransform>();
+        tb.AddPlatformIndependentPasses();
 
-    fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kMSL);
-    fuzzer.SetTransformManager(tb.manager(), tb.data_map());
-    fuzzer.SetDumpInput(GetCliParams().dump_input);
-    fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
+        fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kMSL);
+        fuzzer.SetTransformManager(tb.manager(), tb.data_map());
+        fuzzer.SetDumpInput(GetCliParams().dump_input);
+        fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
 
-    fuzzer.Run(data, size);
-  }
+        fuzzer.Run(data, size);
+    }
 #endif  // TINT_BUILD_MSL_WRITER
 #if TINT_BUILD_SPV_WRITER
-  {
-    TransformBuilder tb(data, size);
-    tb.AddTransform<ShuffleTransform>();
-    tb.AddPlatformIndependentPasses();
+    {
+        TransformBuilder tb(data, size);
+        tb.AddTransform<ShuffleTransform>();
+        tb.AddPlatformIndependentPasses();
 
-    fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
-    fuzzer.SetTransformManager(tb.manager(), tb.data_map());
-    fuzzer.SetDumpInput(GetCliParams().dump_input);
-    fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
+        fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
+        fuzzer.SetTransformManager(tb.manager(), tb.data_map());
+        fuzzer.SetDumpInput(GetCliParams().dump_input);
+        fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
 
-    fuzzer.Run(data, size);
-  }
+        fuzzer.Run(data, size);
+    }
 #endif  // TINT_BUILD_SPV_WRITER
 
-  return 0;
+    return 0;
 }
 
 }  // namespace tint::fuzzers

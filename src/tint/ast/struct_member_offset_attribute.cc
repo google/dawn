@@ -30,14 +30,13 @@ StructMemberOffsetAttribute::StructMemberOffsetAttribute(ProgramID pid,
 StructMemberOffsetAttribute::~StructMemberOffsetAttribute() = default;
 
 std::string StructMemberOffsetAttribute::Name() const {
-  return "offset";
+    return "offset";
 }
 
-const StructMemberOffsetAttribute* StructMemberOffsetAttribute::Clone(
-    CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<StructMemberOffsetAttribute>(src, offset);
+const StructMemberOffsetAttribute* StructMemberOffsetAttribute::Clone(CloneContext* ctx) const {
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<StructMemberOffsetAttribute>(src, offset);
 }
 
 }  // namespace tint::ast

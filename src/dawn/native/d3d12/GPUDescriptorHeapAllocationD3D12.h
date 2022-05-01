@@ -21,23 +21,23 @@
 
 namespace dawn::native::d3d12 {
 
-    // Wrapper for a handle into a GPU-only descriptor heap.
-    class GPUDescriptorHeapAllocation {
-      public:
-        GPUDescriptorHeapAllocation() = default;
-        GPUDescriptorHeapAllocation(D3D12_GPU_DESCRIPTOR_HANDLE baseDescriptor,
-                                    ExecutionSerial lastUsageSerial,
-                                    HeapVersionID heapSerial);
+// Wrapper for a handle into a GPU-only descriptor heap.
+class GPUDescriptorHeapAllocation {
+  public:
+    GPUDescriptorHeapAllocation() = default;
+    GPUDescriptorHeapAllocation(D3D12_GPU_DESCRIPTOR_HANDLE baseDescriptor,
+                                ExecutionSerial lastUsageSerial,
+                                HeapVersionID heapSerial);
 
-        D3D12_GPU_DESCRIPTOR_HANDLE GetBaseDescriptor() const;
-        ExecutionSerial GetLastUsageSerial() const;
-        HeapVersionID GetHeapSerial() const;
+    D3D12_GPU_DESCRIPTOR_HANDLE GetBaseDescriptor() const;
+    ExecutionSerial GetLastUsageSerial() const;
+    HeapVersionID GetHeapSerial() const;
 
-      private:
-        D3D12_GPU_DESCRIPTOR_HANDLE mBaseDescriptor = {0};
-        ExecutionSerial mLastUsageSerial = ExecutionSerial(0);
-        HeapVersionID mHeapSerial = HeapVersionID(0);
-    };
+  private:
+    D3D12_GPU_DESCRIPTOR_HANDLE mBaseDescriptor = {0};
+    ExecutionSerial mLastUsageSerial = ExecutionSerial(0);
+    HeapVersionID mHeapSerial = HeapVersionID(0);
+};
 
 }  // namespace dawn::native::d3d12
 

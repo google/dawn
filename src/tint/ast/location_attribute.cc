@@ -22,21 +22,19 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::LocationAttribute);
 
 namespace tint::ast {
 
-LocationAttribute::LocationAttribute(ProgramID pid,
-                                     const Source& src,
-                                     uint32_t val)
+LocationAttribute::LocationAttribute(ProgramID pid, const Source& src, uint32_t val)
     : Base(pid, src), value(val) {}
 
 LocationAttribute::~LocationAttribute() = default;
 
 std::string LocationAttribute::Name() const {
-  return "location";
+    return "location";
 }
 
 const LocationAttribute* LocationAttribute::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<LocationAttribute>(src, value);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<LocationAttribute>(src, value);
 }
 
 }  // namespace tint::ast

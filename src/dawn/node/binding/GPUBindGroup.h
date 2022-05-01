@@ -24,23 +24,21 @@
 
 namespace wgpu::binding {
 
-    // GPUBindGroup is an implementation of interop::GPUBindGroup that wraps a wgpu::BindGroup.
-    class GPUBindGroup final : public interop::GPUBindGroup {
-      public:
-        explicit GPUBindGroup(wgpu::BindGroup group);
+// GPUBindGroup is an implementation of interop::GPUBindGroup that wraps a wgpu::BindGroup.
+class GPUBindGroup final : public interop::GPUBindGroup {
+  public:
+    explicit GPUBindGroup(wgpu::BindGroup group);
 
-        // Implicit cast operator to Dawn GPU object
-        inline operator const wgpu::BindGroup&() const {
-            return group_;
-        }
+    // Implicit cast operator to Dawn GPU object
+    inline operator const wgpu::BindGroup&() const { return group_; }
 
-        // interop::GPUBindGroup interface compliance
-        std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
-        void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
+    // interop::GPUBindGroup interface compliance
+    std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
+    void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
 
-      private:
-        wgpu::BindGroup group_;
-    };
+  private:
+    wgpu::BindGroup group_;
+};
 
 }  // namespace wgpu::binding
 

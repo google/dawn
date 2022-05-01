@@ -24,23 +24,23 @@
 
 namespace {
 
-    constexpr unsigned int kNumDraws = 2000;
+constexpr unsigned int kNumDraws = 2000;
 
-    constexpr uint32_t kTextureSize = 64;
-    constexpr size_t kUniformSize = 3 * sizeof(float);
+constexpr uint32_t kTextureSize = 64;
+constexpr size_t kUniformSize = 3 * sizeof(float);
 
-    constexpr float kVertexData[12] = {
-        0.0f, 0.5f, 0.0f, 1.0f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f, -0.5f, 0.0f, 1.0f,
-    };
+constexpr float kVertexData[12] = {
+    0.0f, 0.5f, 0.0f, 1.0f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f, -0.5f, 0.0f, 1.0f,
+};
 
-    constexpr char kVertexShader[] = R"(
+constexpr char kVertexShader[] = R"(
         @stage(vertex) fn main(
             @location(0) pos : vec4<f32>
         ) -> @builtin(position) vec4<f32> {
             return pos;
         })";
 
-    constexpr char kFragmentShaderA[] = R"(
+constexpr char kFragmentShaderA[] = R"(
         struct Uniforms {
             color : vec3<f32>
         }
@@ -49,7 +49,7 @@ namespace {
             return vec4<f32>(uniforms.color * (1.0 / 5000.0), 1.0);
         })";
 
-    constexpr char kFragmentShaderB[] = R"(
+constexpr char kFragmentShaderB[] = R"(
         struct Constants {
             color : vec3<f32>
         }
@@ -63,148 +63,146 @@ namespace {
             return vec4<f32>((constants.color + uniforms.color) * (1.0 / 5000.0), 1.0);
         })";
 
-    enum class Pipeline {
-        Static,     // Keep the same pipeline for all draws.
-        Redundant,  // Use the same pipeline, but redundantly set it.
-        Dynamic,    // Change the pipeline between draws.
+enum class Pipeline {
+    Static,     // Keep the same pipeline for all draws.
+    Redundant,  // Use the same pipeline, but redundantly set it.
+    Dynamic,    // Change the pipeline between draws.
+};
+
+enum class UniformData {
+    Static,   // Don't update per-draw uniform data.
+    Dynamic,  // Update the per-draw uniform data once per frame.
+};
+
+enum class BindGroup {
+    NoChange,   // Use one bind group for all draws.
+    Redundant,  // Use the same bind group, but redundantly set it.
+    NoReuse,    // Create a new bind group every time.
+    Multiple,   // Use multiple static bind groups.
+    Dynamic,    // Use bind groups with dynamic offsets.
+};
+
+enum class VertexBuffer {
+    NoChange,  // Use one vertex buffer for all draws.
+    Multiple,  // Use multiple static vertex buffers.
+    Dynamic,   // Switch vertex buffers between draws.
+};
+
+enum class RenderBundle {
+    No,   // Record commands in a render pass
+    Yes,  // Record commands in a render bundle
+};
+
+struct DrawCallParam {
+    Pipeline pipelineType;
+    VertexBuffer vertexBufferType;
+    BindGroup bindGroupType;
+    UniformData uniformDataType;
+    RenderBundle withRenderBundle;
+};
+
+using DrawCallParamTuple = std::tuple<Pipeline, VertexBuffer, BindGroup, UniformData, RenderBundle>;
+
+template <typename T>
+unsigned int AssignParam(T& lhs, T rhs) {
+    lhs = rhs;
+    return 0u;
+}
+
+// This helper function allows creating a DrawCallParam from a list of arguments
+// without specifying all of the members. Provided members can be passed once in an arbitrary
+// order. Unspecified members default to:
+//  - Pipeline::Static
+//  - VertexBuffer::NoChange
+//  - BindGroup::NoChange
+//  - UniformData::Static
+//  - RenderBundle::No
+template <typename... Ts>
+DrawCallParam MakeParam(Ts... args) {
+    // Baseline param
+    DrawCallParamTuple paramTuple{Pipeline::Static, VertexBuffer::NoChange, BindGroup::NoChange,
+                                  UniformData::Static, RenderBundle::No};
+
+    unsigned int unused[] = {
+        0,  // Avoid making a 0-sized array.
+        AssignParam(std::get<Ts>(paramTuple), args)...,
     };
+    DAWN_UNUSED(unused);
 
-    enum class UniformData {
-        Static,   // Don't update per-draw uniform data.
-        Dynamic,  // Update the per-draw uniform data once per frame.
+    return DrawCallParam{
+        std::get<Pipeline>(paramTuple),     std::get<VertexBuffer>(paramTuple),
+        std::get<BindGroup>(paramTuple),    std::get<UniformData>(paramTuple),
+        std::get<RenderBundle>(paramTuple),
     };
+}
 
-    enum class BindGroup {
-        NoChange,   // Use one bind group for all draws.
-        Redundant,  // Use the same bind group, but redundantly set it.
-        NoReuse,    // Create a new bind group every time.
-        Multiple,   // Use multiple static bind groups.
-        Dynamic,    // Use bind groups with dynamic offsets.
-    };
+struct DrawCallParamForTest : AdapterTestParam {
+    DrawCallParamForTest(const AdapterTestParam& backendParam, DrawCallParam param)
+        : AdapterTestParam(backendParam), param(param) {}
+    DrawCallParam param;
+};
 
-    enum class VertexBuffer {
-        NoChange,  // Use one vertex buffer for all draws.
-        Multiple,  // Use multiple static vertex buffers.
-        Dynamic,   // Switch vertex buffers between draws.
-    };
+std::ostream& operator<<(std::ostream& ostream, const DrawCallParamForTest& testParams) {
+    ostream << static_cast<const AdapterTestParam&>(testParams);
 
-    enum class RenderBundle {
-        No,   // Record commands in a render pass
-        Yes,  // Record commands in a render bundle
-    };
+    const DrawCallParam& param = testParams.param;
 
-    struct DrawCallParam {
-        Pipeline pipelineType;
-        VertexBuffer vertexBufferType;
-        BindGroup bindGroupType;
-        UniformData uniformDataType;
-        RenderBundle withRenderBundle;
-    };
-
-    using DrawCallParamTuple =
-        std::tuple<Pipeline, VertexBuffer, BindGroup, UniformData, RenderBundle>;
-
-    template <typename T>
-    unsigned int AssignParam(T& lhs, T rhs) {
-        lhs = rhs;
-        return 0u;
+    switch (param.pipelineType) {
+        case Pipeline::Static:
+            break;
+        case Pipeline::Redundant:
+            ostream << "_RedundantPipeline";
+            break;
+        case Pipeline::Dynamic:
+            ostream << "_DynamicPipeline";
+            break;
     }
 
-    // This helper function allows creating a DrawCallParam from a list of arguments
-    // without specifying all of the members. Provided members can be passed once in an arbitrary
-    // order. Unspecified members default to:
-    //  - Pipeline::Static
-    //  - VertexBuffer::NoChange
-    //  - BindGroup::NoChange
-    //  - UniformData::Static
-    //  - RenderBundle::No
-    template <typename... Ts>
-    DrawCallParam MakeParam(Ts... args) {
-        // Baseline param
-        DrawCallParamTuple paramTuple{Pipeline::Static, VertexBuffer::NoChange, BindGroup::NoChange,
-                                      UniformData::Static, RenderBundle::No};
-
-        unsigned int unused[] = {
-            0,  // Avoid making a 0-sized array.
-            AssignParam(std::get<Ts>(paramTuple), args)...,
-        };
-        DAWN_UNUSED(unused);
-
-        return DrawCallParam{
-            std::get<Pipeline>(paramTuple),     std::get<VertexBuffer>(paramTuple),
-            std::get<BindGroup>(paramTuple),    std::get<UniformData>(paramTuple),
-            std::get<RenderBundle>(paramTuple),
-        };
+    switch (param.vertexBufferType) {
+        case VertexBuffer::NoChange:
+            break;
+        case VertexBuffer::Multiple:
+            ostream << "_MultipleVertexBuffers";
+            break;
+        case VertexBuffer::Dynamic:
+            ostream << "_DynamicVertexBuffer";
     }
 
-    struct DrawCallParamForTest : AdapterTestParam {
-        DrawCallParamForTest(const AdapterTestParam& backendParam, DrawCallParam param)
-            : AdapterTestParam(backendParam), param(param) {
-        }
-        DrawCallParam param;
-    };
-
-    std::ostream& operator<<(std::ostream& ostream, const DrawCallParamForTest& testParams) {
-        ostream << static_cast<const AdapterTestParam&>(testParams);
-
-        const DrawCallParam& param = testParams.param;
-
-        switch (param.pipelineType) {
-            case Pipeline::Static:
-                break;
-            case Pipeline::Redundant:
-                ostream << "_RedundantPipeline";
-                break;
-            case Pipeline::Dynamic:
-                ostream << "_DynamicPipeline";
-                break;
-        }
-
-        switch (param.vertexBufferType) {
-            case VertexBuffer::NoChange:
-                break;
-            case VertexBuffer::Multiple:
-                ostream << "_MultipleVertexBuffers";
-                break;
-            case VertexBuffer::Dynamic:
-                ostream << "_DynamicVertexBuffer";
-        }
-
-        switch (param.bindGroupType) {
-            case BindGroup::NoChange:
-                break;
-            case BindGroup::Redundant:
-                ostream << "_RedundantBindGroups";
-                break;
-            case BindGroup::NoReuse:
-                ostream << "_NoReuseBindGroups";
-                break;
-            case BindGroup::Multiple:
-                ostream << "_MultipleBindGroups";
-                break;
-            case BindGroup::Dynamic:
-                ostream << "_DynamicBindGroup";
-                break;
-        }
-
-        switch (param.uniformDataType) {
-            case UniformData::Static:
-                break;
-            case UniformData::Dynamic:
-                ostream << "_DynamicData";
-                break;
-        }
-
-        switch (param.withRenderBundle) {
-            case RenderBundle::No:
-                break;
-            case RenderBundle::Yes:
-                ostream << "_RenderBundle";
-                break;
-        }
-
-        return ostream;
+    switch (param.bindGroupType) {
+        case BindGroup::NoChange:
+            break;
+        case BindGroup::Redundant:
+            ostream << "_RedundantBindGroups";
+            break;
+        case BindGroup::NoReuse:
+            ostream << "_NoReuseBindGroups";
+            break;
+        case BindGroup::Multiple:
+            ostream << "_MultipleBindGroups";
+            break;
+        case BindGroup::Dynamic:
+            ostream << "_DynamicBindGroup";
+            break;
     }
+
+    switch (param.uniformDataType) {
+        case UniformData::Static:
+            break;
+        case UniformData::Dynamic:
+            ostream << "_DynamicData";
+            break;
+    }
+
+    switch (param.withRenderBundle) {
+        case RenderBundle::No:
+            break;
+        case RenderBundle::Yes:
+            ostream << "_RenderBundle";
+            break;
+    }
+
+    return ostream;
+}
 
 }  // anonymous namespace
 
@@ -224,16 +222,13 @@ namespace {
 //     the efficiency of resource transitions.
 class DrawCallPerf : public DawnPerfTestWithParams<DrawCallParamForTest> {
   public:
-    DrawCallPerf() : DawnPerfTestWithParams(kNumDraws, 3) {
-    }
+    DrawCallPerf() : DawnPerfTestWithParams(kNumDraws, 3) {}
     ~DrawCallPerf() override = default;
 
     void SetUp() override;
 
   protected:
-    DrawCallParam GetParam() const {
-        return DawnPerfTestWithParams::GetParam().param;
-    }
+    DrawCallParam GetParam() const { return DawnPerfTestWithParams::GetParam().param; }
 
     template <typename Encoder>
     void RecordRenderCommands(Encoder encoder);

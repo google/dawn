@@ -23,41 +23,41 @@ class Expression;
 
 /// A for loop statement
 class ForLoopStatement final : public Castable<ForLoopStatement, Statement> {
- public:
-  /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the for loop statement source
-  /// @param initializer the optional loop initializer statement
-  /// @param condition the optional loop condition expression
-  /// @param continuing the optional continuing statement
-  /// @param body the loop body
-  ForLoopStatement(ProgramID program_id,
-                   Source const& source,
-                   const Statement* initializer,
-                   const Expression* condition,
-                   const Statement* continuing,
-                   const BlockStatement* body);
-  /// Move constructor
-  ForLoopStatement(ForLoopStatement&&);
-  ~ForLoopStatement() override;
+  public:
+    /// Constructor
+    /// @param program_id the identifier of the program that owns this node
+    /// @param source the for loop statement source
+    /// @param initializer the optional loop initializer statement
+    /// @param condition the optional loop condition expression
+    /// @param continuing the optional continuing statement
+    /// @param body the loop body
+    ForLoopStatement(ProgramID program_id,
+                     Source const& source,
+                     const Statement* initializer,
+                     const Expression* condition,
+                     const Statement* continuing,
+                     const BlockStatement* body);
+    /// Move constructor
+    ForLoopStatement(ForLoopStatement&&);
+    ~ForLoopStatement() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const ForLoopStatement* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const ForLoopStatement* Clone(CloneContext* ctx) const override;
 
-  /// The initializer statement
-  const Statement* const initializer;
+    /// The initializer statement
+    const Statement* const initializer;
 
-  /// The condition expression
-  const Expression* const condition;
+    /// The condition expression
+    const Expression* const condition;
 
-  /// The continuing statement
-  const Statement* const continuing;
+    /// The continuing statement
+    const Statement* const continuing;
 
-  /// The loop body block
-  const BlockStatement* const body;
+    /// The loop body block
+    const BlockStatement* const body;
 };
 
 }  // namespace tint::ast

@@ -28,35 +28,34 @@ Demangler::Demangler() = default;
 
 Demangler::~Demangler() = default;
 
-std::string Demangler::Demangle(const SymbolTable& symbols,
-                                const std::string& str) const {
-  std::stringstream out;
+std::string Demangler::Demangle(const SymbolTable& symbols, const std::string& str) const {
+    std::stringstream out;
 
-  size_t pos = 0;
-  for (;;) {
-    auto idx = str.find(kSymbol, pos);
-    if (idx == std::string::npos) {
-      out << str.substr(pos);
-      break;
+    size_t pos = 0;
+    for (;;) {
+        auto idx = str.find(kSymbol, pos);
+        if (idx == std::string::npos) {
+            out << str.substr(pos);
+            break;
+        }
+
+        out << str.substr(pos, idx - pos);
+
+        auto start_idx = idx + kSymbolLen;
+        auto end_idx = start_idx;
+        while (str[end_idx] >= '0' && str[end_idx] <= '9') {
+            end_idx++;
+        }
+        auto len = end_idx - start_idx;
+
+        auto id = str.substr(start_idx, len);
+        Symbol sym(std::stoi(id), symbols.ProgramID());
+        out << symbols.NameFor(sym);
+
+        pos = end_idx;
     }
 
-    out << str.substr(pos, idx - pos);
-
-    auto start_idx = idx + kSymbolLen;
-    auto end_idx = start_idx;
-    while (str[end_idx] >= '0' && str[end_idx] <= '9') {
-      end_idx++;
-    }
-    auto len = end_idx - start_idx;
-
-    auto id = str.substr(start_idx, len);
-    Symbol sym(std::stoi(id), symbols.ProgramID());
-    out << symbols.NameFor(sym);
-
-    pos = end_idx;
-  }
-
-  return out.str();
+    return out.str();
 }
 
 }  // namespace tint

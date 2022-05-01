@@ -25,19 +25,16 @@
 // IndexLinkNode
 
 SlabAllocatorImpl::IndexLinkNode::IndexLinkNode(Index index, Index nextIndex)
-    : index(index), nextIndex(nextIndex) {
-}
+    : index(index), nextIndex(nextIndex) {}
 
 // Slab
 
 SlabAllocatorImpl::Slab::Slab(char allocation[], IndexLinkNode* head)
-    : allocation(allocation), freeList(head), prev(nullptr), next(nullptr), blocksInUse(0) {
-}
+    : allocation(allocation), freeList(head), prev(nullptr), next(nullptr), blocksInUse(0) {}
 
 SlabAllocatorImpl::Slab::Slab(Slab&& rhs) = default;
 
-SlabAllocatorImpl::SentinelSlab::SentinelSlab() : Slab(nullptr, nullptr) {
-}
+SlabAllocatorImpl::SentinelSlab::SentinelSlab() : Slab(nullptr, nullptr) {}
 
 SlabAllocatorImpl::SentinelSlab::SentinelSlab(SentinelSlab&& rhs) = default;
 
@@ -83,8 +80,7 @@ SlabAllocatorImpl::SlabAllocatorImpl(SlabAllocatorImpl&& rhs)
       mTotalAllocationSize(rhs.mTotalAllocationSize),
       mAvailableSlabs(std::move(rhs.mAvailableSlabs)),
       mFullSlabs(std::move(rhs.mFullSlabs)),
-      mRecycledSlabs(std::move(rhs.mRecycledSlabs)) {
-}
+      mRecycledSlabs(std::move(rhs.mRecycledSlabs)) {}
 
 SlabAllocatorImpl::~SlabAllocatorImpl() = default;
 

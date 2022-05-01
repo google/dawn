@@ -29,21 +29,21 @@ class SymbolTable;
 namespace tint::ast {
 /// Base class for a type in the system
 class Type : public Castable<Type, Node> {
- public:
-  /// Move constructor
-  Type(Type&&);
-  ~Type() override;
+  public:
+    /// Move constructor
+    Type(Type&&);
+    ~Type() override;
 
-  /// @param symbols the program's symbol table
-  /// @returns the name for this type that closely resembles how it would be
-  /// declared in WGSL.
-  virtual std::string FriendlyName(const SymbolTable& symbols) const = 0;
+    /// @param symbols the program's symbol table
+    /// @returns the name for this type that closely resembles how it would be
+    /// declared in WGSL.
+    virtual std::string FriendlyName(const SymbolTable& symbols) const = 0;
 
- protected:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  Type(ProgramID pid, const Source& src);
+  protected:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    Type(ProgramID pid, const Source& src);
 };
 
 }  // namespace tint::ast

@@ -25,84 +25,81 @@
 
 namespace dawn::native::d3d12 {
 
-    class Device;
+class Device;
 
-    class PipelineLayout final : public PipelineLayoutBase {
-      public:
-        static ResultOrError<Ref<PipelineLayout>> Create(
-            Device* device,
-            const PipelineLayoutDescriptor* descriptor);
+class PipelineLayout final : public PipelineLayoutBase {
+  public:
+    static ResultOrError<Ref<PipelineLayout>> Create(Device* device,
+                                                     const PipelineLayoutDescriptor* descriptor);
 
-        uint32_t GetCbvUavSrvRootParameterIndex(BindGroupIndex group) const;
-        uint32_t GetSamplerRootParameterIndex(BindGroupIndex group) const;
+    uint32_t GetCbvUavSrvRootParameterIndex(BindGroupIndex group) const;
+    uint32_t GetSamplerRootParameterIndex(BindGroupIndex group) const;
 
-        // Returns the index of the root parameter reserved for a dynamic buffer binding
-        uint32_t GetDynamicRootParameterIndex(BindGroupIndex group,
-                                              BindingIndex bindingIndex) const;
+    // Returns the index of the root parameter reserved for a dynamic buffer binding
+    uint32_t GetDynamicRootParameterIndex(BindGroupIndex group, BindingIndex bindingIndex) const;
 
-        uint32_t GetFirstIndexOffsetRegisterSpace() const;
-        uint32_t GetFirstIndexOffsetShaderRegister() const;
-        uint32_t GetFirstIndexOffsetParameterIndex() const;
+    uint32_t GetFirstIndexOffsetRegisterSpace() const;
+    uint32_t GetFirstIndexOffsetShaderRegister() const;
+    uint32_t GetFirstIndexOffsetParameterIndex() const;
 
-        uint32_t GetNumWorkgroupsRegisterSpace() const;
-        uint32_t GetNumWorkgroupsShaderRegister() const;
-        uint32_t GetNumWorkgroupsParameterIndex() const;
+    uint32_t GetNumWorkgroupsRegisterSpace() const;
+    uint32_t GetNumWorkgroupsShaderRegister() const;
+    uint32_t GetNumWorkgroupsParameterIndex() const;
 
-        uint32_t GetDynamicStorageBufferLengthsRegisterSpace() const;
-        uint32_t GetDynamicStorageBufferLengthsShaderRegister() const;
-        uint32_t GetDynamicStorageBufferLengthsParameterIndex() const;
+    uint32_t GetDynamicStorageBufferLengthsRegisterSpace() const;
+    uint32_t GetDynamicStorageBufferLengthsShaderRegister() const;
+    uint32_t GetDynamicStorageBufferLengthsParameterIndex() const;
 
-        ID3D12RootSignature* GetRootSignature() const;
+    ID3D12RootSignature* GetRootSignature() const;
 
-        ID3D12CommandSignature* GetDispatchIndirectCommandSignatureWithNumWorkgroups();
+    ID3D12CommandSignature* GetDispatchIndirectCommandSignatureWithNumWorkgroups();
 
-        ID3D12CommandSignature* GetDrawIndirectCommandSignatureWithInstanceVertexOffsets();
+    ID3D12CommandSignature* GetDrawIndirectCommandSignatureWithInstanceVertexOffsets();
 
-        ID3D12CommandSignature* GetDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets();
+    ID3D12CommandSignature* GetDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets();
 
-        struct PerBindGroupDynamicStorageBufferLengthInfo {
-            // First register offset for a bind group's dynamic storage buffer lengths.
-            // This is the index into the array of root constants where this bind group's
-            // lengths start.
-            uint32_t firstRegisterOffset;
+    struct PerBindGroupDynamicStorageBufferLengthInfo {
+        // First register offset for a bind group's dynamic storage buffer lengths.
+        // This is the index into the array of root constants where this bind group's
+        // lengths start.
+        uint32_t firstRegisterOffset;
 
-            struct BindingAndRegisterOffset {
-                BindingNumber binding;
-                uint32_t registerOffset;
-            };
-            // Associative list of (BindingNumber,registerOffset) pairs, which is passed into
-            // the shader to map the BindingPoint(thisGroup, BindingNumber) to the registerOffset
-            // into the root constant array which holds the dynamic storage buffer lengths.
-            std::vector<BindingAndRegisterOffset> bindingAndRegisterOffsets;
+        struct BindingAndRegisterOffset {
+            BindingNumber binding;
+            uint32_t registerOffset;
         };
-
-        // Flat map from bind group index to the list of (BindingNumber,Register) pairs.
-        // Each pair is used in shader translation to
-        using DynamicStorageBufferLengthInfo =
-            ityp::array<BindGroupIndex, PerBindGroupDynamicStorageBufferLengthInfo, kMaxBindGroups>;
-
-        const DynamicStorageBufferLengthInfo& GetDynamicStorageBufferLengthInfo() const;
-
-      private:
-        ~PipelineLayout() override = default;
-        using PipelineLayoutBase::PipelineLayoutBase;
-        MaybeError Initialize();
-        ityp::array<BindGroupIndex, uint32_t, kMaxBindGroups> mCbvUavSrvRootParameterInfo;
-        ityp::array<BindGroupIndex, uint32_t, kMaxBindGroups> mSamplerRootParameterInfo;
-        ityp::array<BindGroupIndex,
-                    ityp::array<BindingIndex, uint32_t, kMaxDynamicBuffersPerPipelineLayout>,
-                    kMaxBindGroups>
-            mDynamicRootParameterIndices;
-        DynamicStorageBufferLengthInfo mDynamicStorageBufferLengthInfo;
-        uint32_t mFirstIndexOffsetParameterIndex;
-        uint32_t mNumWorkgroupsParameterIndex;
-        uint32_t mDynamicStorageBufferLengthsParameterIndex;
-        ComPtr<ID3D12RootSignature> mRootSignature;
-        ComPtr<ID3D12CommandSignature> mDispatchIndirectCommandSignatureWithNumWorkgroups;
-        ComPtr<ID3D12CommandSignature> mDrawIndirectCommandSignatureWithInstanceVertexOffsets;
-        ComPtr<ID3D12CommandSignature>
-            mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets;
+        // Associative list of (BindingNumber,registerOffset) pairs, which is passed into
+        // the shader to map the BindingPoint(thisGroup, BindingNumber) to the registerOffset
+        // into the root constant array which holds the dynamic storage buffer lengths.
+        std::vector<BindingAndRegisterOffset> bindingAndRegisterOffsets;
     };
+
+    // Flat map from bind group index to the list of (BindingNumber,Register) pairs.
+    // Each pair is used in shader translation to
+    using DynamicStorageBufferLengthInfo =
+        ityp::array<BindGroupIndex, PerBindGroupDynamicStorageBufferLengthInfo, kMaxBindGroups>;
+
+    const DynamicStorageBufferLengthInfo& GetDynamicStorageBufferLengthInfo() const;
+
+  private:
+    ~PipelineLayout() override = default;
+    using PipelineLayoutBase::PipelineLayoutBase;
+    MaybeError Initialize();
+    ityp::array<BindGroupIndex, uint32_t, kMaxBindGroups> mCbvUavSrvRootParameterInfo;
+    ityp::array<BindGroupIndex, uint32_t, kMaxBindGroups> mSamplerRootParameterInfo;
+    ityp::array<BindGroupIndex,
+                ityp::array<BindingIndex, uint32_t, kMaxDynamicBuffersPerPipelineLayout>,
+                kMaxBindGroups>
+        mDynamicRootParameterIndices;
+    DynamicStorageBufferLengthInfo mDynamicStorageBufferLengthInfo;
+    uint32_t mFirstIndexOffsetParameterIndex;
+    uint32_t mNumWorkgroupsParameterIndex;
+    uint32_t mDynamicStorageBufferLengthsParameterIndex;
+    ComPtr<ID3D12RootSignature> mRootSignature;
+    ComPtr<ID3D12CommandSignature> mDispatchIndirectCommandSignatureWithNumWorkgroups;
+    ComPtr<ID3D12CommandSignature> mDrawIndirectCommandSignatureWithInstanceVertexOffsets;
+    ComPtr<ID3D12CommandSignature> mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets;
+};
 
 }  // namespace dawn::native::d3d12
 

@@ -21,36 +21,36 @@ namespace tint::writer::glsl {
 
 /// A structure representing the version of GLSL to be generated.
 struct Version {
-  /// Is this version desktop GLSL, or GLSL ES?
-  enum class Standard {
-    kDesktop,
-    kES,
-  };
+    /// Is this version desktop GLSL, or GLSL ES?
+    enum class Standard {
+        kDesktop,
+        kES,
+    };
 
-  /// Constructor
-  /// @param standard_ Desktop or ES
-  /// @param major_ the major version
-  /// @param minor_ the minor version
-  Version(Standard standard_, uint32_t major_, uint32_t minor_)
-      : standard(standard_), major_version(major_), minor_version(minor_) {}
+    /// Constructor
+    /// @param standard_ Desktop or ES
+    /// @param major_ the major version
+    /// @param minor_ the minor version
+    Version(Standard standard_, uint32_t major_, uint32_t minor_)
+        : standard(standard_), major_version(major_), minor_version(minor_) {}
 
-  /// Default constructor (see default values below)
-  Version() = default;
+    /// Default constructor (see default values below)
+    Version() = default;
 
-  /// @returns true if this version is GLSL ES
-  bool IsES() const { return standard == Standard::kES; }
+    /// @returns true if this version is GLSL ES
+    bool IsES() const { return standard == Standard::kES; }
 
-  /// @returns true if this version is Desktop GLSL
-  bool IsDesktop() const { return standard == Standard::kDesktop; }
+    /// @returns true if this version is Desktop GLSL
+    bool IsDesktop() const { return standard == Standard::kDesktop; }
 
-  /// Desktop or ES
-  Standard standard = Standard::kES;
+    /// Desktop or ES
+    Standard standard = Standard::kES;
 
-  /// Major GLSL version
-  uint32_t major_version = 3;
+    /// Major GLSL version
+    uint32_t major_version = 3;
 
-  /// Minor GLSL version
-  uint32_t minor_version = 1;
+    /// Minor GLSL version
+    uint32_t minor_version = 1;
 };
 
 }  // namespace tint::writer::glsl

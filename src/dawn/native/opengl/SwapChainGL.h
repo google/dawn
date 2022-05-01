@@ -21,17 +21,17 @@
 
 namespace dawn::native::opengl {
 
-    class Device;
+class Device;
 
-    class SwapChain final : public OldSwapChainBase {
-      public:
-        SwapChain(Device* device, const SwapChainDescriptor* descriptor);
+class SwapChain final : public OldSwapChainBase {
+  public:
+    SwapChain(Device* device, const SwapChainDescriptor* descriptor);
 
-      protected:
-        ~SwapChain() override;
-        TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
-        MaybeError OnBeforePresent(TextureViewBase* view) override;
-    };
+  protected:
+    ~SwapChain() override;
+    TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
+    MaybeError OnBeforePresent(TextureViewBase* view) override;
+};
 
 }  // namespace dawn::native::opengl
 

@@ -29,54 +29,53 @@
 
 namespace dawn::native {
 
-    class DeviceBase;
+class DeviceBase;
 
-    // AttachmentStateBlueprint and AttachmentState are separated so the AttachmentState
-    // can be constructed by copying the blueprint state instead of traversing descriptors.
-    // Also, AttachmentStateBlueprint does not need a refcount like AttachmentState.
-    class AttachmentStateBlueprint {
-      public:
-        // Note: Descriptors must be validated before the AttachmentState is constructed.
-        explicit AttachmentStateBlueprint(const RenderBundleEncoderDescriptor* descriptor);
-        explicit AttachmentStateBlueprint(const RenderPipelineDescriptor* descriptor);
-        explicit AttachmentStateBlueprint(const RenderPassDescriptor* descriptor);
+// AttachmentStateBlueprint and AttachmentState are separated so the AttachmentState
+// can be constructed by copying the blueprint state instead of traversing descriptors.
+// Also, AttachmentStateBlueprint does not need a refcount like AttachmentState.
+class AttachmentStateBlueprint {
+  public:
+    // Note: Descriptors must be validated before the AttachmentState is constructed.
+    explicit AttachmentStateBlueprint(const RenderBundleEncoderDescriptor* descriptor);
+    explicit AttachmentStateBlueprint(const RenderPipelineDescriptor* descriptor);
+    explicit AttachmentStateBlueprint(const RenderPassDescriptor* descriptor);
 
-        AttachmentStateBlueprint(const AttachmentStateBlueprint& rhs);
+    AttachmentStateBlueprint(const AttachmentStateBlueprint& rhs);
 
-        // Functors necessary for the unordered_set<AttachmentState*>-based cache.
-        struct HashFunc {
-            size_t operator()(const AttachmentStateBlueprint* attachmentState) const;
-        };
-        struct EqualityFunc {
-            bool operator()(const AttachmentStateBlueprint* a,
-                            const AttachmentStateBlueprint* b) const;
-        };
-
-      protected:
-        ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> mColorAttachmentsSet;
-        ityp::array<ColorAttachmentIndex, wgpu::TextureFormat, kMaxColorAttachments> mColorFormats;
-        // Default (texture format Undefined) indicates there is no depth stencil attachment.
-        wgpu::TextureFormat mDepthStencilFormat = wgpu::TextureFormat::Undefined;
-        uint32_t mSampleCount = 0;
+    // Functors necessary for the unordered_set<AttachmentState*>-based cache.
+    struct HashFunc {
+        size_t operator()(const AttachmentStateBlueprint* attachmentState) const;
+    };
+    struct EqualityFunc {
+        bool operator()(const AttachmentStateBlueprint* a, const AttachmentStateBlueprint* b) const;
     };
 
-    class AttachmentState final : public AttachmentStateBlueprint,
-                                  public ObjectBase,
-                                  public CachedObject {
-      public:
-        AttachmentState(DeviceBase* device, const AttachmentStateBlueprint& blueprint);
+  protected:
+    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> mColorAttachmentsSet;
+    ityp::array<ColorAttachmentIndex, wgpu::TextureFormat, kMaxColorAttachments> mColorFormats;
+    // Default (texture format Undefined) indicates there is no depth stencil attachment.
+    wgpu::TextureFormat mDepthStencilFormat = wgpu::TextureFormat::Undefined;
+    uint32_t mSampleCount = 0;
+};
 
-        ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> GetColorAttachmentsMask() const;
-        wgpu::TextureFormat GetColorAttachmentFormat(ColorAttachmentIndex index) const;
-        bool HasDepthStencilAttachment() const;
-        wgpu::TextureFormat GetDepthStencilFormat() const;
-        uint32_t GetSampleCount() const;
+class AttachmentState final : public AttachmentStateBlueprint,
+                              public ObjectBase,
+                              public CachedObject {
+  public:
+    AttachmentState(DeviceBase* device, const AttachmentStateBlueprint& blueprint);
 
-        size_t ComputeContentHash() override;
+    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> GetColorAttachmentsMask() const;
+    wgpu::TextureFormat GetColorAttachmentFormat(ColorAttachmentIndex index) const;
+    bool HasDepthStencilAttachment() const;
+    wgpu::TextureFormat GetDepthStencilFormat() const;
+    uint32_t GetSampleCount() const;
 
-      private:
-        ~AttachmentState() override;
-    };
+    size_t ComputeContentHash() override;
+
+  private:
+    ~AttachmentState() override;
+};
 
 }  // namespace dawn::native
 

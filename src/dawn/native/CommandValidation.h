@@ -23,74 +23,74 @@
 
 namespace dawn::native {
 
-    class QuerySetBase;
-    struct SyncScopeResourceUsage;
-    struct TexelBlockInfo;
+class QuerySetBase;
+struct SyncScopeResourceUsage;
+struct TexelBlockInfo;
 
-    MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& usage);
+MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& usage);
 
-    MaybeError ValidateTimestampQuery(const DeviceBase* device,
-                                      const QuerySetBase* querySet,
-                                      uint32_t queryIndex);
+MaybeError ValidateTimestampQuery(const DeviceBase* device,
+                                  const QuerySetBase* querySet,
+                                  uint32_t queryIndex);
 
-    MaybeError ValidateWriteBuffer(const DeviceBase* device,
-                                   const BufferBase* buffer,
-                                   uint64_t bufferOffset,
-                                   uint64_t size);
+MaybeError ValidateWriteBuffer(const DeviceBase* device,
+                               const BufferBase* buffer,
+                               uint64_t bufferOffset,
+                               uint64_t size);
 
-    template <typename A, typename B>
-    DAWN_FORCE_INLINE uint64_t Safe32x32(A a, B b) {
-        static_assert(std::is_same<A, uint32_t>::value, "'a' must be uint32_t");
-        static_assert(std::is_same<B, uint32_t>::value, "'b' must be uint32_t");
-        return uint64_t(a) * uint64_t(b);
-    }
+template <typename A, typename B>
+DAWN_FORCE_INLINE uint64_t Safe32x32(A a, B b) {
+    static_assert(std::is_same<A, uint32_t>::value, "'a' must be uint32_t");
+    static_assert(std::is_same<B, uint32_t>::value, "'b' must be uint32_t");
+    return uint64_t(a) * uint64_t(b);
+}
 
-    ResultOrError<uint64_t> ComputeRequiredBytesInCopy(const TexelBlockInfo& blockInfo,
-                                                       const Extent3D& copySize,
-                                                       uint32_t bytesPerRow,
-                                                       uint32_t rowsPerImage);
+ResultOrError<uint64_t> ComputeRequiredBytesInCopy(const TexelBlockInfo& blockInfo,
+                                                   const Extent3D& copySize,
+                                                   uint32_t bytesPerRow,
+                                                   uint32_t rowsPerImage);
 
-    void ApplyDefaultTextureDataLayoutOptions(TextureDataLayout* layout,
-                                              const TexelBlockInfo& blockInfo,
-                                              const Extent3D& copyExtent);
-    MaybeError ValidateLinearTextureData(const TextureDataLayout& layout,
-                                         uint64_t byteSize,
-                                         const TexelBlockInfo& blockInfo,
-                                         const Extent3D& copyExtent);
-    MaybeError ValidateTextureCopyRange(DeviceBase const* device,
-                                        const ImageCopyTexture& imageCopyTexture,
-                                        const Extent3D& copySize);
-    ResultOrError<Aspect> SingleAspectUsedByImageCopyTexture(const ImageCopyTexture& view);
-    MaybeError ValidateLinearToDepthStencilCopyRestrictions(const ImageCopyTexture& dst);
+void ApplyDefaultTextureDataLayoutOptions(TextureDataLayout* layout,
+                                          const TexelBlockInfo& blockInfo,
+                                          const Extent3D& copyExtent);
+MaybeError ValidateLinearTextureData(const TextureDataLayout& layout,
+                                     uint64_t byteSize,
+                                     const TexelBlockInfo& blockInfo,
+                                     const Extent3D& copyExtent);
+MaybeError ValidateTextureCopyRange(DeviceBase const* device,
+                                    const ImageCopyTexture& imageCopyTexture,
+                                    const Extent3D& copySize);
+ResultOrError<Aspect> SingleAspectUsedByImageCopyTexture(const ImageCopyTexture& view);
+MaybeError ValidateLinearToDepthStencilCopyRestrictions(const ImageCopyTexture& dst);
 
-    MaybeError ValidateImageCopyBuffer(DeviceBase const* device,
-                                       const ImageCopyBuffer& imageCopyBuffer);
-    MaybeError ValidateImageCopyTexture(DeviceBase const* device,
-                                        const ImageCopyTexture& imageCopyTexture,
-                                        const Extent3D& copySize);
+MaybeError ValidateImageCopyBuffer(DeviceBase const* device,
+                                   const ImageCopyBuffer& imageCopyBuffer);
+MaybeError ValidateImageCopyTexture(DeviceBase const* device,
+                                    const ImageCopyTexture& imageCopyTexture,
+                                    const Extent3D& copySize);
 
-    MaybeError ValidateCopySizeFitsInBuffer(const Ref<BufferBase>& buffer,
-                                            uint64_t offset,
-                                            uint64_t size);
+MaybeError ValidateCopySizeFitsInBuffer(const Ref<BufferBase>& buffer,
+                                        uint64_t offset,
+                                        uint64_t size);
 
-    bool IsRangeOverlapped(uint32_t startA, uint32_t startB, uint32_t length);
+bool IsRangeOverlapped(uint32_t startA, uint32_t startB, uint32_t length);
 
-    MaybeError ValidateTextureToTextureCopyCommonRestrictions(const ImageCopyTexture& src,
-                                                              const ImageCopyTexture& dst,
-                                                              const Extent3D& copySize);
-    MaybeError ValidateTextureToTextureCopyRestrictions(const ImageCopyTexture& src,
-                                                        const ImageCopyTexture& dst,
-                                                        const Extent3D& copySize);
+MaybeError ValidateTextureToTextureCopyCommonRestrictions(const ImageCopyTexture& src,
+                                                          const ImageCopyTexture& dst,
+                                                          const Extent3D& copySize);
+MaybeError ValidateTextureToTextureCopyRestrictions(const ImageCopyTexture& src,
+                                                    const ImageCopyTexture& dst,
+                                                    const Extent3D& copySize);
 
-    enum class UsageValidationMode {
-        Default,
-        Internal,
-    };
+enum class UsageValidationMode {
+    Default,
+    Internal,
+};
 
-    MaybeError ValidateCanUseAs(const TextureBase* texture,
-                                wgpu::TextureUsage usage,
-                                UsageValidationMode mode);
-    MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage);
+MaybeError ValidateCanUseAs(const TextureBase* texture,
+                            wgpu::TextureUsage usage,
+                            UsageValidationMode mode);
+MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage);
 
 }  // namespace dawn::native
 

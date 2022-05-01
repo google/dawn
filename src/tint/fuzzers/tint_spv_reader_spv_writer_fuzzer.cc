@@ -20,16 +20,15 @@
 namespace tint::fuzzers {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-  DataBuilder db(data, size);
-  writer::spirv::Options options;
-  GenerateSpirvOptions(&db, &options);
-  tint::fuzzers::ReaderWriterFuzzer fuzzer(InputFormat::kSpv,
-                                           OutputFormat::kSpv);
-  fuzzer.SetOptionsSpirv(options);
-  fuzzer.SetDumpInput(GetCliParams().dump_input);
-  fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
+    DataBuilder db(data, size);
+    writer::spirv::Options options;
+    GenerateSpirvOptions(&db, &options);
+    tint::fuzzers::ReaderWriterFuzzer fuzzer(InputFormat::kSpv, OutputFormat::kSpv);
+    fuzzer.SetOptionsSpirv(options);
+    fuzzer.SetDumpInput(GetCliParams().dump_input);
+    fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
 
-  return fuzzer.Run(data, size);
+    return fuzzer.Run(data, size);
 }
 
 }  // namespace tint::fuzzers

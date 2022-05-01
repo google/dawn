@@ -28,24 +28,24 @@ using ::testing::Not;
 using ::testing::StartsWith;
 
 Program ParseAndBuild(std::string spirv) {
-  const char* preamble = R"(OpCapability Shader
+    const char* preamble = R"(OpCapability Shader
             OpMemoryModel Logical GLSL450
             OpEntryPoint GLCompute %main "main"
             OpExecutionMode %main LocalSize 1 1 1
             OpName %main "main"
 )";
 
-  auto p = std::make_unique<ParserImpl>(test::Assemble(preamble + spirv));
-  if (!p->BuildAndParseInternalModule()) {
-    ProgramBuilder builder;
-    builder.Diagnostics().add_error(diag::System::Reader, p->error());
-    return Program(std::move(builder));
-  }
-  return p->program();
+    auto p = std::make_unique<ParserImpl>(test::Assemble(preamble + spirv));
+    if (!p->BuildAndParseInternalModule()) {
+        ProgramBuilder builder;
+        builder.Diagnostics().add_error(diag::System::Reader, p->error());
+        return Program(std::move(builder));
+    }
+    return p->program();
 }
 
 TEST_F(SpvParserTest, WorkgroupBarrier) {
-  auto program = ParseAndBuild(R"(
+    auto program = ParseAndBuild(R"(
                OpName %helper "helper"
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
@@ -62,23 +62,22 @@ TEST_F(SpvParserTest, WorkgroupBarrier) {
                OpReturn
                OpFunctionEnd
   )");
-  ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
-  auto* helper =
-      program.AST().Functions().Find(program.Symbols().Get("helper"));
-  ASSERT_NE(helper, nullptr);
-  ASSERT_GT(helper->body->statements.size(), 0u);
-  auto* call = helper->body->statements[0]->As<ast::CallStatement>();
-  ASSERT_NE(call, nullptr);
-  EXPECT_EQ(call->expr->args.size(), 0u);
-  auto* sem_call = program.Sem().Get(call->expr);
-  ASSERT_NE(sem_call, nullptr);
-  auto* builtin = sem_call->Target()->As<sem::Builtin>();
-  ASSERT_NE(builtin, nullptr);
-  EXPECT_EQ(builtin->Type(), sem::BuiltinType::kWorkgroupBarrier);
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    auto* helper = program.AST().Functions().Find(program.Symbols().Get("helper"));
+    ASSERT_NE(helper, nullptr);
+    ASSERT_GT(helper->body->statements.size(), 0u);
+    auto* call = helper->body->statements[0]->As<ast::CallStatement>();
+    ASSERT_NE(call, nullptr);
+    EXPECT_EQ(call->expr->args.size(), 0u);
+    auto* sem_call = program.Sem().Get(call->expr);
+    ASSERT_NE(sem_call, nullptr);
+    auto* builtin = sem_call->Target()->As<sem::Builtin>();
+    ASSERT_NE(builtin, nullptr);
+    EXPECT_EQ(builtin->Type(), sem::BuiltinType::kWorkgroupBarrier);
 }
 
 TEST_F(SpvParserTest, StorageBarrier) {
-  auto program = ParseAndBuild(R"(
+    auto program = ParseAndBuild(R"(
                OpName %helper "helper"
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
@@ -96,23 +95,22 @@ TEST_F(SpvParserTest, StorageBarrier) {
                OpReturn
                OpFunctionEnd
   )");
-  ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
-  auto* helper =
-      program.AST().Functions().Find(program.Symbols().Get("helper"));
-  ASSERT_NE(helper, nullptr);
-  ASSERT_GT(helper->body->statements.size(), 0u);
-  auto* call = helper->body->statements[0]->As<ast::CallStatement>();
-  ASSERT_NE(call, nullptr);
-  EXPECT_EQ(call->expr->args.size(), 0u);
-  auto* sem_call = program.Sem().Get(call->expr);
-  ASSERT_NE(sem_call, nullptr);
-  auto* builtin = sem_call->Target()->As<sem::Builtin>();
-  ASSERT_NE(builtin, nullptr);
-  EXPECT_EQ(builtin->Type(), sem::BuiltinType::kStorageBarrier);
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    auto* helper = program.AST().Functions().Find(program.Symbols().Get("helper"));
+    ASSERT_NE(helper, nullptr);
+    ASSERT_GT(helper->body->statements.size(), 0u);
+    auto* call = helper->body->statements[0]->As<ast::CallStatement>();
+    ASSERT_NE(call, nullptr);
+    EXPECT_EQ(call->expr->args.size(), 0u);
+    auto* sem_call = program.Sem().Get(call->expr);
+    ASSERT_NE(sem_call, nullptr);
+    auto* builtin = sem_call->Target()->As<sem::Builtin>();
+    ASSERT_NE(builtin, nullptr);
+    EXPECT_EQ(builtin->Type(), sem::BuiltinType::kStorageBarrier);
 }
 
 TEST_F(SpvParserTest, ErrBarrierInvalidExecution) {
-  auto program = ParseAndBuild(R"(
+    auto program = ParseAndBuild(R"(
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
@@ -125,13 +123,13 @@ TEST_F(SpvParserTest, ErrBarrierInvalidExecution) {
                OpReturn
                OpFunctionEnd
   )");
-  EXPECT_FALSE(program.IsValid());
-  EXPECT_THAT(program.Diagnostics().str(),
-              HasSubstr("unsupported control barrier execution scope"));
+    EXPECT_FALSE(program.IsValid());
+    EXPECT_THAT(program.Diagnostics().str(),
+                HasSubstr("unsupported control barrier execution scope"));
 }
 
 TEST_F(SpvParserTest, ErrBarrierSemanticsMissingAcquireRelease) {
-  auto program = ParseAndBuild(R"(
+    auto program = ParseAndBuild(R"(
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
@@ -143,14 +141,13 @@ TEST_F(SpvParserTest, ErrBarrierSemanticsMissingAcquireRelease) {
                OpReturn
                OpFunctionEnd
   )");
-  EXPECT_FALSE(program.IsValid());
-  EXPECT_THAT(
-      program.Diagnostics().str(),
-      HasSubstr("control barrier semantics requires acquire and release"));
+    EXPECT_FALSE(program.IsValid());
+    EXPECT_THAT(program.Diagnostics().str(),
+                HasSubstr("control barrier semantics requires acquire and release"));
 }
 
 TEST_F(SpvParserTest, ErrBarrierInvalidSemantics) {
-  auto program = ParseAndBuild(R"(
+    auto program = ParseAndBuild(R"(
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
@@ -162,13 +159,12 @@ TEST_F(SpvParserTest, ErrBarrierInvalidSemantics) {
                OpReturn
                OpFunctionEnd
   )");
-  EXPECT_FALSE(program.IsValid());
-  EXPECT_THAT(program.Diagnostics().str(),
-              HasSubstr("unsupported control barrier semantics"));
+    EXPECT_FALSE(program.IsValid());
+    EXPECT_THAT(program.Diagnostics().str(), HasSubstr("unsupported control barrier semantics"));
 }
 
 TEST_F(SpvParserTest, ErrWorkgroupBarrierInvalidMemory) {
-  auto program = ParseAndBuild(R"(
+    auto program = ParseAndBuild(R"(
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
@@ -181,13 +177,13 @@ TEST_F(SpvParserTest, ErrWorkgroupBarrierInvalidMemory) {
                OpReturn
                OpFunctionEnd
   )");
-  EXPECT_FALSE(program.IsValid());
-  EXPECT_THAT(program.Diagnostics().str(),
-              HasSubstr("workgroupBarrier requires workgroup memory scope"));
+    EXPECT_FALSE(program.IsValid());
+    EXPECT_THAT(program.Diagnostics().str(),
+                HasSubstr("workgroupBarrier requires workgroup memory scope"));
 }
 
 TEST_F(SpvParserTest, ErrStorageBarrierInvalidMemory) {
-  auto program = ParseAndBuild(R"(
+    auto program = ParseAndBuild(R"(
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
@@ -200,9 +196,9 @@ TEST_F(SpvParserTest, ErrStorageBarrierInvalidMemory) {
                OpReturn
                OpFunctionEnd
   )");
-  EXPECT_FALSE(program.IsValid());
-  EXPECT_THAT(program.Diagnostics().str(),
-              HasSubstr("storageBarrier requires device memory scope"));
+    EXPECT_FALSE(program.IsValid());
+    EXPECT_THAT(program.Diagnostics().str(),
+                HasSubstr("storageBarrier requires device memory scope"));
 }
 
 }  // namespace

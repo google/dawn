@@ -22,12 +22,12 @@ CliParams cli_params;
 }
 
 const CliParams& GetCliParams() {
-  return cli_params;
+    return cli_params;
 }
 
 extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
-  cli_params = ParseCliParams(argc, *argv);
-  return 0;
+    cli_params = ParseCliParams(argc, *argv);
+    return 0;
 }
 
 }  // namespace tint::fuzzers

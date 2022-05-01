@@ -23,43 +23,43 @@ namespace {
 using ReturnStatementTest = TestHelper;
 
 TEST_F(ReturnStatementTest, Creation) {
-  auto* expr = Expr("expr");
+    auto* expr = Expr("expr");
 
-  auto* r = create<ReturnStatement>(expr);
-  EXPECT_EQ(r->value, expr);
+    auto* r = create<ReturnStatement>(expr);
+    EXPECT_EQ(r->value, expr);
 }
 
 TEST_F(ReturnStatementTest, Creation_WithSource) {
-  auto* r = create<ReturnStatement>(Source{Source::Location{20, 2}});
-  auto src = r->source;
-  EXPECT_EQ(src.range.begin.line, 20u);
-  EXPECT_EQ(src.range.begin.column, 2u);
+    auto* r = create<ReturnStatement>(Source{Source::Location{20, 2}});
+    auto src = r->source;
+    EXPECT_EQ(src.range.begin.line, 20u);
+    EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(ReturnStatementTest, IsReturn) {
-  auto* r = create<ReturnStatement>();
-  EXPECT_TRUE(r->Is<ReturnStatement>());
+    auto* r = create<ReturnStatement>();
+    EXPECT_TRUE(r->Is<ReturnStatement>());
 }
 
 TEST_F(ReturnStatementTest, WithoutValue) {
-  auto* r = create<ReturnStatement>();
-  EXPECT_EQ(r->value, nullptr);
+    auto* r = create<ReturnStatement>();
+    EXPECT_EQ(r->value, nullptr);
 }
 
 TEST_F(ReturnStatementTest, WithValue) {
-  auto* expr = Expr("expr");
-  auto* r = create<ReturnStatement>(expr);
-  EXPECT_NE(r->value, nullptr);
+    auto* expr = Expr("expr");
+    auto* r = create<ReturnStatement>(expr);
+    EXPECT_NE(r->value, nullptr);
 }
 
 TEST_F(ReturnStatementTest, Assert_DifferentProgramID_Expr) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b1;
-        ProgramBuilder b2;
-        b1.create<ReturnStatement>(b2.Expr(true));
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b1;
+            ProgramBuilder b2;
+            b1.create<ReturnStatement>(b2.Expr(true));
+        },
+        "internal compiler error");
 }
 
 }  // namespace

@@ -23,16 +23,16 @@ namespace {
 using AstVectorTest = TestHelper;
 
 TEST_F(AstVectorTest, Creation) {
-  auto* i32 = create<I32>();
-  auto* v = create<Vector>(i32, 2);
-  EXPECT_EQ(v->type, i32);
-  EXPECT_EQ(v->width, 2u);
+    auto* i32 = create<I32>();
+    auto* v = create<Vector>(i32, 2);
+    EXPECT_EQ(v->type, i32);
+    EXPECT_EQ(v->width, 2u);
 }
 
 TEST_F(AstVectorTest, FriendlyName) {
-  auto* f32 = create<F32>();
-  auto* v = create<Vector>(f32, 3);
-  EXPECT_EQ(v->FriendlyName(Symbols()), "vec3<f32>");
+    auto* f32 = create<F32>();
+    auto* v = create<Vector>(f32, 3);
+    EXPECT_EQ(v->FriendlyName(Symbols()), "vec3<f32>");
 }
 
 }  // namespace

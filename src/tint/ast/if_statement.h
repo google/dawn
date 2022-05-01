@@ -24,36 +24,36 @@ namespace tint::ast {
 
 /// An if statement
 class IfStatement final : public Castable<IfStatement, Statement> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param condition the if condition
-  /// @param body the if body
-  /// @param else_stmt the else statement, or nullptr
-  IfStatement(ProgramID pid,
-              const Source& src,
-              const Expression* condition,
-              const BlockStatement* body,
-              const Statement* else_stmt);
-  /// Move constructor
-  IfStatement(IfStatement&&);
-  ~IfStatement() override;
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param condition the if condition
+    /// @param body the if body
+    /// @param else_stmt the else statement, or nullptr
+    IfStatement(ProgramID pid,
+                const Source& src,
+                const Expression* condition,
+                const BlockStatement* body,
+                const Statement* else_stmt);
+    /// Move constructor
+    IfStatement(IfStatement&&);
+    ~IfStatement() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const IfStatement* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const IfStatement* Clone(CloneContext* ctx) const override;
 
-  /// The if condition or nullptr if none set
-  const Expression* const condition;
+    /// The if condition or nullptr if none set
+    const Expression* const condition;
 
-  /// The if body
-  const BlockStatement* const body;
+    /// The if body
+    const BlockStatement* const body;
 
-  /// The optional else statement, or nullptr
-  const Statement* else_statement;
+    /// The optional else statement, or nullptr
+    const Statement* else_statement;
 };
 
 }  // namespace tint::ast

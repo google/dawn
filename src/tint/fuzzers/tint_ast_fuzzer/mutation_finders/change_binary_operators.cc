@@ -26,63 +26,61 @@ MutationList MutationFinderChangeBinaryOperators::FindMutations(
     const tint::Program& program,
     NodeIdMap* node_id_map,
     ProbabilityContext* probability_context) const {
-  MutationList result;
+    MutationList result;
 
-  // Go through each binary expression in the AST and add a mutation that
-  // replaces its operator with some other type-compatible operator.
+    // Go through each binary expression in the AST and add a mutation that
+    // replaces its operator with some other type-compatible operator.
 
-  const std::vector<ast::BinaryOp> all_binary_operators = {
-      ast::BinaryOp::kAnd,
-      ast::BinaryOp::kOr,
-      ast::BinaryOp::kXor,
-      ast::BinaryOp::kLogicalAnd,
-      ast::BinaryOp::kLogicalOr,
-      ast::BinaryOp::kEqual,
-      ast::BinaryOp::kNotEqual,
-      ast::BinaryOp::kLessThan,
-      ast::BinaryOp::kGreaterThan,
-      ast::BinaryOp::kLessThanEqual,
-      ast::BinaryOp::kGreaterThanEqual,
-      ast::BinaryOp::kShiftLeft,
-      ast::BinaryOp::kShiftRight,
-      ast::BinaryOp::kAdd,
-      ast::BinaryOp::kSubtract,
-      ast::BinaryOp::kMultiply,
-      ast::BinaryOp::kDivide,
-      ast::BinaryOp::kModulo};
+    const std::vector<ast::BinaryOp> all_binary_operators = {ast::BinaryOp::kAnd,
+                                                             ast::BinaryOp::kOr,
+                                                             ast::BinaryOp::kXor,
+                                                             ast::BinaryOp::kLogicalAnd,
+                                                             ast::BinaryOp::kLogicalOr,
+                                                             ast::BinaryOp::kEqual,
+                                                             ast::BinaryOp::kNotEqual,
+                                                             ast::BinaryOp::kLessThan,
+                                                             ast::BinaryOp::kGreaterThan,
+                                                             ast::BinaryOp::kLessThanEqual,
+                                                             ast::BinaryOp::kGreaterThanEqual,
+                                                             ast::BinaryOp::kShiftLeft,
+                                                             ast::BinaryOp::kShiftRight,
+                                                             ast::BinaryOp::kAdd,
+                                                             ast::BinaryOp::kSubtract,
+                                                             ast::BinaryOp::kMultiply,
+                                                             ast::BinaryOp::kDivide,
+                                                             ast::BinaryOp::kModulo};
 
-  for (const auto* node : program.ASTNodes().Objects()) {
-    const auto* binary_expr = As<ast::BinaryExpression>(node);
-    if (!binary_expr) {
-      continue;
+    for (const auto* node : program.ASTNodes().Objects()) {
+        const auto* binary_expr = As<ast::BinaryExpression>(node);
+        if (!binary_expr) {
+            continue;
+        }
+
+        // Get vector of all operators this could be replaced with.
+        std::vector<ast::BinaryOp> allowed_replacements;
+        for (auto candidate_op : all_binary_operators) {
+            if (MutationChangeBinaryOperator::CanReplaceBinaryOperator(program, *binary_expr,
+                                                                       candidate_op)) {
+                allowed_replacements.push_back(candidate_op);
+            }
+        }
+
+        if (!allowed_replacements.empty()) {
+            // Choose an available replacement operator at random.
+            const ast::BinaryOp replacement =
+                allowed_replacements[probability_context->GetRandomIndex(allowed_replacements)];
+            // Add a mutation according to the chosen replacement.
+            result.push_back(std::make_unique<MutationChangeBinaryOperator>(
+                node_id_map->GetId(binary_expr), replacement));
+        }
     }
 
-    // Get vector of all operators this could be replaced with.
-    std::vector<ast::BinaryOp> allowed_replacements;
-    for (auto candidate_op : all_binary_operators) {
-      if (MutationChangeBinaryOperator::CanReplaceBinaryOperator(
-              program, *binary_expr, candidate_op)) {
-        allowed_replacements.push_back(candidate_op);
-      }
-    }
-
-    if (!allowed_replacements.empty()) {
-      // Choose an available replacement operator at random.
-      const ast::BinaryOp replacement =
-          allowed_replacements[probability_context->GetRandomIndex(
-              allowed_replacements)];
-      // Add a mutation according to the chosen replacement.
-      result.push_back(std::make_unique<MutationChangeBinaryOperator>(
-          node_id_map->GetId(binary_expr), replacement));
-    }
-  }
-
-  return result;
+    return result;
 }
 
 uint32_t MutationFinderChangeBinaryOperators::GetChanceOfApplyingMutation(
     ProbabilityContext* probability_context) const {
-  return probability_context->GetChanceOfChangingBinaryOperators();
+    return probability_context->GetChanceOfChangingBinaryOperators();
 }
 
 }  // namespace tint::fuzzers::ast_fuzzer

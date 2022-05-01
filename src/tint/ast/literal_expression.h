@@ -23,14 +23,14 @@ namespace tint::ast {
 
 /// Base class for a literal value expressions
 class LiteralExpression : public Castable<LiteralExpression, Expression> {
- public:
-  ~LiteralExpression() override;
+  public:
+    ~LiteralExpression() override;
 
- protected:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the input source
-  LiteralExpression(ProgramID pid, const Source& src);
+  protected:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the input source
+    LiteralExpression(ProgramID pid, const Source& src);
 };
 
 }  // namespace tint::ast

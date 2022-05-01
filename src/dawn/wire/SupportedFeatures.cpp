@@ -16,34 +16,34 @@
 
 namespace dawn::wire {
 
-    // Note: Upon updating this list, please also update serialization/deserialization
-    // of limit structs on Adapter/Device initialization.
-    bool IsFeatureSupported(WGPUFeatureName feature) {
-        switch (feature) {
-            case WGPUFeatureName_Undefined:
-            case WGPUFeatureName_Force32:
-            case WGPUFeatureName_DawnNative:
-                return false;
-            case WGPUFeatureName_Depth24UnormStencil8:
-            case WGPUFeatureName_Depth32FloatStencil8:
-            case WGPUFeatureName_TimestampQuery:
-            case WGPUFeatureName_PipelineStatisticsQuery:
-            case WGPUFeatureName_TextureCompressionBC:
-            case WGPUFeatureName_TextureCompressionETC2:
-            case WGPUFeatureName_TextureCompressionASTC:
-            case WGPUFeatureName_IndirectFirstInstance:
-            case WGPUFeatureName_DepthClamping:
-            case WGPUFeatureName_DawnShaderFloat16:
-            case WGPUFeatureName_DawnInternalUsages:
-            case WGPUFeatureName_DawnMultiPlanarFormats:
-                return true;
-        }
-
-        // Catch-all, for unsupported features.
-        // "default:" is not used so we get compiler errors for
-        // newly added, unhandled features, but still catch completely
-        // unknown enums.
-        return false;
+// Note: Upon updating this list, please also update serialization/deserialization
+// of limit structs on Adapter/Device initialization.
+bool IsFeatureSupported(WGPUFeatureName feature) {
+    switch (feature) {
+        case WGPUFeatureName_Undefined:
+        case WGPUFeatureName_Force32:
+        case WGPUFeatureName_DawnNative:
+            return false;
+        case WGPUFeatureName_Depth24UnormStencil8:
+        case WGPUFeatureName_Depth32FloatStencil8:
+        case WGPUFeatureName_TimestampQuery:
+        case WGPUFeatureName_PipelineStatisticsQuery:
+        case WGPUFeatureName_TextureCompressionBC:
+        case WGPUFeatureName_TextureCompressionETC2:
+        case WGPUFeatureName_TextureCompressionASTC:
+        case WGPUFeatureName_IndirectFirstInstance:
+        case WGPUFeatureName_DepthClamping:
+        case WGPUFeatureName_DawnShaderFloat16:
+        case WGPUFeatureName_DawnInternalUsages:
+        case WGPUFeatureName_DawnMultiPlanarFormats:
+            return true;
     }
+
+    // Catch-all, for unsupported features.
+    // "default:" is not used so we get compiler errors for
+    // newly added, unhandled features, but still catch completely
+    // unknown enums.
+    return false;
+}
 
 }  // namespace dawn::wire

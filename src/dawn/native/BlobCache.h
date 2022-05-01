@@ -19,57 +19,57 @@
 #include <mutex>
 
 namespace dawn::platform {
-    class CachingInterface;
+class CachingInterface;
 }
 
 namespace dawn::native {
 
-    class BlobCache;
-    class CacheKey;
-    class InstanceBase;
+class BlobCache;
+class CacheKey;
+class InstanceBase;
 
-    class CachedBlob {
-      public:
-        explicit CachedBlob(size_t size = 0);
+class CachedBlob {
+  public:
+    explicit CachedBlob(size_t size = 0);
 
-        bool Empty() const;
-        const uint8_t* Data() const;
-        uint8_t* Data();
-        size_t Size() const;
-        void Reset(size_t size);
+    bool Empty() const;
+    const uint8_t* Data() const;
+    uint8_t* Data();
+    size_t Size() const;
+    void Reset(size_t size);
 
-      private:
-        std::unique_ptr<uint8_t[]> mData = nullptr;
-        size_t mSize = 0;
-    };
+  private:
+    std::unique_ptr<uint8_t[]> mData = nullptr;
+    size_t mSize = 0;
+};
 
-    // This class should always be thread-safe because it may be called asynchronously. Its purpose
-    // is to wrap the CachingInterface provided via a platform.
-    class BlobCache {
-      public:
-        explicit BlobCache(dawn::platform::CachingInterface* cachingInterface = nullptr);
+// This class should always be thread-safe because it may be called asynchronously. Its purpose
+// is to wrap the CachingInterface provided via a platform.
+class BlobCache {
+  public:
+    explicit BlobCache(dawn::platform::CachingInterface* cachingInterface = nullptr);
 
-        // Returns empty blob if the key is not found in the cache.
-        CachedBlob Load(const CacheKey& key);
+    // Returns empty blob if the key is not found in the cache.
+    CachedBlob Load(const CacheKey& key);
 
-        // Value to store must be non-empty/non-null.
-        void Store(const CacheKey& key, size_t valueSize, const void* value);
-        void Store(const CacheKey& key, const CachedBlob& value);
+    // Value to store must be non-empty/non-null.
+    void Store(const CacheKey& key, size_t valueSize, const void* value);
+    void Store(const CacheKey& key, const CachedBlob& value);
 
-      private:
-        // Non-thread safe internal implementations of load and store. Exposed callers that use
-        // these helpers need to make sure that these are entered with `mMutex` held.
-        CachedBlob LoadInternal(const CacheKey& key);
-        void StoreInternal(const CacheKey& key, size_t valueSize, const void* value);
+  private:
+    // Non-thread safe internal implementations of load and store. Exposed callers that use
+    // these helpers need to make sure that these are entered with `mMutex` held.
+    CachedBlob LoadInternal(const CacheKey& key);
+    void StoreInternal(const CacheKey& key, size_t valueSize, const void* value);
 
-        // Protects thread safety of access to mCache.
-        std::mutex mMutex;
+    // Protects thread safety of access to mCache.
+    std::mutex mMutex;
 
-        // TODO(dawn:549): Current CachingInterface declaration requires passing a device to each
-        //   call, but this might be unnecessary. This class just passes nullptr for those calls
-        //   right now. Eventually we can just change the interface to be more generic.
-        dawn::platform::CachingInterface* mCache;
-    };
+    // TODO(dawn:549): Current CachingInterface declaration requires passing a device to each
+    //   call, but this might be unnecessary. This class just passes nullptr for those calls
+    //   right now. Eventually we can just change the interface to be more generic.
+    dawn::platform::CachingInterface* mCache;
+};
 
 }  // namespace dawn::native
 

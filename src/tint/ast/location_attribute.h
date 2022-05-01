@@ -23,25 +23,25 @@ namespace tint::ast {
 
 /// A location attribute
 class LocationAttribute final : public Castable<LocationAttribute, Attribute> {
- public:
-  /// constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param value the location value
-  LocationAttribute(ProgramID pid, const Source& src, uint32_t value);
-  ~LocationAttribute() override;
+  public:
+    /// constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param value the location value
+    LocationAttribute(ProgramID pid, const Source& src, uint32_t value);
+    ~LocationAttribute() override;
 
-  /// @returns the WGSL name for the attribute
-  std::string Name() const override;
+    /// @returns the WGSL name for the attribute
+    std::string Name() const override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const LocationAttribute* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const LocationAttribute* Clone(CloneContext* ctx) const override;
 
-  /// The location value
-  const uint32_t value;
+    /// The location value
+    const uint32_t value;
 };
 
 }  // namespace tint::ast

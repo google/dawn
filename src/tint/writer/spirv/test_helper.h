@@ -29,103 +29,100 @@ namespace tint::writer::spirv {
 /// Helper class for testing
 template <typename BASE>
 class TestHelperBase : public ProgramBuilder, public BASE {
- public:
-  TestHelperBase() = default;
-  ~TestHelperBase() override = default;
+  public:
+    TestHelperBase() = default;
+    ~TestHelperBase() override = default;
 
-  /// Builds and returns a spirv::Builder from the program.
-  /// @note The spirv::Builder is only built once. Multiple calls to Build()
-  /// will return the same spirv::Builder without rebuilding.
-  /// @return the built spirv::Builder
-  spirv::Builder& Build() {
-    if (spirv_builder) {
-      return *spirv_builder;
+    /// Builds and returns a spirv::Builder from the program.
+    /// @note The spirv::Builder is only built once. Multiple calls to Build()
+    /// will return the same spirv::Builder without rebuilding.
+    /// @return the built spirv::Builder
+    spirv::Builder& Build() {
+        if (spirv_builder) {
+            return *spirv_builder;
+        }
+        [&]() {
+            ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
+                                   << diag::Formatter().format(Diagnostics());
+        }();
+        program = std::make_unique<Program>(std::move(*this));
+        [&]() {
+            ASSERT_TRUE(program->IsValid()) << diag::Formatter().format(program->Diagnostics());
+        }();
+        spirv_builder = std::make_unique<spirv::Builder>(program.get());
+        return *spirv_builder;
     }
-    [&]() {
-      ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
-                             << diag::Formatter().format(Diagnostics());
-    }();
-    program = std::make_unique<Program>(std::move(*this));
-    [&]() {
-      ASSERT_TRUE(program->IsValid())
-          << diag::Formatter().format(program->Diagnostics());
-    }();
-    spirv_builder = std::make_unique<spirv::Builder>(program.get());
-    return *spirv_builder;
-  }
 
-  /// Builds the program, runs the program through the transform::Spirv
-  /// sanitizer and returns a spirv::Builder from the sanitized program.
-  /// @param options The SPIR-V generator options.
-  /// @note The spirv::Builder is only built once. Multiple calls to Build()
-  /// will return the same spirv::Builder without rebuilding.
-  /// @return the built spirv::Builder
-  spirv::Builder& SanitizeAndBuild(const Options& options = {}) {
-    if (spirv_builder) {
-      return *spirv_builder;
+    /// Builds the program, runs the program through the transform::Spirv
+    /// sanitizer and returns a spirv::Builder from the sanitized program.
+    /// @param options The SPIR-V generator options.
+    /// @note The spirv::Builder is only built once. Multiple calls to Build()
+    /// will return the same spirv::Builder without rebuilding.
+    /// @return the built spirv::Builder
+    spirv::Builder& SanitizeAndBuild(const Options& options = {}) {
+        if (spirv_builder) {
+            return *spirv_builder;
+        }
+        [&]() {
+            ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
+                                   << diag::Formatter().format(Diagnostics());
+        }();
+        program = std::make_unique<Program>(std::move(*this));
+        [&]() {
+            ASSERT_TRUE(program->IsValid()) << diag::Formatter().format(program->Diagnostics());
+        }();
+        auto result = Sanitize(program.get(), options);
+        [&]() {
+            ASSERT_TRUE(result.program.IsValid())
+                << diag::Formatter().format(result.program.Diagnostics());
+        }();
+        *program = std::move(result.program);
+        spirv_builder = std::make_unique<spirv::Builder>(program.get());
+        return *spirv_builder;
     }
-    [&]() {
-      ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
-                             << diag::Formatter().format(Diagnostics());
-    }();
-    program = std::make_unique<Program>(std::move(*this));
-    [&]() {
-      ASSERT_TRUE(program->IsValid())
-          << diag::Formatter().format(program->Diagnostics());
-    }();
-    auto result = Sanitize(program.get(), options);
-    [&]() {
-      ASSERT_TRUE(result.program.IsValid())
-          << diag::Formatter().format(result.program.Diagnostics());
-    }();
-    *program = std::move(result.program);
-    spirv_builder = std::make_unique<spirv::Builder>(program.get());
-    return *spirv_builder;
-  }
 
-  /// Validate passes the generated SPIR-V of the builder `b` to the SPIR-V
-  /// Tools Validator. If the validator finds problems the test will fail.
-  /// @param b the spirv::Builder containing the built SPIR-V module
-  void Validate(spirv::Builder& b) {
-    BinaryWriter writer;
-    writer.WriteHeader(b.id_bound());
-    writer.WriteBuilder(&b);
-    auto binary = writer.result();
+    /// Validate passes the generated SPIR-V of the builder `b` to the SPIR-V
+    /// Tools Validator. If the validator finds problems the test will fail.
+    /// @param b the spirv::Builder containing the built SPIR-V module
+    void Validate(spirv::Builder& b) {
+        BinaryWriter writer;
+        writer.WriteHeader(b.id_bound());
+        writer.WriteBuilder(&b);
+        auto binary = writer.result();
 
-    std::string spv_errors;
-    auto msg_consumer = [&spv_errors](spv_message_level_t level, const char*,
-                                      const spv_position_t& position,
-                                      const char* message) {
-      switch (level) {
-        case SPV_MSG_FATAL:
-        case SPV_MSG_INTERNAL_ERROR:
-        case SPV_MSG_ERROR:
-          spv_errors += "error: line " + std::to_string(position.index) + ": " +
-                        message + "\n";
-          break;
-        case SPV_MSG_WARNING:
-          spv_errors += "warning: line " + std::to_string(position.index) +
-                        ": " + message + "\n";
-          break;
-        case SPV_MSG_INFO:
-          spv_errors += "info: line " + std::to_string(position.index) + ": " +
-                        message + "\n";
-          break;
-        case SPV_MSG_DEBUG:
-          break;
-      }
-    };
+        std::string spv_errors;
+        auto msg_consumer = [&spv_errors](spv_message_level_t level, const char*,
+                                          const spv_position_t& position, const char* message) {
+            switch (level) {
+                case SPV_MSG_FATAL:
+                case SPV_MSG_INTERNAL_ERROR:
+                case SPV_MSG_ERROR:
+                    spv_errors +=
+                        "error: line " + std::to_string(position.index) + ": " + message + "\n";
+                    break;
+                case SPV_MSG_WARNING:
+                    spv_errors +=
+                        "warning: line " + std::to_string(position.index) + ": " + message + "\n";
+                    break;
+                case SPV_MSG_INFO:
+                    spv_errors +=
+                        "info: line " + std::to_string(position.index) + ": " + message + "\n";
+                    break;
+                case SPV_MSG_DEBUG:
+                    break;
+            }
+        };
 
-    spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_2);
-    tools.SetMessageConsumer(msg_consumer);
-    ASSERT_TRUE(tools.Validate(binary)) << spv_errors;
-  }
+        spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_2);
+        tools.SetMessageConsumer(msg_consumer);
+        ASSERT_TRUE(tools.Validate(binary)) << spv_errors;
+    }
 
-  /// The program built with a call to Build()
-  std::unique_ptr<Program> program;
+    /// The program built with a call to Build()
+    std::unique_ptr<Program> program;
 
- private:
-  std::unique_ptr<spirv::Builder> spirv_builder;
+  private:
+    std::unique_ptr<spirv::Builder> spirv_builder;
 };
 using TestHelper = TestHelperBase<testing::Test>;
 

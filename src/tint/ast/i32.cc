@@ -27,12 +27,12 @@ I32::I32(I32&&) = default;
 I32::~I32() = default;
 
 std::string I32::FriendlyName(const SymbolTable&) const {
-  return "i32";
+    return "i32";
 }
 
 const I32* I32::Clone(CloneContext* ctx) const {
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<I32>(src);
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<I32>(src);
 }
 
 }  // namespace tint::ast

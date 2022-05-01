@@ -20,30 +20,30 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Switch) {
-  auto* cond = Var("cond", ty.i32());
+    auto* cond = Var("cond", ty.i32());
 
-  auto* def_body = Block(create<ast::BreakStatement>());
-  auto* def = create<ast::CaseStatement>(ast::CaseSelectorList{}, def_body);
+    auto* def_body = Block(create<ast::BreakStatement>());
+    auto* def = create<ast::CaseStatement>(ast::CaseSelectorList{}, def_body);
 
-  ast::CaseSelectorList case_val;
-  case_val.push_back(Expr(5));
+    ast::CaseSelectorList case_val;
+    case_val.push_back(Expr(5));
 
-  auto* case_body = Block(create<ast::BreakStatement>());
+    auto* case_body = Block(create<ast::BreakStatement>());
 
-  auto* case_stmt = create<ast::CaseStatement>(case_val, case_body);
+    auto* case_stmt = create<ast::CaseStatement>(case_val, case_body);
 
-  ast::CaseStatementList body;
-  body.push_back(case_stmt);
-  body.push_back(def);
+    ast::CaseStatementList body;
+    body.push_back(case_stmt);
+    body.push_back(def);
 
-  auto* s = create<ast::SwitchStatement>(Expr(cond), body);
-  WrapInFunction(cond, s);
-  GeneratorImpl& gen = Build();
+    auto* s = create<ast::SwitchStatement>(Expr(cond), body);
+    WrapInFunction(cond, s);
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  switch(cond) {
+    ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  switch(cond) {
     case 5: {
       break;
     }

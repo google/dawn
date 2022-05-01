@@ -21,23 +21,23 @@ namespace tint::ast {
 
 /// Storage class of a given pointer.
 enum class StorageClass {
-  kInvalid = -1,
-  kNone,
-  kInput,
-  kOutput,
-  kUniform,
-  kWorkgroup,
-  kHandle,
-  kStorage,
-  kPrivate,
-  kFunction
+    kInvalid = -1,
+    kNone,
+    kInput,
+    kOutput,
+    kUniform,
+    kWorkgroup,
+    kHandle,
+    kStorage,
+    kPrivate,
+    kFunction
 };
 
 /// @returns true if the StorageClass is host-shareable
 /// @param sc the StorageClass
 /// @see https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable
 inline bool IsHostShareable(StorageClass sc) {
-  return sc == ast::StorageClass::kUniform || sc == ast::StorageClass::kStorage;
+    return sc == ast::StorageClass::kUniform || sc == ast::StorageClass::kStorage;
 }
 
 /// @param sc the StorageClass

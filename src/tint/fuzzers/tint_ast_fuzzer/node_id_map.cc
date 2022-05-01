@@ -21,41 +21,41 @@ namespace tint::fuzzers::ast_fuzzer {
 NodeIdMap::NodeIdMap() = default;
 
 NodeIdMap::NodeIdMap(const Program& program) : NodeIdMap() {
-  for (const auto* node : program.ASTNodes().Objects()) {
-    Add(node, TakeFreshId());
-  }
+    for (const auto* node : program.ASTNodes().Objects()) {
+        Add(node, TakeFreshId());
+    }
 }
 
 NodeIdMap::IdType NodeIdMap::GetId(const ast::Node* node) const {
-  auto it = node_to_id_.find(node);
-  return it == node_to_id_.end() ? 0 : it->second;
+    auto it = node_to_id_.find(node);
+    return it == node_to_id_.end() ? 0 : it->second;
 }
 
 const ast::Node* NodeIdMap::GetNode(IdType id) const {
-  auto it = id_to_node_.find(id);
-  return it == id_to_node_.end() ? nullptr : it->second;
+    auto it = id_to_node_.find(id);
+    return it == id_to_node_.end() ? nullptr : it->second;
 }
 
 void NodeIdMap::Add(const ast::Node* node, IdType id) {
-  assert(!node_to_id_.count(node) && "The node already exists in the map");
-  assert(IdIsFreshAndValid(id) && "Id already exists in the map or Id is zero");
-  assert(node && "`node` can't be a nullptr");
+    assert(!node_to_id_.count(node) && "The node already exists in the map");
+    assert(IdIsFreshAndValid(id) && "Id already exists in the map or Id is zero");
+    assert(node && "`node` can't be a nullptr");
 
-  node_to_id_[node] = id;
-  id_to_node_[id] = node;
+    node_to_id_[node] = id;
+    id_to_node_[id] = node;
 
-  if (id >= fresh_id_) {
-    fresh_id_ = id + 1;
-  }
+    if (id >= fresh_id_) {
+        fresh_id_ = id + 1;
+    }
 }
 
 bool NodeIdMap::IdIsFreshAndValid(IdType id) const {
-  return id && !id_to_node_.count(id);
+    return id && !id_to_node_.count(id);
 }
 
 NodeIdMap::IdType NodeIdMap::TakeFreshId() {
-  assert(fresh_id_ != 0 && "`NodeIdMap` id has overflowed");
-  return fresh_id_++;
+    assert(fresh_id_ != 0 && "`NodeIdMap` id has overflowed");
+    return fresh_id_++;
 }
 
 }  // namespace tint::fuzzers::ast_fuzzer

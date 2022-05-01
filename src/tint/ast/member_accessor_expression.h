@@ -20,33 +20,32 @@
 namespace tint::ast {
 
 /// A member accessor expression
-class MemberAccessorExpression final
-    : public Castable<MemberAccessorExpression, Expression> {
- public:
-  /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the member accessor expression source
-  /// @param structure the structure
-  /// @param member the member
-  MemberAccessorExpression(ProgramID program_id,
-                           const Source& source,
-                           const Expression* structure,
-                           const IdentifierExpression* member);
-  /// Move constructor
-  MemberAccessorExpression(MemberAccessorExpression&&);
-  ~MemberAccessorExpression() override;
+class MemberAccessorExpression final : public Castable<MemberAccessorExpression, Expression> {
+  public:
+    /// Constructor
+    /// @param program_id the identifier of the program that owns this node
+    /// @param source the member accessor expression source
+    /// @param structure the structure
+    /// @param member the member
+    MemberAccessorExpression(ProgramID program_id,
+                             const Source& source,
+                             const Expression* structure,
+                             const IdentifierExpression* member);
+    /// Move constructor
+    MemberAccessorExpression(MemberAccessorExpression&&);
+    ~MemberAccessorExpression() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const MemberAccessorExpression* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const MemberAccessorExpression* Clone(CloneContext* ctx) const override;
 
-  /// The structure
-  const Expression* const structure;
+    /// The structure
+    const Expression* const structure;
 
-  /// The member expression
-  const IdentifierExpression* const member;
+    /// The member expression
+    const IdentifierExpression* const member;
 };
 
 }  // namespace tint::ast

@@ -19,67 +19,67 @@ namespace {
 
 using ParserImplReservedKeywordTest = ParserImplTestWithParam<std::string>;
 TEST_P(ParserImplReservedKeywordTest, Function) {
-  auto name = GetParam();
-  auto p = parser("fn " + name + "() {}");
-  EXPECT_FALSE(p->Parse());
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:4: '" + name + "' is a reserved keyword");
+    auto name = GetParam();
+    auto p = parser("fn " + name + "() {}");
+    EXPECT_FALSE(p->Parse());
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:4: '" + name + "' is a reserved keyword");
 }
 TEST_P(ParserImplReservedKeywordTest, ModuleLet) {
-  auto name = GetParam();
-  auto p = parser("let " + name + " : i32 = 1;");
-  EXPECT_FALSE(p->Parse());
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:5: '" + name + "' is a reserved keyword");
+    auto name = GetParam();
+    auto p = parser("let " + name + " : i32 = 1;");
+    EXPECT_FALSE(p->Parse());
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:5: '" + name + "' is a reserved keyword");
 }
 TEST_P(ParserImplReservedKeywordTest, ModuleVar) {
-  auto name = GetParam();
-  auto p = parser("var " + name + " : i32 = 1;");
-  EXPECT_FALSE(p->Parse());
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:5: '" + name + "' is a reserved keyword");
+    auto name = GetParam();
+    auto p = parser("var " + name + " : i32 = 1;");
+    EXPECT_FALSE(p->Parse());
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:5: '" + name + "' is a reserved keyword");
 }
 TEST_P(ParserImplReservedKeywordTest, FunctionLet) {
-  auto name = GetParam();
-  auto p = parser("fn f() { let " + name + " : i32 = 1; }");
-  EXPECT_FALSE(p->Parse());
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:14: '" + name + "' is a reserved keyword");
+    auto name = GetParam();
+    auto p = parser("fn f() { let " + name + " : i32 = 1; }");
+    EXPECT_FALSE(p->Parse());
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:14: '" + name + "' is a reserved keyword");
 }
 TEST_P(ParserImplReservedKeywordTest, FunctionVar) {
-  auto name = GetParam();
-  auto p = parser("fn f() { var " + name + " : i32 = 1; }");
-  EXPECT_FALSE(p->Parse());
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:14: '" + name + "' is a reserved keyword");
+    auto name = GetParam();
+    auto p = parser("fn f() { var " + name + " : i32 = 1; }");
+    EXPECT_FALSE(p->Parse());
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:14: '" + name + "' is a reserved keyword");
 }
 TEST_P(ParserImplReservedKeywordTest, FunctionParam) {
-  auto name = GetParam();
-  auto p = parser("fn f(" + name + " : i32) {}");
-  EXPECT_FALSE(p->Parse());
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:6: '" + name + "' is a reserved keyword");
+    auto name = GetParam();
+    auto p = parser("fn f(" + name + " : i32) {}");
+    EXPECT_FALSE(p->Parse());
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:6: '" + name + "' is a reserved keyword");
 }
 TEST_P(ParserImplReservedKeywordTest, Struct) {
-  auto name = GetParam();
-  auto p = parser("struct " + name + " {};");
-  EXPECT_FALSE(p->Parse());
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:8: '" + name + "' is a reserved keyword");
+    auto name = GetParam();
+    auto p = parser("struct " + name + " {};");
+    EXPECT_FALSE(p->Parse());
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:8: '" + name + "' is a reserved keyword");
 }
 TEST_P(ParserImplReservedKeywordTest, StructMember) {
-  auto name = GetParam();
-  auto p = parser("struct S { " + name + " : i32, };");
-  EXPECT_FALSE(p->Parse());
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:12: '" + name + "' is a reserved keyword");
+    auto name = GetParam();
+    auto p = parser("struct S { " + name + " : i32, };");
+    EXPECT_FALSE(p->Parse());
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:12: '" + name + "' is a reserved keyword");
 }
 TEST_P(ParserImplReservedKeywordTest, Alias) {
-  auto name = GetParam();
-  auto p = parser("type " + name + " = i32;");
-  EXPECT_FALSE(p->Parse());
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:6: '" + name + "' is a reserved keyword");
+    auto name = GetParam();
+    auto p = parser("type " + name + " = i32;");
+    EXPECT_FALSE(p->Parse());
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:6: '" + name + "' is a reserved keyword");
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplReservedKeywordTest,
                          ParserImplReservedKeywordTest,

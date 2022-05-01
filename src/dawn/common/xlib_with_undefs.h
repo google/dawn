@@ -18,7 +18,7 @@
 #include "dawn/common/Platform.h"
 
 #if !defined(DAWN_PLATFORM_LINUX)
-#    error "xlib_with_undefs.h included on non-Linux"
+#error "xlib_with_undefs.h included on non-Linux"
 #endif
 
 // This header includes <X11/Xlib.h> but removes all the extra defines that conflict with

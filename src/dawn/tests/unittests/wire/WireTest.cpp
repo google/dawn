@@ -25,11 +25,9 @@ using testing::Exactly;
 using testing::Mock;
 using testing::Return;
 
-WireTest::WireTest() {
-}
+WireTest::WireTest() {}
 
-WireTest::~WireTest() {
-}
+WireTest::~WireTest() {}
 
 dawn::wire::client::MemoryTransferService* WireTest::GetClientMemoryTransferService() {
     return nullptr;

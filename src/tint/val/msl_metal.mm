@@ -25,33 +25,32 @@
 namespace tint::val {
 
 Result MslUsingMetalAPI(const std::string& src) {
-  tint::val::Result result;
+    tint::val::Result result;
 
-  NSError* error = nil;
+    NSError* error = nil;
 
-  id<MTLDevice> device = MTLCreateSystemDefaultDevice();
-  if (!device) {
-    result.output = "MTLCreateSystemDefaultDevice returned null";
-    result.failed = true;
+    id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+    if (!device) {
+        result.output = "MTLCreateSystemDefaultDevice returned null";
+        result.failed = true;
+        return result;
+    }
+
+    NSString* source = [NSString stringWithCString:src.c_str() encoding:NSUTF8StringEncoding];
+
+    MTLCompileOptions* compileOptions = [MTLCompileOptions new];
+    compileOptions.languageVersion = MTLLanguageVersion1_2;
+
+    id<MTLLibrary> library = [device newLibraryWithSource:source
+                                                  options:compileOptions
+                                                    error:&error];
+    if (!library) {
+        NSString* output = [error localizedDescription];
+        result.output = [output UTF8String];
+        result.failed = true;
+    }
+
     return result;
-  }
-
-  NSString* source = [NSString stringWithCString:src.c_str()
-                                        encoding:NSUTF8StringEncoding];
-
-  MTLCompileOptions* compileOptions = [MTLCompileOptions new];
-  compileOptions.languageVersion = MTLLanguageVersion1_2;
-
-  id<MTLLibrary> library = [device newLibraryWithSource:source
-                                                options:compileOptions
-                                                  error:&error];
-  if (!library) {
-    NSString* output = [error localizedDescription];
-    result.output = [output UTF8String];
-    result.failed = true;
-  }
-
-  return result;
 }
 
 }  // namespace tint::val

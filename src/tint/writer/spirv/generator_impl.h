@@ -27,8 +27,8 @@ namespace tint::writer::spirv {
 
 /// The result of sanitizing a program for generation.
 struct SanitizedResult {
-  /// The sanitized program.
-  Program program;
+    /// The sanitized program.
+    Program program;
 };
 
 /// Sanitize a program in preparation for generating SPIR-V.
@@ -38,28 +38,28 @@ SanitizedResult Sanitize(const Program* program, const Options& options);
 
 /// Implementation class for SPIR-V generator
 class GeneratorImpl {
- public:
-  /// Constructor
-  /// @param program the program to generate
-  /// @param zero_initialize_workgroup_memory `true` to initialize all the
-  /// variables in the Workgroup storage class with OpConstantNull
-  GeneratorImpl(const Program* program, bool zero_initialize_workgroup_memory);
+  public:
+    /// Constructor
+    /// @param program the program to generate
+    /// @param zero_initialize_workgroup_memory `true` to initialize all the
+    /// variables in the Workgroup storage class with OpConstantNull
+    GeneratorImpl(const Program* program, bool zero_initialize_workgroup_memory);
 
-  /// @returns true on successful generation; false otherwise
-  bool Generate();
+    /// @returns true on successful generation; false otherwise
+    bool Generate();
 
-  /// @returns the result data
-  const std::vector<uint32_t>& result() const;
+    /// @returns the result data
+    const std::vector<uint32_t>& result() const;
 
-  /// @returns the result data
-  std::vector<uint32_t>& result();
+    /// @returns the result data
+    std::vector<uint32_t>& result();
 
-  /// @returns the error
-  std::string error() const;
+    /// @returns the error
+    std::string error() const;
 
- private:
-  Builder builder_;
-  BinaryWriter writer_;
+  private:
+    Builder builder_;
+    BinaryWriter writer_;
 };
 
 }  // namespace tint::writer::spirv

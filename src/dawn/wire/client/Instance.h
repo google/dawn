@@ -24,32 +24,32 @@
 
 namespace dawn::wire::client {
 
-    class Instance final : public ObjectBase {
-      public:
-        using ObjectBase::ObjectBase;
+class Instance final : public ObjectBase {
+  public:
+    using ObjectBase::ObjectBase;
 
-        ~Instance();
-        void CancelCallbacksForDisconnect() override;
+    ~Instance();
+    void CancelCallbacksForDisconnect() override;
 
-        void RequestAdapter(const WGPURequestAdapterOptions* options,
-                            WGPURequestAdapterCallback callback,
-                            void* userdata);
-        bool OnRequestAdapterCallback(uint64_t requestSerial,
-                                      WGPURequestAdapterStatus status,
-                                      const char* message,
-                                      const WGPUAdapterProperties* properties,
-                                      const WGPUSupportedLimits* limits,
-                                      uint32_t featuresCount,
-                                      const WGPUFeatureName* features);
+    void RequestAdapter(const WGPURequestAdapterOptions* options,
+                        WGPURequestAdapterCallback callback,
+                        void* userdata);
+    bool OnRequestAdapterCallback(uint64_t requestSerial,
+                                  WGPURequestAdapterStatus status,
+                                  const char* message,
+                                  const WGPUAdapterProperties* properties,
+                                  const WGPUSupportedLimits* limits,
+                                  uint32_t featuresCount,
+                                  const WGPUFeatureName* features);
 
-      private:
-        struct RequestAdapterData {
-            WGPURequestAdapterCallback callback = nullptr;
-            ObjectId adapterObjectId;
-            void* userdata = nullptr;
-        };
-        RequestTracker<RequestAdapterData> mRequestAdapterRequests;
+  private:
+    struct RequestAdapterData {
+        WGPURequestAdapterCallback callback = nullptr;
+        ObjectId adapterObjectId;
+        void* userdata = nullptr;
     };
+    RequestTracker<RequestAdapterData> mRequestAdapterRequests;
+};
 
 }  // namespace dawn::wire::client
 

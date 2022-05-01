@@ -22,36 +22,36 @@ namespace {
 using ::testing::HasSubstr;
 
 TEST_F(SpvParserTest, NamedTypes_AnonStruct) {
-  auto p = parser(test::Assemble(R"(
+    auto p = parser(test::Assemble(R"(
     %uint = OpTypeInt 32 0
     %s = OpTypeStruct %uint %uint
   )"));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(test::ToString(p->program()), HasSubstr("struct S"));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_THAT(test::ToString(p->program()), HasSubstr("struct S"));
 
-  p->DeliberatelyInvalidSpirv();
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserTest, NamedTypes_NamedStruct) {
-  auto p = parser(test::Assemble(R"(
+    auto p = parser(test::Assemble(R"(
     OpName %s "mystruct"
     %uint = OpTypeInt 32 0
     %s = OpTypeStruct %uint %uint
   )"));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(test::ToString(p->program()), HasSubstr("struct mystruct"));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_THAT(test::ToString(p->program()), HasSubstr("struct mystruct"));
 
-  p->DeliberatelyInvalidSpirv();
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserTest, NamedTypes_Dup_EmitBoth) {
-  auto p = parser(test::Assemble(R"(
+    auto p = parser(test::Assemble(R"(
     %uint = OpTypeInt 32 0
     %s = OpTypeStruct %uint %uint
     %s2 = OpTypeStruct %uint %uint
   )"));
-  EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
-  EXPECT_THAT(test::ToString(p->program()), HasSubstr(R"(struct S {
+    EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
+    EXPECT_THAT(test::ToString(p->program()), HasSubstr(R"(struct S {
   field0 : u32,
   field1 : u32,
 }
@@ -61,60 +61,57 @@ struct S_1 {
   field1 : u32,
 })"));
 
-  p->DeliberatelyInvalidSpirv();
+    p->DeliberatelyInvalidSpirv();
 }
 
 // TODO(dneto): Should we make an alias for an un-decoratrd array with
 // an OpName?
 
 TEST_F(SpvParserTest, NamedTypes_AnonRTArrayWithDecoration) {
-  // Runtime arrays are always in SSBO, and those are always laid out.
-  auto p = parser(test::Assemble(R"(
+    // Runtime arrays are always in SSBO, and those are always laid out.
+    auto p = parser(test::Assemble(R"(
     OpDecorate %arr ArrayStride 8
     %uint = OpTypeInt 32 0
     %arr = OpTypeRuntimeArray %uint
   )"));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(test::ToString(p->program()),
-              HasSubstr("RTArr = @stride(8) array<u32>;\n"));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_THAT(test::ToString(p->program()), HasSubstr("RTArr = @stride(8) array<u32>;\n"));
 
-  p->DeliberatelyInvalidSpirv();
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserTest, NamedTypes_AnonRTArray_Dup_EmitBoth) {
-  auto p = parser(test::Assemble(R"(
+    auto p = parser(test::Assemble(R"(
     OpDecorate %arr ArrayStride 8
     OpDecorate %arr2 ArrayStride 8
     %uint = OpTypeInt 32 0
     %arr = OpTypeRuntimeArray %uint
     %arr2 = OpTypeRuntimeArray %uint
   )"));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(test::ToString(p->program()),
-              HasSubstr(R"(type RTArr = @stride(8) array<u32>;
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_THAT(test::ToString(p->program()), HasSubstr(R"(type RTArr = @stride(8) array<u32>;
 
 type RTArr_1 = @stride(8) array<u32>;
 )"));
 
-  p->DeliberatelyInvalidSpirv();
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserTest, NamedTypes_NamedRTArray) {
-  auto p = parser(test::Assemble(R"(
+    auto p = parser(test::Assemble(R"(
     OpName %arr "myrtarr"
     OpDecorate %arr ArrayStride 8
     %uint = OpTypeInt 32 0
     %arr = OpTypeRuntimeArray %uint
   )"));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(test::ToString(p->program()),
-              HasSubstr("myrtarr = @stride(8) array<u32>;\n"));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_THAT(test::ToString(p->program()), HasSubstr("myrtarr = @stride(8) array<u32>;\n"));
 
-  p->DeliberatelyInvalidSpirv();
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserTest, NamedTypes_NamedArray) {
-  auto p = parser(test::Assemble(R"(
+    auto p = parser(test::Assemble(R"(
     OpName %arr "myarr"
     OpDecorate %arr ArrayStride 8
     %uint = OpTypeInt 32 0
@@ -122,15 +119,14 @@ TEST_F(SpvParserTest, NamedTypes_NamedArray) {
     %arr = OpTypeArray %uint %uint_5
     %arr2 = OpTypeArray %uint %uint_5
   )"));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(test::ToString(p->program()),
-              HasSubstr("myarr = @stride(8) array<u32, 5u>;"));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_THAT(test::ToString(p->program()), HasSubstr("myarr = @stride(8) array<u32, 5u>;"));
 
-  p->DeliberatelyInvalidSpirv();
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserTest, NamedTypes_AnonArray_Dup_EmitBoth) {
-  auto p = parser(test::Assemble(R"(
+    auto p = parser(test::Assemble(R"(
     OpDecorate %arr ArrayStride 8
     OpDecorate %arr2 ArrayStride 8
     %uint = OpTypeInt 32 0
@@ -138,14 +134,13 @@ TEST_F(SpvParserTest, NamedTypes_AnonArray_Dup_EmitBoth) {
     %arr = OpTypeArray %uint %uint_5
     %arr2 = OpTypeArray %uint %uint_5
   )"));
-  EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(test::ToString(p->program()),
-              HasSubstr(R"(type Arr = @stride(8) array<u32, 5u>;
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    EXPECT_THAT(test::ToString(p->program()), HasSubstr(R"(type Arr = @stride(8) array<u32, 5u>;
 
 type Arr_1 = @stride(8) array<u32, 5u>;
 )"));
 
-  p->DeliberatelyInvalidSpirv();
+    p->DeliberatelyInvalidSpirv();
 }
 
 // TODO(dneto): Handle arrays sized by a spec constant.

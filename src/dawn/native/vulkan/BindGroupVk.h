@@ -23,31 +23,31 @@
 
 namespace dawn::native::vulkan {
 
-    class Device;
+class Device;
 
-    class BindGroup final : public BindGroupBase, public PlacementAllocated {
-      public:
-        static ResultOrError<Ref<BindGroup>> Create(Device* device,
-                                                    const BindGroupDescriptor* descriptor);
+class BindGroup final : public BindGroupBase, public PlacementAllocated {
+  public:
+    static ResultOrError<Ref<BindGroup>> Create(Device* device,
+                                                const BindGroupDescriptor* descriptor);
 
-        BindGroup(Device* device,
-                  const BindGroupDescriptor* descriptor,
-                  DescriptorSetAllocation descriptorSetAllocation);
+    BindGroup(Device* device,
+              const BindGroupDescriptor* descriptor,
+              DescriptorSetAllocation descriptorSetAllocation);
 
-        VkDescriptorSet GetHandle() const;
+    VkDescriptorSet GetHandle() const;
 
-      private:
-        ~BindGroup() override;
+  private:
+    ~BindGroup() override;
 
-        void DestroyImpl() override;
+    void DestroyImpl() override;
 
-        // Dawn API
-        void SetLabelImpl() override;
+    // Dawn API
+    void SetLabelImpl() override;
 
-        // The descriptor set in this allocation outlives the BindGroup because it is owned by
-        // the BindGroupLayout which is referenced by the BindGroup.
-        DescriptorSetAllocation mDescriptorSetAllocation;
-    };
+    // The descriptor set in this allocation outlives the BindGroup because it is owned by
+    // the BindGroupLayout which is referenced by the BindGroup.
+    DescriptorSetAllocation mDescriptorSetAllocation;
+};
 
 }  // namespace dawn::native::vulkan
 

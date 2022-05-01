@@ -26,11 +26,11 @@
 #include "dawn/native/MetalBackend.h"
 
 namespace {
-    void AddIntegerValue(CFMutableDictionaryRef dictionary, const CFStringRef key, int32_t value) {
-        CFNumberRef number(CFNumberCreate(nullptr, kCFNumberSInt32Type, &value));
-        CFDictionaryAddValue(dictionary, key, number);
-        CFRelease(number);
-    }
+void AddIntegerValue(CFMutableDictionaryRef dictionary, const CFStringRef key, int32_t value) {
+    CFNumberRef number(CFNumberCreate(nullptr, kCFNumberSInt32Type, &value));
+    CFDictionaryAddValue(dictionary, key, number);
+    CFRelease(number);
+}
 
 }  // anonymous namespace
 
@@ -40,13 +40,9 @@ class PlatformTextureIOSurface : public VideoViewsTestBackend::PlatformTexture {
         : PlatformTexture(std::move(texture)) {
         mIOSurface = AcquireCFRef<IOSurfaceRef>(iosurface);
     }
-    ~PlatformTextureIOSurface() override {
-        mIOSurface = nullptr;
-    }
+    ~PlatformTextureIOSurface() override { mIOSurface = nullptr; }
 
-    bool CanWrapAsWGPUTexture() override {
-        return true;
-    }
+    bool CanWrapAsWGPUTexture() override { return true; }
 
   private:
     CFRef<IOSurfaceRef> mIOSurface = nullptr;
@@ -54,9 +50,7 @@ class PlatformTextureIOSurface : public VideoViewsTestBackend::PlatformTexture {
 
 class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
   public:
-    void OnSetUp(WGPUDevice device) override {
-        mWGPUDevice = device;
-    }
+    void OnSetUp(WGPUDevice device) override { mWGPUDevice = device; }
 
   private:
     OSType ToCVFormat(wgpu::TextureFormat format) {
@@ -173,8 +167,7 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
     }
 
     void DestroyVideoTextureForTest(
-        std::unique_ptr<VideoViewsTestBackend::PlatformTexture>&& platformTexture) override {
-    }
+        std::unique_ptr<VideoViewsTestBackend::PlatformTexture>&& platformTexture) override {}
 
     WGPUDevice mWGPUDevice = nullptr;
 };

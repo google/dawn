@@ -37,46 +37,46 @@ Statement::Statement(Statement&&) = default;
 Statement::~Statement() = default;
 
 const char* Statement::Name() const {
-  if (Is<AssignmentStatement>()) {
-    return "assignment statement";
-  }
-  if (Is<BlockStatement>()) {
-    return "block statement";
-  }
-  if (Is<BreakStatement>()) {
-    return "break statement";
-  }
-  if (Is<CaseStatement>()) {
-    return "case statement";
-  }
-  if (Is<CallStatement>()) {
-    return "function call";
-  }
-  if (Is<ContinueStatement>()) {
-    return "continue statement";
-  }
-  if (Is<DiscardStatement>()) {
-    return "discard statement";
-  }
-  if (Is<FallthroughStatement>()) {
-    return "fallthrough statement";
-  }
-  if (Is<IfStatement>()) {
-    return "if statement";
-  }
-  if (Is<LoopStatement>()) {
-    return "loop statement";
-  }
-  if (Is<ReturnStatement>()) {
-    return "return statement";
-  }
-  if (Is<SwitchStatement>()) {
-    return "switch statement";
-  }
-  if (Is<VariableDeclStatement>()) {
-    return "variable declaration";
-  }
-  return "statement";
+    if (Is<AssignmentStatement>()) {
+        return "assignment statement";
+    }
+    if (Is<BlockStatement>()) {
+        return "block statement";
+    }
+    if (Is<BreakStatement>()) {
+        return "break statement";
+    }
+    if (Is<CaseStatement>()) {
+        return "case statement";
+    }
+    if (Is<CallStatement>()) {
+        return "function call";
+    }
+    if (Is<ContinueStatement>()) {
+        return "continue statement";
+    }
+    if (Is<DiscardStatement>()) {
+        return "discard statement";
+    }
+    if (Is<FallthroughStatement>()) {
+        return "fallthrough statement";
+    }
+    if (Is<IfStatement>()) {
+        return "if statement";
+    }
+    if (Is<LoopStatement>()) {
+        return "loop statement";
+    }
+    if (Is<ReturnStatement>()) {
+        return "return statement";
+    }
+    if (Is<SwitchStatement>()) {
+        return "switch statement";
+    }
+    if (Is<VariableDeclStatement>()) {
+        return "variable declaration";
+    }
+    return "statement";
 }
 
 }  // namespace tint::ast

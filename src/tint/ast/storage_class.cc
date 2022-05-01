@@ -17,33 +17,33 @@
 namespace tint::ast {
 
 const char* ToString(StorageClass sc) {
-  switch (sc) {
-    case StorageClass::kInvalid:
-      return "invalid";
-    case StorageClass::kNone:
-      return "none";
-    case StorageClass::kInput:
-      return "in";
-    case StorageClass::kOutput:
-      return "out";
-    case StorageClass::kUniform:
-      return "uniform";
-    case StorageClass::kWorkgroup:
-      return "workgroup";
-    case StorageClass::kHandle:
-      return "handle";
-    case StorageClass::kStorage:
-      return "storage";
-    case StorageClass::kPrivate:
-      return "private";
-    case StorageClass::kFunction:
-      return "function";
-  }
-  return "<unknown>";
+    switch (sc) {
+        case StorageClass::kInvalid:
+            return "invalid";
+        case StorageClass::kNone:
+            return "none";
+        case StorageClass::kInput:
+            return "in";
+        case StorageClass::kOutput:
+            return "out";
+        case StorageClass::kUniform:
+            return "uniform";
+        case StorageClass::kWorkgroup:
+            return "workgroup";
+        case StorageClass::kHandle:
+            return "handle";
+        case StorageClass::kStorage:
+            return "storage";
+        case StorageClass::kPrivate:
+            return "private";
+        case StorageClass::kFunction:
+            return "function";
+    }
+    return "<unknown>";
 }
 std::ostream& operator<<(std::ostream& out, StorageClass sc) {
-  out << ToString(sc);
-  return out;
+    out << ToString(sc);
+    return out;
 }
 
 }  // namespace tint::ast

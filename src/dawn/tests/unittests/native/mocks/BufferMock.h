@@ -22,27 +22,25 @@
 
 namespace dawn::native {
 
-    class BufferMock : public BufferBase {
-      public:
-        BufferMock(DeviceBase* device, BufferBase::BufferState state) : BufferBase(device, state) {
-            ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
-                this->BufferBase::DestroyImpl();
-            });
-        }
-        ~BufferMock() override = default;
+class BufferMock : public BufferBase {
+  public:
+    BufferMock(DeviceBase* device, BufferBase::BufferState state) : BufferBase(device, state) {
+        ON_CALL(*this, DestroyImpl).WillByDefault([this]() { this->BufferBase::DestroyImpl(); });
+    }
+    ~BufferMock() override = default;
 
-        MOCK_METHOD(void, DestroyImpl, (), (override));
+    MOCK_METHOD(void, DestroyImpl, (), (override));
 
-        MOCK_METHOD(MaybeError, MapAtCreationImpl, (), (override));
-        MOCK_METHOD(MaybeError,
-                    MapAsyncImpl,
-                    (wgpu::MapMode mode, size_t offset, size_t size),
-                    (override));
-        MOCK_METHOD(void, UnmapImpl, (), (override));
-        MOCK_METHOD(void*, GetMappedPointerImpl, (), (override));
+    MOCK_METHOD(MaybeError, MapAtCreationImpl, (), (override));
+    MOCK_METHOD(MaybeError,
+                MapAsyncImpl,
+                (wgpu::MapMode mode, size_t offset, size_t size),
+                (override));
+    MOCK_METHOD(void, UnmapImpl, (), (override));
+    MOCK_METHOD(void*, GetMappedPointerImpl, (), (override));
 
-        MOCK_METHOD(bool, IsCPUWritableAtCreation, (), (const, override));
-    };
+    MOCK_METHOD(bool, IsCPUWritableAtCreation, (), (const, override));
+};
 
 }  // namespace dawn::native
 

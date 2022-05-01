@@ -22,30 +22,30 @@ namespace tint::utils {
 namespace {
 
 TEST(UniqueAllocator, Int) {
-  UniqueAllocator<int> a;
-  EXPECT_NE(a.Get(0), a.Get(1));
-  EXPECT_NE(a.Get(1), a.Get(2));
-  EXPECT_EQ(a.Get(0), a.Get(0));
-  EXPECT_EQ(a.Get(1), a.Get(1));
-  EXPECT_EQ(a.Get(2), a.Get(2));
+    UniqueAllocator<int> a;
+    EXPECT_NE(a.Get(0), a.Get(1));
+    EXPECT_NE(a.Get(1), a.Get(2));
+    EXPECT_EQ(a.Get(0), a.Get(0));
+    EXPECT_EQ(a.Get(1), a.Get(1));
+    EXPECT_EQ(a.Get(2), a.Get(2));
 }
 
 TEST(UniqueAllocator, Float) {
-  UniqueAllocator<float> a;
-  EXPECT_NE(a.Get(0.1f), a.Get(1.1f));
-  EXPECT_NE(a.Get(1.1f), a.Get(2.1f));
-  EXPECT_EQ(a.Get(0.1f), a.Get(0.1f));
-  EXPECT_EQ(a.Get(1.1f), a.Get(1.1f));
-  EXPECT_EQ(a.Get(2.1f), a.Get(2.1f));
+    UniqueAllocator<float> a;
+    EXPECT_NE(a.Get(0.1f), a.Get(1.1f));
+    EXPECT_NE(a.Get(1.1f), a.Get(2.1f));
+    EXPECT_EQ(a.Get(0.1f), a.Get(0.1f));
+    EXPECT_EQ(a.Get(1.1f), a.Get(1.1f));
+    EXPECT_EQ(a.Get(2.1f), a.Get(2.1f));
 }
 
 TEST(UniqueAllocator, String) {
-  UniqueAllocator<std::string> a;
-  EXPECT_NE(a.Get("x"), a.Get("y"));
-  EXPECT_NE(a.Get("z"), a.Get("w"));
-  EXPECT_EQ(a.Get("x"), a.Get("x"));
-  EXPECT_EQ(a.Get("y"), a.Get("y"));
-  EXPECT_EQ(a.Get("z"), a.Get("z"));
+    UniqueAllocator<std::string> a;
+    EXPECT_NE(a.Get("x"), a.Get("y"));
+    EXPECT_NE(a.Get("z"), a.Get("w"));
+    EXPECT_EQ(a.Get("x"), a.Get("x"));
+    EXPECT_EQ(a.Get("y"), a.Get("y"));
+    EXPECT_EQ(a.Get("z"), a.Get("z"));
 }
 
 }  // namespace

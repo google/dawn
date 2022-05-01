@@ -20,8 +20,7 @@ namespace tint {
 
 Symbol::Symbol() = default;
 
-Symbol::Symbol(uint32_t val, tint::ProgramID program_id)
-    : val_(val), program_id_(program_id) {}
+Symbol::Symbol(uint32_t val, tint::ProgramID program_id) : val_(val), program_id_(program_id) {}
 
 #if TINT_SYMBOL_STORE_DEBUG_NAME
 Symbol::Symbol(uint32_t val, tint::ProgramID program_id, std::string debug_name)
@@ -39,19 +38,17 @@ Symbol& Symbol::operator=(const Symbol& o) = default;
 Symbol& Symbol::operator=(Symbol&& o) = default;
 
 bool Symbol::operator==(const Symbol& other) const {
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Symbol, program_id_,
-                                         other.program_id_);
-  return val_ == other.val_;
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Symbol, program_id_, other.program_id_);
+    return val_ == other.val_;
 }
 
 bool Symbol::operator<(const Symbol& other) const {
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Symbol, program_id_,
-                                         other.program_id_);
-  return val_ < other.val_;
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Symbol, program_id_, other.program_id_);
+    return val_ < other.val_;
 }
 
 std::string Symbol::to_str() const {
-  return "$" + std::to_string(val_);
+    return "$" + std::to_string(val_);
 }
 
 }  // namespace tint

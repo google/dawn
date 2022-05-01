@@ -37,33 +37,31 @@ namespace tint::fuzzers::ast_fuzzer {
 /// it would make sense to apply only a probabilistically selected subset of
 /// them.
 class MutationFinder {
- public:
-  /// Virtual destructor.
-  virtual ~MutationFinder();
+  public:
+    /// Virtual destructor.
+    virtual ~MutationFinder();
 
-  /// @brief Traverses the `program`, looking for opportunities to apply
-  /// mutations.
-  ///
-  /// @param program - the program being fuzzed.
-  /// @param node_id_map - a map from `tint::ast::` nodes in the `program` to
-  ///     their unique ids.
-  /// @param probability_context - determines various probabilistic stuff in the
-  ///     mutator. This should ideally be used as less as possible.
-  /// @return all the found mutations.
-  virtual MutationList FindMutations(
-      const tint::Program& program,
-      NodeIdMap* node_id_map,
-      ProbabilityContext* probability_context) const = 0;
+    /// @brief Traverses the `program`, looking for opportunities to apply
+    /// mutations.
+    ///
+    /// @param program - the program being fuzzed.
+    /// @param node_id_map - a map from `tint::ast::` nodes in the `program` to
+    ///     their unique ids.
+    /// @param probability_context - determines various probabilistic stuff in the
+    ///     mutator. This should ideally be used as less as possible.
+    /// @return all the found mutations.
+    virtual MutationList FindMutations(const tint::Program& program,
+                                       NodeIdMap* node_id_map,
+                                       ProbabilityContext* probability_context) const = 0;
 
-  /// @brief Compute a probability of applying a single mutation, returned by
-  /// this class.
-  ///
-  /// @param probability_context - contains information about various
-  ///     non-deterministic stuff in the fuzzer.
-  /// @return a number in the range [0; 100] which is a chance of applying a
-  ///     mutation.
-  virtual uint32_t GetChanceOfApplyingMutation(
-      ProbabilityContext* probability_context) const = 0;
+    /// @brief Compute a probability of applying a single mutation, returned by
+    /// this class.
+    ///
+    /// @param probability_context - contains information about various
+    ///     non-deterministic stuff in the fuzzer.
+    /// @return a number in the range [0; 100] which is a chance of applying a
+    ///     mutation.
+    virtual uint32_t GetChanceOfApplyingMutation(ProbabilityContext* probability_context) const = 0;
 };
 
 using MutationFinderList = std::vector<std::unique_ptr<MutationFinder>>;

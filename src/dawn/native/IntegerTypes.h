@@ -21,55 +21,55 @@
 #include "dawn/common/TypedInteger.h"
 
 namespace dawn::native {
-    // Binding numbers in the shader and BindGroup/BindGroupLayoutDescriptors
-    using BindingNumber = TypedInteger<struct BindingNumberT, uint32_t>;
-    constexpr BindingNumber kMaxBindingNumberTyped = BindingNumber(kMaxBindingNumber);
+// Binding numbers in the shader and BindGroup/BindGroupLayoutDescriptors
+using BindingNumber = TypedInteger<struct BindingNumberT, uint32_t>;
+constexpr BindingNumber kMaxBindingNumberTyped = BindingNumber(kMaxBindingNumber);
 
-    // Binding numbers get mapped to a packed range of indices
-    using BindingIndex = TypedInteger<struct BindingIndexT, uint32_t>;
+// Binding numbers get mapped to a packed range of indices
+using BindingIndex = TypedInteger<struct BindingIndexT, uint32_t>;
 
-    using BindGroupIndex = TypedInteger<struct BindGroupIndexT, uint32_t>;
+using BindGroupIndex = TypedInteger<struct BindGroupIndexT, uint32_t>;
 
-    constexpr BindGroupIndex kMaxBindGroupsTyped = BindGroupIndex(kMaxBindGroups);
+constexpr BindGroupIndex kMaxBindGroupsTyped = BindGroupIndex(kMaxBindGroups);
 
-    using ColorAttachmentIndex = TypedInteger<struct ColorAttachmentIndexT, uint8_t>;
+using ColorAttachmentIndex = TypedInteger<struct ColorAttachmentIndexT, uint8_t>;
 
-    constexpr ColorAttachmentIndex kMaxColorAttachmentsTyped =
-        ColorAttachmentIndex(kMaxColorAttachments);
+constexpr ColorAttachmentIndex kMaxColorAttachmentsTyped =
+    ColorAttachmentIndex(kMaxColorAttachments);
 
-    using VertexBufferSlot = TypedInteger<struct VertexBufferSlotT, uint8_t>;
-    using VertexAttributeLocation = TypedInteger<struct VertexAttributeLocationT, uint8_t>;
+using VertexBufferSlot = TypedInteger<struct VertexBufferSlotT, uint8_t>;
+using VertexAttributeLocation = TypedInteger<struct VertexAttributeLocationT, uint8_t>;
 
-    constexpr VertexBufferSlot kMaxVertexBuffersTyped = VertexBufferSlot(kMaxVertexBuffers);
-    constexpr VertexAttributeLocation kMaxVertexAttributesTyped =
-        VertexAttributeLocation(kMaxVertexAttributes);
+constexpr VertexBufferSlot kMaxVertexBuffersTyped = VertexBufferSlot(kMaxVertexBuffers);
+constexpr VertexAttributeLocation kMaxVertexAttributesTyped =
+    VertexAttributeLocation(kMaxVertexAttributes);
 
-    // Serials are 64bit integers that are incremented by one each time to produce unique values.
-    // Some serials (like queue serials) are compared numerically to know which one is before
-    // another, while some serials are only checked for equality. We call serials only checked
-    // for equality IDs.
+// Serials are 64bit integers that are incremented by one each time to produce unique values.
+// Some serials (like queue serials) are compared numerically to know which one is before
+// another, while some serials are only checked for equality. We call serials only checked
+// for equality IDs.
 
-    // Buffer mapping requests are stored outside of the buffer while they are being processed and
-    // cannot be invalidated. Instead they are associated with an ID, and when a map request is
-    // finished, the mapping callback is fired only if its ID matches the ID if the last request
-    // that was sent.
-    using MapRequestID = TypedInteger<struct MapRequestIDT, uint64_t>;
+// Buffer mapping requests are stored outside of the buffer while they are being processed and
+// cannot be invalidated. Instead they are associated with an ID, and when a map request is
+// finished, the mapping callback is fired only if its ID matches the ID if the last request
+// that was sent.
+using MapRequestID = TypedInteger<struct MapRequestIDT, uint64_t>;
 
-    // The type for the WebGPU API fence serial values.
-    using FenceAPISerial = TypedInteger<struct FenceAPISerialT, uint64_t>;
+// The type for the WebGPU API fence serial values.
+using FenceAPISerial = TypedInteger<struct FenceAPISerialT, uint64_t>;
 
-    // A serial used to watch the progression of GPU execution on a queue, each time operations
-    // that need to be followed individually are scheduled for execution on a queue, the serial
-    // is incremented by one. This way to know if something is done executing, we just need to
-    // compare its serial with the currently completed serial.
-    using ExecutionSerial = TypedInteger<struct QueueSerialT, uint64_t>;
-    constexpr ExecutionSerial kMaxExecutionSerial = ExecutionSerial(~uint64_t(0));
+// A serial used to watch the progression of GPU execution on a queue, each time operations
+// that need to be followed individually are scheduled for execution on a queue, the serial
+// is incremented by one. This way to know if something is done executing, we just need to
+// compare its serial with the currently completed serial.
+using ExecutionSerial = TypedInteger<struct QueueSerialT, uint64_t>;
+constexpr ExecutionSerial kMaxExecutionSerial = ExecutionSerial(~uint64_t(0));
 
-    // An identifier that indicates which Pipeline a BindGroupLayout is compatible with. Pipelines
-    // created with a default layout will produce BindGroupLayouts with a non-zero compatibility
-    // token, which prevents them (and any BindGroups created with them) from being used with any
-    // other pipelines.
-    using PipelineCompatibilityToken = TypedInteger<struct PipelineCompatibilityTokenT, uint64_t>;
+// An identifier that indicates which Pipeline a BindGroupLayout is compatible with. Pipelines
+// created with a default layout will produce BindGroupLayouts with a non-zero compatibility
+// token, which prevents them (and any BindGroups created with them) from being used with any
+// other pipelines.
+using PipelineCompatibilityToken = TypedInteger<struct PipelineCompatibilityTokenT, uint64_t>;
 
 }  // namespace dawn::native
 

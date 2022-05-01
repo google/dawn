@@ -20,111 +20,109 @@
 
 namespace dawn::native::opengl {
 
-    namespace {
-        GLenum MagFilterMode(wgpu::FilterMode filter) {
-            switch (filter) {
+namespace {
+GLenum MagFilterMode(wgpu::FilterMode filter) {
+    switch (filter) {
+        case wgpu::FilterMode::Nearest:
+            return GL_NEAREST;
+        case wgpu::FilterMode::Linear:
+            return GL_LINEAR;
+    }
+    UNREACHABLE();
+}
+
+GLenum MinFilterMode(wgpu::FilterMode minFilter, wgpu::FilterMode mipMapFilter) {
+    switch (minFilter) {
+        case wgpu::FilterMode::Nearest:
+            switch (mipMapFilter) {
                 case wgpu::FilterMode::Nearest:
-                    return GL_NEAREST;
+                    return GL_NEAREST_MIPMAP_NEAREST;
                 case wgpu::FilterMode::Linear:
-                    return GL_LINEAR;
+                    return GL_NEAREST_MIPMAP_LINEAR;
             }
-            UNREACHABLE();
-        }
-
-        GLenum MinFilterMode(wgpu::FilterMode minFilter, wgpu::FilterMode mipMapFilter) {
-            switch (minFilter) {
+        case wgpu::FilterMode::Linear:
+            switch (mipMapFilter) {
                 case wgpu::FilterMode::Nearest:
-                    switch (mipMapFilter) {
-                        case wgpu::FilterMode::Nearest:
-                            return GL_NEAREST_MIPMAP_NEAREST;
-                        case wgpu::FilterMode::Linear:
-                            return GL_NEAREST_MIPMAP_LINEAR;
-                    }
+                    return GL_LINEAR_MIPMAP_NEAREST;
                 case wgpu::FilterMode::Linear:
-                    switch (mipMapFilter) {
-                        case wgpu::FilterMode::Nearest:
-                            return GL_LINEAR_MIPMAP_NEAREST;
-                        case wgpu::FilterMode::Linear:
-                            return GL_LINEAR_MIPMAP_LINEAR;
-                    }
+                    return GL_LINEAR_MIPMAP_LINEAR;
             }
-            UNREACHABLE();
-        }
+    }
+    UNREACHABLE();
+}
 
-        GLenum WrapMode(wgpu::AddressMode mode) {
-            switch (mode) {
-                case wgpu::AddressMode::Repeat:
-                    return GL_REPEAT;
-                case wgpu::AddressMode::MirrorRepeat:
-                    return GL_MIRRORED_REPEAT;
-                case wgpu::AddressMode::ClampToEdge:
-                    return GL_CLAMP_TO_EDGE;
-            }
-            UNREACHABLE();
-        }
+GLenum WrapMode(wgpu::AddressMode mode) {
+    switch (mode) {
+        case wgpu::AddressMode::Repeat:
+            return GL_REPEAT;
+        case wgpu::AddressMode::MirrorRepeat:
+            return GL_MIRRORED_REPEAT;
+        case wgpu::AddressMode::ClampToEdge:
+            return GL_CLAMP_TO_EDGE;
+    }
+    UNREACHABLE();
+}
 
-    }  // namespace
+}  // namespace
 
-    Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
-        : SamplerBase(device, descriptor) {
-        const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
+    : SamplerBase(device, descriptor) {
+    const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
 
-        gl.GenSamplers(1, &mFilteringHandle);
-        SetupGLSampler(mFilteringHandle, descriptor, false);
+    gl.GenSamplers(1, &mFilteringHandle);
+    SetupGLSampler(mFilteringHandle, descriptor, false);
 
-        gl.GenSamplers(1, &mNonFilteringHandle);
-        SetupGLSampler(mNonFilteringHandle, descriptor, true);
+    gl.GenSamplers(1, &mNonFilteringHandle);
+    SetupGLSampler(mNonFilteringHandle, descriptor, true);
+}
+
+Sampler::~Sampler() = default;
+
+void Sampler::DestroyImpl() {
+    SamplerBase::DestroyImpl();
+    const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+    gl.DeleteSamplers(1, &mFilteringHandle);
+    gl.DeleteSamplers(1, &mNonFilteringHandle);
+}
+
+void Sampler::SetupGLSampler(GLuint sampler,
+                             const SamplerDescriptor* descriptor,
+                             bool forceNearest) {
+    Device* device = ToBackend(GetDevice());
+    const OpenGLFunctions& gl = device->gl;
+
+    if (forceNearest) {
+        gl.SamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        gl.SamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+    } else {
+        gl.SamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, MagFilterMode(descriptor->magFilter));
+        gl.SamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER,
+                             MinFilterMode(descriptor->minFilter, descriptor->mipmapFilter));
+    }
+    gl.SamplerParameteri(sampler, GL_TEXTURE_WRAP_R, WrapMode(descriptor->addressModeW));
+    gl.SamplerParameteri(sampler, GL_TEXTURE_WRAP_S, WrapMode(descriptor->addressModeU));
+    gl.SamplerParameteri(sampler, GL_TEXTURE_WRAP_T, WrapMode(descriptor->addressModeV));
+
+    gl.SamplerParameterf(sampler, GL_TEXTURE_MIN_LOD, descriptor->lodMinClamp);
+    gl.SamplerParameterf(sampler, GL_TEXTURE_MAX_LOD, descriptor->lodMaxClamp);
+
+    if (descriptor->compare != wgpu::CompareFunction::Undefined) {
+        gl.SamplerParameteri(sampler, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+        gl.SamplerParameteri(sampler, GL_TEXTURE_COMPARE_FUNC,
+                             ToOpenGLCompareFunction(descriptor->compare));
     }
 
-    Sampler::~Sampler() = default;
-
-    void Sampler::DestroyImpl() {
-        SamplerBase::DestroyImpl();
-        const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
-        gl.DeleteSamplers(1, &mFilteringHandle);
-        gl.DeleteSamplers(1, &mNonFilteringHandle);
+    if (gl.IsAtLeastGL(4, 6) || gl.IsGLExtensionSupported("GL_EXT_texture_filter_anisotropic")) {
+        gl.SamplerParameterf(sampler, GL_TEXTURE_MAX_ANISOTROPY, GetMaxAnisotropy());
     }
+}
 
-    void Sampler::SetupGLSampler(GLuint sampler,
-                                 const SamplerDescriptor* descriptor,
-                                 bool forceNearest) {
-        Device* device = ToBackend(GetDevice());
-        const OpenGLFunctions& gl = device->gl;
+GLuint Sampler::GetFilteringHandle() const {
+    return mFilteringHandle;
+}
 
-        if (forceNearest) {
-            gl.SamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            gl.SamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-        } else {
-            gl.SamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER,
-                                 MagFilterMode(descriptor->magFilter));
-            gl.SamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER,
-                                 MinFilterMode(descriptor->minFilter, descriptor->mipmapFilter));
-        }
-        gl.SamplerParameteri(sampler, GL_TEXTURE_WRAP_R, WrapMode(descriptor->addressModeW));
-        gl.SamplerParameteri(sampler, GL_TEXTURE_WRAP_S, WrapMode(descriptor->addressModeU));
-        gl.SamplerParameteri(sampler, GL_TEXTURE_WRAP_T, WrapMode(descriptor->addressModeV));
-
-        gl.SamplerParameterf(sampler, GL_TEXTURE_MIN_LOD, descriptor->lodMinClamp);
-        gl.SamplerParameterf(sampler, GL_TEXTURE_MAX_LOD, descriptor->lodMaxClamp);
-
-        if (descriptor->compare != wgpu::CompareFunction::Undefined) {
-            gl.SamplerParameteri(sampler, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-            gl.SamplerParameteri(sampler, GL_TEXTURE_COMPARE_FUNC,
-                                 ToOpenGLCompareFunction(descriptor->compare));
-        }
-
-        if (gl.IsAtLeastGL(4, 6) ||
-            gl.IsGLExtensionSupported("GL_EXT_texture_filter_anisotropic")) {
-            gl.SamplerParameterf(sampler, GL_TEXTURE_MAX_ANISOTROPY, GetMaxAnisotropy());
-        }
-    }
-
-    GLuint Sampler::GetFilteringHandle() const {
-        return mFilteringHandle;
-    }
-
-    GLuint Sampler::GetNonFilteringHandle() const {
-        return mNonFilteringHandle;
-    }
+GLuint Sampler::GetNonFilteringHandle() const {
+    return mNonFilteringHandle;
+}
 
 }  // namespace dawn::native::opengl

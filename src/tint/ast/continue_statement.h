@@ -21,20 +21,20 @@ namespace tint::ast {
 
 /// An continue statement
 class ContinueStatement final : public Castable<ContinueStatement, Statement> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  ContinueStatement(ProgramID pid, const Source& src);
-  /// Move constructor
-  ContinueStatement(ContinueStatement&&);
-  ~ContinueStatement() override;
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    ContinueStatement(ProgramID pid, const Source& src);
+    /// Move constructor
+    ContinueStatement(ContinueStatement&&);
+    ~ContinueStatement() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const ContinueStatement* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const ContinueStatement* Clone(CloneContext* ctx) const override;
 };
 
 }  // namespace tint::ast

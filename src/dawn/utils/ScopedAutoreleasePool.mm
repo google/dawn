@@ -18,27 +18,26 @@
 
 namespace utils {
 
-    ScopedAutoreleasePool::ScopedAutoreleasePool() : mPool([[NSAutoreleasePool alloc] init]) {
-    }
+ScopedAutoreleasePool::ScopedAutoreleasePool() : mPool([[NSAutoreleasePool alloc] init]) {}
 
-    ScopedAutoreleasePool::~ScopedAutoreleasePool() {
-        if (mPool != nullptr) {
-            [static_cast<NSAutoreleasePool*>(mPool) release];
-            mPool = nullptr;
-        }
+ScopedAutoreleasePool::~ScopedAutoreleasePool() {
+    if (mPool != nullptr) {
+        [static_cast<NSAutoreleasePool*>(mPool) release];
+        mPool = nullptr;
     }
+}
 
-    ScopedAutoreleasePool::ScopedAutoreleasePool(ScopedAutoreleasePool&& rhs) {
+ScopedAutoreleasePool::ScopedAutoreleasePool(ScopedAutoreleasePool&& rhs) {
+    mPool = rhs.mPool;
+    rhs.mPool = nullptr;
+}
+
+ScopedAutoreleasePool& ScopedAutoreleasePool::operator=(ScopedAutoreleasePool&& rhs) {
+    if (&rhs != this) {
         mPool = rhs.mPool;
         rhs.mPool = nullptr;
     }
-
-    ScopedAutoreleasePool& ScopedAutoreleasePool::operator=(ScopedAutoreleasePool&& rhs) {
-        if (&rhs != this) {
-            mPool = rhs.mPool;
-            rhs.mPool = nullptr;
-        }
-        return *this;
-    }
+    return *this;
+}
 
 }  // namespace utils

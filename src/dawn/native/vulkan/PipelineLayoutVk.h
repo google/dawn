@@ -22,28 +22,27 @@
 
 namespace dawn::native::vulkan {
 
-    class Device;
+class Device;
 
-    class PipelineLayout final : public PipelineLayoutBase {
-      public:
-        static ResultOrError<Ref<PipelineLayout>> Create(
-            Device* device,
-            const PipelineLayoutDescriptor* descriptor);
+class PipelineLayout final : public PipelineLayoutBase {
+  public:
+    static ResultOrError<Ref<PipelineLayout>> Create(Device* device,
+                                                     const PipelineLayoutDescriptor* descriptor);
 
-        VkPipelineLayout GetHandle() const;
+    VkPipelineLayout GetHandle() const;
 
-      private:
-        ~PipelineLayout() override;
-        void DestroyImpl() override;
+  private:
+    ~PipelineLayout() override;
+    void DestroyImpl() override;
 
-        using PipelineLayoutBase::PipelineLayoutBase;
-        MaybeError Initialize();
+    using PipelineLayoutBase::PipelineLayoutBase;
+    MaybeError Initialize();
 
-        // Dawn API
-        void SetLabelImpl() override;
+    // Dawn API
+    void SetLabelImpl() override;
 
-        VkPipelineLayout mHandle = VK_NULL_HANDLE;
-    };
+    VkPipelineLayout mHandle = VK_NULL_HANDLE;
+};
 
 }  // namespace dawn::native::vulkan
 

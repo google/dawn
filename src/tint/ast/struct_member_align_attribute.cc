@@ -23,22 +23,19 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMemberAlignAttribute);
 
 namespace tint::ast {
 
-StructMemberAlignAttribute::StructMemberAlignAttribute(ProgramID pid,
-                                                       const Source& src,
-                                                       uint32_t a)
+StructMemberAlignAttribute::StructMemberAlignAttribute(ProgramID pid, const Source& src, uint32_t a)
     : Base(pid, src), align(a) {}
 
 StructMemberAlignAttribute::~StructMemberAlignAttribute() = default;
 
 std::string StructMemberAlignAttribute::Name() const {
-  return "align";
+    return "align";
 }
 
-const StructMemberAlignAttribute* StructMemberAlignAttribute::Clone(
-    CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<StructMemberAlignAttribute>(src, align);
+const StructMemberAlignAttribute* StructMemberAlignAttribute::Clone(CloneContext* ctx) const {
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<StructMemberAlignAttribute>(src, align);
 }
 
 }  // namespace tint::ast

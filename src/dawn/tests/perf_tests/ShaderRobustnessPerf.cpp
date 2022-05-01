@@ -19,9 +19,9 @@
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace {
-    constexpr uint32_t kTileSize = 32u;
+constexpr uint32_t kTileSize = 32u;
 
-    const std::string& kMatMulFloatHeader = R"(
+const std::string& kMatMulFloatHeader = R"(
         struct Uniforms {
             dimAOuter : u32,
             dimInner : u32,
@@ -68,13 +68,13 @@ namespace {
         let TileBOuter : u32 = 32u;
         let TileInner : u32 = 32u;)";
 
-    const std::string& kMatMulFloatSharedArray1D = R"(
+const std::string& kMatMulFloatSharedArray1D = R"(
         var<workgroup> mm_Asub : array<f32, 1024>;
         var<workgroup> mm_Bsub : array<f32, 1024>;)";
-    const std::string& kMatMulFloatSharedArray2D = R"(
+const std::string& kMatMulFloatSharedArray2D = R"(
         var<workgroup> mm_Asub : array<array<f32, 32>, 32>;
         var<workgroup> mm_Bsub : array<array<f32, 32>, 32>;)";
-    const std::string& kMatMulFloatBodyPart1 = R"(
+const std::string& kMatMulFloatBodyPart1 = R"(
         @stage(compute) @workgroup_size(8, 8, 1)
         fn main(@builtin(local_invocation_id) local_id : vec3<u32>,
                 @builtin(global_invocation_id) global_id  : vec3<u32>) {
@@ -109,7 +109,7 @@ namespace {
                 for (var innerCol : u32 = 0u; innerCol < ColPerThreadA; innerCol = innerCol + 1u) {
                     let inputRow : u32 = tileRow + innerRow;
                     let inputCol : u32 = tileColA + innerCol;)";
-    const std::string& kMatMulFloatBodyPart2Array1D = R"(
+const std::string& kMatMulFloatBodyPart2Array1D = R"(
                     let index : u32 = inputRow * TileInner + inputCol;
                     mm_Asub[index] = mm_readA(globalRow + innerRow, t * TileInner + inputCol);
                 }
@@ -135,7 +135,7 @@ namespace {
 
                     for (var innerRow : u32 = 0u; innerRow < RowPerThread; innerRow = innerRow + 1u) {
                         ACached = mm_Asub[(tileRow + innerRow) * TileInner + k];)";
-    const std::string& kMatMulFloatBodyPart2Array2D = R"(
+const std::string& kMatMulFloatBodyPart2Array2D = R"(
                     mm_Asub[inputRow][inputCol] = mm_readA(globalRow + innerRow, t * TileInner + inputCol);
                 }
                 }
@@ -159,7 +159,7 @@ namespace {
 
                     for (var innerRow : u32 = 0u; innerRow < RowPerThread; innerRow = innerRow + 1u) {
                         ACached = mm_Asub[tileRow + innerRow][k];)";
-    const std::string& kMatMulFloatBodyPart3 = R"(
+const std::string& kMatMulFloatBodyPart3 = R"(
                         for (var innerCol : u32 = 0u; innerCol < ColPerThread; innerCol = innerCol + 1u) {
                             let index : u32 = innerRow * ColPerThread + innerCol;
                             acc[index] = acc[index] + ACached * BCached[innerCol];
@@ -179,16 +179,16 @@ namespace {
             }
             }
         })";
-    const std::string& kMatMulFloatOneDimensionalSharedArray =
-        kMatMulFloatHeader + kMatMulFloatSharedArray1D + kMatMulFloatBodyPart1 +
-        kMatMulFloatBodyPart2Array1D + kMatMulFloatBodyPart3;
+const std::string& kMatMulFloatOneDimensionalSharedArray =
+    kMatMulFloatHeader + kMatMulFloatSharedArray1D + kMatMulFloatBodyPart1 +
+    kMatMulFloatBodyPart2Array1D + kMatMulFloatBodyPart3;
 
-    const std::string& kMatMulFloatTwoDimensionalSharedArray =
-        kMatMulFloatHeader + kMatMulFloatSharedArray2D + kMatMulFloatBodyPart1 +
-        kMatMulFloatBodyPart2Array2D + kMatMulFloatBodyPart3;
+const std::string& kMatMulFloatTwoDimensionalSharedArray =
+    kMatMulFloatHeader + kMatMulFloatSharedArray2D + kMatMulFloatBodyPart1 +
+    kMatMulFloatBodyPart2Array2D + kMatMulFloatBodyPart3;
 
-    // The vec4 version requires that dimInner and dimBOuter are divisible by 4.
-    const std::string& kMatMulVec4Header = R"(
+// The vec4 version requires that dimInner and dimBOuter are divisible by 4.
+const std::string& kMatMulVec4Header = R"(
         struct Uniforms {
             dimAOuter : u32,
             dimInner : u32,
@@ -233,13 +233,13 @@ namespace {
         let ColPerThread : u32 = 4u;
         let TileOuter : u32 = 32u;
         let TileInner : u32 = 32u;)";
-    const std::string& kMatMulVec4SharedArray1D = R"(
+const std::string& kMatMulVec4SharedArray1D = R"(
         var<workgroup> mm_Asub : array<vec4<f32>, 256>;
         var<workgroup> mm_Bsub : array<vec4<f32>, 256>;)";
-    const std::string& kMatMulVec4SharedArray2D = R"(
+const std::string& kMatMulVec4SharedArray2D = R"(
         var<workgroup> mm_Asub : array<array<vec4<f32>, 8>, 32>;
         var<workgroup> mm_Bsub : array<array<vec4<f32>, 8>, 32>;)";
-    const std::string& kMatMulVec4BodyPart1 = R"(
+const std::string& kMatMulVec4BodyPart1 = R"(
         @stage(compute) @workgroup_size(8, 8, 1)
         fn main(@builtin(local_invocation_id) local_id : vec3<u32>,
                 @builtin(global_invocation_id) global_id  : vec3<u32>) {
@@ -272,7 +272,7 @@ namespace {
                 for (var innerRow : u32 = 0u; innerRow < RowPerThread; innerRow = innerRow + 1u) {
                     let inputRow : u32 = tileRow + innerRow;
                     let inputCol : u32 = tileCol;)";
-    const std::string& kMatMulVec4BodyPart2Array1D = R"(
+const std::string& kMatMulVec4BodyPart2Array1D = R"(
                     let index : u32 = inputRow * TileInner / ColPerThread + inputCol;
                     mm_Asub[index] = mm_readA(globalRow + innerRow, globalColA);
                 }
@@ -297,7 +297,7 @@ namespace {
 
                     for (var i : u32 = 0u; i < RowPerThread; i = i + 1u) {
                         ACached = mm_Asub[(tileRow + i) * (TileInner / ColPerThread) + k];)";
-    const std::string& kMatMulVec4BodyPart2Array2D = R"(
+const std::string& kMatMulVec4BodyPart2Array2D = R"(
                     mm_Asub[inputRow][inputCol] = mm_readA(globalRow + innerRow, globalColA);
                 }
                 globalColA = globalColA + TileInner / ColPerThread;
@@ -320,7 +320,7 @@ namespace {
 
                     for (var i : u32 = 0u; i < RowPerThread; i = i + 1u) {
                         ACached = mm_Asub[tileRow + i][k];)";
-    const std::string& kMatMulVec4BodyPart3 = R"(
+const std::string& kMatMulVec4BodyPart3 = R"(
                         acc[i] = BCached[0] * ACached.x + acc[i];
                         acc[i] = BCached[1] * ACached.y + acc[i];
                         acc[i] = BCached[2] * ACached.z + acc[i];
@@ -338,45 +338,45 @@ namespace {
             }
         })";
 
-    const std::string& kMatMulVec4OneDimensionalSharedArray =
-        kMatMulVec4Header + kMatMulVec4SharedArray1D + kMatMulVec4BodyPart1 +
-        kMatMulVec4BodyPart2Array1D + kMatMulVec4BodyPart3;
+const std::string& kMatMulVec4OneDimensionalSharedArray =
+    kMatMulVec4Header + kMatMulVec4SharedArray1D + kMatMulVec4BodyPart1 +
+    kMatMulVec4BodyPart2Array1D + kMatMulVec4BodyPart3;
 
-    const std::string& kMatMulVec4TwoDimensionalSharedArray =
-        kMatMulVec4Header + kMatMulVec4SharedArray2D + kMatMulVec4BodyPart1 +
-        kMatMulVec4BodyPart2Array2D + kMatMulVec4BodyPart3;
+const std::string& kMatMulVec4TwoDimensionalSharedArray =
+    kMatMulVec4Header + kMatMulVec4SharedArray2D + kMatMulVec4BodyPart1 +
+    kMatMulVec4BodyPart2Array2D + kMatMulVec4BodyPart3;
 
-    constexpr unsigned int kNumIterations = 50;
+constexpr unsigned int kNumIterations = 50;
 
-    enum class MatMulMethod {
-        MatMulFloatOneDimSharedArray,
-        MatMulFloatTwoDimSharedArray,
-        MatMulVec4OneDimSharedArray,
-        MatMulVec4TwoDimSharedArray
-    };
+enum class MatMulMethod {
+    MatMulFloatOneDimSharedArray,
+    MatMulFloatTwoDimSharedArray,
+    MatMulVec4OneDimSharedArray,
+    MatMulVec4TwoDimSharedArray
+};
 
-    std::ostream& operator<<(std::ostream& ostream, const MatMulMethod& matMulMethod) {
-        switch (matMulMethod) {
-            case MatMulMethod::MatMulFloatOneDimSharedArray:
-                ostream << "MatMulFloatOneDimSharedArray";
-                break;
-            case MatMulMethod::MatMulFloatTwoDimSharedArray:
-                ostream << "MatMulFloatTwoDimSharedArray";
-                break;
-            case MatMulMethod::MatMulVec4OneDimSharedArray:
-                ostream << "MatMulVec4OneDimSharedArray";
-                break;
-            case MatMulMethod::MatMulVec4TwoDimSharedArray:
-                ostream << "MatMulVec4TwoDimSharedArray";
-                break;
-        }
-        return ostream;
+std::ostream& operator<<(std::ostream& ostream, const MatMulMethod& matMulMethod) {
+    switch (matMulMethod) {
+        case MatMulMethod::MatMulFloatOneDimSharedArray:
+            ostream << "MatMulFloatOneDimSharedArray";
+            break;
+        case MatMulMethod::MatMulFloatTwoDimSharedArray:
+            ostream << "MatMulFloatTwoDimSharedArray";
+            break;
+        case MatMulMethod::MatMulVec4OneDimSharedArray:
+            ostream << "MatMulVec4OneDimSharedArray";
+            break;
+        case MatMulMethod::MatMulVec4TwoDimSharedArray:
+            ostream << "MatMulVec4TwoDimSharedArray";
+            break;
     }
+    return ostream;
+}
 
-    using DimAOuter = uint32_t;
-    using DimInner = uint32_t;
-    using DimBOuter = uint32_t;
-    DAWN_TEST_PARAM_STRUCT(ShaderRobustnessParams, MatMulMethod, DimAOuter, DimInner, DimBOuter);
+using DimAOuter = uint32_t;
+using DimInner = uint32_t;
+using DimBOuter = uint32_t;
+DAWN_TEST_PARAM_STRUCT(ShaderRobustnessParams, MatMulMethod, DimAOuter, DimInner, DimBOuter);
 
 }  // namespace
 
@@ -388,8 +388,7 @@ class ShaderRobustnessPerf : public DawnPerfTestWithParams<ShaderRobustnessParam
         : DawnPerfTestWithParams(kNumIterations, 1),
           mDimAOuter(GetParam().mDimAOuter),
           mDimInner(GetParam().mDimInner),
-          mDimBOuter(GetParam().mDimBOuter) {
-    }
+          mDimBOuter(GetParam().mDimBOuter) {}
     ~ShaderRobustnessPerf() override = default;
 
     void SetUp() override;

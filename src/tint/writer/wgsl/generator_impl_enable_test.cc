@@ -20,11 +20,10 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Enable) {
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitEnableDirective(
-      ast::Enable::ExtensionKind::kInternalExtensionForTesting));
-  EXPECT_EQ(gen.result(), R"(enable InternalExtensionForTesting;
+    ASSERT_TRUE(gen.EmitEnableDirective(ast::Enable::ExtensionKind::kInternalExtensionForTesting));
+    EXPECT_EQ(gen.result(), R"(enable InternalExtensionForTesting;
 )");
 }
 

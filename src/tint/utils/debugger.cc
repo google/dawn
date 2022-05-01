@@ -27,32 +27,31 @@
 #ifdef _MSC_VER
 #define TINT_DEBUGGER_BREAK_DEFINED
 void tint::debugger::Break() {
-  if (::IsDebuggerPresent()) {
-    ::DebugBreak();
-  }
+    if (::IsDebuggerPresent()) {
+        ::DebugBreak();
+    }
 }
 
 #elif defined(__linux__)
 
 #define TINT_DEBUGGER_BREAK_DEFINED
 void tint::debugger::Break() {
-  // A process is being traced (debugged) if "/proc/self/status" contains a
-  // line with "TracerPid: <non-zero-digit>...".
-  bool is_traced = false;
-  std::ifstream fin("/proc/self/status");
-  std::string line;
-  while (!is_traced && std::getline(fin, line)) {
-    const char kPrefix[] = "TracerPid:\t";
-    static constexpr int kPrefixLen = sizeof(kPrefix) - 1;
-    if (line.length() > kPrefixLen &&
-        line.compare(0, kPrefixLen, kPrefix) == 0) {
-      is_traced = line[kPrefixLen] != '0';
+    // A process is being traced (debugged) if "/proc/self/status" contains a
+    // line with "TracerPid: <non-zero-digit>...".
+    bool is_traced = false;
+    std::ifstream fin("/proc/self/status");
+    std::string line;
+    while (!is_traced && std::getline(fin, line)) {
+        const char kPrefix[] = "TracerPid:\t";
+        static constexpr int kPrefixLen = sizeof(kPrefix) - 1;
+        if (line.length() > kPrefixLen && line.compare(0, kPrefixLen, kPrefix) == 0) {
+            is_traced = line[kPrefixLen] != '0';
+        }
     }
-  }
 
-  if (is_traced) {
-    raise(SIGTRAP);
-  }
+    if (is_traced) {
+        raise(SIGTRAP);
+    }
 }
 #endif  // platform
 

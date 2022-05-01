@@ -19,12 +19,12 @@ namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ContinueStmt) {
-  auto p = parser("continue");
-  auto e = p->continue_stmt();
-  EXPECT_FALSE(e.errored);
-  EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::ContinueStatement>());
+    auto p = parser("continue");
+    auto e = p->continue_stmt();
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::ContinueStatement>());
 }
 
 }  // namespace

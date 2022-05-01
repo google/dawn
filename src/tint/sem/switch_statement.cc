@@ -25,27 +25,27 @@ SwitchStatement::SwitchStatement(const ast::SwitchStatement* declaration,
                                  const CompoundStatement* parent,
                                  const sem::Function* function)
     : Base(declaration, parent, function) {
-  TINT_ASSERT(Semantic, parent);
-  TINT_ASSERT(Semantic, function);
+    TINT_ASSERT(Semantic, parent);
+    TINT_ASSERT(Semantic, function);
 }
 
 SwitchStatement::~SwitchStatement() = default;
 
 const ast::SwitchStatement* SwitchStatement::Declaration() const {
-  return static_cast<const ast::SwitchStatement*>(Base::Declaration());
+    return static_cast<const ast::SwitchStatement*>(Base::Declaration());
 }
 
 CaseStatement::CaseStatement(const ast::CaseStatement* declaration,
                              const CompoundStatement* parent,
                              const sem::Function* function)
     : Base(declaration, parent, function) {
-  TINT_ASSERT(Semantic, parent);
-  TINT_ASSERT(Semantic, function);
+    TINT_ASSERT(Semantic, parent);
+    TINT_ASSERT(Semantic, function);
 }
 CaseStatement::~CaseStatement() = default;
 
 const ast::CaseStatement* CaseStatement::Declaration() const {
-  return static_cast<const ast::CaseStatement*>(Base::Declaration());
+    return static_cast<const ast::CaseStatement*>(Base::Declaration());
 }
 
 }  // namespace tint::sem

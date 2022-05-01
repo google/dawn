@@ -23,39 +23,39 @@ namespace tint::reader {
 
 /// Base class for input readers
 class Reader {
- public:
-  virtual ~Reader();
+  public:
+    virtual ~Reader();
 
-  /// Parses the input data
-  /// @returns true if the parse was successful
-  virtual bool Parse() = 0;
+    /// Parses the input data
+    /// @returns true if the parse was successful
+    virtual bool Parse() = 0;
 
-  /// @returns true if an error was encountered.
-  bool has_error() const { return diags_.contains_errors(); }
+    /// @returns true if an error was encountered.
+    bool has_error() const { return diags_.contains_errors(); }
 
-  /// @returns the parser error string
-  std::string error() const {
-    diag::Formatter formatter{{false, false, false, false}};
-    return formatter.format(diags_);
-  }
+    /// @returns the parser error string
+    std::string error() const {
+        diag::Formatter formatter{{false, false, false, false}};
+        return formatter.format(diags_);
+    }
 
-  /// @returns the full list of diagnostic messages.
-  const diag::List& diagnostics() const { return diags_; }
+    /// @returns the full list of diagnostic messages.
+    const diag::List& diagnostics() const { return diags_; }
 
-  /// @returns the program. The program builder in the parser will be reset
-  /// after this.
-  virtual Program program() = 0;
+    /// @returns the program. The program builder in the parser will be reset
+    /// after this.
+    virtual Program program() = 0;
 
- protected:
-  /// Constructor
-  Reader();
+  protected:
+    /// Constructor
+    Reader();
 
-  /// Sets the diagnostic messages
-  /// @param diags the list of diagnostic messages
-  void set_diagnostics(const diag::List& diags) { diags_ = diags; }
+    /// Sets the diagnostic messages
+    /// @param diags the list of diagnostic messages
+    void set_diagnostics(const diag::List& diags) { diags_ = diags; }
 
-  /// All diagnostic messages from the reader.
-  diag::List diags_;
+    /// All diagnostic messages from the reader.
+    diag::List diags_;
 };
 
 }  // namespace tint::reader

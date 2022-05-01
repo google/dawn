@@ -21,24 +21,24 @@
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace {
-    using TextureFormat = wgpu::TextureFormat;
-    DAWN_TEST_PARAM_STRUCT(DepthStencilSamplingTestParams, TextureFormat);
+using TextureFormat = wgpu::TextureFormat;
+DAWN_TEST_PARAM_STRUCT(DepthStencilSamplingTestParams, TextureFormat);
 
-    constexpr wgpu::CompareFunction kCompareFunctions[] = {
-        wgpu::CompareFunction::Never,        wgpu::CompareFunction::Less,
-        wgpu::CompareFunction::LessEqual,    wgpu::CompareFunction::Greater,
-        wgpu::CompareFunction::GreaterEqual, wgpu::CompareFunction::Equal,
-        wgpu::CompareFunction::NotEqual,     wgpu::CompareFunction::Always,
-    };
+constexpr wgpu::CompareFunction kCompareFunctions[] = {
+    wgpu::CompareFunction::Never,        wgpu::CompareFunction::Less,
+    wgpu::CompareFunction::LessEqual,    wgpu::CompareFunction::Greater,
+    wgpu::CompareFunction::GreaterEqual, wgpu::CompareFunction::Equal,
+    wgpu::CompareFunction::NotEqual,     wgpu::CompareFunction::Always,
+};
 
-    // Test a "normal" ref value between 0 and 1; as well as negative and > 1 refs.
-    constexpr float kCompareRefs[] = {-0.1, 0.4, 1.2};
+// Test a "normal" ref value between 0 and 1; as well as negative and > 1 refs.
+constexpr float kCompareRefs[] = {-0.1, 0.4, 1.2};
 
-    // Test 0, below the ref, equal to, above the ref, and 1.
-    const std::vector<float> kNormalizedTextureValues = {0.0, 0.3, 0.4, 0.5, 1.0};
+// Test 0, below the ref, equal to, above the ref, and 1.
+const std::vector<float> kNormalizedTextureValues = {0.0, 0.3, 0.4, 0.5, 1.0};
 
-    // Test the limits, and some values in between.
-    const std::vector<uint32_t> kStencilValues = {0, 1, 38, 255};
+// Test the limits, and some values in between.
+const std::vector<uint32_t> kStencilValues = {0, 1, 38, 255};
 
 }  // anonymous namespace
 
@@ -426,8 +426,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
         using StencilData = std::array<uint32_t, 4>;
 
       public:
-        explicit ExtraStencilComponentsExpectation(uint32_t expected) : mExpected(expected) {
-        }
+        explicit ExtraStencilComponentsExpectation(uint32_t expected) : mExpected(expected) {}
 
         ~ExtraStencilComponentsExpectation() override = default;
 

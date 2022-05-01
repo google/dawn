@@ -29,9 +29,7 @@ class ShaderFloat16Tests : public DawnTest {
         return {wgpu::FeatureName::DawnShaderFloat16};
     }
 
-    bool IsShaderFloat16Supported() const {
-        return mIsShaderFloat16Supported;
-    }
+    bool IsShaderFloat16Supported() const { return mIsShaderFloat16Supported; }
 
     bool mIsShaderFloat16Supported = false;
 };

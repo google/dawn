@@ -18,13 +18,15 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-namespace dawn { namespace {
+namespace dawn {
+namespace {
 
-    using ::testing::SizeIs;
+using ::testing::SizeIs;
 
-    TEST(VersionTests, GitCommitHashLength) {
-        // Git hashes should be 40 characters long.
-        EXPECT_THAT(std::string(kGitHash), SizeIs(40));
-    }
+TEST(VersionTests, GitCommitHashLength) {
+    // Git hashes should be 40 characters long.
+    EXPECT_THAT(std::string(kGitHash), SizeIs(40));
+}
 
-}}  // namespace dawn::
+}  // namespace
+}  // namespace dawn

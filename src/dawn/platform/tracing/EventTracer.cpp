@@ -18,41 +18,41 @@
 
 namespace dawn::platform::tracing {
 
-    const unsigned char* GetTraceCategoryEnabledFlag(Platform* platform, TraceCategory category) {
-        static unsigned char disabled = 0;
-        if (platform == nullptr) {
-            return &disabled;
-        }
-
-        const unsigned char* categoryEnabledFlag = platform->GetTraceCategoryEnabledFlag(category);
-        if (categoryEnabledFlag != nullptr) {
-            return categoryEnabledFlag;
-        }
-
+const unsigned char* GetTraceCategoryEnabledFlag(Platform* platform, TraceCategory category) {
+    static unsigned char disabled = 0;
+    if (platform == nullptr) {
         return &disabled;
     }
 
-    TraceEventHandle AddTraceEvent(Platform* platform,
-                                   char phase,
-                                   const unsigned char* categoryGroupEnabled,
-                                   const char* name,
-                                   uint64_t id,
-                                   int numArgs,
-                                   const char** argNames,
-                                   const unsigned char* argTypes,
-                                   const uint64_t* argValues,
-                                   unsigned char flags) {
-        ASSERT(platform != nullptr);
-
-        double timestamp = platform->MonotonicallyIncreasingTime();
-        if (timestamp != 0) {
-            TraceEventHandle handle =
-                platform->AddTraceEvent(phase, categoryGroupEnabled, name, id, timestamp, numArgs,
-                                        argNames, argTypes, argValues, flags);
-            return handle;
-        }
-
-        return static_cast<TraceEventHandle>(0);
+    const unsigned char* categoryEnabledFlag = platform->GetTraceCategoryEnabledFlag(category);
+    if (categoryEnabledFlag != nullptr) {
+        return categoryEnabledFlag;
     }
+
+    return &disabled;
+}
+
+TraceEventHandle AddTraceEvent(Platform* platform,
+                               char phase,
+                               const unsigned char* categoryGroupEnabled,
+                               const char* name,
+                               uint64_t id,
+                               int numArgs,
+                               const char** argNames,
+                               const unsigned char* argTypes,
+                               const uint64_t* argValues,
+                               unsigned char flags) {
+    ASSERT(platform != nullptr);
+
+    double timestamp = platform->MonotonicallyIncreasingTime();
+    if (timestamp != 0) {
+        TraceEventHandle handle =
+            platform->AddTraceEvent(phase, categoryGroupEnabled, name, id, timestamp, numArgs,
+                                    argNames, argTypes, argValues, flags);
+        return handle;
+    }
+
+    return static_cast<TraceEventHandle>(0);
+}
 
 }  // namespace dawn::platform::tracing

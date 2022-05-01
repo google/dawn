@@ -23,19 +23,17 @@
 
 namespace wgpu::binding {
 
-    ////////////////////////////////////////////////////////////////////////////////
-    // wgpu::bindings::GPURenderBundle
-    ////////////////////////////////////////////////////////////////////////////////
-    GPURenderBundle::GPURenderBundle(wgpu::RenderBundle bundle) : bundle_(std::move(bundle)) {
-    }
+////////////////////////////////////////////////////////////////////////////////
+// wgpu::bindings::GPURenderBundle
+////////////////////////////////////////////////////////////////////////////////
+GPURenderBundle::GPURenderBundle(wgpu::RenderBundle bundle) : bundle_(std::move(bundle)) {}
 
-    std::variant<std::string, interop::UndefinedType> GPURenderBundle::getLabel(Napi::Env) {
-        UNIMPLEMENTED();
-    }
+std::variant<std::string, interop::UndefinedType> GPURenderBundle::getLabel(Napi::Env) {
+    UNIMPLEMENTED();
+}
 
-    void GPURenderBundle::setLabel(Napi::Env,
-                                   std::variant<std::string, interop::UndefinedType> value) {
-        UNIMPLEMENTED();
-    }
+void GPURenderBundle::setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) {
+    UNIMPLEMENTED();
+}
 
 }  // namespace wgpu::binding

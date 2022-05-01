@@ -20,11 +20,9 @@ namespace tint::fuzzers::spvtools_fuzzer {
 // translation unit (see -Wweak-vtables clang flag).
 Mutator::~Mutator() = default;
 
-Mutator::Result::Result(Status status, bool is_changed)
-    : status_(status), is_changed_(is_changed) {
-  assert((is_changed || status == Status::kStuck ||
-          status == Status::kLimitReached) &&
-         "Returning invalid result state");
+Mutator::Result::Result(Status status, bool is_changed) : status_(status), is_changed_(is_changed) {
+    assert((is_changed || status == Status::kStuck || status == Status::kLimitReached) &&
+           "Returning invalid result state");
 }
 
 }  // namespace tint::fuzzers::spvtools_fuzzer

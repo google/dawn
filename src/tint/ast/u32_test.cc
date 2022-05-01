@@ -22,8 +22,8 @@ namespace {
 using AstU32Test = TestHelper;
 
 TEST_F(AstU32Test, FriendlyName) {
-  auto* u = create<U32>();
-  EXPECT_EQ(u->FriendlyName(Symbols()), "u32");
+    auto* u = create<U32>();
+    EXPECT_EQ(u->FriendlyName(Symbols()), "u32");
 }
 
 }  // namespace

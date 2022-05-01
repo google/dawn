@@ -21,16 +21,16 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Generate) {
-  Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::AttributeList{
-           Stage(ast::PipelineStage::kCompute),
-           WorkgroupSize(1),
-       });
+    Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
+         ast::AttributeList{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1),
+         });
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 kernel void my_func() {
@@ -41,56 +41,50 @@ kernel void my_func() {
 }
 
 struct MslBuiltinData {
-  ast::Builtin builtin;
-  const char* attribute_name;
+    ast::Builtin builtin;
+    const char* attribute_name;
 };
 inline std::ostream& operator<<(std::ostream& out, MslBuiltinData data) {
-  out << data.builtin;
-  return out;
+    out << data.builtin;
+    return out;
 }
 using MslBuiltinConversionTest = TestParamHelper<MslBuiltinData>;
 TEST_P(MslBuiltinConversionTest, Emit) {
-  auto params = GetParam();
+    auto params = GetParam();
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  EXPECT_EQ(gen.builtin_to_attribute(params.builtin),
-            std::string(params.attribute_name));
+    EXPECT_EQ(gen.builtin_to_attribute(params.builtin), std::string(params.attribute_name));
 }
 INSTANTIATE_TEST_SUITE_P(
     MslGeneratorImplTest,
     MslBuiltinConversionTest,
-    testing::Values(MslBuiltinData{ast::Builtin::kPosition, "position"},
-                    MslBuiltinData{ast::Builtin::kVertexIndex, "vertex_id"},
-                    MslBuiltinData{ast::Builtin::kInstanceIndex, "instance_id"},
-                    MslBuiltinData{ast::Builtin::kFrontFacing, "front_facing"},
-                    MslBuiltinData{ast::Builtin::kFragDepth, "depth(any)"},
-                    MslBuiltinData{ast::Builtin::kLocalInvocationId,
-                                   "thread_position_in_threadgroup"},
-                    MslBuiltinData{ast::Builtin::kLocalInvocationIndex,
-                                   "thread_index_in_threadgroup"},
-                    MslBuiltinData{ast::Builtin::kGlobalInvocationId,
-                                   "thread_position_in_grid"},
-                    MslBuiltinData{ast::Builtin::kWorkgroupId,
-                                   "threadgroup_position_in_grid"},
-                    MslBuiltinData{ast::Builtin::kNumWorkgroups,
-                                   "threadgroups_per_grid"},
-                    MslBuiltinData{ast::Builtin::kSampleIndex, "sample_id"},
-                    MslBuiltinData{ast::Builtin::kSampleMask, "sample_mask"},
-                    MslBuiltinData{ast::Builtin::kPointSize, "point_size"}));
+    testing::Values(
+        MslBuiltinData{ast::Builtin::kPosition, "position"},
+        MslBuiltinData{ast::Builtin::kVertexIndex, "vertex_id"},
+        MslBuiltinData{ast::Builtin::kInstanceIndex, "instance_id"},
+        MslBuiltinData{ast::Builtin::kFrontFacing, "front_facing"},
+        MslBuiltinData{ast::Builtin::kFragDepth, "depth(any)"},
+        MslBuiltinData{ast::Builtin::kLocalInvocationId, "thread_position_in_threadgroup"},
+        MslBuiltinData{ast::Builtin::kLocalInvocationIndex, "thread_index_in_threadgroup"},
+        MslBuiltinData{ast::Builtin::kGlobalInvocationId, "thread_position_in_grid"},
+        MslBuiltinData{ast::Builtin::kWorkgroupId, "threadgroup_position_in_grid"},
+        MslBuiltinData{ast::Builtin::kNumWorkgroups, "threadgroups_per_grid"},
+        MslBuiltinData{ast::Builtin::kSampleIndex, "sample_id"},
+        MslBuiltinData{ast::Builtin::kSampleMask, "sample_mask"},
+        MslBuiltinData{ast::Builtin::kPointSize, "point_size"}));
 
 TEST_F(MslGeneratorImplTest, HasInvariantAttribute_True) {
-  auto* out = Structure(
-      "Out", {Member("pos", ty.vec4<f32>(),
-                     {Builtin(ast::Builtin::kPosition), Invariant()})});
-  Func("vert_main", ast::VariableList{}, ty.Of(out),
-       {Return(Construct(ty.Of(out)))}, {Stage(ast::PipelineStage::kVertex)});
+    auto* out = Structure(
+        "Out", {Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition), Invariant()})});
+    Func("vert_main", ast::VariableList{}, ty.Of(out), {Return(Construct(ty.Of(out)))},
+         {Stage(ast::PipelineStage::kVertex)});
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_TRUE(gen.HasInvariant());
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_TRUE(gen.HasInvariant());
+    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -112,16 +106,16 @@ vertex Out vert_main() {
 }
 
 TEST_F(MslGeneratorImplTest, HasInvariantAttribute_False) {
-  auto* out = Structure("Out", {Member("pos", ty.vec4<f32>(),
-                                       {Builtin(ast::Builtin::kPosition)})});
-  Func("vert_main", ast::VariableList{}, ty.Of(out),
-       {Return(Construct(ty.Of(out)))}, {Stage(ast::PipelineStage::kVertex)});
+    auto* out =
+        Structure("Out", {Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)})});
+    Func("vert_main", ast::VariableList{}, ty.Of(out), {Return(Construct(ty.Of(out)))},
+         {Stage(ast::PipelineStage::kVertex)});
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_FALSE(gen.HasInvariant());
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_FALSE(gen.HasInvariant());
+    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 struct Out {
@@ -136,15 +130,14 @@ vertex Out vert_main() {
 }
 
 TEST_F(MslGeneratorImplTest, WorkgroupMatrix) {
-  Global("m", ty.mat2x2<f32>(), ast::StorageClass::kWorkgroup);
-  Func("comp_main", ast::VariableList{}, ty.void_(),
-       {Decl(Let("x", nullptr, Expr("m")))},
-       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+    Global("m", ty.mat2x2<f32>(), ast::StorageClass::kWorkgroup);
+    Func("comp_main", ast::VariableList{}, ty.void_(), {Decl(Let("x", nullptr, Expr("m")))},
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
-  GeneratorImpl& gen = SanitizeAndBuild();
+    GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 struct tint_symbol_3 {
@@ -167,22 +160,21 @@ kernel void comp_main(threadgroup tint_symbol_3* tint_symbol_2 [[threadgroup(0)]
 
 )");
 
-  auto allocations = gen.DynamicWorkgroupAllocations();
-  ASSERT_TRUE(allocations.count("comp_main"));
-  ASSERT_EQ(allocations["comp_main"].size(), 1u);
-  EXPECT_EQ(allocations["comp_main"][0], 2u * 2u * sizeof(float));
+    auto allocations = gen.DynamicWorkgroupAllocations();
+    ASSERT_TRUE(allocations.count("comp_main"));
+    ASSERT_EQ(allocations["comp_main"].size(), 1u);
+    EXPECT_EQ(allocations["comp_main"][0], 2u * 2u * sizeof(float));
 }
 
 TEST_F(MslGeneratorImplTest, WorkgroupMatrixInArray) {
-  Global("m", ty.array(ty.mat2x2<f32>(), 4), ast::StorageClass::kWorkgroup);
-  Func("comp_main", ast::VariableList{}, ty.void_(),
-       {Decl(Let("x", nullptr, Expr("m")))},
-       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+    Global("m", ty.array(ty.mat2x2<f32>(), 4), ast::StorageClass::kWorkgroup);
+    Func("comp_main", ast::VariableList{}, ty.void_(), {Decl(Let("x", nullptr, Expr("m")))},
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
-  GeneratorImpl& gen = SanitizeAndBuild();
+    GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 struct tint_array_wrapper {
@@ -210,29 +202,28 @@ kernel void comp_main(threadgroup tint_symbol_3* tint_symbol_2 [[threadgroup(0)]
 
 )");
 
-  auto allocations = gen.DynamicWorkgroupAllocations();
-  ASSERT_TRUE(allocations.count("comp_main"));
-  ASSERT_EQ(allocations["comp_main"].size(), 1u);
-  EXPECT_EQ(allocations["comp_main"][0], 4u * 2u * 2u * sizeof(float));
+    auto allocations = gen.DynamicWorkgroupAllocations();
+    ASSERT_TRUE(allocations.count("comp_main"));
+    ASSERT_EQ(allocations["comp_main"].size(), 1u);
+    EXPECT_EQ(allocations["comp_main"][0], 4u * 2u * 2u * sizeof(float));
 }
 
 TEST_F(MslGeneratorImplTest, WorkgroupMatrixInStruct) {
-  Structure("S1", {
-                      Member("m1", ty.mat2x2<f32>()),
-                      Member("m2", ty.mat4x4<f32>()),
-                  });
-  Structure("S2", {
-                      Member("s", ty.type_name("S1")),
-                  });
-  Global("s", ty.type_name("S2"), ast::StorageClass::kWorkgroup);
-  Func("comp_main", ast::VariableList{}, ty.void_(),
-       {Decl(Let("x", nullptr, Expr("s")))},
-       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+    Structure("S1", {
+                        Member("m1", ty.mat2x2<f32>()),
+                        Member("m2", ty.mat4x4<f32>()),
+                    });
+    Structure("S2", {
+                        Member("s", ty.type_name("S1")),
+                    });
+    Global("s", ty.type_name("S2"), ast::StorageClass::kWorkgroup);
+    Func("comp_main", ast::VariableList{}, ty.void_(), {Decl(Let("x", nullptr, Expr("s")))},
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
-  GeneratorImpl& gen = SanitizeAndBuild();
+    GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 struct S1 {
@@ -265,51 +256,50 @@ kernel void comp_main(threadgroup tint_symbol_4* tint_symbol_3 [[threadgroup(0)]
 
 )");
 
-  auto allocations = gen.DynamicWorkgroupAllocations();
-  ASSERT_TRUE(allocations.count("comp_main"));
-  ASSERT_EQ(allocations["comp_main"].size(), 1u);
-  EXPECT_EQ(allocations["comp_main"][0],
-            (2 * 2 * sizeof(float)) + (4u * 4u * sizeof(float)));
+    auto allocations = gen.DynamicWorkgroupAllocations();
+    ASSERT_TRUE(allocations.count("comp_main"));
+    ASSERT_EQ(allocations["comp_main"].size(), 1u);
+    EXPECT_EQ(allocations["comp_main"][0], (2 * 2 * sizeof(float)) + (4u * 4u * sizeof(float)));
 }
 
 TEST_F(MslGeneratorImplTest, WorkgroupMatrix_Multiples) {
-  Global("m1", ty.mat2x2<f32>(), ast::StorageClass::kWorkgroup);
-  Global("m2", ty.mat2x3<f32>(), ast::StorageClass::kWorkgroup);
-  Global("m3", ty.mat2x4<f32>(), ast::StorageClass::kWorkgroup);
-  Global("m4", ty.mat3x2<f32>(), ast::StorageClass::kWorkgroup);
-  Global("m5", ty.mat3x3<f32>(), ast::StorageClass::kWorkgroup);
-  Global("m6", ty.mat3x4<f32>(), ast::StorageClass::kWorkgroup);
-  Global("m7", ty.mat4x2<f32>(), ast::StorageClass::kWorkgroup);
-  Global("m8", ty.mat4x3<f32>(), ast::StorageClass::kWorkgroup);
-  Global("m9", ty.mat4x4<f32>(), ast::StorageClass::kWorkgroup);
-  Func("main1", ast::VariableList{}, ty.void_(),
-       {
-           Decl(Let("a1", nullptr, Expr("m1"))),
-           Decl(Let("a2", nullptr, Expr("m2"))),
-           Decl(Let("a3", nullptr, Expr("m3"))),
-       },
-       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
-  Func("main2", ast::VariableList{}, ty.void_(),
-       {
-           Decl(Let("a1", nullptr, Expr("m4"))),
-           Decl(Let("a2", nullptr, Expr("m5"))),
-           Decl(Let("a3", nullptr, Expr("m6"))),
-       },
-       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
-  Func("main3", ast::VariableList{}, ty.void_(),
-       {
-           Decl(Let("a1", nullptr, Expr("m7"))),
-           Decl(Let("a2", nullptr, Expr("m8"))),
-           Decl(Let("a3", nullptr, Expr("m9"))),
-       },
-       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
-  Func("main4_no_usages", ast::VariableList{}, ty.void_(), {},
-       {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+    Global("m1", ty.mat2x2<f32>(), ast::StorageClass::kWorkgroup);
+    Global("m2", ty.mat2x3<f32>(), ast::StorageClass::kWorkgroup);
+    Global("m3", ty.mat2x4<f32>(), ast::StorageClass::kWorkgroup);
+    Global("m4", ty.mat3x2<f32>(), ast::StorageClass::kWorkgroup);
+    Global("m5", ty.mat3x3<f32>(), ast::StorageClass::kWorkgroup);
+    Global("m6", ty.mat3x4<f32>(), ast::StorageClass::kWorkgroup);
+    Global("m7", ty.mat4x2<f32>(), ast::StorageClass::kWorkgroup);
+    Global("m8", ty.mat4x3<f32>(), ast::StorageClass::kWorkgroup);
+    Global("m9", ty.mat4x4<f32>(), ast::StorageClass::kWorkgroup);
+    Func("main1", ast::VariableList{}, ty.void_(),
+         {
+             Decl(Let("a1", nullptr, Expr("m1"))),
+             Decl(Let("a2", nullptr, Expr("m2"))),
+             Decl(Let("a3", nullptr, Expr("m3"))),
+         },
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+    Func("main2", ast::VariableList{}, ty.void_(),
+         {
+             Decl(Let("a1", nullptr, Expr("m4"))),
+             Decl(Let("a2", nullptr, Expr("m5"))),
+             Decl(Let("a3", nullptr, Expr("m6"))),
+         },
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+    Func("main3", ast::VariableList{}, ty.void_(),
+         {
+             Decl(Let("a1", nullptr, Expr("m7"))),
+             Decl(Let("a2", nullptr, Expr("m8"))),
+             Decl(Let("a3", nullptr, Expr("m9"))),
+         },
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+    Func("main4_no_usages", ast::VariableList{}, ty.void_(), {},
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
 
-  GeneratorImpl& gen = SanitizeAndBuild();
+    GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 struct tint_symbol_7 {
@@ -396,17 +386,17 @@ kernel void main4_no_usages() {
 
 )");
 
-  auto allocations = gen.DynamicWorkgroupAllocations();
-  ASSERT_TRUE(allocations.count("main1"));
-  ASSERT_TRUE(allocations.count("main2"));
-  ASSERT_TRUE(allocations.count("main3"));
-  EXPECT_EQ(allocations.count("main4_no_usages"), 0u);
-  ASSERT_EQ(allocations["main1"].size(), 1u);
-  EXPECT_EQ(allocations["main1"][0], 20u * sizeof(float));
-  ASSERT_EQ(allocations["main2"].size(), 1u);
-  EXPECT_EQ(allocations["main2"][0], 32u * sizeof(float));
-  ASSERT_EQ(allocations["main3"].size(), 1u);
-  EXPECT_EQ(allocations["main3"][0], 40u * sizeof(float));
+    auto allocations = gen.DynamicWorkgroupAllocations();
+    ASSERT_TRUE(allocations.count("main1"));
+    ASSERT_TRUE(allocations.count("main2"));
+    ASSERT_TRUE(allocations.count("main3"));
+    EXPECT_EQ(allocations.count("main4_no_usages"), 0u);
+    ASSERT_EQ(allocations["main1"].size(), 1u);
+    EXPECT_EQ(allocations["main1"][0], 20u * sizeof(float));
+    ASSERT_EQ(allocations["main2"].size(), 1u);
+    EXPECT_EQ(allocations["main2"][0], 32u * sizeof(float));
+    ASSERT_EQ(allocations["main3"].size(), 1u);
+    EXPECT_EQ(allocations["main3"][0], 40u * sizeof(float));
 }
 
 }  // namespace

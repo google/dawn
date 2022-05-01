@@ -31,54 +31,53 @@ InterpolateAttribute::InterpolateAttribute(ProgramID pid,
 InterpolateAttribute::~InterpolateAttribute() = default;
 
 std::string InterpolateAttribute::Name() const {
-  return "interpolate";
+    return "interpolate";
 }
 
-const InterpolateAttribute* InterpolateAttribute::Clone(
-    CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<InterpolateAttribute>(src, type, sampling);
+const InterpolateAttribute* InterpolateAttribute::Clone(CloneContext* ctx) const {
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<InterpolateAttribute>(src, type, sampling);
 }
 
 std::ostream& operator<<(std::ostream& out, InterpolationType type) {
-  switch (type) {
-    case InterpolationType::kPerspective: {
-      out << "perspective";
-      break;
+    switch (type) {
+        case InterpolationType::kPerspective: {
+            out << "perspective";
+            break;
+        }
+        case InterpolationType::kLinear: {
+            out << "linear";
+            break;
+        }
+        case InterpolationType::kFlat: {
+            out << "flat";
+            break;
+        }
     }
-    case InterpolationType::kLinear: {
-      out << "linear";
-      break;
-    }
-    case InterpolationType::kFlat: {
-      out << "flat";
-      break;
-    }
-  }
-  return out;
+    return out;
 }
 
 std::ostream& operator<<(std::ostream& out, InterpolationSampling sampling) {
-  switch (sampling) {
-    case InterpolationSampling::kNone: {
-      out << "none";
-      break;
+    switch (sampling) {
+        case InterpolationSampling::kNone: {
+            out << "none";
+            break;
+        }
+        case InterpolationSampling::kCenter: {
+            out << "center";
+            break;
+        }
+        case InterpolationSampling::kCentroid: {
+            out << "centroid";
+            break;
+        }
+        case InterpolationSampling::kSample: {
+            out << "sample";
+            break;
+        }
     }
-    case InterpolationSampling::kCenter: {
-      out << "center";
-      break;
-    }
-    case InterpolationSampling::kCentroid: {
-      out << "centroid";
-      break;
-    }
-    case InterpolationSampling::kSample: {
-      out << "sample";
-      break;
-    }
-  }
-  return out;
+    return out;
 }
 
 }  // namespace tint::ast

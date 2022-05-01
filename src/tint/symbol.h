@@ -30,74 +30,74 @@ namespace tint {
 
 /// A symbol representing a string in the system
 class Symbol {
- public:
-  /// Constructor
-  /// An invalid symbol
-  Symbol();
-  /// Constructor
-  /// @param val the symbol value
-  /// @param program_id the identifier of the program that owns this Symbol
-  Symbol(uint32_t val, tint::ProgramID program_id);
+  public:
+    /// Constructor
+    /// An invalid symbol
+    Symbol();
+    /// Constructor
+    /// @param val the symbol value
+    /// @param program_id the identifier of the program that owns this Symbol
+    Symbol(uint32_t val, tint::ProgramID program_id);
 #if TINT_SYMBOL_STORE_DEBUG_NAME
-  /// Constructor
-  /// @param val the symbol value
-  /// @param program_id the identifier of the program that owns this Symbol
-  /// @param debug_name name of symbols used only for debugging
-  Symbol(uint32_t val, tint::ProgramID program_id, std::string debug_name);
+    /// Constructor
+    /// @param val the symbol value
+    /// @param program_id the identifier of the program that owns this Symbol
+    /// @param debug_name name of symbols used only for debugging
+    Symbol(uint32_t val, tint::ProgramID program_id, std::string debug_name);
 #endif
-  /// Copy constructor
-  /// @param o the symbol to copy
-  Symbol(const Symbol& o);
-  /// Move constructor
-  /// @param o the symbol to move
-  Symbol(Symbol&& o);
-  /// Destructor
-  ~Symbol();
+    /// Copy constructor
+    /// @param o the symbol to copy
+    Symbol(const Symbol& o);
+    /// Move constructor
+    /// @param o the symbol to move
+    Symbol(Symbol&& o);
+    /// Destructor
+    ~Symbol();
 
-  /// Copy assignment
-  /// @param o the other symbol
-  /// @returns the symbol after doing the copy
-  Symbol& operator=(const Symbol& o);
-  /// Move assignment
-  /// @param o the other symbol
-  /// @returns teh symbol after doing the move
-  Symbol& operator=(Symbol&& o);
+    /// Copy assignment
+    /// @param o the other symbol
+    /// @returns the symbol after doing the copy
+    Symbol& operator=(const Symbol& o);
+    /// Move assignment
+    /// @param o the other symbol
+    /// @returns teh symbol after doing the move
+    Symbol& operator=(Symbol&& o);
 
-  /// Comparison operator
-  /// @param o the other symbol
-  /// @returns true if the symbols are the same
-  bool operator==(const Symbol& o) const;
+    /// Comparison operator
+    /// @param o the other symbol
+    /// @returns true if the symbols are the same
+    bool operator==(const Symbol& o) const;
 
-  /// Less-than operator
-  /// @param o the other symbol
-  /// @returns true if this symbol is ordered before symbol `o`
-  bool operator<(const Symbol& o) const;
+    /// Less-than operator
+    /// @param o the other symbol
+    /// @returns true if this symbol is ordered before symbol `o`
+    bool operator<(const Symbol& o) const;
 
-  /// @returns true if the symbol is valid
-  bool IsValid() const { return val_ != static_cast<uint32_t>(-1); }
+    /// @returns true if the symbol is valid
+    bool IsValid() const { return val_ != static_cast<uint32_t>(-1); }
 
-  /// @returns the value for the symbol
-  uint32_t value() const { return val_; }
+    /// @returns the value for the symbol
+    uint32_t value() const { return val_; }
 
-  /// Convert the symbol to a string
-  /// @return the string representation of the symbol
-  std::string to_str() const;
+    /// Convert the symbol to a string
+    /// @return the string representation of the symbol
+    std::string to_str() const;
 
-  /// @returns the identifier of the Program that owns this symbol.
-  tint::ProgramID ProgramID() const { return program_id_; }
+    /// @returns the identifier of the Program that owns this symbol.
+    tint::ProgramID ProgramID() const { return program_id_; }
 
- private:
-  uint32_t val_ = static_cast<uint32_t>(-1);
-  tint::ProgramID program_id_;
+  private:
+    uint32_t val_ = static_cast<uint32_t>(-1);
+    tint::ProgramID program_id_;
 #if TINT_SYMBOL_STORE_DEBUG_NAME
-  std::string debug_name_;
+    std::string debug_name_;
 #endif
 };
 
 /// @param sym the Symbol
 /// @returns the ProgramID that owns the given Symbol
 inline ProgramID ProgramIDOf(Symbol sym) {
-  return sym.IsValid() ? sym.ProgramID() : ProgramID();
+    return sym.IsValid() ? sym.ProgramID() : ProgramID();
 }
 
 }  // namespace tint
@@ -108,12 +108,12 @@ namespace std {
 /// keys for std::unordered_map and std::unordered_set.
 template <>
 class hash<tint::Symbol> {
- public:
-  /// @param sym the symbol to return
-  /// @return the Symbol internal value
-  inline std::size_t operator()(const tint::Symbol& sym) const {
-    return static_cast<std::size_t>(sym.value());
-  }
+  public:
+    /// @param sym the symbol to return
+    /// @return the Symbol internal value
+    inline std::size_t operator()(const tint::Symbol& sym) const {
+        return static_cast<std::size_t>(sym.value());
+    }
 };
 
 }  // namespace std

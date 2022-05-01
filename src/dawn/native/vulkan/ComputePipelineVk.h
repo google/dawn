@@ -22,31 +22,30 @@
 
 namespace dawn::native::vulkan {
 
-    class Device;
+class Device;
 
-    class ComputePipeline final : public ComputePipelineBase {
-      public:
-        static Ref<ComputePipeline> CreateUninitialized(
-            Device* device,
-            const ComputePipelineDescriptor* descriptor);
-        static void InitializeAsync(Ref<ComputePipelineBase> computePipeline,
-                                    WGPUCreateComputePipelineAsyncCallback callback,
-                                    void* userdata);
+class ComputePipeline final : public ComputePipelineBase {
+  public:
+    static Ref<ComputePipeline> CreateUninitialized(Device* device,
+                                                    const ComputePipelineDescriptor* descriptor);
+    static void InitializeAsync(Ref<ComputePipelineBase> computePipeline,
+                                WGPUCreateComputePipelineAsyncCallback callback,
+                                void* userdata);
 
-        VkPipeline GetHandle() const;
+    VkPipeline GetHandle() const;
 
-        MaybeError Initialize() override;
+    MaybeError Initialize() override;
 
-        // Dawn API
-        void SetLabelImpl() override;
+    // Dawn API
+    void SetLabelImpl() override;
 
-      private:
-        ~ComputePipeline() override;
-        void DestroyImpl() override;
-        using ComputePipelineBase::ComputePipelineBase;
+  private:
+    ~ComputePipeline() override;
+    void DestroyImpl() override;
+    using ComputePipelineBase::ComputePipelineBase;
 
-        VkPipeline mHandle = VK_NULL_HANDLE;
-    };
+    VkPipeline mHandle = VK_NULL_HANDLE;
+};
 
 }  // namespace dawn::native::vulkan
 

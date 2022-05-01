@@ -32,20 +32,20 @@ using ::testing::ContainerEq;
 using RenamerTest = TransformTest;
 
 TEST_F(RenamerTest, EmptyModule) {
-  auto* src = "";
-  auto* expect = "";
+    auto* src = "";
+    auto* expect = "";
 
-  auto got = Run<Renamer>(src);
+    auto got = Run<Renamer>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 
-  auto* data = got.data.Get<Renamer::Data>();
+    auto* data = got.data.Get<Renamer::Data>();
 
-  ASSERT_EQ(data->remappings.size(), 0u);
+    ASSERT_EQ(data->remappings.size(), 0u);
 }
 
 TEST_F(RenamerTest, BasicModuleVertexIndex) {
-  auto* src = R"(
+    auto* src = R"(
 fn test(vert_idx : u32) -> u32 {
   return vert_idx;
 }
@@ -58,7 +58,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn tint_symbol(tint_symbol_1 : u32) -> u32 {
   return tint_symbol_1;
 }
@@ -70,23 +70,23 @@ fn tint_symbol_2(@builtin(vertex_index) tint_symbol_1 : u32) -> @builtin(positio
 }
 )";
 
-  auto got = Run<Renamer>(src);
+    auto got = Run<Renamer>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 
-  auto* data = got.data.Get<Renamer::Data>();
+    auto* data = got.data.Get<Renamer::Data>();
 
-  ASSERT_NE(data, nullptr);
-  Renamer::Data::Remappings expected_remappings = {
-      {"vert_idx", "tint_symbol_1"},
-      {"test", "tint_symbol"},
-      {"entry", "tint_symbol_2"},
-  };
-  EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
+    ASSERT_NE(data, nullptr);
+    Renamer::Data::Remappings expected_remappings = {
+        {"vert_idx", "tint_symbol_1"},
+        {"test", "tint_symbol"},
+        {"entry", "tint_symbol_2"},
+    };
+    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
 TEST_F(RenamerTest, PreserveSwizzles) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn entry() -> @builtin(position) vec4<f32> {
   var v : vec4<f32>;
@@ -96,7 +96,7 @@ fn entry() -> @builtin(position) vec4<f32> {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(vertex)
 fn tint_symbol() -> @builtin(position) vec4<f32> {
   var tint_symbol_1 : vec4<f32>;
@@ -106,24 +106,24 @@ fn tint_symbol() -> @builtin(position) vec4<f32> {
 }
 )";
 
-  auto got = Run<Renamer>(src);
+    auto got = Run<Renamer>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 
-  auto* data = got.data.Get<Renamer::Data>();
+    auto* data = got.data.Get<Renamer::Data>();
 
-  ASSERT_NE(data, nullptr);
-  Renamer::Data::Remappings expected_remappings = {
-      {"entry", "tint_symbol"},
-      {"v", "tint_symbol_1"},
-      {"rgba", "tint_symbol_2"},
-      {"xyzw", "tint_symbol_3"},
-  };
-  EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
+    ASSERT_NE(data, nullptr);
+    Renamer::Data::Remappings expected_remappings = {
+        {"entry", "tint_symbol"},
+        {"v", "tint_symbol_1"},
+        {"rgba", "tint_symbol_2"},
+        {"xyzw", "tint_symbol_3"},
+    };
+    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
 TEST_F(RenamerTest, PreserveBuiltins) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn entry() -> @builtin(position) vec4<f32> {
   var blah : vec4<f32>;
@@ -131,7 +131,7 @@ fn entry() -> @builtin(position) vec4<f32> {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(vertex)
 fn tint_symbol() -> @builtin(position) vec4<f32> {
   var tint_symbol_1 : vec4<f32>;
@@ -139,22 +139,22 @@ fn tint_symbol() -> @builtin(position) vec4<f32> {
 }
 )";
 
-  auto got = Run<Renamer>(src);
+    auto got = Run<Renamer>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 
-  auto* data = got.data.Get<Renamer::Data>();
+    auto* data = got.data.Get<Renamer::Data>();
 
-  ASSERT_NE(data, nullptr);
-  Renamer::Data::Remappings expected_remappings = {
-      {"entry", "tint_symbol"},
-      {"blah", "tint_symbol_1"},
-  };
-  EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
+    ASSERT_NE(data, nullptr);
+    Renamer::Data::Remappings expected_remappings = {
+        {"entry", "tint_symbol"},
+        {"blah", "tint_symbol_1"},
+    };
+    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
 TEST_F(RenamerTest, PreserveBuiltinTypes) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn entry() {
   var a = modf(1.0).whole;
@@ -164,7 +164,7 @@ fn entry() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(compute) @workgroup_size(1)
 fn tint_symbol() {
   var tint_symbol_1 = modf(1.0).whole;
@@ -174,41 +174,41 @@ fn tint_symbol() {
 }
 )";
 
-  auto got = Run<Renamer>(src);
+    auto got = Run<Renamer>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 
-  auto* data = got.data.Get<Renamer::Data>();
+    auto* data = got.data.Get<Renamer::Data>();
 
-  ASSERT_NE(data, nullptr);
-  Renamer::Data::Remappings expected_remappings = {
-      {"entry", "tint_symbol"}, {"a", "tint_symbol_1"}, {"b", "tint_symbol_2"},
-      {"c", "tint_symbol_3"},   {"d", "tint_symbol_4"},
-  };
-  EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
+    ASSERT_NE(data, nullptr);
+    Renamer::Data::Remappings expected_remappings = {
+        {"entry", "tint_symbol"}, {"a", "tint_symbol_1"}, {"b", "tint_symbol_2"},
+        {"c", "tint_symbol_3"},   {"d", "tint_symbol_4"},
+    };
+    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
 TEST_F(RenamerTest, PreserveUnicode) {
-  auto src = R"(
+    auto src = R"(
 @stage(fragment)
 fn frag_main() {
   var )" + std::string(kUnicodeIdentifier) +
-             R"( : i32;
+               R"( : i32;
 }
 )";
 
-  auto expect = src;
+    auto expect = src;
 
-  DataMap inputs;
-  inputs.Add<Renamer::Config>(Renamer::Target::kMslKeywords,
-                              /* preserve_unicode */ true);
-  auto got = Run<Renamer>(src, inputs);
+    DataMap inputs;
+    inputs.Add<Renamer::Config>(Renamer::Target::kMslKeywords,
+                                /* preserve_unicode */ true);
+    auto got = Run<Renamer>(src, inputs);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RenamerTest, AttemptSymbolCollision) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn entry() -> @builtin(position) vec4<f32> {
   var tint_symbol : vec4<f32>;
@@ -218,7 +218,7 @@ fn entry() -> @builtin(position) vec4<f32> {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(vertex)
 fn tint_symbol() -> @builtin(position) vec4<f32> {
   var tint_symbol_1 : vec4<f32>;
@@ -228,20 +228,20 @@ fn tint_symbol() -> @builtin(position) vec4<f32> {
 }
 )";
 
-  auto got = Run<Renamer>(src);
+    auto got = Run<Renamer>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 
-  auto* data = got.data.Get<Renamer::Data>();
+    auto* data = got.data.Get<Renamer::Data>();
 
-  ASSERT_NE(data, nullptr);
-  Renamer::Data::Remappings expected_remappings = {
-      {"entry", "tint_symbol"},
-      {"tint_symbol", "tint_symbol_1"},
-      {"tint_symbol_2", "tint_symbol_2"},
-      {"tint_symbol_4", "tint_symbol_3"},
-  };
-  EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
+    ASSERT_NE(data, nullptr);
+    Renamer::Data::Remappings expected_remappings = {
+        {"entry", "tint_symbol"},
+        {"tint_symbol", "tint_symbol_1"},
+        {"tint_symbol_2", "tint_symbol_2"},
+        {"tint_symbol_4", "tint_symbol_3"},
+    };
+    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
 using RenamerTestGlsl = TransformTestWithParam<std::string>;
@@ -249,81 +249,81 @@ using RenamerTestHlsl = TransformTestWithParam<std::string>;
 using RenamerTestMsl = TransformTestWithParam<std::string>;
 
 TEST_P(RenamerTestGlsl, Keywords) {
-  auto keyword = GetParam();
+    auto keyword = GetParam();
 
-  auto src = R"(
+    auto src = R"(
 @stage(fragment)
 fn frag_main() {
   var )" + keyword +
-             R"( : i32;
+               R"( : i32;
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(fragment)
 fn frag_main() {
   var tint_symbol : i32;
 }
 )";
 
-  DataMap inputs;
-  inputs.Add<Renamer::Config>(Renamer::Target::kGlslKeywords,
-                              /* preserve_unicode */ false);
-  auto got = Run<Renamer>(src, inputs);
+    DataMap inputs;
+    inputs.Add<Renamer::Config>(Renamer::Target::kGlslKeywords,
+                                /* preserve_unicode */ false);
+    auto got = Run<Renamer>(src, inputs);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_P(RenamerTestHlsl, Keywords) {
-  auto keyword = GetParam();
+    auto keyword = GetParam();
 
-  auto src = R"(
+    auto src = R"(
 @stage(fragment)
 fn frag_main() {
   var )" + keyword +
-             R"( : i32;
+               R"( : i32;
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(fragment)
 fn frag_main() {
   var tint_symbol : i32;
 }
 )";
 
-  DataMap inputs;
-  inputs.Add<Renamer::Config>(Renamer::Target::kHlslKeywords,
-                              /* preserve_unicode */ false);
-  auto got = Run<Renamer>(src, inputs);
+    DataMap inputs;
+    inputs.Add<Renamer::Config>(Renamer::Target::kHlslKeywords,
+                                /* preserve_unicode */ false);
+    auto got = Run<Renamer>(src, inputs);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_P(RenamerTestMsl, Keywords) {
-  auto keyword = GetParam();
+    auto keyword = GetParam();
 
-  auto src = R"(
+    auto src = R"(
 @stage(fragment)
 fn frag_main() {
   var )" + keyword +
-             R"( : i32;
+               R"( : i32;
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @stage(fragment)
 fn frag_main() {
   var tint_symbol : i32;
 }
 )";
 
-  DataMap inputs;
-  inputs.Add<Renamer::Config>(Renamer::Target::kMslKeywords,
-                              /* preserve_unicode */ false);
-  auto got = Run<Renamer>(src, inputs);
+    DataMap inputs;
+    inputs.Add<Renamer::Config>(Renamer::Target::kMslKeywords,
+                                /* preserve_unicode */ false);
+    auto got = Run<Renamer>(src, inputs);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 INSTANTIATE_TEST_SUITE_P(RenamerTestGlsl,

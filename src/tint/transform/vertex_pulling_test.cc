@@ -24,88 +24,87 @@ namespace {
 using VertexPullingTest = TransformTest;
 
 TEST_F(VertexPullingTest, Error_NoEntryPoint) {
-  auto* src = "";
+    auto* src = "";
 
-  auto* expect = "error: Vertex stage entry point not found";
+    auto* expect = "error: Vertex stage entry point not found";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>();
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>();
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, Error_InvalidEntryPoint) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn main() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
 )";
 
-  auto* expect = "error: Vertex stage entry point not found";
+    auto* expect = "error: Vertex stage entry point not found";
 
-  VertexPulling::Config cfg;
-  cfg.entry_point_name = "_";
+    VertexPulling::Config cfg;
+    cfg.entry_point_name = "_";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, Error_EntryPointWrongStage) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(fragment)
 fn main() {}
 )";
 
-  auto* expect = "error: Vertex stage entry point not found";
+    auto* expect = "error: Vertex stage entry point not found";
 
-  VertexPulling::Config cfg;
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, Error_BadStride) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn main(@location(0) var_a : f32) -> @builtin(position) vec4<f32> {
   return vec4<f32>(var_a, 0.0, 0.0, 1.0);
 }
 )";
 
-  auto* expect =
-      "error: WebGPU requires that vertex stride must be a multiple of 4 "
-      "bytes, but VertexPulling array stride for buffer 0 was 15 bytes";
+    auto* expect =
+        "error: WebGPU requires that vertex stride must be a multiple of 4 "
+        "bytes, but VertexPulling array stride for buffer 0 was 15 bytes";
 
-  VertexPulling::Config cfg;
-  cfg.vertex_state = {
-      {{15, VertexStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {{{15, VertexStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, BasicModule) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn main() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : array<u32>,
 }
@@ -116,25 +115,25 @@ fn main() -> @builtin(position) vec4<f32> {
 }
 )";
 
-  VertexPulling::Config cfg;
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, OneAttribute) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn main(@location(0) var_a : f32) -> @builtin(position) vec4<f32> {
   return vec4<f32>(var_a, 0.0, 0.0, 1.0);
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : array<u32>,
 }
@@ -152,27 +151,26 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
 }
 )";
 
-  VertexPulling::Config cfg;
-  cfg.vertex_state = {
-      {{4, VertexStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {{{4, VertexStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, OneInstancedAttribute) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn main(@location(0) var_a : f32) -> @builtin(position) vec4<f32> {
   return vec4<f32>(var_a, 0.0, 0.0, 1.0);
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : array<u32>,
 }
@@ -190,27 +188,26 @@ fn main(@builtin(instance_index) tint_pulling_instance_index : u32) -> @builtin(
 }
 )";
 
-  VertexPulling::Config cfg;
-  cfg.vertex_state = {
-      {{4, VertexStepMode::kInstance, {{VertexFormat::kFloat32, 0, 0}}}}};
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {{{4, VertexStepMode::kInstance, {{VertexFormat::kFloat32, 0, 0}}}}};
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn main(@location(0) var_a : f32) -> @builtin(position) vec4<f32> {
   return vec4<f32>(var_a, 0.0, 0.0, 1.0);
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : array<u32>,
 }
@@ -228,21 +225,20 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
 }
 )";
 
-  VertexPulling::Config cfg;
-  cfg.vertex_state = {
-      {{4, VertexStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
-  cfg.pulling_group = 5;
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {{{4, VertexStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
+    cfg.pulling_group = 5;
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, OneAttribute_Struct) {
-  auto* src = R"(
+    auto* src = R"(
 struct Inputs {
   @location(0) var_a : f32,
 };
@@ -253,7 +249,7 @@ fn main(inputs : Inputs) -> @builtin(position) vec4<f32> {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : array<u32>,
 }
@@ -276,21 +272,20 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
 }
 )";
 
-  VertexPulling::Config cfg;
-  cfg.vertex_state = {
-      {{4, VertexStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {{{4, VertexStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 // We expect the transform to use an existing builtin variables if it finds them
 TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn main(@location(0) var_a : f32,
         @location(1) var_b : f32,
@@ -301,7 +296,7 @@ fn main(@location(0) var_a : f32,
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : array<u32>,
 }
@@ -324,30 +319,30 @@ fn main(@builtin(vertex_index) custom_vertex_index : u32, @builtin(instance_inde
 }
 )";
 
-  VertexPulling::Config cfg;
-  cfg.vertex_state = {{
-      {
-          4,
-          VertexStepMode::kVertex,
-          {{VertexFormat::kFloat32, 0, 0}},
-      },
-      {
-          4,
-          VertexStepMode::kInstance,
-          {{VertexFormat::kFloat32, 0, 1}},
-      },
-  }};
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {{
+        {
+            4,
+            VertexStepMode::kVertex,
+            {{VertexFormat::kFloat32, 0, 0}},
+        },
+        {
+            4,
+            VertexStepMode::kInstance,
+            {{VertexFormat::kFloat32, 0, 1}},
+        },
+    }};
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex_Struct) {
-  auto* src = R"(
+    auto* src = R"(
 struct Inputs {
   @location(0) var_a : f32,
   @location(1) var_b : f32,
@@ -361,7 +356,7 @@ fn main(inputs : Inputs) -> @builtin(position) vec4<f32> {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : array<u32>,
 }
@@ -403,31 +398,30 @@ fn main(tint_symbol_1 : tint_symbol) -> @builtin(position) vec4<f32> {
 }
 )";
 
-  VertexPulling::Config cfg;
-  cfg.vertex_state = {{
-      {
-          4,
-          VertexStepMode::kVertex,
-          {{VertexFormat::kFloat32, 0, 0}},
-      },
-      {
-          4,
-          VertexStepMode::kInstance,
-          {{VertexFormat::kFloat32, 0, 1}},
-      },
-  }};
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {{
+        {
+            4,
+            VertexStepMode::kVertex,
+            {{VertexFormat::kFloat32, 0, 0}},
+        },
+        {
+            4,
+            VertexStepMode::kInstance,
+            {{VertexFormat::kFloat32, 0, 1}},
+        },
+    }};
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(VertexPullingTest,
-       ExistingVertexIndexAndInstanceIndex_Struct_OutOfOrder) {
-  auto* src = R"(
+TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex_Struct_OutOfOrder) {
+    auto* src = R"(
 @stage(vertex)
 fn main(inputs : Inputs) -> @builtin(position) vec4<f32> {
   return vec4<f32>(inputs.var_a, inputs.var_b, 0.0, 1.0);
@@ -441,7 +435,7 @@ struct Inputs {
 };
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : array<u32>,
 }
@@ -483,30 +477,30 @@ struct Inputs {
 }
 )";
 
-  VertexPulling::Config cfg;
-  cfg.vertex_state = {{
-      {
-          4,
-          VertexStepMode::kVertex,
-          {{VertexFormat::kFloat32, 0, 0}},
-      },
-      {
-          4,
-          VertexStepMode::kInstance,
-          {{VertexFormat::kFloat32, 0, 1}},
-      },
-  }};
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {{
+        {
+            4,
+            VertexStepMode::kVertex,
+            {{VertexFormat::kFloat32, 0, 0}},
+        },
+        {
+            4,
+            VertexStepMode::kInstance,
+            {{VertexFormat::kFloat32, 0, 1}},
+        },
+    }};
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex_SeparateStruct) {
-  auto* src = R"(
+    auto* src = R"(
 struct Inputs {
   @location(0) var_a : f32,
   @location(1) var_b : f32,
@@ -523,7 +517,7 @@ fn main(inputs : Inputs, indices : Indices) -> @builtin(position) vec4<f32> {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : array<u32>,
 }
@@ -559,31 +553,30 @@ fn main(indices : Indices) -> @builtin(position) vec4<f32> {
 }
 )";
 
-  VertexPulling::Config cfg;
-  cfg.vertex_state = {{
-      {
-          4,
-          VertexStepMode::kVertex,
-          {{VertexFormat::kFloat32, 0, 0}},
-      },
-      {
-          4,
-          VertexStepMode::kInstance,
-          {{VertexFormat::kFloat32, 0, 1}},
-      },
-  }};
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {{
+        {
+            4,
+            VertexStepMode::kVertex,
+            {{VertexFormat::kFloat32, 0, 0}},
+        },
+        {
+            4,
+            VertexStepMode::kInstance,
+            {{VertexFormat::kFloat32, 0, 1}},
+        },
+    }};
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(VertexPullingTest,
-       ExistingVertexIndexAndInstanceIndex_SeparateStruct_OutOfOrder) {
-  auto* src = R"(
+TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex_SeparateStruct_OutOfOrder) {
+    auto* src = R"(
 @stage(vertex)
 fn main(inputs : Inputs, indices : Indices) -> @builtin(position) vec4<f32> {
   return vec4<f32>(inputs.var_a, inputs.var_b, 0.0, 1.0);
@@ -600,7 +593,7 @@ struct Indices {
 };
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : array<u32>,
 }
@@ -636,30 +629,30 @@ struct Indices {
 }
 )";
 
-  VertexPulling::Config cfg;
-  cfg.vertex_state = {{
-      {
-          4,
-          VertexStepMode::kVertex,
-          {{VertexFormat::kFloat32, 0, 0}},
-      },
-      {
-          4,
-          VertexStepMode::kInstance,
-          {{VertexFormat::kFloat32, 0, 1}},
-      },
-  }};
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {{
+        {
+            4,
+            VertexStepMode::kVertex,
+            {{VertexFormat::kFloat32, 0, 0}},
+        },
+        {
+            4,
+            VertexStepMode::kInstance,
+            {{VertexFormat::kFloat32, 0, 1}},
+        },
+    }};
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn main(@location(0) var_a : f32,
         @location(1) var_b : vec4<f32>) -> @builtin(position) vec4<f32> {
@@ -667,7 +660,7 @@ fn main(@location(0) var_a : f32,
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : array<u32>,
 }
@@ -687,22 +680,21 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
 }
 )";
 
-  VertexPulling::Config cfg;
-  cfg.vertex_state = {
-      {{16,
-        VertexStepMode::kVertex,
-        {{VertexFormat::kFloat32, 0, 0}, {VertexFormat::kFloat32x4, 0, 1}}}}};
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {{{16,
+                          VertexStepMode::kVertex,
+                          {{VertexFormat::kFloat32, 0, 0}, {VertexFormat::kFloat32x4, 0, 1}}}}};
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, FloatVectorAttributes) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn main(@location(0) var_a : vec2<f32>,
         @location(1) var_b : vec3<f32>,
@@ -712,7 +704,7 @@ fn main(@location(0) var_a : vec2<f32>,
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : array<u32>,
 }
@@ -740,23 +732,23 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
 }
 )";
 
-  VertexPulling::Config cfg;
-  cfg.vertex_state = {{
-      {8, VertexStepMode::kVertex, {{VertexFormat::kFloat32x2, 0, 0}}},
-      {12, VertexStepMode::kVertex, {{VertexFormat::kFloat32x3, 0, 1}}},
-      {16, VertexStepMode::kVertex, {{VertexFormat::kFloat32x4, 0, 2}}},
-  }};
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {{
+        {8, VertexStepMode::kVertex, {{VertexFormat::kFloat32x2, 0, 0}}},
+        {12, VertexStepMode::kVertex, {{VertexFormat::kFloat32x3, 0, 1}}},
+        {16, VertexStepMode::kVertex, {{VertexFormat::kFloat32x4, 0, 2}}},
+    }};
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, AttemptSymbolCollision) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn main(@location(0) var_a : f32,
         @location(1) var_b : vec4<f32>) -> @builtin(position) vec4<f32> {
@@ -768,7 +760,7 @@ fn main(@location(0) var_a : f32,
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data_1 : array<u32>,
 }
@@ -792,22 +784,21 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index_1 : u32) -> @builtin(po
 }
 )";
 
-  VertexPulling::Config cfg;
-  cfg.vertex_state = {
-      {{16,
-        VertexStepMode::kVertex,
-        {{VertexFormat::kFloat32, 0, 0}, {VertexFormat::kFloat32x4, 0, 1}}}}};
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {{{16,
+                          VertexStepMode::kVertex,
+                          {{VertexFormat::kFloat32, 0, 0}, {VertexFormat::kFloat32x4, 0, 1}}}}};
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, std::move(data));
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, std::move(data));
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, FormatsAligned) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn main(
     @location(0) uint8x2 : vec2<u32>,
@@ -845,7 +836,7 @@ fn main(
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : array<u32>,
 }
@@ -921,52 +912,38 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
 }
 )";
 
-  VertexPulling::Config cfg;
-  cfg.vertex_state = {{{256,
-                        VertexStepMode::kVertex,
-                        {
-                            {VertexFormat::kUint8x2, 64, 0},
-                            {VertexFormat::kUint8x4, 64, 1},
-                            {VertexFormat::kSint8x2, 64, 2},
-                            {VertexFormat::kSint8x4, 64, 3},
-                            {VertexFormat::kUnorm8x2, 64, 4},
-                            {VertexFormat::kUnorm8x4, 64, 5},
-                            {VertexFormat::kSnorm8x2, 64, 6},
-                            {VertexFormat::kSnorm8x4, 64, 7},
-                            {VertexFormat::kUint16x2, 64, 8},
-                            {VertexFormat::kUint16x4, 64, 9},
-                            {VertexFormat::kSint16x2, 64, 10},
-                            {VertexFormat::kSint16x4, 64, 11},
-                            {VertexFormat::kUnorm16x2, 64, 12},
-                            {VertexFormat::kUnorm16x4, 64, 13},
-                            {VertexFormat::kSnorm16x2, 64, 14},
-                            {VertexFormat::kSnorm16x4, 64, 15},
-                            {VertexFormat::kFloat16x2, 64, 16},
-                            {VertexFormat::kFloat16x4, 64, 17},
-                            {VertexFormat::kFloat32, 64, 18},
-                            {VertexFormat::kFloat32x2, 64, 19},
-                            {VertexFormat::kFloat32x3, 64, 20},
-                            {VertexFormat::kFloat32x4, 64, 21},
-                            {VertexFormat::kUint32, 64, 22},
-                            {VertexFormat::kUint32x2, 64, 23},
-                            {VertexFormat::kUint32x3, 64, 24},
-                            {VertexFormat::kUint32x4, 64, 25},
-                            {VertexFormat::kSint32, 64, 26},
-                            {VertexFormat::kSint32x2, 64, 27},
-                            {VertexFormat::kSint32x3, 64, 28},
-                            {VertexFormat::kSint32x4, 64, 29},
-                        }}}};
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {
+        {{256,
+          VertexStepMode::kVertex,
+          {
+              {VertexFormat::kUint8x2, 64, 0},    {VertexFormat::kUint8x4, 64, 1},
+              {VertexFormat::kSint8x2, 64, 2},    {VertexFormat::kSint8x4, 64, 3},
+              {VertexFormat::kUnorm8x2, 64, 4},   {VertexFormat::kUnorm8x4, 64, 5},
+              {VertexFormat::kSnorm8x2, 64, 6},   {VertexFormat::kSnorm8x4, 64, 7},
+              {VertexFormat::kUint16x2, 64, 8},   {VertexFormat::kUint16x4, 64, 9},
+              {VertexFormat::kSint16x2, 64, 10},  {VertexFormat::kSint16x4, 64, 11},
+              {VertexFormat::kUnorm16x2, 64, 12}, {VertexFormat::kUnorm16x4, 64, 13},
+              {VertexFormat::kSnorm16x2, 64, 14}, {VertexFormat::kSnorm16x4, 64, 15},
+              {VertexFormat::kFloat16x2, 64, 16}, {VertexFormat::kFloat16x4, 64, 17},
+              {VertexFormat::kFloat32, 64, 18},   {VertexFormat::kFloat32x2, 64, 19},
+              {VertexFormat::kFloat32x3, 64, 20}, {VertexFormat::kFloat32x4, 64, 21},
+              {VertexFormat::kUint32, 64, 22},    {VertexFormat::kUint32x2, 64, 23},
+              {VertexFormat::kUint32x3, 64, 24},  {VertexFormat::kUint32x4, 64, 25},
+              {VertexFormat::kSint32, 64, 26},    {VertexFormat::kSint32x2, 64, 27},
+              {VertexFormat::kSint32x3, 64, 28},  {VertexFormat::kSint32x4, 64, 29},
+          }}}};
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, FormatsStrideUnaligned) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn main(
     @location(0) uint8x2 : vec2<u32>,
@@ -1004,8 +981,8 @@ fn main(
 }
 )";
 
-  auto* expect =
-      R"(
+    auto* expect =
+        R"(
 struct TintVertexData {
   tint_vertex_data : array<u32>,
 }
@@ -1081,52 +1058,38 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
 }
 )";
 
-  VertexPulling::Config cfg;
-  cfg.vertex_state = {{{256,
-                        VertexStepMode::kVertex,
-                        {
-                            {VertexFormat::kUint8x2, 63, 0},
-                            {VertexFormat::kUint8x4, 63, 1},
-                            {VertexFormat::kSint8x2, 63, 2},
-                            {VertexFormat::kSint8x4, 63, 3},
-                            {VertexFormat::kUnorm8x2, 63, 4},
-                            {VertexFormat::kUnorm8x4, 63, 5},
-                            {VertexFormat::kSnorm8x2, 63, 6},
-                            {VertexFormat::kSnorm8x4, 63, 7},
-                            {VertexFormat::kUint16x2, 63, 8},
-                            {VertexFormat::kUint16x4, 63, 9},
-                            {VertexFormat::kSint16x2, 63, 10},
-                            {VertexFormat::kSint16x4, 63, 11},
-                            {VertexFormat::kUnorm16x2, 63, 12},
-                            {VertexFormat::kUnorm16x4, 63, 13},
-                            {VertexFormat::kSnorm16x2, 63, 14},
-                            {VertexFormat::kSnorm16x4, 63, 15},
-                            {VertexFormat::kFloat16x2, 63, 16},
-                            {VertexFormat::kFloat16x4, 63, 17},
-                            {VertexFormat::kFloat32, 63, 18},
-                            {VertexFormat::kFloat32x2, 63, 19},
-                            {VertexFormat::kFloat32x3, 63, 20},
-                            {VertexFormat::kFloat32x4, 63, 21},
-                            {VertexFormat::kUint32, 63, 22},
-                            {VertexFormat::kUint32x2, 63, 23},
-                            {VertexFormat::kUint32x3, 63, 24},
-                            {VertexFormat::kUint32x4, 63, 25},
-                            {VertexFormat::kSint32, 63, 26},
-                            {VertexFormat::kSint32x2, 63, 27},
-                            {VertexFormat::kSint32x3, 63, 28},
-                            {VertexFormat::kSint32x4, 63, 29},
-                        }}}};
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {
+        {{256,
+          VertexStepMode::kVertex,
+          {
+              {VertexFormat::kUint8x2, 63, 0},    {VertexFormat::kUint8x4, 63, 1},
+              {VertexFormat::kSint8x2, 63, 2},    {VertexFormat::kSint8x4, 63, 3},
+              {VertexFormat::kUnorm8x2, 63, 4},   {VertexFormat::kUnorm8x4, 63, 5},
+              {VertexFormat::kSnorm8x2, 63, 6},   {VertexFormat::kSnorm8x4, 63, 7},
+              {VertexFormat::kUint16x2, 63, 8},   {VertexFormat::kUint16x4, 63, 9},
+              {VertexFormat::kSint16x2, 63, 10},  {VertexFormat::kSint16x4, 63, 11},
+              {VertexFormat::kUnorm16x2, 63, 12}, {VertexFormat::kUnorm16x4, 63, 13},
+              {VertexFormat::kSnorm16x2, 63, 14}, {VertexFormat::kSnorm16x4, 63, 15},
+              {VertexFormat::kFloat16x2, 63, 16}, {VertexFormat::kFloat16x4, 63, 17},
+              {VertexFormat::kFloat32, 63, 18},   {VertexFormat::kFloat32x2, 63, 19},
+              {VertexFormat::kFloat32x3, 63, 20}, {VertexFormat::kFloat32x4, 63, 21},
+              {VertexFormat::kUint32, 63, 22},    {VertexFormat::kUint32x2, 63, 23},
+              {VertexFormat::kUint32x3, 63, 24},  {VertexFormat::kUint32x4, 63, 25},
+              {VertexFormat::kSint32, 63, 26},    {VertexFormat::kSint32x2, 63, 27},
+              {VertexFormat::kSint32x3, 63, 28},  {VertexFormat::kSint32x4, 63, 29},
+          }}}};
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, FormatsWithVectorsResized) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(vertex)
 fn main(
     @location(0) uint8x2 : vec3<u32>,
@@ -1164,7 +1127,7 @@ fn main(
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct TintVertexData {
   tint_vertex_data : array<u32>,
 }
@@ -1240,48 +1203,34 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
 }
 )";
 
-  VertexPulling::Config cfg;
-  cfg.vertex_state = {{{256,
-                        VertexStepMode::kVertex,
-                        {
-                            {VertexFormat::kUint8x2, 64, 0},
-                            {VertexFormat::kUint8x4, 64, 1},
-                            {VertexFormat::kSint8x2, 64, 2},
-                            {VertexFormat::kSint8x4, 64, 3},
-                            {VertexFormat::kUnorm8x2, 64, 4},
-                            {VertexFormat::kUnorm8x4, 64, 5},
-                            {VertexFormat::kSnorm8x2, 64, 6},
-                            {VertexFormat::kSnorm8x4, 64, 7},
-                            {VertexFormat::kUint16x2, 64, 8},
-                            {VertexFormat::kUint16x4, 64, 9},
-                            {VertexFormat::kSint16x2, 64, 10},
-                            {VertexFormat::kSint16x4, 64, 11},
-                            {VertexFormat::kUnorm16x2, 64, 12},
-                            {VertexFormat::kUnorm16x4, 64, 13},
-                            {VertexFormat::kSnorm16x2, 64, 14},
-                            {VertexFormat::kSnorm16x4, 64, 15},
-                            {VertexFormat::kFloat16x2, 64, 16},
-                            {VertexFormat::kFloat16x4, 64, 17},
-                            {VertexFormat::kFloat32, 64, 18},
-                            {VertexFormat::kFloat32x2, 64, 19},
-                            {VertexFormat::kFloat32x3, 64, 20},
-                            {VertexFormat::kFloat32x4, 64, 21},
-                            {VertexFormat::kUint32, 64, 22},
-                            {VertexFormat::kUint32x2, 64, 23},
-                            {VertexFormat::kUint32x3, 64, 24},
-                            {VertexFormat::kUint32x4, 64, 25},
-                            {VertexFormat::kSint32, 64, 26},
-                            {VertexFormat::kSint32x2, 64, 27},
-                            {VertexFormat::kSint32x3, 64, 28},
-                            {VertexFormat::kSint32x4, 64, 29},
-                        }}}};
-  cfg.entry_point_name = "main";
+    VertexPulling::Config cfg;
+    cfg.vertex_state = {
+        {{256,
+          VertexStepMode::kVertex,
+          {
+              {VertexFormat::kUint8x2, 64, 0},    {VertexFormat::kUint8x4, 64, 1},
+              {VertexFormat::kSint8x2, 64, 2},    {VertexFormat::kSint8x4, 64, 3},
+              {VertexFormat::kUnorm8x2, 64, 4},   {VertexFormat::kUnorm8x4, 64, 5},
+              {VertexFormat::kSnorm8x2, 64, 6},   {VertexFormat::kSnorm8x4, 64, 7},
+              {VertexFormat::kUint16x2, 64, 8},   {VertexFormat::kUint16x4, 64, 9},
+              {VertexFormat::kSint16x2, 64, 10},  {VertexFormat::kSint16x4, 64, 11},
+              {VertexFormat::kUnorm16x2, 64, 12}, {VertexFormat::kUnorm16x4, 64, 13},
+              {VertexFormat::kSnorm16x2, 64, 14}, {VertexFormat::kSnorm16x4, 64, 15},
+              {VertexFormat::kFloat16x2, 64, 16}, {VertexFormat::kFloat16x4, 64, 17},
+              {VertexFormat::kFloat32, 64, 18},   {VertexFormat::kFloat32x2, 64, 19},
+              {VertexFormat::kFloat32x3, 64, 20}, {VertexFormat::kFloat32x4, 64, 21},
+              {VertexFormat::kUint32, 64, 22},    {VertexFormat::kUint32x2, 64, 23},
+              {VertexFormat::kUint32x3, 64, 24},  {VertexFormat::kUint32x4, 64, 25},
+              {VertexFormat::kSint32, 64, 26},    {VertexFormat::kSint32x2, 64, 27},
+              {VertexFormat::kSint32x3, 64, 28},  {VertexFormat::kSint32x4, 64, 29},
+          }}}};
+    cfg.entry_point_name = "main";
 
-  DataMap data;
-  data.Add<VertexPulling::Config>(cfg);
-  auto got = Run<VertexPulling>(src, data);
+    DataMap data;
+    data.Add<VertexPulling::Config>(cfg);
+    auto got = Run<VertexPulling>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

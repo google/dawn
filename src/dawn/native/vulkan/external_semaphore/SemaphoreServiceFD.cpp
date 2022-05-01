@@ -29,111 +29,110 @@ static constexpr VkExternalSemaphoreHandleTypeFlagBits kHandleType =
 
 namespace dawn::native::vulkan::external_semaphore {
 
-    Service::Service(Device* device)
-        : mDevice(device),
-          mSupported(CheckSupport(device->GetDeviceInfo(),
-                                  ToBackend(device->GetAdapter())->GetPhysicalDevice(),
-                                  device->fn)) {
+Service::Service(Device* device)
+    : mDevice(device),
+      mSupported(CheckSupport(device->GetDeviceInfo(),
+                              ToBackend(device->GetAdapter())->GetPhysicalDevice(),
+                              device->fn)) {}
+
+Service::~Service() = default;
+
+// static
+bool Service::CheckSupport(const VulkanDeviceInfo& deviceInfo,
+                           VkPhysicalDevice physicalDevice,
+                           const VulkanFunctions& fn) {
+    if (!deviceInfo.HasExt(DeviceExt::ExternalSemaphoreFD)) {
+        return false;
     }
 
-    Service::~Service() = default;
+    VkPhysicalDeviceExternalSemaphoreInfoKHR semaphoreInfo;
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_SEMAPHORE_INFO_KHR;
+    semaphoreInfo.pNext = nullptr;
+    semaphoreInfo.handleType = kHandleType;
 
-    // static
-    bool Service::CheckSupport(const VulkanDeviceInfo& deviceInfo,
-                               VkPhysicalDevice physicalDevice,
-                               const VulkanFunctions& fn) {
-        if (!deviceInfo.HasExt(DeviceExt::ExternalSemaphoreFD)) {
-            return false;
-        }
+    VkExternalSemaphorePropertiesKHR semaphoreProperties;
+    semaphoreProperties.sType = VK_STRUCTURE_TYPE_EXTERNAL_SEMAPHORE_PROPERTIES_KHR;
+    semaphoreProperties.pNext = nullptr;
 
-        VkPhysicalDeviceExternalSemaphoreInfoKHR semaphoreInfo;
-        semaphoreInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_SEMAPHORE_INFO_KHR;
-        semaphoreInfo.pNext = nullptr;
-        semaphoreInfo.handleType = kHandleType;
+    fn.GetPhysicalDeviceExternalSemaphoreProperties(physicalDevice, &semaphoreInfo,
+                                                    &semaphoreProperties);
 
-        VkExternalSemaphorePropertiesKHR semaphoreProperties;
-        semaphoreProperties.sType = VK_STRUCTURE_TYPE_EXTERNAL_SEMAPHORE_PROPERTIES_KHR;
-        semaphoreProperties.pNext = nullptr;
+    VkFlags requiredFlags = VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT_KHR |
+                            VK_EXTERNAL_SEMAPHORE_FEATURE_IMPORTABLE_BIT_KHR;
 
-        fn.GetPhysicalDeviceExternalSemaphoreProperties(physicalDevice, &semaphoreInfo,
-                                                        &semaphoreProperties);
+    return IsSubset(requiredFlags, semaphoreProperties.externalSemaphoreFeatures);
+}
 
-        VkFlags requiredFlags = VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT_KHR |
-                                VK_EXTERNAL_SEMAPHORE_FEATURE_IMPORTABLE_BIT_KHR;
+bool Service::Supported() {
+    return mSupported;
+}
 
-        return IsSubset(requiredFlags, semaphoreProperties.externalSemaphoreFeatures);
+ResultOrError<VkSemaphore> Service::ImportSemaphore(ExternalSemaphoreHandle handle) {
+    DAWN_INVALID_IF(handle < 0, "Importing a semaphore with an invalid handle.");
+
+    VkSemaphore semaphore = VK_NULL_HANDLE;
+    VkSemaphoreCreateInfo info;
+    info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    info.pNext = nullptr;
+    info.flags = 0;
+
+    DAWN_TRY(CheckVkSuccess(
+        mDevice->fn.CreateSemaphore(mDevice->GetVkDevice(), &info, nullptr, &*semaphore),
+        "vkCreateSemaphore"));
+
+    VkImportSemaphoreFdInfoKHR importSemaphoreFdInfo;
+    importSemaphoreFdInfo.sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR;
+    importSemaphoreFdInfo.pNext = nullptr;
+    importSemaphoreFdInfo.semaphore = semaphore;
+    importSemaphoreFdInfo.flags = 0;
+    importSemaphoreFdInfo.handleType = kHandleType;
+    importSemaphoreFdInfo.fd = handle;
+
+    MaybeError status = CheckVkSuccess(
+        mDevice->fn.ImportSemaphoreFdKHR(mDevice->GetVkDevice(), &importSemaphoreFdInfo),
+        "vkImportSemaphoreFdKHR");
+
+    if (status.IsError()) {
+        mDevice->fn.DestroySemaphore(mDevice->GetVkDevice(), semaphore, nullptr);
+        DAWN_TRY(std::move(status));
     }
 
-    bool Service::Supported() {
-        return mSupported;
-    }
+    return semaphore;
+}
 
-    ResultOrError<VkSemaphore> Service::ImportSemaphore(ExternalSemaphoreHandle handle) {
-        DAWN_INVALID_IF(handle < 0, "Importing a semaphore with an invalid handle.");
+ResultOrError<VkSemaphore> Service::CreateExportableSemaphore() {
+    VkExportSemaphoreCreateInfoKHR exportSemaphoreInfo;
+    exportSemaphoreInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO_KHR;
+    exportSemaphoreInfo.pNext = nullptr;
+    exportSemaphoreInfo.handleTypes = kHandleType;
 
-        VkSemaphore semaphore = VK_NULL_HANDLE;
-        VkSemaphoreCreateInfo info;
-        info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-        info.pNext = nullptr;
-        info.flags = 0;
+    VkSemaphoreCreateInfo semaphoreCreateInfo;
+    semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    semaphoreCreateInfo.pNext = &exportSemaphoreInfo;
+    semaphoreCreateInfo.flags = 0;
 
-        DAWN_TRY(CheckVkSuccess(
-            mDevice->fn.CreateSemaphore(mDevice->GetVkDevice(), &info, nullptr, &*semaphore),
-            "vkCreateSemaphore"));
+    VkSemaphore signalSemaphore;
+    DAWN_TRY(
+        CheckVkSuccess(mDevice->fn.CreateSemaphore(mDevice->GetVkDevice(), &semaphoreCreateInfo,
+                                                   nullptr, &*signalSemaphore),
+                       "vkCreateSemaphore"));
+    return signalSemaphore;
+}
 
-        VkImportSemaphoreFdInfoKHR importSemaphoreFdInfo;
-        importSemaphoreFdInfo.sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR;
-        importSemaphoreFdInfo.pNext = nullptr;
-        importSemaphoreFdInfo.semaphore = semaphore;
-        importSemaphoreFdInfo.flags = 0;
-        importSemaphoreFdInfo.handleType = kHandleType;
-        importSemaphoreFdInfo.fd = handle;
+ResultOrError<ExternalSemaphoreHandle> Service::ExportSemaphore(VkSemaphore semaphore) {
+    VkSemaphoreGetFdInfoKHR semaphoreGetFdInfo;
+    semaphoreGetFdInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR;
+    semaphoreGetFdInfo.pNext = nullptr;
+    semaphoreGetFdInfo.semaphore = semaphore;
+    semaphoreGetFdInfo.handleType = kHandleType;
 
-        MaybeError status = CheckVkSuccess(
-            mDevice->fn.ImportSemaphoreFdKHR(mDevice->GetVkDevice(), &importSemaphoreFdInfo),
-            "vkImportSemaphoreFdKHR");
+    int fd = -1;
+    DAWN_TRY(CheckVkSuccess(
+        mDevice->fn.GetSemaphoreFdKHR(mDevice->GetVkDevice(), &semaphoreGetFdInfo, &fd),
+        "vkGetSemaphoreFdKHR"));
 
-        if (status.IsError()) {
-            mDevice->fn.DestroySemaphore(mDevice->GetVkDevice(), semaphore, nullptr);
-            DAWN_TRY(std::move(status));
-        }
-
-        return semaphore;
-    }
-
-    ResultOrError<VkSemaphore> Service::CreateExportableSemaphore() {
-        VkExportSemaphoreCreateInfoKHR exportSemaphoreInfo;
-        exportSemaphoreInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO_KHR;
-        exportSemaphoreInfo.pNext = nullptr;
-        exportSemaphoreInfo.handleTypes = kHandleType;
-
-        VkSemaphoreCreateInfo semaphoreCreateInfo;
-        semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-        semaphoreCreateInfo.pNext = &exportSemaphoreInfo;
-        semaphoreCreateInfo.flags = 0;
-
-        VkSemaphore signalSemaphore;
-        DAWN_TRY(
-            CheckVkSuccess(mDevice->fn.CreateSemaphore(mDevice->GetVkDevice(), &semaphoreCreateInfo,
-                                                       nullptr, &*signalSemaphore),
-                           "vkCreateSemaphore"));
-        return signalSemaphore;
-    }
-
-    ResultOrError<ExternalSemaphoreHandle> Service::ExportSemaphore(VkSemaphore semaphore) {
-        VkSemaphoreGetFdInfoKHR semaphoreGetFdInfo;
-        semaphoreGetFdInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR;
-        semaphoreGetFdInfo.pNext = nullptr;
-        semaphoreGetFdInfo.semaphore = semaphore;
-        semaphoreGetFdInfo.handleType = kHandleType;
-
-        int fd = -1;
-        DAWN_TRY(CheckVkSuccess(
-            mDevice->fn.GetSemaphoreFdKHR(mDevice->GetVkDevice(), &semaphoreGetFdInfo, &fd),
-            "vkGetSemaphoreFdKHR"));
-
-        ASSERT(fd >= 0);
-        return fd;
-    }
+    ASSERT(fd >= 0);
+    return fd;
+}
 
 }  // namespace dawn::native::vulkan::external_semaphore

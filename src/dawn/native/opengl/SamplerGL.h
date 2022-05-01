@@ -21,27 +21,27 @@
 
 namespace dawn::native::opengl {
 
-    class Device;
+class Device;
 
-    class Sampler final : public SamplerBase {
-      public:
-        Sampler(Device* device, const SamplerDescriptor* descriptor);
+class Sampler final : public SamplerBase {
+  public:
+    Sampler(Device* device, const SamplerDescriptor* descriptor);
 
-        GLuint GetFilteringHandle() const;
-        GLuint GetNonFilteringHandle() const;
+    GLuint GetFilteringHandle() const;
+    GLuint GetNonFilteringHandle() const;
 
-      private:
-        ~Sampler() override;
-        void DestroyImpl() override;
+  private:
+    ~Sampler() override;
+    void DestroyImpl() override;
 
-        void SetupGLSampler(GLuint sampler, const SamplerDescriptor* descriptor, bool forceNearest);
+    void SetupGLSampler(GLuint sampler, const SamplerDescriptor* descriptor, bool forceNearest);
 
-        GLuint mFilteringHandle;
+    GLuint mFilteringHandle;
 
-        // This is a sampler equivalent to mFilteringHandle except that it uses NEAREST filtering
-        // for everything, which is important to preserve texture completeness for u/int textures.
-        GLuint mNonFilteringHandle;
-    };
+    // This is a sampler equivalent to mFilteringHandle except that it uses NEAREST filtering
+    // for everything, which is important to preserve texture completeness for u/int textures.
+    GLuint mNonFilteringHandle;
+};
 
 }  // namespace dawn::native::opengl
 

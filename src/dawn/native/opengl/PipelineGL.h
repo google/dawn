@@ -23,46 +23,46 @@
 #include "dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native {
-    struct ProgrammableStage;
+struct ProgrammableStage;
 }  // namespace dawn::native
 
 namespace dawn::native::opengl {
 
-    struct OpenGLFunctions;
-    class PipelineLayout;
-    class Sampler;
+struct OpenGLFunctions;
+class PipelineLayout;
+class Sampler;
 
-    class PipelineGL {
-      public:
-        PipelineGL();
-        ~PipelineGL();
+class PipelineGL {
+  public:
+    PipelineGL();
+    ~PipelineGL();
 
-        // For each unit a sampler is bound to we need to know if we should use filtering or not
-        // because int and uint texture are only complete without filtering.
-        struct SamplerUnit {
-            GLuint unit;
-            bool shouldUseFiltering;
-        };
-        const std::vector<SamplerUnit>& GetTextureUnitsForSampler(GLuint index) const;
-        const std::vector<GLuint>& GetTextureUnitsForTextureView(GLuint index) const;
-        GLuint GetProgramHandle() const;
-
-      protected:
-        void ApplyNow(const OpenGLFunctions& gl);
-        MaybeError InitializeBase(const OpenGLFunctions& gl,
-                                  const PipelineLayout* layout,
-                                  const PerStage<ProgrammableStage>& stages);
-        void DeleteProgram(const OpenGLFunctions& gl);
-
-      private:
-        GLuint mProgram;
-        std::vector<std::vector<SamplerUnit>> mUnitsForSamplers;
-        std::vector<std::vector<GLuint>> mUnitsForTextures;
-        std::vector<GLuint> mPlaceholderSamplerUnits;
-        // TODO(enga): This could live on the Device, or elsewhere, but currently it makes Device
-        // destruction complex as it requires the sampler to be destroyed before the sampler cache.
-        Ref<Sampler> mPlaceholderSampler;
+    // For each unit a sampler is bound to we need to know if we should use filtering or not
+    // because int and uint texture are only complete without filtering.
+    struct SamplerUnit {
+        GLuint unit;
+        bool shouldUseFiltering;
     };
+    const std::vector<SamplerUnit>& GetTextureUnitsForSampler(GLuint index) const;
+    const std::vector<GLuint>& GetTextureUnitsForTextureView(GLuint index) const;
+    GLuint GetProgramHandle() const;
+
+  protected:
+    void ApplyNow(const OpenGLFunctions& gl);
+    MaybeError InitializeBase(const OpenGLFunctions& gl,
+                              const PipelineLayout* layout,
+                              const PerStage<ProgrammableStage>& stages);
+    void DeleteProgram(const OpenGLFunctions& gl);
+
+  private:
+    GLuint mProgram;
+    std::vector<std::vector<SamplerUnit>> mUnitsForSamplers;
+    std::vector<std::vector<GLuint>> mUnitsForTextures;
+    std::vector<GLuint> mPlaceholderSamplerUnits;
+    // TODO(enga): This could live on the Device, or elsewhere, but currently it makes Device
+    // destruction complex as it requires the sampler to be destroyed before the sampler cache.
+    Ref<Sampler> mPlaceholderSampler;
+};
 
 }  // namespace dawn::native::opengl
 

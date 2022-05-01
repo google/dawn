@@ -19,23 +19,23 @@
 
 namespace utils {
 
-    class TerribleCommandBuffer : public dawn::wire::CommandSerializer {
-      public:
-        TerribleCommandBuffer();
-        explicit TerribleCommandBuffer(dawn::wire::CommandHandler* handler);
+class TerribleCommandBuffer : public dawn::wire::CommandSerializer {
+  public:
+    TerribleCommandBuffer();
+    explicit TerribleCommandBuffer(dawn::wire::CommandHandler* handler);
 
-        void SetHandler(dawn::wire::CommandHandler* handler);
+    void SetHandler(dawn::wire::CommandHandler* handler);
 
-        size_t GetMaximumAllocationSize() const override;
+    size_t GetMaximumAllocationSize() const override;
 
-        void* GetCmdSpace(size_t size) override;
-        bool Flush() override;
+    void* GetCmdSpace(size_t size) override;
+    bool Flush() override;
 
-      private:
-        dawn::wire::CommandHandler* mHandler = nullptr;
-        size_t mOffset = 0;
-        char mBuffer[1000000];
-    };
+  private:
+    dawn::wire::CommandHandler* mHandler = nullptr;
+    size_t mOffset = 0;
+    char mBuffer[1000000];
+};
 
 }  // namespace utils
 

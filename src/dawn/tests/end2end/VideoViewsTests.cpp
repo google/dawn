@@ -19,8 +19,7 @@
 #include "dawn/utils/WGPUHelpers.h"
 
 VideoViewsTestBackend::PlatformTexture::PlatformTexture(wgpu::Texture&& texture)
-    : wgpuTexture(texture) {
-}
+    : wgpuTexture(texture) {}
 VideoViewsTestBackend::PlatformTexture::~PlatformTexture() = default;
 
 VideoViewsTestBackend::~VideoViewsTestBackend() = default;

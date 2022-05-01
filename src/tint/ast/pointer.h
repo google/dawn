@@ -25,40 +25,40 @@ namespace tint::ast {
 
 /// A pointer type.
 class Pointer final : public Castable<Pointer, Type> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param subtype the pointee type
-  /// @param storage_class the storage class of the pointer
-  /// @param access the access control of the pointer
-  Pointer(ProgramID pid,
-          const Source& src,
-          const Type* const subtype,
-          ast::StorageClass storage_class,
-          ast::Access access);
-  /// Move constructor
-  Pointer(Pointer&&);
-  ~Pointer() override;
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param subtype the pointee type
+    /// @param storage_class the storage class of the pointer
+    /// @param access the access control of the pointer
+    Pointer(ProgramID pid,
+            const Source& src,
+            const Type* const subtype,
+            ast::StorageClass storage_class,
+            ast::Access access);
+    /// Move constructor
+    Pointer(Pointer&&);
+    ~Pointer() override;
 
-  /// @param symbols the program's symbol table
-  /// @returns the name for this type that closely resembles how it would be
-  /// declared in WGSL.
-  std::string FriendlyName(const SymbolTable& symbols) const override;
+    /// @param symbols the program's symbol table
+    /// @returns the name for this type that closely resembles how it would be
+    /// declared in WGSL.
+    std::string FriendlyName(const SymbolTable& symbols) const override;
 
-  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned type
-  const Pointer* Clone(CloneContext* ctx) const override;
+    /// Clones this type and all transitive types using the `CloneContext` `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned type
+    const Pointer* Clone(CloneContext* ctx) const override;
 
-  /// The pointee type
-  const Type* const type;
+    /// The pointee type
+    const Type* const type;
 
-  /// The storage class of the pointer
-  ast::StorageClass const storage_class;
+    /// The storage class of the pointer
+    ast::StorageClass const storage_class;
 
-  /// The access control of the pointer
-  ast::Access const access;
+    /// The access control of the pointer
+    ast::Access const access;
 };
 
 }  // namespace tint::ast

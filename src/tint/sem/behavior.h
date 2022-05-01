@@ -22,12 +22,12 @@ namespace tint::sem {
 /// Behavior enumerates the possible behaviors of an expression or statement.
 /// @see https://www.w3.org/TR/WGSL/#behaviors
 enum class Behavior {
-  kReturn,
-  kDiscard,
-  kBreak,
-  kContinue,
-  kFallthrough,
-  kNext,
+    kReturn,
+    kDiscard,
+    kBreak,
+    kContinue,
+    kFallthrough,
+    kNext,
 };
 
 /// Behaviors is a set of Behavior

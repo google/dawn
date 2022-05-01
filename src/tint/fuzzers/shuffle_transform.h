@@ -21,18 +21,18 @@ namespace tint::fuzzers {
 
 /// ShuffleTransform reorders the module scope declarations into a random order
 class ShuffleTransform : public tint::transform::Transform {
- public:
-  /// Constructor
-  /// @param seed the random seed to use for the shuffling
-  explicit ShuffleTransform(size_t seed);
+  public:
+    /// Constructor
+    /// @param seed the random seed to use for the shuffling
+    explicit ShuffleTransform(size_t seed);
 
- protected:
-  void Run(CloneContext& ctx,
-           const tint::transform::DataMap&,
-           tint::transform::DataMap&) const override;
+  protected:
+    void Run(CloneContext& ctx,
+             const tint::transform::DataMap&,
+             tint::transform::DataMap&) const override;
 
- private:
-  size_t seed_;
+  private:
+    size_t seed_;
 };
 
 }  // namespace tint::fuzzers

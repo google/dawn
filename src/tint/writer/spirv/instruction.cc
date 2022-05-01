@@ -26,11 +26,11 @@ Instruction::Instruction(const Instruction&) = default;
 Instruction::~Instruction() = default;
 
 uint32_t Instruction::word_length() const {
-  uint32_t size = 1;  // Initial 1 for the op and size
-  for (const auto& op : operands_) {
-    size += OperandLength(op);
-  }
-  return size;
+    uint32_t size = 1;  // Initial 1 for the op and size
+    for (const auto& op : operands_) {
+        size += OperandLength(op);
+    }
+    return size;
 }
 
 }  // namespace tint::writer::spirv

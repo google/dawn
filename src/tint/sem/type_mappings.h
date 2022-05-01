@@ -57,29 +57,29 @@ namespace tint::sem {
 /// corresponding semantic node types. The standard operator overload resolving
 /// rules will be used to infer the return type based on the argument type.
 struct TypeMappings {
-  //! @cond Doxygen_Suppress
-  Array* operator()(ast::Array*);
-  Call* operator()(ast::CallExpression*);
-  Expression* operator()(ast::Expression*);
-  ForLoopStatement* operator()(ast::ForLoopStatement*);
-  Function* operator()(ast::Function*);
-  IfStatement* operator()(ast::IfStatement*);
-  MemberAccessorExpression* operator()(ast::MemberAccessorExpression*);
-  Node* operator()(ast::Node*);
-  Statement* operator()(ast::Statement*);
-  Struct* operator()(ast::Struct*);
-  StructMember* operator()(ast::StructMember*);
-  Type* operator()(ast::Type*);
-  Type* operator()(ast::TypeDecl*);
-  Variable* operator()(ast::Variable*);
-  //! @endcond
+    //! @cond Doxygen_Suppress
+    Array* operator()(ast::Array*);
+    Call* operator()(ast::CallExpression*);
+    Expression* operator()(ast::Expression*);
+    ForLoopStatement* operator()(ast::ForLoopStatement*);
+    Function* operator()(ast::Function*);
+    IfStatement* operator()(ast::IfStatement*);
+    MemberAccessorExpression* operator()(ast::MemberAccessorExpression*);
+    Node* operator()(ast::Node*);
+    Statement* operator()(ast::Statement*);
+    Struct* operator()(ast::Struct*);
+    StructMember* operator()(ast::StructMember*);
+    Type* operator()(ast::Type*);
+    Type* operator()(ast::TypeDecl*);
+    Variable* operator()(ast::Variable*);
+    //! @endcond
 };
 
 /// SemanticNodeTypeFor resolves to the appropriate sem::Node type for the
 /// AST or type node `AST_OR_TYPE`.
 template <typename AST_OR_TYPE>
-using SemanticNodeTypeFor = typename std::remove_pointer<decltype(
-    TypeMappings()(std::declval<AST_OR_TYPE*>()))>::type;
+using SemanticNodeTypeFor =
+    typename std::remove_pointer<decltype(TypeMappings()(std::declval<AST_OR_TYPE*>()))>::type;
 
 }  // namespace tint::sem
 

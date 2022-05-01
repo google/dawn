@@ -27,20 +27,16 @@ const std::pair<uint32_t, uint32_t> kChanceOfWrappingUnaryOperators = {30, 70};
 
 ProbabilityContext::ProbabilityContext(RandomGenerator* generator)
     : generator_(generator),
-      chance_of_changing_binary_operators_(
-          RandomFromRange(kChanceOfChangingBinaryOperators)),
-      chance_of_replacing_identifiers_(
-          RandomFromRange(kChanceOfReplacingIdentifiers)),
-      chance_of_wrapping_unary_operators_(
-          RandomFromRange(kChanceOfWrappingUnaryOperators)) {
-  assert(generator != nullptr && "generator must not be nullptr");
+      chance_of_changing_binary_operators_(RandomFromRange(kChanceOfChangingBinaryOperators)),
+      chance_of_replacing_identifiers_(RandomFromRange(kChanceOfReplacingIdentifiers)),
+      chance_of_wrapping_unary_operators_(RandomFromRange(kChanceOfWrappingUnaryOperators)) {
+    assert(generator != nullptr && "generator must not be nullptr");
 }
 
-uint32_t ProbabilityContext::RandomFromRange(
-    std::pair<uint32_t, uint32_t> range) {
-  assert(range.first <= range.second && "Range must be non-decreasing");
-  return generator_->GetUInt32(
-      range.first, range.second + 1);  // + 1 need since range is inclusive.
+uint32_t ProbabilityContext::RandomFromRange(std::pair<uint32_t, uint32_t> range) {
+    assert(range.first <= range.second && "Range must be non-decreasing");
+    return generator_->GetUInt32(range.first,
+                                 range.second + 1);  // + 1 need since range is inclusive.
 }
 
 }  // namespace tint::fuzzers::ast_fuzzer

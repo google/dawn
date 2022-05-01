@@ -20,18 +20,18 @@ namespace tint::reader::wgsl {
 namespace {
 
 void ParseWGSL(benchmark::State& state, std::string input_name) {
-  auto res = bench::LoadInputFile(input_name);
-  if (auto err = std::get_if<bench::Error>(&res)) {
-    state.SkipWithError(err->msg.c_str());
-    return;
-  }
-  auto& file = std::get<Source::File>(res);
-  for (auto _ : state) {
-    auto res = Parse(&file);
-    if (res.Diagnostics().contains_errors()) {
-      state.SkipWithError(res.Diagnostics().str().c_str());
+    auto res = bench::LoadInputFile(input_name);
+    if (auto err = std::get_if<bench::Error>(&res)) {
+        state.SkipWithError(err->msg.c_str());
+        return;
     }
-  }
+    auto& file = std::get<Source::File>(res);
+    for (auto _ : state) {
+        auto res = Parse(&file);
+        if (res.Diagnostics().contains_errors()) {
+            state.SkipWithError(res.Diagnostics().str().c_str());
+        }
+    }
 }
 
 TINT_BENCHMARK_WGSL_PROGRAMS(ParseWGSL);

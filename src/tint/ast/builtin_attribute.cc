@@ -28,13 +28,13 @@ BuiltinAttribute::BuiltinAttribute(ProgramID pid, const Source& src, Builtin b)
 BuiltinAttribute::~BuiltinAttribute() = default;
 
 std::string BuiltinAttribute::Name() const {
-  return "builtin";
+    return "builtin";
 }
 
 const BuiltinAttribute* BuiltinAttribute::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<BuiltinAttribute>(src, builtin);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<BuiltinAttribute>(src, builtin);
 }
 
 }  // namespace tint::ast

@@ -22,20 +22,16 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Struct);
 
 namespace tint::ast {
 
-Struct::Struct(ProgramID pid,
-               const Source& src,
-               Symbol n,
-               StructMemberList m,
-               AttributeList attrs)
+Struct::Struct(ProgramID pid, const Source& src, Symbol n, StructMemberList m, AttributeList attrs)
     : Base(pid, src, n), members(std::move(m)), attributes(std::move(attrs)) {
-  for (auto* mem : members) {
-    TINT_ASSERT(AST, mem);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, mem, program_id);
-  }
-  for (auto* attr : attributes) {
-    TINT_ASSERT(AST, attr);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
-  }
+    for (auto* mem : members) {
+        TINT_ASSERT(AST, mem);
+        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, mem, program_id);
+    }
+    for (auto* attr : attributes) {
+        TINT_ASSERT(AST, attr);
+        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
+    }
 }
 
 Struct::Struct(Struct&&) = default;
@@ -43,12 +39,12 @@ Struct::Struct(Struct&&) = default;
 Struct::~Struct() = default;
 
 const Struct* Struct::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  auto n = ctx->Clone(name);
-  auto mem = ctx->Clone(members);
-  auto attrs = ctx->Clone(attributes);
-  return ctx->dst->create<Struct>(src, n, mem, attrs);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    auto n = ctx->Clone(name);
+    auto mem = ctx->Clone(members);
+    auto attrs = ctx->Clone(attributes);
+    return ctx->dst->create<Struct>(src, n, mem, attrs);
 }
 
 }  // namespace tint::ast

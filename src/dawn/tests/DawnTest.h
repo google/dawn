@@ -120,10 +120,8 @@
 #define ASSERT_DEVICE_ERROR(statement) ASSERT_DEVICE_ERROR_MSG(statement, testing::_)
 
 struct RGBA8 {
-    constexpr RGBA8() : RGBA8(0, 0, 0, 0) {
-    }
-    constexpr RGBA8(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : r(r), g(g), b(b), a(a) {
-    }
+    constexpr RGBA8() : RGBA8(0, 0, 0, 0) {}
+    constexpr RGBA8(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : r(r), g(g), b(b), a(a) {}
     bool operator==(const RGBA8& other) const;
     bool operator!=(const RGBA8& other) const;
     bool operator<=(const RGBA8& other) const;
@@ -194,25 +192,25 @@ BackendTestConfig VulkanBackend(std::initializer_list<const char*> forceEnabledW
 struct GLFWwindow;
 
 namespace utils {
-    class PlatformDebugLogger;
-    class TerribleCommandBuffer;
-    class WireHelper;
+class PlatformDebugLogger;
+class TerribleCommandBuffer;
+class WireHelper;
 }  // namespace utils
 
 namespace detail {
-    class Expectation;
-    class CustomTextureExpectation;
+class Expectation;
+class CustomTextureExpectation;
 
-    template <typename T, typename U = T>
-    class ExpectEq;
-    template <typename T>
-    class ExpectBetweenColors;
+template <typename T, typename U = T>
+class ExpectEq;
+template <typename T>
+class ExpectBetweenColors;
 }  // namespace detail
 
 namespace dawn::wire {
-    class CommandHandler;
-    class WireClient;
-    class WireServer;
+class CommandHandler;
+class WireClient;
+class WireServer;
 }  // namespace dawn::wire
 
 void InitDawnEnd2EndTestEnvironment(int argc, char** argv);
@@ -655,18 +653,13 @@ class DawnTestWithParams : public DawnTestBase, public ::testing::TestWithParam<
     DawnTestWithParams();
     ~DawnTestWithParams() override = default;
 
-    void SetUp() override {
-        DawnTestBase::SetUp();
-    }
+    void SetUp() override { DawnTestBase::SetUp(); }
 
-    void TearDown() override {
-        DawnTestBase::TearDown();
-    }
+    void TearDown() override { DawnTestBase::TearDown(); }
 };
 
 template <typename Params>
-DawnTestWithParams<Params>::DawnTestWithParams() : DawnTestBase(this->GetParam()) {
-}
+DawnTestWithParams<Params>::DawnTestWithParams() : DawnTestBase(this->GetParam()) {}
 
 using DawnTest = DawnTestWithParams<>;
 
@@ -727,8 +720,7 @@ using DawnTest = DawnTestWithParams<>;
         template <typename... Args>                                                                \
         StructName(const AdapterTestParam& param, Args&&... args)                                  \
             : AdapterTestParam(param),                                                             \
-              DAWN_PP_CONCATENATE(_Dawn_, StructName){std::forward<Args>(args)...} {               \
-        }                                                                                          \
+              DAWN_PP_CONCATENATE(_Dawn_, StructName){std::forward<Args>(args)...} {}              \
     };                                                                                             \
     std::ostream& operator<<(std::ostream& o, const StructName& param) {                           \
         o << static_cast<const AdapterTestParam&>(param);                                          \
@@ -738,69 +730,69 @@ using DawnTest = DawnTestWithParams<>;
     static_assert(true, "require semicolon")
 
 namespace detail {
-    // Helper functions used for DAWN_INSTANTIATE_TEST
-    std::vector<AdapterTestParam> GetAvailableAdapterTestParamsForBackends(
-        const BackendTestConfig* params,
-        size_t numParams);
+// Helper functions used for DAWN_INSTANTIATE_TEST
+std::vector<AdapterTestParam> GetAvailableAdapterTestParamsForBackends(
+    const BackendTestConfig* params,
+    size_t numParams);
 
-    // All classes used to implement the deferred expectations should inherit from this.
-    class Expectation {
-      public:
-        virtual ~Expectation() = default;
+// All classes used to implement the deferred expectations should inherit from this.
+class Expectation {
+  public:
+    virtual ~Expectation() = default;
 
-        // Will be called with the buffer or texture data the expectation should check.
-        virtual testing::AssertionResult Check(const void* data, size_t size) = 0;
-    };
+    // Will be called with the buffer or texture data the expectation should check.
+    virtual testing::AssertionResult Check(const void* data, size_t size) = 0;
+};
 
-    // Expectation that checks the data is equal to some expected values.
-    // T - expected value Type
-    // U - actual value Type (defaults = T)
-    // This is expanded for float16 mostly where T=float, U=uint16_t
-    template <typename T, typename U>
-    class ExpectEq : public Expectation {
-      public:
-        explicit ExpectEq(T singleValue, T tolerance = {});
-        ExpectEq(const T* values, const unsigned int count, T tolerance = {});
+// Expectation that checks the data is equal to some expected values.
+// T - expected value Type
+// U - actual value Type (defaults = T)
+// This is expanded for float16 mostly where T=float, U=uint16_t
+template <typename T, typename U>
+class ExpectEq : public Expectation {
+  public:
+    explicit ExpectEq(T singleValue, T tolerance = {});
+    ExpectEq(const T* values, const unsigned int count, T tolerance = {});
 
-        testing::AssertionResult Check(const void* data, size_t size) override;
+    testing::AssertionResult Check(const void* data, size_t size) override;
 
-      private:
-        std::vector<T> mExpected;
-        T mTolerance;
-    };
-    extern template class ExpectEq<uint8_t>;
-    extern template class ExpectEq<int16_t>;
-    extern template class ExpectEq<uint32_t>;
-    extern template class ExpectEq<uint64_t>;
-    extern template class ExpectEq<RGBA8>;
-    extern template class ExpectEq<float>;
-    extern template class ExpectEq<float, uint16_t>;
+  private:
+    std::vector<T> mExpected;
+    T mTolerance;
+};
+extern template class ExpectEq<uint8_t>;
+extern template class ExpectEq<int16_t>;
+extern template class ExpectEq<uint32_t>;
+extern template class ExpectEq<uint64_t>;
+extern template class ExpectEq<RGBA8>;
+extern template class ExpectEq<float>;
+extern template class ExpectEq<float, uint16_t>;
 
-    template <typename T>
-    class ExpectBetweenColors : public Expectation {
-      public:
-        // Inclusive for now
-        ExpectBetweenColors(T value0, T value1);
-        testing::AssertionResult Check(const void* data, size_t size) override;
+template <typename T>
+class ExpectBetweenColors : public Expectation {
+  public:
+    // Inclusive for now
+    ExpectBetweenColors(T value0, T value1);
+    testing::AssertionResult Check(const void* data, size_t size) override;
 
-      private:
-        std::vector<T> mLowerColorChannels;
-        std::vector<T> mHigherColorChannels;
+  private:
+    std::vector<T> mLowerColorChannels;
+    std::vector<T> mHigherColorChannels;
 
-        // used for printing error
-        std::vector<T> mValues0;
-        std::vector<T> mValues1;
-    };
-    // A color is considered between color0 and color1 when all channel values are within range of
-    // each counterparts. It doesn't matter which value is higher or lower. Essentially color =
-    // lerp(color0, color1, t) where t is [0,1]. But I don't want to be too strict here.
-    extern template class ExpectBetweenColors<RGBA8>;
+    // used for printing error
+    std::vector<T> mValues0;
+    std::vector<T> mValues1;
+};
+// A color is considered between color0 and color1 when all channel values are within range of
+// each counterparts. It doesn't matter which value is higher or lower. Essentially color =
+// lerp(color0, color1, t) where t is [0,1]. But I don't want to be too strict here.
+extern template class ExpectBetweenColors<RGBA8>;
 
-    class CustomTextureExpectation : public Expectation {
-      public:
-        virtual ~CustomTextureExpectation() = default;
-        virtual uint32_t DataSize() = 0;
-    };
+class CustomTextureExpectation : public Expectation {
+  public:
+    virtual ~CustomTextureExpectation() = default;
+    virtual uint32_t DataSize() = 0;
+};
 
 }  // namespace detail
 

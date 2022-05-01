@@ -20,16 +20,16 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Continue) {
-  auto* loop = Loop(Block(If(false, Block(Break())),  //
-                          Continue()));
-  WrapInFunction(loop);
+    auto* loop = Loop(Block(If(false, Block(Break())),  //
+                            Continue()));
+    WrapInFunction(loop);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(loop)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  while (true) {
+    ASSERT_TRUE(gen.EmitStatement(loop)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  while (true) {
     if (false) {
       break;
     }

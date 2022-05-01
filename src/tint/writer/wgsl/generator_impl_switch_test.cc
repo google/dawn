@@ -20,32 +20,32 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Switch) {
-  Global("cond", ty.i32(), ast::StorageClass::kPrivate);
+    Global("cond", ty.i32(), ast::StorageClass::kPrivate);
 
-  auto* def_body = Block(create<ast::BreakStatement>());
-  auto* def = create<ast::CaseStatement>(ast::CaseSelectorList{}, def_body);
+    auto* def_body = Block(create<ast::BreakStatement>());
+    auto* def = create<ast::CaseStatement>(ast::CaseSelectorList{}, def_body);
 
-  ast::CaseSelectorList case_val;
-  case_val.push_back(Expr(5));
+    ast::CaseSelectorList case_val;
+    case_val.push_back(Expr(5));
 
-  auto* case_body = Block(create<ast::BreakStatement>());
+    auto* case_body = Block(create<ast::BreakStatement>());
 
-  auto* case_stmt = create<ast::CaseStatement>(case_val, case_body);
+    auto* case_stmt = create<ast::CaseStatement>(case_val, case_body);
 
-  ast::CaseStatementList body;
-  body.push_back(case_stmt);
-  body.push_back(def);
+    ast::CaseStatementList body;
+    body.push_back(case_stmt);
+    body.push_back(def);
 
-  auto* cond = Expr("cond");
-  auto* s = create<ast::SwitchStatement>(cond, body);
-  WrapInFunction(s);
+    auto* cond = Expr("cond");
+    auto* s = create<ast::SwitchStatement>(cond, body);
+    WrapInFunction(s);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  switch(cond) {
+    ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  switch(cond) {
     case 5: {
       break;
     }

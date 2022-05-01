@@ -19,55 +19,55 @@ namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, CaseBody_Empty) {
-  auto p = parser("");
-  auto e = p->case_body();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  EXPECT_FALSE(e.errored);
-  EXPECT_TRUE(e.matched);
-  EXPECT_EQ(e->statements.size(), 0u);
+    auto p = parser("");
+    auto e = p->case_body();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    EXPECT_FALSE(e.errored);
+    EXPECT_TRUE(e.matched);
+    EXPECT_EQ(e->statements.size(), 0u);
 }
 
 TEST_F(ParserImplTest, CaseBody_Statements) {
-  auto p = parser(R"(
+    auto p = parser(R"(
   var a: i32;
   a = 2;)");
 
-  auto e = p->case_body();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  EXPECT_FALSE(e.errored);
-  EXPECT_TRUE(e.matched);
-  ASSERT_EQ(e->statements.size(), 2u);
-  EXPECT_TRUE(e->statements[0]->Is<ast::VariableDeclStatement>());
-  EXPECT_TRUE(e->statements[1]->Is<ast::AssignmentStatement>());
+    auto e = p->case_body();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    EXPECT_FALSE(e.errored);
+    EXPECT_TRUE(e.matched);
+    ASSERT_EQ(e->statements.size(), 2u);
+    EXPECT_TRUE(e->statements[0]->Is<ast::VariableDeclStatement>());
+    EXPECT_TRUE(e->statements[1]->Is<ast::AssignmentStatement>());
 }
 
 TEST_F(ParserImplTest, CaseBody_InvalidStatement) {
-  auto p = parser("a =");
-  auto e = p->case_body();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(e.errored);
-  EXPECT_FALSE(e.matched);
-  EXPECT_EQ(e.value, nullptr);
+    auto p = parser("a =");
+    auto e = p->case_body();
+    EXPECT_TRUE(p->has_error());
+    EXPECT_TRUE(e.errored);
+    EXPECT_FALSE(e.matched);
+    EXPECT_EQ(e.value, nullptr);
 }
 
 TEST_F(ParserImplTest, CaseBody_Fallthrough) {
-  auto p = parser("fallthrough;");
-  auto e = p->case_body();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  EXPECT_FALSE(e.errored);
-  EXPECT_TRUE(e.matched);
-  ASSERT_EQ(e->statements.size(), 1u);
-  EXPECT_TRUE(e->statements[0]->Is<ast::FallthroughStatement>());
+    auto p = parser("fallthrough;");
+    auto e = p->case_body();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    EXPECT_FALSE(e.errored);
+    EXPECT_TRUE(e.matched);
+    ASSERT_EQ(e->statements.size(), 1u);
+    EXPECT_TRUE(e->statements[0]->Is<ast::FallthroughStatement>());
 }
 
 TEST_F(ParserImplTest, CaseBody_Fallthrough_MissingSemicolon) {
-  auto p = parser("fallthrough");
-  auto e = p->case_body();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(e.errored);
-  EXPECT_FALSE(e.matched);
-  EXPECT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:12: expected ';' for fallthrough statement");
+    auto p = parser("fallthrough");
+    auto e = p->case_body();
+    EXPECT_TRUE(p->has_error());
+    EXPECT_TRUE(e.errored);
+    EXPECT_FALSE(e.matched);
+    EXPECT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), "1:12: expected ';' for fallthrough statement");
 }
 
 }  // namespace

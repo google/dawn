@@ -22,38 +22,38 @@
 #include "dawn/native/vulkan/VulkanInfo.h"
 
 namespace dawn::native::vulkan {
-    class Device;
+class Device;
 }  // namespace dawn::native::vulkan
 
 namespace dawn::native::vulkan::external_semaphore {
 
-    class Service {
-      public:
-        explicit Service(Device* device);
-        ~Service();
+class Service {
+  public:
+    explicit Service(Device* device);
+    ~Service();
 
-        static bool CheckSupport(const VulkanDeviceInfo& deviceInfo,
-                                 VkPhysicalDevice physicalDevice,
-                                 const VulkanFunctions& fn);
+    static bool CheckSupport(const VulkanDeviceInfo& deviceInfo,
+                             VkPhysicalDevice physicalDevice,
+                             const VulkanFunctions& fn);
 
-        // True if the device reports it supports this feature
-        bool Supported();
+    // True if the device reports it supports this feature
+    bool Supported();
 
-        // Given an external handle, import it into a VkSemaphore
-        ResultOrError<VkSemaphore> ImportSemaphore(ExternalSemaphoreHandle handle);
+    // Given an external handle, import it into a VkSemaphore
+    ResultOrError<VkSemaphore> ImportSemaphore(ExternalSemaphoreHandle handle);
 
-        // Create a VkSemaphore that is exportable into an external handle later
-        ResultOrError<VkSemaphore> CreateExportableSemaphore();
+    // Create a VkSemaphore that is exportable into an external handle later
+    ResultOrError<VkSemaphore> CreateExportableSemaphore();
 
-        // Export a VkSemaphore into an external handle
-        ResultOrError<ExternalSemaphoreHandle> ExportSemaphore(VkSemaphore semaphore);
+    // Export a VkSemaphore into an external handle
+    ResultOrError<ExternalSemaphoreHandle> ExportSemaphore(VkSemaphore semaphore);
 
-      private:
-        Device* mDevice = nullptr;
+  private:
+    Device* mDevice = nullptr;
 
-        // True if early checks pass that determine if the service is supported
-        bool mSupported = false;
-    };
+    // True if early checks pass that determine if the service is supported
+    bool mSupported = false;
+};
 
 }  // namespace dawn::native::vulkan::external_semaphore
 

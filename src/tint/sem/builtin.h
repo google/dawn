@@ -72,72 +72,72 @@ bool IsAtomicBuiltin(BuiltinType i);
 
 /// Builtin holds the semantic information for a builtin function.
 class Builtin final : public Castable<Builtin, CallTarget> {
- public:
-  /// Constructor
-  /// @param type the builtin type
-  /// @param return_type the return type for the builtin call
-  /// @param parameters the parameters for the builtin overload
-  /// @param supported_stages the pipeline stages that this builtin can be
-  /// used in
-  /// @param is_deprecated true if the particular overload is considered
-  /// deprecated
-  Builtin(BuiltinType type,
-          const sem::Type* return_type,
-          std::vector<Parameter*> parameters,
-          PipelineStageSet supported_stages,
-          bool is_deprecated);
+  public:
+    /// Constructor
+    /// @param type the builtin type
+    /// @param return_type the return type for the builtin call
+    /// @param parameters the parameters for the builtin overload
+    /// @param supported_stages the pipeline stages that this builtin can be
+    /// used in
+    /// @param is_deprecated true if the particular overload is considered
+    /// deprecated
+    Builtin(BuiltinType type,
+            const sem::Type* return_type,
+            std::vector<Parameter*> parameters,
+            PipelineStageSet supported_stages,
+            bool is_deprecated);
 
-  /// Destructor
-  ~Builtin() override;
+    /// Destructor
+    ~Builtin() override;
 
-  /// @return the type of the builtin
-  BuiltinType Type() const { return type_; }
+    /// @return the type of the builtin
+    BuiltinType Type() const { return type_; }
 
-  /// @return the pipeline stages that this builtin can be used in
-  PipelineStageSet SupportedStages() const { return supported_stages_; }
+    /// @return the pipeline stages that this builtin can be used in
+    PipelineStageSet SupportedStages() const { return supported_stages_; }
 
-  /// @return true if the builtin overload is considered deprecated
-  bool IsDeprecated() const { return is_deprecated_; }
+    /// @return true if the builtin overload is considered deprecated
+    bool IsDeprecated() const { return is_deprecated_; }
 
-  /// @returns the name of the builtin function type. The spelling, including
-  /// case, matches the name in the WGSL spec.
-  const char* str() const;
+    /// @returns the name of the builtin function type. The spelling, including
+    /// case, matches the name in the WGSL spec.
+    const char* str() const;
 
-  /// @returns true if builtin is a coarse derivative builtin
-  bool IsCoarseDerivative() const;
+    /// @returns true if builtin is a coarse derivative builtin
+    bool IsCoarseDerivative() const;
 
-  /// @returns true if builtin is a fine a derivative builtin
-  bool IsFineDerivative() const;
+    /// @returns true if builtin is a fine a derivative builtin
+    bool IsFineDerivative() const;
 
-  /// @returns true if builtin is a derivative builtin
-  bool IsDerivative() const;
+    /// @returns true if builtin is a derivative builtin
+    bool IsDerivative() const;
 
-  /// @returns true if builtin is a texture operation builtin
-  bool IsTexture() const;
+    /// @returns true if builtin is a texture operation builtin
+    bool IsTexture() const;
 
-  /// @returns true if builtin is a image query builtin
-  bool IsImageQuery() const;
+    /// @returns true if builtin is a image query builtin
+    bool IsImageQuery() const;
 
-  /// @returns true if builtin is a data packing builtin
-  bool IsDataPacking() const;
+    /// @returns true if builtin is a data packing builtin
+    bool IsDataPacking() const;
 
-  /// @returns true if builtin is a data unpacking builtin
-  bool IsDataUnpacking() const;
+    /// @returns true if builtin is a data unpacking builtin
+    bool IsDataUnpacking() const;
 
-  /// @returns true if builtin is a barrier builtin
-  bool IsBarrier() const;
+    /// @returns true if builtin is a barrier builtin
+    bool IsBarrier() const;
 
-  /// @returns true if builtin is a atomic builtin
-  bool IsAtomic() const;
+    /// @returns true if builtin is a atomic builtin
+    bool IsAtomic() const;
 
-  /// @returns true if intrinsic may have side-effects (i.e. writes to at least
-  /// one of its inputs)
-  bool HasSideEffects() const;
+    /// @returns true if intrinsic may have side-effects (i.e. writes to at least
+    /// one of its inputs)
+    bool HasSideEffects() const;
 
- private:
-  const BuiltinType type_;
-  const PipelineStageSet supported_stages_;
-  const bool is_deprecated_;
+  private:
+    const BuiltinType type_;
+    const PipelineStageSet supported_stages_;
+    const bool is_deprecated_;
 };
 
 /// Constant value used by the degrees() builtin
@@ -153,13 +153,13 @@ namespace std {
 /// Custom std::hash specialization for tint::sem::Builtin
 template <>
 class hash<tint::sem::Builtin> {
- public:
-  /// @param i the Builtin to create a hash for
-  /// @return the hash value
-  inline std::size_t operator()(const tint::sem::Builtin& i) const {
-    return tint::utils::Hash(i.Type(), i.SupportedStages(), i.ReturnType(),
-                             i.Parameters(), i.IsDeprecated());
-  }
+  public:
+    /// @param i the Builtin to create a hash for
+    /// @return the hash value
+    inline std::size_t operator()(const tint::sem::Builtin& i) const {
+        return tint::utils::Hash(i.Type(), i.SupportedStages(), i.ReturnType(), i.Parameters(),
+                                 i.IsDeprecated());
+    }
 };
 
 }  // namespace std

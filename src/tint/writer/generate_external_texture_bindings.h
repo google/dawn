@@ -19,8 +19,8 @@
 
 namespace tint::writer {
 
-transform::MultiplanarExternalTexture::BindingsMap
-GenerateExternalTextureBindings(const Program* program);
+transform::MultiplanarExternalTexture::BindingsMap GenerateExternalTextureBindings(
+    const Program* program);
 
 }  // namespace tint::writer
 

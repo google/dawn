@@ -23,16 +23,14 @@ namespace tint::sem {
 namespace {
 
 bool IsValidDepthDimension(ast::TextureDimension dim) {
-  return dim == ast::TextureDimension::k2d ||
-         dim == ast::TextureDimension::k2dArray ||
-         dim == ast::TextureDimension::kCube ||
-         dim == ast::TextureDimension::kCubeArray;
+    return dim == ast::TextureDimension::k2d || dim == ast::TextureDimension::k2dArray ||
+           dim == ast::TextureDimension::kCube || dim == ast::TextureDimension::kCubeArray;
 }
 
 }  // namespace
 
 DepthTexture::DepthTexture(ast::TextureDimension dim) : Base(dim) {
-  TINT_ASSERT(Semantic, IsValidDepthDimension(dim));
+    TINT_ASSERT(Semantic, IsValidDepthDimension(dim));
 }
 
 DepthTexture::DepthTexture(DepthTexture&&) = default;
@@ -40,20 +38,20 @@ DepthTexture::DepthTexture(DepthTexture&&) = default;
 DepthTexture::~DepthTexture() = default;
 
 size_t DepthTexture::Hash() const {
-  return utils::Hash(TypeInfo::Of<DepthTexture>().full_hashcode, dim());
+    return utils::Hash(TypeInfo::Of<DepthTexture>().full_hashcode, dim());
 }
 
 bool DepthTexture::Equals(const sem::Type& other) const {
-  if (auto* o = other.As<DepthTexture>()) {
-    return o->dim() == dim();
-  }
-  return false;
+    if (auto* o = other.As<DepthTexture>()) {
+        return o->dim() == dim();
+    }
+    return false;
 }
 
 std::string DepthTexture::FriendlyName(const SymbolTable&) const {
-  std::ostringstream out;
-  out << "texture_depth_" << dim();
-  return out.str();
+    std::ostringstream out;
+    out << "texture_depth_" << dim();
+    return out.str();
 }
 
 }  // namespace tint::sem

@@ -23,8 +23,7 @@ struct SubresourceTrackingParams : AdapterTestParam {
                               uint32_t mipLevelCountIn)
         : AdapterTestParam(param),
           arrayLayerCount(arrayLayerCountIn),
-          mipLevelCount(mipLevelCountIn) {
-    }
+          mipLevelCount(mipLevelCountIn) {}
     uint32_t arrayLayerCount;
     uint32_t mipLevelCount;
 };
@@ -44,8 +43,7 @@ class SubresourceTrackingPerf : public DawnPerfTestWithParams<SubresourceTrackin
   public:
     static constexpr unsigned int kNumIterations = 50;
 
-    SubresourceTrackingPerf() : DawnPerfTestWithParams(kNumIterations, 1) {
-    }
+    SubresourceTrackingPerf() : DawnPerfTestWithParams(kNumIterations, 1) {}
     ~SubresourceTrackingPerf() override = default;
 
     void SetUp() override {

@@ -20,20 +20,18 @@
 
 namespace wgpu::binding {
 
-    ////////////////////////////////////////////////////////////////////////////////
-    // wgpu::bindings::GPUBindGroupLayout
-    ////////////////////////////////////////////////////////////////////////////////
-    GPUBindGroupLayout::GPUBindGroupLayout(wgpu::BindGroupLayout layout)
-        : layout_(std::move(layout)) {
-    }
+////////////////////////////////////////////////////////////////////////////////
+// wgpu::bindings::GPUBindGroupLayout
+////////////////////////////////////////////////////////////////////////////////
+GPUBindGroupLayout::GPUBindGroupLayout(wgpu::BindGroupLayout layout) : layout_(std::move(layout)) {}
 
-    std::variant<std::string, interop::UndefinedType> GPUBindGroupLayout::getLabel(Napi::Env) {
-        UNIMPLEMENTED();
-    }
+std::variant<std::string, interop::UndefinedType> GPUBindGroupLayout::getLabel(Napi::Env) {
+    UNIMPLEMENTED();
+}
 
-    void GPUBindGroupLayout::setLabel(Napi::Env,
-                                      std::variant<std::string, interop::UndefinedType> value) {
-        UNIMPLEMENTED();
-    }
+void GPUBindGroupLayout::setLabel(Napi::Env,
+                                  std::variant<std::string, interop::UndefinedType> value) {
+    UNIMPLEMENTED();
+}
 
 }  // namespace wgpu::binding

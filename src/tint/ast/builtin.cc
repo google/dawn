@@ -17,64 +17,64 @@
 namespace tint::ast {
 
 std::ostream& operator<<(std::ostream& out, Builtin builtin) {
-  switch (builtin) {
-    case Builtin::kNone: {
-      out << "none";
-      break;
+    switch (builtin) {
+        case Builtin::kNone: {
+            out << "none";
+            break;
+        }
+        case Builtin::kPosition: {
+            out << "position";
+            break;
+        }
+        case Builtin::kVertexIndex: {
+            out << "vertex_index";
+            break;
+        }
+        case Builtin::kInstanceIndex: {
+            out << "instance_index";
+            break;
+        }
+        case Builtin::kFrontFacing: {
+            out << "front_facing";
+            break;
+        }
+        case Builtin::kFragDepth: {
+            out << "frag_depth";
+            break;
+        }
+        case Builtin::kLocalInvocationId: {
+            out << "local_invocation_id";
+            break;
+        }
+        case Builtin::kLocalInvocationIndex: {
+            out << "local_invocation_index";
+            break;
+        }
+        case Builtin::kGlobalInvocationId: {
+            out << "global_invocation_id";
+            break;
+        }
+        case Builtin::kWorkgroupId: {
+            out << "workgroup_id";
+            break;
+        }
+        case Builtin::kNumWorkgroups: {
+            out << "num_workgroups";
+            break;
+        }
+        case Builtin::kSampleIndex: {
+            out << "sample_index";
+            break;
+        }
+        case Builtin::kSampleMask: {
+            out << "sample_mask";
+            break;
+        }
+        case Builtin::kPointSize: {
+            out << "pointsize";
+        }
     }
-    case Builtin::kPosition: {
-      out << "position";
-      break;
-    }
-    case Builtin::kVertexIndex: {
-      out << "vertex_index";
-      break;
-    }
-    case Builtin::kInstanceIndex: {
-      out << "instance_index";
-      break;
-    }
-    case Builtin::kFrontFacing: {
-      out << "front_facing";
-      break;
-    }
-    case Builtin::kFragDepth: {
-      out << "frag_depth";
-      break;
-    }
-    case Builtin::kLocalInvocationId: {
-      out << "local_invocation_id";
-      break;
-    }
-    case Builtin::kLocalInvocationIndex: {
-      out << "local_invocation_index";
-      break;
-    }
-    case Builtin::kGlobalInvocationId: {
-      out << "global_invocation_id";
-      break;
-    }
-    case Builtin::kWorkgroupId: {
-      out << "workgroup_id";
-      break;
-    }
-    case Builtin::kNumWorkgroups: {
-      out << "num_workgroups";
-      break;
-    }
-    case Builtin::kSampleIndex: {
-      out << "sample_index";
-      break;
-    }
-    case Builtin::kSampleMask: {
-      out << "sample_mask";
-      break;
-    }
-    case Builtin::kPointSize: {
-      out << "pointsize";
-    }
-  }
-  return out;
+    return out;
 }
 
 }  // namespace tint::ast

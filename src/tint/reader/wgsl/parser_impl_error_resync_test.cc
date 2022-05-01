@@ -17,31 +17,31 @@
 namespace tint::reader::wgsl {
 namespace {
 
-const diag::Formatter::Style formatter_style{
-    /* print_file: */ true, /* print_severity: */ true,
-    /* print_line: */ true, /* print_newline_at_end: */ false};
+const diag::Formatter::Style formatter_style{/* print_file: */ true, /* print_severity: */ true,
+                                             /* print_line: */ true,
+                                             /* print_newline_at_end: */ false};
 
 class ParserImplErrorResyncTest : public ParserImplTest {};
 
-#define EXPECT(SOURCE, EXPECTED)                                               \
-  do {                                                                         \
-    std::string source = SOURCE;                                               \
-    std::string expected = EXPECTED;                                           \
-    auto p = parser(source);                                                   \
-    EXPECT_EQ(false, p->Parse());                                              \
-    auto diagnostics = p->builder().Diagnostics();                             \
-    EXPECT_EQ(true, diagnostics.contains_errors());                            \
-    EXPECT_EQ(expected, diag::Formatter(formatter_style).format(diagnostics)); \
-  } while (false)
+#define EXPECT(SOURCE, EXPECTED)                                                   \
+    do {                                                                           \
+        std::string source = SOURCE;                                               \
+        std::string expected = EXPECTED;                                           \
+        auto p = parser(source);                                                   \
+        EXPECT_EQ(false, p->Parse());                                              \
+        auto diagnostics = p->builder().Diagnostics();                             \
+        EXPECT_EQ(true, diagnostics.contains_errors());                            \
+        EXPECT_EQ(expected, diag::Formatter(formatter_style).format(diagnostics)); \
+    } while (false)
 
 TEST_F(ParserImplErrorResyncTest, BadFunctionDecls) {
-  EXPECT(R"(
+    EXPECT(R"(
 fn .() -> . {}
 fn x(.) {}
 @_ fn -> {}
 fn good() {}
 )",
-         R"(test.wgsl:2:4 error: expected identifier for function declaration
+           R"(test.wgsl:2:4 error: expected identifier for function declaration
 fn .() -> . {}
    ^
 
@@ -64,7 +64,7 @@ test.wgsl:4:7 error: expected identifier for function declaration
 }
 
 TEST_F(ParserImplErrorResyncTest, AssignmentStatement) {
-  EXPECT(R"(
+    EXPECT(R"(
 fn f() {
   blah blah blah blah;
   good = 1;
@@ -73,7 +73,7 @@ fn f() {
   good = 1;
 }
 )",
-         R"(test.wgsl:3:8 error: expected '=' for assignment
+           R"(test.wgsl:3:8 error: expected '=' for assignment
   blah blah blah blah;
        ^^^^
 
@@ -88,14 +88,14 @@ test.wgsl:6:7 error: unable to parse right side of assignment
 }
 
 TEST_F(ParserImplErrorResyncTest, DiscardStatement) {
-  EXPECT(R"(
+    EXPECT(R"(
 fn f() {
   discard blah blah blah;
   a = 1;
   discard blah blah blah;
 }
 )",
-         R"(test.wgsl:3:11 error: expected ';' for discard statement
+           R"(test.wgsl:3:11 error: expected ';' for discard statement
   discard blah blah blah;
           ^^^^
 
@@ -106,7 +106,7 @@ test.wgsl:5:11 error: expected ';' for discard statement
 }
 
 TEST_F(ParserImplErrorResyncTest, StructMembers) {
-  EXPECT(R"(
+    EXPECT(R"(
 struct S {
     blah blah blah,
     a : i32,
@@ -116,7 +116,7 @@ struct S {
     c : i32,
 }
 )",
-         R"(test.wgsl:3:10 error: expected ':' for struct member
+           R"(test.wgsl:3:10 error: expected ':' for struct member
     blah blah blah,
          ^^^^
 
@@ -135,14 +135,14 @@ test.wgsl:7:6 error: expected attribute
 // the outer resynchronize() is looking for a terminating '}' for the function
 // scope.
 TEST_F(ParserImplErrorResyncTest, NestedSyncPoints) {
-  EXPECT(R"(
+    EXPECT(R"(
 fn f() {
   x = 1;
   discard
 }
 struct S { blah };
 )",
-         R"(test.wgsl:5:1 error: expected ';' for discard statement
+           R"(test.wgsl:5:1 error: expected ';' for discard statement
 }
 ^
 
@@ -153,14 +153,14 @@ struct S { blah };
 }
 
 TEST_F(ParserImplErrorResyncTest, BracketCounting) {
-  EXPECT(
-      R"(
+    EXPECT(
+        R"(
 fn f(x(((())))) {
   meow = {{{}}}
 }
 struct S { blah };
 )",
-      R"(test.wgsl:2:7 error: expected ':' for parameter
+        R"(test.wgsl:2:7 error: expected ':' for parameter
 fn f(x(((())))) {
       ^
 

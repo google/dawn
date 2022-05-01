@@ -22,36 +22,36 @@
 
 namespace dawn::native::opengl {
 
-    class Device;
+class Device;
 
-    class NativeSwapChainImpl {
-      public:
-        using WSIContext = DawnWSIContextGL;
+class NativeSwapChainImpl {
+  public:
+    using WSIContext = DawnWSIContextGL;
 
-        NativeSwapChainImpl(Device* device, PresentCallback present, void* presentUserdata);
-        ~NativeSwapChainImpl();
+    NativeSwapChainImpl(Device* device, PresentCallback present, void* presentUserdata);
+    ~NativeSwapChainImpl();
 
-        void Init(DawnWSIContextGL* context);
-        DawnSwapChainError Configure(WGPUTextureFormat format,
-                                     WGPUTextureUsage,
-                                     uint32_t width,
-                                     uint32_t height);
-        DawnSwapChainError GetNextTexture(DawnSwapChainNextTexture* nextTexture);
-        DawnSwapChainError Present();
+    void Init(DawnWSIContextGL* context);
+    DawnSwapChainError Configure(WGPUTextureFormat format,
+                                 WGPUTextureUsage,
+                                 uint32_t width,
+                                 uint32_t height);
+    DawnSwapChainError GetNextTexture(DawnSwapChainNextTexture* nextTexture);
+    DawnSwapChainError Present();
 
-        wgpu::TextureFormat GetPreferredFormat() const;
+    wgpu::TextureFormat GetPreferredFormat() const;
 
-      private:
-        PresentCallback mPresentCallback;
-        void* mPresentUserdata;
+  private:
+    PresentCallback mPresentCallback;
+    void* mPresentUserdata;
 
-        uint32_t mWidth = 0;
-        uint32_t mHeight = 0;
-        GLuint mBackFBO = 0;
-        GLuint mBackTexture = 0;
+    uint32_t mWidth = 0;
+    uint32_t mHeight = 0;
+    GLuint mBackFBO = 0;
+    GLuint mBackTexture = 0;
 
-        Device* mDevice = nullptr;
-    };
+    Device* mDevice = nullptr;
+};
 
 }  // namespace dawn::native::opengl
 

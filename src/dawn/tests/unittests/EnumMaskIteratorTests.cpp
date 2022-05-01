@@ -18,55 +18,55 @@
 
 namespace dawn::native {
 
-    enum class TestAspect : uint8_t {
-        Color = 1,
-        Depth = 2,
-        Stencil = 4,
-    };
+enum class TestAspect : uint8_t {
+    Color = 1,
+    Depth = 2,
+    Stencil = 4,
+};
 
-    template <>
-    struct EnumBitmaskSize<TestAspect> {
-        static constexpr unsigned value = 3;
-    };
+template <>
+struct EnumBitmaskSize<TestAspect> {
+    static constexpr unsigned value = 3;
+};
 
 }  // namespace dawn::native
 
 namespace dawn {
 
-    template <>
-    struct IsDawnBitmask<dawn::native::TestAspect> {
-        static constexpr bool enable = true;
-    };
+template <>
+struct IsDawnBitmask<dawn::native::TestAspect> {
+    static constexpr bool enable = true;
+};
 
 }  // namespace dawn
 
 namespace dawn::native {
 
-    static_assert(EnumBitmaskSize<TestAspect>::value == 3);
+static_assert(EnumBitmaskSize<TestAspect>::value == 3);
 
-    TEST(EnumMaskIteratorTests, None) {
-        for (TestAspect aspect : IterateEnumMask(static_cast<TestAspect>(0))) {
-            FAIL();
-            DAWN_UNUSED(aspect);
-        }
+TEST(EnumMaskIteratorTests, None) {
+    for (TestAspect aspect : IterateEnumMask(static_cast<TestAspect>(0))) {
+        FAIL();
+        DAWN_UNUSED(aspect);
     }
+}
 
-    TEST(EnumMaskIteratorTests, All) {
-        TestAspect expected[] = {TestAspect::Color, TestAspect::Depth, TestAspect::Stencil};
-        uint32_t i = 0;
-        TestAspect aspects = TestAspect::Color | TestAspect::Depth | TestAspect::Stencil;
-        for (TestAspect aspect : IterateEnumMask(aspects)) {
-            EXPECT_EQ(aspect, expected[i++]);
-        }
+TEST(EnumMaskIteratorTests, All) {
+    TestAspect expected[] = {TestAspect::Color, TestAspect::Depth, TestAspect::Stencil};
+    uint32_t i = 0;
+    TestAspect aspects = TestAspect::Color | TestAspect::Depth | TestAspect::Stencil;
+    for (TestAspect aspect : IterateEnumMask(aspects)) {
+        EXPECT_EQ(aspect, expected[i++]);
     }
+}
 
-    TEST(EnumMaskIteratorTests, Partial) {
-        TestAspect expected[] = {TestAspect::Color, TestAspect::Stencil};
-        uint32_t i = 0;
-        TestAspect aspects = TestAspect::Stencil | TestAspect::Color;
-        for (TestAspect aspect : IterateEnumMask(aspects)) {
-            EXPECT_EQ(aspect, expected[i++]);
-        }
+TEST(EnumMaskIteratorTests, Partial) {
+    TestAspect expected[] = {TestAspect::Color, TestAspect::Stencil};
+    uint32_t i = 0;
+    TestAspect aspects = TestAspect::Stencil | TestAspect::Color;
+    for (TestAspect aspect : IterateEnumMask(aspects)) {
+        EXPECT_EQ(aspect, expected[i++]);
     }
+}
 
 }  // namespace dawn::native

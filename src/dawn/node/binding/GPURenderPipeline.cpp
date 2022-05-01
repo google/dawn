@@ -22,27 +22,26 @@
 
 namespace wgpu::binding {
 
-    ////////////////////////////////////////////////////////////////////////////////
-    // wgpu::bindings::GPURenderPipeline
-    ////////////////////////////////////////////////////////////////////////////////
-    GPURenderPipeline::GPURenderPipeline(wgpu::RenderPipeline pipeline)
-        : pipeline_(std::move(pipeline)) {
-    }
+////////////////////////////////////////////////////////////////////////////////
+// wgpu::bindings::GPURenderPipeline
+////////////////////////////////////////////////////////////////////////////////
+GPURenderPipeline::GPURenderPipeline(wgpu::RenderPipeline pipeline)
+    : pipeline_(std::move(pipeline)) {}
 
-    interop::Interface<interop::GPUBindGroupLayout> GPURenderPipeline::getBindGroupLayout(
-        Napi::Env env,
-        uint32_t index) {
-        return interop::GPUBindGroupLayout::Create<GPUBindGroupLayout>(
-            env, pipeline_.GetBindGroupLayout(index));
-    }
+interop::Interface<interop::GPUBindGroupLayout> GPURenderPipeline::getBindGroupLayout(
+    Napi::Env env,
+    uint32_t index) {
+    return interop::GPUBindGroupLayout::Create<GPUBindGroupLayout>(
+        env, pipeline_.GetBindGroupLayout(index));
+}
 
-    std::variant<std::string, interop::UndefinedType> GPURenderPipeline::getLabel(Napi::Env) {
-        UNIMPLEMENTED();
-    }
+std::variant<std::string, interop::UndefinedType> GPURenderPipeline::getLabel(Napi::Env) {
+    UNIMPLEMENTED();
+}
 
-    void GPURenderPipeline::setLabel(Napi::Env,
-                                     std::variant<std::string, interop::UndefinedType> value) {
-        UNIMPLEMENTED();
-    }
+void GPURenderPipeline::setLabel(Napi::Env,
+                                 std::variant<std::string, interop::UndefinedType> value) {
+    UNIMPLEMENTED();
+}
 
 }  // namespace wgpu::binding

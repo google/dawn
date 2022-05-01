@@ -23,18 +23,18 @@
 
 namespace {
 
-    class VulkanErrorInjectorTests : public DawnTest {
-      public:
-        void SetUp() override {
-            DawnTest::SetUp();
-            DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+class VulkanErrorInjectorTests : public DawnTest {
+  public:
+    void SetUp() override {
+        DawnTest::SetUp();
+        DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
-            mDeviceVk = dawn::native::vulkan::ToBackend(dawn::native::FromAPI(device.Get()));
-        }
+        mDeviceVk = dawn::native::vulkan::ToBackend(dawn::native::FromAPI(device.Get()));
+    }
 
-      protected:
-        dawn::native::vulkan::Device* mDeviceVk;
-    };
+  protected:
+    dawn::native::vulkan::Device* mDeviceVk;
+};
 
 }  // anonymous namespace
 

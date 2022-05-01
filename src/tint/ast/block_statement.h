@@ -23,34 +23,30 @@ namespace tint::ast {
 
 /// A block statement
 class BlockStatement final : public Castable<BlockStatement, Statement> {
- public:
-  /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the block statement source
-  /// @param statements the statements
-  BlockStatement(ProgramID program_id,
-                 const Source& source,
-                 const StatementList& statements);
-  /// Move constructor
-  BlockStatement(BlockStatement&&);
-  ~BlockStatement() override;
+  public:
+    /// Constructor
+    /// @param program_id the identifier of the program that owns this node
+    /// @param source the block statement source
+    /// @param statements the statements
+    BlockStatement(ProgramID program_id, const Source& source, const StatementList& statements);
+    /// Move constructor
+    BlockStatement(BlockStatement&&);
+    ~BlockStatement() override;
 
-  /// @returns true if the block has no statements
-  bool Empty() const { return statements.empty(); }
+    /// @returns true if the block has no statements
+    bool Empty() const { return statements.empty(); }
 
-  /// @returns the last statement in the block or nullptr if block empty
-  const Statement* Last() const {
-    return statements.empty() ? nullptr : statements.back();
-  }
+    /// @returns the last statement in the block or nullptr if block empty
+    const Statement* Last() const { return statements.empty() ? nullptr : statements.back(); }
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const BlockStatement* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const BlockStatement* Clone(CloneContext* ctx) const override;
 
-  /// the statement list
-  const StatementList statements;
+    /// the statement list
+    const StatementList statements;
 };
 
 }  // namespace tint::ast

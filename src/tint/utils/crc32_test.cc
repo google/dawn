@@ -20,15 +20,15 @@ namespace tint::utils {
 namespace {
 
 TEST(CRC32Test, Compiletime) {
-  static_assert(CRC32("") == 0x00000000u);
-  static_assert(CRC32("hello world") == 0x0d4a1185u);
-  static_assert(CRC32("123456789") == 0xcbf43926u);
+    static_assert(CRC32("") == 0x00000000u);
+    static_assert(CRC32("hello world") == 0x0d4a1185u);
+    static_assert(CRC32("123456789") == 0xcbf43926u);
 }
 
 TEST(CRC32Test, Runtime) {
-  EXPECT_EQ(CRC32(""), 0x00000000u);
-  EXPECT_EQ(CRC32("hello world"), 0x0d4a1185u);
-  EXPECT_EQ(CRC32("123456789"), 0xcbf43926u);
+    EXPECT_EQ(CRC32(""), 0x00000000u);
+    EXPECT_EQ(CRC32("hello world"), 0x0d4a1185u);
+    EXPECT_EQ(CRC32("123456789"), 0xcbf43926u);
 }
 
 }  // namespace

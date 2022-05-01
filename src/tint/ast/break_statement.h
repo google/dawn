@@ -21,20 +21,20 @@ namespace tint::ast {
 
 /// An break statement
 class BreakStatement final : public Castable<BreakStatement, Statement> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  BreakStatement(ProgramID pid, const Source& src);
-  /// Move constructor
-  BreakStatement(BreakStatement&&);
-  ~BreakStatement() override;
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    BreakStatement(ProgramID pid, const Source& src);
+    /// Move constructor
+    BreakStatement(BreakStatement&&);
+    ~BreakStatement() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const BreakStatement* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const BreakStatement* Clone(CloneContext* ctx) const override;
 };
 
 }  // namespace tint::ast

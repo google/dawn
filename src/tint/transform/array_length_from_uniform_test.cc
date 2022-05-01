@@ -26,13 +26,13 @@ namespace {
 using ArrayLengthFromUniformTest = TransformTest;
 
 TEST_F(ArrayLengthFromUniformTest, ShouldRunEmptyModule) {
-  auto* src = R"()";
+    auto* src = R"()";
 
-  EXPECT_FALSE(ShouldRun<ArrayLengthFromUniform>(src));
+    EXPECT_FALSE(ShouldRun<ArrayLengthFromUniform>(src));
 }
 
 TEST_F(ArrayLengthFromUniformTest, ShouldRunNoArrayLength) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB {
   x : i32,
   arr : array<i32>,
@@ -45,11 +45,11 @@ fn main() {
 }
 )";
 
-  EXPECT_FALSE(ShouldRun<ArrayLengthFromUniform>(src));
+    EXPECT_FALSE(ShouldRun<ArrayLengthFromUniform>(src));
 }
 
 TEST_F(ArrayLengthFromUniformTest, ShouldRunWithArrayLength) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB {
   x : i32,
   arr : array<i32>,
@@ -63,11 +63,11 @@ fn main() {
 }
 )";
 
-  EXPECT_TRUE(ShouldRun<ArrayLengthFromUniform>(src));
+    EXPECT_TRUE(ShouldRun<ArrayLengthFromUniform>(src));
 }
 
 TEST_F(ArrayLengthFromUniformTest, Error_MissingTransformData) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB {
   x : i32,
   arr : array<i32>,
@@ -81,17 +81,17 @@ fn main() {
 }
 )";
 
-  auto* expect =
-      "error: missing transform data for "
-      "tint::transform::ArrayLengthFromUniform";
+    auto* expect =
+        "error: missing transform data for "
+        "tint::transform::ArrayLengthFromUniform";
 
-  auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src);
+    auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(ArrayLengthFromUniformTest, Basic) {
-  auto* src = R"(
+    auto* src = R"(
 @group(0) @binding(0) var<storage, read> sb : array<i32>;
 
 @stage(compute) @workgroup_size(1)
@@ -100,7 +100,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_symbol {
   buffer_size : array<vec4<u32>, 1u>,
 }
@@ -115,21 +115,21 @@ fn main() {
 }
 )";
 
-  ArrayLengthFromUniform::Config cfg({0, 30u});
-  cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 0}, 0);
+    ArrayLengthFromUniform::Config cfg({0, 30u});
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 0}, 0);
 
-  DataMap data;
-  data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
+    DataMap data;
+    data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src, data);
+    auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src, data);
 
-  EXPECT_EQ(expect, str(got));
-  EXPECT_EQ(std::unordered_set<uint32_t>({0}),
-            got.data.Get<ArrayLengthFromUniform::Result>()->used_size_indices);
+    EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(std::unordered_set<uint32_t>({0}),
+              got.data.Get<ArrayLengthFromUniform::Result>()->used_size_indices);
 }
 
 TEST_F(ArrayLengthFromUniformTest, BasicInStruct) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB {
   x : i32,
   arr : array<i32>,
@@ -143,7 +143,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_symbol {
   buffer_size : array<vec4<u32>, 1u>,
 }
@@ -163,21 +163,21 @@ fn main() {
 }
 )";
 
-  ArrayLengthFromUniform::Config cfg({0, 30u});
-  cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 0}, 0);
+    ArrayLengthFromUniform::Config cfg({0, 30u});
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 0}, 0);
 
-  DataMap data;
-  data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
+    DataMap data;
+    data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src, data);
+    auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src, data);
 
-  EXPECT_EQ(expect, str(got));
-  EXPECT_EQ(std::unordered_set<uint32_t>({0}),
-            got.data.Get<ArrayLengthFromUniform::Result>()->used_size_indices);
+    EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(std::unordered_set<uint32_t>({0}),
+              got.data.Get<ArrayLengthFromUniform::Result>()->used_size_indices);
 }
 
 TEST_F(ArrayLengthFromUniformTest, MultipleStorageBuffers) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB1 {
   x : i32,
   arr1 : array<i32>,
@@ -208,7 +208,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_symbol {
   buffer_size : array<vec4<u32>, 2u>,
 }
@@ -251,25 +251,25 @@ fn main() {
 }
 )";
 
-  ArrayLengthFromUniform::Config cfg({0, 30u});
-  cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 2u}, 0);
-  cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{1u, 2u}, 1);
-  cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{2u, 2u}, 2);
-  cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{3u, 2u}, 3);
-  cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{4u, 2u}, 4);
+    ArrayLengthFromUniform::Config cfg({0, 30u});
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 2u}, 0);
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{1u, 2u}, 1);
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{2u, 2u}, 2);
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{3u, 2u}, 3);
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{4u, 2u}, 4);
 
-  DataMap data;
-  data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
+    DataMap data;
+    data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src, data);
+    auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src, data);
 
-  EXPECT_EQ(expect, str(got));
-  EXPECT_EQ(std::unordered_set<uint32_t>({0, 1, 2, 3, 4}),
-            got.data.Get<ArrayLengthFromUniform::Result>()->used_size_indices);
+    EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(std::unordered_set<uint32_t>({0, 1, 2, 3, 4}),
+              got.data.Get<ArrayLengthFromUniform::Result>()->used_size_indices);
 }
 
 TEST_F(ArrayLengthFromUniformTest, MultipleUnusedStorageBuffers) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB1 {
   x : i32,
   arr1 : array<i32>,
@@ -297,7 +297,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_symbol {
   buffer_size : array<vec4<u32>, 1u>,
 }
@@ -337,25 +337,25 @@ fn main() {
 }
 )";
 
-  ArrayLengthFromUniform::Config cfg({0, 30u});
-  cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 2u}, 0);
-  cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{1u, 2u}, 1);
-  cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{2u, 2u}, 2);
-  cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{3u, 2u}, 3);
-  cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{4u, 2u}, 4);
+    ArrayLengthFromUniform::Config cfg({0, 30u});
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 2u}, 0);
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{1u, 2u}, 1);
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{2u, 2u}, 2);
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{3u, 2u}, 3);
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{4u, 2u}, 4);
 
-  DataMap data;
-  data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
+    DataMap data;
+    data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src, data);
+    auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src, data);
 
-  EXPECT_EQ(expect, str(got));
-  EXPECT_EQ(std::unordered_set<uint32_t>({0, 2}),
-            got.data.Get<ArrayLengthFromUniform::Result>()->used_size_indices);
+    EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(std::unordered_set<uint32_t>({0, 2}),
+              got.data.Get<ArrayLengthFromUniform::Result>()->used_size_indices);
 }
 
 TEST_F(ArrayLengthFromUniformTest, NoArrayLengthCalls) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB {
   x : i32,
   arr : array<i32>,
@@ -369,20 +369,20 @@ fn main() {
 }
 )";
 
-  ArrayLengthFromUniform::Config cfg({0, 30u});
-  cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 0}, 0);
+    ArrayLengthFromUniform::Config cfg({0, 30u});
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 0}, 0);
 
-  DataMap data;
-  data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
+    DataMap data;
+    data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src, data);
+    auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src, data);
 
-  EXPECT_EQ(src, str(got));
-  EXPECT_EQ(got.data.Get<ArrayLengthFromUniform::Result>(), nullptr);
+    EXPECT_EQ(src, str(got));
+    EXPECT_EQ(got.data.Get<ArrayLengthFromUniform::Result>(), nullptr);
 }
 
 TEST_F(ArrayLengthFromUniformTest, MissingBindingPointToIndexMapping) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB1 {
   x : i32,
   arr1 : array<i32>,
@@ -405,7 +405,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_symbol {
   buffer_size : array<vec4<u32>, 1u>,
 }
@@ -434,21 +434,21 @@ fn main() {
 }
 )";
 
-  ArrayLengthFromUniform::Config cfg({0, 30u});
-  cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 2}, 0);
+    ArrayLengthFromUniform::Config cfg({0, 30u});
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 2}, 0);
 
-  DataMap data;
-  data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
+    DataMap data;
+    data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src, data);
+    auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src, data);
 
-  EXPECT_EQ(expect, str(got));
-  EXPECT_EQ(std::unordered_set<uint32_t>({0}),
-            got.data.Get<ArrayLengthFromUniform::Result>()->used_size_indices);
+    EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(std::unordered_set<uint32_t>({0}),
+              got.data.Get<ArrayLengthFromUniform::Result>()->used_size_indices);
 }
 
 TEST_F(ArrayLengthFromUniformTest, OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main() {
   var len : u32 = arrayLength(&sb.arr);
@@ -462,7 +462,7 @@ struct SB {
 };
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_symbol {
   buffer_size : array<vec4<u32>, 1u>,
 }
@@ -482,17 +482,17 @@ struct SB {
 }
 )";
 
-  ArrayLengthFromUniform::Config cfg({0, 30u});
-  cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 0}, 0);
+    ArrayLengthFromUniform::Config cfg({0, 30u});
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 0}, 0);
 
-  DataMap data;
-  data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
+    DataMap data;
+    data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
 
-  auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src, data);
+    auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src, data);
 
-  EXPECT_EQ(expect, str(got));
-  EXPECT_EQ(std::unordered_set<uint32_t>({0}),
-            got.data.Get<ArrayLengthFromUniform::Result>()->used_size_indices);
+    EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(std::unordered_set<uint32_t>({0}),
+              got.data.Get<ArrayLengthFromUniform::Result>()->used_size_indices);
 }
 
 }  // namespace

@@ -16,21 +16,20 @@
 
 namespace dawn::native {
 
-    BackendConnection::BackendConnection(InstanceBase* instance, wgpu::BackendType type)
-        : mInstance(instance), mType(type) {
-    }
+BackendConnection::BackendConnection(InstanceBase* instance, wgpu::BackendType type)
+    : mInstance(instance), mType(type) {}
 
-    wgpu::BackendType BackendConnection::GetType() const {
-        return mType;
-    }
+wgpu::BackendType BackendConnection::GetType() const {
+    return mType;
+}
 
-    InstanceBase* BackendConnection::GetInstance() const {
-        return mInstance;
-    }
+InstanceBase* BackendConnection::GetInstance() const {
+    return mInstance;
+}
 
-    ResultOrError<std::vector<Ref<AdapterBase>>> BackendConnection::DiscoverAdapters(
-        const AdapterDiscoveryOptionsBase* options) {
-        return DAWN_FORMAT_VALIDATION_ERROR("DiscoverAdapters not implemented for this backend.");
-    }
+ResultOrError<std::vector<Ref<AdapterBase>>> BackendConnection::DiscoverAdapters(
+    const AdapterDiscoveryOptionsBase* options) {
+    return DAWN_FORMAT_VALIDATION_ERROR("DiscoverAdapters not implemented for this backend.");
+}
 
 }  // namespace dawn::native

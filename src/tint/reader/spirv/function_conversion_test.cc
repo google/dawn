@@ -24,7 +24,7 @@ using ::testing::Eq;
 using ::testing::HasSubstr;
 
 std::string Preamble() {
-  return R"(
+    return R"(
   OpCapability Shader
   OpMemoryModel Logical Simple
   OpEntryPoint Fragment %100 "main"
@@ -70,142 +70,133 @@ std::string Preamble() {
 using SpvUnaryConversionTest = SpvParserTestBase<::testing::Test>;
 
 TEST_F(SpvUnaryConversionTest, Bitcast_Scalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpBitcast %uint %float_50
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : u32 = bitcast<u32>(50.0);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : u32 = bitcast<u32>(50.0);"));
 }
 
 TEST_F(SpvUnaryConversionTest, Bitcast_Vector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpBitcast %v2float %v2uint_10_20
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(
-      test::ToString(p->program(), ast_body),
-      HasSubstr(
-          "let x_1 : vec2<f32> = bitcast<vec2<f32>>(vec2<u32>(10u, 20u));"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : vec2<f32> = bitcast<vec2<f32>>(vec2<u32>(10u, 20u));"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_BadArg) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertSToF %float %void
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(),
-              HasSubstr("unhandled expression for ID 2\n%2 = OpTypeVoid"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_FALSE(fe.EmitBody());
+    EXPECT_THAT(p->error(), HasSubstr("unhandled expression for ID 2\n%2 = OpTypeVoid"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_BadArg) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertUToF %float %void
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(),
-              HasSubstr("unhandled expression for ID 2\n%2 = OpTypeVoid"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_FALSE(fe.EmitBody());
+    EXPECT_THAT(p->error(), HasSubstr("unhandled expression for ID 2\n%2 = OpTypeVoid"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_BadArg) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertFToS %float %void
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(),
-              HasSubstr("unhandled expression for ID 2\n%2 = OpTypeVoid"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_FALSE(fe.EmitBody());
+    EXPECT_THAT(p->error(), HasSubstr("unhandled expression for ID 2\n%2 = OpTypeVoid"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_BadArg) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertFToU %float %void
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(),
-              HasSubstr("unhandled expression for ID 2\n%2 = OpTypeVoid"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_FALSE(fe.EmitBody());
+    EXPECT_THAT(p->error(), HasSubstr("unhandled expression for ID 2\n%2 = OpTypeVoid"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_BadArgType) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertSToF %float %false
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(),
-              HasSubstr("operand for conversion to floating point must be "
-                        "integral scalar or vector"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_FALSE(fe.EmitBody());
+    EXPECT_THAT(p->error(), HasSubstr("operand for conversion to floating point must be "
+                                      "integral scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_BadArgType) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertSToF %v2float %v2bool_t_f
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(
-      p->error(),
-      HasSubstr("operand for conversion to floating point must be integral "
-                "scalar or vector"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_FALSE(fe.EmitBody());
+    EXPECT_THAT(p->error(), HasSubstr("operand for conversion to floating point must be integral "
+                                      "scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromSigned) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %int %int_30
@@ -213,17 +204,16 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromSigned) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : f32 = f32(x_30);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 : f32 = f32(x_30);"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromUnsigned) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %uint %uint_10
@@ -231,17 +221,17 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromUnsigned) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : f32 = f32(bitcast<i32>(x_30));"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : f32 = f32(bitcast<i32>(x_30));"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromSigned) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %v2int %v2int_30_40
@@ -249,17 +239,17 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromSigned) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : vec2<f32> = vec2<f32>(x_30);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : vec2<f32> = vec2<f32>(x_30);"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromUnsigned) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %v2uint %v2uint_10_20
@@ -267,53 +257,49 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromUnsigned) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(
-      test::ToString(p->program(), ast_body),
-      HasSubstr("let x_1 : vec2<f32> = vec2<f32>(bitcast<vec2<i32>>(x_30));"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : vec2<f32> = vec2<f32>(bitcast<vec2<i32>>(x_30));"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_BadArgType) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertUToF %float %false
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(),
-              HasSubstr("operand for conversion to floating point must be "
-                        "integral scalar or vector"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_FALSE(fe.EmitBody());
+    EXPECT_THAT(p->error(), HasSubstr("operand for conversion to floating point must be "
+                                      "integral scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_BadArgType) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertUToF %v2float %v2bool_t_f
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(
-      p->error(),
-      HasSubstr("operand for conversion to floating point must be integral "
-                "scalar or vector"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_FALSE(fe.EmitBody());
+    EXPECT_THAT(p->error(), HasSubstr("operand for conversion to floating point must be integral "
+                                      "scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromSigned) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %int %int_30
@@ -321,17 +307,17 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromSigned) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : f32 = f32(bitcast<u32>(x_30));"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : f32 = f32(bitcast<u32>(x_30));"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromUnsigned) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %uint %uint_10
@@ -339,17 +325,16 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromUnsigned) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : f32 = f32(x_30);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 : f32 = f32(x_30);"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromSigned) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %v2int %v2int_30_40
@@ -357,18 +342,17 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromSigned) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(
-      test::ToString(p->program(), ast_body),
-      HasSubstr("let x_1 : vec2<f32> = vec2<f32>(bitcast<vec2<u32>>(x_30));"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : vec2<f32> = vec2<f32>(bitcast<vec2<u32>>(x_30));"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromUnsigned) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %v2uint %v2uint_10_20
@@ -376,53 +360,49 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromUnsigned) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : vec2<f32> = vec2<f32>(x_30);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : vec2<f32> = vec2<f32>(x_30);"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_BadArgType) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertFToS %int %uint_10
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(
-      p->error(),
-      HasSubstr("operand for conversion to signed integer must be floating "
-                "point scalar or vector"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_FALSE(fe.EmitBody());
+    EXPECT_THAT(p->error(), HasSubstr("operand for conversion to signed integer must be floating "
+                                      "point scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_BadArgType) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertFToS %v2float %v2bool_t_f
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(
-      p->error(),
-      HasSubstr("operand for conversion to signed integer must be floating "
-                "point scalar or vector"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_FALSE(fe.EmitBody());
+    EXPECT_THAT(p->error(), HasSubstr("operand for conversion to signed integer must be floating "
+                                      "point scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToSigned) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %float %float_50
@@ -430,17 +410,16 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToSigned) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : i32 = i32(x_30);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 : i32 = i32(x_30);"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToUnsigned) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %float %float_50
@@ -448,17 +427,17 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToUnsigned) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : u32 = bitcast<u32>(i32(x_30));"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : u32 = bitcast<u32>(i32(x_30));"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToSigned) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %v2float %v2float_50_60
@@ -466,17 +445,17 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToSigned) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : vec2<i32> = vec2<i32>(x_30);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : vec2<i32> = vec2<i32>(x_30);"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToUnsigned) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %v2float %v2float_50_60
@@ -484,54 +463,49 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToUnsigned) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(
-      test::ToString(p->program(), ast_body),
-      HasSubstr("let x_1 : vec2<u32> = bitcast<vec2<u32>>(vec2<i32>(x_30));"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : vec2<u32> = bitcast<vec2<u32>>(vec2<i32>(x_30));"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_BadArgType) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertFToU %int %uint_10
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(
-      p->error(),
-      HasSubstr("operand for conversion to unsigned integer must be floating "
-                "point scalar or vector"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_FALSE(fe.EmitBody());
+    EXPECT_THAT(p->error(), HasSubstr("operand for conversion to unsigned integer must be floating "
+                                      "point scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_BadArgType) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertFToU %v2float %v2bool_t_f
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(
-      p->error(),
-      HasSubstr("operand for conversion to unsigned integer must be floating "
-                "point scalar or vector"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_FALSE(fe.EmitBody());
+    EXPECT_THAT(p->error(), HasSubstr("operand for conversion to unsigned integer must be floating "
+                                      "point scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToSigned_IsError) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %float %float_50
@@ -539,15 +513,15 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToSigned_IsError) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_FALSE(p->Parse());
-  EXPECT_FALSE(p->success());
-  EXPECT_THAT(p->error(), HasSubstr("Expected unsigned int scalar or vector "
-                                    "type as Result Type: ConvertFToU"));
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_FALSE(p->Parse());
+    EXPECT_FALSE(p->success());
+    EXPECT_THAT(p->error(), HasSubstr("Expected unsigned int scalar or vector "
+                                      "type as Result Type: ConvertFToU"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToUnsigned) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %float %float_50
@@ -555,17 +529,16 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToUnsigned) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : u32 = u32(x_30);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 : u32 = u32(x_30);"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToSigned_IsError) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %v2float %v2float_50_60
@@ -573,15 +546,15 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToSigned_IsError) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  EXPECT_FALSE(p->Parse());
-  EXPECT_FALSE(p->success());
-  EXPECT_THAT(p->error(), HasSubstr("Expected unsigned int scalar or vector "
-                                    "type as Result Type: ConvertFToU"));
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_FALSE(p->Parse());
+    EXPECT_FALSE(p->success());
+    EXPECT_THAT(p->error(), HasSubstr("Expected unsigned int scalar or vector "
+                                      "type as Result Type: ConvertFToU"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToUnsigned) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %v2float %v2float_50_60
@@ -589,18 +562,18 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToUnsigned) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : vec2<u32> = vec2<u32>(x_30);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : vec2<u32> = vec2<u32>(x_30);"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_HoistedValue) {
-  // From crbug.com/tint/804
-  const auto assembly = Preamble() + R"(
+    // From crbug.com/tint/804
+    const auto assembly = Preamble() + R"(
 
 %100 = OpFunction %void None %voidfn
 %10 = OpLabel
@@ -631,13 +604,12 @@ OpReturn
 OpFunctionEnd
 
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_82 : u32 = u32(x_600);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_82 : u32 = u32(x_600);"));
 }
 
 // TODO(dneto): OpSConvert // only if multiple widths

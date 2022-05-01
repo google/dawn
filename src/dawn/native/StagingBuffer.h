@@ -19,22 +19,22 @@
 
 namespace dawn::native {
 
-    class StagingBufferBase {
-      public:
-        explicit StagingBufferBase(size_t size);
-        virtual ~StagingBufferBase() = default;
+class StagingBufferBase {
+  public:
+    explicit StagingBufferBase(size_t size);
+    virtual ~StagingBufferBase() = default;
 
-        virtual MaybeError Initialize() = 0;
+    virtual MaybeError Initialize() = 0;
 
-        void* GetMappedPointer() const;
-        size_t GetSize() const;
+    void* GetMappedPointer() const;
+    size_t GetSize() const;
 
-      protected:
-        void* mMappedPointer = nullptr;
+  protected:
+    void* mMappedPointer = nullptr;
 
-      private:
-        const size_t mBufferSize;
-    };
+  private:
+    const size_t mBufferSize;
+};
 
 }  // namespace dawn::native
 

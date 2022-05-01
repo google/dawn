@@ -26,58 +26,58 @@
 namespace {
 
 void TintInternalCompilerErrorReporter(const tint::diag::List& diagnostics) {
-  FAIL() << diagnostics.str();
+    FAIL() << diagnostics.str();
 }
 
 struct Flags {
-  bool spirv_reader_dump_converted = false;
+    bool spirv_reader_dump_converted = false;
 
-  bool parse(int argc, char** argv) {
-    bool errored = false;
-    for (int i = 1; i < argc && !errored; i++) {
-      auto match = [&](std::string name) { return name == argv[i]; };
+    bool parse(int argc, char** argv) {
+        bool errored = false;
+        for (int i = 1; i < argc && !errored; i++) {
+            auto match = [&](std::string name) { return name == argv[i]; };
 
-      if (match("--dump-spirv")) {
-        spirv_reader_dump_converted = true;
-      } else {
-        std::cout << "Unknown flag '" << argv[i] << "'" << std::endl;
-        return false;
-      }
+            if (match("--dump-spirv")) {
+                spirv_reader_dump_converted = true;
+            } else {
+                std::cout << "Unknown flag '" << argv[i] << "'" << std::endl;
+                return false;
+            }
+        }
+        return true;
     }
-    return true;
-  }
 };
 
 }  // namespace
 
 // Entry point for tint unit tests
 int main(int argc, char** argv) {
-  testing::InitGoogleMock(&argc, argv);
+    testing::InitGoogleMock(&argc, argv);
 
 #if TINT_BUILD_WGSL_WRITER
-  tint::Program::printer = [](const tint::Program* program) {
-    auto result = tint::writer::wgsl::Generate(program, {});
-    if (!result.error.empty()) {
-      return "error: " + result.error;
-    }
-    return result.wgsl;
-  };
+    tint::Program::printer = [](const tint::Program* program) {
+        auto result = tint::writer::wgsl::Generate(program, {});
+        if (!result.error.empty()) {
+            return "error: " + result.error;
+        }
+        return result.wgsl;
+    };
 #endif  // TINT_BUILD_WGSL_WRITER
 
-  Flags flags;
-  if (!flags.parse(argc, argv)) {
-    return -1;
-  }
+    Flags flags;
+    if (!flags.parse(argc, argv)) {
+        return -1;
+    }
 
 #if TINT_BUILD_SPV_READER
-  if (flags.spirv_reader_dump_converted) {
-    tint::reader::spirv::test::DumpSuccessfullyConvertedSpirv();
-  }
+    if (flags.spirv_reader_dump_converted) {
+        tint::reader::spirv::test::DumpSuccessfullyConvertedSpirv();
+    }
 #endif  // TINT_BUILD_SPV_READER
 
-  tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
+    tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
 
-  auto res = RUN_ALL_TESTS();
+    auto res = RUN_ALL_TESTS();
 
-  return res;
+    return res;
 }

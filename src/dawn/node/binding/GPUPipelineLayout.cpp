@@ -20,19 +20,18 @@
 
 namespace wgpu::binding {
 
-    ////////////////////////////////////////////////////////////////////////////////
-    // wgpu::bindings::GPUPipelineLayout
-    ////////////////////////////////////////////////////////////////////////////////
-    GPUPipelineLayout::GPUPipelineLayout(wgpu::PipelineLayout layout) : layout_(std::move(layout)) {
-    }
+////////////////////////////////////////////////////////////////////////////////
+// wgpu::bindings::GPUPipelineLayout
+////////////////////////////////////////////////////////////////////////////////
+GPUPipelineLayout::GPUPipelineLayout(wgpu::PipelineLayout layout) : layout_(std::move(layout)) {}
 
-    std::variant<std::string, interop::UndefinedType> GPUPipelineLayout::getLabel(Napi::Env) {
-        UNIMPLEMENTED();
-    }
+std::variant<std::string, interop::UndefinedType> GPUPipelineLayout::getLabel(Napi::Env) {
+    UNIMPLEMENTED();
+}
 
-    void GPUPipelineLayout::setLabel(Napi::Env,
-                                     std::variant<std::string, interop::UndefinedType> value) {
-        UNIMPLEMENTED();
-    }
+void GPUPipelineLayout::setLabel(Napi::Env,
+                                 std::variant<std::string, interop::UndefinedType> value) {
+    UNIMPLEMENTED();
+}
 
 }  // namespace wgpu::binding

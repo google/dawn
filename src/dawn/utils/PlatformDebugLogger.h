@@ -17,12 +17,12 @@
 
 namespace utils {
 
-    class PlatformDebugLogger {
-      public:
-        virtual ~PlatformDebugLogger() = default;
-    };
+class PlatformDebugLogger {
+  public:
+    virtual ~PlatformDebugLogger() = default;
+};
 
-    PlatformDebugLogger* CreatePlatformDebugLogger();
+PlatformDebugLogger* CreatePlatformDebugLogger();
 
 }  // namespace utils
 

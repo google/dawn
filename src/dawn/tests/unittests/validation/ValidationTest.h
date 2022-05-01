@@ -18,11 +18,11 @@
 #include <memory>
 #include <string>
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
 #include "dawn/common/Log.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 // Argument helpers to allow macro overriding.
 #define UNIMPLEMENTED_MACRO(...) UNREACHABLE()
@@ -88,7 +88,7 @@
 #define EXPECT_DEPRECATION_WARNING(statement) EXPECT_DEPRECATION_WARNINGS(statement, 1)
 
 namespace utils {
-    class WireHelper;
+class WireHelper;
 }  // namespace utils
 
 void InitDawnValidationTestEnvironment(int argc, char** argv);

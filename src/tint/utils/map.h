@@ -28,11 +28,9 @@ namespace tint::utils {
 /// @return the map item value, or `if_missing` if the map does not contain the
 /// given key
 template <typename K, typename V, typename H, typename C, typename KV = K>
-V Lookup(const std::unordered_map<K, V, H, C>& map,
-         const KV& key,
-         const V& if_missing = {}) {
-  auto it = map.find(key);
-  return it != map.end() ? it->second : if_missing;
+V Lookup(const std::unordered_map<K, V, H, C>& map, const KV& key, const V& if_missing = {}) {
+    auto it = map.find(key);
+    return it != map.end() ? it->second : if_missing;
 }
 
 /// GetOrCreate is a utility function for lazily adding to an unordered map.
@@ -43,16 +41,14 @@ V Lookup(const std::unordered_map<K, V, H, C>& map,
 /// @param create a callable function-like object with the signature `V()`
 /// @return the value of the item with the given key, or the newly created item
 template <typename K, typename V, typename H, typename C, typename CREATE>
-V GetOrCreate(std::unordered_map<K, V, H, C>& map,
-              const K& key,
-              CREATE&& create) {
-  auto it = map.find(key);
-  if (it != map.end()) {
-    return it->second;
-  }
-  V value = create();
-  map.emplace(key, value);
-  return value;
+V GetOrCreate(std::unordered_map<K, V, H, C>& map, const K& key, CREATE&& create) {
+    auto it = map.find(key);
+    if (it != map.end()) {
+        return it->second;
+    }
+    V value = create();
+    map.emplace(key, value);
+    return value;
 }
 
 }  // namespace tint::utils

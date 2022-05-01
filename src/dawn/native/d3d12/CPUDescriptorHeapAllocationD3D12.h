@@ -21,26 +21,26 @@
 
 namespace dawn::native::d3d12 {
 
-    // Wrapper for a handle into a CPU-only descriptor heap.
-    class CPUDescriptorHeapAllocation {
-      public:
-        CPUDescriptorHeapAllocation() = default;
-        CPUDescriptorHeapAllocation(D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor, uint32_t heapIndex);
+// Wrapper for a handle into a CPU-only descriptor heap.
+class CPUDescriptorHeapAllocation {
+  public:
+    CPUDescriptorHeapAllocation() = default;
+    CPUDescriptorHeapAllocation(D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor, uint32_t heapIndex);
 
-        D3D12_CPU_DESCRIPTOR_HANDLE GetBaseDescriptor() const;
+    D3D12_CPU_DESCRIPTOR_HANDLE GetBaseDescriptor() const;
 
-        D3D12_CPU_DESCRIPTOR_HANDLE OffsetFrom(uint32_t sizeIncrementInBytes,
-                                               uint32_t offsetInDescriptorCount) const;
-        uint32_t GetHeapIndex() const;
+    D3D12_CPU_DESCRIPTOR_HANDLE OffsetFrom(uint32_t sizeIncrementInBytes,
+                                           uint32_t offsetInDescriptorCount) const;
+    uint32_t GetHeapIndex() const;
 
-        bool IsValid() const;
+    bool IsValid() const;
 
-        void Invalidate();
+    void Invalidate();
 
-      private:
-        D3D12_CPU_DESCRIPTOR_HANDLE mBaseDescriptor = {0};
-        uint32_t mHeapIndex = -1;
-    };
+  private:
+    D3D12_CPU_DESCRIPTOR_HANDLE mBaseDescriptor = {0};
+    uint32_t mHeapIndex = -1;
+};
 
 }  // namespace dawn::native::d3d12
 

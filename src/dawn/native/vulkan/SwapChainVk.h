@@ -23,75 +23,75 @@
 
 namespace dawn::native::vulkan {
 
-    class Device;
-    class Texture;
-    struct VulkanSurfaceInfo;
+class Device;
+class Texture;
+struct VulkanSurfaceInfo;
 
-    class OldSwapChain : public OldSwapChainBase {
-      public:
-        static Ref<OldSwapChain> Create(Device* device, const SwapChainDescriptor* descriptor);
+class OldSwapChain : public OldSwapChainBase {
+  public:
+    static Ref<OldSwapChain> Create(Device* device, const SwapChainDescriptor* descriptor);
 
-      protected:
-        OldSwapChain(Device* device, const SwapChainDescriptor* descriptor);
-        ~OldSwapChain() override;
+  protected:
+    OldSwapChain(Device* device, const SwapChainDescriptor* descriptor);
+    ~OldSwapChain() override;
 
-        TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
-        MaybeError OnBeforePresent(TextureViewBase* texture) override;
+    TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
+    MaybeError OnBeforePresent(TextureViewBase* texture) override;
 
-      private:
-        wgpu::TextureUsage mTextureUsage;
+  private:
+    wgpu::TextureUsage mTextureUsage;
+};
+
+class SwapChain : public NewSwapChainBase {
+  public:
+    static ResultOrError<Ref<SwapChain>> Create(Device* device,
+                                                Surface* surface,
+                                                NewSwapChainBase* previousSwapChain,
+                                                const SwapChainDescriptor* descriptor);
+    ~SwapChain() override;
+
+  private:
+    using NewSwapChainBase::NewSwapChainBase;
+    MaybeError Initialize(NewSwapChainBase* previousSwapChain);
+    void DestroyImpl() override;
+
+    struct Config {
+        // Information that's passed to vulkan swapchain creation.
+        VkPresentModeKHR presentMode;
+        VkExtent2D extent;
+        VkImageUsageFlags usage;
+        VkFormat format;
+        VkColorSpaceKHR colorSpace;
+        uint32_t targetImageCount;
+        VkSurfaceTransformFlagBitsKHR transform;
+        VkCompositeAlphaFlagBitsKHR alphaMode;
+
+        // Redundant information but as WebGPU enums to create the wgpu::Texture that
+        // encapsulates the native swapchain texture.
+        wgpu::TextureUsage wgpuUsage;
+        wgpu::TextureFormat wgpuFormat;
+
+        // Information about the blit workarounds we need to do (if any)
+        bool needsBlit = false;
     };
+    ResultOrError<Config> ChooseConfig(const VulkanSurfaceInfo& surfaceInfo) const;
+    ResultOrError<Ref<TextureViewBase>> GetCurrentTextureViewInternal(bool isReentrant = false);
 
-    class SwapChain : public NewSwapChainBase {
-      public:
-        static ResultOrError<Ref<SwapChain>> Create(Device* device,
-                                                    Surface* surface,
-                                                    NewSwapChainBase* previousSwapChain,
-                                                    const SwapChainDescriptor* descriptor);
-        ~SwapChain() override;
+    // NewSwapChainBase implementation
+    MaybeError PresentImpl() override;
+    ResultOrError<Ref<TextureViewBase>> GetCurrentTextureViewImpl() override;
+    void DetachFromSurfaceImpl() override;
 
-      private:
-        using NewSwapChainBase::NewSwapChainBase;
-        MaybeError Initialize(NewSwapChainBase* previousSwapChain);
-        void DestroyImpl() override;
+    Config mConfig;
 
-        struct Config {
-            // Information that's passed to vulkan swapchain creation.
-            VkPresentModeKHR presentMode;
-            VkExtent2D extent;
-            VkImageUsageFlags usage;
-            VkFormat format;
-            VkColorSpaceKHR colorSpace;
-            uint32_t targetImageCount;
-            VkSurfaceTransformFlagBitsKHR transform;
-            VkCompositeAlphaFlagBitsKHR alphaMode;
+    VkSurfaceKHR mVkSurface = VK_NULL_HANDLE;
+    VkSwapchainKHR mSwapChain = VK_NULL_HANDLE;
+    std::vector<VkImage> mSwapChainImages;
+    uint32_t mLastImageIndex = 0;
 
-            // Redundant information but as WebGPU enums to create the wgpu::Texture that
-            // encapsulates the native swapchain texture.
-            wgpu::TextureUsage wgpuUsage;
-            wgpu::TextureFormat wgpuFormat;
-
-            // Information about the blit workarounds we need to do (if any)
-            bool needsBlit = false;
-        };
-        ResultOrError<Config> ChooseConfig(const VulkanSurfaceInfo& surfaceInfo) const;
-        ResultOrError<Ref<TextureViewBase>> GetCurrentTextureViewInternal(bool isReentrant = false);
-
-        // NewSwapChainBase implementation
-        MaybeError PresentImpl() override;
-        ResultOrError<Ref<TextureViewBase>> GetCurrentTextureViewImpl() override;
-        void DetachFromSurfaceImpl() override;
-
-        Config mConfig;
-
-        VkSurfaceKHR mVkSurface = VK_NULL_HANDLE;
-        VkSwapchainKHR mSwapChain = VK_NULL_HANDLE;
-        std::vector<VkImage> mSwapChainImages;
-        uint32_t mLastImageIndex = 0;
-
-        Ref<Texture> mBlitTexture;
-        Ref<Texture> mTexture;
-    };
+    Ref<Texture> mBlitTexture;
+    Ref<Texture> mTexture;
+};
 
 }  // namespace dawn::native::vulkan
 

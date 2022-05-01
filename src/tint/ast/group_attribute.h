@@ -23,25 +23,25 @@ namespace tint::ast {
 
 /// A group attribute
 class GroupAttribute final : public Castable<GroupAttribute, Attribute> {
- public:
-  /// constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param value the group value
-  GroupAttribute(ProgramID pid, const Source& src, uint32_t value);
-  ~GroupAttribute() override;
+  public:
+    /// constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param value the group value
+    GroupAttribute(ProgramID pid, const Source& src, uint32_t value);
+    ~GroupAttribute() override;
 
-  /// @returns the WGSL name for the attribute
-  std::string Name() const override;
+    /// @returns the WGSL name for the attribute
+    std::string Name() const override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const GroupAttribute* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const GroupAttribute* Clone(CloneContext* ctx) const override;
 
-  /// The group value
-  const uint32_t value;
+    /// The group value
+    const uint32_t value;
 };
 
 }  // namespace tint::ast

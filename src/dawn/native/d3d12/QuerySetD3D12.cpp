@@ -22,56 +22,56 @@
 
 namespace dawn::native::d3d12 {
 
-    namespace {
-        D3D12_QUERY_HEAP_TYPE D3D12QueryHeapType(wgpu::QueryType type) {
-            switch (type) {
-                case wgpu::QueryType::Occlusion:
-                    return D3D12_QUERY_HEAP_TYPE_OCCLUSION;
-                case wgpu::QueryType::PipelineStatistics:
-                    return D3D12_QUERY_HEAP_TYPE_PIPELINE_STATISTICS;
-                case wgpu::QueryType::Timestamp:
-                    return D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
-            }
-        }
-    }  // anonymous namespace
-
-    // static
-    ResultOrError<Ref<QuerySet>> QuerySet::Create(Device* device,
-                                                  const QuerySetDescriptor* descriptor) {
-        Ref<QuerySet> querySet = AcquireRef(new QuerySet(device, descriptor));
-        DAWN_TRY(querySet->Initialize());
-        return querySet;
+namespace {
+D3D12_QUERY_HEAP_TYPE D3D12QueryHeapType(wgpu::QueryType type) {
+    switch (type) {
+        case wgpu::QueryType::Occlusion:
+            return D3D12_QUERY_HEAP_TYPE_OCCLUSION;
+        case wgpu::QueryType::PipelineStatistics:
+            return D3D12_QUERY_HEAP_TYPE_PIPELINE_STATISTICS;
+        case wgpu::QueryType::Timestamp:
+            return D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
     }
+}
+}  // anonymous namespace
 
-    MaybeError QuerySet::Initialize() {
-        D3D12_QUERY_HEAP_DESC queryHeapDesc = {};
-        queryHeapDesc.Type = D3D12QueryHeapType(GetQueryType());
-        queryHeapDesc.Count = std::max(GetQueryCount(), uint32_t(1u));
+// static
+ResultOrError<Ref<QuerySet>> QuerySet::Create(Device* device,
+                                              const QuerySetDescriptor* descriptor) {
+    Ref<QuerySet> querySet = AcquireRef(new QuerySet(device, descriptor));
+    DAWN_TRY(querySet->Initialize());
+    return querySet;
+}
 
-        ID3D12Device* d3d12Device = ToBackend(GetDevice())->GetD3D12Device();
-        DAWN_TRY(CheckOutOfMemoryHRESULT(
-            d3d12Device->CreateQueryHeap(&queryHeapDesc, IID_PPV_ARGS(&mQueryHeap)),
-            "ID3D12Device::CreateQueryHeap"));
+MaybeError QuerySet::Initialize() {
+    D3D12_QUERY_HEAP_DESC queryHeapDesc = {};
+    queryHeapDesc.Type = D3D12QueryHeapType(GetQueryType());
+    queryHeapDesc.Count = std::max(GetQueryCount(), uint32_t(1u));
 
-        SetLabelImpl();
+    ID3D12Device* d3d12Device = ToBackend(GetDevice())->GetD3D12Device();
+    DAWN_TRY(CheckOutOfMemoryHRESULT(
+        d3d12Device->CreateQueryHeap(&queryHeapDesc, IID_PPV_ARGS(&mQueryHeap)),
+        "ID3D12Device::CreateQueryHeap"));
 
-        return {};
-    }
+    SetLabelImpl();
 
-    ID3D12QueryHeap* QuerySet::GetQueryHeap() const {
-        return mQueryHeap.Get();
-    }
+    return {};
+}
 
-    QuerySet::~QuerySet() = default;
+ID3D12QueryHeap* QuerySet::GetQueryHeap() const {
+    return mQueryHeap.Get();
+}
 
-    void QuerySet::DestroyImpl() {
-        QuerySetBase::DestroyImpl();
-        ToBackend(GetDevice())->ReferenceUntilUnused(mQueryHeap);
-        mQueryHeap = nullptr;
-    }
+QuerySet::~QuerySet() = default;
 
-    void QuerySet::SetLabelImpl() {
-        SetDebugName(ToBackend(GetDevice()), mQueryHeap.Get(), "Dawn_QuerySet", GetLabel());
-    }
+void QuerySet::DestroyImpl() {
+    QuerySetBase::DestroyImpl();
+    ToBackend(GetDevice())->ReferenceUntilUnused(mQueryHeap);
+    mQueryHeap = nullptr;
+}
+
+void QuerySet::SetLabelImpl() {
+    SetDebugName(ToBackend(GetDevice()), mQueryHeap.Get(), "Dawn_QuerySet", GetLabel());
+}
 
 }  // namespace dawn::native::d3d12

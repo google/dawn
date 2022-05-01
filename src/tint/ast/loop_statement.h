@@ -21,31 +21,31 @@ namespace tint::ast {
 
 /// A loop statement
 class LoopStatement final : public Castable<LoopStatement, Statement> {
- public:
-  /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the loop statement source
-  /// @param body the body statements
-  /// @param continuing the continuing statements
-  LoopStatement(ProgramID program_id,
-                const Source& source,
-                const BlockStatement* body,
-                const BlockStatement* continuing);
-  /// Move constructor
-  LoopStatement(LoopStatement&&);
-  ~LoopStatement() override;
+  public:
+    /// Constructor
+    /// @param program_id the identifier of the program that owns this node
+    /// @param source the loop statement source
+    /// @param body the body statements
+    /// @param continuing the continuing statements
+    LoopStatement(ProgramID program_id,
+                  const Source& source,
+                  const BlockStatement* body,
+                  const BlockStatement* continuing);
+    /// Move constructor
+    LoopStatement(LoopStatement&&);
+    ~LoopStatement() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const LoopStatement* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const LoopStatement* Clone(CloneContext* ctx) const override;
 
-  /// The loop body
-  const BlockStatement* const body;
+    /// The loop body
+    const BlockStatement* const body;
 
-  /// The continuing statements
-  const BlockStatement* const continuing;
+    /// The continuing statements
+    const BlockStatement* const continuing;
 };
 
 }  // namespace tint::ast

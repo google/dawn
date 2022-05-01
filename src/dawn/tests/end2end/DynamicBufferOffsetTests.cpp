@@ -17,8 +17,8 @@
 #include <string>
 #include <vector>
 
-#include "dawn/tests/DawnTest.h"
 #include "dawn/common/Math.h"
+#include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
@@ -404,11 +404,11 @@ TEST_P(DynamicBufferOffsetTests, UpdateDynamicOffsetsMultipleTimesComputePipelin
 }
 
 namespace {
-    using ReadBufferUsage = wgpu::BufferUsage;
-    using OOBRead = bool;
-    using OOBWrite = bool;
+using ReadBufferUsage = wgpu::BufferUsage;
+using OOBRead = bool;
+using OOBWrite = bool;
 
-    DAWN_TEST_PARAM_STRUCT(ClampedOOBDynamicBufferOffsetParams, ReadBufferUsage, OOBRead, OOBWrite);
+DAWN_TEST_PARAM_STRUCT(ClampedOOBDynamicBufferOffsetParams, ReadBufferUsage, OOBRead, OOBWrite);
 }  // anonymous namespace
 
 class ClampedOOBDynamicBufferOffsetTests

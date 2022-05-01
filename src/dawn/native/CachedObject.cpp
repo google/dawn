@@ -19,35 +19,35 @@
 
 namespace dawn::native {
 
-    bool CachedObject::IsCachedReference() const {
-        return mIsCachedReference;
-    }
+bool CachedObject::IsCachedReference() const {
+    return mIsCachedReference;
+}
 
-    void CachedObject::SetIsCachedReference() {
-        mIsCachedReference = true;
-    }
+void CachedObject::SetIsCachedReference() {
+    mIsCachedReference = true;
+}
 
-    size_t CachedObject::HashFunc::operator()(const CachedObject* obj) const {
-        return obj->GetContentHash();
-    }
+size_t CachedObject::HashFunc::operator()(const CachedObject* obj) const {
+    return obj->GetContentHash();
+}
 
-    size_t CachedObject::GetContentHash() const {
-        ASSERT(mIsContentHashInitialized);
-        return mContentHash;
-    }
+size_t CachedObject::GetContentHash() const {
+    ASSERT(mIsContentHashInitialized);
+    return mContentHash;
+}
 
-    void CachedObject::SetContentHash(size_t contentHash) {
-        ASSERT(!mIsContentHashInitialized);
-        mContentHash = contentHash;
-        mIsContentHashInitialized = true;
-    }
+void CachedObject::SetContentHash(size_t contentHash) {
+    ASSERT(!mIsContentHashInitialized);
+    mContentHash = contentHash;
+    mIsContentHashInitialized = true;
+}
 
-    const CacheKey& CachedObject::GetCacheKey() const {
-        return mCacheKey;
-    }
+const CacheKey& CachedObject::GetCacheKey() const {
+    return mCacheKey;
+}
 
-    CacheKey* CachedObject::GetCacheKey() {
-        return &mCacheKey;
-    }
+CacheKey* CachedObject::GetCacheKey() {
+    return &mCacheKey;
+}
 
 }  // namespace dawn::native

@@ -20,21 +20,21 @@
 #include "dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native::opengl {
-    struct OpenGLFunctions;
+struct OpenGLFunctions;
 
-    GLuint ToOpenGLCompareFunction(wgpu::CompareFunction compareFunction);
-    GLint GetStencilMaskFromStencilFormat(wgpu::TextureFormat depthStencilFormat);
-    void CopyImageSubData(const OpenGLFunctions& gl,
-                          Aspect srcAspects,
-                          GLuint srcHandle,
-                          GLenum srcTarget,
-                          GLint srcLevel,
-                          const Origin3D& src,
-                          GLuint dstHandle,
-                          GLenum dstTarget,
-                          GLint dstLevel,
-                          const Origin3D& dst,
-                          const Extent3D& size);
+GLuint ToOpenGLCompareFunction(wgpu::CompareFunction compareFunction);
+GLint GetStencilMaskFromStencilFormat(wgpu::TextureFormat depthStencilFormat);
+void CopyImageSubData(const OpenGLFunctions& gl,
+                      Aspect srcAspects,
+                      GLuint srcHandle,
+                      GLenum srcTarget,
+                      GLint srcLevel,
+                      const Origin3D& src,
+                      GLuint dstHandle,
+                      GLenum dstTarget,
+                      GLint dstLevel,
+                      const Origin3D& dst,
+                      const Extent3D& size);
 
 }  // namespace dawn::native::opengl
 

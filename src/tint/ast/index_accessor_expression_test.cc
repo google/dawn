@@ -21,68 +21,68 @@ namespace {
 using IndexAccessorExpressionTest = TestHelper;
 
 TEST_F(IndexAccessorExpressionTest, Create) {
-  auto* obj = Expr("obj");
-  auto* idx = Expr("idx");
+    auto* obj = Expr("obj");
+    auto* idx = Expr("idx");
 
-  auto* exp = IndexAccessor(obj, idx);
-  ASSERT_EQ(exp->object, obj);
-  ASSERT_EQ(exp->index, idx);
+    auto* exp = IndexAccessor(obj, idx);
+    ASSERT_EQ(exp->object, obj);
+    ASSERT_EQ(exp->index, idx);
 }
 
 TEST_F(IndexAccessorExpressionTest, CreateWithSource) {
-  auto* obj = Expr("obj");
-  auto* idx = Expr("idx");
+    auto* obj = Expr("obj");
+    auto* idx = Expr("idx");
 
-  auto* exp = IndexAccessor(Source{{20, 2}}, obj, idx);
-  auto src = exp->source;
-  EXPECT_EQ(src.range.begin.line, 20u);
-  EXPECT_EQ(src.range.begin.column, 2u);
+    auto* exp = IndexAccessor(Source{{20, 2}}, obj, idx);
+    auto src = exp->source;
+    EXPECT_EQ(src.range.begin.line, 20u);
+    EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(IndexAccessorExpressionTest, IsIndexAccessor) {
-  auto* obj = Expr("obj");
-  auto* idx = Expr("idx");
+    auto* obj = Expr("obj");
+    auto* idx = Expr("idx");
 
-  auto* exp = IndexAccessor(obj, idx);
-  EXPECT_TRUE(exp->Is<IndexAccessorExpression>());
+    auto* exp = IndexAccessor(obj, idx);
+    EXPECT_TRUE(exp->Is<IndexAccessorExpression>());
 }
 
 TEST_F(IndexAccessorExpressionTest, Assert_Null_Array) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b;
-        b.IndexAccessor(nullptr, b.Expr("idx"));
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.IndexAccessor(nullptr, b.Expr("idx"));
+        },
+        "internal compiler error");
 }
 
 TEST_F(IndexAccessorExpressionTest, Assert_Null_Index) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b;
-        b.IndexAccessor(b.Expr("arr"), nullptr);
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.IndexAccessor(b.Expr("arr"), nullptr);
+        },
+        "internal compiler error");
 }
 
 TEST_F(IndexAccessorExpressionTest, Assert_DifferentProgramID_Array) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b1;
-        ProgramBuilder b2;
-        b1.IndexAccessor(b2.Expr("arr"), b1.Expr("idx"));
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b1;
+            ProgramBuilder b2;
+            b1.IndexAccessor(b2.Expr("arr"), b1.Expr("idx"));
+        },
+        "internal compiler error");
 }
 
 TEST_F(IndexAccessorExpressionTest, Assert_DifferentProgramID_Index) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b1;
-        ProgramBuilder b2;
-        b1.IndexAccessor(b1.Expr("arr"), b2.Expr("idx"));
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b1;
+            ProgramBuilder b2;
+            b1.IndexAccessor(b1.Expr("arr"), b2.Expr("idx"));
+        },
+        "internal compiler error");
 }
 
 }  // namespace

@@ -21,7 +21,7 @@
 
 // Make our own Base - Backend object pair, reusing the AdapterBase name
 namespace dawn::native {
-    class AdapterBase : public RefCounted {};
+class AdapterBase : public RefCounted {};
 
 class MyAdapter : public AdapterBase {};
 

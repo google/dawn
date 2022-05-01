@@ -23,8 +23,8 @@ namespace {
 using StageAttributeTest = TestHelper;
 
 TEST_F(StageAttributeTest, Creation_1param) {
-  auto* d = create<StageAttribute>(PipelineStage::kFragment);
-  EXPECT_EQ(d->stage, PipelineStage::kFragment);
+    auto* d = create<StageAttribute>(PipelineStage::kFragment);
+    EXPECT_EQ(d->stage, PipelineStage::kFragment);
 }
 
 }  // namespace

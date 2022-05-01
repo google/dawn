@@ -33,7 +33,7 @@ Statement::Statement(const ast::Statement* declaration,
 Statement::~Statement() = default;
 
 const BlockStatement* Statement::Block() const {
-  return FindFirstParent<BlockStatement>();
+    return FindFirstParent<BlockStatement>();
 }
 
 CompoundStatement::CompoundStatement(const ast::Statement* declaration,

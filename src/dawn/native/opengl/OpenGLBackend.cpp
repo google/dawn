@@ -23,43 +23,39 @@
 
 namespace dawn::native::opengl {
 
-    AdapterDiscoveryOptions::AdapterDiscoveryOptions()
-        : AdapterDiscoveryOptionsBase(WGPUBackendType_OpenGL) {
-    }
+AdapterDiscoveryOptions::AdapterDiscoveryOptions()
+    : AdapterDiscoveryOptionsBase(WGPUBackendType_OpenGL) {}
 
-    AdapterDiscoveryOptionsES::AdapterDiscoveryOptionsES()
-        : AdapterDiscoveryOptionsBase(WGPUBackendType_OpenGLES) {
-    }
+AdapterDiscoveryOptionsES::AdapterDiscoveryOptionsES()
+    : AdapterDiscoveryOptionsBase(WGPUBackendType_OpenGLES) {}
 
-    DawnSwapChainImplementation CreateNativeSwapChainImpl(WGPUDevice device,
-                                                          PresentCallback present,
-                                                          void* presentUserdata) {
-        Device* backendDevice = ToBackend(FromAPI(device));
+DawnSwapChainImplementation CreateNativeSwapChainImpl(WGPUDevice device,
+                                                      PresentCallback present,
+                                                      void* presentUserdata) {
+    Device* backendDevice = ToBackend(FromAPI(device));
 
-        DawnSwapChainImplementation impl;
-        impl = CreateSwapChainImplementation(
-            new NativeSwapChainImpl(backendDevice, present, presentUserdata));
-        impl.textureUsage = WGPUTextureUsage_Present;
+    DawnSwapChainImplementation impl;
+    impl = CreateSwapChainImplementation(
+        new NativeSwapChainImpl(backendDevice, present, presentUserdata));
+    impl.textureUsage = WGPUTextureUsage_Present;
 
-        return impl;
-    }
+    return impl;
+}
 
-    WGPUTextureFormat GetNativeSwapChainPreferredFormat(
-        const DawnSwapChainImplementation* swapChain) {
-        NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);
-        return static_cast<WGPUTextureFormat>(impl->GetPreferredFormat());
-    }
+WGPUTextureFormat GetNativeSwapChainPreferredFormat(const DawnSwapChainImplementation* swapChain) {
+    NativeSwapChainImpl* impl = reinterpret_cast<NativeSwapChainImpl*>(swapChain->userData);
+    return static_cast<WGPUTextureFormat>(impl->GetPreferredFormat());
+}
 
-    ExternalImageDescriptorEGLImage::ExternalImageDescriptorEGLImage()
-        : ExternalImageDescriptor(ExternalImageType::EGLImage) {
-    }
+ExternalImageDescriptorEGLImage::ExternalImageDescriptorEGLImage()
+    : ExternalImageDescriptor(ExternalImageType::EGLImage) {}
 
-    WGPUTexture WrapExternalEGLImage(WGPUDevice device,
-                                     const ExternalImageDescriptorEGLImage* descriptor) {
-        Device* backendDevice = ToBackend(FromAPI(device));
-        TextureBase* texture =
-            backendDevice->CreateTextureWrappingEGLImage(descriptor, descriptor->image);
-        return ToAPI(texture);
-    }
+WGPUTexture WrapExternalEGLImage(WGPUDevice device,
+                                 const ExternalImageDescriptorEGLImage* descriptor) {
+    Device* backendDevice = ToBackend(FromAPI(device));
+    TextureBase* texture =
+        backendDevice->CreateTextureWrappingEGLImage(descriptor, descriptor->image);
+    return ToAPI(texture);
+}
 
 }  // namespace dawn::native::opengl

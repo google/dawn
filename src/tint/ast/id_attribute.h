@@ -23,25 +23,25 @@ namespace tint::ast {
 
 /// An id attribute for pipeline-overridable constants
 class IdAttribute final : public Castable<IdAttribute, Attribute> {
- public:
-  /// Create an id attribute.
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param val the numeric id value
-  IdAttribute(ProgramID pid, const Source& src, uint32_t val);
-  ~IdAttribute() override;
+  public:
+    /// Create an id attribute.
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param val the numeric id value
+    IdAttribute(ProgramID pid, const Source& src, uint32_t val);
+    ~IdAttribute() override;
 
-  /// @returns the WGSL name for the attribute
-  std::string Name() const override;
+    /// @returns the WGSL name for the attribute
+    std::string Name() const override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const IdAttribute* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const IdAttribute* Clone(CloneContext* ctx) const override;
 
-  /// The id value
-  const uint32_t value;
+    /// The id value
+    const uint32_t value;
 };
 
 }  // namespace tint::ast

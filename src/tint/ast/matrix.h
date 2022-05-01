@@ -23,44 +23,40 @@ namespace tint::ast {
 
 /// A matrix type
 class Matrix final : public Castable<Matrix, Type> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param subtype the declared type of the matrix components. May be null for
-  ///        matrix constructors, where the element type will be inferred from
-  ///        the constructor arguments
-  /// @param rows the number of rows in the matrix
-  /// @param columns the number of columns in the matrix
-  Matrix(ProgramID pid,
-         const Source& src,
-         const Type* subtype,
-         uint32_t rows,
-         uint32_t columns);
-  /// Move constructor
-  Matrix(Matrix&&);
-  ~Matrix() override;
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param subtype the declared type of the matrix components. May be null for
+    ///        matrix constructors, where the element type will be inferred from
+    ///        the constructor arguments
+    /// @param rows the number of rows in the matrix
+    /// @param columns the number of columns in the matrix
+    Matrix(ProgramID pid, const Source& src, const Type* subtype, uint32_t rows, uint32_t columns);
+    /// Move constructor
+    Matrix(Matrix&&);
+    ~Matrix() override;
 
-  /// @param symbols the program's symbol table
-  /// @returns the name for this type that closely resembles how it would be
-  /// declared in WGSL.
-  std::string FriendlyName(const SymbolTable& symbols) const override;
+    /// @param symbols the program's symbol table
+    /// @returns the name for this type that closely resembles how it would be
+    /// declared in WGSL.
+    std::string FriendlyName(const SymbolTable& symbols) const override;
 
-  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned type
-  const Matrix* Clone(CloneContext* ctx) const override;
+    /// Clones this type and all transitive types using the `CloneContext` `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned type
+    const Matrix* Clone(CloneContext* ctx) const override;
 
-  /// The declared type of the matrix components. May be null for matrix
-  /// constructors, where the element type will be inferred from the constructor
-  /// arguments
-  const Type* const type;
+    /// The declared type of the matrix components. May be null for matrix
+    /// constructors, where the element type will be inferred from the constructor
+    /// arguments
+    const Type* const type;
 
-  /// The number of rows in the matrix
-  const uint32_t rows;
+    /// The number of rows in the matrix
+    const uint32_t rows;
 
-  /// The number of columns in the matrix
-  const uint32_t columns;
+    /// The number of columns in the matrix
+    const uint32_t columns;
 };
 
 }  // namespace tint::ast

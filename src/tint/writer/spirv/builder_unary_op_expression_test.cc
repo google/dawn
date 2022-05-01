@@ -21,95 +21,92 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, UnaryOp_Negation_Integer) {
-  auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(1));
-  WrapInFunction(expr);
+    auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(1));
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+    b.push_function(Function{});
+    EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
 %3 = OpConstant %2 1
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%1 = OpSNegate %2 %3
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%1 = OpSNegate %2 %3
 )");
 }
 
 TEST_F(BuilderTest, UnaryOp_Negation_Float) {
-  auto* expr =
-      create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(1.f));
-  WrapInFunction(expr);
+    auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(1.f));
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+    b.push_function(Function{});
+    EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %3 = OpConstant %2 1
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%1 = OpFNegate %2 %3
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%1 = OpFNegate %2 %3
 )");
 }
 
 TEST_F(BuilderTest, UnaryOp_Complement) {
-  auto* expr =
-      create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement, Expr(1));
-  WrapInFunction(expr);
+    auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement, Expr(1));
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
+    b.push_function(Function{});
+    EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
 %3 = OpConstant %2 1
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%1 = OpNot %2 %3
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%1 = OpNot %2 %3
 )");
 }
 
 TEST_F(BuilderTest, UnaryOp_Not) {
-  auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, Expr(false));
-  WrapInFunction(expr);
+    auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, Expr(false));
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
+    b.push_function(Function{});
+    EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
 %3 = OpConstantFalse %2
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%1 = OpLogicalNot %2 %3
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%1 = OpLogicalNot %2 %3
 )");
 }
 
 TEST_F(BuilderTest, UnaryOp_LoadRequired) {
-  auto* var = Var("param", ty.vec3<f32>());
+    auto* var = Var("param", ty.vec3<f32>());
 
-  auto* expr =
-      create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr("param"));
-  WrapInFunction(var, expr);
+    auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr("param"));
+    WrapInFunction(var, expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 6u) << b.error();
-  ASSERT_FALSE(b.has_error()) << b.error();
+    b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
+    EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 6u) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Function %3
 %5 = OpConstantNull %3
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%1 = OpVariable %2 Function %5
+    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+              R"(%1 = OpVariable %2 Function %5
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%7 = OpLoad %3 %1
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%7 = OpLoad %3 %1
 %6 = OpFNegate %3 %7
 )");
 }

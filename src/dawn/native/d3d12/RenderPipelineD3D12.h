@@ -22,44 +22,44 @@
 
 namespace dawn::native::d3d12 {
 
-    class Device;
+class Device;
 
-    class RenderPipeline final : public RenderPipelineBase {
-      public:
-        static Ref<RenderPipeline> CreateUninitialized(Device* device,
-                                                       const RenderPipelineDescriptor* descriptor);
-        static void InitializeAsync(Ref<RenderPipelineBase> renderPipeline,
-                                    WGPUCreateRenderPipelineAsyncCallback callback,
-                                    void* userdata);
-        RenderPipeline() = delete;
+class RenderPipeline final : public RenderPipelineBase {
+  public:
+    static Ref<RenderPipeline> CreateUninitialized(Device* device,
+                                                   const RenderPipelineDescriptor* descriptor);
+    static void InitializeAsync(Ref<RenderPipelineBase> renderPipeline,
+                                WGPUCreateRenderPipelineAsyncCallback callback,
+                                void* userdata);
+    RenderPipeline() = delete;
 
-        MaybeError Initialize() override;
+    MaybeError Initialize() override;
 
-        D3D12_PRIMITIVE_TOPOLOGY GetD3D12PrimitiveTopology() const;
-        ID3D12PipelineState* GetPipelineState() const;
+    D3D12_PRIMITIVE_TOPOLOGY GetD3D12PrimitiveTopology() const;
+    ID3D12PipelineState* GetPipelineState() const;
 
-        bool UsesVertexOrInstanceIndex() const;
+    bool UsesVertexOrInstanceIndex() const;
 
-        // Dawn API
-        void SetLabelImpl() override;
+    // Dawn API
+    void SetLabelImpl() override;
 
-        ComPtr<ID3D12CommandSignature> GetDrawIndirectCommandSignature();
+    ComPtr<ID3D12CommandSignature> GetDrawIndirectCommandSignature();
 
-        ComPtr<ID3D12CommandSignature> GetDrawIndexedIndirectCommandSignature();
+    ComPtr<ID3D12CommandSignature> GetDrawIndexedIndirectCommandSignature();
 
-      private:
-        ~RenderPipeline() override;
+  private:
+    ~RenderPipeline() override;
 
-        void DestroyImpl() override;
+    void DestroyImpl() override;
 
-        using RenderPipelineBase::RenderPipelineBase;
-        D3D12_INPUT_LAYOUT_DESC ComputeInputLayout(
-            std::array<D3D12_INPUT_ELEMENT_DESC, kMaxVertexAttributes>* inputElementDescriptors);
+    using RenderPipelineBase::RenderPipelineBase;
+    D3D12_INPUT_LAYOUT_DESC ComputeInputLayout(
+        std::array<D3D12_INPUT_ELEMENT_DESC, kMaxVertexAttributes>* inputElementDescriptors);
 
-        D3D12_PRIMITIVE_TOPOLOGY mD3d12PrimitiveTopology;
-        ComPtr<ID3D12PipelineState> mPipelineState;
-        bool mUsesVertexOrInstanceIndex;
-    };
+    D3D12_PRIMITIVE_TOPOLOGY mD3d12PrimitiveTopology;
+    ComPtr<ID3D12PipelineState> mPipelineState;
+    bool mUsesVertexOrInstanceIndex;
+};
 
 }  // namespace dawn::native::d3d12
 

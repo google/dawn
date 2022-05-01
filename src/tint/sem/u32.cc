@@ -27,27 +27,27 @@ U32::~U32() = default;
 U32::U32(U32&&) = default;
 
 size_t U32::Hash() const {
-  return static_cast<size_t>(TypeInfo::Of<U32>().full_hashcode);
+    return static_cast<size_t>(TypeInfo::Of<U32>().full_hashcode);
 }
 
 bool U32::Equals(const Type& other) const {
-  return other.Is<U32>();
+    return other.Is<U32>();
 }
 
 std::string U32::FriendlyName(const SymbolTable&) const {
-  return "u32";
+    return "u32";
 }
 
 bool U32::IsConstructible() const {
-  return true;
+    return true;
 }
 
 uint32_t U32::Size() const {
-  return 4;
+    return 4;
 }
 
 uint32_t U32::Align() const {
-  return 4;
+    return 4;
 }
 
 }  // namespace tint::sem

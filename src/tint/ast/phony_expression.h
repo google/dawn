@@ -22,20 +22,20 @@ namespace tint::ast {
 /// Represents the `_` of a phony assignment `_ = <expr>`
 /// @see https://www.w3.org/TR/WGSL/#phony-assignment-section
 class PhonyExpression final : public Castable<PhonyExpression, Expression> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  PhonyExpression(ProgramID pid, const Source& src);
-  /// Move constructor
-  PhonyExpression(PhonyExpression&&);
-  ~PhonyExpression() override;
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    PhonyExpression(ProgramID pid, const Source& src);
+    /// Move constructor
+    PhonyExpression(PhonyExpression&&);
+    ~PhonyExpression() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const PhonyExpression* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const PhonyExpression* Clone(CloneContext* ctx) const override;
 };
 
 }  // namespace tint::ast

@@ -21,100 +21,100 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Assign_Var) {
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kPrivate);
+    auto* v = Global("var", ty.f32(), ast::StorageClass::kPrivate);
 
-  auto* assign = Assign("var", 1.f);
+    auto* assign = Assign("var", 1.f);
 
-  WrapInFunction(assign);
+    WrapInFunction(assign);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  ASSERT_FALSE(b.has_error()) << b.error();
+    b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
-  EXPECT_FALSE(b.has_error());
+    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
+    EXPECT_FALSE(b.has_error());
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
 %5 = OpConstant %3 1
 )");
 
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpStore %1 %5
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpStore %1 %5
 )");
 }
 
 TEST_F(BuilderTest, Assign_Var_OutsideFunction_IsError) {
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kPrivate);
+    auto* v = Global("var", ty.f32(), ast::StorageClass::kPrivate);
 
-  auto* assign = Assign("var", Expr(1.f));
+    auto* assign = Assign("var", Expr(1.f));
 
-  WrapInFunction(assign);
+    WrapInFunction(assign);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_FALSE(b.GenerateAssignStatement(assign)) << b.error();
-  EXPECT_TRUE(b.has_error());
-  EXPECT_EQ(b.error(),
-            "Internal error: trying to add SPIR-V instruction 62 outside a "
-            "function");
+    EXPECT_FALSE(b.GenerateAssignStatement(assign)) << b.error();
+    EXPECT_TRUE(b.has_error());
+    EXPECT_EQ(b.error(),
+              "Internal error: trying to add SPIR-V instruction 62 outside a "
+              "function");
 }
 
 TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
-  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
-  auto* val = vec3<f32>();
-  auto* assign = Assign("var", val);
+    auto* val = vec3<f32>();
+    auto* assign = Assign("var", val);
 
-  WrapInFunction(assign);
+    WrapInFunction(assign);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  ASSERT_FALSE(b.has_error()) << b.error();
+    b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
-  EXPECT_FALSE(b.has_error());
+    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
+    EXPECT_FALSE(b.has_error());
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
 %1 = OpVariable %2 Private %5
 )");
 
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpStore %1 %5
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpStore %1 %5
 )");
 }
 
 TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
-  auto* init = vec3<f32>(vec2<f32>(1.f, 2.f), 3.f);
+    auto* init = vec3<f32>(vec2<f32>(1.f, 2.f), 3.f);
 
-  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
-  auto* assign = Assign("var", init);
+    auto* assign = Assign("var", init);
 
-  WrapInFunction(assign);
+    WrapInFunction(assign);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  ASSERT_FALSE(b.has_error()) << b.error();
+    b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
-  EXPECT_FALSE(b.has_error());
+    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
+    EXPECT_FALSE(b.has_error());
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -125,8 +125,8 @@ TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
 %9 = OpConstantComposite %6 %7 %8
 %12 = OpConstant %4 3
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%10 = OpCompositeExtract %4 %9 0
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%10 = OpCompositeExtract %4 %9 0
 %11 = OpCompositeExtract %4 %9 1
 %13 = OpCompositeConstruct %3 %10 %11 %12
 OpStore %1 %13
@@ -134,24 +134,24 @@ OpStore %1 %13
 }
 
 TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
-  auto* init = vec3<f32>(1.f, 2.f, 3.f);
+    auto* init = vec3<f32>(1.f, 2.f, 3.f);
 
-  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
-  auto* assign = Assign("var", init);
+    auto* assign = Assign("var", init);
 
-  WrapInFunction(assign);
+    WrapInFunction(assign);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  ASSERT_FALSE(b.has_error()) << b.error();
+    b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
-  EXPECT_FALSE(b.has_error());
+    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
+    EXPECT_FALSE(b.has_error());
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -161,40 +161,40 @@ TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
 %8 = OpConstant %4 3
 %9 = OpConstantComposite %3 %6 %7 %8
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpStore %1 %9
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpStore %1 %9
 )");
 }
 
 TEST_F(BuilderTest, Assign_StructMember) {
-  // my_struct {
-  //   a : f32
-  //   b : f32
-  // }
-  // var ident : my_struct
-  // ident.b = 4.0;
+    // my_struct {
+    //   a : f32
+    //   b : f32
+    // }
+    // var ident : my_struct
+    // ident.b = 4.0;
 
-  auto* s = Structure("my_struct", {
-                                       Member("a", ty.f32()),
-                                       Member("b", ty.f32()),
-                                   });
+    auto* s = Structure("my_struct", {
+                                         Member("a", ty.f32()),
+                                         Member("b", ty.f32()),
+                                     });
 
-  auto* v = Var("ident", ty.Of(s));
+    auto* v = Var("ident", ty.Of(s));
 
-  auto* assign = Assign(MemberAccessor("ident", "b"), Expr(4.f));
+    auto* assign = Assign(MemberAccessor("ident", "b"), Expr(4.f));
 
-  WrapInFunction(v, assign);
+    WrapInFunction(v, assign);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  ASSERT_FALSE(b.has_error()) << b.error();
+    b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
-  EXPECT_FALSE(b.has_error());
+    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
+    EXPECT_FALSE(b.has_error());
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeStruct %4 %4
 %2 = OpTypePointer Function %3
 %1 = OpVariable %2 Function
@@ -204,30 +204,30 @@ TEST_F(BuilderTest, Assign_StructMember) {
 %9 = OpConstant %4 4
 )");
 
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%8 = OpAccessChain %7 %1 %6
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%8 = OpAccessChain %7 %1 %6
 OpStore %8 %9
 )");
 }
 
 TEST_F(BuilderTest, Assign_Vector) {
-  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
-  auto* val = vec3<f32>(1.f, 1.f, 3.f);
-  auto* assign = Assign("var", val);
+    auto* val = vec3<f32>(1.f, 1.f, 3.f);
+    auto* assign = Assign("var", val);
 
-  WrapInFunction(assign);
+    WrapInFunction(assign);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  ASSERT_FALSE(b.has_error()) << b.error();
+    b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
-  EXPECT_FALSE(b.has_error());
+    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
+    EXPECT_FALSE(b.has_error());
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -237,30 +237,30 @@ TEST_F(BuilderTest, Assign_Vector) {
 %8 = OpConstantComposite %3 %6 %6 %7
 )");
 
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpStore %1 %8
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpStore %1 %8
 )");
 }
 
 TEST_F(BuilderTest, Assign_Vector_MemberByName) {
-  // var.y = 1
+    // var.y = 1
 
-  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
-  auto* assign = Assign(MemberAccessor("var", "y"), Expr(1.f));
+    auto* assign = Assign(MemberAccessor("var", "y"), Expr(1.f));
 
-  WrapInFunction(assign);
+    WrapInFunction(assign);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  ASSERT_FALSE(b.has_error()) << b.error();
+    b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
-  EXPECT_FALSE(b.has_error());
+    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
+    EXPECT_FALSE(b.has_error());
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -271,31 +271,31 @@ TEST_F(BuilderTest, Assign_Vector_MemberByName) {
 %10 = OpConstant %4 1
 )");
 
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%9 = OpAccessChain %8 %1 %7
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%9 = OpAccessChain %8 %1 %7
 OpStore %9 %10
 )");
 }
 
 TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
-  // var[1] = 1
+    // var[1] = 1
 
-  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
-  auto* assign = Assign(IndexAccessor("var", 1), Expr(1.f));
+    auto* assign = Assign(IndexAccessor("var", 1), Expr(1.f));
 
-  WrapInFunction(assign);
+    WrapInFunction(assign);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  ASSERT_FALSE(b.has_error()) << b.error();
+    b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.error();
 
-  EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
-  EXPECT_FALSE(b.has_error());
+    EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
+    EXPECT_FALSE(b.has_error());
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -306,8 +306,8 @@ TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
 %10 = OpConstant %4 1
 )");
 
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%9 = OpAccessChain %8 %1 %7
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%9 = OpAccessChain %8 %1 %7
 OpStore %9 %10
 )");
 }

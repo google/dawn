@@ -21,27 +21,27 @@
 
 namespace dawn::native::d3d12 {
 
-    class Heap;
+class Heap;
 
-    class ResourceHeapAllocation : public ResourceMemoryAllocation {
-      public:
-        ResourceHeapAllocation() = default;
-        ResourceHeapAllocation(const AllocationInfo& info,
-                               uint64_t offset,
-                               ComPtr<ID3D12Resource> resource,
-                               Heap* heap);
-        ~ResourceHeapAllocation() override = default;
-        ResourceHeapAllocation(const ResourceHeapAllocation&) = default;
-        ResourceHeapAllocation& operator=(const ResourceHeapAllocation&) = default;
+class ResourceHeapAllocation : public ResourceMemoryAllocation {
+  public:
+    ResourceHeapAllocation() = default;
+    ResourceHeapAllocation(const AllocationInfo& info,
+                           uint64_t offset,
+                           ComPtr<ID3D12Resource> resource,
+                           Heap* heap);
+    ~ResourceHeapAllocation() override = default;
+    ResourceHeapAllocation(const ResourceHeapAllocation&) = default;
+    ResourceHeapAllocation& operator=(const ResourceHeapAllocation&) = default;
 
-        void Invalidate() override;
+    void Invalidate() override;
 
-        ID3D12Resource* GetD3D12Resource() const;
-        D3D12_GPU_VIRTUAL_ADDRESS GetGPUPointer() const;
+    ID3D12Resource* GetD3D12Resource() const;
+    D3D12_GPU_VIRTUAL_ADDRESS GetGPUPointer() const;
 
-      private:
-        ComPtr<ID3D12Resource> mResource;
-    };
+  private:
+    ComPtr<ID3D12Resource> mResource;
+};
 
 }  // namespace dawn::native::d3d12
 

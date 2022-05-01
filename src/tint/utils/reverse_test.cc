@@ -22,12 +22,12 @@ namespace tint::utils {
 namespace {
 
 TEST(ReverseTest, Vector) {
-  std::vector<int> vec{1, 3, 5, 7, 9};
-  std::vector<int> rev;
-  for (auto v : Reverse(vec)) {
-    rev.emplace_back(v);
-  }
-  ASSERT_THAT(rev, testing::ElementsAre(9, 7, 5, 3, 1));
+    std::vector<int> vec{1, 3, 5, 7, 9};
+    std::vector<int> rev;
+    for (auto v : Reverse(vec)) {
+        rev.emplace_back(v);
+    }
+    ASSERT_THAT(rev, testing::ElementsAre(9, 7, 5, 3, 1));
 }
 
 }  // namespace

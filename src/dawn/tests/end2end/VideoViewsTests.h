@@ -29,8 +29,7 @@ class VideoViewsTestBackend {
     virtual ~VideoViewsTestBackend();
 
     virtual void OnSetUp(WGPUDevice device) = 0;
-    virtual void OnTearDown() {
-    }
+    virtual void OnTearDown() {}
 
     class PlatformTexture {
       public:

@@ -20,58 +20,58 @@
 
 namespace dawn::native::opengl {
 
-    MaybeError OpenGLVersion::Initialize(GetProcAddress getProc) {
-        PFNGLGETSTRINGPROC getString = reinterpret_cast<PFNGLGETSTRINGPROC>(getProc("glGetString"));
-        if (getString == nullptr) {
-            return DAWN_INTERNAL_ERROR("Couldn't load glGetString");
-        }
-
-        std::string version = reinterpret_cast<const char*>(getString(GL_VERSION));
-
-        if (version.find("OpenGL ES") != std::string::npos) {
-            // ES spec states that the GL_VERSION string will be in the following format:
-            // "OpenGL ES N.M vendor-specific information"
-            mStandard = Standard::ES;
-            mMajorVersion = version[10] - '0';
-            mMinorVersion = version[12] - '0';
-
-            // The minor version shouldn't get to two digits.
-            ASSERT(version.size() <= 13 || !isdigit(version[13]));
-        } else {
-            // OpenGL spec states the GL_VERSION string will be in the following format:
-            // <version number><space><vendor-specific information>
-            // The version number is either of the form major number.minor number or major
-            // number.minor number.release number, where the numbers all have one or more
-            // digits
-            mStandard = Standard::Desktop;
-            mMajorVersion = version[0] - '0';
-            mMinorVersion = version[2] - '0';
-
-            // The minor version shouldn't get to two digits.
-            ASSERT(version.size() <= 3 || !isdigit(version[3]));
-        }
-
-        return {};
+MaybeError OpenGLVersion::Initialize(GetProcAddress getProc) {
+    PFNGLGETSTRINGPROC getString = reinterpret_cast<PFNGLGETSTRINGPROC>(getProc("glGetString"));
+    if (getString == nullptr) {
+        return DAWN_INTERNAL_ERROR("Couldn't load glGetString");
     }
 
-    bool OpenGLVersion::IsDesktop() const {
-        return mStandard == Standard::Desktop;
+    std::string version = reinterpret_cast<const char*>(getString(GL_VERSION));
+
+    if (version.find("OpenGL ES") != std::string::npos) {
+        // ES spec states that the GL_VERSION string will be in the following format:
+        // "OpenGL ES N.M vendor-specific information"
+        mStandard = Standard::ES;
+        mMajorVersion = version[10] - '0';
+        mMinorVersion = version[12] - '0';
+
+        // The minor version shouldn't get to two digits.
+        ASSERT(version.size() <= 13 || !isdigit(version[13]));
+    } else {
+        // OpenGL spec states the GL_VERSION string will be in the following format:
+        // <version number><space><vendor-specific information>
+        // The version number is either of the form major number.minor number or major
+        // number.minor number.release number, where the numbers all have one or more
+        // digits
+        mStandard = Standard::Desktop;
+        mMajorVersion = version[0] - '0';
+        mMinorVersion = version[2] - '0';
+
+        // The minor version shouldn't get to two digits.
+        ASSERT(version.size() <= 3 || !isdigit(version[3]));
     }
 
-    bool OpenGLVersion::IsES() const {
-        return mStandard == Standard::ES;
-    }
+    return {};
+}
 
-    uint32_t OpenGLVersion::GetMajor() const {
-        return mMajorVersion;
-    }
+bool OpenGLVersion::IsDesktop() const {
+    return mStandard == Standard::Desktop;
+}
 
-    uint32_t OpenGLVersion::GetMinor() const {
-        return mMinorVersion;
-    }
+bool OpenGLVersion::IsES() const {
+    return mStandard == Standard::ES;
+}
 
-    bool OpenGLVersion::IsAtLeast(uint32_t majorVersion, uint32_t minorVersion) const {
-        return std::tie(mMajorVersion, mMinorVersion) >= std::tie(majorVersion, minorVersion);
-    }
+uint32_t OpenGLVersion::GetMajor() const {
+    return mMajorVersion;
+}
+
+uint32_t OpenGLVersion::GetMinor() const {
+    return mMinorVersion;
+}
+
+bool OpenGLVersion::IsAtLeast(uint32_t majorVersion, uint32_t minorVersion) const {
+    return std::tie(mMajorVersion, mMinorVersion) >= std::tie(majorVersion, minorVersion);
+}
 
 }  // namespace dawn::native::opengl

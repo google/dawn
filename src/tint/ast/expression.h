@@ -25,16 +25,16 @@ namespace tint::ast {
 
 /// Base expression class
 class Expression : public Castable<Expression, Node> {
- public:
-  ~Expression() override;
+  public:
+    ~Expression() override;
 
- protected:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  Expression(ProgramID pid, const Source& src);
-  /// Move constructor
-  Expression(Expression&&);
+  protected:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    Expression(ProgramID pid, const Source& src);
+    /// Move constructor
+    Expression(Expression&&);
 };
 
 /// A list of expressions

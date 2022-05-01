@@ -20,16 +20,16 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitIdentifierExpression) {
-  auto* foo = Var("foo", ty.i32());
+    auto* foo = Var("foo", ty.i32());
 
-  auto* i = Expr("foo");
-  WrapInFunction(foo, i);
+    auto* i = Expr("foo");
+    WrapInFunction(foo, i);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, i)) << gen.error();
-  EXPECT_EQ(out.str(), "foo");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, i)) << gen.error();
+    EXPECT_EQ(out.str(), "foo");
 }
 
 }  // namespace

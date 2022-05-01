@@ -21,22 +21,22 @@
 
 namespace dawn::native::vulkan {
 
-    class Device;
+class Device;
 
-    class StagingBuffer : public StagingBufferBase {
-      public:
-        StagingBuffer(size_t size, Device* device);
-        ~StagingBuffer() override;
+class StagingBuffer : public StagingBufferBase {
+  public:
+    StagingBuffer(size_t size, Device* device);
+    ~StagingBuffer() override;
 
-        VkBuffer GetBufferHandle() const;
+    VkBuffer GetBufferHandle() const;
 
-        MaybeError Initialize() override;
+    MaybeError Initialize() override;
 
-      private:
-        Device* mDevice;
-        VkBuffer mBuffer;
-        ResourceMemoryAllocation mAllocation;
-    };
+  private:
+    Device* mDevice;
+    VkBuffer mBuffer;
+    ResourceMemoryAllocation mAllocation;
+};
 }  // namespace dawn::native::vulkan
 
 #endif  // SRC_DAWN_NATIVE_VULKAN_STAGINGBUFFERVK_H_

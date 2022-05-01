@@ -18,169 +18,169 @@ namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl) {
-  auto p = parser("var a : i32;");
-  auto e = p->variable_stmt();
-  EXPECT_TRUE(e.matched);
-  EXPECT_FALSE(e.errored);
-  EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
-  ASSERT_NE(e->variable, nullptr);
-  EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
+    auto p = parser("var a : i32;");
+    auto e = p->variable_stmt();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
+    ASSERT_NE(e->variable, nullptr);
+    EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_EQ(e->source.range.begin.line, 1u);
-  ASSERT_EQ(e->source.range.begin.column, 5u);
-  ASSERT_EQ(e->source.range.end.line, 1u);
-  ASSERT_EQ(e->source.range.end.column, 6u);
+    ASSERT_EQ(e->source.range.begin.line, 1u);
+    ASSERT_EQ(e->source.range.begin.column, 5u);
+    ASSERT_EQ(e->source.range.end.line, 1u);
+    ASSERT_EQ(e->source.range.end.column, 6u);
 
-  EXPECT_EQ(e->variable->constructor, nullptr);
+    EXPECT_EQ(e->variable->constructor, nullptr);
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
-  auto p = parser("var a : i32 = 1;");
-  auto e = p->variable_stmt();
-  EXPECT_TRUE(e.matched);
-  EXPECT_FALSE(e.errored);
-  EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
-  ASSERT_NE(e->variable, nullptr);
-  EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
+    auto p = parser("var a : i32 = 1;");
+    auto e = p->variable_stmt();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
+    ASSERT_NE(e->variable, nullptr);
+    EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_EQ(e->source.range.begin.line, 1u);
-  ASSERT_EQ(e->source.range.begin.column, 5u);
-  ASSERT_EQ(e->source.range.end.line, 1u);
-  ASSERT_EQ(e->source.range.end.column, 6u);
+    ASSERT_EQ(e->source.range.begin.line, 1u);
+    ASSERT_EQ(e->source.range.begin.column, 5u);
+    ASSERT_EQ(e->source.range.end.line, 1u);
+    ASSERT_EQ(e->source.range.end.column, 6u);
 
-  ASSERT_NE(e->variable->constructor, nullptr);
-  EXPECT_TRUE(e->variable->constructor->Is<ast::LiteralExpression>());
+    ASSERT_NE(e->variable->constructor, nullptr);
+    EXPECT_TRUE(e->variable->constructor->Is<ast::LiteralExpression>());
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_ConstructorInvalid) {
-  auto p = parser("var a : i32 = if(a) {}");
-  auto e = p->variable_stmt();
-  EXPECT_FALSE(e.matched);
-  EXPECT_TRUE(e.errored);
-  EXPECT_EQ(e.value, nullptr);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:15: missing constructor for variable declaration");
+    auto p = parser("var a : i32 = if(a) {}");
+    auto e = p->variable_stmt();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_EQ(e.value, nullptr);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:15: missing constructor for variable declaration");
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit) {
-  auto p = parser("var a : array<i32> = array<i32>();");
-  auto e = p->variable_stmt();
-  EXPECT_TRUE(e.matched);
-  EXPECT_FALSE(e.errored);
-  EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
-  ASSERT_NE(e->variable, nullptr);
-  EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
+    auto p = parser("var a : array<i32> = array<i32>();");
+    auto e = p->variable_stmt();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
+    ASSERT_NE(e->variable, nullptr);
+    EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_NE(e->variable->constructor, nullptr);
-  auto* call = e->variable->constructor->As<ast::CallExpression>();
-  ASSERT_NE(call, nullptr);
-  EXPECT_EQ(call->target.name, nullptr);
-  EXPECT_NE(call->target.type, nullptr);
+    ASSERT_NE(e->variable->constructor, nullptr);
+    auto* call = e->variable->constructor->As<ast::CallExpression>();
+    ASSERT_NE(call, nullptr);
+    EXPECT_EQ(call->target.name, nullptr);
+    EXPECT_NE(call->target.type, nullptr);
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit_NoSpace) {
-  auto p = parser("var a : array<i32>=array<i32>();");
-  auto e = p->variable_stmt();
-  EXPECT_TRUE(e.matched);
-  EXPECT_FALSE(e.errored);
-  EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
-  ASSERT_NE(e->variable, nullptr);
-  EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
+    auto p = parser("var a : array<i32>=array<i32>();");
+    auto e = p->variable_stmt();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
+    ASSERT_NE(e->variable, nullptr);
+    EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_NE(e->variable->constructor, nullptr);
-  auto* call = e->variable->constructor->As<ast::CallExpression>();
-  ASSERT_NE(call, nullptr);
-  EXPECT_EQ(call->target.name, nullptr);
-  EXPECT_NE(call->target.type, nullptr);
+    ASSERT_NE(e->variable->constructor, nullptr);
+    auto* call = e->variable->constructor->As<ast::CallExpression>();
+    ASSERT_NE(call, nullptr);
+    EXPECT_EQ(call->target.name, nullptr);
+    EXPECT_NE(call->target.type, nullptr);
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit) {
-  auto p = parser("var a : vec2<i32> = vec2<i32>();");
-  auto e = p->variable_stmt();
-  EXPECT_TRUE(e.matched);
-  EXPECT_FALSE(e.errored);
-  EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
-  ASSERT_NE(e->variable, nullptr);
-  EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
+    auto p = parser("var a : vec2<i32> = vec2<i32>();");
+    auto e = p->variable_stmt();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
+    ASSERT_NE(e->variable, nullptr);
+    EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_NE(e->variable->constructor, nullptr);
-  auto* call = e->variable->constructor->As<ast::CallExpression>();
-  ASSERT_NE(call, nullptr);
-  EXPECT_EQ(call->target.name, nullptr);
-  EXPECT_NE(call->target.type, nullptr);
+    ASSERT_NE(e->variable->constructor, nullptr);
+    auto* call = e->variable->constructor->As<ast::CallExpression>();
+    ASSERT_NE(call, nullptr);
+    EXPECT_EQ(call->target.name, nullptr);
+    EXPECT_NE(call->target.type, nullptr);
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit_NoSpace) {
-  auto p = parser("var a : vec2<i32>=vec2<i32>();");
-  auto e = p->variable_stmt();
-  EXPECT_TRUE(e.matched);
-  EXPECT_FALSE(e.errored);
-  EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
-  ASSERT_NE(e->variable, nullptr);
-  EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
+    auto p = parser("var a : vec2<i32>=vec2<i32>();");
+    auto e = p->variable_stmt();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
+    ASSERT_NE(e->variable, nullptr);
+    EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_NE(e->variable->constructor, nullptr);
-  auto* call = e->variable->constructor->As<ast::CallExpression>();
-  ASSERT_NE(call, nullptr);
-  EXPECT_EQ(call->target.name, nullptr);
-  EXPECT_NE(call->target.type, nullptr);
+    ASSERT_NE(e->variable->constructor, nullptr);
+    auto* call = e->variable->constructor->As<ast::CallExpression>();
+    ASSERT_NE(call, nullptr);
+    EXPECT_EQ(call->target.name, nullptr);
+    EXPECT_NE(call->target.type, nullptr);
 }
 
 TEST_F(ParserImplTest, VariableStmt_Let) {
-  auto p = parser("let a : i32 = 1");
-  auto e = p->variable_stmt();
-  EXPECT_TRUE(e.matched);
-  EXPECT_FALSE(e.errored);
-  EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
+    auto p = parser("let a : i32 = 1");
+    auto e = p->variable_stmt();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
 
-  ASSERT_EQ(e->source.range.begin.line, 1u);
-  ASSERT_EQ(e->source.range.begin.column, 5u);
-  ASSERT_EQ(e->source.range.end.line, 1u);
-  ASSERT_EQ(e->source.range.end.column, 6u);
+    ASSERT_EQ(e->source.range.begin.line, 1u);
+    ASSERT_EQ(e->source.range.begin.column, 5u);
+    ASSERT_EQ(e->source.range.end.line, 1u);
+    ASSERT_EQ(e->source.range.end.column, 6u);
 }
 
 TEST_F(ParserImplTest, VariableStmt_Let_MissingEqual) {
-  auto p = parser("let a : i32 1");
-  auto e = p->variable_stmt();
-  EXPECT_FALSE(e.matched);
-  EXPECT_TRUE(e.errored);
-  EXPECT_EQ(e.value, nullptr);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:13: expected '=' for let declaration");
+    auto p = parser("let a : i32 1");
+    auto e = p->variable_stmt();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_EQ(e.value, nullptr);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:13: expected '=' for let declaration");
 }
 
 TEST_F(ParserImplTest, VariableStmt_Let_MissingConstructor) {
-  auto p = parser("let a : i32 =");
-  auto e = p->variable_stmt();
-  EXPECT_FALSE(e.matched);
-  EXPECT_TRUE(e.errored);
-  EXPECT_EQ(e.value, nullptr);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:14: missing constructor for let declaration");
+    auto p = parser("let a : i32 =");
+    auto e = p->variable_stmt();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_EQ(e.value, nullptr);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:14: missing constructor for let declaration");
 }
 
 TEST_F(ParserImplTest, VariableStmt_Let_InvalidConstructor) {
-  auto p = parser("let a : i32 = if (a) {}");
-  auto e = p->variable_stmt();
-  EXPECT_FALSE(e.matched);
-  EXPECT_TRUE(e.errored);
-  EXPECT_EQ(e.value, nullptr);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:15: missing constructor for let declaration");
+    auto p = parser("let a : i32 = if (a) {}");
+    auto e = p->variable_stmt();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_EQ(e.value, nullptr);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:15: missing constructor for let declaration");
 }
 
 }  // namespace

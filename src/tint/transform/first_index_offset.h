@@ -58,71 +58,68 @@ namespace tint::transform {
 /// ```
 ///
 class FirstIndexOffset final : public Castable<FirstIndexOffset, Transform> {
- public:
-  /// BindingPoint is consumed by the FirstIndexOffset transform.
-  /// BindingPoint specifies the binding point of the first index uniform
-  /// buffer.
-  struct BindingPoint final : public Castable<BindingPoint, transform::Data> {
-    /// Constructor
-    BindingPoint();
+  public:
+    /// BindingPoint is consumed by the FirstIndexOffset transform.
+    /// BindingPoint specifies the binding point of the first index uniform
+    /// buffer.
+    struct BindingPoint final : public Castable<BindingPoint, transform::Data> {
+        /// Constructor
+        BindingPoint();
+
+        /// Constructor
+        /// @param b the binding index
+        /// @param g the binding group
+        BindingPoint(uint32_t b, uint32_t g);
+
+        /// Destructor
+        ~BindingPoint() override;
+
+        /// `@binding()` for the first vertex / first instance uniform buffer
+        uint32_t binding = 0;
+        /// `@group()` for the first vertex / first instance uniform buffer
+        uint32_t group = 0;
+    };
+
+    /// Data is outputted by the FirstIndexOffset transform.
+    /// Data holds information about shader usage and constant buffer offsets.
+    struct Data final : public Castable<Data, transform::Data> {
+        /// Constructor
+        /// @param has_vtx_or_inst_index True if the shader uses vertex_index or
+        /// instance_index
+        explicit Data(bool has_vtx_or_inst_index);
+
+        /// Copy constructor
+        Data(const Data&);
+
+        /// Destructor
+        ~Data() override;
+
+        /// True if the shader uses vertex_index
+        const bool has_vertex_or_instance_index;
+    };
 
     /// Constructor
-    /// @param b the binding index
-    /// @param g the binding group
-    BindingPoint(uint32_t b, uint32_t g);
-
+    FirstIndexOffset();
     /// Destructor
-    ~BindingPoint() override;
+    ~FirstIndexOffset() override;
 
-    /// `@binding()` for the first vertex / first instance uniform buffer
-    uint32_t binding = 0;
-    /// `@group()` for the first vertex / first instance uniform buffer
-    uint32_t group = 0;
-  };
+    /// @param program the program to inspect
+    /// @param data optional extra transform-specific input data
+    /// @returns true if this transform should be run for the given program
+    bool ShouldRun(const Program* program, const DataMap& data = {}) const override;
 
-  /// Data is outputted by the FirstIndexOffset transform.
-  /// Data holds information about shader usage and constant buffer offsets.
-  struct Data final : public Castable<Data, transform::Data> {
-    /// Constructor
-    /// @param has_vtx_or_inst_index True if the shader uses vertex_index or
-    /// instance_index
-    explicit Data(bool has_vtx_or_inst_index);
+  protected:
+    /// Runs the transform using the CloneContext built for transforming a
+    /// program. Run() is responsible for calling Clone() on the CloneContext.
+    /// @param ctx the CloneContext primed with the input program and
+    /// ProgramBuilder
+    /// @param inputs optional extra transform-specific input data
+    /// @param outputs optional extra transform-specific output data
+    void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) const override;
 
-    /// Copy constructor
-    Data(const Data&);
-
-    /// Destructor
-    ~Data() override;
-
-    /// True if the shader uses vertex_index
-    const bool has_vertex_or_instance_index;
-  };
-
-  /// Constructor
-  FirstIndexOffset();
-  /// Destructor
-  ~FirstIndexOffset() override;
-
-  /// @param program the program to inspect
-  /// @param data optional extra transform-specific input data
-  /// @returns true if this transform should be run for the given program
-  bool ShouldRun(const Program* program,
-                 const DataMap& data = {}) const override;
-
- protected:
-  /// Runs the transform using the CloneContext built for transforming a
-  /// program. Run() is responsible for calling Clone() on the CloneContext.
-  /// @param ctx the CloneContext primed with the input program and
-  /// ProgramBuilder
-  /// @param inputs optional extra transform-specific input data
-  /// @param outputs optional extra transform-specific output data
-  void Run(CloneContext& ctx,
-           const DataMap& inputs,
-           DataMap& outputs) const override;
-
- private:
-  uint32_t binding_ = 0;
-  uint32_t group_ = 0;
+  private:
+    uint32_t binding_ = 0;
+    uint32_t group_ = 0;
 };
 
 }  // namespace tint::transform

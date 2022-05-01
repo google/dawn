@@ -36,30 +36,27 @@ RemoveUnreachableStatements::RemoveUnreachableStatements() = default;
 
 RemoveUnreachableStatements::~RemoveUnreachableStatements() = default;
 
-bool RemoveUnreachableStatements::ShouldRun(const Program* program,
-                                            const DataMap&) const {
-  for (auto* node : program->ASTNodes().Objects()) {
-    if (auto* stmt = program->Sem().Get<sem::Statement>(node)) {
-      if (!stmt->IsReachable()) {
-        return true;
-      }
+bool RemoveUnreachableStatements::ShouldRun(const Program* program, const DataMap&) const {
+    for (auto* node : program->ASTNodes().Objects()) {
+        if (auto* stmt = program->Sem().Get<sem::Statement>(node)) {
+            if (!stmt->IsReachable()) {
+                return true;
+            }
+        }
     }
-  }
-  return false;
+    return false;
 }
 
-void RemoveUnreachableStatements::Run(CloneContext& ctx,
-                                      const DataMap&,
-                                      DataMap&) const {
-  for (auto* node : ctx.src->ASTNodes().Objects()) {
-    if (auto* stmt = ctx.src->Sem().Get<sem::Statement>(node)) {
-      if (!stmt->IsReachable()) {
-        RemoveStatement(ctx, stmt->Declaration());
-      }
+void RemoveUnreachableStatements::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
+    for (auto* node : ctx.src->ASTNodes().Objects()) {
+        if (auto* stmt = ctx.src->Sem().Get<sem::Statement>(node)) {
+            if (!stmt->IsReachable()) {
+                RemoveStatement(ctx, stmt->Declaration());
+            }
+        }
     }
-  }
 
-  ctx.Clone();
+    ctx.Clone();
 }
 
 }  // namespace tint::transform

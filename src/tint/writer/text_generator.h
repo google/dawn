@@ -28,211 +28,207 @@ namespace tint::writer {
 
 /// Helper methods for generators which are creating text output
 class TextGenerator {
- public:
-  /// Line holds a single line of text
-  struct Line {
-    /// The indentation of the line in blankspace
-    uint32_t indent = 0;
-    /// The content of the line, without a trailing newline character
-    std::string content;
-  };
+  public:
+    /// Line holds a single line of text
+    struct Line {
+        /// The indentation of the line in blankspace
+        uint32_t indent = 0;
+        /// The content of the line, without a trailing newline character
+        std::string content;
+    };
 
-  /// TextBuffer holds a list of lines of text.
-  struct TextBuffer {
-    // Constructor
-    TextBuffer();
+    /// TextBuffer holds a list of lines of text.
+    struct TextBuffer {
+        // Constructor
+        TextBuffer();
 
-    // Destructor
-    ~TextBuffer();
+        // Destructor
+        ~TextBuffer();
 
-    /// IncrementIndent increases the indentation of lines that will be written
-    /// to the TextBuffer
-    void IncrementIndent();
+        /// IncrementIndent increases the indentation of lines that will be written
+        /// to the TextBuffer
+        void IncrementIndent();
 
-    /// DecrementIndent decreases the indentation of lines that will be written
-    /// to the TextBuffer
-    void DecrementIndent();
+        /// DecrementIndent decreases the indentation of lines that will be written
+        /// to the TextBuffer
+        void DecrementIndent();
 
-    /// Appends the line to the end of the TextBuffer
-    /// @param line the line to append to the TextBuffer
-    void Append(const std::string& line);
+        /// Appends the line to the end of the TextBuffer
+        /// @param line the line to append to the TextBuffer
+        void Append(const std::string& line);
 
-    /// Inserts the line to the TextBuffer before the line with index `before`
-    /// @param line the line to append to the TextBuffer
-    /// @param before the zero-based index of the line to insert the text before
-    /// @param indent the indentation to apply to the inserted lines
-    void Insert(const std::string& line, size_t before, uint32_t indent);
+        /// Inserts the line to the TextBuffer before the line with index `before`
+        /// @param line the line to append to the TextBuffer
+        /// @param before the zero-based index of the line to insert the text before
+        /// @param indent the indentation to apply to the inserted lines
+        void Insert(const std::string& line, size_t before, uint32_t indent);
 
-    /// Appends the lines of `tb` to the end of this TextBuffer
-    /// @param tb the TextBuffer to append to the end of this TextBuffer
-    void Append(const TextBuffer& tb);
+        /// Appends the lines of `tb` to the end of this TextBuffer
+        /// @param tb the TextBuffer to append to the end of this TextBuffer
+        void Append(const TextBuffer& tb);
 
-    /// Inserts the lines of `tb` to the TextBuffer before the line with index
-    /// `before`
-    /// @param tb the TextBuffer to insert into this TextBuffer
-    /// @param before the zero-based index of the line to insert the text before
-    /// @param indent the indentation to apply to the inserted lines
-    void Insert(const TextBuffer& tb, size_t before, uint32_t indent);
+        /// Inserts the lines of `tb` to the TextBuffer before the line with index
+        /// `before`
+        /// @param tb the TextBuffer to insert into this TextBuffer
+        /// @param before the zero-based index of the line to insert the text before
+        /// @param indent the indentation to apply to the inserted lines
+        void Insert(const TextBuffer& tb, size_t before, uint32_t indent);
 
-    /// @returns the buffer's content as a single string
-    /// @param indent additional indentation to apply to each line
-    std::string String(uint32_t indent = 0) const;
+        /// @returns the buffer's content as a single string
+        /// @param indent additional indentation to apply to each line
+        std::string String(uint32_t indent = 0) const;
 
-    /// The current indentation of the TextBuffer. Lines appended to the
-    /// TextBuffer will use this indentation.
-    uint32_t current_indent = 0;
+        /// The current indentation of the TextBuffer. Lines appended to the
+        /// TextBuffer will use this indentation.
+        uint32_t current_indent = 0;
 
-    /// The lines
-    std::vector<Line> lines;
-  };
+        /// The lines
+        std::vector<Line> lines;
+    };
 
-  /// Constructor
-  /// @param program the program used by the generator
-  explicit TextGenerator(const Program* program);
-  ~TextGenerator();
-
-  /// Increment the emitter indent level
-  void increment_indent() { current_buffer_->IncrementIndent(); }
-  /// Decrement the emitter indent level
-  void decrement_indent() { current_buffer_->DecrementIndent(); }
-
-  /// @returns the result data
-  std::string result() const { return main_buffer_.String(); }
-
-  /// @returns the list of diagnostics raised by the generator.
-  const diag::List& Diagnostics() const { return diagnostics_; }
-
-  /// @returns the error
-  std::string error() const { return diagnostics_.str(); }
-
-  /// @return a new, unique identifier with the given prefix.
-  /// @param prefix optional prefix to apply to the generated identifier. If
-  /// empty "tint_symbol" will be used.
-  std::string UniqueIdentifier(const std::string& prefix = "");
-
-  /// @param s the semantic structure
-  /// @returns the name of the structure, taking special care of builtin
-  /// structures that start with double underscores. If the structure is a
-  /// builtin, then the returned name will be a unique name without the leading
-  /// underscores.
-  std::string StructName(const sem::Struct* s);
-
-  /// @param str the string
-  /// @param suffix the suffix to remove
-  /// @return returns str without the provided trailing suffix string. If str
-  /// doesn't end with suffix, str is returned unchanged.
-  std::string TrimSuffix(std::string str, const std::string& suffix);
-
- protected:
-  /// LineWriter is a helper that acts as a string buffer, who's content is
-  /// emitted to the TextBuffer as a single line on destruction.
-  struct LineWriter {
-   public:
     /// Constructor
-    /// @param buffer the TextBuffer that the LineWriter will append its
-    /// content to on destruction, at the end of the buffer.
-    explicit LineWriter(TextBuffer* buffer);
+    /// @param program the program used by the generator
+    explicit TextGenerator(const Program* program);
+    ~TextGenerator();
 
-    /// Move constructor
-    /// @param rhs the LineWriter to move
-    LineWriter(LineWriter&& rhs);
-    /// Destructor
-    ~LineWriter();
+    /// Increment the emitter indent level
+    void increment_indent() { current_buffer_->IncrementIndent(); }
+    /// Decrement the emitter indent level
+    void decrement_indent() { current_buffer_->DecrementIndent(); }
 
-    /// @returns the ostringstream
-    operator std::ostream&() { return os; }
+    /// @returns the result data
+    std::string result() const { return main_buffer_.String(); }
 
-    /// @param rhs the value to write to the line
-    /// @returns the ostream so calls can be chained
-    template <typename T>
-    std::ostream& operator<<(T&& rhs) {
-      return os << std::forward<T>(rhs);
+    /// @returns the list of diagnostics raised by the generator.
+    const diag::List& Diagnostics() const { return diagnostics_; }
+
+    /// @returns the error
+    std::string error() const { return diagnostics_.str(); }
+
+    /// @return a new, unique identifier with the given prefix.
+    /// @param prefix optional prefix to apply to the generated identifier. If
+    /// empty "tint_symbol" will be used.
+    std::string UniqueIdentifier(const std::string& prefix = "");
+
+    /// @param s the semantic structure
+    /// @returns the name of the structure, taking special care of builtin
+    /// structures that start with double underscores. If the structure is a
+    /// builtin, then the returned name will be a unique name without the leading
+    /// underscores.
+    std::string StructName(const sem::Struct* s);
+
+    /// @param str the string
+    /// @param suffix the suffix to remove
+    /// @return returns str without the provided trailing suffix string. If str
+    /// doesn't end with suffix, str is returned unchanged.
+    std::string TrimSuffix(std::string str, const std::string& suffix);
+
+  protected:
+    /// LineWriter is a helper that acts as a string buffer, who's content is
+    /// emitted to the TextBuffer as a single line on destruction.
+    struct LineWriter {
+      public:
+        /// Constructor
+        /// @param buffer the TextBuffer that the LineWriter will append its
+        /// content to on destruction, at the end of the buffer.
+        explicit LineWriter(TextBuffer* buffer);
+
+        /// Move constructor
+        /// @param rhs the LineWriter to move
+        LineWriter(LineWriter&& rhs);
+        /// Destructor
+        ~LineWriter();
+
+        /// @returns the ostringstream
+        operator std::ostream&() { return os; }
+
+        /// @param rhs the value to write to the line
+        /// @returns the ostream so calls can be chained
+        template <typename T>
+        std::ostream& operator<<(T&& rhs) {
+            return os << std::forward<T>(rhs);
+        }
+
+      private:
+        LineWriter(const LineWriter&) = delete;
+        LineWriter& operator=(const LineWriter&) = delete;
+
+        std::ostringstream os;
+        TextBuffer* buffer;
+    };
+
+    /// Helper for writing a '(' on construction and a ')' destruction.
+    struct ScopedParen {
+        /// Constructor
+        /// @param stream the std::ostream that will be written to
+        explicit ScopedParen(std::ostream& stream);
+        /// Destructor
+        ~ScopedParen();
+
+      private:
+        ScopedParen(ScopedParen&& rhs) = delete;
+        ScopedParen(const ScopedParen&) = delete;
+        ScopedParen& operator=(const ScopedParen&) = delete;
+        std::ostream& s;
+    };
+
+    /// Helper for incrementing indentation on construction and decrementing
+    /// indentation on destruction.
+    struct ScopedIndent {
+        /// Constructor
+        /// @param buffer the TextBuffer that the ScopedIndent will indent
+        explicit ScopedIndent(TextBuffer* buffer);
+        /// Constructor
+        /// @param generator ScopedIndent will indent the generator's
+        /// `current_buffer_`
+        explicit ScopedIndent(TextGenerator* generator);
+        /// Destructor
+        ~ScopedIndent();
+
+      private:
+        ScopedIndent(ScopedIndent&& rhs) = delete;
+        ScopedIndent(const ScopedIndent&) = delete;
+        ScopedIndent& operator=(const ScopedIndent&) = delete;
+        TextBuffer* buffer_;
+    };
+
+    /// @returns the resolved type of the ast::Expression `expr`
+    /// @param expr the expression
+    const sem::Type* TypeOf(const ast::Expression* expr) const { return builder_.TypeOf(expr); }
+
+    /// @returns the resolved type of the ast::Type `type`
+    /// @param type the type
+    const sem::Type* TypeOf(const ast::Type* type) const { return builder_.TypeOf(type); }
+
+    /// @returns the resolved type of the ast::TypeDecl `type_decl`
+    /// @param type_decl the type
+    const sem::Type* TypeOf(const ast::TypeDecl* type_decl) const {
+        return builder_.TypeOf(type_decl);
     }
 
-   private:
-    LineWriter(const LineWriter&) = delete;
-    LineWriter& operator=(const LineWriter&) = delete;
+    /// @returns a new LineWriter, used for buffering and writing a line to
+    /// the end of #current_buffer_.
+    LineWriter line() { return LineWriter(current_buffer_); }
 
-    std::ostringstream os;
-    TextBuffer* buffer;
-  };
+    /// @param buffer the TextBuffer to write the line to
+    /// @returns a new LineWriter, used for buffering and writing a line to
+    /// the end of `buffer`.
+    static LineWriter line(TextBuffer* buffer) { return LineWriter(buffer); }
 
-  /// Helper for writing a '(' on construction and a ')' destruction.
-  struct ScopedParen {
-    /// Constructor
-    /// @param stream the std::ostream that will be written to
-    explicit ScopedParen(std::ostream& stream);
-    /// Destructor
-    ~ScopedParen();
+    /// The program
+    Program const* const program_;
+    /// A ProgramBuilder that thinly wraps program_
+    ProgramBuilder builder_;
+    /// Diagnostics generated by the generator
+    diag::List diagnostics_;
+    /// The buffer the TextGenerator is currently appending lines to
+    TextBuffer* current_buffer_ = &main_buffer_;
 
-   private:
-    ScopedParen(ScopedParen&& rhs) = delete;
-    ScopedParen(const ScopedParen&) = delete;
-    ScopedParen& operator=(const ScopedParen&) = delete;
-    std::ostream& s;
-  };
-
-  /// Helper for incrementing indentation on construction and decrementing
-  /// indentation on destruction.
-  struct ScopedIndent {
-    /// Constructor
-    /// @param buffer the TextBuffer that the ScopedIndent will indent
-    explicit ScopedIndent(TextBuffer* buffer);
-    /// Constructor
-    /// @param generator ScopedIndent will indent the generator's
-    /// `current_buffer_`
-    explicit ScopedIndent(TextGenerator* generator);
-    /// Destructor
-    ~ScopedIndent();
-
-   private:
-    ScopedIndent(ScopedIndent&& rhs) = delete;
-    ScopedIndent(const ScopedIndent&) = delete;
-    ScopedIndent& operator=(const ScopedIndent&) = delete;
-    TextBuffer* buffer_;
-  };
-
-  /// @returns the resolved type of the ast::Expression `expr`
-  /// @param expr the expression
-  const sem::Type* TypeOf(const ast::Expression* expr) const {
-    return builder_.TypeOf(expr);
-  }
-
-  /// @returns the resolved type of the ast::Type `type`
-  /// @param type the type
-  const sem::Type* TypeOf(const ast::Type* type) const {
-    return builder_.TypeOf(type);
-  }
-
-  /// @returns the resolved type of the ast::TypeDecl `type_decl`
-  /// @param type_decl the type
-  const sem::Type* TypeOf(const ast::TypeDecl* type_decl) const {
-    return builder_.TypeOf(type_decl);
-  }
-
-  /// @returns a new LineWriter, used for buffering and writing a line to
-  /// the end of #current_buffer_.
-  LineWriter line() { return LineWriter(current_buffer_); }
-
-  /// @param buffer the TextBuffer to write the line to
-  /// @returns a new LineWriter, used for buffering and writing a line to
-  /// the end of `buffer`.
-  static LineWriter line(TextBuffer* buffer) { return LineWriter(buffer); }
-
-  /// The program
-  Program const* const program_;
-  /// A ProgramBuilder that thinly wraps program_
-  ProgramBuilder builder_;
-  /// Diagnostics generated by the generator
-  diag::List diagnostics_;
-  /// The buffer the TextGenerator is currently appending lines to
-  TextBuffer* current_buffer_ = &main_buffer_;
-
- private:
-  /// The primary text buffer that the generator will emit
-  TextBuffer main_buffer_;
-  /// Map of builtin structure to unique generated name
-  std::unordered_map<const sem::Struct*, std::string> builtin_struct_names_;
+  private:
+    /// The primary text buffer that the generator will emit
+    TextBuffer main_buffer_;
+    /// Map of builtin structure to unique generated name
+    std::unordered_map<const sem::Struct*, std::string> builtin_struct_names_;
 };
 
 }  // namespace tint::writer

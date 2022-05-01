@@ -29,11 +29,11 @@ ExternalTexture::ExternalTexture(ExternalTexture&&) = default;
 ExternalTexture::~ExternalTexture() = default;
 
 std::string ExternalTexture::FriendlyName(const SymbolTable&) const {
-  return "texture_external";
+    return "texture_external";
 }
 
 const ExternalTexture* ExternalTexture::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<ExternalTexture>();
+    return ctx->dst->create<ExternalTexture>();
 }
 
 }  // namespace tint::ast

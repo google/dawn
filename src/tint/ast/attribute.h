@@ -24,17 +24,17 @@ namespace tint::ast {
 
 /// The base class for all attributes
 class Attribute : public Castable<Attribute, Node> {
- public:
-  ~Attribute() override;
+  public:
+    ~Attribute() override;
 
-  /// @returns the WGSL name for the attribute
-  virtual std::string Name() const = 0;
+    /// @returns the WGSL name for the attribute
+    virtual std::string Name() const = 0;
 
- protected:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  Attribute(ProgramID pid, const Source& src) : Base(pid, src) {}
+  protected:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    Attribute(ProgramID pid, const Source& src) : Base(pid, src) {}
 };
 
 /// A list of attributes
@@ -44,24 +44,24 @@ using AttributeList = std::vector<const Attribute*>;
 /// @returns true if `attributes` includes a attribute of type `T`
 template <typename T>
 bool HasAttribute(const AttributeList& attributes) {
-  for (auto* attr : attributes) {
-    if (attr->Is<T>()) {
-      return true;
+    for (auto* attr : attributes) {
+        if (attr->Is<T>()) {
+            return true;
+        }
     }
-  }
-  return false;
+    return false;
 }
 
 /// @param attributes the list of attributes to search
 /// @returns a pointer to `T` from `attributes` if found, otherwise nullptr.
 template <typename T>
 const T* GetAttribute(const AttributeList& attributes) {
-  for (auto* attr : attributes) {
-    if (attr->Is<T>()) {
-      return attr->As<T>();
+    for (auto* attr : attributes) {
+        if (attr->Is<T>()) {
+            return attr->As<T>();
+        }
     }
-  }
-  return nullptr;
+    return nullptr;
 }
 
 }  // namespace tint::ast

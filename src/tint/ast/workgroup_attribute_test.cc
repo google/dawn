@@ -23,55 +23,55 @@ namespace {
 using WorkgroupAttributeTest = TestHelper;
 
 TEST_F(WorkgroupAttributeTest, Creation_1param) {
-  auto* d = WorkgroupSize(2);
-  auto values = d->Values();
+    auto* d = WorkgroupSize(2);
+    auto values = d->Values();
 
-  ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-  EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
+    ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
 
-  EXPECT_EQ(values[1], nullptr);
-  EXPECT_EQ(values[2], nullptr);
+    EXPECT_EQ(values[1], nullptr);
+    EXPECT_EQ(values[2], nullptr);
 }
 TEST_F(WorkgroupAttributeTest, Creation_2param) {
-  auto* d = WorkgroupSize(2, 4);
-  auto values = d->Values();
+    auto* d = WorkgroupSize(2, 4);
+    auto values = d->Values();
 
-  ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-  EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
+    ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
 
-  ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
-  EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
+    ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
 
-  EXPECT_EQ(values[2], nullptr);
+    EXPECT_EQ(values[2], nullptr);
 }
 
 TEST_F(WorkgroupAttributeTest, Creation_3param) {
-  auto* d = WorkgroupSize(2, 4, 6);
-  auto values = d->Values();
+    auto* d = WorkgroupSize(2, 4, 6);
+    auto values = d->Values();
 
-  ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-  EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
+    ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
 
-  ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
-  EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
+    ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
 
-  ASSERT_TRUE(values[2]->Is<ast::IntLiteralExpression>());
-  EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->ValueAsU32(), 6u);
+    ASSERT_TRUE(values[2]->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->ValueAsU32(), 6u);
 }
 
 TEST_F(WorkgroupAttributeTest, Creation_WithIdentifier) {
-  auto* d = WorkgroupSize(2, 4, "depth");
-  auto values = d->Values();
+    auto* d = WorkgroupSize(2, 4, "depth");
+    auto values = d->Values();
 
-  ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-  EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
+    ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
 
-  ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
-  EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
+    ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
 
-  auto* z_ident = As<ast::IdentifierExpression>(values[2]);
-  ASSERT_TRUE(z_ident);
-  EXPECT_EQ(Symbols().NameFor(z_ident->symbol), "depth");
+    auto* z_ident = As<ast::IdentifierExpression>(values[2]);
+    ASSERT_TRUE(z_ident);
+    EXPECT_EQ(Symbols().NameFor(z_ident->symbol), "depth");
 }
 
 }  // namespace

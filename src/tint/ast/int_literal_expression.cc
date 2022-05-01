@@ -18,8 +18,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::IntLiteralExpression);
 
 namespace tint::ast {
 
-IntLiteralExpression::IntLiteralExpression(ProgramID pid, const Source& src)
-    : Base(pid, src) {}
+IntLiteralExpression::IntLiteralExpression(ProgramID pid, const Source& src) : Base(pid, src) {}
 
 IntLiteralExpression::~IntLiteralExpression() = default;
 

@@ -23,28 +23,28 @@ namespace {
 using DemanglerTest = testing::Test;
 
 TEST_F(DemanglerTest, NoSymbols) {
-  SymbolTable t{ProgramID::New()};
-  t.Register("sym1");
+    SymbolTable t{ProgramID::New()};
+    t.Register("sym1");
 
-  Demangler d;
-  EXPECT_EQ("test str", d.Demangle(t, "test str"));
+    Demangler d;
+    EXPECT_EQ("test str", d.Demangle(t, "test str"));
 }
 
 TEST_F(DemanglerTest, Symbol) {
-  SymbolTable t{ProgramID::New()};
-  t.Register("sym1");
+    SymbolTable t{ProgramID::New()};
+    t.Register("sym1");
 
-  Demangler d;
-  EXPECT_EQ("test sym1 str", d.Demangle(t, "test $1 str"));
+    Demangler d;
+    EXPECT_EQ("test sym1 str", d.Demangle(t, "test $1 str"));
 }
 
 TEST_F(DemanglerTest, MultipleSymbols) {
-  SymbolTable t{ProgramID::New()};
-  t.Register("sym1");
-  t.Register("sym2");
+    SymbolTable t{ProgramID::New()};
+    t.Register("sym1");
+    t.Register("sym2");
 
-  Demangler d;
-  EXPECT_EQ("test sym1 sym2 sym1 str", d.Demangle(t, "test $1 $2 $1 str"));
+    Demangler d;
+    EXPECT_EQ("test sym1 sym2 sym1 str", d.Demangle(t, "test $1 $2 $1 str"));
 }
 
 }  // namespace

@@ -19,10 +19,10 @@
 
 namespace dawn::wire {
 
-    enum class [[nodiscard]] WireResult{
-        Success,
-        FatalError,
-    };
+enum class [[nodiscard]] WireResult{
+    Success,
+    FatalError,
+};
 
 // Macro to simplify error handling, similar to DAWN_TRY but for WireResult.
 #define WIRE_TRY(EXPR)                                          \

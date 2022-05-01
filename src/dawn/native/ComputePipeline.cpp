@@ -20,80 +20,78 @@
 
 namespace dawn::native {
 
-    MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
-                                                 const ComputePipelineDescriptor* descriptor) {
-        if (descriptor->nextInChain != nullptr) {
-            return DAWN_FORMAT_VALIDATION_ERROR("nextInChain must be nullptr.");
+MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
+                                             const ComputePipelineDescriptor* descriptor) {
+    if (descriptor->nextInChain != nullptr) {
+        return DAWN_FORMAT_VALIDATION_ERROR("nextInChain must be nullptr.");
+    }
+
+    if (descriptor->layout != nullptr) {
+        DAWN_TRY(device->ValidateObject(descriptor->layout));
+    }
+
+    return ValidateProgrammableStage(
+        device, descriptor->compute.module, descriptor->compute.entryPoint,
+        descriptor->compute.constantCount, descriptor->compute.constants, descriptor->layout,
+        SingleShaderStage::Compute);
+}
+
+// ComputePipelineBase
+
+ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
+                                         const ComputePipelineDescriptor* descriptor)
+    : PipelineBase(
+          device,
+          descriptor->layout,
+          descriptor->label,
+          {{SingleShaderStage::Compute, descriptor->compute.module, descriptor->compute.entryPoint,
+            descriptor->compute.constantCount, descriptor->compute.constants}}) {
+    SetContentHash(ComputeContentHash());
+    TrackInDevice();
+
+    // Initialize the cache key to include the cache type and device information.
+    GetCacheKey()->Record(CacheKey::Type::ComputePipeline, device->GetCacheKey());
+}
+
+ComputePipelineBase::ComputePipelineBase(DeviceBase* device) : PipelineBase(device) {
+    TrackInDevice();
+}
+
+ComputePipelineBase::ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
+    : PipelineBase(device, tag) {}
+
+ComputePipelineBase::~ComputePipelineBase() = default;
+
+void ComputePipelineBase::DestroyImpl() {
+    if (IsCachedReference()) {
+        // Do not uncache the actual cached object if we are a blueprint.
+        GetDevice()->UncacheComputePipeline(this);
+    }
+}
+
+// static
+ComputePipelineBase* ComputePipelineBase::MakeError(DeviceBase* device) {
+    class ErrorComputePipeline final : public ComputePipelineBase {
+      public:
+        explicit ErrorComputePipeline(DeviceBase* device)
+            : ComputePipelineBase(device, ObjectBase::kError) {}
+
+        MaybeError Initialize() override {
+            UNREACHABLE();
+            return {};
         }
+    };
 
-        if (descriptor->layout != nullptr) {
-            DAWN_TRY(device->ValidateObject(descriptor->layout));
-        }
+    return new ErrorComputePipeline(device);
+}
 
-        return ValidateProgrammableStage(
-            device, descriptor->compute.module, descriptor->compute.entryPoint,
-            descriptor->compute.constantCount, descriptor->compute.constants, descriptor->layout,
-            SingleShaderStage::Compute);
-    }
+ObjectType ComputePipelineBase::GetType() const {
+    return ObjectType::ComputePipeline;
+}
 
-    // ComputePipelineBase
-
-    ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
-                                             const ComputePipelineDescriptor* descriptor)
-        : PipelineBase(device,
-                       descriptor->layout,
-                       descriptor->label,
-                       {{SingleShaderStage::Compute, descriptor->compute.module,
-                         descriptor->compute.entryPoint, descriptor->compute.constantCount,
-                         descriptor->compute.constants}}) {
-        SetContentHash(ComputeContentHash());
-        TrackInDevice();
-
-        // Initialize the cache key to include the cache type and device information.
-        GetCacheKey()->Record(CacheKey::Type::ComputePipeline, device->GetCacheKey());
-    }
-
-    ComputePipelineBase::ComputePipelineBase(DeviceBase* device) : PipelineBase(device) {
-        TrackInDevice();
-    }
-
-    ComputePipelineBase::ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-        : PipelineBase(device, tag) {
-    }
-
-    ComputePipelineBase::~ComputePipelineBase() = default;
-
-    void ComputePipelineBase::DestroyImpl() {
-        if (IsCachedReference()) {
-            // Do not uncache the actual cached object if we are a blueprint.
-            GetDevice()->UncacheComputePipeline(this);
-        }
-    }
-
-    // static
-    ComputePipelineBase* ComputePipelineBase::MakeError(DeviceBase* device) {
-        class ErrorComputePipeline final : public ComputePipelineBase {
-          public:
-            explicit ErrorComputePipeline(DeviceBase* device)
-                : ComputePipelineBase(device, ObjectBase::kError) {
-            }
-
-            MaybeError Initialize() override {
-                UNREACHABLE();
-                return {};
-            }
-        };
-
-        return new ErrorComputePipeline(device);
-    }
-
-    ObjectType ComputePipelineBase::GetType() const {
-        return ObjectType::ComputePipeline;
-    }
-
-    bool ComputePipelineBase::EqualityFunc::operator()(const ComputePipelineBase* a,
-                                                       const ComputePipelineBase* b) const {
-        return PipelineBase::EqualForCache(a, b);
-    }
+bool ComputePipelineBase::EqualityFunc::operator()(const ComputePipelineBase* a,
+                                                   const ComputePipelineBase* b) const {
+    return PipelineBase::EqualForCache(a, b);
+}
 
 }  // namespace dawn::native

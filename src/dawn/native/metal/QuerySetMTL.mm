@@ -20,120 +20,119 @@
 
 namespace dawn::native::metal {
 
-    namespace {
+namespace {
 
-        ResultOrError<id<MTLCounterSampleBuffer>> CreateCounterSampleBuffer(
-            Device* device,
-            MTLCommonCounterSet counterSet,
-            uint32_t count) API_AVAILABLE(macos(10.15), ios(14.0)) {
-            NSRef<MTLCounterSampleBufferDescriptor> descriptorRef =
-                AcquireNSRef([MTLCounterSampleBufferDescriptor new]);
-            MTLCounterSampleBufferDescriptor* descriptor = descriptorRef.Get();
+ResultOrError<id<MTLCounterSampleBuffer>> CreateCounterSampleBuffer(Device* device,
+                                                                    MTLCommonCounterSet counterSet,
+                                                                    uint32_t count)
+    API_AVAILABLE(macos(10.15), ios(14.0)) {
+    NSRef<MTLCounterSampleBufferDescriptor> descriptorRef =
+        AcquireNSRef([MTLCounterSampleBufferDescriptor new]);
+    MTLCounterSampleBufferDescriptor* descriptor = descriptorRef.Get();
 
-            // To determine which counters are available from a device, we need to iterate through
-            // the counterSets property of a MTLDevice. Then configure which counters will be
-            // sampled by creating a MTLCounterSampleBufferDescriptor and setting its counterSet
-            // property to the matched one of the available set.
-            for (id<MTLCounterSet> set in device->GetMTLDevice().counterSets) {
-                if ([set.name isEqualToString:counterSet]) {
-                    descriptor.counterSet = set;
-                    break;
-                }
-            }
-            ASSERT(descriptor.counterSet != nullptr);
-
-            descriptor.sampleCount = static_cast<NSUInteger>(std::max(count, uint32_t(1u)));
-            descriptor.storageMode = MTLStorageModePrivate;
-            if (device->IsToggleEnabled(Toggle::MetalUseSharedModeForCounterSampleBuffer)) {
-                descriptor.storageMode = MTLStorageModeShared;
-            }
-
-            NSError* error = nullptr;
-            id<MTLCounterSampleBuffer> counterSampleBuffer =
-                [device->GetMTLDevice() newCounterSampleBufferWithDescriptor:descriptor
-                                                                       error:&error];
-            if (error != nullptr) {
-                return DAWN_OUT_OF_MEMORY_ERROR(std::string("Error creating query set: ") +
-                                                [error.localizedDescription UTF8String]);
-            }
-
-            return counterSampleBuffer;
+    // To determine which counters are available from a device, we need to iterate through
+    // the counterSets property of a MTLDevice. Then configure which counters will be
+    // sampled by creating a MTLCounterSampleBufferDescriptor and setting its counterSet
+    // property to the matched one of the available set.
+    for (id<MTLCounterSet> set in device->GetMTLDevice().counterSets) {
+        if ([set.name isEqualToString:counterSet]) {
+            descriptor.counterSet = set;
+            break;
         }
     }
+    ASSERT(descriptor.counterSet != nullptr);
 
-    // static
-    ResultOrError<Ref<QuerySet>> QuerySet::Create(Device* device,
-                                                  const QuerySetDescriptor* descriptor) {
-        Ref<QuerySet> queryset = AcquireRef(new QuerySet(device, descriptor));
-        DAWN_TRY(queryset->Initialize());
-        return queryset;
+    descriptor.sampleCount = static_cast<NSUInteger>(std::max(count, uint32_t(1u)));
+    descriptor.storageMode = MTLStorageModePrivate;
+    if (device->IsToggleEnabled(Toggle::MetalUseSharedModeForCounterSampleBuffer)) {
+        descriptor.storageMode = MTLStorageModeShared;
     }
 
-    MaybeError QuerySet::Initialize() {
-        Device* device = ToBackend(GetDevice());
+    NSError* error = nullptr;
+    id<MTLCounterSampleBuffer> counterSampleBuffer =
+        [device->GetMTLDevice() newCounterSampleBufferWithDescriptor:descriptor error:&error];
+    if (error != nullptr) {
+        return DAWN_OUT_OF_MEMORY_ERROR(std::string("Error creating query set: ") +
+                                        [error.localizedDescription UTF8String]);
+    }
 
-        switch (GetQueryType()) {
-            case wgpu::QueryType::Occlusion: {
-                // Create buffer for writing 64-bit results.
-                NSUInteger bufferSize = static_cast<NSUInteger>(
-                    std::max(GetQueryCount() * sizeof(uint64_t), size_t(4u)));
-                mVisibilityBuffer = AcquireNSPRef([device->GetMTLDevice()
-                    newBufferWithLength:bufferSize
-                                options:MTLResourceStorageModePrivate]);
+    return counterSampleBuffer;
+}
+}  // namespace
 
-                if (mVisibilityBuffer == nil) {
-                    return DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate query set.");
-                }
-                break;
+// static
+ResultOrError<Ref<QuerySet>> QuerySet::Create(Device* device,
+                                              const QuerySetDescriptor* descriptor) {
+    Ref<QuerySet> queryset = AcquireRef(new QuerySet(device, descriptor));
+    DAWN_TRY(queryset->Initialize());
+    return queryset;
+}
+
+MaybeError QuerySet::Initialize() {
+    Device* device = ToBackend(GetDevice());
+
+    switch (GetQueryType()) {
+        case wgpu::QueryType::Occlusion: {
+            // Create buffer for writing 64-bit results.
+            NSUInteger bufferSize =
+                static_cast<NSUInteger>(std::max(GetQueryCount() * sizeof(uint64_t), size_t(4u)));
+            mVisibilityBuffer = AcquireNSPRef([device->GetMTLDevice()
+                newBufferWithLength:bufferSize
+                            options:MTLResourceStorageModePrivate]);
+
+            if (mVisibilityBuffer == nil) {
+                return DAWN_OUT_OF_MEMORY_ERROR("Failed to allocate query set.");
             }
-            case wgpu::QueryType::PipelineStatistics:
-                if (@available(macOS 10.15, iOS 14.0, *)) {
-                    DAWN_TRY_ASSIGN(mCounterSampleBuffer,
-                                    CreateCounterSampleBuffer(device, MTLCommonCounterSetStatistic,
-                                                              GetQueryCount()));
-                } else {
-                    UNREACHABLE();
-                }
-                break;
-            case wgpu::QueryType::Timestamp:
-                if (@available(macOS 10.15, iOS 14.0, *)) {
-                    DAWN_TRY_ASSIGN(mCounterSampleBuffer,
-                                    CreateCounterSampleBuffer(device, MTLCommonCounterSetTimestamp,
-                                                              GetQueryCount()));
-                } else {
-                    UNREACHABLE();
-                }
-                break;
-            default:
+            break;
+        }
+        case wgpu::QueryType::PipelineStatistics:
+            if (@available(macOS 10.15, iOS 14.0, *)) {
+                DAWN_TRY_ASSIGN(mCounterSampleBuffer,
+                                CreateCounterSampleBuffer(device, MTLCommonCounterSetStatistic,
+                                                          GetQueryCount()));
+            } else {
                 UNREACHABLE();
-                break;
-        }
-
-        return {};
+            }
+            break;
+        case wgpu::QueryType::Timestamp:
+            if (@available(macOS 10.15, iOS 14.0, *)) {
+                DAWN_TRY_ASSIGN(mCounterSampleBuffer,
+                                CreateCounterSampleBuffer(device, MTLCommonCounterSetTimestamp,
+                                                          GetQueryCount()));
+            } else {
+                UNREACHABLE();
+            }
+            break;
+        default:
+            UNREACHABLE();
+            break;
     }
 
-    id<MTLBuffer> QuerySet::GetVisibilityBuffer() const {
-        return mVisibilityBuffer.Get();
+    return {};
+}
+
+id<MTLBuffer> QuerySet::GetVisibilityBuffer() const {
+    return mVisibilityBuffer.Get();
+}
+
+id<MTLCounterSampleBuffer> QuerySet::GetCounterSampleBuffer() const
+    API_AVAILABLE(macos(10.15), ios(14.0)) {
+    return mCounterSampleBuffer;
+}
+
+QuerySet::~QuerySet() = default;
+
+void QuerySet::DestroyImpl() {
+    QuerySetBase::DestroyImpl();
+
+    mVisibilityBuffer = nullptr;
+
+    // mCounterSampleBuffer isn't an NSRef because API_AVAILABLE doesn't work will with
+    // templates.
+    if (@available(macOS 10.15, iOS 14.0, *)) {
+        [mCounterSampleBuffer release];
+        mCounterSampleBuffer = nullptr;
     }
-
-    id<MTLCounterSampleBuffer> QuerySet::GetCounterSampleBuffer() const
-        API_AVAILABLE(macos(10.15), ios(14.0)) {
-        return mCounterSampleBuffer;
-    }
-
-    QuerySet::~QuerySet() = default;
-
-    void QuerySet::DestroyImpl() {
-        QuerySetBase::DestroyImpl();
-
-        mVisibilityBuffer = nullptr;
-
-        // mCounterSampleBuffer isn't an NSRef because API_AVAILABLE doesn't work will with
-        // templates.
-        if (@available(macOS 10.15, iOS 14.0, *)) {
-            [mCounterSampleBuffer release];
-            mCounterSampleBuffer = nullptr;
-        }
-    }
+}
 
 }  // namespace dawn::native::metal

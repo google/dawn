@@ -30,50 +30,49 @@
 
 namespace dawn::native::vulkan {
 
-    class Device;
-    class PipelineLayout;
+class Device;
+class PipelineLayout;
 
-    class ShaderModule final : public ShaderModuleBase {
+class ShaderModule final : public ShaderModuleBase {
+  public:
+    using Spirv = std::vector<uint32_t>;
+    using ModuleAndSpirv = std::pair<VkShaderModule, const Spirv*>;
+
+    static ResultOrError<Ref<ShaderModule>> Create(Device* device,
+                                                   const ShaderModuleDescriptor* descriptor,
+                                                   ShaderModuleParseResult* parseResult);
+
+    ResultOrError<ModuleAndSpirv> GetHandleAndSpirv(const char* entryPointName,
+                                                    PipelineLayout* layout);
+
+  private:
+    ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
+    ~ShaderModule() override;
+    MaybeError Initialize(ShaderModuleParseResult* parseResult);
+    void DestroyImpl() override;
+
+    // New handles created by GetHandleAndSpirv at pipeline creation time.
+    class ConcurrentTransformedShaderModuleCache {
       public:
-        using Spirv = std::vector<uint32_t>;
-        using ModuleAndSpirv = std::pair<VkShaderModule, const Spirv*>;
+        explicit ConcurrentTransformedShaderModuleCache(Device* device);
+        ~ConcurrentTransformedShaderModuleCache();
 
-        static ResultOrError<Ref<ShaderModule>> Create(Device* device,
-                                                       const ShaderModuleDescriptor* descriptor,
-                                                       ShaderModuleParseResult* parseResult);
-
-        ResultOrError<ModuleAndSpirv> GetHandleAndSpirv(const char* entryPointName,
-                                                        PipelineLayout* layout);
+        std::optional<ModuleAndSpirv> Find(const PipelineLayoutEntryPointPair& key);
+        ModuleAndSpirv AddOrGet(const PipelineLayoutEntryPointPair& key,
+                                VkShaderModule module,
+                                std::vector<uint32_t>&& spirv);
 
       private:
-        ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
-        ~ShaderModule() override;
-        MaybeError Initialize(ShaderModuleParseResult* parseResult);
-        void DestroyImpl() override;
+        using Entry = std::pair<VkShaderModule, std::unique_ptr<Spirv>>;
 
-        // New handles created by GetHandleAndSpirv at pipeline creation time.
-        class ConcurrentTransformedShaderModuleCache {
-          public:
-            explicit ConcurrentTransformedShaderModuleCache(Device* device);
-            ~ConcurrentTransformedShaderModuleCache();
-
-            std::optional<ModuleAndSpirv> Find(const PipelineLayoutEntryPointPair& key);
-            ModuleAndSpirv AddOrGet(const PipelineLayoutEntryPointPair& key,
-                                    VkShaderModule module,
-                                    std::vector<uint32_t>&& spirv);
-
-          private:
-            using Entry = std::pair<VkShaderModule, std::unique_ptr<Spirv>>;
-
-            Device* mDevice;
-            std::mutex mMutex;
-            std::unordered_map<PipelineLayoutEntryPointPair,
-                               Entry,
-                               PipelineLayoutEntryPointPairHashFunc>
+        Device* mDevice;
+        std::mutex mMutex;
+        std::
+            unordered_map<PipelineLayoutEntryPointPair, Entry, PipelineLayoutEntryPointPairHashFunc>
                 mTransformedShaderModuleCache;
-        };
-        std::unique_ptr<ConcurrentTransformedShaderModuleCache> mTransformedShaderModuleCache;
     };
+    std::unique_ptr<ConcurrentTransformedShaderModuleCache> mTransformedShaderModuleCache;
+};
 
 }  // namespace dawn::native::vulkan
 

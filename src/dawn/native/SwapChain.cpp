@@ -24,400 +24,386 @@
 
 namespace dawn::native {
 
-    namespace {
+namespace {
 
-        class ErrorSwapChain final : public SwapChainBase {
-          public:
-            explicit ErrorSwapChain(DeviceBase* device)
-                : SwapChainBase(device, ObjectBase::kError) {
-            }
+class ErrorSwapChain final : public SwapChainBase {
+  public:
+    explicit ErrorSwapChain(DeviceBase* device) : SwapChainBase(device, ObjectBase::kError) {}
 
-          private:
-            void APIConfigure(wgpu::TextureFormat format,
-                              wgpu::TextureUsage allowedUsage,
-                              uint32_t width,
-                              uint32_t height) override {
-                GetDevice()->ConsumedError(
-                    DAWN_FORMAT_VALIDATION_ERROR("%s is an error swapchain.", this));
-            }
+  private:
+    void APIConfigure(wgpu::TextureFormat format,
+                      wgpu::TextureUsage allowedUsage,
+                      uint32_t width,
+                      uint32_t height) override {
+        GetDevice()->ConsumedError(DAWN_FORMAT_VALIDATION_ERROR("%s is an error swapchain.", this));
+    }
 
-            TextureViewBase* APIGetCurrentTextureView() override {
-                GetDevice()->ConsumedError(
-                    DAWN_FORMAT_VALIDATION_ERROR("%s is an error swapchain.", this));
-                return TextureViewBase::MakeError(GetDevice());
-            }
+    TextureViewBase* APIGetCurrentTextureView() override {
+        GetDevice()->ConsumedError(DAWN_FORMAT_VALIDATION_ERROR("%s is an error swapchain.", this));
+        return TextureViewBase::MakeError(GetDevice());
+    }
 
-            void APIPresent() override {
-                GetDevice()->ConsumedError(
-                    DAWN_FORMAT_VALIDATION_ERROR("%s is an error swapchain.", this));
-            }
-        };
+    void APIPresent() override {
+        GetDevice()->ConsumedError(DAWN_FORMAT_VALIDATION_ERROR("%s is an error swapchain.", this));
+    }
+};
 
-    }  // anonymous namespace
+}  // anonymous namespace
 
-    MaybeError ValidateSwapChainDescriptor(const DeviceBase* device,
-                                           const Surface* surface,
-                                           const SwapChainDescriptor* descriptor) {
-        if (descriptor->implementation != 0) {
-            DAWN_INVALID_IF(surface != nullptr,
-                            "Exactly one of surface or implementation must be set");
+MaybeError ValidateSwapChainDescriptor(const DeviceBase* device,
+                                       const Surface* surface,
+                                       const SwapChainDescriptor* descriptor) {
+    if (descriptor->implementation != 0) {
+        DAWN_INVALID_IF(surface != nullptr, "Exactly one of surface or implementation must be set");
 
-            DawnSwapChainImplementation* impl =
-                reinterpret_cast<DawnSwapChainImplementation*>(descriptor->implementation);
+        DawnSwapChainImplementation* impl =
+            reinterpret_cast<DawnSwapChainImplementation*>(descriptor->implementation);
 
-            DAWN_INVALID_IF(!impl->Init || !impl->Destroy || !impl->Configure ||
-                                !impl->GetNextTexture || !impl->Present,
-                            "Implementation is incomplete");
+        DAWN_INVALID_IF(!impl->Init || !impl->Destroy || !impl->Configure ||
+                            !impl->GetNextTexture || !impl->Present,
+                        "Implementation is incomplete");
 
-        } else {
-            DAWN_INVALID_IF(surface == nullptr,
-                            "At least one of surface or implementation must be set");
+    } else {
+        DAWN_INVALID_IF(surface == nullptr,
+                        "At least one of surface or implementation must be set");
 
-            DAWN_TRY(ValidatePresentMode(descriptor->presentMode));
+        DAWN_TRY(ValidatePresentMode(descriptor->presentMode));
 
 // TODO(crbug.com/dawn/160): Lift this restriction once wgpu::Instance::GetPreferredSurfaceFormat is
 // implemented.
 // TODO(dawn:286):
 #if defined(DAWN_PLATFORM_ANDROID)
-            constexpr wgpu::TextureFormat kRequireSwapChainFormat = wgpu::TextureFormat::RGBA8Unorm;
+        constexpr wgpu::TextureFormat kRequireSwapChainFormat = wgpu::TextureFormat::RGBA8Unorm;
 #else
-            constexpr wgpu::TextureFormat kRequireSwapChainFormat = wgpu::TextureFormat::BGRA8Unorm;
+        constexpr wgpu::TextureFormat kRequireSwapChainFormat = wgpu::TextureFormat::BGRA8Unorm;
 #endif  // !defined(DAWN_PLATFORM_ANDROID)
-            DAWN_INVALID_IF(descriptor->format != kRequireSwapChainFormat,
-                            "Format (%s) is not %s, which is (currently) the only accepted format.",
-                            descriptor->format, kRequireSwapChainFormat);
+        DAWN_INVALID_IF(descriptor->format != kRequireSwapChainFormat,
+                        "Format (%s) is not %s, which is (currently) the only accepted format.",
+                        descriptor->format, kRequireSwapChainFormat);
 
-            DAWN_INVALID_IF(descriptor->usage != wgpu::TextureUsage::RenderAttachment,
-                            "Usage (%s) is not %s, which is (currently) the only accepted usage.",
-                            descriptor->usage, wgpu::TextureUsage::RenderAttachment);
+        DAWN_INVALID_IF(descriptor->usage != wgpu::TextureUsage::RenderAttachment,
+                        "Usage (%s) is not %s, which is (currently) the only accepted usage.",
+                        descriptor->usage, wgpu::TextureUsage::RenderAttachment);
 
-            DAWN_INVALID_IF(descriptor->width == 0 || descriptor->height == 0,
-                            "Swap Chain size (width: %u, height: %u) is empty.", descriptor->width,
-                            descriptor->height);
+        DAWN_INVALID_IF(descriptor->width == 0 || descriptor->height == 0,
+                        "Swap Chain size (width: %u, height: %u) is empty.", descriptor->width,
+                        descriptor->height);
 
-            DAWN_INVALID_IF(
-                descriptor->width > device->GetLimits().v1.maxTextureDimension2D ||
-                    descriptor->height > device->GetLimits().v1.maxTextureDimension2D,
-                "Swap Chain size (width: %u, height: %u) is greater than the maximum 2D texture "
-                "size (width: %u, height: %u).",
-                descriptor->width, descriptor->height, device->GetLimits().v1.maxTextureDimension2D,
-                device->GetLimits().v1.maxTextureDimension2D);
-        }
-
-        return {};
+        DAWN_INVALID_IF(
+            descriptor->width > device->GetLimits().v1.maxTextureDimension2D ||
+                descriptor->height > device->GetLimits().v1.maxTextureDimension2D,
+            "Swap Chain size (width: %u, height: %u) is greater than the maximum 2D texture "
+            "size (width: %u, height: %u).",
+            descriptor->width, descriptor->height, device->GetLimits().v1.maxTextureDimension2D,
+            device->GetLimits().v1.maxTextureDimension2D);
     }
 
-    TextureDescriptor GetSwapChainBaseTextureDescriptor(NewSwapChainBase* swapChain) {
-        TextureDescriptor desc;
-        desc.usage = swapChain->GetUsage();
-        desc.dimension = wgpu::TextureDimension::e2D;
-        desc.size = {swapChain->GetWidth(), swapChain->GetHeight(), 1};
-        desc.format = swapChain->GetFormat();
-        desc.mipLevelCount = 1;
-        desc.sampleCount = 1;
+    return {};
+}
 
-        return desc;
+TextureDescriptor GetSwapChainBaseTextureDescriptor(NewSwapChainBase* swapChain) {
+    TextureDescriptor desc;
+    desc.usage = swapChain->GetUsage();
+    desc.dimension = wgpu::TextureDimension::e2D;
+    desc.size = {swapChain->GetWidth(), swapChain->GetHeight(), 1};
+    desc.format = swapChain->GetFormat();
+    desc.mipLevelCount = 1;
+    desc.sampleCount = 1;
+
+    return desc;
+}
+
+// SwapChainBase
+
+SwapChainBase::SwapChainBase(DeviceBase* device) : ApiObjectBase(device, kLabelNotImplemented) {
+    TrackInDevice();
+}
+
+SwapChainBase::SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag)
+    : ApiObjectBase(device, tag) {}
+
+SwapChainBase::~SwapChainBase() {}
+
+void SwapChainBase::DestroyImpl() {}
+
+// static
+SwapChainBase* SwapChainBase::MakeError(DeviceBase* device) {
+    return new ErrorSwapChain(device);
+}
+
+ObjectType SwapChainBase::GetType() const {
+    return ObjectType::SwapChain;
+}
+
+// OldSwapChainBase
+
+OldSwapChainBase::OldSwapChainBase(DeviceBase* device, const SwapChainDescriptor* descriptor)
+    : SwapChainBase(device),
+      mImplementation(*reinterpret_cast<DawnSwapChainImplementation*>(descriptor->implementation)) {
+}
+
+OldSwapChainBase::~OldSwapChainBase() {
+    if (!IsError()) {
+        const auto& im = GetImplementation();
+        im.Destroy(im.userData);
     }
+}
 
-    // SwapChainBase
-
-    SwapChainBase::SwapChainBase(DeviceBase* device) : ApiObjectBase(device, kLabelNotImplemented) {
-        TrackInDevice();
+void OldSwapChainBase::APIConfigure(wgpu::TextureFormat format,
+                                    wgpu::TextureUsage allowedUsage,
+                                    uint32_t width,
+                                    uint32_t height) {
+    if (GetDevice()->ConsumedError(ValidateConfigure(format, allowedUsage, width, height))) {
+        return;
     }
+    ASSERT(!IsError());
 
-    SwapChainBase::SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-        : ApiObjectBase(device, tag) {
+    allowedUsage |= wgpu::TextureUsage::Present;
+
+    mFormat = format;
+    mAllowedUsage = allowedUsage;
+    mWidth = width;
+    mHeight = height;
+    mImplementation.Configure(mImplementation.userData, static_cast<WGPUTextureFormat>(format),
+                              static_cast<WGPUTextureUsage>(allowedUsage), width, height);
+}
+
+TextureViewBase* OldSwapChainBase::APIGetCurrentTextureView() {
+    if (GetDevice()->ConsumedError(ValidateGetCurrentTextureView())) {
+        return TextureViewBase::MakeError(GetDevice());
     }
+    ASSERT(!IsError());
 
-    SwapChainBase::~SwapChainBase() {
-    }
-
-    void SwapChainBase::DestroyImpl() {
-    }
-
-    // static
-    SwapChainBase* SwapChainBase::MakeError(DeviceBase* device) {
-        return new ErrorSwapChain(device);
-    }
-
-    ObjectType SwapChainBase::GetType() const {
-        return ObjectType::SwapChain;
-    }
-
-    // OldSwapChainBase
-
-    OldSwapChainBase::OldSwapChainBase(DeviceBase* device, const SwapChainDescriptor* descriptor)
-        : SwapChainBase(device),
-          mImplementation(
-              *reinterpret_cast<DawnSwapChainImplementation*>(descriptor->implementation)) {
-    }
-
-    OldSwapChainBase::~OldSwapChainBase() {
-        if (!IsError()) {
-            const auto& im = GetImplementation();
-            im.Destroy(im.userData);
-        }
-    }
-
-    void OldSwapChainBase::APIConfigure(wgpu::TextureFormat format,
-                                        wgpu::TextureUsage allowedUsage,
-                                        uint32_t width,
-                                        uint32_t height) {
-        if (GetDevice()->ConsumedError(ValidateConfigure(format, allowedUsage, width, height))) {
-            return;
-        }
-        ASSERT(!IsError());
-
-        allowedUsage |= wgpu::TextureUsage::Present;
-
-        mFormat = format;
-        mAllowedUsage = allowedUsage;
-        mWidth = width;
-        mHeight = height;
-        mImplementation.Configure(mImplementation.userData, static_cast<WGPUTextureFormat>(format),
-                                  static_cast<WGPUTextureUsage>(allowedUsage), width, height);
-    }
-
-    TextureViewBase* OldSwapChainBase::APIGetCurrentTextureView() {
-        if (GetDevice()->ConsumedError(ValidateGetCurrentTextureView())) {
-            return TextureViewBase::MakeError(GetDevice());
-        }
-        ASSERT(!IsError());
-
-        // Return the same current texture view until Present is called.
-        if (mCurrentTextureView != nullptr) {
-            // Calling GetCurrentTextureView always returns a new reference so add it even when
-            // reuse the existing texture view.
-            mCurrentTextureView->Reference();
-            return mCurrentTextureView.Get();
-        }
-
-        // Create the backing texture and the view.
-        TextureDescriptor descriptor;
-        descriptor.dimension = wgpu::TextureDimension::e2D;
-        descriptor.size.width = mWidth;
-        descriptor.size.height = mHeight;
-        descriptor.size.depthOrArrayLayers = 1;
-        descriptor.sampleCount = 1;
-        descriptor.format = mFormat;
-        descriptor.mipLevelCount = 1;
-        descriptor.usage = mAllowedUsage;
-
-        // Get the texture but remove the external refcount because it is never passed outside
-        // of dawn_native
-        mCurrentTexture = AcquireRef(GetNextTextureImpl(&descriptor));
-
-        mCurrentTextureView = mCurrentTexture->APICreateView();
+    // Return the same current texture view until Present is called.
+    if (mCurrentTextureView != nullptr) {
+        // Calling GetCurrentTextureView always returns a new reference so add it even when
+        // reuse the existing texture view.
+        mCurrentTextureView->Reference();
         return mCurrentTextureView.Get();
     }
 
-    void OldSwapChainBase::APIPresent() {
-        if (GetDevice()->ConsumedError(ValidatePresent())) {
-            return;
-        }
-        ASSERT(!IsError());
+    // Create the backing texture and the view.
+    TextureDescriptor descriptor;
+    descriptor.dimension = wgpu::TextureDimension::e2D;
+    descriptor.size.width = mWidth;
+    descriptor.size.height = mHeight;
+    descriptor.size.depthOrArrayLayers = 1;
+    descriptor.sampleCount = 1;
+    descriptor.format = mFormat;
+    descriptor.mipLevelCount = 1;
+    descriptor.usage = mAllowedUsage;
 
-        if (GetDevice()->ConsumedError(OnBeforePresent(mCurrentTextureView.Get()))) {
-            return;
-        }
+    // Get the texture but remove the external refcount because it is never passed outside
+    // of dawn_native
+    mCurrentTexture = AcquireRef(GetNextTextureImpl(&descriptor));
 
-        mImplementation.Present(mImplementation.userData);
+    mCurrentTextureView = mCurrentTexture->APICreateView();
+    return mCurrentTextureView.Get();
+}
 
-        mCurrentTexture = nullptr;
-        mCurrentTextureView = nullptr;
+void OldSwapChainBase::APIPresent() {
+    if (GetDevice()->ConsumedError(ValidatePresent())) {
+        return;
+    }
+    ASSERT(!IsError());
+
+    if (GetDevice()->ConsumedError(OnBeforePresent(mCurrentTextureView.Get()))) {
+        return;
     }
 
-    const DawnSwapChainImplementation& OldSwapChainBase::GetImplementation() {
-        ASSERT(!IsError());
-        return mImplementation;
+    mImplementation.Present(mImplementation.userData);
+
+    mCurrentTexture = nullptr;
+    mCurrentTextureView = nullptr;
+}
+
+const DawnSwapChainImplementation& OldSwapChainBase::GetImplementation() {
+    ASSERT(!IsError());
+    return mImplementation;
+}
+
+MaybeError OldSwapChainBase::ValidateConfigure(wgpu::TextureFormat format,
+                                               wgpu::TextureUsage allowedUsage,
+                                               uint32_t width,
+                                               uint32_t height) const {
+    DAWN_TRY(GetDevice()->ValidateIsAlive());
+    DAWN_TRY(GetDevice()->ValidateObject(this));
+
+    DAWN_TRY(ValidateTextureUsage(allowedUsage));
+    DAWN_TRY(ValidateTextureFormat(format));
+
+    DAWN_INVALID_IF(width == 0 || height == 0,
+                    "Configuration size (width: %u, height: %u) for %s is empty.", width, height,
+                    this);
+
+    return {};
+}
+
+MaybeError OldSwapChainBase::ValidateGetCurrentTextureView() const {
+    DAWN_TRY(GetDevice()->ValidateIsAlive());
+    DAWN_TRY(GetDevice()->ValidateObject(this));
+
+    // If width is 0, it implies swap chain has never been configured
+    DAWN_INVALID_IF(mWidth == 0, "%s was not configured prior to calling GetNextTexture.", this);
+
+    return {};
+}
+
+MaybeError OldSwapChainBase::ValidatePresent() const {
+    DAWN_TRY(GetDevice()->ValidateIsAlive());
+    DAWN_TRY(GetDevice()->ValidateObject(this));
+
+    DAWN_INVALID_IF(
+        mCurrentTextureView == nullptr,
+        "GetCurrentTextureView was not called on %s this frame prior to calling Present.", this);
+
+    return {};
+}
+
+// Implementation of NewSwapChainBase
+
+NewSwapChainBase::NewSwapChainBase(DeviceBase* device,
+                                   Surface* surface,
+                                   const SwapChainDescriptor* descriptor)
+    : SwapChainBase(device),
+      mAttached(false),
+      mWidth(descriptor->width),
+      mHeight(descriptor->height),
+      mFormat(descriptor->format),
+      mUsage(descriptor->usage),
+      mPresentMode(descriptor->presentMode),
+      mSurface(surface) {}
+
+NewSwapChainBase::~NewSwapChainBase() {
+    if (mCurrentTextureView != nullptr) {
+        ASSERT(mCurrentTextureView->GetTexture()->GetTextureState() ==
+               TextureBase::TextureState::Destroyed);
     }
 
-    MaybeError OldSwapChainBase::ValidateConfigure(wgpu::TextureFormat format,
-                                                   wgpu::TextureUsage allowedUsage,
-                                                   uint32_t width,
-                                                   uint32_t height) const {
-        DAWN_TRY(GetDevice()->ValidateIsAlive());
-        DAWN_TRY(GetDevice()->ValidateObject(this));
+    ASSERT(!mAttached);
+}
 
-        DAWN_TRY(ValidateTextureUsage(allowedUsage));
-        DAWN_TRY(ValidateTextureFormat(format));
-
-        DAWN_INVALID_IF(width == 0 || height == 0,
-                        "Configuration size (width: %u, height: %u) for %s is empty.", width,
-                        height, this);
-
-        return {};
+void NewSwapChainBase::DetachFromSurface() {
+    if (mAttached) {
+        DetachFromSurfaceImpl();
+        mSurface = nullptr;
+        mAttached = false;
     }
+}
 
-    MaybeError OldSwapChainBase::ValidateGetCurrentTextureView() const {
-        DAWN_TRY(GetDevice()->ValidateIsAlive());
-        DAWN_TRY(GetDevice()->ValidateObject(this));
+void NewSwapChainBase::SetIsAttached() {
+    mAttached = true;
+}
 
-        // If width is 0, it implies swap chain has never been configured
-        DAWN_INVALID_IF(mWidth == 0, "%s was not configured prior to calling GetNextTexture.",
-                        this);
+void NewSwapChainBase::APIConfigure(wgpu::TextureFormat format,
+                                    wgpu::TextureUsage allowedUsage,
+                                    uint32_t width,
+                                    uint32_t height) {
+    GetDevice()->ConsumedError(
+        DAWN_FORMAT_VALIDATION_ERROR("Configure is invalid for surface-based swapchains."));
+}
 
-        return {};
+TextureViewBase* NewSwapChainBase::APIGetCurrentTextureView() {
+    Ref<TextureViewBase> result;
+    if (GetDevice()->ConsumedError(GetCurrentTextureView(), &result,
+                                   "calling %s.GetCurrentTextureView()", this)) {
+        return TextureViewBase::MakeError(GetDevice());
     }
+    return result.Detach();
+}
 
-    MaybeError OldSwapChainBase::ValidatePresent() const {
-        DAWN_TRY(GetDevice()->ValidateIsAlive());
-        DAWN_TRY(GetDevice()->ValidateObject(this));
+ResultOrError<Ref<TextureViewBase>> NewSwapChainBase::GetCurrentTextureView() {
+    DAWN_TRY(ValidateGetCurrentTextureView());
 
-        DAWN_INVALID_IF(
-            mCurrentTextureView == nullptr,
-            "GetCurrentTextureView was not called on %s this frame prior to calling Present.",
-            this);
-
-        return {};
-    }
-
-    // Implementation of NewSwapChainBase
-
-    NewSwapChainBase::NewSwapChainBase(DeviceBase* device,
-                                       Surface* surface,
-                                       const SwapChainDescriptor* descriptor)
-        : SwapChainBase(device),
-          mAttached(false),
-          mWidth(descriptor->width),
-          mHeight(descriptor->height),
-          mFormat(descriptor->format),
-          mUsage(descriptor->usage),
-          mPresentMode(descriptor->presentMode),
-          mSurface(surface) {
-    }
-
-    NewSwapChainBase::~NewSwapChainBase() {
-        if (mCurrentTextureView != nullptr) {
-            ASSERT(mCurrentTextureView->GetTexture()->GetTextureState() ==
-                   TextureBase::TextureState::Destroyed);
-        }
-
-        ASSERT(!mAttached);
-    }
-
-    void NewSwapChainBase::DetachFromSurface() {
-        if (mAttached) {
-            DetachFromSurfaceImpl();
-            mSurface = nullptr;
-            mAttached = false;
-        }
-    }
-
-    void NewSwapChainBase::SetIsAttached() {
-        mAttached = true;
-    }
-
-    void NewSwapChainBase::APIConfigure(wgpu::TextureFormat format,
-                                        wgpu::TextureUsage allowedUsage,
-                                        uint32_t width,
-                                        uint32_t height) {
-        GetDevice()->ConsumedError(
-            DAWN_FORMAT_VALIDATION_ERROR("Configure is invalid for surface-based swapchains."));
-    }
-
-    TextureViewBase* NewSwapChainBase::APIGetCurrentTextureView() {
-        Ref<TextureViewBase> result;
-        if (GetDevice()->ConsumedError(GetCurrentTextureView(), &result,
-                                       "calling %s.GetCurrentTextureView()", this)) {
-            return TextureViewBase::MakeError(GetDevice());
-        }
-        return result.Detach();
-    }
-
-    ResultOrError<Ref<TextureViewBase>> NewSwapChainBase::GetCurrentTextureView() {
-        DAWN_TRY(ValidateGetCurrentTextureView());
-
-        if (mCurrentTextureView != nullptr) {
-            // Calling GetCurrentTextureView always returns a new reference.
-            return mCurrentTextureView;
-        }
-
-        DAWN_TRY_ASSIGN(mCurrentTextureView, GetCurrentTextureViewImpl());
-
-        // Check that the return texture view matches exactly what was given for this descriptor.
-        ASSERT(mCurrentTextureView->GetTexture()->GetFormat().format == mFormat);
-        ASSERT(IsSubset(mUsage, mCurrentTextureView->GetTexture()->GetUsage()));
-        ASSERT(mCurrentTextureView->GetLevelCount() == 1);
-        ASSERT(mCurrentTextureView->GetLayerCount() == 1);
-        ASSERT(mCurrentTextureView->GetDimension() == wgpu::TextureViewDimension::e2D);
-        ASSERT(mCurrentTextureView->GetTexture()
-                   ->GetMipLevelVirtualSize(mCurrentTextureView->GetBaseMipLevel())
-                   .width == mWidth);
-        ASSERT(mCurrentTextureView->GetTexture()
-                   ->GetMipLevelVirtualSize(mCurrentTextureView->GetBaseMipLevel())
-                   .height == mHeight);
-
+    if (mCurrentTextureView != nullptr) {
+        // Calling GetCurrentTextureView always returns a new reference.
         return mCurrentTextureView;
     }
 
-    void NewSwapChainBase::APIPresent() {
-        if (GetDevice()->ConsumedError(ValidatePresent())) {
-            return;
-        }
+    DAWN_TRY_ASSIGN(mCurrentTextureView, GetCurrentTextureViewImpl());
 
-        if (GetDevice()->ConsumedError(PresentImpl())) {
-            return;
-        }
+    // Check that the return texture view matches exactly what was given for this descriptor.
+    ASSERT(mCurrentTextureView->GetTexture()->GetFormat().format == mFormat);
+    ASSERT(IsSubset(mUsage, mCurrentTextureView->GetTexture()->GetUsage()));
+    ASSERT(mCurrentTextureView->GetLevelCount() == 1);
+    ASSERT(mCurrentTextureView->GetLayerCount() == 1);
+    ASSERT(mCurrentTextureView->GetDimension() == wgpu::TextureViewDimension::e2D);
+    ASSERT(mCurrentTextureView->GetTexture()
+               ->GetMipLevelVirtualSize(mCurrentTextureView->GetBaseMipLevel())
+               .width == mWidth);
+    ASSERT(mCurrentTextureView->GetTexture()
+               ->GetMipLevelVirtualSize(mCurrentTextureView->GetBaseMipLevel())
+               .height == mHeight);
 
-        ASSERT(mCurrentTextureView->GetTexture()->GetTextureState() ==
-               TextureBase::TextureState::Destroyed);
-        mCurrentTextureView = nullptr;
+    return mCurrentTextureView;
+}
+
+void NewSwapChainBase::APIPresent() {
+    if (GetDevice()->ConsumedError(ValidatePresent())) {
+        return;
     }
 
-    uint32_t NewSwapChainBase::GetWidth() const {
-        return mWidth;
+    if (GetDevice()->ConsumedError(PresentImpl())) {
+        return;
     }
 
-    uint32_t NewSwapChainBase::GetHeight() const {
-        return mHeight;
-    }
+    ASSERT(mCurrentTextureView->GetTexture()->GetTextureState() ==
+           TextureBase::TextureState::Destroyed);
+    mCurrentTextureView = nullptr;
+}
 
-    wgpu::TextureFormat NewSwapChainBase::GetFormat() const {
-        return mFormat;
-    }
+uint32_t NewSwapChainBase::GetWidth() const {
+    return mWidth;
+}
 
-    wgpu::TextureUsage NewSwapChainBase::GetUsage() const {
-        return mUsage;
-    }
+uint32_t NewSwapChainBase::GetHeight() const {
+    return mHeight;
+}
 
-    wgpu::PresentMode NewSwapChainBase::GetPresentMode() const {
-        return mPresentMode;
-    }
+wgpu::TextureFormat NewSwapChainBase::GetFormat() const {
+    return mFormat;
+}
 
-    Surface* NewSwapChainBase::GetSurface() const {
-        return mSurface;
-    }
+wgpu::TextureUsage NewSwapChainBase::GetUsage() const {
+    return mUsage;
+}
 
-    bool NewSwapChainBase::IsAttached() const {
-        return mAttached;
-    }
+wgpu::PresentMode NewSwapChainBase::GetPresentMode() const {
+    return mPresentMode;
+}
 
-    wgpu::BackendType NewSwapChainBase::GetBackendType() const {
-        return GetDevice()->GetAdapter()->GetBackendType();
-    }
+Surface* NewSwapChainBase::GetSurface() const {
+    return mSurface;
+}
 
-    MaybeError NewSwapChainBase::ValidatePresent() const {
-        DAWN_TRY(GetDevice()->ValidateIsAlive());
-        DAWN_TRY(GetDevice()->ValidateObject(this));
+bool NewSwapChainBase::IsAttached() const {
+    return mAttached;
+}
 
-        DAWN_INVALID_IF(!mAttached, "Cannot call Present called on detached %s.", this);
+wgpu::BackendType NewSwapChainBase::GetBackendType() const {
+    return GetDevice()->GetAdapter()->GetBackendType();
+}
 
-        DAWN_INVALID_IF(
-            mCurrentTextureView == nullptr,
-            "GetCurrentTextureView was not called on %s this frame prior to calling Present.",
-            this);
+MaybeError NewSwapChainBase::ValidatePresent() const {
+    DAWN_TRY(GetDevice()->ValidateIsAlive());
+    DAWN_TRY(GetDevice()->ValidateObject(this));
 
-        return {};
-    }
+    DAWN_INVALID_IF(!mAttached, "Cannot call Present called on detached %s.", this);
 
-    MaybeError NewSwapChainBase::ValidateGetCurrentTextureView() const {
-        DAWN_TRY(GetDevice()->ValidateIsAlive());
-        DAWN_TRY(GetDevice()->ValidateObject(this));
+    DAWN_INVALID_IF(
+        mCurrentTextureView == nullptr,
+        "GetCurrentTextureView was not called on %s this frame prior to calling Present.", this);
 
-        DAWN_INVALID_IF(!mAttached, "Cannot call GetCurrentTextureView on detached %s.", this);
+    return {};
+}
 
-        return {};
-    }
+MaybeError NewSwapChainBase::ValidateGetCurrentTextureView() const {
+    DAWN_TRY(GetDevice()->ValidateIsAlive());
+    DAWN_TRY(GetDevice()->ValidateObject(this));
+
+    DAWN_INVALID_IF(!mAttached, "Cannot call GetCurrentTextureView on detached %s.", this);
+
+    return {};
+}
 
 }  // namespace dawn::native

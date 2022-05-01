@@ -31,47 +31,44 @@ using NthTypeOf = typename std::tuple_element<N, std::tuple<Types...>>::type;
 /// Signature describes the signature of a function.
 template <typename RETURN, typename... PARAMETERS>
 struct Signature {
-  /// The return type of the function signature
-  using ret = RETURN;
-  /// The parameters of the function signature held in a std::tuple
-  using parameters = std::tuple<PARAMETERS...>;
-  /// The type of the Nth parameter of function signature
-  template <std::size_t N>
-  using parameter = NthTypeOf<N, PARAMETERS...>;
-  /// The total number of parameters
-  static constexpr std::size_t parameter_count = sizeof...(PARAMETERS);
+    /// The return type of the function signature
+    using ret = RETURN;
+    /// The parameters of the function signature held in a std::tuple
+    using parameters = std::tuple<PARAMETERS...>;
+    /// The type of the Nth parameter of function signature
+    template <std::size_t N>
+    using parameter = NthTypeOf<N, PARAMETERS...>;
+    /// The total number of parameters
+    static constexpr std::size_t parameter_count = sizeof...(PARAMETERS);
 };
 
 /// SignatureOf is a traits helper that infers the signature of the function,
 /// method, static method, lambda, or function-like object `F`.
 template <typename F>
 struct SignatureOf {
-  /// The signature of the function-like object `F`
-  using type = typename SignatureOf<decltype(&F::operator())>::type;
+    /// The signature of the function-like object `F`
+    using type = typename SignatureOf<decltype(&F::operator())>::type;
 };
 
 /// SignatureOf specialization for a regular function or static method.
 template <typename R, typename... ARGS>
 struct SignatureOf<R (*)(ARGS...)> {
-  /// The signature of the function-like object `F`
-  using type = Signature<typename std::decay<R>::type,
-                         typename std::decay<ARGS>::type...>;
+    /// The signature of the function-like object `F`
+    using type = Signature<typename std::decay<R>::type, typename std::decay<ARGS>::type...>;
 };
 
 /// SignatureOf specialization for a non-static method.
 template <typename R, typename C, typename... ARGS>
 struct SignatureOf<R (C::*)(ARGS...)> {
-  /// The signature of the function-like object `F`
-  using type = Signature<typename std::decay<R>::type,
-                         typename std::decay<ARGS>::type...>;
+    /// The signature of the function-like object `F`
+    using type = Signature<typename std::decay<R>::type, typename std::decay<ARGS>::type...>;
 };
 
 /// SignatureOf specialization for a non-static, const method.
 template <typename R, typename C, typename... ARGS>
 struct SignatureOf<R (C::*)(ARGS...) const> {
-  /// The signature of the function-like object `F`
-  using type = Signature<typename std::decay<R>::type,
-                         typename std::decay<ARGS>::type...>;
+    /// The signature of the function-like object `F`
+    using type = Signature<typename std::decay<R>::type, typename std::decay<ARGS>::type...>;
 };
 
 /// SignatureOfT is an alias to `typename SignatureOf<F>::type`.
@@ -90,8 +87,7 @@ using ReturnType = typename SignatureOfT<F>::ret;
 /// `BASE`.
 template <typename T, typename BASE>
 static constexpr bool IsTypeOrDerived =
-    std::is_base_of<BASE, Decay<T>>::value ||
-    std::is_same<BASE, Decay<T>>::value;
+    std::is_base_of<BASE, Decay<T>>::value || std::is_same<BASE, Decay<T>>::value;
 
 /// If `CONDITION` is true then EnableIf resolves to type T, otherwise an
 /// invalid type.
@@ -111,13 +107,13 @@ using EnableIfIsNotType = EnableIf<!IsTypeOrDerived<T, BASE>, T>;
 /// @returns the std::index_sequence with all the indices shifted by OFFSET.
 template <std::size_t OFFSET, std::size_t... INDICES>
 constexpr auto Shift(std::index_sequence<INDICES...>) {
-  return std::integer_sequence<std::size_t, OFFSET + INDICES...>{};
+    return std::integer_sequence<std::size_t, OFFSET + INDICES...>{};
 }
 
 /// @returns a std::integer_sequence with the integers `[OFFSET..OFFSET+COUNT)`
 template <std::size_t OFFSET, std::size_t COUNT>
 constexpr auto Range() {
-  return Shift<OFFSET>(std::make_index_sequence<COUNT>{});
+    return Shift<OFFSET>(std::make_index_sequence<COUNT>{});
 }
 
 namespace detail {
@@ -125,11 +121,9 @@ namespace detail {
 /// @returns the tuple `t` swizzled by `INDICES`
 template <typename TUPLE, std::size_t... INDICES>
 constexpr auto Swizzle(TUPLE&& t, std::index_sequence<INDICES...>)
-    -> std::tuple<
-        std::tuple_element_t<INDICES, std::remove_reference_t<TUPLE>>...> {
-  return {std::forward<
-      std::tuple_element_t<INDICES, std::remove_reference_t<TUPLE>>>(
-      std::get<INDICES>(std::forward<TUPLE>(t)))...};
+    -> std::tuple<std::tuple_element_t<INDICES, std::remove_reference_t<TUPLE>>...> {
+    return {std::forward<std::tuple_element_t<INDICES, std::remove_reference_t<TUPLE>>>(
+        std::get<INDICES>(std::forward<TUPLE>(t)))...};
 }
 
 /// @returns a nullptr of the tuple type `TUPLE` swizzled by `INDICES`.
@@ -138,8 +132,8 @@ constexpr auto Swizzle(TUPLE&& t, std::index_sequence<INDICES...>)
 /// types.
 template <typename TUPLE, std::size_t... INDICES>
 constexpr auto* SwizzlePtrTy(std::index_sequence<INDICES...>) {
-  using Swizzled = std::tuple<std::tuple_element_t<INDICES, TUPLE>...>;
-  return static_cast<Swizzled*>(nullptr);
+    using Swizzled = std::tuple<std::tuple_element_t<INDICES, TUPLE>...>;
+    return static_cast<Swizzled*>(nullptr);
 }
 
 }  // namespace detail
@@ -148,14 +142,14 @@ constexpr auto* SwizzlePtrTy(std::index_sequence<INDICES...>) {
 /// `[OFFSET..OFFSET+COUNT)`
 template <std::size_t OFFSET, std::size_t COUNT, typename TUPLE>
 constexpr auto Slice(TUPLE&& t) {
-  return detail::Swizzle<TUPLE>(std::forward<TUPLE>(t), Range<OFFSET, COUNT>());
+    return detail::Swizzle<TUPLE>(std::forward<TUPLE>(t), Range<OFFSET, COUNT>());
 }
 
 /// Resolves to the slice of the tuple `t` with the tuple elements
 /// `[OFFSET..OFFSET+COUNT)`
 template <std::size_t OFFSET, std::size_t COUNT, typename TUPLE>
-using SliceTuple = std::remove_pointer_t<decltype(
-    detail::SwizzlePtrTy<TUPLE>(Range<OFFSET, COUNT>()))>;
+using SliceTuple =
+    std::remove_pointer_t<decltype(detail::SwizzlePtrTy<TUPLE>(Range<OFFSET, COUNT>()))>;
 
 }  // namespace tint::traits
 

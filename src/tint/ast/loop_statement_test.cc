@@ -25,78 +25,77 @@ namespace {
 using LoopStatementTest = TestHelper;
 
 TEST_F(LoopStatementTest, Creation) {
-  auto* body = Block(create<DiscardStatement>());
-  auto* b = body->Last();
+    auto* body = Block(create<DiscardStatement>());
+    auto* b = body->Last();
 
-  auto* continuing = Block(create<DiscardStatement>());
+    auto* continuing = Block(create<DiscardStatement>());
 
-  auto* l = create<LoopStatement>(body, continuing);
-  ASSERT_EQ(l->body->statements.size(), 1u);
-  EXPECT_EQ(l->body->statements[0], b);
-  ASSERT_EQ(l->continuing->statements.size(), 1u);
-  EXPECT_EQ(l->continuing->statements[0], continuing->Last());
+    auto* l = create<LoopStatement>(body, continuing);
+    ASSERT_EQ(l->body->statements.size(), 1u);
+    EXPECT_EQ(l->body->statements[0], b);
+    ASSERT_EQ(l->continuing->statements.size(), 1u);
+    EXPECT_EQ(l->continuing->statements[0], continuing->Last());
 }
 
 TEST_F(LoopStatementTest, Creation_WithSource) {
-  auto* body = Block(create<DiscardStatement>());
+    auto* body = Block(create<DiscardStatement>());
 
-  auto* continuing = Block(create<DiscardStatement>());
+    auto* continuing = Block(create<DiscardStatement>());
 
-  auto* l =
-      create<LoopStatement>(Source{Source::Location{20, 2}}, body, continuing);
-  auto src = l->source;
-  EXPECT_EQ(src.range.begin.line, 20u);
-  EXPECT_EQ(src.range.begin.column, 2u);
+    auto* l = create<LoopStatement>(Source{Source::Location{20, 2}}, body, continuing);
+    auto src = l->source;
+    EXPECT_EQ(src.range.begin.line, 20u);
+    EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(LoopStatementTest, IsLoop) {
-  auto* l = create<LoopStatement>(Block(), Block());
-  EXPECT_TRUE(l->Is<LoopStatement>());
+    auto* l = create<LoopStatement>(Block(), Block());
+    EXPECT_TRUE(l->Is<LoopStatement>());
 }
 
 TEST_F(LoopStatementTest, HasContinuing_WithoutContinuing) {
-  auto* body = Block(create<DiscardStatement>());
+    auto* body = Block(create<DiscardStatement>());
 
-  auto* l = create<LoopStatement>(body, nullptr);
-  EXPECT_FALSE(l->continuing);
+    auto* l = create<LoopStatement>(body, nullptr);
+    EXPECT_FALSE(l->continuing);
 }
 
 TEST_F(LoopStatementTest, HasContinuing_WithContinuing) {
-  auto* body = Block(create<DiscardStatement>());
+    auto* body = Block(create<DiscardStatement>());
 
-  auto* continuing = Block(create<DiscardStatement>());
+    auto* continuing = Block(create<DiscardStatement>());
 
-  auto* l = create<LoopStatement>(body, continuing);
-  EXPECT_TRUE(l->continuing);
+    auto* l = create<LoopStatement>(body, continuing);
+    EXPECT_TRUE(l->continuing);
 }
 
 TEST_F(LoopStatementTest, Assert_Null_Body) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b;
-        b.create<LoopStatement>(nullptr, nullptr);
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.create<LoopStatement>(nullptr, nullptr);
+        },
+        "internal compiler error");
 }
 
 TEST_F(LoopStatementTest, Assert_DifferentProgramID_Body) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b1;
-        ProgramBuilder b2;
-        b1.create<LoopStatement>(b2.Block(), b1.Block());
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b1;
+            ProgramBuilder b2;
+            b1.create<LoopStatement>(b2.Block(), b1.Block());
+        },
+        "internal compiler error");
 }
 
 TEST_F(LoopStatementTest, Assert_DifferentProgramID_Continuing) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b1;
-        ProgramBuilder b2;
-        b1.create<LoopStatement>(b1.Block(), b2.Block());
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b1;
+            ProgramBuilder b2;
+            b1.create<LoopStatement>(b1.Block(), b2.Block());
+        },
+        "internal compiler error");
 }
 
 }  // namespace

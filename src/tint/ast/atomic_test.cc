@@ -23,15 +23,15 @@ namespace {
 using AstAtomicTest = TestHelper;
 
 TEST_F(AstAtomicTest, Creation) {
-  auto* i32 = create<I32>();
-  auto* p = create<Atomic>(i32);
-  EXPECT_EQ(p->type, i32);
+    auto* i32 = create<I32>();
+    auto* p = create<Atomic>(i32);
+    EXPECT_EQ(p->type, i32);
 }
 
 TEST_F(AstAtomicTest, FriendlyName) {
-  auto* i32 = create<I32>();
-  auto* p = create<Atomic>(i32);
-  EXPECT_EQ(p->FriendlyName(Symbols()), "atomic<i32>");
+    auto* i32 = create<I32>();
+    auto* p = create<Atomic>(i32);
+    EXPECT_EQ(p->FriendlyName(Symbols()), "atomic<i32>");
 }
 
 }  // namespace

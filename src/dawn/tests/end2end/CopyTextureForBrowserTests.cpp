@@ -23,131 +23,131 @@
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace {
-    static constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
+static constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
 
-    // Set default texture size to single line texture for color conversion tests.
-    static constexpr uint64_t kDefaultTextureWidth = 10;
-    static constexpr uint64_t kDefaultTextureHeight = 1;
+// Set default texture size to single line texture for color conversion tests.
+static constexpr uint64_t kDefaultTextureWidth = 10;
+static constexpr uint64_t kDefaultTextureHeight = 1;
 
-    enum class ColorSpace : uint32_t {
-        SRGB = 0x00,
-        DisplayP3 = 0x01,
-    };
+enum class ColorSpace : uint32_t {
+    SRGB = 0x00,
+    DisplayP3 = 0x01,
+};
 
-    using SrcFormat = wgpu::TextureFormat;
-    using DstFormat = wgpu::TextureFormat;
-    using SrcOrigin = wgpu::Origin3D;
-    using DstOrigin = wgpu::Origin3D;
-    using CopySize = wgpu::Extent3D;
-    using FlipY = bool;
-    using SrcColorSpace = ColorSpace;
-    using DstColorSpace = ColorSpace;
-    using SrcAlphaMode = wgpu::AlphaMode;
-    using DstAlphaMode = wgpu::AlphaMode;
+using SrcFormat = wgpu::TextureFormat;
+using DstFormat = wgpu::TextureFormat;
+using SrcOrigin = wgpu::Origin3D;
+using DstOrigin = wgpu::Origin3D;
+using CopySize = wgpu::Extent3D;
+using FlipY = bool;
+using SrcColorSpace = ColorSpace;
+using DstColorSpace = ColorSpace;
+using SrcAlphaMode = wgpu::AlphaMode;
+using DstAlphaMode = wgpu::AlphaMode;
 
-    std::ostream& operator<<(std::ostream& o, wgpu::Origin3D origin) {
-        o << origin.x << ", " << origin.y << ", " << origin.z;
-        return o;
-    }
+std::ostream& operator<<(std::ostream& o, wgpu::Origin3D origin) {
+    o << origin.x << ", " << origin.y << ", " << origin.z;
+    return o;
+}
 
-    std::ostream& operator<<(std::ostream& o, wgpu::Extent3D copySize) {
-        o << copySize.width << ", " << copySize.height << ", " << copySize.depthOrArrayLayers;
-        return o;
-    }
+std::ostream& operator<<(std::ostream& o, wgpu::Extent3D copySize) {
+    o << copySize.width << ", " << copySize.height << ", " << copySize.depthOrArrayLayers;
+    return o;
+}
 
-    std::ostream& operator<<(std::ostream& o, ColorSpace space) {
-        o << static_cast<uint32_t>(space);
-        return o;
-    }
+std::ostream& operator<<(std::ostream& o, ColorSpace space) {
+    o << static_cast<uint32_t>(space);
+    return o;
+}
 
-    DAWN_TEST_PARAM_STRUCT(AlphaTestParams, SrcAlphaMode, DstAlphaMode);
-    DAWN_TEST_PARAM_STRUCT(FormatTestParams, SrcFormat, DstFormat);
-    DAWN_TEST_PARAM_STRUCT(SubRectTestParams, SrcOrigin, DstOrigin, CopySize, FlipY);
-    DAWN_TEST_PARAM_STRUCT(ColorSpaceTestParams,
-                           DstFormat,
-                           SrcColorSpace,
-                           DstColorSpace,
-                           SrcAlphaMode,
-                           DstAlphaMode);
+DAWN_TEST_PARAM_STRUCT(AlphaTestParams, SrcAlphaMode, DstAlphaMode);
+DAWN_TEST_PARAM_STRUCT(FormatTestParams, SrcFormat, DstFormat);
+DAWN_TEST_PARAM_STRUCT(SubRectTestParams, SrcOrigin, DstOrigin, CopySize, FlipY);
+DAWN_TEST_PARAM_STRUCT(ColorSpaceTestParams,
+                       DstFormat,
+                       SrcColorSpace,
+                       DstColorSpace,
+                       SrcAlphaMode,
+                       DstAlphaMode);
 
-    // Color Space table
-    struct ColorSpaceInfo {
-        ColorSpace index;
-        std::array<float, 9> toXYZD50;    // 3x3 row major transform matrix
-        std::array<float, 9> fromXYZD50;  // inverse transform matrix of toXYZD50, precomputed
-        std::array<float, 7> gammaDecodingParams;  // Follow { A, B, G, E, epsilon, C, F } order
-        std::array<float, 7> gammaEncodingParams;  // inverse op of decoding, precomputed
-        bool isNonLinear;
-        bool isExtended;  // For extended color space.
-    };
-    static constexpr size_t kSupportedColorSpaceCount = 2;
-    static constexpr std::array<ColorSpaceInfo, kSupportedColorSpaceCount> ColorSpaceTable = {{
-        // sRGB,
-        // Got primary attributes from https://drafts.csswg.org/css-color/#predefined-sRGB
-        // Use matrices from
-        // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html#WSMatrices
-        // Get gamma-linear conversion params from https://en.wikipedia.org/wiki/SRGB with some
-        // mathematics.
-        {
-            //
-            ColorSpace::SRGB,
-            {{
-                //
-                0.4360747, 0.3850649, 0.1430804,  //
-                0.2225045, 0.7168786, 0.0606169,  //
-                0.0139322, 0.0971045, 0.7141733   //
-            }},
-
-            {{
-                //
-                3.1338561, -1.6168667, -0.4906146,  //
-                -0.9787684, 1.9161415, 0.0334540,   //
-                0.0719453, -0.2289914, 1.4052427    //
-            }},
-
-            // {G, A, B, C, D, E, F, }
-            {{2.4, 1.0 / 1.055, 0.055 / 1.055, 1.0 / 12.92, 4.045e-02, 0.0, 0.0}},
-
-            {{1.0 / 2.4, 1.13711 /*pow(1.055, 2.4)*/, 0.0, 12.92f, 3.1308e-03, -0.055, 0.0}},
-
-            true,
-            true  //
-        },
-
-        // Display P3, got primary attributes from
-        // https://www.w3.org/TR/css-color-4/#valdef-color-display-p3
-        // Use equations found in
-        // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html,
-        // Use Bradford method to do D65 to D50 transform.
-        // Get matrices with help of http://www.russellcottrell.com/photo/matrixCalculator.htm
-        // Gamma-linear conversion params is the same as Srgb.
-        {
-            //
-            ColorSpace::DisplayP3,
-            {{
-                //
-                0.5151114, 0.2919612, 0.1571274,  //
-                0.2411865, 0.6922440, 0.0665695,  //
-                -0.0010491, 0.0418832, 0.7842659  //
-            }},
-
-            {{
-                //
-                2.4039872, -0.9898498, -0.3976181,  //
-                -0.8422138, 1.7988188, 0.0160511,   //
-                0.0481937, -0.0973889, 1.2736887    //
-            }},
-
-            // {G, A, B, C, D, E, F, }
-            {{2.4, 1.0 / 1.055, 0.055 / 1.055, 1.0 / 12.92, 4.045e-02, 0.0, 0.0}},
-
-            {{1.0 / 2.4, 1.13711 /*pow(1.055, 2.4)*/, 0.0, 12.92f, 3.1308e-03, -0.055, 0.0}},
-
-            true,
-            false  //
-        }
+// Color Space table
+struct ColorSpaceInfo {
+    ColorSpace index;
+    std::array<float, 9> toXYZD50;             // 3x3 row major transform matrix
+    std::array<float, 9> fromXYZD50;           // inverse transform matrix of toXYZD50, precomputed
+    std::array<float, 7> gammaDecodingParams;  // Follow { A, B, G, E, epsilon, C, F } order
+    std::array<float, 7> gammaEncodingParams;  // inverse op of decoding, precomputed
+    bool isNonLinear;
+    bool isExtended;  // For extended color space.
+};
+static constexpr size_t kSupportedColorSpaceCount = 2;
+static constexpr std::array<ColorSpaceInfo, kSupportedColorSpaceCount> ColorSpaceTable = {{
+    // sRGB,
+    // Got primary attributes from https://drafts.csswg.org/css-color/#predefined-sRGB
+    // Use matrices from
+    // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html#WSMatrices
+    // Get gamma-linear conversion params from https://en.wikipedia.org/wiki/SRGB with some
+    // mathematics.
+    {
         //
-    }};
+        ColorSpace::SRGB,
+        {{
+            //
+            0.4360747, 0.3850649, 0.1430804,  //
+            0.2225045, 0.7168786, 0.0606169,  //
+            0.0139322, 0.0971045, 0.7141733   //
+        }},
+
+        {{
+            //
+            3.1338561, -1.6168667, -0.4906146,  //
+            -0.9787684, 1.9161415, 0.0334540,   //
+            0.0719453, -0.2289914, 1.4052427    //
+        }},
+
+        // {G, A, B, C, D, E, F, }
+        {{2.4, 1.0 / 1.055, 0.055 / 1.055, 1.0 / 12.92, 4.045e-02, 0.0, 0.0}},
+
+        {{1.0 / 2.4, 1.13711 /*pow(1.055, 2.4)*/, 0.0, 12.92f, 3.1308e-03, -0.055, 0.0}},
+
+        true,
+        true  //
+    },
+
+    // Display P3, got primary attributes from
+    // https://www.w3.org/TR/css-color-4/#valdef-color-display-p3
+    // Use equations found in
+    // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html,
+    // Use Bradford method to do D65 to D50 transform.
+    // Get matrices with help of http://www.russellcottrell.com/photo/matrixCalculator.htm
+    // Gamma-linear conversion params is the same as Srgb.
+    {
+        //
+        ColorSpace::DisplayP3,
+        {{
+            //
+            0.5151114, 0.2919612, 0.1571274,  //
+            0.2411865, 0.6922440, 0.0665695,  //
+            -0.0010491, 0.0418832, 0.7842659  //
+        }},
+
+        {{
+            //
+            2.4039872, -0.9898498, -0.3976181,  //
+            -0.8422138, 1.7988188, 0.0160511,   //
+            0.0481937, -0.0973889, 1.2736887    //
+        }},
+
+        // {G, A, B, C, D, E, F, }
+        {{2.4, 1.0 / 1.055, 0.055 / 1.055, 1.0 / 12.92, 4.045e-02, 0.0, 0.0}},
+
+        {{1.0 / 2.4, 1.13711 /*pow(1.055, 2.4)*/, 0.0, 12.92f, 3.1308e-03, -0.055, 0.0}},
+
+        true,
+        false  //
+    }
+    //
+}};
 }  // anonymous namespace
 
 template <typename Parent>

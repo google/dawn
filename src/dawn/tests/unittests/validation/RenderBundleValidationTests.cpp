@@ -22,12 +22,12 @@
 
 namespace {
 
-    class RenderBundleValidationTest : public ValidationTest {
-      protected:
-        void SetUp() override {
-            ValidationTest::SetUp();
+class RenderBundleValidationTest : public ValidationTest {
+  protected:
+    void SetUp() override {
+        ValidationTest::SetUp();
 
-            vsModule = utils::CreateShaderModule(device, R"(
+        vsModule = utils::CreateShaderModule(device, R"(
                 struct S {
                     transform : mat2x2<f32>
                 }
@@ -37,7 +37,7 @@ namespace {
                     return vec4<f32>();
                 })");
 
-            fsModule = utils::CreateShaderModule(device, R"(
+        fsModule = utils::CreateShaderModule(device, R"(
                 struct Uniforms {
                     color : vec4<f32>
                 }
@@ -51,75 +51,75 @@ namespace {
                 @stage(fragment) fn main() {
                 })");
 
-            wgpu::BindGroupLayout bgls[] = {
-                utils::MakeBindGroupLayout(
-                    device, {{0, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform}}),
-                utils::MakeBindGroupLayout(
-                    device, {
-                                {0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform},
-                                {1, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage},
-                            })};
+        wgpu::BindGroupLayout bgls[] = {
+            utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform}}),
+            utils::MakeBindGroupLayout(
+                device, {
+                            {0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform},
+                            {1, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage},
+                        })};
 
-            wgpu::PipelineLayoutDescriptor pipelineLayoutDesc = {};
-            pipelineLayoutDesc.bindGroupLayoutCount = 2;
-            pipelineLayoutDesc.bindGroupLayouts = bgls;
+        wgpu::PipelineLayoutDescriptor pipelineLayoutDesc = {};
+        pipelineLayoutDesc.bindGroupLayoutCount = 2;
+        pipelineLayoutDesc.bindGroupLayouts = bgls;
 
-            pipelineLayout = device.CreatePipelineLayout(&pipelineLayoutDesc);
+        pipelineLayout = device.CreatePipelineLayout(&pipelineLayoutDesc);
 
-            utils::ComboRenderPipelineDescriptor descriptor;
-            InitializeRenderPipelineDescriptor(&descriptor);
-            pipeline = device.CreateRenderPipeline(&descriptor);
+        utils::ComboRenderPipelineDescriptor descriptor;
+        InitializeRenderPipelineDescriptor(&descriptor);
+        pipeline = device.CreateRenderPipeline(&descriptor);
 
-            float data[8];
-            wgpu::Buffer buffer = utils::CreateBufferFromData(device, data, 8 * sizeof(float),
-                                                              wgpu::BufferUsage::Uniform);
+        float data[8];
+        wgpu::Buffer buffer = utils::CreateBufferFromData(device, data, 8 * sizeof(float),
+                                                          wgpu::BufferUsage::Uniform);
 
-            constexpr static float kVertices[] = {-1.f, 1.f, 1.f, -1.f, -1.f, 1.f};
+        constexpr static float kVertices[] = {-1.f, 1.f, 1.f, -1.f, -1.f, 1.f};
 
-            vertexBuffer = utils::CreateBufferFromData(device, kVertices, sizeof(kVertices),
-                                                       wgpu::BufferUsage::Vertex);
+        vertexBuffer = utils::CreateBufferFromData(device, kVertices, sizeof(kVertices),
+                                                   wgpu::BufferUsage::Vertex);
 
-            // Placeholder storage buffer.
-            wgpu::Buffer storageBuffer = utils::CreateBufferFromData(
-                device, kVertices, sizeof(kVertices), wgpu::BufferUsage::Storage);
+        // Placeholder storage buffer.
+        wgpu::Buffer storageBuffer = utils::CreateBufferFromData(
+            device, kVertices, sizeof(kVertices), wgpu::BufferUsage::Storage);
 
-            // Vertex buffer with storage usage for testing read+write error usage.
-            vertexStorageBuffer =
-                utils::CreateBufferFromData(device, kVertices, sizeof(kVertices),
-                                            wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Storage);
+        // Vertex buffer with storage usage for testing read+write error usage.
+        vertexStorageBuffer =
+            utils::CreateBufferFromData(device, kVertices, sizeof(kVertices),
+                                        wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Storage);
 
-            bg0 = utils::MakeBindGroup(device, bgls[0], {{0, buffer, 0, 8 * sizeof(float)}});
-            bg1 = utils::MakeBindGroup(
-                device, bgls[1],
-                {{0, buffer, 0, 4 * sizeof(float)}, {1, storageBuffer, 0, sizeof(kVertices)}});
+        bg0 = utils::MakeBindGroup(device, bgls[0], {{0, buffer, 0, 8 * sizeof(float)}});
+        bg1 = utils::MakeBindGroup(
+            device, bgls[1],
+            {{0, buffer, 0, 4 * sizeof(float)}, {1, storageBuffer, 0, sizeof(kVertices)}});
 
-            bg1Vertex = utils::MakeBindGroup(device, bgls[1],
-                                             {{0, buffer, 0, 8 * sizeof(float)},
-                                              {1, vertexStorageBuffer, 0, sizeof(kVertices)}});
-        }
+        bg1Vertex = utils::MakeBindGroup(
+            device, bgls[1],
+            {{0, buffer, 0, 8 * sizeof(float)}, {1, vertexStorageBuffer, 0, sizeof(kVertices)}});
+    }
 
-        void InitializeRenderPipelineDescriptor(utils::ComboRenderPipelineDescriptor* descriptor) {
-            descriptor->layout = pipelineLayout;
-            descriptor->vertex.module = vsModule;
-            descriptor->cFragment.module = fsModule;
-            descriptor->cTargets[0].writeMask = wgpu::ColorWriteMask::None;
-            descriptor->vertex.bufferCount = 1;
-            descriptor->cBuffers[0].arrayStride = 2 * sizeof(float);
-            descriptor->cBuffers[0].attributeCount = 1;
-            descriptor->cAttributes[0].format = wgpu::VertexFormat::Float32x2;
-            descriptor->cAttributes[0].shaderLocation = 0;
-        }
+    void InitializeRenderPipelineDescriptor(utils::ComboRenderPipelineDescriptor* descriptor) {
+        descriptor->layout = pipelineLayout;
+        descriptor->vertex.module = vsModule;
+        descriptor->cFragment.module = fsModule;
+        descriptor->cTargets[0].writeMask = wgpu::ColorWriteMask::None;
+        descriptor->vertex.bufferCount = 1;
+        descriptor->cBuffers[0].arrayStride = 2 * sizeof(float);
+        descriptor->cBuffers[0].attributeCount = 1;
+        descriptor->cAttributes[0].format = wgpu::VertexFormat::Float32x2;
+        descriptor->cAttributes[0].shaderLocation = 0;
+    }
 
-        wgpu::ShaderModule vsModule;
-        wgpu::ShaderModule fsModule;
-        wgpu::PipelineLayout pipelineLayout;
-        wgpu::RenderPipeline pipeline;
-        wgpu::Buffer vertexBuffer;
-        wgpu::Buffer vertexStorageBuffer;
-        wgpu::BindGroup bg0;
-        wgpu::BindGroup bg1;
-        wgpu::BindGroup bg1Vertex;
-    };
+    wgpu::ShaderModule vsModule;
+    wgpu::ShaderModule fsModule;
+    wgpu::PipelineLayout pipelineLayout;
+    wgpu::RenderPipeline pipeline;
+    wgpu::Buffer vertexBuffer;
+    wgpu::Buffer vertexStorageBuffer;
+    wgpu::BindGroup bg0;
+    wgpu::BindGroup bg1;
+    wgpu::BindGroup bg1Vertex;
+};
 
 }  // anonymous namespace
 

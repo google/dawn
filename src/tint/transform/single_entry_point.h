@@ -26,43 +26,41 @@ namespace tint::transform {
 /// All module-scope variables, types, and functions that are not used by the
 /// target entry point will also be removed.
 class SingleEntryPoint : public Castable<SingleEntryPoint, Transform> {
- public:
-  /// Configuration options for the transform
-  struct Config : public Castable<Config, Data> {
-    /// Constructor
-    /// @param entry_point the name of the entry point to keep
-    explicit Config(std::string entry_point = "");
+  public:
+    /// Configuration options for the transform
+    struct Config : public Castable<Config, Data> {
+        /// Constructor
+        /// @param entry_point the name of the entry point to keep
+        explicit Config(std::string entry_point = "");
 
-    /// Copy constructor
-    Config(const Config&);
+        /// Copy constructor
+        Config(const Config&);
+
+        /// Destructor
+        ~Config() override;
+
+        /// Assignment operator
+        /// @returns this Config
+        Config& operator=(const Config&);
+
+        /// The name of the entry point to keep.
+        std::string entry_point_name;
+    };
+
+    /// Constructor
+    SingleEntryPoint();
 
     /// Destructor
-    ~Config() override;
+    ~SingleEntryPoint() override;
 
-    /// Assignment operator
-    /// @returns this Config
-    Config& operator=(const Config&);
-
-    /// The name of the entry point to keep.
-    std::string entry_point_name;
-  };
-
-  /// Constructor
-  SingleEntryPoint();
-
-  /// Destructor
-  ~SingleEntryPoint() override;
-
- protected:
-  /// Runs the transform using the CloneContext built for transforming a
-  /// program. Run() is responsible for calling Clone() on the CloneContext.
-  /// @param ctx the CloneContext primed with the input program and
-  /// ProgramBuilder
-  /// @param inputs optional extra transform-specific input data
-  /// @param outputs optional extra transform-specific output data
-  void Run(CloneContext& ctx,
-           const DataMap& inputs,
-           DataMap& outputs) const override;
+  protected:
+    /// Runs the transform using the CloneContext built for transforming a
+    /// program. Run() is responsible for calling Clone() on the CloneContext.
+    /// @param ctx the CloneContext primed with the input program and
+    /// ProgramBuilder
+    /// @param inputs optional extra transform-specific input data
+    /// @param outputs optional extra transform-specific output data
+    void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) const override;
 };
 
 }  // namespace tint::transform

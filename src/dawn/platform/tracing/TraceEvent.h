@@ -758,75 +758,62 @@
 
 namespace dawn::platform::TraceEvent {
 
-    // Specify these values when the corresponding argument of addTraceEvent is not
-    // used.
-    const int zeroNumArgs = 0;
-    const uint64_t noEventId = 0;
+// Specify these values when the corresponding argument of addTraceEvent is not
+// used.
+const int zeroNumArgs = 0;
+const uint64_t noEventId = 0;
 
-    // TraceID encapsulates an ID that can either be an integer or pointer. Pointers
-    // are mangled with the Process ID so that they are unlikely to collide when the
-    // same pointer is used on different processes.
-    class TraceID {
-      public:
-        explicit TraceID(const void* id, unsigned char* flags)
-            : m_data(static_cast<uint64_t>(reinterpret_cast<uintptr_t>(id))) {
-            *flags |= TRACE_EVENT_FLAG_MANGLE_ID;
-        }
-        explicit TraceID(uint64_t id, unsigned char* flags) : m_data(id) {
-            (void)flags;
-        }
-        explicit TraceID(uint32_t id, unsigned char* flags) : m_data(id) {
-            (void)flags;
-        }
-        explicit TraceID(uint16_t id, unsigned char* flags) : m_data(id) {
-            (void)flags;
-        }
-        explicit TraceID(unsigned char id, unsigned char* flags) : m_data(id) {
-            (void)flags;
-        }
-        explicit TraceID(int64_t id, unsigned char* flags) : m_data(static_cast<uint64_t>(id)) {
-            (void)flags;
-        }
-        explicit TraceID(int32_t id, unsigned char* flags) : m_data(static_cast<uint64_t>(id)) {
-            (void)flags;
-        }
-        explicit TraceID(int16_t id, unsigned char* flags) : m_data(static_cast<uint64_t>(id)) {
-            (void)flags;
-        }
-        explicit TraceID(signed char id, unsigned char* flags) : m_data(static_cast<uint64_t>(id)) {
-            (void)flags;
-        }
+// TraceID encapsulates an ID that can either be an integer or pointer. Pointers
+// are mangled with the Process ID so that they are unlikely to collide when the
+// same pointer is used on different processes.
+class TraceID {
+  public:
+    explicit TraceID(const void* id, unsigned char* flags)
+        : m_data(static_cast<uint64_t>(reinterpret_cast<uintptr_t>(id))) {
+        *flags |= TRACE_EVENT_FLAG_MANGLE_ID;
+    }
+    explicit TraceID(uint64_t id, unsigned char* flags) : m_data(id) { (void)flags; }
+    explicit TraceID(uint32_t id, unsigned char* flags) : m_data(id) { (void)flags; }
+    explicit TraceID(uint16_t id, unsigned char* flags) : m_data(id) { (void)flags; }
+    explicit TraceID(unsigned char id, unsigned char* flags) : m_data(id) { (void)flags; }
+    explicit TraceID(int64_t id, unsigned char* flags) : m_data(static_cast<uint64_t>(id)) {
+        (void)flags;
+    }
+    explicit TraceID(int32_t id, unsigned char* flags) : m_data(static_cast<uint64_t>(id)) {
+        (void)flags;
+    }
+    explicit TraceID(int16_t id, unsigned char* flags) : m_data(static_cast<uint64_t>(id)) {
+        (void)flags;
+    }
+    explicit TraceID(signed char id, unsigned char* flags) : m_data(static_cast<uint64_t>(id)) {
+        (void)flags;
+    }
 
-        uint64_t data() const {
-            return m_data;
-        }
+    uint64_t data() const { return m_data; }
 
-      private:
-        uint64_t m_data;
-    };
+  private:
+    uint64_t m_data;
+};
 
-    // Simple union to store various types as uint64_t.
-    union TraceValueUnion {
-        bool m_bool;
-        uint64_t m_uint;
-        int64_t m_int;
-        double m_double;
-        const void* m_pointer;
-        const char* m_string;
-    };
+// Simple union to store various types as uint64_t.
+union TraceValueUnion {
+    bool m_bool;
+    uint64_t m_uint;
+    int64_t m_int;
+    double m_double;
+    const void* m_pointer;
+    const char* m_string;
+};
 
-    // Simple container for const char* that should be copied instead of retained.
-    class TraceStringWithCopy {
-      public:
-        explicit TraceStringWithCopy(const char* str) : m_str(str) {
-        }
-        operator const char*() const {
-            return m_str;
-        }
+// Simple container for const char* that should be copied instead of retained.
+class TraceStringWithCopy {
+  public:
+    explicit TraceStringWithCopy(const char* str) : m_str(str) {}
+    operator const char*() const { return m_str; }
 
-      private:
-        const char* m_str;
-    };
+  private:
+    const char* m_str;
+};
 
 // Define setTraceValue for each allowed type. It stores the type and
 // value in the return arguments. This allows this API to avoid declaring any
@@ -845,135 +832,132 @@ namespace dawn::platform::TraceEvent {
         *value = static_cast<uint64_t>(arg);                                                  \
     }
 
-    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(uint64_t, TRACE_VALUE_TYPE_UINT)
-    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(uint32_t, TRACE_VALUE_TYPE_UINT)
-    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(uint16_t, TRACE_VALUE_TYPE_UINT)
-    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(unsigned char, TRACE_VALUE_TYPE_UINT)
-    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(int64_t, TRACE_VALUE_TYPE_INT)
-    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(int32_t, TRACE_VALUE_TYPE_INT)
-    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(int16_t, TRACE_VALUE_TYPE_INT)
-    INTERNAL_DECLARE_SET_TRACE_VALUE_INT(signed char, TRACE_VALUE_TYPE_INT)
-    INTERNAL_DECLARE_SET_TRACE_VALUE(bool, m_bool, TRACE_VALUE_TYPE_BOOL)
-    INTERNAL_DECLARE_SET_TRACE_VALUE(double, m_double, TRACE_VALUE_TYPE_DOUBLE)
-    INTERNAL_DECLARE_SET_TRACE_VALUE(const void*, m_pointer, TRACE_VALUE_TYPE_POINTER)
-    INTERNAL_DECLARE_SET_TRACE_VALUE(const char*, m_string, TRACE_VALUE_TYPE_STRING)
-    INTERNAL_DECLARE_SET_TRACE_VALUE(const TraceStringWithCopy&,
-                                     m_string,
-                                     TRACE_VALUE_TYPE_COPY_STRING)
+INTERNAL_DECLARE_SET_TRACE_VALUE_INT(uint64_t, TRACE_VALUE_TYPE_UINT)
+INTERNAL_DECLARE_SET_TRACE_VALUE_INT(uint32_t, TRACE_VALUE_TYPE_UINT)
+INTERNAL_DECLARE_SET_TRACE_VALUE_INT(uint16_t, TRACE_VALUE_TYPE_UINT)
+INTERNAL_DECLARE_SET_TRACE_VALUE_INT(unsigned char, TRACE_VALUE_TYPE_UINT)
+INTERNAL_DECLARE_SET_TRACE_VALUE_INT(int64_t, TRACE_VALUE_TYPE_INT)
+INTERNAL_DECLARE_SET_TRACE_VALUE_INT(int32_t, TRACE_VALUE_TYPE_INT)
+INTERNAL_DECLARE_SET_TRACE_VALUE_INT(int16_t, TRACE_VALUE_TYPE_INT)
+INTERNAL_DECLARE_SET_TRACE_VALUE_INT(signed char, TRACE_VALUE_TYPE_INT)
+INTERNAL_DECLARE_SET_TRACE_VALUE(bool, m_bool, TRACE_VALUE_TYPE_BOOL)
+INTERNAL_DECLARE_SET_TRACE_VALUE(double, m_double, TRACE_VALUE_TYPE_DOUBLE)
+INTERNAL_DECLARE_SET_TRACE_VALUE(const void*, m_pointer, TRACE_VALUE_TYPE_POINTER)
+INTERNAL_DECLARE_SET_TRACE_VALUE(const char*, m_string, TRACE_VALUE_TYPE_STRING)
+INTERNAL_DECLARE_SET_TRACE_VALUE(const TraceStringWithCopy&, m_string, TRACE_VALUE_TYPE_COPY_STRING)
 
 #undef INTERNAL_DECLARE_SET_TRACE_VALUE
 #undef INTERNAL_DECLARE_SET_TRACE_VALUE_INT
 
-    static inline void setTraceValue(const std::string& arg, unsigned char* type, uint64_t* value) {
-        TraceValueUnion typeValue;
-        typeValue.m_string = arg.data();
-        *type = TRACE_VALUE_TYPE_COPY_STRING;
-        *value = typeValue.m_uint;
+static inline void setTraceValue(const std::string& arg, unsigned char* type, uint64_t* value) {
+    TraceValueUnion typeValue;
+    typeValue.m_string = arg.data();
+    *type = TRACE_VALUE_TYPE_COPY_STRING;
+    *value = typeValue.m_uint;
+}
+
+// These addTraceEvent template functions are defined here instead of in the
+// macro, because the arg values could be temporary string objects. In order to
+// store pointers to the internal c_str and pass through to the tracing API, the
+// arg values must live throughout these procedures.
+
+static inline dawn::platform::tracing::TraceEventHandle addTraceEvent(
+    dawn::platform::Platform* platform,
+    char phase,
+    const unsigned char* categoryEnabled,
+    const char* name,
+    uint64_t id,
+    unsigned char flags,
+    int /*unused, helps avoid empty __VA_ARGS__*/) {
+    return TRACE_EVENT_API_ADD_TRACE_EVENT(platform, phase, categoryEnabled, name, id, zeroNumArgs,
+                                           0, 0, 0, flags);
+}
+
+template <class ARG1_TYPE>
+static inline dawn::platform::tracing::TraceEventHandle addTraceEvent(
+    dawn::platform::Platform* platform,
+    char phase,
+    const unsigned char* categoryEnabled,
+    const char* name,
+    uint64_t id,
+    unsigned char flags,
+    int /*unused, helps avoid empty __VA_ARGS__*/,
+    const char* arg1Name,
+    const ARG1_TYPE& arg1Val) {
+    const int numArgs = 1;
+    unsigned char argTypes[1];
+    uint64_t argValues[1];
+    setTraceValue(arg1Val, &argTypes[0], &argValues[0]);
+    return TRACE_EVENT_API_ADD_TRACE_EVENT(platform, phase, categoryEnabled, name, id, numArgs,
+                                           &arg1Name, argTypes, argValues, flags);
+}
+
+template <class ARG1_TYPE, class ARG2_TYPE>
+static inline dawn::platform::tracing::TraceEventHandle addTraceEvent(
+    dawn::platform::Platform* platform,
+    char phase,
+    const unsigned char* categoryEnabled,
+    const char* name,
+    uint64_t id,
+    unsigned char flags,
+    int /*unused, helps avoid empty __VA_ARGS__*/,
+    const char* arg1Name,
+    const ARG1_TYPE& arg1Val,
+    const char* arg2Name,
+    const ARG2_TYPE& arg2Val) {
+    const int numArgs = 2;
+    const char* argNames[2] = {arg1Name, arg2Name};
+    unsigned char argTypes[2];
+    uint64_t argValues[2];
+    setTraceValue(arg1Val, &argTypes[0], &argValues[0]);
+    setTraceValue(arg2Val, &argTypes[1], &argValues[1]);
+    return TRACE_EVENT_API_ADD_TRACE_EVENT(platform, phase, categoryEnabled, name, id, numArgs,
+                                           argNames, argTypes, argValues, flags);
+}
+
+// Used by TRACE_EVENTx macro. Do not use directly.
+class TraceEndOnScopeClose {
+  public:
+    // Note: members of m_data intentionally left uninitialized. See initialize.
+    TraceEndOnScopeClose() : m_pdata(0) {}
+    ~TraceEndOnScopeClose() {
+        if (m_pdata)
+            addEventIfEnabled();
     }
 
-    // These addTraceEvent template functions are defined here instead of in the
-    // macro, because the arg values could be temporary string objects. In order to
-    // store pointers to the internal c_str and pass through to the tracing API, the
-    // arg values must live throughout these procedures.
-
-    static inline dawn::platform::tracing::TraceEventHandle addTraceEvent(
-        dawn::platform::Platform* platform,
-        char phase,
-        const unsigned char* categoryEnabled,
-        const char* name,
-        uint64_t id,
-        unsigned char flags,
-        int /*unused, helps avoid empty __VA_ARGS__*/) {
-        return TRACE_EVENT_API_ADD_TRACE_EVENT(platform, phase, categoryEnabled, name, id,
-                                               zeroNumArgs, 0, 0, 0, flags);
+    void initialize(dawn::platform::Platform* platform,
+                    const unsigned char* categoryEnabled,
+                    const char* name) {
+        m_data.platform = platform;
+        m_data.categoryEnabled = categoryEnabled;
+        m_data.name = name;
+        m_pdata = &m_data;
     }
 
-    template <class ARG1_TYPE>
-    static inline dawn::platform::tracing::TraceEventHandle addTraceEvent(
-        dawn::platform::Platform* platform,
-        char phase,
-        const unsigned char* categoryEnabled,
-        const char* name,
-        uint64_t id,
-        unsigned char flags,
-        int /*unused, helps avoid empty __VA_ARGS__*/,
-        const char* arg1Name,
-        const ARG1_TYPE& arg1Val) {
-        const int numArgs = 1;
-        unsigned char argTypes[1];
-        uint64_t argValues[1];
-        setTraceValue(arg1Val, &argTypes[0], &argValues[0]);
-        return TRACE_EVENT_API_ADD_TRACE_EVENT(platform, phase, categoryEnabled, name, id, numArgs,
-                                               &arg1Name, argTypes, argValues, flags);
+  private:
+    // Add the end event if the category is still enabled.
+    void addEventIfEnabled() {
+        // Only called when m_pdata is non-null.
+        if (*m_pdata->categoryEnabled) {
+            TRACE_EVENT_API_ADD_TRACE_EVENT(m_pdata->platform, TRACE_EVENT_PHASE_END,
+                                            m_pdata->categoryEnabled, m_pdata->name, noEventId,
+                                            zeroNumArgs, 0, 0, 0, TRACE_EVENT_FLAG_NONE);
+        }
     }
 
-    template <class ARG1_TYPE, class ARG2_TYPE>
-    static inline dawn::platform::tracing::TraceEventHandle addTraceEvent(
-        dawn::platform::Platform* platform,
-        char phase,
-        const unsigned char* categoryEnabled,
-        const char* name,
-        uint64_t id,
-        unsigned char flags,
-        int /*unused, helps avoid empty __VA_ARGS__*/,
-        const char* arg1Name,
-        const ARG1_TYPE& arg1Val,
-        const char* arg2Name,
-        const ARG2_TYPE& arg2Val) {
-        const int numArgs = 2;
-        const char* argNames[2] = {arg1Name, arg2Name};
-        unsigned char argTypes[2];
-        uint64_t argValues[2];
-        setTraceValue(arg1Val, &argTypes[0], &argValues[0]);
-        setTraceValue(arg2Val, &argTypes[1], &argValues[1]);
-        return TRACE_EVENT_API_ADD_TRACE_EVENT(platform, phase, categoryEnabled, name, id, numArgs,
-                                               argNames, argTypes, argValues, flags);
-    }
-
-    // Used by TRACE_EVENTx macro. Do not use directly.
-    class TraceEndOnScopeClose {
-      public:
-        // Note: members of m_data intentionally left uninitialized. See initialize.
-        TraceEndOnScopeClose() : m_pdata(0) {
-        }
-        ~TraceEndOnScopeClose() {
-            if (m_pdata)
-                addEventIfEnabled();
-        }
-
-        void initialize(dawn::platform::Platform* platform,
-                        const unsigned char* categoryEnabled,
-                        const char* name) {
-            m_data.platform = platform;
-            m_data.categoryEnabled = categoryEnabled;
-            m_data.name = name;
-            m_pdata = &m_data;
-        }
-
-      private:
-        // Add the end event if the category is still enabled.
-        void addEventIfEnabled() {
-            // Only called when m_pdata is non-null.
-            if (*m_pdata->categoryEnabled) {
-                TRACE_EVENT_API_ADD_TRACE_EVENT(m_pdata->platform, TRACE_EVENT_PHASE_END,
-                                                m_pdata->categoryEnabled, m_pdata->name, noEventId,
-                                                zeroNumArgs, 0, 0, 0, TRACE_EVENT_FLAG_NONE);
-            }
-        }
-
-        // This Data struct workaround is to avoid initializing all the members
-        // in Data during construction of this object, since this object is always
-        // constructed, even when tracing is disabled. If the members of Data were
-        // members of this class instead, compiler warnings occur about potential
-        // uninitialized accesses.
-        struct Data {
-            dawn::platform::Platform* platform;
-            const unsigned char* categoryEnabled;
-            const char* name;
-        };
-        Data* m_pdata;
-        Data m_data;
+    // This Data struct workaround is to avoid initializing all the members
+    // in Data during construction of this object, since this object is always
+    // constructed, even when tracing is disabled. If the members of Data were
+    // members of this class instead, compiler warnings occur about potential
+    // uninitialized accesses.
+    struct Data {
+        dawn::platform::Platform* platform;
+        const unsigned char* categoryEnabled;
+        const char* name;
     };
+    Data* m_pdata;
+    Data m_data;
+};
 
 }  // namespace dawn::platform::TraceEvent
 

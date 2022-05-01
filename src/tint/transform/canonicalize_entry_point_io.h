@@ -82,64 +82,61 @@ namespace tint::transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * Unshadow
-class CanonicalizeEntryPointIO final
-    : public Castable<CanonicalizeEntryPointIO, Transform> {
- public:
-  /// ShaderStyle is an enumerator of different ways to emit shader IO.
-  enum class ShaderStyle {
-    /// Target SPIR-V (using global variables).
-    kSpirv,
-    /// Target GLSL (using global variables).
-    kGlsl,
-    /// Target MSL (using non-struct function parameters for builtins).
-    kMsl,
-    /// Target HLSL (using structures for all IO).
-    kHlsl,
-  };
+class CanonicalizeEntryPointIO final : public Castable<CanonicalizeEntryPointIO, Transform> {
+  public:
+    /// ShaderStyle is an enumerator of different ways to emit shader IO.
+    enum class ShaderStyle {
+        /// Target SPIR-V (using global variables).
+        kSpirv,
+        /// Target GLSL (using global variables).
+        kGlsl,
+        /// Target MSL (using non-struct function parameters for builtins).
+        kMsl,
+        /// Target HLSL (using structures for all IO).
+        kHlsl,
+    };
 
-  /// Configuration options for the transform.
-  struct Config final : public Castable<Config, Data> {
+    /// Configuration options for the transform.
+    struct Config final : public Castable<Config, Data> {
+        /// Constructor
+        /// @param style the approach to use for emitting shader IO.
+        /// @param sample_mask an optional sample mask to combine with shader masks
+        /// @param emit_vertex_point_size `true` to generate a pointsize builtin
+        explicit Config(ShaderStyle style,
+                        uint32_t sample_mask = 0xFFFFFFFF,
+                        bool emit_vertex_point_size = false);
+
+        /// Copy constructor
+        Config(const Config&);
+
+        /// Destructor
+        ~Config() override;
+
+        /// The approach to use for emitting shader IO.
+        const ShaderStyle shader_style;
+
+        /// A fixed sample mask to combine into masks produced by fragment shaders.
+        const uint32_t fixed_sample_mask;
+
+        /// Set to `true` to generate a pointsize builtin and have it set to 1.0
+        /// from all vertex shaders in the module.
+        const bool emit_vertex_point_size;
+    };
+
     /// Constructor
-    /// @param style the approach to use for emitting shader IO.
-    /// @param sample_mask an optional sample mask to combine with shader masks
-    /// @param emit_vertex_point_size `true` to generate a pointsize builtin
-    explicit Config(ShaderStyle style,
-                    uint32_t sample_mask = 0xFFFFFFFF,
-                    bool emit_vertex_point_size = false);
+    CanonicalizeEntryPointIO();
+    ~CanonicalizeEntryPointIO() override;
 
-    /// Copy constructor
-    Config(const Config&);
+  protected:
+    /// Runs the transform using the CloneContext built for transforming a
+    /// program. Run() is responsible for calling Clone() on the CloneContext.
+    /// @param ctx the CloneContext primed with the input program and
+    /// ProgramBuilder
+    /// @param inputs optional extra transform-specific input data
+    /// @param outputs optional extra transform-specific output data
+    void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) const override;
 
-    /// Destructor
-    ~Config() override;
-
-    /// The approach to use for emitting shader IO.
-    const ShaderStyle shader_style;
-
-    /// A fixed sample mask to combine into masks produced by fragment shaders.
-    const uint32_t fixed_sample_mask;
-
-    /// Set to `true` to generate a pointsize builtin and have it set to 1.0
-    /// from all vertex shaders in the module.
-    const bool emit_vertex_point_size;
-  };
-
-  /// Constructor
-  CanonicalizeEntryPointIO();
-  ~CanonicalizeEntryPointIO() override;
-
- protected:
-  /// Runs the transform using the CloneContext built for transforming a
-  /// program. Run() is responsible for calling Clone() on the CloneContext.
-  /// @param ctx the CloneContext primed with the input program and
-  /// ProgramBuilder
-  /// @param inputs optional extra transform-specific input data
-  /// @param outputs optional extra transform-specific output data
-  void Run(CloneContext& ctx,
-           const DataMap& inputs,
-           DataMap& outputs) const override;
-
-  struct State;
+    struct State;
 };
 
 }  // namespace tint::transform

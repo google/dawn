@@ -8,25 +8,21 @@
 #include <cstddef>
 #include <vector>
 
-#include "gtest/gtest.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/StackContainer.h"
+#include "gtest/gtest.h"
 
 namespace {
 
-    class Placeholder : public RefCounted {
-      public:
-        explicit Placeholder(int* alive) : mAlive(alive) {
-            ++*mAlive;
-        }
+class Placeholder : public RefCounted {
+  public:
+    explicit Placeholder(int* alive) : mAlive(alive) { ++*mAlive; }
 
-      private:
-        ~Placeholder() {
-            --*mAlive;
-        }
+  private:
+    ~Placeholder() { --*mAlive; }
 
-        int* const mAlive;
-    };
+    int* const mAlive;
+};
 
 }  // namespace
 
@@ -98,17 +94,15 @@ TEST(StackContainer, VectorDoubleDelete) {
 
 namespace {
 
-    template <size_t alignment>
-    class AlignedData {
-      public:
-        AlignedData() {
-            memset(data_, 0, alignment);
-        }
-        ~AlignedData() = default;
-        AlignedData(const AlignedData&) = default;
-        AlignedData& operator=(const AlignedData&) = default;
-        alignas(alignment) char data_[alignment];
-    };
+template <size_t alignment>
+class AlignedData {
+  public:
+    AlignedData() { memset(data_, 0, alignment); }
+    ~AlignedData() = default;
+    AlignedData(const AlignedData&) = default;
+    AlignedData& operator=(const AlignedData&) = default;
+    alignas(alignment) char data_[alignment];
+};
 
 }  // anonymous namespace
 

@@ -32,16 +32,16 @@ BlockStatement::BlockStatement(const ast::BlockStatement* declaration,
 BlockStatement::~BlockStatement() = default;
 
 const ast::BlockStatement* BlockStatement::Declaration() const {
-  return Base::Declaration()->As<ast::BlockStatement>();
+    return Base::Declaration()->As<ast::BlockStatement>();
 }
 
 void BlockStatement::AddDecl(const ast::Variable* var) {
-  decls_.push_back(var);
+    decls_.push_back(var);
 }
 
 FunctionBlockStatement::FunctionBlockStatement(const sem::Function* function)
     : Base(function->Declaration()->body, nullptr, function) {
-  TINT_ASSERT(Semantic, function);
+    TINT_ASSERT(Semantic, function);
 }
 
 FunctionBlockStatement::~FunctionBlockStatement() = default;
@@ -50,16 +50,15 @@ LoopBlockStatement::LoopBlockStatement(const ast::BlockStatement* declaration,
                                        const CompoundStatement* parent,
                                        const sem::Function* function)
     : Base(declaration, parent, function) {
-  TINT_ASSERT(Semantic, parent);
-  TINT_ASSERT(Semantic, function);
+    TINT_ASSERT(Semantic, parent);
+    TINT_ASSERT(Semantic, function);
 }
 LoopBlockStatement::~LoopBlockStatement() = default;
 
-void LoopBlockStatement::SetFirstContinue(
-    const ast::ContinueStatement* first_continue,
-    size_t num_decls) {
-  first_continue_ = first_continue;
-  num_decls_at_first_continue_ = num_decls;
+void LoopBlockStatement::SetFirstContinue(const ast::ContinueStatement* first_continue,
+                                          size_t num_decls) {
+    first_continue_ = first_continue;
+    num_decls_at_first_continue_ = num_decls;
 }
 
 }  // namespace tint::sem

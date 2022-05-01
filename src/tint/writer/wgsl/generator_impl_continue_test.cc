@@ -20,17 +20,17 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Continue) {
-  auto* c = Continue();
+    auto* c = Continue();
 
-  WrapInFunction(Loop(Block(If(false, Block(Break())),  //
-                            c)));
+    WrapInFunction(Loop(Block(If(false, Block(Break())),  //
+                              c)));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(c)) << gen.error();
-  EXPECT_EQ(gen.result(), "  continue;\n");
+    ASSERT_TRUE(gen.EmitStatement(c)) << gen.error();
+    EXPECT_EQ(gen.result(), "  continue;\n");
 }
 
 }  // namespace

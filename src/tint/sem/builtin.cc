@@ -26,76 +26,61 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Builtin);
 namespace tint::sem {
 
 const char* Builtin::str() const {
-  return sem::str(type_);
+    return sem::str(type_);
 }
 
 bool IsCoarseDerivativeBuiltin(BuiltinType i) {
-  return i == BuiltinType::kDpdxCoarse || i == BuiltinType::kDpdyCoarse ||
-         i == BuiltinType::kFwidthCoarse;
+    return i == BuiltinType::kDpdxCoarse || i == BuiltinType::kDpdyCoarse ||
+           i == BuiltinType::kFwidthCoarse;
 }
 
 bool IsFineDerivativeBuiltin(BuiltinType i) {
-  return i == BuiltinType::kDpdxFine || i == BuiltinType::kDpdyFine ||
-         i == BuiltinType::kFwidthFine;
+    return i == BuiltinType::kDpdxFine || i == BuiltinType::kDpdyFine ||
+           i == BuiltinType::kFwidthFine;
 }
 
 bool IsDerivativeBuiltin(BuiltinType i) {
-  return i == BuiltinType::kDpdx || i == BuiltinType::kDpdy ||
-         i == BuiltinType::kFwidth || IsCoarseDerivativeBuiltin(i) ||
-         IsFineDerivativeBuiltin(i);
+    return i == BuiltinType::kDpdx || i == BuiltinType::kDpdy || i == BuiltinType::kFwidth ||
+           IsCoarseDerivativeBuiltin(i) || IsFineDerivativeBuiltin(i);
 }
 
 bool IsTextureBuiltin(BuiltinType i) {
-  return IsImageQueryBuiltin(i) || i == BuiltinType::kTextureLoad ||
-         i == BuiltinType::kTextureGather ||
-         i == BuiltinType::kTextureGatherCompare ||
-         i == BuiltinType::kTextureSample ||
-         i == BuiltinType::kTextureSampleLevel ||
-         i == BuiltinType::kTextureSampleBias ||
-         i == BuiltinType::kTextureSampleCompare ||
-         i == BuiltinType::kTextureSampleCompareLevel ||
-         i == BuiltinType::kTextureSampleGrad ||
-         i == BuiltinType::kTextureStore;
+    return IsImageQueryBuiltin(i) || i == BuiltinType::kTextureLoad ||
+           i == BuiltinType::kTextureGather || i == BuiltinType::kTextureGatherCompare ||
+           i == BuiltinType::kTextureSample || i == BuiltinType::kTextureSampleLevel ||
+           i == BuiltinType::kTextureSampleBias || i == BuiltinType::kTextureSampleCompare ||
+           i == BuiltinType::kTextureSampleCompareLevel || i == BuiltinType::kTextureSampleGrad ||
+           i == BuiltinType::kTextureStore;
 }
 
 bool IsImageQueryBuiltin(BuiltinType i) {
-  return i == BuiltinType::kTextureDimensions ||
-         i == BuiltinType::kTextureNumLayers ||
-         i == BuiltinType::kTextureNumLevels ||
-         i == BuiltinType::kTextureNumSamples;
+    return i == BuiltinType::kTextureDimensions || i == BuiltinType::kTextureNumLayers ||
+           i == BuiltinType::kTextureNumLevels || i == BuiltinType::kTextureNumSamples;
 }
 
 bool IsDataPackingBuiltin(BuiltinType i) {
-  return i == BuiltinType::kPack4x8snorm || i == BuiltinType::kPack4x8unorm ||
-         i == BuiltinType::kPack2x16snorm || i == BuiltinType::kPack2x16unorm ||
-         i == BuiltinType::kPack2x16float;
+    return i == BuiltinType::kPack4x8snorm || i == BuiltinType::kPack4x8unorm ||
+           i == BuiltinType::kPack2x16snorm || i == BuiltinType::kPack2x16unorm ||
+           i == BuiltinType::kPack2x16float;
 }
 
 bool IsDataUnpackingBuiltin(BuiltinType i) {
-  return i == BuiltinType::kUnpack4x8snorm ||
-         i == BuiltinType::kUnpack4x8unorm ||
-         i == BuiltinType::kUnpack2x16snorm ||
-         i == BuiltinType::kUnpack2x16unorm ||
-         i == BuiltinType::kUnpack2x16float;
+    return i == BuiltinType::kUnpack4x8snorm || i == BuiltinType::kUnpack4x8unorm ||
+           i == BuiltinType::kUnpack2x16snorm || i == BuiltinType::kUnpack2x16unorm ||
+           i == BuiltinType::kUnpack2x16float;
 }
 
 bool IsBarrierBuiltin(BuiltinType i) {
-  return i == BuiltinType::kWorkgroupBarrier ||
-         i == BuiltinType::kStorageBarrier;
+    return i == BuiltinType::kWorkgroupBarrier || i == BuiltinType::kStorageBarrier;
 }
 
 bool IsAtomicBuiltin(BuiltinType i) {
-  return i == sem::BuiltinType::kAtomicLoad ||
-         i == sem::BuiltinType::kAtomicStore ||
-         i == sem::BuiltinType::kAtomicAdd ||
-         i == sem::BuiltinType::kAtomicSub ||
-         i == sem::BuiltinType::kAtomicMax ||
-         i == sem::BuiltinType::kAtomicMin ||
-         i == sem::BuiltinType::kAtomicAnd ||
-         i == sem::BuiltinType::kAtomicOr ||
-         i == sem::BuiltinType::kAtomicXor ||
-         i == sem::BuiltinType::kAtomicExchange ||
-         i == sem::BuiltinType::kAtomicCompareExchangeWeak;
+    return i == sem::BuiltinType::kAtomicLoad || i == sem::BuiltinType::kAtomicStore ||
+           i == sem::BuiltinType::kAtomicAdd || i == sem::BuiltinType::kAtomicSub ||
+           i == sem::BuiltinType::kAtomicMax || i == sem::BuiltinType::kAtomicMin ||
+           i == sem::BuiltinType::kAtomicAnd || i == sem::BuiltinType::kAtomicOr ||
+           i == sem::BuiltinType::kAtomicXor || i == sem::BuiltinType::kAtomicExchange ||
+           i == sem::BuiltinType::kAtomicCompareExchangeWeak;
 }
 
 Builtin::Builtin(BuiltinType type,
@@ -107,57 +92,57 @@ Builtin::Builtin(BuiltinType type,
       type_(type),
       supported_stages_(supported_stages),
       is_deprecated_(is_deprecated) {
-  for (auto* parameter : parameters) {
-    parameter->SetOwner(this);
-  }
+    for (auto* parameter : parameters) {
+        parameter->SetOwner(this);
+    }
 }
 
 Builtin::~Builtin() = default;
 
 bool Builtin::IsCoarseDerivative() const {
-  return IsCoarseDerivativeBuiltin(type_);
+    return IsCoarseDerivativeBuiltin(type_);
 }
 
 bool Builtin::IsFineDerivative() const {
-  return IsFineDerivativeBuiltin(type_);
+    return IsFineDerivativeBuiltin(type_);
 }
 
 bool Builtin::IsDerivative() const {
-  return IsDerivativeBuiltin(type_);
+    return IsDerivativeBuiltin(type_);
 }
 
 bool Builtin::IsTexture() const {
-  return IsTextureBuiltin(type_);
+    return IsTextureBuiltin(type_);
 }
 
 bool Builtin::IsImageQuery() const {
-  return IsImageQueryBuiltin(type_);
+    return IsImageQueryBuiltin(type_);
 }
 
 bool Builtin::IsDataPacking() const {
-  return IsDataPackingBuiltin(type_);
+    return IsDataPackingBuiltin(type_);
 }
 
 bool Builtin::IsDataUnpacking() const {
-  return IsDataUnpackingBuiltin(type_);
+    return IsDataUnpackingBuiltin(type_);
 }
 
 bool Builtin::IsBarrier() const {
-  return IsBarrierBuiltin(type_);
+    return IsBarrierBuiltin(type_);
 }
 
 bool Builtin::IsAtomic() const {
-  return IsAtomicBuiltin(type_);
+    return IsAtomicBuiltin(type_);
 }
 
 bool Builtin::HasSideEffects() const {
-  if (IsAtomic() && type_ != sem::BuiltinType::kAtomicLoad) {
-    return true;
-  }
-  if (type_ == sem::BuiltinType::kTextureStore) {
-    return true;
-  }
-  return false;
+    if (IsAtomic() && type_ != sem::BuiltinType::kAtomicLoad) {
+        return true;
+    }
+    if (type_ == sem::BuiltinType::kTextureStore) {
+        return true;
+    }
+    return false;
 }
 
 }  // namespace tint::sem

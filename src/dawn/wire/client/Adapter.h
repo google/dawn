@@ -25,45 +25,45 @@
 
 namespace dawn::wire::client {
 
-    class Adapter final : public ObjectBase {
-      public:
-        using ObjectBase::ObjectBase;
+class Adapter final : public ObjectBase {
+  public:
+    using ObjectBase::ObjectBase;
 
-        ~Adapter();
-        void CancelCallbacksForDisconnect() override;
+    ~Adapter();
+    void CancelCallbacksForDisconnect() override;
 
-        bool GetLimits(WGPUSupportedLimits* limits) const;
-        bool HasFeature(WGPUFeatureName feature) const;
-        size_t EnumerateFeatures(WGPUFeatureName* features) const;
-        void SetLimits(const WGPUSupportedLimits* limits);
-        void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
-        void SetProperties(const WGPUAdapterProperties* properties);
-        void GetProperties(WGPUAdapterProperties* properties) const;
-        void RequestDevice(const WGPUDeviceDescriptor* descriptor,
-                           WGPURequestDeviceCallback callback,
-                           void* userdata);
+    bool GetLimits(WGPUSupportedLimits* limits) const;
+    bool HasFeature(WGPUFeatureName feature) const;
+    size_t EnumerateFeatures(WGPUFeatureName* features) const;
+    void SetLimits(const WGPUSupportedLimits* limits);
+    void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
+    void SetProperties(const WGPUAdapterProperties* properties);
+    void GetProperties(WGPUAdapterProperties* properties) const;
+    void RequestDevice(const WGPUDeviceDescriptor* descriptor,
+                       WGPURequestDeviceCallback callback,
+                       void* userdata);
 
-        bool OnRequestDeviceCallback(uint64_t requestSerial,
-                                     WGPURequestDeviceStatus status,
-                                     const char* message,
-                                     const WGPUSupportedLimits* limits,
-                                     uint32_t featuresCount,
-                                     const WGPUFeatureName* features);
+    bool OnRequestDeviceCallback(uint64_t requestSerial,
+                                 WGPURequestDeviceStatus status,
+                                 const char* message,
+                                 const WGPUSupportedLimits* limits,
+                                 uint32_t featuresCount,
+                                 const WGPUFeatureName* features);
 
-        // Unimplementable. Only availale in dawn_native.
-        WGPUDevice CreateDevice(const WGPUDeviceDescriptor*);
+    // Unimplementable. Only availale in dawn_native.
+    WGPUDevice CreateDevice(const WGPUDeviceDescriptor*);
 
-      private:
-        LimitsAndFeatures mLimitsAndFeatures;
-        WGPUAdapterProperties mProperties;
+  private:
+    LimitsAndFeatures mLimitsAndFeatures;
+    WGPUAdapterProperties mProperties;
 
-        struct RequestDeviceData {
-            WGPURequestDeviceCallback callback = nullptr;
-            ObjectId deviceObjectId;
-            void* userdata = nullptr;
-        };
-        RequestTracker<RequestDeviceData> mRequestDeviceRequests;
+    struct RequestDeviceData {
+        WGPURequestDeviceCallback callback = nullptr;
+        ObjectId deviceObjectId;
+        void* userdata = nullptr;
     };
+    RequestTracker<RequestDeviceData> mRequestDeviceRequests;
+};
 
 }  // namespace dawn::wire::client
 

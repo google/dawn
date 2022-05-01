@@ -27,10 +27,10 @@ Matrix::Matrix(const Vector* column_type, uint32_t columns)
       column_type_(column_type),
       rows_(column_type->Width()),
       columns_(columns) {
-  TINT_ASSERT(AST, rows_ > 1);
-  TINT_ASSERT(AST, rows_ < 5);
-  TINT_ASSERT(AST, columns_ > 1);
-  TINT_ASSERT(AST, columns_ < 5);
+    TINT_ASSERT(AST, rows_ > 1);
+    TINT_ASSERT(AST, rows_ < 5);
+    TINT_ASSERT(AST, columns_ > 1);
+    TINT_ASSERT(AST, columns_ < 5);
 }
 
 Matrix::Matrix(Matrix&&) = default;
@@ -38,39 +38,36 @@ Matrix::Matrix(Matrix&&) = default;
 Matrix::~Matrix() = default;
 
 size_t Matrix::Hash() const {
-  return utils::Hash(TypeInfo::Of<Vector>().full_hashcode, rows_, columns_,
-                     column_type_);
+    return utils::Hash(TypeInfo::Of<Vector>().full_hashcode, rows_, columns_, column_type_);
 }
 
 bool Matrix::Equals(const Type& other) const {
-  if (auto* v = other.As<Matrix>()) {
-    return v->rows_ == rows_ && v->columns_ == columns_ &&
-           v->column_type_ == column_type_;
-  }
-  return false;
+    if (auto* v = other.As<Matrix>()) {
+        return v->rows_ == rows_ && v->columns_ == columns_ && v->column_type_ == column_type_;
+    }
+    return false;
 }
 
 std::string Matrix::FriendlyName(const SymbolTable& symbols) const {
-  std::ostringstream out;
-  out << "mat" << columns_ << "x" << rows_ << "<"
-      << subtype_->FriendlyName(symbols) << ">";
-  return out.str();
+    std::ostringstream out;
+    out << "mat" << columns_ << "x" << rows_ << "<" << subtype_->FriendlyName(symbols) << ">";
+    return out.str();
 }
 
 bool Matrix::IsConstructible() const {
-  return true;
+    return true;
 }
 
 uint32_t Matrix::Size() const {
-  return column_type_->Align() * columns();
+    return column_type_->Align() * columns();
 }
 
 uint32_t Matrix::Align() const {
-  return column_type_->Align();
+    return column_type_->Align();
 }
 
 uint32_t Matrix::ColumnStride() const {
-  return column_type_->Align();
+    return column_type_->Align();
 }
 
 }  // namespace tint::sem

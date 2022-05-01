@@ -29,34 +29,34 @@ namespace tint::reader::wgsl::detail {
 /// the Expect<T> or Maybe<T> is not in an error state before dereferencing.
 template <typename T>
 struct OperatorArrow {
-  /// type resolves to the return type for the operator->()
-  using type = T*;
-  /// @param val the value held by `ParserImpl::Expect<T>` or
-  /// `ParserImpl::Maybe<T>`.
-  /// @return a pointer to `val`
-  static inline T* ptr(T& val) { return &val; }
+    /// type resolves to the return type for the operator->()
+    using type = T*;
+    /// @param val the value held by `ParserImpl::Expect<T>` or
+    /// `ParserImpl::Maybe<T>`.
+    /// @return a pointer to `val`
+    static inline T* ptr(T& val) { return &val; }
 };
 
 /// OperatorArrow template specialization for std::unique_ptr<>.
 template <typename T>
 struct OperatorArrow<std::unique_ptr<T>> {
-  /// type resolves to the return type for the operator->()
-  using type = T*;
-  /// @param val the value held by `ParserImpl::Expect<T>` or
-  /// `ParserImpl::Maybe<T>`.
-  /// @return the raw pointer held by `val`.
-  static inline T* ptr(std::unique_ptr<T>& val) { return val.get(); }
+    /// type resolves to the return type for the operator->()
+    using type = T*;
+    /// @param val the value held by `ParserImpl::Expect<T>` or
+    /// `ParserImpl::Maybe<T>`.
+    /// @return the raw pointer held by `val`.
+    static inline T* ptr(std::unique_ptr<T>& val) { return val.get(); }
 };
 
 /// OperatorArrow template specialization for T*.
 template <typename T>
 struct OperatorArrow<T*> {
-  /// type resolves to the return type for the operator->()
-  using type = T*;
-  /// @param val the value held by `ParserImpl::Expect<T>` or
-  /// `ParserImpl::Maybe<T>`.
-  /// @return `val`.
-  static inline T* ptr(T* val) { return val; }
+    /// type resolves to the return type for the operator->()
+    using type = T*;
+    /// @param val the value held by `ParserImpl::Expect<T>` or
+    /// `ParserImpl::Maybe<T>`.
+    /// @return `val`.
+    static inline T* ptr(T* val) { return val; }
 };
 
 }  // namespace tint::reader::wgsl::detail

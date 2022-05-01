@@ -20,15 +20,15 @@ namespace {
 using HlslGeneratorImplTest_Break = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Break, Emit_Break) {
-  auto* b = create<ast::BreakStatement>();
-  WrapInFunction(Loop(Block(b)));
+    auto* b = create<ast::BreakStatement>();
+    WrapInFunction(Loop(Block(b)));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(b)) << gen.error();
-  EXPECT_EQ(gen.result(), "  break;\n");
+    ASSERT_TRUE(gen.EmitStatement(b)) << gen.error();
+    EXPECT_EQ(gen.result(), "  break;\n");
 }
 
 }  // namespace

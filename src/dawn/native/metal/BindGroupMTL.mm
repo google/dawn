@@ -18,20 +18,19 @@
 #include "dawn/native/metal/DeviceMTL.h"
 namespace dawn::native::metal {
 
-    BindGroup::BindGroup(Device* device, const BindGroupDescriptor* descriptor)
-        : BindGroupBase(this, device, descriptor) {
-    }
+BindGroup::BindGroup(Device* device, const BindGroupDescriptor* descriptor)
+    : BindGroupBase(this, device, descriptor) {}
 
-    BindGroup::~BindGroup() = default;
+BindGroup::~BindGroup() = default;
 
-    void BindGroup::DestroyImpl() {
-        BindGroupBase::DestroyImpl();
-        ToBackend(GetLayout())->DeallocateBindGroup(this);
-    }
+void BindGroup::DestroyImpl() {
+    BindGroupBase::DestroyImpl();
+    ToBackend(GetLayout())->DeallocateBindGroup(this);
+}
 
-    // static
-    Ref<BindGroup> BindGroup::Create(Device* device, const BindGroupDescriptor* descriptor) {
-        return ToBackend(descriptor->layout)->AllocateBindGroup(device, descriptor);
-    }
+// static
+Ref<BindGroup> BindGroup::Create(Device* device, const BindGroupDescriptor* descriptor) {
+    return ToBackend(descriptor->layout)->AllocateBindGroup(device, descriptor);
+}
 
 }  // namespace dawn::native::metal

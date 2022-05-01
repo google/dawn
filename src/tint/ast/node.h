@@ -32,25 +32,25 @@ namespace tint::ast {
 
 /// AST base class node
 class Node : public Castable<Node, Cloneable> {
- public:
-  ~Node() override;
+  public:
+    ~Node() override;
 
-  /// The identifier of the program that owns this node
-  const ProgramID program_id;
+    /// The identifier of the program that owns this node
+    const ProgramID program_id;
 
-  /// The node source data
-  const Source source;
+    /// The node source data
+    const Source source;
 
- protected:
-  /// Create a new node
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the input source for the node
-  Node(ProgramID pid, const Source& src);
-  /// Move constructor
-  Node(Node&&);
+  protected:
+    /// Create a new node
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the input source for the node
+    Node(ProgramID pid, const Source& src);
+    /// Move constructor
+    Node(Node&&);
 
- private:
-  Node(const Node&) = delete;
+  private:
+    Node(const Node&) = delete;
 };
 
 }  // namespace tint::ast
@@ -60,7 +60,7 @@ namespace tint {
 /// @param node a pointer to an AST node
 /// @returns the ProgramID of the given AST node.
 inline ProgramID ProgramIDOf(const ast::Node* node) {
-  return node ? node->program_id : ProgramID();
+    return node ? node->program_id : ProgramID();
 }
 
 }  // namespace tint

@@ -27,37 +27,37 @@
 namespace tint::sem {
 
 const char* str(ParameterUsage usage) {
-  switch (usage) {
-    case ParameterUsage::kNone:
-      return "none";
-    case ParameterUsage::kArrayIndex:
-      return "array_index";
-    case ParameterUsage::kBias:
-      return "bias";
-    case ParameterUsage::kComponent:
-      return "component";
-    case ParameterUsage::kCoords:
-      return "coords";
-    case ParameterUsage::kDdx:
-      return "ddx";
-    case ParameterUsage::kDdy:
-      return "ddy";
-    case ParameterUsage::kDepthRef:
-      return "depth_ref";
-    case ParameterUsage::kLevel:
-      return "level";
-    case ParameterUsage::kOffset:
-      return "offset";
-    case ParameterUsage::kSampleIndex:
-      return "sample_index";
-    case ParameterUsage::kSampler:
-      return "sampler";
-    case ParameterUsage::kTexture:
-      return "texture";
-    case ParameterUsage::kValue:
-      return "value";
-  }
-  return "<unknown>";
+    switch (usage) {
+        case ParameterUsage::kNone:
+            return "none";
+        case ParameterUsage::kArrayIndex:
+            return "array_index";
+        case ParameterUsage::kBias:
+            return "bias";
+        case ParameterUsage::kComponent:
+            return "component";
+        case ParameterUsage::kCoords:
+            return "coords";
+        case ParameterUsage::kDdx:
+            return "ddx";
+        case ParameterUsage::kDdy:
+            return "ddy";
+        case ParameterUsage::kDepthRef:
+            return "depth_ref";
+        case ParameterUsage::kLevel:
+            return "level";
+        case ParameterUsage::kOffset:
+            return "offset";
+        case ParameterUsage::kSampleIndex:
+            return "sample_index";
+        case ParameterUsage::kSampler:
+            return "sampler";
+        case ParameterUsage::kTexture:
+            return "texture";
+        case ParameterUsage::kValue:
+            return "value";
+    }
+    return "<unknown>";
 }
 
 }  // namespace tint::sem

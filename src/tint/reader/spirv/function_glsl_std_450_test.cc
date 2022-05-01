@@ -23,7 +23,7 @@ namespace {
 using ::testing::HasSubstr;
 
 std::string Preamble() {
-  return R"(
+    return R"(
   OpCapability Shader
   %glsl = OpExtInstImport "GLSL.std.450"
   OpMemoryModel Logical GLSL450
@@ -127,12 +127,12 @@ std::string Preamble() {
 }
 
 struct GlslStd450Case {
-  std::string opcode;
-  std::string wgsl_func;
+    std::string opcode;
+    std::string wgsl_func;
 };
 inline std::ostream& operator<<(std::ostream& out, GlslStd450Case c) {
-  out << "GlslStd450Case(" << c.opcode << " " << c.wgsl_func << ")";
-  return out;
+    out << "GlslStd450Case(" << c.opcode << " " << c.wgsl_func << ")";
+    return out;
 }
 
 // Nomenclature:
@@ -171,240 +171,222 @@ using SpvParserTest_GlslStd450_Uinting_UintingUintingUinting =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 
 TEST_P(SpvParserTest_GlslStd450_Float_Floating, Scalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %float %glsl )" +
-                        GetParam().opcode + R"( %f1
+                          GetParam().opcode + R"( %f1
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body,
-              HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(f1);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(f1);")) << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Float_Floating, Vector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %float %glsl )" +
-                        GetParam().opcode + R"( %v2f1
+                          GetParam().opcode + R"( %v2f1
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body,
-              HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(v2f1);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(v2f1);")) << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Scalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %float %glsl )" +
-                        GetParam().opcode + R"( %f1 %f2
+                          GetParam().opcode + R"( %f1 %f2
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(
-      body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(f1, f2);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(f1, f2);")) << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Vector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %float %glsl )" +
-                        GetParam().opcode + R"( %v2f1 %v2f2
+                          GetParam().opcode + R"( %v2f1 %v2f2
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func +
-                              "(v2f1, v2f2);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(v2f1, v2f2);"))
+        << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Scalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %float %glsl )" +
-                        GetParam().opcode + R"( %f1
+                          GetParam().opcode + R"( %f1
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body,
-              HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(f1);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(f1);")) << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Vector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %v2float %glsl )" +
-                        GetParam().opcode + R"( %v2f1
+                          GetParam().opcode + R"( %v2f1
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = " + GetParam().wgsl_func +
-                              "(v2f1);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = " + GetParam().wgsl_func + "(v2f1);"))
+        << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Scalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %float %glsl )" +
-                        GetParam().opcode + R"( %f1 %f2
+                          GetParam().opcode + R"( %f1 %f2
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(
-      body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(f1, f2);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(f1, f2);")) << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Vector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %v2float %glsl )" +
-                        GetParam().opcode + R"( %v2f1 %v2f2
+                          GetParam().opcode + R"( %v2f1 %v2f2
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = " + GetParam().wgsl_func +
-                              "(v2f1, v2f2);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = " + GetParam().wgsl_func + "(v2f1, v2f2);"))
+        << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Scalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %float %glsl )" +
-                        GetParam().opcode + R"( %f1 %f2 %f3
+                          GetParam().opcode + R"( %f1 %f2 %f3
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func +
-                              "(f1, f2, f3);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(f1, f2, f3);"))
+        << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %v2float %glsl )" +
-                        GetParam().opcode +
-                        R"( %v2f1 %v2f2 %v2f3
+                          GetParam().opcode +
+                          R"( %v2f1 %v2f2 %v2f3
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = " + GetParam().wgsl_func +
-                              "(v2f1, v2f2, v2f3);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body,
+                HasSubstr("let x_1 : vec2<f32> = " + GetParam().wgsl_func + "(v2f1, v2f2, v2f3);"))
+        << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Scalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %float %glsl )" +
-                        GetParam().opcode + R"( %f1 %i1
+                          GetParam().opcode + R"( %f1 %i1
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(
-      body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(f1, i1);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : f32 = " + GetParam().wgsl_func + "(f1, i1);")) << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Vector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %v2float %glsl )" +
-                        GetParam().opcode +
-                        R"( %v2f1 %v2i1
+                          GetParam().opcode +
+                          R"( %v2f1 %v2i1
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = " + GetParam().wgsl_func +
-                              "(v2f1, v2i1);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = " + GetParam().wgsl_func + "(v2f1, v2i1);"))
+        << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Float3_Float3Float3, Samples) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %v3float %glsl )" +
-                        GetParam().opcode +
-                        R"( %v3f1 %v3f2
+                          GetParam().opcode +
+                          R"( %v3f1 %v3f2
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : vec3<f32> = " + GetParam().wgsl_func +
-                              "(v3f1, v3f2);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec3<f32> = " + GetParam().wgsl_func + "(v3f1, v3f2);"))
+        << body;
 }
 
 INSTANTIATE_TEST_SUITE_P(Samples,
@@ -413,8 +395,7 @@ INSTANTIATE_TEST_SUITE_P(Samples,
 
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Float_FloatingFloating,
-                         ::testing::Values(GlslStd450Case{"Distance",
-                                                          "distance"}));
+                         ::testing::Values(GlslStd450Case{"Distance", "distance"}));
 
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Floating_Floating,
@@ -467,128 +448,120 @@ INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Float3_Float3Float3,
                          ::testing::Values(GlslStd450Case{"Cross", "cross"}));
 
-INSTANTIATE_TEST_SUITE_P(
-    Samples,
-    SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating,
-    ::testing::ValuesIn(std::vector<GlslStd450Case>{
-        {"NClamp", "clamp"},
-        {"FClamp", "clamp"},  // WGSL FClamp promises more for NaN
-        {"Fma", "fma"},
-        {"FMix", "mix"},
-        {"SmoothStep", "smoothstep"}}));
+INSTANTIATE_TEST_SUITE_P(Samples,
+                         SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating,
+                         ::testing::ValuesIn(std::vector<GlslStd450Case>{
+                             {"NClamp", "clamp"},
+                             {"FClamp", "clamp"},  // WGSL FClamp promises more for NaN
+                             {"Fma", "fma"},
+                             {"FMix", "mix"},
+                             {"SmoothStep", "smoothstep"}}));
 
 TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Scalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %int %glsl )" +
-                        GetParam().opcode +
-                        R"( %i1
+                          GetParam().opcode +
+                          R"( %i1
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body,
-              HasSubstr("let x_1 : i32 = " + GetParam().wgsl_func + "(i1);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : i32 = " + GetParam().wgsl_func + "(i1);")) << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Vector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %v2int %glsl )" +
-                        GetParam().opcode +
-                        R"( %v2i1
+                          GetParam().opcode +
+                          R"( %v2i1
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = " + GetParam().wgsl_func +
-                              "(v2i1);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = " + GetParam().wgsl_func + "(v2i1);"))
+        << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Scalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %int %glsl )" +
-                        GetParam().opcode +
-                        R"( %i1 %i2
+                          GetParam().opcode +
+                          R"( %i1 %i2
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(
-      body, HasSubstr("let x_1 : i32 = " + GetParam().wgsl_func + "(i1, i2);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : i32 = " + GetParam().wgsl_func + "(i1, i2);")) << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Vector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %v2int %glsl )" +
-                        GetParam().opcode +
-                        R"( %v2i1 %v2i2
+                          GetParam().opcode +
+                          R"( %v2i1 %v2i2
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = " + GetParam().wgsl_func +
-                              "(v2i1, v2i2);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = " + GetParam().wgsl_func + "(v2i1, v2i2);"))
+        << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Scalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %int %glsl )" +
-                        GetParam().opcode +
-                        R"( %i1 %i2 %i3
+                          GetParam().opcode +
+                          R"( %i1 %i2 %i3
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : i32 = " + GetParam().wgsl_func +
-                              "(i1, i2, i3);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : i32 = " + GetParam().wgsl_func + "(i1, i2, i3);"))
+        << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Vector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %v2int %glsl )" +
-                        GetParam().opcode +
-                        R"( %v2i1 %v2i2 %v2i3
+                          GetParam().opcode +
+                          R"( %v2i1 %v2i2 %v2i3
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = " + GetParam().wgsl_func +
-                              "(v2i1, v2i2, v2i3);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body,
+                HasSubstr("let x_1 : vec2<i32> = " + GetParam().wgsl_func + "(v2i1, v2i2, v2i3);"))
+        << body;
 }
 
 INSTANTIATE_TEST_SUITE_P(Samples,
@@ -605,77 +578,73 @@ INSTANTIATE_TEST_SUITE_P(Samples,
                          ::testing::Values(GlslStd450Case{"SClamp", "clamp"}));
 
 TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Scalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %uint %glsl )" +
-                        GetParam().opcode + R"( %u1 %u2
+                          GetParam().opcode + R"( %u1 %u2
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(
-      body, HasSubstr("let x_1 : u32 = " + GetParam().wgsl_func + "(u1, u2);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : u32 = " + GetParam().wgsl_func + "(u1, u2);")) << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Vector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %v2uint %glsl )" +
-                        GetParam().opcode +
-                        R"( %v2u1 %v2u2
+                          GetParam().opcode +
+                          R"( %v2u1 %v2u2
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<u32> = " + GetParam().wgsl_func +
-                              "(v2u1, v2u2);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<u32> = " + GetParam().wgsl_func + "(v2u1, v2u2);"))
+        << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Scalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %uint %glsl )" +
-                        GetParam().opcode + R"( %u1 %u2 %u3
+                          GetParam().opcode + R"( %u1 %u2 %u3
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : u32 = " + GetParam().wgsl_func +
-                              "(u1, u2, u3);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : u32 = " + GetParam().wgsl_func + "(u1, u2, u3);"))
+        << body;
 }
 
 TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Vector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %v2uint %glsl )" +
-                        GetParam().opcode +
-                        R"( %v2u1 %v2u2 %v2u3
+                          GetParam().opcode +
+                          R"( %v2u1 %v2u2 %v2u3
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<u32> = " + GetParam().wgsl_func +
-                              "(v2u1, v2u2, v2u3);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body,
+                HasSubstr("let x_1 : vec2<u32> = " + GetParam().wgsl_func + "(v2u1, v2u2, v2u3);"))
+        << body;
 }
 
 INSTANTIATE_TEST_SUITE_P(Samples,
@@ -692,281 +661,269 @@ INSTANTIATE_TEST_SUITE_P(Samples,
 // above.
 
 TEST_F(SpvParserTest, Normalize_Scalar) {
-  // Scalar normalize always results in 1.0
-  const auto assembly = Preamble() + R"(
+    // Scalar normalize always results in 1.0
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %float %glsl Normalize %f1
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : f32 = 1.0;")) << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : f32 = 1.0;")) << body;
 }
 
 TEST_F(SpvParserTest, Normalize_Vector2) {
-  // Scalar normalize always results in 1.0
-  const auto assembly = Preamble() + R"(
+    // Scalar normalize always results in 1.0
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %v2float %glsl Normalize %v2f1
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = normalize(v2f1);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<f32> = normalize(v2f1);")) << body;
 }
 
 TEST_F(SpvParserTest, Normalize_Vector3) {
-  // Scalar normalize always results in 1.0
-  const auto assembly = Preamble() + R"(
+    // Scalar normalize always results in 1.0
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %v3float %glsl Normalize %v3f1
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : vec3<f32> = normalize(v3f1);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec3<f32> = normalize(v3f1);")) << body;
 }
 
 TEST_F(SpvParserTest, Normalize_Vector4) {
-  // Scalar normalize always results in 1.0
-  const auto assembly = Preamble() + R"(
+    // Scalar normalize always results in 1.0
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %v4float %glsl Normalize %v4f1
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : vec4<f32> = normalize(v4f1);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec4<f32> = normalize(v4f1);")) << body;
 }
 
 // Check that we convert signedness of operands and result type.
 // This is needed for each of the integer-based extended instructions.
 
 TEST_F(SpvParserTest, RectifyOperandsAndResult_SAbs) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %uint %glsl SAbs %u1
      %2 = OpExtInst %v2uint %glsl SAbs %v2u1
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(
-      body,
-      HasSubstr(R"(let x_1 : u32 = bitcast<u32>(abs(bitcast<i32>(u1)));)"))
-      << body;
-  EXPECT_THAT(
-      body,
-      HasSubstr(
-          R"(let x_2 : vec2<u32> = bitcast<vec2<u32>>(abs(bitcast<vec2<i32>>(v2u1)));)"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr(R"(let x_1 : u32 = bitcast<u32>(abs(bitcast<i32>(u1)));)")) << body;
+    EXPECT_THAT(
+        body,
+        HasSubstr(R"(let x_2 : vec2<u32> = bitcast<vec2<u32>>(abs(bitcast<vec2<i32>>(v2u1)));)"))
+        << body;
 }
 
 TEST_F(SpvParserTest, RectifyOperandsAndResult_SMax) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %uint %glsl SMax %u1 %u2
      %2 = OpExtInst %v2uint %glsl SMax %v2u1 %v2u2
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(
-      body,
-      HasSubstr(
-          R"(let x_1 : u32 = bitcast<u32>(max(bitcast<i32>(u1), bitcast<i32>(u2)));)"))
-      << body;
-  EXPECT_THAT(
-      body,
-      HasSubstr(
-          R"(let x_2 : vec2<u32> = bitcast<vec2<u32>>(max(bitcast<vec2<i32>>(v2u1), bitcast<vec2<i32>>(v2u2)));)"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(
+        body,
+        HasSubstr(R"(let x_1 : u32 = bitcast<u32>(max(bitcast<i32>(u1), bitcast<i32>(u2)));)"))
+        << body;
+    EXPECT_THAT(
+        body,
+        HasSubstr(
+            R"(let x_2 : vec2<u32> = bitcast<vec2<u32>>(max(bitcast<vec2<i32>>(v2u1), bitcast<vec2<i32>>(v2u2)));)"))
+        << body;
 }
 
 TEST_F(SpvParserTest, RectifyOperandsAndResult_SMin) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %uint %glsl SMin %u1 %u2
      %2 = OpExtInst %v2uint %glsl SMin %v2u1 %v2u2
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(
-      body,
-      HasSubstr(
-          R"(let x_1 : u32 = bitcast<u32>(min(bitcast<i32>(u1), bitcast<i32>(u2)));)"))
-      << body;
-  EXPECT_THAT(
-      body,
-      HasSubstr(
-          R"(let x_2 : vec2<u32> = bitcast<vec2<u32>>(min(bitcast<vec2<i32>>(v2u1), bitcast<vec2<i32>>(v2u2)));)"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(
+        body,
+        HasSubstr(R"(let x_1 : u32 = bitcast<u32>(min(bitcast<i32>(u1), bitcast<i32>(u2)));)"))
+        << body;
+    EXPECT_THAT(
+        body,
+        HasSubstr(
+            R"(let x_2 : vec2<u32> = bitcast<vec2<u32>>(min(bitcast<vec2<i32>>(v2u1), bitcast<vec2<i32>>(v2u2)));)"))
+        << body;
 }
 
 TEST_F(SpvParserTest, RectifyOperandsAndResult_SClamp) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %uint %glsl SClamp %u1 %i2 %u3
      %2 = OpExtInst %v2uint %glsl SClamp %v2u1 %v2i2 %v2u3
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(
-      body,
-      HasSubstr(
-          R"(let x_1 : u32 = bitcast<u32>(clamp(bitcast<i32>(u1), i2, bitcast<i32>(u3)));)"))
-      << body;
-  EXPECT_THAT(
-      body,
-      HasSubstr(
-          R"(let x_2 : vec2<u32> = bitcast<vec2<u32>>(clamp(bitcast<vec2<i32>>(v2u1), v2i2, bitcast<vec2<i32>>(v2u3)));)"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(
+        body,
+        HasSubstr(
+            R"(let x_1 : u32 = bitcast<u32>(clamp(bitcast<i32>(u1), i2, bitcast<i32>(u3)));)"))
+        << body;
+    EXPECT_THAT(
+        body,
+        HasSubstr(
+            R"(let x_2 : vec2<u32> = bitcast<vec2<u32>>(clamp(bitcast<vec2<i32>>(v2u1), v2i2, bitcast<vec2<i32>>(v2u3)));)"))
+        << body;
 }
 
 TEST_F(SpvParserTest, RectifyOperandsAndResult_UMax) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %int %glsl UMax %i1 %i2
      %2 = OpExtInst %v2int %glsl UMax %v2i1 %v2i2
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(
-      body,
-      HasSubstr(
-          R"(let x_1 : i32 = bitcast<i32>(max(bitcast<u32>(i1), bitcast<u32>(i2)));)"))
-      << body;
-  EXPECT_THAT(
-      body,
-      HasSubstr(
-          R"(let x_2 : vec2<i32> = bitcast<vec2<i32>>(max(bitcast<vec2<u32>>(v2i1), bitcast<vec2<u32>>(v2i2)));)"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(
+        body,
+        HasSubstr(R"(let x_1 : i32 = bitcast<i32>(max(bitcast<u32>(i1), bitcast<u32>(i2)));)"))
+        << body;
+    EXPECT_THAT(
+        body,
+        HasSubstr(
+            R"(let x_2 : vec2<i32> = bitcast<vec2<i32>>(max(bitcast<vec2<u32>>(v2i1), bitcast<vec2<u32>>(v2i2)));)"))
+        << body;
 }
 
 TEST_F(SpvParserTest, RectifyOperandsAndResult_UMin) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %int %glsl UMin %i1 %i2
      %2 = OpExtInst %v2int %glsl UMin %v2i1 %v2i2
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(
-      body,
-      HasSubstr(
-          R"(let x_1 : i32 = bitcast<i32>(min(bitcast<u32>(i1), bitcast<u32>(i2)));)"))
-      << body;
-  EXPECT_THAT(
-      body,
-      HasSubstr(
-          R"(let x_2 : vec2<i32> = bitcast<vec2<i32>>(min(bitcast<vec2<u32>>(v2i1), bitcast<vec2<u32>>(v2i2)));)"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(
+        body,
+        HasSubstr(R"(let x_1 : i32 = bitcast<i32>(min(bitcast<u32>(i1), bitcast<u32>(i2)));)"))
+        << body;
+    EXPECT_THAT(
+        body,
+        HasSubstr(
+            R"(let x_2 : vec2<i32> = bitcast<vec2<i32>>(min(bitcast<vec2<u32>>(v2i1), bitcast<vec2<u32>>(v2i2)));)"))
+        << body;
 }
 
 TEST_F(SpvParserTest, RectifyOperandsAndResult_UClamp) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %int %glsl UClamp %i1 %u2 %i3
      %2 = OpExtInst %v2int %glsl UClamp %v2i1 %v2u2 %v2i3
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(
-      body,
-      HasSubstr(
-          R"(let x_1 : i32 = bitcast<i32>(clamp(bitcast<u32>(i1), u2, bitcast<u32>(i3)));)"))
-      << body;
-  EXPECT_THAT(
-      body,
-      HasSubstr(
-          R"(let x_2 : vec2<i32> = bitcast<vec2<i32>>(clamp(bitcast<vec2<u32>>(v2i1), v2u2, bitcast<vec2<u32>>(v2i3)));)"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(
+        body,
+        HasSubstr(
+            R"(let x_1 : i32 = bitcast<i32>(clamp(bitcast<u32>(i1), u2, bitcast<u32>(i3)));)"))
+        << body;
+    EXPECT_THAT(
+        body,
+        HasSubstr(
+            R"(let x_2 : vec2<i32> = bitcast<vec2<i32>>(clamp(bitcast<vec2<u32>>(v2i1), v2u2, bitcast<vec2<u32>>(v2i3)));)"))
+        << body;
 }
 
 struct DataPackingCase {
-  std::string opcode;
-  std::string wgsl_func;
-  uint32_t vec_size;
+    std::string opcode;
+    std::string wgsl_func;
+    uint32_t vec_size;
 };
 
 inline std::ostream& operator<<(std::ostream& out, DataPackingCase c) {
-  out << "DataPacking(" << c.opcode << ")";
-  return out;
+    out << "DataPacking(" << c.opcode << ")";
+    return out;
 }
 
 using SpvParserTest_GlslStd450_DataPacking =
     SpvParserTestBase<::testing::TestWithParam<DataPackingCase>>;
 
 TEST_P(SpvParserTest_GlslStd450_DataPacking, Valid) {
-  auto param = GetParam();
-  const auto assembly = Preamble() + R"(
+    auto param = GetParam();
+    const auto assembly = Preamble() + R"(
   %1 = OpExtInst %uint %glsl )" +
-                        param.opcode +
-                        (param.vec_size == 2 ? " %v2f1" : " %v4f1") + R"(
+                          param.opcode + (param.vec_size == 2 ? " %v2f1" : " %v4f1") + R"(
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : u32 = " + param.wgsl_func + "(v" +
-                              std::to_string(param.vec_size) + "f1);"))
-      << body;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : u32 = " + param.wgsl_func + "(v" +
+                                std::to_string(param.vec_size) + "f1);"))
+        << body;
 }
 
 INSTANTIATE_TEST_SUITE_P(Samples,
@@ -982,25 +939,24 @@ using SpvParserTest_GlslStd450_DataUnpacking =
     SpvParserTestBase<::testing::TestWithParam<DataPackingCase>>;
 
 TEST_P(SpvParserTest_GlslStd450_DataUnpacking, Valid) {
-  auto param = GetParam();
-  const auto assembly = Preamble() + R"(
+    auto param = GetParam();
+    const auto assembly = Preamble() + R"(
   %1 = OpExtInst )" + (param.vec_size == 2 ? "%v2float" : "%v4float") +
-                        std::string(" %glsl ") + param.opcode + R"( %u1
+                          std::string(" %glsl ") + param.opcode + R"( %u1
   OpReturn
   OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(body, HasSubstr("let x_1 : " +
-                              std::string(param.vec_size == 2 ? "vec2<f32>"
-                                                              : "vec4<f32>") +
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : " +
+                                std::string(param.vec_size == 2 ? "vec2<f32>" : "vec4<f32>") +
 
-                              +" = " + param.wgsl_func + "(u1);"))
-      << body;
+                                +" = " + param.wgsl_func + "(u1);"))
+        << body;
 }
 
 INSTANTIATE_TEST_SUITE_P(Samples,
@@ -1013,160 +969,157 @@ INSTANTIATE_TEST_SUITE_P(Samples,
                              {"UnpackHalf2x16", "unpack2x16float", 2}}));
 
 TEST_F(SpvParserTest, GlslStd450_Refract_Scalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %float %glsl Refract %f1 %f2 %f3
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  const auto* expected =
-      R"(let x_1 : f32 = refract(vec2<f32>(f1, 0.0), vec2<f32>(f2, 0.0), f3).x;)";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    const auto* expected =
+        R"(let x_1 : f32 = refract(vec2<f32>(f1, 0.0), vec2<f32>(f2, 0.0), f3).x;)";
 
-  EXPECT_THAT(body, HasSubstr(expected)) << body;
+    EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
 
 TEST_F(SpvParserTest, GlslStd450_Refract_Vector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %v2float %glsl Refract %v2f1 %v2f2 %f3
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  const auto* expected = R"(let x_1 : vec2<f32> = refract(v2f1, v2f2, f3);)";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    const auto* expected = R"(let x_1 : vec2<f32> = refract(v2f1, v2f2, f3);)";
 
-  EXPECT_THAT(body, HasSubstr(expected)) << body;
+    EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
 
 TEST_F(SpvParserTest, GlslStd450_FaceForward_Scalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %99 = OpFAdd %float %f1 %f1 ; normal operand has only one use
      %1 = OpExtInst %float %glsl FaceForward %99 %f2 %f3
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  // The %99 sum only has one use.  Ensure it is evaluated only once by
-  // making a let-declaration for it, since it is the normal operand to
-  // the builtin function, and code generation uses it twice.
-  const auto* expected =
-      R"(let x_1 : f32 = select(-(x_99), x_99, ((f2 * f3) < 0.0));)";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    // The %99 sum only has one use.  Ensure it is evaluated only once by
+    // making a let-declaration for it, since it is the normal operand to
+    // the builtin function, and code generation uses it twice.
+    const auto* expected = R"(let x_1 : f32 = select(-(x_99), x_99, ((f2 * f3) < 0.0));)";
 
-  EXPECT_THAT(body, HasSubstr(expected)) << body;
+    EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
 
 TEST_F(SpvParserTest, GlslStd450_FaceForward_Vector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %99 = OpFAdd %v2float %v2f1 %v2f1
      %1 = OpExtInst %v2float %glsl FaceForward %v2f1 %v2f2 %v2f3
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  const auto* expected =
-      R"(let x_1 : vec2<f32> = faceForward(v2f1, v2f2, v2f3);)";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    const auto* expected = R"(let x_1 : vec2<f32> = faceForward(v2f1, v2f2, v2f3);)";
 
-  EXPECT_THAT(body, HasSubstr(expected)) << body;
+    EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
 
 TEST_F(SpvParserTest, GlslStd450_Reflect_Scalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %98 = OpFAdd %float %f1 %f1 ; has only one use
      %99 = OpFAdd %float %f2 %f2 ; has only one use
      %1 = OpExtInst %float %glsl Reflect %98 %99
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  // The %99 sum only has one use.  Ensure it is evaluated only once by
-  // making a let-declaration for it, since it is the normal operand to
-  // the builtin function, and code generation uses it twice.
-  const auto* expected =
-      R"(let x_1 : f32 = (x_98 - (2.0 * (x_99 * (x_99 * x_98))));)";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    // The %99 sum only has one use.  Ensure it is evaluated only once by
+    // making a let-declaration for it, since it is the normal operand to
+    // the builtin function, and code generation uses it twice.
+    const auto* expected = R"(let x_1 : f32 = (x_98 - (2.0 * (x_99 * (x_99 * x_98))));)";
 
-  EXPECT_THAT(body, HasSubstr(expected)) << body;
+    EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
 
 TEST_F(SpvParserTest, GlslStd450_Reflect_Vector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %98 = OpFAdd %v2float %v2f1 %v2f1
      %99 = OpFAdd %v2float %v2f2 %v2f2
      %1 = OpExtInst %v2float %glsl Reflect %98 %99
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  const auto* expected = R"(
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    const auto* expected = R"(
 let x_98 : vec2<f32> = (v2f1 + v2f1);
 let x_99 : vec2<f32> = (v2f2 + v2f2);
 let x_1 : vec2<f32> = reflect(x_98, x_99);
 )";
 
-  EXPECT_THAT(body, HasSubstr(expected)) << body;
+    EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
 
 // For ldexp with signed second argument, see above.
 TEST_F(SpvParserTest, GlslStd450_Ldexp_Scalar_Float_Uint) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %float %glsl Ldexp %f1 %u1
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  const auto* expected = "let x_1 : f32 = ldexp(f1, i32(u1));";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    const auto* expected = "let x_1 : f32 = ldexp(f1, i32(u1));";
 
-  EXPECT_THAT(body, HasSubstr(expected)) << body;
+    EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
 
 TEST_F(SpvParserTest, GlslStd450_Ldexp_Vector_Floatvec_Uintvec) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %1 = OpExtInst %v2float %glsl Ldexp %v2f1 %v2u1
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto body = test::ToString(p->program(), ast_body);
-  const auto* expected = "let x_1 : vec2<f32> = ldexp(v2f1, vec2<i32>(v2u1));";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    const auto* expected = "let x_1 : vec2<f32> = ldexp(v2f1, vec2<i32>(v2u1));";
 
-  EXPECT_THAT(body, HasSubstr(expected)) << body;
+    EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
 
 }  // namespace

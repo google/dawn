@@ -29,37 +29,37 @@
 
 namespace {
 
-    struct SimpleTaskResult {
-        uint32_t id;
-    };
+struct SimpleTaskResult {
+    uint32_t id;
+};
 
-    // A thread-safe queue that stores the task results.
-    class ConcurrentTaskResultQueue : public NonCopyable {
-      public:
-        void AddResult(std::unique_ptr<SimpleTaskResult> result) {
-            std::lock_guard<std::mutex> lock(mMutex);
-            mTaskResults.push_back(std::move(result));
-        }
-
-        std::vector<std::unique_ptr<SimpleTaskResult>> GetAllResults() {
-            std::vector<std::unique_ptr<SimpleTaskResult>> outputResults;
-            {
-                std::lock_guard<std::mutex> lock(mMutex);
-                outputResults.swap(mTaskResults);
-            }
-            return outputResults;
-        }
-
-      private:
-        std::mutex mMutex;
-        std::vector<std::unique_ptr<SimpleTaskResult>> mTaskResults;
-    };
-
-    void DoTask(ConcurrentTaskResultQueue* resultQueue, uint32_t id) {
-        std::unique_ptr<SimpleTaskResult> result = std::make_unique<SimpleTaskResult>();
-        result->id = id;
-        resultQueue->AddResult(std::move(result));
+// A thread-safe queue that stores the task results.
+class ConcurrentTaskResultQueue : public NonCopyable {
+  public:
+    void AddResult(std::unique_ptr<SimpleTaskResult> result) {
+        std::lock_guard<std::mutex> lock(mMutex);
+        mTaskResults.push_back(std::move(result));
     }
+
+    std::vector<std::unique_ptr<SimpleTaskResult>> GetAllResults() {
+        std::vector<std::unique_ptr<SimpleTaskResult>> outputResults;
+        {
+            std::lock_guard<std::mutex> lock(mMutex);
+            outputResults.swap(mTaskResults);
+        }
+        return outputResults;
+    }
+
+  private:
+    std::mutex mMutex;
+    std::vector<std::unique_ptr<SimpleTaskResult>> mTaskResults;
+};
+
+void DoTask(ConcurrentTaskResultQueue* resultQueue, uint32_t id) {
+    std::unique_ptr<SimpleTaskResult> result = std::make_unique<SimpleTaskResult>();
+    result->id = id;
+    resultQueue->AddResult(std::move(result));
+}
 
 }  // anonymous namespace
 

@@ -19,48 +19,48 @@
 
 namespace utils {
 
-    struct TextureDataCopyLayout {
-        uint64_t byteLength;
-        uint64_t texelBlockCount;
-        uint32_t bytesPerRow;
-        uint32_t rowsPerImage;
-        uint32_t texelBlocksPerRow;
-        uint32_t bytesPerImage;
-        uint32_t texelBlocksPerImage;
-        wgpu::Extent3D mipSize;
-    };
+struct TextureDataCopyLayout {
+    uint64_t byteLength;
+    uint64_t texelBlockCount;
+    uint32_t bytesPerRow;
+    uint32_t rowsPerImage;
+    uint32_t texelBlocksPerRow;
+    uint32_t bytesPerImage;
+    uint32_t texelBlocksPerImage;
+    wgpu::Extent3D mipSize;
+};
 
-    uint32_t GetMinimumBytesPerRow(wgpu::TextureFormat format, uint32_t width);
-    TextureDataCopyLayout GetTextureDataCopyLayoutForTextureAtLevel(
-        wgpu::TextureFormat format,
-        wgpu::Extent3D textureSizeAtLevel0,
-        uint32_t mipmapLevel,
-        wgpu::TextureDimension dimension = wgpu::TextureDimension::e2D,
-        uint32_t rowsPerImage = wgpu::kCopyStrideUndefined);
+uint32_t GetMinimumBytesPerRow(wgpu::TextureFormat format, uint32_t width);
+TextureDataCopyLayout GetTextureDataCopyLayoutForTextureAtLevel(
+    wgpu::TextureFormat format,
+    wgpu::Extent3D textureSizeAtLevel0,
+    uint32_t mipmapLevel,
+    wgpu::TextureDimension dimension = wgpu::TextureDimension::e2D,
+    uint32_t rowsPerImage = wgpu::kCopyStrideUndefined);
 
-    uint64_t RequiredBytesInCopy(uint64_t bytesPerRow,
-                                 uint64_t rowsPerImage,
-                                 wgpu::Extent3D copyExtent,
-                                 wgpu::TextureFormat textureFormat);
-    uint64_t RequiredBytesInCopy(uint64_t bytesPerRow,
-                                 uint64_t rowsPerImage,
-                                 uint64_t widthInBlocks,
-                                 uint64_t heightInBlocks,
-                                 uint64_t depth,
-                                 uint64_t bytesPerBlock);
+uint64_t RequiredBytesInCopy(uint64_t bytesPerRow,
+                             uint64_t rowsPerImage,
+                             wgpu::Extent3D copyExtent,
+                             wgpu::TextureFormat textureFormat);
+uint64_t RequiredBytesInCopy(uint64_t bytesPerRow,
+                             uint64_t rowsPerImage,
+                             uint64_t widthInBlocks,
+                             uint64_t heightInBlocks,
+                             uint64_t depth,
+                             uint64_t bytesPerBlock);
 
-    uint64_t GetTexelCountInCopyRegion(uint64_t bytesPerRow,
-                                       uint64_t rowsPerImage,
-                                       wgpu::Extent3D copyExtent,
-                                       wgpu::TextureFormat textureFormat);
+uint64_t GetTexelCountInCopyRegion(uint64_t bytesPerRow,
+                                   uint64_t rowsPerImage,
+                                   wgpu::Extent3D copyExtent,
+                                   wgpu::TextureFormat textureFormat);
 
-    // A helper function used for testing DynamicUploader offset alignment.
-    // A call of this function will do a Queue::WriteTexture with 1 byte of data,
-    // so that assuming that WriteTexture uses DynamicUploader, the first RingBuffer
-    // in it will contain 1 byte of data.
-    void UnalignDynamicUploader(wgpu::Device device);
+// A helper function used for testing DynamicUploader offset alignment.
+// A call of this function will do a Queue::WriteTexture with 1 byte of data,
+// so that assuming that WriteTexture uses DynamicUploader, the first RingBuffer
+// in it will contain 1 byte of data.
+void UnalignDynamicUploader(wgpu::Device device);
 
-    uint32_t VertexFormatSize(wgpu::VertexFormat format);
+uint32_t VertexFormatSize(wgpu::VertexFormat format);
 
 }  // namespace utils
 

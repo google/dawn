@@ -556,9 +556,7 @@ class BufferMappedAtCreationTests : public DawnTest {
         return buffer.GetConstMappedRange(0, size);
     }
 
-    void UnmapBuffer(const wgpu::Buffer& buffer) {
-        buffer.Unmap();
-    }
+    void UnmapBuffer(const wgpu::Buffer& buffer) { buffer.Unmap(); }
 
     wgpu::Buffer BufferMappedAtCreation(wgpu::BufferUsage usage, uint64_t size) {
         wgpu::BufferDescriptor descriptor;

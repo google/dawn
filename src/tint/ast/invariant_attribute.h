@@ -22,23 +22,22 @@
 namespace tint::ast {
 
 /// The invariant attribute
-class InvariantAttribute final
-    : public Castable<InvariantAttribute, Attribute> {
- public:
-  /// constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  InvariantAttribute(ProgramID pid, const Source& src);
-  ~InvariantAttribute() override;
+class InvariantAttribute final : public Castable<InvariantAttribute, Attribute> {
+  public:
+    /// constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    InvariantAttribute(ProgramID pid, const Source& src);
+    ~InvariantAttribute() override;
 
-  /// @returns the WGSL name for the attribute
-  std::string Name() const override;
+    /// @returns the WGSL name for the attribute
+    std::string Name() const override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const InvariantAttribute* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const InvariantAttribute* Clone(CloneContext* ctx) const override;
 };
 
 }  // namespace tint::ast

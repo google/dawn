@@ -27,34 +27,34 @@ using CaseSelectorList = std::vector<const IntLiteralExpression*>;
 
 /// A case statement
 class CaseStatement final : public Castable<CaseStatement, Statement> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param selectors the case selectors
-  /// @param body the case body
-  CaseStatement(ProgramID pid,
-                const Source& src,
-                CaseSelectorList selectors,
-                const BlockStatement* body);
-  /// Move constructor
-  CaseStatement(CaseStatement&&);
-  ~CaseStatement() override;
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param selectors the case selectors
+    /// @param body the case body
+    CaseStatement(ProgramID pid,
+                  const Source& src,
+                  CaseSelectorList selectors,
+                  const BlockStatement* body);
+    /// Move constructor
+    CaseStatement(CaseStatement&&);
+    ~CaseStatement() override;
 
-  /// @returns true if this is a default statement
-  bool IsDefault() const { return selectors.empty(); }
+    /// @returns true if this is a default statement
+    bool IsDefault() const { return selectors.empty(); }
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const CaseStatement* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const CaseStatement* Clone(CloneContext* ctx) const override;
 
-  /// The case selectors, empty if none set
-  const CaseSelectorList selectors;
+    /// The case selectors, empty if none set
+    const CaseSelectorList selectors;
 
-  /// The case body
-  const BlockStatement* const body;
+    /// The case body
+    const BlockStatement* const body;
 };
 
 /// A list of case statements

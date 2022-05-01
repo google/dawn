@@ -19,18 +19,18 @@
 
 namespace dawn::native {
 
-    class DeviceBase;
+class DeviceBase;
 
-    // Indicates that for the lifetime of this object tint internal compiler errors should be
-    // reported to the given device.
-    class ScopedTintICEHandler : public NonCopyable {
-      public:
-        explicit ScopedTintICEHandler(DeviceBase* device);
-        ~ScopedTintICEHandler();
+// Indicates that for the lifetime of this object tint internal compiler errors should be
+// reported to the given device.
+class ScopedTintICEHandler : public NonCopyable {
+  public:
+    explicit ScopedTintICEHandler(DeviceBase* device);
+    ~ScopedTintICEHandler();
 
-      private:
-        ScopedTintICEHandler(ScopedTintICEHandler&&) = delete;
-    };
+  private:
+    ScopedTintICEHandler(ScopedTintICEHandler&&) = delete;
+};
 
 }  // namespace dawn::native
 

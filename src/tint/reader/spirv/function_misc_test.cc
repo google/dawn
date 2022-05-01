@@ -24,7 +24,7 @@ using ::testing::Eq;
 using ::testing::HasSubstr;
 
 std::string Preamble() {
-  return R"(
+    return R"(
    OpCapability Shader
    OpMemoryModel Logical Simple
    OpEntryPoint Fragment %100 "main"
@@ -33,7 +33,7 @@ std::string Preamble() {
 }
 
 std::string CommonTypes() {
-  return R"(
+    return R"(
   %void = OpTypeVoid
   %voidfn = OpTypeFunction %void
 
@@ -52,7 +52,7 @@ std::string CommonTypes() {
 using SpvParserTestMiscInstruction = SpvParserTest;
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_BeforeFunction_Scalar) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+    const auto assembly = Preamble() + CommonTypes() + R"(
      %1 = OpUndef %bool
      %2 = OpUndef %uint
      %3 = OpUndef %int
@@ -67,13 +67,12 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_BeforeFunction_Scalar) {
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr(R"(let x_11 : bool = false;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(let x_11 : bool = false;
 let x_12 : u32 = 0u;
 let x_13 : i32 = 0;
 let x_14 : f32 = 0.0;
@@ -81,7 +80,7 @@ let x_14 : f32 = 0.0;
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_BeforeFunction_Vector) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+    const auto assembly = Preamble() + CommonTypes() + R"(
      %4 = OpUndef %v2bool
      %1 = OpUndef %v2uint
      %2 = OpUndef %v2int
@@ -97,13 +96,13 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_BeforeFunction_Vector) {
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr(R"(let x_14 : vec2<bool> = vec2<bool>();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr(R"(let x_14 : vec2<bool> = vec2<bool>();
 let x_11 : vec2<u32> = vec2<u32>();
 let x_12 : vec2<i32> = vec2<i32>();
 let x_13 : vec2<f32> = vec2<f32>();
@@ -111,7 +110,7 @@ let x_13 : vec2<f32> = vec2<f32>();
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Scalar) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+    const auto assembly = Preamble() + CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpUndef %bool
@@ -126,13 +125,12 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Scalar) {
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr(R"(let x_11 : bool = false;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(let x_11 : bool = false;
 let x_12 : u32 = 0u;
 let x_13 : i32 = 0;
 let x_14 : f32 = 0.0;
@@ -140,7 +138,7 @@ let x_14 : f32 = 0.0;
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Vector) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+    const auto assembly = Preamble() + CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpUndef %v2uint
@@ -153,20 +151,20 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Vector) {
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr(R"(let x_11 : vec2<u32> = vec2<u32>();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr(R"(let x_11 : vec2<u32> = vec2<u32>();
 let x_12 : vec2<i32> = vec2<i32>();
 let x_13 : vec2<f32> = vec2<f32>();
 )"));
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Matrix) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+    const auto assembly = Preamble() + CommonTypes() + R"(
      %mat = OpTypeMatrix %v2float 2
 
      %100 = OpFunction %void None %voidfn
@@ -177,17 +175,17 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Matrix) {
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_11 : mat2x2<f32> = mat2x2<f32>();"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_11 : mat2x2<f32> = mat2x2<f32>();"));
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Array) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+    const auto assembly = Preamble() + CommonTypes() + R"(
      %uint_2 = OpConstant %uint 2
      %arr = OpTypeArray %uint %uint_2
 
@@ -199,17 +197,17 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Array) {
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_11 : array<u32, 2u> = array<u32, 2u>();"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_11 : array<u32, 2u> = array<u32, 2u>();"));
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+    const auto assembly = Preamble() + CommonTypes() + R"(
      %strct = OpTypeStruct %bool %uint %int %float
 
      %100 = OpFunction %void None %voidfn
@@ -220,82 +218,79 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_11 : S = S(false, 0u, 0, 0.0);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_11 : S = S(false, 0u, 0, 0.0);"));
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpNop) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+    const auto assembly = Preamble() + CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      OpNop
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_EQ(test::ToString(p->program(), ast_body), "return;\n");
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_EQ(test::ToString(p->program(), ast_body), "return;\n");
 }
 
 // Test swizzle generation.
 
 struct SwizzleCase {
-  uint32_t index;
-  std::string expected_expr;
-  std::string expected_error;
+    uint32_t index;
+    std::string expected_expr;
+    std::string expected_error;
 };
-using SpvParserSwizzleTest =
-    SpvParserTestBase<::testing::TestWithParam<SwizzleCase>>;
+using SpvParserSwizzleTest = SpvParserTestBase<::testing::TestWithParam<SwizzleCase>>;
 
 TEST_P(SpvParserSwizzleTest, Sample) {
-  // We need a function so we can get a FunctionEmitter.
-  const auto assembly = Preamble() + CommonTypes() + R"(
+    // We need a function so we can get a FunctionEmitter.
+    const auto assembly = Preamble() + CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
 
-  auto* result = fe.Swizzle(GetParam().index);
-  if (GetParam().expected_error.empty()) {
-    Program program(p->program());
-    EXPECT_TRUE(fe.success());
-    ASSERT_NE(result, nullptr);
-    auto got = test::ToString(program, result);
-    EXPECT_EQ(got, GetParam().expected_expr);
-  } else {
-    EXPECT_EQ(result, nullptr);
-    EXPECT_FALSE(fe.success());
-    EXPECT_EQ(p->error(), GetParam().expected_error);
-  }
+    auto* result = fe.Swizzle(GetParam().index);
+    if (GetParam().expected_error.empty()) {
+        Program program(p->program());
+        EXPECT_TRUE(fe.success());
+        ASSERT_NE(result, nullptr);
+        auto got = test::ToString(program, result);
+        EXPECT_EQ(got, GetParam().expected_expr);
+    } else {
+        EXPECT_EQ(result, nullptr);
+        EXPECT_FALSE(fe.success());
+        EXPECT_EQ(p->error(), GetParam().expected_error);
+    }
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    ValidIndex,
-    SpvParserSwizzleTest,
-    ::testing::ValuesIn(std::vector<SwizzleCase>{
-        {0, "x", ""},
-        {1, "y", ""},
-        {2, "z", ""},
-        {3, "w", ""},
-        {4, "", "vector component index is larger than 3: 4"},
-        {99999, "", "vector component index is larger than 3: 99999"}}));
+INSTANTIATE_TEST_SUITE_P(ValidIndex,
+                         SpvParserSwizzleTest,
+                         ::testing::ValuesIn(std::vector<SwizzleCase>{
+                             {0, "x", ""},
+                             {1, "y", ""},
+                             {2, "z", ""},
+                             {3, "w", ""},
+                             {4, "", "vector component index is larger than 3: 4"},
+                             {99999, "", "vector component index is larger than 3: 99999"}}));
 
 TEST_F(SpvParserTest, ValueFromBlockNotInBlockOrder) {
-  // crbug.com/tint/804
-  const auto assembly = Preamble() + CommonTypes() + R"(
+    // crbug.com/tint/804
+    const auto assembly = Preamble() + CommonTypes() + R"(
      %float_42 = OpConstant %float 42.0
      %cond = OpUndef %bool
 
@@ -329,13 +324,13 @@ TEST_F(SpvParserTest, ValueFromBlockNotInBlockOrder) {
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  const auto got = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(got, HasSubstr("let x_81 : f32 = (0.0 * 42.0);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(got, HasSubstr("let x_81 : f32 = (0.0 * 42.0);"));
 }
 
 // TODO(dneto): OpSizeof : requires Kernel (OpenCL)

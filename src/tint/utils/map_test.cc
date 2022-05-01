@@ -22,34 +22,34 @@ namespace tint::utils {
 namespace {
 
 TEST(Lookup, Test) {
-  std::unordered_map<int, int> map;
-  map.emplace(10, 1);
-  EXPECT_EQ(Lookup(map, 10, 0), 1);    // exists, with if_missing
-  EXPECT_EQ(Lookup(map, 10), 1);       // exists, without if_missing
-  EXPECT_EQ(Lookup(map, 20, 50), 50);  // missing, with if_missing
-  EXPECT_EQ(Lookup(map, 20), 0);       // missing, without if_missing
+    std::unordered_map<int, int> map;
+    map.emplace(10, 1);
+    EXPECT_EQ(Lookup(map, 10, 0), 1);    // exists, with if_missing
+    EXPECT_EQ(Lookup(map, 10), 1);       // exists, without if_missing
+    EXPECT_EQ(Lookup(map, 20, 50), 50);  // missing, with if_missing
+    EXPECT_EQ(Lookup(map, 20), 0);       // missing, without if_missing
 }
 
 TEST(GetOrCreateTest, NewKey) {
-  std::unordered_map<int, int> map;
-  EXPECT_EQ(GetOrCreate(map, 1, [&] { return 2; }), 2);
-  EXPECT_EQ(map.size(), 1u);
-  EXPECT_EQ(map[1], 2);
+    std::unordered_map<int, int> map;
+    EXPECT_EQ(GetOrCreate(map, 1, [&] { return 2; }), 2);
+    EXPECT_EQ(map.size(), 1u);
+    EXPECT_EQ(map[1], 2);
 }
 
 TEST(GetOrCreateTest, ExistingKey) {
-  std::unordered_map<int, int> map;
-  map[1] = 2;
-  bool called = false;
-  EXPECT_EQ(GetOrCreate(map, 1,
-                        [&] {
-                          called = true;
-                          return -2;
-                        }),
-            2);
-  EXPECT_EQ(called, false);
-  EXPECT_EQ(map.size(), 1u);
-  EXPECT_EQ(map[1], 2);
+    std::unordered_map<int, int> map;
+    map[1] = 2;
+    bool called = false;
+    EXPECT_EQ(GetOrCreate(map, 1,
+                          [&] {
+                              called = true;
+                              return -2;
+                          }),
+              2);
+    EXPECT_EQ(called, false);
+    EXPECT_EQ(map.size(), 1u);
+    EXPECT_EQ(map[1], 2);
 }
 
 }  // namespace

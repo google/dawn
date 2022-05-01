@@ -17,11 +17,11 @@
 #include "dawn/common/GPUInfo.h"
 
 namespace {
-    const PCIVendorID vendorID = 0x8086;
-    const gpu_info::D3DDriverVersion version1 = {20, 19, 15, 5107};
-    const gpu_info::D3DDriverVersion version2 = {21, 20, 16, 5077};
-    const gpu_info::D3DDriverVersion version3 = {27, 20, 100, 9946};
-    const gpu_info::D3DDriverVersion version4 = {27, 20, 101, 2003};
+const PCIVendorID vendorID = 0x8086;
+const gpu_info::D3DDriverVersion version1 = {20, 19, 15, 5107};
+const gpu_info::D3DDriverVersion version2 = {21, 20, 16, 5077};
+const gpu_info::D3DDriverVersion version3 = {27, 20, 100, 9946};
+const gpu_info::D3DDriverVersion version4 = {27, 20, 101, 2003};
 }  // anonymous namespace
 
 TEST(GPUInfo, CompareD3DDriverVersion) {

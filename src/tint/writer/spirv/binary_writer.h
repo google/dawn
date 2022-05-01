@@ -23,36 +23,36 @@ namespace tint::writer::spirv {
 
 /// Writer to convert from builder to SPIR-V binary
 class BinaryWriter {
- public:
-  /// Constructor
-  BinaryWriter();
-  ~BinaryWriter();
+  public:
+    /// Constructor
+    BinaryWriter();
+    ~BinaryWriter();
 
-  /// Writes the SPIR-V header.
-  /// @param bound the bound to output
-  void WriteHeader(uint32_t bound);
+    /// Writes the SPIR-V header.
+    /// @param bound the bound to output
+    void WriteHeader(uint32_t bound);
 
-  /// Writes the given builder data into a binary. Note, this does not emit
-  /// the SPIR-V header. You **must** call WriteHeader() before WriteBuilder()
-  /// if you want the SPIR-V to be emitted.
-  /// @param builder the builder to assemble from
-  void WriteBuilder(Builder* builder);
+    /// Writes the given builder data into a binary. Note, this does not emit
+    /// the SPIR-V header. You **must** call WriteHeader() before WriteBuilder()
+    /// if you want the SPIR-V to be emitted.
+    /// @param builder the builder to assemble from
+    void WriteBuilder(Builder* builder);
 
-  /// Writes the given instruction into the binary.
-  /// @param inst the instruction to assemble
-  void WriteInstruction(const Instruction& inst);
+    /// Writes the given instruction into the binary.
+    /// @param inst the instruction to assemble
+    void WriteInstruction(const Instruction& inst);
 
-  /// @returns the assembled SPIR-V
-  const std::vector<uint32_t>& result() const { return out_; }
+    /// @returns the assembled SPIR-V
+    const std::vector<uint32_t>& result() const { return out_; }
 
-  /// @returns the assembled SPIR-V
-  std::vector<uint32_t>& result() { return out_; }
+    /// @returns the assembled SPIR-V
+    std::vector<uint32_t>& result() { return out_; }
 
- private:
-  void process_instruction(const Instruction& inst);
-  void process_op(const Operand& op);
+  private:
+    void process_instruction(const Instruction& inst);
+    void process_op(const Operand& op);
 
-  std::vector<uint32_t> out_;
+    std::vector<uint32_t> out_;
 };
 
 }  // namespace tint::writer::spirv

@@ -23,223 +23,221 @@
 
 namespace dawn::wire::server {
 
-    class Server;
-    class MemoryTransferService;
+class Server;
+class MemoryTransferService;
 
-    // CallbackUserdata and its derived classes are intended to be created by
-    // Server::MakeUserdata<T> and then passed as the userdata argument for Dawn
-    // callbacks.
-    // It contains a pointer back to the Server so that the callback can call the
-    // Server to perform operations like serialization, and it contains a weak pointer
-    // |serverIsAlive|. If the weak pointer has expired, it means the server has
-    // been destroyed and the callback must not use the Server pointer.
-    // To assist with checking |serverIsAlive| and lifetime management of the userdata,
-    // |ForwardToServer| (defined later in this file) can be used to acquire the userdata,
-    // return early if |serverIsAlive| has expired, and then forward the arguments
-    // to userdata->server->MyCallbackHandler.
-    //
-    // Example Usage:
-    //
-    // struct MyUserdata : CallbackUserdata { uint32_t foo; };
-    //
-    // auto userdata = MakeUserdata<MyUserdata>();
-    // userdata->foo = 2;
-    //
-    // callMyCallbackHandler(
-    //      ForwardToServer<&Server::MyCallbackHandler>,
-    //      userdata.release());
-    //
-    // void Server::MyCallbackHandler(MyUserdata* userdata, Other args) { }
-    struct CallbackUserdata {
-        Server* const server;
-        std::weak_ptr<bool> const serverIsAlive;
+// CallbackUserdata and its derived classes are intended to be created by
+// Server::MakeUserdata<T> and then passed as the userdata argument for Dawn
+// callbacks.
+// It contains a pointer back to the Server so that the callback can call the
+// Server to perform operations like serialization, and it contains a weak pointer
+// |serverIsAlive|. If the weak pointer has expired, it means the server has
+// been destroyed and the callback must not use the Server pointer.
+// To assist with checking |serverIsAlive| and lifetime management of the userdata,
+// |ForwardToServer| (defined later in this file) can be used to acquire the userdata,
+// return early if |serverIsAlive| has expired, and then forward the arguments
+// to userdata->server->MyCallbackHandler.
+//
+// Example Usage:
+//
+// struct MyUserdata : CallbackUserdata { uint32_t foo; };
+//
+// auto userdata = MakeUserdata<MyUserdata>();
+// userdata->foo = 2;
+//
+// callMyCallbackHandler(
+//      ForwardToServer<&Server::MyCallbackHandler>,
+//      userdata.release());
+//
+// void Server::MyCallbackHandler(MyUserdata* userdata, Other args) { }
+struct CallbackUserdata {
+    Server* const server;
+    std::weak_ptr<bool> const serverIsAlive;
 
-        CallbackUserdata() = delete;
-        CallbackUserdata(Server* server, const std::shared_ptr<bool>& serverIsAlive)
-            : server(server), serverIsAlive(serverIsAlive) {
-        }
-    };
+    CallbackUserdata() = delete;
+    CallbackUserdata(Server* server, const std::shared_ptr<bool>& serverIsAlive)
+        : server(server), serverIsAlive(serverIsAlive) {}
+};
 
-    template <auto F>
-    struct ForwardToServerHelper {
-        template <typename _>
-        struct ExtractedTypes;
+template <auto F>
+struct ForwardToServerHelper {
+    template <typename _>
+    struct ExtractedTypes;
 
-        // An internal structure used to unpack the various types that compose the type of F
-        template <typename Return, typename Class, typename Userdata, typename... Args>
-        struct ExtractedTypes<Return (Class::*)(Userdata*, Args...)> {
-            using UntypedCallback = Return (*)(Args..., void*);
-            static Return Callback(Args... args, void* userdata) {
-                // Acquire the userdata, and cast it to UserdataT.
-                std::unique_ptr<Userdata> data(static_cast<Userdata*>(userdata));
-                if (data->serverIsAlive.expired()) {
-                    // Do nothing if the server has already been destroyed.
-                    return;
-                }
-                // Forward the arguments and the typed userdata to the Server:: member function.
-                (data->server->*F)(data.get(), std::forward<decltype(args)>(args)...);
+    // An internal structure used to unpack the various types that compose the type of F
+    template <typename Return, typename Class, typename Userdata, typename... Args>
+    struct ExtractedTypes<Return (Class::*)(Userdata*, Args...)> {
+        using UntypedCallback = Return (*)(Args..., void*);
+        static Return Callback(Args... args, void* userdata) {
+            // Acquire the userdata, and cast it to UserdataT.
+            std::unique_ptr<Userdata> data(static_cast<Userdata*>(userdata));
+            if (data->serverIsAlive.expired()) {
+                // Do nothing if the server has already been destroyed.
+                return;
             }
-        };
-
-        static constexpr typename ExtractedTypes<decltype(F)>::UntypedCallback Create() {
-            return ExtractedTypes<decltype(F)>::Callback;
+            // Forward the arguments and the typed userdata to the Server:: member function.
+            (data->server->*F)(data.get(), std::forward<decltype(args)>(args)...);
         }
     };
 
-    template <auto F>
-    constexpr auto ForwardToServer = ForwardToServerHelper<F>::Create();
+    static constexpr typename ExtractedTypes<decltype(F)>::UntypedCallback Create() {
+        return ExtractedTypes<decltype(F)>::Callback;
+    }
+};
 
-    struct MapUserdata : CallbackUserdata {
-        using CallbackUserdata::CallbackUserdata;
+template <auto F>
+constexpr auto ForwardToServer = ForwardToServerHelper<F>::Create();
 
-        ObjectHandle buffer;
-        WGPUBuffer bufferObj;
-        uint64_t requestSerial;
-        uint64_t offset;
-        uint64_t size;
-        WGPUMapModeFlags mode;
-    };
+struct MapUserdata : CallbackUserdata {
+    using CallbackUserdata::CallbackUserdata;
 
-    struct ErrorScopeUserdata : CallbackUserdata {
-        using CallbackUserdata::CallbackUserdata;
+    ObjectHandle buffer;
+    WGPUBuffer bufferObj;
+    uint64_t requestSerial;
+    uint64_t offset;
+    uint64_t size;
+    WGPUMapModeFlags mode;
+};
 
-        ObjectHandle device;
-        uint64_t requestSerial;
-    };
+struct ErrorScopeUserdata : CallbackUserdata {
+    using CallbackUserdata::CallbackUserdata;
 
-    struct ShaderModuleGetCompilationInfoUserdata : CallbackUserdata {
-        using CallbackUserdata::CallbackUserdata;
+    ObjectHandle device;
+    uint64_t requestSerial;
+};
 
-        ObjectHandle shaderModule;
-        uint64_t requestSerial;
-    };
+struct ShaderModuleGetCompilationInfoUserdata : CallbackUserdata {
+    using CallbackUserdata::CallbackUserdata;
 
-    struct QueueWorkDoneUserdata : CallbackUserdata {
-        using CallbackUserdata::CallbackUserdata;
+    ObjectHandle shaderModule;
+    uint64_t requestSerial;
+};
 
-        ObjectHandle queue;
-        uint64_t requestSerial;
-    };
+struct QueueWorkDoneUserdata : CallbackUserdata {
+    using CallbackUserdata::CallbackUserdata;
 
-    struct CreatePipelineAsyncUserData : CallbackUserdata {
-        using CallbackUserdata::CallbackUserdata;
+    ObjectHandle queue;
+    uint64_t requestSerial;
+};
 
-        ObjectHandle device;
-        uint64_t requestSerial;
-        ObjectId pipelineObjectID;
-    };
+struct CreatePipelineAsyncUserData : CallbackUserdata {
+    using CallbackUserdata::CallbackUserdata;
 
-    struct RequestAdapterUserdata : CallbackUserdata {
-        using CallbackUserdata::CallbackUserdata;
+    ObjectHandle device;
+    uint64_t requestSerial;
+    ObjectId pipelineObjectID;
+};
 
-        ObjectHandle instance;
-        uint64_t requestSerial;
-        ObjectId adapterObjectId;
-    };
+struct RequestAdapterUserdata : CallbackUserdata {
+    using CallbackUserdata::CallbackUserdata;
 
-    struct RequestDeviceUserdata : CallbackUserdata {
-        using CallbackUserdata::CallbackUserdata;
+    ObjectHandle instance;
+    uint64_t requestSerial;
+    ObjectId adapterObjectId;
+};
 
-        ObjectHandle adapter;
-        uint64_t requestSerial;
-        ObjectId deviceObjectId;
-    };
+struct RequestDeviceUserdata : CallbackUserdata {
+    using CallbackUserdata::CallbackUserdata;
 
-    class Server : public ServerBase {
-      public:
-        Server(const DawnProcTable& procs,
-               CommandSerializer* serializer,
-               MemoryTransferService* memoryTransferService);
-        ~Server() override;
+    ObjectHandle adapter;
+    uint64_t requestSerial;
+    ObjectId deviceObjectId;
+};
 
-        // ChunkedCommandHandler implementation
-        const volatile char* HandleCommandsImpl(const volatile char* commands,
-                                                size_t size) override;
+class Server : public ServerBase {
+  public:
+    Server(const DawnProcTable& procs,
+           CommandSerializer* serializer,
+           MemoryTransferService* memoryTransferService);
+    ~Server() override;
 
-        bool InjectTexture(WGPUTexture texture,
-                           uint32_t id,
-                           uint32_t generation,
-                           uint32_t deviceId,
-                           uint32_t deviceGeneration);
+    // ChunkedCommandHandler implementation
+    const volatile char* HandleCommandsImpl(const volatile char* commands, size_t size) override;
 
-        bool InjectSwapChain(WGPUSwapChain swapchain,
-                             uint32_t id,
-                             uint32_t generation,
-                             uint32_t deviceId,
-                             uint32_t deviceGeneration);
+    bool InjectTexture(WGPUTexture texture,
+                       uint32_t id,
+                       uint32_t generation,
+                       uint32_t deviceId,
+                       uint32_t deviceGeneration);
 
-        bool InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation);
+    bool InjectSwapChain(WGPUSwapChain swapchain,
+                         uint32_t id,
+                         uint32_t generation,
+                         uint32_t deviceId,
+                         uint32_t deviceGeneration);
 
-        bool InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generation);
+    bool InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation);
 
-        WGPUDevice GetDevice(uint32_t id, uint32_t generation);
+    bool InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generation);
 
-        template <typename T,
-                  typename Enable = std::enable_if<std::is_base_of<CallbackUserdata, T>::value>>
-        std::unique_ptr<T> MakeUserdata() {
-            return std::unique_ptr<T>(new T(this, mIsAlive));
-        }
+    WGPUDevice GetDevice(uint32_t id, uint32_t generation);
 
-      private:
-        template <typename Cmd>
-        void SerializeCommand(const Cmd& cmd) {
-            mSerializer.SerializeCommand(cmd);
-        }
+    template <typename T,
+              typename Enable = std::enable_if<std::is_base_of<CallbackUserdata, T>::value>>
+    std::unique_ptr<T> MakeUserdata() {
+        return std::unique_ptr<T>(new T(this, mIsAlive));
+    }
 
-        template <typename Cmd, typename ExtraSizeSerializeFn>
-        void SerializeCommand(const Cmd& cmd,
-                              size_t extraSize,
-                              ExtraSizeSerializeFn&& SerializeExtraSize) {
-            mSerializer.SerializeCommand(cmd, extraSize, SerializeExtraSize);
-        }
+  private:
+    template <typename Cmd>
+    void SerializeCommand(const Cmd& cmd) {
+        mSerializer.SerializeCommand(cmd);
+    }
 
-        void SetForwardingDeviceCallbacks(ObjectData<WGPUDevice>* deviceObject);
-        void ClearDeviceCallbacks(WGPUDevice device);
+    template <typename Cmd, typename ExtraSizeSerializeFn>
+    void SerializeCommand(const Cmd& cmd,
+                          size_t extraSize,
+                          ExtraSizeSerializeFn&& SerializeExtraSize) {
+        mSerializer.SerializeCommand(cmd, extraSize, SerializeExtraSize);
+    }
 
-        // Error callbacks
-        void OnUncapturedError(ObjectHandle device, WGPUErrorType type, const char* message);
-        void OnDeviceLost(ObjectHandle device, WGPUDeviceLostReason reason, const char* message);
-        void OnLogging(ObjectHandle device, WGPULoggingType type, const char* message);
-        void OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
-                                   WGPUErrorType type,
-                                   const char* message);
-        void OnBufferMapAsyncCallback(MapUserdata* userdata, WGPUBufferMapAsyncStatus status);
-        void OnQueueWorkDone(QueueWorkDoneUserdata* userdata, WGPUQueueWorkDoneStatus status);
-        void OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* userdata,
-                                                  WGPUCreatePipelineAsyncStatus status,
-                                                  WGPUComputePipeline pipeline,
-                                                  const char* message);
-        void OnCreateRenderPipelineAsyncCallback(CreatePipelineAsyncUserData* userdata,
-                                                 WGPUCreatePipelineAsyncStatus status,
-                                                 WGPURenderPipeline pipeline,
-                                                 const char* message);
-        void OnShaderModuleGetCompilationInfo(ShaderModuleGetCompilationInfoUserdata* userdata,
-                                              WGPUCompilationInfoRequestStatus status,
-                                              const WGPUCompilationInfo* info);
-        void OnRequestAdapterCallback(RequestAdapterUserdata* userdata,
-                                      WGPURequestAdapterStatus status,
-                                      WGPUAdapter adapter,
-                                      const char* message);
-        void OnRequestDeviceCallback(RequestDeviceUserdata* userdata,
-                                     WGPURequestDeviceStatus status,
-                                     WGPUDevice device,
-                                     const char* message);
+    void SetForwardingDeviceCallbacks(ObjectData<WGPUDevice>* deviceObject);
+    void ClearDeviceCallbacks(WGPUDevice device);
+
+    // Error callbacks
+    void OnUncapturedError(ObjectHandle device, WGPUErrorType type, const char* message);
+    void OnDeviceLost(ObjectHandle device, WGPUDeviceLostReason reason, const char* message);
+    void OnLogging(ObjectHandle device, WGPULoggingType type, const char* message);
+    void OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
+                               WGPUErrorType type,
+                               const char* message);
+    void OnBufferMapAsyncCallback(MapUserdata* userdata, WGPUBufferMapAsyncStatus status);
+    void OnQueueWorkDone(QueueWorkDoneUserdata* userdata, WGPUQueueWorkDoneStatus status);
+    void OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* userdata,
+                                              WGPUCreatePipelineAsyncStatus status,
+                                              WGPUComputePipeline pipeline,
+                                              const char* message);
+    void OnCreateRenderPipelineAsyncCallback(CreatePipelineAsyncUserData* userdata,
+                                             WGPUCreatePipelineAsyncStatus status,
+                                             WGPURenderPipeline pipeline,
+                                             const char* message);
+    void OnShaderModuleGetCompilationInfo(ShaderModuleGetCompilationInfoUserdata* userdata,
+                                          WGPUCompilationInfoRequestStatus status,
+                                          const WGPUCompilationInfo* info);
+    void OnRequestAdapterCallback(RequestAdapterUserdata* userdata,
+                                  WGPURequestAdapterStatus status,
+                                  WGPUAdapter adapter,
+                                  const char* message);
+    void OnRequestDeviceCallback(RequestDeviceUserdata* userdata,
+                                 WGPURequestDeviceStatus status,
+                                 WGPUDevice device,
+                                 const char* message);
 
 #include "dawn/wire/server/ServerPrototypes_autogen.inc"
 
-        WireDeserializeAllocator mAllocator;
-        ChunkedCommandSerializer mSerializer;
-        DawnProcTable mProcs;
-        std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
-        MemoryTransferService* mMemoryTransferService = nullptr;
+    WireDeserializeAllocator mAllocator;
+    ChunkedCommandSerializer mSerializer;
+    DawnProcTable mProcs;
+    std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
+    MemoryTransferService* mMemoryTransferService = nullptr;
 
-        std::shared_ptr<bool> mIsAlive;
-    };
+    std::shared_ptr<bool> mIsAlive;
+};
 
-    bool TrackDeviceChild(DeviceInfo* device, ObjectType type, ObjectId id);
-    bool UntrackDeviceChild(DeviceInfo* device, ObjectType type, ObjectId id);
+bool TrackDeviceChild(DeviceInfo* device, ObjectType type, ObjectId id);
+bool UntrackDeviceChild(DeviceInfo* device, ObjectType type, ObjectId id);
 
-    std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();
+std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();
 
 }  // namespace dawn::wire::server
 

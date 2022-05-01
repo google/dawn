@@ -26,49 +26,48 @@ namespace tint::transform {
 /// expressions, possibly converting 'for-loop's to 'loop's and 'else-if's to
 // 'else {if}'s.
 class HoistToDeclBefore {
- public:
-  /// Constructor
-  /// @param ctx the clone context
-  explicit HoistToDeclBefore(CloneContext& ctx);
+  public:
+    /// Constructor
+    /// @param ctx the clone context
+    explicit HoistToDeclBefore(CloneContext& ctx);
 
-  /// Destructor
-  ~HoistToDeclBefore();
+    /// Destructor
+    ~HoistToDeclBefore();
 
-  /// Hoists `expr` to a `let` or `var` with optional `decl_name`, inserting it
-  /// before `before_expr`.
-  /// @param before_expr expression to insert `expr` before
-  /// @param expr expression to hoist
-  /// @param as_const hoist to `let` if true, otherwise to `var`
-  /// @param decl_name optional name to use for the variable/constant name
-  /// @return true on success
-  bool Add(const sem::Expression* before_expr,
-           const ast::Expression* expr,
-           bool as_const,
-           const char* decl_name = "");
+    /// Hoists `expr` to a `let` or `var` with optional `decl_name`, inserting it
+    /// before `before_expr`.
+    /// @param before_expr expression to insert `expr` before
+    /// @param expr expression to hoist
+    /// @param as_const hoist to `let` if true, otherwise to `var`
+    /// @param decl_name optional name to use for the variable/constant name
+    /// @return true on success
+    bool Add(const sem::Expression* before_expr,
+             const ast::Expression* expr,
+             bool as_const,
+             const char* decl_name = "");
 
-  /// Inserts `stmt` before `before_stmt`, possibly converting 'for-loop's to
-  /// 'loop's if necessary.
-  /// @param before_stmt statement to insert `stmt` before
-  /// @param stmt statement to insert
-  /// @return true on success
-  bool InsertBefore(const sem::Statement* before_stmt,
-                    const ast::Statement* stmt);
+    /// Inserts `stmt` before `before_stmt`, possibly converting 'for-loop's to
+    /// 'loop's if necessary.
+    /// @param before_stmt statement to insert `stmt` before
+    /// @param stmt statement to insert
+    /// @return true on success
+    bool InsertBefore(const sem::Statement* before_stmt, const ast::Statement* stmt);
 
-  /// Use to signal that we plan on hoisting a decl before `before_expr`. This
-  /// will convert 'for-loop's to 'loop's and 'else-if's to 'else {if}'s if
-  /// needed.
-  /// @param before_expr expression we would hoist a decl before
-  /// @return true on success
-  bool Prepare(const sem::Expression* before_expr);
+    /// Use to signal that we plan on hoisting a decl before `before_expr`. This
+    /// will convert 'for-loop's to 'loop's and 'else-if's to 'else {if}'s if
+    /// needed.
+    /// @param before_expr expression we would hoist a decl before
+    /// @return true on success
+    bool Prepare(const sem::Expression* before_expr);
 
-  /// Applies any scheduled insertions from previous calls to Add() to
-  /// CloneContext. Call this once before ctx.Clone().
-  /// @return true on success
-  bool Apply();
+    /// Applies any scheduled insertions from previous calls to Add() to
+    /// CloneContext. Call this once before ctx.Clone().
+    /// @return true on success
+    bool Apply();
 
- private:
-  class State;
-  std::unique_ptr<State> state_;
+  private:
+    class State;
+    std::unique_ptr<State> state_;
 };
 
 }  // namespace tint::transform

@@ -26,15 +26,15 @@ AbstractInt::AbstractInt(AbstractInt&&) = default;
 AbstractInt::~AbstractInt() = default;
 
 size_t AbstractInt::Hash() const {
-  return utils::Hash(TypeInfo::Of<AbstractInt>().full_hashcode);
+    return utils::Hash(TypeInfo::Of<AbstractInt>().full_hashcode);
 }
 
 bool AbstractInt::Equals(const sem::Type& other) const {
-  return other.Is<AbstractInt>();
+    return other.Is<AbstractInt>();
 }
 
 std::string AbstractInt::FriendlyName(const SymbolTable&) const {
-  return "AbstractInt";
+    return "AbstractInt";
 }
 
 }  // namespace tint::sem

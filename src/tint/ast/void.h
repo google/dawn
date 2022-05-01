@@ -23,24 +23,24 @@ namespace tint::ast {
 
 /// A void type
 class Void final : public Castable<Void, Type> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  Void(ProgramID pid, const Source& src);
-  /// Move constructor
-  Void(Void&&);
-  ~Void() override;
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    Void(ProgramID pid, const Source& src);
+    /// Move constructor
+    Void(Void&&);
+    ~Void() override;
 
-  /// @param symbols the program's symbol table
-  /// @returns the name for this type that closely resembles how it would be
-  /// declared in WGSL.
-  std::string FriendlyName(const SymbolTable& symbols) const override;
+    /// @param symbols the program's symbol table
+    /// @returns the name for this type that closely resembles how it would be
+    /// declared in WGSL.
+    std::string FriendlyName(const SymbolTable& symbols) const override;
 
-  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned type
-  const Void* Clone(CloneContext* ctx) const override;
+    /// Clones this type and all transitive types using the `CloneContext` `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned type
+    const Void* Clone(CloneContext* ctx) const override;
 };
 
 }  // namespace tint::ast

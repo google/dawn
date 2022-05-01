@@ -28,41 +28,40 @@ class Expression;
 namespace tint::ast {
 
 /// A workgroup attribute
-class WorkgroupAttribute final
-    : public Castable<WorkgroupAttribute, Attribute> {
- public:
-  /// constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param x the workgroup x dimension expression
-  /// @param y the optional workgroup y dimension expression
-  /// @param z the optional workgroup z dimension expression
-  WorkgroupAttribute(ProgramID pid,
-                     const Source& src,
-                     const ast::Expression* x,
-                     const ast::Expression* y = nullptr,
-                     const ast::Expression* z = nullptr);
+class WorkgroupAttribute final : public Castable<WorkgroupAttribute, Attribute> {
+  public:
+    /// constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param x the workgroup x dimension expression
+    /// @param y the optional workgroup y dimension expression
+    /// @param z the optional workgroup z dimension expression
+    WorkgroupAttribute(ProgramID pid,
+                       const Source& src,
+                       const ast::Expression* x,
+                       const ast::Expression* y = nullptr,
+                       const ast::Expression* z = nullptr);
 
-  ~WorkgroupAttribute() override;
+    ~WorkgroupAttribute() override;
 
-  /// @returns the workgroup dimensions
-  std::array<const ast::Expression*, 3> Values() const { return {x, y, z}; }
+    /// @returns the workgroup dimensions
+    std::array<const ast::Expression*, 3> Values() const { return {x, y, z}; }
 
-  /// @returns the WGSL name for the attribute
-  std::string Name() const override;
+    /// @returns the WGSL name for the attribute
+    std::string Name() const override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const WorkgroupAttribute* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const WorkgroupAttribute* Clone(CloneContext* ctx) const override;
 
-  /// The workgroup x dimension.
-  const ast::Expression* const x;
-  /// The optional workgroup y dimension. May be null.
-  const ast::Expression* const y = nullptr;
-  /// The optional workgroup z dimension. May be null.
-  const ast::Expression* const z = nullptr;
+    /// The workgroup x dimension.
+    const ast::Expression* const x;
+    /// The optional workgroup y dimension. May be null.
+    const ast::Expression* const y = nullptr;
+    /// The optional workgroup z dimension. May be null.
+    const ast::Expression* const z = nullptr;
 };
 
 }  // namespace tint::ast

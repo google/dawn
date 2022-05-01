@@ -21,21 +21,21 @@
 
 namespace dawn::native::d3d12 {
 
-    class Device;
+class Device;
 
-    class StagingBuffer : public StagingBufferBase {
-      public:
-        StagingBuffer(size_t size, Device* device);
-        ~StagingBuffer() override;
+class StagingBuffer : public StagingBufferBase {
+  public:
+    StagingBuffer(size_t size, Device* device);
+    ~StagingBuffer() override;
 
-        ID3D12Resource* GetResource() const;
+    ID3D12Resource* GetResource() const;
 
-        MaybeError Initialize() override;
+    MaybeError Initialize() override;
 
-      private:
-        Device* mDevice;
-        ResourceHeapAllocation mUploadHeap;
-    };
+  private:
+    Device* mDevice;
+    ResourceHeapAllocation mUploadHeap;
+};
 }  // namespace dawn::native::d3d12
 
 #endif  // SRC_DAWN_NATIVE_D3D12_STAGINGBUFFERD3D12_H_

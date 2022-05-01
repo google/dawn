@@ -26,28 +26,28 @@ constexpr static wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
 constexpr static uint32_t kBytesPerBlock = 4;
 
 namespace {
-    enum class Type { B2TCopy, T2BCopy };
+enum class Type { B2TCopy, T2BCopy };
 
-    std::ostream& operator<<(std::ostream& o, Type copyType) {
-        switch (copyType) {
-            case Type::B2TCopy:
-                o << "B2TCopy";
-                break;
-            case Type::T2BCopy:
-                o << "T2BCopy";
-                break;
-        }
-        return o;
+std::ostream& operator<<(std::ostream& o, Type copyType) {
+    switch (copyType) {
+        case Type::B2TCopy:
+            o << "B2TCopy";
+            break;
+        case Type::T2BCopy:
+            o << "T2BCopy";
+            break;
     }
+    return o;
+}
 
-    using TextureDimension = wgpu::TextureDimension;
-    using CopyDepth = uint32_t;
-    using ExtraRowsPerImage = uint64_t;
-    DAWN_TEST_PARAM_STRUCT(RequiredBufferSizeInCopyTestsParams,
-                           Type,
-                           TextureDimension,
-                           CopyDepth,
-                           ExtraRowsPerImage);
+using TextureDimension = wgpu::TextureDimension;
+using CopyDepth = uint32_t;
+using ExtraRowsPerImage = uint64_t;
+DAWN_TEST_PARAM_STRUCT(RequiredBufferSizeInCopyTestsParams,
+                       Type,
+                       TextureDimension,
+                       CopyDepth,
+                       ExtraRowsPerImage);
 }  // namespace
 
 // Tests in this file are used to expose an error on D3D12 about required minimum buffer size.

@@ -20,22 +20,22 @@
 
 namespace dawn::native::opengl {
 
-    class Device;
+class Device;
 
-    struct GLFormat {
-        GLenum internalFormat = 0;
-        GLenum format = 0;
-        GLenum type = 0;
-        bool isSupportedOnBackend = false;
+struct GLFormat {
+    GLenum internalFormat = 0;
+    GLenum format = 0;
+    GLenum type = 0;
+    bool isSupportedOnBackend = false;
 
-        // OpenGL has different functions depending on the format component type, for example
-        // glClearBufferfv is only valid on formats with the Float ComponentType
-        enum ComponentType { Float, Int, Uint, DepthStencil };
-        ComponentType componentType;
-    };
+    // OpenGL has different functions depending on the format component type, for example
+    // glClearBufferfv is only valid on formats with the Float ComponentType
+    enum ComponentType { Float, Int, Uint, DepthStencil };
+    ComponentType componentType;
+};
 
-    using GLFormatTable = ityp::array<FormatIndex, GLFormat, kKnownFormatCount>;
-    GLFormatTable BuildGLFormatTable(GLenum internalFormatForBGRA);
+using GLFormatTable = ityp::array<FormatIndex, GLFormat, kKnownFormatCount>;
+GLFormatTable BuildGLFormatTable(GLenum internalFormatForBGRA);
 
 }  // namespace dawn::native::opengl
 

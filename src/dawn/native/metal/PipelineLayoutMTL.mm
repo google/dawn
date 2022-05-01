@@ -20,63 +20,63 @@
 
 namespace dawn::native::metal {
 
-    // static
-    Ref<PipelineLayout> PipelineLayout::Create(Device* device,
-                                               const PipelineLayoutDescriptor* descriptor) {
-        return AcquireRef(new PipelineLayout(device, descriptor));
-    }
+// static
+Ref<PipelineLayout> PipelineLayout::Create(Device* device,
+                                           const PipelineLayoutDescriptor* descriptor) {
+    return AcquireRef(new PipelineLayout(device, descriptor));
+}
 
-    PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor)
-        : PipelineLayoutBase(device, descriptor) {
-        // Each stage has its own numbering namespace in CompilerMSL.
-        for (auto stage : IterateStages(kAllStages)) {
-            uint32_t bufferIndex = 0;
-            uint32_t samplerIndex = 0;
-            uint32_t textureIndex = 0;
+PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor)
+    : PipelineLayoutBase(device, descriptor) {
+    // Each stage has its own numbering namespace in CompilerMSL.
+    for (auto stage : IterateStages(kAllStages)) {
+        uint32_t bufferIndex = 0;
+        uint32_t samplerIndex = 0;
+        uint32_t textureIndex = 0;
 
-            for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
-                mIndexInfo[stage][group].resize(GetBindGroupLayout(group)->GetBindingCount());
+        for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
+            mIndexInfo[stage][group].resize(GetBindGroupLayout(group)->GetBindingCount());
 
-                for (BindingIndex bindingIndex{0};
-                     bindingIndex < GetBindGroupLayout(group)->GetBindingCount(); ++bindingIndex) {
-                    const BindingInfo& bindingInfo =
-                        GetBindGroupLayout(group)->GetBindingInfo(bindingIndex);
-                    if (!(bindingInfo.visibility & StageBit(stage))) {
-                        continue;
-                    }
+            for (BindingIndex bindingIndex{0};
+                 bindingIndex < GetBindGroupLayout(group)->GetBindingCount(); ++bindingIndex) {
+                const BindingInfo& bindingInfo =
+                    GetBindGroupLayout(group)->GetBindingInfo(bindingIndex);
+                if (!(bindingInfo.visibility & StageBit(stage))) {
+                    continue;
+                }
 
-                    switch (bindingInfo.bindingType) {
-                        case BindingInfoType::Buffer:
-                            mIndexInfo[stage][group][bindingIndex] = bufferIndex;
-                            bufferIndex++;
-                            break;
+                switch (bindingInfo.bindingType) {
+                    case BindingInfoType::Buffer:
+                        mIndexInfo[stage][group][bindingIndex] = bufferIndex;
+                        bufferIndex++;
+                        break;
 
-                        case BindingInfoType::Sampler:
-                            mIndexInfo[stage][group][bindingIndex] = samplerIndex;
-                            samplerIndex++;
-                            break;
+                    case BindingInfoType::Sampler:
+                        mIndexInfo[stage][group][bindingIndex] = samplerIndex;
+                        samplerIndex++;
+                        break;
 
-                        case BindingInfoType::Texture:
-                        case BindingInfoType::StorageTexture:
-                        case BindingInfoType::ExternalTexture:
-                            mIndexInfo[stage][group][bindingIndex] = textureIndex;
-                            textureIndex++;
-                            break;
-                    }
+                    case BindingInfoType::Texture:
+                    case BindingInfoType::StorageTexture:
+                    case BindingInfoType::ExternalTexture:
+                        mIndexInfo[stage][group][bindingIndex] = textureIndex;
+                        textureIndex++;
+                        break;
                 }
             }
-
-            mBufferBindingCount[stage] = bufferIndex;
         }
-    }
 
-    const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo(
-        SingleShaderStage stage) const {
-        return mIndexInfo[stage];
+        mBufferBindingCount[stage] = bufferIndex;
     }
+}
 
-    uint32_t PipelineLayout::GetBufferBindingCount(SingleShaderStage stage) {
-        return mBufferBindingCount[stage];
-    }
+const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo(
+    SingleShaderStage stage) const {
+    return mIndexInfo[stage];
+}
+
+uint32_t PipelineLayout::GetBufferBindingCount(SingleShaderStage stage) {
+    return mBufferBindingCount[stage];
+}
 
 }  // namespace dawn::native::metal

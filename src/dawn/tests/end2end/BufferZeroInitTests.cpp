@@ -34,14 +34,14 @@
 
 namespace {
 
-    struct BufferZeroInitInCopyT2BSpec {
-        wgpu::Extent3D textureSize;
-        uint64_t bufferOffset;
-        uint64_t extraBytes;
-        uint32_t bytesPerRow;
-        uint32_t rowsPerImage;
-        uint32_t lazyClearCount;
-    };
+struct BufferZeroInitInCopyT2BSpec {
+    wgpu::Extent3D textureSize;
+    uint64_t bufferOffset;
+    uint64_t extraBytes;
+    uint32_t bytesPerRow;
+    uint32_t rowsPerImage;
+    uint32_t lazyClearCount;
+};
 
 }  // anonymous namespace
 

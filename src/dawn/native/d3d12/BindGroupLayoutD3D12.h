@@ -26,70 +26,70 @@
 
 namespace dawn::native::d3d12 {
 
-    class CPUDescriptorHeapAllocation;
-    class Device;
-    class StagingDescriptorAllocator;
+class CPUDescriptorHeapAllocation;
+class Device;
+class StagingDescriptorAllocator;
 
-    // A purposefully invalid register space.
+// A purposefully invalid register space.
+//
+// We use the bind group index as the register space, but don't know the bind group index until
+// pipeline layout creation time. This value should be replaced in PipelineLayoutD3D12.
+static constexpr uint32_t kRegisterSpacePlaceholder =
+    D3D12_DRIVER_RESERVED_REGISTER_SPACE_VALUES_START;
+
+class BindGroupLayout final : public BindGroupLayoutBase {
+  public:
+    static Ref<BindGroupLayout> Create(Device* device,
+                                       const BindGroupLayoutDescriptor* descriptor,
+                                       PipelineCompatibilityToken pipelineCompatibilityToken);
+
+    ResultOrError<Ref<BindGroup>> AllocateBindGroup(Device* device,
+                                                    const BindGroupDescriptor* descriptor);
+    void DeallocateBindGroup(BindGroup* bindGroup, CPUDescriptorHeapAllocation* viewAllocation);
+
+    // The offset (in descriptor count) into the corresponding descriptor heap. Not valid for
+    // dynamic binding indexes.
+    ityp::span<BindingIndex, const uint32_t> GetDescriptorHeapOffsets() const;
+
+    // The D3D shader register that the Dawn binding index is mapped to by this bind group
+    // layout.
+    uint32_t GetShaderRegister(BindingIndex bindingIndex) const;
+
+    // Counts of descriptors in the descriptor tables.
+    uint32_t GetCbvUavSrvDescriptorCount() const;
+    uint32_t GetSamplerDescriptorCount() const;
+
+    const std::vector<D3D12_DESCRIPTOR_RANGE>& GetCbvUavSrvDescriptorRanges() const;
+    const std::vector<D3D12_DESCRIPTOR_RANGE>& GetSamplerDescriptorRanges() const;
+
+  private:
+    BindGroupLayout(Device* device,
+                    const BindGroupLayoutDescriptor* descriptor,
+                    PipelineCompatibilityToken pipelineCompatibilityToken);
+    ~BindGroupLayout() override = default;
+
+    // Contains the offset into the descriptor heap for the given resource view. Samplers and
+    // non-samplers are stored in separate descriptor heaps, so the offsets should be unique
+    // within each group and tightly packed.
     //
-    // We use the bind group index as the register space, but don't know the bind group index until
-    // pipeline layout creation time. This value should be replaced in PipelineLayoutD3D12.
-    static constexpr uint32_t kRegisterSpacePlaceholder =
-        D3D12_DRIVER_RESERVED_REGISTER_SPACE_VALUES_START;
+    // Dynamic resources are not used here since their descriptors are placed directly in root
+    // parameters.
+    ityp::stack_vec<BindingIndex, uint32_t, kMaxOptimalBindingsPerGroup> mDescriptorHeapOffsets;
 
-    class BindGroupLayout final : public BindGroupLayoutBase {
-      public:
-        static Ref<BindGroupLayout> Create(Device* device,
-                                           const BindGroupLayoutDescriptor* descriptor,
-                                           PipelineCompatibilityToken pipelineCompatibilityToken);
+    // Contains the shader register this binding is mapped to.
+    ityp::stack_vec<BindingIndex, uint32_t, kMaxOptimalBindingsPerGroup> mShaderRegisters;
 
-        ResultOrError<Ref<BindGroup>> AllocateBindGroup(Device* device,
-                                                        const BindGroupDescriptor* descriptor);
-        void DeallocateBindGroup(BindGroup* bindGroup, CPUDescriptorHeapAllocation* viewAllocation);
+    uint32_t mCbvUavSrvDescriptorCount;
+    uint32_t mSamplerDescriptorCount;
 
-        // The offset (in descriptor count) into the corresponding descriptor heap. Not valid for
-        // dynamic binding indexes.
-        ityp::span<BindingIndex, const uint32_t> GetDescriptorHeapOffsets() const;
+    std::vector<D3D12_DESCRIPTOR_RANGE> mCbvUavSrvDescriptorRanges;
+    std::vector<D3D12_DESCRIPTOR_RANGE> mSamplerDescriptorRanges;
 
-        // The D3D shader register that the Dawn binding index is mapped to by this bind group
-        // layout.
-        uint32_t GetShaderRegister(BindingIndex bindingIndex) const;
+    SlabAllocator<BindGroup> mBindGroupAllocator;
 
-        // Counts of descriptors in the descriptor tables.
-        uint32_t GetCbvUavSrvDescriptorCount() const;
-        uint32_t GetSamplerDescriptorCount() const;
-
-        const std::vector<D3D12_DESCRIPTOR_RANGE>& GetCbvUavSrvDescriptorRanges() const;
-        const std::vector<D3D12_DESCRIPTOR_RANGE>& GetSamplerDescriptorRanges() const;
-
-      private:
-        BindGroupLayout(Device* device,
-                        const BindGroupLayoutDescriptor* descriptor,
-                        PipelineCompatibilityToken pipelineCompatibilityToken);
-        ~BindGroupLayout() override = default;
-
-        // Contains the offset into the descriptor heap for the given resource view. Samplers and
-        // non-samplers are stored in separate descriptor heaps, so the offsets should be unique
-        // within each group and tightly packed.
-        //
-        // Dynamic resources are not used here since their descriptors are placed directly in root
-        // parameters.
-        ityp::stack_vec<BindingIndex, uint32_t, kMaxOptimalBindingsPerGroup> mDescriptorHeapOffsets;
-
-        // Contains the shader register this binding is mapped to.
-        ityp::stack_vec<BindingIndex, uint32_t, kMaxOptimalBindingsPerGroup> mShaderRegisters;
-
-        uint32_t mCbvUavSrvDescriptorCount;
-        uint32_t mSamplerDescriptorCount;
-
-        std::vector<D3D12_DESCRIPTOR_RANGE> mCbvUavSrvDescriptorRanges;
-        std::vector<D3D12_DESCRIPTOR_RANGE> mSamplerDescriptorRanges;
-
-        SlabAllocator<BindGroup> mBindGroupAllocator;
-
-        StagingDescriptorAllocator* mSamplerAllocator = nullptr;
-        StagingDescriptorAllocator* mViewAllocator = nullptr;
-    };
+    StagingDescriptorAllocator* mSamplerAllocator = nullptr;
+    StagingDescriptorAllocator* mViewAllocator = nullptr;
+};
 
 }  // namespace dawn::native::d3d12
 

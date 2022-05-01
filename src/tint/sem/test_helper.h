@@ -25,17 +25,17 @@ namespace tint::sem {
 /// Helper class for testing
 template <typename BASE>
 class TestHelperBase : public BASE, public ProgramBuilder {
- public:
-  /// Builds and returns the program. Must only be called once per test
-  /// @return the built program
-  Program Build() {
-    diag::Formatter formatter;
-    [&]() {
-      ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
-                             << formatter.format(Diagnostics());
-    }();
-    return Program(std::move(*this));
-  }
+  public:
+    /// Builds and returns the program. Must only be called once per test
+    /// @return the built program
+    Program Build() {
+        diag::Formatter formatter;
+        [&]() {
+            ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
+                                   << formatter.format(Diagnostics());
+        }();
+        return Program(std::move(*this));
+    }
 };
 using TestHelper = TestHelperBase<testing::Test>;
 

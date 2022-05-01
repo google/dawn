@@ -34,23 +34,23 @@ struct Options {};
 
 /// The result produced when generating WGSL.
 struct Result {
-  /// Constructor
-  Result();
+    /// Constructor
+    Result();
 
-  /// Destructor
-  ~Result();
+    /// Destructor
+    ~Result();
 
-  /// Copy constructor
-  Result(const Result&);
+    /// Copy constructor
+    Result(const Result&);
 
-  /// True if generation was successful.
-  bool success = false;
+    /// True if generation was successful.
+    bool success = false;
 
-  /// The errors generated during code generation, if any.
-  std::string error;
+    /// The errors generated during code generation, if any.
+    std::string error;
 
-  /// The generated WGSL.
-  std::string wgsl = "";
+    /// The generated WGSL.
+    std::string wgsl = "";
 };
 
 /// Generate WGSL for a program, according to a set of configuration options.

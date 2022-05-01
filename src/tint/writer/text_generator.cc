@@ -27,127 +27,118 @@ TextGenerator::TextGenerator(const Program* program)
 TextGenerator::~TextGenerator() = default;
 
 std::string TextGenerator::UniqueIdentifier(const std::string& prefix) {
-  return builder_.Symbols().NameFor(builder_.Symbols().New(prefix));
+    return builder_.Symbols().NameFor(builder_.Symbols().New(prefix));
 }
 
 std::string TextGenerator::StructName(const sem::Struct* s) {
-  auto name = builder_.Symbols().NameFor(s->Name());
-  if (name.size() > 1 && name[0] == '_' && name[1] == '_') {
-    name = utils::GetOrCreate(builtin_struct_names_, s,
-                              [&] { return UniqueIdentifier(name.substr(2)); });
-  }
-  return name;
+    auto name = builder_.Symbols().NameFor(s->Name());
+    if (name.size() > 1 && name[0] == '_' && name[1] == '_') {
+        name = utils::GetOrCreate(builtin_struct_names_, s,
+                                  [&] { return UniqueIdentifier(name.substr(2)); });
+    }
+    return name;
 }
 
-std::string TextGenerator::TrimSuffix(std::string str,
-                                      const std::string& suffix) {
-  if (str.size() >= suffix.size()) {
-    if (str.substr(str.size() - suffix.size(), suffix.size()) == suffix) {
-      return str.substr(0, str.size() - suffix.size());
+std::string TextGenerator::TrimSuffix(std::string str, const std::string& suffix) {
+    if (str.size() >= suffix.size()) {
+        if (str.substr(str.size() - suffix.size(), suffix.size()) == suffix) {
+            return str.substr(0, str.size() - suffix.size());
+        }
     }
-  }
-  return str;
+    return str;
 }
 
 TextGenerator::LineWriter::LineWriter(TextBuffer* buf) : buffer(buf) {}
 
 TextGenerator::LineWriter::LineWriter(LineWriter&& other) {
-  buffer = other.buffer;
-  other.buffer = nullptr;
+    buffer = other.buffer;
+    other.buffer = nullptr;
 }
 
 TextGenerator::LineWriter::~LineWriter() {
-  if (buffer) {
-    buffer->Append(os.str());
-  }
+    if (buffer) {
+        buffer->Append(os.str());
+    }
 }
 
 TextGenerator::TextBuffer::TextBuffer() = default;
 TextGenerator::TextBuffer::~TextBuffer() = default;
 
 void TextGenerator::TextBuffer::IncrementIndent() {
-  current_indent += 2;
+    current_indent += 2;
 }
 
 void TextGenerator::TextBuffer::DecrementIndent() {
-  current_indent = std::max(2u, current_indent) - 2u;
+    current_indent = std::max(2u, current_indent) - 2u;
 }
 
 void TextGenerator::TextBuffer::Append(const std::string& line) {
-  lines.emplace_back(Line{current_indent, line});
+    lines.emplace_back(Line{current_indent, line});
 }
 
-void TextGenerator::TextBuffer::Insert(const std::string& line,
-                                       size_t before,
-                                       uint32_t indent) {
-  if (before >= lines.size()) {
-    diag::List d;
-    TINT_ICE(Writer, d)
-        << "TextBuffer::Insert() called with before >= lines.size()\n"
-        << "  before:" << before << "\n"
-        << "  lines.size(): " << lines.size();
-    return;
-  }
-  lines.insert(lines.begin() + before, Line{indent, line});
+void TextGenerator::TextBuffer::Insert(const std::string& line, size_t before, uint32_t indent) {
+    if (before >= lines.size()) {
+        diag::List d;
+        TINT_ICE(Writer, d) << "TextBuffer::Insert() called with before >= lines.size()\n"
+                            << "  before:" << before << "\n"
+                            << "  lines.size(): " << lines.size();
+        return;
+    }
+    lines.insert(lines.begin() + before, Line{indent, line});
 }
 
 void TextGenerator::TextBuffer::Append(const TextBuffer& tb) {
-  for (auto& line : tb.lines) {
-    // TODO(bclayton): inefficent, consider optimizing
-    lines.emplace_back(Line{current_indent + line.indent, line.content});
-  }
+    for (auto& line : tb.lines) {
+        // TODO(bclayton): inefficent, consider optimizing
+        lines.emplace_back(Line{current_indent + line.indent, line.content});
+    }
 }
 
-void TextGenerator::TextBuffer::Insert(const TextBuffer& tb,
-                                       size_t before,
-                                       uint32_t indent) {
-  if (before >= lines.size()) {
-    diag::List d;
-    TINT_ICE(Writer, d)
-        << "TextBuffer::Insert() called with before >= lines.size()\n"
-        << "  before:" << before << "\n"
-        << "  lines.size(): " << lines.size();
-    return;
-  }
-  size_t idx = 0;
-  for (auto& line : tb.lines) {
-    // TODO(bclayton): inefficent, consider optimizing
-    lines.insert(lines.begin() + before + idx,
-                 Line{indent + line.indent, line.content});
-    idx++;
-  }
+void TextGenerator::TextBuffer::Insert(const TextBuffer& tb, size_t before, uint32_t indent) {
+    if (before >= lines.size()) {
+        diag::List d;
+        TINT_ICE(Writer, d) << "TextBuffer::Insert() called with before >= lines.size()\n"
+                            << "  before:" << before << "\n"
+                            << "  lines.size(): " << lines.size();
+        return;
+    }
+    size_t idx = 0;
+    for (auto& line : tb.lines) {
+        // TODO(bclayton): inefficent, consider optimizing
+        lines.insert(lines.begin() + before + idx, Line{indent + line.indent, line.content});
+        idx++;
+    }
 }
 
 std::string TextGenerator::TextBuffer::String(uint32_t indent /* = 0 */) const {
-  std::stringstream ss;
-  for (auto& line : lines) {
-    if (!line.content.empty()) {
-      for (uint32_t i = 0; i < indent + line.indent; i++) {
-        ss << " ";
-      }
-      ss << line.content;
+    std::stringstream ss;
+    for (auto& line : lines) {
+        if (!line.content.empty()) {
+            for (uint32_t i = 0; i < indent + line.indent; i++) {
+                ss << " ";
+            }
+            ss << line.content;
+        }
+        ss << std::endl;
     }
-    ss << std::endl;
-  }
-  return ss.str();
+    return ss.str();
 }
 
 TextGenerator::ScopedParen::ScopedParen(std::ostream& stream) : s(stream) {
-  s << "(";
+    s << "(";
 }
 TextGenerator::ScopedParen::~ScopedParen() {
-  s << ")";
+    s << ")";
 }
 
 TextGenerator::ScopedIndent::ScopedIndent(TextGenerator* generator)
     : ScopedIndent(generator->current_buffer_) {}
 
-TextGenerator::ScopedIndent::ScopedIndent(TextBuffer* buffer)
-    : buffer_(buffer) {
-  buffer_->IncrementIndent();
+TextGenerator::ScopedIndent::ScopedIndent(TextBuffer* buffer) : buffer_(buffer) {
+    buffer_->IncrementIndent();
 }
 TextGenerator::ScopedIndent::~ScopedIndent() {
-  buffer_->DecrementIndent();
+    buffer_->DecrementIndent();
 }
 
 }  // namespace tint::writer

@@ -20,19 +20,19 @@
 
 namespace dawn::native::metal {
 
-    class Device;
+class Device;
 
-    class BindGroup final : public BindGroupBase, public PlacementAllocated {
-      public:
-        static Ref<BindGroup> Create(Device* device, const BindGroupDescriptor* descriptor);
+class BindGroup final : public BindGroupBase, public PlacementAllocated {
+  public:
+    static Ref<BindGroup> Create(Device* device, const BindGroupDescriptor* descriptor);
 
-        BindGroup(Device* device, const BindGroupDescriptor* descriptor);
+    BindGroup(Device* device, const BindGroupDescriptor* descriptor);
 
-      private:
-        ~BindGroup() override;
+  private:
+    ~BindGroup() override;
 
-        void DestroyImpl() override;
-    };
+    void DestroyImpl() override;
+};
 
 }  // namespace dawn::native::metal
 

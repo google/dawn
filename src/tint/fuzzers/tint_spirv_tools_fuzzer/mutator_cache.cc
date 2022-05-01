@@ -16,59 +16,57 @@
 
 namespace tint::fuzzers::spvtools_fuzzer {
 
-MutatorCache::MutatorCache(size_t max_size)
-    : map_(), entries_(), max_size_(max_size) {
-  assert(max_size && "`max_size` may not be 0");
+MutatorCache::MutatorCache(size_t max_size) : map_(), entries_(), max_size_(max_size) {
+    assert(max_size && "`max_size` may not be 0");
 }
 
 MutatorCache::Value::pointer MutatorCache::Get(const Key& key) {
-  auto it = map_.find(key);
-  if (it == map_.end()) {
-    return nullptr;
-  }
-  UpdateUsage(it);
-  return entries_.front().second.get();
+    auto it = map_.find(key);
+    if (it == map_.end()) {
+        return nullptr;
+    }
+    UpdateUsage(it);
+    return entries_.front().second.get();
 }
 
 void MutatorCache::Put(const Key& key, Value value) {
-  assert(value && "Mutator cache can't have nullptr unique_ptr");
-  auto it = map_.find(key);
-  if (it != map_.end()) {
-    it->second->second = std::move(value);
-    UpdateUsage(it);
-  } else {
-    if (map_.size() == max_size_) {
-      Remove(*entries_.back().first);
-    }
+    assert(value && "Mutator cache can't have nullptr unique_ptr");
+    auto it = map_.find(key);
+    if (it != map_.end()) {
+        it->second->second = std::move(value);
+        UpdateUsage(it);
+    } else {
+        if (map_.size() == max_size_) {
+            Remove(*entries_.back().first);
+        }
 
-    entries_.emplace_front(nullptr, std::move(value));
-    auto pair = map_.emplace(key, entries_.begin());
-    assert(pair.second && "The key must be unique");
-    entries_.front().first = &pair.first->first;
-  }
+        entries_.emplace_front(nullptr, std::move(value));
+        auto pair = map_.emplace(key, entries_.begin());
+        assert(pair.second && "The key must be unique");
+        entries_.front().first = &pair.first->first;
+    }
 }
 
 MutatorCache::Value MutatorCache::Remove(const Key& key) {
-  auto it = map_.find(key);
-  if (it == map_.end()) {
-    return nullptr;
-  }
-  auto result = std::move(it->second->second);
-  entries_.erase(it->second);
-  map_.erase(it);
-  return result;
+    auto it = map_.find(key);
+    if (it == map_.end()) {
+        return nullptr;
+    }
+    auto result = std::move(it->second->second);
+    entries_.erase(it->second);
+    map_.erase(it);
+    return result;
 }
 
-size_t MutatorCache::KeyHash::operator()(
-    const std::vector<uint32_t>& vec) const {
-  return std::hash<std::u32string>()({vec.begin(), vec.end()});
+size_t MutatorCache::KeyHash::operator()(const std::vector<uint32_t>& vec) const {
+    return std::hash<std::u32string>()({vec.begin(), vec.end()});
 }
 
 void MutatorCache::UpdateUsage(Map::iterator it) {
-  auto entry = std::move(*it->second);
-  entries_.erase(it->second);
-  entries_.push_front(std::move(entry));
-  it->second = entries_.begin();
+    auto entry = std::move(*it->second);
+    entries_.erase(it->second);
+    entries_.push_front(std::move(entry));
+    it->second = entries_.begin();
 }
 
 }  // namespace tint::fuzzers::spvtools_fuzzer

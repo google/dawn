@@ -15,16 +15,16 @@
 // Contains a helper function for Surface.cpp that needs to be written in ObjectiveC.
 
 #if !defined(DAWN_ENABLE_BACKEND_METAL)
-#    error "Surface_metal.mm requires the Metal backend to be enabled."
+#error "Surface_metal.mm requires the Metal backend to be enabled."
 #endif  // !defined(DAWN_ENABLE_BACKEND_METAL)
 
 #import <QuartzCore/CAMetalLayer.h>
 
 namespace dawn::native {
 
-    bool InheritsFromCAMetalLayer(void* obj) {
-        id<NSObject> object = static_cast<id>(obj);
-        return [object isKindOfClass:[CAMetalLayer class]];
-    }
+bool InheritsFromCAMetalLayer(void* obj) {
+    id<NSObject> object = static_cast<id>(obj);
+    return [object isKindOfClass:[CAMetalLayer class]];
+}
 
 }  // namespace dawn::native

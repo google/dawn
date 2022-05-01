@@ -31,8 +31,8 @@ namespace {
 /// @returns i, where lower <= i < upper
 template <typename I>
 I RandomInteger(std::mt19937_64* engine, I lower, I upper) {
-  assert(lower < upper && "|lower| must be strictly less than |upper|");
-  return std::uniform_int_distribution<I>(lower, upper - 1)(*engine);
+    assert(lower < upper && "|lower| must be strictly less than |upper|");
+    return std::uniform_int_distribution<I>(lower, upper - 1)(*engine);
 }
 
 }  // namespace
@@ -40,18 +40,17 @@ I RandomInteger(std::mt19937_64* engine, I lower, I upper) {
 MersenneTwisterEngine::MersenneTwisterEngine(uint64_t seed) : engine_(seed) {}
 
 uint32_t MersenneTwisterEngine::RandomUInt32(uint32_t lower, uint32_t upper) {
-  return RandomInteger(&engine_, lower, upper);
+    return RandomInteger(&engine_, lower, upper);
 }
 
 uint64_t MersenneTwisterEngine::RandomUInt64(uint64_t lower, uint64_t upper) {
-  return RandomInteger(&engine_, lower, upper);
+    return RandomInteger(&engine_, lower, upper);
 }
 
 void MersenneTwisterEngine::RandomNBytes(uint8_t* dest, size_t n) {
-  assert(dest && "|dest| must not be nullptr");
-  std::generate(
-      dest, dest + n,
-      std::independent_bits_engine<std::mt19937_64, 8, uint8_t>(engine_));
+    assert(dest && "|dest| must not be nullptr");
+    std::generate(dest, dest + n,
+                  std::independent_bits_engine<std::mt19937_64, 8, uint8_t>(engine_));
 }
 
 }  // namespace tint::fuzzers

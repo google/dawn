@@ -27,39 +27,39 @@
 
 namespace dawn::native::vulkan {
 
-    class Device;
+class Device;
 
-    // Various kinds of memory that influence the result of the allocation. For example, to take
-    // into account mappability and Vulkan's bufferImageGranularity.
-    enum class MemoryKind {
-        Linear,
-        LinearMappable,
-        Opaque,
-    };
+// Various kinds of memory that influence the result of the allocation. For example, to take
+// into account mappability and Vulkan's bufferImageGranularity.
+enum class MemoryKind {
+    Linear,
+    LinearMappable,
+    Opaque,
+};
 
-    class ResourceMemoryAllocator {
-      public:
-        explicit ResourceMemoryAllocator(Device* device);
-        ~ResourceMemoryAllocator();
+class ResourceMemoryAllocator {
+  public:
+    explicit ResourceMemoryAllocator(Device* device);
+    ~ResourceMemoryAllocator();
 
-        ResultOrError<ResourceMemoryAllocation> Allocate(const VkMemoryRequirements& requirements,
-                                                         MemoryKind kind);
-        void Deallocate(ResourceMemoryAllocation* allocation);
+    ResultOrError<ResourceMemoryAllocation> Allocate(const VkMemoryRequirements& requirements,
+                                                     MemoryKind kind);
+    void Deallocate(ResourceMemoryAllocation* allocation);
 
-        void DestroyPool();
+    void DestroyPool();
 
-        void Tick(ExecutionSerial completedSerial);
+    void Tick(ExecutionSerial completedSerial);
 
-        int FindBestTypeIndex(VkMemoryRequirements requirements, MemoryKind kind);
+    int FindBestTypeIndex(VkMemoryRequirements requirements, MemoryKind kind);
 
-      private:
-        Device* mDevice;
+  private:
+    Device* mDevice;
 
-        class SingleTypeAllocator;
-        std::vector<std::unique_ptr<SingleTypeAllocator>> mAllocatorsPerType;
+    class SingleTypeAllocator;
+    std::vector<std::unique_ptr<SingleTypeAllocator>> mAllocatorsPerType;
 
-        SerialQueue<ExecutionSerial, ResourceMemoryAllocation> mSubAllocationsToDelete;
-    };
+    SerialQueue<ExecutionSerial, ResourceMemoryAllocation> mSubAllocationsToDelete;
+};
 
 }  // namespace dawn::native::vulkan
 

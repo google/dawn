@@ -22,8 +22,8 @@ namespace {
 using StructMemberAlignAttributeTest = TestHelper;
 
 TEST_F(StructMemberAlignAttributeTest, Creation) {
-  auto* d = create<StructMemberAlignAttribute>(2);
-  EXPECT_EQ(2u, d->align);
+    auto* d = create<StructMemberAlignAttribute>(2);
+    EXPECT_EQ(2u, d->align);
 }
 
 }  // namespace

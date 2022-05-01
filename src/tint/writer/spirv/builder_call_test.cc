@@ -23,20 +23,19 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Expression_Call) {
-  ast::VariableList func_params;
-  func_params.push_back(Param("a", ty.f32()));
-  func_params.push_back(Param("b", ty.f32()));
+    ast::VariableList func_params;
+    func_params.push_back(Param("a", ty.f32()));
+    func_params.push_back(Param("b", ty.f32()));
 
-  auto* a_func = Func("a_func", func_params, ty.f32(), {Return(Add("a", "b"))});
-  auto* func =
-      Func("main", {}, ty.void_(), {Assign(Phony(), Call("a_func", 1.f, 1.f))});
+    auto* a_func = Func("a_func", func_params, ty.f32(), {Return(Add("a", "b"))});
+    auto* func = Func("main", {}, ty.void_(), {Assign(Phony(), Call("a_func", 1.f, 1.f))});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(a_func)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(a_func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
+    EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 OpName %4 "a"
 OpName %5 "b"
 OpName %10 "main"
@@ -61,21 +60,20 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Statement_Call) {
-  ast::VariableList func_params;
-  func_params.push_back(Param("a", ty.f32()));
-  func_params.push_back(Param("b", ty.f32()));
+    ast::VariableList func_params;
+    func_params.push_back(Param("a", ty.f32()));
+    func_params.push_back(Param("b", ty.f32()));
 
-  auto* a_func = Func("a_func", func_params, ty.f32(), {Return(Add("a", "b"))});
+    auto* a_func = Func("a_func", func_params, ty.f32(), {Return(Add("a", "b"))});
 
-  auto* func =
-      Func("main", {}, ty.void_(), {CallStmt(Call("a_func", 1.f, 1.f))});
+    auto* func = Func("main", {}, ty.void_(), {CallStmt(Call("a_func", 1.f, 1.f))});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(a_func)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(a_func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
+    EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 OpName %4 "a"
 OpName %5 "b"
 OpName %10 "main"

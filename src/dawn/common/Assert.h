@@ -32,32 +32,32 @@
 // MSVC triggers a warning in /W4 for do {} while(0). SDL worked around this by using (0,0) and
 // points out that it looks like an owl face.
 #if defined(DAWN_COMPILER_MSVC)
-#    define DAWN_ASSERT_LOOP_CONDITION (0, 0)
+#define DAWN_ASSERT_LOOP_CONDITION (0, 0)
 #else
-#    define DAWN_ASSERT_LOOP_CONDITION (0)
+#define DAWN_ASSERT_LOOP_CONDITION (0)
 #endif
 
 // DAWN_ASSERT_CALLSITE_HELPER generates the actual assert code. In Debug it does what you would
 // expect of an assert and in release it tries to give hints to make the compiler generate better
 // code.
 #if defined(DAWN_ENABLE_ASSERTS)
-#    define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition)  \
-        do {                                                          \
-            if (!(condition)) {                                       \
-                HandleAssertionFailure(file, func, line, #condition); \
-            }                                                         \
-        } while (DAWN_ASSERT_LOOP_CONDITION)
+#define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition)  \
+    do {                                                          \
+        if (!(condition)) {                                       \
+            HandleAssertionFailure(file, func, line, #condition); \
+        }                                                         \
+    } while (DAWN_ASSERT_LOOP_CONDITION)
 #else
-#    if defined(DAWN_COMPILER_MSVC)
-#        define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition) __assume(condition)
-#    elif defined(DAWN_COMPILER_CLANG) && defined(__builtin_assume)
-#        define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition) __builtin_assume(condition)
-#    else
-#        define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition) \
-            do {                                                         \
-                DAWN_UNUSED(sizeof(condition));                          \
-            } while (DAWN_ASSERT_LOOP_CONDITION)
-#    endif
+#if defined(DAWN_COMPILER_MSVC)
+#define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition) __assume(condition)
+#elif defined(DAWN_COMPILER_CLANG) && defined(__builtin_assume)
+#define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition) __builtin_assume(condition)
+#else
+#define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition) \
+    do {                                                         \
+        DAWN_UNUSED(sizeof(condition));                          \
+    } while (DAWN_ASSERT_LOOP_CONDITION)
+#endif
 #endif
 
 #define DAWN_ASSERT(condition) DAWN_ASSERT_CALLSITE_HELPER(__FILE__, __func__, __LINE__, condition)
@@ -68,8 +68,8 @@
     } while (DAWN_ASSERT_LOOP_CONDITION)
 
 #if !defined(DAWN_SKIP_ASSERT_SHORTHANDS)
-#    define ASSERT DAWN_ASSERT
-#    define UNREACHABLE DAWN_UNREACHABLE
+#define ASSERT DAWN_ASSERT
+#define UNREACHABLE DAWN_UNREACHABLE
 #endif
 
 void HandleAssertionFailure(const char* file,

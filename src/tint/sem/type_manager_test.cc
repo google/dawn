@@ -23,58 +23,58 @@ namespace {
 
 template <typename T>
 size_t count(const T& range_loopable) {
-  size_t n = 0;
-  for (auto it : range_loopable) {
-    (void)it;
-    n++;
-  }
-  return n;
+    size_t n = 0;
+    for (auto it : range_loopable) {
+        (void)it;
+        n++;
+    }
+    return n;
 }
 
 using TypeManagerTest = testing::Test;
 
 TEST_F(TypeManagerTest, GetUnregistered) {
-  Manager tm;
-  auto* t = tm.Get<I32>();
-  ASSERT_NE(t, nullptr);
-  EXPECT_TRUE(t->Is<I32>());
+    Manager tm;
+    auto* t = tm.Get<I32>();
+    ASSERT_NE(t, nullptr);
+    EXPECT_TRUE(t->Is<I32>());
 }
 
 TEST_F(TypeManagerTest, GetSameTypeReturnsSamePtr) {
-  Manager tm;
-  auto* t = tm.Get<I32>();
-  ASSERT_NE(t, nullptr);
-  EXPECT_TRUE(t->Is<I32>());
+    Manager tm;
+    auto* t = tm.Get<I32>();
+    ASSERT_NE(t, nullptr);
+    EXPECT_TRUE(t->Is<I32>());
 
-  auto* t2 = tm.Get<I32>();
-  EXPECT_EQ(t, t2);
+    auto* t2 = tm.Get<I32>();
+    EXPECT_EQ(t, t2);
 }
 
 TEST_F(TypeManagerTest, GetDifferentTypeReturnsDifferentPtr) {
-  Manager tm;
-  Type* t = tm.Get<I32>();
-  ASSERT_NE(t, nullptr);
-  EXPECT_TRUE(t->Is<I32>());
+    Manager tm;
+    Type* t = tm.Get<I32>();
+    ASSERT_NE(t, nullptr);
+    EXPECT_TRUE(t->Is<I32>());
 
-  Type* t2 = tm.Get<U32>();
-  ASSERT_NE(t2, nullptr);
-  EXPECT_NE(t, t2);
-  EXPECT_TRUE(t2->Is<U32>());
+    Type* t2 = tm.Get<U32>();
+    ASSERT_NE(t2, nullptr);
+    EXPECT_NE(t, t2);
+    EXPECT_TRUE(t2->Is<U32>());
 }
 
 TEST_F(TypeManagerTest, WrapDoesntAffectInner) {
-  Manager inner;
-  Manager outer = Manager::Wrap(inner);
+    Manager inner;
+    Manager outer = Manager::Wrap(inner);
 
-  inner.Get<I32>();
+    inner.Get<I32>();
 
-  EXPECT_EQ(count(inner), 1u);
-  EXPECT_EQ(count(outer), 0u);
+    EXPECT_EQ(count(inner), 1u);
+    EXPECT_EQ(count(outer), 0u);
 
-  outer.Get<U32>();
+    outer.Get<U32>();
 
-  EXPECT_EQ(count(inner), 1u);
-  EXPECT_EQ(count(outer), 1u);
+    EXPECT_EQ(count(inner), 1u);
+    EXPECT_EQ(count(outer), 1u);
 }
 
 }  // namespace

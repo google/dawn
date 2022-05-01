@@ -16,11 +16,11 @@
 #include <memory>
 #include <string>
 
-#include "gmock/gmock.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/tests/MockCallback.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "gmock/gmock.h"
 
 using testing::_;
 using testing::Exactly;

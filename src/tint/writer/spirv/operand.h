@@ -31,7 +31,7 @@ using Operand = std::variant<uint32_t, float, std::string>;
 // Helper for returning an uint32_t Operand with the provided integer value.
 template <typename T>
 inline Operand U32Operand(T val) {
-  return Operand{static_cast<uint32_t>(val)};
+    return Operand{static_cast<uint32_t>(val)};
 }
 
 /// @returns the number of uint32_t's needed for this operand
@@ -49,12 +49,12 @@ namespace std {
 /// Custom std::hash specialization for tint::writer::spirv::Operand
 template <>
 class hash<tint::writer::spirv::Operand> {
- public:
-  /// @param o the Operand
-  /// @return the hash value
-  inline std::size_t operator()(const tint::writer::spirv::Operand& o) const {
-    return std::visit([](auto v) { return tint::utils::Hash(v); }, o);
-  }
+  public:
+    /// @param o the Operand
+    /// @return the hash value
+    inline std::size_t operator()(const tint::writer::spirv::Operand& o) const {
+        return std::visit([](auto v) { return tint::utils::Hash(v); }, o);
+    }
 };
 
 }  // namespace std

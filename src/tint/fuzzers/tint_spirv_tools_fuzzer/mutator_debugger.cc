@@ -34,51 +34,43 @@
 /// tool is useful when one of the spirv-tools mutators crashes or produces an
 /// invalid binary in LLVMFuzzerCustomMutator.
 int main(int argc, const char** argv) {
-  auto params =
-      tint::fuzzers::spvtools_fuzzer::ParseMutatorDebuggerCliParams(argc, argv);
+    auto params = tint::fuzzers::spvtools_fuzzer::ParseMutatorDebuggerCliParams(argc, argv);
 
-  std::unique_ptr<tint::fuzzers::spvtools_fuzzer::Mutator> mutator;
-  const auto& mutator_params = params.mutator_params;
-  switch (params.mutator_type) {
-    case tint::fuzzers::spvtools_fuzzer::MutatorType::kFuzz:
-      mutator =
-          std::make_unique<tint::fuzzers::spvtools_fuzzer::SpirvFuzzMutator>(
-              mutator_params.target_env, params.original_binary, params.seed,
-              mutator_params.donors, mutator_params.enable_all_fuzzer_passes,
-              mutator_params.repeated_pass_strategy,
-              mutator_params.validate_after_each_fuzzer_pass,
-              mutator_params.transformation_batch_size);
-      break;
-    case tint::fuzzers::spvtools_fuzzer::MutatorType::kReduce:
-      mutator =
-          std::make_unique<tint::fuzzers::spvtools_fuzzer::SpirvReduceMutator>(
-              mutator_params.target_env, params.original_binary, params.seed,
-              mutator_params.reduction_batch_size,
-              mutator_params.enable_all_reduce_passes,
-              mutator_params.validate_after_each_reduce_pass);
-      break;
-    case tint::fuzzers::spvtools_fuzzer::MutatorType::kOpt:
-      mutator =
-          std::make_unique<tint::fuzzers::spvtools_fuzzer::SpirvOptMutator>(
-              mutator_params.target_env, params.seed, params.original_binary,
-              mutator_params.validate_after_each_opt_pass,
-              mutator_params.opt_batch_size);
-      break;
-    default:
-      assert(false && "All mutator types must've been handled");
-      return 1;
-  }
+    std::unique_ptr<tint::fuzzers::spvtools_fuzzer::Mutator> mutator;
+    const auto& mutator_params = params.mutator_params;
+    switch (params.mutator_type) {
+        case tint::fuzzers::spvtools_fuzzer::MutatorType::kFuzz:
+            mutator = std::make_unique<tint::fuzzers::spvtools_fuzzer::SpirvFuzzMutator>(
+                mutator_params.target_env, params.original_binary, params.seed,
+                mutator_params.donors, mutator_params.enable_all_fuzzer_passes,
+                mutator_params.repeated_pass_strategy,
+                mutator_params.validate_after_each_fuzzer_pass,
+                mutator_params.transformation_batch_size);
+            break;
+        case tint::fuzzers::spvtools_fuzzer::MutatorType::kReduce:
+            mutator = std::make_unique<tint::fuzzers::spvtools_fuzzer::SpirvReduceMutator>(
+                mutator_params.target_env, params.original_binary, params.seed,
+                mutator_params.reduction_batch_size, mutator_params.enable_all_reduce_passes,
+                mutator_params.validate_after_each_reduce_pass);
+            break;
+        case tint::fuzzers::spvtools_fuzzer::MutatorType::kOpt:
+            mutator = std::make_unique<tint::fuzzers::spvtools_fuzzer::SpirvOptMutator>(
+                mutator_params.target_env, params.seed, params.original_binary,
+                mutator_params.validate_after_each_opt_pass, mutator_params.opt_batch_size);
+            break;
+        default:
+            assert(false && "All mutator types must've been handled");
+            return 1;
+    }
 
-  while (true) {
-    auto result = mutator->Mutate();
-    if (result.GetStatus() ==
-        tint::fuzzers::spvtools_fuzzer::Mutator::Status::kInvalid) {
-      std::cerr << mutator->GetErrors() << std::endl;
-      return 0;
+    while (true) {
+        auto result = mutator->Mutate();
+        if (result.GetStatus() == tint::fuzzers::spvtools_fuzzer::Mutator::Status::kInvalid) {
+            std::cerr << mutator->GetErrors() << std::endl;
+            return 0;
+        }
+        if (result.GetStatus() == tint::fuzzers::spvtools_fuzzer::Mutator::Status::kLimitReached) {
+            break;
+        }
     }
-    if (result.GetStatus() ==
-        tint::fuzzers::spvtools_fuzzer::Mutator::Status::kLimitReached) {
-      break;
-    }
-  }
 }

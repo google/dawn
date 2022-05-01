@@ -18,82 +18,79 @@ namespace tint::writer::msl {
 namespace {
 
 struct BinaryData {
-  const char* result;
-  ast::BinaryOp op;
+    const char* result;
+    ast::BinaryOp op;
 };
 inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
-  out << data.op;
-  return out;
+    out << data.op;
+    return out;
 }
 using MslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(MslBinaryTest, Emit) {
-  auto params = GetParam();
+    auto params = GetParam();
 
-  auto type = [&] {
-    return ((params.op == ast::BinaryOp::kLogicalAnd) ||
-            (params.op == ast::BinaryOp::kLogicalOr))
-               ? static_cast<const ast::Type*>(ty.bool_())
-               : static_cast<const ast::Type*>(ty.u32());
-  };
+    auto type = [&] {
+        return ((params.op == ast::BinaryOp::kLogicalAnd) ||
+                (params.op == ast::BinaryOp::kLogicalOr))
+                   ? static_cast<const ast::Type*>(ty.bool_())
+                   : static_cast<const ast::Type*>(ty.u32());
+    };
 
-  auto* left = Var("left", type());
-  auto* right = Var("right", type());
+    auto* left = Var("left", type());
+    auto* right = Var("right", type());
 
-  auto* expr =
-      create<ast::BinaryExpression>(params.op, Expr(left), Expr(right));
-  WrapInFunction(left, right, expr);
+    auto* expr = create<ast::BinaryExpression>(params.op, Expr(left), Expr(right));
+    WrapInFunction(left, right, expr);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-  EXPECT_EQ(out.str(), params.result);
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
     MslGeneratorImplTest,
     MslBinaryTest,
-    testing::Values(
-        BinaryData{"(left & right)", ast::BinaryOp::kAnd},
-        BinaryData{"(left | right)", ast::BinaryOp::kOr},
-        BinaryData{"(left ^ right)", ast::BinaryOp::kXor},
-        BinaryData{"(left && right)", ast::BinaryOp::kLogicalAnd},
-        BinaryData{"(left || right)", ast::BinaryOp::kLogicalOr},
-        BinaryData{"(left == right)", ast::BinaryOp::kEqual},
-        BinaryData{"(left != right)", ast::BinaryOp::kNotEqual},
-        BinaryData{"(left < right)", ast::BinaryOp::kLessThan},
-        BinaryData{"(left > right)", ast::BinaryOp::kGreaterThan},
-        BinaryData{"(left <= right)", ast::BinaryOp::kLessThanEqual},
-        BinaryData{"(left >= right)", ast::BinaryOp::kGreaterThanEqual},
-        BinaryData{"(left << right)", ast::BinaryOp::kShiftLeft},
-        BinaryData{"(left >> right)", ast::BinaryOp::kShiftRight},
-        BinaryData{"(left + right)", ast::BinaryOp::kAdd},
-        BinaryData{"(left - right)", ast::BinaryOp::kSubtract},
-        BinaryData{"(left * right)", ast::BinaryOp::kMultiply},
-        BinaryData{"(left / right)", ast::BinaryOp::kDivide},
-        BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
+    testing::Values(BinaryData{"(left & right)", ast::BinaryOp::kAnd},
+                    BinaryData{"(left | right)", ast::BinaryOp::kOr},
+                    BinaryData{"(left ^ right)", ast::BinaryOp::kXor},
+                    BinaryData{"(left && right)", ast::BinaryOp::kLogicalAnd},
+                    BinaryData{"(left || right)", ast::BinaryOp::kLogicalOr},
+                    BinaryData{"(left == right)", ast::BinaryOp::kEqual},
+                    BinaryData{"(left != right)", ast::BinaryOp::kNotEqual},
+                    BinaryData{"(left < right)", ast::BinaryOp::kLessThan},
+                    BinaryData{"(left > right)", ast::BinaryOp::kGreaterThan},
+                    BinaryData{"(left <= right)", ast::BinaryOp::kLessThanEqual},
+                    BinaryData{"(left >= right)", ast::BinaryOp::kGreaterThanEqual},
+                    BinaryData{"(left << right)", ast::BinaryOp::kShiftLeft},
+                    BinaryData{"(left >> right)", ast::BinaryOp::kShiftRight},
+                    BinaryData{"(left + right)", ast::BinaryOp::kAdd},
+                    BinaryData{"(left - right)", ast::BinaryOp::kSubtract},
+                    BinaryData{"(left * right)", ast::BinaryOp::kMultiply},
+                    BinaryData{"(left / right)", ast::BinaryOp::kDivide},
+                    BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
 
-using MslBinaryTest_SignedOverflowDefinedBehaviour =
-    TestParamHelper<BinaryData>;
+using MslBinaryTest_SignedOverflowDefinedBehaviour = TestParamHelper<BinaryData>;
 TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour, Emit) {
-  auto params = GetParam();
+    auto params = GetParam();
 
-  auto* a_type = ty.i32();
-  auto* b_type = (params.op == ast::BinaryOp::kShiftLeft ||
-                  params.op == ast::BinaryOp::kShiftRight)
-                     ? static_cast<const ast::Type*>(ty.u32())
-                     : ty.i32();
+    auto* a_type = ty.i32();
+    auto* b_type =
+        (params.op == ast::BinaryOp::kShiftLeft || params.op == ast::BinaryOp::kShiftRight)
+            ? static_cast<const ast::Type*>(ty.u32())
+            : ty.i32();
 
-  auto* a = Var("a", a_type);
-  auto* b = Var("b", b_type);
+    auto* a = Var("a", a_type);
+    auto* b = Var("b", b_type);
 
-  auto* expr = create<ast::BinaryExpression>(params.op, Expr(a), Expr(b));
-  WrapInFunction(a, b, expr);
+    auto* expr = create<ast::BinaryExpression>(params.op, Expr(a), Expr(b));
+    WrapInFunction(a, b, expr);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-  EXPECT_EQ(out.str(), params.result);
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), params.result);
 }
 using Op = ast::BinaryOp;
 constexpr BinaryData signed_overflow_defined_behaviour_cases[] = {
@@ -102,34 +99,32 @@ constexpr BinaryData signed_overflow_defined_behaviour_cases[] = {
     {"as_type<int>((as_type<uint>(a) + as_type<uint>(b)))", Op::kAdd},
     {"as_type<int>((as_type<uint>(a) - as_type<uint>(b)))", Op::kSubtract},
     {"as_type<int>((as_type<uint>(a) * as_type<uint>(b)))", Op::kMultiply}};
-INSTANTIATE_TEST_SUITE_P(
-    MslGeneratorImplTest,
-    MslBinaryTest_SignedOverflowDefinedBehaviour,
-    testing::ValuesIn(signed_overflow_defined_behaviour_cases));
+INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
+                         MslBinaryTest_SignedOverflowDefinedBehaviour,
+                         testing::ValuesIn(signed_overflow_defined_behaviour_cases));
 
-using MslBinaryTest_SignedOverflowDefinedBehaviour_Chained =
-    TestParamHelper<BinaryData>;
+using MslBinaryTest_SignedOverflowDefinedBehaviour_Chained = TestParamHelper<BinaryData>;
 TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour_Chained, Emit) {
-  auto params = GetParam();
+    auto params = GetParam();
 
-  auto* a_type = ty.i32();
-  auto* b_type = (params.op == ast::BinaryOp::kShiftLeft ||
-                  params.op == ast::BinaryOp::kShiftRight)
-                     ? static_cast<const ast::Type*>(ty.u32())
-                     : ty.i32();
+    auto* a_type = ty.i32();
+    auto* b_type =
+        (params.op == ast::BinaryOp::kShiftLeft || params.op == ast::BinaryOp::kShiftRight)
+            ? static_cast<const ast::Type*>(ty.u32())
+            : ty.i32();
 
-  auto* a = Var("a", a_type);
-  auto* b = Var("b", b_type);
+    auto* a = Var("a", a_type);
+    auto* b = Var("b", b_type);
 
-  auto* expr1 = create<ast::BinaryExpression>(params.op, Expr(a), Expr(b));
-  auto* expr2 = create<ast::BinaryExpression>(params.op, expr1, Expr(b));
-  WrapInFunction(a, b, expr2);
+    auto* expr1 = create<ast::BinaryExpression>(params.op, Expr(a), Expr(b));
+    auto* expr2 = create<ast::BinaryExpression>(params.op, expr1, Expr(b));
+    WrapInFunction(a, b, expr2);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, expr2)) << gen.error();
-  EXPECT_EQ(out.str(), params.result);
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, expr2)) << gen.error();
+    EXPECT_EQ(out.str(), params.result);
 }
 using Op = ast::BinaryOp;
 constexpr BinaryData signed_overflow_defined_behaviour_chained_cases[] = {
@@ -146,37 +141,34 @@ constexpr BinaryData signed_overflow_defined_behaviour_chained_cases[] = {
     {"as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(a) * "
      "as_type<uint>(b)))) * as_type<uint>(b)))",
      Op::kMultiply}};
-INSTANTIATE_TEST_SUITE_P(
-    MslGeneratorImplTest,
-    MslBinaryTest_SignedOverflowDefinedBehaviour_Chained,
-    testing::ValuesIn(signed_overflow_defined_behaviour_chained_cases));
+INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
+                         MslBinaryTest_SignedOverflowDefinedBehaviour_Chained,
+                         testing::ValuesIn(signed_overflow_defined_behaviour_chained_cases));
 
 TEST_F(MslBinaryTest, ModF32) {
-  auto* left = Var("left", ty.f32());
-  auto* right = Var("right", ty.f32());
-  auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr(left),
-                                             Expr(right));
-  WrapInFunction(left, right, expr);
+    auto* left = Var("left", ty.f32());
+    auto* right = Var("right", ty.f32());
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr(left), Expr(right));
+    WrapInFunction(left, right, expr);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-  EXPECT_EQ(out.str(), "fmod(left, right)");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "fmod(left, right)");
 }
 
 TEST_F(MslBinaryTest, ModVec3F32) {
-  auto* left = Var("left", ty.vec3<f32>());
-  auto* right = Var("right", ty.vec3<f32>());
-  auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr(left),
-                                             Expr(right));
-  WrapInFunction(left, right, expr);
+    auto* left = Var("left", ty.vec3<f32>());
+    auto* right = Var("right", ty.vec3<f32>());
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr(left), Expr(right));
+    WrapInFunction(left, right, expr);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-  EXPECT_EQ(out.str(), "fmod(left, right)");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "fmod(left, right)");
 }
 
 }  // namespace

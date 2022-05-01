@@ -28,13 +28,13 @@ StrideAttribute::StrideAttribute(ProgramID pid, const Source& src, uint32_t s)
 StrideAttribute::~StrideAttribute() = default;
 
 std::string StrideAttribute::Name() const {
-  return "stride";
+    return "stride";
 }
 
 const StrideAttribute* StrideAttribute::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<StrideAttribute>(src, stride);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<StrideAttribute>(src, stride);
 }
 
 }  // namespace tint::ast

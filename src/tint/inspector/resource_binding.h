@@ -24,90 +24,89 @@ namespace tint::inspector {
 
 /// Container for information about how a resource is bound
 struct ResourceBinding {
-  /// The dimensionality of a texture
-  enum class TextureDimension {
-    /// Invalid texture
-    kNone = -1,
-    /// 1 dimensional texture
-    k1d,
-    /// 2 dimensional texture
-    k2d,
-    /// 2 dimensional array texture
-    k2dArray,
-    /// 3 dimensional texture
-    k3d,
-    /// cube texture
-    kCube,
-    /// cube array texture
-    kCubeArray,
-  };
+    /// The dimensionality of a texture
+    enum class TextureDimension {
+        /// Invalid texture
+        kNone = -1,
+        /// 1 dimensional texture
+        k1d,
+        /// 2 dimensional texture
+        k2d,
+        /// 2 dimensional array texture
+        k2dArray,
+        /// 3 dimensional texture
+        k3d,
+        /// cube texture
+        kCube,
+        /// cube array texture
+        kCubeArray,
+    };
 
-  /// Component type of the texture's data. Same as the Sampled Type parameter
-  /// in SPIR-V OpTypeImage.
-  enum class SampledKind { kUnknown = -1, kFloat, kUInt, kSInt };
+    /// Component type of the texture's data. Same as the Sampled Type parameter
+    /// in SPIR-V OpTypeImage.
+    enum class SampledKind { kUnknown = -1, kFloat, kUInt, kSInt };
 
-  /// Enumerator of texel image formats
-  enum class TexelFormat {
-    kNone = -1,
+    /// Enumerator of texel image formats
+    enum class TexelFormat {
+        kNone = -1,
 
-    kRgba8Unorm,
-    kRgba8Snorm,
-    kRgba8Uint,
-    kRgba8Sint,
-    kRgba16Uint,
-    kRgba16Sint,
-    kRgba16Float,
-    kR32Uint,
-    kR32Sint,
-    kR32Float,
-    kRg32Uint,
-    kRg32Sint,
-    kRg32Float,
-    kRgba32Uint,
-    kRgba32Sint,
-    kRgba32Float,
-  };
+        kRgba8Unorm,
+        kRgba8Snorm,
+        kRgba8Uint,
+        kRgba8Sint,
+        kRgba16Uint,
+        kRgba16Sint,
+        kRgba16Float,
+        kR32Uint,
+        kR32Sint,
+        kR32Float,
+        kRg32Uint,
+        kRg32Sint,
+        kRg32Float,
+        kRgba32Uint,
+        kRgba32Sint,
+        kRgba32Float,
+    };
 
-  /// kXXX maps to entries returned by GetXXXResourceBindings call.
-  enum class ResourceType {
-    kUniformBuffer,
-    kStorageBuffer,
-    kReadOnlyStorageBuffer,
-    kSampler,
-    kComparisonSampler,
-    kSampledTexture,
-    kMultisampledTexture,
-    kWriteOnlyStorageTexture,
-    kDepthTexture,
-    kDepthMultisampledTexture,
-    kExternalTexture
-  };
+    /// kXXX maps to entries returned by GetXXXResourceBindings call.
+    enum class ResourceType {
+        kUniformBuffer,
+        kStorageBuffer,
+        kReadOnlyStorageBuffer,
+        kSampler,
+        kComparisonSampler,
+        kSampledTexture,
+        kMultisampledTexture,
+        kWriteOnlyStorageTexture,
+        kDepthTexture,
+        kDepthMultisampledTexture,
+        kExternalTexture
+    };
 
-  /// Type of resource that is bound.
-  ResourceType resource_type;
-  /// Bind group the binding belongs
-  uint32_t bind_group;
-  /// Identifier to identify this binding within the bind group
-  uint32_t binding;
-  /// Size for this binding, in bytes, if defined.
-  uint64_t size;
-  /// Size for this binding without trailing structure padding, in bytes, if
-  /// defined.
-  uint64_t size_no_padding;
-  /// Dimensionality of this binding, if defined.
-  TextureDimension dim;
-  /// Kind of data being sampled, if defined.
-  SampledKind sampled_kind;
-  /// Format of data, if defined.
-  TexelFormat image_format;
+    /// Type of resource that is bound.
+    ResourceType resource_type;
+    /// Bind group the binding belongs
+    uint32_t bind_group;
+    /// Identifier to identify this binding within the bind group
+    uint32_t binding;
+    /// Size for this binding, in bytes, if defined.
+    uint64_t size;
+    /// Size for this binding without trailing structure padding, in bytes, if
+    /// defined.
+    uint64_t size_no_padding;
+    /// Dimensionality of this binding, if defined.
+    TextureDimension dim;
+    /// Kind of data being sampled, if defined.
+    SampledKind sampled_kind;
+    /// Format of data, if defined.
+    TexelFormat image_format;
 };
 
 /// Convert from internal ast::TextureDimension to public
 /// ResourceBinding::TextureDimension
 /// @param type_dim internal value to convert from
 /// @returns the publicly visible equivalent
-ResourceBinding::TextureDimension
-TypeTextureDimensionToResourceBindingTextureDimension(
+ResourceBinding::TextureDimension TypeTextureDimensionToResourceBindingTextureDimension(
     const ast::TextureDimension& type_dim);
 
 /// Infer ResourceBinding::SampledKind for a given sem::Type

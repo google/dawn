@@ -20,22 +20,19 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::UintLiteralExpression);
 
 namespace tint::ast {
 
-UintLiteralExpression::UintLiteralExpression(ProgramID pid,
-                                             const Source& src,
-                                             uint32_t val)
+UintLiteralExpression::UintLiteralExpression(ProgramID pid, const Source& src, uint32_t val)
     : Base(pid, src), value(val) {}
 
 UintLiteralExpression::~UintLiteralExpression() = default;
 
 uint32_t UintLiteralExpression::ValueAsU32() const {
-  return value;
+    return value;
 }
 
-const UintLiteralExpression* UintLiteralExpression::Clone(
-    CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<UintLiteralExpression>(src, value);
+const UintLiteralExpression* UintLiteralExpression::Clone(CloneContext* ctx) const {
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<UintLiteralExpression>(src, value);
 }
 
 }  // namespace tint::ast

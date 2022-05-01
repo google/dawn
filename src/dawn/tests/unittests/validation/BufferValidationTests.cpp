@@ -15,8 +15,8 @@
 #include <limits>
 #include <memory>
 
-#include "gmock/gmock.h"
 #include "dawn/tests/unittests/validation/ValidationTest.h"
+#include "gmock/gmock.h"
 
 using testing::_;
 using testing::InvokeWithoutArgs;

@@ -27,50 +27,46 @@
 
 namespace dawn::native::d3d12 {
 
-    // static
-    Ref<Queue> Queue::Create(Device* device, const QueueDescriptor* descriptor) {
-        Ref<Queue> queue = AcquireRef(new Queue(device, descriptor));
-        queue->Initialize();
-        return queue;
+// static
+Ref<Queue> Queue::Create(Device* device, const QueueDescriptor* descriptor) {
+    Ref<Queue> queue = AcquireRef(new Queue(device, descriptor));
+    queue->Initialize();
+    return queue;
+}
+
+Queue::Queue(Device* device, const QueueDescriptor* descriptor) : QueueBase(device, descriptor) {}
+
+void Queue::Initialize() {
+    SetLabelImpl();
+}
+
+MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
+    Device* device = ToBackend(GetDevice());
+
+    DAWN_TRY(device->Tick());
+
+    CommandRecordingContext* commandContext;
+    DAWN_TRY_ASSIGN(commandContext, device->GetPendingCommandContext());
+
+    TRACE_EVENT_BEGIN1(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D12::RecordCommands",
+                       "serial", uint64_t(GetDevice()->GetPendingCommandSerial()));
+    for (uint32_t i = 0; i < commandCount; ++i) {
+        DAWN_TRY(ToBackend(commands[i])->RecordCommands(commandContext));
     }
+    TRACE_EVENT_END1(GetDevice()->GetPlatform(), Recording, "CommandBufferD3D12::RecordCommands",
+                     "serial", uint64_t(GetDevice()->GetPendingCommandSerial()));
 
-    Queue::Queue(Device* device, const QueueDescriptor* descriptor)
-        : QueueBase(device, descriptor) {
-    }
+    DAWN_TRY(device->ExecutePendingCommandContext());
 
-    void Queue::Initialize() {
-        SetLabelImpl();
-    }
+    DAWN_TRY(device->NextSerial());
+    return {};
+}
 
-    MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
-        Device* device = ToBackend(GetDevice());
-
-        DAWN_TRY(device->Tick());
-
-        CommandRecordingContext* commandContext;
-        DAWN_TRY_ASSIGN(commandContext, device->GetPendingCommandContext());
-
-        TRACE_EVENT_BEGIN1(GetDevice()->GetPlatform(), Recording,
-                           "CommandBufferD3D12::RecordCommands", "serial",
-                           uint64_t(GetDevice()->GetPendingCommandSerial()));
-        for (uint32_t i = 0; i < commandCount; ++i) {
-            DAWN_TRY(ToBackend(commands[i])->RecordCommands(commandContext));
-        }
-        TRACE_EVENT_END1(GetDevice()->GetPlatform(), Recording,
-                         "CommandBufferD3D12::RecordCommands", "serial",
-                         uint64_t(GetDevice()->GetPendingCommandSerial()));
-
-        DAWN_TRY(device->ExecutePendingCommandContext());
-
-        DAWN_TRY(device->NextSerial());
-        return {};
-    }
-
-    void Queue::SetLabelImpl() {
-        Device* device = ToBackend(GetDevice());
-        // TODO(crbug.com/dawn/1344): When we start using multiple queues this needs to be adjusted
-        // so it doesn't always change the default queue's label.
-        SetDebugName(device, device->GetCommandQueue().Get(), "Dawn_Queue", GetLabel());
-    }
+void Queue::SetLabelImpl() {
+    Device* device = ToBackend(GetDevice());
+    // TODO(crbug.com/dawn/1344): When we start using multiple queues this needs to be adjusted
+    // so it doesn't always change the default queue's label.
+    SetDebugName(device, device->GetCommandQueue().Get(), "Dawn_Queue", GetLabel());
+}
 
 }  // namespace dawn::native::d3d12

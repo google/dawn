@@ -28,38 +28,38 @@ namespace tint::fuzzers::ast_fuzzer {
 namespace {
 
 TEST(ExpressionSizeTest, Basic) {
-  std::string content = R"(
+    std::string content = R"(
     fn main() {
       let a = (0 + 0) * (0 + 0);
     }
   )";
-  Source::File file("test.wgsl", content);
-  auto program = reader::wgsl::Parse(&file);
-  ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    Source::File file("test.wgsl", content);
+    auto program = reader::wgsl::Parse(&file);
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
-  ExpressionSize expression_size(program);
-  for (const auto* node : program.ASTNodes().Objects()) {
-    const auto* expr = node->As<ast::Expression>();
-    if (expr == nullptr) {
-      continue;
+    ExpressionSize expression_size(program);
+    for (const auto* node : program.ASTNodes().Objects()) {
+        const auto* expr = node->As<ast::Expression>();
+        if (expr == nullptr) {
+            continue;
+        }
+        if (expr->Is<ast::IntLiteralExpression>()) {
+            ASSERT_EQ(1, expression_size(expr));
+        } else {
+            const auto* binary_expr = expr->As<ast::BinaryExpression>();
+            ASSERT_TRUE(binary_expr != nullptr);
+            switch (binary_expr->op) {
+                case ast::BinaryOp::kAdd:
+                    ASSERT_EQ(3, expression_size(expr));
+                    break;
+                case ast::BinaryOp::kMultiply:
+                    ASSERT_EQ(7, expression_size(expr));
+                    break;
+                default:
+                    FAIL();
+            }
+        }
     }
-    if (expr->Is<ast::IntLiteralExpression>()) {
-      ASSERT_EQ(1, expression_size(expr));
-    } else {
-      const auto* binary_expr = expr->As<ast::BinaryExpression>();
-      ASSERT_TRUE(binary_expr != nullptr);
-      switch (binary_expr->op) {
-        case ast::BinaryOp::kAdd:
-          ASSERT_EQ(3, expression_size(expr));
-          break;
-        case ast::BinaryOp::kMultiply:
-          ASSERT_EQ(7, expression_size(expr));
-          break;
-        default:
-          FAIL();
-      }
-    }
-  }
 }
 
 }  // namespace

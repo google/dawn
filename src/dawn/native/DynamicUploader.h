@@ -27,43 +27,42 @@
 // usage.
 namespace dawn::native {
 
-    struct UploadHandle {
-        uint8_t* mappedBuffer = nullptr;
-        uint64_t startOffset = 0;
-        StagingBufferBase* stagingBuffer = nullptr;
+struct UploadHandle {
+    uint8_t* mappedBuffer = nullptr;
+    uint64_t startOffset = 0;
+    StagingBufferBase* stagingBuffer = nullptr;
+};
+
+class DynamicUploader {
+  public:
+    explicit DynamicUploader(DeviceBase* device);
+    ~DynamicUploader() = default;
+
+    // We add functions to Release StagingBuffers to the DynamicUploader as there's
+    // currently no place to track the allocated staging buffers such that they're freed after
+    // pending commands are finished. This should be changed when better resource allocation is
+    // implemented.
+    void ReleaseStagingBuffer(std::unique_ptr<StagingBufferBase> stagingBuffer);
+
+    ResultOrError<UploadHandle> Allocate(uint64_t allocationSize,
+                                         ExecutionSerial serial,
+                                         uint64_t offsetAlignment);
+    void Deallocate(ExecutionSerial lastCompletedSerial);
+
+  private:
+    static constexpr uint64_t kRingBufferSize = 4 * 1024 * 1024;
+
+    struct RingBuffer {
+        std::unique_ptr<StagingBufferBase> mStagingBuffer;
+        RingBufferAllocator mAllocator;
     };
 
-    class DynamicUploader {
-      public:
-        explicit DynamicUploader(DeviceBase* device);
-        ~DynamicUploader() = default;
+    ResultOrError<UploadHandle> AllocateInternal(uint64_t allocationSize, ExecutionSerial serial);
 
-        // We add functions to Release StagingBuffers to the DynamicUploader as there's
-        // currently no place to track the allocated staging buffers such that they're freed after
-        // pending commands are finished. This should be changed when better resource allocation is
-        // implemented.
-        void ReleaseStagingBuffer(std::unique_ptr<StagingBufferBase> stagingBuffer);
-
-        ResultOrError<UploadHandle> Allocate(uint64_t allocationSize,
-                                             ExecutionSerial serial,
-                                             uint64_t offsetAlignment);
-        void Deallocate(ExecutionSerial lastCompletedSerial);
-
-      private:
-        static constexpr uint64_t kRingBufferSize = 4 * 1024 * 1024;
-
-        struct RingBuffer {
-            std::unique_ptr<StagingBufferBase> mStagingBuffer;
-            RingBufferAllocator mAllocator;
-        };
-
-        ResultOrError<UploadHandle> AllocateInternal(uint64_t allocationSize,
-                                                     ExecutionSerial serial);
-
-        std::vector<std::unique_ptr<RingBuffer>> mRingBuffers;
-        SerialQueue<ExecutionSerial, std::unique_ptr<StagingBufferBase>> mReleasedStagingBuffers;
-        DeviceBase* mDevice;
-    };
+    std::vector<std::unique_ptr<RingBuffer>> mRingBuffers;
+    SerialQueue<ExecutionSerial, std::unique_ptr<StagingBufferBase>> mReleasedStagingBuffers;
+    DeviceBase* mDevice;
+};
 }  // namespace dawn::native
 
 #endif  // SRC_DAWN_NATIVE_DYNAMICUPLOADER_H_

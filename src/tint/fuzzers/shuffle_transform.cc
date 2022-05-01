@@ -25,12 +25,12 @@ ShuffleTransform::ShuffleTransform(size_t seed) : seed_(seed) {}
 void ShuffleTransform::Run(CloneContext& ctx,
                            const tint::transform::DataMap&,
                            tint::transform::DataMap&) const {
-  auto decls = ctx.src->AST().GlobalDeclarations();
-  auto rng = std::mt19937_64{seed_};
-  std::shuffle(std::begin(decls), std::end(decls), rng);
-  for (auto* decl : decls) {
-    ctx.dst->AST().AddGlobalDeclaration(ctx.Clone(decl));
-  }
+    auto decls = ctx.src->AST().GlobalDeclarations();
+    auto rng = std::mt19937_64{seed_};
+    std::shuffle(std::begin(decls), std::end(decls), rng);
+    for (auto* decl : decls) {
+        ctx.dst->AST().AddGlobalDeclaration(ctx.Clone(decl));
+    }
 }
 
 }  // namespace tint::fuzzers

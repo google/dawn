@@ -31,52 +31,52 @@ namespace tint::ast {
 /// * sem::TypeConstructor
 /// * sem::TypeConversion
 class CallExpression final : public Castable<CallExpression, Expression> {
- public:
-  /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the call expression source
-  /// @param name the function or type name
-  /// @param args the arguments
-  CallExpression(ProgramID program_id,
-                 const Source& source,
-                 const IdentifierExpression* name,
-                 ExpressionList args);
+  public:
+    /// Constructor
+    /// @param program_id the identifier of the program that owns this node
+    /// @param source the call expression source
+    /// @param name the function or type name
+    /// @param args the arguments
+    CallExpression(ProgramID program_id,
+                   const Source& source,
+                   const IdentifierExpression* name,
+                   ExpressionList args);
 
-  /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the call expression source
-  /// @param type the type
-  /// @param args the arguments
-  CallExpression(ProgramID program_id,
-                 const Source& source,
-                 const Type* type,
-                 ExpressionList args);
+    /// Constructor
+    /// @param program_id the identifier of the program that owns this node
+    /// @param source the call expression source
+    /// @param type the type
+    /// @param args the arguments
+    CallExpression(ProgramID program_id,
+                   const Source& source,
+                   const Type* type,
+                   ExpressionList args);
 
-  /// Move constructor
-  CallExpression(CallExpression&&);
-  ~CallExpression() override;
+    /// Move constructor
+    CallExpression(CallExpression&&);
+    ~CallExpression() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const CallExpression* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const CallExpression* Clone(CloneContext* ctx) const override;
 
-  /// Target is either an identifier, or a Type.
-  /// One of these must be nullptr and the other a non-nullptr.
-  struct Target {
-    /// name is a function or builtin to call, or type name to construct or
-    /// cast-to
-    const IdentifierExpression* name = nullptr;
-    /// type to construct or cast-to
-    const Type* type = nullptr;
-  };
+    /// Target is either an identifier, or a Type.
+    /// One of these must be nullptr and the other a non-nullptr.
+    struct Target {
+        /// name is a function or builtin to call, or type name to construct or
+        /// cast-to
+        const IdentifierExpression* name = nullptr;
+        /// type to construct or cast-to
+        const Type* type = nullptr;
+    };
 
-  /// The target function
-  const Target target;
+    /// The target function
+    const Target target;
 
-  /// The arguments
-  const ExpressionList args;
+    /// The arguments
+    const ExpressionList args;
 };
 
 }  // namespace tint::ast

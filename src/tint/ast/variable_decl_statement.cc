@@ -20,24 +20,21 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::VariableDeclStatement);
 
 namespace tint::ast {
 
-VariableDeclStatement::VariableDeclStatement(ProgramID pid,
-                                             const Source& src,
-                                             const Variable* var)
+VariableDeclStatement::VariableDeclStatement(ProgramID pid, const Source& src, const Variable* var)
     : Base(pid, src), variable(var) {
-  TINT_ASSERT(AST, variable);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, variable, program_id);
+    TINT_ASSERT(AST, variable);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, variable, program_id);
 }
 
 VariableDeclStatement::VariableDeclStatement(VariableDeclStatement&&) = default;
 
 VariableDeclStatement::~VariableDeclStatement() = default;
 
-const VariableDeclStatement* VariableDeclStatement::Clone(
-    CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  auto* var = ctx->Clone(variable);
-  return ctx->dst->create<VariableDeclStatement>(src, var);
+const VariableDeclStatement* VariableDeclStatement::Clone(CloneContext* ctx) const {
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    auto* var = ctx->Clone(variable);
+    return ctx->dst->create<VariableDeclStatement>(src, var);
 }
 
 }  // namespace tint::ast

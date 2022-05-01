@@ -22,27 +22,27 @@
 // template parameter. It includes a specialization for detail::TypedIntegerImpl which yields
 // the wrapped integer type.
 namespace detail {
-    template <typename T, typename Enable = void>
-    struct UnderlyingTypeImpl;
+template <typename T, typename Enable = void>
+struct UnderlyingTypeImpl;
 
-    template <typename I>
-    struct UnderlyingTypeImpl<I, typename std::enable_if_t<std::is_integral<I>::value>> {
-        using type = I;
-    };
+template <typename I>
+struct UnderlyingTypeImpl<I, typename std::enable_if_t<std::is_integral<I>::value>> {
+    using type = I;
+};
 
-    template <typename E>
-    struct UnderlyingTypeImpl<E, typename std::enable_if_t<std::is_enum<E>::value>> {
-        using type = std::underlying_type_t<E>;
-    };
+template <typename E>
+struct UnderlyingTypeImpl<E, typename std::enable_if_t<std::is_enum<E>::value>> {
+    using type = std::underlying_type_t<E>;
+};
 
-    // Forward declare the TypedInteger impl.
-    template <typename Tag, typename T>
-    class TypedIntegerImpl;
+// Forward declare the TypedInteger impl.
+template <typename Tag, typename T>
+class TypedIntegerImpl;
 
-    template <typename Tag, typename I>
-    struct UnderlyingTypeImpl<TypedIntegerImpl<Tag, I>> {
-        using type = typename UnderlyingTypeImpl<I>::type;
-    };
+template <typename Tag, typename I>
+struct UnderlyingTypeImpl<TypedIntegerImpl<Tag, I>> {
+    using type = typename UnderlyingTypeImpl<I>::type;
+};
 }  // namespace detail
 
 template <typename T>

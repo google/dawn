@@ -27,12 +27,12 @@ Bool::Bool(Bool&&) = default;
 Bool::~Bool() = default;
 
 std::string Bool::FriendlyName(const SymbolTable&) const {
-  return "bool";
+    return "bool";
 }
 
 const Bool* Bool::Clone(CloneContext* ctx) const {
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<Bool>(src);
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<Bool>(src);
 }
 
 }  // namespace tint::ast

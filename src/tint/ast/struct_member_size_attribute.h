@@ -23,27 +23,26 @@
 namespace tint::ast {
 
 /// A struct member size attribute
-class StructMemberSizeAttribute final
-    : public Castable<StructMemberSizeAttribute, Attribute> {
- public:
-  /// constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param size the size value
-  StructMemberSizeAttribute(ProgramID pid, const Source& src, uint32_t size);
-  ~StructMemberSizeAttribute() override;
+class StructMemberSizeAttribute final : public Castable<StructMemberSizeAttribute, Attribute> {
+  public:
+    /// constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param size the size value
+    StructMemberSizeAttribute(ProgramID pid, const Source& src, uint32_t size);
+    ~StructMemberSizeAttribute() override;
 
-  /// @returns the WGSL name for the attribute
-  std::string Name() const override;
+    /// @returns the WGSL name for the attribute
+    std::string Name() const override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const StructMemberSizeAttribute* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const StructMemberSizeAttribute* Clone(CloneContext* ctx) const override;
 
-  /// The size value
-  const uint32_t size;
+    /// The size value
+    const uint32_t size;
 };
 
 }  // namespace tint::ast

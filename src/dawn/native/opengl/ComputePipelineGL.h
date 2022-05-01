@@ -23,23 +23,22 @@
 
 namespace dawn::native::opengl {
 
-    class Device;
+class Device;
 
-    class ComputePipeline final : public ComputePipelineBase, public PipelineGL {
-      public:
-        static Ref<ComputePipeline> CreateUninitialized(
-            Device* device,
-            const ComputePipelineDescriptor* descriptor);
+class ComputePipeline final : public ComputePipelineBase, public PipelineGL {
+  public:
+    static Ref<ComputePipeline> CreateUninitialized(Device* device,
+                                                    const ComputePipelineDescriptor* descriptor);
 
-        void ApplyNow();
+    void ApplyNow();
 
-        MaybeError Initialize() override;
+    MaybeError Initialize() override;
 
-      private:
-        using ComputePipelineBase::ComputePipelineBase;
-        ~ComputePipeline() override;
-        void DestroyImpl() override;
-    };
+  private:
+    using ComputePipelineBase::ComputePipelineBase;
+    ~ComputePipeline() override;
+    void DestroyImpl() override;
+};
 
 }  // namespace dawn::native::opengl
 

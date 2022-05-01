@@ -20,21 +20,21 @@ namespace tint::diag {
 namespace {
 
 class PrinterOther : public Printer {
- public:
-  explicit PrinterOther(FILE* f) : file(f) {}
+  public:
+    explicit PrinterOther(FILE* f) : file(f) {}
 
-  void write(const std::string& str, const Style&) override {
-    fwrite(str.data(), 1, str.size(), file);
-  }
+    void write(const std::string& str, const Style&) override {
+        fwrite(str.data(), 1, str.size(), file);
+    }
 
- private:
-  FILE* file;
+  private:
+    FILE* file;
 };
 
 }  // namespace
 
 std::unique_ptr<Printer> Printer::create(FILE* out, bool) {
-  return std::make_unique<PrinterOther>(out);
+    return std::make_unique<PrinterOther>(out);
 }
 
 }  // namespace tint::diag

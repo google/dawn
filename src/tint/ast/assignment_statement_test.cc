@@ -23,69 +23,68 @@ namespace {
 using AssignmentStatementTest = TestHelper;
 
 TEST_F(AssignmentStatementTest, Creation) {
-  auto* lhs = Expr("lhs");
-  auto* rhs = Expr("rhs");
+    auto* lhs = Expr("lhs");
+    auto* rhs = Expr("rhs");
 
-  auto* stmt = create<AssignmentStatement>(lhs, rhs);
-  EXPECT_EQ(stmt->lhs, lhs);
-  EXPECT_EQ(stmt->rhs, rhs);
+    auto* stmt = create<AssignmentStatement>(lhs, rhs);
+    EXPECT_EQ(stmt->lhs, lhs);
+    EXPECT_EQ(stmt->rhs, rhs);
 }
 
 TEST_F(AssignmentStatementTest, CreationWithSource) {
-  auto* lhs = Expr("lhs");
-  auto* rhs = Expr("rhs");
+    auto* lhs = Expr("lhs");
+    auto* rhs = Expr("rhs");
 
-  auto* stmt =
-      create<AssignmentStatement>(Source{Source::Location{20, 2}}, lhs, rhs);
-  auto src = stmt->source;
-  EXPECT_EQ(src.range.begin.line, 20u);
-  EXPECT_EQ(src.range.begin.column, 2u);
+    auto* stmt = create<AssignmentStatement>(Source{Source::Location{20, 2}}, lhs, rhs);
+    auto src = stmt->source;
+    EXPECT_EQ(src.range.begin.line, 20u);
+    EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(AssignmentStatementTest, IsAssign) {
-  auto* lhs = Expr("lhs");
-  auto* rhs = Expr("rhs");
+    auto* lhs = Expr("lhs");
+    auto* rhs = Expr("rhs");
 
-  auto* stmt = create<AssignmentStatement>(lhs, rhs);
-  EXPECT_TRUE(stmt->Is<AssignmentStatement>());
+    auto* stmt = create<AssignmentStatement>(lhs, rhs);
+    EXPECT_TRUE(stmt->Is<AssignmentStatement>());
 }
 
 TEST_F(AssignmentStatementTest, Assert_Null_LHS) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b;
-        b.create<AssignmentStatement>(nullptr, b.Expr(1));
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.create<AssignmentStatement>(nullptr, b.Expr(1));
+        },
+        "internal compiler error");
 }
 
 TEST_F(AssignmentStatementTest, Assert_Null_RHS) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b;
-        b.create<AssignmentStatement>(b.Expr(1), nullptr);
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.create<AssignmentStatement>(b.Expr(1), nullptr);
+        },
+        "internal compiler error");
 }
 
 TEST_F(AssignmentStatementTest, Assert_DifferentProgramID_LHS) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b1;
-        ProgramBuilder b2;
-        b1.create<AssignmentStatement>(b2.Expr("lhs"), b1.Expr("rhs"));
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b1;
+            ProgramBuilder b2;
+            b1.create<AssignmentStatement>(b2.Expr("lhs"), b1.Expr("rhs"));
+        },
+        "internal compiler error");
 }
 
 TEST_F(AssignmentStatementTest, Assert_DifferentProgramID_RHS) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b1;
-        ProgramBuilder b2;
-        b1.create<AssignmentStatement>(b1.Expr("lhs"), b2.Expr("rhs"));
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b1;
+            ProgramBuilder b2;
+            b1.create<AssignmentStatement>(b1.Expr("lhs"), b2.Expr("rhs"));
+        },
+        "internal compiler error");
 }
 
 }  // namespace

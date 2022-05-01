@@ -22,13 +22,13 @@ namespace {
 using LoopToForLoopTest = TransformTest;
 
 TEST_F(LoopToForLoopTest, ShouldRunEmptyModule) {
-  auto* src = R"()";
+    auto* src = R"()";
 
-  EXPECT_FALSE(ShouldRun<LoopToForLoop>(src));
+    EXPECT_FALSE(ShouldRun<LoopToForLoop>(src));
 }
 
 TEST_F(LoopToForLoopTest, ShouldRunHasForLoop) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   loop {
     break;
@@ -36,20 +36,20 @@ fn f() {
 }
 )";
 
-  EXPECT_TRUE(ShouldRun<LoopToForLoop>(src));
+    EXPECT_TRUE(ShouldRun<LoopToForLoop>(src));
 }
 
 TEST_F(LoopToForLoopTest, EmptyModule) {
-  auto* src = "";
-  auto* expect = "";
+    auto* src = "";
+    auto* expect = "";
 
-  auto got = Run<LoopToForLoop>(src);
+    auto got = Run<LoopToForLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(LoopToForLoopTest, IfBreak) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   i = 0;
@@ -67,7 +67,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i : i32;
   i = 0;
@@ -77,13 +77,13 @@ fn f() {
 }
 )";
 
-  auto got = Run<LoopToForLoop>(src);
+    auto got = Run<LoopToForLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(LoopToForLoopTest, IfElseBreak) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   i = 0;
@@ -102,7 +102,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i : i32;
   i = 0;
@@ -112,13 +112,13 @@ fn f() {
 }
 )";
 
-  auto got = Run<LoopToForLoop>(src);
+    auto got = Run<LoopToForLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(LoopToForLoopTest, Nested) {
-  auto* src = R"(
+    auto* src = R"(
 let N = 16u;
 
 fn f() {
@@ -150,7 +150,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 let N = 16u;
 
 fn f() {
@@ -167,13 +167,13 @@ fn f() {
 }
 )";
 
-  auto got = Run<LoopToForLoop>(src);
+    auto got = Run<LoopToForLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(LoopToForLoopTest, NoTransform_IfMultipleStmts) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   i = 0;
@@ -191,15 +191,15 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<LoopToForLoop>(src);
+    auto got = Run<LoopToForLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(LoopToForLoopTest, NoTransform_IfElseMultipleStmts) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   i = 0;
@@ -218,15 +218,15 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<LoopToForLoop>(src);
+    auto got = Run<LoopToForLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(LoopToForLoopTest, NoTransform_ContinuingIsCompound) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   i = 0;
@@ -244,15 +244,15 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<LoopToForLoop>(src);
+    auto got = Run<LoopToForLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(LoopToForLoopTest, NoTransform_ContinuingMultipleStmts) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   i = 0;
@@ -270,15 +270,15 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<LoopToForLoop>(src);
+    auto got = Run<LoopToForLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(LoopToForLoopTest, NoTransform_ContinuingUsesVarDeclInLoopBody) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   i = 0;
@@ -295,15 +295,15 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<LoopToForLoop>(src);
+    auto got = Run<LoopToForLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(LoopToForLoopTest, NoTransform_IfBreakWithElse) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   i = 0;
@@ -321,15 +321,15 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<LoopToForLoop>(src);
+    auto got = Run<LoopToForLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(LoopToForLoopTest, NoTransform_IfBreakWithElseIf) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   i = 0;
@@ -347,11 +347,11 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<LoopToForLoop>(src);
+    auto got = Run<LoopToForLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

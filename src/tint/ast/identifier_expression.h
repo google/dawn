@@ -20,26 +20,25 @@
 namespace tint::ast {
 
 /// An identifier expression
-class IdentifierExpression final
-    : public Castable<IdentifierExpression, Expression> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param sym the symbol for the identifier
-  IdentifierExpression(ProgramID pid, const Source& src, Symbol sym);
-  /// Move constructor
-  IdentifierExpression(IdentifierExpression&&);
-  ~IdentifierExpression() override;
+class IdentifierExpression final : public Castable<IdentifierExpression, Expression> {
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param sym the symbol for the identifier
+    IdentifierExpression(ProgramID pid, const Source& src, Symbol sym);
+    /// Move constructor
+    IdentifierExpression(IdentifierExpression&&);
+    ~IdentifierExpression() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const IdentifierExpression* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const IdentifierExpression* Clone(CloneContext* ctx) const override;
 
-  /// The symbol for the identifier
-  const Symbol symbol;
+    /// The symbol for the identifier
+    const Symbol symbol;
 };
 
 }  // namespace tint::ast

@@ -19,54 +19,53 @@ namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, AttributeDecl_Parses) {
-  auto p = parser("@invariant");
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(p->has_error());
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_TRUE(attrs.matched);
-  ASSERT_EQ(attrs.value.size(), 1u);
-  auto* invariant = attrs.value[0]->As<ast::Attribute>();
-  EXPECT_TRUE(invariant->Is<ast::InvariantAttribute>());
+    auto p = parser("@invariant");
+    auto attrs = p->attribute_list();
+    EXPECT_FALSE(p->has_error());
+    EXPECT_FALSE(attrs.errored);
+    EXPECT_TRUE(attrs.matched);
+    ASSERT_EQ(attrs.value.size(), 1u);
+    auto* invariant = attrs.value[0]->As<ast::Attribute>();
+    EXPECT_TRUE(invariant->Is<ast::InvariantAttribute>());
 }
 
 TEST_F(ParserImplTest, AttributeDecl_MissingParenLeft) {
-  auto p = parser("@location 1)");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_TRUE(attrs.value.empty());
-  EXPECT_EQ(p->error(), "1:11: expected '(' for location attribute");
+    auto p = parser("@location 1)");
+    auto attrs = p->attribute_list();
+    EXPECT_TRUE(p->has_error());
+    EXPECT_TRUE(attrs.errored);
+    EXPECT_FALSE(attrs.matched);
+    EXPECT_TRUE(attrs.value.empty());
+    EXPECT_EQ(p->error(), "1:11: expected '(' for location attribute");
 }
 
 TEST_F(ParserImplTest, AttributeDecl_MissingValue) {
-  auto p = parser("@location()");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_TRUE(attrs.value.empty());
-  EXPECT_EQ(p->error(),
-            "1:11: expected signed integer literal for location attribute");
+    auto p = parser("@location()");
+    auto attrs = p->attribute_list();
+    EXPECT_TRUE(p->has_error());
+    EXPECT_TRUE(attrs.errored);
+    EXPECT_FALSE(attrs.matched);
+    EXPECT_TRUE(attrs.value.empty());
+    EXPECT_EQ(p->error(), "1:11: expected signed integer literal for location attribute");
 }
 
 TEST_F(ParserImplTest, AttributeDecl_MissingParenRight) {
-  auto p = parser("@location(1");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_TRUE(attrs.value.empty());
-  EXPECT_EQ(p->error(), "1:12: expected ')' for location attribute");
+    auto p = parser("@location(1");
+    auto attrs = p->attribute_list();
+    EXPECT_TRUE(p->has_error());
+    EXPECT_TRUE(attrs.errored);
+    EXPECT_FALSE(attrs.matched);
+    EXPECT_TRUE(attrs.value.empty());
+    EXPECT_EQ(p->error(), "1:12: expected ')' for location attribute");
 }
 
 TEST_F(ParserImplTest, AttributeDecl_Invalidattribute) {
-  auto p = parser("@invalid");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_TRUE(attrs.value.empty());
+    auto p = parser("@invalid");
+    auto attrs = p->attribute_list();
+    EXPECT_TRUE(p->has_error());
+    EXPECT_TRUE(attrs.errored);
+    EXPECT_FALSE(attrs.matched);
+    EXPECT_TRUE(attrs.value.empty());
 }
 
 }  // namespace

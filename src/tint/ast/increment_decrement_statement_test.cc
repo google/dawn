@@ -23,45 +23,44 @@ namespace {
 using IncrementDecrementStatementTest = TestHelper;
 
 TEST_F(IncrementDecrementStatementTest, Creation) {
-  auto* expr = Expr("expr");
+    auto* expr = Expr("expr");
 
-  auto* i = create<IncrementDecrementStatement>(expr, true);
-  EXPECT_EQ(i->lhs, expr);
-  EXPECT_TRUE(i->increment);
+    auto* i = create<IncrementDecrementStatement>(expr, true);
+    EXPECT_EQ(i->lhs, expr);
+    EXPECT_TRUE(i->increment);
 }
 
 TEST_F(IncrementDecrementStatementTest, Creation_WithSource) {
-  auto* expr = Expr("expr");
-  auto* i = create<IncrementDecrementStatement>(Source{Source::Location{20, 2}},
-                                                expr, true);
-  auto src = i->source;
-  EXPECT_EQ(i->lhs, expr);
-  EXPECT_TRUE(i->increment);
-  EXPECT_EQ(src.range.begin.line, 20u);
-  EXPECT_EQ(src.range.begin.column, 2u);
+    auto* expr = Expr("expr");
+    auto* i = create<IncrementDecrementStatement>(Source{Source::Location{20, 2}}, expr, true);
+    auto src = i->source;
+    EXPECT_EQ(i->lhs, expr);
+    EXPECT_TRUE(i->increment);
+    EXPECT_EQ(src.range.begin.line, 20u);
+    EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(IncrementDecrementStatementTest, IsIncrementDecrement) {
-  auto* expr = Expr("expr");
-  auto* i = create<IncrementDecrementStatement>(expr, true);
-  EXPECT_TRUE(i->Is<IncrementDecrementStatement>());
+    auto* expr = Expr("expr");
+    auto* i = create<IncrementDecrementStatement>(expr, true);
+    EXPECT_TRUE(i->Is<IncrementDecrementStatement>());
 }
 
 TEST_F(IncrementDecrementStatementTest, Decrement) {
-  auto* expr = Expr("expr");
-  auto* i = create<IncrementDecrementStatement>(expr, false);
-  EXPECT_EQ(i->lhs, expr);
-  EXPECT_FALSE(i->increment);
+    auto* expr = Expr("expr");
+    auto* i = create<IncrementDecrementStatement>(expr, false);
+    EXPECT_EQ(i->lhs, expr);
+    EXPECT_FALSE(i->increment);
 }
 
 TEST_F(IncrementDecrementStatementTest, Assert_DifferentProgramID_Expr) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b1;
-        ProgramBuilder b2;
-        b1.create<IncrementDecrementStatement>(b2.Expr(true), true);
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b1;
+            ProgramBuilder b2;
+            b1.create<IncrementDecrementStatement>(b2.Expr(true), true);
+        },
+        "internal compiler error");
 }
 
 }  // namespace

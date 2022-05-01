@@ -37,87 +37,80 @@ SpirvFuzzMutator::SpirvFuzzMutator(
       validator_options_(),
       original_binary_(std::move(binary)),
       seed_(seed) {
-  auto ir_context = spvtools::BuildModule(
-      target_env, spvtools::fuzz::fuzzerutil::kSilentMessageConsumer,
-      original_binary_.data(), original_binary_.size());
-  assert(ir_context && "|binary| is invalid");
+    auto ir_context =
+        spvtools::BuildModule(target_env, spvtools::fuzz::fuzzerutil::kSilentMessageConsumer,
+                              original_binary_.data(), original_binary_.size());
+    assert(ir_context && "|binary| is invalid");
 
-  auto transformation_context =
-      std::make_unique<spvtools::fuzz::TransformationContext>(
-          std::make_unique<spvtools::fuzz::FactManager>(ir_context.get()),
-          validator_options_);
+    auto transformation_context = std::make_unique<spvtools::fuzz::TransformationContext>(
+        std::make_unique<spvtools::fuzz::FactManager>(ir_context.get()), validator_options_);
 
-  auto fuzzer_context = std::make_unique<spvtools::fuzz::FuzzerContext>(
-      std::make_unique<spvtools::fuzz::PseudoRandomGenerator>(seed),
-      spvtools::fuzz::FuzzerContext::GetMinFreshId(ir_context.get()), false);
-  fuzzer_ = std::make_unique<spvtools::fuzz::Fuzzer>(
-      std::move(ir_context), std::move(transformation_context),
-      std::move(fuzzer_context), util::GetBufferMessageConsumer(errors_.get()),
-      donors, enable_all_passes, repeated_pass_strategy,
-      validate_after_each_pass, validator_options_);
+    auto fuzzer_context = std::make_unique<spvtools::fuzz::FuzzerContext>(
+        std::make_unique<spvtools::fuzz::PseudoRandomGenerator>(seed),
+        spvtools::fuzz::FuzzerContext::GetMinFreshId(ir_context.get()), false);
+    fuzzer_ = std::make_unique<spvtools::fuzz::Fuzzer>(
+        std::move(ir_context), std::move(transformation_context), std::move(fuzzer_context),
+        util::GetBufferMessageConsumer(errors_.get()), donors, enable_all_passes,
+        repeated_pass_strategy, validate_after_each_pass, validator_options_);
 }
 
 Mutator::Result SpirvFuzzMutator::Mutate() {
-  // The assertion will fail in |fuzzer_->Run| if the previous fuzzing led to
-  // invalid module.
-  auto result = fuzzer_->Run(transformation_batch_size_);
-  switch (result.status) {
-    case spvtools::fuzz::Fuzzer::Status::kComplete:
-      return {Mutator::Status::kComplete, result.is_changed};
-    case spvtools::fuzz::Fuzzer::Status::kModuleTooBig:
-    case spvtools::fuzz::Fuzzer::Status::kTransformationLimitReached:
-      return {Mutator::Status::kLimitReached, result.is_changed};
-    case spvtools::fuzz::Fuzzer::Status::kFuzzerStuck:
-      return {Mutator::Status::kStuck, result.is_changed};
-    case spvtools::fuzz::Fuzzer::Status::kFuzzerPassLedToInvalidModule:
-      return {Mutator::Status::kInvalid, result.is_changed};
-  }
+    // The assertion will fail in |fuzzer_->Run| if the previous fuzzing led to
+    // invalid module.
+    auto result = fuzzer_->Run(transformation_batch_size_);
+    switch (result.status) {
+        case spvtools::fuzz::Fuzzer::Status::kComplete:
+            return {Mutator::Status::kComplete, result.is_changed};
+        case spvtools::fuzz::Fuzzer::Status::kModuleTooBig:
+        case spvtools::fuzz::Fuzzer::Status::kTransformationLimitReached:
+            return {Mutator::Status::kLimitReached, result.is_changed};
+        case spvtools::fuzz::Fuzzer::Status::kFuzzerStuck:
+            return {Mutator::Status::kStuck, result.is_changed};
+        case spvtools::fuzz::Fuzzer::Status::kFuzzerPassLedToInvalidModule:
+            return {Mutator::Status::kInvalid, result.is_changed};
+    }
 }
 
 std::vector<uint32_t> SpirvFuzzMutator::GetBinary() const {
-  std::vector<uint32_t> result;
-  fuzzer_->GetIRContext()->module()->ToBinary(&result, true);
-  return result;
+    std::vector<uint32_t> result;
+    fuzzer_->GetIRContext()->module()->ToBinary(&result, true);
+    return result;
 }
 
 std::string SpirvFuzzMutator::GetErrors() const {
-  return errors_->str();
+    return errors_->str();
 }
 
-void SpirvFuzzMutator::LogErrors(const std::string* path,
-                                 uint32_t count) const {
-  auto message = GetErrors();
-  std::cout << count << " | SpirvFuzzMutator (seed: " << seed_ << ")"
-            << std::endl;
-  std::cout << message << std::endl;
+void SpirvFuzzMutator::LogErrors(const std::string* path, uint32_t count) const {
+    auto message = GetErrors();
+    std::cout << count << " | SpirvFuzzMutator (seed: " << seed_ << ")" << std::endl;
+    std::cout << message << std::endl;
 
-  if (path) {
-    auto prefix = *path + std::to_string(count);
+    if (path) {
+        auto prefix = *path + std::to_string(count);
 
-    // Write errors to file.
-    std::ofstream(prefix + ".fuzzer.log") << "seed: " << seed_ << std::endl
-                                          << message << std::endl;
+        // Write errors to file.
+        std::ofstream(prefix + ".fuzzer.log") << "seed: " << seed_ << std::endl
+                                              << message << std::endl;
 
-    // Write the invalid SPIR-V binary.
-    util::WriteBinary(prefix + ".fuzzer.invalid.spv", GetBinary());
+        // Write the invalid SPIR-V binary.
+        util::WriteBinary(prefix + ".fuzzer.invalid.spv", GetBinary());
 
-    // Write the original SPIR-V binary.
-    util::WriteBinary(prefix + ".fuzzer.original.spv", original_binary_);
+        // Write the original SPIR-V binary.
+        util::WriteBinary(prefix + ".fuzzer.original.spv", original_binary_);
 
-    // Write transformations.
-    google::protobuf::util::JsonOptions options;
-    options.add_whitespace = true;
-    std::string json;
-    google::protobuf::util::MessageToJsonString(
-        fuzzer_->GetTransformationSequence(), &json, options);
-    std::ofstream(prefix + ".fuzzer.transformations.json") << json << std::endl;
+        // Write transformations.
+        google::protobuf::util::JsonOptions options;
+        options.add_whitespace = true;
+        std::string json;
+        google::protobuf::util::MessageToJsonString(fuzzer_->GetTransformationSequence(), &json,
+                                                    options);
+        std::ofstream(prefix + ".fuzzer.transformations.json") << json << std::endl;
 
-    std::ofstream binary_transformations(
-        prefix + ".fuzzer.transformations.binary",
-        std::ios::binary | std::ios::out);
-    fuzzer_->GetTransformationSequence().SerializeToOstream(
-        &binary_transformations);
-  }
+        std::ofstream binary_transformations(prefix + ".fuzzer.transformations.binary",
+                                             std::ios::binary | std::ios::out);
+        fuzzer_->GetTransformationSequence().SerializeToOstream(&binary_transformations);
+    }
 }
 
 }  // namespace tint::fuzzers::spvtools_fuzzer

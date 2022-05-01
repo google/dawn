@@ -53,54 +53,52 @@ namespace tint::transform {
 /// (dimensionality, component type, etc). The GLSL writer outputs such
 /// (Tint) Textures as (GLSL) Samplers.
 class CombineSamplers final : public Castable<CombineSamplers, Transform> {
- public:
-  /// A pair of binding points.
-  using SamplerTexturePair = sem::SamplerTexturePair;
+  public:
+    /// A pair of binding points.
+    using SamplerTexturePair = sem::SamplerTexturePair;
 
-  /// A map from a sampler/texture pair to a named global.
-  using BindingMap = std::unordered_map<SamplerTexturePair, std::string>;
+    /// A map from a sampler/texture pair to a named global.
+    using BindingMap = std::unordered_map<SamplerTexturePair, std::string>;
 
-  /// The client-provided mapping from separate texture and sampler binding
-  /// points to combined sampler binding point.
-  struct BindingInfo final : public Castable<Data, transform::Data> {
+    /// The client-provided mapping from separate texture and sampler binding
+    /// points to combined sampler binding point.
+    struct BindingInfo final : public Castable<Data, transform::Data> {
+        /// Constructor
+        /// @param map the map of all (texture, sampler) -> (combined) pairs
+        /// @param placeholder the binding point to use for placeholder samplers.
+        BindingInfo(const BindingMap& map, const sem::BindingPoint& placeholder);
+
+        /// Copy constructor
+        /// @param other the other BindingInfo to copy
+        BindingInfo(const BindingInfo& other);
+
+        /// Destructor
+        ~BindingInfo() override;
+
+        /// A map of bindings from (texture, sampler) -> combined sampler.
+        BindingMap binding_map;
+
+        /// The binding point to use for placeholder samplers.
+        sem::BindingPoint placeholder_binding_point;
+    };
+
     /// Constructor
-    /// @param map the map of all (texture, sampler) -> (combined) pairs
-    /// @param placeholder the binding point to use for placeholder samplers.
-    BindingInfo(const BindingMap& map, const sem::BindingPoint& placeholder);
-
-    /// Copy constructor
-    /// @param other the other BindingInfo to copy
-    BindingInfo(const BindingInfo& other);
+    CombineSamplers();
 
     /// Destructor
-    ~BindingInfo() override;
+    ~CombineSamplers() override;
 
-    /// A map of bindings from (texture, sampler) -> combined sampler.
-    BindingMap binding_map;
+  protected:
+    /// The PIMPL state for this transform
+    struct State;
 
-    /// The binding point to use for placeholder samplers.
-    sem::BindingPoint placeholder_binding_point;
-  };
-
-  /// Constructor
-  CombineSamplers();
-
-  /// Destructor
-  ~CombineSamplers() override;
-
- protected:
-  /// The PIMPL state for this transform
-  struct State;
-
-  /// Runs the transform using the CloneContext built for transforming a
-  /// program. Run() is responsible for calling Clone() on the CloneContext.
-  /// @param ctx the CloneContext primed with the input program and
-  /// ProgramBuilder
-  /// @param inputs optional extra transform-specific input data
-  /// @param outputs optional extra transform-specific output data
-  void Run(CloneContext& ctx,
-           const DataMap& inputs,
-           DataMap& outputs) const override;
+    /// Runs the transform using the CloneContext built for transforming a
+    /// program. Run() is responsible for calling Clone() on the CloneContext.
+    /// @param ctx the CloneContext primed with the input program and
+    /// ProgramBuilder
+    /// @param inputs optional extra transform-specific input data
+    /// @param outputs optional extra transform-specific output data
+    void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) const override;
 };
 
 }  // namespace tint::transform

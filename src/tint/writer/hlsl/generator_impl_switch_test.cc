@@ -20,19 +20,19 @@ namespace {
 using HlslGeneratorImplTest_Switch = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
-  Global("cond", ty.i32(), ast::StorageClass::kPrivate);
-  auto* s = Switch(                   //
-      Expr("cond"),                   //
-      Case(Expr(5), Block(Break())),  //
-      DefaultCase());
-  WrapInFunction(s);
+    Global("cond", ty.i32(), ast::StorageClass::kPrivate);
+    auto* s = Switch(                   //
+        Expr("cond"),                   //
+        Case(Expr(5), Block(Break())),  //
+        DefaultCase());
+    WrapInFunction(s);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  switch(cond) {
+    ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  switch(cond) {
     case 5: {
       break;
     }
@@ -44,19 +44,19 @@ TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
 }
 
 TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch_OnlyDefaultCase) {
-  Global("cond", ty.i32(), ast::StorageClass::kPrivate);
-  Global("a", ty.i32(), ast::StorageClass::kPrivate);
-  auto* s = Switch(  //
-      Expr("cond"),  //
-      DefaultCase(Block(Assign(Expr("a"), Expr(42)))));
-  WrapInFunction(s);
+    Global("cond", ty.i32(), ast::StorageClass::kPrivate);
+    Global("a", ty.i32(), ast::StorageClass::kPrivate);
+    auto* s = Switch(  //
+        Expr("cond"),  //
+        DefaultCase(Block(Assign(Expr("a"), Expr(42)))));
+    WrapInFunction(s);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  cond;
+    ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  cond;
   do {
     a = 42;
   } while (false);

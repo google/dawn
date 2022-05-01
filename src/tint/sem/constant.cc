@@ -26,26 +26,24 @@ namespace tint::sem {
 namespace {
 
 const Type* ElemType(const Type* ty, size_t num_elements) {
-  diag::List diag;
-  if (ty->is_scalar()) {
-    if (num_elements != 1) {
-      TINT_ICE(Semantic, diag)
-          << "sem::Constant() type <-> num_element mismatch. type: '"
-          << ty->TypeInfo().name << "' num_elements: " << num_elements;
+    diag::List diag;
+    if (ty->is_scalar()) {
+        if (num_elements != 1) {
+            TINT_ICE(Semantic, diag) << "sem::Constant() type <-> num_element mismatch. type: '"
+                                     << ty->TypeInfo().name << "' num_elements: " << num_elements;
+        }
+        return ty;
     }
-    return ty;
-  }
-  if (auto* vec = ty->As<Vector>()) {
-    if (num_elements != vec->Width()) {
-      TINT_ICE(Semantic, diag)
-          << "sem::Constant() type <-> num_element mismatch. type: '"
-          << ty->TypeInfo().name << "' num_elements: " << num_elements;
+    if (auto* vec = ty->As<Vector>()) {
+        if (num_elements != vec->Width()) {
+            TINT_ICE(Semantic, diag) << "sem::Constant() type <-> num_element mismatch. type: '"
+                                     << ty->TypeInfo().name << "' num_elements: " << num_elements;
+        }
+        TINT_ASSERT(Semantic, vec->type()->is_scalar());
+        return vec->type();
     }
-    TINT_ASSERT(Semantic, vec->type()->is_scalar());
-    return vec->type();
-  }
-  TINT_UNREACHABLE(Semantic, diag) << "Unsupported sem::Constant type";
-  return nullptr;
+    TINT_UNREACHABLE(Semantic, diag) << "Unsupported sem::Constant type";
+    return nullptr;
 }
 
 }  // namespace
@@ -62,21 +60,20 @@ Constant::~Constant() = default;
 Constant& Constant::operator=(const Constant& rhs) = default;
 
 bool Constant::AnyZero() const {
-  for (size_t i = 0; i < Elements().size(); ++i) {
-    if (WithScalarAt(i, [&](auto&& s) {
-          // Use std::equal_to to work around -Wfloat-equal warnings
-          auto equals_to =
-              std::equal_to<std::remove_reference_t<decltype(s)>>{};
+    for (size_t i = 0; i < Elements().size(); ++i) {
+        if (WithScalarAt(i, [&](auto&& s) {
+                // Use std::equal_to to work around -Wfloat-equal warnings
+                auto equals_to = std::equal_to<std::remove_reference_t<decltype(s)>>{};
 
-          if (equals_to(s, 0)) {
+                if (equals_to(s, 0)) {
+                    return true;
+                }
+                return false;
+            })) {
             return true;
-          }
-          return false;
-        })) {
-      return true;
+        }
     }
-  }
-  return false;
+    return false;
 }
 
 }  // namespace tint::sem

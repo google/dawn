@@ -26,75 +26,64 @@
 
 namespace ityp {
 
-    // ityp::array is a helper class that wraps std::array with the restriction that
-    // indices must be a particular type |Index|. Dawn uses multiple flat maps of
-    // index-->data, and this class helps ensure an indices cannot be passed interchangably
-    // to a flat map of a different type.
-    template <typename Index, typename Value, size_t Size>
-    class array : private std::array<Value, Size> {
-        using I = UnderlyingType<Index>;
-        using Base = std::array<Value, Size>;
+// ityp::array is a helper class that wraps std::array with the restriction that
+// indices must be a particular type |Index|. Dawn uses multiple flat maps of
+// index-->data, and this class helps ensure an indices cannot be passed interchangably
+// to a flat map of a different type.
+template <typename Index, typename Value, size_t Size>
+class array : private std::array<Value, Size> {
+    using I = UnderlyingType<Index>;
+    using Base = std::array<Value, Size>;
 
-        static_assert(Size <= std::numeric_limits<I>::max());
+    static_assert(Size <= std::numeric_limits<I>::max());
 
-      public:
-        constexpr array() = default;
+  public:
+    constexpr array() = default;
 
-        template <typename... Values>
-        // NOLINTNEXTLINE(runtime/explicit)
-        constexpr array(Values&&... values) : Base{std::forward<Values>(values)...} {
-        }
+    template <typename... Values>
+    // NOLINTNEXTLINE(runtime/explicit)
+    constexpr array(Values&&... values) : Base{std::forward<Values>(values)...} {}
 
-        Value& operator[](Index i) {
-            I index = static_cast<I>(i);
-            ASSERT(index >= 0 && index < I(Size));
-            return Base::operator[](index);
-        }
+    Value& operator[](Index i) {
+        I index = static_cast<I>(i);
+        ASSERT(index >= 0 && index < I(Size));
+        return Base::operator[](index);
+    }
 
-        constexpr const Value& operator[](Index i) const {
-            I index = static_cast<I>(i);
-            ASSERT(index >= 0 && index < I(Size));
-            return Base::operator[](index);
-        }
+    constexpr const Value& operator[](Index i) const {
+        I index = static_cast<I>(i);
+        ASSERT(index >= 0 && index < I(Size));
+        return Base::operator[](index);
+    }
 
-        Value& at(Index i) {
-            I index = static_cast<I>(i);
-            ASSERT(index >= 0 && index < I(Size));
-            return Base::at(index);
-        }
+    Value& at(Index i) {
+        I index = static_cast<I>(i);
+        ASSERT(index >= 0 && index < I(Size));
+        return Base::at(index);
+    }
 
-        constexpr const Value& at(Index i) const {
-            I index = static_cast<I>(i);
-            ASSERT(index >= 0 && index < I(Size));
-            return Base::at(index);
-        }
+    constexpr const Value& at(Index i) const {
+        I index = static_cast<I>(i);
+        ASSERT(index >= 0 && index < I(Size));
+        return Base::at(index);
+    }
 
-        typename Base::iterator begin() noexcept {
-            return Base::begin();
-        }
+    typename Base::iterator begin() noexcept { return Base::begin(); }
 
-        typename Base::const_iterator begin() const noexcept {
-            return Base::begin();
-        }
+    typename Base::const_iterator begin() const noexcept { return Base::begin(); }
 
-        typename Base::iterator end() noexcept {
-            return Base::end();
-        }
+    typename Base::iterator end() noexcept { return Base::end(); }
 
-        typename Base::const_iterator end() const noexcept {
-            return Base::end();
-        }
+    typename Base::const_iterator end() const noexcept { return Base::end(); }
 
-        constexpr Index size() const {
-            return Index(I(Size));
-        }
+    constexpr Index size() const { return Index(I(Size)); }
 
-        using Base::back;
-        using Base::data;
-        using Base::empty;
-        using Base::fill;
-        using Base::front;
-    };
+    using Base::back;
+    using Base::data;
+    using Base::empty;
+    using Base::fill;
+    using Base::front;
+};
 
 }  // namespace ityp
 

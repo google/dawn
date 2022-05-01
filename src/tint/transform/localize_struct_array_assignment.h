@@ -27,28 +27,25 @@ namespace tint::transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * SimplifyPointers
-class LocalizeStructArrayAssignment
-    : public Castable<LocalizeStructArrayAssignment, Transform> {
- public:
-  /// Constructor
-  LocalizeStructArrayAssignment();
+class LocalizeStructArrayAssignment : public Castable<LocalizeStructArrayAssignment, Transform> {
+  public:
+    /// Constructor
+    LocalizeStructArrayAssignment();
 
-  /// Destructor
-  ~LocalizeStructArrayAssignment() override;
+    /// Destructor
+    ~LocalizeStructArrayAssignment() override;
 
- protected:
-  /// Runs the transform using the CloneContext built for transforming a
-  /// program. Run() is responsible for calling Clone() on the CloneContext.
-  /// @param ctx the CloneContext primed with the input program and
-  /// ProgramBuilder
-  /// @param inputs optional extra transform-specific input data
-  /// @param outputs optional extra transform-specific output data
-  void Run(CloneContext& ctx,
-           const DataMap& inputs,
-           DataMap& outputs) const override;
+  protected:
+    /// Runs the transform using the CloneContext built for transforming a
+    /// program. Run() is responsible for calling Clone() on the CloneContext.
+    /// @param ctx the CloneContext primed with the input program and
+    /// ProgramBuilder
+    /// @param inputs optional extra transform-specific input data
+    /// @param outputs optional extra transform-specific output data
+    void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) const override;
 
- private:
-  class State;
+  private:
+    class State;
 };
 
 }  // namespace tint::transform

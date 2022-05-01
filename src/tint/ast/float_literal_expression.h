@@ -22,24 +22,23 @@
 namespace tint::ast {
 
 /// A float literal
-class FloatLiteralExpression final
-    : public Castable<FloatLiteralExpression, LiteralExpression> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param value the float literals value
-  FloatLiteralExpression(ProgramID pid, const Source& src, float value);
-  ~FloatLiteralExpression() override;
+class FloatLiteralExpression final : public Castable<FloatLiteralExpression, LiteralExpression> {
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param value the float literals value
+    FloatLiteralExpression(ProgramID pid, const Source& src, float value);
+    ~FloatLiteralExpression() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const FloatLiteralExpression* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const FloatLiteralExpression* Clone(CloneContext* ctx) const override;
 
-  /// The float literal value
-  const float value;
+    /// The float literal value
+    const float value;
 };
 
 }  // namespace tint::ast

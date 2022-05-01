@@ -27,61 +27,61 @@
 
 namespace dawn::native::vulkan {
 
-    enum class ICD {
-        None,
-        SwiftShader,
-    };
+enum class ICD {
+    None,
+    SwiftShader,
+};
 
-    // VulkanInstance holds the reference to the Vulkan library, the VkInstance, VkPhysicalDevices
-    // on that instance, Vulkan functions loaded from the library, and global information
-    // gathered from the instance. VkPhysicalDevices bound to the VkInstance are bound to the GPU
-    // and GPU driver, keeping them active. It is RefCounted so that (eventually) when all adapters
-    // on an instance are no longer in use, the instance is deleted. This can be particuarly useful
-    // when we create multiple instances to selectively discover ICDs (like only
-    // SwiftShader/iGPU/dGPU/eGPU), and only one physical device on one instance remains in use. We
-    // can delete the VkInstances that are not in use to avoid holding the discrete GPU active.
-    class VulkanInstance : public RefCounted {
-      public:
-        static ResultOrError<Ref<VulkanInstance>> Create(const InstanceBase* instance, ICD icd);
-        ~VulkanInstance();
+// VulkanInstance holds the reference to the Vulkan library, the VkInstance, VkPhysicalDevices
+// on that instance, Vulkan functions loaded from the library, and global information
+// gathered from the instance. VkPhysicalDevices bound to the VkInstance are bound to the GPU
+// and GPU driver, keeping them active. It is RefCounted so that (eventually) when all adapters
+// on an instance are no longer in use, the instance is deleted. This can be particuarly useful
+// when we create multiple instances to selectively discover ICDs (like only
+// SwiftShader/iGPU/dGPU/eGPU), and only one physical device on one instance remains in use. We
+// can delete the VkInstances that are not in use to avoid holding the discrete GPU active.
+class VulkanInstance : public RefCounted {
+  public:
+    static ResultOrError<Ref<VulkanInstance>> Create(const InstanceBase* instance, ICD icd);
+    ~VulkanInstance();
 
-        const VulkanFunctions& GetFunctions() const;
-        VkInstance GetVkInstance() const;
-        const VulkanGlobalInfo& GetGlobalInfo() const;
-        const std::vector<VkPhysicalDevice>& GetPhysicalDevices() const;
+    const VulkanFunctions& GetFunctions() const;
+    VkInstance GetVkInstance() const;
+    const VulkanGlobalInfo& GetGlobalInfo() const;
+    const std::vector<VkPhysicalDevice>& GetPhysicalDevices() const;
 
-      private:
-        VulkanInstance();
+  private:
+    VulkanInstance();
 
-        MaybeError Initialize(const InstanceBase* instance, ICD icd);
-        ResultOrError<VulkanGlobalKnobs> CreateVkInstance(const InstanceBase* instance);
+    MaybeError Initialize(const InstanceBase* instance, ICD icd);
+    ResultOrError<VulkanGlobalKnobs> CreateVkInstance(const InstanceBase* instance);
 
-        MaybeError RegisterDebugUtils();
+    MaybeError RegisterDebugUtils();
 
-        DynamicLib mVulkanLib;
-        VulkanGlobalInfo mGlobalInfo = {};
-        VkInstance mInstance = VK_NULL_HANDLE;
-        VulkanFunctions mFunctions;
+    DynamicLib mVulkanLib;
+    VulkanGlobalInfo mGlobalInfo = {};
+    VkInstance mInstance = VK_NULL_HANDLE;
+    VulkanFunctions mFunctions;
 
-        VkDebugUtilsMessengerEXT mDebugUtilsMessenger = VK_NULL_HANDLE;
+    VkDebugUtilsMessengerEXT mDebugUtilsMessenger = VK_NULL_HANDLE;
 
-        std::vector<VkPhysicalDevice> mPhysicalDevices;
-    };
+    std::vector<VkPhysicalDevice> mPhysicalDevices;
+};
 
-    class Backend : public BackendConnection {
-      public:
-        explicit Backend(InstanceBase* instance);
-        ~Backend() override;
+class Backend : public BackendConnection {
+  public:
+    explicit Backend(InstanceBase* instance);
+    ~Backend() override;
 
-        MaybeError Initialize();
+    MaybeError Initialize();
 
-        std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters() override;
-        ResultOrError<std::vector<Ref<AdapterBase>>> DiscoverAdapters(
-            const AdapterDiscoveryOptionsBase* optionsBase) override;
+    std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters() override;
+    ResultOrError<std::vector<Ref<AdapterBase>>> DiscoverAdapters(
+        const AdapterDiscoveryOptionsBase* optionsBase) override;
 
-      private:
-        ityp::array<ICD, Ref<VulkanInstance>, 2> mVulkanInstances = {};
-    };
+  private:
+    ityp::array<ICD, Ref<VulkanInstance>, 2> mVulkanInstances = {};
+};
 
 }  // namespace dawn::native::vulkan
 

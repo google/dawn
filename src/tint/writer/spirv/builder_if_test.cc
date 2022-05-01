@@ -21,21 +21,21 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, If_Empty) {
-  // if (true) {
-  // }
-  auto* expr = If(true, Block());
-  WrapInFunction(expr);
+    // if (true) {
+    // }
+    auto* expr = If(true, Block());
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
+    b.push_function(Function{});
 
-  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
+    EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
 %2 = OpConstantTrue %1
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpSelectionMerge %3 None
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpSelectionMerge %3 None
 OpBranchConditional %2 %4 %3
 %4 = OpLabel
 OpBranch %3
@@ -44,40 +44,40 @@ OpBranch %3
 }
 
 TEST_F(BuilderTest, If_Empty_OutsideFunction_IsError) {
-  // Outside a function.
-  // if (true) {
-  // }
+    // Outside a function.
+    // if (true) {
+    // }
 
-  auto* block = Block();
-  auto* expr = If(true, block);
-  WrapInFunction(expr);
+    auto* block = Block();
+    auto* expr = If(true, block);
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  EXPECT_FALSE(b.GenerateIfStatement(expr)) << b.error();
-  EXPECT_TRUE(b.has_error());
-  EXPECT_EQ(b.error(),
-            "Internal error: trying to add SPIR-V instruction 247 outside a "
-            "function");
+    EXPECT_FALSE(b.GenerateIfStatement(expr)) << b.error();
+    EXPECT_TRUE(b.has_error());
+    EXPECT_EQ(b.error(),
+              "Internal error: trying to add SPIR-V instruction 247 outside a "
+              "function");
 }
 
 TEST_F(BuilderTest, If_WithStatements) {
-  // if (true) {
-  //   v = 2;
-  // }
+    // if (true) {
+    //   v = 2;
+    // }
 
-  auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-  auto* body = Block(Assign("v", 2));
-  auto* expr = If(true, body);
-  WrapInFunction(expr);
+    auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
+    auto* body = Block(Assign("v", 2));
+    auto* expr = If(true, body);
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    b.push_function(Function{});
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
+    EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
@@ -85,8 +85,8 @@ TEST_F(BuilderTest, If_WithStatements) {
 %6 = OpConstantTrue %5
 %9 = OpConstant %3 2
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpSelectionMerge %7 None
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpSelectionMerge %7 None
 OpBranchConditional %6 %8 %7
 %8 = OpLabel
 OpStore %1 %9
@@ -96,26 +96,26 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, If_WithElse) {
-  // if (true) {
-  //   v = 2;
-  // } else {
-  //   v = 3;
-  // }
+    // if (true) {
+    //   v = 2;
+    // } else {
+    //   v = 3;
+    // }
 
-  auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-  auto* body = Block(Assign("v", 2));
-  auto* else_body = Block(Assign("v", 3));
+    auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
+    auto* body = Block(Assign("v", 2));
+    auto* else_body = Block(Assign("v", 3));
 
-  auto* expr = If(true, body, else_body);
-  WrapInFunction(expr);
+    auto* expr = If(true, body, else_body);
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    b.push_function(Function{});
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
+    EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
@@ -124,8 +124,8 @@ TEST_F(BuilderTest, If_WithElse) {
 %10 = OpConstant %3 2
 %11 = OpConstant %3 3
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpSelectionMerge %7 None
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpSelectionMerge %7 None
 OpBranchConditional %6 %8 %9
 %8 = OpLabel
 OpStore %1 %10
@@ -138,26 +138,26 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, If_WithElseIf) {
-  // if (true) {
-  //   v = 2;
-  // } else if (true) {
-  //   v = 3;
-  // }
+    // if (true) {
+    //   v = 2;
+    // } else if (true) {
+    //   v = 3;
+    // }
 
-  auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-  auto* body = Block(Assign("v", 2));
-  auto* else_body = Block(Assign("v", 3));
+    auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
+    auto* body = Block(Assign("v", 2));
+    auto* else_body = Block(Assign("v", 3));
 
-  auto* expr = If(true, body, If(true, else_body));
-  WrapInFunction(expr);
+    auto* expr = If(true, body, If(true, else_body));
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    b.push_function(Function{});
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
+    EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
@@ -166,8 +166,8 @@ TEST_F(BuilderTest, If_WithElseIf) {
 %10 = OpConstant %3 2
 %13 = OpConstant %3 3
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpSelectionMerge %7 None
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpSelectionMerge %7 None
 OpBranchConditional %6 %8 %9
 %8 = OpLabel
 OpStore %1 %10
@@ -185,35 +185,35 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, If_WithMultiple) {
-  // if (true) {
-  //   v = 2;
-  // } else if (true) {
-  //   v = 3;
-  // } else if (false) {
-  //   v = 4;
-  // } else {
-  //   v = 5;
-  // }
+    // if (true) {
+    //   v = 2;
+    // } else if (true) {
+    //   v = 3;
+    // } else if (false) {
+    //   v = 4;
+    // } else {
+    //   v = 5;
+    // }
 
-  auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-  auto* body = Block(Assign("v", 2));
-  auto* elseif_1_body = Block(Assign("v", 3));
-  auto* elseif_2_body = Block(Assign("v", 4));
-  auto* else_body = Block(Assign("v", 5));
+    auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
+    auto* body = Block(Assign("v", 2));
+    auto* elseif_1_body = Block(Assign("v", 3));
+    auto* elseif_2_body = Block(Assign("v", 4));
+    auto* else_body = Block(Assign("v", 5));
 
-  auto* expr = If(true, body,                  //
-                  If(true, elseif_1_body,      //
-                     If(false, elseif_2_body,  //
-                        else_body)));
-  WrapInFunction(expr);
+    auto* expr = If(true, body,                  //
+                    If(true, elseif_1_body,      //
+                       If(false, elseif_2_body,  //
+                          else_body)));
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    b.push_function(Function{});
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
+    EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
@@ -225,8 +225,8 @@ TEST_F(BuilderTest, If_WithMultiple) {
 %19 = OpConstant %3 4
 %20 = OpConstant %3 5
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpSelectionMerge %7 None
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpSelectionMerge %7 None
 OpBranchConditional %6 %8 %9
 %8 = OpLabel
 OpStore %1 %10
@@ -255,31 +255,31 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, If_WithBreak) {
-  // loop {
-  //   if (true) {
-  //     break;
-  //   }
-  // }
+    // loop {
+    //   if (true) {
+    //     break;
+    //   }
+    // }
 
-  auto* if_body = Block(Break());
+    auto* if_body = Block(Break());
 
-  auto* if_stmt = If(true, if_body);
+    auto* if_stmt = If(true, if_body);
 
-  auto* loop_body = Block(if_stmt);
+    auto* loop_body = Block(if_stmt);
 
-  auto* expr = Loop(loop_body, Block());
-  WrapInFunction(expr);
+    auto* expr = Loop(loop_body, Block());
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
+    b.push_function(Function{});
 
-  EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
+    EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
 %6 = OpConstantTrue %5
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpBranch %1
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpBranch %1
 %1 = OpLabel
 OpLoopMerge %2 %3 None
 OpBranch %4
@@ -297,31 +297,31 @@ OpBranch %1
 }
 
 TEST_F(BuilderTest, If_WithElseBreak) {
-  // loop {
-  //   if (true) {
-  //   } else {
-  //     break;
-  //   }
-  // }
-  auto* else_body = Block(Break());
+    // loop {
+    //   if (true) {
+    //   } else {
+    //     break;
+    //   }
+    // }
+    auto* else_body = Block(Break());
 
-  auto* if_stmt = If(true, Block(), else_body);
+    auto* if_stmt = If(true, Block(), else_body);
 
-  auto* loop_body = Block(if_stmt);
+    auto* loop_body = Block(if_stmt);
 
-  auto* expr = Loop(loop_body, Block());
-  WrapInFunction(expr);
+    auto* expr = Loop(loop_body, Block());
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
+    b.push_function(Function{});
 
-  EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
+    EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
 %6 = OpConstantTrue %5
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpBranch %1
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpBranch %1
 %1 = OpLabel
 OpLoopMerge %2 %3 None
 OpBranch %4
@@ -341,29 +341,29 @@ OpBranch %1
 }
 
 TEST_F(BuilderTest, If_WithContinueAndBreak) {
-  // loop {
-  //   if (true) {
-  //     continue;
-  //   } else {
-  //     break;
-  //   }
-  // }
+    // loop {
+    //   if (true) {
+    //     continue;
+    //   } else {
+    //     break;
+    //   }
+    // }
 
-  auto* if_stmt = If(true, Block(Continue()), Block(Break()));
+    auto* if_stmt = If(true, Block(Continue()), Block(Break()));
 
-  auto* expr = Loop(Block(if_stmt), Block());
-  WrapInFunction(expr);
+    auto* expr = Loop(Block(if_stmt), Block());
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
+    b.push_function(Function{});
 
-  EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
+    EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
 %6 = OpConstantTrue %5
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpBranch %1
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpBranch %1
 %1 = OpLabel
 OpLoopMerge %2 %3 None
 OpBranch %4
@@ -383,32 +383,32 @@ OpBranch %1
 }
 
 TEST_F(BuilderTest, If_WithElseContinue) {
-  // loop {
-  //   if (true) {
-  //   } else {
-  //     continue;
-  //   }
-  //   break;
-  // }
-  auto* else_body = Block(create<ast::ContinueStatement>());
+    // loop {
+    //   if (true) {
+    //   } else {
+    //     continue;
+    //   }
+    //   break;
+    // }
+    auto* else_body = Block(create<ast::ContinueStatement>());
 
-  auto* if_stmt = If(true, Block(), else_body);
+    auto* if_stmt = If(true, Block(), else_body);
 
-  auto* loop_body = Block(if_stmt, Break());
+    auto* loop_body = Block(if_stmt, Break());
 
-  auto* expr = Loop(loop_body, Block());
-  WrapInFunction(expr);
+    auto* expr = Loop(loop_body, Block());
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
+    b.push_function(Function{});
 
-  EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
+    EXPECT_TRUE(b.GenerateLoopStatement(expr)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
 %6 = OpConstantTrue %5
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpBranch %1
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpBranch %1
 %1 = OpLabel
 OpLoopMerge %2 %3 None
 OpBranch %4
@@ -428,22 +428,22 @@ OpBranch %1
 }
 
 TEST_F(BuilderTest, If_WithReturn) {
-  // if (true) {
-  //   return;
-  // }
+    // if (true) {
+    //   return;
+    // }
 
-  auto* fn = Func("f", {}, ty.void_(), {If(true, Block(Return()))});
+    auto* fn = Func("f", {}, ty.void_(), {If(true, Block(Return()))});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+    EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %5 = OpTypeBool
 %6 = OpConstantTrue %5
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpSelectionMerge %7 None
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpSelectionMerge %7 None
 OpBranchConditional %6 %8 %7
 %8 = OpLabel
 OpReturn
@@ -453,27 +453,27 @@ OpReturn
 }
 
 TEST_F(BuilderTest, If_WithReturnValue) {
-  // if (true) {
-  //   return false;
-  // }
-  // return true;
+    // if (true) {
+    //   return false;
+    // }
+    // return true;
 
-  auto* fn = Func("f", {}, ty.bool_(),
-                  {
-                      If(true, Block(Return(false))),
-                      Return(true),
-                  });
+    auto* fn = Func("f", {}, ty.bool_(),
+                    {
+                        If(true, Block(Return(false))),
+                        Return(true),
+                    });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
+    EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
 %1 = OpTypeFunction %2
 %5 = OpConstantTrue %2
 %8 = OpConstantFalse %2
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpSelectionMerge %6 None
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpSelectionMerge %6 None
 OpBranchConditional %5 %7 %6
 %7 = OpLabel
 OpReturnValue %8
@@ -483,29 +483,29 @@ OpReturnValue %5
 }
 
 TEST_F(BuilderTest, IfElse_BothReturn) {
-  // if (true) {
-  //   return true;
-  // } else {
-  //   return true;
-  // }
+    // if (true) {
+    //   return true;
+    // } else {
+    //   return true;
+    // }
 
-  auto* fn = Func("f", {}, ty.bool_(),
-                  {
-                      If(true,                 //
-                         Block(Return(true)),  //
-                         Block(Return(true))),
-                  });
+    auto* fn = Func("f", {}, ty.bool_(),
+                    {
+                        If(true,                 //
+                           Block(Return(true)),  //
+                           Block(Return(true))),
+                    });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
+    EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
 %1 = OpTypeFunction %2
 %5 = OpConstantTrue %2
 %9 = OpConstantNull %2
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpSelectionMerge %6 None
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpSelectionMerge %6 None
 OpBranchConditional %5 %7 %8
 %7 = OpLabel
 OpReturnValue %5
@@ -517,33 +517,33 @@ OpReturnValue %9
 }
 
 TEST_F(BuilderTest, If_WithNestedBlockReturnValue) {
-  // if (true) {
-  //  {
-  //    {
-  //      {
-  //        return false;
-  //      }
-  //    }
-  //  }
-  // }
-  // return true;
+    // if (true) {
+    //  {
+    //    {
+    //      {
+    //        return false;
+    //      }
+    //    }
+    //  }
+    // }
+    // return true;
 
-  auto* fn = Func("f", {}, ty.bool_(),
-                  {
-                      If(true, Block(Block(Block(Block(Return(false)))))),
-                      Return(true),
-                  });
+    auto* fn = Func("f", {}, ty.bool_(),
+                    {
+                        If(true, Block(Block(Block(Block(Return(false)))))),
+                        Return(true),
+                    });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
+    EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
 %1 = OpTypeFunction %2
 %5 = OpConstantTrue %2
 %8 = OpConstantFalse %2
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpSelectionMerge %6 None
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpSelectionMerge %6 None
 OpBranchConditional %5 %7 %6
 %7 = OpLabel
 OpReturnValue %8
@@ -553,26 +553,26 @@ OpReturnValue %5
 }
 
 TEST_F(BuilderTest, If_WithLoad_Bug327) {
-  // var a : bool;
-  // if (a) {
-  // }
+    // var a : bool;
+    // if (a) {
+    // }
 
-  auto* var = Global("a", ty.bool_(), ast::StorageClass::kPrivate);
-  auto* fn = Func("f", {}, ty.void_(), {If("a", Block())});
+    auto* var = Global("a", ty.bool_(), ast::StorageClass::kPrivate);
+    auto* fn = Func("f", {}, ty.void_(), {If("a", Block())});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeBool
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeBool
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
 %6 = OpTypeVoid
 %5 = OpTypeFunction %6
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%9 = OpLoad %3 %1
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%9 = OpLoad %3 %1
 OpSelectionMerge %10 None
 OpBranchConditional %9 %11 %10
 %11 = OpLabel
@@ -583,26 +583,26 @@ OpReturn
 }
 
 TEST_F(BuilderTest, If_ElseIf_WithReturn) {
-  // crbug.com/tint/1315
-  // if (false) {
-  // } else if (true) {
-  //   return;
-  // }
+    // crbug.com/tint/1315
+    // if (false) {
+    // } else if (true) {
+    //   return;
+    // }
 
-  auto* if_stmt = If(false, Block(), If(true, Block(Return())));
-  auto* fn = Func("f", {}, ty.void_(), {if_stmt});
+    auto* if_stmt = If(false, Block(), If(true, Block(Return())));
+    auto* fn = Func("f", {}, ty.void_(), {if_stmt});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+    EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %5 = OpTypeBool
 %6 = OpConstantFalse %5
 %10 = OpConstantTrue %5
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpSelectionMerge %7 None
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpSelectionMerge %7 None
 OpBranchConditional %6 %8 %9
 %8 = OpLabel
 OpBranch %7
@@ -619,28 +619,28 @@ OpReturn
 }
 
 TEST_F(BuilderTest, Loop_If_ElseIf_WithBreak) {
-  // crbug.com/tint/1315
-  // loop {
-  //   if (false) {
-  //   } else if (true) {
-  //     break;
-  //   }
-  // }
+    // crbug.com/tint/1315
+    // loop {
+    //   if (false) {
+    //   } else if (true) {
+    //     break;
+    //   }
+    // }
 
-  auto* if_stmt = If(false, Block(), If(true, Block(Break())));
-  auto* fn = Func("f", {}, ty.void_(), {Loop(Block(if_stmt))});
+    auto* if_stmt = If(false, Block(), If(true, Block(Break())));
+    auto* fn = Func("f", {}, ty.void_(), {Loop(Block(if_stmt))});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+    EXPECT_TRUE(b.GenerateFunction(fn)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %9 = OpTypeBool
 %10 = OpConstantFalse %9
 %14 = OpConstantTrue %9
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpBranch %5
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpBranch %5
 %5 = OpLabel
 OpLoopMerge %6 %7 None
 OpBranch %8

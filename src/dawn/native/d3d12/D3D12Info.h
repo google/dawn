@@ -21,21 +21,21 @@
 
 namespace dawn::native::d3d12 {
 
-    class Adapter;
+class Adapter;
 
-    struct D3D12DeviceInfo {
-        bool isUMA;
-        uint32_t resourceHeapTier;
-        bool supportsRenderPass;
-        bool supportsShaderFloat16;
-        // shaderModel indicates the maximum supported shader model, for example, the value 62
-        // indicates that current driver supports the maximum shader model is shader model 6.2.
-        uint32_t shaderModel;
-        PerStage<std::wstring> shaderProfiles;
-        bool supportsSharedResourceCapabilityTier1;
-    };
+struct D3D12DeviceInfo {
+    bool isUMA;
+    uint32_t resourceHeapTier;
+    bool supportsRenderPass;
+    bool supportsShaderFloat16;
+    // shaderModel indicates the maximum supported shader model, for example, the value 62
+    // indicates that current driver supports the maximum shader model is shader model 6.2.
+    uint32_t shaderModel;
+    PerStage<std::wstring> shaderProfiles;
+    bool supportsSharedResourceCapabilityTier1;
+};
 
-    ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const Adapter& adapter);
+ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const Adapter& adapter);
 }  // namespace dawn::native::d3d12
 
 #endif  // SRC_DAWN_NATIVE_D3D12_D3D12INFO_H_

@@ -23,8 +23,7 @@ constexpr static unsigned int kRTSize = 16;
 
 class DrawQuad {
   public:
-    DrawQuad() {
-    }
+    DrawQuad() {}
     DrawQuad(wgpu::Device device, const char* vsSource, const char* fsSource) : device(device) {
         vsModule = utils::CreateShaderModule(device, vsSource);
         fsModule = utils::CreateShaderModule(device, fsSource);

@@ -19,40 +19,40 @@ namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, BodyStmt) {
-  auto p = parser(R"({
+    auto p = parser(R"({
   discard;
   return 1 + b / 2;
 })");
-  auto e = p->expect_body_stmt();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_FALSE(e.errored);
-  ASSERT_EQ(e->statements.size(), 2u);
-  EXPECT_TRUE(e->statements[0]->Is<ast::DiscardStatement>());
-  EXPECT_TRUE(e->statements[1]->Is<ast::ReturnStatement>());
+    auto e = p->expect_body_stmt();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    ASSERT_FALSE(e.errored);
+    ASSERT_EQ(e->statements.size(), 2u);
+    EXPECT_TRUE(e->statements[0]->Is<ast::DiscardStatement>());
+    EXPECT_TRUE(e->statements[1]->Is<ast::ReturnStatement>());
 }
 
 TEST_F(ParserImplTest, BodyStmt_Empty) {
-  auto p = parser("{}");
-  auto e = p->expect_body_stmt();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_FALSE(e.errored);
-  EXPECT_EQ(e->statements.size(), 0u);
+    auto p = parser("{}");
+    auto e = p->expect_body_stmt();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    ASSERT_FALSE(e.errored);
+    EXPECT_EQ(e->statements.size(), 0u);
 }
 
 TEST_F(ParserImplTest, BodyStmt_InvalidStmt) {
-  auto p = parser("{fn main() {}}");
-  auto e = p->expect_body_stmt();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(e.errored);
-  EXPECT_EQ(p->error(), "1:2: expected '}'");
+    auto p = parser("{fn main() {}}");
+    auto e = p->expect_body_stmt();
+    ASSERT_TRUE(p->has_error());
+    ASSERT_TRUE(e.errored);
+    EXPECT_EQ(p->error(), "1:2: expected '}'");
 }
 
 TEST_F(ParserImplTest, BodyStmt_MissingRightParen) {
-  auto p = parser("{return;");
-  auto e = p->expect_body_stmt();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(e.errored);
-  EXPECT_EQ(p->error(), "1:9: expected '}'");
+    auto p = parser("{return;");
+    auto e = p->expect_body_stmt();
+    ASSERT_TRUE(p->has_error());
+    ASSERT_TRUE(e.errored);
+    EXPECT_EQ(p->error(), "1:9: expected '}'");
 }
 
 }  // namespace

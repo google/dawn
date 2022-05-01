@@ -22,22 +22,22 @@ namespace {
 using AstExternalTextureTest = TestHelper;
 
 TEST_F(AstExternalTextureTest, IsTexture) {
-  Texture* ty = create<ExternalTexture>();
-  EXPECT_FALSE(ty->Is<DepthTexture>());
-  EXPECT_TRUE(ty->Is<ExternalTexture>());
-  EXPECT_FALSE(ty->Is<MultisampledTexture>());
-  EXPECT_FALSE(ty->Is<SampledTexture>());
-  EXPECT_FALSE(ty->Is<StorageTexture>());
+    Texture* ty = create<ExternalTexture>();
+    EXPECT_FALSE(ty->Is<DepthTexture>());
+    EXPECT_TRUE(ty->Is<ExternalTexture>());
+    EXPECT_FALSE(ty->Is<MultisampledTexture>());
+    EXPECT_FALSE(ty->Is<SampledTexture>());
+    EXPECT_FALSE(ty->Is<StorageTexture>());
 }
 
 TEST_F(AstExternalTextureTest, Dim) {
-  auto* ty = create<ExternalTexture>();
-  EXPECT_EQ(ty->dim, ast::TextureDimension::k2d);
+    auto* ty = create<ExternalTexture>();
+    EXPECT_EQ(ty->dim, ast::TextureDimension::k2d);
 }
 
 TEST_F(AstExternalTextureTest, FriendlyName) {
-  auto* ty = create<ExternalTexture>();
-  EXPECT_EQ(ty->FriendlyName(Symbols()), "texture_external");
+    auto* ty = create<ExternalTexture>();
+    EXPECT_EQ(ty->FriendlyName(Symbols()), "texture_external");
 }
 
 }  // namespace

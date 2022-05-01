@@ -25,33 +25,33 @@
 
 namespace dawn::native::d3d12 {
 
-    class Device;
+class Device;
 
-    class CommandAllocatorManager {
-      public:
-        explicit CommandAllocatorManager(Device* device);
+class CommandAllocatorManager {
+  public:
+    explicit CommandAllocatorManager(Device* device);
 
-        // A CommandAllocator that is reserved must be used on the next ExecuteCommandLists
-        // otherwise its commands may be reset before execution has completed on the GPU
-        ResultOrError<ID3D12CommandAllocator*> ReserveCommandAllocator();
-        MaybeError Tick(ExecutionSerial lastCompletedSerial);
+    // A CommandAllocator that is reserved must be used on the next ExecuteCommandLists
+    // otherwise its commands may be reset before execution has completed on the GPU
+    ResultOrError<ID3D12CommandAllocator*> ReserveCommandAllocator();
+    MaybeError Tick(ExecutionSerial lastCompletedSerial);
 
-      private:
-        Device* device;
+  private:
+    Device* device;
 
-        // This must be at least 2 because the Device and Queue use separate command allocators
-        static constexpr unsigned int kMaxCommandAllocators = 32;
-        unsigned int mAllocatorCount;
+    // This must be at least 2 because the Device and Queue use separate command allocators
+    static constexpr unsigned int kMaxCommandAllocators = 32;
+    unsigned int mAllocatorCount;
 
-        struct IndexedCommandAllocator {
-            ComPtr<ID3D12CommandAllocator> commandAllocator;
-            unsigned int index;
-        };
-
-        ComPtr<ID3D12CommandAllocator> mCommandAllocators[kMaxCommandAllocators];
-        std::bitset<kMaxCommandAllocators> mFreeAllocators;
-        SerialQueue<ExecutionSerial, IndexedCommandAllocator> mInFlightCommandAllocators;
+    struct IndexedCommandAllocator {
+        ComPtr<ID3D12CommandAllocator> commandAllocator;
+        unsigned int index;
     };
+
+    ComPtr<ID3D12CommandAllocator> mCommandAllocators[kMaxCommandAllocators];
+    std::bitset<kMaxCommandAllocators> mFreeAllocators;
+    SerialQueue<ExecutionSerial, IndexedCommandAllocator> mInFlightCommandAllocators;
+};
 
 }  // namespace dawn::native::d3d12
 

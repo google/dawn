@@ -21,14 +21,14 @@ namespace tint::sem {
 
 /// TypeConstructor is the CallTarget for a type constructor.
 class TypeConstructor final : public Castable<TypeConstructor, CallTarget> {
- public:
-  /// Constructor
-  /// @param type the type that's being constructed
-  /// @param parameters the type constructor parameters
-  TypeConstructor(const sem::Type* type, const ParameterList& parameters);
+  public:
+    /// Constructor
+    /// @param type the type that's being constructed
+    /// @param parameters the type constructor parameters
+    TypeConstructor(const sem::Type* type, const ParameterList& parameters);
 
-  /// Destructor
-  ~TypeConstructor() override;
+    /// Destructor
+    ~TypeConstructor() override;
 };
 
 }  // namespace tint::sem

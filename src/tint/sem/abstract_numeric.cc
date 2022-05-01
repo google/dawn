@@ -23,15 +23,15 @@ AbstractNumeric::AbstractNumeric(AbstractNumeric&&) = default;
 AbstractNumeric::~AbstractNumeric() = default;
 
 uint32_t AbstractNumeric::Size() const {
-  return 0;
+    return 0;
 }
 
 uint32_t AbstractNumeric::Align() const {
-  return 0;
+    return 0;
 }
 
 bool AbstractNumeric::IsConstructible() const {
-  return false;
+    return false;
 }
 
 }  // namespace tint::sem

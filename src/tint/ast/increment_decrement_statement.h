@@ -21,33 +21,29 @@
 namespace tint::ast {
 
 /// An increment or decrement statement
-class IncrementDecrementStatement final
-    : public Castable<IncrementDecrementStatement, Statement> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param lhs the LHS expression
-  /// @param inc `true` for increment, `false` for decrement
-  IncrementDecrementStatement(ProgramID pid,
-                              const Source& src,
-                              const Expression* lhs,
-                              bool inc);
-  /// Move constructor
-  IncrementDecrementStatement(IncrementDecrementStatement&&);
-  ~IncrementDecrementStatement() override;
+class IncrementDecrementStatement final : public Castable<IncrementDecrementStatement, Statement> {
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param lhs the LHS expression
+    /// @param inc `true` for increment, `false` for decrement
+    IncrementDecrementStatement(ProgramID pid, const Source& src, const Expression* lhs, bool inc);
+    /// Move constructor
+    IncrementDecrementStatement(IncrementDecrementStatement&&);
+    ~IncrementDecrementStatement() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const IncrementDecrementStatement* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const IncrementDecrementStatement* Clone(CloneContext* ctx) const override;
 
-  /// The LHS expression.
-  const Expression* const lhs;
+    /// The LHS expression.
+    const Expression* const lhs;
 
-  /// `true` for increment, `false` for decrement.
-  bool increment;
+    /// `true` for increment, `false` for decrement.
+    bool increment;
 };
 
 }  // namespace tint::ast

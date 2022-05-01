@@ -1,8 +1,5 @@
 # http://clang.llvm.org/docs/ClangFormatStyleOptions.html
 BasedOnStyle: Chromium
-Standard: Cpp11
-
-AllowShortFunctionsOnASingleLine: false
 
 ColumnLimit: 100
 
@@ -11,10 +8,3 @@ IndentWidth: 4
 ObjCBlockIndentWidth: 4
 AccessModifierOffset: -2
 
-CompactNamespaces: true
-
-# This should result in only one indentation level with compacted namespaces
-NamespaceIndentation: All
-
-# Use this option once clang-format 6 is out.
-IndentPPDirectives: AfterHash

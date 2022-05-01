@@ -22,35 +22,35 @@ namespace {
 using DecomposeMemoryAccessTest = TransformTest;
 
 TEST_F(DecomposeMemoryAccessTest, ShouldRunEmptyModule) {
-  auto* src = R"()";
+    auto* src = R"()";
 
-  EXPECT_FALSE(ShouldRun<DecomposeMemoryAccess>(src));
+    EXPECT_FALSE(ShouldRun<DecomposeMemoryAccess>(src));
 }
 
 TEST_F(DecomposeMemoryAccessTest, ShouldRunStorageBuffer) {
-  auto* src = R"(
+    auto* src = R"(
 struct Buffer {
   i : i32,
 };
 @group(0) @binding(0) var<storage, read_write> sb : Buffer;
 )";
 
-  EXPECT_TRUE(ShouldRun<DecomposeMemoryAccess>(src));
+    EXPECT_TRUE(ShouldRun<DecomposeMemoryAccess>(src));
 }
 
 TEST_F(DecomposeMemoryAccessTest, ShouldRunUniformBuffer) {
-  auto* src = R"(
+    auto* src = R"(
 struct Buffer {
   i : i32,
 };
 @group(0) @binding(0) var<uniform> ub : Buffer;
 )";
 
-  EXPECT_TRUE(ShouldRun<DecomposeMemoryAccess>(src));
+    EXPECT_TRUE(ShouldRun<DecomposeMemoryAccess>(src));
 }
 
 TEST_F(DecomposeMemoryAccessTest, SB_BasicLoad) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB {
   a : i32,
   b : u32,
@@ -105,7 +105,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct SB {
   a : i32,
   b : u32,
@@ -240,13 +240,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, SB_BasicLoad_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main() {
   var a : i32 = sb.a;
@@ -301,7 +301,7 @@ struct SB {
 };
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_load_storage_i32) @internal(disable_validation__function_has_no_body)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> i32
 
@@ -436,13 +436,13 @@ struct SB {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, UB_BasicLoad) {
-  auto* src = R"(
+    auto* src = R"(
 struct UB {
   a : i32,
   b : u32,
@@ -497,7 +497,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct UB {
   a : i32,
   b : u32,
@@ -632,13 +632,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, UB_BasicLoad_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main() {
   var a : i32 = ub.a;
@@ -693,7 +693,7 @@ struct UB {
 };
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_load_uniform_i32) @internal(disable_validation__function_has_no_body)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : UB, offset : u32) -> i32
 
@@ -828,13 +828,13 @@ struct UB {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, SB_BasicStore) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB {
   a : i32,
   b : u32,
@@ -889,7 +889,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct SB {
   a : i32,
   b : u32,
@@ -1041,13 +1041,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, SB_BasicStore_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main() {
   sb.a = i32();
@@ -1102,7 +1102,7 @@ struct SB {
 };
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_store_storage_i32) @internal(disable_validation__function_has_no_body)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, value : i32)
 
@@ -1254,13 +1254,13 @@ struct SB {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, LoadStructure) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB {
   a : i32,
   b : u32,
@@ -1294,7 +1294,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct SB {
   a : i32,
   b : u32,
@@ -1412,13 +1412,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, LoadStructure_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main() {
   var x : SB = sb;
@@ -1452,7 +1452,7 @@ struct SB {
 };
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_load_storage_i32) @internal(disable_validation__function_has_no_body)
 fn tint_symbol_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> i32
 
@@ -1570,13 +1570,13 @@ struct SB {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, StoreStructure) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB {
   a : i32,
   b : u32,
@@ -1610,7 +1610,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct SB {
   a : i32,
   b : u32,
@@ -1766,13 +1766,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, StoreStructure_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main() {
   sb = SB();
@@ -1806,7 +1806,7 @@ struct SB {
 };
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_store_storage_i32) @internal(disable_validation__function_has_no_body)
 fn tint_symbol_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, value : i32)
 
@@ -1962,13 +1962,13 @@ struct SB {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, ComplexStaticAccessChain) {
-  auto* src = R"(
+    auto* src = R"(
 // sizeof(S1) == 32
 // alignof(S1) == 16
 struct S1 {
@@ -1999,14 +1999,14 @@ fn main() {
 }
 )";
 
-  // sb.b[4].b[1].b.z
-  //    ^  ^ ^  ^ ^ ^
-  //    |  | |  | | |
-  //  128  | |688 | 712
-  //       | |    |
-  //     640 656  704
+    // sb.b[4].b[1].b.z
+    //    ^  ^ ^  ^ ^ ^
+    //    |  | |  | | |
+    //  128  | |688 | 712
+    //       | |    |
+    //     640 656  704
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct S1 {
   a : i32,
   b : vec3<f32>,
@@ -2036,13 +2036,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, ComplexStaticAccessChain_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main() {
   var x : f32 = sb.b[4].b[1].b.z;
@@ -2069,14 +2069,14 @@ struct S1 {
 };
 )";
 
-  // sb.b[4].b[1].b.z
-  //    ^  ^ ^  ^ ^ ^
-  //    |  | |  | | |
-  //  128  | |688 | 712
-  //       | |    |
-  //     640 656  704
+    // sb.b[4].b[1].b.z
+    //    ^  ^ ^  ^ ^ ^
+    //    |  | |  | | |
+    //  128  | |688 | 712
+    //       | |    |
+    //     640 656  704
 
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_load_storage_f32) @internal(disable_validation__function_has_no_body)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> f32
 
@@ -2106,13 +2106,13 @@ struct S1 {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, ComplexDynamicAccessChain) {
-  auto* src = R"(
+    auto* src = R"(
 struct S1 {
   a : i32,
   b : vec3<f32>,
@@ -2142,7 +2142,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct S1 {
   a : i32,
   b : vec3<f32>,
@@ -2175,13 +2175,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, ComplexDynamicAccessChain_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main() {
   var i : i32 = 4;
@@ -2211,7 +2211,7 @@ struct S1 {
 };
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_load_storage_f32) @internal(disable_validation__function_has_no_body)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> f32
 
@@ -2244,13 +2244,13 @@ struct S1 {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, ComplexDynamicAccessChainWithAliases) {
-  auto* src = R"(
+    auto* src = R"(
 struct S1 {
   a : i32,
   b : vec3<f32>,
@@ -2288,7 +2288,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct S1 {
   a : i32,
   b : vec3<f32>,
@@ -2329,14 +2329,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(DecomposeMemoryAccessTest,
-       ComplexDynamicAccessChainWithAliases_OutOfOrder) {
-  auto* src = R"(
+TEST_F(DecomposeMemoryAccessTest, ComplexDynamicAccessChainWithAliases_OutOfOrder) {
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main() {
   var i : i32 = 4;
@@ -2374,7 +2373,7 @@ struct S1 {
 };
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_load_storage_f32) @internal(disable_validation__function_has_no_body)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> f32
 
@@ -2415,13 +2414,13 @@ struct S1 {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, StorageBufferAtomics) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB {
   padding : vec4<f32>,
   a : atomic<i32>,
@@ -2458,7 +2457,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct SB {
   padding : vec4<f32>,
   a : atomic<i32>,
@@ -2560,13 +2559,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, StorageBufferAtomics_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main() {
   atomicStore(&sb.a, 123);
@@ -2603,7 +2602,7 @@ struct SB {
 };
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_atomic_store_storage_i32) @internal(disable_validation__function_has_no_body)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32)
 
@@ -2705,13 +2704,13 @@ struct SB {
 }
 )";
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, WorkgroupBufferAtomics) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   padding : vec4<f32>,
   a : atomic<i32>,
@@ -2747,15 +2746,15 @@ fn main() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(DecomposeMemoryAccessTest, WorkgroupBufferAtomics_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main() {
   atomicStore(&(w.a), 123);
@@ -2791,11 +2790,11 @@ struct S {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<DecomposeMemoryAccess>(src);
+    auto got = Run<DecomposeMemoryAccess>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

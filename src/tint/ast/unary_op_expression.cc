@@ -25,8 +25,8 @@ UnaryOpExpression::UnaryOpExpression(ProgramID pid,
                                      UnaryOp o,
                                      const Expression* e)
     : Base(pid, src), op(o), expr(e) {
-  TINT_ASSERT(AST, expr);
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, expr, program_id);
+    TINT_ASSERT(AST, expr);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, expr, program_id);
 }
 
 UnaryOpExpression::UnaryOpExpression(UnaryOpExpression&&) = default;
@@ -34,10 +34,10 @@ UnaryOpExpression::UnaryOpExpression(UnaryOpExpression&&) = default;
 UnaryOpExpression::~UnaryOpExpression() = default;
 
 const UnaryOpExpression* UnaryOpExpression::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  auto* e = ctx->Clone(expr);
-  return ctx->dst->create<UnaryOpExpression>(src, op, e);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    auto* e = ctx->Clone(expr);
+    return ctx->dst->create<UnaryOpExpression>(src, op, e);
 }
 
 }  // namespace tint::ast

@@ -17,47 +17,46 @@
 
 namespace dawn::wire {
 
-    using testing::Return;
-    using testing::Sequence;
+using testing::Return;
+using testing::Sequence;
 
-    class WireDestroyObjectTests : public WireTest {};
+class WireDestroyObjectTests : public WireTest {};
 
-    // Test that destroying the device also destroys child objects.
-    TEST_F(WireDestroyObjectTests, DestroyDeviceDestroysChildren) {
-        WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
+// Test that destroying the device also destroys child objects.
+TEST_F(WireDestroyObjectTests, DestroyDeviceDestroysChildren) {
+    WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
 
-        WGPUCommandEncoder apiEncoder = api.GetNewCommandEncoder();
-        EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
-            .WillOnce(Return(apiEncoder));
+    WGPUCommandEncoder apiEncoder = api.GetNewCommandEncoder();
+    EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr)).WillOnce(Return(apiEncoder));
 
-        FlushClient();
+    FlushClient();
 
-        // Release the device. It should cause the command encoder to be destroyed.
-        wgpuDeviceRelease(device);
+    // Release the device. It should cause the command encoder to be destroyed.
+    wgpuDeviceRelease(device);
 
-        Sequence s1, s2;
-        // The device and child objects should be released.
-        EXPECT_CALL(api, CommandEncoderRelease(apiEncoder)).InSequence(s1);
-        EXPECT_CALL(api, QueueRelease(apiQueue)).InSequence(s2);
-        EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr))
-            .Times(1)
-            .InSequence(s1, s2);
-        EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr))
-            .Times(1)
-            .InSequence(s1, s2);
-        EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, nullptr, nullptr))
-            .Times(1)
-            .InSequence(s1, s2);
-        EXPECT_CALL(api, DeviceRelease(apiDevice)).InSequence(s1, s2);
+    Sequence s1, s2;
+    // The device and child objects should be released.
+    EXPECT_CALL(api, CommandEncoderRelease(apiEncoder)).InSequence(s1);
+    EXPECT_CALL(api, QueueRelease(apiQueue)).InSequence(s2);
+    EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr))
+        .Times(1)
+        .InSequence(s1, s2);
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr))
+        .Times(1)
+        .InSequence(s1, s2);
+    EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, nullptr, nullptr))
+        .Times(1)
+        .InSequence(s1, s2);
+    EXPECT_CALL(api, DeviceRelease(apiDevice)).InSequence(s1, s2);
 
-        FlushClient();
+    FlushClient();
 
-        // Signal that we already released and cleared callbacks for |apiDevice|
-        DefaultApiDeviceWasReleased();
+    // Signal that we already released and cleared callbacks for |apiDevice|
+    DefaultApiDeviceWasReleased();
 
-        // Using the command encoder should be an error.
-        wgpuCommandEncoderFinish(encoder, nullptr);
-        FlushClient(false);
-    }
+    // Using the command encoder should be an error.
+    wgpuCommandEncoderFinish(encoder, nullptr);
+    FlushClient(false);
+}
 
 }  // namespace dawn::wire

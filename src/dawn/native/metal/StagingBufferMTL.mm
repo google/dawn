@@ -17,30 +17,29 @@
 
 namespace dawn::native::metal {
 
-    StagingBuffer::StagingBuffer(size_t size, Device* device)
-        : StagingBufferBase(size), mDevice(device) {
+StagingBuffer::StagingBuffer(size_t size, Device* device)
+    : StagingBufferBase(size), mDevice(device) {}
+
+MaybeError StagingBuffer::Initialize() {
+    const size_t bufferSize = GetSize();
+    mBuffer =
+        AcquireNSPRef([mDevice->GetMTLDevice() newBufferWithLength:bufferSize
+                                                           options:MTLResourceStorageModeShared]);
+
+    if (mBuffer == nullptr) {
+        return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
     }
 
-    MaybeError StagingBuffer::Initialize() {
-        const size_t bufferSize = GetSize();
-        mBuffer = AcquireNSPRef([mDevice->GetMTLDevice()
-            newBufferWithLength:bufferSize
-                        options:MTLResourceStorageModeShared]);
-
-        if (mBuffer == nullptr) {
-            return DAWN_OUT_OF_MEMORY_ERROR("Unable to allocate buffer.");
-        }
-
-        mMappedPointer = [*mBuffer contents];
-        if (mMappedPointer == nullptr) {
-            return DAWN_INTERNAL_ERROR("Unable to map staging buffer.");
-        }
-
-        return {};
+    mMappedPointer = [*mBuffer contents];
+    if (mMappedPointer == nullptr) {
+        return DAWN_INTERNAL_ERROR("Unable to map staging buffer.");
     }
 
-    id<MTLBuffer> StagingBuffer::GetBufferHandle() const {
-        return mBuffer.Get();
-    }
+    return {};
+}
+
+id<MTLBuffer> StagingBuffer::GetBufferHandle() const {
+    return mBuffer.Get();
+}
 
 }  // namespace dawn::native::metal

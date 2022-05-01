@@ -20,9 +20,9 @@ namespace {
 using FloatLiteralExpressionTest = TestHelper;
 
 TEST_F(FloatLiteralExpressionTest, Value) {
-  auto* f = create<FloatLiteralExpression>(47.2f);
-  ASSERT_TRUE(f->Is<FloatLiteralExpression>());
-  EXPECT_EQ(f->value, 47.2f);
+    auto* f = create<FloatLiteralExpression>(47.2f);
+    ASSERT_TRUE(f->Is<FloatLiteralExpression>());
+    EXPECT_EQ(f->value, 47.2f);
 }
 
 }  // namespace

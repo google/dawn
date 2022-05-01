@@ -22,18 +22,15 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::FloatLiteralExpression);
 
 namespace tint::ast {
 
-FloatLiteralExpression::FloatLiteralExpression(ProgramID pid,
-                                               const Source& src,
-                                               float val)
+FloatLiteralExpression::FloatLiteralExpression(ProgramID pid, const Source& src, float val)
     : Base(pid, src), value(val) {}
 
 FloatLiteralExpression::~FloatLiteralExpression() = default;
 
-const FloatLiteralExpression* FloatLiteralExpression::Clone(
-    CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<FloatLiteralExpression>(src, value);
+const FloatLiteralExpression* FloatLiteralExpression::Clone(CloneContext* ctx) const {
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<FloatLiteralExpression>(src, value);
 }
 
 }  // namespace tint::ast

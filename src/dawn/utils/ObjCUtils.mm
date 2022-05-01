@@ -18,8 +18,8 @@
 
 namespace utils {
 
-    void* CreatePlaceholderCALayer() {
-        return [CALayer layer];
-    }
+void* CreatePlaceholderCALayer() {
+    return [CALayer layer];
+}
 
 }  // namespace utils

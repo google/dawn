@@ -15,24 +15,24 @@
 #include <cmath>
 #include <vector>
 
-#include "gtest/gtest.h"
 #include "dawn/EnumClassBitmasks.h"
 #include "dawn/common/Math.h"
 #include "dawn/webgpu_cpp.h"
+#include "gtest/gtest.h"
 
 namespace wgpu {
-    enum class TestEnum {
-        A = 0x1,
-        B = 0x2,
-        C = 0x4,
-    };
+enum class TestEnum {
+    A = 0x1,
+    B = 0x2,
+    C = 0x4,
+};
 }  // namespace wgpu
 
 namespace dawn {
-    template <>
-    struct IsDawnBitmask<wgpu::TestEnum> {
-        static constexpr bool enable = true;
-    };
+template <>
+struct IsDawnBitmask<wgpu::TestEnum> {
+    static constexpr bool enable = true;
+};
 }  // namespace dawn
 
 // Tests for ScanForward

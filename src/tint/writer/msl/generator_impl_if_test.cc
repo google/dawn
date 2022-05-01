@@ -20,33 +20,33 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_If) {
-  auto* cond = Var("cond", ty.bool_());
-  auto* i = If(cond, Block(Return()));
-  WrapInFunction(cond, i);
+    auto* cond = Var("cond", ty.bool_());
+    auto* i = If(cond, Block(Return()));
+    WrapInFunction(cond, i);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  if (cond) {
+    ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   }
 )");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_IfWithElseIf) {
-  auto* cond = Var("cond", ty.bool_());
-  auto* else_cond = Var("else_cond", ty.bool_());
-  auto* i = If(cond, Block(Return()), If(else_cond, Block(Return())));
-  WrapInFunction(cond, else_cond, i);
+    auto* cond = Var("cond", ty.bool_());
+    auto* else_cond = Var("else_cond", ty.bool_());
+    auto* i = If(cond, Block(Return()), If(else_cond, Block(Return())));
+    WrapInFunction(cond, else_cond, i);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  if (cond) {
+    ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   } else {
     if (else_cond) {
@@ -57,16 +57,16 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElseIf) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_IfWithElse) {
-  auto* cond = Var("cond", ty.bool_());
-  auto* i = If(cond, Block(Return()), Block(Return()));
-  WrapInFunction(cond, i);
+    auto* cond = Var("cond", ty.bool_());
+    auto* i = If(cond, Block(Return()), Block(Return()));
+    WrapInFunction(cond, i);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  if (cond) {
+    ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   } else {
     return;
@@ -75,18 +75,17 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElse) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_IfWithMultiple) {
-  auto* cond = Var("cond", ty.bool_());
-  auto* else_cond = Var("else_cond", ty.bool_());
-  auto* i = If(cond, Block(Return()),
-               If(else_cond, Block(Return()), Block(Return())));
-  WrapInFunction(cond, else_cond, i);
+    auto* cond = Var("cond", ty.bool_());
+    auto* else_cond = Var("else_cond", ty.bool_());
+    auto* i = If(cond, Block(Return()), If(else_cond, Block(Return()), Block(Return())));
+    WrapInFunction(cond, else_cond, i);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  if (cond) {
+    ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  if (cond) {
     return;
   } else {
     if (else_cond) {

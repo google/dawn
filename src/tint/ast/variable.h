@@ -35,14 +35,14 @@ namespace tint::ast {
 
 /// VariableBindingPoint holds a group and binding attribute.
 struct VariableBindingPoint {
-  /// The `@group` part of the binding point
-  const GroupAttribute* group = nullptr;
-  /// The `@binding` part of the binding point
-  const BindingAttribute* binding = nullptr;
+    /// The `@group` part of the binding point
+    const GroupAttribute* group = nullptr;
+    /// The `@binding` part of the binding point
+    const BindingAttribute* binding = nullptr;
 
-  /// @returns true if the BindingPoint has a valid group and binding
-  /// attribute.
-  inline operator bool() const { return group && binding; }
+    /// @returns true if the BindingPoint has a valid group and binding
+    /// attribute.
+    inline operator bool() const { return group && binding; }
 };
 
 /// A Variable statement.
@@ -115,67 +115,67 @@ struct VariableBindingPoint {
 ///   - "let" is always StorageClass::kNone.
 ///   - formal parameter is always StorageClass::kNone.
 class Variable final : public Castable<Variable, Node> {
- public:
-  /// Create a variable
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the variable source
-  /// @param sym the variable symbol
-  /// @param declared_storage_class the declared storage class
-  /// @param declared_access the declared access control
-  /// @param type the declared variable type
-  /// @param is_const true if the variable is const
-  /// @param is_overridable true if the variable is pipeline-overridable
-  /// @param constructor the constructor expression
-  /// @param attributes the variable attributes
-  Variable(ProgramID program_id,
-           const Source& source,
-           const Symbol& sym,
-           StorageClass declared_storage_class,
-           Access declared_access,
-           const ast::Type* type,
-           bool is_const,
-           bool is_overridable,
-           const Expression* constructor,
-           AttributeList attributes);
-  /// Move constructor
-  Variable(Variable&&);
+  public:
+    /// Create a variable
+    /// @param program_id the identifier of the program that owns this node
+    /// @param source the variable source
+    /// @param sym the variable symbol
+    /// @param declared_storage_class the declared storage class
+    /// @param declared_access the declared access control
+    /// @param type the declared variable type
+    /// @param is_const true if the variable is const
+    /// @param is_overridable true if the variable is pipeline-overridable
+    /// @param constructor the constructor expression
+    /// @param attributes the variable attributes
+    Variable(ProgramID program_id,
+             const Source& source,
+             const Symbol& sym,
+             StorageClass declared_storage_class,
+             Access declared_access,
+             const ast::Type* type,
+             bool is_const,
+             bool is_overridable,
+             const Expression* constructor,
+             AttributeList attributes);
+    /// Move constructor
+    Variable(Variable&&);
 
-  ~Variable() override;
+    ~Variable() override;
 
-  /// @returns the binding point information for the variable
-  VariableBindingPoint BindingPoint() const;
+    /// @returns the binding point information for the variable
+    VariableBindingPoint BindingPoint() const;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const Variable* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const Variable* Clone(CloneContext* ctx) const override;
 
-  /// The variable symbol
-  const Symbol symbol;
+    /// The variable symbol
+    const Symbol symbol;
 
-  /// The declared variable type. This is null if the type is inferred, e.g.:
-  ///   let f = 1.0;
-  ///   var i = 1;
-  const ast::Type* const type;
+    /// The declared variable type. This is null if the type is inferred, e.g.:
+    ///   let f = 1.0;
+    ///   var i = 1;
+    const ast::Type* const type;
 
-  /// True if this is a constant, false otherwise
-  const bool is_const;
+    /// True if this is a constant, false otherwise
+    const bool is_const;
 
-  /// True if this is a pipeline-overridable constant, false otherwise
-  const bool is_overridable;
+    /// True if this is a pipeline-overridable constant, false otherwise
+    const bool is_overridable;
 
-  /// The constructor expression or nullptr if none set
-  const Expression* const constructor;
+    /// The constructor expression or nullptr if none set
+    const Expression* const constructor;
 
-  /// The attributes attached to this variable
-  const AttributeList attributes;
+    /// The attributes attached to this variable
+    const AttributeList attributes;
 
-  /// The declared storage class
-  const StorageClass declared_storage_class;
+    /// The declared storage class
+    const StorageClass declared_storage_class;
 
-  /// The declared access control
-  const Access declared_access;
+    /// The declared access control
+    const Access declared_access;
 };
 
 /// A list of variables

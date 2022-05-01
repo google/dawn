@@ -19,73 +19,72 @@
 
 #include "gmock/gmock.h"
 
-#define CHECK_ELEMENT_TYPE(vector, expected)                                 \
-  static_assert(std::is_same<decltype(vector)::value_type, expected>::value, \
-                "unexpected result vector element type")
+#define CHECK_ELEMENT_TYPE(vector, expected)                                   \
+    static_assert(std::is_same<decltype(vector)::value_type, expected>::value, \
+                  "unexpected result vector element type")
 
 namespace tint::utils {
 namespace {
 
 TEST(TransformTest, Empty) {
-  const std::vector<int> empty{};
-  {
-    auto transformed = Transform(empty, [](int) -> int {
-      [] { FAIL() << "Transform should not be called for empty vector"; }();
-      return 0;
-    });
-    CHECK_ELEMENT_TYPE(transformed, int);
-    EXPECT_EQ(transformed.size(), 0u);
-  }
-  {
-    auto transformed = Transform(empty, [](int, size_t) -> int {
-      [] { FAIL() << "Transform should not be called for empty vector"; }();
-      return 0;
-    });
-    CHECK_ELEMENT_TYPE(transformed, int);
-    EXPECT_EQ(transformed.size(), 0u);
-  }
+    const std::vector<int> empty{};
+    {
+        auto transformed = Transform(empty, [](int) -> int {
+            [] { FAIL() << "Transform should not be called for empty vector"; }();
+            return 0;
+        });
+        CHECK_ELEMENT_TYPE(transformed, int);
+        EXPECT_EQ(transformed.size(), 0u);
+    }
+    {
+        auto transformed = Transform(empty, [](int, size_t) -> int {
+            [] { FAIL() << "Transform should not be called for empty vector"; }();
+            return 0;
+        });
+        CHECK_ELEMENT_TYPE(transformed, int);
+        EXPECT_EQ(transformed.size(), 0u);
+    }
 }
 
 TEST(TransformTest, Identity) {
-  const std::vector<int> input{1, 2, 3, 4};
-  {
-    auto transformed = Transform(input, [](int i) { return i; });
-    CHECK_ELEMENT_TYPE(transformed, int);
-    EXPECT_THAT(transformed, testing::ElementsAre(1, 2, 3, 4));
-  }
-  {
-    auto transformed = Transform(input, [](int i, size_t) { return i; });
-    CHECK_ELEMENT_TYPE(transformed, int);
-    EXPECT_THAT(transformed, testing::ElementsAre(1, 2, 3, 4));
-  }
+    const std::vector<int> input{1, 2, 3, 4};
+    {
+        auto transformed = Transform(input, [](int i) { return i; });
+        CHECK_ELEMENT_TYPE(transformed, int);
+        EXPECT_THAT(transformed, testing::ElementsAre(1, 2, 3, 4));
+    }
+    {
+        auto transformed = Transform(input, [](int i, size_t) { return i; });
+        CHECK_ELEMENT_TYPE(transformed, int);
+        EXPECT_THAT(transformed, testing::ElementsAre(1, 2, 3, 4));
+    }
 }
 
 TEST(TransformTest, Index) {
-  const std::vector<int> input{10, 20, 30, 40};
-  {
-    auto transformed = Transform(input, [](int, size_t idx) { return idx; });
-    CHECK_ELEMENT_TYPE(transformed, size_t);
-    EXPECT_THAT(transformed, testing::ElementsAre(0u, 1u, 2u, 3u));
-  }
+    const std::vector<int> input{10, 20, 30, 40};
+    {
+        auto transformed = Transform(input, [](int, size_t idx) { return idx; });
+        CHECK_ELEMENT_TYPE(transformed, size_t);
+        EXPECT_THAT(transformed, testing::ElementsAre(0u, 1u, 2u, 3u));
+    }
 }
 
 TEST(TransformTest, TransformSameType) {
-  const std::vector<int> input{1, 2, 3, 4};
-  {
-    auto transformed = Transform(input, [](int i) { return i * 10; });
-    CHECK_ELEMENT_TYPE(transformed, int);
-    EXPECT_THAT(transformed, testing::ElementsAre(10, 20, 30, 40));
-  }
+    const std::vector<int> input{1, 2, 3, 4};
+    {
+        auto transformed = Transform(input, [](int i) { return i * 10; });
+        CHECK_ELEMENT_TYPE(transformed, int);
+        EXPECT_THAT(transformed, testing::ElementsAre(10, 20, 30, 40));
+    }
 }
 
 TEST(TransformTest, TransformDifferentType) {
-  const std::vector<int> input{1, 2, 3, 4};
-  {
-    auto transformed =
-        Transform(input, [](int i) { return std::to_string(i); });
-    CHECK_ELEMENT_TYPE(transformed, std::string);
-    EXPECT_THAT(transformed, testing::ElementsAre("1", "2", "3", "4"));
-  }
+    const std::vector<int> input{1, 2, 3, 4};
+    {
+        auto transformed = Transform(input, [](int i) { return std::to_string(i); });
+        CHECK_ELEMENT_TYPE(transformed, std::string);
+        EXPECT_THAT(transformed, testing::ElementsAre("1", "2", "3", "4"));
+    }
 }
 
 }  // namespace

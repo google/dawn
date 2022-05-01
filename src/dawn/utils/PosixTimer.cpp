@@ -19,56 +19,53 @@
 
 namespace utils {
 
-    namespace {
+namespace {
 
-        uint64_t GetCurrentTimeNs() {
-            struct timespec currentTime;
-            clock_gettime(CLOCK_MONOTONIC, &currentTime);
-            return currentTime.tv_sec * 1'000'000'000llu + currentTime.tv_nsec;
-        }
+uint64_t GetCurrentTimeNs() {
+    struct timespec currentTime;
+    clock_gettime(CLOCK_MONOTONIC, &currentTime);
+    return currentTime.tv_sec * 1'000'000'000llu + currentTime.tv_nsec;
+}
 
-    }  // anonymous namespace
+}  // anonymous namespace
 
-    class PosixTimer : public Timer {
-      public:
-        PosixTimer() : Timer(), mRunning(false) {
-        }
+class PosixTimer : public Timer {
+  public:
+    PosixTimer() : Timer(), mRunning(false) {}
 
-        ~PosixTimer() override = default;
+    ~PosixTimer() override = default;
 
-        void Start() override {
-            mStartTimeNs = GetCurrentTimeNs();
-            mRunning = true;
-        }
-
-        void Stop() override {
-            mStopTimeNs = GetCurrentTimeNs();
-            mRunning = false;
-        }
-
-        double GetElapsedTime() const override {
-            uint64_t endTimeNs;
-            if (mRunning) {
-                endTimeNs = GetCurrentTimeNs();
-            } else {
-                endTimeNs = mStopTimeNs;
-            }
-
-            return (endTimeNs - mStartTimeNs) * 1e-9;
-        }
-
-        double GetAbsoluteTime() override {
-            return GetCurrentTimeNs() * 1e-9;
-        }
-
-      private:
-        bool mRunning;
-        uint64_t mStartTimeNs;
-        uint64_t mStopTimeNs;
-    };
-
-    Timer* CreateTimer() {
-        return new PosixTimer();
+    void Start() override {
+        mStartTimeNs = GetCurrentTimeNs();
+        mRunning = true;
     }
+
+    void Stop() override {
+        mStopTimeNs = GetCurrentTimeNs();
+        mRunning = false;
+    }
+
+    double GetElapsedTime() const override {
+        uint64_t endTimeNs;
+        if (mRunning) {
+            endTimeNs = GetCurrentTimeNs();
+        } else {
+            endTimeNs = mStopTimeNs;
+        }
+
+        return (endTimeNs - mStartTimeNs) * 1e-9;
+    }
+
+    double GetAbsoluteTime() override { return GetCurrentTimeNs() * 1e-9; }
+
+  private:
+    bool mRunning;
+    uint64_t mStartTimeNs;
+    uint64_t mStopTimeNs;
+};
+
+Timer* CreateTimer() {
+    return new PosixTimer();
+}
 
 }  // namespace utils

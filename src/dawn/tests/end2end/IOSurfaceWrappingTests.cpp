@@ -24,88 +24,82 @@
 
 namespace {
 
-    void AddIntegerValue(CFMutableDictionaryRef dictionary, const CFStringRef key, int32_t value) {
-        CFNumberRef number = CFNumberCreate(nullptr, kCFNumberSInt32Type, &value);
-        CFDictionaryAddValue(dictionary, key, number);
-        CFRelease(number);
+void AddIntegerValue(CFMutableDictionaryRef dictionary, const CFStringRef key, int32_t value) {
+    CFNumberRef number = CFNumberCreate(nullptr, kCFNumberSInt32Type, &value);
+    CFDictionaryAddValue(dictionary, key, number);
+    CFRelease(number);
+}
+
+class ScopedIOSurfaceRef {
+  public:
+    ScopedIOSurfaceRef() : mSurface(nullptr) {}
+    explicit ScopedIOSurfaceRef(IOSurfaceRef surface) : mSurface(surface) {}
+
+    ~ScopedIOSurfaceRef() {
+        if (mSurface != nullptr) {
+            CFRelease(mSurface);
+            mSurface = nullptr;
+        }
     }
 
-    class ScopedIOSurfaceRef {
-      public:
-        ScopedIOSurfaceRef() : mSurface(nullptr) {
+    IOSurfaceRef get() const { return mSurface; }
+
+    ScopedIOSurfaceRef(ScopedIOSurfaceRef&& other) {
+        if (mSurface != nullptr) {
+            CFRelease(mSurface);
         }
-        explicit ScopedIOSurfaceRef(IOSurfaceRef surface) : mSurface(surface) {
-        }
-
-        ~ScopedIOSurfaceRef() {
-            if (mSurface != nullptr) {
-                CFRelease(mSurface);
-                mSurface = nullptr;
-            }
-        }
-
-        IOSurfaceRef get() const {
-            return mSurface;
-        }
-
-        ScopedIOSurfaceRef(ScopedIOSurfaceRef&& other) {
-            if (mSurface != nullptr) {
-                CFRelease(mSurface);
-            }
-            mSurface = other.mSurface;
-            other.mSurface = nullptr;
-        }
-
-        ScopedIOSurfaceRef& operator=(ScopedIOSurfaceRef&& other) {
-            if (mSurface != nullptr) {
-                CFRelease(mSurface);
-            }
-            mSurface = other.mSurface;
-            other.mSurface = nullptr;
-
-            return *this;
-        }
-
-        ScopedIOSurfaceRef(const ScopedIOSurfaceRef&) = delete;
-        ScopedIOSurfaceRef& operator=(const ScopedIOSurfaceRef&) = delete;
-
-      private:
-        IOSurfaceRef mSurface = nullptr;
-    };
-
-    ScopedIOSurfaceRef CreateSinglePlaneIOSurface(uint32_t width,
-                                                  uint32_t height,
-                                                  uint32_t format,
-                                                  uint32_t bytesPerElement) {
-        CFMutableDictionaryRef dict =
-            CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks,
-                                      &kCFTypeDictionaryValueCallBacks);
-        AddIntegerValue(dict, kIOSurfaceWidth, width);
-        AddIntegerValue(dict, kIOSurfaceHeight, height);
-        AddIntegerValue(dict, kIOSurfacePixelFormat, format);
-        AddIntegerValue(dict, kIOSurfaceBytesPerElement, bytesPerElement);
-
-        IOSurfaceRef ioSurface = IOSurfaceCreate(dict);
-        EXPECT_NE(nullptr, ioSurface);
-        CFRelease(dict);
-
-        return ScopedIOSurfaceRef(ioSurface);
+        mSurface = other.mSurface;
+        other.mSurface = nullptr;
     }
 
-    class IOSurfaceTestBase : public DawnTest {
-      public:
-        wgpu::Texture WrapIOSurface(const wgpu::TextureDescriptor* descriptor,
-                                    IOSurfaceRef ioSurface,
-                                    bool isInitialized = true) {
-            dawn::native::metal::ExternalImageDescriptorIOSurface externDesc;
-            externDesc.cTextureDescriptor =
-                reinterpret_cast<const WGPUTextureDescriptor*>(descriptor);
-            externDesc.ioSurface = ioSurface;
-            externDesc.isInitialized = isInitialized;
-            WGPUTexture texture = dawn::native::metal::WrapIOSurface(device.Get(), &externDesc);
-            return wgpu::Texture::Acquire(texture);
+    ScopedIOSurfaceRef& operator=(ScopedIOSurfaceRef&& other) {
+        if (mSurface != nullptr) {
+            CFRelease(mSurface);
         }
-    };
+        mSurface = other.mSurface;
+        other.mSurface = nullptr;
+
+        return *this;
+    }
+
+    ScopedIOSurfaceRef(const ScopedIOSurfaceRef&) = delete;
+    ScopedIOSurfaceRef& operator=(const ScopedIOSurfaceRef&) = delete;
+
+  private:
+    IOSurfaceRef mSurface = nullptr;
+};
+
+ScopedIOSurfaceRef CreateSinglePlaneIOSurface(uint32_t width,
+                                              uint32_t height,
+                                              uint32_t format,
+                                              uint32_t bytesPerElement) {
+    CFMutableDictionaryRef dict = CFDictionaryCreateMutable(
+        kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    AddIntegerValue(dict, kIOSurfaceWidth, width);
+    AddIntegerValue(dict, kIOSurfaceHeight, height);
+    AddIntegerValue(dict, kIOSurfacePixelFormat, format);
+    AddIntegerValue(dict, kIOSurfaceBytesPerElement, bytesPerElement);
+
+    IOSurfaceRef ioSurface = IOSurfaceCreate(dict);
+    EXPECT_NE(nullptr, ioSurface);
+    CFRelease(dict);
+
+    return ScopedIOSurfaceRef(ioSurface);
+}
+
+class IOSurfaceTestBase : public DawnTest {
+  public:
+    wgpu::Texture WrapIOSurface(const wgpu::TextureDescriptor* descriptor,
+                                IOSurfaceRef ioSurface,
+                                bool isInitialized = true) {
+        dawn::native::metal::ExternalImageDescriptorIOSurface externDesc;
+        externDesc.cTextureDescriptor = reinterpret_cast<const WGPUTextureDescriptor*>(descriptor);
+        externDesc.ioSurface = ioSurface;
+        externDesc.isInitialized = isInitialized;
+        WGPUTexture texture = dawn::native::metal::WrapIOSurface(device.Get(), &externDesc);
+        return wgpu::Texture::Acquire(texture);
+    }
+};
 
 }  // anonymous namespace
 

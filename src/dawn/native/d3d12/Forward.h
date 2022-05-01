@@ -19,50 +19,50 @@
 
 namespace dawn::native::d3d12 {
 
-    class Adapter;
-    class BindGroup;
-    class BindGroupLayout;
-    class Buffer;
-    class CommandBuffer;
-    class ComputePipeline;
-    class Device;
-    class Heap;
-    class PipelineLayout;
-    class QuerySet;
-    class Queue;
-    class RenderPipeline;
-    class Sampler;
-    class ShaderModule;
-    class StagingBuffer;
-    class SwapChain;
-    class Texture;
-    class TextureView;
+class Adapter;
+class BindGroup;
+class BindGroupLayout;
+class Buffer;
+class CommandBuffer;
+class ComputePipeline;
+class Device;
+class Heap;
+class PipelineLayout;
+class QuerySet;
+class Queue;
+class RenderPipeline;
+class Sampler;
+class ShaderModule;
+class StagingBuffer;
+class SwapChain;
+class Texture;
+class TextureView;
 
-    struct D3D12BackendTraits {
-        using AdapterType = Adapter;
-        using BindGroupType = BindGroup;
-        using BindGroupLayoutType = BindGroupLayout;
-        using BufferType = Buffer;
-        using CommandBufferType = CommandBuffer;
-        using ComputePipelineType = ComputePipeline;
-        using DeviceType = Device;
-        using PipelineLayoutType = PipelineLayout;
-        using QuerySetType = QuerySet;
-        using QueueType = Queue;
-        using RenderPipelineType = RenderPipeline;
-        using ResourceHeapType = Heap;
-        using SamplerType = Sampler;
-        using ShaderModuleType = ShaderModule;
-        using StagingBufferType = StagingBuffer;
-        using SwapChainType = SwapChain;
-        using TextureType = Texture;
-        using TextureViewType = TextureView;
-    };
+struct D3D12BackendTraits {
+    using AdapterType = Adapter;
+    using BindGroupType = BindGroup;
+    using BindGroupLayoutType = BindGroupLayout;
+    using BufferType = Buffer;
+    using CommandBufferType = CommandBuffer;
+    using ComputePipelineType = ComputePipeline;
+    using DeviceType = Device;
+    using PipelineLayoutType = PipelineLayout;
+    using QuerySetType = QuerySet;
+    using QueueType = Queue;
+    using RenderPipelineType = RenderPipeline;
+    using ResourceHeapType = Heap;
+    using SamplerType = Sampler;
+    using ShaderModuleType = ShaderModule;
+    using StagingBufferType = StagingBuffer;
+    using SwapChainType = SwapChain;
+    using TextureType = Texture;
+    using TextureViewType = TextureView;
+};
 
-    template <typename T>
-    auto ToBackend(T&& common) -> decltype(ToBackendBase<D3D12BackendTraits>(common)) {
-        return ToBackendBase<D3D12BackendTraits>(common);
-    }
+template <typename T>
+auto ToBackend(T&& common) -> decltype(ToBackendBase<D3D12BackendTraits>(common)) {
+    return ToBackendBase<D3D12BackendTraits>(common);
+}
 
 }  // namespace dawn::native::d3d12
 

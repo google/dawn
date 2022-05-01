@@ -23,29 +23,29 @@ namespace {
 using AstSampledTextureTest = TestHelper;
 
 TEST_F(AstSampledTextureTest, IsTexture) {
-  auto* f32 = create<F32>();
-  Texture* ty = create<SampledTexture>(TextureDimension::kCube, f32);
-  EXPECT_FALSE(ty->Is<DepthTexture>());
-  EXPECT_TRUE(ty->Is<SampledTexture>());
-  EXPECT_FALSE(ty->Is<StorageTexture>());
+    auto* f32 = create<F32>();
+    Texture* ty = create<SampledTexture>(TextureDimension::kCube, f32);
+    EXPECT_FALSE(ty->Is<DepthTexture>());
+    EXPECT_TRUE(ty->Is<SampledTexture>());
+    EXPECT_FALSE(ty->Is<StorageTexture>());
 }
 
 TEST_F(AstSampledTextureTest, Dim) {
-  auto* f32 = create<F32>();
-  auto* s = create<SampledTexture>(TextureDimension::k3d, f32);
-  EXPECT_EQ(s->dim, TextureDimension::k3d);
+    auto* f32 = create<F32>();
+    auto* s = create<SampledTexture>(TextureDimension::k3d, f32);
+    EXPECT_EQ(s->dim, TextureDimension::k3d);
 }
 
 TEST_F(AstSampledTextureTest, Type) {
-  auto* f32 = create<F32>();
-  auto* s = create<SampledTexture>(TextureDimension::k3d, f32);
-  EXPECT_EQ(s->type, f32);
+    auto* f32 = create<F32>();
+    auto* s = create<SampledTexture>(TextureDimension::k3d, f32);
+    EXPECT_EQ(s->type, f32);
 }
 
 TEST_F(AstSampledTextureTest, FriendlyName) {
-  auto* f32 = create<F32>();
-  auto* s = create<SampledTexture>(TextureDimension::k3d, f32);
-  EXPECT_EQ(s->FriendlyName(Symbols()), "texture_3d<f32>");
+    auto* f32 = create<F32>();
+    auto* s = create<SampledTexture>(TextureDimension::k3d, f32);
+    EXPECT_EQ(s->FriendlyName(Symbols()), "texture_3d<f32>");
 }
 
 }  // namespace

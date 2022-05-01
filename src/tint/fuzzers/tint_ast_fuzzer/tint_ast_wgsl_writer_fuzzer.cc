@@ -20,10 +20,10 @@
 namespace tint::fuzzers::ast_fuzzer {
 
 void OverrideCliParams(CliParams& cli_params) {
-  assert(cli_params.fuzzing_target == FuzzingTarget::kAll &&
-         "The fuzzing target should not have been set by a CLI parameter: it "
-         "should have its default value.");
-  cli_params.fuzzing_target = FuzzingTarget::kWgsl;
+    assert(cli_params.fuzzing_target == FuzzingTarget::kAll &&
+           "The fuzzing target should not have been set by a CLI parameter: it "
+           "should have its default value.");
+    cli_params.fuzzing_target = FuzzingTarget::kWgsl;
 }
 
 }  // namespace tint::fuzzers::ast_fuzzer

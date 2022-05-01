@@ -24,9 +24,9 @@ Atomic::Atomic(ProgramID pid, const Source& src, const Type* const subtype)
     : Base(pid, src), type(subtype) {}
 
 std::string Atomic::FriendlyName(const SymbolTable& symbols) const {
-  std::ostringstream out;
-  out << "atomic<" << type->FriendlyName(symbols) << ">";
-  return out.str();
+    std::ostringstream out;
+    out << "atomic<" << type->FriendlyName(symbols) << ">";
+    return out.str();
 }
 
 Atomic::Atomic(Atomic&&) = default;
@@ -34,10 +34,10 @@ Atomic::Atomic(Atomic&&) = default;
 Atomic::~Atomic() = default;
 
 const Atomic* Atomic::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  auto* ty = ctx->Clone(type);
-  return ctx->dst->create<Atomic>(src, ty);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    auto* ty = ctx->Clone(type);
+    return ctx->dst->create<Atomic>(src, ty);
 }
 
 }  // namespace tint::ast

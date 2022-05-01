@@ -19,8 +19,8 @@ import("../../../tint_overrides_with_defaults.gni")
 # To run the fuzzers outside of Chromium, use the CMake based builds.
 
 if (build_with_chromium) {
-  import("../../../scripts/dawn_overrides_with_defaults.gni")
   import("//testing/libfuzzer/fuzzer_test.gni")
+  import("../../../scripts/dawn_overrides_with_defaults.gni")
 
   fuzzer_corpus_wgsl_dir = "${target_gen_dir}/fuzzer_corpus_wgsl"
   fuzzer_corpus_wgsl_stamp = "${fuzzer_corpus_wgsl_dir}.stamp"

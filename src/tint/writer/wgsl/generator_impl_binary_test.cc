@@ -18,62 +18,60 @@ namespace tint::writer::wgsl {
 namespace {
 
 struct BinaryData {
-  const char* result;
-  ast::BinaryOp op;
+    const char* result;
+    ast::BinaryOp op;
 };
 inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
-  out << data.op;
-  return out;
+    out << data.op;
+    return out;
 }
 using WgslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(WgslBinaryTest, Emit) {
-  auto params = GetParam();
+    auto params = GetParam();
 
-  auto op_ty = [&]() -> const ast::Type* {
-    if (params.op == ast::BinaryOp::kLogicalAnd ||
-        params.op == ast::BinaryOp::kLogicalOr) {
-      return ty.bool_();
-    } else {
-      return ty.u32();
-    }
-  };
+    auto op_ty = [&]() -> const ast::Type* {
+        if (params.op == ast::BinaryOp::kLogicalAnd || params.op == ast::BinaryOp::kLogicalOr) {
+            return ty.bool_();
+        } else {
+            return ty.u32();
+        }
+    };
 
-  Global("left", op_ty(), ast::StorageClass::kPrivate);
-  Global("right", op_ty(), ast::StorageClass::kPrivate);
-  auto* left = Expr("left");
-  auto* right = Expr("right");
+    Global("left", op_ty(), ast::StorageClass::kPrivate);
+    Global("right", op_ty(), ast::StorageClass::kPrivate);
+    auto* left = Expr("left");
+    auto* right = Expr("right");
 
-  auto* expr = create<ast::BinaryExpression>(params.op, left, right);
-  WrapInFunction(expr);
+    auto* expr = create<ast::BinaryExpression>(params.op, left, right);
+    WrapInFunction(expr);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-  EXPECT_EQ(out.str(), params.result);
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
     WgslBinaryTest,
-    testing::Values(
-        BinaryData{"(left & right)", ast::BinaryOp::kAnd},
-        BinaryData{"(left | right)", ast::BinaryOp::kOr},
-        BinaryData{"(left ^ right)", ast::BinaryOp::kXor},
-        BinaryData{"(left && right)", ast::BinaryOp::kLogicalAnd},
-        BinaryData{"(left || right)", ast::BinaryOp::kLogicalOr},
-        BinaryData{"(left == right)", ast::BinaryOp::kEqual},
-        BinaryData{"(left != right)", ast::BinaryOp::kNotEqual},
-        BinaryData{"(left < right)", ast::BinaryOp::kLessThan},
-        BinaryData{"(left > right)", ast::BinaryOp::kGreaterThan},
-        BinaryData{"(left <= right)", ast::BinaryOp::kLessThanEqual},
-        BinaryData{"(left >= right)", ast::BinaryOp::kGreaterThanEqual},
-        BinaryData{"(left << right)", ast::BinaryOp::kShiftLeft},
-        BinaryData{"(left >> right)", ast::BinaryOp::kShiftRight},
-        BinaryData{"(left + right)", ast::BinaryOp::kAdd},
-        BinaryData{"(left - right)", ast::BinaryOp::kSubtract},
-        BinaryData{"(left * right)", ast::BinaryOp::kMultiply},
-        BinaryData{"(left / right)", ast::BinaryOp::kDivide},
-        BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
+    testing::Values(BinaryData{"(left & right)", ast::BinaryOp::kAnd},
+                    BinaryData{"(left | right)", ast::BinaryOp::kOr},
+                    BinaryData{"(left ^ right)", ast::BinaryOp::kXor},
+                    BinaryData{"(left && right)", ast::BinaryOp::kLogicalAnd},
+                    BinaryData{"(left || right)", ast::BinaryOp::kLogicalOr},
+                    BinaryData{"(left == right)", ast::BinaryOp::kEqual},
+                    BinaryData{"(left != right)", ast::BinaryOp::kNotEqual},
+                    BinaryData{"(left < right)", ast::BinaryOp::kLessThan},
+                    BinaryData{"(left > right)", ast::BinaryOp::kGreaterThan},
+                    BinaryData{"(left <= right)", ast::BinaryOp::kLessThanEqual},
+                    BinaryData{"(left >= right)", ast::BinaryOp::kGreaterThanEqual},
+                    BinaryData{"(left << right)", ast::BinaryOp::kShiftLeft},
+                    BinaryData{"(left >> right)", ast::BinaryOp::kShiftRight},
+                    BinaryData{"(left + right)", ast::BinaryOp::kAdd},
+                    BinaryData{"(left - right)", ast::BinaryOp::kSubtract},
+                    BinaryData{"(left * right)", ast::BinaryOp::kMultiply},
+                    BinaryData{"(left / right)", ast::BinaryOp::kDivide},
+                    BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
 
 }  // namespace
 }  // namespace tint::writer::wgsl

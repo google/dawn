@@ -20,49 +20,45 @@ namespace {
 using HlslGeneratorImplTest = TestHelper;
 
 TEST_F(HlslGeneratorImplTest, Generate) {
-  Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::AttributeList{});
+    Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{}, ast::AttributeList{});
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(void my_func() {
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(void my_func() {
 }
 )");
 }
 
 struct HlslBuiltinData {
-  ast::Builtin builtin;
-  const char* attribute_name;
+    ast::Builtin builtin;
+    const char* attribute_name;
 };
 inline std::ostream& operator<<(std::ostream& out, HlslBuiltinData data) {
-  out << data.builtin;
-  return out;
+    out << data.builtin;
+    return out;
 }
 using HlslBuiltinConversionTest = TestParamHelper<HlslBuiltinData>;
 TEST_P(HlslBuiltinConversionTest, Emit) {
-  auto params = GetParam();
-  GeneratorImpl& gen = Build();
+    auto params = GetParam();
+    GeneratorImpl& gen = Build();
 
-  EXPECT_EQ(gen.builtin_to_attribute(params.builtin),
-            std::string(params.attribute_name));
+    EXPECT_EQ(gen.builtin_to_attribute(params.builtin), std::string(params.attribute_name));
 }
 INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest,
     HlslBuiltinConversionTest,
-    testing::Values(
-        HlslBuiltinData{ast::Builtin::kPosition, "SV_Position"},
-        HlslBuiltinData{ast::Builtin::kVertexIndex, "SV_VertexID"},
-        HlslBuiltinData{ast::Builtin::kInstanceIndex, "SV_InstanceID"},
-        HlslBuiltinData{ast::Builtin::kFrontFacing, "SV_IsFrontFace"},
-        HlslBuiltinData{ast::Builtin::kFragDepth, "SV_Depth"},
-        HlslBuiltinData{ast::Builtin::kLocalInvocationId, "SV_GroupThreadID"},
-        HlslBuiltinData{ast::Builtin::kLocalInvocationIndex, "SV_GroupIndex"},
-        HlslBuiltinData{ast::Builtin::kGlobalInvocationId,
-                        "SV_DispatchThreadID"},
-        HlslBuiltinData{ast::Builtin::kWorkgroupId, "SV_GroupID"},
-        HlslBuiltinData{ast::Builtin::kSampleIndex, "SV_SampleIndex"},
-        HlslBuiltinData{ast::Builtin::kSampleMask, "SV_Coverage"}));
+    testing::Values(HlslBuiltinData{ast::Builtin::kPosition, "SV_Position"},
+                    HlslBuiltinData{ast::Builtin::kVertexIndex, "SV_VertexID"},
+                    HlslBuiltinData{ast::Builtin::kInstanceIndex, "SV_InstanceID"},
+                    HlslBuiltinData{ast::Builtin::kFrontFacing, "SV_IsFrontFace"},
+                    HlslBuiltinData{ast::Builtin::kFragDepth, "SV_Depth"},
+                    HlslBuiltinData{ast::Builtin::kLocalInvocationId, "SV_GroupThreadID"},
+                    HlslBuiltinData{ast::Builtin::kLocalInvocationIndex, "SV_GroupIndex"},
+                    HlslBuiltinData{ast::Builtin::kGlobalInvocationId, "SV_DispatchThreadID"},
+                    HlslBuiltinData{ast::Builtin::kWorkgroupId, "SV_GroupID"},
+                    HlslBuiltinData{ast::Builtin::kSampleIndex, "SV_SampleIndex"},
+                    HlslBuiltinData{ast::Builtin::kSampleMask, "SV_Coverage"}));
 
 }  // namespace
 }  // namespace tint::writer::hlsl

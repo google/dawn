@@ -23,46 +23,44 @@ namespace {
 using BlockStatementTest = TestHelper;
 
 TEST_F(BlockStatementTest, Creation) {
-  auto* d = create<DiscardStatement>();
-  auto* ptr = d;
+    auto* d = create<DiscardStatement>();
+    auto* ptr = d;
 
-  auto* b = create<BlockStatement>(StatementList{d});
+    auto* b = create<BlockStatement>(StatementList{d});
 
-  ASSERT_EQ(b->statements.size(), 1u);
-  EXPECT_EQ(b->statements[0], ptr);
+    ASSERT_EQ(b->statements.size(), 1u);
+    EXPECT_EQ(b->statements[0], ptr);
 }
 
 TEST_F(BlockStatementTest, Creation_WithSource) {
-  auto* b = create<BlockStatement>(Source{Source::Location{20, 2}},
-                                   ast::StatementList{});
-  auto src = b->source;
-  EXPECT_EQ(src.range.begin.line, 20u);
-  EXPECT_EQ(src.range.begin.column, 2u);
+    auto* b = create<BlockStatement>(Source{Source::Location{20, 2}}, ast::StatementList{});
+    auto src = b->source;
+    EXPECT_EQ(src.range.begin.line, 20u);
+    EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(BlockStatementTest, IsBlock) {
-  auto* b = create<BlockStatement>(ast::StatementList{});
-  EXPECT_TRUE(b->Is<BlockStatement>());
+    auto* b = create<BlockStatement>(ast::StatementList{});
+    EXPECT_TRUE(b->Is<BlockStatement>());
 }
 
 TEST_F(BlockStatementTest, Assert_Null_Statement) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b;
-        b.create<BlockStatement>(ast::StatementList{nullptr});
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.create<BlockStatement>(ast::StatementList{nullptr});
+        },
+        "internal compiler error");
 }
 
 TEST_F(BlockStatementTest, Assert_DifferentProgramID_Statement) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b1;
-        ProgramBuilder b2;
-        b1.create<BlockStatement>(
-            ast::StatementList{b2.create<DiscardStatement>()});
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b1;
+            ProgramBuilder b2;
+            b1.create<BlockStatement>(ast::StatementList{b2.create<DiscardStatement>()});
+        },
+        "internal compiler error");
 }
 
 }  // namespace

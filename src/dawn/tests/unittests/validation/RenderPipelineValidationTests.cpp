@@ -17,8 +17,8 @@
 #include <string>
 #include <vector>
 
-#include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "dawn/common/Constants.h"
+#include "dawn/tests/unittests/validation/ValidationTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
@@ -49,11 +49,11 @@ class RenderPipelineValidationTest : public ValidationTest {
 };
 
 namespace {
-    bool BlendFactorContainsSrcAlpha(const wgpu::BlendFactor& blendFactor) {
-        return blendFactor == wgpu::BlendFactor::SrcAlpha ||
-               blendFactor == wgpu::BlendFactor::OneMinusSrcAlpha ||
-               blendFactor == wgpu::BlendFactor::SrcAlphaSaturated;
-    }
+bool BlendFactorContainsSrcAlpha(const wgpu::BlendFactor& blendFactor) {
+    return blendFactor == wgpu::BlendFactor::SrcAlpha ||
+           blendFactor == wgpu::BlendFactor::OneMinusSrcAlpha ||
+           blendFactor == wgpu::BlendFactor::SrcAlphaSaturated;
+}
 }  // namespace
 
 // Test cases where creation should succeed

@@ -25,21 +25,21 @@ namespace tint::fuzzers::ast_fuzzer {
 /// This class computes the size of the subtree rooted at each expression in a
 /// program, and allows these sizes to be subsequently queried.
 class ExpressionSize {
- public:
-  /// Initializes expression size information for the given program.
-  /// @param program - the program for which expression sizes will be computed;
-  ///     must remain in scope as long as this instance exists.
-  explicit ExpressionSize(const Program& program);
+  public:
+    /// Initializes expression size information for the given program.
+    /// @param program - the program for which expression sizes will be computed;
+    ///     must remain in scope as long as this instance exists.
+    explicit ExpressionSize(const Program& program);
 
-  /// Returns the size of the subtree rooted at the given expression.
-  /// @param expression - the expression whose size should be returned.
-  /// @return the size of the subtree rooted at `expression`.
-  size_t operator()(const ast::Expression* expression) const {
-    return expr_to_size_.at(expression);
-  }
+    /// Returns the size of the subtree rooted at the given expression.
+    /// @param expression - the expression whose size should be returned.
+    /// @return the size of the subtree rooted at `expression`.
+    size_t operator()(const ast::Expression* expression) const {
+        return expr_to_size_.at(expression);
+    }
 
- private:
-  std::unordered_map<const ast::Expression*, size_t> expr_to_size_;
+  private:
+    std::unordered_map<const ast::Expression*, size_t> expr_to_size_;
 };
 
 }  // namespace tint::fuzzers::ast_fuzzer

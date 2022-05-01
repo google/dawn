@@ -23,86 +23,83 @@ namespace tint::reader::wgsl {
 
 /// Converts the input stream into a series of Tokens
 class Lexer {
- public:
-  /// Creates a new Lexer
-  /// @param file the source file
-  explicit Lexer(const Source::File* file);
-  ~Lexer();
+  public:
+    /// Creates a new Lexer
+    /// @param file the source file
+    explicit Lexer(const Source::File* file);
+    ~Lexer();
 
-  /// Returns the next token in the input stream.
-  /// @return Token
-  Token next();
+    /// Returns the next token in the input stream.
+    /// @return Token
+    Token next();
 
- private:
-  /// Advances past blankspace and comments, if present at the current position.
-  /// @returns error token, EOF, or uninitialized
-  Token skip_blankspace_and_comments();
-  /// Advances past a comment at the current position, if one exists.
-  /// Returns an error if there was an unterminated block comment,
-  /// or a null character was present.
-  /// @returns uninitialized token on success, or error
-  Token skip_comment();
+  private:
+    /// Advances past blankspace and comments, if present at the current position.
+    /// @returns error token, EOF, or uninitialized
+    Token skip_blankspace_and_comments();
+    /// Advances past a comment at the current position, if one exists.
+    /// Returns an error if there was an unterminated block comment,
+    /// or a null character was present.
+    /// @returns uninitialized token on success, or error
+    Token skip_comment();
 
-  Token build_token_from_int_if_possible(Source source,
-                                         size_t start,
-                                         size_t end,
-                                         int32_t base);
-  Token check_keyword(const Source&, std::string_view);
+    Token build_token_from_int_if_possible(Source source, size_t start, size_t end, int32_t base);
+    Token check_keyword(const Source&, std::string_view);
 
-  /// The try_* methods have the following in common:
-  /// - They assume there is at least one character to be consumed,
-  ///   i.e. the input has not yet reached end of file.
-  /// - They return an initialized token when they match and consume
-  ///   a token of the specified kind.
-  /// - Some can return an error token.
-  /// - Otherwise they return an uninitialized token when they did not
-  ///   match a token of the specfied kind.
-  Token try_float();
-  Token try_hex_float();
-  Token try_hex_integer();
-  Token try_ident();
-  Token try_integer();
-  Token try_punctuation();
+    /// The try_* methods have the following in common:
+    /// - They assume there is at least one character to be consumed,
+    ///   i.e. the input has not yet reached end of file.
+    /// - They return an initialized token when they match and consume
+    ///   a token of the specified kind.
+    /// - Some can return an error token.
+    /// - Otherwise they return an uninitialized token when they did not
+    ///   match a token of the specfied kind.
+    Token try_float();
+    Token try_hex_float();
+    Token try_hex_integer();
+    Token try_ident();
+    Token try_integer();
+    Token try_punctuation();
 
-  Source begin_source() const;
-  void end_source(Source&) const;
+    Source begin_source() const;
+    void end_source(Source&) const;
 
-  /// @returns view of current line
-  const std::string_view line() const;
-  /// @returns position in current line
-  size_t pos() const;
-  /// @returns length of current line
-  size_t length() const;
-  /// @returns reference to character at `pos` within current line
-  const char& at(size_t pos) const;
-  /// @returns substring view at `offset` within current line of length `count`
-  std::string_view substr(size_t offset, size_t count);
-  /// advances current position by `offset` within current line
-  void advance(size_t offset = 1);
-  /// sets current position to `pos` within current line
-  void set_pos(size_t pos);
-  /// advances current position to next line
-  void advance_line();
-  /// @returns true if the end of the input has been reached.
-  bool is_eof() const;
-  /// @returns true if the end of the current line has been reached.
-  bool is_eol() const;
-  /// @returns true if there is another character on the input and
-  /// it is not null.
-  bool is_null() const;
-  /// @param ch a character
-  /// @returns true if 'ch' is a decimal digit
-  bool is_digit(char ch) const;
-  /// @param ch a character
-  /// @returns true if 'ch' is a hexadecimal digit
-  bool is_hex(char ch) const;
-  /// @returns true if string at `pos` matches `substr`
-  bool matches(size_t pos, std::string_view substr);
+    /// @returns view of current line
+    const std::string_view line() const;
+    /// @returns position in current line
+    size_t pos() const;
+    /// @returns length of current line
+    size_t length() const;
+    /// @returns reference to character at `pos` within current line
+    const char& at(size_t pos) const;
+    /// @returns substring view at `offset` within current line of length `count`
+    std::string_view substr(size_t offset, size_t count);
+    /// advances current position by `offset` within current line
+    void advance(size_t offset = 1);
+    /// sets current position to `pos` within current line
+    void set_pos(size_t pos);
+    /// advances current position to next line
+    void advance_line();
+    /// @returns true if the end of the input has been reached.
+    bool is_eof() const;
+    /// @returns true if the end of the current line has been reached.
+    bool is_eol() const;
+    /// @returns true if there is another character on the input and
+    /// it is not null.
+    bool is_null() const;
+    /// @param ch a character
+    /// @returns true if 'ch' is a decimal digit
+    bool is_digit(char ch) const;
+    /// @param ch a character
+    /// @returns true if 'ch' is a hexadecimal digit
+    bool is_hex(char ch) const;
+    /// @returns true if string at `pos` matches `substr`
+    bool matches(size_t pos, std::string_view substr);
 
-  /// The source file content
-  Source::File const* const file_;
-  /// The current location within the input
-  Source::Location location_;
+    /// The source file content
+    Source::File const* const file_;
+    /// The current location within the input
+    Source::Location location_;
 };
 
 }  // namespace tint::reader::wgsl

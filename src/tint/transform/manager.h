@@ -28,33 +28,33 @@ namespace tint::transform {
 /// If any inner transform fails the manager will return immediately and
 /// the error can be retrieved with the Output's diagnostics.
 class Manager : public Castable<Manager, Transform> {
- public:
-  /// Constructor
-  Manager();
-  ~Manager() override;
+  public:
+    /// Constructor
+    Manager();
+    ~Manager() override;
 
-  /// Add pass to the manager
-  /// @param transform the transform to append
-  void append(std::unique_ptr<Transform> transform) {
-    transforms_.push_back(std::move(transform));
-  }
+    /// Add pass to the manager
+    /// @param transform the transform to append
+    void append(std::unique_ptr<Transform> transform) {
+        transforms_.push_back(std::move(transform));
+    }
 
-  /// Add pass to the manager of type `T`, constructed with the provided
-  /// arguments.
-  /// @param args the arguments to forward to the `T` constructor
-  template <typename T, typename... ARGS>
-  void Add(ARGS&&... args) {
-    transforms_.emplace_back(std::make_unique<T>(std::forward<ARGS>(args)...));
-  }
+    /// Add pass to the manager of type `T`, constructed with the provided
+    /// arguments.
+    /// @param args the arguments to forward to the `T` constructor
+    template <typename T, typename... ARGS>
+    void Add(ARGS&&... args) {
+        transforms_.emplace_back(std::make_unique<T>(std::forward<ARGS>(args)...));
+    }
 
-  /// Runs the transforms on `program`, returning the transformation result.
-  /// @param program the source program to transform
-  /// @param data optional extra transform-specific input data
-  /// @returns the transformed program and diagnostics
-  Output Run(const Program* program, const DataMap& data = {}) const override;
+    /// Runs the transforms on `program`, returning the transformation result.
+    /// @param program the source program to transform
+    /// @param data optional extra transform-specific input data
+    /// @returns the transformed program and diagnostics
+    Output Run(const Program* program, const DataMap& data = {}) const override;
 
- private:
-  std::vector<std::unique_ptr<Transform>> transforms_;
+  private:
+    std::vector<std::unique_ptr<Transform>> transforms_;
 };
 
 }  // namespace tint::transform

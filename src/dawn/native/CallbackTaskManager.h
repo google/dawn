@@ -21,24 +21,24 @@
 
 namespace dawn::native {
 
-    struct CallbackTask {
-      public:
-        virtual ~CallbackTask() = default;
-        virtual void Finish() = 0;
-        virtual void HandleShutDown() = 0;
-        virtual void HandleDeviceLoss() = 0;
-    };
+struct CallbackTask {
+  public:
+    virtual ~CallbackTask() = default;
+    virtual void Finish() = 0;
+    virtual void HandleShutDown() = 0;
+    virtual void HandleDeviceLoss() = 0;
+};
 
-    class CallbackTaskManager {
-      public:
-        void AddCallbackTask(std::unique_ptr<CallbackTask> callbackTask);
-        bool IsEmpty();
-        std::vector<std::unique_ptr<CallbackTask>> AcquireCallbackTasks();
+class CallbackTaskManager {
+  public:
+    void AddCallbackTask(std::unique_ptr<CallbackTask> callbackTask);
+    bool IsEmpty();
+    std::vector<std::unique_ptr<CallbackTask>> AcquireCallbackTasks();
 
-      private:
-        std::mutex mCallbackTaskQueueMutex;
-        std::vector<std::unique_ptr<CallbackTask>> mCallbackTaskQueue;
-    };
+  private:
+    std::mutex mCallbackTaskQueueMutex;
+    std::vector<std::unique_ptr<CallbackTask>> mCallbackTaskQueue;
+};
 
 }  // namespace dawn::native
 

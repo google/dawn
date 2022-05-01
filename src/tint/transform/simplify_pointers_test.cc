@@ -23,16 +23,16 @@ namespace {
 using SimplifyPointersTest = TransformTest;
 
 TEST_F(SimplifyPointersTest, EmptyModule) {
-  auto* src = "";
-  auto* expect = "";
+    auto* src = "";
+    auto* expect = "";
 
-  auto got = Run<Unshadow, SimplifyPointers>(src);
+    auto got = Run<Unshadow, SimplifyPointers>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SimplifyPointersTest, FoldPointer) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var v : i32;
   let p : ptr<function, i32> = &v;
@@ -40,20 +40,20 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var v : i32;
   let x : i32 = v;
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers>(src);
+    auto got = Run<Unshadow, SimplifyPointers>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SimplifyPointersTest, AddressOfDeref) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var v : i32;
   let p : ptr<function, i32> = &(v);
@@ -66,7 +66,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var v : i32;
   var a = v;
@@ -75,13 +75,13 @@ fn f() {
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers>(src);
+    auto got = Run<Unshadow, SimplifyPointers>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SimplifyPointersTest, DerefAddressOf) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var v : i32;
   let x : i32 = *(&(v));
@@ -90,7 +90,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var v : i32;
   let x : i32 = v;
@@ -99,13 +99,13 @@ fn f() {
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers>(src);
+    auto got = Run<Unshadow, SimplifyPointers>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SimplifyPointersTest, ComplexChain) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var a : array<mat4x4<f32>, 4>;
   let ap : ptr<function, array<mat4x4<f32>, 4>> = &a;
@@ -115,20 +115,20 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var a : array<mat4x4<f32>, 4>;
   let v : vec4<f32> = a[3][2];
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers>(src);
+    auto got = Run<Unshadow, SimplifyPointers>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SimplifyPointersTest, SavedVars) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   i : i32,
 };
@@ -152,7 +152,7 @@ fn matrix() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct S {
   i : i32,
 }
@@ -176,13 +176,13 @@ fn matrix() {
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers>(src);
+    auto got = Run<Unshadow, SimplifyPointers>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SimplifyPointersTest, DontSaveLiterals) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var arr : array<i32, 2>;
   let p1 : ptr<function, i32> = &arr[1];
@@ -190,20 +190,20 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var arr : array<i32, 2>;
   arr[1] = 4;
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers>(src);
+    auto got = Run<Unshadow, SimplifyPointers>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SimplifyPointersTest, SavedVarsChain) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var arr : array<array<i32, 2>, 2>;
   let i : i32 = 0;
@@ -214,7 +214,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var arr : array<array<i32, 2>, 2>;
   let i : i32 = 0;
@@ -225,13 +225,13 @@ fn f() {
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers>(src);
+    auto got = Run<Unshadow, SimplifyPointers>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SimplifyPointersTest, ForLoopInit) {
-  auto* src = R"(
+    auto* src = R"(
 fn foo() -> i32 {
   return 1;
 }
@@ -246,7 +246,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn foo() -> i32 {
   return 1;
 }
@@ -262,13 +262,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers>(src);
+    auto got = Run<Unshadow, SimplifyPointers>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SimplifyPointersTest, MultiSavedVarsInSinglePtrLetExpr) {
-  auto* src = R"(
+    auto* src = R"(
 fn x() -> i32 {
   return 1;
 }
@@ -297,7 +297,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn x() -> i32 {
   return 1;
 }
@@ -328,13 +328,13 @@ fn f() {
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers>(src);
+    auto got = Run<Unshadow, SimplifyPointers>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SimplifyPointersTest, ShadowPointer) {
-  auto* src = R"(
+    auto* src = R"(
 var<private> a : array<i32, 2>;
 
 @stage(compute) @workgroup_size(1)
@@ -347,7 +347,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 var<private> a : array<i32, 2>;
 
 @stage(compute) @workgroup_size(1)
@@ -359,9 +359,9 @@ fn main() {
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers>(src);
+    auto got = Run<Unshadow, SimplifyPointers>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

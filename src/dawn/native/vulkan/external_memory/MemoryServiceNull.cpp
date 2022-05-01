@@ -17,49 +17,49 @@
 
 namespace dawn::native::vulkan::external_memory {
 
-    Service::Service(Device* device) : mDevice(device) {
-        DAWN_UNUSED(mDevice);
-        DAWN_UNUSED(mSupported);
-    }
+Service::Service(Device* device) : mDevice(device) {
+    DAWN_UNUSED(mDevice);
+    DAWN_UNUSED(mSupported);
+}
 
-    Service::~Service() = default;
+Service::~Service() = default;
 
-    // static
-    bool Service::CheckSupport(const VulkanDeviceInfo& deviceInfo) {
-        return false;
-    }
+// static
+bool Service::CheckSupport(const VulkanDeviceInfo& deviceInfo) {
+    return false;
+}
 
-    bool Service::SupportsImportMemory(VkFormat format,
-                                       VkImageType type,
-                                       VkImageTiling tiling,
-                                       VkImageUsageFlags usage,
-                                       VkImageCreateFlags flags) {
-        return false;
-    }
+bool Service::SupportsImportMemory(VkFormat format,
+                                   VkImageType type,
+                                   VkImageTiling tiling,
+                                   VkImageUsageFlags usage,
+                                   VkImageCreateFlags flags) {
+    return false;
+}
 
-    bool Service::SupportsCreateImage(const ExternalImageDescriptor* descriptor,
-                                      VkFormat format,
-                                      VkImageUsageFlags usage,
-                                      bool* supportsDisjoint) {
-        *supportsDisjoint = false;
-        return false;
-    }
+bool Service::SupportsCreateImage(const ExternalImageDescriptor* descriptor,
+                                  VkFormat format,
+                                  VkImageUsageFlags usage,
+                                  bool* supportsDisjoint) {
+    *supportsDisjoint = false;
+    return false;
+}
 
-    ResultOrError<MemoryImportParams> Service::GetMemoryImportParams(
-        const ExternalImageDescriptor* descriptor,
-        VkImage image) {
-        return DAWN_UNIMPLEMENTED_ERROR("Using null memory service to interop inside Vulkan");
-    }
+ResultOrError<MemoryImportParams> Service::GetMemoryImportParams(
+    const ExternalImageDescriptor* descriptor,
+    VkImage image) {
+    return DAWN_UNIMPLEMENTED_ERROR("Using null memory service to interop inside Vulkan");
+}
 
-    ResultOrError<VkDeviceMemory> Service::ImportMemory(ExternalMemoryHandle handle,
-                                                        const MemoryImportParams& importParams,
-                                                        VkImage image) {
-        return DAWN_UNIMPLEMENTED_ERROR("Using null memory service to interop inside Vulkan");
-    }
+ResultOrError<VkDeviceMemory> Service::ImportMemory(ExternalMemoryHandle handle,
+                                                    const MemoryImportParams& importParams,
+                                                    VkImage image) {
+    return DAWN_UNIMPLEMENTED_ERROR("Using null memory service to interop inside Vulkan");
+}
 
-    ResultOrError<VkImage> Service::CreateImage(const ExternalImageDescriptor* descriptor,
-                                                const VkImageCreateInfo& baseCreateInfo) {
-        return DAWN_UNIMPLEMENTED_ERROR("Using null memory service to interop inside Vulkan");
-    }
+ResultOrError<VkImage> Service::CreateImage(const ExternalImageDescriptor* descriptor,
+                                            const VkImageCreateInfo& baseCreateInfo) {
+    return DAWN_UNIMPLEMENTED_ERROR("Using null memory service to interop inside Vulkan");
+}
 
 }  // namespace dawn::native::vulkan::external_memory

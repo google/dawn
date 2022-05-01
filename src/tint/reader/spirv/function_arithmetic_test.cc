@@ -23,7 +23,7 @@ namespace {
 using ::testing::HasSubstr;
 
 std::string Preamble() {
-  return R"(
+    return R"(
   OpCapability Shader
   OpMemoryModel Logical Simple
   OpEntryPoint Fragment %100 "main"
@@ -74,317 +74,283 @@ std::string Preamble() {
 
 // Returns the AST dump for a given SPIR-V assembly constant.
 std::string AstFor(std::string assembly) {
-  if (assembly == "v2uint_10_20") {
-    return "vec2<u32>(10u, 20u)";
-  }
-  if (assembly == "v2uint_20_10") {
-    return "vec2<u32>(20u, 10u)";
-  }
-  if (assembly == "v2int_30_40") {
-    return "vec2<i32>(30, 40)";
-  }
-  if (assembly == "v2int_40_30") {
-    return "vec2<i32>(40, 30)";
-  }
-  if (assembly == "cast_int_v2uint_10_20") {
-    return "bitcast<vec2<i32>>(vec2<u32>(10u, 20u))";
-  }
-  if (assembly == "cast_uint_v2int_40_30") {
-    return "bitcast<vec2<u32>>(vec2<i32>(40, 30))";
-  }
-  if (assembly == "v2float_50_60") {
-    return "vec2<f32>(50.0, 60.0)";
-  }
-  if (assembly == "v2float_60_50") {
-    return "vec2<f32>(60.0, 50.0)";
-  }
-  return "bad case";
+    if (assembly == "v2uint_10_20") {
+        return "vec2<u32>(10u, 20u)";
+    }
+    if (assembly == "v2uint_20_10") {
+        return "vec2<u32>(20u, 10u)";
+    }
+    if (assembly == "v2int_30_40") {
+        return "vec2<i32>(30, 40)";
+    }
+    if (assembly == "v2int_40_30") {
+        return "vec2<i32>(40, 30)";
+    }
+    if (assembly == "cast_int_v2uint_10_20") {
+        return "bitcast<vec2<i32>>(vec2<u32>(10u, 20u))";
+    }
+    if (assembly == "cast_uint_v2int_40_30") {
+        return "bitcast<vec2<u32>>(vec2<i32>(40, 30))";
+    }
+    if (assembly == "v2float_50_60") {
+        return "vec2<f32>(50.0, 60.0)";
+    }
+    if (assembly == "v2float_60_50") {
+        return "vec2<f32>(60.0, 50.0)";
+    }
+    return "bad case";
 }
 
 using SpvUnaryArithTest = SpvParserTestBase<::testing::Test>;
 
 TEST_F(SpvUnaryArithTest, SNegate_Int_Int) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSNegate %int %int_30
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : i32 = -(30);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 : i32 = -(30);"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_Int_Uint) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSNegate %int %uint_10
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : i32 = -(bitcast<i32>(10u));"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : i32 = -(bitcast<i32>(10u));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_Uint_Int) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSNegate %uint %int_30
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : u32 = bitcast<u32>(-(30));"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : u32 = bitcast<u32>(-(30));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_Uint_Uint) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSNegate %uint %uint_10
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : u32 = bitcast<u32>(-(bitcast<i32>(10u)));"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : u32 = bitcast<u32>(-(bitcast<i32>(10u)));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_SignedVec_SignedVec) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSNegate %v2int %v2int_30_40
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : vec2<i32> = -(vec2<i32>(30, 40));"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : vec2<i32> = -(vec2<i32>(30, 40));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSNegate %v2int %v2uint_10_20
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(
-      test::ToString(p->program(), ast_body),
-      HasSubstr(
-          "let x_1 : vec2<i32> = -(bitcast<vec2<i32>>(vec2<u32>(10u, 20u)));"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : vec2<i32> = -(bitcast<vec2<i32>>(vec2<u32>(10u, 20u)));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSNegate %v2uint %v2int_30_40
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(
-      test::ToString(p->program(), ast_body),
-      HasSubstr(
-          "let x_1 : vec2<u32> = bitcast<vec2<u32>>(-(vec2<i32>(30, 40)));"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : vec2<u32> = bitcast<vec2<u32>>(-(vec2<i32>(30, 40)));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSNegate %v2uint %v2uint_10_20
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(
-      test::ToString(p->program(), ast_body),
-      HasSubstr(
-          R"(let x_1 : vec2<u32> = bitcast<vec2<u32>>(-(bitcast<vec2<i32>>(vec2<u32>(10u, 20u))));)"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(
+        test::ToString(p->program(), ast_body),
+        HasSubstr(
+            R"(let x_1 : vec2<u32> = bitcast<vec2<u32>>(-(bitcast<vec2<i32>>(vec2<u32>(10u, 20u))));)"));
 }
 
 TEST_F(SpvUnaryArithTest, FNegate_Scalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpFNegate %float %float_50
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : f32 = -(50.0);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 : f32 = -(50.0);"));
 }
 
 TEST_F(SpvUnaryArithTest, FNegate_Vector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpFNegate %v2float %v2float_50_60
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : vec2<f32> = -(vec2<f32>(50.0, 60.0));"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : vec2<f32> = -(vec2<f32>(50.0, 60.0));"));
 }
 
 struct BinaryData {
-  const std::string res_type;
-  const std::string lhs;
-  const std::string op;
-  const std::string rhs;
-  const std::string ast_type;
-  const std::string ast_lhs;
-  const std::string ast_op;
-  const std::string ast_rhs;
+    const std::string res_type;
+    const std::string lhs;
+    const std::string op;
+    const std::string rhs;
+    const std::string ast_type;
+    const std::string ast_lhs;
+    const std::string ast_op;
+    const std::string ast_rhs;
 };
 inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
-  out << "BinaryData{" << data.res_type << "," << data.lhs << "," << data.op
-      << "," << data.rhs << "," << data.ast_type << "," << data.ast_lhs << ","
-      << data.ast_op << "," << data.ast_rhs << "}";
-  return out;
+    out << "BinaryData{" << data.res_type << "," << data.lhs << "," << data.op << "," << data.rhs
+        << "," << data.ast_type << "," << data.ast_lhs << "," << data.ast_op << "," << data.ast_rhs
+        << "}";
+    return out;
 }
 
-using SpvBinaryArithTest =
-    SpvParserTestBase<::testing::TestWithParam<BinaryData>>;
+using SpvBinaryArithTest = SpvParserTestBase<::testing::TestWithParam<BinaryData>>;
 using SpvBinaryArithTestBasic = SpvParserTestBase<::testing::Test>;
 
 TEST_P(SpvBinaryArithTest, EmitExpression) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = )" + GetParam().op +
-                        " %" + GetParam().res_type + " %" + GetParam().lhs +
-                        " %" + GetParam().rhs + R"(
+                          " %" + GetParam().res_type + " %" + GetParam().lhs + " %" +
+                          GetParam().rhs + R"(
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  std::ostringstream ss;
-  ss << "let x_1 : " << GetParam().ast_type << " = (" << GetParam().ast_lhs
-     << " " << GetParam().ast_op << " " << GetParam().ast_rhs << ");";
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(got, HasSubstr(ss.str())) << "got:\n" << got << assembly;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    std::ostringstream ss;
+    ss << "let x_1 : " << GetParam().ast_type << " = (" << GetParam().ast_lhs << " "
+       << GetParam().ast_op << " " << GetParam().ast_rhs << ");";
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(got, HasSubstr(ss.str())) << "got:\n" << got << assembly;
 }
 
 // Use this when the result might have extra bitcasts on the outside.
 struct BinaryDataGeneral {
-  const std::string res_type;
-  const std::string lhs;
-  const std::string op;
-  const std::string rhs;
-  const std::string wgsl_type;
-  const std::string expected;
+    const std::string res_type;
+    const std::string lhs;
+    const std::string op;
+    const std::string rhs;
+    const std::string wgsl_type;
+    const std::string expected;
 };
 inline std::ostream& operator<<(std::ostream& out, BinaryDataGeneral data) {
-  out << "BinaryDataGeneral{" << data.res_type << "," << data.lhs << ","
-      << data.op << "," << data.rhs << "," << data.wgsl_type << ","
-      << data.expected << "}";
-  return out;
+    out << "BinaryDataGeneral{" << data.res_type << "," << data.lhs << "," << data.op << ","
+        << data.rhs << "," << data.wgsl_type << "," << data.expected << "}";
+    return out;
 }
 
-using SpvBinaryArithGeneralTest =
-    SpvParserTestBase<::testing::TestWithParam<BinaryDataGeneral>>;
+using SpvBinaryArithGeneralTest = SpvParserTestBase<::testing::TestWithParam<BinaryDataGeneral>>;
 
 TEST_P(SpvBinaryArithGeneralTest, EmitExpression) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = )" + GetParam().op +
-                        " %" + GetParam().res_type + " %" + GetParam().lhs +
-                        " %" + GetParam().rhs + R"(
+                          " %" + GetParam().res_type + " %" + GetParam().lhs + " %" +
+                          GetParam().rhs + R"(
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  std::ostringstream ss;
-  ss << "let x_1 : " << GetParam().wgsl_type << " = " << GetParam().expected
-     << ";";
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(got, HasSubstr(ss.str())) << "got:\n" << got << assembly;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    std::ostringstream ss;
+    ss << "let x_1 : " << GetParam().wgsl_type << " = " << GetParam().expected << ";";
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(got, HasSubstr(ss.str())) << "got:\n" << got << assembly;
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -392,13 +358,10 @@ INSTANTIATE_TEST_SUITE_P(
     SpvBinaryArithTest,
     ::testing::Values(
         // Both uint
-        BinaryData{"uint", "uint_10", "OpIAdd", "uint_20", "u32", "10u", "+",
-                   "20u"},  // Both int
-        BinaryData{"int", "int_30", "OpIAdd", "int_40", "i32", "30", "+",
-                   "40"},  // Both v2uint
-        BinaryData{"v2uint", "v2uint_10_20", "OpIAdd", "v2uint_20_10",
-                   "vec2<u32>", AstFor("v2uint_10_20"), "+",
-                   AstFor("v2uint_20_10")},
+        BinaryData{"uint", "uint_10", "OpIAdd", "uint_20", "u32", "10u", "+", "20u"},  // Both int
+        BinaryData{"int", "int_30", "OpIAdd", "int_40", "i32", "30", "+", "40"},  // Both v2uint
+        BinaryData{"v2uint", "v2uint_10_20", "OpIAdd", "v2uint_20_10", "vec2<u32>",
+                   AstFor("v2uint_10_20"), "+", AstFor("v2uint_20_10")},
         // Both v2int
         BinaryData{"v2int", "v2int_30_40", "OpIAdd", "v2int_40_30", "vec2<i32>",
                    AstFor("v2int_30_40"), "+", AstFor("v2int_40_30")}));
@@ -411,11 +374,9 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryDataGeneral{"uint", "int_30", "OpIAdd", "uint_10", "u32",
                           "bitcast<u32>((30 + bitcast<i32>(10u)))"},
         // Mixed, int <- int uint
-        BinaryDataGeneral{"int", "int_30", "OpIAdd", "uint_10", "i32",
-                          "(30 + bitcast<i32>(10u))"},
+        BinaryDataGeneral{"int", "int_30", "OpIAdd", "uint_10", "i32", "(30 + bitcast<i32>(10u))"},
         // Mixed, uint <- uint int
-        BinaryDataGeneral{"uint", "uint_10", "OpIAdd", "int_30", "u32",
-                          "(10u + bitcast<u32>(30))"},
+        BinaryDataGeneral{"uint", "uint_10", "OpIAdd", "int_30", "u32", "(10u + bitcast<u32>(30))"},
         // Mixed, int <- uint uint
         BinaryDataGeneral{"int", "uint_20", "OpIAdd", "uint_10", "i32",
                           "bitcast<i32>((20u + 10u))"},
@@ -428,29 +389,25 @@ INSTANTIATE_TEST_SUITE_P(
             "v2int", "v2uint_10_20", "OpIAdd", "v2int_40_30", "vec2<i32>",
             R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) + bitcast<vec2<u32>>(vec2<i32>(40, 30)))))"}));
 
-INSTANTIATE_TEST_SUITE_P(
-    SpvParserTest_FAdd,
-    SpvBinaryArithTest,
-    ::testing::Values(
-        // Scalar float
-        BinaryData{"float", "float_50", "OpFAdd", "float_60", "f32", "50.0",
-                   "+", "60.0"},  // Vector float
-        BinaryData{"v2float", "v2float_50_60", "OpFAdd", "v2float_60_50",
-                   "vec2<f32>", AstFor("v2float_50_60"), "+",
-                   AstFor("v2float_60_50")}));
+INSTANTIATE_TEST_SUITE_P(SpvParserTest_FAdd,
+                         SpvBinaryArithTest,
+                         ::testing::Values(
+                             // Scalar float
+                             BinaryData{"float", "float_50", "OpFAdd", "float_60", "f32", "50.0",
+                                        "+", "60.0"},  // Vector float
+                             BinaryData{"v2float", "v2float_50_60", "OpFAdd", "v2float_60_50",
+                                        "vec2<f32>", AstFor("v2float_50_60"), "+",
+                                        AstFor("v2float_60_50")}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_ISub,
     SpvBinaryArithTest,
     ::testing::Values(
         // Both uint
-        BinaryData{"uint", "uint_10", "OpISub", "uint_20", "u32", "10u", "-",
-                   "20u"},  // Both int
-        BinaryData{"int", "int_30", "OpISub", "int_40", "i32", "30", "-",
-                   "40"},  // Both v2uint
-        BinaryData{"v2uint", "v2uint_10_20", "OpISub", "v2uint_20_10",
-                   "vec2<u32>", AstFor("v2uint_10_20"), "-",
-                   AstFor("v2uint_20_10")},
+        BinaryData{"uint", "uint_10", "OpISub", "uint_20", "u32", "10u", "-", "20u"},  // Both int
+        BinaryData{"int", "int_30", "OpISub", "int_40", "i32", "30", "-", "40"},  // Both v2uint
+        BinaryData{"v2uint", "v2uint_10_20", "OpISub", "v2uint_20_10", "vec2<u32>",
+                   AstFor("v2uint_10_20"), "-", AstFor("v2uint_20_10")},
         // Both v2int
         BinaryData{"v2int", "v2int_30_40", "OpISub", "v2int_40_30", "vec2<i32>",
                    AstFor("v2int_30_40"), "-", AstFor("v2int_40_30")}));
@@ -463,11 +420,9 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryDataGeneral{"uint", "int_30", "OpISub", "uint_10", "u32",
                           R"(bitcast<u32>((30 - bitcast<i32>(10u))))"},
         // Mixed, int <- int uint
-        BinaryDataGeneral{"int", "int_30", "OpISub", "uint_10", "i32",
-                          "(30 - bitcast<i32>(10u))"},
+        BinaryDataGeneral{"int", "int_30", "OpISub", "uint_10", "i32", "(30 - bitcast<i32>(10u))"},
         // Mixed, uint <- uint int
-        BinaryDataGeneral{"uint", "uint_10", "OpISub", "int_30", "u32",
-                          "(10u - bitcast<u32>(30))"},
+        BinaryDataGeneral{"uint", "uint_10", "OpISub", "int_30", "u32", "(10u - bitcast<u32>(30))"},
         // Mixed, int <- uint uint
         BinaryDataGeneral{"int", "uint_20", "OpISub", "uint_10", "i32",
                           "bitcast<i32>((20u - 10u))"},
@@ -480,29 +435,25 @@ INSTANTIATE_TEST_SUITE_P(
             "v2int", "v2uint_10_20", "OpISub", "v2int_40_30", "vec2<i32>",
             R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) - bitcast<vec2<u32>>(vec2<i32>(40, 30)))))"}));
 
-INSTANTIATE_TEST_SUITE_P(
-    SpvParserTest_FSub,
-    SpvBinaryArithTest,
-    ::testing::Values(
-        // Scalar float
-        BinaryData{"float", "float_50", "OpFSub", "float_60", "f32", "50.0",
-                   "-", "60.0"},  // Vector float
-        BinaryData{"v2float", "v2float_50_60", "OpFSub", "v2float_60_50",
-                   "vec2<f32>", AstFor("v2float_50_60"), "-",
-                   AstFor("v2float_60_50")}));
+INSTANTIATE_TEST_SUITE_P(SpvParserTest_FSub,
+                         SpvBinaryArithTest,
+                         ::testing::Values(
+                             // Scalar float
+                             BinaryData{"float", "float_50", "OpFSub", "float_60", "f32", "50.0",
+                                        "-", "60.0"},  // Vector float
+                             BinaryData{"v2float", "v2float_50_60", "OpFSub", "v2float_60_50",
+                                        "vec2<f32>", AstFor("v2float_50_60"), "-",
+                                        AstFor("v2float_60_50")}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_IMul,
     SpvBinaryArithTest,
     ::testing::Values(
         // Both uint
-        BinaryData{"uint", "uint_10", "OpIMul", "uint_20", "u32", "10u", "*",
-                   "20u"},  // Both int
-        BinaryData{"int", "int_30", "OpIMul", "int_40", "i32", "30", "*",
-                   "40"},  // Both v2uint
-        BinaryData{"v2uint", "v2uint_10_20", "OpIMul", "v2uint_20_10",
-                   "vec2<u32>", AstFor("v2uint_10_20"), "*",
-                   AstFor("v2uint_20_10")},
+        BinaryData{"uint", "uint_10", "OpIMul", "uint_20", "u32", "10u", "*", "20u"},  // Both int
+        BinaryData{"int", "int_30", "OpIMul", "int_40", "i32", "30", "*", "40"},  // Both v2uint
+        BinaryData{"v2uint", "v2uint_10_20", "OpIMul", "v2uint_20_10", "vec2<u32>",
+                   AstFor("v2uint_10_20"), "*", AstFor("v2uint_20_10")},
         // Both v2int
         BinaryData{"v2int", "v2int_30_40", "OpIMul", "v2int_40_30", "vec2<i32>",
                    AstFor("v2int_30_40"), "*", AstFor("v2int_40_30")}));
@@ -515,11 +466,9 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryDataGeneral{"uint", "int_30", "OpIMul", "uint_10", "u32",
                           "bitcast<u32>((30 * bitcast<i32>(10u)))"},
         // Mixed, int <- int uint
-        BinaryDataGeneral{"int", "int_30", "OpIMul", "uint_10", "i32",
-                          "(30 * bitcast<i32>(10u))"},
+        BinaryDataGeneral{"int", "int_30", "OpIMul", "uint_10", "i32", "(30 * bitcast<i32>(10u))"},
         // Mixed, uint <- uint int
-        BinaryDataGeneral{"uint", "uint_10", "OpIMul", "int_30", "u32",
-                          "(10u * bitcast<u32>(30))"},
+        BinaryDataGeneral{"uint", "uint_10", "OpIMul", "int_30", "u32", "(10u * bitcast<u32>(30))"},
         // Mixed, int <- uint uint
         BinaryDataGeneral{"int", "uint_20", "OpIMul", "uint_10", "i32",
                           "bitcast<i32>((20u * 10u))"},
@@ -532,35 +481,32 @@ INSTANTIATE_TEST_SUITE_P(
             "v2int", "v2uint_10_20", "OpIMul", "v2int_40_30", "vec2<i32>",
             R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) * bitcast<vec2<u32>>(vec2<i32>(40, 30)))))"}));
 
-INSTANTIATE_TEST_SUITE_P(
-    SpvParserTest_FMul,
-    SpvBinaryArithTest,
-    ::testing::Values(
-        // Scalar float
-        BinaryData{"float", "float_50", "OpFMul", "float_60", "f32", "50.0",
-                   "*", "60.0"},  // Vector float
-        BinaryData{"v2float", "v2float_50_60", "OpFMul", "v2float_60_50",
-                   "vec2<f32>", AstFor("v2float_50_60"), "*",
-                   AstFor("v2float_60_50")}));
+INSTANTIATE_TEST_SUITE_P(SpvParserTest_FMul,
+                         SpvBinaryArithTest,
+                         ::testing::Values(
+                             // Scalar float
+                             BinaryData{"float", "float_50", "OpFMul", "float_60", "f32", "50.0",
+                                        "*", "60.0"},  // Vector float
+                             BinaryData{"v2float", "v2float_50_60", "OpFMul", "v2float_60_50",
+                                        "vec2<f32>", AstFor("v2float_50_60"), "*",
+                                        AstFor("v2float_60_50")}));
 
-INSTANTIATE_TEST_SUITE_P(
-    SpvParserTest_UDiv,
-    SpvBinaryArithTest,
-    ::testing::Values(
-        // Both uint
-        BinaryData{"uint", "uint_10", "OpUDiv", "uint_20", "u32", "10u", "/",
-                   "20u"},  // Both v2uint
-        BinaryData{"v2uint", "v2uint_10_20", "OpUDiv", "v2uint_20_10",
-                   "vec2<u32>", AstFor("v2uint_10_20"), "/",
-                   AstFor("v2uint_20_10")}));
+INSTANTIATE_TEST_SUITE_P(SpvParserTest_UDiv,
+                         SpvBinaryArithTest,
+                         ::testing::Values(
+                             // Both uint
+                             BinaryData{"uint", "uint_10", "OpUDiv", "uint_20", "u32", "10u", "/",
+                                        "20u"},  // Both v2uint
+                             BinaryData{"v2uint", "v2uint_10_20", "OpUDiv", "v2uint_20_10",
+                                        "vec2<u32>", AstFor("v2uint_10_20"), "/",
+                                        AstFor("v2uint_20_10")}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_SDiv,
     SpvBinaryArithTest,
     ::testing::Values(
         // Both int
-        BinaryData{"int", "int_30", "OpSDiv", "int_40", "i32", "30", "/",
-                   "40"},  // Both v2int
+        BinaryData{"int", "int_30", "OpSDiv", "int_40", "i32", "30", "/", "40"},  // Both v2int
         BinaryData{"v2int", "v2int_30_40", "OpSDiv", "v2int_40_30", "vec2<i32>",
                    AstFor("v2int_30_40"), "/", AstFor("v2int_40_30")}));
 
@@ -569,89 +515,79 @@ INSTANTIATE_TEST_SUITE_P(
     SpvBinaryArithTest,
     ::testing::Values(
         // Mixed, returning int, second arg uint
-        BinaryData{"int", "int_30", "OpSDiv", "uint_10", "i32", "30", "/",
-                   "bitcast<i32>(10u)"},
+        BinaryData{"int", "int_30", "OpSDiv", "uint_10", "i32", "30", "/", "bitcast<i32>(10u)"},
         // Mixed, returning int, first arg uint
-        BinaryData{"int", "uint_10", "OpSDiv", "int_30", "i32",
-                   "bitcast<i32>(10u)", "/",
+        BinaryData{"int", "uint_10", "OpSDiv", "int_30", "i32", "bitcast<i32>(10u)", "/",
                    "30"},  // Mixed, returning v2int, first arg v2uint
-        BinaryData{"v2int", "v2uint_10_20", "OpSDiv", "v2int_30_40",
-                   "vec2<i32>", AstFor("cast_int_v2uint_10_20"), "/",
-                   AstFor("v2int_30_40")},
+        BinaryData{"v2int", "v2uint_10_20", "OpSDiv", "v2int_30_40", "vec2<i32>",
+                   AstFor("cast_int_v2uint_10_20"), "/", AstFor("v2int_30_40")},
         // Mixed, returning v2int, second arg v2uint
-        BinaryData{"v2int", "v2int_30_40", "OpSDiv", "v2uint_10_20",
-                   "vec2<i32>", AstFor("v2int_30_40"), "/",
-                   AstFor("cast_int_v2uint_10_20")}));
+        BinaryData{"v2int", "v2int_30_40", "OpSDiv", "v2uint_10_20", "vec2<i32>",
+                   AstFor("v2int_30_40"), "/", AstFor("cast_int_v2uint_10_20")}));
 
 TEST_F(SpvBinaryArithTestBasic, SDiv_Scalar_UnsignedResult) {
-  // The WGSL signed division operator expects both operands to be signed
-  // and the result is signed as well.
-  // In this test SPIR-V demands an unsigned result, so we have to
-  // wrap the result with an as-cast.
-  const auto assembly = Preamble() + R"(
+    // The WGSL signed division operator expects both operands to be signed
+    // and the result is signed as well.
+    // In this test SPIR-V demands an unsigned result, so we have to
+    // wrap the result with an as-cast.
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSDiv %uint %int_30 %int_40
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : u32 = bitcast<u32>((30 / 40));"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : u32 = bitcast<u32>((30 / 40));"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, SDiv_Vector_UnsignedResult) {
-  // The WGSL signed division operator expects both operands to be signed
-  // and the result is signed as well.
-  // In this test SPIR-V demands an unsigned result, so we have to
-  // wrap the result with an as-cast.
-  const auto assembly = Preamble() + R"(
+    // The WGSL signed division operator expects both operands to be signed
+    // and the result is signed as well.
+    // In this test SPIR-V demands an unsigned result, so we have to
+    // wrap the result with an as-cast.
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSDiv %v2uint %v2int_30_40 %v2int_40_30
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(
-      test::ToString(p->program(), ast_body),
-      HasSubstr(
-          R"(let x_1 : vec2<u32> = bitcast<vec2<u32>>((vec2<i32>(30, 40) / vec2<i32>(40, 30)));)"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(
+        test::ToString(p->program(), ast_body),
+        HasSubstr(
+            R"(let x_1 : vec2<u32> = bitcast<vec2<u32>>((vec2<i32>(30, 40) / vec2<i32>(40, 30)));)"));
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    SpvParserTest_FDiv,
-    SpvBinaryArithTest,
-    ::testing::Values(
-        // Scalar float
-        BinaryData{"float", "float_50", "OpFDiv", "float_60", "f32", "50.0",
-                   "/", "60.0"},  // Vector float
-        BinaryData{"v2float", "v2float_50_60", "OpFDiv", "v2float_60_50",
-                   "vec2<f32>", AstFor("v2float_50_60"), "/",
-                   AstFor("v2float_60_50")}));
+INSTANTIATE_TEST_SUITE_P(SpvParserTest_FDiv,
+                         SpvBinaryArithTest,
+                         ::testing::Values(
+                             // Scalar float
+                             BinaryData{"float", "float_50", "OpFDiv", "float_60", "f32", "50.0",
+                                        "/", "60.0"},  // Vector float
+                             BinaryData{"v2float", "v2float_50_60", "OpFDiv", "v2float_60_50",
+                                        "vec2<f32>", AstFor("v2float_50_60"), "/",
+                                        AstFor("v2float_60_50")}));
 
-INSTANTIATE_TEST_SUITE_P(
-    SpvParserTest_UMod,
-    SpvBinaryArithTest,
-    ::testing::Values(
-        // Both uint
-        BinaryData{"uint", "uint_10", "OpUMod", "uint_20", "u32", "10u", "%",
-                   "20u"},  // Both v2uint
-        BinaryData{"v2uint", "v2uint_10_20", "OpUMod", "v2uint_20_10",
-                   "vec2<u32>", AstFor("v2uint_10_20"), "%",
-                   AstFor("v2uint_20_10")}));
+INSTANTIATE_TEST_SUITE_P(SpvParserTest_UMod,
+                         SpvBinaryArithTest,
+                         ::testing::Values(
+                             // Both uint
+                             BinaryData{"uint", "uint_10", "OpUMod", "uint_20", "u32", "10u", "%",
+                                        "20u"},  // Both v2uint
+                             BinaryData{"v2uint", "v2uint_10_20", "OpUMod", "v2uint_20_10",
+                                        "vec2<u32>", AstFor("v2uint_10_20"), "%",
+                                        AstFor("v2uint_20_10")}));
 
 // Currently WGSL is missing a mapping for OpSRem
 // https://github.com/gpuweb/gpuweb/issues/702
@@ -661,8 +597,7 @@ INSTANTIATE_TEST_SUITE_P(
     SpvBinaryArithTest,
     ::testing::Values(
         // Both int
-        BinaryData{"int", "int_30", "OpSMod", "int_40", "i32", "30", "%",
-                   "40"},  // Both v2int
+        BinaryData{"int", "int_30", "OpSMod", "int_40", "i32", "30", "%", "40"},  // Both v2int
         BinaryData{"v2int", "v2int_30_40", "OpSMod", "v2int_40_30", "vec2<i32>",
                    AstFor("v2int_30_40"), "%", AstFor("v2int_40_30")}));
 
@@ -671,122 +606,108 @@ INSTANTIATE_TEST_SUITE_P(
     SpvBinaryArithTest,
     ::testing::Values(
         // Mixed, returning int, second arg uint
-        BinaryData{"int", "int_30", "OpSMod", "uint_10", "i32", "30", "%",
-                   "bitcast<i32>(10u)"},
+        BinaryData{"int", "int_30", "OpSMod", "uint_10", "i32", "30", "%", "bitcast<i32>(10u)"},
         // Mixed, returning int, first arg uint
-        BinaryData{"int", "uint_10", "OpSMod", "int_30", "i32",
-                   "bitcast<i32>(10u)", "%",
+        BinaryData{"int", "uint_10", "OpSMod", "int_30", "i32", "bitcast<i32>(10u)", "%",
                    "30"},  // Mixed, returning v2int, first arg v2uint
-        BinaryData{"v2int", "v2uint_10_20", "OpSMod", "v2int_30_40",
-                   "vec2<i32>", AstFor("cast_int_v2uint_10_20"), "%",
-                   AstFor("v2int_30_40")},
+        BinaryData{"v2int", "v2uint_10_20", "OpSMod", "v2int_30_40", "vec2<i32>",
+                   AstFor("cast_int_v2uint_10_20"), "%", AstFor("v2int_30_40")},
         // Mixed, returning v2int, second arg v2uint
-        BinaryData{"v2int", "v2int_30_40", "OpSMod", "v2uint_10_20",
-                   "vec2<i32>", AstFor("v2int_30_40"), "%",
-                   AstFor("cast_int_v2uint_10_20")}));
+        BinaryData{"v2int", "v2int_30_40", "OpSMod", "v2uint_10_20", "vec2<i32>",
+                   AstFor("v2int_30_40"), "%", AstFor("cast_int_v2uint_10_20")}));
 
 TEST_F(SpvBinaryArithTestBasic, SMod_Scalar_UnsignedResult) {
-  // The WGSL signed modulus operator expects both operands to be signed
-  // and the result is signed as well.
-  // In this test SPIR-V demands an unsigned result, so we have to
-  // wrap the result with an as-cast.
-  const auto assembly = Preamble() + R"(
+    // The WGSL signed modulus operator expects both operands to be signed
+    // and the result is signed as well.
+    // In this test SPIR-V demands an unsigned result, so we have to
+    // wrap the result with an as-cast.
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSMod %uint %int_30 %int_40
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_1 : u32 = bitcast<u32>((30 % 40));"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : u32 = bitcast<u32>((30 % 40));"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, SMod_Vector_UnsignedResult) {
-  // The WGSL signed modulus operator expects both operands to be signed
-  // and the result is signed as well.
-  // In this test SPIR-V demands an unsigned result, so we have to
-  // wrap the result with an as-cast.
-  const auto assembly = Preamble() + R"(
+    // The WGSL signed modulus operator expects both operands to be signed
+    // and the result is signed as well.
+    // In this test SPIR-V demands an unsigned result, so we have to
+    // wrap the result with an as-cast.
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSMod %v2uint %v2int_30_40 %v2int_40_30
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(
-      test::ToString(p->program(), ast_body),
-      HasSubstr(
-          R"(let x_1 : vec2<u32> = bitcast<vec2<u32>>((vec2<i32>(30, 40) % vec2<i32>(40, 30)));)"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(
+        test::ToString(p->program(), ast_body),
+        HasSubstr(
+            R"(let x_1 : vec2<u32> = bitcast<vec2<u32>>((vec2<i32>(30, 40) % vec2<i32>(40, 30)));)"));
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    SpvParserTest_FRem,
-    SpvBinaryArithTest,
-    ::testing::Values(
-        // Scalar float
-        BinaryData{"float", "float_50", "OpFRem", "float_60", "f32", "50.0",
-                   "%", "60.0"},  // Vector float
-        BinaryData{"v2float", "v2float_50_60", "OpFRem", "v2float_60_50",
-                   "vec2<f32>", AstFor("v2float_50_60"), "%",
-                   AstFor("v2float_60_50")}));
+INSTANTIATE_TEST_SUITE_P(SpvParserTest_FRem,
+                         SpvBinaryArithTest,
+                         ::testing::Values(
+                             // Scalar float
+                             BinaryData{"float", "float_50", "OpFRem", "float_60", "f32", "50.0",
+                                        "%", "60.0"},  // Vector float
+                             BinaryData{"v2float", "v2float_50_60", "OpFRem", "v2float_60_50",
+                                        "vec2<f32>", AstFor("v2float_50_60"), "%",
+                                        AstFor("v2float_60_50")}));
 
 TEST_F(SpvBinaryArithTestBasic, FMod_Scalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpFMod %float %float_50 %float_60
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(
-      test::ToString(p->program(), ast_body),
-      HasSubstr("let x_1 : f32 = (50.0 - (60.0 * floor((50.0 / 60.0))));"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : f32 = (50.0 - (60.0 * floor((50.0 / 60.0))));"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, FMod_Vector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpFMod %v2float %v2float_50_60 %v2float_60_50
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(
-      test::ToString(p->program(), ast_body),
-      HasSubstr(
-          R"(let x_1 : vec2<f32> = (vec2<f32>(50.0, 60.0) - (vec2<f32>(60.0, 50.0) * floor((vec2<f32>(50.0, 60.0) / vec2<f32>(60.0, 50.0)))));)"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(
+        test::ToString(p->program(), ast_body),
+        HasSubstr(
+            R"(let x_1 : vec2<f32> = (vec2<f32>(50.0, 60.0) - (vec2<f32>(60.0, 50.0) * floor((vec2<f32>(50.0, 60.0) / vec2<f32>(60.0, 50.0)))));)"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, VectorTimesScalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %v2float %v2float_50_60
@@ -795,18 +716,17 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesScalar) {
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_10 : vec2<f32> = (x_1 * x_2);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_10 : vec2<f32> = (x_1 * x_2);"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesScalar) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %m2v2float %m2v2float_a
@@ -815,18 +735,17 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesScalar) {
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_10 : mat2x2<f32> = (x_1 * x_2);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_10 : mat2x2<f32> = (x_1 * x_2);"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, VectorTimesMatrix) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %m2v2float %m2v2float_a
@@ -835,18 +754,17 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesMatrix) {
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_10 : vec2<f32> = (x_1 * x_2);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_10 : vec2<f32> = (x_1 * x_2);"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesVector) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %m2v2float %m2v2float_a
@@ -855,18 +773,17 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesVector) {
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_10 : vec2<f32> = (x_1 * x_2);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_10 : vec2<f32> = (x_1 * x_2);"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesMatrix) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %m2v2float %m2v2float_a
@@ -875,18 +792,17 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesMatrix) {
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_10 : mat2x2<f32> = (x_1 * x_2);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_10 : mat2x2<f32> = (x_1 * x_2);"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, Dot) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %v2float %v2float_50_60
@@ -895,20 +811,19 @@ TEST_F(SpvBinaryArithTestBasic, Dot) {
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("let x_3 : f32 = dot(x_1, x_2);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_3 : f32 = dot(x_1, x_2);"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, OuterProduct) {
-  // OpOuterProduct is expanded to basic operations.
-  // The operands, even if used once, are given their own const definitions.
-  const auto assembly = Preamble() + R"(
+    // OpOuterProduct is expanded to basic operations.
+    // The operands, even if used once, are given their own const definitions.
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpFAdd %v3float %v3float_50_60_70 %v3float_50_60_70 ; column vector
@@ -917,91 +832,84 @@ TEST_F(SpvBinaryArithTestBasic, OuterProduct) {
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(
-      got,
-      HasSubstr(
-          "let x_3 : mat2x3<f32> = mat2x3<f32>("
-          "vec3<f32>((x_2.x * x_1.x), (x_2.x * x_1.y), (x_2.x * x_1.z)), "
-          "vec3<f32>((x_2.y * x_1.x), (x_2.y * x_1.y), (x_2.y * x_1.z)));"))
-      << got;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(got, HasSubstr("let x_3 : mat2x3<f32> = mat2x3<f32>("
+                               "vec3<f32>((x_2.x * x_1.x), (x_2.x * x_1.y), (x_2.x * x_1.z)), "
+                               "vec3<f32>((x_2.y * x_1.x), (x_2.y * x_1.y), (x_2.y * x_1.z)));"))
+        << got;
 }
 
 struct BuiltinData {
-  const std::string spirv;
-  const std::string wgsl;
+    const std::string spirv;
+    const std::string wgsl;
 };
 inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
-  out << "OpData{" << data.spirv << "," << data.wgsl << "}";
-  return out;
+    out << "OpData{" << data.spirv << "," << data.wgsl << "}";
+    return out;
 }
 struct ArgAndTypeData {
-  const std::string spirv_type;
-  const std::string spirv_arg;
-  const std::string ast_type;
+    const std::string spirv_type;
+    const std::string spirv_arg;
+    const std::string ast_type;
 };
 inline std::ostream& operator<<(std::ostream& out, ArgAndTypeData data) {
-  out << "ArgAndTypeData{" << data.spirv_type << "," << data.spirv_arg << ","
-      << data.ast_type << "}";
-  return out;
+    out << "ArgAndTypeData{" << data.spirv_type << "," << data.spirv_arg << "," << data.ast_type
+        << "}";
+    return out;
 }
 
-using SpvBinaryDerivativeTest = SpvParserTestBase<
-    ::testing::TestWithParam<std::tuple<BuiltinData, ArgAndTypeData>>>;
+using SpvBinaryDerivativeTest =
+    SpvParserTestBase<::testing::TestWithParam<std::tuple<BuiltinData, ArgAndTypeData>>>;
 
 TEST_P(SpvBinaryDerivativeTest, Derivatives) {
-  auto& builtin = std::get<0>(GetParam());
-  auto& arg = std::get<1>(GetParam());
+    auto& builtin = std::get<0>(GetParam());
+    auto& arg = std::get<1>(GetParam());
 
-  const auto assembly = R"(
+    const auto assembly = R"(
      OpCapability DerivativeControl
 )" + Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %)" +
-                        arg.spirv_type + " %" + arg.spirv_arg + R"(
+                          arg.spirv_type + " %" + arg.spirv_arg + R"(
      %2 = )" + builtin.spirv +
-                        " %" + arg.spirv_type + R"( %1
+                          " %" + arg.spirv_type + R"( %1
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(
-      test::ToString(p->program(), ast_body),
-      HasSubstr("let x_2 : " + arg.ast_type + " = " + builtin.wgsl + "(x_1);"));
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_2 : " + arg.ast_type + " = " + builtin.wgsl + "(x_1);"));
 }
 
 INSTANTIATE_TEST_SUITE_P(
     SpvBinaryDerivativeTest,
     SpvBinaryDerivativeTest,
-    testing::Combine(
-        ::testing::Values(BuiltinData{"OpDPdx", "dpdx"},
-                          BuiltinData{"OpDPdy", "dpdy"},
-                          BuiltinData{"OpFwidth", "fwidth"},
-                          BuiltinData{"OpDPdxFine", "dpdxFine"},
-                          BuiltinData{"OpDPdyFine", "dpdyFine"},
-                          BuiltinData{"OpFwidthFine", "fwidthFine"},
-                          BuiltinData{"OpDPdxCoarse", "dpdxCoarse"},
-                          BuiltinData{"OpDPdyCoarse", "dpdyCoarse"},
-                          BuiltinData{"OpFwidthCoarse", "fwidthCoarse"}),
-        ::testing::Values(
-            ArgAndTypeData{"float", "float_50", "f32"},
-            ArgAndTypeData{"v2float", "v2float_50_60", "vec2<f32>"},
-            ArgAndTypeData{"v3float", "v3float_50_60_70", "vec3<f32>"})));
+    testing::Combine(::testing::Values(BuiltinData{"OpDPdx", "dpdx"},
+                                       BuiltinData{"OpDPdy", "dpdy"},
+                                       BuiltinData{"OpFwidth", "fwidth"},
+                                       BuiltinData{"OpDPdxFine", "dpdxFine"},
+                                       BuiltinData{"OpDPdyFine", "dpdyFine"},
+                                       BuiltinData{"OpFwidthFine", "fwidthFine"},
+                                       BuiltinData{"OpDPdxCoarse", "dpdxCoarse"},
+                                       BuiltinData{"OpDPdyCoarse", "dpdyCoarse"},
+                                       BuiltinData{"OpFwidthCoarse", "fwidthCoarse"}),
+                     ::testing::Values(ArgAndTypeData{"float", "float_50", "f32"},
+                                       ArgAndTypeData{"v2float", "v2float_50_60", "vec2<f32>"},
+                                       ArgAndTypeData{"v3float", "v3float_50_60_70",
+                                                      "vec3<f32>"})));
 
 TEST_F(SpvUnaryArithTest, Transpose_2x2) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %m2v2float %m2v2float_a
@@ -1009,20 +917,18 @@ TEST_F(SpvUnaryArithTest, Transpose_2x2) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto* expected = "let x_2 : mat2x2<f32> = transpose(x_1);";
-  auto ast_body = fe.ast_body();
-  const auto got = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(got, HasSubstr(expected)) << got;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    const auto* expected = "let x_2 : mat2x2<f32> = transpose(x_1);";
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
 TEST_F(SpvUnaryArithTest, Transpose_2x3) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %m2v3float %m2v3float_a
@@ -1030,23 +936,21 @@ TEST_F(SpvUnaryArithTest, Transpose_2x3) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  // Note, in the AST dump mat_2_3 means 2 rows and 3 columns.
-  // So the column vectors have 2 elements.
-  // That is,   %m3v2float is __mat_2_3f32.
-  const auto* expected = "let x_2 : mat3x2<f32> = transpose(x_1);";
-  auto ast_body = fe.ast_body();
-  const auto got = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(got, HasSubstr(expected)) << got;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    // Note, in the AST dump mat_2_3 means 2 rows and 3 columns.
+    // So the column vectors have 2 elements.
+    // That is,   %m3v2float is __mat_2_3f32.
+    const auto* expected = "let x_2 : mat3x2<f32> = transpose(x_1);";
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
 TEST_F(SpvUnaryArithTest, Transpose_3x2) {
-  const auto assembly = Preamble() + R"(
+    const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %m3v2float %m3v2float_a
@@ -1054,16 +958,14 @@ TEST_F(SpvUnaryArithTest, Transpose_3x2) {
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << p->error() << "\n"
-      << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto* expected = "let x_2 : mat2x3<f32> = transpose(x_1);";
-  auto ast_body = fe.ast_body();
-  const auto got = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(got, HasSubstr(expected)) << got;
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error() << "\n" << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    const auto* expected = "let x_2 : mat2x3<f32> = transpose(x_1);";
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 
 // TODO(dneto): OpSRem. Missing from WGSL

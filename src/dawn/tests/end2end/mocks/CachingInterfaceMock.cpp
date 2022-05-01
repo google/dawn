@@ -79,8 +79,7 @@ void CachingInterfaceMock::StoreDataDefault(const WGPUDevice device,
 }
 
 DawnCachingMockPlatform::DawnCachingMockPlatform(dawn::platform::CachingInterface* cachingInterface)
-    : mCachingInterface(cachingInterface) {
-}
+    : mCachingInterface(cachingInterface) {}
 
 dawn::platform::CachingInterface* DawnCachingMockPlatform::GetCachingInterface(
     const void* fingerprint,

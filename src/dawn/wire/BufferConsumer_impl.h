@@ -22,51 +22,51 @@
 
 namespace dawn::wire {
 
-    template <typename BufferT>
-    template <typename T>
-    WireResult BufferConsumer<BufferT>::Peek(T** data) {
-        if (sizeof(T) > mSize) {
-            return WireResult::FatalError;
-        }
-
-        *data = reinterpret_cast<T*>(mBuffer);
-        return WireResult::Success;
+template <typename BufferT>
+template <typename T>
+WireResult BufferConsumer<BufferT>::Peek(T** data) {
+    if (sizeof(T) > mSize) {
+        return WireResult::FatalError;
     }
 
-    template <typename BufferT>
-    template <typename T>
-    WireResult BufferConsumer<BufferT>::Next(T** data) {
-        if (sizeof(T) > mSize) {
-            return WireResult::FatalError;
-        }
+    *data = reinterpret_cast<T*>(mBuffer);
+    return WireResult::Success;
+}
 
-        *data = reinterpret_cast<T*>(mBuffer);
-        mBuffer += sizeof(T);
-        mSize -= sizeof(T);
-        return WireResult::Success;
+template <typename BufferT>
+template <typename T>
+WireResult BufferConsumer<BufferT>::Next(T** data) {
+    if (sizeof(T) > mSize) {
+        return WireResult::FatalError;
     }
 
-    template <typename BufferT>
-    template <typename T, typename N>
-    WireResult BufferConsumer<BufferT>::NextN(N count, T** data) {
-        static_assert(std::is_unsigned<N>::value, "|count| argument of NextN must be unsigned.");
+    *data = reinterpret_cast<T*>(mBuffer);
+    mBuffer += sizeof(T);
+    mSize -= sizeof(T);
+    return WireResult::Success;
+}
 
-        constexpr size_t kMaxCountWithoutOverflows = std::numeric_limits<size_t>::max() / sizeof(T);
-        if (count > kMaxCountWithoutOverflows) {
-            return WireResult::FatalError;
-        }
+template <typename BufferT>
+template <typename T, typename N>
+WireResult BufferConsumer<BufferT>::NextN(N count, T** data) {
+    static_assert(std::is_unsigned<N>::value, "|count| argument of NextN must be unsigned.");
 
-        // Cannot overflow because |count| is not greater than |kMaxCountWithoutOverflows|.
-        size_t totalSize = sizeof(T) * count;
-        if (totalSize > mSize) {
-            return WireResult::FatalError;
-        }
-
-        *data = reinterpret_cast<T*>(mBuffer);
-        mBuffer += totalSize;
-        mSize -= totalSize;
-        return WireResult::Success;
+    constexpr size_t kMaxCountWithoutOverflows = std::numeric_limits<size_t>::max() / sizeof(T);
+    if (count > kMaxCountWithoutOverflows) {
+        return WireResult::FatalError;
     }
+
+    // Cannot overflow because |count| is not greater than |kMaxCountWithoutOverflows|.
+    size_t totalSize = sizeof(T) * count;
+    if (totalSize > mSize) {
+        return WireResult::FatalError;
+    }
+
+    *data = reinterpret_cast<T*>(mBuffer);
+    mBuffer += totalSize;
+    mSize -= totalSize;
+    return WireResult::Success;
+}
 
 }  // namespace dawn::wire
 

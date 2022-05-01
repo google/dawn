@@ -30,20 +30,20 @@ namespace tint::sem {
 /// ParameterUsage is extra metadata for identifying a parameter based on its
 /// overload position
 enum class ParameterUsage {
-  kNone = -1,
-  kArrayIndex,
-  kBias,
-  kComponent,
-  kCoords,
-  kDdx,
-  kDdy,
-  kDepthRef,
-  kLevel,
-  kOffset,
-  kSampleIndex,
-  kSampler,
-  kTexture,
-  kValue,
+    kNone = -1,
+    kArrayIndex,
+    kBias,
+    kComponent,
+    kCoords,
+    kDdx,
+    kDdy,
+    kDepthRef,
+    kLevel,
+    kOffset,
+    kSampleIndex,
+    kSampler,
+    kTexture,
+    kValue,
 };
 
 /// @returns a string representation of the given parameter usage.

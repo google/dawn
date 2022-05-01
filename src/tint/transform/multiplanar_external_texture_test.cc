@@ -21,38 +21,38 @@ namespace {
 using MultiplanarExternalTextureTest = TransformTest;
 
 TEST_F(MultiplanarExternalTextureTest, ShouldRunEmptyModule) {
-  auto* src = R"()";
+    auto* src = R"()";
 
-  EXPECT_FALSE(ShouldRun<MultiplanarExternalTexture>(src));
+    EXPECT_FALSE(ShouldRun<MultiplanarExternalTexture>(src));
 }
 
 TEST_F(MultiplanarExternalTextureTest, ShouldRunHasExternalTextureAlias) {
-  auto* src = R"(
+    auto* src = R"(
 type ET = texture_external;
 )";
 
-  EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src));
+    EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src));
 }
 TEST_F(MultiplanarExternalTextureTest, ShouldRunHasExternalTextureGlobal) {
-  auto* src = R"(
+    auto* src = R"(
 @group(0) @binding(0) var ext_tex : texture_external;
 )";
 
-  EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src));
+    EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src));
 }
 
 TEST_F(MultiplanarExternalTextureTest, ShouldRunHasExternalTextureParam) {
-  auto* src = R"(
+    auto* src = R"(
 fn f(ext_tex : texture_external) {}
 )";
 
-  EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src));
+    EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src));
 }
 
 // Running the transform without passing in data for the new bindings should
 // result in an error.
 TEST_F(MultiplanarExternalTextureTest, ErrorNoPassedData) {
-  auto* src = R"(
+    auto* src = R"(
 @group(0) @binding(0) var s : sampler;
 @group(0) @binding(1) var ext_tex : texture_external;
 
@@ -61,16 +61,16 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   return textureSampleLevel(ext_tex, s, coord.xy);
 }
 )";
-  auto* expect =
-      R"(error: missing new binding point data for tint::transform::MultiplanarExternalTexture)";
+    auto* expect =
+        R"(error: missing new binding point data for tint::transform::MultiplanarExternalTexture)";
 
-  auto got = Run<MultiplanarExternalTexture>(src);
-  EXPECT_EQ(expect, str(got));
+    auto got = Run<MultiplanarExternalTexture>(src);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Running the transform with incorrect binding data should result in an error.
 TEST_F(MultiplanarExternalTextureTest, ErrorIncorrectBindingPont) {
-  auto* src = R"(
+    auto* src = R"(
 @group(0) @binding(0) var s : sampler;
 @group(0) @binding(1) var ext_tex : texture_external;
 
@@ -80,21 +80,20 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  auto* expect =
-      R"(error: missing new binding points for texture_external at binding {0,1})";
+    auto* expect = R"(error: missing new binding points for texture_external at binding {0,1})";
 
-  DataMap data;
-  // This bindings map specifies 0,0 as the location of the texture_external,
-  // which is incorrect.
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    // This bindings map specifies 0,0 as the location of the texture_external,
+    // which is incorrect.
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Tests that the transform works with a textureDimensions call.
 TEST_F(MultiplanarExternalTextureTest, Dimensions) {
-  auto* src = R"(
+    auto* src = R"(
 @group(0) @binding(0) var ext_tex : texture_external;
 
 @stage(fragment)
@@ -105,7 +104,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -139,16 +138,16 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Tests that the transform works with a textureDimensions call.
 TEST_F(MultiplanarExternalTextureTest, Dimensions_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(fragment)
 fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   var dim : vec2<i32>;
@@ -159,7 +158,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 @group(0) @binding(0) var ext_tex : texture_external;
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -193,16 +192,16 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;
 )";
 
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Test that the transform works with a textureSampleLevel call.
 TEST_F(MultiplanarExternalTextureTest, BasicTextureSampleLevel) {
-  auto* src = R"(
+    auto* src = R"(
 @group(0) @binding(0) var s : sampler;
 @group(0) @binding(1) var ext_tex : texture_external;
 
@@ -212,7 +211,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -266,16 +265,16 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        MultiplanarExternalTexture::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Test that the transform works with a textureSampleLevel call.
 TEST_F(MultiplanarExternalTextureTest, BasicTextureSampleLevel_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(fragment)
 fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   return textureSampleLevel(ext_tex, s, coord.xy);
@@ -285,7 +284,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 @group(0) @binding(0) var s : sampler;
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -339,16 +338,16 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 @group(0) @binding(0) var s : sampler;
 )";
 
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        MultiplanarExternalTexture::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Tests that the transform works with a textureLoad call.
 TEST_F(MultiplanarExternalTextureTest, BasicTextureLoad) {
-  auto* src = R"(
+    auto* src = R"(
 @group(0) @binding(0) var ext_tex : texture_external;
 
 @stage(fragment)
@@ -357,7 +356,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -409,16 +408,16 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Tests that the transform works with a textureLoad call.
 TEST_F(MultiplanarExternalTextureTest, BasicTextureLoad_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(fragment)
 fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   return textureLoad(ext_tex, vec2<i32>(1, 1));
@@ -427,7 +426,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 @group(0) @binding(0) var ext_tex : texture_external;
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -479,17 +478,17 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;
 )";
 
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Tests that the transform works with both a textureSampleLevel and textureLoad
 // call.
 TEST_F(MultiplanarExternalTextureTest, TextureSampleAndTextureLoad) {
-  auto* src = R"(
+    auto* src = R"(
 @group(0) @binding(0) var s : sampler;
 @group(0) @binding(1) var ext_tex : texture_external;
 
@@ -499,7 +498,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -566,17 +565,17 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        MultiplanarExternalTexture::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Tests that the transform works with both a textureSampleLevel and textureLoad
 // call.
 TEST_F(MultiplanarExternalTextureTest, TextureSampleAndTextureLoad_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(fragment)
 fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   return textureSampleLevel(ext_tex, s, coord.xy) + textureLoad(ext_tex, vec2<i32>(1, 1));
@@ -586,7 +585,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 @group(0) @binding(1) var ext_tex : texture_external;
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -653,16 +652,16 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 @group(0) @binding(1) var ext_tex : texture_2d<f32>;
 )";
 
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        MultiplanarExternalTexture::BindingsMap{{{0, 1}, {{0, 2}, {0, 3}}}});
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Tests that the transform works with many instances of texture_external.
 TEST_F(MultiplanarExternalTextureTest, ManyTextureSampleLevel) {
-  auto* src = R"(
+    auto* src = R"(
 @group(0) @binding(0) var s : sampler;
 @group(0) @binding(1) var ext_tex : texture_external;
 @group(0) @binding(2) var ext_tex_1 : texture_external;
@@ -675,7 +674,7 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -747,22 +746,21 @@ fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
 }
 )";
 
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{
-          {{0, 1}, {{0, 4}, {0, 5}}},
-          {{0, 2}, {{0, 6}, {0, 7}}},
-          {{0, 3}, {{0, 8}, {0, 9}}},
-          {{1, 0}, {{1, 1}, {1, 2}}},
-      });
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
+        {{0, 1}, {{0, 4}, {0, 5}}},
+        {{0, 2}, {{0, 6}, {0, 7}}},
+        {{0, 3}, {{0, 8}, {0, 9}}},
+        {{1, 0}, {{1, 1}, {1, 2}}},
+    });
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Tests that the texture_external passed as a function parameter produces the
 // correct output.
 TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsParam) {
-  auto* src = R"(
+    auto* src = R"(
 fn f(t : texture_external, s : sampler) {
   textureSampleLevel(t, s, vec2<f32>(1.0, 2.0));
 }
@@ -776,7 +774,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -833,20 +831,18 @@ fn main() {
   f(ext_tex, ext_tex_plane_1, ext_tex_params, smp);
 }
 )";
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{
-          {{0, 0}, {{0, 2}, {0, 3}}},
-      });
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
+        {{0, 0}, {{0, 2}, {0, 3}}},
+    });
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Tests that the texture_external passed as a function parameter produces the
 // correct output.
-TEST_F(MultiplanarExternalTextureTest,
-       ExternalTexturePassedAsParam_OutOfOrder) {
-  auto* src = R"(
+TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsParam_OutOfOrder) {
+    auto* src = R"(
 @stage(fragment)
 fn main() {
   f(ext_tex, smp);
@@ -860,7 +856,7 @@ fn f(t : texture_external, s : sampler) {
 @group(0) @binding(1) var smp : sampler;
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -917,19 +913,18 @@ fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 
 
 @group(0) @binding(1) var smp : sampler;
 )";
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{
-          {{0, 0}, {{0, 2}, {0, 3}}},
-      });
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
+        {{0, 0}, {{0, 2}, {0, 3}}},
+    });
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Tests that the texture_external passed as a parameter not in the first
 // position produces the correct output.
 TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsSecondParam) {
-  auto* src = R"(
+    auto* src = R"(
 fn f(s : sampler, t : texture_external) {
   textureSampleLevel(t, s, vec2<f32>(1.0, 2.0));
 }
@@ -943,7 +938,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -1000,19 +995,18 @@ fn main() {
   f(smp, ext_tex, ext_tex_plane_1, ext_tex_params);
 }
 )";
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{
-          {{0, 0}, {{0, 2}, {0, 3}}},
-      });
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
+        {{0, 0}, {{0, 2}, {0, 3}}},
+    });
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Tests that multiple texture_external params passed to a function produces the
 // correct output.
 TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsParamMultiple) {
-  auto* src = R"(
+    auto* src = R"(
 fn f(t : texture_external, s : sampler, t2 : texture_external) {
   textureSampleLevel(t, s, vec2<f32>(1.0, 2.0));
   textureSampleLevel(t2, s, vec2<f32>(1.0, 2.0));
@@ -1028,7 +1022,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -1092,21 +1086,19 @@ fn main() {
   f(ext_tex, ext_tex_plane_1, ext_tex_params, smp, ext_tex2, ext_tex_plane_1_1, ext_tex_params_1);
 }
 )";
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{
-          {{0, 0}, {{0, 3}, {0, 4}}},
-          {{0, 2}, {{0, 5}, {0, 6}}},
-      });
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
+        {{0, 0}, {{0, 3}, {0, 4}}},
+        {{0, 2}, {{0, 5}, {0, 6}}},
+    });
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Tests that multiple texture_external params passed to a function produces the
 // correct output.
-TEST_F(MultiplanarExternalTextureTest,
-       ExternalTexturePassedAsParamMultiple_OutOfOrder) {
-  auto* src = R"(
+TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsParamMultiple_OutOfOrder) {
+    auto* src = R"(
 @stage(fragment)
 fn main() {
   f(ext_tex, smp, ext_tex2);
@@ -1123,7 +1115,7 @@ fn f(t : texture_external, s : sampler, t2 : texture_external) {
 
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -1187,20 +1179,19 @@ fn f(t : texture_2d<f32>, ext_tex_plane_1_2 : texture_2d<f32>, ext_tex_params_2 
 
 @group(0) @binding(2) var ext_tex2 : texture_2d<f32>;
 )";
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{
-          {{0, 0}, {{0, 3}, {0, 4}}},
-          {{0, 2}, {{0, 5}, {0, 6}}},
-      });
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
+        {{0, 0}, {{0, 3}, {0, 4}}},
+        {{0, 2}, {{0, 5}, {0, 6}}},
+    });
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Tests that the texture_external passed to as a parameter to multiple
 // functions produces the correct output.
 TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsParamNested) {
-  auto* src = R"(
+    auto* src = R"(
 fn nested(t : texture_external, s : sampler) {
   textureSampleLevel(t, s, vec2<f32>(1.0, 2.0));
 }
@@ -1218,7 +1209,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -1279,20 +1270,18 @@ fn main() {
   f(ext_tex, ext_tex_plane_1, ext_tex_params, smp);
 }
 )";
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{
-          {{0, 0}, {{0, 2}, {0, 3}}},
-      });
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
+        {{0, 0}, {{0, 2}, {0, 3}}},
+    });
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Tests that the texture_external passed to as a parameter to multiple
 // functions produces the correct output.
-TEST_F(MultiplanarExternalTextureTest,
-       ExternalTexturePassedAsParamNested_OutOfOrder) {
-  auto* src = R"(
+TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsParamNested_OutOfOrder) {
+    auto* src = R"(
 fn nested(t : texture_external, s : sampler) {
   textureSampleLevel(t, s, vec2<f32>(1.0, 2.0));
 }
@@ -1310,7 +1299,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -1371,26 +1360,24 @@ fn main() {
   f(ext_tex, ext_tex_plane_1, ext_tex_params, smp);
 }
 )";
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{
-          {{0, 0}, {{0, 2}, {0, 3}}},
-      });
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
+        {{0, 0}, {{0, 2}, {0, 3}}},
+    });
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Tests that the transform works with a function using an external texture,
 // even if there's no external texture declared at module scope.
-TEST_F(MultiplanarExternalTextureTest,
-       ExternalTexturePassedAsParamWithoutGlobalDecl) {
-  auto* src = R"(
+TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsParamWithoutGlobalDecl) {
+    auto* src = R"(
 fn f(ext_tex : texture_external) -> vec2<i32> {
   return textureDimensions(ext_tex);
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -1415,16 +1402,16 @@ fn f(ext_tex : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_param
 }
 )";
 
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Tests that the the transform handles aliases to external textures
 TEST_F(MultiplanarExternalTextureTest, ExternalTextureAlias) {
-  auto* src = R"(
+    auto* src = R"(
 type ET = texture_external;
 
 fn f(t : ET, s : sampler) {
@@ -1440,7 +1427,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -1499,18 +1486,17 @@ fn main() {
   f(ext_tex, ext_tex_plane_1, ext_tex_params, smp);
 }
 )";
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{
-          {{0, 0}, {{0, 2}, {0, 3}}},
-      });
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
+        {{0, 0}, {{0, 2}, {0, 3}}},
+    });
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Tests that the the transform handles aliases to external textures
 TEST_F(MultiplanarExternalTextureTest, ExternalTextureAlias_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(fragment)
 fn main() {
   f(ext_tex, smp);
@@ -1526,7 +1512,7 @@ fn f(t : ET, s : sampler) {
 type ET = texture_external;
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 struct GammaTransferParams {
   G : f32,
   A : f32,
@@ -1585,13 +1571,12 @@ fn f(t : texture_2d<f32>, ext_tex_plane_1_1 : texture_2d<f32>, ext_tex_params_1 
 
 type ET = texture_external;
 )";
-  DataMap data;
-  data.Add<MultiplanarExternalTexture::NewBindingPoints>(
-      MultiplanarExternalTexture::BindingsMap{
-          {{0, 0}, {{0, 2}, {0, 3}}},
-      });
-  auto got = Run<MultiplanarExternalTexture>(src, data);
-  EXPECT_EQ(expect, str(got));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(MultiplanarExternalTexture::BindingsMap{
+        {{0, 0}, {{0, 2}, {0, 3}}},
+    });
+    auto got = Run<MultiplanarExternalTexture>(src, data);
+    EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

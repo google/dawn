@@ -20,25 +20,25 @@
 
 namespace dawn::native::opengl {
 
-    struct OpenGLFunctions;
+struct OpenGLFunctions;
 
-    class PersistentPipelineState {
-      public:
-        void SetDefaultState(const OpenGLFunctions& gl);
-        void SetStencilFuncsAndMask(const OpenGLFunctions& gl,
-                                    GLenum stencilBackCompareFunction,
-                                    GLenum stencilFrontCompareFunction,
-                                    uint32_t stencilReadMask);
-        void SetStencilReference(const OpenGLFunctions& gl, uint32_t stencilReference);
+class PersistentPipelineState {
+  public:
+    void SetDefaultState(const OpenGLFunctions& gl);
+    void SetStencilFuncsAndMask(const OpenGLFunctions& gl,
+                                GLenum stencilBackCompareFunction,
+                                GLenum stencilFrontCompareFunction,
+                                uint32_t stencilReadMask);
+    void SetStencilReference(const OpenGLFunctions& gl, uint32_t stencilReference);
 
-      private:
-        void CallGLStencilFunc(const OpenGLFunctions& gl);
+  private:
+    void CallGLStencilFunc(const OpenGLFunctions& gl);
 
-        GLenum mStencilBackCompareFunction = GL_ALWAYS;
-        GLenum mStencilFrontCompareFunction = GL_ALWAYS;
-        GLuint mStencilReadMask = 0xffffffff;
-        GLuint mStencilReference = 0;
-    };
+    GLenum mStencilBackCompareFunction = GL_ALWAYS;
+    GLenum mStencilFrontCompareFunction = GL_ALWAYS;
+    GLuint mStencilReadMask = 0xffffffff;
+    GLuint mStencilReference = 0;
+};
 
 }  // namespace dawn::native::opengl
 

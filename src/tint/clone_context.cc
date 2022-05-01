@@ -26,91 +26,85 @@ namespace tint {
 CloneContext::ListTransforms::ListTransforms() = default;
 CloneContext::ListTransforms::~ListTransforms() = default;
 
-CloneContext::CloneContext(ProgramBuilder* to,
-                           Program const* from,
-                           bool auto_clone_symbols)
+CloneContext::CloneContext(ProgramBuilder* to, Program const* from, bool auto_clone_symbols)
     : dst(to), src(from) {
-  if (auto_clone_symbols) {
-    // Almost all transforms will want to clone all symbols before doing any
-    // work, to avoid any newly created symbols clashing with existing symbols
-    // in the source program and causing them to be renamed.
-    from->Symbols().Foreach([&](Symbol s, const std::string&) { Clone(s); });
-  }
+    if (auto_clone_symbols) {
+        // Almost all transforms will want to clone all symbols before doing any
+        // work, to avoid any newly created symbols clashing with existing symbols
+        // in the source program and causing them to be renamed.
+        from->Symbols().Foreach([&](Symbol s, const std::string&) { Clone(s); });
+    }
 }
 
-CloneContext::CloneContext(ProgramBuilder* builder)
-    : CloneContext(builder, nullptr, false) {}
+CloneContext::CloneContext(ProgramBuilder* builder) : CloneContext(builder, nullptr, false) {}
 
 CloneContext::~CloneContext() = default;
 
 Symbol CloneContext::Clone(Symbol s) {
-  if (!src) {
-    return s;  // In-place clone
-  }
-  return utils::GetOrCreate(cloned_symbols_, s, [&]() -> Symbol {
-    if (symbol_transform_) {
-      return symbol_transform_(s);
+    if (!src) {
+        return s;  // In-place clone
     }
-    return dst->Symbols().New(src->Symbols().NameFor(s));
-  });
+    return utils::GetOrCreate(cloned_symbols_, s, [&]() -> Symbol {
+        if (symbol_transform_) {
+            return symbol_transform_(s);
+        }
+        return dst->Symbols().New(src->Symbols().NameFor(s));
+    });
 }
 
 void CloneContext::Clone() {
-  dst->AST().Copy(this, &src->AST());
+    dst->AST().Copy(this, &src->AST());
 }
 
 ast::FunctionList CloneContext::Clone(const ast::FunctionList& v) {
-  ast::FunctionList out;
-  out.reserve(v.size());
-  for (const ast::Function* el : v) {
-    out.Add(Clone(el));
-  }
-  return out;
+    ast::FunctionList out;
+    out.reserve(v.size());
+    for (const ast::Function* el : v) {
+        out.Add(Clone(el));
+    }
+    return out;
 }
 
 const tint::Cloneable* CloneContext::CloneCloneable(const Cloneable* object) {
-  // If the input is nullptr, there's nothing to clone - just return nullptr.
-  if (object == nullptr) {
-    return nullptr;
-  }
-
-  // Was Replace() called for this object?
-  auto it = replacements_.find(object);
-  if (it != replacements_.end()) {
-    return it->second();
-  }
-
-  // Attempt to clone using the registered replacer functions.
-  auto& typeinfo = object->TypeInfo();
-  for (auto& transform : transforms_) {
-    if (typeinfo.Is(transform.typeinfo)) {
-      if (auto* transformed = transform.function(object)) {
-        return transformed;
-      }
-      break;
+    // If the input is nullptr, there's nothing to clone - just return nullptr.
+    if (object == nullptr) {
+        return nullptr;
     }
-  }
 
-  // No transform for this type, or the transform returned nullptr.
-  // Clone with T::Clone().
-  return object->Clone(this);
+    // Was Replace() called for this object?
+    auto it = replacements_.find(object);
+    if (it != replacements_.end()) {
+        return it->second();
+    }
+
+    // Attempt to clone using the registered replacer functions.
+    auto& typeinfo = object->TypeInfo();
+    for (auto& transform : transforms_) {
+        if (typeinfo.Is(transform.typeinfo)) {
+            if (auto* transformed = transform.function(object)) {
+                return transformed;
+            }
+            break;
+        }
+    }
+
+    // No transform for this type, or the transform returned nullptr.
+    // Clone with T::Clone().
+    return object->Clone(this);
 }
 
-void CloneContext::CheckedCastFailure(const Cloneable* got,
-                                      const TypeInfo& expected) {
-  TINT_ICE(Clone, Diagnostics())
-      << "Cloned object was not of the expected type\n"
-      << "got:      " << got->TypeInfo().name << "\n"
-      << "expected: " << expected.name;
+void CloneContext::CheckedCastFailure(const Cloneable* got, const TypeInfo& expected) {
+    TINT_ICE(Clone, Diagnostics()) << "Cloned object was not of the expected type\n"
+                                   << "got:      " << got->TypeInfo().name << "\n"
+                                   << "expected: " << expected.name;
 }
 
 diag::List& CloneContext::Diagnostics() const {
-  return dst->Diagnostics();
+    return dst->Diagnostics();
 }
 
 CloneContext::CloneableTransform::CloneableTransform() = default;
-CloneContext::CloneableTransform::CloneableTransform(
-    const CloneableTransform&) = default;
+CloneContext::CloneableTransform::CloneableTransform(const CloneableTransform&) = default;
 CloneContext::CloneableTransform::~CloneableTransform() = default;
 
 }  // namespace tint

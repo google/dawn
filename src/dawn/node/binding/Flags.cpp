@@ -15,15 +15,15 @@
 #include "src/dawn/node/binding/Flags.h"
 
 namespace wgpu::binding {
-    void Flags::Set(const std::string& key, const std::string& value) {
-        flags_[key] = value;
-    }
+void Flags::Set(const std::string& key, const std::string& value) {
+    flags_[key] = value;
+}
 
-    std::optional<std::string> Flags::Get(const std::string& key) const {
-        auto iter = flags_.find(key);
-        if (iter != flags_.end()) {
-            return iter->second;
-        }
-        return {};
+std::optional<std::string> Flags::Get(const std::string& key) const {
+    auto iter = flags_.find(key);
+    if (iter != flags_.end()) {
+        return iter->second;
     }
+    return {};
+}
 }  // namespace wgpu::binding

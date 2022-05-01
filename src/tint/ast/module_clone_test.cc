@@ -23,9 +23,9 @@ namespace {
 
 TEST(ModuleCloneTest, Clone) {
 #if TINT_BUILD_WGSL_READER && TINT_BUILD_WGSL_WRITER
-  // Shader that exercises the bulk of the AST nodes and types.
-  // See also fuzzers/tint_ast_clone_fuzzer.cc for further coverage of cloning.
-  Source::File file("test.wgsl", R"(struct S0 {
+    // Shader that exercises the bulk of the AST nodes and types.
+    // See also fuzzers/tint_ast_clone_fuzzer.cc for further coverage of cloning.
+    Source::File file("test.wgsl", R"(struct S0 {
   @size(4)
   m0 : u32,
   m1 : array<u32>,
@@ -116,62 +116,62 @@ let declaration_order_check_4 : i32 = 1;
 
 )");
 
-  // Parse the wgsl, create the src program
-  auto src = reader::wgsl::Parse(&file);
+    // Parse the wgsl, create the src program
+    auto src = reader::wgsl::Parse(&file);
 
-  ASSERT_TRUE(src.IsValid()) << diag::Formatter().format(src.Diagnostics());
+    ASSERT_TRUE(src.IsValid()) << diag::Formatter().format(src.Diagnostics());
 
-  // Clone the src program to dst
-  Program dst(src.Clone());
+    // Clone the src program to dst
+    Program dst(src.Clone());
 
-  ASSERT_TRUE(dst.IsValid()) << diag::Formatter().format(dst.Diagnostics());
+    ASSERT_TRUE(dst.IsValid()) << diag::Formatter().format(dst.Diagnostics());
 
-  // Expect the printed strings to match
-  EXPECT_EQ(Program::printer(&src), Program::printer(&dst));
+    // Expect the printed strings to match
+    EXPECT_EQ(Program::printer(&src), Program::printer(&dst));
 
-  // Check that none of the AST nodes or type pointers in dst are found in src
-  std::unordered_set<const ast::Node*> src_nodes;
-  for (auto* src_node : src.ASTNodes().Objects()) {
-    src_nodes.emplace(src_node);
-  }
-  std::unordered_set<const sem::Type*> src_types;
-  for (auto* src_type : src.Types()) {
-    src_types.emplace(src_type);
-  }
-  for (auto* dst_node : dst.ASTNodes().Objects()) {
-    ASSERT_EQ(src_nodes.count(dst_node), 0u);
-  }
-  for (auto* dst_type : dst.Types()) {
-    ASSERT_EQ(src_types.count(dst_type), 0u);
-  }
+    // Check that none of the AST nodes or type pointers in dst are found in src
+    std::unordered_set<const ast::Node*> src_nodes;
+    for (auto* src_node : src.ASTNodes().Objects()) {
+        src_nodes.emplace(src_node);
+    }
+    std::unordered_set<const sem::Type*> src_types;
+    for (auto* src_type : src.Types()) {
+        src_types.emplace(src_type);
+    }
+    for (auto* dst_node : dst.ASTNodes().Objects()) {
+        ASSERT_EQ(src_nodes.count(dst_node), 0u);
+    }
+    for (auto* dst_type : dst.Types()) {
+        ASSERT_EQ(src_types.count(dst_type), 0u);
+    }
 
-  // Regenerate the wgsl for the src program. We use this instead of the
-  // original source so that reformatting doesn't impact the final wgsl
-  // comparison.
-  writer::wgsl::Options options;
-  std::string src_wgsl;
-  {
-    auto result = writer::wgsl::Generate(&src, options);
-    ASSERT_TRUE(result.success) << result.error;
-    src_wgsl = result.wgsl;
+    // Regenerate the wgsl for the src program. We use this instead of the
+    // original source so that reformatting doesn't impact the final wgsl
+    // comparison.
+    writer::wgsl::Options options;
+    std::string src_wgsl;
+    {
+        auto result = writer::wgsl::Generate(&src, options);
+        ASSERT_TRUE(result.success) << result.error;
+        src_wgsl = result.wgsl;
 
-    // Move the src program to a temporary that'll be dropped, so that the src
-    // program is released before we attempt to print the dst program. This
-    // guarantee that all the source program nodes and types are destructed and
-    // freed. ASAN should error if there's any remaining references in dst when
-    // we try to reconstruct the WGSL.
-    auto tmp = std::move(src);
-  }
+        // Move the src program to a temporary that'll be dropped, so that the src
+        // program is released before we attempt to print the dst program. This
+        // guarantee that all the source program nodes and types are destructed and
+        // freed. ASAN should error if there's any remaining references in dst when
+        // we try to reconstruct the WGSL.
+        auto tmp = std::move(src);
+    }
 
-  // Print the dst module, check it matches the original source
-  auto result = writer::wgsl::Generate(&dst, options);
-  ASSERT_TRUE(result.success);
-  auto dst_wgsl = result.wgsl;
-  ASSERT_EQ(src_wgsl, dst_wgsl);
+    // Print the dst module, check it matches the original source
+    auto result = writer::wgsl::Generate(&dst, options);
+    ASSERT_TRUE(result.success);
+    auto dst_wgsl = result.wgsl;
+    ASSERT_EQ(src_wgsl, dst_wgsl);
 
 #else  // #if TINT_BUILD_WGSL_READER && TINT_BUILD_WGSL_WRITER
-  GTEST_SKIP() << "ModuleCloneTest requires TINT_BUILD_WGSL_READER and "
-                  "TINT_BUILD_WGSL_WRITER to be enabled";
+    GTEST_SKIP() << "ModuleCloneTest requires TINT_BUILD_WGSL_READER and "
+                    "TINT_BUILD_WGSL_WRITER to be enabled";
 #endif
 }
 

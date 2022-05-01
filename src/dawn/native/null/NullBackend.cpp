@@ -22,11 +22,11 @@
 
 namespace dawn::native::null {
 
-    DawnSwapChainImplementation CreateNativeSwapChainImpl() {
-        DawnSwapChainImplementation impl;
-        impl = CreateSwapChainImplementation(new NativeSwapChainImpl());
-        impl.textureUsage = WGPUTextureUsage_Present;
-        return impl;
-    }
+DawnSwapChainImplementation CreateNativeSwapChainImpl() {
+    DawnSwapChainImplementation impl;
+    impl = CreateSwapChainImplementation(new NativeSwapChainImpl());
+    impl.textureUsage = WGPUTextureUsage_Present;
+    return impl;
+}
 
 }  // namespace dawn::native::null

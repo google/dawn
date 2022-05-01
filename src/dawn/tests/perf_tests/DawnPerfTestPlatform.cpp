@@ -24,28 +24,27 @@
 #include "dawn/utils/Timer.h"
 namespace {
 
-    struct TraceCategoryInfo {
-        unsigned char enabled;
-        dawn::platform::TraceCategory category;
-    };
+struct TraceCategoryInfo {
+    unsigned char enabled;
+    dawn::platform::TraceCategory category;
+};
 
-    constexpr TraceCategoryInfo gTraceCategories[4] = {
-        {1, dawn::platform::TraceCategory::General},
-        {1, dawn::platform::TraceCategory::Validation},
-        {1, dawn::platform::TraceCategory::Recording},
-        {1, dawn::platform::TraceCategory::GPUWork},
-    };
+constexpr TraceCategoryInfo gTraceCategories[4] = {
+    {1, dawn::platform::TraceCategory::General},
+    {1, dawn::platform::TraceCategory::Validation},
+    {1, dawn::platform::TraceCategory::Recording},
+    {1, dawn::platform::TraceCategory::GPUWork},
+};
 
-    static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::General) == 0);
-    static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::Validation) == 1);
-    static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::Recording) == 2);
-    static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::GPUWork) == 3);
+static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::General) == 0);
+static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::Validation) == 1);
+static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::Recording) == 2);
+static_assert(static_cast<uint32_t>(dawn::platform::TraceCategory::GPUWork) == 3);
 
 }  // anonymous namespace
 
 DawnPerfTestPlatform::DawnPerfTestPlatform()
-    : dawn::platform::Platform(), mTimer(utils::CreateTimer()) {
-}
+    : dawn::platform::Platform(), mTimer(utils::CreateTimer()) {}
 
 DawnPerfTestPlatform::~DawnPerfTestPlatform() = default;
 

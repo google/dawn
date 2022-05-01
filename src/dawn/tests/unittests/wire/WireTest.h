@@ -40,12 +40,9 @@ using MatcherLambdaArgument = typename MatcherMethodArgument<decltype(&Lambda::o
 template <typename Lambda, typename Arg>
 class LambdaMatcherImpl : public testing::MatcherInterface<Arg> {
   public:
-    explicit LambdaMatcherImpl(Lambda lambda) : mLambda(lambda) {
-    }
+    explicit LambdaMatcherImpl(Lambda lambda) : mLambda(lambda) {}
 
-    void DescribeTo(std::ostream* os) const override {
-        *os << "with a custom matcher";
-    }
+    void DescribeTo(std::ostream* os) const override { *os << "with a custom matcher"; }
 
     bool MatchAndExplain(Arg value, testing::MatchResultListener* listener) const override {
         if (!mLambda(value)) {
@@ -71,8 +68,7 @@ inline testing::Matcher<MatcherLambdaArgument<Lambda>> MatchesLambda(Lambda lamb
 
 class StringMessageMatcher : public testing::MatcherInterface<const char*> {
   public:
-    StringMessageMatcher() {
-    }
+    StringMessageMatcher() {}
 
     bool MatchAndExplain(const char* message,
                          testing::MatchResultListener* listener) const override {
@@ -87,13 +83,9 @@ class StringMessageMatcher : public testing::MatcherInterface<const char*> {
         return true;
     }
 
-    void DescribeTo(std::ostream* os) const override {
-        *os << "valid error message";
-    }
+    void DescribeTo(std::ostream* os) const override { *os << "valid error message"; }
 
-    void DescribeNegationTo(std::ostream* os) const override {
-        *os << "invalid error message";
-    }
+    void DescribeNegationTo(std::ostream* os) const override { *os << "invalid error message"; }
 };
 
 inline testing::Matcher<const char*> ValidStringMessage() {
@@ -101,18 +93,18 @@ inline testing::Matcher<const char*> ValidStringMessage() {
 }
 
 namespace dawn::wire {
-    class WireClient;
-    class WireServer;
-    namespace client {
-        class MemoryTransferService;
-    }  // namespace client
-    namespace server {
-        class MemoryTransferService;
-    }  // namespace server
+class WireClient;
+class WireServer;
+namespace client {
+class MemoryTransferService;
+}  // namespace client
+namespace server {
+class MemoryTransferService;
+}  // namespace server
 }  // namespace dawn::wire
 
 namespace utils {
-    class TerribleCommandBuffer;
+class TerribleCommandBuffer;
 }
 
 class WireTest : public testing::Test {

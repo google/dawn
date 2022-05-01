@@ -18,10 +18,9 @@
 
 namespace dawn::native::opengl {
 
-    QuerySet::QuerySet(Device* device, const QuerySetDescriptor* descriptor)
-        : QuerySetBase(device, descriptor) {
-    }
+QuerySet::QuerySet(Device* device, const QuerySetDescriptor* descriptor)
+    : QuerySetBase(device, descriptor) {}
 
-    QuerySet::~QuerySet() = default;
+QuerySet::~QuerySet() = default;
 
 }  // namespace dawn::native::opengl

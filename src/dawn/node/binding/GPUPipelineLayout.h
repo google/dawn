@@ -24,24 +24,22 @@
 
 namespace wgpu::binding {
 
-    // GPUPipelineLayout is an implementation of interop::GPUPipelineLayout that wraps a
-    // wgpu::PipelineLayout.
-    class GPUPipelineLayout final : public interop::GPUPipelineLayout {
-      public:
-        explicit GPUPipelineLayout(wgpu::PipelineLayout layout);
+// GPUPipelineLayout is an implementation of interop::GPUPipelineLayout that wraps a
+// wgpu::PipelineLayout.
+class GPUPipelineLayout final : public interop::GPUPipelineLayout {
+  public:
+    explicit GPUPipelineLayout(wgpu::PipelineLayout layout);
 
-        // Implicit cast operator to Dawn GPU object
-        inline operator const wgpu::PipelineLayout&() const {
-            return layout_;
-        }
+    // Implicit cast operator to Dawn GPU object
+    inline operator const wgpu::PipelineLayout&() const { return layout_; }
 
-        // interop::GPUPipelineLayout interface compliance
-        std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
-        void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
+    // interop::GPUPipelineLayout interface compliance
+    std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
+    void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
 
-      private:
-        wgpu::PipelineLayout layout_;
-    };
+  private:
+    wgpu::PipelineLayout layout_;
+};
 
 }  // namespace wgpu::binding
 

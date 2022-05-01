@@ -16,14 +16,13 @@
 
 namespace dawn::native {
 
-    StagingBufferBase::StagingBufferBase(size_t size) : mBufferSize(size) {
-    }
+StagingBufferBase::StagingBufferBase(size_t size) : mBufferSize(size) {}
 
-    size_t StagingBufferBase::GetSize() const {
-        return mBufferSize;
-    }
+size_t StagingBufferBase::GetSize() const {
+    return mBufferSize;
+}
 
-    void* StagingBufferBase::GetMappedPointer() const {
-        return mMappedPointer;
-    }
+void* StagingBufferBase::GetMappedPointer() const {
+    return mMappedPointer;
+}
 }  // namespace dawn::native

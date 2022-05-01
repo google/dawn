@@ -24,59 +24,57 @@
 
 namespace dawn::wire::client {
 
-    class Device;
-    class MemoryTransferService;
+class Device;
+class MemoryTransferService;
 
-    template <typename Request>
-    class RequestTracker : NonCopyable {
-      public:
-        ~RequestTracker() {
-            ASSERT(mRequests.empty());
+template <typename Request>
+class RequestTracker : NonCopyable {
+  public:
+    ~RequestTracker() { ASSERT(mRequests.empty()); }
+
+    uint64_t Add(Request&& request) {
+        mSerial++;
+        mRequests.emplace(mSerial, request);
+        return mSerial;
+    }
+
+    bool Acquire(uint64_t serial, Request* request) {
+        auto it = mRequests.find(serial);
+        if (it == mRequests.end()) {
+            return false;
         }
+        *request = std::move(it->second);
+        mRequests.erase(it);
+        return true;
+    }
 
-        uint64_t Add(Request&& request) {
-            mSerial++;
-            mRequests.emplace(mSerial, request);
-            return mSerial;
-        }
-
-        bool Acquire(uint64_t serial, Request* request) {
-            auto it = mRequests.find(serial);
-            if (it == mRequests.end()) {
-                return false;
-            }
-            *request = std::move(it->second);
-            mRequests.erase(it);
-            return true;
-        }
-
-        template <typename CloseFunc>
-        void CloseAll(CloseFunc&& closeFunc) {
-            // Call closeFunc on all requests while handling reentrancy where the callback of some
-            // requests may add some additional requests. We guarantee all callbacks for requests
-            // are called exactly onces, so keep closing new requests if the first batch added more.
-            // It is fine to loop infinitely here if that's what the application makes use do.
-            while (!mRequests.empty()) {
-                // Move mRequests to a local variable so that further reentrant modifications of
-                // mRequests don't invalidate the iterators.
-                auto allRequests = std::move(mRequests);
-                for (auto& [_, request] : allRequests) {
-                    closeFunc(&request);
-                }
+    template <typename CloseFunc>
+    void CloseAll(CloseFunc&& closeFunc) {
+        // Call closeFunc on all requests while handling reentrancy where the callback of some
+        // requests may add some additional requests. We guarantee all callbacks for requests
+        // are called exactly onces, so keep closing new requests if the first batch added more.
+        // It is fine to loop infinitely here if that's what the application makes use do.
+        while (!mRequests.empty()) {
+            // Move mRequests to a local variable so that further reentrant modifications of
+            // mRequests don't invalidate the iterators.
+            auto allRequests = std::move(mRequests);
+            for (auto& [_, request] : allRequests) {
+                closeFunc(&request);
             }
         }
+    }
 
-        template <typename F>
-        void ForAll(F&& f) {
-            for (auto& [_, request] : mRequests) {
-                f(&request);
-            }
+    template <typename F>
+    void ForAll(F&& f) {
+        for (auto& [_, request] : mRequests) {
+            f(&request);
         }
+    }
 
-      private:
-        uint64_t mSerial;
-        std::map<uint64_t, Request> mRequests;
-    };
+  private:
+    uint64_t mSerial;
+    std::map<uint64_t, Request> mRequests;
+};
 
 }  // namespace dawn::wire::client
 

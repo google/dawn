@@ -22,34 +22,34 @@ namespace {
 using AtomicTest = TestHelper;
 
 TEST_F(AtomicTest, Creation) {
-  auto* a = create<Atomic>(create<I32>());
-  auto* b = create<Atomic>(create<I32>());
-  auto* c = create<Atomic>(create<U32>());
-  EXPECT_TRUE(a->Type()->Is<sem::I32>());
-  EXPECT_EQ(a, b);
-  EXPECT_NE(a, c);
+    auto* a = create<Atomic>(create<I32>());
+    auto* b = create<Atomic>(create<I32>());
+    auto* c = create<Atomic>(create<U32>());
+    EXPECT_TRUE(a->Type()->Is<sem::I32>());
+    EXPECT_EQ(a, b);
+    EXPECT_NE(a, c);
 }
 
 TEST_F(AtomicTest, Hash) {
-  auto* a = create<Atomic>(create<I32>());
-  auto* b = create<Atomic>(create<I32>());
-  auto* c = create<Atomic>(create<U32>());
-  EXPECT_EQ(a->Hash(), b->Hash());
-  EXPECT_NE(a->Hash(), c->Hash());
+    auto* a = create<Atomic>(create<I32>());
+    auto* b = create<Atomic>(create<I32>());
+    auto* c = create<Atomic>(create<U32>());
+    EXPECT_EQ(a->Hash(), b->Hash());
+    EXPECT_NE(a->Hash(), c->Hash());
 }
 
 TEST_F(AtomicTest, Equals) {
-  auto* a = create<Atomic>(create<I32>());
-  auto* b = create<Atomic>(create<I32>());
-  auto* c = create<Atomic>(create<U32>());
-  EXPECT_TRUE(a->Equals(*b));
-  EXPECT_FALSE(a->Equals(*c));
-  EXPECT_FALSE(a->Equals(Void{}));
+    auto* a = create<Atomic>(create<I32>());
+    auto* b = create<Atomic>(create<I32>());
+    auto* c = create<Atomic>(create<U32>());
+    EXPECT_TRUE(a->Equals(*b));
+    EXPECT_FALSE(a->Equals(*c));
+    EXPECT_FALSE(a->Equals(Void{}));
 }
 
 TEST_F(AtomicTest, FriendlyName) {
-  auto* a = create<Atomic>(create<I32>());
-  EXPECT_EQ(a->FriendlyName(Symbols()), "atomic<i32>");
+    auto* a = create<Atomic>(create<I32>());
+    EXPECT_EQ(a->FriendlyName(Symbols()), "atomic<i32>");
 }
 
 }  // namespace

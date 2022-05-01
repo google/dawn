@@ -24,25 +24,25 @@ namespace tint::ast {
 
 /// A builtin attribute
 class BuiltinAttribute final : public Castable<BuiltinAttribute, Attribute> {
- public:
-  /// constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param builtin the builtin value
-  BuiltinAttribute(ProgramID pid, const Source& src, Builtin builtin);
-  ~BuiltinAttribute() override;
+  public:
+    /// constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param builtin the builtin value
+    BuiltinAttribute(ProgramID pid, const Source& src, Builtin builtin);
+    ~BuiltinAttribute() override;
 
-  /// @returns the WGSL name for the attribute
-  std::string Name() const override;
+    /// @returns the WGSL name for the attribute
+    std::string Name() const override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const BuiltinAttribute* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const BuiltinAttribute* Clone(CloneContext* ctx) const override;
 
-  /// The builtin value
-  const Builtin builtin;
+    /// The builtin value
+    const Builtin builtin;
 };
 
 }  // namespace tint::ast

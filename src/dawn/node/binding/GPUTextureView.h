@@ -24,24 +24,22 @@
 
 namespace wgpu::binding {
 
-    // GPUTextureView is an implementation of interop::GPUTextureView that wraps a
-    // wgpu::TextureView.
-    class GPUTextureView final : public interop::GPUTextureView {
-      public:
-        explicit GPUTextureView(wgpu::TextureView view);
+// GPUTextureView is an implementation of interop::GPUTextureView that wraps a
+// wgpu::TextureView.
+class GPUTextureView final : public interop::GPUTextureView {
+  public:
+    explicit GPUTextureView(wgpu::TextureView view);
 
-        // Implicit cast operator to Dawn GPU object
-        inline operator const wgpu::TextureView&() const {
-            return view_;
-        }
+    // Implicit cast operator to Dawn GPU object
+    inline operator const wgpu::TextureView&() const { return view_; }
 
-        // interop::GPUTextureView interface compliance
-        std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
-        void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
+    // interop::GPUTextureView interface compliance
+    std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
+    void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
 
-      private:
-        wgpu::TextureView view_;
-    };
+  private:
+    wgpu::TextureView view_;
+};
 
 }  // namespace wgpu::binding
 

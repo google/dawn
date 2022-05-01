@@ -20,19 +20,18 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::InvariantAttribute);
 
 namespace tint::ast {
 
-InvariantAttribute::InvariantAttribute(ProgramID pid, const Source& src)
-    : Base(pid, src) {}
+InvariantAttribute::InvariantAttribute(ProgramID pid, const Source& src) : Base(pid, src) {}
 
 InvariantAttribute::~InvariantAttribute() = default;
 
 std::string InvariantAttribute::Name() const {
-  return "invariant";
+    return "invariant";
 }
 
 const InvariantAttribute* InvariantAttribute::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<InvariantAttribute>(src);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<InvariantAttribute>(src);
 }
 
 }  // namespace tint::ast

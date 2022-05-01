@@ -23,42 +23,42 @@
 
 namespace dawn::native {
 
-    // Some objects are cached so that instead of creating new duplicate objects,
-    // we increase the refcount of an existing object.
-    // When an object is successfully created, the device should call
-    // SetIsCachedReference() and insert the object into the cache.
-    class CachedObject {
-      public:
-        bool IsCachedReference() const;
+// Some objects are cached so that instead of creating new duplicate objects,
+// we increase the refcount of an existing object.
+// When an object is successfully created, the device should call
+// SetIsCachedReference() and insert the object into the cache.
+class CachedObject {
+  public:
+    bool IsCachedReference() const;
 
-        // Functor necessary for the unordered_set<CachedObject*>-based cache.
-        struct HashFunc {
-            size_t operator()(const CachedObject* obj) const;
-        };
-
-        size_t GetContentHash() const;
-        void SetContentHash(size_t contentHash);
-
-        // Returns the cache key for the object only, i.e. without device/adapter information.
-        const CacheKey& GetCacheKey() const;
-
-      protected:
-        // Protected accessor for derived classes to access and modify the key.
-        CacheKey* GetCacheKey();
-
-      private:
-        friend class DeviceBase;
-        void SetIsCachedReference();
-
-        bool mIsCachedReference = false;
-
-        // Called by ObjectContentHasher upon creation to record the object.
-        virtual size_t ComputeContentHash() = 0;
-
-        size_t mContentHash = 0;
-        bool mIsContentHashInitialized = false;
-        CacheKey mCacheKey;
+    // Functor necessary for the unordered_set<CachedObject*>-based cache.
+    struct HashFunc {
+        size_t operator()(const CachedObject* obj) const;
     };
+
+    size_t GetContentHash() const;
+    void SetContentHash(size_t contentHash);
+
+    // Returns the cache key for the object only, i.e. without device/adapter information.
+    const CacheKey& GetCacheKey() const;
+
+  protected:
+    // Protected accessor for derived classes to access and modify the key.
+    CacheKey* GetCacheKey();
+
+  private:
+    friend class DeviceBase;
+    void SetIsCachedReference();
+
+    bool mIsCachedReference = false;
+
+    // Called by ObjectContentHasher upon creation to record the object.
+    virtual size_t ComputeContentHash() = 0;
+
+    size_t mContentHash = 0;
+    bool mIsContentHashInitialized = false;
+    CacheKey mCacheKey;
+};
 
 }  // namespace dawn::native
 

@@ -23,53 +23,52 @@
 
 namespace dawn::wire {
 
-    class DAWN_WIRE_EXPORT CommandSerializer {
-      public:
-        CommandSerializer();
-        virtual ~CommandSerializer();
-        CommandSerializer(const CommandSerializer& rhs) = delete;
-        CommandSerializer& operator=(const CommandSerializer& rhs) = delete;
+class DAWN_WIRE_EXPORT CommandSerializer {
+  public:
+    CommandSerializer();
+    virtual ~CommandSerializer();
+    CommandSerializer(const CommandSerializer& rhs) = delete;
+    CommandSerializer& operator=(const CommandSerializer& rhs) = delete;
 
-        // Get space for serializing commands.
-        // GetCmdSpace will never be called with a value larger than
-        // what GetMaximumAllocationSize returns. Return nullptr to indicate
-        // a fatal error.
-        virtual void* GetCmdSpace(size_t size) = 0;
-        virtual bool Flush() = 0;
-        virtual size_t GetMaximumAllocationSize() const = 0;
-        virtual void OnSerializeError();
-    };
+    // Get space for serializing commands.
+    // GetCmdSpace will never be called with a value larger than
+    // what GetMaximumAllocationSize returns. Return nullptr to indicate
+    // a fatal error.
+    virtual void* GetCmdSpace(size_t size) = 0;
+    virtual bool Flush() = 0;
+    virtual size_t GetMaximumAllocationSize() const = 0;
+    virtual void OnSerializeError();
+};
 
-    class DAWN_WIRE_EXPORT CommandHandler {
-      public:
-        CommandHandler();
-        virtual ~CommandHandler();
-        CommandHandler(const CommandHandler& rhs) = delete;
-        CommandHandler& operator=(const CommandHandler& rhs) = delete;
+class DAWN_WIRE_EXPORT CommandHandler {
+  public:
+    CommandHandler();
+    virtual ~CommandHandler();
+    CommandHandler(const CommandHandler& rhs) = delete;
+    CommandHandler& operator=(const CommandHandler& rhs) = delete;
 
-        virtual const volatile char* HandleCommands(const volatile char* commands, size_t size) = 0;
-    };
+    virtual const volatile char* HandleCommands(const volatile char* commands, size_t size) = 0;
+};
 
-    DAWN_WIRE_EXPORT size_t
-    SerializedWGPUDevicePropertiesSize(const WGPUDeviceProperties* deviceProperties);
+DAWN_WIRE_EXPORT size_t
+SerializedWGPUDevicePropertiesSize(const WGPUDeviceProperties* deviceProperties);
 
-    DAWN_WIRE_EXPORT void SerializeWGPUDeviceProperties(
-        const WGPUDeviceProperties* deviceProperties,
-        char* serializeBuffer);
+DAWN_WIRE_EXPORT void SerializeWGPUDeviceProperties(const WGPUDeviceProperties* deviceProperties,
+                                                    char* serializeBuffer);
 
-    DAWN_WIRE_EXPORT bool DeserializeWGPUDeviceProperties(WGPUDeviceProperties* deviceProperties,
-                                                          const volatile char* deserializeBuffer,
-                                                          size_t deserializeBufferSize);
+DAWN_WIRE_EXPORT bool DeserializeWGPUDeviceProperties(WGPUDeviceProperties* deviceProperties,
+                                                      const volatile char* deserializeBuffer,
+                                                      size_t deserializeBufferSize);
 
-    DAWN_WIRE_EXPORT size_t
-    SerializedWGPUSupportedLimitsSize(const WGPUSupportedLimits* supportedLimits);
+DAWN_WIRE_EXPORT size_t
+SerializedWGPUSupportedLimitsSize(const WGPUSupportedLimits* supportedLimits);
 
-    DAWN_WIRE_EXPORT void SerializeWGPUSupportedLimits(const WGPUSupportedLimits* supportedLimits,
-                                                       char* serializeBuffer);
+DAWN_WIRE_EXPORT void SerializeWGPUSupportedLimits(const WGPUSupportedLimits* supportedLimits,
+                                                   char* serializeBuffer);
 
-    DAWN_WIRE_EXPORT bool DeserializeWGPUSupportedLimits(WGPUSupportedLimits* supportedLimits,
-                                                         const volatile char* deserializeBuffer,
-                                                         size_t deserializeBufferSize);
+DAWN_WIRE_EXPORT bool DeserializeWGPUSupportedLimits(WGPUSupportedLimits* supportedLimits,
+                                                     const volatile char* deserializeBuffer,
+                                                     size_t deserializeBufferSize);
 
 }  // namespace dawn::wire
 

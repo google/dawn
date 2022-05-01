@@ -32,16 +32,16 @@ WorkgroupAttribute::WorkgroupAttribute(ProgramID pid,
 WorkgroupAttribute::~WorkgroupAttribute() = default;
 
 std::string WorkgroupAttribute::Name() const {
-  return "workgroup_size";
+    return "workgroup_size";
 }
 
 const WorkgroupAttribute* WorkgroupAttribute::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  auto* x_ = ctx->Clone(x);
-  auto* y_ = ctx->Clone(y);
-  auto* z_ = ctx->Clone(z);
-  return ctx->dst->create<WorkgroupAttribute>(src, x_, y_, z_);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    auto* x_ = ctx->Clone(x);
+    auto* y_ = ctx->Clone(y);
+    auto* z_ = ctx->Clone(z);
+    return ctx->dst->create<WorkgroupAttribute>(src, x_, y_, z_);
 }
 
 }  // namespace tint::ast

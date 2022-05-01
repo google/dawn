@@ -22,13 +22,13 @@ namespace {
 using RemoveUnreachableStatementsTest = TransformTest;
 
 TEST_F(RemoveUnreachableStatementsTest, ShouldRunEmptyModule) {
-  auto* src = R"()";
+    auto* src = R"()";
 
-  EXPECT_FALSE(ShouldRun<RemoveUnreachableStatements>(src));
+    EXPECT_FALSE(ShouldRun<RemoveUnreachableStatements>(src));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, ShouldRunHasNoUnreachable) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   if (true) {
     var x = 1;
@@ -36,11 +36,11 @@ fn f() {
 }
 )";
 
-  EXPECT_FALSE(ShouldRun<RemoveUnreachableStatements>(src));
+    EXPECT_FALSE(ShouldRun<RemoveUnreachableStatements>(src));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, ShouldRunHasUnreachable) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   return;
   if (true) {
@@ -49,20 +49,20 @@ fn f() {
 }
 )";
 
-  EXPECT_TRUE(ShouldRun<RemoveUnreachableStatements>(src));
+    EXPECT_TRUE(ShouldRun<RemoveUnreachableStatements>(src));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, EmptyModule) {
-  auto* src = "";
-  auto* expect = "";
+    auto* src = "";
+    auto* expect = "";
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, Return) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   return;
   var remove_me = 1;
@@ -72,19 +72,19 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   return;
 }
 )";
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, NestedReturn) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   {
     {
@@ -98,7 +98,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   {
     {
@@ -108,13 +108,13 @@ fn f() {
 }
 )";
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, Discard) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   discard;
   var remove_me = 1;
@@ -124,19 +124,19 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   discard;
 }
 )";
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, NestedDiscard) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   {
     {
@@ -150,7 +150,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   {
     {
@@ -160,13 +160,13 @@ fn f() {
 }
 )";
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, CallToFuncWithDiscard) {
-  auto* src = R"(
+    auto* src = R"(
 fn DISCARD() {
   discard;
 }
@@ -180,7 +180,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn DISCARD() {
   discard;
 }
@@ -190,13 +190,13 @@ fn f() {
 }
 )";
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, CallToFuncWithIfDiscard) {
-  auto* src = R"(
+    auto* src = R"(
 fn DISCARD() {
   if (true) {
     discard;
@@ -212,15 +212,15 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, IfDiscardElseDiscard) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   if (true) {
     discard;
@@ -234,7 +234,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   if (true) {
     discard;
@@ -244,13 +244,13 @@ fn f() {
 }
 )";
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, IfDiscardElseReturn) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   if (true) {
     discard;
@@ -264,7 +264,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   if (true) {
     discard;
@@ -274,13 +274,13 @@ fn f() {
 }
 )";
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, IfDiscard) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   if (true) {
     discard;
@@ -292,15 +292,15 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, IfReturn) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   if (true) {
     return;
@@ -312,15 +312,15 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, IfElseDiscard) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   if (true) {
   } else {
@@ -333,15 +333,15 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, IfElseReturn) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   if (true) {
   } else {
@@ -354,15 +354,15 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, LoopWithDiscard) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   loop {
     var a = 1;
@@ -379,7 +379,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   loop {
     var a = 1;
@@ -392,13 +392,13 @@ fn f() {
 }
 )";
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, LoopWithConditionalBreak) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   loop {
     var a = 1;
@@ -417,15 +417,15 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, LoopWithConditionalBreakInContinuing) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   loop {
 
@@ -442,15 +442,15 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, SwitchDefaultDiscard) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   switch(1) {
     default: {
@@ -464,7 +464,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   switch(1) {
     default: {
@@ -474,13 +474,13 @@ fn f() {
 }
 )";
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, SwitchCaseReturnDefaultDiscard) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   switch(1) {
     case 0: {
@@ -497,7 +497,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   switch(1) {
     case 0: {
@@ -510,13 +510,13 @@ fn f() {
 }
 )";
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, SwitchCaseBreakDefaultDiscard) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   switch(1) {
     case 0: {
@@ -533,15 +533,15 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveUnreachableStatementsTest, SwitchCaseReturnDefaultBreak) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   switch(1) {
     case 0: {
@@ -558,11 +558,11 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<RemoveUnreachableStatements>(src);
+    auto got = Run<RemoveUnreachableStatements>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

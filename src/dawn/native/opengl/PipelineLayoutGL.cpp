@@ -20,76 +20,75 @@
 
 namespace dawn::native::opengl {
 
-    PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor)
-        : PipelineLayoutBase(device, descriptor) {
-        GLuint uboIndex = 0;
-        GLuint samplerIndex = 0;
-        GLuint sampledTextureIndex = 0;
-        GLuint ssboIndex = 0;
-        GLuint storageTextureIndex = 0;
+PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor)
+    : PipelineLayoutBase(device, descriptor) {
+    GLuint uboIndex = 0;
+    GLuint samplerIndex = 0;
+    GLuint sampledTextureIndex = 0;
+    GLuint ssboIndex = 0;
+    GLuint storageTextureIndex = 0;
 
-        for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
-            const BindGroupLayoutBase* bgl = GetBindGroupLayout(group);
-            mIndexInfo[group].resize(bgl->GetBindingCount());
+    for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
+        const BindGroupLayoutBase* bgl = GetBindGroupLayout(group);
+        mIndexInfo[group].resize(bgl->GetBindingCount());
 
-            for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBindingCount();
-                 ++bindingIndex) {
-                const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
-                switch (bindingInfo.bindingType) {
-                    case BindingInfoType::Buffer:
-                        switch (bindingInfo.buffer.type) {
-                            case wgpu::BufferBindingType::Uniform:
-                                mIndexInfo[group][bindingIndex] = uboIndex;
-                                uboIndex++;
-                                break;
-                            case wgpu::BufferBindingType::Storage:
-                            case kInternalStorageBufferBinding:
-                            case wgpu::BufferBindingType::ReadOnlyStorage:
-                                mIndexInfo[group][bindingIndex] = ssboIndex;
-                                ssboIndex++;
-                                break;
-                            case wgpu::BufferBindingType::Undefined:
-                                UNREACHABLE();
-                        }
-                        break;
+        for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
+            const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
+            switch (bindingInfo.bindingType) {
+                case BindingInfoType::Buffer:
+                    switch (bindingInfo.buffer.type) {
+                        case wgpu::BufferBindingType::Uniform:
+                            mIndexInfo[group][bindingIndex] = uboIndex;
+                            uboIndex++;
+                            break;
+                        case wgpu::BufferBindingType::Storage:
+                        case kInternalStorageBufferBinding:
+                        case wgpu::BufferBindingType::ReadOnlyStorage:
+                            mIndexInfo[group][bindingIndex] = ssboIndex;
+                            ssboIndex++;
+                            break;
+                        case wgpu::BufferBindingType::Undefined:
+                            UNREACHABLE();
+                    }
+                    break;
 
-                    case BindingInfoType::Sampler:
-                        mIndexInfo[group][bindingIndex] = samplerIndex;
-                        samplerIndex++;
-                        break;
+                case BindingInfoType::Sampler:
+                    mIndexInfo[group][bindingIndex] = samplerIndex;
+                    samplerIndex++;
+                    break;
 
-                    case BindingInfoType::Texture:
-                    case BindingInfoType::ExternalTexture:
-                        mIndexInfo[group][bindingIndex] = sampledTextureIndex;
-                        sampledTextureIndex++;
-                        break;
+                case BindingInfoType::Texture:
+                case BindingInfoType::ExternalTexture:
+                    mIndexInfo[group][bindingIndex] = sampledTextureIndex;
+                    sampledTextureIndex++;
+                    break;
 
-                    case BindingInfoType::StorageTexture:
-                        mIndexInfo[group][bindingIndex] = storageTextureIndex;
-                        storageTextureIndex++;
-                        break;
-                }
+                case BindingInfoType::StorageTexture:
+                    mIndexInfo[group][bindingIndex] = storageTextureIndex;
+                    storageTextureIndex++;
+                    break;
             }
         }
-
-        mNumSamplers = samplerIndex;
-        mNumSampledTextures = sampledTextureIndex;
     }
 
-    const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo() const {
-        return mIndexInfo;
-    }
+    mNumSamplers = samplerIndex;
+    mNumSampledTextures = sampledTextureIndex;
+}
 
-    GLuint PipelineLayout::GetTextureUnitsUsed() const {
-        return 0;
-    }
+const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo() const {
+    return mIndexInfo;
+}
 
-    size_t PipelineLayout::GetNumSamplers() const {
-        return mNumSamplers;
-    }
+GLuint PipelineLayout::GetTextureUnitsUsed() const {
+    return 0;
+}
 
-    size_t PipelineLayout::GetNumSampledTextures() const {
-        return mNumSampledTextures;
-    }
+size_t PipelineLayout::GetNumSamplers() const {
+    return mNumSamplers;
+}
+
+size_t PipelineLayout::GetNumSampledTextures() const {
+    return mNumSampledTextures;
+}
 
 }  // namespace dawn::native::opengl

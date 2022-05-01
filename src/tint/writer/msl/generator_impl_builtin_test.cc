@@ -24,177 +24,177 @@ using BuiltinType = sem::BuiltinType;
 using MslGeneratorImplTest = TestHelper;
 
 enum class ParamType {
-  kF32,
-  kU32,
-  kBool,
+    kF32,
+    kU32,
+    kBool,
 };
 
 struct BuiltinData {
-  BuiltinType builtin;
-  ParamType type;
-  const char* msl_name;
+    BuiltinType builtin;
+    ParamType type;
+    const char* msl_name;
 };
 inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
-  out << data.msl_name << "<";
-  switch (data.type) {
-    case ParamType::kF32:
-      out << "f32";
-      break;
-    case ParamType::kU32:
-      out << "u32";
-      break;
-    case ParamType::kBool:
-      out << "bool";
-      break;
-  }
-  out << ">";
-  return out;
+    out << data.msl_name << "<";
+    switch (data.type) {
+        case ParamType::kF32:
+            out << "f32";
+            break;
+        case ParamType::kU32:
+            out << "u32";
+            break;
+        case ParamType::kBool:
+            out << "bool";
+            break;
+    }
+    out << ">";
+    return out;
 }
 
 const ast::CallExpression* GenerateCall(BuiltinType builtin,
                                         ParamType type,
                                         ProgramBuilder* builder) {
-  std::string name;
-  std::ostringstream str(name);
-  str << builtin;
-  switch (builtin) {
-    case BuiltinType::kAcos:
-    case BuiltinType::kAsin:
-    case BuiltinType::kAtan:
-    case BuiltinType::kCeil:
-    case BuiltinType::kCos:
-    case BuiltinType::kCosh:
-    case BuiltinType::kDpdx:
-    case BuiltinType::kDpdxCoarse:
-    case BuiltinType::kDpdxFine:
-    case BuiltinType::kDpdy:
-    case BuiltinType::kDpdyCoarse:
-    case BuiltinType::kDpdyFine:
-    case BuiltinType::kExp:
-    case BuiltinType::kExp2:
-    case BuiltinType::kFloor:
-    case BuiltinType::kFract:
-    case BuiltinType::kFwidth:
-    case BuiltinType::kFwidthCoarse:
-    case BuiltinType::kFwidthFine:
-    case BuiltinType::kInverseSqrt:
-    case BuiltinType::kLength:
-    case BuiltinType::kLog:
-    case BuiltinType::kLog2:
-    case BuiltinType::kNormalize:
-    case BuiltinType::kRound:
-    case BuiltinType::kSin:
-    case BuiltinType::kSinh:
-    case BuiltinType::kSqrt:
-    case BuiltinType::kTan:
-    case BuiltinType::kTanh:
-    case BuiltinType::kTrunc:
-    case BuiltinType::kSign:
-      return builder->Call(str.str(), "f2");
-    case BuiltinType::kLdexp:
-      return builder->Call(str.str(), "f2", "i2");
-    case BuiltinType::kAtan2:
-    case BuiltinType::kDot:
-    case BuiltinType::kDistance:
-    case BuiltinType::kPow:
-    case BuiltinType::kReflect:
-    case BuiltinType::kStep:
-      return builder->Call(str.str(), "f2", "f2");
-    case BuiltinType::kStorageBarrier:
-      return builder->Call(str.str());
-    case BuiltinType::kCross:
-      return builder->Call(str.str(), "f3", "f3");
-    case BuiltinType::kFma:
-    case BuiltinType::kMix:
-    case BuiltinType::kFaceForward:
-    case BuiltinType::kSmoothstep:
-    case BuiltinType::kSmoothStep:
-      return builder->Call(str.str(), "f2", "f2", "f2");
-    case BuiltinType::kAll:
-    case BuiltinType::kAny:
-      return builder->Call(str.str(), "b2");
-    case BuiltinType::kAbs:
-      if (type == ParamType::kF32) {
-        return builder->Call(str.str(), "f2");
-      } else {
-        return builder->Call(str.str(), "u2");
-      }
-    case BuiltinType::kCountLeadingZeros:
-    case BuiltinType::kCountOneBits:
-    case BuiltinType::kCountTrailingZeros:
-    case BuiltinType::kReverseBits:
-      return builder->Call(str.str(), "u2");
-    case BuiltinType::kExtractBits:
-      return builder->Call(str.str(), "u2", "u1", "u1");
-    case BuiltinType::kInsertBits:
-      return builder->Call(str.str(), "u2", "u2", "u1", "u1");
-    case BuiltinType::kMax:
-    case BuiltinType::kMin:
-      if (type == ParamType::kF32) {
-        return builder->Call(str.str(), "f2", "f2");
-      } else {
-        return builder->Call(str.str(), "u2", "u2");
-      }
-    case BuiltinType::kClamp:
-      if (type == ParamType::kF32) {
-        return builder->Call(str.str(), "f2", "f2", "f2");
-      } else {
-        return builder->Call(str.str(), "u2", "u2", "u2");
-      }
-    case BuiltinType::kSelect:
-      return builder->Call(str.str(), "f2", "f2", "b2");
-    case BuiltinType::kDeterminant:
-      return builder->Call(str.str(), "m2x2");
-    case BuiltinType::kPack2x16snorm:
-    case BuiltinType::kPack2x16unorm:
-      return builder->Call(str.str(), "f2");
-    case BuiltinType::kPack4x8snorm:
-    case BuiltinType::kPack4x8unorm:
-      return builder->Call(str.str(), "f4");
-    case BuiltinType::kUnpack4x8snorm:
-    case BuiltinType::kUnpack4x8unorm:
-    case BuiltinType::kUnpack2x16snorm:
-    case BuiltinType::kUnpack2x16unorm:
-      return builder->Call(str.str(), "u1");
-    case BuiltinType::kWorkgroupBarrier:
-      return builder->Call(str.str());
-    case BuiltinType::kTranspose:
-      return builder->Call(str.str(), "m3x2");
-    default:
-      break;
-  }
-  return nullptr;
+    std::string name;
+    std::ostringstream str(name);
+    str << builtin;
+    switch (builtin) {
+        case BuiltinType::kAcos:
+        case BuiltinType::kAsin:
+        case BuiltinType::kAtan:
+        case BuiltinType::kCeil:
+        case BuiltinType::kCos:
+        case BuiltinType::kCosh:
+        case BuiltinType::kDpdx:
+        case BuiltinType::kDpdxCoarse:
+        case BuiltinType::kDpdxFine:
+        case BuiltinType::kDpdy:
+        case BuiltinType::kDpdyCoarse:
+        case BuiltinType::kDpdyFine:
+        case BuiltinType::kExp:
+        case BuiltinType::kExp2:
+        case BuiltinType::kFloor:
+        case BuiltinType::kFract:
+        case BuiltinType::kFwidth:
+        case BuiltinType::kFwidthCoarse:
+        case BuiltinType::kFwidthFine:
+        case BuiltinType::kInverseSqrt:
+        case BuiltinType::kLength:
+        case BuiltinType::kLog:
+        case BuiltinType::kLog2:
+        case BuiltinType::kNormalize:
+        case BuiltinType::kRound:
+        case BuiltinType::kSin:
+        case BuiltinType::kSinh:
+        case BuiltinType::kSqrt:
+        case BuiltinType::kTan:
+        case BuiltinType::kTanh:
+        case BuiltinType::kTrunc:
+        case BuiltinType::kSign:
+            return builder->Call(str.str(), "f2");
+        case BuiltinType::kLdexp:
+            return builder->Call(str.str(), "f2", "i2");
+        case BuiltinType::kAtan2:
+        case BuiltinType::kDot:
+        case BuiltinType::kDistance:
+        case BuiltinType::kPow:
+        case BuiltinType::kReflect:
+        case BuiltinType::kStep:
+            return builder->Call(str.str(), "f2", "f2");
+        case BuiltinType::kStorageBarrier:
+            return builder->Call(str.str());
+        case BuiltinType::kCross:
+            return builder->Call(str.str(), "f3", "f3");
+        case BuiltinType::kFma:
+        case BuiltinType::kMix:
+        case BuiltinType::kFaceForward:
+        case BuiltinType::kSmoothstep:
+        case BuiltinType::kSmoothStep:
+            return builder->Call(str.str(), "f2", "f2", "f2");
+        case BuiltinType::kAll:
+        case BuiltinType::kAny:
+            return builder->Call(str.str(), "b2");
+        case BuiltinType::kAbs:
+            if (type == ParamType::kF32) {
+                return builder->Call(str.str(), "f2");
+            } else {
+                return builder->Call(str.str(), "u2");
+            }
+        case BuiltinType::kCountLeadingZeros:
+        case BuiltinType::kCountOneBits:
+        case BuiltinType::kCountTrailingZeros:
+        case BuiltinType::kReverseBits:
+            return builder->Call(str.str(), "u2");
+        case BuiltinType::kExtractBits:
+            return builder->Call(str.str(), "u2", "u1", "u1");
+        case BuiltinType::kInsertBits:
+            return builder->Call(str.str(), "u2", "u2", "u1", "u1");
+        case BuiltinType::kMax:
+        case BuiltinType::kMin:
+            if (type == ParamType::kF32) {
+                return builder->Call(str.str(), "f2", "f2");
+            } else {
+                return builder->Call(str.str(), "u2", "u2");
+            }
+        case BuiltinType::kClamp:
+            if (type == ParamType::kF32) {
+                return builder->Call(str.str(), "f2", "f2", "f2");
+            } else {
+                return builder->Call(str.str(), "u2", "u2", "u2");
+            }
+        case BuiltinType::kSelect:
+            return builder->Call(str.str(), "f2", "f2", "b2");
+        case BuiltinType::kDeterminant:
+            return builder->Call(str.str(), "m2x2");
+        case BuiltinType::kPack2x16snorm:
+        case BuiltinType::kPack2x16unorm:
+            return builder->Call(str.str(), "f2");
+        case BuiltinType::kPack4x8snorm:
+        case BuiltinType::kPack4x8unorm:
+            return builder->Call(str.str(), "f4");
+        case BuiltinType::kUnpack4x8snorm:
+        case BuiltinType::kUnpack4x8unorm:
+        case BuiltinType::kUnpack2x16snorm:
+        case BuiltinType::kUnpack2x16unorm:
+            return builder->Call(str.str(), "u1");
+        case BuiltinType::kWorkgroupBarrier:
+            return builder->Call(str.str());
+        case BuiltinType::kTranspose:
+            return builder->Call(str.str(), "m3x2");
+        default:
+            break;
+    }
+    return nullptr;
 }
 
 using MslBuiltinTest = TestParamHelper<BuiltinData>;
 TEST_P(MslBuiltinTest, Emit) {
-  auto param = GetParam();
+    auto param = GetParam();
 
-  Global("f2", ty.vec2<f32>(), ast::StorageClass::kPrivate);
-  Global("f3", ty.vec3<f32>(), ast::StorageClass::kPrivate);
-  Global("f4", ty.vec4<f32>(), ast::StorageClass::kPrivate);
-  Global("u1", ty.u32(), ast::StorageClass::kPrivate);
-  Global("u2", ty.vec2<u32>(), ast::StorageClass::kPrivate);
-  Global("i2", ty.vec2<i32>(), ast::StorageClass::kPrivate);
-  Global("b2", ty.vec2<bool>(), ast::StorageClass::kPrivate);
-  Global("m2x2", ty.mat2x2<f32>(), ast::StorageClass::kPrivate);
-  Global("m3x2", ty.mat3x2<f32>(), ast::StorageClass::kPrivate);
+    Global("f2", ty.vec2<f32>(), ast::StorageClass::kPrivate);
+    Global("f3", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    Global("f4", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    Global("u1", ty.u32(), ast::StorageClass::kPrivate);
+    Global("u2", ty.vec2<u32>(), ast::StorageClass::kPrivate);
+    Global("i2", ty.vec2<i32>(), ast::StorageClass::kPrivate);
+    Global("b2", ty.vec2<bool>(), ast::StorageClass::kPrivate);
+    Global("m2x2", ty.mat2x2<f32>(), ast::StorageClass::kPrivate);
+    Global("m3x2", ty.mat3x2<f32>(), ast::StorageClass::kPrivate);
 
-  auto* call = GenerateCall(param.builtin, param.type, this);
-  ASSERT_NE(nullptr, call) << "Unhandled builtin";
-  Func("func", {}, ty.void_(), {Ignore(call)},
-       {create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
+    auto* call = GenerateCall(param.builtin, param.type, this);
+    ASSERT_NE(nullptr, call) << "Unhandled builtin";
+    Func("func", {}, ty.void_(), {Ignore(call)},
+         {create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  auto* sem = program->Sem().Get(call);
-  ASSERT_NE(sem, nullptr);
-  auto* target = sem->Target();
-  ASSERT_NE(target, nullptr);
-  auto* builtin = target->As<sem::Builtin>();
-  ASSERT_NE(builtin, nullptr);
+    auto* sem = program->Sem().Get(call);
+    ASSERT_NE(sem, nullptr);
+    auto* target = sem->Target();
+    ASSERT_NE(target, nullptr);
+    auto* builtin = target->As<sem::Builtin>();
+    ASSERT_NE(builtin, nullptr);
 
-  EXPECT_EQ(gen.generate_builtin_name(builtin), param.msl_name);
+    EXPECT_EQ(gen.generate_builtin_name(builtin), param.msl_name);
 }
 INSTANTIATE_TEST_SUITE_P(
     MslGeneratorImplTest,
@@ -247,14 +247,10 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{BuiltinType::kMin, ParamType::kF32, "fmin"},
         BuiltinData{BuiltinType::kMin, ParamType::kU32, "min"},
         BuiltinData{BuiltinType::kNormalize, ParamType::kF32, "normalize"},
-        BuiltinData{BuiltinType::kPack4x8snorm, ParamType::kF32,
-                    "pack_float_to_snorm4x8"},
-        BuiltinData{BuiltinType::kPack4x8unorm, ParamType::kF32,
-                    "pack_float_to_unorm4x8"},
-        BuiltinData{BuiltinType::kPack2x16snorm, ParamType::kF32,
-                    "pack_float_to_snorm2x16"},
-        BuiltinData{BuiltinType::kPack2x16unorm, ParamType::kF32,
-                    "pack_float_to_unorm2x16"},
+        BuiltinData{BuiltinType::kPack4x8snorm, ParamType::kF32, "pack_float_to_snorm4x8"},
+        BuiltinData{BuiltinType::kPack4x8unorm, ParamType::kF32, "pack_float_to_unorm4x8"},
+        BuiltinData{BuiltinType::kPack2x16snorm, ParamType::kF32, "pack_float_to_snorm2x16"},
+        BuiltinData{BuiltinType::kPack2x16unorm, ParamType::kF32, "pack_float_to_unorm2x16"},
         BuiltinData{BuiltinType::kPow, ParamType::kF32, "pow"},
         BuiltinData{BuiltinType::kReflect, ParamType::kF32, "reflect"},
         BuiltinData{BuiltinType::kReverseBits, ParamType::kU32, "reverse_bits"},
@@ -271,60 +267,56 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{BuiltinType::kTanh, ParamType::kF32, "tanh"},
         BuiltinData{BuiltinType::kTranspose, ParamType::kF32, "transpose"},
         BuiltinData{BuiltinType::kTrunc, ParamType::kF32, "trunc"},
-        BuiltinData{BuiltinType::kUnpack4x8snorm, ParamType::kU32,
-                    "unpack_snorm4x8_to_float"},
-        BuiltinData{BuiltinType::kUnpack4x8unorm, ParamType::kU32,
-                    "unpack_unorm4x8_to_float"},
-        BuiltinData{BuiltinType::kUnpack2x16snorm, ParamType::kU32,
-                    "unpack_snorm2x16_to_float"},
-        BuiltinData{BuiltinType::kUnpack2x16unorm, ParamType::kU32,
-                    "unpack_unorm2x16_to_float"}));
+        BuiltinData{BuiltinType::kUnpack4x8snorm, ParamType::kU32, "unpack_snorm4x8_to_float"},
+        BuiltinData{BuiltinType::kUnpack4x8unorm, ParamType::kU32, "unpack_unorm4x8_to_float"},
+        BuiltinData{BuiltinType::kUnpack2x16snorm, ParamType::kU32, "unpack_snorm2x16_to_float"},
+        BuiltinData{BuiltinType::kUnpack2x16unorm, ParamType::kU32, "unpack_unorm2x16_to_float"}));
 
 TEST_F(MslGeneratorImplTest, Builtin_Call) {
-  Global("param1", ty.vec2<f32>(), ast::StorageClass::kPrivate);
-  Global("param2", ty.vec2<f32>(), ast::StorageClass::kPrivate);
+    Global("param1", ty.vec2<f32>(), ast::StorageClass::kPrivate);
+    Global("param2", ty.vec2<f32>(), ast::StorageClass::kPrivate);
 
-  auto* call = Call("dot", "param1", "param2");
-  WrapInFunction(CallStmt(call));
+    auto* call = Call("dot", "param1", "param2");
+    WrapInFunction(CallStmt(call));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_EQ(out.str(), "dot(param1, param2)");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+    EXPECT_EQ(out.str(), "dot(param1, param2)");
 }
 
 TEST_F(MslGeneratorImplTest, StorageBarrier) {
-  auto* call = Call("storageBarrier");
-  WrapInFunction(CallStmt(call));
+    auto* call = Call("storageBarrier");
+    WrapInFunction(CallStmt(call));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_EQ(out.str(), "threadgroup_barrier(mem_flags::mem_device)");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+    EXPECT_EQ(out.str(), "threadgroup_barrier(mem_flags::mem_device)");
 }
 
 TEST_F(MslGeneratorImplTest, WorkgroupBarrier) {
-  auto* call = Call("workgroupBarrier");
-  WrapInFunction(CallStmt(call));
+    auto* call = Call("workgroupBarrier");
+    WrapInFunction(CallStmt(call));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_EQ(out.str(), "threadgroup_barrier(mem_flags::mem_threadgroup)");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+    EXPECT_EQ(out.str(), "threadgroup_barrier(mem_flags::mem_threadgroup)");
 }
 
 TEST_F(MslGeneratorImplTest, Degrees_Scalar) {
-  auto* val = Var("val", ty.f32());
-  auto* call = Call("degrees", val);
-  WrapInFunction(val, call);
+    auto* val = Var("val", ty.f32());
+    auto* call = Call("degrees", val);
+    WrapInFunction(val, call);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -342,14 +334,14 @@ kernel void test_function() {
 }
 
 TEST_F(MslGeneratorImplTest, Degrees_Vector) {
-  auto* val = Var("val", ty.vec3<f32>());
-  auto* call = Call("degrees", val);
-  WrapInFunction(val, call);
+    auto* val = Var("val", ty.vec3<f32>());
+    auto* call = Call("degrees", val);
+    WrapInFunction(val, call);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -367,14 +359,14 @@ kernel void test_function() {
 }
 
 TEST_F(MslGeneratorImplTest, Radians_Scalar) {
-  auto* val = Var("val", ty.f32());
-  auto* call = Call("radians", val);
-  WrapInFunction(val, call);
+    auto* val = Var("val", ty.f32());
+    auto* call = Call("radians", val);
+    WrapInFunction(val, call);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -392,14 +384,14 @@ kernel void test_function() {
 }
 
 TEST_F(MslGeneratorImplTest, Radians_Vector) {
-  auto* val = Var("val", ty.vec3<f32>());
-  auto* call = Call("radians", val);
-  WrapInFunction(val, call);
+    auto* val = Var("val", ty.vec3<f32>());
+    auto* call = Call("radians", val);
+    WrapInFunction(val, call);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -417,37 +409,37 @@ kernel void test_function() {
 }
 
 TEST_F(MslGeneratorImplTest, Pack2x16Float) {
-  auto* call = Call("pack2x16float", "p1");
-  Global("p1", ty.vec2<f32>(), ast::StorageClass::kPrivate);
-  WrapInFunction(CallStmt(call));
+    auto* call = Call("pack2x16float", "p1");
+    Global("p1", ty.vec2<f32>(), ast::StorageClass::kPrivate);
+    WrapInFunction(CallStmt(call));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_EQ(out.str(), "as_type<uint>(half2(p1))");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+    EXPECT_EQ(out.str(), "as_type<uint>(half2(p1))");
 }
 
 TEST_F(MslGeneratorImplTest, Unpack2x16Float) {
-  auto* call = Call("unpack2x16float", "p1");
-  Global("p1", ty.u32(), ast::StorageClass::kPrivate);
-  WrapInFunction(CallStmt(call));
+    auto* call = Call("unpack2x16float", "p1");
+    Global("p1", ty.u32(), ast::StorageClass::kPrivate);
+    WrapInFunction(CallStmt(call));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-  EXPECT_EQ(out.str(), "float2(as_type<half2>(p1))");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
+    EXPECT_EQ(out.str(), "float2(as_type<half2>(p1))");
 }
 
 TEST_F(MslGeneratorImplTest, DotI32) {
-  Global("v", ty.vec3<i32>(), ast::StorageClass::kPrivate);
-  WrapInFunction(CallStmt(Call("dot", "v", "v")));
+    Global("v", ty.vec3<i32>(), ast::StorageClass::kPrivate);
+    WrapInFunction(CallStmt(Call("dot", "v", "v")));
 
-  GeneratorImpl& gen = SanitizeAndBuild();
+    GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 
@@ -465,19 +457,19 @@ kernel void test_function() {
 }
 
 TEST_F(MslGeneratorImplTest, Ignore) {
-  Func("f", {Param("a", ty.i32()), Param("b", ty.i32()), Param("c", ty.i32())},
-       ty.i32(), {Return(Mul(Add("a", "b"), "c"))});
+    Func("f", {Param("a", ty.i32()), Param("b", ty.i32()), Param("c", ty.i32())}, ty.i32(),
+         {Return(Mul(Add("a", "b"), "c"))});
 
-  Func("func", {}, ty.void_(), {CallStmt(Call("f", 1, 2, 3))},
-       {
-           Stage(ast::PipelineStage::kCompute),
-           WorkgroupSize(1),
-       });
+    Func("func", {}, ty.void_(), {CallStmt(Call("f", 1, 2, 3))},
+         {
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1),
+         });
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
 int f(int a, int b, int c) {

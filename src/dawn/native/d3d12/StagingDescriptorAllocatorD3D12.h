@@ -33,53 +33,53 @@
 // offset is inserted back into the free-list.
 namespace dawn::native::d3d12 {
 
-    class Device;
+class Device;
 
-    class StagingDescriptorAllocator {
-      public:
-        StagingDescriptorAllocator() = default;
-        StagingDescriptorAllocator(Device* device,
-                                   uint32_t descriptorCount,
-                                   uint32_t heapSize,
-                                   D3D12_DESCRIPTOR_HEAP_TYPE heapType);
-        ~StagingDescriptorAllocator();
+class StagingDescriptorAllocator {
+  public:
+    StagingDescriptorAllocator() = default;
+    StagingDescriptorAllocator(Device* device,
+                               uint32_t descriptorCount,
+                               uint32_t heapSize,
+                               D3D12_DESCRIPTOR_HEAP_TYPE heapType);
+    ~StagingDescriptorAllocator();
 
-        ResultOrError<CPUDescriptorHeapAllocation> AllocateCPUDescriptors();
+    ResultOrError<CPUDescriptorHeapAllocation> AllocateCPUDescriptors();
 
-        // Will call Deallocate when the serial is passed.
-        ResultOrError<CPUDescriptorHeapAllocation> AllocateTransientCPUDescriptors();
+    // Will call Deallocate when the serial is passed.
+    ResultOrError<CPUDescriptorHeapAllocation> AllocateTransientCPUDescriptors();
 
-        void Deallocate(CPUDescriptorHeapAllocation* allocation);
+    void Deallocate(CPUDescriptorHeapAllocation* allocation);
 
-        uint32_t GetSizeIncrement() const;
+    uint32_t GetSizeIncrement() const;
 
-        void Tick(ExecutionSerial completedSerial);
+    void Tick(ExecutionSerial completedSerial);
 
-      private:
-        using Index = uint16_t;
+  private:
+    using Index = uint16_t;
 
-        struct NonShaderVisibleBuffer {
-            ComPtr<ID3D12DescriptorHeap> heap;
-            std::vector<Index> freeBlockIndices;
-        };
-
-        MaybeError AllocateCPUHeap();
-
-        Index GetFreeBlockIndicesSize() const;
-
-        std::vector<uint32_t> mAvailableHeaps;  // Indices into the pool.
-        std::vector<NonShaderVisibleBuffer> mPool;
-
-        Device* mDevice;
-
-        uint32_t mSizeIncrement;  // Size of the descriptor (in bytes).
-        uint32_t mBlockSize;      // Size of the block of descriptors (in bytes).
-        uint32_t mHeapSize;       // Size of the heap (in number of descriptors).
-
-        D3D12_DESCRIPTOR_HEAP_TYPE mHeapType;
-
-        SerialQueue<ExecutionSerial, CPUDescriptorHeapAllocation> mAllocationsToDelete;
+    struct NonShaderVisibleBuffer {
+        ComPtr<ID3D12DescriptorHeap> heap;
+        std::vector<Index> freeBlockIndices;
     };
+
+    MaybeError AllocateCPUHeap();
+
+    Index GetFreeBlockIndicesSize() const;
+
+    std::vector<uint32_t> mAvailableHeaps;  // Indices into the pool.
+    std::vector<NonShaderVisibleBuffer> mPool;
+
+    Device* mDevice;
+
+    uint32_t mSizeIncrement;  // Size of the descriptor (in bytes).
+    uint32_t mBlockSize;      // Size of the block of descriptors (in bytes).
+    uint32_t mHeapSize;       // Size of the heap (in number of descriptors).
+
+    D3D12_DESCRIPTOR_HEAP_TYPE mHeapType;
+
+    SerialQueue<ExecutionSerial, CPUDescriptorHeapAllocation> mAllocationsToDelete;
+};
 
 }  // namespace dawn::native::d3d12
 

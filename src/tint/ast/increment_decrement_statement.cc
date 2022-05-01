@@ -25,20 +25,18 @@ IncrementDecrementStatement::IncrementDecrementStatement(ProgramID pid,
                                                          const Expression* l,
                                                          bool inc)
     : Base(pid, src), lhs(l), increment(inc) {
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, lhs, program_id);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, lhs, program_id);
 }
 
-IncrementDecrementStatement::IncrementDecrementStatement(
-    IncrementDecrementStatement&&) = default;
+IncrementDecrementStatement::IncrementDecrementStatement(IncrementDecrementStatement&&) = default;
 
 IncrementDecrementStatement::~IncrementDecrementStatement() = default;
 
-const IncrementDecrementStatement* IncrementDecrementStatement::Clone(
-    CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  auto* l = ctx->Clone(lhs);
-  return ctx->dst->create<IncrementDecrementStatement>(src, l, increment);
+const IncrementDecrementStatement* IncrementDecrementStatement::Clone(CloneContext* ctx) const {
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    auto* l = ctx->Clone(lhs);
+    return ctx->dst->create<IncrementDecrementStatement>(src, l, increment);
 }
 
 }  // namespace tint::ast

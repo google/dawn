@@ -31,29 +31,26 @@ namespace tint::ast {
 /// trivial for the Resolver to handle `@offset(n)` or `@size(n)` /
 /// `@align(n)` attributes, so this is what we do, keeping all the layout
 /// logic in one place.
-class StructMemberOffsetAttribute final
-    : public Castable<StructMemberOffsetAttribute, Attribute> {
- public:
-  /// constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param offset the offset value
-  StructMemberOffsetAttribute(ProgramID pid,
-                              const Source& src,
-                              uint32_t offset);
-  ~StructMemberOffsetAttribute() override;
+class StructMemberOffsetAttribute final : public Castable<StructMemberOffsetAttribute, Attribute> {
+  public:
+    /// constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param offset the offset value
+    StructMemberOffsetAttribute(ProgramID pid, const Source& src, uint32_t offset);
+    ~StructMemberOffsetAttribute() override;
 
-  /// @returns the WGSL name for the attribute
-  std::string Name() const override;
+    /// @returns the WGSL name for the attribute
+    std::string Name() const override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const StructMemberOffsetAttribute* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const StructMemberOffsetAttribute* Clone(CloneContext* ctx) const override;
 
-  /// The offset value
-  const uint32_t offset;
+    /// The offset value
+    const uint32_t offset;
 };
 
 }  // namespace tint::ast

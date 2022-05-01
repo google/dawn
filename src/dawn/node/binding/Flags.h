@@ -20,16 +20,16 @@
 #include <unordered_map>
 
 namespace wgpu::binding {
-    // Flags maintains a key-value mapping of input flags passed into the module's create()
-    // function, used to configure dawn_node.
-    class Flags {
-      public:
-        void Set(const std::string& key, const std::string& value);
-        std::optional<std::string> Get(const std::string& key) const;
+// Flags maintains a key-value mapping of input flags passed into the module's create()
+// function, used to configure dawn_node.
+class Flags {
+  public:
+    void Set(const std::string& key, const std::string& value);
+    std::optional<std::string> Get(const std::string& key) const;
 
-      private:
-        std::unordered_map<std::string, std::string> flags_;
-    };
+  private:
+    std::unordered_map<std::string, std::string> flags_;
+};
 }  // namespace wgpu::binding
 
 #endif  // SRC_DAWN_NODE_BINDING_FLAGS_H_

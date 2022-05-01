@@ -21,155 +21,148 @@
 
 namespace dawn::native {
 
-    AttachmentStateBlueprint::AttachmentStateBlueprint(
-        const RenderBundleEncoderDescriptor* descriptor)
-        : mSampleCount(descriptor->sampleCount) {
-        ASSERT(descriptor->colorFormatsCount <= kMaxColorAttachments);
+AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderBundleEncoderDescriptor* descriptor)
+    : mSampleCount(descriptor->sampleCount) {
+    ASSERT(descriptor->colorFormatsCount <= kMaxColorAttachments);
+    for (ColorAttachmentIndex i(uint8_t(0));
+         i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->colorFormatsCount)); ++i) {
+        wgpu::TextureFormat format = descriptor->colorFormats[static_cast<uint8_t>(i)];
+        if (format != wgpu::TextureFormat::Undefined) {
+            mColorAttachmentsSet.set(i);
+            mColorFormats[i] = format;
+        }
+    }
+    mDepthStencilFormat = descriptor->depthStencilFormat;
+}
+
+AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPipelineDescriptor* descriptor)
+    : mSampleCount(descriptor->multisample.count) {
+    if (descriptor->fragment != nullptr) {
+        ASSERT(descriptor->fragment->targetCount <= kMaxColorAttachments);
         for (ColorAttachmentIndex i(uint8_t(0));
-             i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->colorFormatsCount)); ++i) {
-            wgpu::TextureFormat format = descriptor->colorFormats[static_cast<uint8_t>(i)];
+             i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->fragment->targetCount));
+             ++i) {
+            wgpu::TextureFormat format =
+                descriptor->fragment->targets[static_cast<uint8_t>(i)].format;
             if (format != wgpu::TextureFormat::Undefined) {
                 mColorAttachmentsSet.set(i);
                 mColorFormats[i] = format;
             }
         }
-        mDepthStencilFormat = descriptor->depthStencilFormat;
+    }
+    if (descriptor->depthStencil != nullptr) {
+        mDepthStencilFormat = descriptor->depthStencil->format;
+    }
+}
+
+AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPassDescriptor* descriptor) {
+    for (ColorAttachmentIndex i(uint8_t(0));
+         i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->colorAttachmentCount)); ++i) {
+        TextureViewBase* attachment = descriptor->colorAttachments[static_cast<uint8_t>(i)].view;
+        if (attachment == nullptr) {
+            continue;
+        }
+        mColorAttachmentsSet.set(i);
+        mColorFormats[i] = attachment->GetFormat().format;
+        if (mSampleCount == 0) {
+            mSampleCount = attachment->GetTexture()->GetSampleCount();
+        } else {
+            ASSERT(mSampleCount == attachment->GetTexture()->GetSampleCount());
+        }
+    }
+    if (descriptor->depthStencilAttachment != nullptr) {
+        TextureViewBase* attachment = descriptor->depthStencilAttachment->view;
+        mDepthStencilFormat = attachment->GetFormat().format;
+        if (mSampleCount == 0) {
+            mSampleCount = attachment->GetTexture()->GetSampleCount();
+        } else {
+            ASSERT(mSampleCount == attachment->GetTexture()->GetSampleCount());
+        }
+    }
+    ASSERT(mSampleCount > 0);
+}
+
+AttachmentStateBlueprint::AttachmentStateBlueprint(const AttachmentStateBlueprint& rhs) = default;
+
+size_t AttachmentStateBlueprint::HashFunc::operator()(
+    const AttachmentStateBlueprint* attachmentState) const {
+    size_t hash = 0;
+
+    // Hash color formats
+    HashCombine(&hash, attachmentState->mColorAttachmentsSet);
+    for (ColorAttachmentIndex i : IterateBitSet(attachmentState->mColorAttachmentsSet)) {
+        HashCombine(&hash, attachmentState->mColorFormats[i]);
     }
 
-    AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPipelineDescriptor* descriptor)
-        : mSampleCount(descriptor->multisample.count) {
-        if (descriptor->fragment != nullptr) {
-            ASSERT(descriptor->fragment->targetCount <= kMaxColorAttachments);
-            for (ColorAttachmentIndex i(uint8_t(0));
-                 i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->fragment->targetCount));
-                 ++i) {
-                wgpu::TextureFormat format =
-                    descriptor->fragment->targets[static_cast<uint8_t>(i)].format;
-                if (format != wgpu::TextureFormat::Undefined) {
-                    mColorAttachmentsSet.set(i);
-                    mColorFormats[i] = format;
-                }
-            }
-        }
-        if (descriptor->depthStencil != nullptr) {
-            mDepthStencilFormat = descriptor->depthStencil->format;
-        }
+    // Hash depth stencil attachment
+    HashCombine(&hash, attachmentState->mDepthStencilFormat);
+
+    // Hash sample count
+    HashCombine(&hash, attachmentState->mSampleCount);
+
+    return hash;
+}
+
+bool AttachmentStateBlueprint::EqualityFunc::operator()(const AttachmentStateBlueprint* a,
+                                                        const AttachmentStateBlueprint* b) const {
+    // Check set attachments
+    if (a->mColorAttachmentsSet != b->mColorAttachmentsSet) {
+        return false;
     }
 
-    AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPassDescriptor* descriptor) {
-        for (ColorAttachmentIndex i(uint8_t(0));
-             i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->colorAttachmentCount));
-             ++i) {
-            TextureViewBase* attachment =
-                descriptor->colorAttachments[static_cast<uint8_t>(i)].view;
-            if (attachment == nullptr) {
-                continue;
-            }
-            mColorAttachmentsSet.set(i);
-            mColorFormats[i] = attachment->GetFormat().format;
-            if (mSampleCount == 0) {
-                mSampleCount = attachment->GetTexture()->GetSampleCount();
-            } else {
-                ASSERT(mSampleCount == attachment->GetTexture()->GetSampleCount());
-            }
-        }
-        if (descriptor->depthStencilAttachment != nullptr) {
-            TextureViewBase* attachment = descriptor->depthStencilAttachment->view;
-            mDepthStencilFormat = attachment->GetFormat().format;
-            if (mSampleCount == 0) {
-                mSampleCount = attachment->GetTexture()->GetSampleCount();
-            } else {
-                ASSERT(mSampleCount == attachment->GetTexture()->GetSampleCount());
-            }
-        }
-        ASSERT(mSampleCount > 0);
-    }
-
-    AttachmentStateBlueprint::AttachmentStateBlueprint(const AttachmentStateBlueprint& rhs) =
-        default;
-
-    size_t AttachmentStateBlueprint::HashFunc::operator()(
-        const AttachmentStateBlueprint* attachmentState) const {
-        size_t hash = 0;
-
-        // Hash color formats
-        HashCombine(&hash, attachmentState->mColorAttachmentsSet);
-        for (ColorAttachmentIndex i : IterateBitSet(attachmentState->mColorAttachmentsSet)) {
-            HashCombine(&hash, attachmentState->mColorFormats[i]);
-        }
-
-        // Hash depth stencil attachment
-        HashCombine(&hash, attachmentState->mDepthStencilFormat);
-
-        // Hash sample count
-        HashCombine(&hash, attachmentState->mSampleCount);
-
-        return hash;
-    }
-
-    bool AttachmentStateBlueprint::EqualityFunc::operator()(
-        const AttachmentStateBlueprint* a,
-        const AttachmentStateBlueprint* b) const {
-        // Check set attachments
-        if (a->mColorAttachmentsSet != b->mColorAttachmentsSet) {
+    // Check color formats
+    for (ColorAttachmentIndex i : IterateBitSet(a->mColorAttachmentsSet)) {
+        if (a->mColorFormats[i] != b->mColorFormats[i]) {
             return false;
         }
-
-        // Check color formats
-        for (ColorAttachmentIndex i : IterateBitSet(a->mColorAttachmentsSet)) {
-            if (a->mColorFormats[i] != b->mColorFormats[i]) {
-                return false;
-            }
-        }
-
-        // Check depth stencil format
-        if (a->mDepthStencilFormat != b->mDepthStencilFormat) {
-            return false;
-        }
-
-        // Check sample count
-        if (a->mSampleCount != b->mSampleCount) {
-            return false;
-        }
-
-        return true;
     }
 
-    AttachmentState::AttachmentState(DeviceBase* device, const AttachmentStateBlueprint& blueprint)
-        : AttachmentStateBlueprint(blueprint), ObjectBase(device) {
+    // Check depth stencil format
+    if (a->mDepthStencilFormat != b->mDepthStencilFormat) {
+        return false;
     }
 
-    AttachmentState::~AttachmentState() {
-        GetDevice()->UncacheAttachmentState(this);
+    // Check sample count
+    if (a->mSampleCount != b->mSampleCount) {
+        return false;
     }
 
-    size_t AttachmentState::ComputeContentHash() {
-        // TODO(dawn:549): skip this traversal and reuse the blueprint.
-        return AttachmentStateBlueprint::HashFunc()(this);
-    }
+    return true;
+}
 
-    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments>
-    AttachmentState::GetColorAttachmentsMask() const {
-        return mColorAttachmentsSet;
-    }
+AttachmentState::AttachmentState(DeviceBase* device, const AttachmentStateBlueprint& blueprint)
+    : AttachmentStateBlueprint(blueprint), ObjectBase(device) {}
 
-    wgpu::TextureFormat AttachmentState::GetColorAttachmentFormat(
-        ColorAttachmentIndex index) const {
-        ASSERT(mColorAttachmentsSet[index]);
-        return mColorFormats[index];
-    }
+AttachmentState::~AttachmentState() {
+    GetDevice()->UncacheAttachmentState(this);
+}
 
-    bool AttachmentState::HasDepthStencilAttachment() const {
-        return mDepthStencilFormat != wgpu::TextureFormat::Undefined;
-    }
+size_t AttachmentState::ComputeContentHash() {
+    // TODO(dawn:549): skip this traversal and reuse the blueprint.
+    return AttachmentStateBlueprint::HashFunc()(this);
+}
 
-    wgpu::TextureFormat AttachmentState::GetDepthStencilFormat() const {
-        ASSERT(HasDepthStencilAttachment());
-        return mDepthStencilFormat;
-    }
+ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> AttachmentState::GetColorAttachmentsMask()
+    const {
+    return mColorAttachmentsSet;
+}
 
-    uint32_t AttachmentState::GetSampleCount() const {
-        return mSampleCount;
-    }
+wgpu::TextureFormat AttachmentState::GetColorAttachmentFormat(ColorAttachmentIndex index) const {
+    ASSERT(mColorAttachmentsSet[index]);
+    return mColorFormats[index];
+}
+
+bool AttachmentState::HasDepthStencilAttachment() const {
+    return mDepthStencilFormat != wgpu::TextureFormat::Undefined;
+}
+
+wgpu::TextureFormat AttachmentState::GetDepthStencilFormat() const {
+    ASSERT(HasDepthStencilAttachment());
+    return mDepthStencilFormat;
+}
+
+uint32_t AttachmentState::GetSampleCount() const {
+    return mSampleCount;
+}
 
 }  // namespace dawn::native

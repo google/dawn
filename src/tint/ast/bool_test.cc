@@ -22,8 +22,8 @@ namespace {
 using AstBoolTest = TestHelper;
 
 TEST_F(AstBoolTest, FriendlyName) {
-  auto* b = create<Bool>();
-  EXPECT_EQ(b->FriendlyName(Symbols()), "bool");
+    auto* b = create<Bool>();
+    EXPECT_EQ(b->FriendlyName(Symbols()), "bool");
 }
 
 }  // namespace

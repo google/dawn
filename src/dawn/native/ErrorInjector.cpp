@@ -19,52 +19,52 @@
 
 namespace dawn::native {
 
-    namespace {
+namespace {
 
-        bool sIsEnabled = false;
-        uint64_t sNextIndex = 0;
-        uint64_t sInjectedFailureIndex = 0;
-        bool sHasPendingInjectedError = false;
+bool sIsEnabled = false;
+uint64_t sNextIndex = 0;
+uint64_t sInjectedFailureIndex = 0;
+bool sHasPendingInjectedError = false;
 
-    }  // anonymous namespace
+}  // anonymous namespace
 
-    void EnableErrorInjector() {
-        sIsEnabled = true;
-    }
+void EnableErrorInjector() {
+    sIsEnabled = true;
+}
 
-    void DisableErrorInjector() {
-        sIsEnabled = false;
-    }
+void DisableErrorInjector() {
+    sIsEnabled = false;
+}
 
-    void ClearErrorInjector() {
-        sNextIndex = 0;
+void ClearErrorInjector() {
+    sNextIndex = 0;
+    sHasPendingInjectedError = false;
+}
+
+bool ErrorInjectorEnabled() {
+    return sIsEnabled;
+}
+
+uint64_t AcquireErrorInjectorCallCount() {
+    uint64_t count = sNextIndex;
+    ClearErrorInjector();
+    return count;
+}
+
+bool ShouldInjectError() {
+    uint64_t index = sNextIndex++;
+    if (sHasPendingInjectedError && index == sInjectedFailureIndex) {
         sHasPendingInjectedError = false;
+        return true;
     }
+    return false;
+}
 
-    bool ErrorInjectorEnabled() {
-        return sIsEnabled;
-    }
-
-    uint64_t AcquireErrorInjectorCallCount() {
-        uint64_t count = sNextIndex;
-        ClearErrorInjector();
-        return count;
-    }
-
-    bool ShouldInjectError() {
-        uint64_t index = sNextIndex++;
-        if (sHasPendingInjectedError && index == sInjectedFailureIndex) {
-            sHasPendingInjectedError = false;
-            return true;
-        }
-        return false;
-    }
-
-    void InjectErrorAt(uint64_t index) {
-        // Only one error can be injected at a time.
-        ASSERT(!sHasPendingInjectedError);
-        sInjectedFailureIndex = index;
-        sHasPendingInjectedError = true;
-    }
+void InjectErrorAt(uint64_t index) {
+    // Only one error can be injected at a time.
+    ASSERT(!sHasPendingInjectedError);
+    sInjectedFailureIndex = index;
+    sHasPendingInjectedError = true;
+}
 
 }  // namespace dawn::native

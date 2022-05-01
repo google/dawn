@@ -25,40 +25,38 @@ namespace tint::sem {
 /// Call is the base class for semantic nodes that hold semantic information for
 /// ast::CallExpression nodes.
 class Call final : public Castable<Call, Expression> {
- public:
-  /// Constructor
-  /// @param declaration the AST node
-  /// @param target the call target
-  /// @param arguments the call arguments
-  /// @param statement the statement that owns this expression
-  /// @param constant the constant value of this expression
-  /// @param has_side_effects whether this expression may have side effects
-  Call(const ast::CallExpression* declaration,
-       const CallTarget* target,
-       std::vector<const sem::Expression*> arguments,
-       const Statement* statement,
-       Constant constant,
-       bool has_side_effects);
+  public:
+    /// Constructor
+    /// @param declaration the AST node
+    /// @param target the call target
+    /// @param arguments the call arguments
+    /// @param statement the statement that owns this expression
+    /// @param constant the constant value of this expression
+    /// @param has_side_effects whether this expression may have side effects
+    Call(const ast::CallExpression* declaration,
+         const CallTarget* target,
+         std::vector<const sem::Expression*> arguments,
+         const Statement* statement,
+         Constant constant,
+         bool has_side_effects);
 
-  /// Destructor
-  ~Call() override;
+    /// Destructor
+    ~Call() override;
 
-  /// @return the target of the call
-  const CallTarget* Target() const { return target_; }
+    /// @return the target of the call
+    const CallTarget* Target() const { return target_; }
 
-  /// @return the call arguments
-  const std::vector<const sem::Expression*>& Arguments() const {
-    return arguments_;
-  }
+    /// @return the call arguments
+    const std::vector<const sem::Expression*>& Arguments() const { return arguments_; }
 
-  /// @returns the AST node
-  const ast::CallExpression* Declaration() const {
-    return static_cast<const ast::CallExpression*>(declaration_);
-  }
+    /// @returns the AST node
+    const ast::CallExpression* Declaration() const {
+        return static_cast<const ast::CallExpression*>(declaration_);
+    }
 
- private:
-  CallTarget const* const target_;
-  std::vector<const sem::Expression*> arguments_;
+  private:
+    CallTarget const* const target_;
+    std::vector<const sem::Expression*> arguments_;
 };
 
 }  // namespace tint::sem

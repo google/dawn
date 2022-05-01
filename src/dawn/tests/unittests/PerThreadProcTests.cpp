@@ -27,8 +27,7 @@ class PerThreadProcTests : public testing::Test {
   public:
     PerThreadProcTests()
         : mNativeInstance(dawn::native::InstanceBase::Create()),
-          mNativeAdapter(mNativeInstance.Get()) {
-    }
+          mNativeAdapter(mNativeInstance.Get()) {}
     ~PerThreadProcTests() override = default;
 
   protected:

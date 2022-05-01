@@ -17,25 +17,25 @@
 namespace tint::ast {
 
 std::ostream& operator<<(std::ostream& out, PipelineStage stage) {
-  switch (stage) {
-    case PipelineStage::kNone: {
-      out << "none";
-      break;
+    switch (stage) {
+        case PipelineStage::kNone: {
+            out << "none";
+            break;
+        }
+        case PipelineStage::kVertex: {
+            out << "vertex";
+            break;
+        }
+        case PipelineStage::kFragment: {
+            out << "fragment";
+            break;
+        }
+        case PipelineStage::kCompute: {
+            out << "compute";
+            break;
+        }
     }
-    case PipelineStage::kVertex: {
-      out << "vertex";
-      break;
-    }
-    case PipelineStage::kFragment: {
-      out << "fragment";
-      break;
-    }
-    case PipelineStage::kCompute: {
-      out << "compute";
-      break;
-    }
-  }
-  return out;
+    return out;
 }
 
 }  // namespace tint::ast

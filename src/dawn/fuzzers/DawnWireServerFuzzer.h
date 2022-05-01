@@ -22,17 +22,17 @@
 
 namespace dawn::native {
 
-    class Instance;
+class Instance;
 
 }  // namespace dawn::native
 
 namespace DawnWireServerFuzzer {
 
-    using MakeDeviceFn = std::function<wgpu::Device(dawn::native::Instance*)>;
+using MakeDeviceFn = std::function<wgpu::Device(dawn::native::Instance*)>;
 
-    int Initialize(int* argc, char*** argv);
+int Initialize(int* argc, char*** argv);
 
-    int Run(const uint8_t* data, size_t size, MakeDeviceFn MakeDevice, bool supportsErrorInjection);
+int Run(const uint8_t* data, size_t size, MakeDeviceFn MakeDevice, bool supportsErrorInjection);
 
 }  // namespace DawnWireServerFuzzer
 

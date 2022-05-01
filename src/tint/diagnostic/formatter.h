@@ -25,44 +25,44 @@ class Printer;
 
 /// Formatter are used to print a list of diagnostics messages.
 class Formatter {
- public:
-  /// Style controls the formatter's output style.
-  struct Style {
-    /// include the file path for each diagnostic
-    bool print_file = true;
-    /// include the severity for each diagnostic
-    bool print_severity = true;
-    /// include the source line(s) for the diagnostic
-    bool print_line = true;
-    /// print a newline at the end of a diagnostic list
-    bool print_newline_at_end = true;
-    /// width of a tab character
-    size_t tab_width = 2u;
-  };
+  public:
+    /// Style controls the formatter's output style.
+    struct Style {
+        /// include the file path for each diagnostic
+        bool print_file = true;
+        /// include the severity for each diagnostic
+        bool print_severity = true;
+        /// include the source line(s) for the diagnostic
+        bool print_line = true;
+        /// print a newline at the end of a diagnostic list
+        bool print_newline_at_end = true;
+        /// width of a tab character
+        size_t tab_width = 2u;
+    };
 
-  /// Constructor for the formatter using a default style.
-  Formatter();
+    /// Constructor for the formatter using a default style.
+    Formatter();
 
-  /// Constructor for the formatter using the custom style.
-  /// @param style the style used for the formatter.
-  explicit Formatter(const Style& style);
+    /// Constructor for the formatter using the custom style.
+    /// @param style the style used for the formatter.
+    explicit Formatter(const Style& style);
 
-  ~Formatter();
+    ~Formatter();
 
-  /// @param list the list of diagnostic messages to format
-  /// @param printer the printer used to display the formatted diagnostics
-  void format(const List& list, Printer* printer) const;
+    /// @param list the list of diagnostic messages to format
+    /// @param printer the printer used to display the formatted diagnostics
+    void format(const List& list, Printer* printer) const;
 
-  /// @return the list of diagnostics `list` formatted to a string.
-  /// @param list the list of diagnostic messages to format
-  std::string format(const List& list) const;
+    /// @return the list of diagnostics `list` formatted to a string.
+    /// @param list the list of diagnostic messages to format
+    std::string format(const List& list) const;
 
- private:
-  struct State;
+  private:
+    struct State;
 
-  void format(const Diagnostic& diag, State& state) const;
+    void format(const Diagnostic& diag, State& state) const;
 
-  const Style style_;
+    const Style style_;
 };
 
 }  // namespace tint::diag

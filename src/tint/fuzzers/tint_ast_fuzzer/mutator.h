@@ -65,8 +65,7 @@ bool MaybeApplyMutation(const tint::Program& program,
 /// @param program - the initial program - must be valid.
 /// @param mutation_sequence - a sequence of mutations.
 /// @return the mutated program.
-tint::Program Replay(tint::Program program,
-                     const protobufs::MutationSequence& mutation_sequence);
+tint::Program Replay(tint::Program program, const protobufs::MutationSequence& mutation_sequence);
 
 /// @brief Applies up to `max_applied_mutations` mutations to the `program`.
 ///

@@ -22,55 +22,54 @@
 
 namespace dawn::native::vulkan {
 
-    StagingBuffer::StagingBuffer(size_t size, Device* device)
-        : StagingBufferBase(size), mDevice(device) {
+StagingBuffer::StagingBuffer(size_t size, Device* device)
+    : StagingBufferBase(size), mDevice(device) {}
+
+MaybeError StagingBuffer::Initialize() {
+    VkBufferCreateInfo createInfo;
+    createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    createInfo.pNext = nullptr;
+    createInfo.flags = 0;
+    createInfo.size = GetSize();
+    createInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    createInfo.queueFamilyIndexCount = 0;
+    createInfo.pQueueFamilyIndices = 0;
+
+    DAWN_TRY(CheckVkSuccess(
+        mDevice->fn.CreateBuffer(mDevice->GetVkDevice(), &createInfo, nullptr, &*mBuffer),
+        "vkCreateBuffer"));
+
+    VkMemoryRequirements requirements;
+    mDevice->fn.GetBufferMemoryRequirements(mDevice->GetVkDevice(), mBuffer, &requirements);
+
+    DAWN_TRY_ASSIGN(mAllocation, mDevice->GetResourceMemoryAllocator()->Allocate(
+                                     requirements, MemoryKind::LinearMappable));
+
+    DAWN_TRY(CheckVkSuccess(
+        mDevice->fn.BindBufferMemory(mDevice->GetVkDevice(), mBuffer,
+                                     ToBackend(mAllocation.GetResourceHeap())->GetMemory(),
+                                     mAllocation.GetOffset()),
+        "vkBindBufferMemory"));
+
+    mMappedPointer = mAllocation.GetMappedPointer();
+    if (mMappedPointer == nullptr) {
+        return DAWN_INTERNAL_ERROR("Unable to map staging buffer.");
     }
 
-    MaybeError StagingBuffer::Initialize() {
-        VkBufferCreateInfo createInfo;
-        createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        createInfo.pNext = nullptr;
-        createInfo.flags = 0;
-        createInfo.size = GetSize();
-        createInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-        createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        createInfo.queueFamilyIndexCount = 0;
-        createInfo.pQueueFamilyIndices = 0;
+    SetDebugName(mDevice, mBuffer, "Dawn_StagingBuffer");
 
-        DAWN_TRY(CheckVkSuccess(
-            mDevice->fn.CreateBuffer(mDevice->GetVkDevice(), &createInfo, nullptr, &*mBuffer),
-            "vkCreateBuffer"));
+    return {};
+}
 
-        VkMemoryRequirements requirements;
-        mDevice->fn.GetBufferMemoryRequirements(mDevice->GetVkDevice(), mBuffer, &requirements);
+StagingBuffer::~StagingBuffer() {
+    mMappedPointer = nullptr;
+    mDevice->GetFencedDeleter()->DeleteWhenUnused(mBuffer);
+    mDevice->GetResourceMemoryAllocator()->Deallocate(&mAllocation);
+}
 
-        DAWN_TRY_ASSIGN(mAllocation, mDevice->GetResourceMemoryAllocator()->Allocate(
-                                         requirements, MemoryKind::LinearMappable));
-
-        DAWN_TRY(CheckVkSuccess(
-            mDevice->fn.BindBufferMemory(mDevice->GetVkDevice(), mBuffer,
-                                         ToBackend(mAllocation.GetResourceHeap())->GetMemory(),
-                                         mAllocation.GetOffset()),
-            "vkBindBufferMemory"));
-
-        mMappedPointer = mAllocation.GetMappedPointer();
-        if (mMappedPointer == nullptr) {
-            return DAWN_INTERNAL_ERROR("Unable to map staging buffer.");
-        }
-
-        SetDebugName(mDevice, mBuffer, "Dawn_StagingBuffer");
-
-        return {};
-    }
-
-    StagingBuffer::~StagingBuffer() {
-        mMappedPointer = nullptr;
-        mDevice->GetFencedDeleter()->DeleteWhenUnused(mBuffer);
-        mDevice->GetResourceMemoryAllocator()->Deallocate(&mAllocation);
-    }
-
-    VkBuffer StagingBuffer::GetBufferHandle() const {
-        return mBuffer;
-    }
+VkBuffer StagingBuffer::GetBufferHandle() const {
+    return mBuffer;
+}
 
 }  // namespace dawn::native::vulkan

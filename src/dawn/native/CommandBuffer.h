@@ -26,50 +26,49 @@
 
 namespace dawn::native {
 
-    struct BeginRenderPassCmd;
-    struct CopyTextureToBufferCmd;
-    struct TextureCopy;
+struct BeginRenderPassCmd;
+struct CopyTextureToBufferCmd;
+struct TextureCopy;
 
-    class CommandBufferBase : public ApiObjectBase {
-      public:
-        CommandBufferBase(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
+class CommandBufferBase : public ApiObjectBase {
+  public:
+    CommandBufferBase(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
 
-        static CommandBufferBase* MakeError(DeviceBase* device);
+    static CommandBufferBase* MakeError(DeviceBase* device);
 
-        ObjectType GetType() const override;
+    ObjectType GetType() const override;
 
-        MaybeError ValidateCanUseInSubmitNow() const;
+    MaybeError ValidateCanUseInSubmitNow() const;
 
-        const CommandBufferResourceUsage& GetResourceUsages() const;
+    const CommandBufferResourceUsage& GetResourceUsages() const;
 
-        CommandIterator* GetCommandIteratorForTesting();
+    CommandIterator* GetCommandIteratorForTesting();
 
-      protected:
-        // Constructor used only for mocking and testing.
-        explicit CommandBufferBase(DeviceBase* device);
-        void DestroyImpl() override;
+  protected:
+    // Constructor used only for mocking and testing.
+    explicit CommandBufferBase(DeviceBase* device);
+    void DestroyImpl() override;
 
-        CommandIterator mCommands;
+    CommandIterator mCommands;
 
-      private:
-        CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+  private:
+    CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        CommandBufferResourceUsage mResourceUsages;
-    };
+    CommandBufferResourceUsage mResourceUsages;
+};
 
-    bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
-                                       const Extent3D copySize,
-                                       const uint32_t mipLevel);
-    SubresourceRange GetSubresourcesAffectedByCopy(const TextureCopy& copy,
-                                                   const Extent3D& copySize);
+bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
+                                   const Extent3D copySize,
+                                   const uint32_t mipLevel);
+SubresourceRange GetSubresourcesAffectedByCopy(const TextureCopy& copy, const Extent3D& copySize);
 
-    void LazyClearRenderPassAttachments(BeginRenderPassCmd* renderPass);
+void LazyClearRenderPassAttachments(BeginRenderPassCmd* renderPass);
 
-    bool IsFullBufferOverwrittenInTextureToBufferCopy(const CopyTextureToBufferCmd* copy);
+bool IsFullBufferOverwrittenInTextureToBufferCopy(const CopyTextureToBufferCmd* copy);
 
-    std::array<float, 4> ConvertToFloatColor(dawn::native::Color color);
-    std::array<int32_t, 4> ConvertToSignedIntegerColor(dawn::native::Color color);
-    std::array<uint32_t, 4> ConvertToUnsignedIntegerColor(dawn::native::Color color);
+std::array<float, 4> ConvertToFloatColor(dawn::native::Color color);
+std::array<int32_t, 4> ConvertToSignedIntegerColor(dawn::native::Color color);
+std::array<uint32_t, 4> ConvertToUnsignedIntegerColor(dawn::native::Color color);
 
 }  // namespace dawn::native
 

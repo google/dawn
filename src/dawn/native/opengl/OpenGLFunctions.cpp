@@ -18,44 +18,44 @@
 
 namespace dawn::native::opengl {
 
-    MaybeError OpenGLFunctions::Initialize(GetProcAddress getProc) {
-        DAWN_TRY(mVersion.Initialize(getProc));
-        if (mVersion.IsES()) {
-            DAWN_TRY(LoadOpenGLESProcs(getProc, mVersion.GetMajor(), mVersion.GetMinor()));
-        } else {
-            DAWN_TRY(LoadDesktopGLProcs(getProc, mVersion.GetMajor(), mVersion.GetMinor()));
-        }
-
-        InitializeSupportedGLExtensions();
-
-        return {};
+MaybeError OpenGLFunctions::Initialize(GetProcAddress getProc) {
+    DAWN_TRY(mVersion.Initialize(getProc));
+    if (mVersion.IsES()) {
+        DAWN_TRY(LoadOpenGLESProcs(getProc, mVersion.GetMajor(), mVersion.GetMinor()));
+    } else {
+        DAWN_TRY(LoadDesktopGLProcs(getProc, mVersion.GetMajor(), mVersion.GetMinor()));
     }
 
-    void OpenGLFunctions::InitializeSupportedGLExtensions() {
-        int32_t numExtensions;
-        GetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+    InitializeSupportedGLExtensions();
 
-        for (int32_t i = 0; i < numExtensions; ++i) {
-            const char* extensionName = reinterpret_cast<const char*>(GetStringi(GL_EXTENSIONS, i));
-            mSupportedGLExtensionsSet.insert(extensionName);
-        }
-    }
+    return {};
+}
 
-    bool OpenGLFunctions::IsGLExtensionSupported(const char* extension) const {
-        ASSERT(extension != nullptr);
-        return mSupportedGLExtensionsSet.count(extension) != 0;
-    }
+void OpenGLFunctions::InitializeSupportedGLExtensions() {
+    int32_t numExtensions;
+    GetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
 
-    const OpenGLVersion& OpenGLFunctions::GetVersion() const {
-        return mVersion;
+    for (int32_t i = 0; i < numExtensions; ++i) {
+        const char* extensionName = reinterpret_cast<const char*>(GetStringi(GL_EXTENSIONS, i));
+        mSupportedGLExtensionsSet.insert(extensionName);
     }
+}
 
-    bool OpenGLFunctions::IsAtLeastGL(uint32_t majorVersion, uint32_t minorVersion) const {
-        return mVersion.IsDesktop() && mVersion.IsAtLeast(majorVersion, minorVersion);
-    }
+bool OpenGLFunctions::IsGLExtensionSupported(const char* extension) const {
+    ASSERT(extension != nullptr);
+    return mSupportedGLExtensionsSet.count(extension) != 0;
+}
 
-    bool OpenGLFunctions::IsAtLeastGLES(uint32_t majorVersion, uint32_t minorVersion) const {
-        return mVersion.IsES() && mVersion.IsAtLeast(majorVersion, minorVersion);
-    }
+const OpenGLVersion& OpenGLFunctions::GetVersion() const {
+    return mVersion;
+}
+
+bool OpenGLFunctions::IsAtLeastGL(uint32_t majorVersion, uint32_t minorVersion) const {
+    return mVersion.IsDesktop() && mVersion.IsAtLeast(majorVersion, minorVersion);
+}
+
+bool OpenGLFunctions::IsAtLeastGLES(uint32_t majorVersion, uint32_t minorVersion) const {
+    return mVersion.IsES() && mVersion.IsAtLeast(majorVersion, minorVersion);
+}
 
 }  // namespace dawn::native::opengl

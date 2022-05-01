@@ -22,35 +22,35 @@ namespace {
 using FoldTrivialSingleUseLetsTest = TransformTest;
 
 TEST_F(FoldTrivialSingleUseLetsTest, EmptyModule) {
-  auto* src = "";
-  auto* expect = "";
+    auto* src = "";
+    auto* expect = "";
 
-  auto got = Run<FoldTrivialSingleUseLets>(src);
+    auto got = Run<FoldTrivialSingleUseLets>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(FoldTrivialSingleUseLetsTest, Single) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   let x = 1;
   _ = x;
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   _ = 1;
 }
 )";
 
-  auto got = Run<FoldTrivialSingleUseLets>(src);
+    auto got = Run<FoldTrivialSingleUseLets>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(FoldTrivialSingleUseLetsTest, Multiple) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   let x = 1;
   let y = 2;
@@ -59,19 +59,19 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   _ = ((1 + 2) + 3);
 }
 )";
 
-  auto got = Run<FoldTrivialSingleUseLets>(src);
+    auto got = Run<FoldTrivialSingleUseLets>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(FoldTrivialSingleUseLetsTest, Chained) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   let x = 1;
   let y = x;
@@ -80,19 +80,19 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   _ = 1;
 }
 )";
 
-  auto got = Run<FoldTrivialSingleUseLets>(src);
+    auto got = Run<FoldTrivialSingleUseLets>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(FoldTrivialSingleUseLetsTest, NoFold_NonTrivialLet) {
-  auto* src = R"(
+    auto* src = R"(
 fn function_with_posssible_side_effect() -> i32 {
   return 1;
 }
@@ -104,15 +104,15 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<FoldTrivialSingleUseLets>(src);
+    auto got = Run<FoldTrivialSingleUseLets>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(FoldTrivialSingleUseLetsTest, NoFold_NonTrivialLet_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   let x = 1;
   let y = function_with_posssible_side_effect();
@@ -124,15 +124,15 @@ fn function_with_posssible_side_effect() -> i32 {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<FoldTrivialSingleUseLets>(src);
+    auto got = Run<FoldTrivialSingleUseLets>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(FoldTrivialSingleUseLetsTest, NoFold_UseInSubBlock) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   let x = 1;
   {
@@ -141,30 +141,30 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<FoldTrivialSingleUseLets>(src);
+    auto got = Run<FoldTrivialSingleUseLets>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(FoldTrivialSingleUseLetsTest, NoFold_MultipleUses) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   let x = 1;
   _ = (x + x);
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<FoldTrivialSingleUseLets>(src);
+    auto got = Run<FoldTrivialSingleUseLets>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(FoldTrivialSingleUseLetsTest, NoFold_Shadowing) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var y = 1;
   let x = y;
@@ -175,11 +175,11 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  auto got = Run<FoldTrivialSingleUseLets>(src);
+    auto got = Run<FoldTrivialSingleUseLets>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

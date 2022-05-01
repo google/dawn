@@ -24,23 +24,21 @@ namespace tint::transform {
 /// transform is used by the SPIR-V writer as there is no SPIR-V instruction
 /// that can dynamically index a non-pointer composite.
 class VarForDynamicIndex : public Transform {
- public:
-  /// Constructor
-  VarForDynamicIndex();
+  public:
+    /// Constructor
+    VarForDynamicIndex();
 
-  /// Destructor
-  ~VarForDynamicIndex() override;
+    /// Destructor
+    ~VarForDynamicIndex() override;
 
- protected:
-  /// Runs the transform using the CloneContext built for transforming a
-  /// program. Run() is responsible for calling Clone() on the CloneContext.
-  /// @param ctx the CloneContext primed with the input program and
-  /// ProgramBuilder
-  /// @param inputs optional extra transform-specific input data
-  /// @param outputs optional extra transform-specific output data
-  void Run(CloneContext& ctx,
-           const DataMap& inputs,
-           DataMap& outputs) const override;
+  protected:
+    /// Runs the transform using the CloneContext built for transforming a
+    /// program. Run() is responsible for calling Clone() on the CloneContext.
+    /// @param ctx the CloneContext primed with the input program and
+    /// ProgramBuilder
+    /// @param inputs optional extra transform-specific input data
+    /// @param outputs optional extra transform-specific output data
+    void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) const override;
 };
 
 }  // namespace tint::transform

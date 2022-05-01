@@ -32,50 +32,45 @@ namespace tint::transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * SimplifyPointers
-class CalculateArrayLength final
-    : public Castable<CalculateArrayLength, Transform> {
- public:
-  /// BufferSizeIntrinsic is an InternalAttribute that's applied to intrinsic
-  /// functions used to obtain the runtime size of a storage buffer.
-  class BufferSizeIntrinsic final
-      : public Castable<BufferSizeIntrinsic, ast::InternalAttribute> {
-   public:
+class CalculateArrayLength final : public Castable<CalculateArrayLength, Transform> {
+  public:
+    /// BufferSizeIntrinsic is an InternalAttribute that's applied to intrinsic
+    /// functions used to obtain the runtime size of a storage buffer.
+    class BufferSizeIntrinsic final : public Castable<BufferSizeIntrinsic, ast::InternalAttribute> {
+      public:
+        /// Constructor
+        /// @param program_id the identifier of the program that owns this node
+        explicit BufferSizeIntrinsic(ProgramID program_id);
+        /// Destructor
+        ~BufferSizeIntrinsic() override;
+
+        /// @return "buffer_size"
+        std::string InternalName() const override;
+
+        /// Performs a deep clone of this object using the CloneContext `ctx`.
+        /// @param ctx the clone context
+        /// @return the newly cloned object
+        const BufferSizeIntrinsic* Clone(CloneContext* ctx) const override;
+    };
+
     /// Constructor
-    /// @param program_id the identifier of the program that owns this node
-    explicit BufferSizeIntrinsic(ProgramID program_id);
+    CalculateArrayLength();
     /// Destructor
-    ~BufferSizeIntrinsic() override;
+    ~CalculateArrayLength() override;
 
-    /// @return "buffer_size"
-    std::string InternalName() const override;
+    /// @param program the program to inspect
+    /// @param data optional extra transform-specific input data
+    /// @returns true if this transform should be run for the given program
+    bool ShouldRun(const Program* program, const DataMap& data = {}) const override;
 
-    /// Performs a deep clone of this object using the CloneContext `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned object
-    const BufferSizeIntrinsic* Clone(CloneContext* ctx) const override;
-  };
-
-  /// Constructor
-  CalculateArrayLength();
-  /// Destructor
-  ~CalculateArrayLength() override;
-
-  /// @param program the program to inspect
-  /// @param data optional extra transform-specific input data
-  /// @returns true if this transform should be run for the given program
-  bool ShouldRun(const Program* program,
-                 const DataMap& data = {}) const override;
-
- protected:
-  /// Runs the transform using the CloneContext built for transforming a
-  /// program. Run() is responsible for calling Clone() on the CloneContext.
-  /// @param ctx the CloneContext primed with the input program and
-  /// ProgramBuilder
-  /// @param inputs optional extra transform-specific input data
-  /// @param outputs optional extra transform-specific output data
-  void Run(CloneContext& ctx,
-           const DataMap& inputs,
-           DataMap& outputs) const override;
+  protected:
+    /// Runs the transform using the CloneContext built for transforming a
+    /// program. Run() is responsible for calling Clone() on the CloneContext.
+    /// @param ctx the CloneContext primed with the input program and
+    /// ProgramBuilder
+    /// @param inputs optional extra transform-specific input data
+    /// @param outputs optional extra transform-specific output data
+    void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) const override;
 };
 
 }  // namespace tint::transform

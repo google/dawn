@@ -31,8 +31,7 @@ int glfwInit(void) {
     return GLFW_TRUE;
 }
 
-void glfwDefaultWindowHints(void) {
-}
+void glfwDefaultWindowHints(void) {}
 
 void glfwWindowHint(int hint, int value) {
     DAWN_UNUSED(hint);

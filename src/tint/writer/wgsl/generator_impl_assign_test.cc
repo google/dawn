@@ -20,17 +20,17 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Assign) {
-  auto* lhs = Global("lhs", ty.i32(), ast::StorageClass::kPrivate);
-  auto* rhs = Global("rhs", ty.i32(), ast::StorageClass::kPrivate);
-  auto* assign = Assign(lhs, rhs);
-  WrapInFunction(assign);
+    auto* lhs = Global("lhs", ty.i32(), ast::StorageClass::kPrivate);
+    auto* rhs = Global("rhs", ty.i32(), ast::StorageClass::kPrivate);
+    auto* assign = Assign(lhs, rhs);
+    WrapInFunction(assign);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(assign)) << gen.error();
-  EXPECT_EQ(gen.result(), "  lhs = rhs;\n");
+    ASSERT_TRUE(gen.EmitStatement(assign)) << gen.error();
+    EXPECT_EQ(gen.result(), "  lhs = rhs;\n");
 }
 
 }  // namespace

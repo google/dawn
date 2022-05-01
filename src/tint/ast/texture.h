@@ -21,20 +21,20 @@ namespace tint::ast {
 
 /// The dimensionality of the texture
 enum class TextureDimension {
-  /// Invalid texture
-  kNone = -1,
-  /// 1 dimensional texture
-  k1d,
-  /// 2 dimensional texture
-  k2d,
-  /// 2 dimensional array texture
-  k2dArray,
-  /// 3 dimensional texture
-  k3d,
-  /// cube texture
-  kCube,
-  /// cube array texture
-  kCubeArray,
+    /// Invalid texture
+    kNone = -1,
+    /// 1 dimensional texture
+    k1d,
+    /// 2 dimensional texture
+    k2d,
+    /// 2 dimensional array texture
+    k2dArray,
+    /// 3 dimensional texture
+    k3d,
+    /// cube texture
+    kCube,
+    /// cube array texture
+    kCubeArray,
 };
 
 /// @param out the std::ostream to write to
@@ -62,18 +62,18 @@ int NumCoordinateAxes(TextureDimension dim);
 
 /// A texture type.
 class Texture : public Castable<Texture, Type> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param dim the dimensionality of the texture
-  Texture(ProgramID pid, const Source& src, TextureDimension dim);
-  /// Move constructor
-  Texture(Texture&&);
-  ~Texture() override;
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param dim the dimensionality of the texture
+    Texture(ProgramID pid, const Source& src, TextureDimension dim);
+    /// Move constructor
+    Texture(Texture&&);
+    ~Texture() override;
 
-  /// The texture dimension
-  const TextureDimension dim;
+    /// The texture dimension
+    const TextureDimension dim;
 };
 
 }  // namespace tint::ast

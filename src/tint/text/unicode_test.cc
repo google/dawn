@@ -30,21 +30,21 @@ namespace tint::text {
 namespace {
 
 struct CodePointCase {
-  CodePoint code_point;
-  bool is_xid_start;
-  bool is_xid_continue;
+    CodePoint code_point;
+    bool is_xid_start;
+    bool is_xid_continue;
 };
 
 std::ostream& operator<<(std::ostream& out, CodePointCase c) {
-  return out << c.code_point;
+    return out << c.code_point;
 }
 
 class CodePointTest : public testing::TestWithParam<CodePointCase> {};
 
 TEST_P(CodePointTest, CharacterSets) {
-  auto param = GetParam();
-  EXPECT_EQ(param.code_point.IsXIDStart(), param.is_xid_start);
-  EXPECT_EQ(param.code_point.IsXIDContinue(), param.is_xid_continue);
+    auto param = GetParam();
+    EXPECT_EQ(param.code_point.IsXIDStart(), param.is_xid_start);
+    EXPECT_EQ(param.code_point.IsXIDContinue(), param.is_xid_continue);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -222,136 +222,131 @@ INSTANTIATE_TEST_SUITE_P(
 namespace {
 
 struct CodePointAndWidth {
-  CodePoint code_point;
-  size_t width;
+    CodePoint code_point;
+    size_t width;
 };
 
 bool operator==(const CodePointAndWidth& a, const CodePointAndWidth& b) {
-  return a.code_point == b.code_point && a.width == b.width;
+    return a.code_point == b.code_point && a.width == b.width;
 }
 
 std::ostream& operator<<(std::ostream& out, CodePointAndWidth cpw) {
-  return out << "code_point: " << cpw.code_point << ", width: " << cpw.width;
+    return out << "code_point: " << cpw.code_point << ", width: " << cpw.width;
 }
 
 struct DecodeUTF8Case {
-  std::string string;
-  std::vector<CodePointAndWidth> expected;
+    std::string string;
+    std::vector<CodePointAndWidth> expected;
 };
 
 std::ostream& operator<<(std::ostream& out, DecodeUTF8Case c) {
-  return out << "'" << c.string << "'";
+    return out << "'" << c.string << "'";
 }
 
 class DecodeUTF8Test : public testing::TestWithParam<DecodeUTF8Case> {};
 
 TEST_P(DecodeUTF8Test, Valid) {
-  auto param = GetParam();
+    auto param = GetParam();
 
-  const uint8_t* data = reinterpret_cast<const uint8_t*>(param.string.data());
-  const size_t len = param.string.size();
+    const uint8_t* data = reinterpret_cast<const uint8_t*>(param.string.data());
+    const size_t len = param.string.size();
 
-  std::vector<CodePointAndWidth> got;
-  size_t offset = 0;
-  while (offset < len) {
-    auto [code_point, width] = utf8::Decode(data + offset, len - offset);
-    if (width == 0) {
-      FAIL() << "Decode() failed at byte offset " << offset;
+    std::vector<CodePointAndWidth> got;
+    size_t offset = 0;
+    while (offset < len) {
+        auto [code_point, width] = utf8::Decode(data + offset, len - offset);
+        if (width == 0) {
+            FAIL() << "Decode() failed at byte offset " << offset;
+        }
+        offset += width;
+        got.emplace_back(CodePointAndWidth{code_point, width});
     }
-    offset += width;
-    got.emplace_back(CodePointAndWidth{code_point, width});
-  }
 
-  EXPECT_THAT(got, ::testing::ElementsAreArray(param.expected));
+    EXPECT_THAT(got, ::testing::ElementsAreArray(param.expected));
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    AsciiLetters,
-    DecodeUTF8Test,
-    ::testing::ValuesIn({
-        DecodeUTF8Case{"a", {{C('a'), 1}}},
-        DecodeUTF8Case{"abc", {{C('a'), 1}, {C('b'), 1}, {C('c'), 1}}},
-        DecodeUTF8Case{"def", {{C('d'), 1}, {C('e'), 1}, {C('f'), 1}}},
-        DecodeUTF8Case{"gh", {{C('g'), 1}, {C('h'), 1}}},
-        DecodeUTF8Case{"ij", {{C('i'), 1}, {C('j'), 1}}},
-        DecodeUTF8Case{"klm", {{C('k'), 1}, {C('l'), 1}, {C('m'), 1}}},
-        DecodeUTF8Case{"nop", {{C('n'), 1}, {C('o'), 1}, {C('p'), 1}}},
-        DecodeUTF8Case{"qr", {{C('q'), 1}, {C('r'), 1}}},
-        DecodeUTF8Case{"stu", {{C('s'), 1}, {C('t'), 1}, {C('u'), 1}}},
-        DecodeUTF8Case{"vw", {{C('v'), 1}, {C('w'), 1}}},
-        DecodeUTF8Case{"xyz", {{C('x'), 1}, {C('y'), 1}, {C('z'), 1}}},
-        DecodeUTF8Case{"A", {{C('A'), 1}}},
-        DecodeUTF8Case{"ABC", {{C('A'), 1}, {C('B'), 1}, {C('C'), 1}}},
-        DecodeUTF8Case{"DEF", {{C('D'), 1}, {C('E'), 1}, {C('F'), 1}}},
-        DecodeUTF8Case{"GH", {{C('G'), 1}, {C('H'), 1}}},
-        DecodeUTF8Case{"IJ", {{C('I'), 1}, {C('J'), 1}}},
-        DecodeUTF8Case{"KLM", {{C('K'), 1}, {C('L'), 1}, {C('M'), 1}}},
-        DecodeUTF8Case{"NOP", {{C('N'), 1}, {C('O'), 1}, {C('P'), 1}}},
-        DecodeUTF8Case{"QR", {{C('Q'), 1}, {C('R'), 1}}},
-        DecodeUTF8Case{"STU", {{C('S'), 1}, {C('T'), 1}, {C('U'), 1}}},
-        DecodeUTF8Case{"VW", {{C('V'), 1}, {C('W'), 1}}},
-        DecodeUTF8Case{"XYZ", {{C('X'), 1}, {C('Y'), 1}, {C('Z'), 1}}},
-    }));
+INSTANTIATE_TEST_SUITE_P(AsciiLetters,
+                         DecodeUTF8Test,
+                         ::testing::ValuesIn({
+                             DecodeUTF8Case{"a", {{C('a'), 1}}},
+                             DecodeUTF8Case{"abc", {{C('a'), 1}, {C('b'), 1}, {C('c'), 1}}},
+                             DecodeUTF8Case{"def", {{C('d'), 1}, {C('e'), 1}, {C('f'), 1}}},
+                             DecodeUTF8Case{"gh", {{C('g'), 1}, {C('h'), 1}}},
+                             DecodeUTF8Case{"ij", {{C('i'), 1}, {C('j'), 1}}},
+                             DecodeUTF8Case{"klm", {{C('k'), 1}, {C('l'), 1}, {C('m'), 1}}},
+                             DecodeUTF8Case{"nop", {{C('n'), 1}, {C('o'), 1}, {C('p'), 1}}},
+                             DecodeUTF8Case{"qr", {{C('q'), 1}, {C('r'), 1}}},
+                             DecodeUTF8Case{"stu", {{C('s'), 1}, {C('t'), 1}, {C('u'), 1}}},
+                             DecodeUTF8Case{"vw", {{C('v'), 1}, {C('w'), 1}}},
+                             DecodeUTF8Case{"xyz", {{C('x'), 1}, {C('y'), 1}, {C('z'), 1}}},
+                             DecodeUTF8Case{"A", {{C('A'), 1}}},
+                             DecodeUTF8Case{"ABC", {{C('A'), 1}, {C('B'), 1}, {C('C'), 1}}},
+                             DecodeUTF8Case{"DEF", {{C('D'), 1}, {C('E'), 1}, {C('F'), 1}}},
+                             DecodeUTF8Case{"GH", {{C('G'), 1}, {C('H'), 1}}},
+                             DecodeUTF8Case{"IJ", {{C('I'), 1}, {C('J'), 1}}},
+                             DecodeUTF8Case{"KLM", {{C('K'), 1}, {C('L'), 1}, {C('M'), 1}}},
+                             DecodeUTF8Case{"NOP", {{C('N'), 1}, {C('O'), 1}, {C('P'), 1}}},
+                             DecodeUTF8Case{"QR", {{C('Q'), 1}, {C('R'), 1}}},
+                             DecodeUTF8Case{"STU", {{C('S'), 1}, {C('T'), 1}, {C('U'), 1}}},
+                             DecodeUTF8Case{"VW", {{C('V'), 1}, {C('W'), 1}}},
+                             DecodeUTF8Case{"XYZ", {{C('X'), 1}, {C('Y'), 1}, {C('Z'), 1}}},
+                         }));
 
-INSTANTIATE_TEST_SUITE_P(
-    AsciiNumbers,
-    DecodeUTF8Test,
-    ::testing::ValuesIn({
-        DecodeUTF8Case{"012", {{C('0'), 1}, {C('1'), 1}, {C('2'), 1}}},
-        DecodeUTF8Case{"345", {{C('3'), 1}, {C('4'), 1}, {C('5'), 1}}},
-        DecodeUTF8Case{"678", {{C('6'), 1}, {C('7'), 1}, {C('8'), 1}}},
-        DecodeUTF8Case{"9", {{C('9'), 1}}},
-    }));
+INSTANTIATE_TEST_SUITE_P(AsciiNumbers,
+                         DecodeUTF8Test,
+                         ::testing::ValuesIn({
+                             DecodeUTF8Case{"012", {{C('0'), 1}, {C('1'), 1}, {C('2'), 1}}},
+                             DecodeUTF8Case{"345", {{C('3'), 1}, {C('4'), 1}, {C('5'), 1}}},
+                             DecodeUTF8Case{"678", {{C('6'), 1}, {C('7'), 1}, {C('8'), 1}}},
+                             DecodeUTF8Case{"9", {{C('9'), 1}}},
+                         }));
 
-INSTANTIATE_TEST_SUITE_P(
-    AsciiSymbols,
-    DecodeUTF8Test,
-    ::testing::ValuesIn({
-        DecodeUTF8Case{"!\"#", {{C('!'), 1}, {C('"'), 1}, {C('#'), 1}}},
-        DecodeUTF8Case{"$%&", {{C('$'), 1}, {C('%'), 1}, {C('&'), 1}}},
-        DecodeUTF8Case{"'()", {{C('\''), 1}, {C('('), 1}, {C(')'), 1}}},
-        DecodeUTF8Case{"*,-", {{C('*'), 1}, {C(','), 1}, {C('-'), 1}}},
-        DecodeUTF8Case{"/`@", {{C('/'), 1}, {C('`'), 1}, {C('@'), 1}}},
-        DecodeUTF8Case{"^\\[", {{C('^'), 1}, {C('\\'), 1}, {C('['), 1}}},
-        DecodeUTF8Case{"]_|", {{C(']'), 1}, {C('_'), 1}, {C('|'), 1}}},
-        DecodeUTF8Case{"{}", {{C('{'), 1}, {C('}'), 1}}},
-    }));
+INSTANTIATE_TEST_SUITE_P(AsciiSymbols,
+                         DecodeUTF8Test,
+                         ::testing::ValuesIn({
+                             DecodeUTF8Case{"!\"#", {{C('!'), 1}, {C('"'), 1}, {C('#'), 1}}},
+                             DecodeUTF8Case{"$%&", {{C('$'), 1}, {C('%'), 1}, {C('&'), 1}}},
+                             DecodeUTF8Case{"'()", {{C('\''), 1}, {C('('), 1}, {C(')'), 1}}},
+                             DecodeUTF8Case{"*,-", {{C('*'), 1}, {C(','), 1}, {C('-'), 1}}},
+                             DecodeUTF8Case{"/`@", {{C('/'), 1}, {C('`'), 1}, {C('@'), 1}}},
+                             DecodeUTF8Case{"^\\[", {{C('^'), 1}, {C('\\'), 1}, {C('['), 1}}},
+                             DecodeUTF8Case{"]_|", {{C(']'), 1}, {C('_'), 1}, {C('|'), 1}}},
+                             DecodeUTF8Case{"{}", {{C('{'), 1}, {C('}'), 1}}},
+                         }));
 
-INSTANTIATE_TEST_SUITE_P(
-    AsciiSpecial,
-    DecodeUTF8Test,
-    ::testing::ValuesIn({
-        DecodeUTF8Case{"", {}},
-        DecodeUTF8Case{" \t\n", {{C(' '), 1}, {C('\t'), 1}, {C('\n'), 1}}},
-        DecodeUTF8Case{"\a\b\f", {{C('\a'), 1}, {C('\b'), 1}, {C('\f'), 1}}},
-        DecodeUTF8Case{"\n\r\t", {{C('\n'), 1}, {C('\r'), 1}, {C('\t'), 1}}},
-        DecodeUTF8Case{"\v", {{C('\v'), 1}}},
-    }));
+INSTANTIATE_TEST_SUITE_P(AsciiSpecial,
+                         DecodeUTF8Test,
+                         ::testing::ValuesIn({
+                             DecodeUTF8Case{"", {}},
+                             DecodeUTF8Case{" \t\n", {{C(' '), 1}, {C('\t'), 1}, {C('\n'), 1}}},
+                             DecodeUTF8Case{"\a\b\f", {{C('\a'), 1}, {C('\b'), 1}, {C('\f'), 1}}},
+                             DecodeUTF8Case{"\n\r\t", {{C('\n'), 1}, {C('\r'), 1}, {C('\t'), 1}}},
+                             DecodeUTF8Case{"\v", {{C('\v'), 1}}},
+                         }));
 
-INSTANTIATE_TEST_SUITE_P(
-    Hindi,
-    DecodeUTF8Test,
-    ::testing::ValuesIn({DecodeUTF8Case{
-        // नमस्ते दुनिया
-        "\xe0\xa4\xa8\xe0\xa4\xae\xe0\xa4\xb8\xe0\xa5\x8d\xe0\xa4\xa4\xe0\xa5"
-        "\x87\x20\xe0\xa4\xa6\xe0\xa5\x81\xe0\xa4\xa8\xe0\xa4\xbf\xe0\xa4\xaf"
-        "\xe0\xa4\xbe",
-        {
-            {C(0x0928), 3},  // न
-            {C(0x092e), 3},  // म
-            {C(0x0938), 3},  // स
-            {C(0x094d), 3},  // ्
-            {C(0x0924), 3},  // त
-            {C(0x0947), 3},  // े
-            {C(' '), 1},
-            {C(0x0926), 3},  // द
-            {C(0x0941), 3},  // ु
-            {C(0x0928), 3},  // न
-            {C(0x093f), 3},  // ि
-            {C(0x092f), 3},  // य
-            {C(0x093e), 3},  // ा
-        },
-    }}));
+INSTANTIATE_TEST_SUITE_P(Hindi,
+                         DecodeUTF8Test,
+                         ::testing::ValuesIn({DecodeUTF8Case{
+                             // नमस्ते दुनिया
+                             "\xe0\xa4\xa8\xe0\xa4\xae\xe0\xa4\xb8\xe0\xa5\x8d\xe0\xa4\xa4\xe0\xa5"
+                             "\x87\x20\xe0\xa4\xa6\xe0\xa5\x81\xe0\xa4\xa8\xe0\xa4\xbf\xe0\xa4\xaf"
+                             "\xe0\xa4\xbe",
+                             {
+                                 {C(0x0928), 3},  // न
+                                 {C(0x092e), 3},  // म
+                                 {C(0x0938), 3},  // स
+                                 {C(0x094d), 3},  // ्
+                                 {C(0x0924), 3},  // त
+                                 {C(0x0947), 3},  // े
+                                 {C(' '), 1},
+                                 {C(0x0926), 3},  // द
+                                 {C(0x0941), 3},  // ु
+                                 {C(0x0928), 3},  // न
+                                 {C(0x093f), 3},  // ि
+                                 {C(0x092f), 3},  // य
+                                 {C(0x093e), 3},  // ा
+                             },
+                         }}));
 
 INSTANTIATE_TEST_SUITE_P(Mandarin,
                          DecodeUTF8Test,
@@ -412,29 +407,28 @@ INSTANTIATE_TEST_SUITE_P(Emoji,
                              },
                          }}));
 
-INSTANTIATE_TEST_SUITE_P(
-    Random,
-    DecodeUTF8Test,
-    ::testing::ValuesIn({DecodeUTF8Case{
-        // Øⓑꚫ쁹Ǵ𐌒岾🥍ⴵ㍨又ᮗ
-        "\xc3\x98\xe2\x93\x91\xea\x9a\xab\xec\x81\xb9\xc7\xb4\xf0\x90\x8c\x92"
-        "\xe5\xb2\xbe\xf0\x9f\xa5\x8d\xe2\xb4\xb5\xe3\x8d\xa8\xe5\x8f\x88\xe1"
-        "\xae\x97",
-        {
-            {C(0x000d8), 2},  // Ø
-            {C(0x024d1), 3},  // ⓑ
-            {C(0x0a6ab), 3},  // ꚫ
-            {C(0x0c079), 3},  // 쁹
-            {C(0x001f4), 2},  // Ǵ
-            {C(0x10312), 4},  // 𐌒
-            {C(0x05cbe), 3},  // 岾
-            {C(0x1f94d), 4},  // 🥍
-            {C(0x02d35), 3},  // ⴵ
-            {C(0x03368), 3},  // ㍨
-            {C(0x053c8), 3},  // 又
-            {C(0x01b97), 3},  // ᮗ
-        },
-    }}));
+INSTANTIATE_TEST_SUITE_P(Random,
+                         DecodeUTF8Test,
+                         ::testing::ValuesIn({DecodeUTF8Case{
+                             // Øⓑꚫ쁹Ǵ𐌒岾🥍ⴵ㍨又ᮗ
+                             "\xc3\x98\xe2\x93\x91\xea\x9a\xab\xec\x81\xb9\xc7\xb4\xf0\x90\x8c\x92"
+                             "\xe5\xb2\xbe\xf0\x9f\xa5\x8d\xe2\xb4\xb5\xe3\x8d\xa8\xe5\x8f\x88\xe1"
+                             "\xae\x97",
+                             {
+                                 {C(0x000d8), 2},  // Ø
+                                 {C(0x024d1), 3},  // ⓑ
+                                 {C(0x0a6ab), 3},  // ꚫ
+                                 {C(0x0c079), 3},  // 쁹
+                                 {C(0x001f4), 2},  // Ǵ
+                                 {C(0x10312), 4},  // 𐌒
+                                 {C(0x05cbe), 3},  // 岾
+                                 {C(0x1f94d), 4},  // 🥍
+                                 {C(0x02d35), 3},  // ⴵ
+                                 {C(0x03368), 3},  // ㍨
+                                 {C(0x053c8), 3},  // 又
+                                 {C(0x01b97), 3},  // ᮗ
+                             },
+                         }}));
 
 }  // namespace
 
@@ -445,52 +439,51 @@ namespace {
 class DecodeUTF8InvalidTest : public testing::TestWithParam<const char*> {};
 
 TEST_P(DecodeUTF8InvalidTest, Invalid) {
-  auto* param = GetParam();
+    auto* param = GetParam();
 
-  const uint8_t* data = reinterpret_cast<const uint8_t*>(param);
-  const size_t len = std::string(param).size();
+    const uint8_t* data = reinterpret_cast<const uint8_t*>(param);
+    const size_t len = std::string(param).size();
 
-  auto [code_point, width] = utf8::Decode(data, len);
-  EXPECT_EQ(code_point, CodePoint(0));
-  EXPECT_EQ(width, 0u);
+    auto [code_point, width] = utf8::Decode(data, len);
+    EXPECT_EQ(code_point, CodePoint(0));
+    EXPECT_EQ(width, 0u);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    Invalid,
-    DecodeUTF8InvalidTest,
-    ::testing::ValuesIn({
-        "\x80\x80\x80\x80",  // 10000000
-        "\x81\x80\x80\x80",  // 10000001
-        "\x8f\x80\x80\x80",  // 10001111
-        "\x90\x80\x80\x80",  // 10010000
-        "\x91\x80\x80\x80",  // 10010001
-        "\x9f\x80\x80\x80",  // 10011111
-        "\xa0\x80\x80\x80",  // 10100000
-        "\xa1\x80\x80\x80",  // 10100001
-        "\xaf\x80\x80\x80",  // 10101111
-        "\xb0\x80\x80\x80",  // 10110000
-        "\xb1\x80\x80\x80",  // 10110001
-        "\xbf\x80\x80\x80",  // 10111111
-        "\xc0\x80\x80\x80",  // 11000000
-        "\xc1\x80\x80\x80",  // 11000001
-        "\xf5\x80\x80\x80",  // 11110101
-        "\xf6\x80\x80\x80",  // 11110110
-        "\xf7\x80\x80\x80",  // 11110111
-        "\xf8\x80\x80\x80",  // 11111000
-        "\xfe\x80\x80\x80",  // 11111110
-        "\xff\x80\x80\x80",  // 11111111
+INSTANTIATE_TEST_SUITE_P(Invalid,
+                         DecodeUTF8InvalidTest,
+                         ::testing::ValuesIn({
+                             "\x80\x80\x80\x80",  // 10000000
+                             "\x81\x80\x80\x80",  // 10000001
+                             "\x8f\x80\x80\x80",  // 10001111
+                             "\x90\x80\x80\x80",  // 10010000
+                             "\x91\x80\x80\x80",  // 10010001
+                             "\x9f\x80\x80\x80",  // 10011111
+                             "\xa0\x80\x80\x80",  // 10100000
+                             "\xa1\x80\x80\x80",  // 10100001
+                             "\xaf\x80\x80\x80",  // 10101111
+                             "\xb0\x80\x80\x80",  // 10110000
+                             "\xb1\x80\x80\x80",  // 10110001
+                             "\xbf\x80\x80\x80",  // 10111111
+                             "\xc0\x80\x80\x80",  // 11000000
+                             "\xc1\x80\x80\x80",  // 11000001
+                             "\xf5\x80\x80\x80",  // 11110101
+                             "\xf6\x80\x80\x80",  // 11110110
+                             "\xf7\x80\x80\x80",  // 11110111
+                             "\xf8\x80\x80\x80",  // 11111000
+                             "\xfe\x80\x80\x80",  // 11111110
+                             "\xff\x80\x80\x80",  // 11111111
 
-        "\xd0",          // 2-bytes, missing second byte
-        "\xe8\x8f",      // 3-bytes, missing third byte
-        "\xf4\x8f\x8f",  // 4-bytes, missing fourth byte
+                             "\xd0",          // 2-bytes, missing second byte
+                             "\xe8\x8f",      // 3-bytes, missing third byte
+                             "\xf4\x8f\x8f",  // 4-bytes, missing fourth byte
 
-        "\xd0\x7f",          // 2-bytes, second byte MSB unset
-        "\xe8\x7f\x8f",      // 3-bytes, second byte MSB unset
-        "\xe8\x8f\x7f",      // 3-bytes, third byte MSB unset
-        "\xf4\x7f\x8f\x8f",  // 4-bytes, second byte MSB unset
-        "\xf4\x8f\x7f\x8f",  // 4-bytes, third byte MSB unset
-        "\xf4\x8f\x8f\x7f",  // 4-bytes, fourth byte MSB unset
-    }));
+                             "\xd0\x7f",          // 2-bytes, second byte MSB unset
+                             "\xe8\x7f\x8f",      // 3-bytes, second byte MSB unset
+                             "\xe8\x8f\x7f",      // 3-bytes, third byte MSB unset
+                             "\xf4\x7f\x8f\x8f",  // 4-bytes, second byte MSB unset
+                             "\xf4\x8f\x7f\x8f",  // 4-bytes, third byte MSB unset
+                             "\xf4\x8f\x8f\x7f",  // 4-bytes, fourth byte MSB unset
+                         }));
 
 }  // namespace
 

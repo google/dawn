@@ -21,7 +21,7 @@
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace {
-    using testing::HasSubstr;
+using testing::HasSubstr;
 }  // anonymous namespace
 
 class UnsafeAPIValidationTest : public ValidationTest {

@@ -27,176 +27,171 @@ namespace tint::transform {
 /// Data is the base class for transforms that accept extra input or emit extra
 /// output information along with a Program.
 class Data : public Castable<Data> {
- public:
-  /// Constructor
-  Data();
+  public:
+    /// Constructor
+    Data();
 
-  /// Copy constructor
-  Data(const Data&);
+    /// Copy constructor
+    Data(const Data&);
 
-  /// Destructor
-  ~Data() override;
+    /// Destructor
+    ~Data() override;
 
-  /// Assignment operator
-  /// @returns this Data
-  Data& operator=(const Data&);
+    /// Assignment operator
+    /// @returns this Data
+    Data& operator=(const Data&);
 };
 
 /// DataMap is a map of Data unique pointers keyed by the Data's ClassID.
 class DataMap {
- public:
-  /// Constructor
-  DataMap();
+  public:
+    /// Constructor
+    DataMap();
 
-  /// Move constructor
-  DataMap(DataMap&&);
+    /// Move constructor
+    DataMap(DataMap&&);
 
-  /// Constructor
-  /// @param data_unique_ptrs a variadic list of additional data unique_ptrs
-  /// produced by the transform
-  template <typename... DATA>
-  explicit DataMap(DATA... data_unique_ptrs) {
-    PutAll(std::forward<DATA>(data_unique_ptrs)...);
-  }
-
-  /// Destructor
-  ~DataMap();
-
-  /// Move assignment operator
-  /// @param rhs the DataMap to move into this DataMap
-  /// @return this DataMap
-  DataMap& operator=(DataMap&& rhs);
-
-  /// Adds the data into DataMap keyed by the ClassID of type T.
-  /// @param data the data to add to the DataMap
-  template <typename T>
-  void Put(std::unique_ptr<T>&& data) {
-    static_assert(std::is_base_of<Data, T>::value,
-                  "T does not derive from Data");
-    map_[&TypeInfo::Of<T>()] = std::move(data);
-  }
-
-  /// Creates the data of type `T` with the provided arguments and adds it into
-  /// DataMap keyed by the ClassID of type T.
-  /// @param args the arguments forwarded to the constructor for type T
-  template <typename T, typename... ARGS>
-  void Add(ARGS&&... args) {
-    Put(std::make_unique<T>(std::forward<ARGS>(args)...));
-  }
-
-  /// @returns a pointer to the Data placed into the DataMap with a call to
-  /// Put()
-  template <typename T>
-  T const* Get() const {
-    return const_cast<DataMap*>(this)->Get<T>();
-  }
-
-  /// @returns a pointer to the Data placed into the DataMap with a call to
-  /// Put()
-  template <typename T>
-  T* Get() {
-    auto it = map_.find(&TypeInfo::Of<T>());
-    if (it == map_.end()) {
-      return nullptr;
+    /// Constructor
+    /// @param data_unique_ptrs a variadic list of additional data unique_ptrs
+    /// produced by the transform
+    template <typename... DATA>
+    explicit DataMap(DATA... data_unique_ptrs) {
+        PutAll(std::forward<DATA>(data_unique_ptrs)...);
     }
-    return static_cast<T*>(it->second.get());
-  }
 
-  /// Add moves all the data from other into this DataMap
-  /// @param other the DataMap to move into this DataMap
-  void Add(DataMap&& other) {
-    for (auto& it : other.map_) {
-      map_.emplace(it.first, std::move(it.second));
+    /// Destructor
+    ~DataMap();
+
+    /// Move assignment operator
+    /// @param rhs the DataMap to move into this DataMap
+    /// @return this DataMap
+    DataMap& operator=(DataMap&& rhs);
+
+    /// Adds the data into DataMap keyed by the ClassID of type T.
+    /// @param data the data to add to the DataMap
+    template <typename T>
+    void Put(std::unique_ptr<T>&& data) {
+        static_assert(std::is_base_of<Data, T>::value, "T does not derive from Data");
+        map_[&TypeInfo::Of<T>()] = std::move(data);
     }
-    other.map_.clear();
-  }
 
- private:
-  template <typename T0>
-  void PutAll(T0&& first) {
-    Put(std::forward<T0>(first));
-  }
+    /// Creates the data of type `T` with the provided arguments and adds it into
+    /// DataMap keyed by the ClassID of type T.
+    /// @param args the arguments forwarded to the constructor for type T
+    template <typename T, typename... ARGS>
+    void Add(ARGS&&... args) {
+        Put(std::make_unique<T>(std::forward<ARGS>(args)...));
+    }
 
-  template <typename T0, typename... Tn>
-  void PutAll(T0&& first, Tn&&... remainder) {
-    Put(std::forward<T0>(first));
-    PutAll(std::forward<Tn>(remainder)...);
-  }
+    /// @returns a pointer to the Data placed into the DataMap with a call to
+    /// Put()
+    template <typename T>
+    T const* Get() const {
+        return const_cast<DataMap*>(this)->Get<T>();
+    }
 
-  std::unordered_map<const TypeInfo*, std::unique_ptr<Data>> map_;
+    /// @returns a pointer to the Data placed into the DataMap with a call to
+    /// Put()
+    template <typename T>
+    T* Get() {
+        auto it = map_.find(&TypeInfo::Of<T>());
+        if (it == map_.end()) {
+            return nullptr;
+        }
+        return static_cast<T*>(it->second.get());
+    }
+
+    /// Add moves all the data from other into this DataMap
+    /// @param other the DataMap to move into this DataMap
+    void Add(DataMap&& other) {
+        for (auto& it : other.map_) {
+            map_.emplace(it.first, std::move(it.second));
+        }
+        other.map_.clear();
+    }
+
+  private:
+    template <typename T0>
+    void PutAll(T0&& first) {
+        Put(std::forward<T0>(first));
+    }
+
+    template <typename T0, typename... Tn>
+    void PutAll(T0&& first, Tn&&... remainder) {
+        Put(std::forward<T0>(first));
+        PutAll(std::forward<Tn>(remainder)...);
+    }
+
+    std::unordered_map<const TypeInfo*, std::unique_ptr<Data>> map_;
 };
 
 /// The return type of Run()
 class Output {
- public:
-  /// Constructor
-  Output();
+  public:
+    /// Constructor
+    Output();
 
-  /// Constructor
-  /// @param program the program to move into this Output
-  explicit Output(Program&& program);
+    /// Constructor
+    /// @param program the program to move into this Output
+    explicit Output(Program&& program);
 
-  /// Constructor
-  /// @param program_ the program to move into this Output
-  /// @param data_ a variadic list of additional data unique_ptrs produced by
-  /// the transform
-  template <typename... DATA>
-  Output(Program&& program_, DATA... data_)
-      : program(std::move(program_)), data(std::forward<DATA>(data_)...) {}
+    /// Constructor
+    /// @param program_ the program to move into this Output
+    /// @param data_ a variadic list of additional data unique_ptrs produced by
+    /// the transform
+    template <typename... DATA>
+    Output(Program&& program_, DATA... data_)
+        : program(std::move(program_)), data(std::forward<DATA>(data_)...) {}
 
-  /// The transformed program. May be empty on error.
-  Program program;
+    /// The transformed program. May be empty on error.
+    Program program;
 
-  /// Extra output generated by the transforms.
-  DataMap data;
+    /// Extra output generated by the transforms.
+    DataMap data;
 };
 
 /// Interface for Program transforms
 class Transform : public Castable<Transform> {
- public:
-  /// Constructor
-  Transform();
-  /// Destructor
-  ~Transform() override;
+  public:
+    /// Constructor
+    Transform();
+    /// Destructor
+    ~Transform() override;
 
-  /// Runs the transform on `program`, returning the transformation result.
-  /// @param program the source program to transform
-  /// @param data optional extra transform-specific input data
-  /// @returns the transformation result
-  virtual Output Run(const Program* program, const DataMap& data = {}) const;
+    /// Runs the transform on `program`, returning the transformation result.
+    /// @param program the source program to transform
+    /// @param data optional extra transform-specific input data
+    /// @returns the transformation result
+    virtual Output Run(const Program* program, const DataMap& data = {}) const;
 
-  /// @param program the program to inspect
-  /// @param data optional extra transform-specific input data
-  /// @returns true if this transform should be run for the given program
-  virtual bool ShouldRun(const Program* program,
-                         const DataMap& data = {}) const;
+    /// @param program the program to inspect
+    /// @param data optional extra transform-specific input data
+    /// @returns true if this transform should be run for the given program
+    virtual bool ShouldRun(const Program* program, const DataMap& data = {}) const;
 
- protected:
-  /// Runs the transform using the CloneContext built for transforming a
-  /// program. Run() is responsible for calling Clone() on the CloneContext.
-  /// @param ctx the CloneContext primed with the input program and
-  /// ProgramBuilder
-  /// @param inputs optional extra transform-specific input data
-  /// @param outputs optional extra transform-specific output data
-  virtual void Run(CloneContext& ctx,
-                   const DataMap& inputs,
-                   DataMap& outputs) const;
+  protected:
+    /// Runs the transform using the CloneContext built for transforming a
+    /// program. Run() is responsible for calling Clone() on the CloneContext.
+    /// @param ctx the CloneContext primed with the input program and
+    /// ProgramBuilder
+    /// @param inputs optional extra transform-specific input data
+    /// @param outputs optional extra transform-specific output data
+    virtual void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) const;
 
-  /// Removes the statement `stmt` from the transformed program.
-  /// RemoveStatement handles edge cases, like statements in the initializer and
-  /// continuing of for-loops.
-  /// @param ctx the clone context
-  /// @param stmt the statement to remove when the program is cloned
-  static void RemoveStatement(CloneContext& ctx, const ast::Statement* stmt);
+    /// Removes the statement `stmt` from the transformed program.
+    /// RemoveStatement handles edge cases, like statements in the initializer and
+    /// continuing of for-loops.
+    /// @param ctx the clone context
+    /// @param stmt the statement to remove when the program is cloned
+    static void RemoveStatement(CloneContext& ctx, const ast::Statement* stmt);
 
-  /// CreateASTTypeFor constructs new ast::Type nodes that reconstructs the
-  /// semantic type `ty`.
-  /// @param ctx the clone context
-  /// @param ty the semantic type to reconstruct
-  /// @returns a ast::Type that when resolved, will produce the semantic type
-  /// `ty`.
-  static const ast::Type* CreateASTTypeFor(CloneContext& ctx,
-                                           const sem::Type* ty);
+    /// CreateASTTypeFor constructs new ast::Type nodes that reconstructs the
+    /// semantic type `ty`.
+    /// @param ctx the clone context
+    /// @param ty the semantic type to reconstruct
+    /// @returns a ast::Type that when resolved, will produce the semantic type
+    /// `ty`.
+    static const ast::Type* CreateASTTypeFor(CloneContext& ctx, const sem::Type* ty);
 };
 
 }  // namespace tint::transform

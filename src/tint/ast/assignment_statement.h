@@ -21,33 +21,32 @@
 namespace tint::ast {
 
 /// An assignment statement
-class AssignmentStatement final
-    : public Castable<AssignmentStatement, Statement> {
- public:
-  /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the assignment statement source
-  /// @param lhs the left side of the expression
-  /// @param rhs the right side of the expression
-  AssignmentStatement(ProgramID program_id,
-                      const Source& source,
-                      const Expression* lhs,
-                      const Expression* rhs);
-  /// Move constructor
-  AssignmentStatement(AssignmentStatement&&);
-  ~AssignmentStatement() override;
+class AssignmentStatement final : public Castable<AssignmentStatement, Statement> {
+  public:
+    /// Constructor
+    /// @param program_id the identifier of the program that owns this node
+    /// @param source the assignment statement source
+    /// @param lhs the left side of the expression
+    /// @param rhs the right side of the expression
+    AssignmentStatement(ProgramID program_id,
+                        const Source& source,
+                        const Expression* lhs,
+                        const Expression* rhs);
+    /// Move constructor
+    AssignmentStatement(AssignmentStatement&&);
+    ~AssignmentStatement() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const AssignmentStatement* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const AssignmentStatement* Clone(CloneContext* ctx) const override;
 
-  /// left side expression
-  const Expression* const lhs;
+    /// left side expression
+    const Expression* const lhs;
 
-  /// right side expression
-  const Expression* const rhs;
+    /// right side expression
+    const Expression* const rhs;
 };
 
 }  // namespace tint::ast

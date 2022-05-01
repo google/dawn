@@ -16,16 +16,15 @@
 
 namespace dawn::native {
 
-    XlibXcbFunctions::XlibXcbFunctions() {
-        if (!mLib.Open("libX11-xcb.so.1") ||
-            !mLib.GetProc(&xGetXCBConnection, "XGetXCBConnection")) {
-            mLib.Close();
-        }
+XlibXcbFunctions::XlibXcbFunctions() {
+    if (!mLib.Open("libX11-xcb.so.1") || !mLib.GetProc(&xGetXCBConnection, "XGetXCBConnection")) {
+        mLib.Close();
     }
-    XlibXcbFunctions::~XlibXcbFunctions() = default;
+}
+XlibXcbFunctions::~XlibXcbFunctions() = default;
 
-    bool XlibXcbFunctions::IsLoaded() const {
-        return xGetXCBConnection != nullptr;
-    }
+bool XlibXcbFunctions::IsLoaded() const {
+    return xGetXCBConnection != nullptr;
+}
 
 }  // namespace dawn::native

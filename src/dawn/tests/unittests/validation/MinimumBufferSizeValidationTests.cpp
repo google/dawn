@@ -22,135 +22,134 @@
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace {
-    // Helper for describing bindings throughout the tests
-    struct BindingDescriptor {
-        uint32_t group;
-        uint32_t binding;
-        std::string decl;
-        std::string ref_type;
-        std::string ref_mem;
-        uint64_t size;
-        wgpu::BufferBindingType type = wgpu::BufferBindingType::Storage;
-        wgpu::ShaderStage visibility = wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment;
-    };
+// Helper for describing bindings throughout the tests
+struct BindingDescriptor {
+    uint32_t group;
+    uint32_t binding;
+    std::string decl;
+    std::string ref_type;
+    std::string ref_mem;
+    uint64_t size;
+    wgpu::BufferBindingType type = wgpu::BufferBindingType::Storage;
+    wgpu::ShaderStage visibility = wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment;
+};
 
-    // Runs |func| with a modified version of |originalSizes| as an argument, adding |offset| to
-    // each element one at a time This is useful to verify some behavior happens if any element is
-    // offset from original
-    template <typename F>
-    void WithEachSizeOffsetBy(int64_t offset, const std::vector<uint64_t>& originalSizes, F func) {
-        std::vector<uint64_t> modifiedSizes = originalSizes;
-        for (size_t i = 0; i < originalSizes.size(); ++i) {
-            if (offset < 0) {
-                ASSERT(originalSizes[i] >= static_cast<uint64_t>(-offset));
+// Runs |func| with a modified version of |originalSizes| as an argument, adding |offset| to
+// each element one at a time This is useful to verify some behavior happens if any element is
+// offset from original
+template <typename F>
+void WithEachSizeOffsetBy(int64_t offset, const std::vector<uint64_t>& originalSizes, F func) {
+    std::vector<uint64_t> modifiedSizes = originalSizes;
+    for (size_t i = 0; i < originalSizes.size(); ++i) {
+        if (offset < 0) {
+            ASSERT(originalSizes[i] >= static_cast<uint64_t>(-offset));
+        }
+        // Run the function with an element offset, and restore element afterwards
+        modifiedSizes[i] += offset;
+        func(modifiedSizes);
+        modifiedSizes[i] -= offset;
+    }
+}
+
+// Runs |func| with |correctSizes|, and an expectation of success and failure
+template <typename F>
+void CheckSizeBounds(const std::vector<uint64_t>& correctSizes, F func) {
+    // To validate size:
+    // Check invalid with bind group with one less
+    // Check valid with bind group with correct size
+
+    // Make sure (every size - 1) produces an error
+    WithEachSizeOffsetBy(-1, correctSizes,
+                         [&](const std::vector<uint64_t>& sizes) { func(sizes, false); });
+
+    // Make sure correct sizes work
+    func(correctSizes, true);
+
+    // Make sure (every size + 1) works
+    WithEachSizeOffsetBy(1, correctSizes,
+                         [&](const std::vector<uint64_t>& sizes) { func(sizes, true); });
+}
+
+// Creates a bind group with given bindings for shader text
+std::string GenerateBindingString(const std::vector<BindingDescriptor>& bindings) {
+    std::ostringstream ostream;
+    size_t index = 0;
+    for (const BindingDescriptor& b : bindings) {
+        ostream << "struct S" << index << " { " << b.decl << "}\n";
+        ostream << "@group(" << b.group << ") @binding(" << b.binding << ") ";
+        switch (b.type) {
+            case wgpu::BufferBindingType::Uniform:
+                ostream << "var<uniform> b" << index << " : S" << index << ";\n";
+                break;
+            case wgpu::BufferBindingType::Storage:
+                ostream << "var<storage, read_write> b" << index << " : S" << index << ";\n";
+                break;
+            case wgpu::BufferBindingType::ReadOnlyStorage:
+                ostream << "var<storage, read> b" << index << " : S" << index << ";\n";
+                break;
+            default:
+                UNREACHABLE();
+        }
+        index++;
+    }
+    return ostream.str();
+}
+
+std::string GenerateReferenceString(const std::vector<BindingDescriptor>& bindings,
+                                    wgpu::ShaderStage stage) {
+    std::ostringstream ostream;
+    size_t index = 0;
+    for (const BindingDescriptor& b : bindings) {
+        if (b.visibility & stage) {
+            if (!b.ref_type.empty() && !b.ref_mem.empty()) {
+                ostream << "var r" << index << " : " << b.ref_type << " = b" << index << "."
+                        << b.ref_mem << ";\n";
             }
-            // Run the function with an element offset, and restore element afterwards
-            modifiedSizes[i] += offset;
-            func(modifiedSizes);
-            modifiedSizes[i] -= offset;
         }
+        index++;
     }
+    return ostream.str();
+}
 
-    // Runs |func| with |correctSizes|, and an expectation of success and failure
-    template <typename F>
-    void CheckSizeBounds(const std::vector<uint64_t>& correctSizes, F func) {
-        // To validate size:
-        // Check invalid with bind group with one less
-        // Check valid with bind group with correct size
+// Used for adding custom types available throughout the tests
+// NOLINTNEXTLINE(runtime/string)
+static const std::string kStructs = "struct ThreeFloats {f1 : f32, f2 : f32, f3 : f32,}\n";
 
-        // Make sure (every size - 1) produces an error
-        WithEachSizeOffsetBy(-1, correctSizes,
-                             [&](const std::vector<uint64_t>& sizes) { func(sizes, false); });
+// Creates a compute shader with given bindings
+std::string CreateComputeShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
+    return kStructs + GenerateBindingString(bindings) +
+           "@stage(compute) @workgroup_size(1,1,1) fn main() {\n" +
+           GenerateReferenceString(bindings, wgpu::ShaderStage::Compute) + "}";
+}
 
-        // Make sure correct sizes work
-        func(correctSizes, true);
+// Creates a vertex shader with given bindings
+std::string CreateVertexShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
+    return kStructs + GenerateBindingString(bindings) +
+           "@stage(vertex) fn main() -> @builtin(position) vec4<f32> {\n" +
+           GenerateReferenceString(bindings, wgpu::ShaderStage::Vertex) +
+           "\n   return vec4<f32>(); " + "}";
+}
 
-        // Make sure (every size + 1) works
-        WithEachSizeOffsetBy(1, correctSizes,
-                             [&](const std::vector<uint64_t>& sizes) { func(sizes, true); });
+// Creates a fragment shader with given bindings
+std::string CreateFragmentShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
+    return kStructs + GenerateBindingString(bindings) + "@stage(fragment) fn main() {\n" +
+           GenerateReferenceString(bindings, wgpu::ShaderStage::Fragment) + "}";
+}
+
+// Concatenates vectors containing BindingDescriptor
+std::vector<BindingDescriptor> CombineBindings(
+    std::initializer_list<std::vector<BindingDescriptor>> bindings) {
+    std::vector<BindingDescriptor> result;
+    for (const std::vector<BindingDescriptor>& b : bindings) {
+        result.insert(result.end(), b.begin(), b.end());
     }
-
-    // Creates a bind group with given bindings for shader text
-    std::string GenerateBindingString(const std::vector<BindingDescriptor>& bindings) {
-        std::ostringstream ostream;
-        size_t index = 0;
-        for (const BindingDescriptor& b : bindings) {
-            ostream << "struct S" << index << " { " << b.decl << "}\n";
-            ostream << "@group(" << b.group << ") @binding(" << b.binding << ") ";
-            switch (b.type) {
-                case wgpu::BufferBindingType::Uniform:
-                    ostream << "var<uniform> b" << index << " : S" << index << ";\n";
-                    break;
-                case wgpu::BufferBindingType::Storage:
-                    ostream << "var<storage, read_write> b" << index << " : S" << index << ";\n";
-                    break;
-                case wgpu::BufferBindingType::ReadOnlyStorage:
-                    ostream << "var<storage, read> b" << index << " : S" << index << ";\n";
-                    break;
-                default:
-                    UNREACHABLE();
-            }
-            index++;
-        }
-        return ostream.str();
-    }
-
-    std::string GenerateReferenceString(const std::vector<BindingDescriptor>& bindings,
-                                        wgpu::ShaderStage stage) {
-        std::ostringstream ostream;
-        size_t index = 0;
-        for (const BindingDescriptor& b : bindings) {
-            if (b.visibility & stage) {
-                if (!b.ref_type.empty() && !b.ref_mem.empty()) {
-                    ostream << "var r" << index << " : " << b.ref_type << " = b" << index << "."
-                            << b.ref_mem << ";\n";
-                }
-            }
-            index++;
-        }
-        return ostream.str();
-    }
-
-    // Used for adding custom types available throughout the tests
-    static const std::string kStructs = "struct ThreeFloats {f1 : f32, f2 : f32, f3 : f32,}\n";
-
-    // Creates a compute shader with given bindings
-    std::string CreateComputeShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
-        return kStructs + GenerateBindingString(bindings) +
-               "@stage(compute) @workgroup_size(1,1,1) fn main() {\n" +
-               GenerateReferenceString(bindings, wgpu::ShaderStage::Compute) + "}";
-    }
-
-    // Creates a vertex shader with given bindings
-    std::string CreateVertexShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
-        return kStructs + GenerateBindingString(bindings) +
-               "@stage(vertex) fn main() -> @builtin(position) vec4<f32> {\n" +
-               GenerateReferenceString(bindings, wgpu::ShaderStage::Vertex) +
-               "\n   return vec4<f32>(); " + "}";
-    }
-
-    // Creates a fragment shader with given bindings
-    std::string CreateFragmentShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
-        return kStructs + GenerateBindingString(bindings) + "@stage(fragment) fn main() {\n" +
-               GenerateReferenceString(bindings, wgpu::ShaderStage::Fragment) + "}";
-    }
-
-    // Concatenates vectors containing BindingDescriptor
-    std::vector<BindingDescriptor> CombineBindings(
-        std::initializer_list<std::vector<BindingDescriptor>> bindings) {
-        std::vector<BindingDescriptor> result;
-        for (const std::vector<BindingDescriptor>& b : bindings) {
-            result.insert(result.end(), b.begin(), b.end());
-        }
-        return result;
-    }
+    return result;
+}
 }  // namespace
 
 class MinBufferSizeTestsBase : public ValidationTest {
   public:
-    void SetUp() override {
-        ValidationTest::SetUp();
-    }
+    void SetUp() override { ValidationTest::SetUp(); }
 
     wgpu::Buffer CreateBuffer(uint64_t bufferSize, wgpu::BufferUsage usage) {
         wgpu::BufferDescriptor bufferDescriptor;

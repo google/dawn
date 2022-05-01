@@ -23,19 +23,19 @@ namespace tint::ast {
 
 /// The base class for type declarations.
 class TypeDecl : public Castable<TypeDecl, Node> {
- public:
-  /// Create a new struct statement
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node for the import statement
-  /// @param name The name of the structure
-  TypeDecl(ProgramID pid, const Source& src, Symbol name);
-  /// Move constructor
-  TypeDecl(TypeDecl&&);
+  public:
+    /// Create a new struct statement
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node for the import statement
+    /// @param name The name of the structure
+    TypeDecl(ProgramID pid, const Source& src, Symbol name);
+    /// Move constructor
+    TypeDecl(TypeDecl&&);
 
-  ~TypeDecl() override;
+    ~TypeDecl() override;
 
-  /// The name of the type declaration
-  const Symbol name;
+    /// The name of the type declaration
+    const Symbol name;
 };
 
 }  // namespace tint::ast

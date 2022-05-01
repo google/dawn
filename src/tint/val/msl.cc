@@ -22,46 +22,46 @@
 namespace tint::val {
 
 Result Msl(const std::string& xcrun_path, const std::string& source) {
-  Result result;
+    Result result;
 
-  auto xcrun = utils::Command(xcrun_path);
-  if (!xcrun.Found()) {
-    result.output = "xcrun not found at '" + std::string(xcrun_path) + "'";
-    result.failed = true;
-    return result;
-  }
+    auto xcrun = utils::Command(xcrun_path);
+    if (!xcrun.Found()) {
+        result.output = "xcrun not found at '" + std::string(xcrun_path) + "'";
+        result.failed = true;
+        return result;
+    }
 
-  utils::TmpFile file(".metal");
-  file << source;
+    utils::TmpFile file(".metal");
+    file << source;
 
 #ifdef _WIN32
-  // On Windows, we should actually be running metal.exe from the Metal
-  // Developer Tools for Windows
-  auto res = xcrun("-x", "metal",        //
-                   "-o", "NUL",          //
-                   "-std=osx-metal1.2",  //
-                   "-c", file.Path());
+    // On Windows, we should actually be running metal.exe from the Metal
+    // Developer Tools for Windows
+    auto res = xcrun("-x", "metal",        //
+                     "-o", "NUL",          //
+                     "-std=osx-metal1.2",  //
+                     "-c", file.Path());
 #else
-  auto res = xcrun("-sdk", "macosx", "metal",  //
-                   "-o", "/dev/null",          //
-                   "-std=osx-metal1.2",        //
-                   "-c", file.Path());
+    auto res = xcrun("-sdk", "macosx", "metal",  //
+                     "-o", "/dev/null",          //
+                     "-std=osx-metal1.2",        //
+                     "-c", file.Path());
 #endif
-  if (!res.out.empty()) {
-    if (!result.output.empty()) {
-      result.output += "\n";
+    if (!res.out.empty()) {
+        if (!result.output.empty()) {
+            result.output += "\n";
+        }
+        result.output += res.out;
     }
-    result.output += res.out;
-  }
-  if (!res.err.empty()) {
-    if (!result.output.empty()) {
-      result.output += "\n";
+    if (!res.err.empty()) {
+        if (!result.output.empty()) {
+            result.output += "\n";
+        }
+        result.output += res.err;
     }
-    result.output += res.err;
-  }
-  result.failed = (res.error_code != 0);
+    result.failed = (res.error_code != 0);
 
-  return result;
+    return result;
 }
 
 }  // namespace tint::val

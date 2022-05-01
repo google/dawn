@@ -62,24 +62,18 @@ class BitSetIterator final {
         uint32_t mOffset;
     };
 
-    Iterator begin() const {
-        return Iterator(mBits);
-    }
-    Iterator end() const {
-        return Iterator(std::bitset<N>(0));
-    }
+    Iterator begin() const { return Iterator(mBits); }
+    Iterator end() const { return Iterator(std::bitset<N>(0)); }
 
   private:
     const std::bitset<N> mBits;
 };
 
 template <size_t N, typename T>
-BitSetIterator<N, T>::BitSetIterator(const std::bitset<N>& bitset) : mBits(bitset) {
-}
+BitSetIterator<N, T>::BitSetIterator(const std::bitset<N>& bitset) : mBits(bitset) {}
 
 template <size_t N, typename T>
-BitSetIterator<N, T>::BitSetIterator(const BitSetIterator& other) : mBits(other.mBits) {
-}
+BitSetIterator<N, T>::BitSetIterator(const BitSetIterator& other) : mBits(other.mBits) {}
 
 template <size_t N, typename T>
 BitSetIterator<N, T>& BitSetIterator<N, T>::operator=(const BitSetIterator& other) {

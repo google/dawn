@@ -21,27 +21,27 @@ namespace {
 using BoolTest = TestHelper;
 
 TEST_F(BoolTest, Creation) {
-  auto* a = create<Bool>();
-  auto* b = create<Bool>();
-  EXPECT_EQ(a, b);
+    auto* a = create<Bool>();
+    auto* b = create<Bool>();
+    EXPECT_EQ(a, b);
 }
 
 TEST_F(BoolTest, Hash) {
-  auto* a = create<Bool>();
-  auto* b = create<Bool>();
-  EXPECT_EQ(a->Hash(), b->Hash());
+    auto* a = create<Bool>();
+    auto* b = create<Bool>();
+    EXPECT_EQ(a->Hash(), b->Hash());
 }
 
 TEST_F(BoolTest, Equals) {
-  auto* a = create<Bool>();
-  auto* b = create<Bool>();
-  EXPECT_TRUE(a->Equals(*b));
-  EXPECT_FALSE(a->Equals(Void{}));
+    auto* a = create<Bool>();
+    auto* b = create<Bool>();
+    EXPECT_TRUE(a->Equals(*b));
+    EXPECT_FALSE(a->Equals(Void{}));
 }
 
 TEST_F(BoolTest, FriendlyName) {
-  Bool b;
-  EXPECT_EQ(b.FriendlyName(Symbols()), "bool");
+    Bool b;
+    EXPECT_EQ(b.FriendlyName(Symbols()), "bool");
 }
 
 }  // namespace

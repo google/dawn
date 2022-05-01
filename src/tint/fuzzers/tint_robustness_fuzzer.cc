@@ -19,15 +19,15 @@
 namespace tint::fuzzers {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-  TransformBuilder tb(data, size);
-  tb.AddTransform<tint::transform::Robustness>();
+    TransformBuilder tb(data, size);
+    tb.AddTransform<tint::transform::Robustness>();
 
-  tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kWGSL);
-  fuzzer.SetTransformManager(tb.manager(), tb.data_map());
-  fuzzer.SetDumpInput(GetCliParams().dump_input);
-  fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
+    tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kWGSL);
+    fuzzer.SetTransformManager(tb.manager(), tb.data_map());
+    fuzzer.SetDumpInput(GetCliParams().dump_input);
+    fuzzer.SetEnforceValidity(GetCliParams().enforce_validity);
 
-  return fuzzer.Run(data, size);
+    return fuzzer.Run(data, size);
 }
 
 }  // namespace tint::fuzzers

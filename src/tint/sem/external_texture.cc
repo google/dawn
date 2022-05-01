@@ -27,15 +27,15 @@ ExternalTexture::ExternalTexture(ExternalTexture&&) = default;
 ExternalTexture::~ExternalTexture() = default;
 
 size_t ExternalTexture::Hash() const {
-  return static_cast<size_t>(TypeInfo::Of<ExternalTexture>().full_hashcode);
+    return static_cast<size_t>(TypeInfo::Of<ExternalTexture>().full_hashcode);
 }
 
 bool ExternalTexture::Equals(const sem::Type& other) const {
-  return other.Is<ExternalTexture>();
+    return other.Is<ExternalTexture>();
 }
 
 std::string ExternalTexture::FriendlyName(const SymbolTable&) const {
-  return "texture_external";
+    return "texture_external";
 }
 
 }  // namespace tint::sem

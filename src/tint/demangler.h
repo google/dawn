@@ -23,18 +23,17 @@ class SymbolTable;
 
 /// Helper to demangle strings and replace symbols with original names
 class Demangler {
- public:
-  /// Constructor
-  Demangler();
-  /// Destructor
-  ~Demangler();
+  public:
+    /// Constructor
+    Demangler();
+    /// Destructor
+    ~Demangler();
 
-  /// Transforms given string and replaces any symbols with original names
-  /// @param symbols the symbol table
-  /// @param str the string to replace
-  /// @returns the string with any symbol replacements performed.
-  std::string Demangle(const SymbolTable& symbols,
-                       const std::string& str) const;
+    /// Transforms given string and replaces any symbols with original names
+    /// @param symbols the symbol table
+    /// @param str the string to replace
+    /// @returns the string with any symbol replacements performed.
+    std::string Demangle(const SymbolTable& symbols, const std::string& str) const;
 };
 
 }  // namespace tint

@@ -23,50 +23,52 @@
 #include "dawn/common/Compiler.h"
 
 namespace wgpu {
-    enum class ErrorType : uint32_t;
+enum class ErrorType : uint32_t;
 }
 
 namespace dawn {
-    using ErrorType = wgpu::ErrorType;
+using ErrorType = wgpu::ErrorType;
 }
 
 namespace dawn::native {
-    enum class InternalErrorType : uint32_t;
+enum class InternalErrorType : uint32_t;
 
-    class [[nodiscard]] ErrorData {
-      public:
-        [[nodiscard]] static std::unique_ptr<ErrorData> Create(
-            InternalErrorType type, std::string message, const char* file, const char* function,
-            int line);
-        ErrorData(InternalErrorType type, std::string message);
+class [[nodiscard]] ErrorData {
+  public:
+    [[nodiscard]] static std::unique_ptr<ErrorData> Create(InternalErrorType type,
+                                                           std::string message,
+                                                           const char* file,
+                                                           const char* function,
+                                                           int line);
+    ErrorData(InternalErrorType type, std::string message);
 
-        struct BacktraceRecord {
-            const char* file;
-            const char* function;
-            int line;
-        };
-        void AppendBacktrace(const char* file, const char* function, int line);
-        void AppendContext(std::string context);
-        void AppendDebugGroup(std::string label);
-        void AppendBackendMessage(std::string message);
-
-        InternalErrorType GetType() const;
-        const std::string& GetMessage() const;
-        const std::vector<BacktraceRecord>& GetBacktrace() const;
-        const std::vector<std::string>& GetContexts() const;
-        const std::vector<std::string>& GetDebugGroups() const;
-        const std::vector<std::string>& GetBackendMessages() const;
-
-        std::string GetFormattedMessage() const;
-
-      private:
-        InternalErrorType mType;
-        std::string mMessage;
-        std::vector<BacktraceRecord> mBacktrace;
-        std::vector<std::string> mContexts;
-        std::vector<std::string> mDebugGroups;
-        std::vector<std::string> mBackendMessages;
+    struct BacktraceRecord {
+        const char* file;
+        const char* function;
+        int line;
     };
+    void AppendBacktrace(const char* file, const char* function, int line);
+    void AppendContext(std::string context);
+    void AppendDebugGroup(std::string label);
+    void AppendBackendMessage(std::string message);
+
+    InternalErrorType GetType() const;
+    const std::string& GetMessage() const;
+    const std::vector<BacktraceRecord>& GetBacktrace() const;
+    const std::vector<std::string>& GetContexts() const;
+    const std::vector<std::string>& GetDebugGroups() const;
+    const std::vector<std::string>& GetBackendMessages() const;
+
+    std::string GetFormattedMessage() const;
+
+  private:
+    InternalErrorType mType;
+    std::string mMessage;
+    std::vector<BacktraceRecord> mBacktrace;
+    std::vector<std::string> mContexts;
+    std::vector<std::string> mDebugGroups;
+    std::vector<std::string> mBackendMessages;
+};
 
 }  // namespace dawn::native
 

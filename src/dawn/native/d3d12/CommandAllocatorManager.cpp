@@ -22,51 +22,51 @@
 
 namespace dawn::native::d3d12 {
 
-    CommandAllocatorManager::CommandAllocatorManager(Device* device)
-        : device(device), mAllocatorCount(0) {
-        mFreeAllocators.set();
+CommandAllocatorManager::CommandAllocatorManager(Device* device)
+    : device(device), mAllocatorCount(0) {
+    mFreeAllocators.set();
+}
+
+ResultOrError<ID3D12CommandAllocator*> CommandAllocatorManager::ReserveCommandAllocator() {
+    // If there are no free allocators, get the oldest serial in flight and wait on it
+    if (mFreeAllocators.none()) {
+        const ExecutionSerial firstSerial = mInFlightCommandAllocators.FirstSerial();
+        DAWN_TRY(device->WaitForSerial(firstSerial));
+        DAWN_TRY(Tick(firstSerial));
     }
 
-    ResultOrError<ID3D12CommandAllocator*> CommandAllocatorManager::ReserveCommandAllocator() {
-        // If there are no free allocators, get the oldest serial in flight and wait on it
-        if (mFreeAllocators.none()) {
-            const ExecutionSerial firstSerial = mInFlightCommandAllocators.FirstSerial();
-            DAWN_TRY(device->WaitForSerial(firstSerial));
-            DAWN_TRY(Tick(firstSerial));
-        }
+    ASSERT(mFreeAllocators.any());
 
-        ASSERT(mFreeAllocators.any());
+    // Get the index of the first free allocator from the bitset
+    unsigned int firstFreeIndex = *(IterateBitSet(mFreeAllocators).begin());
 
-        // Get the index of the first free allocator from the bitset
-        unsigned int firstFreeIndex = *(IterateBitSet(mFreeAllocators).begin());
-
-        if (firstFreeIndex >= mAllocatorCount) {
-            ASSERT(firstFreeIndex == mAllocatorCount);
-            mAllocatorCount++;
-            DAWN_TRY(CheckHRESULT(device->GetD3D12Device()->CreateCommandAllocator(
-                                      D3D12_COMMAND_LIST_TYPE_DIRECT,
-                                      IID_PPV_ARGS(&mCommandAllocators[firstFreeIndex])),
-                                  "D3D12 create command allocator"));
-        }
-
-        // Mark the command allocator as used
-        mFreeAllocators.reset(firstFreeIndex);
-
-        // Enqueue the command allocator. It will be scheduled for reset after the next
-        // ExecuteCommandLists
-        mInFlightCommandAllocators.Enqueue({mCommandAllocators[firstFreeIndex], firstFreeIndex},
-                                           device->GetPendingCommandSerial());
-        return mCommandAllocators[firstFreeIndex].Get();
+    if (firstFreeIndex >= mAllocatorCount) {
+        ASSERT(firstFreeIndex == mAllocatorCount);
+        mAllocatorCount++;
+        DAWN_TRY(CheckHRESULT(
+            device->GetD3D12Device()->CreateCommandAllocator(
+                D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&mCommandAllocators[firstFreeIndex])),
+            "D3D12 create command allocator"));
     }
 
-    MaybeError CommandAllocatorManager::Tick(ExecutionSerial lastCompletedSerial) {
-        // Reset all command allocators that are no longer in flight
-        for (auto it : mInFlightCommandAllocators.IterateUpTo(lastCompletedSerial)) {
-            DAWN_TRY(CheckHRESULT(it.commandAllocator->Reset(), "D3D12 reset command allocator"));
-            mFreeAllocators.set(it.index);
-        }
-        mInFlightCommandAllocators.ClearUpTo(lastCompletedSerial);
-        return {};
+    // Mark the command allocator as used
+    mFreeAllocators.reset(firstFreeIndex);
+
+    // Enqueue the command allocator. It will be scheduled for reset after the next
+    // ExecuteCommandLists
+    mInFlightCommandAllocators.Enqueue({mCommandAllocators[firstFreeIndex], firstFreeIndex},
+                                       device->GetPendingCommandSerial());
+    return mCommandAllocators[firstFreeIndex].Get();
+}
+
+MaybeError CommandAllocatorManager::Tick(ExecutionSerial lastCompletedSerial) {
+    // Reset all command allocators that are no longer in flight
+    for (auto it : mInFlightCommandAllocators.IterateUpTo(lastCompletedSerial)) {
+        DAWN_TRY(CheckHRESULT(it.commandAllocator->Reset(), "D3D12 reset command allocator"));
+        mFreeAllocators.set(it.index);
     }
+    mInFlightCommandAllocators.ClearUpTo(lastCompletedSerial);
+    return {};
+}
 
 }  // namespace dawn::native::d3d12

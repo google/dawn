@@ -23,39 +23,31 @@ using testing::StrictMock;
 
 namespace {
 
-    enum class DestructedClass {
-        Foo,
-        Bar,
-    };
+enum class DestructedClass {
+    Foo,
+    Bar,
+};
 
-    class MockDestructor {
-      public:
-        MOCK_METHOD(void, Call, (void*, DestructedClass));
-    };
+class MockDestructor {
+  public:
+    MOCK_METHOD(void, Call, (void*, DestructedClass));
+};
 
-    std::unique_ptr<StrictMock<MockDestructor>> mockDestructor;
+std::unique_ptr<StrictMock<MockDestructor>> mockDestructor;
 
-    class PlacementAllocatedTests : public testing::Test {
-        void SetUp() override {
-            mockDestructor = std::make_unique<StrictMock<MockDestructor>>();
-        }
+class PlacementAllocatedTests : public testing::Test {
+    void SetUp() override { mockDestructor = std::make_unique<StrictMock<MockDestructor>>(); }
 
-        void TearDown() override {
-            mockDestructor = nullptr;
-        }
-    };
+    void TearDown() override { mockDestructor = nullptr; }
+};
 
-    struct Foo : PlacementAllocated {
-        virtual ~Foo() {
-            mockDestructor->Call(this, DestructedClass::Foo);
-        }
-    };
+struct Foo : PlacementAllocated {
+    virtual ~Foo() { mockDestructor->Call(this, DestructedClass::Foo); }
+};
 
-    struct Bar : Foo {
-        ~Bar() override {
-            mockDestructor->Call(this, DestructedClass::Bar);
-        }
-    };
+struct Bar : Foo {
+    ~Bar() override { mockDestructor->Call(this, DestructedClass::Bar); }
+};
 }  // namespace
 
 // Test that deletion calls the destructor and does not free memory.

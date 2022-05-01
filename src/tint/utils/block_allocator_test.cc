@@ -20,127 +20,125 @@ namespace tint::utils {
 namespace {
 
 struct LifetimeCounter {
-  explicit LifetimeCounter(size_t* count) : count_(count) { (*count)++; }
-  ~LifetimeCounter() { (*count_)--; }
+    explicit LifetimeCounter(size_t* count) : count_(count) { (*count)++; }
+    ~LifetimeCounter() { (*count_)--; }
 
-  size_t* const count_;
+    size_t* const count_;
 };
 
 using BlockAllocatorTest = testing::Test;
 
 TEST_F(BlockAllocatorTest, Empty) {
-  using Allocator = BlockAllocator<int>;
+    using Allocator = BlockAllocator<int>;
 
-  Allocator allocator;
+    Allocator allocator;
 
-  for (int* i : allocator.Objects()) {
-    (void)i;
-    if ((true)) {  // Workaround for "error: loop will run at most once"
-      FAIL() << "BlockAllocator should be empty";
+    for (int* i : allocator.Objects()) {
+        (void)i;
+        if ((true)) {  // Workaround for "error: loop will run at most once"
+            FAIL() << "BlockAllocator should be empty";
+        }
     }
-  }
-  for (const int* i : static_cast<const Allocator&>(allocator).Objects()) {
-    (void)i;
-    if ((true)) {  // Workaround for "error: loop will run at most once"
-      FAIL() << "BlockAllocator should be empty";
+    for (const int* i : static_cast<const Allocator&>(allocator).Objects()) {
+        (void)i;
+        if ((true)) {  // Workaround for "error: loop will run at most once"
+            FAIL() << "BlockAllocator should be empty";
+        }
     }
-  }
 }
 
 TEST_F(BlockAllocatorTest, ObjectLifetime) {
-  using Allocator = BlockAllocator<LifetimeCounter>;
+    using Allocator = BlockAllocator<LifetimeCounter>;
 
-  size_t count = 0;
-  {
-    Allocator allocator;
+    size_t count = 0;
+    {
+        Allocator allocator;
+        EXPECT_EQ(count, 0u);
+        allocator.Create(&count);
+        EXPECT_EQ(count, 1u);
+        allocator.Create(&count);
+        EXPECT_EQ(count, 2u);
+        allocator.Create(&count);
+        EXPECT_EQ(count, 3u);
+    }
     EXPECT_EQ(count, 0u);
-    allocator.Create(&count);
-    EXPECT_EQ(count, 1u);
-    allocator.Create(&count);
-    EXPECT_EQ(count, 2u);
-    allocator.Create(&count);
-    EXPECT_EQ(count, 3u);
-  }
-  EXPECT_EQ(count, 0u);
 }
 
 TEST_F(BlockAllocatorTest, MoveConstruct) {
-  using Allocator = BlockAllocator<LifetimeCounter>;
+    using Allocator = BlockAllocator<LifetimeCounter>;
 
-  for (size_t n :
-       {0, 1, 10, 16, 20, 32, 50, 64, 100, 256, 300, 512, 500, 512}) {
-    size_t count = 0;
-    {
-      Allocator allocator_a;
-      for (size_t i = 0; i < n; i++) {
-        allocator_a.Create(&count);
-      }
-      EXPECT_EQ(count, n);
+    for (size_t n : {0, 1, 10, 16, 20, 32, 50, 64, 100, 256, 300, 512, 500, 512}) {
+        size_t count = 0;
+        {
+            Allocator allocator_a;
+            for (size_t i = 0; i < n; i++) {
+                allocator_a.Create(&count);
+            }
+            EXPECT_EQ(count, n);
 
-      Allocator allocator_b{std::move(allocator_a)};
-      EXPECT_EQ(count, n);
+            Allocator allocator_b{std::move(allocator_a)};
+            EXPECT_EQ(count, n);
+        }
+
+        EXPECT_EQ(count, 0u);
     }
-
-    EXPECT_EQ(count, 0u);
-  }
 }
 
 TEST_F(BlockAllocatorTest, MoveAssign) {
-  using Allocator = BlockAllocator<LifetimeCounter>;
+    using Allocator = BlockAllocator<LifetimeCounter>;
 
-  for (size_t n :
-       {0, 1, 10, 16, 20, 32, 50, 64, 100, 256, 300, 512, 500, 512}) {
-    size_t count_a = 0;
-    size_t count_b = 0;
+    for (size_t n : {0, 1, 10, 16, 20, 32, 50, 64, 100, 256, 300, 512, 500, 512}) {
+        size_t count_a = 0;
+        size_t count_b = 0;
 
-    {
-      Allocator allocator_a;
-      for (size_t i = 0; i < n; i++) {
-        allocator_a.Create(&count_a);
-      }
-      EXPECT_EQ(count_a, n);
+        {
+            Allocator allocator_a;
+            for (size_t i = 0; i < n; i++) {
+                allocator_a.Create(&count_a);
+            }
+            EXPECT_EQ(count_a, n);
 
-      Allocator allocator_b;
-      for (size_t i = 0; i < n; i++) {
-        allocator_b.Create(&count_b);
-      }
-      EXPECT_EQ(count_b, n);
+            Allocator allocator_b;
+            for (size_t i = 0; i < n; i++) {
+                allocator_b.Create(&count_b);
+            }
+            EXPECT_EQ(count_b, n);
 
-      allocator_b = std::move(allocator_a);
-      EXPECT_EQ(count_a, n);
-      EXPECT_EQ(count_b, 0u);
+            allocator_b = std::move(allocator_a);
+            EXPECT_EQ(count_a, n);
+            EXPECT_EQ(count_b, 0u);
+        }
+
+        EXPECT_EQ(count_a, 0u);
+        EXPECT_EQ(count_b, 0u);
     }
-
-    EXPECT_EQ(count_a, 0u);
-    EXPECT_EQ(count_b, 0u);
-  }
 }
 
 TEST_F(BlockAllocatorTest, ObjectOrder) {
-  using Allocator = BlockAllocator<int>;
+    using Allocator = BlockAllocator<int>;
 
-  Allocator allocator;
-  constexpr int N = 10000;
-  for (int i = 0; i < N; i++) {
-    allocator.Create(i);
-  }
+    Allocator allocator;
+    constexpr int N = 10000;
+    for (int i = 0; i < N; i++) {
+        allocator.Create(i);
+    }
 
-  {
-    int i = 0;
-    for (int* p : allocator.Objects()) {
-      EXPECT_EQ(*p, i);
-      i++;
+    {
+        int i = 0;
+        for (int* p : allocator.Objects()) {
+            EXPECT_EQ(*p, i);
+            i++;
+        }
+        EXPECT_EQ(i, N);
     }
-    EXPECT_EQ(i, N);
-  }
-  {
-    int i = 0;
-    for (const int* p : static_cast<const Allocator&>(allocator).Objects()) {
-      EXPECT_EQ(*p, i);
-      i++;
+    {
+        int i = 0;
+        for (const int* p : static_cast<const Allocator&>(allocator).Objects()) {
+            EXPECT_EQ(*p, i);
+            i++;
+        }
+        EXPECT_EQ(i, N);
     }
-    EXPECT_EQ(i, N);
-  }
 }
 
 }  // namespace

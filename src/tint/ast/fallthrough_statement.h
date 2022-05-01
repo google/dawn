@@ -20,22 +20,21 @@
 namespace tint::ast {
 
 /// An fallthrough statement
-class FallthroughStatement final
-    : public Castable<FallthroughStatement, Statement> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  FallthroughStatement(ProgramID pid, const Source& src);
-  /// Move constructor
-  FallthroughStatement(FallthroughStatement&&);
-  ~FallthroughStatement() override;
+class FallthroughStatement final : public Castable<FallthroughStatement, Statement> {
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    FallthroughStatement(ProgramID pid, const Source& src);
+    /// Move constructor
+    FallthroughStatement(FallthroughStatement&&);
+    ~FallthroughStatement() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const FallthroughStatement* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const FallthroughStatement* Clone(CloneContext* ctx) const override;
 };
 
 }  // namespace tint::ast

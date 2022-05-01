@@ -34,40 +34,40 @@ namespace tint::writer::spirv {
 
 /// Configuration options used for generating SPIR-V.
 struct Options {
-  /// Set to `true` to generate a PointSize builtin and have it set to 1.0
-  /// from all vertex shaders in the module.
-  bool emit_vertex_point_size = true;
+    /// Set to `true` to generate a PointSize builtin and have it set to 1.0
+    /// from all vertex shaders in the module.
+    bool emit_vertex_point_size = true;
 
-  /// Set to `true` to disable workgroup memory zero initialization
-  bool disable_workgroup_init = false;
+    /// Set to `true` to disable workgroup memory zero initialization
+    bool disable_workgroup_init = false;
 
-  /// Set to 'true' to generates binding mappings for external textures
-  bool generate_external_texture_bindings = false;
+    /// Set to 'true' to generates binding mappings for external textures
+    bool generate_external_texture_bindings = false;
 
-  /// Set to `true` to initialize workgroup memory with OpConstantNull when
-  /// VK_KHR_zero_initialize_workgroup_memory is enabled.
-  bool use_zero_initialize_workgroup_memory_extension = false;
+    /// Set to `true` to initialize workgroup memory with OpConstantNull when
+    /// VK_KHR_zero_initialize_workgroup_memory is enabled.
+    bool use_zero_initialize_workgroup_memory_extension = false;
 };
 
 /// The result produced when generating SPIR-V.
 struct Result {
-  /// Constructor
-  Result();
+    /// Constructor
+    Result();
 
-  /// Destructor
-  ~Result();
+    /// Destructor
+    ~Result();
 
-  /// Copy constructor
-  Result(const Result&);
+    /// Copy constructor
+    Result(const Result&);
 
-  /// True if generation was successful.
-  bool success = false;
+    /// True if generation was successful.
+    bool success = false;
 
-  /// The errors generated during code generation, if any.
-  std::string error;
+    /// The errors generated during code generation, if any.
+    std::string error;
 
-  /// The generated SPIR-V.
-  std::vector<uint32_t> spirv;
+    /// The generated SPIR-V.
+    std::vector<uint32_t> spirv;
 };
 
 /// Generate SPIR-V for a program, according to a set of configuration options.

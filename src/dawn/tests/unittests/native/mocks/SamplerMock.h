@@ -22,17 +22,15 @@
 
 namespace dawn::native {
 
-    class SamplerMock : public SamplerBase {
-      public:
-        explicit SamplerMock(DeviceBase* device) : SamplerBase(device) {
-            ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
-                this->SamplerBase::DestroyImpl();
-            });
-        }
-        ~SamplerMock() override = default;
+class SamplerMock : public SamplerBase {
+  public:
+    explicit SamplerMock(DeviceBase* device) : SamplerBase(device) {
+        ON_CALL(*this, DestroyImpl).WillByDefault([this]() { this->SamplerBase::DestroyImpl(); });
+    }
+    ~SamplerMock() override = default;
 
-        MOCK_METHOD(void, DestroyImpl, (), (override));
-    };
+    MOCK_METHOD(void, DestroyImpl, (), (override));
+};
 
 }  // namespace dawn::native
 

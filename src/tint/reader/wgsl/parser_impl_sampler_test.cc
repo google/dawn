@@ -18,36 +18,36 @@ namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, SamplerType_Invalid) {
-  auto p = parser("1234");
-  auto t = p->sampler();
-  EXPECT_FALSE(t.matched);
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, nullptr);
-  EXPECT_FALSE(p->has_error());
+    auto p = parser("1234");
+    auto t = p->sampler();
+    EXPECT_FALSE(t.matched);
+    EXPECT_FALSE(t.errored);
+    EXPECT_EQ(t.value, nullptr);
+    EXPECT_FALSE(p->has_error());
 }
 
 TEST_F(ParserImplTest, SamplerType_Sampler) {
-  auto p = parser("sampler");
-  auto t = p->sampler();
-  EXPECT_TRUE(t.matched);
-  EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::Sampler>());
-  EXPECT_FALSE(t->As<ast::Sampler>()->IsComparison());
-  EXPECT_FALSE(p->has_error());
-  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 8u}}));
+    auto p = parser("sampler");
+    auto t = p->sampler();
+    EXPECT_TRUE(t.matched);
+    EXPECT_FALSE(t.errored);
+    ASSERT_NE(t.value, nullptr);
+    ASSERT_TRUE(t->Is<ast::Sampler>());
+    EXPECT_FALSE(t->As<ast::Sampler>()->IsComparison());
+    EXPECT_FALSE(p->has_error());
+    EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 8u}}));
 }
 
 TEST_F(ParserImplTest, SamplerType_ComparisonSampler) {
-  auto p = parser("sampler_comparison");
-  auto t = p->sampler();
-  EXPECT_TRUE(t.matched);
-  EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<ast::Sampler>());
-  EXPECT_TRUE(t->As<ast::Sampler>()->IsComparison());
-  EXPECT_FALSE(p->has_error());
-  EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 19u}}));
+    auto p = parser("sampler_comparison");
+    auto t = p->sampler();
+    EXPECT_TRUE(t.matched);
+    EXPECT_FALSE(t.errored);
+    ASSERT_NE(t.value, nullptr);
+    ASSERT_TRUE(t->Is<ast::Sampler>());
+    EXPECT_TRUE(t->As<ast::Sampler>()->IsComparison());
+    EXPECT_FALSE(p->has_error());
+    EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 19u}}));
 }
 
 }  // namespace

@@ -21,15 +21,15 @@
 
 namespace dawn::native::d3d12 {
 
-    constexpr HRESULT E_FAKE_ERROR_FOR_TESTING = MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0xFF);
-    constexpr HRESULT E_FAKE_OUTOFMEMORY_ERROR_FOR_TESTING =
-        MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0xFE);
+constexpr HRESULT E_FAKE_ERROR_FOR_TESTING = MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0xFF);
+constexpr HRESULT E_FAKE_OUTOFMEMORY_ERROR_FOR_TESTING =
+    MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0xFE);
 
-    // Returns a success only if result of HResult is success
-    MaybeError CheckHRESULTImpl(HRESULT result, const char* context);
+// Returns a success only if result of HResult is success
+MaybeError CheckHRESULTImpl(HRESULT result, const char* context);
 
-    // Uses CheckRESULT but returns OOM specific error when recoverable.
-    MaybeError CheckOutOfMemoryHRESULTImpl(HRESULT result, const char* context);
+// Uses CheckRESULT but returns OOM specific error when recoverable.
+MaybeError CheckOutOfMemoryHRESULTImpl(HRESULT result, const char* context);
 
 #define CheckHRESULT(resultIn, contextIn)    \
     ::dawn::native::d3d12::CheckHRESULTImpl( \

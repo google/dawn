@@ -20,18 +20,18 @@ namespace tint::writer::msl {
 namespace {
 
 void GenerateMSL(benchmark::State& state, std::string input_name) {
-  auto res = bench::LoadProgram(input_name);
-  if (auto err = std::get_if<bench::Error>(&res)) {
-    state.SkipWithError(err->msg.c_str());
-    return;
-  }
-  auto& program = std::get<bench::ProgramAndFile>(res).program;
-  for (auto _ : state) {
-    auto res = Generate(&program, {});
-    if (!res.error.empty()) {
-      state.SkipWithError(res.error.c_str());
+    auto res = bench::LoadProgram(input_name);
+    if (auto err = std::get_if<bench::Error>(&res)) {
+        state.SkipWithError(err->msg.c_str());
+        return;
     }
-  }
+    auto& program = std::get<bench::ProgramAndFile>(res).program;
+    for (auto _ : state) {
+        auto res = Generate(&program, {});
+        if (!res.error.empty()) {
+            state.SkipWithError(res.error.c_str());
+        }
+    }
 }
 
 TINT_BENCHMARK_WGSL_PROGRAMS(GenerateMSL);

@@ -24,13 +24,13 @@ namespace {
 using CalculateArrayLengthTest = TransformTest;
 
 TEST_F(CalculateArrayLengthTest, ShouldRunEmptyModule) {
-  auto* src = R"()";
+    auto* src = R"()";
 
-  EXPECT_FALSE(ShouldRun<CalculateArrayLength>(src));
+    EXPECT_FALSE(ShouldRun<CalculateArrayLength>(src));
 }
 
 TEST_F(CalculateArrayLengthTest, ShouldRunNoArrayLength) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB {
   x : i32,
   arr : array<i32>,
@@ -43,11 +43,11 @@ fn main() {
 }
 )";
 
-  EXPECT_FALSE(ShouldRun<CalculateArrayLength>(src));
+    EXPECT_FALSE(ShouldRun<CalculateArrayLength>(src));
 }
 
 TEST_F(CalculateArrayLengthTest, ShouldRunWithArrayLength) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB {
   x : i32,
   arr : array<i32>,
@@ -61,11 +61,11 @@ fn main() {
 }
 )";
 
-  EXPECT_TRUE(ShouldRun<CalculateArrayLength>(src));
+    EXPECT_TRUE(ShouldRun<CalculateArrayLength>(src));
 }
 
 TEST_F(CalculateArrayLengthTest, BasicArray) {
-  auto* src = R"(
+    auto* src = R"(
 @group(0) @binding(0) var<storage, read> sb : array<i32>;
 
 @stage(compute) @workgroup_size(1)
@@ -74,7 +74,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_buffer_size)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : array<i32>, result : ptr<function, u32>)
 
@@ -89,13 +89,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+    auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(CalculateArrayLengthTest, BasicInStruct) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB {
   x : i32,
   arr : array<i32>,
@@ -109,7 +109,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_buffer_size)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, result : ptr<function, u32>)
 
@@ -129,13 +129,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+    auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(CalculateArrayLengthTest, ArrayOfStruct) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   f : f32,
 }
@@ -147,7 +147,7 @@ fn main() {
   let len = arrayLength(&arr);
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_buffer_size)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : array<S>, result : ptr<function, u32>)
 
@@ -166,13 +166,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+    auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(CalculateArrayLengthTest, ArrayOfArrayOfStruct) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   f : f32,
 }
@@ -184,7 +184,7 @@ fn main() {
   let len = arrayLength(&arr);
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_buffer_size)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : array<array<S, 4u>>, result : ptr<function, u32>)
 
@@ -203,13 +203,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+    auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(CalculateArrayLengthTest, InSameBlock) {
-  auto* src = R"(
+    auto* src = R"(
 @group(0) @binding(0) var<storage, read> sb : array<i32>;;
 
 @stage(compute) @workgroup_size(1)
@@ -220,7 +220,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_buffer_size)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : array<i32>, result : ptr<function, u32>)
 
@@ -237,13 +237,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+    auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(CalculateArrayLengthTest, InSameBlock_Struct) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB {
   x : i32,
   arr : array<i32>,
@@ -259,7 +259,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_buffer_size)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, result : ptr<function, u32>)
 
@@ -281,13 +281,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+    auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(CalculateArrayLengthTest, Nested) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB {
   x : i32,
   arr : array<i32>,
@@ -307,7 +307,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_buffer_size)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, result : ptr<function, u32>)
 
@@ -336,13 +336,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+    auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(CalculateArrayLengthTest, MultipleStorageBuffers) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB1 {
   x : i32,
   arr1 : array<i32>,
@@ -368,7 +368,7 @@ fn main() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_buffer_size)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB1, result : ptr<function, u32>)
 
@@ -412,13 +412,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+    auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(CalculateArrayLengthTest, Shadowing) {
-  auto* src = R"(
+    auto* src = R"(
 struct SB {
   x : i32,
   arr : array<i32>,
@@ -437,8 +437,8 @@ fn main() {
 }
 )";
 
-  auto* expect =
-      R"(
+    auto* expect =
+        R"(
 @internal(intrinsic_buffer_size)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, result : ptr<function, u32>)
 
@@ -466,13 +466,13 @@ fn main() {
 }
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+    auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(CalculateArrayLengthTest, OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 @stage(compute) @workgroup_size(1)
 fn main() {
   var len1 : u32 = arrayLength(&(sb1.arr1));
@@ -498,7 +498,7 @@ struct SB2 {
 @group(0) @binding(2) var<storage, read> sb3 : array<i32>;
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 @internal(intrinsic_buffer_size)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB1, result : ptr<function, u32>)
 
@@ -542,9 +542,9 @@ struct SB2 {
 @group(0) @binding(2) var<storage, read> sb3 : array<i32>;
 )";
 
-  auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+    auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

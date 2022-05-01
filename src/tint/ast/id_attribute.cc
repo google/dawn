@@ -28,13 +28,13 @@ IdAttribute::IdAttribute(ProgramID pid, const Source& src, uint32_t val)
 IdAttribute::~IdAttribute() = default;
 
 std::string IdAttribute::Name() const {
-  return "id";
+    return "id";
 }
 
 const IdAttribute* IdAttribute::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<IdAttribute>(src, value);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<IdAttribute>(src, value);
 }
 
 }  // namespace tint::ast

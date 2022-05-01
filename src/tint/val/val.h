@@ -32,10 +32,10 @@ using EntryPointList = std::vector<std::pair<std::string, ast::PipelineStage>>;
 
 /// The return structure of Validate()
 struct Result {
-  /// True if validation passed
-  bool failed = false;
-  /// Output of DXC.
-  std::string output;
+    /// True if validation passed
+    bool failed = false;
+    /// Output of DXC.
+    std::string output;
 };
 
 /// Hlsl attempts to compile the shader with DXC, verifying that the shader
@@ -54,8 +54,7 @@ Result HlslUsingDXC(const std::string& dxc_path,
 /// @param source the generated HLSL source
 /// @param entry_points the list of entry points to validate
 /// @return the result of the compile
-Result HlslUsingFXC(const std::string& source,
-                    const EntryPointList& entry_points);
+Result HlslUsingFXC(const std::string& source, const EntryPointList& entry_points);
 #endif  // _WIN32
 
 /// Msl attempts to compile the shader with the Metal Shader Compiler,

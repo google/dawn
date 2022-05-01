@@ -17,25 +17,25 @@
 namespace tint::ast {
 
 std::ostream& operator<<(std::ostream& out, Access access) {
-  switch (access) {
-    case ast::Access::kUndefined: {
-      out << "undefined";
-      break;
+    switch (access) {
+        case ast::Access::kUndefined: {
+            out << "undefined";
+            break;
+        }
+        case ast::Access::kRead: {
+            out << "read";
+            break;
+        }
+        case ast::Access::kReadWrite: {
+            out << "read_write";
+            break;
+        }
+        case ast::Access::kWrite: {
+            out << "write";
+            break;
+        }
     }
-    case ast::Access::kRead: {
-      out << "read";
-      break;
-    }
-    case ast::Access::kReadWrite: {
-      out << "read_write";
-      break;
-    }
-    case ast::Access::kWrite: {
-      out << "write";
-      break;
-    }
-  }
-  return out;
+    return out;
 }
 
 }  // namespace tint::ast

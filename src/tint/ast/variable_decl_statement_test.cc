@@ -23,47 +23,45 @@ namespace {
 using VariableDeclStatementTest = TestHelper;
 
 TEST_F(VariableDeclStatementTest, Creation) {
-  auto* var = Var("a", ty.f32(), StorageClass::kNone);
+    auto* var = Var("a", ty.f32(), StorageClass::kNone);
 
-  auto* stmt = create<VariableDeclStatement>(var);
-  EXPECT_EQ(stmt->variable, var);
+    auto* stmt = create<VariableDeclStatement>(var);
+    EXPECT_EQ(stmt->variable, var);
 }
 
 TEST_F(VariableDeclStatementTest, Creation_WithSource) {
-  auto* var = Var("a", ty.f32(), StorageClass::kNone);
+    auto* var = Var("a", ty.f32(), StorageClass::kNone);
 
-  auto* stmt =
-      create<VariableDeclStatement>(Source{Source::Location{20, 2}}, var);
-  auto src = stmt->source;
-  EXPECT_EQ(src.range.begin.line, 20u);
-  EXPECT_EQ(src.range.begin.column, 2u);
+    auto* stmt = create<VariableDeclStatement>(Source{Source::Location{20, 2}}, var);
+    auto src = stmt->source;
+    EXPECT_EQ(src.range.begin.line, 20u);
+    EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(VariableDeclStatementTest, IsVariableDecl) {
-  auto* var = Var("a", ty.f32(), StorageClass::kNone);
+    auto* var = Var("a", ty.f32(), StorageClass::kNone);
 
-  auto* stmt = create<VariableDeclStatement>(var);
-  EXPECT_TRUE(stmt->Is<VariableDeclStatement>());
+    auto* stmt = create<VariableDeclStatement>(var);
+    EXPECT_TRUE(stmt->Is<VariableDeclStatement>());
 }
 
 TEST_F(VariableDeclStatementTest, Assert_Null_Variable) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b;
-        b.create<VariableDeclStatement>(nullptr);
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b;
+            b.create<VariableDeclStatement>(nullptr);
+        },
+        "internal compiler error");
 }
 
 TEST_F(VariableDeclStatementTest, Assert_DifferentProgramID_Variable) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b1;
-        ProgramBuilder b2;
-        b1.create<VariableDeclStatement>(
-            b2.Var("a", b2.ty.f32(), StorageClass::kNone));
-      },
-      "internal compiler error");
+    EXPECT_FATAL_FAILURE(
+        {
+            ProgramBuilder b1;
+            ProgramBuilder b2;
+            b1.create<VariableDeclStatement>(b2.Var("a", b2.ty.f32(), StorageClass::kNone));
+        },
+        "internal compiler error");
 }
 
 }  // namespace

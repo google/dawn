@@ -22,68 +22,67 @@
 
 namespace dawn::native::metal {
 
-    // static
-    Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
-        Device* device,
-        const ComputePipelineDescriptor* descriptor) {
-        return AcquireRef(new ComputePipeline(device, descriptor));
+// static
+Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
+    Device* device,
+    const ComputePipelineDescriptor* descriptor) {
+    return AcquireRef(new ComputePipeline(device, descriptor));
+}
+
+MaybeError ComputePipeline::Initialize() {
+    auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
+
+    const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
+    ShaderModule::MetalFunctionData computeData;
+
+    DAWN_TRY(CreateMTLFunction(computeStage, SingleShaderStage::Compute, ToBackend(GetLayout()),
+                               &computeData));
+
+    NSError* error = nullptr;
+    mMtlComputePipelineState.Acquire(
+        [mtlDevice newComputePipelineStateWithFunction:computeData.function.Get() error:&error]);
+    if (error != nullptr) {
+        return DAWN_INTERNAL_ERROR("Error creating pipeline state " +
+                                   std::string([error.localizedDescription UTF8String]));
     }
+    ASSERT(mMtlComputePipelineState != nil);
 
-    MaybeError ComputePipeline::Initialize() {
-        auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
+    // Copy over the local workgroup size as it is passed to dispatch explicitly in Metal
+    Origin3D localSize = GetStage(SingleShaderStage::Compute).metadata->localWorkgroupSize;
+    mLocalWorkgroupSize = MTLSizeMake(localSize.x, localSize.y, localSize.z);
 
-        const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
-        ShaderModule::MetalFunctionData computeData;
+    mRequiresStorageBufferLength = computeData.needsStorageBufferLength;
+    mWorkgroupAllocations = std::move(computeData.workgroupAllocations);
+    return {};
+}
 
-        DAWN_TRY(CreateMTLFunction(computeStage, SingleShaderStage::Compute, ToBackend(GetLayout()),
-                                   &computeData));
-
-        NSError* error = nullptr;
-        mMtlComputePipelineState.Acquire([mtlDevice
-            newComputePipelineStateWithFunction:computeData.function.Get()
-                                          error:&error]);
-        if (error != nullptr) {
-            return DAWN_INTERNAL_ERROR("Error creating pipeline state " +
-                                       std::string([error.localizedDescription UTF8String]));
+void ComputePipeline::Encode(id<MTLComputeCommandEncoder> encoder) {
+    [encoder setComputePipelineState:mMtlComputePipelineState.Get()];
+    for (size_t i = 0; i < mWorkgroupAllocations.size(); ++i) {
+        if (mWorkgroupAllocations[i] == 0) {
+            continue;
         }
-        ASSERT(mMtlComputePipelineState != nil);
-
-        // Copy over the local workgroup size as it is passed to dispatch explicitly in Metal
-        Origin3D localSize = GetStage(SingleShaderStage::Compute).metadata->localWorkgroupSize;
-        mLocalWorkgroupSize = MTLSizeMake(localSize.x, localSize.y, localSize.z);
-
-        mRequiresStorageBufferLength = computeData.needsStorageBufferLength;
-        mWorkgroupAllocations = std::move(computeData.workgroupAllocations);
-        return {};
+        // Size must be a multiple of 16 bytes.
+        uint32_t rounded = Align<uint32_t>(mWorkgroupAllocations[i], 16);
+        [encoder setThreadgroupMemoryLength:rounded atIndex:i];
     }
+}
 
-    void ComputePipeline::Encode(id<MTLComputeCommandEncoder> encoder) {
-        [encoder setComputePipelineState:mMtlComputePipelineState.Get()];
-        for (size_t i = 0; i < mWorkgroupAllocations.size(); ++i) {
-            if (mWorkgroupAllocations[i] == 0) {
-                continue;
-            }
-            // Size must be a multiple of 16 bytes.
-            uint32_t rounded = Align<uint32_t>(mWorkgroupAllocations[i], 16);
-            [encoder setThreadgroupMemoryLength:rounded atIndex:i];
-        }
-    }
+MTLSize ComputePipeline::GetLocalWorkGroupSize() const {
+    return mLocalWorkgroupSize;
+}
 
-    MTLSize ComputePipeline::GetLocalWorkGroupSize() const {
-        return mLocalWorkgroupSize;
-    }
+bool ComputePipeline::RequiresStorageBufferLength() const {
+    return mRequiresStorageBufferLength;
+}
 
-    bool ComputePipeline::RequiresStorageBufferLength() const {
-        return mRequiresStorageBufferLength;
-    }
-
-    void ComputePipeline::InitializeAsync(Ref<ComputePipelineBase> computePipeline,
-                                          WGPUCreateComputePipelineAsyncCallback callback,
-                                          void* userdata) {
-        std::unique_ptr<CreateComputePipelineAsyncTask> asyncTask =
-            std::make_unique<CreateComputePipelineAsyncTask>(std::move(computePipeline), callback,
-                                                             userdata);
-        CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
-    }
+void ComputePipeline::InitializeAsync(Ref<ComputePipelineBase> computePipeline,
+                                      WGPUCreateComputePipelineAsyncCallback callback,
+                                      void* userdata) {
+    std::unique_ptr<CreateComputePipelineAsyncTask> asyncTask =
+        std::make_unique<CreateComputePipelineAsyncTask>(std::move(computePipeline), callback,
+                                                         userdata);
+    CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
+}
 
 }  // namespace dawn::native::metal

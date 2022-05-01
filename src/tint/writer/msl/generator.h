@@ -36,76 +36,76 @@ namespace tint::writer::msl {
 
 /// Configuration options used for generating MSL.
 struct Options {
-  /// Constructor
-  Options();
-  /// Destructor
-  ~Options();
-  /// Copy constructor
-  Options(const Options&);
-  /// Copy assignment
-  /// @returns this Options
-  Options& operator=(const Options&);
+    /// Constructor
+    Options();
+    /// Destructor
+    ~Options();
+    /// Copy constructor
+    Options(const Options&);
+    /// Copy assignment
+    /// @returns this Options
+    Options& operator=(const Options&);
 
-  /// The index to use when generating a UBO to receive storage buffer sizes.
-  /// Defaults to 30, which is the last valid buffer slot.
-  uint32_t buffer_size_ubo_index = 30;
+    /// The index to use when generating a UBO to receive storage buffer sizes.
+    /// Defaults to 30, which is the last valid buffer slot.
+    uint32_t buffer_size_ubo_index = 30;
 
-  /// The fixed sample mask to combine with fragment shader outputs.
-  /// Defaults to 0xFFFFFFFF.
-  uint32_t fixed_sample_mask = 0xFFFFFFFF;
+    /// The fixed sample mask to combine with fragment shader outputs.
+    /// Defaults to 0xFFFFFFFF.
+    uint32_t fixed_sample_mask = 0xFFFFFFFF;
 
-  /// Set to `true` to generate a [[point_size]] attribute which is set to 1.0
-  /// for all vertex shaders in the module.
-  bool emit_vertex_point_size = false;
+    /// Set to `true` to generate a [[point_size]] attribute which is set to 1.0
+    /// for all vertex shaders in the module.
+    bool emit_vertex_point_size = false;
 
-  /// Set to `true` to disable workgroup memory zero initialization
-  bool disable_workgroup_init = false;
+    /// Set to `true` to disable workgroup memory zero initialization
+    bool disable_workgroup_init = false;
 
-  /// Set to 'true' to generates binding mappings for external textures
-  bool generate_external_texture_bindings = false;
+    /// Set to 'true' to generates binding mappings for external textures
+    bool generate_external_texture_bindings = false;
 
-  /// Options used to specify a mapping of binding points to indices into a UBO
-  /// from which to load buffer sizes.
-  ArrayLengthFromUniformOptions array_length_from_uniform = {};
+    /// Options used to specify a mapping of binding points to indices into a UBO
+    /// from which to load buffer sizes.
+    ArrayLengthFromUniformOptions array_length_from_uniform = {};
 
-  // NOTE: Update src/tint/fuzzers/data_builder.h when adding or changing any
-  // struct members.
+    // NOTE: Update src/tint/fuzzers/data_builder.h when adding or changing any
+    // struct members.
 };
 
 /// The result produced when generating MSL.
 struct Result {
-  /// Constructor
-  Result();
+    /// Constructor
+    Result();
 
-  /// Destructor
-  ~Result();
+    /// Destructor
+    ~Result();
 
-  /// Copy constructor
-  Result(const Result&);
+    /// Copy constructor
+    Result(const Result&);
 
-  /// True if generation was successful.
-  bool success = false;
+    /// True if generation was successful.
+    bool success = false;
 
-  /// The errors generated during code generation, if any.
-  std::string error;
+    /// The errors generated during code generation, if any.
+    std::string error;
 
-  /// The generated MSL.
-  std::string msl = "";
+    /// The generated MSL.
+    std::string msl = "";
 
-  /// True if the shader needs a UBO of buffer sizes.
-  bool needs_storage_buffer_sizes = false;
+    /// True if the shader needs a UBO of buffer sizes.
+    bool needs_storage_buffer_sizes = false;
 
-  /// True if the generated shader uses the invariant attribute.
-  bool has_invariant_attribute = false;
+    /// True if the generated shader uses the invariant attribute.
+    bool has_invariant_attribute = false;
 
-  /// A map from entry point name to a list of dynamic workgroup allocations.
-  /// Each entry in the vector is the size of the workgroup allocation that
-  /// should be created for that index.
-  std::unordered_map<std::string, std::vector<uint32_t>> workgroup_allocations;
+    /// A map from entry point name to a list of dynamic workgroup allocations.
+    /// Each entry in the vector is the size of the workgroup allocation that
+    /// should be created for that index.
+    std::unordered_map<std::string, std::vector<uint32_t>> workgroup_allocations;
 
-  /// Indices into the array_length_from_uniform binding that are statically
-  /// used.
-  std::unordered_set<uint32_t> used_array_length_from_uniform_indices;
+    /// Indices into the array_length_from_uniform binding that are statically
+    /// used.
+    std::unordered_set<uint32_t> used_array_length_from_uniform_indices;
 };
 
 /// Generate MSL for a program, according to a set of configuration options. The

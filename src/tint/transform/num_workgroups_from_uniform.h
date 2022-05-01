@@ -42,46 +42,42 @@ namespace tint::transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * CanonicalizeEntryPointIO
-class NumWorkgroupsFromUniform
-    : public Castable<NumWorkgroupsFromUniform, Transform> {
- public:
-  /// Constructor
-  NumWorkgroupsFromUniform();
-  /// Destructor
-  ~NumWorkgroupsFromUniform() override;
-
-  /// Configuration options for the NumWorkgroupsFromUniform transform.
-  struct Config : public Castable<Data, transform::Data> {
+class NumWorkgroupsFromUniform : public Castable<NumWorkgroupsFromUniform, Transform> {
+  public:
     /// Constructor
-    /// @param ubo_bp the binding point to use for the generated uniform buffer.
-    explicit Config(sem::BindingPoint ubo_bp);
-
-    /// Copy constructor
-    Config(const Config&);
-
+    NumWorkgroupsFromUniform();
     /// Destructor
-    ~Config() override;
+    ~NumWorkgroupsFromUniform() override;
 
-    /// The binding point to use for the generated uniform buffer.
-    sem::BindingPoint ubo_binding;
-  };
+    /// Configuration options for the NumWorkgroupsFromUniform transform.
+    struct Config : public Castable<Data, transform::Data> {
+        /// Constructor
+        /// @param ubo_bp the binding point to use for the generated uniform buffer.
+        explicit Config(sem::BindingPoint ubo_bp);
 
-  /// @param program the program to inspect
-  /// @param data optional extra transform-specific input data
-  /// @returns true if this transform should be run for the given program
-  bool ShouldRun(const Program* program,
-                 const DataMap& data = {}) const override;
+        /// Copy constructor
+        Config(const Config&);
 
- protected:
-  /// Runs the transform using the CloneContext built for transforming a
-  /// program. Run() is responsible for calling Clone() on the CloneContext.
-  /// @param ctx the CloneContext primed with the input program and
-  /// ProgramBuilder
-  /// @param inputs optional extra transform-specific input data
-  /// @param outputs optional extra transform-specific output data
-  void Run(CloneContext& ctx,
-           const DataMap& inputs,
-           DataMap& outputs) const override;
+        /// Destructor
+        ~Config() override;
+
+        /// The binding point to use for the generated uniform buffer.
+        sem::BindingPoint ubo_binding;
+    };
+
+    /// @param program the program to inspect
+    /// @param data optional extra transform-specific input data
+    /// @returns true if this transform should be run for the given program
+    bool ShouldRun(const Program* program, const DataMap& data = {}) const override;
+
+  protected:
+    /// Runs the transform using the CloneContext built for transforming a
+    /// program. Run() is responsible for calling Clone() on the CloneContext.
+    /// @param ctx the CloneContext primed with the input program and
+    /// ProgramBuilder
+    /// @param inputs optional extra transform-specific input data
+    /// @param outputs optional extra transform-specific output data
+    void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) const override;
 };
 
 }  // namespace tint::transform

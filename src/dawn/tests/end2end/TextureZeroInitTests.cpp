@@ -1721,9 +1721,7 @@ class CompressedTextureZeroInitTest : public TextureZeroInitTest {
         return {wgpu::FeatureName::TextureCompressionBC};
     }
 
-    bool IsBCFormatSupported() const {
-        return mIsBCFormatSupported;
-    }
+    bool IsBCFormatSupported() const { return mIsBCFormatSupported; }
 
     // Copy the compressed texture data into the destination texture.
     void InitializeDataInCompressedTextureAndExpectLazyClear(

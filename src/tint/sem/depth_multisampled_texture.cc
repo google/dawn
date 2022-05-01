@@ -23,37 +23,34 @@ namespace tint::sem {
 namespace {
 
 bool IsValidDepthDimension(ast::TextureDimension dim) {
-  return dim == ast::TextureDimension::k2d;
+    return dim == ast::TextureDimension::k2d;
 }
 
 }  // namespace
 
-DepthMultisampledTexture::DepthMultisampledTexture(ast::TextureDimension dim)
-    : Base(dim) {
-  TINT_ASSERT(Semantic, IsValidDepthDimension(dim));
+DepthMultisampledTexture::DepthMultisampledTexture(ast::TextureDimension dim) : Base(dim) {
+    TINT_ASSERT(Semantic, IsValidDepthDimension(dim));
 }
 
-DepthMultisampledTexture::DepthMultisampledTexture(DepthMultisampledTexture&&) =
-    default;
+DepthMultisampledTexture::DepthMultisampledTexture(DepthMultisampledTexture&&) = default;
 
 DepthMultisampledTexture::~DepthMultisampledTexture() = default;
 
 size_t DepthMultisampledTexture::Hash() const {
-  return utils::Hash(TypeInfo::Of<DepthMultisampledTexture>().full_hashcode,
-                     dim());
+    return utils::Hash(TypeInfo::Of<DepthMultisampledTexture>().full_hashcode, dim());
 }
 
 bool DepthMultisampledTexture::Equals(const sem::Type& other) const {
-  if (auto* o = other.As<DepthMultisampledTexture>()) {
-    return o->dim() == dim();
-  }
-  return false;
+    if (auto* o = other.As<DepthMultisampledTexture>()) {
+        return o->dim() == dim();
+    }
+    return false;
 }
 
 std::string DepthMultisampledTexture::FriendlyName(const SymbolTable&) const {
-  std::ostringstream out;
-  out << "texture_depth_multisampled_" << dim();
-  return out.str();
+    std::ostringstream out;
+    out << "texture_depth_multisampled_" << dim();
+    return out.str();
 }
 
 }  // namespace tint::sem

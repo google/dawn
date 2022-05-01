@@ -20,24 +20,21 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::IdentifierExpression);
 
 namespace tint::ast {
 
-IdentifierExpression::IdentifierExpression(ProgramID pid,
-                                           const Source& src,
-                                           Symbol sym)
+IdentifierExpression::IdentifierExpression(ProgramID pid, const Source& src, Symbol sym)
     : Base(pid, src), symbol(sym) {
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol, program_id);
-  TINT_ASSERT(AST, symbol.IsValid());
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol, program_id);
+    TINT_ASSERT(AST, symbol.IsValid());
 }
 
 IdentifierExpression::IdentifierExpression(IdentifierExpression&&) = default;
 
 IdentifierExpression::~IdentifierExpression() = default;
 
-const IdentifierExpression* IdentifierExpression::Clone(
-    CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  auto sym = ctx->Clone(symbol);
-  return ctx->dst->create<IdentifierExpression>(src, sym);
+const IdentifierExpression* IdentifierExpression::Clone(CloneContext* ctx) const {
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    auto sym = ctx->Clone(symbol);
+    return ctx->dst->create<IdentifierExpression>(src, sym);
 }
 
 }  // namespace tint::ast

@@ -22,62 +22,61 @@
 
 namespace {
 
-    void EncodeConvertTimestampsToNanoseconds(wgpu::CommandEncoder encoder,
-                                              wgpu::Buffer timestamps,
-                                              wgpu::Buffer availability,
-                                              wgpu::Buffer params) {
-        ASSERT_TRUE(
-            dawn::native::EncodeConvertTimestampsToNanoseconds(
-                dawn::native::FromAPI(encoder.Get()), dawn::native::FromAPI(timestamps.Get()),
-                dawn::native::FromAPI(availability.Get()), dawn::native::FromAPI(params.Get()))
-                .IsSuccess());
+void EncodeConvertTimestampsToNanoseconds(wgpu::CommandEncoder encoder,
+                                          wgpu::Buffer timestamps,
+                                          wgpu::Buffer availability,
+                                          wgpu::Buffer params) {
+    ASSERT_TRUE(dawn::native::EncodeConvertTimestampsToNanoseconds(
+                    dawn::native::FromAPI(encoder.Get()), dawn::native::FromAPI(timestamps.Get()),
+                    dawn::native::FromAPI(availability.Get()), dawn::native::FromAPI(params.Get()))
+                    .IsSuccess());
+}
+
+class InternalShaderExpectation : public detail::Expectation {
+  public:
+    ~InternalShaderExpectation() override = default;
+
+    InternalShaderExpectation(const uint64_t* values, const unsigned int count) {
+        mExpected.assign(values, values + count);
     }
 
-    class InternalShaderExpectation : public detail::Expectation {
-      public:
-        ~InternalShaderExpectation() override = default;
+    // Expect the actual results are approximately equal to the expected values.
+    testing::AssertionResult Check(const void* data, size_t size) override {
+        DAWN_ASSERT(size == sizeof(uint64_t) * mExpected.size());
+        // The computations in the shader use a multiplier that's a 16bit integer plus a shift
+        // that maximize the multiplier. This means that for the range of periods we care about
+        // (1 to 2^16-1 ns per tick), the high order bit of the multiplier will always be set.
+        // Intuitively this means that we have 15 bits of precision in the computation so we
+        // expect that for the error tolerance.
+        constexpr static float kErrorToleranceRatio = 1.0 / (1 << 15);  // about 3e-5.
 
-        InternalShaderExpectation(const uint64_t* values, const unsigned int count) {
-            mExpected.assign(values, values + count);
-        }
-
-        // Expect the actual results are approximately equal to the expected values.
-        testing::AssertionResult Check(const void* data, size_t size) override {
-            DAWN_ASSERT(size == sizeof(uint64_t) * mExpected.size());
-            // The computations in the shader use a multiplier that's a 16bit integer plus a shift
-            // that maximize the multiplier. This means that for the range of periods we care about
-            // (1 to 2^16-1 ns per tick), the high order bit of the multiplier will always be set.
-            // Intuitively this means that we have 15 bits of precision in the computation so we
-            // expect that for the error tolerance.
-            constexpr static float kErrorToleranceRatio = 1.0 / (1 << 15);  // about 3e-5.
-
-            const uint64_t* actual = static_cast<const uint64_t*>(data);
-            for (size_t i = 0; i < mExpected.size(); ++i) {
-                if (mExpected[i] == 0) {
-                    if (actual[i] != 0) {
-                        return testing::AssertionFailure()
-                               << "Expected data[" << i << "] to be 0, actual " << actual[i]
-                               << std::endl;
-                    }
-                    continue;
-                }
-
-                float errorRate = abs(static_cast<int64_t>(mExpected[i] - actual[i])) /
-                                  static_cast<float>(mExpected[i]);
-                if (errorRate > kErrorToleranceRatio) {
+        const uint64_t* actual = static_cast<const uint64_t*>(data);
+        for (size_t i = 0; i < mExpected.size(); ++i) {
+            if (mExpected[i] == 0) {
+                if (actual[i] != 0) {
                     return testing::AssertionFailure()
-                           << "Expected data[" << i << "] to be " << mExpected[i] << ", actual "
-                           << actual[i] << ". Error rate " << errorRate << " is larger than "
-                           << kErrorToleranceRatio << std::endl;
+                           << "Expected data[" << i << "] to be 0, actual " << actual[i]
+                           << std::endl;
                 }
+                continue;
             }
 
-            return testing::AssertionSuccess();
+            float errorRate = abs(static_cast<int64_t>(mExpected[i] - actual[i])) /
+                              static_cast<float>(mExpected[i]);
+            if (errorRate > kErrorToleranceRatio) {
+                return testing::AssertionFailure()
+                       << "Expected data[" << i << "] to be " << mExpected[i] << ", actual "
+                       << actual[i] << ". Error rate " << errorRate << " is larger than "
+                       << kErrorToleranceRatio << std::endl;
+            }
         }
 
-      private:
-        std::vector<uint64_t> mExpected;
-    };
+        return testing::AssertionSuccess();
+    }
+
+  private:
+    std::vector<uint64_t> mExpected;
+};
 
 }  // anonymous namespace
 
@@ -190,7 +189,7 @@ class QueryInternalShaderTests : public DawnTest {
 //   Expect 0 for unavailable timestamps and nanoseconds for available timestamps in an expected
 //   error tolerance ratio.
 // - The availability buffer passes the data of which slot in timestamps buffer is an initialized
-//   timestamp.
+//    timestamp.
 // - The params buffer passes the timestamp count, the offset in timestamps buffer and the
 //   timestamp period (here use GPU frequency (HZ) on Intel D3D12 to calculate the period in
 //   ns for testing).

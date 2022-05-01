@@ -27,34 +27,31 @@ namespace tint::writer::wgsl {
 /// Helper class for testing
 template <typename BASE>
 class TestHelperBase : public BASE, public ProgramBuilder {
- public:
-  TestHelperBase() = default;
+  public:
+    TestHelperBase() = default;
 
-  ~TestHelperBase() override = default;
+    ~TestHelperBase() override = default;
 
-  /// Builds and returns a GeneratorImpl from the program.
-  /// @note The generator is only built once. Multiple calls to Build() will
-  /// return the same GeneratorImpl without rebuilding.
-  /// @return the built generator
-  GeneratorImpl& Build() {
-    if (gen_) {
-      return *gen_;
+    /// Builds and returns a GeneratorImpl from the program.
+    /// @note The generator is only built once. Multiple calls to Build() will
+    /// return the same GeneratorImpl without rebuilding.
+    /// @return the built generator
+    GeneratorImpl& Build() {
+        if (gen_) {
+            return *gen_;
+        }
+        program = std::make_unique<Program>(std::move(*this));
+        diag::Formatter formatter;
+        [&]() { ASSERT_TRUE(program->IsValid()) << formatter.format(program->Diagnostics()); }();
+        gen_ = std::make_unique<GeneratorImpl>(program.get());
+        return *gen_;
     }
-    program = std::make_unique<Program>(std::move(*this));
-    diag::Formatter formatter;
-    [&]() {
-      ASSERT_TRUE(program->IsValid())
-          << formatter.format(program->Diagnostics());
-    }();
-    gen_ = std::make_unique<GeneratorImpl>(program.get());
-    return *gen_;
-  }
 
-  /// The program built with a call to Build()
-  std::unique_ptr<Program> program;
+    /// The program built with a call to Build()
+    std::unique_ptr<Program> program;
 
- private:
-  std::unique_ptr<GeneratorImpl> gen_;
+  private:
+    std::unique_ptr<GeneratorImpl> gen_;
 };
 using TestHelper = TestHelperBase<testing::Test>;
 

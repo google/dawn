@@ -23,31 +23,31 @@
 
 namespace dawn::native::metal {
 
-    class Device;
+class Device;
 
-    class QuerySet final : public QuerySetBase {
-      public:
-        static ResultOrError<Ref<QuerySet>> Create(Device* device,
-                                                   const QuerySetDescriptor* descriptor);
+class QuerySet final : public QuerySetBase {
+  public:
+    static ResultOrError<Ref<QuerySet>> Create(Device* device,
+                                               const QuerySetDescriptor* descriptor);
 
-        id<MTLBuffer> GetVisibilityBuffer() const;
-        id<MTLCounterSampleBuffer> GetCounterSampleBuffer() const
-            API_AVAILABLE(macos(10.15), ios(14.0));
+    id<MTLBuffer> GetVisibilityBuffer() const;
+    id<MTLCounterSampleBuffer> GetCounterSampleBuffer() const
+        API_AVAILABLE(macos(10.15), ios(14.0));
 
-      private:
-        ~QuerySet() override;
-        using QuerySetBase::QuerySetBase;
-        MaybeError Initialize();
+  private:
+    ~QuerySet() override;
+    using QuerySetBase::QuerySetBase;
+    MaybeError Initialize();
 
-        // Dawn API
-        void DestroyImpl() override;
+    // Dawn API
+    void DestroyImpl() override;
 
-        NSPRef<id<MTLBuffer>> mVisibilityBuffer;
-        // Note that mCounterSampleBuffer cannot be an NSRef because the API_AVAILABLE macros don't
-        // propagate nicely through templates.
-        id<MTLCounterSampleBuffer> mCounterSampleBuffer API_AVAILABLE(macos(10.15),
-                                                                      ios(14.0)) = nullptr;
-    };
+    NSPRef<id<MTLBuffer>> mVisibilityBuffer;
+    // Note that mCounterSampleBuffer cannot be an NSRef because the API_AVAILABLE macros don't
+    // propagate nicely through templates.
+    id<MTLCounterSampleBuffer> mCounterSampleBuffer API_AVAILABLE(macos(10.15),
+                                                                  ios(14.0)) = nullptr;
+};
 
 }  // namespace dawn::native::metal
 

@@ -21,23 +21,23 @@ namespace tint::writer {
 
 /// Base class for the output writers
 class Writer {
- public:
-  virtual ~Writer();
+  public:
+    virtual ~Writer();
 
-  /// @returns the writer error string
-  const std::string& error() const { return error_; }
+    /// @returns the writer error string
+    const std::string& error() const { return error_; }
 
-  /// Converts the module into the desired format
-  /// @returns true on success; false on failure
-  virtual bool Generate() = 0;
+    /// Converts the module into the desired format
+    /// @returns true on success; false on failure
+    virtual bool Generate() = 0;
 
- protected:
-  /// Sets the error string
-  /// @param msg the error message
-  void set_error(const std::string& msg) { error_ = msg; }
+  protected:
+    /// Sets the error string
+    /// @param msg the error message
+    void set_error(const std::string& msg) { error_ = msg; }
 
-  /// An error message, if an error was encountered
-  std::string error_;
+    /// An error message, if an error was encountered
+    std::string error_;
 };
 
 }  // namespace tint::writer

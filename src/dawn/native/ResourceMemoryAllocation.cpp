@@ -17,37 +17,35 @@
 
 namespace dawn::native {
 
-    ResourceMemoryAllocation::ResourceMemoryAllocation()
-        : mOffset(0), mResourceHeap(nullptr), mMappedPointer(nullptr) {
-    }
+ResourceMemoryAllocation::ResourceMemoryAllocation()
+    : mOffset(0), mResourceHeap(nullptr), mMappedPointer(nullptr) {}
 
-    ResourceMemoryAllocation::ResourceMemoryAllocation(const AllocationInfo& info,
-                                                       uint64_t offset,
-                                                       ResourceHeapBase* resourceHeap,
-                                                       uint8_t* mappedPointer)
-        : mInfo(info), mOffset(offset), mResourceHeap(resourceHeap), mMappedPointer(mappedPointer) {
-    }
+ResourceMemoryAllocation::ResourceMemoryAllocation(const AllocationInfo& info,
+                                                   uint64_t offset,
+                                                   ResourceHeapBase* resourceHeap,
+                                                   uint8_t* mappedPointer)
+    : mInfo(info), mOffset(offset), mResourceHeap(resourceHeap), mMappedPointer(mappedPointer) {}
 
-    ResourceHeapBase* ResourceMemoryAllocation::GetResourceHeap() const {
-        ASSERT(mInfo.mMethod != AllocationMethod::kInvalid);
-        return mResourceHeap;
-    }
+ResourceHeapBase* ResourceMemoryAllocation::GetResourceHeap() const {
+    ASSERT(mInfo.mMethod != AllocationMethod::kInvalid);
+    return mResourceHeap;
+}
 
-    uint64_t ResourceMemoryAllocation::GetOffset() const {
-        ASSERT(mInfo.mMethod != AllocationMethod::kInvalid);
-        return mOffset;
-    }
+uint64_t ResourceMemoryAllocation::GetOffset() const {
+    ASSERT(mInfo.mMethod != AllocationMethod::kInvalid);
+    return mOffset;
+}
 
-    AllocationInfo ResourceMemoryAllocation::GetInfo() const {
-        return mInfo;
-    }
+AllocationInfo ResourceMemoryAllocation::GetInfo() const {
+    return mInfo;
+}
 
-    uint8_t* ResourceMemoryAllocation::GetMappedPointer() const {
-        return mMappedPointer;
-    }
+uint8_t* ResourceMemoryAllocation::GetMappedPointer() const {
+    return mMappedPointer;
+}
 
-    void ResourceMemoryAllocation::Invalidate() {
-        mResourceHeap = nullptr;
-        mInfo = {};
-    }
+void ResourceMemoryAllocation::Invalidate() {
+    mResourceHeap = nullptr;
+    mInfo = {};
+}
 }  // namespace dawn::native

@@ -21,19 +21,19 @@
 
 namespace dawn::native::d3d12 {
 
-    class Device;
+class Device;
 
-    class Sampler final : public SamplerBase {
-      public:
-        static Ref<Sampler> Create(Device* device, const SamplerDescriptor* descriptor);
+class Sampler final : public SamplerBase {
+  public:
+    static Ref<Sampler> Create(Device* device, const SamplerDescriptor* descriptor);
 
-        const D3D12_SAMPLER_DESC& GetSamplerDescriptor() const;
+    const D3D12_SAMPLER_DESC& GetSamplerDescriptor() const;
 
-      private:
-        Sampler(Device* device, const SamplerDescriptor* descriptor);
-        ~Sampler() override = default;
-        D3D12_SAMPLER_DESC mSamplerDesc = {};
-    };
+  private:
+    Sampler(Device* device, const SamplerDescriptor* descriptor);
+    ~Sampler() override = default;
+    D3D12_SAMPLER_DESC mSamplerDesc = {};
+};
 
 }  // namespace dawn::native::d3d12
 

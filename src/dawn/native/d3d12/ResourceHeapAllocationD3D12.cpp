@@ -20,24 +20,24 @@
 #include "dawn/native/d3d12/HeapD3D12.h"
 
 namespace dawn::native::d3d12 {
-    ResourceHeapAllocation::ResourceHeapAllocation(const AllocationInfo& info,
-                                                   uint64_t offset,
-                                                   ComPtr<ID3D12Resource> resource,
-                                                   Heap* heap)
-        : ResourceMemoryAllocation(info, offset, heap), mResource(std::move(resource)) {
-        ASSERT((info.mMethod == AllocationMethod::kExternal) == (heap == nullptr));
-    }
+ResourceHeapAllocation::ResourceHeapAllocation(const AllocationInfo& info,
+                                               uint64_t offset,
+                                               ComPtr<ID3D12Resource> resource,
+                                               Heap* heap)
+    : ResourceMemoryAllocation(info, offset, heap), mResource(std::move(resource)) {
+    ASSERT((info.mMethod == AllocationMethod::kExternal) == (heap == nullptr));
+}
 
-    void ResourceHeapAllocation::Invalidate() {
-        ResourceMemoryAllocation::Invalidate();
-        mResource.Reset();
-    }
+void ResourceHeapAllocation::Invalidate() {
+    ResourceMemoryAllocation::Invalidate();
+    mResource.Reset();
+}
 
-    ID3D12Resource* ResourceHeapAllocation::GetD3D12Resource() const {
-        return mResource.Get();
-    }
+ID3D12Resource* ResourceHeapAllocation::GetD3D12Resource() const {
+    return mResource.Get();
+}
 
-    D3D12_GPU_VIRTUAL_ADDRESS ResourceHeapAllocation::GetGPUPointer() const {
-        return mResource->GetGPUVirtualAddress();
-    }
+D3D12_GPU_VIRTUAL_ADDRESS ResourceHeapAllocation::GetGPUPointer() const {
+    return mResource->GetGPUVirtualAddress();
+}
 }  // namespace dawn::native::d3d12

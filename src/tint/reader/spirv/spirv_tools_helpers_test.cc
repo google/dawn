@@ -20,42 +20,38 @@
 namespace tint::reader::spirv::test {
 
 std::vector<uint32_t> Assemble(const std::string& spirv_assembly) {
-  // TODO(dneto): Use ScopedTrace?
+    // TODO(dneto): Use ScopedTrace?
 
-  // (The target environment doesn't affect assembly.
-  spvtools::SpirvTools tools(SPV_ENV_UNIVERSAL_1_0);
-  std::stringstream errors;
-  std::vector<uint32_t> result;
-  tools.SetMessageConsumer([&errors](spv_message_level_t, const char*,
-                                     const spv_position_t& position,
-                                     const char* message) {
-    errors << "assembly error:" << position.line << ":" << position.column
-           << ": " << message;
-  });
+    // (The target environment doesn't affect assembly.
+    spvtools::SpirvTools tools(SPV_ENV_UNIVERSAL_1_0);
+    std::stringstream errors;
+    std::vector<uint32_t> result;
+    tools.SetMessageConsumer([&errors](spv_message_level_t, const char*,
+                                       const spv_position_t& position, const char* message) {
+        errors << "assembly error:" << position.line << ":" << position.column << ": " << message;
+    });
 
-  const auto success = tools.Assemble(
-      spirv_assembly, &result, SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS);
-  EXPECT_TRUE(success) << errors.str();
+    const auto success =
+        tools.Assemble(spirv_assembly, &result, SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS);
+    EXPECT_TRUE(success) << errors.str();
 
-  return result;
+    return result;
 }
 
 std::string Disassemble(const std::vector<uint32_t>& spirv_module) {
-  spvtools::SpirvTools tools(SPV_ENV_UNIVERSAL_1_0);
-  std::stringstream errors;
-  tools.SetMessageConsumer([&errors](spv_message_level_t, const char*,
-                                     const spv_position_t& position,
-                                     const char* message) {
-    errors << "disassmbly error:" << position.line << ":" << position.column
-           << ": " << message;
-  });
+    spvtools::SpirvTools tools(SPV_ENV_UNIVERSAL_1_0);
+    std::stringstream errors;
+    tools.SetMessageConsumer([&errors](spv_message_level_t, const char*,
+                                       const spv_position_t& position, const char* message) {
+        errors << "disassmbly error:" << position.line << ":" << position.column << ": " << message;
+    });
 
-  std::string result;
-  const auto success = tools.Disassemble(
-      spirv_module, &result, SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES);
-  EXPECT_TRUE(success) << errors.str();
+    std::string result;
+    const auto success =
+        tools.Disassemble(spirv_module, &result, SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES);
+    EXPECT_TRUE(success) << errors.str();
 
-  return result;
+    return result;
 }
 
 }  // namespace tint::reader::spirv::test

@@ -19,15 +19,15 @@
 
 namespace dawn::native::metal {
 
-    class Device;
+class Device;
 
-    class Queue final : public QueueBase {
-      public:
-        Queue(Device* device, const QueueDescriptor* descriptor);
+class Queue final : public QueueBase {
+  public:
+    Queue(Device* device, const QueueDescriptor* descriptor);
 
-      private:
-        MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
-    };
+  private:
+    MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
+};
 
 }  // namespace dawn::native::metal
 

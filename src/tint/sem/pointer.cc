@@ -22,36 +22,33 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Pointer);
 
 namespace tint::sem {
 
-Pointer::Pointer(const Type* subtype,
-                 ast::StorageClass storage_class,
-                 ast::Access access)
+Pointer::Pointer(const Type* subtype, ast::StorageClass storage_class, ast::Access access)
     : subtype_(subtype), storage_class_(storage_class), access_(access) {
-  TINT_ASSERT(Semantic, !subtype->Is<Reference>());
-  TINT_ASSERT(Semantic, access != ast::Access::kUndefined);
+    TINT_ASSERT(Semantic, !subtype->Is<Reference>());
+    TINT_ASSERT(Semantic, access != ast::Access::kUndefined);
 }
 
 size_t Pointer::Hash() const {
-  return utils::Hash(TypeInfo::Of<Pointer>().full_hashcode, storage_class_,
-                     subtype_, access_);
+    return utils::Hash(TypeInfo::Of<Pointer>().full_hashcode, storage_class_, subtype_, access_);
 }
 
 bool Pointer::Equals(const sem::Type& other) const {
-  if (auto* o = other.As<Pointer>()) {
-    return o->storage_class_ == storage_class_ && o->subtype_ == subtype_ &&
-           o->access_ == access_;
-  }
-  return false;
+    if (auto* o = other.As<Pointer>()) {
+        return o->storage_class_ == storage_class_ && o->subtype_ == subtype_ &&
+               o->access_ == access_;
+    }
+    return false;
 }
 
 std::string Pointer::FriendlyName(const SymbolTable& symbols) const {
-  std::ostringstream out;
-  out << "ptr<";
-  if (storage_class_ != ast::StorageClass::kNone) {
-    out << storage_class_ << ", ";
-  }
-  out << subtype_->FriendlyName(symbols) << ", " << access_;
-  out << ">";
-  return out.str();
+    std::ostringstream out;
+    out << "ptr<";
+    if (storage_class_ != ast::StorageClass::kNone) {
+        out << storage_class_ << ", ";
+    }
+    out << subtype_->FriendlyName(symbols) << ", " << access_;
+    out << ">";
+    return out.str();
 }
 
 Pointer::Pointer(Pointer&&) = default;

@@ -28,18 +28,18 @@ Sampler::Sampler(Sampler&&) = default;
 Sampler::~Sampler() = default;
 
 size_t Sampler::Hash() const {
-  return utils::Hash(TypeInfo::Of<Sampler>().full_hashcode, kind_);
+    return utils::Hash(TypeInfo::Of<Sampler>().full_hashcode, kind_);
 }
 
 bool Sampler::Equals(const sem::Type& other) const {
-  if (auto* o = other.As<Sampler>()) {
-    return o->kind_ == kind_;
-  }
-  return false;
+    if (auto* o = other.As<Sampler>()) {
+        return o->kind_ == kind_;
+    }
+    return false;
 }
 
 std::string Sampler::FriendlyName(const SymbolTable&) const {
-  return kind_ == ast::SamplerKind::kSampler ? "sampler" : "sampler_comparison";
+    return kind_ == ast::SamplerKind::kSampler ? "sampler" : "sampler_comparison";
 }
 
 }  // namespace tint::sem

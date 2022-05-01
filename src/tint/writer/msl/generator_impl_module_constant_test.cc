@@ -21,39 +21,38 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
-  auto* var =
-      GlobalConst("pos", ty.array<f32, 3>(), array<f32, 3>(1.f, 2.f, 3.f));
+    auto* var = GlobalConst("pos", ty.array<f32, 3>(), array<f32, 3>(1.f, 2.f, 3.f));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
-  EXPECT_EQ(gen.result(), "constant float pos[3] = {1.0f, 2.0f, 3.0f};\n");
+    ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
+    EXPECT_EQ(gen.result(), "constant float pos[3] = {1.0f, 2.0f, 3.0f};\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
-  auto* var = Override("pos", ty.f32(), Expr(3.f),
-                       ast::AttributeList{
-                           Id(23),
-                       });
+    auto* var = Override("pos", ty.f32(), Expr(3.f),
+                         ast::AttributeList{
+                             Id(23),
+                         });
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
-  EXPECT_EQ(gen.result(), "constant float pos [[function_constant(23)]];\n");
+    ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
+    EXPECT_EQ(gen.result(), "constant float pos [[function_constant(23)]];\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_SpecConstant_NoId) {
-  auto* var_a = Override("a", ty.f32(), nullptr,
-                         ast::AttributeList{
-                             Id(0),
-                         });
-  auto* var_b = Override("b", ty.f32(), nullptr);
+    auto* var_a = Override("a", ty.f32(), nullptr,
+                           ast::AttributeList{
+                               Id(0),
+                           });
+    auto* var_b = Override("b", ty.f32(), nullptr);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitProgramConstVariable(var_a)) << gen.error();
-  ASSERT_TRUE(gen.EmitProgramConstVariable(var_b)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(constant float a [[function_constant(0)]];
+    ASSERT_TRUE(gen.EmitProgramConstVariable(var_a)) << gen.error();
+    ASSERT_TRUE(gen.EmitProgramConstVariable(var_b)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(constant float a [[function_constant(0)]];
 constant float b [[function_constant(1)]];
 )");
 }

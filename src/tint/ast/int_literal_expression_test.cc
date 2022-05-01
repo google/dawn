@@ -20,13 +20,13 @@ namespace {
 using IntLiteralExpressionTest = TestHelper;
 
 TEST_F(IntLiteralExpressionTest, Sint_IsInt) {
-  auto* i = create<SintLiteralExpression>(47);
-  ASSERT_TRUE(i->Is<IntLiteralExpression>());
+    auto* i = create<SintLiteralExpression>(47);
+    ASSERT_TRUE(i->Is<IntLiteralExpression>());
 }
 
 TEST_F(IntLiteralExpressionTest, Uint_IsInt) {
-  auto* i = create<UintLiteralExpression>(42);
-  EXPECT_TRUE(i->Is<IntLiteralExpression>());
+    auto* i = create<UintLiteralExpression>(42);
+    EXPECT_TRUE(i->Is<IntLiteralExpression>());
 }
 
 }  // namespace

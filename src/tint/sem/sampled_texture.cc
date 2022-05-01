@@ -23,7 +23,7 @@ namespace tint::sem {
 
 SampledTexture::SampledTexture(ast::TextureDimension dim, const Type* type)
     : Base(dim), type_(type) {
-  TINT_ASSERT(Semantic, type_);
+    TINT_ASSERT(Semantic, type_);
 }
 
 SampledTexture::SampledTexture(SampledTexture&&) = default;
@@ -31,21 +31,20 @@ SampledTexture::SampledTexture(SampledTexture&&) = default;
 SampledTexture::~SampledTexture() = default;
 
 size_t SampledTexture::Hash() const {
-  return utils::Hash(TypeInfo::Of<SampledTexture>().full_hashcode, dim(),
-                     type_);
+    return utils::Hash(TypeInfo::Of<SampledTexture>().full_hashcode, dim(), type_);
 }
 
 bool SampledTexture::Equals(const sem::Type& other) const {
-  if (auto* o = other.As<SampledTexture>()) {
-    return o->dim() == dim() && o->type_ == type_;
-  }
-  return false;
+    if (auto* o = other.As<SampledTexture>()) {
+        return o->dim() == dim() && o->type_ == type_;
+    }
+    return false;
 }
 
 std::string SampledTexture::FriendlyName(const SymbolTable& symbols) const {
-  std::ostringstream out;
-  out << "texture_" << dim() << "<" << type_->FriendlyName(symbols) << ">";
-  return out.str();
+    std::ostringstream out;
+    out << "texture_" << dim() << "<" << type_->FriendlyName(symbols) << ">";
+    return out.str();
 }
 
 }  // namespace tint::sem

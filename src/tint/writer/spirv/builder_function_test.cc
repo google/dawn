@@ -22,13 +22,13 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Function_Empty) {
-  Func("a_func", {}, ty.void_(), ast::StatementList{}, ast::AttributeList{});
+    Func("a_func", {}, ty.void_(), ast::StatementList{}, ast::AttributeList{});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  auto* func = program->AST().Functions()[0];
-  ASSERT_TRUE(b.GenerateFunction(func));
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
+    auto* func = program->AST().Functions()[0];
+    ASSERT_TRUE(b.GenerateFunction(func));
+    EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %3 = OpFunction %2 None %1
@@ -39,17 +39,17 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_Return) {
-  Func("a_func", {}, ty.void_(),
-       ast::StatementList{
-           Return(),
-       },
-       ast::AttributeList{});
+    Func("a_func", {}, ty.void_(),
+         ast::StatementList{
+             Return(),
+         },
+         ast::AttributeList{});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  auto* func = program->AST().Functions()[0];
-  ASSERT_TRUE(b.GenerateFunction(func));
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
+    auto* func = program->AST().Functions()[0];
+    ASSERT_TRUE(b.GenerateFunction(func));
+    EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %3 = OpFunction %2 None %1
@@ -60,19 +60,18 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
-  Global("a", ty.f32(), ast::StorageClass::kPrivate);
+    Global("a", ty.f32(), ast::StorageClass::kPrivate);
 
-  Func("a_func", {}, ty.f32(), ast::StatementList{Return("a")},
-       ast::AttributeList{});
+    Func("a_func", {}, ty.f32(), ast::StatementList{Return("a")}, ast::AttributeList{});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  auto* var_a = program->AST().GlobalVariables()[0];
-  auto* func = program->AST().Functions()[0];
+    auto* var_a = program->AST().GlobalVariables()[0];
+    auto* func = program->AST().Functions()[0];
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "a"
+    ASSERT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "a"
 OpName %6 "a_func"
 %3 = OpTypeFloat 32
 %2 = OpTypePointer Private %3
@@ -88,17 +87,17 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_Discard) {
-  Func("a_func", {}, ty.void_(),
-       ast::StatementList{
-           create<ast::DiscardStatement>(),
-       },
-       ast::AttributeList{});
+    Func("a_func", {}, ty.void_(),
+         ast::StatementList{
+             create<ast::DiscardStatement>(),
+         },
+         ast::AttributeList{});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  auto* func = program->AST().Functions()[0];
-  ASSERT_TRUE(b.GenerateFunction(func));
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
+    auto* func = program->AST().Functions()[0];
+    ASSERT_TRUE(b.GenerateFunction(func));
+    EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %3 = OpFunction %2 None %1
@@ -109,16 +108,15 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_WithParams) {
-  ast::VariableList params = {Param("a", ty.f32()), Param("b", ty.i32())};
+    ast::VariableList params = {Param("a", ty.f32()), Param("b", ty.i32())};
 
-  Func("a_func", params, ty.f32(), ast::StatementList{Return("a")},
-       ast::AttributeList{});
+    Func("a_func", params, ty.f32(), ast::StatementList{Return("a")}, ast::AttributeList{});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  auto* func = program->AST().Functions()[0];
-  ASSERT_TRUE(b.GenerateFunction(func));
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "a_func"
+    auto* func = program->AST().Functions()[0];
+    ASSERT_TRUE(b.GenerateFunction(func));
+    EXPECT_EQ(DumpBuilder(b), R"(OpName %4 "a_func"
 OpName %5 "a"
 OpName %6 "b"
 %2 = OpTypeFloat 32
@@ -134,17 +132,17 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_WithBody) {
-  Func("a_func", {}, ty.void_(),
-       ast::StatementList{
-           Return(),
-       },
-       ast::AttributeList{});
+    Func("a_func", {}, ty.void_(),
+         ast::StatementList{
+             Return(),
+         },
+         ast::AttributeList{});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  auto* func = program->AST().Functions()[0];
-  ASSERT_TRUE(b.GenerateFunction(func));
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
+    auto* func = program->AST().Functions()[0];
+    ASSERT_TRUE(b.GenerateFunction(func));
+    EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %3 = OpFunction %2 None %1
@@ -155,87 +153,81 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, FunctionType) {
-  Func("a_func", {}, ty.void_(), ast::StatementList{}, ast::AttributeList{});
+    Func("a_func", {}, ty.void_(), ast::StatementList{}, ast::AttributeList{});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  auto* func = program->AST().Functions()[0];
-  ASSERT_TRUE(b.GenerateFunction(func));
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+    auto* func = program->AST().Functions()[0];
+    ASSERT_TRUE(b.GenerateFunction(func));
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
 )");
 }
 
 TEST_F(BuilderTest, FunctionType_DeDuplicate) {
-  auto* func1 = Func("a_func", {}, ty.void_(), ast::StatementList{},
-                     ast::AttributeList{});
-  auto* func2 = Func("b_func", {}, ty.void_(), ast::StatementList{},
-                     ast::AttributeList{});
+    auto* func1 = Func("a_func", {}, ty.void_(), ast::StatementList{}, ast::AttributeList{});
+    auto* func2 = Func("b_func", {}, ty.void_(), ast::StatementList{}, ast::AttributeList{});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func1));
-  ASSERT_TRUE(b.GenerateFunction(func2));
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+    ASSERT_TRUE(b.GenerateFunction(func1));
+    ASSERT_TRUE(b.GenerateFunction(func2));
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
 )");
 }
 
 // https://crbug.com/tint/297
 TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
-  // struct Data {
-  //   d : f32;
-  // };
-  // @binding(0) @group(0) var<storage> data : Data;
-  //
-  // @stage(compute) @workgroup_size(1)
-  // fn a() {
-  //   return;
-  // }
-  //
-  // @stage(compute) @workgroup_size(1)
-  // fn b() {
-  //   return;
-  // }
+    // struct Data {
+    //   d : f32;
+    // };
+    // @binding(0) @group(0) var<storage> data : Data;
+    //
+    // @stage(compute) @workgroup_size(1)
+    // fn a() {
+    //   return;
+    // }
+    //
+    // @stage(compute) @workgroup_size(1)
+    // fn b() {
+    //   return;
+    // }
 
-  auto* s = Structure("Data", {Member("d", ty.f32())});
+    auto* s = Structure("Data", {Member("d", ty.f32())});
 
-  Global("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-         ast::AttributeList{
-             create<ast::BindingAttribute>(0),
-             create<ast::GroupAttribute>(0),
-         });
+    Global("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+           ast::AttributeList{
+               create<ast::BindingAttribute>(0),
+               create<ast::GroupAttribute>(0),
+           });
 
-  {
-    auto* var = Var("v", ty.f32(), ast::StorageClass::kNone,
-                    MemberAccessor("data", "d"));
+    {
+        auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("data", "d"));
 
-    Func("a", ast::VariableList{}, ty.void_(),
-         ast::StatementList{
-             Decl(var),
-             Return(),
-         },
-         ast::AttributeList{Stage(ast::PipelineStage::kCompute),
-                            WorkgroupSize(1)});
-  }
+        Func("a", ast::VariableList{}, ty.void_(),
+             ast::StatementList{
+                 Decl(var),
+                 Return(),
+             },
+             ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+    }
 
-  {
-    auto* var = Var("v", ty.f32(), ast::StorageClass::kNone,
-                    MemberAccessor("data", "d"));
+    {
+        auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("data", "d"));
 
-    Func("b", ast::VariableList{}, ty.void_(),
-         ast::StatementList{
-             Decl(var),
-             Return(),
-         },
-         ast::AttributeList{Stage(ast::PipelineStage::kCompute),
-                            WorkgroupSize(1)});
-  }
+        Func("b", ast::VariableList{}, ty.void_(),
+             ast::StatementList{
+                 Decl(var),
+                 Return(),
+             },
+             ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+    }
 
-  spirv::Builder& b = SanitizeAndBuild();
+    spirv::Builder& b = SanitizeAndBuild();
 
-  ASSERT_TRUE(b.Build());
-  EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
+    ASSERT_TRUE(b.Build());
+    EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
 OpEntryPoint GLCompute %7 "a"
 OpEntryPoint GLCompute %17 "b"

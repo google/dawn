@@ -28,16 +28,16 @@ namespace tint::bench {
 
 /// Error indicates an operation did not complete successfully.
 struct Error {
-  /// The error message.
-  std::string msg;
+    /// The error message.
+    std::string msg;
 };
 
 /// ProgramAndFile holds a Program and a Source::File.
 struct ProgramAndFile {
-  /// The tint program parsed from file.
-  Program program;
-  /// The source file
-  Source::File file;
+    /// The tint program parsed from file.
+    Program program;
+    /// The source file
+    Source::File file;
 };
 
 /// LoadInputFile attempts to load a benchmark input file with the given file
@@ -53,24 +53,23 @@ std::variant<Source::File, Error> LoadInputFile(std::string name);
 std::variant<ProgramAndFile, Error> LoadProgram(std::string name);
 
 /// Declares a benchmark with the given function and WGSL file name
-#define TINT_BENCHMARK_WGSL_PROGRAM(FUNC, WGSL_NAME) \
-  BENCHMARK_CAPTURE(FUNC, WGSL_NAME, WGSL_NAME);
+#define TINT_BENCHMARK_WGSL_PROGRAM(FUNC, WGSL_NAME) BENCHMARK_CAPTURE(FUNC, WGSL_NAME, WGSL_NAME);
 
 /// Declares a set of benchmarks for the given function using a list of WGSL
 /// files in `<tint>/test/benchmark`.
-#define TINT_BENCHMARK_WGSL_PROGRAMS(FUNC)                                 \
-  TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "animometer.wgsl");                    \
-  TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "bloom-vertical-blur.wgsl");           \
-  TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "cluster-lights.wgsl");                \
-  TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "empty.wgsl");                         \
-  TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "metaball-isosurface.wgsl");           \
-  TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "particles.wgsl");                     \
-  TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "shadow-fragment.wgsl");               \
-  TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "simple-compute.wgsl");                \
-  TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "simple-fragment.wgsl");               \
-  TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "simple-vertex.wgsl");                 \
-  TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "skinned-shadowed-pbr-fragment.wgsl"); \
-  TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "skinned-shadowed-pbr-vertex.wgsl");
+#define TINT_BENCHMARK_WGSL_PROGRAMS(FUNC)                                   \
+    TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "animometer.wgsl");                    \
+    TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "bloom-vertical-blur.wgsl");           \
+    TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "cluster-lights.wgsl");                \
+    TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "empty.wgsl");                         \
+    TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "metaball-isosurface.wgsl");           \
+    TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "particles.wgsl");                     \
+    TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "shadow-fragment.wgsl");               \
+    TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "simple-compute.wgsl");                \
+    TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "simple-fragment.wgsl");               \
+    TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "simple-vertex.wgsl");                 \
+    TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "skinned-shadowed-pbr-fragment.wgsl"); \
+    TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "skinned-shadowed-pbr-vertex.wgsl");
 
 }  // namespace tint::bench
 

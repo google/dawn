@@ -22,7 +22,7 @@ namespace tint::ast {
 namespace {
 
 bool IsValidDepthDimension(TextureDimension dim) {
-  return dim == TextureDimension::k2d;
+    return dim == TextureDimension::k2d;
 }
 
 }  // namespace
@@ -31,24 +31,22 @@ DepthMultisampledTexture::DepthMultisampledTexture(ProgramID pid,
                                                    const Source& src,
                                                    TextureDimension d)
     : Base(pid, src, d) {
-  TINT_ASSERT(AST, IsValidDepthDimension(dim));
+    TINT_ASSERT(AST, IsValidDepthDimension(dim));
 }
 
-DepthMultisampledTexture::DepthMultisampledTexture(DepthMultisampledTexture&&) =
-    default;
+DepthMultisampledTexture::DepthMultisampledTexture(DepthMultisampledTexture&&) = default;
 
 DepthMultisampledTexture::~DepthMultisampledTexture() = default;
 
 std::string DepthMultisampledTexture::FriendlyName(const SymbolTable&) const {
-  std::ostringstream out;
-  out << "texture_depth_multisampled_" << dim;
-  return out.str();
+    std::ostringstream out;
+    out << "texture_depth_multisampled_" << dim;
+    return out.str();
 }
 
-const DepthMultisampledTexture* DepthMultisampledTexture::Clone(
-    CloneContext* ctx) const {
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<DepthMultisampledTexture>(src, dim);
+const DepthMultisampledTexture* DepthMultisampledTexture::Clone(CloneContext* ctx) const {
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<DepthMultisampledTexture>(src, dim);
 }
 
 }  // namespace tint::ast

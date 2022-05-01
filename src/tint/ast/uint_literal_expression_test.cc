@@ -20,9 +20,9 @@ namespace {
 using UintLiteralExpressionTest = TestHelper;
 
 TEST_F(UintLiteralExpressionTest, Value) {
-  auto* u = create<UintLiteralExpression>(47);
-  ASSERT_TRUE(u->Is<UintLiteralExpression>());
-  EXPECT_EQ(u->value, 47u);
+    auto* u = create<UintLiteralExpression>(47);
+    ASSERT_TRUE(u->Is<UintLiteralExpression>());
+    EXPECT_EQ(u->value, 47u);
 }
 
 }  // namespace

@@ -19,7 +19,7 @@
 
 namespace dawn::wire {
 
-    bool IsFeatureSupported(WGPUFeatureName feature);
+bool IsFeatureSupported(WGPUFeatureName feature);
 
 }  // namespace dawn::wire
 

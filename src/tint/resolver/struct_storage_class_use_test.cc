@@ -26,167 +26,156 @@ namespace {
 using ResolverStorageClassUseTest = ResolverTest;
 
 TEST_F(ResolverStorageClassUseTest, UnreachableStruct) {
-  auto* s = Structure("S", {Member("a", ty.f32())});
+    auto* s = Structure("S", {Member("a", ty.f32())});
 
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* sem = TypeOf(s)->As<sem::Struct>();
-  ASSERT_NE(sem, nullptr);
-  EXPECT_TRUE(sem->StorageClassUsage().empty());
+    auto* sem = TypeOf(s)->As<sem::Struct>();
+    ASSERT_NE(sem, nullptr);
+    EXPECT_TRUE(sem->StorageClassUsage().empty());
 }
 
 TEST_F(ResolverStorageClassUseTest, StructReachableFromParameter) {
-  auto* s = Structure("S", {Member("a", ty.f32())});
+    auto* s = Structure("S", {Member("a", ty.f32())});
 
-  Func("f", {Param("param", ty.Of(s))}, ty.void_(), {}, {});
+    Func("f", {Param("param", ty.Of(s))}, ty.void_(), {}, {});
 
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* sem = TypeOf(s)->As<sem::Struct>();
-  ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(sem->StorageClassUsage(),
-              UnorderedElementsAre(ast::StorageClass::kNone));
+    auto* sem = TypeOf(s)->As<sem::Struct>();
+    ASSERT_NE(sem, nullptr);
+    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kNone));
 }
 
 TEST_F(ResolverStorageClassUseTest, StructReachableFromReturnType) {
-  auto* s = Structure("S", {Member("a", ty.f32())});
+    auto* s = Structure("S", {Member("a", ty.f32())});
 
-  Func("f", {}, ty.Of(s), {Return(Construct(ty.Of(s)))}, {});
+    Func("f", {}, ty.Of(s), {Return(Construct(ty.Of(s)))}, {});
 
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* sem = TypeOf(s)->As<sem::Struct>();
-  ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(sem->StorageClassUsage(),
-              UnorderedElementsAre(ast::StorageClass::kNone));
+    auto* sem = TypeOf(s)->As<sem::Struct>();
+    ASSERT_NE(sem, nullptr);
+    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kNone));
 }
 
 TEST_F(ResolverStorageClassUseTest, StructReachableFromGlobal) {
-  auto* s = Structure("S", {Member("a", ty.f32())});
+    auto* s = Structure("S", {Member("a", ty.f32())});
 
-  Global("g", ty.Of(s), ast::StorageClass::kPrivate);
+    Global("g", ty.Of(s), ast::StorageClass::kPrivate);
 
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* sem = TypeOf(s)->As<sem::Struct>();
-  ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(sem->StorageClassUsage(),
-              UnorderedElementsAre(ast::StorageClass::kPrivate));
+    auto* sem = TypeOf(s)->As<sem::Struct>();
+    ASSERT_NE(sem, nullptr);
+    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kPrivate));
 }
 
 TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalAlias) {
-  auto* s = Structure("S", {Member("a", ty.f32())});
-  auto* a = Alias("A", ty.Of(s));
-  Global("g", ty.Of(a), ast::StorageClass::kPrivate);
+    auto* s = Structure("S", {Member("a", ty.f32())});
+    auto* a = Alias("A", ty.Of(s));
+    Global("g", ty.Of(a), ast::StorageClass::kPrivate);
 
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* sem = TypeOf(s)->As<sem::Struct>();
-  ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(sem->StorageClassUsage(),
-              UnorderedElementsAre(ast::StorageClass::kPrivate));
+    auto* sem = TypeOf(s)->As<sem::Struct>();
+    ASSERT_NE(sem, nullptr);
+    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kPrivate));
 }
 
 TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalStruct) {
-  auto* s = Structure("S", {Member("a", ty.f32())});
-  auto* o = Structure("O", {Member("a", ty.Of(s))});
-  Global("g", ty.Of(o), ast::StorageClass::kPrivate);
+    auto* s = Structure("S", {Member("a", ty.f32())});
+    auto* o = Structure("O", {Member("a", ty.Of(s))});
+    Global("g", ty.Of(o), ast::StorageClass::kPrivate);
 
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* sem = TypeOf(s)->As<sem::Struct>();
-  ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(sem->StorageClassUsage(),
-              UnorderedElementsAre(ast::StorageClass::kPrivate));
+    auto* sem = TypeOf(s)->As<sem::Struct>();
+    ASSERT_NE(sem, nullptr);
+    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kPrivate));
 }
 
 TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalArray) {
-  auto* s = Structure("S", {Member("a", ty.f32())});
-  auto* a = ty.array(ty.Of(s), 3);
-  Global("g", a, ast::StorageClass::kPrivate);
+    auto* s = Structure("S", {Member("a", ty.f32())});
+    auto* a = ty.array(ty.Of(s), 3);
+    Global("g", a, ast::StorageClass::kPrivate);
 
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* sem = TypeOf(s)->As<sem::Struct>();
-  ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(sem->StorageClassUsage(),
-              UnorderedElementsAre(ast::StorageClass::kPrivate));
+    auto* sem = TypeOf(s)->As<sem::Struct>();
+    ASSERT_NE(sem, nullptr);
+    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kPrivate));
 }
 
 TEST_F(ResolverStorageClassUseTest, StructReachableFromLocal) {
-  auto* s = Structure("S", {Member("a", ty.f32())});
+    auto* s = Structure("S", {Member("a", ty.f32())});
 
-  WrapInFunction(Var("g", ty.Of(s)));
+    WrapInFunction(Var("g", ty.Of(s)));
 
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* sem = TypeOf(s)->As<sem::Struct>();
-  ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(sem->StorageClassUsage(),
-              UnorderedElementsAre(ast::StorageClass::kFunction));
+    auto* sem = TypeOf(s)->As<sem::Struct>();
+    ASSERT_NE(sem, nullptr);
+    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kFunction));
 }
 
 TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalAlias) {
-  auto* s = Structure("S", {Member("a", ty.f32())});
-  auto* a = Alias("A", ty.Of(s));
-  WrapInFunction(Var("g", ty.Of(a)));
+    auto* s = Structure("S", {Member("a", ty.f32())});
+    auto* a = Alias("A", ty.Of(s));
+    WrapInFunction(Var("g", ty.Of(a)));
 
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* sem = TypeOf(s)->As<sem::Struct>();
-  ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(sem->StorageClassUsage(),
-              UnorderedElementsAre(ast::StorageClass::kFunction));
+    auto* sem = TypeOf(s)->As<sem::Struct>();
+    ASSERT_NE(sem, nullptr);
+    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kFunction));
 }
 
 TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalStruct) {
-  auto* s = Structure("S", {Member("a", ty.f32())});
-  auto* o = Structure("O", {Member("a", ty.Of(s))});
-  WrapInFunction(Var("g", ty.Of(o)));
+    auto* s = Structure("S", {Member("a", ty.f32())});
+    auto* o = Structure("O", {Member("a", ty.Of(s))});
+    WrapInFunction(Var("g", ty.Of(o)));
 
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* sem = TypeOf(s)->As<sem::Struct>();
-  ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(sem->StorageClassUsage(),
-              UnorderedElementsAre(ast::StorageClass::kFunction));
+    auto* sem = TypeOf(s)->As<sem::Struct>();
+    ASSERT_NE(sem, nullptr);
+    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kFunction));
 }
 
 TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalArray) {
-  auto* s = Structure("S", {Member("a", ty.f32())});
-  auto* a = ty.array(ty.Of(s), 3);
-  WrapInFunction(Var("g", a));
+    auto* s = Structure("S", {Member("a", ty.f32())});
+    auto* a = ty.array(ty.Of(s), 3);
+    WrapInFunction(Var("g", a));
 
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* sem = TypeOf(s)->As<sem::Struct>();
-  ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(sem->StorageClassUsage(),
-              UnorderedElementsAre(ast::StorageClass::kFunction));
+    auto* sem = TypeOf(s)->As<sem::Struct>();
+    ASSERT_NE(sem, nullptr);
+    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kFunction));
 }
 
 TEST_F(ResolverStorageClassUseTest, StructMultipleStorageClassUses) {
-  auto* s = Structure("S", {Member("a", ty.f32())});
-  Global("x", ty.Of(s), ast::StorageClass::kUniform,
-         ast::AttributeList{
-             create<ast::BindingAttribute>(0),
-             create<ast::GroupAttribute>(0),
-         });
-  Global("y", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-         ast::AttributeList{
-             create<ast::BindingAttribute>(1),
-             create<ast::GroupAttribute>(0),
-         });
-  WrapInFunction(Var("g", ty.Of(s)));
+    auto* s = Structure("S", {Member("a", ty.f32())});
+    Global("x", ty.Of(s), ast::StorageClass::kUniform,
+           ast::AttributeList{
+               create<ast::BindingAttribute>(0),
+               create<ast::GroupAttribute>(0),
+           });
+    Global("y", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+           ast::AttributeList{
+               create<ast::BindingAttribute>(1),
+               create<ast::GroupAttribute>(0),
+           });
+    WrapInFunction(Var("g", ty.Of(s)));
 
-  ASSERT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* sem = TypeOf(s)->As<sem::Struct>();
-  ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(sem->StorageClassUsage(),
-              UnorderedElementsAre(ast::StorageClass::kUniform,
-                                   ast::StorageClass::kStorage,
-                                   ast::StorageClass::kFunction));
+    auto* sem = TypeOf(s)->As<sem::Struct>();
+    ASSERT_NE(sem, nullptr);
+    EXPECT_THAT(sem->StorageClassUsage(),
+                UnorderedElementsAre(ast::StorageClass::kUniform, ast::StorageClass::kStorage,
+                                     ast::StorageClass::kFunction));
 }
 
 }  // namespace

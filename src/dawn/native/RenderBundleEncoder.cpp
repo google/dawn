@@ -28,147 +28,144 @@
 
 namespace dawn::native {
 
-    MaybeError ValidateColorAttachmentFormat(const DeviceBase* device,
-                                             wgpu::TextureFormat textureFormat) {
-        DAWN_TRY(ValidateTextureFormat(textureFormat));
-        const Format* format = nullptr;
-        DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
-        DAWN_INVALID_IF(!format->IsColor() || !format->isRenderable,
-                        "Texture format %s is not color renderable.", textureFormat);
-        return {};
+MaybeError ValidateColorAttachmentFormat(const DeviceBase* device,
+                                         wgpu::TextureFormat textureFormat) {
+    DAWN_TRY(ValidateTextureFormat(textureFormat));
+    const Format* format = nullptr;
+    DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
+    DAWN_INVALID_IF(!format->IsColor() || !format->isRenderable,
+                    "Texture format %s is not color renderable.", textureFormat);
+    return {};
+}
+
+MaybeError ValidateDepthStencilAttachmentFormat(const DeviceBase* device,
+                                                wgpu::TextureFormat textureFormat,
+                                                bool depthReadOnly,
+                                                bool stencilReadOnly) {
+    DAWN_TRY(ValidateTextureFormat(textureFormat));
+    const Format* format = nullptr;
+    DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
+    DAWN_INVALID_IF(!format->HasDepthOrStencil() || !format->isRenderable,
+                    "Texture format %s is not depth/stencil renderable.", textureFormat);
+
+    DAWN_INVALID_IF(
+        format->HasDepth() && format->HasStencil() && depthReadOnly != stencilReadOnly,
+        "depthReadOnly (%u) and stencilReadOnly (%u) must be the same when format %s has "
+        "both depth and stencil aspects.",
+        depthReadOnly, stencilReadOnly, textureFormat);
+
+    return {};
+}
+
+MaybeError ValidateRenderBundleEncoderDescriptor(const DeviceBase* device,
+                                                 const RenderBundleEncoderDescriptor* descriptor) {
+    DAWN_INVALID_IF(!IsValidSampleCount(descriptor->sampleCount),
+                    "Sample count (%u) is not supported.", descriptor->sampleCount);
+
+    DAWN_INVALID_IF(descriptor->colorFormatsCount > kMaxColorAttachments,
+                    "Color formats count (%u) exceeds maximum number of color attachements (%u).",
+                    descriptor->colorFormatsCount, kMaxColorAttachments);
+
+    bool allColorFormatsUndefined = true;
+    for (uint32_t i = 0; i < descriptor->colorFormatsCount; ++i) {
+        wgpu::TextureFormat format = descriptor->colorFormats[i];
+        if (format != wgpu::TextureFormat::Undefined) {
+            DAWN_TRY_CONTEXT(ValidateColorAttachmentFormat(device, format),
+                             "validating colorFormats[%u]", i);
+            allColorFormatsUndefined = false;
+        }
     }
 
-    MaybeError ValidateDepthStencilAttachmentFormat(const DeviceBase* device,
-                                                    wgpu::TextureFormat textureFormat,
-                                                    bool depthReadOnly,
-                                                    bool stencilReadOnly) {
-        DAWN_TRY(ValidateTextureFormat(textureFormat));
-        const Format* format = nullptr;
-        DAWN_TRY_ASSIGN(format, device->GetInternalFormat(textureFormat));
-        DAWN_INVALID_IF(!format->HasDepthOrStencil() || !format->isRenderable,
-                        "Texture format %s is not depth/stencil renderable.", textureFormat);
-
+    if (descriptor->depthStencilFormat != wgpu::TextureFormat::Undefined) {
+        DAWN_TRY_CONTEXT(ValidateDepthStencilAttachmentFormat(
+                             device, descriptor->depthStencilFormat, descriptor->depthReadOnly,
+                             descriptor->stencilReadOnly),
+                         "validating depthStencilFormat");
+    } else {
         DAWN_INVALID_IF(
-            format->HasDepth() && format->HasStencil() && depthReadOnly != stencilReadOnly,
-            "depthReadOnly (%u) and stencilReadOnly (%u) must be the same when format %s has "
-            "both depth and stencil aspects.",
-            depthReadOnly, stencilReadOnly, textureFormat);
-
-        return {};
+            allColorFormatsUndefined,
+            "No color or depthStencil attachments specified. At least one is required.");
     }
 
-    MaybeError ValidateRenderBundleEncoderDescriptor(
-        const DeviceBase* device,
-        const RenderBundleEncoderDescriptor* descriptor) {
-        DAWN_INVALID_IF(!IsValidSampleCount(descriptor->sampleCount),
-                        "Sample count (%u) is not supported.", descriptor->sampleCount);
+    return {};
+}
 
-        DAWN_INVALID_IF(
-            descriptor->colorFormatsCount > kMaxColorAttachments,
-            "Color formats count (%u) exceeds maximum number of color attachements (%u).",
-            descriptor->colorFormatsCount, kMaxColorAttachments);
+RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device,
+                                         const RenderBundleEncoderDescriptor* descriptor)
+    : RenderEncoderBase(device,
+                        descriptor->label,
+                        &mBundleEncodingContext,
+                        device->GetOrCreateAttachmentState(descriptor),
+                        descriptor->depthReadOnly,
+                        descriptor->stencilReadOnly),
+      mBundleEncodingContext(device, this) {
+    TrackInDevice();
+}
 
-        bool allColorFormatsUndefined = true;
-        for (uint32_t i = 0; i < descriptor->colorFormatsCount; ++i) {
-            wgpu::TextureFormat format = descriptor->colorFormats[i];
-            if (format != wgpu::TextureFormat::Undefined) {
-                DAWN_TRY_CONTEXT(ValidateColorAttachmentFormat(device, format),
-                                 "validating colorFormats[%u]", i);
-                allColorFormatsUndefined = false;
-            }
-        }
+RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag)
+    : RenderEncoderBase(device, &mBundleEncodingContext, errorTag),
+      mBundleEncodingContext(device, this) {}
 
-        if (descriptor->depthStencilFormat != wgpu::TextureFormat::Undefined) {
-            DAWN_TRY_CONTEXT(ValidateDepthStencilAttachmentFormat(
-                                 device, descriptor->depthStencilFormat, descriptor->depthReadOnly,
-                                 descriptor->stencilReadOnly),
-                             "validating depthStencilFormat");
-        } else {
-            DAWN_INVALID_IF(
-                allColorFormatsUndefined,
-                "No color or depthStencil attachments specified. At least one is required.");
-        }
+void RenderBundleEncoder::DestroyImpl() {
+    RenderEncoderBase::DestroyImpl();
+    mBundleEncodingContext.Destroy();
+}
 
-        return {};
+// static
+Ref<RenderBundleEncoder> RenderBundleEncoder::Create(
+    DeviceBase* device,
+    const RenderBundleEncoderDescriptor* descriptor) {
+    return AcquireRef(new RenderBundleEncoder(device, descriptor));
+}
+
+// static
+RenderBundleEncoder* RenderBundleEncoder::MakeError(DeviceBase* device) {
+    return new RenderBundleEncoder(device, ObjectBase::kError);
+}
+
+ObjectType RenderBundleEncoder::GetType() const {
+    return ObjectType::RenderBundleEncoder;
+}
+
+CommandIterator RenderBundleEncoder::AcquireCommands() {
+    return mBundleEncodingContext.AcquireCommands();
+}
+
+RenderBundleBase* RenderBundleEncoder::APIFinish(const RenderBundleDescriptor* descriptor) {
+    RenderBundleBase* result = nullptr;
+
+    if (GetDevice()->ConsumedError(FinishImpl(descriptor), &result, "calling %s.Finish(%s).", this,
+                                   descriptor)) {
+        return RenderBundleBase::MakeError(GetDevice());
     }
 
-    RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device,
-                                             const RenderBundleEncoderDescriptor* descriptor)
-        : RenderEncoderBase(device,
-                            descriptor->label,
-                            &mBundleEncodingContext,
-                            device->GetOrCreateAttachmentState(descriptor),
-                            descriptor->depthReadOnly,
-                            descriptor->stencilReadOnly),
-          mBundleEncodingContext(device, this) {
-        TrackInDevice();
-    }
+    return result;
+}
 
-    RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag)
-        : RenderEncoderBase(device, &mBundleEncodingContext, errorTag),
-          mBundleEncodingContext(device, this) {
-    }
+ResultOrError<RenderBundleBase*> RenderBundleEncoder::FinishImpl(
+    const RenderBundleDescriptor* descriptor) {
+    // Even if mBundleEncodingContext.Finish() validation fails, calling it will mutate the
+    // internal state of the encoding context. Subsequent calls to encode commands will generate
+    // errors.
+    DAWN_TRY(mBundleEncodingContext.Finish());
 
-    void RenderBundleEncoder::DestroyImpl() {
-        RenderEncoderBase::DestroyImpl();
-        mBundleEncodingContext.Destroy();
-    }
-
-    // static
-    Ref<RenderBundleEncoder> RenderBundleEncoder::Create(
-        DeviceBase* device,
-        const RenderBundleEncoderDescriptor* descriptor) {
-        return AcquireRef(new RenderBundleEncoder(device, descriptor));
-    }
-
-    // static
-    RenderBundleEncoder* RenderBundleEncoder::MakeError(DeviceBase* device) {
-        return new RenderBundleEncoder(device, ObjectBase::kError);
-    }
-
-    ObjectType RenderBundleEncoder::GetType() const {
-        return ObjectType::RenderBundleEncoder;
-    }
-
-    CommandIterator RenderBundleEncoder::AcquireCommands() {
-        return mBundleEncodingContext.AcquireCommands();
-    }
-
-    RenderBundleBase* RenderBundleEncoder::APIFinish(const RenderBundleDescriptor* descriptor) {
-        RenderBundleBase* result = nullptr;
-
-        if (GetDevice()->ConsumedError(FinishImpl(descriptor), &result, "calling %s.Finish(%s).",
-                                       this, descriptor)) {
-            return RenderBundleBase::MakeError(GetDevice());
-        }
-
-        return result;
-    }
-
-    ResultOrError<RenderBundleBase*> RenderBundleEncoder::FinishImpl(
-        const RenderBundleDescriptor* descriptor) {
-        // Even if mBundleEncodingContext.Finish() validation fails, calling it will mutate the
-        // internal state of the encoding context. Subsequent calls to encode commands will generate
-        // errors.
-        DAWN_TRY(mBundleEncodingContext.Finish());
-
-        RenderPassResourceUsage usages = mUsageTracker.AcquireResourceUsage();
-        if (IsValidationEnabled()) {
-            DAWN_TRY(GetDevice()->ValidateObject(this));
-            DAWN_TRY(ValidateProgrammableEncoderEnd());
-            DAWN_TRY(ValidateFinish(usages));
-        }
-
-        return new RenderBundleBase(this, descriptor, AcquireAttachmentState(), IsDepthReadOnly(),
-                                    IsStencilReadOnly(), std::move(usages),
-                                    std::move(mIndirectDrawMetadata));
-    }
-
-    MaybeError RenderBundleEncoder::ValidateFinish(const RenderPassResourceUsage& usages) const {
-        TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "RenderBundleEncoder::ValidateFinish");
+    RenderPassResourceUsage usages = mUsageTracker.AcquireResourceUsage();
+    if (IsValidationEnabled()) {
         DAWN_TRY(GetDevice()->ValidateObject(this));
-        DAWN_TRY(ValidateSyncScopeResourceUsage(usages));
-        return {};
+        DAWN_TRY(ValidateProgrammableEncoderEnd());
+        DAWN_TRY(ValidateFinish(usages));
     }
+
+    return new RenderBundleBase(this, descriptor, AcquireAttachmentState(), IsDepthReadOnly(),
+                                IsStencilReadOnly(), std::move(usages),
+                                std::move(mIndirectDrawMetadata));
+}
+
+MaybeError RenderBundleEncoder::ValidateFinish(const RenderPassResourceUsage& usages) const {
+    TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "RenderBundleEncoder::ValidateFinish");
+    DAWN_TRY(GetDevice()->ValidateObject(this));
+    DAWN_TRY(ValidateSyncScopeResourceUsage(usages));
+    return {};
+}
 
 }  // namespace dawn::native

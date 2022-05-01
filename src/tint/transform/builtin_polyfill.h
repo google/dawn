@@ -21,73 +21,70 @@ namespace tint::transform {
 
 /// Implements builtins for backends that do not have a native implementation.
 class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
- public:
-  /// Constructor
-  BuiltinPolyfill();
-  /// Destructor
-  ~BuiltinPolyfill() override;
-
-  /// Enumerator of polyfill levels
-  enum class Level {
-    /// No polyfill needed, supported by the backend.
-    kNone,
-    /// Clamp the parameters to the inner implementation.
-    kClampParameters,
-    /// Polyfill the entire function
-    kFull,
-  };
-
-  /// Specifies the builtins that should be polyfilled by the transform.
-  struct Builtins {
-    /// Should `countLeadingZeros()` be polyfilled?
-    bool count_leading_zeros = false;
-    /// Should `countTrailingZeros()` be polyfilled?
-    bool count_trailing_zeros = false;
-    /// What level should `extractBits()` be polyfilled?
-    Level extract_bits = Level::kNone;
-    /// Should `firstLeadingBit()` be polyfilled?
-    bool first_leading_bit = false;
-    /// Should `firstTrailingBit()` be polyfilled?
-    bool first_trailing_bit = false;
-    /// Should `insertBits()` be polyfilled?
-    Level insert_bits = Level::kNone;
-  };
-
-  /// Config is consumed by the BuiltinPolyfill transform.
-  /// Config specifies the builtins that should be polyfilled.
-  struct Config final : public Castable<Data, transform::Data> {
+  public:
     /// Constructor
-    /// @param b the list of builtins to polyfill
-    explicit Config(const Builtins& b);
-
-    /// Copy constructor
-    Config(const Config&);
-
+    BuiltinPolyfill();
     /// Destructor
-    ~Config() override;
+    ~BuiltinPolyfill() override;
 
-    /// The builtins to polyfill
-    const Builtins builtins;
-  };
+    /// Enumerator of polyfill levels
+    enum class Level {
+        /// No polyfill needed, supported by the backend.
+        kNone,
+        /// Clamp the parameters to the inner implementation.
+        kClampParameters,
+        /// Polyfill the entire function
+        kFull,
+    };
 
-  /// @param program the program to inspect
-  /// @param data optional extra transform-specific input data
-  /// @returns true if this transform should be run for the given program
-  bool ShouldRun(const Program* program,
-                 const DataMap& data = {}) const override;
+    /// Specifies the builtins that should be polyfilled by the transform.
+    struct Builtins {
+        /// Should `countLeadingZeros()` be polyfilled?
+        bool count_leading_zeros = false;
+        /// Should `countTrailingZeros()` be polyfilled?
+        bool count_trailing_zeros = false;
+        /// What level should `extractBits()` be polyfilled?
+        Level extract_bits = Level::kNone;
+        /// Should `firstLeadingBit()` be polyfilled?
+        bool first_leading_bit = false;
+        /// Should `firstTrailingBit()` be polyfilled?
+        bool first_trailing_bit = false;
+        /// Should `insertBits()` be polyfilled?
+        Level insert_bits = Level::kNone;
+    };
 
- protected:
-  struct State;
+    /// Config is consumed by the BuiltinPolyfill transform.
+    /// Config specifies the builtins that should be polyfilled.
+    struct Config final : public Castable<Data, transform::Data> {
+        /// Constructor
+        /// @param b the list of builtins to polyfill
+        explicit Config(const Builtins& b);
 
-  /// Runs the transform using the CloneContext built for transforming a
-  /// program. Run() is responsible for calling Clone() on the CloneContext.
-  /// @param ctx the CloneContext primed with the input program and
-  /// ProgramBuilder
-  /// @param inputs optional extra transform-specific input data
-  /// @param outputs optional extra transform-specific output data
-  void Run(CloneContext& ctx,
-           const DataMap& inputs,
-           DataMap& outputs) const override;
+        /// Copy constructor
+        Config(const Config&);
+
+        /// Destructor
+        ~Config() override;
+
+        /// The builtins to polyfill
+        const Builtins builtins;
+    };
+
+    /// @param program the program to inspect
+    /// @param data optional extra transform-specific input data
+    /// @returns true if this transform should be run for the given program
+    bool ShouldRun(const Program* program, const DataMap& data = {}) const override;
+
+  protected:
+    struct State;
+
+    /// Runs the transform using the CloneContext built for transforming a
+    /// program. Run() is responsible for calling Clone() on the CloneContext.
+    /// @param ctx the CloneContext primed with the input program and
+    /// ProgramBuilder
+    /// @param inputs optional extra transform-specific input data
+    /// @param outputs optional extra transform-specific output data
+    void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) const override;
 };
 
 }  // namespace tint::transform

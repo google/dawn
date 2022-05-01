@@ -29,7 +29,7 @@ ProgramID::ProgramID() = default;
 ProgramID::ProgramID(uint32_t id) : val(id) {}
 
 ProgramID ProgramID::New() {
-  return ProgramID(next_program_id++);
+    return ProgramID(next_program_id++);
 }
 
 namespace detail {
@@ -44,14 +44,14 @@ void AssertProgramIDsEqual(ProgramID a,
                            const char* msg,
                            const char* file,
                            size_t line) {
-  if (a == b) {
-    return;  // matched
-  }
-  if (if_valid && (!a || !b)) {
-    return;  //  a or b were not valid
-  }
-  diag::List diagnostics;
-  tint::InternalCompilerError(file, line, system, diagnostics) << msg;
+    if (a == b) {
+        return;  // matched
+    }
+    if (if_valid && (!a || !b)) {
+        return;  //  a or b were not valid
+    }
+    diag::List diagnostics;
+    tint::InternalCompilerError(file, line, system, diagnostics) << msg;
 }
 
 }  // namespace detail

@@ -21,31 +21,31 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
-  auto* var = Var("a", ty.f32());
+    auto* var = Var("a", ty.f32());
 
-  auto* stmt = Decl(var);
-  WrapInFunction(stmt);
+    auto* stmt = Decl(var);
+    WrapInFunction(stmt);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  var a : f32;\n");
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    EXPECT_EQ(gen.result(), "  var a : f32;\n");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_InferredType) {
-  auto* var = Var("a", nullptr, ast::StorageClass::kNone, Expr(123));
+    auto* var = Var("a", nullptr, ast::StorageClass::kNone, Expr(123));
 
-  auto* stmt = Decl(var);
-  WrapInFunction(stmt);
+    auto* stmt = Decl(var);
+    WrapInFunction(stmt);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  var a = 123;\n");
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    EXPECT_EQ(gen.result(), "  var a = 123;\n");
 }
 
 }  // namespace

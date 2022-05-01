@@ -26,13 +26,13 @@ StructMember::StructMember(ProgramID pid,
                            const ast::Type* ty,
                            AttributeList attrs)
     : Base(pid, src), symbol(sym), type(ty), attributes(std::move(attrs)) {
-  TINT_ASSERT(AST, type);
-  TINT_ASSERT(AST, symbol.IsValid());
-  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol, program_id);
-  for (auto* attr : attributes) {
-    TINT_ASSERT(AST, attr);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
-  }
+    TINT_ASSERT(AST, type);
+    TINT_ASSERT(AST, symbol.IsValid());
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol, program_id);
+    for (auto* attr : attributes) {
+        TINT_ASSERT(AST, attr);
+        TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, attr, program_id);
+    }
 }
 
 StructMember::StructMember(StructMember&&) = default;
@@ -40,12 +40,12 @@ StructMember::StructMember(StructMember&&) = default;
 StructMember::~StructMember() = default;
 
 const StructMember* StructMember::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  auto sym = ctx->Clone(symbol);
-  auto* ty = ctx->Clone(type);
-  auto attrs = ctx->Clone(attributes);
-  return ctx->dst->create<StructMember>(src, sym, ty, attrs);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    auto sym = ctx->Clone(symbol);
+    auto* ty = ctx->Clone(type);
+    auto attrs = ctx->Clone(attributes);
+    return ctx->dst->create<StructMember>(src, sym, ty, attrs);
 }
 
 }  // namespace tint::ast

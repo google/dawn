@@ -20,14 +20,11 @@
 
 class RCTest : public RefCounted {
   public:
-    RCTest() : RefCounted() {
-    }
+    RCTest() : RefCounted() {}
 
-    explicit RCTest(uint64_t payload) : RefCounted(payload) {
-    }
+    explicit RCTest(uint64_t payload) : RefCounted(payload) {}
 
-    explicit RCTest(bool* deleted) : mDeleted(deleted) {
-    }
+    explicit RCTest(bool* deleted) : mDeleted(deleted) {}
 
     ~RCTest() override {
         if (mDeleted != nullptr) {
@@ -35,9 +32,7 @@ class RCTest : public RefCounted {
         }
     }
 
-    RCTest* GetThis() {
-        return this;
-    }
+    RCTest* GetThis() { return this; }
 
   private:
     bool* mDeleted = nullptr;

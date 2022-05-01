@@ -38,9 +38,9 @@ List& List::operator=(const List& rhs) = default;
 List& List::operator=(List&& rhs) = default;
 
 std::string List::str() const {
-  diag::Formatter::Style style;
-  style.print_newline_at_end = false;
-  return Formatter{style}.format(*this);
+    diag::Formatter::Style style;
+    style.print_newline_at_end = false;
+    return Formatter{style}.format(*this);
 }
 
 }  // namespace tint::diag

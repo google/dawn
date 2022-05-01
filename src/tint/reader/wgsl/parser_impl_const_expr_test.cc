@@ -18,152 +18,151 @@ namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
-  auto p = parser("vec2<f32>(1., 2.)");
-  auto e = p->expect_const_expr();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_FALSE(e.errored);
-  ASSERT_TRUE(e->Is<ast::CallExpression>());
+    auto p = parser("vec2<f32>(1., 2.)");
+    auto e = p->expect_const_expr();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    ASSERT_FALSE(e.errored);
+    ASSERT_TRUE(e->Is<ast::CallExpression>());
 
-  auto* t = e->As<ast::CallExpression>();
-  ASSERT_TRUE(t->target.type->Is<ast::Vector>());
-  EXPECT_EQ(t->target.type->As<ast::Vector>()->width, 2u);
+    auto* t = e->As<ast::CallExpression>();
+    ASSERT_TRUE(t->target.type->Is<ast::Vector>());
+    EXPECT_EQ(t->target.type->As<ast::Vector>()->width, 2u);
 
-  ASSERT_EQ(t->args.size(), 2u);
+    ASSERT_EQ(t->args.size(), 2u);
 
-  ASSERT_TRUE(t->args[0]->Is<ast::FloatLiteralExpression>());
-  EXPECT_FLOAT_EQ(t->args[0]->As<ast::FloatLiteralExpression>()->value, 1.);
+    ASSERT_TRUE(t->args[0]->Is<ast::FloatLiteralExpression>());
+    EXPECT_FLOAT_EQ(t->args[0]->As<ast::FloatLiteralExpression>()->value, 1.);
 
-  ASSERT_TRUE(t->args[1]->Is<ast::FloatLiteralExpression>());
-  EXPECT_FLOAT_EQ(t->args[1]->As<ast::FloatLiteralExpression>()->value, 2.);
+    ASSERT_TRUE(t->args[1]->Is<ast::FloatLiteralExpression>());
+    EXPECT_FLOAT_EQ(t->args[1]->As<ast::FloatLiteralExpression>()->value, 2.);
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_Empty) {
-  auto p = parser("vec2<f32>()");
-  auto e = p->expect_const_expr();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_FALSE(e.errored);
-  ASSERT_TRUE(e->Is<ast::CallExpression>());
+    auto p = parser("vec2<f32>()");
+    auto e = p->expect_const_expr();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    ASSERT_FALSE(e.errored);
+    ASSERT_TRUE(e->Is<ast::CallExpression>());
 
-  auto* t = e->As<ast::CallExpression>();
-  ASSERT_TRUE(t->target.type->Is<ast::Vector>());
-  EXPECT_EQ(t->target.type->As<ast::Vector>()->width, 2u);
+    auto* t = e->As<ast::CallExpression>();
+    ASSERT_TRUE(t->target.type->Is<ast::Vector>());
+    EXPECT_EQ(t->target.type->As<ast::Vector>()->width, 2u);
 
-  ASSERT_EQ(t->args.size(), 0u);
+    ASSERT_EQ(t->args.size(), 0u);
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_TrailingComma) {
-  auto p = parser("vec2<f32>(1., 2.,)");
-  auto e = p->expect_const_expr();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_FALSE(e.errored);
-  ASSERT_TRUE(e->Is<ast::CallExpression>());
+    auto p = parser("vec2<f32>(1., 2.,)");
+    auto e = p->expect_const_expr();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    ASSERT_FALSE(e.errored);
+    ASSERT_TRUE(e->Is<ast::CallExpression>());
 
-  auto* t = e->As<ast::CallExpression>();
-  ASSERT_TRUE(t->target.type->Is<ast::Vector>());
-  EXPECT_EQ(t->target.type->As<ast::Vector>()->width, 2u);
+    auto* t = e->As<ast::CallExpression>();
+    ASSERT_TRUE(t->target.type->Is<ast::Vector>());
+    EXPECT_EQ(t->target.type->As<ast::Vector>()->width, 2u);
 
-  ASSERT_EQ(t->args.size(), 2u);
-  ASSERT_TRUE(t->args[0]->Is<ast::LiteralExpression>());
-  ASSERT_TRUE(t->args[1]->Is<ast::LiteralExpression>());
+    ASSERT_EQ(t->args.size(), 2u);
+    ASSERT_TRUE(t->args[0]->Is<ast::LiteralExpression>());
+    ASSERT_TRUE(t->args[1]->Is<ast::LiteralExpression>());
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingRightParen) {
-  auto p = parser("vec2<f32>(1., 2.");
-  auto e = p->expect_const_expr();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(e.errored);
-  ASSERT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:17: expected ')' for type constructor");
+    auto p = parser("vec2<f32>(1., 2.");
+    auto e = p->expect_const_expr();
+    ASSERT_TRUE(p->has_error());
+    ASSERT_TRUE(e.errored);
+    ASSERT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), "1:17: expected ')' for type constructor");
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingLeftParen) {
-  auto p = parser("vec2<f32> 1., 2.)");
-  auto e = p->expect_const_expr();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(e.errored);
-  ASSERT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:11: expected '(' for type constructor");
+    auto p = parser("vec2<f32> 1., 2.)");
+    auto e = p->expect_const_expr();
+    ASSERT_TRUE(p->has_error());
+    ASSERT_TRUE(e.errored);
+    ASSERT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), "1:11: expected '(' for type constructor");
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingComma) {
-  auto p = parser("vec2<f32>(1. 2.");
-  auto e = p->expect_const_expr();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(e.errored);
-  ASSERT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:14: expected ')' for type constructor");
+    auto p = parser("vec2<f32>(1. 2.");
+    auto e = p->expect_const_expr();
+    ASSERT_TRUE(p->has_error());
+    ASSERT_TRUE(e.errored);
+    ASSERT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), "1:14: expected ')' for type constructor");
 }
 
 TEST_F(ParserImplTest, ConstExpr_InvalidExpr) {
-  auto p = parser("vec2<f32>(1., if(a) {})");
-  auto e = p->expect_const_expr();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(e.errored);
-  ASSERT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:15: invalid type for const_expr");
+    auto p = parser("vec2<f32>(1., if(a) {})");
+    auto e = p->expect_const_expr();
+    ASSERT_TRUE(p->has_error());
+    ASSERT_TRUE(e.errored);
+    ASSERT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), "1:15: invalid type for const_expr");
 }
 
 TEST_F(ParserImplTest, ConstExpr_ConstLiteral) {
-  auto p = parser("true");
-  auto e = p->expect_const_expr();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_FALSE(e.errored);
-  ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e.value->Is<ast::BoolLiteralExpression>());
-  EXPECT_TRUE(e.value->As<ast::BoolLiteralExpression>()->value);
+    auto p = parser("true");
+    auto e = p->expect_const_expr();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    ASSERT_FALSE(e.errored);
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e.value->Is<ast::BoolLiteralExpression>());
+    EXPECT_TRUE(e.value->As<ast::BoolLiteralExpression>()->value);
 }
 
 TEST_F(ParserImplTest, ConstExpr_ConstLiteral_Invalid) {
-  auto p = parser("invalid");
-  auto e = p->expect_const_expr();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(e.errored);
-  ASSERT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:1: unable to parse const_expr");
+    auto p = parser("invalid");
+    auto e = p->expect_const_expr();
+    ASSERT_TRUE(p->has_error());
+    ASSERT_TRUE(e.errored);
+    ASSERT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), "1:1: unable to parse const_expr");
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeConstructor) {
-  auto p = parser("S(0)");
+    auto p = parser("S(0)");
 
-  auto e = p->expect_const_expr();
-  ASSERT_FALSE(e.errored);
-  ASSERT_TRUE(e->Is<ast::CallExpression>());
-  ASSERT_NE(e->As<ast::CallExpression>()->target.type, nullptr);
-  ASSERT_TRUE(e->As<ast::CallExpression>()->target.type->Is<ast::TypeName>());
-  EXPECT_EQ(
-      e->As<ast::CallExpression>()->target.type->As<ast::TypeName>()->name,
-      p->builder().Symbols().Get("S"));
+    auto e = p->expect_const_expr();
+    ASSERT_FALSE(e.errored);
+    ASSERT_TRUE(e->Is<ast::CallExpression>());
+    ASSERT_NE(e->As<ast::CallExpression>()->target.type, nullptr);
+    ASSERT_TRUE(e->As<ast::CallExpression>()->target.type->Is<ast::TypeName>());
+    EXPECT_EQ(e->As<ast::CallExpression>()->target.type->As<ast::TypeName>()->name,
+              p->builder().Symbols().Get("S"));
 }
 
 TEST_F(ParserImplTest, ConstExpr_Recursion) {
-  std::stringstream out;
-  for (size_t i = 0; i < 200; i++) {
-    out << "f32(";
-  }
-  out << "1.0";
-  for (size_t i = 0; i < 200; i++) {
-    out << ")";
-  }
-  auto p = parser(out.str());
-  auto e = p->expect_const_expr();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(e.errored);
-  ASSERT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:517: maximum parser recursive depth reached");
+    std::stringstream out;
+    for (size_t i = 0; i < 200; i++) {
+        out << "f32(";
+    }
+    out << "1.0";
+    for (size_t i = 0; i < 200; i++) {
+        out << ")";
+    }
+    auto p = parser(out.str());
+    auto e = p->expect_const_expr();
+    ASSERT_TRUE(p->has_error());
+    ASSERT_TRUE(e.errored);
+    ASSERT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), "1:517: maximum parser recursive depth reached");
 }
 
 TEST_F(ParserImplTest, UnaryOp_Recursion) {
-  std::stringstream out;
-  for (size_t i = 0; i < 200; i++) {
-    out << "!";
-  }
-  out << "1.0";
-  auto p = parser(out.str());
-  auto e = p->unary_expression();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(e.errored);
-  ASSERT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:130: maximum parser recursive depth reached");
+    std::stringstream out;
+    for (size_t i = 0; i < 200; i++) {
+        out << "!";
+    }
+    out << "1.0";
+    auto p = parser(out.str());
+    auto e = p->unary_expression();
+    ASSERT_TRUE(p->has_error());
+    ASSERT_TRUE(e.errored);
+    ASSERT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), "1:130: maximum parser recursive depth reached");
 }
 
 }  // namespace

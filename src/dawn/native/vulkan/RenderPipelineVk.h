@@ -22,37 +22,37 @@
 
 namespace dawn::native::vulkan {
 
-    class Device;
+class Device;
 
-    class RenderPipeline final : public RenderPipelineBase {
-      public:
-        static Ref<RenderPipeline> CreateUninitialized(Device* device,
-                                                       const RenderPipelineDescriptor* descriptor);
-        static void InitializeAsync(Ref<RenderPipelineBase> renderPipeline,
-                                    WGPUCreateRenderPipelineAsyncCallback callback,
-                                    void* userdata);
+class RenderPipeline final : public RenderPipelineBase {
+  public:
+    static Ref<RenderPipeline> CreateUninitialized(Device* device,
+                                                   const RenderPipelineDescriptor* descriptor);
+    static void InitializeAsync(Ref<RenderPipelineBase> renderPipeline,
+                                WGPUCreateRenderPipelineAsyncCallback callback,
+                                void* userdata);
 
-        VkPipeline GetHandle() const;
+    VkPipeline GetHandle() const;
 
-        MaybeError Initialize() override;
+    MaybeError Initialize() override;
 
-        // Dawn API
-        void SetLabelImpl() override;
+    // Dawn API
+    void SetLabelImpl() override;
 
-      private:
-        ~RenderPipeline() override;
-        void DestroyImpl() override;
-        using RenderPipelineBase::RenderPipelineBase;
+  private:
+    ~RenderPipeline() override;
+    void DestroyImpl() override;
+    using RenderPipelineBase::RenderPipelineBase;
 
-        struct PipelineVertexInputStateCreateInfoTemporaryAllocations {
-            std::array<VkVertexInputBindingDescription, kMaxVertexBuffers> bindings;
-            std::array<VkVertexInputAttributeDescription, kMaxVertexAttributes> attributes;
-        };
-        VkPipelineVertexInputStateCreateInfo ComputeVertexInputDesc(
-            PipelineVertexInputStateCreateInfoTemporaryAllocations* temporaryAllocations);
-
-        VkPipeline mHandle = VK_NULL_HANDLE;
+    struct PipelineVertexInputStateCreateInfoTemporaryAllocations {
+        std::array<VkVertexInputBindingDescription, kMaxVertexBuffers> bindings;
+        std::array<VkVertexInputAttributeDescription, kMaxVertexAttributes> attributes;
     };
+    VkPipelineVertexInputStateCreateInfo ComputeVertexInputDesc(
+        PipelineVertexInputStateCreateInfoTemporaryAllocations* temporaryAllocations);
+
+    VkPipeline mHandle = VK_NULL_HANDLE;
+};
 
 }  // namespace dawn::native::vulkan
 

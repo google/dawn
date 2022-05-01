@@ -20,18 +20,17 @@ InspectorRunner::InspectorRunner() = default;
 InspectorRunner::~InspectorRunner() = default;
 
 Inspector& InspectorRunner::Initialize(std::string shader) {
-  if (inspector_) {
-    return *inspector_;
-  }
+    if (inspector_) {
+        return *inspector_;
+    }
 
-  file_ = std::make_unique<Source::File>("test", shader);
-  program_ = std::make_unique<Program>(reader::wgsl::Parse(file_.get()));
-  [&]() {
-    ASSERT_TRUE(program_->IsValid())
-        << diag::Formatter().format(program_->Diagnostics());
-  }();
-  inspector_ = std::make_unique<Inspector>(program_.get());
-  return *inspector_;
+    file_ = std::make_unique<Source::File>("test", shader);
+    program_ = std::make_unique<Program>(reader::wgsl::Parse(file_.get()));
+    [&]() {
+        ASSERT_TRUE(program_->IsValid()) << diag::Formatter().format(program_->Diagnostics());
+    }();
+    inspector_ = std::make_unique<Inspector>(program_.get());
+    return *inspector_;
 }
 
 }  // namespace tint::inspector

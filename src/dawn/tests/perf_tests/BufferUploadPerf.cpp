@@ -19,67 +19,66 @@
 
 namespace {
 
-    constexpr unsigned int kNumIterations = 50;
+constexpr unsigned int kNumIterations = 50;
 
-    enum class UploadMethod {
-        WriteBuffer,
-        MappedAtCreation,
-    };
+enum class UploadMethod {
+    WriteBuffer,
+    MappedAtCreation,
+};
 
-    // Perf delta exists between ranges [0, 1MB] vs [1MB, MAX_SIZE).
-    // These are sample buffer sizes within each range.
-    enum class UploadSize {
-        BufferSize_1KB = 1 * 1024,
-        BufferSize_64KB = 64 * 1024,
-        BufferSize_1MB = 1 * 1024 * 1024,
+// Perf delta exists between ranges [0, 1MB] vs [1MB, MAX_SIZE).
+// These are sample buffer sizes within each range.
+enum class UploadSize {
+    BufferSize_1KB = 1 * 1024,
+    BufferSize_64KB = 64 * 1024,
+    BufferSize_1MB = 1 * 1024 * 1024,
 
-        BufferSize_4MB = 4 * 1024 * 1024,
-        BufferSize_16MB = 16 * 1024 * 1024,
-    };
+    BufferSize_4MB = 4 * 1024 * 1024,
+    BufferSize_16MB = 16 * 1024 * 1024,
+};
 
-    struct BufferUploadParams : AdapterTestParam {
-        BufferUploadParams(const AdapterTestParam& param,
-                           UploadMethod uploadMethod,
-                           UploadSize uploadSize)
-            : AdapterTestParam(param), uploadMethod(uploadMethod), uploadSize(uploadSize) {
-        }
+struct BufferUploadParams : AdapterTestParam {
+    BufferUploadParams(const AdapterTestParam& param,
+                       UploadMethod uploadMethod,
+                       UploadSize uploadSize)
+        : AdapterTestParam(param), uploadMethod(uploadMethod), uploadSize(uploadSize) {}
 
-        UploadMethod uploadMethod;
-        UploadSize uploadSize;
-    };
+    UploadMethod uploadMethod;
+    UploadSize uploadSize;
+};
 
-    std::ostream& operator<<(std::ostream& ostream, const BufferUploadParams& param) {
-        ostream << static_cast<const AdapterTestParam&>(param);
+std::ostream& operator<<(std::ostream& ostream, const BufferUploadParams& param) {
+    ostream << static_cast<const AdapterTestParam&>(param);
 
-        switch (param.uploadMethod) {
-            case UploadMethod::WriteBuffer:
-                ostream << "_WriteBuffer";
-                break;
-            case UploadMethod::MappedAtCreation:
-                ostream << "_MappedAtCreation";
-                break;
-        }
-
-        switch (param.uploadSize) {
-            case UploadSize::BufferSize_1KB:
-                ostream << "_BufferSize_1KB";
-                break;
-            case UploadSize::BufferSize_64KB:
-                ostream << "_BufferSize_64KB";
-                break;
-            case UploadSize::BufferSize_1MB:
-                ostream << "_BufferSize_1MB";
-                break;
-            case UploadSize::BufferSize_4MB:
-                ostream << "_BufferSize_4MB";
-                break;
-            case UploadSize::BufferSize_16MB:
-                ostream << "_BufferSize_16MB";
-                break;
-        }
-
-        return ostream;
+    switch (param.uploadMethod) {
+        case UploadMethod::WriteBuffer:
+            ostream << "_WriteBuffer";
+            break;
+        case UploadMethod::MappedAtCreation:
+            ostream << "_MappedAtCreation";
+            break;
     }
+
+    switch (param.uploadSize) {
+        case UploadSize::BufferSize_1KB:
+            ostream << "_BufferSize_1KB";
+            break;
+        case UploadSize::BufferSize_64KB:
+            ostream << "_BufferSize_64KB";
+            break;
+        case UploadSize::BufferSize_1MB:
+            ostream << "_BufferSize_1MB";
+            break;
+        case UploadSize::BufferSize_4MB:
+            ostream << "_BufferSize_4MB";
+            break;
+        case UploadSize::BufferSize_16MB:
+            ostream << "_BufferSize_16MB";
+            break;
+    }
+
+    return ostream;
+}
 
 }  // namespace
 
@@ -88,8 +87,7 @@ class BufferUploadPerf : public DawnPerfTestWithParams<BufferUploadParams> {
   public:
     BufferUploadPerf()
         : DawnPerfTestWithParams(kNumIterations, 1),
-          data(static_cast<size_t>(GetParam().uploadSize)) {
-    }
+          data(static_cast<size_t>(GetParam().uploadSize)) {}
     ~BufferUploadPerf() override = default;
 
     void SetUp() override;

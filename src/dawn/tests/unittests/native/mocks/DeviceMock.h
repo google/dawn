@@ -23,99 +23,98 @@
 
 namespace dawn::native {
 
-    class DeviceMock : public DeviceBase {
-      public:
-        // Exposes some protected functions for testing purposes.
-        using DeviceBase::DestroyObjects;
-        using DeviceBase::SetToggle;
+class DeviceMock : public DeviceBase {
+  public:
+    // Exposes some protected functions for testing purposes.
+    using DeviceBase::DestroyObjects;
+    using DeviceBase::SetToggle;
 
-        MOCK_METHOD(ResultOrError<Ref<CommandBufferBase>>,
-                    CreateCommandBuffer,
-                    (CommandEncoder*, const CommandBufferDescriptor*),
-                    (override));
+    MOCK_METHOD(ResultOrError<Ref<CommandBufferBase>>,
+                CreateCommandBuffer,
+                (CommandEncoder*, const CommandBufferDescriptor*),
+                (override));
 
-        MOCK_METHOD(ResultOrError<std::unique_ptr<StagingBufferBase>>,
-                    CreateStagingBuffer,
-                    (size_t),
-                    (override));
-        MOCK_METHOD(MaybeError,
-                    CopyFromStagingToBuffer,
-                    (StagingBufferBase*, uint64_t, BufferBase*, uint64_t, uint64_t),
-                    (override));
-        MOCK_METHOD(
-            MaybeError,
-            CopyFromStagingToTexture,
-            (const StagingBufferBase*, const TextureDataLayout&, TextureCopy*, const Extent3D&),
-            (override));
+    MOCK_METHOD(ResultOrError<std::unique_ptr<StagingBufferBase>>,
+                CreateStagingBuffer,
+                (size_t),
+                (override));
+    MOCK_METHOD(MaybeError,
+                CopyFromStagingToBuffer,
+                (StagingBufferBase*, uint64_t, BufferBase*, uint64_t, uint64_t),
+                (override));
+    MOCK_METHOD(MaybeError,
+                CopyFromStagingToTexture,
+                (const StagingBufferBase*, const TextureDataLayout&, TextureCopy*, const Extent3D&),
+                (override));
 
-        MOCK_METHOD(uint32_t, GetOptimalBytesPerRowAlignment, (), (const, override));
-        MOCK_METHOD(uint64_t, GetOptimalBufferToTextureCopyOffsetAlignment, (), (const, override));
+    MOCK_METHOD(uint32_t, GetOptimalBytesPerRowAlignment, (), (const, override));
+    MOCK_METHOD(uint64_t, GetOptimalBufferToTextureCopyOffsetAlignment, (), (const, override));
 
-        MOCK_METHOD(float, GetTimestampPeriodInNS, (), (const, override));
+    MOCK_METHOD(float, GetTimestampPeriodInNS, (), (const, override));
 
-        MOCK_METHOD(ResultOrError<Ref<BindGroupBase>>,
-                    CreateBindGroupImpl,
-                    (const BindGroupDescriptor*),
-                    (override));
-        MOCK_METHOD(ResultOrError<Ref<BindGroupLayoutBase>>,
-                    CreateBindGroupLayoutImpl,
-                    (const BindGroupLayoutDescriptor*, PipelineCompatibilityToken),
-                    (override));
-        MOCK_METHOD(ResultOrError<Ref<BufferBase>>,
-                    CreateBufferImpl,
-                    (const BufferDescriptor*),
-                    (override));
-        MOCK_METHOD(Ref<ComputePipelineBase>,
-                    CreateUninitializedComputePipelineImpl,
-                    (const ComputePipelineDescriptor*),
-                    (override));
-        MOCK_METHOD(ResultOrError<Ref<ExternalTextureBase>>,
-                    CreateExternalTextureImpl,
-                    (const ExternalTextureDescriptor*),
-                    (override));
-        MOCK_METHOD(ResultOrError<Ref<PipelineLayoutBase>>,
-                    CreatePipelineLayoutImpl,
-                    (const PipelineLayoutDescriptor*),
-                    (override));
-        MOCK_METHOD(ResultOrError<Ref<QuerySetBase>>,
-                    CreateQuerySetImpl,
-                    (const QuerySetDescriptor*),
-                    (override));
-        MOCK_METHOD(Ref<RenderPipelineBase>,
-                    CreateUninitializedRenderPipelineImpl,
-                    (const RenderPipelineDescriptor*),
-                    (override));
-        MOCK_METHOD(ResultOrError<Ref<SamplerBase>>,
-                    CreateSamplerImpl,
-                    (const SamplerDescriptor*),
-                    (override));
-        MOCK_METHOD(ResultOrError<Ref<ShaderModuleBase>>,
-                    CreateShaderModuleImpl,
-                    (const ShaderModuleDescriptor*, ShaderModuleParseResult*),
-                    (override));
-        MOCK_METHOD(ResultOrError<Ref<SwapChainBase>>,
-                    CreateSwapChainImpl,
-                    (const SwapChainDescriptor*),
-                    (override));
-        MOCK_METHOD(ResultOrError<Ref<NewSwapChainBase>>,
-                    CreateSwapChainImpl,
-                    (Surface*, NewSwapChainBase*, const SwapChainDescriptor*),
-                    (override));
-        MOCK_METHOD(ResultOrError<Ref<TextureBase>>,
-                    CreateTextureImpl,
-                    (const TextureDescriptor*),
-                    (override));
-        MOCK_METHOD(ResultOrError<Ref<TextureViewBase>>,
-                    CreateTextureViewImpl,
-                    (TextureBase*, const TextureViewDescriptor*),
-                    (override));
+    MOCK_METHOD(ResultOrError<Ref<BindGroupBase>>,
+                CreateBindGroupImpl,
+                (const BindGroupDescriptor*),
+                (override));
+    MOCK_METHOD(ResultOrError<Ref<BindGroupLayoutBase>>,
+                CreateBindGroupLayoutImpl,
+                (const BindGroupLayoutDescriptor*, PipelineCompatibilityToken),
+                (override));
+    MOCK_METHOD(ResultOrError<Ref<BufferBase>>,
+                CreateBufferImpl,
+                (const BufferDescriptor*),
+                (override));
+    MOCK_METHOD(Ref<ComputePipelineBase>,
+                CreateUninitializedComputePipelineImpl,
+                (const ComputePipelineDescriptor*),
+                (override));
+    MOCK_METHOD(ResultOrError<Ref<ExternalTextureBase>>,
+                CreateExternalTextureImpl,
+                (const ExternalTextureDescriptor*),
+                (override));
+    MOCK_METHOD(ResultOrError<Ref<PipelineLayoutBase>>,
+                CreatePipelineLayoutImpl,
+                (const PipelineLayoutDescriptor*),
+                (override));
+    MOCK_METHOD(ResultOrError<Ref<QuerySetBase>>,
+                CreateQuerySetImpl,
+                (const QuerySetDescriptor*),
+                (override));
+    MOCK_METHOD(Ref<RenderPipelineBase>,
+                CreateUninitializedRenderPipelineImpl,
+                (const RenderPipelineDescriptor*),
+                (override));
+    MOCK_METHOD(ResultOrError<Ref<SamplerBase>>,
+                CreateSamplerImpl,
+                (const SamplerDescriptor*),
+                (override));
+    MOCK_METHOD(ResultOrError<Ref<ShaderModuleBase>>,
+                CreateShaderModuleImpl,
+                (const ShaderModuleDescriptor*, ShaderModuleParseResult*),
+                (override));
+    MOCK_METHOD(ResultOrError<Ref<SwapChainBase>>,
+                CreateSwapChainImpl,
+                (const SwapChainDescriptor*),
+                (override));
+    MOCK_METHOD(ResultOrError<Ref<NewSwapChainBase>>,
+                CreateSwapChainImpl,
+                (Surface*, NewSwapChainBase*, const SwapChainDescriptor*),
+                (override));
+    MOCK_METHOD(ResultOrError<Ref<TextureBase>>,
+                CreateTextureImpl,
+                (const TextureDescriptor*),
+                (override));
+    MOCK_METHOD(ResultOrError<Ref<TextureViewBase>>,
+                CreateTextureViewImpl,
+                (TextureBase*, const TextureViewDescriptor*),
+                (override));
 
-        MOCK_METHOD(MaybeError, TickImpl, (), (override));
+    MOCK_METHOD(MaybeError, TickImpl, (), (override));
 
-        MOCK_METHOD(ResultOrError<ExecutionSerial>, CheckAndUpdateCompletedSerials, (), (override));
-        MOCK_METHOD(void, DestroyImpl, (), (override));
-        MOCK_METHOD(MaybeError, WaitForIdleForDestruction, (), (override));
-    };
+    MOCK_METHOD(ResultOrError<ExecutionSerial>, CheckAndUpdateCompletedSerials, (), (override));
+    MOCK_METHOD(void, DestroyImpl, (), (override));
+    MOCK_METHOD(MaybeError, WaitForIdleForDestruction, (), (override));
+};
 
 }  // namespace dawn::native
 

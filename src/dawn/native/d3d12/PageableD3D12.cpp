@@ -17,62 +17,59 @@
 #include <utility>
 
 namespace dawn::native::d3d12 {
-    Pageable::Pageable(ComPtr<ID3D12Pageable> d3d12Pageable,
-                       MemorySegment memorySegment,
-                       uint64_t size)
-        : mD3d12Pageable(std::move(d3d12Pageable)), mMemorySegment(memorySegment), mSize(size) {
-    }
+Pageable::Pageable(ComPtr<ID3D12Pageable> d3d12Pageable, MemorySegment memorySegment, uint64_t size)
+    : mD3d12Pageable(std::move(d3d12Pageable)), mMemorySegment(memorySegment), mSize(size) {}
 
-    // When a pageable is destroyed, it no longer resides in resident memory, so we must evict
-    // it from the LRU cache. If this heap is not manually removed from the LRU-cache, the
-    // ResidencyManager will attempt to use it after it has been deallocated.
-    Pageable::~Pageable() {
-        if (IsInResidencyLRUCache()) {
-            RemoveFromList();
-        }
+// When a pageable is destroyed, it no longer resides in resident memory, so we must evict
+// it from the LRU cache. If this heap is not manually removed from the LRU-cache, the
+// ResidencyManager will attempt to use it after it has been deallocated.
+Pageable::~Pageable() {
+    if (IsInResidencyLRUCache()) {
+        RemoveFromList();
     }
+}
 
-    ID3D12Pageable* Pageable::GetD3D12Pageable() const {
-        return mD3d12Pageable.Get();
-    }
+ID3D12Pageable* Pageable::GetD3D12Pageable() const {
+    return mD3d12Pageable.Get();
+}
 
-    ExecutionSerial Pageable::GetLastUsage() const {
-        return mLastUsage;
-    }
+ExecutionSerial Pageable::GetLastUsage() const {
+    return mLastUsage;
+}
 
-    void Pageable::SetLastUsage(ExecutionSerial serial) {
-        mLastUsage = serial;
-    }
+void Pageable::SetLastUsage(ExecutionSerial serial) {
+    mLastUsage = serial;
+}
 
-    ExecutionSerial Pageable::GetLastSubmission() const {
-        return mLastSubmission;
-    }
+ExecutionSerial Pageable::GetLastSubmission() const {
+    return mLastSubmission;
+}
 
-    void Pageable::SetLastSubmission(ExecutionSerial serial) {
-        mLastSubmission = serial;
-    }
+void Pageable::SetLastSubmission(ExecutionSerial serial) {
+    mLastSubmission = serial;
+}
 
-    MemorySegment Pageable::GetMemorySegment() const {
-        return mMemorySegment;
-    }
+MemorySegment Pageable::GetMemorySegment() const {
+    return mMemorySegment;
+}
 
-    uint64_t Pageable::GetSize() const {
-        return mSize;
-    }
+uint64_t Pageable::GetSize() const {
+    return mSize;
+}
 
-    bool Pageable::IsInResidencyLRUCache() const {
-        return IsInList();
-    }
+bool Pageable::IsInResidencyLRUCache() const {
+    return IsInList();
+}
 
-    void Pageable::IncrementResidencyLock() {
-        mResidencyLockRefCount++;
-    }
+void Pageable::IncrementResidencyLock() {
+    mResidencyLockRefCount++;
+}
 
-    void Pageable::DecrementResidencyLock() {
-        mResidencyLockRefCount--;
-    }
+void Pageable::DecrementResidencyLock() {
+    mResidencyLockRefCount--;
+}
 
-    bool Pageable::IsResidencyLocked() const {
-        return mResidencyLockRefCount != 0;
-    }
+bool Pageable::IsResidencyLocked() const {
+    return mResidencyLockRefCount != 0;
+}
 }  // namespace dawn::native::d3d12

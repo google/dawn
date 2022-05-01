@@ -27,15 +27,15 @@ Void::Void(Void&&) = default;
 Void::~Void() = default;
 
 size_t Void::Hash() const {
-  return static_cast<size_t>(TypeInfo::Of<Void>().full_hashcode);
+    return static_cast<size_t>(TypeInfo::Of<Void>().full_hashcode);
 }
 
 bool Void::Equals(const Type& other) const {
-  return other.Is<Void>();
+    return other.Is<Void>();
 }
 
 std::string Void::FriendlyName(const SymbolTable&) const {
-  return "void";
+    return "void";
 }
 
 }  // namespace tint::sem

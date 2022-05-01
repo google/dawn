@@ -19,23 +19,23 @@ namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ContinuingStmt) {
-  auto p = parser("continuing { discard; }");
-  auto e = p->continuing_stmt();
-  EXPECT_TRUE(e.matched);
-  EXPECT_FALSE(e.errored);
-  EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e->statements.size(), 1u);
-  ASSERT_TRUE(e->statements[0]->Is<ast::DiscardStatement>());
+    auto p = parser("continuing { discard; }");
+    auto e = p->continuing_stmt();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_EQ(e->statements.size(), 1u);
+    ASSERT_TRUE(e->statements[0]->Is<ast::DiscardStatement>());
 }
 
 TEST_F(ParserImplTest, ContinuingStmt_InvalidBody) {
-  auto p = parser("continuing { discard }");
-  auto e = p->continuing_stmt();
-  EXPECT_FALSE(e.matched);
-  EXPECT_TRUE(e.errored);
-  EXPECT_EQ(e.value, nullptr);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:22: expected ';' for discard statement");
+    auto p = parser("continuing { discard }");
+    auto e = p->continuing_stmt();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_EQ(e.value, nullptr);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:22: expected ';' for discard statement");
 }
 
 }  // namespace

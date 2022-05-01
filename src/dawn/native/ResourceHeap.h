@@ -19,12 +19,12 @@
 
 namespace dawn::native {
 
-    // Wrapper for a resource backed by a heap.
-    class ResourceHeapBase {
-      public:
-        ResourceHeapBase() = default;
-        virtual ~ResourceHeapBase() = default;
-    };
+// Wrapper for a resource backed by a heap.
+class ResourceHeapBase {
+  public:
+    ResourceHeapBase() = default;
+    virtual ~ResourceHeapBase() = default;
+};
 
 }  // namespace dawn::native
 

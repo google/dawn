@@ -26,7 +26,7 @@ InternalCompilerErrorReporter* ice_reporter = nullptr;
 }  // namespace
 
 void SetInternalCompilerErrorReporter(InternalCompilerErrorReporter* reporter) {
-  ice_reporter = reporter;
+    ice_reporter = reporter;
 }
 
 InternalCompilerError::InternalCompilerError(const char* file,
@@ -36,15 +36,15 @@ InternalCompilerError::InternalCompilerError(const char* file,
     : file_(file), line_(line), system_(system), diagnostics_(diagnostics) {}
 
 InternalCompilerError::~InternalCompilerError() {
-  auto file = std::make_shared<Source::File>(file_, "");
-  Source source{Source::Range{{line_}}, file.get()};
-  diagnostics_.add_ice(system_, msg_.str(), source, std::move(file));
+    auto file = std::make_shared<Source::File>(file_, "");
+    Source source{Source::Range{{line_}}, file.get()};
+    diagnostics_.add_ice(system_, msg_.str(), source, std::move(file));
 
-  if (ice_reporter) {
-    ice_reporter(diagnostics_);
-  }
+    if (ice_reporter) {
+        ice_reporter(diagnostics_);
+    }
 
-  debugger::Break();
+    debugger::Break();
 }
 
 }  // namespace tint

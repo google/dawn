@@ -19,21 +19,21 @@
 
 namespace dawn::native {
 
-    enum class VertexFormatBaseType {
-        Float,
-        Uint,
-        Sint,
-    };
+enum class VertexFormatBaseType {
+    Float,
+    Uint,
+    Sint,
+};
 
-    struct VertexFormatInfo {
-        wgpu::VertexFormat format;
-        uint32_t byteSize;
-        uint32_t componentCount;
-        uint32_t componentByteSize;
-        VertexFormatBaseType baseType;
-    };
+struct VertexFormatInfo {
+    wgpu::VertexFormat format;
+    uint32_t byteSize;
+    uint32_t componentCount;
+    uint32_t componentByteSize;
+    VertexFormatBaseType baseType;
+};
 
-    const VertexFormatInfo& GetVertexFormatInfo(wgpu::VertexFormat format);
+const VertexFormatInfo& GetVertexFormatInfo(wgpu::VertexFormat format);
 
 }  // namespace dawn::native
 

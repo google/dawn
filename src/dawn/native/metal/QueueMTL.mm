@@ -26,24 +26,22 @@
 
 namespace dawn::native::metal {
 
-    Queue::Queue(Device* device, const QueueDescriptor* descriptor)
-        : QueueBase(device, descriptor) {
+Queue::Queue(Device* device, const QueueDescriptor* descriptor) : QueueBase(device, descriptor) {}
+
+MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
+    Device* device = ToBackend(GetDevice());
+
+    DAWN_TRY(device->Tick());
+
+    CommandRecordingContext* commandContext = device->GetPendingCommandContext();
+
+    TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferMTL::FillCommands");
+    for (uint32_t i = 0; i < commandCount; ++i) {
+        DAWN_TRY(ToBackend(commands[i])->FillCommands(commandContext));
     }
+    TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferMTL::FillCommands");
 
-    MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
-        Device* device = ToBackend(GetDevice());
-
-        DAWN_TRY(device->Tick());
-
-        CommandRecordingContext* commandContext = device->GetPendingCommandContext();
-
-        TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferMTL::FillCommands");
-        for (uint32_t i = 0; i < commandCount; ++i) {
-            DAWN_TRY(ToBackend(commands[i])->FillCommands(commandContext));
-        }
-        TRACE_EVENT_END0(GetDevice()->GetPlatform(), Recording, "CommandBufferMTL::FillCommands");
-
-        return device->SubmitPendingCommandBuffer();
-    }
+    return device->SubmitPendingCommandBuffer();
+}
 
 }  // namespace dawn::native::metal

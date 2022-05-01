@@ -23,28 +23,28 @@
 
 namespace dawn::native {
 
-    // An common interface for all backends. Mostly used to create adapters for a particular
-    // backend.
-    class BackendConnection {
-      public:
-        BackendConnection(InstanceBase* instance, wgpu::BackendType type);
-        virtual ~BackendConnection() = default;
+// An common interface for all backends. Mostly used to create adapters for a particular
+// backend.
+class BackendConnection {
+  public:
+    BackendConnection(InstanceBase* instance, wgpu::BackendType type);
+    virtual ~BackendConnection() = default;
 
-        wgpu::BackendType GetType() const;
-        InstanceBase* GetInstance() const;
+    wgpu::BackendType GetType() const;
+    InstanceBase* GetInstance() const;
 
-        // Returns all the adapters for the system that can be created by the backend, without extra
-        // options (such as debug adapters, custom driver libraries, etc.)
-        virtual std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters() = 0;
+    // Returns all the adapters for the system that can be created by the backend, without extra
+    // options (such as debug adapters, custom driver libraries, etc.)
+    virtual std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters() = 0;
 
-        // Returns new adapters created with the backend-specific options.
-        virtual ResultOrError<std::vector<Ref<AdapterBase>>> DiscoverAdapters(
-            const AdapterDiscoveryOptionsBase* options);
+    // Returns new adapters created with the backend-specific options.
+    virtual ResultOrError<std::vector<Ref<AdapterBase>>> DiscoverAdapters(
+        const AdapterDiscoveryOptionsBase* options);
 
-      private:
-        InstanceBase* mInstance = nullptr;
-        wgpu::BackendType mType;
-    };
+  private:
+    InstanceBase* mInstance = nullptr;
+    wgpu::BackendType mType;
+};
 
 }  // namespace dawn::native
 

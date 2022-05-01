@@ -23,7 +23,7 @@ namespace {
 using ::testing::HasSubstr;
 
 std::string Preamble() {
-  return R"(
+    return R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Fragment %100 "x_100"
@@ -34,15 +34,15 @@ std::string Preamble() {
 /// @returns a SPIR-V assembly segment which assigns debug names
 /// to particular IDs.
 std::string Names(std::vector<std::string> ids) {
-  std::ostringstream outs;
-  for (auto& id : ids) {
-    outs << "    OpName %" << id << " \"" << id << "\"\n";
-  }
-  return outs.str();
+    std::ostringstream outs;
+    for (auto& id : ids) {
+        outs << "    OpName %" << id << " \"" << id << "\"\n";
+    }
+    return outs.str();
 }
 
 std::string CommonTypes() {
-  return R"(
+    return R"(
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
     %float = OpTypeFloat 32
@@ -53,7 +53,7 @@ std::string CommonTypes() {
 }
 
 std::string MainBody() {
-  return R"(
+    return R"(
     %100 = OpFunction %void None %voidfn
     %entry_100 = OpLabel
     OpReturn
@@ -62,46 +62,45 @@ std::string MainBody() {
 }
 
 TEST_F(SpvParserTest, Emit_VoidFunctionWithoutParams) {
-  auto p = parser(test::Assemble(Preamble() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.Emit());
-  auto got = test::ToString(p->program());
-  std::string expect = R"(fn x_100() {
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.Emit());
+    auto got = test::ToString(p->program());
+    std::string expect = R"(fn x_100() {
   return;
 }
 )";
-  EXPECT_EQ(got, expect);
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(SpvParserTest, Emit_NonVoidResultType) {
-  auto p = parser(test::Assemble(Preamble() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + CommonTypes() + R"(
      %fn_ret_float = OpTypeFunction %float
      %200 = OpFunction %float None %fn_ret_float
      %entry = OpLabel
      OpReturnValue %float_0
      OpFunctionEnd
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(200);
-  EXPECT_TRUE(fe.Emit());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(200);
+    EXPECT_TRUE(fe.Emit());
 
-  auto got = test::ToString(p->program());
-  std::string expect = R"(fn x_200() -> f32 {
+    auto got = test::ToString(p->program());
+    std::string expect = R"(fn x_200() -> f32 {
   return 0.0;
 }
 )";
-  EXPECT_THAT(got, HasSubstr(expect));
+    EXPECT_THAT(got, HasSubstr(expect));
 }
 
 TEST_F(SpvParserTest, Emit_MixedParamTypes) {
-  auto p = parser(
-      test::Assemble(Preamble() + Names({"a", "b", "c"}) + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + Names({"a", "b", "c"}) + CommonTypes() + R"(
      %fn_mixed_params = OpTypeFunction %void %uint %float %int
 
      %200 = OpFunction %void None %fn_mixed_params
@@ -112,20 +111,20 @@ TEST_F(SpvParserTest, Emit_MixedParamTypes) {
      OpReturn
      OpFunctionEnd
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(200);
-  EXPECT_TRUE(fe.Emit());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(200);
+    EXPECT_TRUE(fe.Emit());
 
-  auto got = test::ToString(p->program());
-  std::string expect = R"(fn x_200(a : u32, b : f32, c : i32) {
+    auto got = test::ToString(p->program());
+    std::string expect = R"(fn x_200(a : u32, b : f32, c : i32) {
   return;
 }
 )";
-  EXPECT_THAT(got, HasSubstr(expect));
+    EXPECT_THAT(got, HasSubstr(expect));
 }
 
 TEST_F(SpvParserTest, Emit_GenerateParamNames) {
-  auto p = parser(test::Assemble(Preamble() + CommonTypes() + R"(
+    auto p = parser(test::Assemble(Preamble() + CommonTypes() + R"(
      %fn_mixed_params = OpTypeFunction %void %uint %float %int
 
      %200 = OpFunction %void None %fn_mixed_params
@@ -136,16 +135,16 @@ TEST_F(SpvParserTest, Emit_GenerateParamNames) {
      OpReturn
      OpFunctionEnd
   )" + MainBody()));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(200);
-  EXPECT_TRUE(fe.Emit());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(200);
+    EXPECT_TRUE(fe.Emit());
 
-  auto got = test::ToString(p->program());
-  std::string expect = R"(fn x_200(x_14 : u32, x_15 : f32, x_16 : i32) {
+    auto got = test::ToString(p->program());
+    std::string expect = R"(fn x_200(x_14 : u32, x_15 : f32, x_16 : i32) {
   return;
 }
 )";
-  EXPECT_THAT(got, HasSubstr(expect));
+    EXPECT_THAT(got, HasSubstr(expect));
 }
 
 }  // namespace

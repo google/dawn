@@ -20,26 +20,26 @@ namespace tint::writer {
 namespace {
 
 TEST(TextGeneratorTest, UniqueIdentifier) {
-  Program program(ProgramBuilder{});
+    Program program(ProgramBuilder{});
 
-  TextGenerator gen(&program);
+    TextGenerator gen(&program);
 
-  ASSERT_EQ(gen.UniqueIdentifier("ident"), "ident");
-  ASSERT_EQ(gen.UniqueIdentifier("ident"), "ident_1");
+    ASSERT_EQ(gen.UniqueIdentifier("ident"), "ident");
+    ASSERT_EQ(gen.UniqueIdentifier("ident"), "ident_1");
 }
 
 TEST(TextGeneratorTest, UniqueIdentifier_ConflictWithExisting) {
-  ProgramBuilder builder;
-  builder.Symbols().Register("ident_1");
-  builder.Symbols().Register("ident_2");
-  Program program(std::move(builder));
+    ProgramBuilder builder;
+    builder.Symbols().Register("ident_1");
+    builder.Symbols().Register("ident_2");
+    Program program(std::move(builder));
 
-  TextGenerator gen(&program);
+    TextGenerator gen(&program);
 
-  ASSERT_EQ(gen.UniqueIdentifier("ident"), "ident");
-  ASSERT_EQ(gen.UniqueIdentifier("ident"), "ident_3");
-  ASSERT_EQ(gen.UniqueIdentifier("ident"), "ident_4");
-  ASSERT_EQ(gen.UniqueIdentifier("ident"), "ident_5");
+    ASSERT_EQ(gen.UniqueIdentifier("ident"), "ident");
+    ASSERT_EQ(gen.UniqueIdentifier("ident"), "ident_3");
+    ASSERT_EQ(gen.UniqueIdentifier("ident"), "ident_4");
+    ASSERT_EQ(gen.UniqueIdentifier("ident"), "ident_5");
 }
 
 }  // namespace

@@ -28,30 +28,30 @@ template <typename T>
 using BuiltinBuilderTestWithParam = TestParamHelper<T>;
 
 struct BuiltinData {
-  std::string name;
-  std::string op;
+    std::string name;
+    std::string op;
 };
 inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
-  out << data.name;
-  return out;
+    out << data.name;
+    return out;
 }
 
 using BuiltinBoolTest = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(BuiltinBoolTest, Call_Bool_Scalar) {
-  auto param = GetParam();
-  auto* var = Global("v", ty.bool_(), ast::StorageClass::kPrivate);
-  auto* expr = Call(param.name, "v");
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* var = Global("v", ty.bool_(), ast::StorageClass::kPrivate);
+    auto* expr = Call(param.name, "v");
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeBool
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeBool
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
@@ -59,26 +59,25 @@ TEST_P(BuiltinBoolTest, Call_Bool_Scalar) {
 %5 = OpTypeFunction %6
 )");
 
-  // both any and all are 'passthrough' for scalar booleans
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            "%10 = OpLoad %3 %1\nOpReturn\n");
+    // both any and all are 'passthrough' for scalar booleans
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), "%10 = OpLoad %3 %1\nOpReturn\n");
 }
 
 TEST_P(BuiltinBoolTest, Call_Bool_Vector) {
-  auto param = GetParam();
-  auto* var = Global("v", ty.vec3<bool>(), ast::StorageClass::kPrivate);
-  auto* expr = Call(param.name, "v");
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* var = Global("v", ty.vec3<bool>(), ast::StorageClass::kPrivate);
+    auto* expr = Call(param.name, "v");
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeBool
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeBool
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -87,34 +86,33 @@ TEST_P(BuiltinBoolTest, Call_Bool_Vector) {
 %6 = OpTypeFunction %7
 )");
 
-  auto expected = utils::ReplaceAll(R"(%11 = OpLoad %3 %1
+    auto expected = utils::ReplaceAll(R"(%11 = OpLoad %3 %1
 %10 = ${op} %4 %11
 OpReturn
 )",
-                                    "${op}", param.op);
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
+                                      "${op}", param.op);
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
 }
 INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          BuiltinBoolTest,
-                         testing::Values(BuiltinData{"any", "OpAny"},
-                                         BuiltinData{"all", "OpAll"}));
+                         testing::Values(BuiltinData{"any", "OpAny"}, BuiltinData{"all", "OpAll"}));
 
 using BuiltinIntTest = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(BuiltinIntTest, Call_SInt_Scalar) {
-  auto param = GetParam();
-  auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-  auto* expr = Call(param.name, "v");
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
+    auto* expr = Call(param.name, "v");
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
@@ -122,29 +120,29 @@ TEST_P(BuiltinIntTest, Call_SInt_Scalar) {
 %5 = OpTypeFunction %6
 )");
 
-  auto expected = utils::ReplaceAll(R"(%10 = OpLoad %3 %1
+    auto expected = utils::ReplaceAll(R"(%10 = OpLoad %3 %1
 %9 = ${op} %3 %10
 OpReturn
 )",
-                                    "${op}", param.op);
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
+                                      "${op}", param.op);
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
 }
 
 TEST_P(BuiltinIntTest, Call_SInt_Vector) {
-  auto param = GetParam();
-  auto* var = Global("v", ty.vec3<i32>(), ast::StorageClass::kPrivate);
-  auto* expr = Call(param.name, "v");
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* var = Global("v", ty.vec3<i32>(), ast::StorageClass::kPrivate);
+    auto* expr = Call(param.name, "v");
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -153,29 +151,29 @@ TEST_P(BuiltinIntTest, Call_SInt_Vector) {
 %6 = OpTypeFunction %7
 )");
 
-  auto expected = utils::ReplaceAll(R"(%11 = OpLoad %3 %1
+    auto expected = utils::ReplaceAll(R"(%11 = OpLoad %3 %1
 %10 = ${op} %3 %11
 OpReturn
 )",
-                                    "${op}", param.op);
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
+                                      "${op}", param.op);
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
 }
 
 TEST_P(BuiltinIntTest, Call_UInt_Scalar) {
-  auto param = GetParam();
-  auto* var = Global("v", ty.u32(), ast::StorageClass::kPrivate);
-  auto* expr = Call(param.name, "v");
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* var = Global("v", ty.u32(), ast::StorageClass::kPrivate);
+    auto* expr = Call(param.name, "v");
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 0
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 0
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
@@ -183,29 +181,29 @@ TEST_P(BuiltinIntTest, Call_UInt_Scalar) {
 %5 = OpTypeFunction %6
 )");
 
-  auto expected = utils::ReplaceAll(R"(%10 = OpLoad %3 %1
+    auto expected = utils::ReplaceAll(R"(%10 = OpLoad %3 %1
 %9 = ${op} %3 %10
 OpReturn
 )",
-                                    "${op}", param.op);
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
+                                      "${op}", param.op);
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
 }
 
 TEST_P(BuiltinIntTest, Call_UInt_Vector) {
-  auto param = GetParam();
-  auto* var = Global("v", ty.vec3<u32>(), ast::StorageClass::kPrivate);
-  auto* expr = Call(param.name, "v");
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* var = Global("v", ty.vec3<u32>(), ast::StorageClass::kPrivate);
+    auto* expr = Call(param.name, "v");
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -214,33 +212,32 @@ TEST_P(BuiltinIntTest, Call_UInt_Vector) {
 %6 = OpTypeFunction %7
 )");
 
-  auto expected = utils::ReplaceAll(R"(%11 = OpLoad %3 %1
+    auto expected = utils::ReplaceAll(R"(%11 = OpLoad %3 %1
 %10 = ${op} %3 %11
 OpReturn
 )",
-                                    "${op}", param.op);
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
+                                      "${op}", param.op);
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
 }
-INSTANTIATE_TEST_SUITE_P(
-    BuiltinBuilderTest,
-    BuiltinIntTest,
-    testing::Values(BuiltinData{"countOneBits", "OpBitCount"},
-                    BuiltinData{"reverseBits", "OpBitReverse"}));
+INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
+                         BuiltinIntTest,
+                         testing::Values(BuiltinData{"countOneBits", "OpBitCount"},
+                                         BuiltinData{"reverseBits", "OpBitReverse"}));
 
 TEST_F(BuiltinBuilderTest, Call_Dot_F32) {
-  auto* var = Global("v", ty.vec3<f32>(), ast::StorageClass::kPrivate);
-  auto* expr = Call("dot", "v", "v");
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto* var = Global("v", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    auto* expr = Call("dot", "v", "v");
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -248,8 +245,8 @@ TEST_F(BuiltinBuilderTest, Call_Dot_F32) {
 %7 = OpTypeVoid
 %6 = OpTypeFunction %7
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%11 = OpLoad %3 %1
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%11 = OpLoad %3 %1
 %12 = OpLoad %3 %1
 %10 = OpDot %4 %11 %12
 OpReturn
@@ -257,19 +254,19 @@ OpReturn
 }
 
 TEST_F(BuiltinBuilderTest, Call_Dot_U32) {
-  auto* var = Global("v", ty.vec3<u32>(), ast::StorageClass::kPrivate);
-  auto* expr = Call("dot", "v", "v");
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto* var = Global("v", ty.vec3<u32>(), ast::StorageClass::kPrivate);
+    auto* expr = Call("dot", "v", "v");
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -277,8 +274,8 @@ TEST_F(BuiltinBuilderTest, Call_Dot_U32) {
 %7 = OpTypeVoid
 %6 = OpTypeFunction %7
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%11 = OpLoad %3 %1
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%11 = OpLoad %3 %1
 %12 = OpLoad %3 %1
 %13 = OpCompositeExtract %4 %11 0
 %14 = OpCompositeExtract %4 %12 0
@@ -296,19 +293,19 @@ OpReturn
 }
 
 TEST_F(BuiltinBuilderTest, Call_Dot_I32) {
-  auto* var = Global("v", ty.vec3<i32>(), ast::StorageClass::kPrivate);
-  auto* expr = Call("dot", "v", "v");
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto* var = Global("v", ty.vec3<i32>(), ast::StorageClass::kPrivate);
+    auto* expr = Call("dot", "v", "v");
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -316,8 +313,8 @@ TEST_F(BuiltinBuilderTest, Call_Dot_I32) {
 %7 = OpTypeVoid
 %6 = OpTypeFunction %7
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%11 = OpLoad %3 %1
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%11 = OpLoad %3 %1
 %12 = OpLoad %3 %1
 %13 = OpCompositeExtract %4 %11 0
 %14 = OpCompositeExtract %4 %12 0
@@ -336,18 +333,18 @@ OpReturn
 
 using BuiltinDeriveTest = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(BuiltinDeriveTest, Call_Derivative_Scalar) {
-  auto param = GetParam();
-  auto* var = Global("v", ty.f32(), ast::StorageClass::kPrivate);
-  auto* expr = Call(param.name, "v");
-  auto* func = Func("func", {}, ty.void_(), {CallStmt(expr)},
-                    {Stage(ast::PipelineStage::kFragment)});
+    auto param = GetParam();
+    auto* var = Global("v", ty.f32(), ast::StorageClass::kPrivate);
+    auto* expr = Call(param.name, "v");
+    auto* func =
+        Func("func", {}, ty.void_(), {CallStmt(expr)}, {Stage(ast::PipelineStage::kFragment)});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
@@ -355,33 +352,33 @@ TEST_P(BuiltinDeriveTest, Call_Derivative_Scalar) {
 %5 = OpTypeFunction %6
 )");
 
-  auto expected = utils::ReplaceAll(R"(%10 = OpLoad %3 %1
+    auto expected = utils::ReplaceAll(R"(%10 = OpLoad %3 %1
 %9 = ${op} %3 %10
 OpReturn
 )",
-                                    "${op}", param.op);
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
+                                      "${op}", param.op);
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
 }
 
 TEST_P(BuiltinDeriveTest, Call_Derivative_Vector) {
-  auto param = GetParam();
-  auto* var = Global("v", ty.vec3<f32>(), ast::StorageClass::kPrivate);
-  auto* expr = Call(param.name, "v");
-  auto* func = Func("func", {}, ty.void_(), {CallStmt(expr)},
-                    {Stage(ast::PipelineStage::kFragment)});
+    auto param = GetParam();
+    auto* var = Global("v", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    auto* expr = Call(param.name, "v");
+    auto* func =
+        Func("func", {}, ty.void_(), {CallStmt(expr)}, {Stage(ast::PipelineStage::kFragment)});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  if (param.name != "dpdx" && param.name != "dpdy" && param.name != "fwidth") {
-    EXPECT_EQ(DumpInstructions(b.capabilities()),
-              R"(OpCapability DerivativeControl
+    if (param.name != "dpdx" && param.name != "dpdy" && param.name != "fwidth") {
+        EXPECT_EQ(DumpInstructions(b.capabilities()),
+                  R"(OpCapability DerivativeControl
 )");
-  }
+    }
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -390,44 +387,42 @@ TEST_P(BuiltinDeriveTest, Call_Derivative_Vector) {
 %6 = OpTypeFunction %7
 )");
 
-  auto expected = utils::ReplaceAll(R"(%11 = OpLoad %3 %1
+    auto expected = utils::ReplaceAll(R"(%11 = OpLoad %3 %1
 %10 = ${op} %3 %11
 OpReturn
 )",
-                                    "${op}", param.op);
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
+                                      "${op}", param.op);
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), expected);
 }
-INSTANTIATE_TEST_SUITE_P(
-    BuiltinBuilderTest,
-    BuiltinDeriveTest,
-    testing::Values(BuiltinData{"dpdx", "OpDPdx"},
-                    BuiltinData{"dpdxFine", "OpDPdxFine"},
-                    BuiltinData{"dpdxCoarse", "OpDPdxCoarse"},
-                    BuiltinData{"dpdy", "OpDPdy"},
-                    BuiltinData{"dpdyFine", "OpDPdyFine"},
-                    BuiltinData{"dpdyCoarse", "OpDPdyCoarse"},
-                    BuiltinData{"fwidth", "OpFwidth"},
-                    BuiltinData{"fwidthFine", "OpFwidthFine"},
-                    BuiltinData{"fwidthCoarse", "OpFwidthCoarse"}));
+INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
+                         BuiltinDeriveTest,
+                         testing::Values(BuiltinData{"dpdx", "OpDPdx"},
+                                         BuiltinData{"dpdxFine", "OpDPdxFine"},
+                                         BuiltinData{"dpdxCoarse", "OpDPdxCoarse"},
+                                         BuiltinData{"dpdy", "OpDPdy"},
+                                         BuiltinData{"dpdyFine", "OpDPdyFine"},
+                                         BuiltinData{"dpdyCoarse", "OpDPdyCoarse"},
+                                         BuiltinData{"fwidth", "OpFwidth"},
+                                         BuiltinData{"fwidthFine", "OpFwidthFine"},
+                                         BuiltinData{"fwidthCoarse", "OpFwidthCoarse"}));
 
 TEST_F(BuiltinBuilderTest, Call_Select) {
-  auto* v3 = Global("v3", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    auto* v3 = Global("v3", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
-  auto* bool_v3 =
-      Global("bool_v3", ty.vec3<bool>(), ast::StorageClass::kPrivate);
-  auto* expr = Call("select", "v3", "v3", "bool_v3");
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto* bool_v3 = Global("bool_v3", ty.vec3<bool>(), ast::StorageClass::kPrivate);
+    auto* expr = Call("select", "v3", "v3", "bool_v3");
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(v3)) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(bool_v3)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(v3)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(bool_v3)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
@@ -440,8 +435,8 @@ TEST_F(BuiltinBuilderTest, Call_Select) {
 %12 = OpTypeVoid
 %11 = OpTypeFunction %12
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%16 = OpLoad %8 %6
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%16 = OpLoad %8 %6
 %17 = OpLoad %3 %1
 %18 = OpLoad %3 %1
 %15 = OpSelect %3 %16 %17 %18
@@ -451,40 +446,38 @@ OpReturn
 
 // This tests that we do not push OpTypeSampledImage and float_0 type twice.
 TEST_F(BuiltinBuilderTest, Call_TextureSampleCompare_Twice) {
-  auto* s = ty.sampler(ast::SamplerKind::kComparisonSampler);
-  auto* t = ty.depth_texture(ast::TextureDimension::k2d);
+    auto* s = ty.sampler(ast::SamplerKind::kComparisonSampler);
+    auto* t = ty.depth_texture(ast::TextureDimension::k2d);
 
-  auto* tex = Global("texture", t,
-                     ast::AttributeList{
-                         create<ast::BindingAttribute>(0),
-                         create<ast::GroupAttribute>(0),
-                     });
+    auto* tex = Global("texture", t,
+                       ast::AttributeList{
+                           create<ast::BindingAttribute>(0),
+                           create<ast::GroupAttribute>(0),
+                       });
 
-  auto* sampler = Global("sampler", s,
-                         ast::AttributeList{
-                             create<ast::BindingAttribute>(1),
-                             create<ast::GroupAttribute>(0),
-                         });
+    auto* sampler = Global("sampler", s,
+                           ast::AttributeList{
+                               create<ast::BindingAttribute>(1),
+                               create<ast::GroupAttribute>(0),
+                           });
 
-  auto* expr1 = Call("textureSampleCompare", "texture", "sampler",
-                     vec2<f32>(1.0f, 2.0f), 2.0f);
-  auto* expr2 = Call("textureSampleCompare", "texture", "sampler",
-                     vec2<f32>(1.0f, 2.0f), 2.0f);
+    auto* expr1 = Call("textureSampleCompare", "texture", "sampler", vec2<f32>(1.0f, 2.0f), 2.0f);
+    auto* expr2 = Call("textureSampleCompare", "texture", "sampler", vec2<f32>(1.0f, 2.0f), 2.0f);
 
-  Func("f1", {}, ty.void_(), {CallStmt(expr1)}, {});
-  Func("f2", {}, ty.void_(), {CallStmt(expr2)}, {});
+    Func("f1", {}, ty.void_(), {CallStmt(expr1)}, {});
+    Func("f2", {}, ty.void_(), {CallStmt(expr2)}, {});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
+    b.push_function(Function{});
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(tex)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(sampler)) << b.error();
 
-  EXPECT_EQ(b.GenerateExpression(expr1), 8u) << b.error();
-  EXPECT_EQ(b.GenerateExpression(expr2), 17u) << b.error();
+    EXPECT_EQ(b.GenerateExpression(expr1), 8u) << b.error();
+    EXPECT_EQ(b.GenerateExpression(expr2), 17u) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 0 0 0 1 Unknown
 %2 = OpTypePointer UniformConstant %3
 %1 = OpVariable %2 UniformConstant
@@ -498,8 +491,8 @@ TEST_F(BuiltinBuilderTest, Call_TextureSampleCompare_Twice) {
 %16 = OpConstantComposite %13 %14 %15
 )");
 
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%9 = OpLoad %7 %5
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%9 = OpLoad %7 %5
 %10 = OpLoad %3 %1
 %12 = OpSampledImage %11 %10 %9
 %8 = OpImageSampleDrefImplicitLod %4 %12 %16 %15
@@ -511,19 +504,19 @@ TEST_F(BuiltinBuilderTest, Call_TextureSampleCompare_Twice) {
 }
 
 TEST_F(BuiltinBuilderTest, Call_GLSLMethod_WithLoad) {
-  auto* var = Global("ident", ty.f32(), ast::StorageClass::kPrivate);
-  auto* expr = Call("round", "ident");
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto* var = Global("ident", ty.f32(), ast::StorageClass::kPrivate);
+    auto* expr = Call("round", "ident");
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%10 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%10 = OpExtInstImport "GLSL.std.450"
 OpName %1 "ident"
 OpName %7 "a_func"
 %3 = OpTypeFloat 32
@@ -541,21 +534,20 @@ OpFunctionEnd
 )");
 }
 
-using Builtin_Builtin_SingleParam_Float_Test =
-    BuiltinBuilderTestWithParam<BuiltinData>;
+using Builtin_Builtin_SingleParam_Float_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_SingleParam_Float_Test, Call_Scalar) {
-  auto param = GetParam();
-  auto* expr = Call(param.name, 1.0f);
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* expr = Call(param.name, 1.0f);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -564,25 +556,25 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
-                                R"( %8
+                                  R"( %8
 OpReturn
 OpFunctionEnd
 )");
 }
 
 TEST_P(Builtin_Builtin_SingleParam_Float_Test, Call_Vector) {
-  auto param = GetParam();
-  auto* expr = Call(param.name, vec2<f32>(1.0f, 1.0f));
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* expr = Call(param.name, vec2<f32>(1.0f, 1.0f));
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -593,7 +585,7 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
-                                R"( %10
+                                  R"( %10
 OpReturn
 OpFunctionEnd
 )");
@@ -612,8 +604,7 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                                          BuiltinData{"exp2", "Exp2"},
                                          BuiltinData{"floor", "Floor"},
                                          BuiltinData{"fract", "Fract"},
-                                         BuiltinData{"inverseSqrt",
-                                                     "InverseSqrt"},
+                                         BuiltinData{"inverseSqrt", "InverseSqrt"},
                                          BuiltinData{"log", "Log"},
                                          BuiltinData{"log2", "Log2"},
                                          BuiltinData{"radians", "Radians"},
@@ -627,17 +618,17 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                                          BuiltinData{"trunc", "Trunc"}));
 
 TEST_F(BuiltinBuilderTest, Call_Length_Scalar) {
-  auto* expr = Call("length", 1.0f);
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto* expr = Call("length", 1.0f);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -652,17 +643,17 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Length_Vector) {
-  auto* expr = Call("length", vec2<f32>(1.0f, 1.0f));
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto* expr = Call("length", vec2<f32>(1.0f, 1.0f));
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -679,17 +670,17 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Normalize) {
-  auto* expr = Call("normalize", vec2<f32>(1.0f, 1.0f));
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto* expr = Call("normalize", vec2<f32>(1.0f, 1.0f));
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -705,21 +696,20 @@ OpFunctionEnd
 )");
 }
 
-using Builtin_Builtin_DualParam_Float_Test =
-    BuiltinBuilderTestWithParam<BuiltinData>;
+using Builtin_Builtin_DualParam_Float_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_DualParam_Float_Test, Call_Scalar) {
-  auto param = GetParam();
-  auto* expr = Call(param.name, 1.0f, 1.0f);
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* expr = Call(param.name, 1.0f, 1.0f);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -728,25 +718,25 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
-                                R"( %8 %8
+                                  R"( %8 %8
 OpReturn
 OpFunctionEnd
 )");
 }
 
 TEST_P(Builtin_Builtin_DualParam_Float_Test, Call_Vector) {
-  auto param = GetParam();
-  auto* expr = Call(param.name, vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* expr = Call(param.name, vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -757,7 +747,7 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
-                                R"( %10 %10
+                                  R"( %10 %10
 OpReturn
 OpFunctionEnd
 )");
@@ -771,17 +761,17 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                                          BuiltinData{"step", "Step"}));
 
 TEST_F(BuiltinBuilderTest, Call_Reflect_Vector) {
-  auto* expr = Call("reflect", vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto* expr = Call("reflect", vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -798,17 +788,17 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Distance_Scalar) {
-  auto* expr = Call("distance", 1.0f, 1.0f);
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto* expr = Call("distance", 1.0f, 1.0f);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -823,17 +813,17 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Distance_Vector) {
-  auto* expr = Call("distance", vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto* expr = Call("distance", vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -850,18 +840,17 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Cross) {
-  auto* expr =
-      Call("cross", vec3<f32>(1.0f, 1.0f, 1.0f), vec3<f32>(1.0f, 1.0f, 1.0f));
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto* expr = Call("cross", vec3<f32>(1.0f, 1.0f, 1.0f), vec3<f32>(1.0f, 1.0f, 1.0f));
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -877,21 +866,20 @@ OpFunctionEnd
 )");
 }
 
-using Builtin_Builtin_ThreeParam_Float_Test =
-    BuiltinBuilderTestWithParam<BuiltinData>;
+using Builtin_Builtin_ThreeParam_Float_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_ThreeParam_Float_Test, Call_Scalar) {
-  auto param = GetParam();
-  auto* expr = Call(param.name, 1.0f, 1.0f, 1.0f);
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* expr = Call(param.name, 1.0f, 1.0f, 1.0f);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -900,26 +888,26 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
-                                R"( %8 %8 %8
+                                  R"( %8 %8 %8
 OpReturn
 OpFunctionEnd
 )");
 }
 
 TEST_P(Builtin_Builtin_ThreeParam_Float_Test, Call_Vector) {
-  auto param = GetParam();
-  auto* expr = Call(param.name, vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f),
-                    vec2<f32>(1.0f, 1.0f));
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* expr =
+        Call(param.name, vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -930,7 +918,7 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
-                                R"( %10 %10 %10
+                                  R"( %10 %10 %10
 OpReturn
 OpFunctionEnd
 )");
@@ -941,22 +929,21 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                                          BuiltinData{"fma", "Fma"},
                                          BuiltinData{"mix", "FMix"},
 
-                                         BuiltinData{"smoothstep",
-                                                     "SmoothStep"}));
+                                         BuiltinData{"smoothstep", "SmoothStep"}));
 
 TEST_F(BuiltinBuilderTest, Call_FaceForward_Vector) {
-  auto* expr = Call("faceForward", vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f),
-                    vec2<f32>(1.0f, 1.0f));
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto* expr =
+        Call("faceForward", vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -972,21 +959,20 @@ OpFunctionEnd
 )");
 }
 
-using Builtin_Builtin_SingleParam_Sint_Test =
-    BuiltinBuilderTestWithParam<BuiltinData>;
+using Builtin_Builtin_SingleParam_Sint_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_SingleParam_Sint_Test, Call_Scalar) {
-  auto param = GetParam();
-  auto* expr = Call(param.name, 1);
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* expr = Call(param.name, 1);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -995,25 +981,25 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
-                                R"( %8
+                                  R"( %8
 OpReturn
 OpFunctionEnd
 )");
 }
 
 TEST_P(Builtin_Builtin_SingleParam_Sint_Test, Call_Vector) {
-  auto param = GetParam();
-  auto* expr = Call(param.name, vec2<i32>(1, 1));
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* expr = Call(param.name, vec2<i32>(1, 1));
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1024,7 +1010,7 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
-                                R"( %10
+                                  R"( %10
 OpReturn
 OpFunctionEnd
 )");
@@ -1036,17 +1022,17 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
 // Calling abs() on an unsigned integer scalar / vector is a no-op.
 using Builtin_Builtin_Abs_Uint_Test = BuiltinBuilderTest;
 TEST_F(Builtin_Builtin_Abs_Uint_Test, Call_Scalar) {
-  auto* expr = Call("abs", 1u);
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto* expr = Call("abs", 1u);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
+    EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeInt 32 0
@@ -1059,17 +1045,17 @@ OpFunctionEnd
 }
 
 TEST_F(Builtin_Builtin_Abs_Uint_Test, Call_Vector) {
-  auto* expr = Call("abs", vec2<u32>(1u, 1u));
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto* expr = Call("abs", vec2<u32>(1u, 1u));
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
+    EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %7 = OpTypeInt 32 0
@@ -1083,21 +1069,20 @@ OpFunctionEnd
 )");
 }
 
-using Builtin_Builtin_DualParam_SInt_Test =
-    BuiltinBuilderTestWithParam<BuiltinData>;
+using Builtin_Builtin_DualParam_SInt_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_DualParam_SInt_Test, Call_Scalar) {
-  auto param = GetParam();
-  auto* expr = Call(param.name, 1, 1);
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* expr = Call(param.name, 1, 1);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1106,25 +1091,25 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
-                                R"( %8 %8
+                                  R"( %8 %8
 OpReturn
 OpFunctionEnd
 )");
 }
 
 TEST_P(Builtin_Builtin_DualParam_SInt_Test, Call_Vector) {
-  auto param = GetParam();
-  auto* expr = Call(param.name, vec2<i32>(1, 1), vec2<i32>(1, 1));
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* expr = Call(param.name, vec2<i32>(1, 1), vec2<i32>(1, 1));
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1135,31 +1120,29 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
-                                R"( %10 %10
+                                  R"( %10 %10
 OpReturn
 OpFunctionEnd
 )");
 }
 INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          Builtin_Builtin_DualParam_SInt_Test,
-                         testing::Values(BuiltinData{"max", "SMax"},
-                                         BuiltinData{"min", "SMin"}));
+                         testing::Values(BuiltinData{"max", "SMax"}, BuiltinData{"min", "SMin"}));
 
-using Builtin_Builtin_DualParam_UInt_Test =
-    BuiltinBuilderTestWithParam<BuiltinData>;
+using Builtin_Builtin_DualParam_UInt_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_DualParam_UInt_Test, Call_Scalar) {
-  auto param = GetParam();
-  auto* expr = Call(param.name, 1u, 1u);
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* expr = Call(param.name, 1u, 1u);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1168,25 +1151,25 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
-                                R"( %8 %8
+                                  R"( %8 %8
 OpReturn
 OpFunctionEnd
 )");
 }
 
 TEST_P(Builtin_Builtin_DualParam_UInt_Test, Call_Vector) {
-  auto param = GetParam();
-  auto* expr = Call(param.name, vec2<u32>(1u, 1u), vec2<u32>(1u, 1u));
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* expr = Call(param.name, vec2<u32>(1u, 1u), vec2<u32>(1u, 1u));
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1197,31 +1180,29 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
-                                R"( %10 %10
+                                  R"( %10 %10
 OpReturn
 OpFunctionEnd
 )");
 }
 INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          Builtin_Builtin_DualParam_UInt_Test,
-                         testing::Values(BuiltinData{"max", "UMax"},
-                                         BuiltinData{"min", "UMin"}));
+                         testing::Values(BuiltinData{"max", "UMax"}, BuiltinData{"min", "UMin"}));
 
-using Builtin_Builtin_ThreeParam_Sint_Test =
-    BuiltinBuilderTestWithParam<BuiltinData>;
+using Builtin_Builtin_ThreeParam_Sint_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_ThreeParam_Sint_Test, Call_Scalar) {
-  auto param = GetParam();
-  auto* expr = Call(param.name, 1, 1, 1);
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* expr = Call(param.name, 1, 1, 1);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1230,26 +1211,25 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
-                                R"( %8 %8 %8
+                                  R"( %8 %8 %8
 OpReturn
 OpFunctionEnd
 )");
 }
 
 TEST_P(Builtin_Builtin_ThreeParam_Sint_Test, Call_Vector) {
-  auto param = GetParam();
-  auto* expr =
-      Call(param.name, vec2<i32>(1, 1), vec2<i32>(1, 1), vec2<i32>(1, 1));
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* expr = Call(param.name, vec2<i32>(1, 1), vec2<i32>(1, 1), vec2<i32>(1, 1));
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1260,7 +1240,7 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
-                                R"( %10 %10 %10
+                                  R"( %10 %10 %10
 OpReturn
 OpFunctionEnd
 )");
@@ -1269,21 +1249,20 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          Builtin_Builtin_ThreeParam_Sint_Test,
                          testing::Values(BuiltinData{"clamp", "SClamp"}));
 
-using Builtin_Builtin_ThreeParam_Uint_Test =
-    BuiltinBuilderTestWithParam<BuiltinData>;
+using Builtin_Builtin_ThreeParam_Uint_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_ThreeParam_Uint_Test, Call_Scalar) {
-  auto param = GetParam();
-  auto* expr = Call(param.name, 1u, 1u, 1u);
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* expr = Call(param.name, 1u, 1u, 1u);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1292,26 +1271,25 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
-                                R"( %8 %8 %8
+                                  R"( %8 %8 %8
 OpReturn
 OpFunctionEnd
 )");
 }
 
 TEST_P(Builtin_Builtin_ThreeParam_Uint_Test, Call_Vector) {
-  auto param = GetParam();
-  auto* expr =
-      Call(param.name, vec2<u32>(1u, 1u), vec2<u32>(1u, 1u), vec2<u32>(1u, 1u));
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto param = GetParam();
+    auto* expr = Call(param.name, vec2<u32>(1u, 1u), vec2<u32>(1u, 1u), vec2<u32>(1u, 1u));
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1322,7 +1300,7 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
-                                R"( %10 %10 %10
+                                  R"( %10 %10 %10
 OpReturn
 OpFunctionEnd
 )");
@@ -1332,15 +1310,14 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          testing::Values(BuiltinData{"clamp", "UClamp"}));
 
 TEST_F(BuiltinBuilderTest, Call_Modf) {
-  auto* expr = Call("modf", vec2<f32>(1.0f, 2.0f));
-  Func("a_func", {}, ty.void_(), {CallStmt(expr)},
-       {Stage(ast::PipelineStage::kFragment)});
+    auto* expr = Call("modf", vec2<f32>(1.0f, 2.0f));
+    Func("a_func", {}, ty.void_(), {CallStmt(expr)}, {Stage(ast::PipelineStage::kFragment)});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.Build()) << b.error();
-  auto got = DumpBuilder(b);
-  auto* expect = R"(OpCapability Shader
+    ASSERT_TRUE(b.Build()) << b.error();
+    auto got = DumpBuilder(b);
+    auto* expect = R"(OpCapability Shader
 %9 = OpExtInstImport "GLSL.std.450"
 OpMemoryModel Logical GLSL450
 OpEntryPoint Fragment %3 "a_func"
@@ -1365,21 +1342,20 @@ OpMemberDecorate %6 1 Offset 8
 OpReturn
 OpFunctionEnd
 )";
-  EXPECT_EQ(expect, got);
+    EXPECT_EQ(expect, got);
 
-  Validate(b);
+    Validate(b);
 }
 
 TEST_F(BuiltinBuilderTest, Call_Frexp) {
-  auto* expr = Call("frexp", vec2<f32>(1.0f, 2.0f));
-  Func("a_func", {}, ty.void_(), {CallStmt(expr)},
-       {Stage(ast::PipelineStage::kFragment)});
+    auto* expr = Call("frexp", vec2<f32>(1.0f, 2.0f));
+    Func("a_func", {}, ty.void_(), {CallStmt(expr)}, {Stage(ast::PipelineStage::kFragment)});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.Build()) << b.error();
-  auto got = DumpBuilder(b);
-  auto* expect = R"(OpCapability Shader
+    ASSERT_TRUE(b.Build()) << b.error();
+    auto got = DumpBuilder(b);
+    auto* expect = R"(OpCapability Shader
 %11 = OpExtInstImport "GLSL.std.450"
 OpMemoryModel Logical GLSL450
 OpEntryPoint Fragment %3 "a_func"
@@ -1406,25 +1382,25 @@ OpMemberDecorate %6 1 Offset 8
 OpReturn
 OpFunctionEnd
 )";
-  EXPECT_EQ(expect, got);
+    EXPECT_EQ(expect, got);
 
-  Validate(b);
+    Validate(b);
 }
 
 TEST_F(BuiltinBuilderTest, Call_Determinant) {
-  auto* var = Global("var", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
-  auto* expr = Call("determinant", "var");
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto* var = Global("var", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
+    auto* expr = Call("determinant", "var");
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(%12 = OpExtInstImport "GLSL.std.450"
+    EXPECT_EQ(DumpBuilder(b), R"(%12 = OpExtInstImport "GLSL.std.450"
 OpName %1 "var"
 OpName %9 "a_func"
 %5 = OpTypeFloat 32
@@ -1445,19 +1421,19 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Transpose) {
-  auto* var = Global("var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
-  auto* expr = Call("transpose", "var");
-  auto* func = Func("a_func", {}, ty.void_(),
-                    {
-                        Assign(Phony(), expr),
-                    });
+    auto* var = Global("var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
+    auto* expr = Call("transpose", "var");
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "var"
+    EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "var"
 OpName %9 "a_func"
 %5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
@@ -1479,29 +1455,29 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_ArrayLength) {
-  auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))});
-  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+    auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))});
+    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+           ast::AttributeList{
+               create<ast::BindingAttribute>(1),
+               create<ast::GroupAttribute>(2),
+           });
+    auto* expr = Call("arrayLength", AddressOf(MemberAccessor("b", "a")));
+
+    Func("a_func", {}, ty.void_(),
+         ast::StatementList{
+             CallStmt(expr),
+         },
          ast::AttributeList{
-             create<ast::BindingAttribute>(1),
-             create<ast::GroupAttribute>(2),
+             Stage(ast::PipelineStage::kFragment),
          });
-  auto* expr = Call("arrayLength", AddressOf(MemberAccessor("b", "a")));
 
-  Func("a_func", {}, ty.void_(),
-       ast::StatementList{
-           CallStmt(expr),
-       },
-       ast::AttributeList{
-           Stage(ast::PipelineStage::kFragment),
-       });
+    spirv::Builder& b = SanitizeAndBuild();
 
-  spirv::Builder& b = SanitizeAndBuild();
+    ASSERT_TRUE(b.Build()) << b.error();
 
-  ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_EQ(b.functions().size(), 1u);
 
-  ASSERT_EQ(b.functions().size(), 1u);
-
-  auto* expected_types = R"(%5 = OpTypeFloat 32
+    auto* expected_types = R"(%5 = OpTypeFloat 32
 %4 = OpTypeRuntimeArray %5
 %3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
@@ -1510,45 +1486,45 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength) {
 %6 = OpTypeFunction %7
 %11 = OpTypeInt 32 0
 )";
-  auto got_types = DumpInstructions(b.types());
-  EXPECT_EQ(expected_types, got_types);
+    auto got_types = DumpInstructions(b.types());
+    EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 0
+    auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 0
 OpReturn
 )";
-  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
-  EXPECT_EQ(expected_instructions, got_instructions);
+    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    EXPECT_EQ(expected_instructions, got_instructions);
 
-  Validate(b);
+    Validate(b);
 }
 
 TEST_F(BuiltinBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
-  auto* s = Structure("my_struct", {
-                                       Member("z", ty.f32()),
-                                       Member(4, "a", ty.array<f32>(4)),
-                                   });
-  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+    auto* s = Structure("my_struct", {
+                                         Member("z", ty.f32()),
+                                         Member(4, "a", ty.array<f32>(4)),
+                                     });
+    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+           ast::AttributeList{
+               create<ast::BindingAttribute>(1),
+               create<ast::GroupAttribute>(2),
+           });
+    auto* expr = Call("arrayLength", AddressOf(MemberAccessor("b", "a")));
+
+    Func("a_func", {}, ty.void_(),
+         ast::StatementList{
+             CallStmt(expr),
+         },
          ast::AttributeList{
-             create<ast::BindingAttribute>(1),
-             create<ast::GroupAttribute>(2),
+             Stage(ast::PipelineStage::kFragment),
          });
-  auto* expr = Call("arrayLength", AddressOf(MemberAccessor("b", "a")));
 
-  Func("a_func", {}, ty.void_(),
-       ast::StatementList{
-           CallStmt(expr),
-       },
-       ast::AttributeList{
-           Stage(ast::PipelineStage::kFragment),
-       });
+    spirv::Builder& b = SanitizeAndBuild();
 
-  spirv::Builder& b = SanitizeAndBuild();
+    ASSERT_TRUE(b.Build()) << b.error();
 
-  ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_EQ(b.functions().size(), 1u);
 
-  ASSERT_EQ(b.functions().size(), 1u);
-
-  auto* expected_types = R"(%4 = OpTypeFloat 32
+    auto* expected_types = R"(%4 = OpTypeFloat 32
 %5 = OpTypeRuntimeArray %4
 %3 = OpTypeStruct %4 %5
 %2 = OpTypePointer StorageBuffer %3
@@ -1557,47 +1533,47 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 %6 = OpTypeFunction %7
 %11 = OpTypeInt 32 0
 )";
-  auto got_types = DumpInstructions(b.types());
-  EXPECT_EQ(expected_types, got_types);
+    auto got_types = DumpInstructions(b.types());
+    EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 1
+    auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 1
 OpReturn
 )";
-  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
-  EXPECT_EQ(expected_instructions, got_instructions);
+    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    EXPECT_EQ(expected_instructions, got_instructions);
 
-  Validate(b);
+    Validate(b);
 }
 
 TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets) {
-  auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))});
-  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+    auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))});
+    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+           ast::AttributeList{
+               create<ast::BindingAttribute>(1),
+               create<ast::GroupAttribute>(2),
+           });
+
+    auto* p = Let("p", nullptr, AddressOf("b"));
+    auto* p2 = Let("p2", nullptr, AddressOf(MemberAccessor(Deref(p), "a")));
+    auto* expr = Call("arrayLength", p2);
+
+    Func("a_func", {}, ty.void_(),
+         ast::StatementList{
+             Decl(p),
+             Decl(p2),
+             CallStmt(expr),
+         },
          ast::AttributeList{
-             create<ast::BindingAttribute>(1),
-             create<ast::GroupAttribute>(2),
+             Stage(ast::PipelineStage::kFragment),
          });
 
-  auto* p = Let("p", nullptr, AddressOf("b"));
-  auto* p2 = Let("p2", nullptr, AddressOf(MemberAccessor(Deref(p), "a")));
-  auto* expr = Call("arrayLength", p2);
+    spirv::Builder& b = SanitizeAndBuild();
 
-  Func("a_func", {}, ty.void_(),
-       ast::StatementList{
-           Decl(p),
-           Decl(p2),
-           CallStmt(expr),
-       },
-       ast::AttributeList{
-           Stage(ast::PipelineStage::kFragment),
-       });
+    ASSERT_TRUE(b.Build()) << b.error();
 
-  spirv::Builder& b = SanitizeAndBuild();
+    ASSERT_EQ(b.functions().size(), 1u);
 
-  ASSERT_TRUE(b.Build()) << b.error();
-
-  ASSERT_EQ(b.functions().size(), 1u);
-
-  auto* expected_types = R"(%5 = OpTypeFloat 32
+    auto* expected_types = R"(%5 = OpTypeFloat 32
 %4 = OpTypeRuntimeArray %5
 %3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
@@ -1606,60 +1582,60 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets) {
 %6 = OpTypeFunction %7
 %11 = OpTypeInt 32 0
 )";
-  auto got_types = DumpInstructions(b.types());
-  EXPECT_EQ(expected_types, got_types);
+    auto got_types = DumpInstructions(b.types());
+    EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 0
+    auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 0
 OpReturn
 )";
-  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
-  EXPECT_EQ(expected_instructions, got_instructions);
+    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    EXPECT_EQ(expected_instructions, got_instructions);
 
-  Validate(b);
+    Validate(b);
 }
 
 TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
-  // struct my_struct {
-  //   a : array<f32>;
-  // };
-  // @binding(1) @group(2) var<storage, read> b : my_struct;
-  //
-  // fn a_func() {
-  //   let p = &*&b;
-  //   let p2 = &*p;
-  //   let p3 = &((*p).a);
-  //   arrayLength(&*p3);
-  // }
-  auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))});
-  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+    // struct my_struct {
+    //   a : array<f32>;
+    // };
+    // @binding(1) @group(2) var<storage, read> b : my_struct;
+    //
+    // fn a_func() {
+    //   let p = &*&b;
+    //   let p2 = &*p;
+    //   let p3 = &((*p).a);
+    //   arrayLength(&*p3);
+    // }
+    auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))});
+    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+           ast::AttributeList{
+               create<ast::BindingAttribute>(1),
+               create<ast::GroupAttribute>(2),
+           });
+
+    auto* p = Let("p", nullptr, AddressOf(Deref(AddressOf("b"))));
+    auto* p2 = Let("p2", nullptr, AddressOf(Deref(p)));
+    auto* p3 = Let("p3", nullptr, AddressOf(MemberAccessor(Deref(p2), "a")));
+    auto* expr = Call("arrayLength", AddressOf(Deref(p3)));
+
+    Func("a_func", {}, ty.void_(),
+         ast::StatementList{
+             Decl(p),
+             Decl(p2),
+             Decl(p3),
+             CallStmt(expr),
+         },
          ast::AttributeList{
-             create<ast::BindingAttribute>(1),
-             create<ast::GroupAttribute>(2),
+             Stage(ast::PipelineStage::kFragment),
          });
 
-  auto* p = Let("p", nullptr, AddressOf(Deref(AddressOf("b"))));
-  auto* p2 = Let("p2", nullptr, AddressOf(Deref(p)));
-  auto* p3 = Let("p3", nullptr, AddressOf(MemberAccessor(Deref(p2), "a")));
-  auto* expr = Call("arrayLength", AddressOf(Deref(p3)));
+    spirv::Builder& b = SanitizeAndBuild();
 
-  Func("a_func", {}, ty.void_(),
-       ast::StatementList{
-           Decl(p),
-           Decl(p2),
-           Decl(p3),
-           CallStmt(expr),
-       },
-       ast::AttributeList{
-           Stage(ast::PipelineStage::kFragment),
-       });
+    ASSERT_TRUE(b.Build()) << b.error();
 
-  spirv::Builder& b = SanitizeAndBuild();
+    ASSERT_EQ(b.functions().size(), 1u);
 
-  ASSERT_TRUE(b.Build()) << b.error();
-
-  ASSERT_EQ(b.functions().size(), 1u);
-
-  auto* expected_types = R"(%5 = OpTypeFloat 32
+    auto* expected_types = R"(%5 = OpTypeFloat 32
 %4 = OpTypeRuntimeArray %5
 %3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
@@ -1668,56 +1644,54 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
 %6 = OpTypeFunction %7
 %11 = OpTypeInt 32 0
 )";
-  auto got_types = DumpInstructions(b.types());
-  EXPECT_EQ(expected_types, got_types);
+    auto got_types = DumpInstructions(b.types());
+    EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 0
+    auto* expected_instructions = R"(%10 = OpArrayLength %11 %1 0
 OpReturn
 )";
-  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
-  EXPECT_EQ(expected_instructions, got_instructions);
+    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    EXPECT_EQ(expected_instructions, got_instructions);
 
-  Validate(b);
+    Validate(b);
 }
 
 TEST_F(BuiltinBuilderTest, Call_AtomicLoad) {
-  // struct S {
-  //   u : atomic<u32>;
-  //   i : atomic<i32>;
-  // }
-  //
-  // @binding(1) @group(2) var<storage, read_write> b : S;
-  //
-  // fn a_func() {
-  //   let u : u32 = atomicLoad(&b.u);
-  //   let i : i32 = atomicLoad(&b.i);
-  // }
-  auto* s = Structure("S", {
-                               Member("u", ty.atomic<u32>()),
-                               Member("i", ty.atomic<i32>()),
-                           });
-  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-         ast::AttributeList{
-             create<ast::BindingAttribute>(1),
-             create<ast::GroupAttribute>(2),
-         });
+    // struct S {
+    //   u : atomic<u32>;
+    //   i : atomic<i32>;
+    // }
+    //
+    // @binding(1) @group(2) var<storage, read_write> b : S;
+    //
+    // fn a_func() {
+    //   let u : u32 = atomicLoad(&b.u);
+    //   let i : i32 = atomicLoad(&b.i);
+    // }
+    auto* s = Structure("S", {
+                                 Member("u", ty.atomic<u32>()),
+                                 Member("i", ty.atomic<i32>()),
+                             });
+    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+           ast::AttributeList{
+               create<ast::BindingAttribute>(1),
+               create<ast::GroupAttribute>(2),
+           });
 
-  Func("a_func", {}, ty.void_(),
-       ast::StatementList{
-           Decl(Let("u", ty.u32(),
-                    Call("atomicLoad", AddressOf(MemberAccessor("b", "u"))))),
-           Decl(Let("i", ty.i32(),
-                    Call("atomicLoad", AddressOf(MemberAccessor("b", "i"))))),
-       },
-       ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
+    Func("a_func", {}, ty.void_(),
+         ast::StatementList{
+             Decl(Let("u", ty.u32(), Call("atomicLoad", AddressOf(MemberAccessor("b", "u"))))),
+             Decl(Let("i", ty.i32(), Call("atomicLoad", AddressOf(MemberAccessor("b", "i"))))),
+         },
+         ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
-  spirv::Builder& b = SanitizeAndBuild();
+    spirv::Builder& b = SanitizeAndBuild();
 
-  ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.error();
 
-  ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1u);
 
-  auto* expected_types = R"(%4 = OpTypeInt 32 0
+    auto* expected_types = R"(%4 = OpTypeInt 32 0
 %5 = OpTypeInt 32 1
 %3 = OpTypeStruct %4 %5
 %2 = OpTypePointer StorageBuffer %3
@@ -1729,63 +1703,61 @@ TEST_F(BuiltinBuilderTest, Call_AtomicLoad) {
 %14 = OpTypePointer StorageBuffer %4
 %18 = OpTypePointer StorageBuffer %5
 )";
-  auto got_types = DumpInstructions(b.types());
-  EXPECT_EQ(expected_types, got_types);
+    auto got_types = DumpInstructions(b.types());
+    EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(%15 = OpAccessChain %14 %1 %12
+    auto* expected_instructions = R"(%15 = OpAccessChain %14 %1 %12
 %10 = OpAtomicLoad %4 %15 %11 %12
 %19 = OpAccessChain %18 %1 %11
 %16 = OpAtomicLoad %5 %19 %11 %12
 OpReturn
 )";
-  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
-  EXPECT_EQ(expected_instructions, got_instructions);
+    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    EXPECT_EQ(expected_instructions, got_instructions);
 
-  Validate(b);
+    Validate(b);
 }
 
 TEST_F(BuiltinBuilderTest, Call_AtomicStore) {
-  // struct S {
-  //   u : atomic<u32>;
-  //   i : atomic<i32>;
-  // }
-  //
-  // @binding(1) @group(2) var<storage, read_write> b : S;
-  //
-  // fn a_func() {
-  //   var u = 1u;
-  //   var i = 2;
-  //   atomicStore(&b.u, u);
-  //   atomicStore(&b.i, i);
-  // }
-  auto* s = Structure("S", {
-                               Member("u", ty.atomic<u32>()),
-                               Member("i", ty.atomic<i32>()),
-                           });
-  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-         ast::AttributeList{
-             create<ast::BindingAttribute>(1),
-             create<ast::GroupAttribute>(2),
-         });
+    // struct S {
+    //   u : atomic<u32>;
+    //   i : atomic<i32>;
+    // }
+    //
+    // @binding(1) @group(2) var<storage, read_write> b : S;
+    //
+    // fn a_func() {
+    //   var u = 1u;
+    //   var i = 2;
+    //   atomicStore(&b.u, u);
+    //   atomicStore(&b.i, i);
+    // }
+    auto* s = Structure("S", {
+                                 Member("u", ty.atomic<u32>()),
+                                 Member("i", ty.atomic<i32>()),
+                             });
+    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+           ast::AttributeList{
+               create<ast::BindingAttribute>(1),
+               create<ast::GroupAttribute>(2),
+           });
 
-  Func("a_func", {}, ty.void_(),
-       ast::StatementList{
-           Decl(Var("u", nullptr, Expr(1u))),
-           Decl(Var("i", nullptr, Expr(2))),
-           CallStmt(
-               Call("atomicStore", AddressOf(MemberAccessor("b", "u")), "u")),
-           CallStmt(
-               Call("atomicStore", AddressOf(MemberAccessor("b", "i")), "i")),
-       },
-       ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
+    Func("a_func", {}, ty.void_(),
+         ast::StatementList{
+             Decl(Var("u", nullptr, Expr(1u))),
+             Decl(Var("i", nullptr, Expr(2))),
+             CallStmt(Call("atomicStore", AddressOf(MemberAccessor("b", "u")), "u")),
+             CallStmt(Call("atomicStore", AddressOf(MemberAccessor("b", "i")), "i")),
+         },
+         ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
-  spirv::Builder& b = SanitizeAndBuild();
+    spirv::Builder& b = SanitizeAndBuild();
 
-  ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.error();
 
-  ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1u);
 
-  auto* expected_types = R"(%4 = OpTypeInt 32 0
+    auto* expected_types = R"(%4 = OpTypeInt 32 0
 %5 = OpTypeInt 32 1
 %3 = OpTypeStruct %4 %5
 %2 = OpTypePointer StorageBuffer %3
@@ -1802,10 +1774,10 @@ TEST_F(BuiltinBuilderTest, Call_AtomicStore) {
 %21 = OpTypePointer StorageBuffer %4
 %26 = OpTypePointer StorageBuffer %5
 )";
-  auto got_types = DumpInstructions(b.types());
-  EXPECT_EQ(expected_types, got_types);
+    auto got_types = DumpInstructions(b.types());
+    EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(OpStore %11 %10
+    auto* expected_instructions = R"(OpStore %11 %10
 OpStore %15 %14
 %22 = OpAccessChain %21 %1 %19
 %23 = OpLoad %4 %11
@@ -1815,49 +1787,48 @@ OpAtomicStore %22 %10 %19 %23
 OpAtomicStore %27 %10 %19 %28
 OpReturn
 )";
-  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
-  EXPECT_EQ(expected_instructions, got_instructions);
+    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    EXPECT_EQ(expected_instructions, got_instructions);
 
-  Validate(b);
+    Validate(b);
 }
 
 using Builtin_Builtin_AtomicRMW_i32 = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_AtomicRMW_i32, Test) {
-  // struct S {
-  //   v : atomic<i32>;
-  // }
-  //
-  // @binding(1) @group(2) var<storage, read_write> b : S;
-  //
-  // fn a_func() {
-  //   var v = 10;
-  //   let x : i32 = atomicOP(&b.v, v);
-  // }
-  auto* s = Structure("S", {
-                               Member("v", ty.atomic<i32>()),
-                           });
-  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-         ast::AttributeList{
-             create<ast::BindingAttribute>(1),
-             create<ast::GroupAttribute>(2),
-         });
+    // struct S {
+    //   v : atomic<i32>;
+    // }
+    //
+    // @binding(1) @group(2) var<storage, read_write> b : S;
+    //
+    // fn a_func() {
+    //   var v = 10;
+    //   let x : i32 = atomicOP(&b.v, v);
+    // }
+    auto* s = Structure("S", {
+                                 Member("v", ty.atomic<i32>()),
+                             });
+    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+           ast::AttributeList{
+               create<ast::BindingAttribute>(1),
+               create<ast::GroupAttribute>(2),
+           });
 
-  Func("a_func", {}, ty.void_(),
-       ast::StatementList{
-           Decl(Var("v", nullptr, Expr(10))),
-           Decl(Let("x", ty.i32(),
-                    Call(GetParam().name, AddressOf(MemberAccessor("b", "v")),
-                         "v"))),
-       },
-       ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
+    Func("a_func", {}, ty.void_(),
+         ast::StatementList{
+             Decl(Var("v", nullptr, Expr(10))),
+             Decl(Let("x", ty.i32(),
+                      Call(GetParam().name, AddressOf(MemberAccessor("b", "v")), "v"))),
+         },
+         ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
-  spirv::Builder& b = SanitizeAndBuild();
+    spirv::Builder& b = SanitizeAndBuild();
 
-  ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.error();
 
-  ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1u);
 
-  std::string expected_types = R"(%4 = OpTypeInt 32 1
+    std::string expected_types = R"(%4 = OpTypeInt 32 1
 %3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
 %1 = OpVariable %2 StorageBuffer
@@ -1871,68 +1842,66 @@ TEST_P(Builtin_Builtin_AtomicRMW_i32, Test) {
 %16 = OpConstant %14 0
 %18 = OpTypePointer StorageBuffer %4
 )";
-  auto got_types = DumpInstructions(b.types());
-  EXPECT_EQ(expected_types, got_types);
+    auto got_types = DumpInstructions(b.types());
+    EXPECT_EQ(expected_types, got_types);
 
-  std::string expected_instructions = R"(OpStore %10 %9
+    std::string expected_instructions = R"(OpStore %10 %9
 %19 = OpAccessChain %18 %1 %16
 %20 = OpLoad %4 %10
 )";
-  expected_instructions += "%13 = " + GetParam().op + " %4 %19 %15 %16 %20\n";
-  expected_instructions += "OpReturn\n";
+    expected_instructions += "%13 = " + GetParam().op + " %4 %19 %15 %16 %20\n";
+    expected_instructions += "OpReturn\n";
 
-  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
-  EXPECT_EQ(expected_instructions, got_instructions);
+    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    EXPECT_EQ(expected_instructions, got_instructions);
 
-  Validate(b);
+    Validate(b);
 }
-INSTANTIATE_TEST_SUITE_P(
-    BuiltinBuilderTest,
-    Builtin_Builtin_AtomicRMW_i32,
-    testing::Values(BuiltinData{"atomicAdd", "OpAtomicIAdd"},
-                    BuiltinData{"atomicMax", "OpAtomicSMax"},
-                    BuiltinData{"atomicMin", "OpAtomicSMin"},
-                    BuiltinData{"atomicAnd", "OpAtomicAnd"},
-                    BuiltinData{"atomicOr", "OpAtomicOr"},
-                    BuiltinData{"atomicXor", "OpAtomicXor"}));
+INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
+                         Builtin_Builtin_AtomicRMW_i32,
+                         testing::Values(BuiltinData{"atomicAdd", "OpAtomicIAdd"},
+                                         BuiltinData{"atomicMax", "OpAtomicSMax"},
+                                         BuiltinData{"atomicMin", "OpAtomicSMin"},
+                                         BuiltinData{"atomicAnd", "OpAtomicAnd"},
+                                         BuiltinData{"atomicOr", "OpAtomicOr"},
+                                         BuiltinData{"atomicXor", "OpAtomicXor"}));
 
 using Builtin_Builtin_AtomicRMW_u32 = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_AtomicRMW_u32, Test) {
-  // struct S {
-  //   v : atomic<u32>;
-  // }
-  //
-  // @binding(1) @group(2) var<storage, read_write> b : S;
-  //
-  // fn a_func() {
-  //   var v = 10u;
-  //   let x : u32 = atomicOP(&b.v, v);
-  // }
-  auto* s = Structure("S", {
-                               Member("v", ty.atomic<u32>()),
-                           });
-  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-         ast::AttributeList{
-             create<ast::BindingAttribute>(1),
-             create<ast::GroupAttribute>(2),
-         });
+    // struct S {
+    //   v : atomic<u32>;
+    // }
+    //
+    // @binding(1) @group(2) var<storage, read_write> b : S;
+    //
+    // fn a_func() {
+    //   var v = 10u;
+    //   let x : u32 = atomicOP(&b.v, v);
+    // }
+    auto* s = Structure("S", {
+                                 Member("v", ty.atomic<u32>()),
+                             });
+    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+           ast::AttributeList{
+               create<ast::BindingAttribute>(1),
+               create<ast::GroupAttribute>(2),
+           });
 
-  Func("a_func", {}, ty.void_(),
-       ast::StatementList{
-           Decl(Var("v", nullptr, Expr(10u))),
-           Decl(Let("x", ty.u32(),
-                    Call(GetParam().name, AddressOf(MemberAccessor("b", "v")),
-                         "v"))),
-       },
-       ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
+    Func("a_func", {}, ty.void_(),
+         ast::StatementList{
+             Decl(Var("v", nullptr, Expr(10u))),
+             Decl(Let("x", ty.u32(),
+                      Call(GetParam().name, AddressOf(MemberAccessor("b", "v")), "v"))),
+         },
+         ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
-  spirv::Builder& b = SanitizeAndBuild();
+    spirv::Builder& b = SanitizeAndBuild();
 
-  ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.error();
 
-  ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1u);
 
-  std::string expected_types = R"(%4 = OpTypeInt 32 0
+    std::string expected_types = R"(%4 = OpTypeInt 32 0
 %3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
 %1 = OpVariable %2 StorageBuffer
@@ -1945,75 +1914,72 @@ TEST_P(Builtin_Builtin_AtomicRMW_u32, Test) {
 %15 = OpConstant %4 0
 %17 = OpTypePointer StorageBuffer %4
 )";
-  auto got_types = DumpInstructions(b.types());
-  EXPECT_EQ(expected_types, got_types);
+    auto got_types = DumpInstructions(b.types());
+    EXPECT_EQ(expected_types, got_types);
 
-  std::string expected_instructions = R"(OpStore %10 %9
+    std::string expected_instructions = R"(OpStore %10 %9
 %18 = OpAccessChain %17 %1 %15
 %19 = OpLoad %4 %10
 )";
-  expected_instructions += "%13 = " + GetParam().op + " %4 %18 %14 %15 %19\n";
-  expected_instructions += "OpReturn\n";
+    expected_instructions += "%13 = " + GetParam().op + " %4 %18 %14 %15 %19\n";
+    expected_instructions += "OpReturn\n";
 
-  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
-  EXPECT_EQ(expected_instructions, got_instructions);
+    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    EXPECT_EQ(expected_instructions, got_instructions);
 
-  Validate(b);
+    Validate(b);
 }
-INSTANTIATE_TEST_SUITE_P(
-    BuiltinBuilderTest,
-    Builtin_Builtin_AtomicRMW_u32,
-    testing::Values(BuiltinData{"atomicAdd", "OpAtomicIAdd"},
-                    BuiltinData{"atomicMax", "OpAtomicUMax"},
-                    BuiltinData{"atomicMin", "OpAtomicUMin"},
-                    BuiltinData{"atomicAnd", "OpAtomicAnd"},
-                    BuiltinData{"atomicOr", "OpAtomicOr"},
-                    BuiltinData{"atomicXor", "OpAtomicXor"}));
+INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
+                         Builtin_Builtin_AtomicRMW_u32,
+                         testing::Values(BuiltinData{"atomicAdd", "OpAtomicIAdd"},
+                                         BuiltinData{"atomicMax", "OpAtomicUMax"},
+                                         BuiltinData{"atomicMin", "OpAtomicUMin"},
+                                         BuiltinData{"atomicAnd", "OpAtomicAnd"},
+                                         BuiltinData{"atomicOr", "OpAtomicOr"},
+                                         BuiltinData{"atomicXor", "OpAtomicXor"}));
 
 TEST_F(BuiltinBuilderTest, Call_AtomicExchange) {
-  // struct S {
-  //   u : atomic<u32>;
-  //   i : atomic<i32>;
-  // }
-  //
-  // @binding(1) @group(2) var<storage, read_write> b : S;
-  //
-  // fn a_func() {
-  //   var u = 10u;
-  //   var i = 10;
-  //   let r : u32 = atomicExchange(&b.u, u);
-  //   let s : i32 = atomicExchange(&b.i, i);
-  // }
-  auto* s = Structure("S", {
-                               Member("u", ty.atomic<u32>()),
-                               Member("i", ty.atomic<i32>()),
-                           });
-  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-         ast::AttributeList{
-             create<ast::BindingAttribute>(1),
-             create<ast::GroupAttribute>(2),
-         });
+    // struct S {
+    //   u : atomic<u32>;
+    //   i : atomic<i32>;
+    // }
+    //
+    // @binding(1) @group(2) var<storage, read_write> b : S;
+    //
+    // fn a_func() {
+    //   var u = 10u;
+    //   var i = 10;
+    //   let r : u32 = atomicExchange(&b.u, u);
+    //   let s : i32 = atomicExchange(&b.i, i);
+    // }
+    auto* s = Structure("S", {
+                                 Member("u", ty.atomic<u32>()),
+                                 Member("i", ty.atomic<i32>()),
+                             });
+    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+           ast::AttributeList{
+               create<ast::BindingAttribute>(1),
+               create<ast::GroupAttribute>(2),
+           });
 
-  Func("a_func", {}, ty.void_(),
-       ast::StatementList{
-           Decl(Var("u", nullptr, Expr(10u))),
-           Decl(Var("i", nullptr, Expr(10))),
-           Decl(Let("r", ty.u32(),
-                    Call("atomicExchange", AddressOf(MemberAccessor("b", "u")),
-                         "u"))),
-           Decl(Let("s", ty.i32(),
-                    Call("atomicExchange", AddressOf(MemberAccessor("b", "i")),
-                         "i"))),
-       },
-       ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
+    Func("a_func", {}, ty.void_(),
+         ast::StatementList{
+             Decl(Var("u", nullptr, Expr(10u))),
+             Decl(Var("i", nullptr, Expr(10))),
+             Decl(Let("r", ty.u32(),
+                      Call("atomicExchange", AddressOf(MemberAccessor("b", "u")), "u"))),
+             Decl(Let("s", ty.i32(),
+                      Call("atomicExchange", AddressOf(MemberAccessor("b", "i")), "i"))),
+         },
+         ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
-  spirv::Builder& b = SanitizeAndBuild();
+    spirv::Builder& b = SanitizeAndBuild();
 
-  ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.error();
 
-  ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1u);
 
-  auto* expected_types = R"(%4 = OpTypeInt 32 0
+    auto* expected_types = R"(%4 = OpTypeInt 32 0
 %5 = OpTypeInt 32 1
 %3 = OpTypeStruct %4 %5
 %2 = OpTypePointer StorageBuffer %3
@@ -2031,10 +1997,10 @@ TEST_F(BuiltinBuilderTest, Call_AtomicExchange) {
 %22 = OpTypePointer StorageBuffer %4
 %27 = OpTypePointer StorageBuffer %5
 )";
-  auto got_types = DumpInstructions(b.types());
-  EXPECT_EQ(expected_types, got_types);
+    auto got_types = DumpInstructions(b.types());
+    EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(OpStore %11 %10
+    auto* expected_instructions = R"(OpStore %11 %10
 OpStore %15 %14
 %23 = OpAccessChain %22 %1 %20
 %24 = OpLoad %4 %11
@@ -2044,52 +2010,52 @@ OpStore %15 %14
 %25 = OpAtomicExchange %5 %28 %19 %20 %29
 OpReturn
 )";
-  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
-  EXPECT_EQ(expected_instructions, got_instructions);
+    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    EXPECT_EQ(expected_instructions, got_instructions);
 
-  Validate(b);
+    Validate(b);
 }
 
 TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
-  // struct S {
-  //   u : atomic<u32>;
-  //   i : atomic<i32>;
-  // }
-  //
-  // @binding(1) @group(2) var<storage, read_write> b : S;
-  //
-  // fn a_func() {
-  //   let u : vec2<u32> = atomicCompareExchangeWeak(&b.u, 10u);
-  //   let i : vec2<i32> = atomicCompareExchangeWeak(&b.i, 10);
-  // }
-  auto* s = Structure("S", {
-                               Member("u", ty.atomic<u32>()),
-                               Member("i", ty.atomic<i32>()),
-                           });
-  Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-         ast::AttributeList{
-             create<ast::BindingAttribute>(1),
-             create<ast::GroupAttribute>(2),
-         });
+    // struct S {
+    //   u : atomic<u32>;
+    //   i : atomic<i32>;
+    // }
+    //
+    // @binding(1) @group(2) var<storage, read_write> b : S;
+    //
+    // fn a_func() {
+    //   let u : vec2<u32> = atomicCompareExchangeWeak(&b.u, 10u);
+    //   let i : vec2<i32> = atomicCompareExchangeWeak(&b.i, 10);
+    // }
+    auto* s = Structure("S", {
+                                 Member("u", ty.atomic<u32>()),
+                                 Member("i", ty.atomic<i32>()),
+                             });
+    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+           ast::AttributeList{
+               create<ast::BindingAttribute>(1),
+               create<ast::GroupAttribute>(2),
+           });
 
-  Func("a_func", {}, ty.void_(),
-       ast::StatementList{
-           Decl(Let("u", ty.vec2<u32>(),
-                    Call("atomicCompareExchangeWeak",
-                         AddressOf(MemberAccessor("b", "u")), 10u, 20u))),
-           Decl(Let("i", ty.vec2<i32>(),
-                    Call("atomicCompareExchangeWeak",
-                         AddressOf(MemberAccessor("b", "i")), 10, 20))),
-       },
-       ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
+    Func("a_func", {}, ty.void_(),
+         ast::StatementList{
+             Decl(Let(
+                 "u", ty.vec2<u32>(),
+                 Call("atomicCompareExchangeWeak", AddressOf(MemberAccessor("b", "u")), 10u, 20u))),
+             Decl(Let(
+                 "i", ty.vec2<i32>(),
+                 Call("atomicCompareExchangeWeak", AddressOf(MemberAccessor("b", "i")), 10, 20))),
+         },
+         ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
-  spirv::Builder& b = SanitizeAndBuild();
+    spirv::Builder& b = SanitizeAndBuild();
 
-  ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.error();
 
-  ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1u);
 
-  auto* expected_types = R"(%4 = OpTypeInt 32 0
+    auto* expected_types = R"(%4 = OpTypeInt 32 0
 %5 = OpTypeInt 32 1
 %3 = OpTypeStruct %4 %5
 %2 = OpTypePointer StorageBuffer %3
@@ -2110,10 +2076,10 @@ TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
 %32 = OpConstant %5 0
 %33 = OpConstant %5 1
 )";
-  auto got_types = DumpInstructions(b.types());
-  EXPECT_EQ(expected_types, got_types);
+    auto got_types = DumpInstructions(b.types());
+    EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(%16 = OpAccessChain %15 %1 %13
+    auto* expected_instructions = R"(%16 = OpAccessChain %15 %1 %13
 %20 = OpAtomicCompareExchange %4 %16 %12 %13 %13 %17 %18
 %21 = OpIEqual %19 %20 %17
 %22 = OpSelect %4 %21 %12 %13
@@ -2125,28 +2091,27 @@ TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
 %23 = OpCompositeConstruct %24 %30 %34
 OpReturn
 )";
-  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
-  EXPECT_EQ(expected_instructions, got_instructions);
+    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    EXPECT_EQ(expected_instructions, got_instructions);
 
-  Validate(b);
+    Validate(b);
 }
 
-using Builtin_Builtin_DataPacking_Test =
-    BuiltinBuilderTestWithParam<BuiltinData>;
+using Builtin_Builtin_DataPacking_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_DataPacking_Test, Binary) {
-  auto param = GetParam();
+    auto param = GetParam();
 
-  bool pack4 = param.name == "pack4x8snorm" || param.name == "pack4x8unorm";
-  auto* call = pack4 ? Call(param.name, vec4<float>(1.0f, 1.0f, 1.0f, 1.0f))
-                     : Call(param.name, vec2<float>(1.0f, 1.0f));
-  auto* func = Func("a_func", {}, ty.void_(), {CallStmt(call)});
+    bool pack4 = param.name == "pack4x8snorm" || param.name == "pack4x8unorm";
+    auto* call = pack4 ? Call(param.name, vec4<float>(1.0f, 1.0f, 1.0f, 1.0f))
+                       : Call(param.name, vec2<float>(1.0f, 1.0f));
+    auto* func = Func("a_func", {}, ty.void_(), {CallStmt(call)});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  if (pack4) {
-    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    if (pack4) {
+        EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -2158,12 +2123,12 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
-                                  R"( %11
+                                      R"( %11
 OpReturn
 OpFunctionEnd
 )");
-  } else {
-    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    } else {
+        EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -2175,36 +2140,34 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %7 )" + param.op +
-                                  R"( %11
+                                      R"( %11
 OpReturn
 OpFunctionEnd
 )");
-  }
+    }
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    BuiltinBuilderTest,
-    Builtin_Builtin_DataPacking_Test,
-    testing::Values(BuiltinData{"pack4x8snorm", "PackSnorm4x8"},
-                    BuiltinData{"pack4x8unorm", "PackUnorm4x8"},
-                    BuiltinData{"pack2x16snorm", "PackSnorm2x16"},
-                    BuiltinData{"pack2x16unorm", "PackUnorm2x16"},
-                    BuiltinData{"pack2x16float", "PackHalf2x16"}));
+INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
+                         Builtin_Builtin_DataPacking_Test,
+                         testing::Values(BuiltinData{"pack4x8snorm", "PackSnorm4x8"},
+                                         BuiltinData{"pack4x8unorm", "PackUnorm4x8"},
+                                         BuiltinData{"pack2x16snorm", "PackSnorm2x16"},
+                                         BuiltinData{"pack2x16unorm", "PackUnorm2x16"},
+                                         BuiltinData{"pack2x16float", "PackHalf2x16"}));
 
-using Builtin_Builtin_DataUnpacking_Test =
-    BuiltinBuilderTestWithParam<BuiltinData>;
+using Builtin_Builtin_DataUnpacking_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_DataUnpacking_Test, Binary) {
-  auto param = GetParam();
+    auto param = GetParam();
 
-  bool pack4 = param.name == "unpack4x8snorm" || param.name == "unpack4x8unorm";
-  auto* func = Func("a_func", {}, ty.void_(), {CallStmt(Call(param.name, 1u))});
+    bool pack4 = param.name == "unpack4x8snorm" || param.name == "unpack4x8unorm";
+    auto* func = Func("a_func", {}, ty.void_(), {CallStmt(Call(param.name, 1u))});
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  if (pack4) {
-    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    if (pack4) {
+        EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -2215,12 +2178,12 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
-                                  R"( %10
+                                      R"( %10
 OpReturn
 OpFunctionEnd
 )");
-  } else {
-    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    } else {
+        EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -2231,102 +2194,101 @@ OpName %3 "a_func"
 %3 = OpFunction %2 None %1
 %4 = OpLabel
 %5 = OpExtInst %6 %8 )" + param.op +
-                                  R"( %10
+                                      R"( %10
 OpReturn
 OpFunctionEnd
 )");
-  }
+    }
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    BuiltinBuilderTest,
-    Builtin_Builtin_DataUnpacking_Test,
-    testing::Values(BuiltinData{"unpack4x8snorm", "UnpackSnorm4x8"},
-                    BuiltinData{"unpack4x8unorm", "UnpackUnorm4x8"},
-                    BuiltinData{"unpack2x16snorm", "UnpackSnorm2x16"},
-                    BuiltinData{"unpack2x16unorm", "UnpackUnorm2x16"},
-                    BuiltinData{"unpack2x16float", "UnpackHalf2x16"}));
+INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
+                         Builtin_Builtin_DataUnpacking_Test,
+                         testing::Values(BuiltinData{"unpack4x8snorm", "UnpackSnorm4x8"},
+                                         BuiltinData{"unpack4x8unorm", "UnpackUnorm4x8"},
+                                         BuiltinData{"unpack2x16snorm", "UnpackSnorm2x16"},
+                                         BuiltinData{"unpack2x16unorm", "UnpackUnorm2x16"},
+                                         BuiltinData{"unpack2x16float", "UnpackHalf2x16"}));
 
 TEST_F(BuiltinBuilderTest, Call_WorkgroupBarrier) {
-  Func("f", {}, ty.void_(),
-       ast::StatementList{
-           CallStmt(Call("workgroupBarrier")),
-       },
-       ast::AttributeList{
-           Stage(ast::PipelineStage::kCompute),
-           WorkgroupSize(1),
-       });
+    Func("f", {}, ty.void_(),
+         ast::StatementList{
+             CallStmt(Call("workgroupBarrier")),
+         },
+         ast::AttributeList{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1),
+         });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.error();
 
-  ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1u);
 
-  auto* expected_types = R"(%2 = OpTypeVoid
+    auto* expected_types = R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeInt 32 0
 %7 = OpConstant %6 2
 %8 = OpConstant %6 264
 )";
-  auto got_types = DumpInstructions(b.types());
-  EXPECT_EQ(expected_types, got_types);
+    auto got_types = DumpInstructions(b.types());
+    EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(OpControlBarrier %7 %7 %8
+    auto* expected_instructions = R"(OpControlBarrier %7 %7 %8
 OpReturn
 )";
-  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
-  EXPECT_EQ(expected_instructions, got_instructions);
+    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    EXPECT_EQ(expected_instructions, got_instructions);
 
-  Validate(b);
+    Validate(b);
 }
 
 TEST_F(BuiltinBuilderTest, Call_StorageBarrier) {
-  Func("f", {}, ty.void_(),
-       ast::StatementList{
-           CallStmt(Call("storageBarrier")),
-       },
-       ast::AttributeList{
-           Stage(ast::PipelineStage::kCompute),
-           WorkgroupSize(1),
-       });
+    Func("f", {}, ty.void_(),
+         ast::StatementList{
+             CallStmt(Call("storageBarrier")),
+         },
+         ast::AttributeList{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1),
+         });
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.error();
 
-  ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1u);
 
-  auto* expected_types = R"(%2 = OpTypeVoid
+    auto* expected_types = R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeInt 32 0
 %7 = OpConstant %6 2
 %8 = OpConstant %6 72
 )";
-  auto got_types = DumpInstructions(b.types());
-  EXPECT_EQ(expected_types, got_types);
+    auto got_types = DumpInstructions(b.types());
+    EXPECT_EQ(expected_types, got_types);
 
-  auto* expected_instructions = R"(OpControlBarrier %7 %7 %8
+    auto* expected_instructions = R"(OpControlBarrier %7 %7 %8
 OpReturn
 )";
-  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
-  EXPECT_EQ(expected_instructions, got_instructions);
+    auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+    EXPECT_EQ(expected_instructions, got_instructions);
 
-  Validate(b);
+    Validate(b);
 }
 
 TEST_F(BuiltinBuilderTest, Call_ExtractBits_i32) {
-  auto* v = Var("v", ty.i32());
-  auto* offset = Var("offset", ty.u32());
-  auto* count = Var("count", ty.u32());
-  auto* call = Call("extractBits", v, offset, count);
-  auto* func = WrapInFunction(v, offset, count, call);
+    auto* v = Var("v", ty.i32());
+    auto* offset = Var("offset", ty.u32());
+    auto* count = Var("count", ty.u32());
+    auto* call = Call("extractBits", v, offset, count);
+    auto* func = WrapInFunction(v, offset, count, call);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "v"
@@ -2355,17 +2317,17 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_ExtractBits_u32) {
-  auto* v = Var("v", ty.u32());
-  auto* offset = Var("offset", ty.u32());
-  auto* count = Var("count", ty.u32());
-  auto* call = Call("extractBits", v, offset, count);
-  auto* func = WrapInFunction(v, offset, count, call);
+    auto* v = Var("v", ty.u32());
+    auto* offset = Var("offset", ty.u32());
+    auto* count = Var("count", ty.u32());
+    auto* call = Call("extractBits", v, offset, count);
+    auto* func = WrapInFunction(v, offset, count, call);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "v"
@@ -2391,17 +2353,17 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_ExtractBits_vec3_i32) {
-  auto* v = Var("v", ty.vec3<i32>());
-  auto* offset = Var("offset", ty.u32());
-  auto* count = Var("count", ty.u32());
-  auto* call = Call("extractBits", v, offset, count);
-  auto* func = WrapInFunction(v, offset, count, call);
+    auto* v = Var("v", ty.vec3<i32>());
+    auto* offset = Var("offset", ty.u32());
+    auto* count = Var("count", ty.u32());
+    auto* call = Call("extractBits", v, offset, count);
+    auto* func = WrapInFunction(v, offset, count, call);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "v"
@@ -2431,17 +2393,17 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_ExtractBits_vec3_u32) {
-  auto* v = Var("v", ty.vec3<u32>());
-  auto* offset = Var("offset", ty.u32());
-  auto* count = Var("count", ty.u32());
-  auto* call = Call("extractBits", v, offset, count);
-  auto* func = WrapInFunction(v, offset, count, call);
+    auto* v = Var("v", ty.vec3<u32>());
+    auto* offset = Var("offset", ty.u32());
+    auto* count = Var("count", ty.u32());
+    auto* call = Call("extractBits", v, offset, count);
+    auto* func = WrapInFunction(v, offset, count, call);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "v"
@@ -2470,18 +2432,18 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_InsertBits_i32) {
-  auto* v = Var("v", ty.i32());
-  auto* n = Var("n", ty.i32());
-  auto* offset = Var("offset", ty.u32());
-  auto* count = Var("count", ty.u32());
-  auto* call = Call("insertBits", v, n, offset, count);
-  auto* func = WrapInFunction(v, n, offset, count, call);
+    auto* v = Var("v", ty.i32());
+    auto* n = Var("n", ty.i32());
+    auto* offset = Var("offset", ty.u32());
+    auto* count = Var("count", ty.u32());
+    auto* call = Call("insertBits", v, n, offset, count);
+    auto* func = WrapInFunction(v, n, offset, count, call);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "v"
@@ -2513,18 +2475,18 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_InsertBits_u32) {
-  auto* v = Var("v", ty.u32());
-  auto* n = Var("n", ty.u32());
-  auto* offset = Var("offset", ty.u32());
-  auto* count = Var("count", ty.u32());
-  auto* call = Call("insertBits", v, n, offset, count);
-  auto* func = WrapInFunction(v, n, offset, count, call);
+    auto* v = Var("v", ty.u32());
+    auto* n = Var("n", ty.u32());
+    auto* offset = Var("offset", ty.u32());
+    auto* count = Var("count", ty.u32());
+    auto* call = Call("insertBits", v, n, offset, count);
+    auto* func = WrapInFunction(v, n, offset, count, call);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "v"
@@ -2553,18 +2515,18 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_InsertBits_vec3_i32) {
-  auto* v = Var("v", ty.vec3<i32>());
-  auto* n = Var("n", ty.vec3<i32>());
-  auto* offset = Var("offset", ty.u32());
-  auto* count = Var("count", ty.u32());
-  auto* call = Call("insertBits", v, n, offset, count);
-  auto* func = WrapInFunction(v, n, offset, count, call);
+    auto* v = Var("v", ty.vec3<i32>());
+    auto* n = Var("n", ty.vec3<i32>());
+    auto* offset = Var("offset", ty.u32());
+    auto* count = Var("count", ty.u32());
+    auto* call = Call("insertBits", v, n, offset, count);
+    auto* func = WrapInFunction(v, n, offset, count, call);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "v"
@@ -2597,18 +2559,18 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_InsertBits_vec3_u32) {
-  auto* v = Var("v", ty.vec3<u32>());
-  auto* n = Var("n", ty.vec3<u32>());
-  auto* offset = Var("offset", ty.u32());
-  auto* count = Var("count", ty.u32());
-  auto* call = Call("insertBits", v, n, offset, count);
-  auto* func = WrapInFunction(v, n, offset, count, call);
+    auto* v = Var("v", ty.vec3<u32>());
+    auto* n = Var("n", ty.vec3<u32>());
+    auto* offset = Var("offset", ty.u32());
+    auto* count = Var("count", ty.u32());
+    auto* call = Call("insertBits", v, n, offset, count);
+    auto* func = WrapInFunction(v, n, offset, count, call);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "v"

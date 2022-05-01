@@ -21,11 +21,9 @@
 
 namespace dawn::native {
 
-    class DeviceBase;
+class DeviceBase;
 
-    MaybeError ValidateSpirv(DeviceBase* device,
-                             const std::vector<uint32_t>& spirv,
-                             bool dumpSpirv);
+MaybeError ValidateSpirv(DeviceBase* device, const std::vector<uint32_t>& spirv, bool dumpSpirv);
 
 }  // namespace dawn::native
 

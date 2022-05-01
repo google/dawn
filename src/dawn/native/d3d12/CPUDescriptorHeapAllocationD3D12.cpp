@@ -17,37 +17,35 @@
 
 namespace dawn::native::d3d12 {
 
-    CPUDescriptorHeapAllocation::CPUDescriptorHeapAllocation(
-        D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor,
-        uint32_t heapIndex)
-        : mBaseDescriptor(baseDescriptor), mHeapIndex(heapIndex) {
-    }
+CPUDescriptorHeapAllocation::CPUDescriptorHeapAllocation(D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor,
+                                                         uint32_t heapIndex)
+    : mBaseDescriptor(baseDescriptor), mHeapIndex(heapIndex) {}
 
-    D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorHeapAllocation::GetBaseDescriptor() const {
-        ASSERT(IsValid());
-        return mBaseDescriptor;
-    }
+D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorHeapAllocation::GetBaseDescriptor() const {
+    ASSERT(IsValid());
+    return mBaseDescriptor;
+}
 
-    D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorHeapAllocation::OffsetFrom(
-        uint32_t sizeIncrementInBytes,
-        uint32_t offsetInDescriptorCount) const {
-        ASSERT(IsValid());
-        D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = mBaseDescriptor;
-        cpuHandle.ptr += sizeIncrementInBytes * offsetInDescriptorCount;
-        return cpuHandle;
-    }
+D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorHeapAllocation::OffsetFrom(
+    uint32_t sizeIncrementInBytes,
+    uint32_t offsetInDescriptorCount) const {
+    ASSERT(IsValid());
+    D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = mBaseDescriptor;
+    cpuHandle.ptr += sizeIncrementInBytes * offsetInDescriptorCount;
+    return cpuHandle;
+}
 
-    uint32_t CPUDescriptorHeapAllocation::GetHeapIndex() const {
-        ASSERT(mHeapIndex >= 0);
-        return mHeapIndex;
-    }
+uint32_t CPUDescriptorHeapAllocation::GetHeapIndex() const {
+    ASSERT(mHeapIndex >= 0);
+    return mHeapIndex;
+}
 
-    bool CPUDescriptorHeapAllocation::IsValid() const {
-        return mBaseDescriptor.ptr != 0;
-    }
+bool CPUDescriptorHeapAllocation::IsValid() const {
+    return mBaseDescriptor.ptr != 0;
+}
 
-    void CPUDescriptorHeapAllocation::Invalidate() {
-        mBaseDescriptor = {0};
-    }
+void CPUDescriptorHeapAllocation::Invalidate() {
+    mBaseDescriptor = {0};
+}
 
 }  // namespace dawn::native::d3d12

@@ -21,27 +21,27 @@ namespace tint::fuzzers::regex_fuzzer {
 
 /// The backend this fuzzer will test.
 enum class FuzzingTarget {
-  kNone = 0,
-  kHlsl = 1 << 0,
-  kMsl = 1 << 1,
-  kSpv = 1 << 2,
-  kWgsl = 1 << 3,
-  kAll = kHlsl | kMsl | kSpv | kWgsl
+    kNone = 0,
+    kHlsl = 1 << 0,
+    kMsl = 1 << 1,
+    kSpv = 1 << 2,
+    kWgsl = 1 << 3,
+    kAll = kHlsl | kMsl | kSpv | kWgsl
 };
 
 inline FuzzingTarget operator|(FuzzingTarget a, FuzzingTarget b) {
-  return static_cast<FuzzingTarget>(static_cast<int>(a) | static_cast<int>(b));
+    return static_cast<FuzzingTarget>(static_cast<int>(a) | static_cast<int>(b));
 }
 
 inline FuzzingTarget operator&(FuzzingTarget a, FuzzingTarget b) {
-  return static_cast<FuzzingTarget>(static_cast<int>(a) & static_cast<int>(b));
+    return static_cast<FuzzingTarget>(static_cast<int>(a) & static_cast<int>(b));
 }
 
 /// CLI parameters accepted by the fuzzer. Type -tint_help in the CLI to see the
 /// help message
 struct CliParams {
-  /// Compiler backends we want to fuzz.
-  FuzzingTarget fuzzing_target = FuzzingTarget::kAll;
+    /// Compiler backends we want to fuzz.
+    FuzzingTarget fuzzing_target = FuzzingTarget::kAll;
 };
 
 /// @brief Parses CLI parameters.

@@ -19,99 +19,85 @@
 #include "gmock/gmock.h"
 
 namespace {
-    using Id = uint32_t;
+using Id = uint32_t;
 
-    enum class Action {
-        kReference,
-        kRelease,
-        kAssign,
-        kMarker,
-    };
+enum class Action {
+    kReference,
+    kRelease,
+    kAssign,
+    kMarker,
+};
 
-    struct Event {
-        Action action;
-        Id thisId = 0;
-        Id otherId = 0;
-    };
+struct Event {
+    Action action;
+    Id thisId = 0;
+    Id otherId = 0;
+};
 
-    std::ostream& operator<<(std::ostream& os, const Event& event) {
-        switch (event.action) {
-            case Action::kReference:
-                os << "Reference " << event.thisId;
-                break;
-            case Action::kRelease:
-                os << "Release " << event.thisId;
-                break;
-            case Action::kAssign:
-                os << "Assign " << event.thisId << " <- " << event.otherId;
-                break;
-            case Action::kMarker:
-                os << "Marker " << event.thisId;
-                break;
+std::ostream& operator<<(std::ostream& os, const Event& event) {
+    switch (event.action) {
+        case Action::kReference:
+            os << "Reference " << event.thisId;
+            break;
+        case Action::kRelease:
+            os << "Release " << event.thisId;
+            break;
+        case Action::kAssign:
+            os << "Assign " << event.thisId << " <- " << event.otherId;
+            break;
+        case Action::kMarker:
+            os << "Marker " << event.thisId;
+            break;
+    }
+    return os;
+}
+
+bool operator==(const Event& a, const Event& b) {
+    return a.action == b.action && a.thisId == b.thisId && a.otherId == b.otherId;
+}
+
+using Events = std::vector<Event>;
+
+struct RefTracker {
+    explicit constexpr RefTracker(nullptr_t) : mId(0), mEvents(nullptr) {}
+
+    constexpr RefTracker(const RefTracker& other) = default;
+
+    RefTracker(Id id, Events* events) : mId(id), mEvents(events) {}
+
+    void Reference() const { mEvents->emplace_back(Event{Action::kReference, mId}); }
+
+    void Release() const { mEvents->emplace_back(Event{Action::kRelease, mId}); }
+
+    RefTracker& operator=(const RefTracker& other) {
+        if (mEvents || other.mEvents) {
+            Events* events = mEvents ? mEvents : other.mEvents;
+            events->emplace_back(Event{Action::kAssign, mId, other.mId});
         }
-        return os;
+        mId = other.mId;
+        mEvents = other.mEvents;
+        return *this;
     }
 
-    bool operator==(const Event& a, const Event& b) {
-        return a.action == b.action && a.thisId == b.thisId && a.otherId == b.otherId;
-    }
+    bool operator==(const RefTracker& other) const { return mId == other.mId; }
 
-    using Events = std::vector<Event>;
+    bool operator!=(const RefTracker& other) const { return mId != other.mId; }
 
-    struct RefTracker {
-        explicit constexpr RefTracker(nullptr_t) : mId(0), mEvents(nullptr) {
-        }
+    Id mId;
+    Events* mEvents;
+};
 
-        constexpr RefTracker(const RefTracker& other) = default;
+struct RefTrackerTraits {
+    static constexpr RefTracker kNullValue{nullptr};
 
-        RefTracker(Id id, Events* events) : mId(id), mEvents(events) {
-        }
+    static void Reference(const RefTracker& handle) { handle.Reference(); }
 
-        void Reference() const {
-            mEvents->emplace_back(Event{Action::kReference, mId});
-        }
+    static void Release(const RefTracker& handle) { handle.Release(); }
+};
 
-        void Release() const {
-            mEvents->emplace_back(Event{Action::kRelease, mId});
-        }
+constexpr RefTracker RefTrackerTraits::kNullValue;
 
-        RefTracker& operator=(const RefTracker& other) {
-            if (mEvents || other.mEvents) {
-                Events* events = mEvents ? mEvents : other.mEvents;
-                events->emplace_back(Event{Action::kAssign, mId, other.mId});
-            }
-            mId = other.mId;
-            mEvents = other.mEvents;
-            return *this;
-        }
-
-        bool operator==(const RefTracker& other) const {
-            return mId == other.mId;
-        }
-
-        bool operator!=(const RefTracker& other) const {
-            return mId != other.mId;
-        }
-
-        Id mId;
-        Events* mEvents;
-    };
-
-    struct RefTrackerTraits {
-        static constexpr RefTracker kNullValue{nullptr};
-
-        static void Reference(const RefTracker& handle) {
-            handle.Reference();
-        }
-
-        static void Release(const RefTracker& handle) {
-            handle.Release();
-        }
-    };
-
-    constexpr RefTracker RefTrackerTraits::kNullValue;
-
-    using Ref = RefBase<RefTracker, RefTrackerTraits>;
+using Ref = RefBase<RefTracker, RefTrackerTraits>;
 }  // namespace
 
 TEST(RefBase, Acquire) {

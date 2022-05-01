@@ -22,34 +22,33 @@
 namespace tint::sem {
 
 /// A multisampled texture type.
-class MultisampledTexture final
-    : public Castable<MultisampledTexture, Texture> {
- public:
-  /// Constructor
-  /// @param dim the dimensionality of the texture
-  /// @param type the data type of the multisampled texture
-  MultisampledTexture(ast::TextureDimension dim, const Type* type);
-  /// Move constructor
-  MultisampledTexture(MultisampledTexture&&);
-  ~MultisampledTexture() override;
+class MultisampledTexture final : public Castable<MultisampledTexture, Texture> {
+  public:
+    /// Constructor
+    /// @param dim the dimensionality of the texture
+    /// @param type the data type of the multisampled texture
+    MultisampledTexture(ast::TextureDimension dim, const Type* type);
+    /// Move constructor
+    MultisampledTexture(MultisampledTexture&&);
+    ~MultisampledTexture() override;
 
-  /// @returns a hash of the type.
-  size_t Hash() const override;
+    /// @returns a hash of the type.
+    size_t Hash() const override;
 
-  /// @param other the other type to compare against
-  /// @returns true if the this type is equal to the given type
-  bool Equals(const Type& other) const override;
+    /// @param other the other type to compare against
+    /// @returns true if the this type is equal to the given type
+    bool Equals(const Type& other) const override;
 
-  /// @returns the subtype of the sampled texture
-  const Type* type() const { return type_; }
+    /// @returns the subtype of the sampled texture
+    const Type* type() const { return type_; }
 
-  /// @param symbols the program's symbol table
-  /// @returns the name for this type that closely resembles how it would be
-  /// declared in WGSL.
-  std::string FriendlyName(const SymbolTable& symbols) const override;
+    /// @param symbols the program's symbol table
+    /// @returns the name for this type that closely resembles how it would be
+    /// declared in WGSL.
+    std::string FriendlyName(const SymbolTable& symbols) const override;
 
- private:
-  const Type* const type_;
+  private:
+    const Type* const type_;
 };
 
 }  // namespace tint::sem

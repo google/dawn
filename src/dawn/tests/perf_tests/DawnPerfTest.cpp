@@ -27,47 +27,47 @@
 
 namespace {
 
-    DawnPerfTestEnvironment* gTestEnv = nullptr;
+DawnPerfTestEnvironment* gTestEnv = nullptr;
 
-    void DumpTraceEventsToJSONFile(
-        const std::vector<DawnPerfTestPlatform::TraceEvent>& traceEventBuffer,
-        const char* traceFile) {
-        std::ofstream outFile;
-        outFile.open(traceFile, std::ios_base::app);
+void DumpTraceEventsToJSONFile(
+    const std::vector<DawnPerfTestPlatform::TraceEvent>& traceEventBuffer,
+    const char* traceFile) {
+    std::ofstream outFile;
+    outFile.open(traceFile, std::ios_base::app);
 
-        for (const DawnPerfTestPlatform::TraceEvent& traceEvent : traceEventBuffer) {
-            const char* category = nullptr;
-            switch (traceEvent.category) {
-                case dawn::platform::TraceCategory::General:
-                    category = "general";
-                    break;
-                case dawn::platform::TraceCategory::Validation:
-                    category = "validation";
-                    break;
-                case dawn::platform::TraceCategory::Recording:
-                    category = "recording";
-                    break;
-                case dawn::platform::TraceCategory::GPUWork:
-                    category = "gpu";
-                    break;
-                default:
-                    UNREACHABLE();
-            }
-
-            uint64_t microseconds = static_cast<uint64_t>(traceEvent.timestamp * 1000.0 * 1000.0);
-
-            outFile << ", { "
-                    << "\"name\": \"" << traceEvent.name << "\", "
-                    << "\"cat\": \"" << category << "\", "
-                    << "\"ph\": \"" << traceEvent.phase << "\", "
-                    << "\"id\": " << traceEvent.id << ", "
-                    << "\"tid\": " << traceEvent.threadId << ", "
-                    << "\"ts\": " << microseconds << ", "
-                    << "\"pid\": \"Dawn\""
-                    << " }";
+    for (const DawnPerfTestPlatform::TraceEvent& traceEvent : traceEventBuffer) {
+        const char* category = nullptr;
+        switch (traceEvent.category) {
+            case dawn::platform::TraceCategory::General:
+                category = "general";
+                break;
+            case dawn::platform::TraceCategory::Validation:
+                category = "validation";
+                break;
+            case dawn::platform::TraceCategory::Recording:
+                category = "recording";
+                break;
+            case dawn::platform::TraceCategory::GPUWork:
+                category = "gpu";
+                break;
+            default:
+                UNREACHABLE();
         }
-        outFile.close();
+
+        uint64_t microseconds = static_cast<uint64_t>(traceEvent.timestamp * 1000.0 * 1000.0);
+
+        outFile << ", { "
+                << "\"name\": \"" << traceEvent.name << "\", "
+                << "\"cat\": \"" << category << "\", "
+                << "\"ph\": \"" << traceEvent.phase << "\", "
+                << "\"id\": " << traceEvent.id << ", "
+                << "\"tid\": " << traceEvent.threadId << ", "
+                << "\"ts\": " << microseconds << ", "
+                << "\"pid\": \"Dawn\""
+                << " }";
     }
+    outFile.close();
+}
 
 }  // namespace
 
@@ -179,8 +179,7 @@ DawnPerfTestBase::DawnPerfTestBase(DawnTestBase* test,
     : mTest(test),
       mIterationsPerStep(iterationsPerStep),
       mMaxStepsInFlight(maxStepsInFlight),
-      mTimer(utils::CreateTimer()) {
-}
+      mTimer(utils::CreateTimer()) {}
 
 DawnPerfTestBase::~DawnPerfTestBase() = default;
 

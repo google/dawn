@@ -24,26 +24,24 @@
 
 namespace wgpu::binding {
 
-    // GPURenderPipeline is an implementation of interop::GPURenderPipeline that wraps a
-    // wgpu::RenderPipeline.
-    class GPURenderPipeline final : public interop::GPURenderPipeline {
-      public:
-        explicit GPURenderPipeline(wgpu::RenderPipeline pipeline);
+// GPURenderPipeline is an implementation of interop::GPURenderPipeline that wraps a
+// wgpu::RenderPipeline.
+class GPURenderPipeline final : public interop::GPURenderPipeline {
+  public:
+    explicit GPURenderPipeline(wgpu::RenderPipeline pipeline);
 
-        // Implicit cast operator to Dawn GPU object
-        inline operator const wgpu::RenderPipeline&() const {
-            return pipeline_;
-        }
+    // Implicit cast operator to Dawn GPU object
+    inline operator const wgpu::RenderPipeline&() const { return pipeline_; }
 
-        // interop::GPURenderPipeline interface compliance
-        interop::Interface<interop::GPUBindGroupLayout> getBindGroupLayout(Napi::Env,
-                                                                           uint32_t index) override;
-        std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
-        void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
+    // interop::GPURenderPipeline interface compliance
+    interop::Interface<interop::GPUBindGroupLayout> getBindGroupLayout(Napi::Env,
+                                                                       uint32_t index) override;
+    std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
+    void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
 
-      private:
-        wgpu::RenderPipeline pipeline_;
-    };
+  private:
+    wgpu::RenderPipeline pipeline_;
+};
 
 }  // namespace wgpu::binding
 

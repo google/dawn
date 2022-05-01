@@ -25,33 +25,33 @@ namespace {
 using WrapArraysInStructsTest = TransformTest;
 
 TEST_F(WrapArraysInStructsTest, ShouldRunEmptyModule) {
-  auto* src = R"()";
+    auto* src = R"()";
 
-  EXPECT_FALSE(ShouldRun<WrapArraysInStructs>(src));
+    EXPECT_FALSE(ShouldRun<WrapArraysInStructs>(src));
 }
 
 TEST_F(WrapArraysInStructsTest, ShouldRunHasArray) {
-  auto* src = R"(
+    auto* src = R"(
 var<private> arr : array<i32, 4>;
 )";
 
-  EXPECT_TRUE(ShouldRun<WrapArraysInStructs>(src));
+    EXPECT_TRUE(ShouldRun<WrapArraysInStructs>(src));
 }
 
 TEST_F(WrapArraysInStructsTest, EmptyModule) {
-  auto* src = R"()";
-  auto* expect = src;
+    auto* src = R"()";
+    auto* expect = src;
 
-  auto got = Run<WrapArraysInStructs>(src);
+    auto got = Run<WrapArraysInStructs>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(WrapArraysInStructsTest, ArrayAsGlobal) {
-  auto* src = R"(
+    auto* src = R"(
 var<private> arr : array<i32, 4>;
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_array_wrapper {
   arr : array<i32, 4u>,
 }
@@ -59,19 +59,19 @@ struct tint_array_wrapper {
 var<private> arr : tint_array_wrapper;
 )";
 
-  auto got = Run<WrapArraysInStructs>(src);
+    auto got = Run<WrapArraysInStructs>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(WrapArraysInStructsTest, ArrayAsFunctionVar) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var arr : array<i32, 4>;
   let x = arr[3];
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_array_wrapper {
   arr : array<i32, 4u>,
 }
@@ -82,18 +82,18 @@ fn f() {
 }
 )";
 
-  auto got = Run<WrapArraysInStructs>(src);
+    auto got = Run<WrapArraysInStructs>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(WrapArraysInStructsTest, ArrayAsParam) {
-  auto* src = R"(
+    auto* src = R"(
 fn f(a : array<i32, 4>) -> i32 {
   return a[2];
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_array_wrapper {
   arr : array<i32, 4u>,
 }
@@ -103,18 +103,18 @@ fn f(a : tint_array_wrapper) -> i32 {
 }
 )";
 
-  auto got = Run<WrapArraysInStructs>(src);
+    auto got = Run<WrapArraysInStructs>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(WrapArraysInStructsTest, ArrayAsReturn) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() -> array<i32, 4> {
   return array<i32, 4>(1, 2, 3, 4);
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_array_wrapper {
   arr : array<i32, 4u>,
 }
@@ -124,13 +124,13 @@ fn f() -> tint_array_wrapper {
 }
 )";
 
-  auto got = Run<WrapArraysInStructs>(src);
+    auto got = Run<WrapArraysInStructs>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(WrapArraysInStructsTest, ArrayAlias) {
-  auto* src = R"(
+    auto* src = R"(
 type Inner = array<i32, 2>;
 type Array = array<Inner, 2>;
 
@@ -143,7 +143,7 @@ fn f() {
   let x = arr[3];
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_array_wrapper {
   arr : array<i32, 2u>,
 }
@@ -166,13 +166,13 @@ fn f() {
 }
 )";
 
-  auto got = Run<WrapArraysInStructs>(src);
+    auto got = Run<WrapArraysInStructs>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(WrapArraysInStructsTest, ArrayAlias_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var arr : Array;
   arr = Array();
@@ -185,7 +185,7 @@ fn f() {
 type Array = array<Inner, 2>;
 type Inner = array<i32, 2>;
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_array_wrapper_1 {
   arr : array<i32, 2u>,
 }
@@ -208,20 +208,20 @@ type Array = tint_array_wrapper;
 type Inner = tint_array_wrapper_1;
 )";
 
-  auto got = Run<WrapArraysInStructs>(src);
+    auto got = Run<WrapArraysInStructs>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(WrapArraysInStructsTest, ArraysInStruct) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   a : array<i32, 4>,
   b : array<i32, 8>,
   c : array<i32, 4>,
 };
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_array_wrapper {
   arr : array<i32, 4u>,
 }
@@ -237,20 +237,20 @@ struct S {
 }
 )";
 
-  auto got = Run<WrapArraysInStructs>(src);
+    auto got = Run<WrapArraysInStructs>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(WrapArraysInStructsTest, ArraysOfArraysInStruct) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   a : array<i32, 4>,
   b : array<array<i32, 4>, 4>,
   c : array<array<array<i32, 4>, 4>, 4>,
 };
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_array_wrapper {
   arr : array<i32, 4u>,
 }
@@ -270,13 +270,13 @@ struct S {
 }
 )";
 
-  auto got = Run<WrapArraysInStructs>(src);
+    auto got = Run<WrapArraysInStructs>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(WrapArraysInStructsTest, AccessArraysOfArraysInStruct) {
-  auto* src = R"(
+    auto* src = R"(
 struct S {
   a : array<i32, 4>,
   b : array<array<i32, 4>, 4>,
@@ -287,7 +287,7 @@ fn f(s : S) -> i32 {
   return s.a[2] + s.b[1][2] + s.c[3][1][2];
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_array_wrapper {
   arr : array<i32, 4u>,
 }
@@ -311,13 +311,13 @@ fn f(s : S) -> i32 {
 }
 )";
 
-  auto got = Run<WrapArraysInStructs>(src);
+    auto got = Run<WrapArraysInStructs>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(WrapArraysInStructsTest, DeclarationOrder) {
-  auto* src = R"(
+    auto* src = R"(
 type T0 = i32;
 
 type T1 = array<i32, 1>;
@@ -333,7 +333,7 @@ fn f2() {
   var v : array<i32, 3>;
 }
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 type T0 = i32;
 
 struct tint_array_wrapper {
@@ -362,13 +362,13 @@ fn f2() {
 }
 )";
 
-  auto got = Run<WrapArraysInStructs>(src);
+    auto got = Run<WrapArraysInStructs>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(WrapArraysInStructsTest, DeclarationOrder_OutOfOrder) {
-  auto* src = R"(
+    auto* src = R"(
 fn f2() {
   var v : array<i32, 3>;
 }
@@ -384,7 +384,7 @@ type T1 = array<i32, 1>;
 
 type T0 = i32;
 )";
-  auto* expect = R"(
+    auto* expect = R"(
 struct tint_array_wrapper {
   arr : array<i32, 3u>,
 }
@@ -413,9 +413,9 @@ type T1 = tint_array_wrapper_2;
 type T0 = i32;
 )";
 
-  auto got = Run<WrapArraysInStructs>(src);
+    auto got = Run<WrapArraysInStructs>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

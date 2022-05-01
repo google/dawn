@@ -19,12 +19,12 @@
 
 namespace dawn::native::vulkan {
 
-    // Contains a descriptor set along with data necessary to track its allocation.
-    struct DescriptorSetAllocation {
-        VkDescriptorSet set = VK_NULL_HANDLE;
-        uint32_t poolIndex;
-        uint16_t setIndex;
-    };
+// Contains a descriptor set along with data necessary to track its allocation.
+struct DescriptorSetAllocation {
+    VkDescriptorSet set = VK_NULL_HANDLE;
+    uint32_t poolIndex;
+    uint16_t setIndex;
+};
 
 }  // namespace dawn::native::vulkan
 

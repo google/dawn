@@ -31,93 +31,93 @@ std::filesystem::path kInputFileDir;
 /// @returns true if we successfully read the file.
 template <typename T>
 std::variant<std::vector<T>, Error> ReadFile(const std::string& input_file) {
-  FILE* file = nullptr;
+    FILE* file = nullptr;
 #if defined(_MSC_VER)
-  fopen_s(&file, input_file.c_str(), "rb");
+    fopen_s(&file, input_file.c_str(), "rb");
 #else
-  file = fopen(input_file.c_str(), "rb");
+    file = fopen(input_file.c_str(), "rb");
 #endif
-  if (!file) {
-    return Error{"Failed to open " + input_file};
-  }
+    if (!file) {
+        return Error{"Failed to open " + input_file};
+    }
 
-  fseek(file, 0, SEEK_END);
-  const auto file_size = static_cast<size_t>(ftell(file));
-  if (0 != (file_size % sizeof(T))) {
-    std::stringstream err;
-    err << "File " << input_file
-        << " does not contain an integral number of objects: " << file_size
-        << " bytes in the file, require " << sizeof(T) << " bytes per object";
+    fseek(file, 0, SEEK_END);
+    const auto file_size = static_cast<size_t>(ftell(file));
+    if (0 != (file_size % sizeof(T))) {
+        std::stringstream err;
+        err << "File " << input_file
+            << " does not contain an integral number of objects: " << file_size
+            << " bytes in the file, require " << sizeof(T) << " bytes per object";
+        fclose(file);
+        return Error{err.str()};
+    }
+    fseek(file, 0, SEEK_SET);
+
+    std::vector<T> buffer;
+    buffer.resize(file_size / sizeof(T));
+
+    size_t bytes_read = fread(buffer.data(), 1, file_size, file);
     fclose(file);
-    return Error{err.str()};
-  }
-  fseek(file, 0, SEEK_SET);
+    if (bytes_read != file_size) {
+        return Error{"Failed to read " + input_file};
+    }
 
-  std::vector<T> buffer;
-  buffer.resize(file_size / sizeof(T));
-
-  size_t bytes_read = fread(buffer.data(), 1, file_size, file);
-  fclose(file);
-  if (bytes_read != file_size) {
-    return Error{"Failed to read " + input_file};
-  }
-
-  return buffer;
+    return buffer;
 }
 
 bool FindBenchmarkInputDir() {
-  // Attempt to find the benchmark input files by searching up from the current
-  // working directory.
-  auto path = std::filesystem::current_path();
-  while (std::filesystem::is_directory(path)) {
-    auto test = path / "test" / "tint" / "benchmark";
-    if (std::filesystem::is_directory(test)) {
-      kInputFileDir = test;
-      return true;
+    // Attempt to find the benchmark input files by searching up from the current
+    // working directory.
+    auto path = std::filesystem::current_path();
+    while (std::filesystem::is_directory(path)) {
+        auto test = path / "test" / "tint" / "benchmark";
+        if (std::filesystem::is_directory(test)) {
+            kInputFileDir = test;
+            return true;
+        }
+        auto parent = path.parent_path();
+        if (path == parent) {
+            break;
+        }
+        path = parent;
     }
-    auto parent = path.parent_path();
-    if (path == parent) {
-      break;
-    }
-    path = parent;
-  }
-  return false;
+    return false;
 }
 
 }  // namespace
 
 std::variant<tint::Source::File, Error> LoadInputFile(std::string name) {
-  auto path = (kInputFileDir / name).string();
-  auto data = ReadFile<uint8_t>(path);
-  if (auto* buf = std::get_if<std::vector<uint8_t>>(&data)) {
-    return tint::Source::File(path, std::string(buf->begin(), buf->end()));
-  }
-  return std::get<Error>(data);
+    auto path = (kInputFileDir / name).string();
+    auto data = ReadFile<uint8_t>(path);
+    if (auto* buf = std::get_if<std::vector<uint8_t>>(&data)) {
+        return tint::Source::File(path, std::string(buf->begin(), buf->end()));
+    }
+    return std::get<Error>(data);
 }
 
 std::variant<ProgramAndFile, Error> LoadProgram(std::string name) {
-  auto res = bench::LoadInputFile(name);
-  if (auto err = std::get_if<bench::Error>(&res)) {
-    return *err;
-  }
-  auto& file = std::get<Source::File>(res);
-  auto program = reader::wgsl::Parse(&file);
-  if (program.Diagnostics().contains_errors()) {
-    return Error{program.Diagnostics().str()};
-  }
-  return ProgramAndFile{std::move(program), std::move(file)};
+    auto res = bench::LoadInputFile(name);
+    if (auto err = std::get_if<bench::Error>(&res)) {
+        return *err;
+    }
+    auto& file = std::get<Source::File>(res);
+    auto program = reader::wgsl::Parse(&file);
+    if (program.Diagnostics().contains_errors()) {
+        return Error{program.Diagnostics().str()};
+    }
+    return ProgramAndFile{std::move(program), std::move(file)};
 }
 
 }  // namespace tint::bench
 
 int main(int argc, char** argv) {
-  benchmark::Initialize(&argc, argv);
-  if (benchmark::ReportUnrecognizedArguments(argc, argv)) {
-    return 1;
-  }
-  if (!tint::bench::FindBenchmarkInputDir()) {
-    std::cerr << "failed to locate benchmark input files" << std::endl;
-    return 1;
-  }
-  benchmark::RunSpecifiedBenchmarks();
+    benchmark::Initialize(&argc, argv);
+    if (benchmark::ReportUnrecognizedArguments(argc, argv)) {
+        return 1;
+    }
+    if (!tint::bench::FindBenchmarkInputDir()) {
+        std::cerr << "failed to locate benchmark input files" << std::endl;
+        return 1;
+    }
+    benchmark::RunSpecifiedBenchmarks();
 }

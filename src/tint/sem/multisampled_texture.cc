@@ -21,10 +21,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::MultisampledTexture);
 
 namespace tint::sem {
 
-MultisampledTexture::MultisampledTexture(ast::TextureDimension dim,
-                                         const Type* type)
+MultisampledTexture::MultisampledTexture(ast::TextureDimension dim, const Type* type)
     : Base(dim), type_(type) {
-  TINT_ASSERT(Semantic, type_);
+    TINT_ASSERT(Semantic, type_);
 }
 
 MultisampledTexture::MultisampledTexture(MultisampledTexture&&) = default;
@@ -32,23 +31,20 @@ MultisampledTexture::MultisampledTexture(MultisampledTexture&&) = default;
 MultisampledTexture::~MultisampledTexture() = default;
 
 size_t MultisampledTexture::Hash() const {
-  return utils::Hash(TypeInfo::Of<MultisampledTexture>().full_hashcode, dim(),
-                     type_);
+    return utils::Hash(TypeInfo::Of<MultisampledTexture>().full_hashcode, dim(), type_);
 }
 
 bool MultisampledTexture::Equals(const sem::Type& other) const {
-  if (auto* o = other.As<MultisampledTexture>()) {
-    return o->dim() == dim() && o->type_ == type_;
-  }
-  return false;
+    if (auto* o = other.As<MultisampledTexture>()) {
+        return o->dim() == dim() && o->type_ == type_;
+    }
+    return false;
 }
 
-std::string MultisampledTexture::FriendlyName(
-    const SymbolTable& symbols) const {
-  std::ostringstream out;
-  out << "texture_multisampled_" << dim() << "<" << type_->FriendlyName(symbols)
-      << ">";
-  return out.str();
+std::string MultisampledTexture::FriendlyName(const SymbolTable& symbols) const {
+    std::ostringstream out;
+    out << "texture_multisampled_" << dim() << "<" << type_->FriendlyName(symbols) << ">";
+    return out.str();
 }
 
 }  // namespace tint::sem

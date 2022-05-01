@@ -22,13 +22,13 @@ namespace {
 using ForLoopToLoopTest = TransformTest;
 
 TEST_F(ForLoopToLoopTest, ShouldRunEmptyModule) {
-  auto* src = R"()";
+    auto* src = R"()";
 
-  EXPECT_FALSE(ShouldRun<ForLoopToLoop>(src));
+    EXPECT_FALSE(ShouldRun<ForLoopToLoop>(src));
 }
 
 TEST_F(ForLoopToLoopTest, ShouldRunHasForLoop) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   for (;;) {
     break;
@@ -36,21 +36,21 @@ fn f() {
 }
 )";
 
-  EXPECT_TRUE(ShouldRun<ForLoopToLoop>(src));
+    EXPECT_TRUE(ShouldRun<ForLoopToLoop>(src));
 }
 
 TEST_F(ForLoopToLoopTest, EmptyModule) {
-  auto* src = "";
-  auto* expect = src;
+    auto* src = "";
+    auto* expect = src;
 
-  auto got = Run<ForLoopToLoop>(src);
+    auto got = Run<ForLoopToLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 // Test an empty for loop.
 TEST_F(ForLoopToLoopTest, Empty) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   for (;;) {
     break;
@@ -58,7 +58,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   loop {
     break;
@@ -66,14 +66,14 @@ fn f() {
 }
 )";
 
-  auto got = Run<ForLoopToLoop>(src);
+    auto got = Run<ForLoopToLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 // Test a for loop with non-empty body.
 TEST_F(ForLoopToLoopTest, Body) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   for (;;) {
     discard;
@@ -81,7 +81,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   loop {
     discard;
@@ -89,14 +89,14 @@ fn f() {
 }
 )";
 
-  auto got = Run<ForLoopToLoop>(src);
+    auto got = Run<ForLoopToLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 // Test a for loop declaring a variable in the initializer statement.
 TEST_F(ForLoopToLoopTest, InitializerStatementDecl) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   for (var i: i32;;) {
     break;
@@ -104,7 +104,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   {
     var i : i32;
@@ -115,15 +115,15 @@ fn f() {
 }
 )";
 
-  auto got = Run<ForLoopToLoop>(src);
+    auto got = Run<ForLoopToLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 // Test a for loop declaring and initializing a variable in the initializer
 // statement.
 TEST_F(ForLoopToLoopTest, InitializerStatementDeclEqual) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   for (var i: i32 = 0;;) {
     break;
@@ -131,7 +131,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   {
     var i : i32 = 0;
@@ -142,14 +142,14 @@ fn f() {
 }
 )";
 
-  auto got = Run<ForLoopToLoop>(src);
+    auto got = Run<ForLoopToLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 // Test a for loop declaring a const variable in the initializer statement.
 TEST_F(ForLoopToLoopTest, InitializerStatementConstDecl) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   for (let i: i32 = 0;;) {
     break;
@@ -157,7 +157,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   {
     let i : i32 = 0;
@@ -168,14 +168,14 @@ fn f() {
 }
 )";
 
-  auto got = Run<ForLoopToLoop>(src);
+    auto got = Run<ForLoopToLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 // Test a for loop assigning a variable in the initializer statement.
 TEST_F(ForLoopToLoopTest, InitializerStatementAssignment) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i: i32;
   for (i = 0;;) {
@@ -184,7 +184,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i : i32;
   {
@@ -196,14 +196,14 @@ fn f() {
 }
 )";
 
-  auto got = Run<ForLoopToLoop>(src);
+    auto got = Run<ForLoopToLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 // Test a for loop calling a function in the initializer statement.
 TEST_F(ForLoopToLoopTest, InitializerStatementFuncCall) {
-  auto* src = R"(
+    auto* src = R"(
 fn a(x : i32, y : i32) {
 }
 
@@ -216,7 +216,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn a(x : i32, y : i32) {
 }
 
@@ -232,21 +232,21 @@ fn f() {
 }
 )";
 
-  auto got = Run<ForLoopToLoop>(src);
+    auto got = Run<ForLoopToLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 // Test a for loop with a break condition
 TEST_F(ForLoopToLoopTest, BreakCondition) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   for (; 0 == 1;) {
   }
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   loop {
     if (!((0 == 1))) {
@@ -256,14 +256,14 @@ fn f() {
 }
 )";
 
-  auto got = Run<ForLoopToLoop>(src);
+    auto got = Run<ForLoopToLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 // Test a for loop assigning a variable in the continuing statement.
 TEST_F(ForLoopToLoopTest, ContinuingAssignment) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var x: i32;
   for (;;x = 2) {
@@ -272,7 +272,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var x : i32;
   loop {
@@ -285,14 +285,14 @@ fn f() {
 }
 )";
 
-  auto got = Run<ForLoopToLoop>(src);
+    auto got = Run<ForLoopToLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 // Test a for loop calling a function in the continuing statement.
 TEST_F(ForLoopToLoopTest, ContinuingFuncCall) {
-  auto* src = R"(
+    auto* src = R"(
 fn a(x : i32, y : i32) {
 }
 
@@ -305,7 +305,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn a(x : i32, y : i32) {
 }
 
@@ -322,14 +322,14 @@ fn f() {
 }
 )";
 
-  auto got = Run<ForLoopToLoop>(src);
+    auto got = Run<ForLoopToLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 // Test a for loop with all statements non-empty.
 TEST_F(ForLoopToLoopTest, All) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var a : i32;
   for(var i : i32 = 0; i < 4; i = i + 1) {
@@ -341,7 +341,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var a : i32;
   {
@@ -363,9 +363,9 @@ fn f() {
 }
 )";
 
-  auto got = Run<ForLoopToLoop>(src);
+    auto got = Run<ForLoopToLoop>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

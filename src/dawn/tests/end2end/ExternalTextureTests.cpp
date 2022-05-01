@@ -18,30 +18,30 @@
 
 namespace {
 
-    wgpu::Texture Create2DTexture(wgpu::Device device,
-                                  uint32_t width,
-                                  uint32_t height,
-                                  wgpu::TextureFormat format,
-                                  wgpu::TextureUsage usage) {
-        wgpu::TextureDescriptor descriptor;
-        descriptor.dimension = wgpu::TextureDimension::e2D;
-        descriptor.size.width = width;
-        descriptor.size.height = height;
-        descriptor.size.depthOrArrayLayers = 1;
-        descriptor.sampleCount = 1;
-        descriptor.format = format;
-        descriptor.mipLevelCount = 1;
-        descriptor.usage = usage;
-        return device.CreateTexture(&descriptor);
-    }
+wgpu::Texture Create2DTexture(wgpu::Device device,
+                              uint32_t width,
+                              uint32_t height,
+                              wgpu::TextureFormat format,
+                              wgpu::TextureUsage usage) {
+    wgpu::TextureDescriptor descriptor;
+    descriptor.dimension = wgpu::TextureDimension::e2D;
+    descriptor.size.width = width;
+    descriptor.size.height = height;
+    descriptor.size.depthOrArrayLayers = 1;
+    descriptor.sampleCount = 1;
+    descriptor.format = format;
+    descriptor.mipLevelCount = 1;
+    descriptor.usage = usage;
+    return device.CreateTexture(&descriptor);
+}
 
-    class ExternalTextureTests : public DawnTest {
-      protected:
-        static constexpr uint32_t kWidth = 4;
-        static constexpr uint32_t kHeight = 4;
-        static constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
-        static constexpr wgpu::TextureUsage kSampledUsage = wgpu::TextureUsage::TextureBinding;
-    };
+class ExternalTextureTests : public DawnTest {
+  protected:
+    static constexpr uint32_t kWidth = 4;
+    static constexpr uint32_t kHeight = 4;
+    static constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
+    static constexpr wgpu::TextureUsage kSampledUsage = wgpu::TextureUsage::TextureBinding;
+};
 }  // anonymous namespace
 
 TEST_P(ExternalTextureTests, CreateExternalTextureSuccess) {

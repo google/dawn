@@ -21,41 +21,41 @@
 
 namespace wgpu::binding {
 
-    // Errors contains static helper methods for creating DOMException error
-    // messages as documented at:
-    // https://heycam.github.io/webidl/#idl-DOMException-error-names
-    class Errors {
-      public:
-        static Napi::Error HierarchyRequestError(Napi::Env, std::string message = {});
-        static Napi::Error WrongDocumentError(Napi::Env, std::string message = {});
-        static Napi::Error InvalidCharacterError(Napi::Env, std::string message = {});
-        static Napi::Error NoModificationAllowedError(Napi::Env, std::string message = {});
-        static Napi::Error NotFoundError(Napi::Env, std::string message = {});
-        static Napi::Error NotSupportedError(Napi::Env, std::string message = {});
-        static Napi::Error InUseAttributeError(Napi::Env, std::string message = {});
-        static Napi::Error InvalidStateError(Napi::Env, std::string message = {});
-        static Napi::Error SyntaxError(Napi::Env, std::string message = {});
-        static Napi::Error InvalidModificationError(Napi::Env, std::string message = {});
-        static Napi::Error NamespaceError(Napi::Env, std::string message = {});
-        static Napi::Error SecurityError(Napi::Env, std::string message = {});
-        static Napi::Error NetworkError(Napi::Env, std::string message = {});
-        static Napi::Error AbortError(Napi::Env, std::string message = {});
-        static Napi::Error URLMismatchError(Napi::Env, std::string message = {});
-        static Napi::Error QuotaExceededError(Napi::Env, std::string message = {});
-        static Napi::Error TimeoutError(Napi::Env, std::string message = {});
-        static Napi::Error InvalidNodeTypeError(Napi::Env, std::string message = {});
-        static Napi::Error DataCloneError(Napi::Env, std::string message = {});
-        static Napi::Error EncodingError(Napi::Env, std::string message = {});
-        static Napi::Error NotReadableError(Napi::Env, std::string message = {});
-        static Napi::Error UnknownError(Napi::Env, std::string message = {});
-        static Napi::Error ConstraintError(Napi::Env, std::string message = {});
-        static Napi::Error DataError(Napi::Env, std::string message = {});
-        static Napi::Error TransactionInactiveError(Napi::Env, std::string message = {});
-        static Napi::Error ReadOnlyError(Napi::Env, std::string message = {});
-        static Napi::Error VersionError(Napi::Env, std::string message = {});
-        static Napi::Error OperationError(Napi::Env, std::string message = {});
-        static Napi::Error NotAllowedError(Napi::Env, std::string message = {});
-    };
+// Errors contains static helper methods for creating DOMException error
+// messages as documented at:
+// https://heycam.github.io/webidl/#idl-DOMException-error-names
+class Errors {
+  public:
+    static Napi::Error HierarchyRequestError(Napi::Env, std::string message = {});
+    static Napi::Error WrongDocumentError(Napi::Env, std::string message = {});
+    static Napi::Error InvalidCharacterError(Napi::Env, std::string message = {});
+    static Napi::Error NoModificationAllowedError(Napi::Env, std::string message = {});
+    static Napi::Error NotFoundError(Napi::Env, std::string message = {});
+    static Napi::Error NotSupportedError(Napi::Env, std::string message = {});
+    static Napi::Error InUseAttributeError(Napi::Env, std::string message = {});
+    static Napi::Error InvalidStateError(Napi::Env, std::string message = {});
+    static Napi::Error SyntaxError(Napi::Env, std::string message = {});
+    static Napi::Error InvalidModificationError(Napi::Env, std::string message = {});
+    static Napi::Error NamespaceError(Napi::Env, std::string message = {});
+    static Napi::Error SecurityError(Napi::Env, std::string message = {});
+    static Napi::Error NetworkError(Napi::Env, std::string message = {});
+    static Napi::Error AbortError(Napi::Env, std::string message = {});
+    static Napi::Error URLMismatchError(Napi::Env, std::string message = {});
+    static Napi::Error QuotaExceededError(Napi::Env, std::string message = {});
+    static Napi::Error TimeoutError(Napi::Env, std::string message = {});
+    static Napi::Error InvalidNodeTypeError(Napi::Env, std::string message = {});
+    static Napi::Error DataCloneError(Napi::Env, std::string message = {});
+    static Napi::Error EncodingError(Napi::Env, std::string message = {});
+    static Napi::Error NotReadableError(Napi::Env, std::string message = {});
+    static Napi::Error UnknownError(Napi::Env, std::string message = {});
+    static Napi::Error ConstraintError(Napi::Env, std::string message = {});
+    static Napi::Error DataError(Napi::Env, std::string message = {});
+    static Napi::Error TransactionInactiveError(Napi::Env, std::string message = {});
+    static Napi::Error ReadOnlyError(Napi::Env, std::string message = {});
+    static Napi::Error VersionError(Napi::Env, std::string message = {});
+    static Napi::Error OperationError(Napi::Env, std::string message = {});
+    static Napi::Error NotAllowedError(Napi::Env, std::string message = {});
+};
 
 }  // namespace wgpu::binding
 

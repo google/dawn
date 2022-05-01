@@ -21,31 +21,29 @@
 
 namespace dawn::platform {
 
-    class Platform;
-    enum class TraceCategory;
+class Platform;
+enum class TraceCategory;
 
-    namespace tracing {
+namespace tracing {
 
-        using TraceEventHandle = uint64_t;
+using TraceEventHandle = uint64_t;
 
-        DAWN_PLATFORM_EXPORT const unsigned char* GetTraceCategoryEnabledFlag(
-            Platform* platform,
-            TraceCategory category);
+DAWN_PLATFORM_EXPORT const unsigned char* GetTraceCategoryEnabledFlag(Platform* platform,
+                                                                      TraceCategory category);
 
-        // TODO(enga): Simplify this API.
-        DAWN_PLATFORM_EXPORT TraceEventHandle
-        AddTraceEvent(Platform* platform,
-                      char phase,
-                      const unsigned char* categoryGroupEnabled,
-                      const char* name,
-                      uint64_t id,
-                      int numArgs,
-                      const char** argNames,
-                      const unsigned char* argTypes,
-                      const uint64_t* argValues,
-                      unsigned char flags);
+// TODO(enga): Simplify this API.
+DAWN_PLATFORM_EXPORT TraceEventHandle AddTraceEvent(Platform* platform,
+                                                    char phase,
+                                                    const unsigned char* categoryGroupEnabled,
+                                                    const char* name,
+                                                    uint64_t id,
+                                                    int numArgs,
+                                                    const char** argNames,
+                                                    const unsigned char* argTypes,
+                                                    const uint64_t* argValues,
+                                                    unsigned char flags);
 
-    }  // namespace tracing
+}  // namespace tracing
 }  // namespace dawn::platform
 
 #endif  // SRC_DAWN_PLATFORM_TRACING_EVENTTRACER_H_

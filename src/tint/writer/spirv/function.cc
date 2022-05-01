@@ -16,8 +16,7 @@
 
 namespace tint::writer::spirv {
 
-Function::Function()
-    : declaration_(Instruction{spv::Op::OpNop, {}}), label_op_(Operand(0u)) {}
+Function::Function() : declaration_(Instruction{spv::Op::OpNop, {}}), label_op_(Operand(0u)) {}
 
 Function::Function(const Instruction& declaration,
                    const Operand& label_op,
@@ -29,22 +28,22 @@ Function::Function(const Function& other) = default;
 Function::~Function() = default;
 
 void Function::iterate(std::function<void(const Instruction&)> cb) const {
-  cb(declaration_);
+    cb(declaration_);
 
-  for (const auto& param : params_) {
-    cb(param);
-  }
+    for (const auto& param : params_) {
+        cb(param);
+    }
 
-  cb(Instruction{spv::Op::OpLabel, {label_op_}});
+    cb(Instruction{spv::Op::OpLabel, {label_op_}});
 
-  for (const auto& var : vars_) {
-    cb(var);
-  }
-  for (const auto& inst : instructions_) {
-    cb(inst);
-  }
+    for (const auto& var : vars_) {
+        cb(var);
+    }
+    for (const auto& inst : instructions_) {
+        cb(inst);
+    }
 
-  cb(Instruction{spv::Op::OpFunctionEnd, {}});
+    cb(Instruction{spv::Op::OpFunctionEnd, {}});
 }
 
 }  // namespace tint::writer::spirv

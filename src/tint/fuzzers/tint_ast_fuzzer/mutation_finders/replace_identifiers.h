@@ -24,13 +24,11 @@ namespace tint::fuzzers::ast_fuzzer {
 /// Concretely, for each variable in the module, tries to replace its users with
 /// the uses of some other variables.
 class MutationFinderReplaceIdentifiers : public MutationFinder {
- public:
-  MutationList FindMutations(
-      const tint::Program& program,
-      NodeIdMap* node_id_map,
-      ProbabilityContext* probability_context) const override;
-  uint32_t GetChanceOfApplyingMutation(
-      ProbabilityContext* probability_context) const override;
+  public:
+    MutationList FindMutations(const tint::Program& program,
+                               NodeIdMap* node_id_map,
+                               ProbabilityContext* probability_context) const override;
+    uint32_t GetChanceOfApplyingMutation(ProbabilityContext* probability_context) const override;
 };
 
 }  // namespace tint::fuzzers::ast_fuzzer

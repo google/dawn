@@ -28,13 +28,13 @@ GroupAttribute::GroupAttribute(ProgramID pid, const Source& src, uint32_t val)
 GroupAttribute::~GroupAttribute() = default;
 
 std::string GroupAttribute::Name() const {
-  return "group";
+    return "group";
 }
 
 const GroupAttribute* GroupAttribute::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<GroupAttribute>(src, value);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<GroupAttribute>(src, value);
 }
 
 }  // namespace tint::ast

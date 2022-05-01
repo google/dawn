@@ -20,17 +20,16 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::PhonyExpression);
 
 namespace tint::ast {
 
-PhonyExpression::PhonyExpression(ProgramID pid, const Source& src)
-    : Base(pid, src) {}
+PhonyExpression::PhonyExpression(ProgramID pid, const Source& src) : Base(pid, src) {}
 
 PhonyExpression::PhonyExpression(PhonyExpression&&) = default;
 
 PhonyExpression::~PhonyExpression() = default;
 
 const PhonyExpression* PhonyExpression::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  return ctx->dst->create<PhonyExpression>(src);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<PhonyExpression>(src);
 }
 
 }  // namespace tint::ast

@@ -20,20 +20,20 @@
 
 namespace dawn::native {
 
-    class CommandEncoder;
-    struct CombinedLimits;
-    class DeviceBase;
-    class RenderPassResourceUsageTracker;
+class CommandEncoder;
+struct CombinedLimits;
+class DeviceBase;
+class RenderPassResourceUsageTracker;
 
-    // The maximum number of draws call we can fit into a single validation batch. This is
-    // essentially limited by the number of indirect parameter blocks that can fit into the maximum
-    // allowed storage binding size (with the base limits, it is about 6.7M).
-    uint32_t ComputeMaxDrawCallsPerIndirectValidationBatch(const CombinedLimits& limits);
+// The maximum number of draws call we can fit into a single validation batch. This is
+// essentially limited by the number of indirect parameter blocks that can fit into the maximum
+// allowed storage binding size (with the base limits, it is about 6.7M).
+uint32_t ComputeMaxDrawCallsPerIndirectValidationBatch(const CombinedLimits& limits);
 
-    MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
-                                                    CommandEncoder* commandEncoder,
-                                                    RenderPassResourceUsageTracker* usageTracker,
-                                                    IndirectDrawMetadata* indirectDrawMetadata);
+MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
+                                                CommandEncoder* commandEncoder,
+                                                RenderPassResourceUsageTracker* usageTracker,
+                                                IndirectDrawMetadata* indirectDrawMetadata);
 
 }  // namespace dawn::native
 

@@ -18,47 +18,47 @@ namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, StorageTextureType_Invalid) {
-  auto p = parser("abc");
-  auto t = p->storage_texture();
-  EXPECT_FALSE(t.matched);
-  EXPECT_FALSE(t.errored);
-  EXPECT_FALSE(p->has_error());
+    auto p = parser("abc");
+    auto t = p->storage_texture();
+    EXPECT_FALSE(t.matched);
+    EXPECT_FALSE(t.errored);
+    EXPECT_FALSE(p->has_error());
 }
 
 TEST_F(ParserImplTest, StorageTextureType_1d) {
-  auto p = parser("texture_storage_1d");
-  auto t = p->storage_texture();
-  EXPECT_TRUE(t.matched);
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TextureDimension::k1d);
-  EXPECT_FALSE(p->has_error());
+    auto p = parser("texture_storage_1d");
+    auto t = p->storage_texture();
+    EXPECT_TRUE(t.matched);
+    EXPECT_FALSE(t.errored);
+    EXPECT_EQ(t.value, ast::TextureDimension::k1d);
+    EXPECT_FALSE(p->has_error());
 }
 
 TEST_F(ParserImplTest, StorageTextureType_2d) {
-  auto p = parser("texture_storage_2d");
-  auto t = p->storage_texture();
-  EXPECT_TRUE(t.matched);
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TextureDimension::k2d);
-  EXPECT_FALSE(p->has_error());
+    auto p = parser("texture_storage_2d");
+    auto t = p->storage_texture();
+    EXPECT_TRUE(t.matched);
+    EXPECT_FALSE(t.errored);
+    EXPECT_EQ(t.value, ast::TextureDimension::k2d);
+    EXPECT_FALSE(p->has_error());
 }
 
 TEST_F(ParserImplTest, StorageTextureType_2dArray) {
-  auto p = parser("texture_storage_2d_array");
-  auto t = p->storage_texture();
-  EXPECT_TRUE(t.matched);
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TextureDimension::k2dArray);
-  EXPECT_FALSE(p->has_error());
+    auto p = parser("texture_storage_2d_array");
+    auto t = p->storage_texture();
+    EXPECT_TRUE(t.matched);
+    EXPECT_FALSE(t.errored);
+    EXPECT_EQ(t.value, ast::TextureDimension::k2dArray);
+    EXPECT_FALSE(p->has_error());
 }
 
 TEST_F(ParserImplTest, StorageTextureType_3d) {
-  auto p = parser("texture_storage_3d");
-  auto t = p->storage_texture();
-  EXPECT_TRUE(t.matched);
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, ast::TextureDimension::k3d);
-  EXPECT_FALSE(p->has_error());
+    auto p = parser("texture_storage_3d");
+    auto t = p->storage_texture();
+    EXPECT_TRUE(t.matched);
+    EXPECT_FALSE(t.errored);
+    EXPECT_EQ(t.value, ast::TextureDimension::k3d);
+    EXPECT_FALSE(p->has_error());
 }
 
 }  // namespace

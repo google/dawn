@@ -20,17 +20,17 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Fallthrough) {
-  auto* f = create<ast::FallthroughStatement>();
-  WrapInFunction(Switch(1,                        //
-                        Case(Expr(1), Block(f)),  //
-                        DefaultCase()));
+    auto* f = create<ast::FallthroughStatement>();
+    WrapInFunction(Switch(1,                        //
+                          Case(Expr(1), Block(f)),  //
+                          DefaultCase()));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
-  EXPECT_EQ(gen.result(), "  fallthrough;\n");
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    EXPECT_EQ(gen.result(), "  fallthrough;\n");
 }
 
 }  // namespace

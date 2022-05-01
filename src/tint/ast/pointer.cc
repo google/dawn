@@ -28,17 +28,17 @@ Pointer::Pointer(ProgramID pid,
     : Base(pid, src), type(subtype), storage_class(sc), access(ac) {}
 
 std::string Pointer::FriendlyName(const SymbolTable& symbols) const {
-  std::ostringstream out;
-  out << "ptr<";
-  if (storage_class != ast::StorageClass::kNone) {
-    out << storage_class << ", ";
-  }
-  out << type->FriendlyName(symbols);
-  if (access != ast::Access::kUndefined) {
-    out << ", " << access;
-  }
-  out << ">";
-  return out.str();
+    std::ostringstream out;
+    out << "ptr<";
+    if (storage_class != ast::StorageClass::kNone) {
+        out << storage_class << ", ";
+    }
+    out << type->FriendlyName(symbols);
+    if (access != ast::Access::kUndefined) {
+        out << ", " << access;
+    }
+    out << ">";
+    return out.str();
 }
 
 Pointer::Pointer(Pointer&&) = default;
@@ -46,10 +46,10 @@ Pointer::Pointer(Pointer&&) = default;
 Pointer::~Pointer() = default;
 
 const Pointer* Pointer::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto src = ctx->Clone(source);
-  auto* ty = ctx->Clone(type);
-  return ctx->dst->create<Pointer>(src, ty, storage_class, access);
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    auto* ty = ctx->Clone(type);
+    return ctx->dst->create<Pointer>(src, ty, storage_class, access);
 }
 
 }  // namespace tint::ast

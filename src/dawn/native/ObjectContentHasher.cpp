@@ -16,7 +16,7 @@
 
 namespace dawn::native {
 
-    size_t ObjectContentHasher::GetContentHash() const {
-        return mContentHash;
-    }
+size_t ObjectContentHasher::GetContentHash() const {
+    return mContentHash;
+}
 }  // namespace dawn::native

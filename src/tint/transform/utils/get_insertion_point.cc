@@ -19,40 +19,39 @@
 
 namespace tint::transform::utils {
 
-InsertionPoint GetInsertionPoint(CloneContext& ctx,
-                                 const ast::Statement* stmt) {
-  auto& sem = ctx.src->Sem();
-  auto& diag = ctx.dst->Diagnostics();
-  using RetType = std::pair<const sem::BlockStatement*, const ast::Statement*>;
+InsertionPoint GetInsertionPoint(CloneContext& ctx, const ast::Statement* stmt) {
+    auto& sem = ctx.src->Sem();
+    auto& diag = ctx.dst->Diagnostics();
+    using RetType = std::pair<const sem::BlockStatement*, const ast::Statement*>;
 
-  if (auto* sem_stmt = sem.Get(stmt)) {
-    auto* parent = sem_stmt->Parent();
-    return Switch(
-        parent,
-        [&](const sem::BlockStatement* block) -> RetType {
-          // Common case, can insert in the current block above/below the input
-          // statement.
-          return {block, stmt};
-        },
-        [&](const sem::ForLoopStatement* fl) -> RetType {
-          // `stmt` is either the for loop initializer or the continuing
-          // statement of a for-loop.
-          if (fl->Declaration()->initializer == stmt) {
-            // For loop init, can insert above the for loop itself.
-            return {fl->Block(), fl->Declaration()};
-          }
+    if (auto* sem_stmt = sem.Get(stmt)) {
+        auto* parent = sem_stmt->Parent();
+        return Switch(
+            parent,
+            [&](const sem::BlockStatement* block) -> RetType {
+                // Common case, can insert in the current block above/below the input
+                // statement.
+                return {block, stmt};
+            },
+            [&](const sem::ForLoopStatement* fl) -> RetType {
+                // `stmt` is either the for loop initializer or the continuing
+                // statement of a for-loop.
+                if (fl->Declaration()->initializer == stmt) {
+                    // For loop init, can insert above the for loop itself.
+                    return {fl->Block(), fl->Declaration()};
+                }
 
-          // Cannot insert before or after continuing statement of a for-loop
-          return {};
-        },
-        [&](Default) -> RetType {
-          TINT_ICE(Transform, diag) << "expected parent of statement to be "
-                                       "either a block or for loop";
-          return {};
-        });
-  }
+                // Cannot insert before or after continuing statement of a for-loop
+                return {};
+            },
+            [&](Default) -> RetType {
+                TINT_ICE(Transform, diag) << "expected parent of statement to be "
+                                             "either a block or for loop";
+                return {};
+            });
+    }
 
-  return {};
+    return {};
 }
 
 }  // namespace tint::transform::utils

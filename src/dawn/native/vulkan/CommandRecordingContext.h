@@ -20,21 +20,21 @@
 #include "dawn/native/vulkan/BufferVk.h"
 
 namespace dawn::native::vulkan {
-    // Used to track operations that are handled after recording.
-    // Currently only tracks semaphores, but may be used to do barrier coalescing in the future.
-    struct CommandRecordingContext {
-        VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
-        std::vector<VkSemaphore> waitSemaphores = {};
-        std::vector<VkSemaphore> signalSemaphores = {};
+// Used to track operations that are handled after recording.
+// Currently only tracks semaphores, but may be used to do barrier coalescing in the future.
+struct CommandRecordingContext {
+    VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
+    std::vector<VkSemaphore> waitSemaphores = {};
+    std::vector<VkSemaphore> signalSemaphores = {};
 
-        // The internal buffers used in the workaround of texture-to-texture copies with compressed
-        // formats.
-        std::vector<Ref<Buffer>> tempBuffers;
+    // The internal buffers used in the workaround of texture-to-texture copies with compressed
+    // formats.
+    std::vector<Ref<Buffer>> tempBuffers;
 
-        // For Device state tracking only.
-        VkCommandPool commandPool = VK_NULL_HANDLE;
-        bool used = false;
-    };
+    // For Device state tracking only.
+    VkCommandPool commandPool = VK_NULL_HANDLE;
+    bool used = false;
+};
 
 }  // namespace dawn::native::vulkan
 

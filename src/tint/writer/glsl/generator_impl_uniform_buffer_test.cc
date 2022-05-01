@@ -23,14 +23,13 @@ namespace {
 using GlslGeneratorImplTest_UniformBuffer = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_UniformBuffer, Simple) {
-  auto* simple = Structure("Simple", {Member("member", ty.f32())});
-  Global("simple", ty.Of(simple), ast::StorageClass::kUniform,
-         GroupAndBinding(0, 0));
+    auto* simple = Structure("Simple", {Member("member", ty.f32())});
+    Global("simple", ty.Of(simple), ast::StorageClass::kUniform, GroupAndBinding(0, 0));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#version 310 es
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 310 es
 
 struct Simple {
   float member;
@@ -44,14 +43,13 @@ layout(binding = 0) uniform Simple_1 {
 }
 
 TEST_F(GlslGeneratorImplTest_UniformBuffer, Simple_Desktop) {
-  auto* simple = Structure("Simple", {Member("member", ty.f32())});
-  Global("simple", ty.Of(simple), ast::StorageClass::kUniform,
-         GroupAndBinding(0, 0));
+    auto* simple = Structure("Simple", {Member("member", ty.f32())});
+    Global("simple", ty.Of(simple), ast::StorageClass::kUniform, GroupAndBinding(0, 0));
 
-  GeneratorImpl& gen = Build(Version(Version::Standard::kDesktop, 4, 4));
+    GeneratorImpl& gen = Build(Version(Version::Standard::kDesktop, 4, 4));
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#version 440
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 440
 
 struct Simple {
   float member;

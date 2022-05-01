@@ -20,18 +20,18 @@ namespace {
 using HlslGeneratorImplTest_Assign = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Assign) {
-  Func("fn", {}, ty.void_(),
-       {
-           Decl(Var("lhs", ty.i32())),
-           Decl(Var("rhs", ty.i32())),
-           Assign("lhs", "rhs"),
-       });
+    Func("fn", {}, ty.void_(),
+         {
+             Decl(Var("lhs", ty.i32())),
+             Decl(Var("rhs", ty.i32())),
+             Assign("lhs", "rhs"),
+         });
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate());
-  EXPECT_EQ(gen.result(),
-            R"(void fn() {
+    ASSERT_TRUE(gen.Generate());
+    EXPECT_EQ(gen.result(),
+              R"(void fn() {
   int lhs = 0;
   int rhs = 0;
   lhs = rhs;
@@ -40,19 +40,19 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Assign) {
 }
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Vector_Assign_ConstantIndex) {
-  Func("fn", {}, ty.void_(),
-       {
-           Decl(Var("lhs", ty.vec3<f32>())),
-           Decl(Var("rhs", ty.f32())),
-           Decl(Let("index", ty.u32(), Expr(0u))),
-           Assign(IndexAccessor("lhs", "index"), "rhs"),
-       });
+    Func("fn", {}, ty.void_(),
+         {
+             Decl(Var("lhs", ty.vec3<f32>())),
+             Decl(Var("rhs", ty.f32())),
+             Decl(Let("index", ty.u32(), Expr(0u))),
+             Assign(IndexAccessor("lhs", "index"), "rhs"),
+         });
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate());
-  EXPECT_EQ(gen.result(),
-            R"(void fn() {
+    ASSERT_TRUE(gen.Generate());
+    EXPECT_EQ(gen.result(),
+              R"(void fn() {
   float3 lhs = float3(0.0f, 0.0f, 0.0f);
   float rhs = 0.0f;
   const uint index = 0u;
@@ -62,19 +62,19 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Vector_Assign_ConstantIndex) {
 }
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Vector_Assign_DynamicIndex) {
-  Func("fn", {}, ty.void_(),
-       {
-           Decl(Var("lhs", ty.vec3<f32>())),
-           Decl(Var("rhs", ty.f32())),
-           Decl(Var("index", ty.u32())),
-           Assign(IndexAccessor("lhs", "index"), "rhs"),
-       });
+    Func("fn", {}, ty.void_(),
+         {
+             Decl(Var("lhs", ty.vec3<f32>())),
+             Decl(Var("rhs", ty.f32())),
+             Decl(Var("index", ty.u32())),
+             Assign(IndexAccessor("lhs", "index"), "rhs"),
+         });
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate());
-  EXPECT_EQ(gen.result(),
-            R"(void set_float3(inout float3 vec, int idx, float val) {
+    ASSERT_TRUE(gen.Generate());
+    EXPECT_EQ(gen.result(),
+              R"(void set_float3(inout float3 vec, int idx, float val) {
   vec = (idx.xxx == int3(0, 1, 2)) ? val.xxx : vec;
 }
 
@@ -88,19 +88,19 @@ void fn() {
 }
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Vector_ConstantIndex) {
-  Func("fn", {}, ty.void_(),
-       {
-           Decl(Var("lhs", ty.mat4x2<f32>())),
-           Decl(Var("rhs", ty.vec2<f32>())),
-           Decl(Let("index", ty.u32(), Expr(0u))),
-           Assign(IndexAccessor("lhs", "index"), "rhs"),
-       });
+    Func("fn", {}, ty.void_(),
+         {
+             Decl(Var("lhs", ty.mat4x2<f32>())),
+             Decl(Var("rhs", ty.vec2<f32>())),
+             Decl(Let("index", ty.u32(), Expr(0u))),
+             Assign(IndexAccessor("lhs", "index"), "rhs"),
+         });
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate());
-  EXPECT_EQ(gen.result(),
-            R"(void fn() {
+    ASSERT_TRUE(gen.Generate());
+    EXPECT_EQ(gen.result(),
+              R"(void fn() {
   float4x2 lhs = float4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   float2 rhs = float2(0.0f, 0.0f);
   const uint index = 0u;
@@ -110,20 +110,19 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Vector_ConstantIndex) {
 }
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Vector_DynamicIndex) {
-  Func("fn", {}, ty.void_(),
-       {
-           Decl(Var("lhs", ty.mat4x2<f32>())),
-           Decl(Var("rhs", ty.vec2<f32>())),
-           Decl(Var("index", ty.u32())),
-           Assign(IndexAccessor("lhs", "index"), "rhs"),
-       });
+    Func("fn", {}, ty.void_(),
+         {
+             Decl(Var("lhs", ty.mat4x2<f32>())),
+             Decl(Var("rhs", ty.vec2<f32>())),
+             Decl(Var("index", ty.u32())),
+             Assign(IndexAccessor("lhs", "index"), "rhs"),
+         });
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate());
-  EXPECT_EQ(
-      gen.result(),
-      R"(void set_vector_float4x2(inout float4x2 mat, int col, float2 val) {
+    ASSERT_TRUE(gen.Generate());
+    EXPECT_EQ(gen.result(),
+              R"(void set_vector_float4x2(inout float4x2 mat, int col, float2 val) {
   switch (col) {
     case 0: mat[0] = val; break;
     case 1: mat[1] = val; break;
@@ -142,19 +141,19 @@ void fn() {
 }
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_ConstantIndex) {
-  Func("fn", {}, ty.void_(),
-       {
-           Decl(Var("lhs", ty.mat4x2<f32>())),
-           Decl(Var("rhs", ty.f32())),
-           Decl(Let("index", ty.u32(), Expr(0u))),
-           Assign(IndexAccessor(IndexAccessor("lhs", "index"), "index"), "rhs"),
-       });
+    Func("fn", {}, ty.void_(),
+         {
+             Decl(Var("lhs", ty.mat4x2<f32>())),
+             Decl(Var("rhs", ty.f32())),
+             Decl(Let("index", ty.u32(), Expr(0u))),
+             Assign(IndexAccessor(IndexAccessor("lhs", "index"), "index"), "rhs"),
+         });
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate());
-  EXPECT_EQ(gen.result(),
-            R"(void fn() {
+    ASSERT_TRUE(gen.Generate());
+    EXPECT_EQ(gen.result(),
+              R"(void fn() {
   float4x2 lhs = float4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   float rhs = 0.0f;
   const uint index = 0u;
@@ -164,20 +163,19 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_ConstantIndex) {
 }
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_DynamicIndex) {
-  Func("fn", {}, ty.void_(),
-       {
-           Decl(Var("lhs", ty.mat4x2<f32>())),
-           Decl(Var("rhs", ty.f32())),
-           Decl(Var("index", ty.u32())),
-           Assign(IndexAccessor(IndexAccessor("lhs", "index"), "index"), "rhs"),
-       });
+    Func("fn", {}, ty.void_(),
+         {
+             Decl(Var("lhs", ty.mat4x2<f32>())),
+             Decl(Var("rhs", ty.f32())),
+             Decl(Var("index", ty.u32())),
+             Assign(IndexAccessor(IndexAccessor("lhs", "index"), "index"), "rhs"),
+         });
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate());
-  EXPECT_EQ(
-      gen.result(),
-      R"(void set_scalar_float4x2(inout float4x2 mat, int col, int row, float val) {
+    ASSERT_TRUE(gen.Generate());
+    EXPECT_EQ(gen.result(),
+              R"(void set_scalar_float4x2(inout float4x2 mat, int col, int row, float val) {
   switch (col) {
     case 0:
       mat[0] = (row.xx == int2(0, 1)) ? val.xx : mat[0];

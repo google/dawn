@@ -27,36 +27,36 @@ namespace tint::utils {
 /// original value is restored.
 template <typename T>
 class ScopedAssignment {
- public:
-  /// Constructor
-  /// @param var the variable to temporarily assign a new value to
-  /// @param val the value to assign to `ref` for the lifetime of this
-  /// ScopedAssignment.
-  ScopedAssignment(T& var, T val) : ref_(var) {
-    old_value_ = var;
-    var = val;
-  }
+  public:
+    /// Constructor
+    /// @param var the variable to temporarily assign a new value to
+    /// @param val the value to assign to `ref` for the lifetime of this
+    /// ScopedAssignment.
+    ScopedAssignment(T& var, T val) : ref_(var) {
+        old_value_ = var;
+        var = val;
+    }
 
-  /// Destructor
-  /// Restores the original value of the variable.
-  ~ScopedAssignment() { ref_ = old_value_; }
+    /// Destructor
+    /// Restores the original value of the variable.
+    ~ScopedAssignment() { ref_ = old_value_; }
 
- private:
-  ScopedAssignment(const ScopedAssignment&) = delete;
-  ScopedAssignment& operator=(const ScopedAssignment&) = delete;
+  private:
+    ScopedAssignment(const ScopedAssignment&) = delete;
+    ScopedAssignment& operator=(const ScopedAssignment&) = delete;
 
-  T& ref_;
-  T old_value_;
+    T& ref_;
+    T old_value_;
 };
 
 }  // namespace tint::utils
 
 /// TINT_SCOPED_ASSIGNMENT(var, val) assigns `val` to `var`, and automatically
 /// restores the original value of `var` when exiting the current lexical scope.
-#define TINT_SCOPED_ASSIGNMENT(var, val)                                  \
-  ::tint::utils::ScopedAssignment<std::remove_reference_t<decltype(var)>> \
-  TINT_CONCAT(tint_scoped_assignment_, __COUNTER__) {                     \
-    var, val                                                              \
-  }
+#define TINT_SCOPED_ASSIGNMENT(var, val)                                                 \
+    ::tint::utils::ScopedAssignment<std::remove_reference_t<decltype(var)>> TINT_CONCAT( \
+        tint_scoped_assignment_, __COUNTER__) {                                          \
+        var, val                                                                         \
+    }
 
 #endif  // SRC_TINT_UTILS_SCOPED_ASSIGNMENT_H_

@@ -28,35 +28,32 @@ Result::Result() = default;
 Result::~Result() = default;
 Result::Result(const Result&) = default;
 
-Result Generate(const Program* program,
-                const Options& options,
-                const std::string& entry_point) {
-  Result result;
+Result Generate(const Program* program, const Options& options, const std::string& entry_point) {
+    Result result;
 
-  // Sanitize the program.
-  auto sanitized_result = Sanitize(program, options, entry_point);
-  if (!sanitized_result.program.IsValid()) {
-    result.success = false;
-    result.error = sanitized_result.program.Diagnostics().str();
-    return result;
-  }
-
-  // Generate the GLSL code.
-  auto impl = std::make_unique<GeneratorImpl>(&sanitized_result.program,
-                                              options.version);
-  result.success = impl->Generate();
-  result.error = impl->error();
-  result.glsl = impl->result();
-
-  // Collect the list of entry points in the sanitized program.
-  for (auto* func : sanitized_result.program.AST().Functions()) {
-    if (func->IsEntryPoint()) {
-      auto name = sanitized_result.program.Symbols().NameFor(func->symbol);
-      result.entry_points.push_back({name, func->PipelineStage()});
+    // Sanitize the program.
+    auto sanitized_result = Sanitize(program, options, entry_point);
+    if (!sanitized_result.program.IsValid()) {
+        result.success = false;
+        result.error = sanitized_result.program.Diagnostics().str();
+        return result;
     }
-  }
 
-  return result;
+    // Generate the GLSL code.
+    auto impl = std::make_unique<GeneratorImpl>(&sanitized_result.program, options.version);
+    result.success = impl->Generate();
+    result.error = impl->error();
+    result.glsl = impl->result();
+
+    // Collect the list of entry points in the sanitized program.
+    for (auto* func : sanitized_result.program.AST().Functions()) {
+        if (func->IsEntryPoint()) {
+            auto name = sanitized_result.program.Symbols().NameFor(func->symbol);
+            result.entry_points.push_back({name, func->PipelineStage()});
+        }
+    }
+
+    return result;
 }
 
 }  // namespace tint::writer::glsl

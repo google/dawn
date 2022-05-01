@@ -21,7 +21,7 @@ namespace {
 using RemoveContinueInSwitchTest = TransformTest;
 
 TEST_F(RemoveContinueInSwitchTest, ShouldRun_True) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i = 0;
   loop {
@@ -39,17 +39,17 @@ fn f() {
 }
 )";
 
-  EXPECT_TRUE(ShouldRun<RemoveContinueInSwitch>(src));
+    EXPECT_TRUE(ShouldRun<RemoveContinueInSwitch>(src));
 }
 
 TEST_F(RemoveContinueInSwitchTest, ShouldRunEmptyModule_False) {
-  auto* src = "";
+    auto* src = "";
 
-  EXPECT_FALSE(ShouldRun<RemoveContinueInSwitch>(src));
+    EXPECT_FALSE(ShouldRun<RemoveContinueInSwitch>(src));
 }
 
 TEST_F(RemoveContinueInSwitchTest, ShouldRunContinueNotInSwitch_False) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i = 0;
   loop {
@@ -70,11 +70,11 @@ fn f() {
 }
 )";
 
-  EXPECT_FALSE(ShouldRun<RemoveContinueInSwitch>(src));
+    EXPECT_FALSE(ShouldRun<RemoveContinueInSwitch>(src));
 }
 
 TEST_F(RemoveContinueInSwitchTest, ShouldRunContinueInLoopInSwitch_False) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i = 0;
   switch(i) {
@@ -94,21 +94,21 @@ fn f() {
 }
 )";
 
-  EXPECT_FALSE(ShouldRun<RemoveContinueInSwitch>(src));
+    EXPECT_FALSE(ShouldRun<RemoveContinueInSwitch>(src));
 }
 
 TEST_F(RemoveContinueInSwitchTest, EmptyModule) {
-  auto* src = "";
-  auto* expect = src;
+    auto* src = "";
+    auto* expect = src;
 
-  DataMap data;
-  auto got = Run<RemoveContinueInSwitch>(src, data);
+    DataMap data;
+    auto got = Run<RemoveContinueInSwitch>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveContinueInSwitchTest, SingleContinue) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i = 0;
   loop {
@@ -132,7 +132,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i = 0;
   loop {
@@ -163,14 +163,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<RemoveContinueInSwitch>(src, data);
+    DataMap data;
+    auto got = Run<RemoveContinueInSwitch>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveContinueInSwitchTest, MultipleContinues) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i = 0;
   loop {
@@ -202,7 +202,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i = 0;
   loop {
@@ -247,14 +247,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<RemoveContinueInSwitch>(src, data);
+    DataMap data;
+    auto got = Run<RemoveContinueInSwitch>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveContinueInSwitchTest, MultipleSwitch) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i = 0;
   loop {
@@ -287,7 +287,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i = 0;
   loop {
@@ -332,14 +332,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<RemoveContinueInSwitch>(src, data);
+    DataMap data;
+    auto got = Run<RemoveContinueInSwitch>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveContinueInSwitchTest, NestedLoopSwitch) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i = 0;
   loop {
@@ -374,7 +374,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i = 0;
   loop {
@@ -423,14 +423,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<RemoveContinueInSwitch>(src, data);
+    DataMap data;
+    auto got = Run<RemoveContinueInSwitch>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveContinueInSwitchTest, ExtraScopes) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i = 0;
   var a = true;
@@ -462,7 +462,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i = 0;
   var a = true;
@@ -501,14 +501,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<RemoveContinueInSwitch>(src, data);
+    DataMap data;
+    auto got = Run<RemoveContinueInSwitch>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RemoveContinueInSwitchTest, ForLoop) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   for (var i = 0; i < 4; i = i + 1) {
     let marker1 = 0;
@@ -527,7 +527,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   for(var i = 0; (i < 4); i = (i + 1)) {
     let marker1 = 0;
@@ -553,10 +553,10 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<RemoveContinueInSwitch>(src, data);
+    DataMap data;
+    auto got = Run<RemoveContinueInSwitch>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

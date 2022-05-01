@@ -23,31 +23,30 @@
 
 namespace dawn::native {
 
-    class DeviceBase;
+class DeviceBase;
 
-    // |PooledResourceMemoryAllocator| allocates a fixed-size resource memory from a resource memory
-    // pool. Internally, it manages a list of heaps using LIFO (newest heaps are recycled first).
-    // The heap is in one of two states: AVAILABLE or not. Upon de-allocate, the heap is returned
-    // the pool and made AVAILABLE.
-    class PooledResourceMemoryAllocator : public ResourceHeapAllocator {
-      public:
-        explicit PooledResourceMemoryAllocator(ResourceHeapAllocator* heapAllocator);
-        ~PooledResourceMemoryAllocator() override = default;
+// |PooledResourceMemoryAllocator| allocates a fixed-size resource memory from a resource memory
+// pool. Internally, it manages a list of heaps using LIFO (newest heaps are recycled first).
+// The heap is in one of two states: AVAILABLE or not. Upon de-allocate, the heap is returned
+// the pool and made AVAILABLE.
+class PooledResourceMemoryAllocator : public ResourceHeapAllocator {
+  public:
+    explicit PooledResourceMemoryAllocator(ResourceHeapAllocator* heapAllocator);
+    ~PooledResourceMemoryAllocator() override = default;
 
-        ResultOrError<std::unique_ptr<ResourceHeapBase>> AllocateResourceHeap(
-            uint64_t size) override;
-        void DeallocateResourceHeap(std::unique_ptr<ResourceHeapBase> allocation) override;
+    ResultOrError<std::unique_ptr<ResourceHeapBase>> AllocateResourceHeap(uint64_t size) override;
+    void DeallocateResourceHeap(std::unique_ptr<ResourceHeapBase> allocation) override;
 
-        void DestroyPool();
+    void DestroyPool();
 
-        // For testing purposes.
-        uint64_t GetPoolSizeForTesting() const;
+    // For testing purposes.
+    uint64_t GetPoolSizeForTesting() const;
 
-      private:
-        ResourceHeapAllocator* mHeapAllocator = nullptr;
+  private:
+    ResourceHeapAllocator* mHeapAllocator = nullptr;
 
-        std::deque<std::unique_ptr<ResourceHeapBase>> mPool;
-    };
+    std::deque<std::unique_ptr<ResourceHeapBase>> mPool;
+};
 
 }  // namespace dawn::native
 

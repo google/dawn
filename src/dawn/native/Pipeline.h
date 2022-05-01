@@ -32,69 +32,69 @@
 
 namespace dawn::native {
 
-    MaybeError ValidateProgrammableStage(DeviceBase* device,
-                                         const ShaderModuleBase* module,
-                                         const std::string& entryPoint,
-                                         uint32_t constantCount,
-                                         const ConstantEntry* constants,
-                                         const PipelineLayoutBase* layout,
-                                         SingleShaderStage stage);
+MaybeError ValidateProgrammableStage(DeviceBase* device,
+                                     const ShaderModuleBase* module,
+                                     const std::string& entryPoint,
+                                     uint32_t constantCount,
+                                     const ConstantEntry* constants,
+                                     const PipelineLayoutBase* layout,
+                                     SingleShaderStage stage);
 
-    // Use map to make sure constant keys are sorted for creating shader cache keys
-    using PipelineConstantEntries = std::map<std::string, double>;
+// Use map to make sure constant keys are sorted for creating shader cache keys
+using PipelineConstantEntries = std::map<std::string, double>;
 
-    struct ProgrammableStage {
-        Ref<ShaderModuleBase> module;
-        std::string entryPoint;
+struct ProgrammableStage {
+    Ref<ShaderModuleBase> module;
+    std::string entryPoint;
 
-        // The metadata lives as long as module, that's ref-ed in the same structure.
-        const EntryPointMetadata* metadata = nullptr;
+    // The metadata lives as long as module, that's ref-ed in the same structure.
+    const EntryPointMetadata* metadata = nullptr;
 
-        PipelineConstantEntries constants;
-    };
+    PipelineConstantEntries constants;
+};
 
-    class PipelineBase : public ApiObjectBase, public CachedObject {
-      public:
-        ~PipelineBase() override;
+class PipelineBase : public ApiObjectBase, public CachedObject {
+  public:
+    ~PipelineBase() override;
 
-        PipelineLayoutBase* GetLayout();
-        const PipelineLayoutBase* GetLayout() const;
-        const RequiredBufferSizes& GetMinBufferSizes() const;
-        const ProgrammableStage& GetStage(SingleShaderStage stage) const;
-        const PerStage<ProgrammableStage>& GetAllStages() const;
-        wgpu::ShaderStage GetStageMask() const;
+    PipelineLayoutBase* GetLayout();
+    const PipelineLayoutBase* GetLayout() const;
+    const RequiredBufferSizes& GetMinBufferSizes() const;
+    const ProgrammableStage& GetStage(SingleShaderStage stage) const;
+    const PerStage<ProgrammableStage>& GetAllStages() const;
+    wgpu::ShaderStage GetStageMask() const;
 
-        ResultOrError<Ref<BindGroupLayoutBase>> GetBindGroupLayout(uint32_t groupIndex);
+    ResultOrError<Ref<BindGroupLayoutBase>> GetBindGroupLayout(uint32_t groupIndex);
 
-        // Helper functions for std::unordered_map-based pipeline caches.
-        size_t ComputeContentHash() override;
-        static bool EqualForCache(const PipelineBase* a, const PipelineBase* b);
+    // Helper functions for std::unordered_map-based pipeline caches.
+    size_t ComputeContentHash() override;
+    static bool EqualForCache(const PipelineBase* a, const PipelineBase* b);
 
-        // Implementation of the API entrypoint. Do not use in a reentrant manner.
-        BindGroupLayoutBase* APIGetBindGroupLayout(uint32_t groupIndex);
+    // Implementation of the API entrypoint. Do not use in a reentrant manner.
+    BindGroupLayoutBase* APIGetBindGroupLayout(uint32_t groupIndex);
 
-        // Initialize() should only be called once by the frontend.
-        virtual MaybeError Initialize() = 0;
+    // Initialize() should only be called once by the frontend.
+    virtual MaybeError Initialize() = 0;
 
-      protected:
-        PipelineBase(DeviceBase* device,
-                     PipelineLayoutBase* layout,
-                     const char* label,
-                     std::vector<StageAndDescriptor> stages);
-        PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+  protected:
+    PipelineBase(DeviceBase* device,
+                 PipelineLayoutBase* layout,
+                 const char* label,
+                 std::vector<StageAndDescriptor> stages);
+    PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        // Constructor used only for mocking and testing.
-        explicit PipelineBase(DeviceBase* device);
+    // Constructor used only for mocking and testing.
+    explicit PipelineBase(DeviceBase* device);
 
-      private:
-        MaybeError ValidateGetBindGroupLayout(uint32_t group);
+  private:
+    MaybeError ValidateGetBindGroupLayout(uint32_t group);
 
-        wgpu::ShaderStage mStageMask = wgpu::ShaderStage::None;
-        PerStage<ProgrammableStage> mStages;
+    wgpu::ShaderStage mStageMask = wgpu::ShaderStage::None;
+    PerStage<ProgrammableStage> mStages;
 
-        Ref<PipelineLayoutBase> mLayout;
-        RequiredBufferSizes mMinBufferSizes;
-    };
+    Ref<PipelineLayoutBase> mLayout;
+    RequiredBufferSizes mMinBufferSizes;
+};
 
 }  // namespace dawn::native
 

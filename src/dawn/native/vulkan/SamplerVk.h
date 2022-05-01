@@ -22,26 +22,25 @@
 
 namespace dawn::native::vulkan {
 
-    class Device;
+class Device;
 
-    class Sampler final : public SamplerBase {
-      public:
-        static ResultOrError<Ref<Sampler>> Create(Device* device,
-                                                  const SamplerDescriptor* descriptor);
+class Sampler final : public SamplerBase {
+  public:
+    static ResultOrError<Ref<Sampler>> Create(Device* device, const SamplerDescriptor* descriptor);
 
-        VkSampler GetHandle() const;
+    VkSampler GetHandle() const;
 
-      private:
-        ~Sampler() override;
-        void DestroyImpl() override;
-        using SamplerBase::SamplerBase;
-        MaybeError Initialize(const SamplerDescriptor* descriptor);
+  private:
+    ~Sampler() override;
+    void DestroyImpl() override;
+    using SamplerBase::SamplerBase;
+    MaybeError Initialize(const SamplerDescriptor* descriptor);
 
-        // Dawn API
-        void SetLabelImpl() override;
+    // Dawn API
+    void SetLabelImpl() override;
 
-        VkSampler mHandle = VK_NULL_HANDLE;
-    };
+    VkSampler mHandle = VK_NULL_HANDLE;
+};
 
 }  // namespace dawn::native::vulkan
 

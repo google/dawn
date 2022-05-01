@@ -30,81 +30,81 @@ struct ID3D12Resource;
 
 namespace dawn::native::d3d12 {
 
-    class D3D11on12ResourceCache;
+class D3D11on12ResourceCache;
 
-    DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<ID3D12Device> GetD3D12Device(WGPUDevice device);
-    DAWN_NATIVE_EXPORT DawnSwapChainImplementation CreateNativeSwapChainImpl(WGPUDevice device,
-                                                                             HWND window);
-    DAWN_NATIVE_EXPORT WGPUTextureFormat
-    GetNativeSwapChainPreferredFormat(const DawnSwapChainImplementation* swapChain);
+DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<ID3D12Device> GetD3D12Device(WGPUDevice device);
+DAWN_NATIVE_EXPORT DawnSwapChainImplementation CreateNativeSwapChainImpl(WGPUDevice device,
+                                                                         HWND window);
+DAWN_NATIVE_EXPORT WGPUTextureFormat
+GetNativeSwapChainPreferredFormat(const DawnSwapChainImplementation* swapChain);
 
-    enum MemorySegment {
-        Local,
-        NonLocal,
-    };
+enum MemorySegment {
+    Local,
+    NonLocal,
+};
 
-    DAWN_NATIVE_EXPORT uint64_t SetExternalMemoryReservation(WGPUDevice device,
-                                                             uint64_t requestedReservationSize,
-                                                             MemorySegment memorySegment);
+DAWN_NATIVE_EXPORT uint64_t SetExternalMemoryReservation(WGPUDevice device,
+                                                         uint64_t requestedReservationSize,
+                                                         MemorySegment memorySegment);
 
-    struct DAWN_NATIVE_EXPORT ExternalImageDescriptorDXGISharedHandle : ExternalImageDescriptor {
-      public:
-        ExternalImageDescriptorDXGISharedHandle();
+struct DAWN_NATIVE_EXPORT ExternalImageDescriptorDXGISharedHandle : ExternalImageDescriptor {
+  public:
+    ExternalImageDescriptorDXGISharedHandle();
 
-        // Note: SharedHandle must be a handle to a texture object.
-        HANDLE sharedHandle;
-    };
+    // Note: SharedHandle must be a handle to a texture object.
+    HANDLE sharedHandle;
+};
 
-    // Keyed mutex acquire/release uses a fixed key of 0 to match Chromium behavior.
-    constexpr UINT64 kDXGIKeyedMutexAcquireReleaseKey = 0;
+// Keyed mutex acquire/release uses a fixed key of 0 to match Chromium behavior.
+constexpr UINT64 kDXGIKeyedMutexAcquireReleaseKey = 0;
 
-    struct DAWN_NATIVE_EXPORT ExternalImageAccessDescriptorDXGIKeyedMutex
-        : ExternalImageAccessDescriptor {
-      public:
-        // TODO(chromium:1241533): Remove deprecated keyed mutex params after removing associated
-        // code from Chromium - we use a fixed key of 0 for acquire and release everywhere now.
-        uint64_t acquireMutexKey;
-        uint64_t releaseMutexKey;
-        bool isSwapChainTexture = false;
-    };
+struct DAWN_NATIVE_EXPORT ExternalImageAccessDescriptorDXGIKeyedMutex
+    : ExternalImageAccessDescriptor {
+  public:
+    // TODO(chromium:1241533): Remove deprecated keyed mutex params after removing associated
+    // code from Chromium - we use a fixed key of 0 for acquire and release everywhere now.
+    uint64_t acquireMutexKey;
+    uint64_t releaseMutexKey;
+    bool isSwapChainTexture = false;
+};
 
-    class DAWN_NATIVE_EXPORT ExternalImageDXGI {
-      public:
-        ~ExternalImageDXGI();
+class DAWN_NATIVE_EXPORT ExternalImageDXGI {
+  public:
+    ~ExternalImageDXGI();
 
-        // Note: SharedHandle must be a handle to a texture object.
-        static std::unique_ptr<ExternalImageDXGI> Create(
-            WGPUDevice device,
-            const ExternalImageDescriptorDXGISharedHandle* descriptor);
+    // Note: SharedHandle must be a handle to a texture object.
+    static std::unique_ptr<ExternalImageDXGI> Create(
+        WGPUDevice device,
+        const ExternalImageDescriptorDXGISharedHandle* descriptor);
 
-        WGPUTexture ProduceTexture(WGPUDevice device,
-                                   const ExternalImageAccessDescriptorDXGIKeyedMutex* descriptor);
+    WGPUTexture ProduceTexture(WGPUDevice device,
+                               const ExternalImageAccessDescriptorDXGIKeyedMutex* descriptor);
 
-      private:
-        ExternalImageDXGI(Microsoft::WRL::ComPtr<ID3D12Resource> d3d12Resource,
-                          const WGPUTextureDescriptor* descriptor);
+  private:
+    ExternalImageDXGI(Microsoft::WRL::ComPtr<ID3D12Resource> d3d12Resource,
+                      const WGPUTextureDescriptor* descriptor);
 
-        Microsoft::WRL::ComPtr<ID3D12Resource> mD3D12Resource;
+    Microsoft::WRL::ComPtr<ID3D12Resource> mD3D12Resource;
 
-        // Contents of WGPUTextureDescriptor are stored individually since the descriptor
-        // could outlive this image.
-        WGPUTextureUsageFlags mUsage;
-        WGPUTextureUsageFlags mUsageInternal = WGPUTextureUsage_None;
-        WGPUTextureDimension mDimension;
-        WGPUExtent3D mSize;
-        WGPUTextureFormat mFormat;
-        uint32_t mMipLevelCount;
-        uint32_t mSampleCount;
+    // Contents of WGPUTextureDescriptor are stored individually since the descriptor
+    // could outlive this image.
+    WGPUTextureUsageFlags mUsage;
+    WGPUTextureUsageFlags mUsageInternal = WGPUTextureUsage_None;
+    WGPUTextureDimension mDimension;
+    WGPUExtent3D mSize;
+    WGPUTextureFormat mFormat;
+    uint32_t mMipLevelCount;
+    uint32_t mSampleCount;
 
-        std::unique_ptr<D3D11on12ResourceCache> mD3D11on12ResourceCache;
-    };
+    std::unique_ptr<D3D11on12ResourceCache> mD3D11on12ResourceCache;
+};
 
-    struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public AdapterDiscoveryOptionsBase {
-        AdapterDiscoveryOptions();
-        explicit AdapterDiscoveryOptions(Microsoft::WRL::ComPtr<IDXGIAdapter> adapter);
+struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public AdapterDiscoveryOptionsBase {
+    AdapterDiscoveryOptions();
+    explicit AdapterDiscoveryOptions(Microsoft::WRL::ComPtr<IDXGIAdapter> adapter);
 
-        Microsoft::WRL::ComPtr<IDXGIAdapter> dxgiAdapter;
-    };
+    Microsoft::WRL::ComPtr<IDXGIAdapter> dxgiAdapter;
+};
 
 }  // namespace dawn::native::d3d12
 

@@ -20,27 +20,27 @@ namespace {
 using HlslGeneratorImplTest_Return = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Return, Emit_Return) {
-  auto* r = Return();
-  WrapInFunction(r);
+    auto* r = Return();
+    WrapInFunction(r);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(r)) << gen.error();
-  EXPECT_EQ(gen.result(), "  return;\n");
+    ASSERT_TRUE(gen.EmitStatement(r)) << gen.error();
+    EXPECT_EQ(gen.result(), "  return;\n");
 }
 
 TEST_F(HlslGeneratorImplTest_Return, Emit_ReturnWithValue) {
-  auto* r = Return(123);
-  Func("f", {}, ty.i32(), {r});
+    auto* r = Return(123);
+    Func("f", {}, ty.i32(), {r});
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(r)) << gen.error();
-  EXPECT_EQ(gen.result(), "  return 123;\n");
+    ASSERT_TRUE(gen.EmitStatement(r)) << gen.error();
+    EXPECT_EQ(gen.result(), "  return 123;\n");
 }
 
 }  // namespace

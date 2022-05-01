@@ -19,12 +19,12 @@
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace {
-    struct CreatePipelineAsyncTask {
-        wgpu::ComputePipeline computePipeline = nullptr;
-        wgpu::RenderPipeline renderPipeline = nullptr;
-        bool isCompleted = false;
-        std::string message;
-    };
+struct CreatePipelineAsyncTask {
+    wgpu::ComputePipeline computePipeline = nullptr;
+    wgpu::RenderPipeline renderPipeline = nullptr;
+    bool isCompleted = false;
+    std::string message;
+};
 }  // anonymous namespace
 
 class CreatePipelineAsyncTest : public DawnTest {
@@ -65,9 +65,7 @@ class CreatePipelineAsyncTest : public DawnTest {
         EXPECT_BUFFER_U32_EQ(kExpected, ssbo, 0);
     }
 
-    void ValidateCreateComputePipelineAsync() {
-        ValidateCreateComputePipelineAsync(&task);
-    }
+    void ValidateCreateComputePipelineAsync() { ValidateCreateComputePipelineAsync(&task); }
 
     void ValidateCreateRenderPipelineAsync(CreatePipelineAsyncTask* currentTask) {
         constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
@@ -106,9 +104,7 @@ class CreatePipelineAsyncTest : public DawnTest {
         EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), outputTexture, 0, 0);
     }
 
-    void ValidateCreateRenderPipelineAsync() {
-        ValidateCreateRenderPipelineAsync(&task);
-    }
+    void ValidateCreateRenderPipelineAsync() { ValidateCreateRenderPipelineAsync(&task); }
 
     void DoCreateRenderPipelineAsync(
         const utils::ComboRenderPipelineDescriptor& renderPipelineDescriptor) {

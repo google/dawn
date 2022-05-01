@@ -19,46 +19,46 @@
 
 namespace dawn::native {
 
-    void IgnoreErrors(MaybeError maybeError) {
-        if (maybeError.IsError()) {
-            std::unique_ptr<ErrorData> errorData = maybeError.AcquireError();
-            // During shutdown and destruction, device lost errors can be ignored.
-            // We can also ignore other unexpected internal errors on shut down and treat it as
-            // device lost so that we can continue with destruction.
-            ASSERT(errorData->GetType() == InternalErrorType::DeviceLost ||
-                   errorData->GetType() == InternalErrorType::Internal);
-        }
+void IgnoreErrors(MaybeError maybeError) {
+    if (maybeError.IsError()) {
+        std::unique_ptr<ErrorData> errorData = maybeError.AcquireError();
+        // During shutdown and destruction, device lost errors can be ignored.
+        // We can also ignore other unexpected internal errors on shut down and treat it as
+        // device lost so that we can continue with destruction.
+        ASSERT(errorData->GetType() == InternalErrorType::DeviceLost ||
+               errorData->GetType() == InternalErrorType::Internal);
     }
+}
 
-    wgpu::ErrorType ToWGPUErrorType(InternalErrorType type) {
-        switch (type) {
-            case InternalErrorType::Validation:
-                return wgpu::ErrorType::Validation;
-            case InternalErrorType::OutOfMemory:
-                return wgpu::ErrorType::OutOfMemory;
+wgpu::ErrorType ToWGPUErrorType(InternalErrorType type) {
+    switch (type) {
+        case InternalErrorType::Validation:
+            return wgpu::ErrorType::Validation;
+        case InternalErrorType::OutOfMemory:
+            return wgpu::ErrorType::OutOfMemory;
 
-            // There is no equivalent of Internal errors in the WebGPU API. Internal errors cause
-            // the device at the API level to be lost, so treat it like a DeviceLost error.
-            case InternalErrorType::Internal:
-            case InternalErrorType::DeviceLost:
-                return wgpu::ErrorType::DeviceLost;
+        // There is no equivalent of Internal errors in the WebGPU API. Internal errors cause
+        // the device at the API level to be lost, so treat it like a DeviceLost error.
+        case InternalErrorType::Internal:
+        case InternalErrorType::DeviceLost:
+            return wgpu::ErrorType::DeviceLost;
 
-            default:
-                return wgpu::ErrorType::Unknown;
-        }
+        default:
+            return wgpu::ErrorType::Unknown;
     }
+}
 
-    InternalErrorType FromWGPUErrorType(wgpu::ErrorType type) {
-        switch (type) {
-            case wgpu::ErrorType::Validation:
-                return InternalErrorType::Validation;
-            case wgpu::ErrorType::OutOfMemory:
-                return InternalErrorType::OutOfMemory;
-            case wgpu::ErrorType::DeviceLost:
-                return InternalErrorType::DeviceLost;
-            default:
-                return InternalErrorType::Internal;
-        }
+InternalErrorType FromWGPUErrorType(wgpu::ErrorType type) {
+    switch (type) {
+        case wgpu::ErrorType::Validation:
+            return InternalErrorType::Validation;
+        case wgpu::ErrorType::OutOfMemory:
+            return InternalErrorType::OutOfMemory;
+        case wgpu::ErrorType::DeviceLost:
+            return InternalErrorType::DeviceLost;
+        default:
+            return InternalErrorType::Internal;
     }
+}
 
 }  // namespace dawn::native

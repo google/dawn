@@ -20,14 +20,14 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Bitcast) {
-  auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr(1));
-  WrapInFunction(bitcast);
+    auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr(1));
+    WrapInFunction(bitcast);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
-  EXPECT_EQ(out.str(), "as_type<float>(1)");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
+    EXPECT_EQ(out.str(), "as_type<float>(1)");
 }
 
 }  // namespace

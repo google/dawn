@@ -22,33 +22,33 @@
 
 namespace dawn::native {
 
-    class DeviceBase;
+class DeviceBase;
 
-    // A ScratchBuffer is a lazily allocated and lazily grown GPU buffer for intermittent use by
-    // commands in the GPU queue. Note that scratch buffers are not zero-initialized, so users must
-    // be careful not to exposed uninitialized bytes to client shaders.
-    class ScratchBuffer {
-      public:
-        // Note that this object does not retain a reference to `device`, so `device` MUST outlive
-        // this object.
-        ScratchBuffer(DeviceBase* device, wgpu::BufferUsage usage);
-        ~ScratchBuffer();
+// A ScratchBuffer is a lazily allocated and lazily grown GPU buffer for intermittent use by
+// commands in the GPU queue. Note that scratch buffers are not zero-initialized, so users must
+// be careful not to exposed uninitialized bytes to client shaders.
+class ScratchBuffer {
+  public:
+    // Note that this object does not retain a reference to `device`, so `device` MUST outlive
+    // this object.
+    ScratchBuffer(DeviceBase* device, wgpu::BufferUsage usage);
+    ~ScratchBuffer();
 
-        // Resets this ScratchBuffer, guaranteeing that the next EnsureCapacity call allocates a
-        // fresh buffer.
-        void Reset();
+    // Resets this ScratchBuffer, guaranteeing that the next EnsureCapacity call allocates a
+    // fresh buffer.
+    void Reset();
 
-        // Ensures that this ScratchBuffer is backed by a buffer on `device` with at least
-        // `capacity` bytes of storage.
-        MaybeError EnsureCapacity(uint64_t capacity);
+    // Ensures that this ScratchBuffer is backed by a buffer on `device` with at least
+    // `capacity` bytes of storage.
+    MaybeError EnsureCapacity(uint64_t capacity);
 
-        BufferBase* GetBuffer() const;
+    BufferBase* GetBuffer() const;
 
-      private:
-        DeviceBase* const mDevice;
-        const wgpu::BufferUsage mUsage;
-        Ref<BufferBase> mBuffer;
-    };
+  private:
+    DeviceBase* const mDevice;
+    const wgpu::BufferUsage mUsage;
+    Ref<BufferBase> mBuffer;
+};
 
 }  // namespace dawn::native
 

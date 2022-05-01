@@ -22,15 +22,15 @@ namespace {
 using BreakStatementTest = TestHelper;
 
 TEST_F(BreakStatementTest, Creation_WithSource) {
-  auto* stmt = create<BreakStatement>(Source{Source::Location{20, 2}});
-  auto src = stmt->source;
-  EXPECT_EQ(src.range.begin.line, 20u);
-  EXPECT_EQ(src.range.begin.column, 2u);
+    auto* stmt = create<BreakStatement>(Source{Source::Location{20, 2}});
+    auto src = stmt->source;
+    EXPECT_EQ(src.range.begin.line, 20u);
+    EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(BreakStatementTest, IsBreak) {
-  auto* stmt = create<BreakStatement>();
-  EXPECT_TRUE(stmt->Is<BreakStatement>());
+    auto* stmt = create<BreakStatement>();
+    EXPECT_TRUE(stmt->Is<BreakStatement>());
 }
 
 }  // namespace

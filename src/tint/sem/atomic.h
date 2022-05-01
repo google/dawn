@@ -23,42 +23,42 @@ namespace tint::sem {
 
 /// A atomic type.
 class Atomic final : public Castable<Atomic, Type> {
- public:
-  /// Constructor
-  /// @param subtype the atomic type
-  explicit Atomic(const sem::Type* subtype);
+  public:
+    /// Constructor
+    /// @param subtype the atomic type
+    explicit Atomic(const sem::Type* subtype);
 
-  /// Move constructor
-  Atomic(Atomic&&);
-  ~Atomic() override;
+    /// Move constructor
+    Atomic(Atomic&&);
+    ~Atomic() override;
 
-  /// @returns a hash of the type.
-  size_t Hash() const override;
+    /// @returns a hash of the type.
+    size_t Hash() const override;
 
-  /// @param other the other type to compare against
-  /// @returns true if the this type is equal to the given type
-  bool Equals(const Type& other) const override;
+    /// @param other the other type to compare against
+    /// @returns true if the this type is equal to the given type
+    bool Equals(const Type& other) const override;
 
-  /// @returns the atomic type
-  const sem::Type* Type() const { return subtype_; }
+    /// @returns the atomic type
+    const sem::Type* Type() const { return subtype_; }
 
-  /// @param symbols the program's symbol table
-  /// @returns the name for this type that closely resembles how it would be
-  /// declared in WGSL.
-  std::string FriendlyName(const SymbolTable& symbols) const override;
+    /// @param symbols the program's symbol table
+    /// @returns the name for this type that closely resembles how it would be
+    /// declared in WGSL.
+    std::string FriendlyName(const SymbolTable& symbols) const override;
 
-  /// @returns the size in bytes of the type.
-  uint32_t Size() const override;
+    /// @returns the size in bytes of the type.
+    uint32_t Size() const override;
 
-  /// @returns the alignment in bytes of the type.
-  uint32_t Align() const override;
+    /// @returns the alignment in bytes of the type.
+    uint32_t Align() const override;
 
-  /// @returns true if constructible as per
-  /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
-  bool IsConstructible() const override;
+    /// @returns true if constructible as per
+    /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
+    bool IsConstructible() const override;
 
- private:
-  sem::Type const* const subtype_;
+  private:
+    sem::Type const* const subtype_;
 };
 
 }  // namespace tint::sem

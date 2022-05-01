@@ -19,38 +19,38 @@
 #include "dawn/native/Error.h"
 
 namespace dawn::native {
-    struct BeginRenderPassCmd;
+struct BeginRenderPassCmd;
 }  // namespace dawn::native
 
 namespace dawn::native::d3d12 {
 
-    class BindGroupStateTracker;
-    class CommandRecordingContext;
-    class RenderPassBuilder;
+class BindGroupStateTracker;
+class CommandRecordingContext;
+class RenderPassBuilder;
 
-    class CommandBuffer final : public CommandBufferBase {
-      public:
-        static Ref<CommandBuffer> Create(CommandEncoder* encoder,
-                                         const CommandBufferDescriptor* descriptor);
+class CommandBuffer final : public CommandBufferBase {
+  public:
+    static Ref<CommandBuffer> Create(CommandEncoder* encoder,
+                                     const CommandBufferDescriptor* descriptor);
 
-        MaybeError RecordCommands(CommandRecordingContext* commandContext);
+    MaybeError RecordCommands(CommandRecordingContext* commandContext);
 
-      private:
-        CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
+  private:
+    CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
 
-        MaybeError RecordComputePass(CommandRecordingContext* commandContext,
-                                     BindGroupStateTracker* bindingTracker,
-                                     const ComputePassResourceUsage& resourceUsages);
-        MaybeError RecordRenderPass(CommandRecordingContext* commandContext,
-                                    BindGroupStateTracker* bindingTracker,
-                                    BeginRenderPassCmd* renderPass,
-                                    bool passHasUAV);
-        MaybeError SetupRenderPass(CommandRecordingContext* commandContext,
-                                   BeginRenderPassCmd* renderPass,
-                                   RenderPassBuilder* renderPassBuilder);
-        void EmulateBeginRenderPass(CommandRecordingContext* commandContext,
-                                    const RenderPassBuilder* renderPassBuilder) const;
-    };
+    MaybeError RecordComputePass(CommandRecordingContext* commandContext,
+                                 BindGroupStateTracker* bindingTracker,
+                                 const ComputePassResourceUsage& resourceUsages);
+    MaybeError RecordRenderPass(CommandRecordingContext* commandContext,
+                                BindGroupStateTracker* bindingTracker,
+                                BeginRenderPassCmd* renderPass,
+                                bool passHasUAV);
+    MaybeError SetupRenderPass(CommandRecordingContext* commandContext,
+                               BeginRenderPassCmd* renderPass,
+                               RenderPassBuilder* renderPassBuilder);
+    void EmulateBeginRenderPass(CommandRecordingContext* commandContext,
+                                const RenderPassBuilder* renderPassBuilder) const;
+};
 
 }  // namespace dawn::native::d3d12
 

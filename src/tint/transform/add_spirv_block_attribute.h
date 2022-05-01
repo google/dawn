@@ -27,46 +27,42 @@ namespace tint::transform {
 /// store type of a buffer. If that structure is nested inside another structure
 /// or an array, then it is wrapped inside another structure which gets the
 /// `@internal(spirv_block)` attribute instead.
-class AddSpirvBlockAttribute final
-    : public Castable<AddSpirvBlockAttribute, Transform> {
- public:
-  /// SpirvBlockAttribute is an InternalAttribute that is used to decorate a
-  // structure that needs a SPIR-V block attribute.
-  class SpirvBlockAttribute final
-      : public Castable<SpirvBlockAttribute, ast::InternalAttribute> {
-   public:
+class AddSpirvBlockAttribute final : public Castable<AddSpirvBlockAttribute, Transform> {
+  public:
+    /// SpirvBlockAttribute is an InternalAttribute that is used to decorate a
+    // structure that needs a SPIR-V block attribute.
+    class SpirvBlockAttribute final : public Castable<SpirvBlockAttribute, ast::InternalAttribute> {
+      public:
+        /// Constructor
+        /// @param program_id the identifier of the program that owns this node
+        explicit SpirvBlockAttribute(ProgramID program_id);
+        /// Destructor
+        ~SpirvBlockAttribute() override;
+
+        /// @return a short description of the internal attribute which will be
+        /// displayed as `@internal(<name>)`
+        std::string InternalName() const override;
+
+        /// Performs a deep clone of this object using the CloneContext `ctx`.
+        /// @param ctx the clone context
+        /// @return the newly cloned object
+        const SpirvBlockAttribute* Clone(CloneContext* ctx) const override;
+    };
+
     /// Constructor
-    /// @param program_id the identifier of the program that owns this node
-    explicit SpirvBlockAttribute(ProgramID program_id);
+    AddSpirvBlockAttribute();
+
     /// Destructor
-    ~SpirvBlockAttribute() override;
+    ~AddSpirvBlockAttribute() override;
 
-    /// @return a short description of the internal attribute which will be
-    /// displayed as `@internal(<name>)`
-    std::string InternalName() const override;
-
-    /// Performs a deep clone of this object using the CloneContext `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned object
-    const SpirvBlockAttribute* Clone(CloneContext* ctx) const override;
-  };
-
-  /// Constructor
-  AddSpirvBlockAttribute();
-
-  /// Destructor
-  ~AddSpirvBlockAttribute() override;
-
- protected:
-  /// Runs the transform using the CloneContext built for transforming a
-  /// program. Run() is responsible for calling Clone() on the CloneContext.
-  /// @param ctx the CloneContext primed with the input program and
-  /// ProgramBuilder
-  /// @param inputs optional extra transform-specific input data
-  /// @param outputs optional extra transform-specific output data
-  void Run(CloneContext& ctx,
-           const DataMap& inputs,
-           DataMap& outputs) const override;
+  protected:
+    /// Runs the transform using the CloneContext built for transforming a
+    /// program. Run() is responsible for calling Clone() on the CloneContext.
+    /// @param ctx the CloneContext primed with the input program and
+    /// ProgramBuilder
+    /// @param inputs optional extra transform-specific input data
+    /// @param outputs optional extra transform-specific output data
+    void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) const override;
 };
 
 }  // namespace tint::transform

@@ -26,232 +26,228 @@
 
 namespace wgpu::binding {
 
-    ////////////////////////////////////////////////////////////////////////////////
-    // wgpu::bindings::GPURenderPassEncoder
-    ////////////////////////////////////////////////////////////////////////////////
-    GPURenderPassEncoder::GPURenderPassEncoder(wgpu::RenderPassEncoder enc) : enc_(std::move(enc)) {
+////////////////////////////////////////////////////////////////////////////////
+// wgpu::bindings::GPURenderPassEncoder
+////////////////////////////////////////////////////////////////////////////////
+GPURenderPassEncoder::GPURenderPassEncoder(wgpu::RenderPassEncoder enc) : enc_(std::move(enc)) {}
+
+void GPURenderPassEncoder::setViewport(Napi::Env,
+                                       float x,
+                                       float y,
+                                       float width,
+                                       float height,
+                                       float minDepth,
+                                       float maxDepth) {
+    enc_.SetViewport(x, y, width, height, minDepth, maxDepth);
+}
+
+void GPURenderPassEncoder::setScissorRect(Napi::Env,
+                                          interop::GPUIntegerCoordinate x,
+                                          interop::GPUIntegerCoordinate y,
+                                          interop::GPUIntegerCoordinate width,
+                                          interop::GPUIntegerCoordinate height) {
+    enc_.SetScissorRect(x, y, width, height);
+}
+
+void GPURenderPassEncoder::setBlendConstant(Napi::Env env, interop::GPUColor color) {
+    Converter conv(env);
+
+    wgpu::Color c{};
+    if (!conv(c, color)) {
+        return;
     }
 
-    void GPURenderPassEncoder::setViewport(Napi::Env,
-                                           float x,
-                                           float y,
-                                           float width,
-                                           float height,
-                                           float minDepth,
-                                           float maxDepth) {
-        enc_.SetViewport(x, y, width, height, minDepth, maxDepth);
+    enc_.SetBlendConstant(&c);
+}
+
+void GPURenderPassEncoder::setStencilReference(Napi::Env, interop::GPUStencilValue reference) {
+    enc_.SetStencilReference(reference);
+}
+
+void GPURenderPassEncoder::beginOcclusionQuery(Napi::Env, interop::GPUSize32 queryIndex) {
+    enc_.BeginOcclusionQuery(queryIndex);
+}
+
+void GPURenderPassEncoder::endOcclusionQuery(Napi::Env) {
+    enc_.EndOcclusionQuery();
+}
+
+void GPURenderPassEncoder::executeBundles(
+    Napi::Env env,
+    std::vector<interop::Interface<interop::GPURenderBundle>> bundles_in) {
+    Converter conv(env);
+
+    wgpu::RenderBundle* bundles = nullptr;
+    uint32_t bundleCount = 0;
+    if (!conv(bundles, bundleCount, bundles_in)) {
+        return;
     }
 
-    void GPURenderPassEncoder::setScissorRect(Napi::Env,
-                                              interop::GPUIntegerCoordinate x,
-                                              interop::GPUIntegerCoordinate y,
-                                              interop::GPUIntegerCoordinate width,
-                                              interop::GPUIntegerCoordinate height) {
-        enc_.SetScissorRect(x, y, width, height);
+    enc_.ExecuteBundles(bundleCount, bundles);
+}
+
+void GPURenderPassEncoder::end(Napi::Env) {
+    enc_.End();
+}
+
+void GPURenderPassEncoder::setBindGroup(
+    Napi::Env env,
+    interop::GPUIndex32 index,
+    interop::Interface<interop::GPUBindGroup> bindGroup,
+    std::vector<interop::GPUBufferDynamicOffset> dynamicOffsets) {
+    Converter conv(env);
+
+    wgpu::BindGroup bg{};
+    uint32_t* offsets = nullptr;
+    uint32_t num_offsets = 0;
+    if (!conv(bg, bindGroup) || !conv(offsets, num_offsets, dynamicOffsets)) {
+        return;
     }
 
-    void GPURenderPassEncoder::setBlendConstant(Napi::Env env, interop::GPUColor color) {
-        Converter conv(env);
+    enc_.SetBindGroup(index, bg, num_offsets, offsets);
+}
 
-        wgpu::Color c{};
-        if (!conv(c, color)) {
-            return;
-        }
+void GPURenderPassEncoder::setBindGroup(Napi::Env env,
+                                        interop::GPUIndex32 index,
+                                        interop::Interface<interop::GPUBindGroup> bindGroup,
+                                        interop::Uint32Array dynamicOffsetsData,
+                                        interop::GPUSize64 dynamicOffsetsDataStart,
+                                        interop::GPUSize32 dynamicOffsetsDataLength) {
+    Converter conv(env);
 
-        enc_.SetBlendConstant(&c);
+    wgpu::BindGroup bg{};
+    if (!conv(bg, bindGroup)) {
+        return;
     }
 
-    void GPURenderPassEncoder::setStencilReference(Napi::Env, interop::GPUStencilValue reference) {
-        enc_.SetStencilReference(reference);
+    if (dynamicOffsetsDataStart > dynamicOffsetsData.ElementLength()) {
+        Napi::RangeError::New(env, "dynamicOffsetsDataStart is out of bound of dynamicOffsetData")
+            .ThrowAsJavaScriptException();
+        return;
     }
 
-    void GPURenderPassEncoder::beginOcclusionQuery(Napi::Env, interop::GPUSize32 queryIndex) {
-        enc_.BeginOcclusionQuery(queryIndex);
+    if (dynamicOffsetsDataLength > dynamicOffsetsData.ElementLength() - dynamicOffsetsDataStart) {
+        Napi::RangeError::New(env,
+                              "dynamicOffsetsDataLength + dynamicOffsetsDataStart is out of "
+                              "bound of dynamicOffsetData")
+            .ThrowAsJavaScriptException();
+        return;
     }
 
-    void GPURenderPassEncoder::endOcclusionQuery(Napi::Env) {
-        enc_.EndOcclusionQuery();
+    enc_.SetBindGroup(index, bg, dynamicOffsetsDataLength,
+                      dynamicOffsetsData.Data() + dynamicOffsetsDataStart);
+}
+
+void GPURenderPassEncoder::pushDebugGroup(Napi::Env, std::string groupLabel) {
+    enc_.PushDebugGroup(groupLabel.c_str());
+}
+
+void GPURenderPassEncoder::popDebugGroup(Napi::Env) {
+    enc_.PopDebugGroup();
+}
+
+void GPURenderPassEncoder::insertDebugMarker(Napi::Env, std::string markerLabel) {
+    enc_.InsertDebugMarker(markerLabel.c_str());
+}
+
+void GPURenderPassEncoder::setPipeline(Napi::Env env,
+                                       interop::Interface<interop::GPURenderPipeline> pipeline) {
+    Converter conv(env);
+    wgpu::RenderPipeline rp{};
+    if (!conv(rp, pipeline)) {
+        return;
     }
+    enc_.SetPipeline(rp);
+}
 
-    void GPURenderPassEncoder::executeBundles(
-        Napi::Env env,
-        std::vector<interop::Interface<interop::GPURenderBundle>> bundles_in) {
-        Converter conv(env);
+void GPURenderPassEncoder::setIndexBuffer(Napi::Env env,
+                                          interop::Interface<interop::GPUBuffer> buffer,
+                                          interop::GPUIndexFormat indexFormat,
+                                          interop::GPUSize64 offset,
+                                          std::optional<interop::GPUSize64> size) {
+    Converter conv(env);
 
-        wgpu::RenderBundle* bundles = nullptr;
-        uint32_t bundleCount = 0;
-        if (!conv(bundles, bundleCount, bundles_in)) {
-            return;
-        }
-
-        enc_.ExecuteBundles(bundleCount, bundles);
+    wgpu::Buffer b{};
+    wgpu::IndexFormat f;
+    uint64_t s = wgpu::kWholeSize;
+    if (!conv(b, buffer) ||       //
+        !conv(f, indexFormat) ||  //
+        !conv(s, size)) {
+        return;
     }
+    enc_.SetIndexBuffer(b, f, offset, s);
+}
 
-    void GPURenderPassEncoder::end(Napi::Env) {
-        enc_.End();
+void GPURenderPassEncoder::setVertexBuffer(Napi::Env env,
+                                           interop::GPUIndex32 slot,
+                                           interop::Interface<interop::GPUBuffer> buffer,
+                                           interop::GPUSize64 offset,
+                                           std::optional<interop::GPUSize64> size) {
+    Converter conv(env);
+
+    wgpu::Buffer b{};
+    uint64_t s = wgpu::kWholeSize;
+    if (!conv(b, buffer) || !conv(s, size)) {
+        return;
     }
+    enc_.SetVertexBuffer(slot, b, offset, s);
+}
 
-    void GPURenderPassEncoder::setBindGroup(
-        Napi::Env env,
-        interop::GPUIndex32 index,
-        interop::Interface<interop::GPUBindGroup> bindGroup,
-        std::vector<interop::GPUBufferDynamicOffset> dynamicOffsets) {
-        Converter conv(env);
+void GPURenderPassEncoder::draw(Napi::Env env,
+                                interop::GPUSize32 vertexCount,
+                                interop::GPUSize32 instanceCount,
+                                interop::GPUSize32 firstVertex,
+                                interop::GPUSize32 firstInstance) {
+    enc_.Draw(vertexCount, instanceCount, firstVertex, firstInstance);
+}
 
-        wgpu::BindGroup bg{};
-        uint32_t* offsets = nullptr;
-        uint32_t num_offsets = 0;
-        if (!conv(bg, bindGroup) || !conv(offsets, num_offsets, dynamicOffsets)) {
-            return;
-        }
+void GPURenderPassEncoder::drawIndexed(Napi::Env env,
+                                       interop::GPUSize32 indexCount,
+                                       interop::GPUSize32 instanceCount,
+                                       interop::GPUSize32 firstIndex,
+                                       interop::GPUSignedOffset32 baseVertex,
+                                       interop::GPUSize32 firstInstance) {
+    enc_.DrawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
+}
 
-        enc_.SetBindGroup(index, bg, num_offsets, offsets);
+void GPURenderPassEncoder::drawIndirect(Napi::Env env,
+                                        interop::Interface<interop::GPUBuffer> indirectBuffer,
+                                        interop::GPUSize64 indirectOffset) {
+    Converter conv(env);
+
+    wgpu::Buffer b{};
+    uint64_t o = 0;
+
+    if (!conv(b, indirectBuffer) ||  //
+        !conv(o, indirectOffset)) {
+        return;
     }
+    enc_.DrawIndirect(b, o);
+}
 
-    void GPURenderPassEncoder::setBindGroup(Napi::Env env,
-                                            interop::GPUIndex32 index,
-                                            interop::Interface<interop::GPUBindGroup> bindGroup,
-                                            interop::Uint32Array dynamicOffsetsData,
-                                            interop::GPUSize64 dynamicOffsetsDataStart,
-                                            interop::GPUSize32 dynamicOffsetsDataLength) {
-        Converter conv(env);
+void GPURenderPassEncoder::drawIndexedIndirect(
+    Napi::Env env,
+    interop::Interface<interop::GPUBuffer> indirectBuffer,
+    interop::GPUSize64 indirectOffset) {
+    Converter conv(env);
 
-        wgpu::BindGroup bg{};
-        if (!conv(bg, bindGroup)) {
-            return;
-        }
+    wgpu::Buffer b{};
+    uint64_t o = 0;
 
-        if (dynamicOffsetsDataStart > dynamicOffsetsData.ElementLength()) {
-            Napi::RangeError::New(env,
-                                  "dynamicOffsetsDataStart is out of bound of dynamicOffsetData")
-                .ThrowAsJavaScriptException();
-            return;
-        }
-
-        if (dynamicOffsetsDataLength >
-            dynamicOffsetsData.ElementLength() - dynamicOffsetsDataStart) {
-            Napi::RangeError::New(env,
-                                  "dynamicOffsetsDataLength + dynamicOffsetsDataStart is out of "
-                                  "bound of dynamicOffsetData")
-                .ThrowAsJavaScriptException();
-            return;
-        }
-
-        enc_.SetBindGroup(index, bg, dynamicOffsetsDataLength,
-                          dynamicOffsetsData.Data() + dynamicOffsetsDataStart);
+    if (!conv(b, indirectBuffer) ||  //
+        !conv(o, indirectOffset)) {
+        return;
     }
+    enc_.DrawIndexedIndirect(b, o);
+}
 
-    void GPURenderPassEncoder::pushDebugGroup(Napi::Env, std::string groupLabel) {
-        enc_.PushDebugGroup(groupLabel.c_str());
-    }
+std::variant<std::string, interop::UndefinedType> GPURenderPassEncoder::getLabel(Napi::Env) {
+    UNIMPLEMENTED();
+}
 
-    void GPURenderPassEncoder::popDebugGroup(Napi::Env) {
-        enc_.PopDebugGroup();
-    }
-
-    void GPURenderPassEncoder::insertDebugMarker(Napi::Env, std::string markerLabel) {
-        enc_.InsertDebugMarker(markerLabel.c_str());
-    }
-
-    void GPURenderPassEncoder::setPipeline(
-        Napi::Env env,
-        interop::Interface<interop::GPURenderPipeline> pipeline) {
-        Converter conv(env);
-        wgpu::RenderPipeline rp{};
-        if (!conv(rp, pipeline)) {
-            return;
-        }
-        enc_.SetPipeline(rp);
-    }
-
-    void GPURenderPassEncoder::setIndexBuffer(Napi::Env env,
-                                              interop::Interface<interop::GPUBuffer> buffer,
-                                              interop::GPUIndexFormat indexFormat,
-                                              interop::GPUSize64 offset,
-                                              std::optional<interop::GPUSize64> size) {
-        Converter conv(env);
-
-        wgpu::Buffer b{};
-        wgpu::IndexFormat f;
-        uint64_t s = wgpu::kWholeSize;
-        if (!conv(b, buffer) ||       //
-            !conv(f, indexFormat) ||  //
-            !conv(s, size)) {
-            return;
-        }
-        enc_.SetIndexBuffer(b, f, offset, s);
-    }
-
-    void GPURenderPassEncoder::setVertexBuffer(Napi::Env env,
-                                               interop::GPUIndex32 slot,
-                                               interop::Interface<interop::GPUBuffer> buffer,
-                                               interop::GPUSize64 offset,
-                                               std::optional<interop::GPUSize64> size) {
-        Converter conv(env);
-
-        wgpu::Buffer b{};
-        uint64_t s = wgpu::kWholeSize;
-        if (!conv(b, buffer) || !conv(s, size)) {
-            return;
-        }
-        enc_.SetVertexBuffer(slot, b, offset, s);
-    }
-
-    void GPURenderPassEncoder::draw(Napi::Env env,
-                                    interop::GPUSize32 vertexCount,
-                                    interop::GPUSize32 instanceCount,
-                                    interop::GPUSize32 firstVertex,
-                                    interop::GPUSize32 firstInstance) {
-        enc_.Draw(vertexCount, instanceCount, firstVertex, firstInstance);
-    }
-
-    void GPURenderPassEncoder::drawIndexed(Napi::Env env,
-                                           interop::GPUSize32 indexCount,
-                                           interop::GPUSize32 instanceCount,
-                                           interop::GPUSize32 firstIndex,
-                                           interop::GPUSignedOffset32 baseVertex,
-                                           interop::GPUSize32 firstInstance) {
-        enc_.DrawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
-    }
-
-    void GPURenderPassEncoder::drawIndirect(Napi::Env env,
-                                            interop::Interface<interop::GPUBuffer> indirectBuffer,
-                                            interop::GPUSize64 indirectOffset) {
-        Converter conv(env);
-
-        wgpu::Buffer b{};
-        uint64_t o = 0;
-
-        if (!conv(b, indirectBuffer) ||  //
-            !conv(o, indirectOffset)) {
-            return;
-        }
-        enc_.DrawIndirect(b, o);
-    }
-
-    void GPURenderPassEncoder::drawIndexedIndirect(
-        Napi::Env env,
-        interop::Interface<interop::GPUBuffer> indirectBuffer,
-        interop::GPUSize64 indirectOffset) {
-        Converter conv(env);
-
-        wgpu::Buffer b{};
-        uint64_t o = 0;
-
-        if (!conv(b, indirectBuffer) ||  //
-            !conv(o, indirectOffset)) {
-            return;
-        }
-        enc_.DrawIndexedIndirect(b, o);
-    }
-
-    std::variant<std::string, interop::UndefinedType> GPURenderPassEncoder::getLabel(Napi::Env) {
-        UNIMPLEMENTED();
-    }
-
-    void GPURenderPassEncoder::setLabel(Napi::Env,
-                                        std::variant<std::string, interop::UndefinedType> value) {
-        UNIMPLEMENTED();
-    }
+void GPURenderPassEncoder::setLabel(Napi::Env,
+                                    std::variant<std::string, interop::UndefinedType> value) {
+    UNIMPLEMENTED();
+}
 
 }  // namespace wgpu::binding

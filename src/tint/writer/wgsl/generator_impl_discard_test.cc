@@ -20,15 +20,15 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Discard) {
-  auto* stmt = create<ast::DiscardStatement>();
-  WrapInFunction(stmt);
+    auto* stmt = create<ast::DiscardStatement>();
+    WrapInFunction(stmt);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  discard;\n");
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    EXPECT_EQ(gen.result(), "  discard;\n");
 }
 
 }  // namespace

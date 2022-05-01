@@ -22,8 +22,8 @@ namespace {
 using StructMemberSizeAttributeTest = TestHelper;
 
 TEST_F(StructMemberSizeAttributeTest, Creation) {
-  auto* d = create<StructMemberSizeAttribute>(2);
-  EXPECT_EQ(2u, d->size);
+    auto* d = create<StructMemberSizeAttribute>(2);
+    EXPECT_EQ(2u, d->size);
 }
 
 }  // namespace

@@ -22,12 +22,12 @@
 
 namespace utils {
 
-    class ComboRenderBundleEncoderDescriptor : public wgpu::RenderBundleEncoderDescriptor {
-      public:
-        ComboRenderBundleEncoderDescriptor();
+class ComboRenderBundleEncoderDescriptor : public wgpu::RenderBundleEncoderDescriptor {
+  public:
+    ComboRenderBundleEncoderDescriptor();
 
-        std::array<wgpu::TextureFormat, kMaxColorAttachments> cColorFormats;
-    };
+    std::array<wgpu::TextureFormat, kMaxColorAttachments> cColorFormats;
+};
 
 }  // namespace utils
 

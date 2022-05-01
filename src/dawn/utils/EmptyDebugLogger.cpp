@@ -16,14 +16,14 @@
 
 namespace utils {
 
-    class EmptyDebugLogger : public PlatformDebugLogger {
-      public:
-        EmptyDebugLogger() = default;
-        ~EmptyDebugLogger() override = default;
-    };
+class EmptyDebugLogger : public PlatformDebugLogger {
+  public:
+    EmptyDebugLogger() = default;
+    ~EmptyDebugLogger() override = default;
+};
 
-    PlatformDebugLogger* CreatePlatformDebugLogger() {
-        return new EmptyDebugLogger();
-    }
+PlatformDebugLogger* CreatePlatformDebugLogger() {
+    return new EmptyDebugLogger();
+}
 
 }  // namespace utils

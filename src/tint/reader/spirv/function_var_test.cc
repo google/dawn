@@ -26,16 +26,16 @@ using ::testing::HasSubstr;
 /// @returns a SPIR-V assembly segment which assigns debug names
 /// to particular IDs.
 std::string Names(std::vector<std::string> ids) {
-  std::ostringstream outs;
-  for (auto& id : ids) {
-    outs << "    OpName %" << id << " \"" << id << "\"\n";
-  }
-  return outs.str();
+    std::ostringstream outs;
+    for (auto& id : ids) {
+        outs << "    OpName %" << id << " \"" << id << "\"\n";
+    }
+    return outs.str();
 }
 
 std::string CommonTypes() {
-  return
-      R"(
+    return
+        R"(
 
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
@@ -80,7 +80,7 @@ std::string CommonTypes() {
 // a vertex shader entry point declaration, and name declarations
 // for specified IDs.
 std::string Caps(std::vector<std::string> ids = {}) {
-  return R"(
+    return R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
     OpEntryPoint Fragment %100 "main"
@@ -91,17 +91,17 @@ std::string Caps(std::vector<std::string> ids = {}) {
 // Returns the SPIR-V assembly for a vertex shader, optionally
 // with OpName decorations for certain SPIR-V IDs
 std::string PreambleNames(std::vector<std::string> ids) {
-  return Caps(ids) + CommonTypes();
+    return Caps(ids) + CommonTypes();
 }
 
 std::string Preamble() {
-  return PreambleNames({});
+    return PreambleNames({});
 }
 
 using SpvParserFunctionVarTest = SpvParserTest;
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_AnonymousVars) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpVariable %ptr_uint Function
@@ -110,20 +110,19 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_AnonymousVars) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitFunctionVariables());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr(R"(var x_1 : u32;
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(var x_1 : u32;
 var x_2 : u32;
 var x_3 : u32;
 )"));
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_NamedVars) {
-  auto p = parser(test::Assemble(PreambleNames({"a", "b", "c"}) + R"(
+    auto p = parser(test::Assemble(PreambleNames({"a", "b", "c"}) + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %a = OpVariable %ptr_uint Function
@@ -132,19 +131,19 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_NamedVars) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitFunctionVariables());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(var a : u32;
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(var a : u32;
 var b : u32;
 var c : u32;
 )"));
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_MixedTypes) {
-  auto p = parser(test::Assemble(PreambleNames({"a", "b", "c"}) + R"(
+    auto p = parser(test::Assemble(PreambleNames({"a", "b", "c"}) + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %a = OpVariable %ptr_uint Function
@@ -153,19 +152,19 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_MixedTypes) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitFunctionVariables());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(var a : u32;
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(var a : u32;
 var b : i32;
 var c : f32;
 )"));
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ScalarInitializers) {
-  auto p = parser(test::Assemble(PreambleNames({"a", "b", "c", "d", "e"}) + R"(
+    auto p = parser(test::Assemble(PreambleNames({"a", "b", "c", "d", "e"}) + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %a = OpVariable %ptr_bool Function %true
@@ -176,13 +175,12 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ScalarInitializers) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitFunctionVariables());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr(R"(var a : bool = true;
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(var a : bool = true;
 var b : bool = false;
 var c : i32 = -1;
 var d : u32 = 1u;
@@ -191,7 +189,7 @@ var e : f32 = 1.5;
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ScalarNullInitializers) {
-  auto p = parser(test::Assemble(PreambleNames({"a", "b", "c", "d"}) + R"(
+    auto p = parser(test::Assemble(PreambleNames({"a", "b", "c", "d"}) + R"(
      %null_bool = OpConstantNull %bool
      %null_int = OpConstantNull %int
      %null_uint = OpConstantNull %uint
@@ -206,13 +204,12 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ScalarNullInitializers) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitFunctionVariables());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr(R"(var a : bool = false;
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(var a : bool = false;
 var b : i32 = 0;
 var c : u32 = 0u;
 var d : f32 = 0.0;
@@ -220,7 +217,7 @@ var d : f32 = 0.0;
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_VectorInitializer) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %v2float
      %two = OpConstant %float 2.0
      %const = OpConstantComposite %v2float %float_1p5 %two
@@ -231,17 +228,17 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_VectorInitializer) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitFunctionVariables());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("var x_200 : vec2<f32> = vec2<f32>(1.5, 2.0);"));
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("var x_200 : vec2<f32> = vec2<f32>(1.5, 2.0);"));
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_MatrixInitializer) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %m3v2float
      %two = OpConstant %float 2.0
      %three = OpConstant %float 3.0
@@ -257,20 +254,20 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_MatrixInitializer) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitFunctionVariables());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("var x_200 : mat3x2<f32> = mat3x2<f32>("
-                        "vec2<f32>(1.5, 2.0), "
-                        "vec2<f32>(2.0, 3.0), "
-                        "vec2<f32>(3.0, 4.0));"));
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("var x_200 : mat3x2<f32> = mat3x2<f32>("
+                          "vec2<f32>(1.5, 2.0), "
+                          "vec2<f32>(2.0, 3.0), "
+                          "vec2<f32>(3.0, 4.0));"));
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %arr2uint
      %two = OpConstant %uint 2
      %const = OpConstantComposite %arr2uint %uint_1 %two
@@ -281,18 +278,17 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitFunctionVariables());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(
-      test::ToString(p->program(), ast_body),
-      HasSubstr("var x_200 : array<u32, 2u> = array<u32, 2u>(1u, 2u);"));
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("var x_200 : array<u32, 2u> = array<u32, 2u>(1u, 2u);"));
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer_Alias) {
-  auto p = parser(test::Assemble(R"(
+    auto p = parser(test::Assemble(R"(
      OpCapability Shader
      OpMemoryModel Logical Simple
      OpEntryPoint Fragment %100 "main"
@@ -309,18 +305,18 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer_Alias) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitFunctionVariables());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  const char* expect = "var x_200 : Arr = Arr(1u, 2u);\n";
-  EXPECT_EQ(expect, got);
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    const char* expect = "var x_200 : Arr = Arr(1u, 2u);\n";
+    EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer_Null) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %arr2uint
      %two = OpConstant %uint 2
      %const = OpConstantNull %arr2uint
@@ -331,18 +327,17 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer_Null) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitFunctionVariables());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("var x_200 : array<u32, 2u> = array<u32, 2u>();"));
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("var x_200 : array<u32, 2u> = array<u32, 2u>();"));
 }
 
-TEST_F(SpvParserFunctionVarTest,
-       EmitFunctionVariables_ArrayInitializer_Alias_Null) {
-  auto p = parser(test::Assemble(R"(
+TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer_Alias_Null) {
+    auto p = parser(test::Assemble(R"(
      OpCapability Shader
      OpMemoryModel Logical Simple
      OpEntryPoint Fragment %100 "main"
@@ -359,17 +354,17 @@ TEST_F(SpvParserFunctionVarTest,
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitFunctionVariables());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("var x_200 : Arr = @stride(16) array<u32, 2u>();"));
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("var x_200 : Arr = @stride(16) array<u32, 2u>();"));
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructInitializer) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %strct
      %two = OpConstant %uint 2
      %arrconst = OpConstantComposite %arr2uint %uint_1 %two
@@ -381,17 +376,17 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructInitializer) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitFunctionVariables());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("var x_200 : S = S(1u, 1.5, array<u32, 2u>(1u, 2u));"));
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("var x_200 : S = S(1u, 1.5, array<u32, 2u>(1u, 2u));"));
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructInitializer_Null) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %strct
      %two = OpConstant %uint 2
      %arrconst = OpConstantComposite %arr2uint %uint_1 %two
@@ -403,19 +398,18 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructInitializer_Null) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitFunctionVariables());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  auto ast_body = fe.ast_body();
-  EXPECT_THAT(test::ToString(p->program(), ast_body),
-              HasSubstr("var x_200 : S = S(0u, 0.0, array<u32, 2u>());"));
+    auto ast_body = fe.ast_body();
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("var x_200 : S = S(0u, 0.0, array<u32, 2u>());"));
 }
 
-TEST_F(SpvParserFunctionVarTest,
-       EmitFunctionVariables_Decorate_RelaxedPrecision) {
-  // RelaxedPrecisionis dropped
-  const auto assembly = Caps({"myvar"}) + R"(
+TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_Decorate_RelaxedPrecision) {
+    // RelaxedPrecisionis dropped
+    const auto assembly = Caps({"myvar"}) + R"(
      OpDecorate %myvar RelaxedPrecision
 
      %float = OpTypeFloat 32
@@ -430,20 +424,19 @@ TEST_F(SpvParserFunctionVarTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitFunctionVariables());
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  auto ast_body = fe.ast_body();
-  const auto got = test::ToString(p->program(), ast_body);
-  EXPECT_EQ(got, "var myvar : f32;\n") << got;
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    EXPECT_EQ(got, "var myvar : f32;\n") << got;
 }
 
-TEST_F(SpvParserFunctionVarTest,
-       EmitFunctionVariables_MemberDecorate_RelaxedPrecision) {
-  // RelaxedPrecisionis dropped
-  const auto assembly = Caps({"myvar", "strct"}) + R"(
+TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_MemberDecorate_RelaxedPrecision) {
+    // RelaxedPrecisionis dropped
+    const auto assembly = Caps({"myvar", "strct"}) + R"(
      OpMemberDecorate %strct 0 RelaxedPrecision
 
      %float = OpTypeFloat 32
@@ -459,20 +452,19 @@ TEST_F(SpvParserFunctionVarTest,
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error() << std::endl;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitFunctionVariables());
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+        << assembly << p->error() << std::endl;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  auto ast_body = fe.ast_body();
-  const auto got = test::ToString(p->program(), ast_body);
-  EXPECT_EQ(got, "var myvar : strct;\n") << got;
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    EXPECT_EQ(got, "var myvar : strct;\n") << got;
 }
 
-TEST_F(SpvParserFunctionVarTest,
-       EmitFunctionVariables_StructDifferOnlyInMemberName) {
-  auto p = parser(test::Assemble(R"(
+TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructDifferOnlyInMemberName) {
+    auto p = parser(test::Assemble(R"(
       OpCapability Shader
       OpMemoryModel Logical Simple
       OpEntryPoint Fragment %100 "main"
@@ -496,20 +488,19 @@ TEST_F(SpvParserFunctionVarTest,
       %41 = OpVariable %_ptr_Function__struct_6 Function
       OpReturn
       OpFunctionEnd)"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitFunctionVariables());
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitFunctionVariables());
 
-  auto ast_body = fe.ast_body();
-  const auto got = test::ToString(p->program(), ast_body);
-  EXPECT_THAT(got, HasSubstr(R"(var x_40 : S;
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(got, HasSubstr(R"(var x_40 : S;
 var x_41 : S_1;
 )"));
 }
 
-TEST_F(SpvParserFunctionVarTest,
-       EmitStatement_CombinatorialValue_Defer_UsedOnceSameConstruct) {
-  auto assembly = Preamble() + R"(
+TEST_F(SpvParserFunctionVarTest, EmitStatement_CombinatorialValue_Defer_UsedOnceSameConstruct) {
+    auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
 
      %10 = OpLabel
@@ -524,25 +515,24 @@ TEST_F(SpvParserFunctionVarTest,
 
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  auto* expect =
-      R"(var x_25 : u32;
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect =
+        R"(var x_25 : u32;
 x_25 = 1u;
 x_25 = (1u + 1u);
 return;
 )";
-  EXPECT_EQ(expect, got);
+    EXPECT_EQ(expect, got);
 }
 
-TEST_F(SpvParserFunctionVarTest,
-       EmitStatement_CombinatorialValue_Immediate_UsedTwice) {
-  auto assembly = Preamble() + R"(
+TEST_F(SpvParserFunctionVarTest, EmitStatement_CombinatorialValue_Immediate_UsedTwice) {
+    auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
 
      %10 = OpLabel
@@ -558,29 +548,29 @@ TEST_F(SpvParserFunctionVarTest,
 
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  auto* expect = R"(var x_25 : u32;
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(var x_25 : u32;
 let x_2 : u32 = (1u + 1u);
 x_25 = 1u;
 x_25 = x_2;
 x_25 = x_2;
 return;
 )";
-  EXPECT_EQ(expect, got);
+    EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserFunctionVarTest,
        EmitStatement_CombinatorialValue_Immediate_UsedOnceDifferentConstruct) {
-  // Translation should not sink expensive operations into or out of control
-  // flow. As a simple heuristic, don't move *any* combinatorial operation
-  // across any control flow.
-  auto assembly = Preamble() + R"(
+    // Translation should not sink expensive operations into or out of control
+    // flow. As a simple heuristic, don't move *any* combinatorial operation
+    // across any control flow.
+    auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
 
      %10 = OpLabel
@@ -603,14 +593,14 @@ TEST_F(SpvParserFunctionVarTest,
 
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  auto* expect = R"(var x_25 : u32;
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(var x_25 : u32;
 let x_2 : u32 = (1u + 1u);
 x_25 = 1u;
 loop {
@@ -622,18 +612,17 @@ loop {
 x_25 = 2u;
 return;
 )";
-  EXPECT_EQ(expect, got);
+    EXPECT_EQ(expect, got);
 }
 
-TEST_F(
-    SpvParserFunctionVarTest,
-    EmitStatement_CombinatorialNonPointer_DefConstruct_DoesNotEncloseAllUses) {
-  // Compensate for the difference between dominance and scoping.
-  // Exercise hoisting of the constant definition to before its natural
-  // location.
-  //
-  // The definition of %2 should be hoisted
-  auto assembly = Preamble() + R"(
+TEST_F(SpvParserFunctionVarTest,
+       EmitStatement_CombinatorialNonPointer_DefConstruct_DoesNotEncloseAllUses) {
+    // Compensate for the difference between dominance and scoping.
+    // Exercise hoisting of the constant definition to before its natural
+    // location.
+    //
+    // The definition of %2 should be hoisted
+    auto assembly = Preamble() + R"(
      %pty = OpTypePointer Private %uint
      %1 = OpVariable %pty Private
 
@@ -676,14 +665,14 @@ TEST_F(
 
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  auto* expect = R"(x_1 = 0u;
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(x_1 = 0u;
 loop {
   var x_2 : u32;
   x_1 = 1u;
@@ -708,21 +697,20 @@ loop {
 x_1 = 5u;
 return;
 )";
-  EXPECT_EQ(expect, got);
+    EXPECT_EQ(expect, got);
 }
 
-TEST_F(
-    SpvParserFunctionVarTest,
-    EmitStatement_CombinatorialNonPointer_Hoisting_DefFirstBlockIf_InFunction) {
-  // This is a hoisting case, where the definition is in the first block
-  // of an if selection construct. In this case the definition should count
-  // as being in the parent (enclosing) construct.
-  //
-  // The definition of %1 is in an IfSelection construct and also the enclosing
-  // Function construct, both of which start at block %10. For the purpose of
-  // determining the construct containing %10, go to the parent construct of
-  // the IfSelection.
-  auto assembly = Preamble() + R"(
+TEST_F(SpvParserFunctionVarTest,
+       EmitStatement_CombinatorialNonPointer_Hoisting_DefFirstBlockIf_InFunction) {
+    // This is a hoisting case, where the definition is in the first block
+    // of an if selection construct. In this case the definition should count
+    // as being in the parent (enclosing) construct.
+    //
+    // The definition of %1 is in an IfSelection construct and also the enclosing
+    // Function construct, both of which start at block %10. For the purpose of
+    // determining the construct containing %10, go to the parent construct of
+    // the IfSelection.
+    auto assembly = Preamble() + R"(
      %pty = OpTypePointer Private %uint
      %200 = OpVariable %pty Private
      %cond = OpConstantTrue %bool
@@ -745,36 +733,36 @@ TEST_F(
 
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  // We don't hoist x_1 into its own mutable variable. It is emitted as
-  // a const definition.
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  auto* expect = R"(let x_1 : u32 = 1u;
+    // We don't hoist x_1 into its own mutable variable. It is emitted as
+    // a const definition.
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(let x_1 : u32 = 1u;
 if (true) {
 }
 let x_3 : u32 = x_1;
 x_200 = x_3;
 return;
 )";
-  EXPECT_EQ(expect, got);
+    EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserFunctionVarTest,
        EmitStatement_CombinatorialNonPointer_Hoisting_DefFirstBlockIf_InIf) {
-  // This is like the previous case, but the IfSelection is nested inside
-  // another IfSelection.
-  // This tests that the hoisting algorithm goes to only one parent of
-  // the definining if-selection block, and doesn't jump all the way out
-  // to the Function construct that encloses everything.
-  //
-  // We should not hoist %1 because its definition should count as being
-  // in the outer IfSelection, not the inner IfSelection.
-  auto assembly = Preamble() + R"(
+    // This is like the previous case, but the IfSelection is nested inside
+    // another IfSelection.
+    // This tests that the hoisting algorithm goes to only one parent of
+    // the definining if-selection block, and doesn't jump all the way out
+    // to the Function construct that encloses everything.
+    //
+    // We should not hoist %1 because its definition should count as being
+    // in the outer IfSelection, not the inner IfSelection.
+    auto assembly = Preamble() + R"(
 
      %pty = OpTypePointer Private %uint
      %200 = OpVariable %pty Private
@@ -807,14 +795,14 @@ TEST_F(SpvParserFunctionVarTest,
 
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  auto* expect = R"(if (true) {
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(if (true) {
   let x_1 : u32 = 1u;
   if (true) {
   }
@@ -823,17 +811,16 @@ TEST_F(SpvParserFunctionVarTest,
 }
 return;
 )";
-  EXPECT_EQ(expect, got);
+    EXPECT_EQ(expect, got);
 }
 
-TEST_F(
-    SpvParserFunctionVarTest,
-    EmitStatement_CombinatorialNonPointer_Hoisting_DefFirstBlockSwitch_InIf) {
-  // This is like the previous case, but the definition is in a SwitchSelection
-  // inside another IfSelection.
-  // Tests that definitions in the first block of a switch count as being
-  // in the parent of the switch construct.
-  auto assembly = Preamble() + R"(
+TEST_F(SpvParserFunctionVarTest,
+       EmitStatement_CombinatorialNonPointer_Hoisting_DefFirstBlockSwitch_InIf) {
+    // This is like the previous case, but the definition is in a SwitchSelection
+    // inside another IfSelection.
+    // Tests that definitions in the first block of a switch count as being
+    // in the parent of the switch construct.
+    auto assembly = Preamble() + R"(
      %pty = OpTypePointer Private %uint
      %200 = OpVariable %pty Private
      %cond = OpConstantTrue %bool
@@ -864,14 +851,14 @@ TEST_F(
      OpReturn
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  auto* expect = R"(if (true) {
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(if (true) {
   let x_1 : u32 = 1u;
   switch(1u) {
     case 0u: {
@@ -884,20 +871,20 @@ TEST_F(
 }
 return;
 )";
-  EXPECT_EQ(expect, got);
+    EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserFunctionVarTest,
        EmitStatement_CombinatorialNonPointer_Hoisting_DefAndUseFirstBlockIf) {
-  // In this test, both the defintion and the use are in the first block
-  // of an IfSelection.  No hoisting occurs because hoisting is triggered
-  // on whether the defining construct contains the last use, rather than
-  // whether the two constructs are the same.
-  //
-  // This example has two SSA IDs which are tempting to hoist but should not:
-  //   %1 is defined and used in the first block of an IfSelection.
-  //       Do not hoist it.
-  auto assembly = Preamble() + R"(
+    // In this test, both the defintion and the use are in the first block
+    // of an IfSelection.  No hoisting occurs because hoisting is triggered
+    // on whether the defining construct contains the last use, rather than
+    // whether the two constructs are the same.
+    //
+    // This example has two SSA IDs which are tempting to hoist but should not:
+    //   %1 is defined and used in the first block of an IfSelection.
+    //       Do not hoist it.
+    auto assembly = Preamble() + R"(
      %cond = OpConstantTrue %bool
 
      %100 = OpFunction %void None %voidfn
@@ -917,26 +904,26 @@ TEST_F(SpvParserFunctionVarTest,
 
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  // We don't hoist x_1 into its own mutable variable. It is emitted as
-  // a const definition.
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  auto* expect = R"(let x_1 : u32 = 1u;
+    // We don't hoist x_1 into its own mutable variable. It is emitted as
+    // a const definition.
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(let x_1 : u32 = 1u;
 let x_2 : u32 = x_1;
 if (true) {
 }
 return;
 )";
-  EXPECT_EQ(expect, got);
+    EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_SingleBlockLoopIndex) {
-  auto assembly = Preamble() + R"(
+    auto assembly = Preamble() + R"(
      %pty = OpTypePointer Private %uint
      %1 = OpVariable %pty Private
      %boolpty = OpTypePointer Private %bool
@@ -974,14 +961,14 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_SingleBlockLoopIndex) {
 
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  auto* expect = R"(loop {
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(loop {
   var x_2_phi : u32;
   var x_3_phi : u32;
   let x_101 : bool = x_7;
@@ -1003,11 +990,11 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_SingleBlockLoopIndex) {
 }
 return;
 )";
-  EXPECT_EQ(expect, got);
+    EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_MultiBlockLoopIndex) {
-  auto assembly = Preamble() + R"(
+    auto assembly = Preamble() + R"(
      %pty = OpTypePointer Private %uint
      %1 = OpVariable %pty Private
      %boolpty = OpTypePointer Private %bool
@@ -1048,14 +1035,14 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_MultiBlockLoopIndex) {
 
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  auto* expect = R"(loop {
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(loop {
   var x_2_phi : u32;
   var x_3_phi : u32;
   let x_101 : bool = x_7;
@@ -1082,12 +1069,11 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_MultiBlockLoopIndex) {
 }
 return;
 )";
-  EXPECT_EQ(expect, got);
+    EXPECT_EQ(expect, got);
 }
 
-TEST_F(SpvParserFunctionVarTest,
-       EmitStatement_Phi_ValueFromLoopBodyAndContinuing) {
-  auto assembly = Preamble() + R"(
+TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_ValueFromLoopBodyAndContinuing) {
+    auto assembly = Preamble() + R"(
      %pty = OpTypePointer Private %uint
      %1 = OpVariable %pty Private
      %boolpty = OpTypePointer Private %bool
@@ -1128,15 +1114,14 @@ TEST_F(SpvParserFunctionVarTest,
 
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
-      << assembly << p->error();
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  auto* expect = R"(let x_101 : bool = x_17;
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(let x_101 : bool = x_17;
 loop {
   var x_2_phi : u32;
   var x_5_phi : u32;
@@ -1161,11 +1146,11 @@ loop {
 }
 return;
 )";
-  EXPECT_EQ(expect, got);
+    EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_FromElseAndThen) {
-  auto assembly = Preamble() + R"(
+    auto assembly = Preamble() + R"(
      %pty = OpTypePointer Private %uint
      %1 = OpVariable %pty Private
      %boolpty = OpTypePointer Private %bool
@@ -1208,14 +1193,14 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_FromElseAndThen) {
 
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  auto* expect = R"(let x_101 : bool = x_7;
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(let x_101 : bool = x_7;
 let x_102 : bool = x_8;
 loop {
   var x_2_phi : u32;
@@ -1238,11 +1223,11 @@ loop {
 }
 return;
 )";
-  EXPECT_EQ(expect, got) << got;
+    EXPECT_EQ(expect, got) << got;
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_FromHeaderAndThen) {
-  auto assembly = Preamble() + R"(
+    auto assembly = Preamble() + R"(
      %pty = OpTypePointer Private %uint
      %1 = OpVariable %pty Private
      %boolpty = OpTypePointer Private %bool
@@ -1282,14 +1267,14 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_FromHeaderAndThen) {
 
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  auto* expect = R"(let x_101 : bool = x_7;
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(let x_101 : bool = x_7;
 let x_102 : bool = x_8;
 loop {
   var x_2_phi : u32;
@@ -1312,13 +1297,12 @@ loop {
 }
 return;
 )";
-  EXPECT_EQ(expect, got) << got;
+    EXPECT_EQ(expect, got) << got;
 }
 
-TEST_F(SpvParserFunctionVarTest,
-       EmitStatement_Phi_InMerge_PredecessorsDominatdByNestedSwitchCase) {
-  // This is the essence of the bug report from crbug.com/tint/495
-  auto assembly = Preamble() + R"(
+TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_InMerge_PredecessorsDominatdByNestedSwitchCase) {
+    // This is the essence of the bug report from crbug.com/tint/495
+    auto assembly = Preamble() + R"(
      %cond = OpConstantTrue %bool
      %pty = OpTypePointer Private %uint
      %1 = OpVariable %pty Private
@@ -1355,14 +1339,14 @@ TEST_F(SpvParserFunctionVarTest,
 
      OpFunctionEnd
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  auto* expect = R"(var x_41_phi : u32;
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(var x_41_phi : u32;
 switch(1u) {
   default: {
     fallthrough;
@@ -1382,20 +1366,20 @@ switch(1u) {
 let x_41 : u32 = x_41_phi;
 return;
 )";
-  EXPECT_EQ(expect, got) << got << assembly;
+    EXPECT_EQ(expect, got) << got << assembly;
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitStatement_UseInPhiCountsAsUse) {
-  // From crbug.com/215
-  // If the only use of a combinatorially computed ID is as the value
-  // in an OpPhi, then we still have to emit it.  The algorithm fix
-  // is to always count uses in Phis.
-  // This is the reduced case from the bug report.
-  //
-  // The only use of %12 is in the phi.
-  // The only use of %11 is in %12.
-  // Both definintions need to be emitted to the output.
-  auto assembly = Preamble() + R"(
+    // From crbug.com/215
+    // If the only use of a combinatorially computed ID is as the value
+    // in an OpPhi, then we still have to emit it.  The algorithm fix
+    // is to always count uses in Phis.
+    // This is the reduced case from the bug report.
+    //
+    // The only use of %12 is in the phi.
+    // The only use of %11 is in %12.
+    // Both definintions need to be emitted to the output.
+    auto assembly = Preamble() + R"(
         %100 = OpFunction %void None %voidfn
 
          %10 = OpLabel
@@ -1414,14 +1398,14 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_UseInPhiCountsAsUse) {
                OpFunctionEnd
 
   )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto ast_body = fe.ast_body();
-  auto got = test::ToString(p->program(), ast_body);
-  auto* expect = R"(var x_101_phi : bool;
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(var x_101_phi : bool;
 let x_11 : bool = (true & true);
 let x_12 : bool = !(x_11);
 x_101_phi = x_11;
@@ -1431,13 +1415,12 @@ if (true) {
 let x_101 : bool = x_101_phi;
 return;
 )";
-  EXPECT_EQ(expect, got);
+    EXPECT_EQ(expect, got);
 }
 
-TEST_F(SpvParserFunctionVarTest,
-       EmitStatement_Phi_ValueFromBlockNotInBlockOrderIgnored) {
-  // From crbug.com/tint/804
-  const auto assembly = Preamble() + R"(
+TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_ValueFromBlockNotInBlockOrderIgnored) {
+    // From crbug.com/tint/804
+    const auto assembly = Preamble() + R"(
      %float_42 = OpConstant %float 42.0
      %cond = OpUndef %bool
 
@@ -1471,12 +1454,12 @@ TEST_F(SpvParserFunctionVarTest,
      OpReturn
      OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  const auto* expected = R"(loop {
+    const auto* expected = R"(loop {
   if (false) {
     break;
   }
@@ -1489,14 +1472,14 @@ TEST_F(SpvParserFunctionVarTest,
 }
 return;
 )";
-  auto ast_body = fe.ast_body();
-  const auto got = test::ToString(p->program(), ast_body);
-  EXPECT_EQ(got, expected);
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    EXPECT_EQ(got, expected);
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitStatement_Hoist_CompositeInsert) {
-  // From crbug.com/tint/804
-  const auto assembly = Preamble() + R"(
+    // From crbug.com/tint/804
+    const auto assembly = Preamble() + R"(
     %100 = OpFunction %void None %voidfn
 
     %10 = OpLabel
@@ -1515,12 +1498,12 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Hoist_CompositeInsert) {
     OpReturn
     OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  const auto* expected = R"(var x_200 : vec2<i32>;
+    const auto* expected = R"(var x_200 : vec2<i32>;
 if (true) {
   x_200 = vec2<i32>();
   x_200.x = 0;
@@ -1530,14 +1513,14 @@ if (true) {
 let x_201 : vec2<i32> = x_200;
 return;
 )";
-  auto ast_body = fe.ast_body();
-  const auto got = test::ToString(p->program(), ast_body);
-  EXPECT_EQ(got, expected);
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    EXPECT_EQ(got, expected);
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitStatement_Hoist_VectorInsertDynamic) {
-  // Spawned from crbug.com/tint/804
-  const auto assembly = Preamble() + R"(
+    // Spawned from crbug.com/tint/804
+    const auto assembly = Preamble() + R"(
     %100 = OpFunction %void None %voidfn
 
     %10 = OpLabel
@@ -1556,14 +1539,14 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Hoist_VectorInsertDynamic) {
     OpReturn
     OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto ast_body = fe.ast_body();
-  const auto got = test::ToString(p->program(), ast_body);
-  const auto* expected = R"(var x_200 : vec2<i32>;
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    const auto* expected = R"(var x_200 : vec2<i32>;
 if (true) {
   x_200 = vec2<i32>();
   x_200[1] = 3;
@@ -1573,12 +1556,12 @@ if (true) {
 let x_201 : vec2<i32> = x_200;
 return;
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
 TEST_F(SpvParserFunctionVarTest, EmitStatement_Hoist_UsedAsNonPtrArg) {
-  // Spawned from crbug.com/tint/804
-  const auto assembly = Preamble() + R"(
+    // Spawned from crbug.com/tint/804
+    const auto assembly = Preamble() + R"(
     %fn_int = OpTypeFunction %void %int
 
     %500 = OpFunction %void None %fn_int
@@ -1605,14 +1588,14 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Hoist_UsedAsNonPtrArg) {
     OpReturn
     OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto ast_body = fe.ast_body();
-  const auto got = test::ToString(p->program(), ast_body);
-  const auto* expected = R"(var x_200 : i32;
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    const auto* expected = R"(var x_200 : i32;
 if (true) {
   x_200 = 1;
 } else {
@@ -1621,13 +1604,13 @@ if (true) {
 x_500(x_200);
 return;
 )";
-  EXPECT_EQ(got, expected) << got;
+    EXPECT_EQ(got, expected) << got;
 }
 
 TEST_F(SpvParserFunctionVarTest, DISABLED_EmitStatement_Hoist_UsedAsPtrArg) {
-  // Spawned from crbug.com/tint/804
-  // Blocked by crbug.com/tint/98: hoisting pointer types
-  const auto assembly = Preamble() + R"(
+    // Spawned from crbug.com/tint/804
+    // Blocked by crbug.com/tint/98: hoisting pointer types
+    const auto assembly = Preamble() + R"(
 
     %fn_int = OpTypeFunction %void %ptr_int
 
@@ -1656,15 +1639,15 @@ TEST_F(SpvParserFunctionVarTest, DISABLED_EmitStatement_Hoist_UsedAsPtrArg) {
     OpReturn
     OpFunctionEnd
 )";
-  auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
 
-  auto ast_body = fe.ast_body();
-  const auto got = test::ToString(p->program(), ast_body);
-  const auto* expected = R"(xxxxxxxxxxxxxxxxxxxxx)";
-  EXPECT_EQ(got, expected) << got;
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    const auto* expected = R"(xxxxxxxxxxxxxxxxxxxxx)";
+    EXPECT_EQ(got, expected) << got;
 }
 
 }  // namespace

@@ -19,88 +19,88 @@ namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, Statement_Call) {
-  auto p = parser("a();");
-  auto e = p->statement();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e.value, nullptr);
-  EXPECT_TRUE(e.matched);
-  EXPECT_FALSE(e.errored);
+    auto p = parser("a();");
+    auto e = p->statement();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
 
-  EXPECT_EQ(e->source.range.begin.line, 1u);
-  EXPECT_EQ(e->source.range.begin.column, 1u);
-  EXPECT_EQ(e->source.range.end.line, 1u);
-  EXPECT_EQ(e->source.range.end.column, 2u);
+    EXPECT_EQ(e->source.range.begin.line, 1u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
+    EXPECT_EQ(e->source.range.end.line, 1u);
+    EXPECT_EQ(e->source.range.end.column, 2u);
 
-  ASSERT_TRUE(e->Is<ast::CallStatement>());
-  auto* c = e->As<ast::CallStatement>()->expr;
+    ASSERT_TRUE(e->Is<ast::CallStatement>());
+    auto* c = e->As<ast::CallStatement>()->expr;
 
-  EXPECT_EQ(c->target.name->symbol, p->builder().Symbols().Get("a"));
+    EXPECT_EQ(c->target.name->symbol, p->builder().Symbols().Get("a"));
 
-  EXPECT_EQ(c->args.size(), 0u);
+    EXPECT_EQ(c->args.size(), 0u);
 }
 
 TEST_F(ParserImplTest, Statement_Call_WithParams) {
-  auto p = parser("a(1, b, 2 + 3 / b);");
-  auto e = p->statement();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e.value, nullptr);
-  EXPECT_TRUE(e.matched);
-  EXPECT_FALSE(e.errored);
+    auto p = parser("a(1, b, 2 + 3 / b);");
+    auto e = p->statement();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
 
-  ASSERT_TRUE(e->Is<ast::CallStatement>());
-  auto* c = e->As<ast::CallStatement>()->expr;
+    ASSERT_TRUE(e->Is<ast::CallStatement>());
+    auto* c = e->As<ast::CallStatement>()->expr;
 
-  EXPECT_EQ(c->target.name->symbol, p->builder().Symbols().Get("a"));
+    EXPECT_EQ(c->target.name->symbol, p->builder().Symbols().Get("a"));
 
-  EXPECT_EQ(c->args.size(), 3u);
-  EXPECT_TRUE(c->args[0]->Is<ast::IntLiteralExpression>());
-  EXPECT_TRUE(c->args[1]->Is<ast::IdentifierExpression>());
-  EXPECT_TRUE(c->args[2]->Is<ast::BinaryExpression>());
+    EXPECT_EQ(c->args.size(), 3u);
+    EXPECT_TRUE(c->args[0]->Is<ast::IntLiteralExpression>());
+    EXPECT_TRUE(c->args[1]->Is<ast::IdentifierExpression>());
+    EXPECT_TRUE(c->args[2]->Is<ast::BinaryExpression>());
 }
 
 TEST_F(ParserImplTest, Statement_Call_WithParams_TrailingComma) {
-  auto p = parser("a(1, b,);");
-  auto e = p->statement();
-  ASSERT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e.value, nullptr);
-  EXPECT_TRUE(e.matched);
-  EXPECT_FALSE(e.errored);
+    auto p = parser("a(1, b,);");
+    auto e = p->statement();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
 
-  ASSERT_TRUE(e->Is<ast::CallStatement>());
-  auto* c = e->As<ast::CallStatement>()->expr;
+    ASSERT_TRUE(e->Is<ast::CallStatement>());
+    auto* c = e->As<ast::CallStatement>()->expr;
 
-  EXPECT_EQ(c->target.name->symbol, p->builder().Symbols().Get("a"));
+    EXPECT_EQ(c->target.name->symbol, p->builder().Symbols().Get("a"));
 
-  EXPECT_EQ(c->args.size(), 2u);
-  EXPECT_TRUE(c->args[0]->Is<ast::IntLiteralExpression>());
-  EXPECT_TRUE(c->args[1]->Is<ast::IdentifierExpression>());
+    EXPECT_EQ(c->args.size(), 2u);
+    EXPECT_TRUE(c->args[0]->Is<ast::IntLiteralExpression>());
+    EXPECT_TRUE(c->args[1]->Is<ast::IdentifierExpression>());
 }
 
 TEST_F(ParserImplTest, Statement_Call_Missing_RightParen) {
-  auto p = parser("a(");
-  auto e = p->statement();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(e.errored);
-  EXPECT_FALSE(e.matched);
-  EXPECT_EQ(p->error(), "1:3: expected ')' for function call");
+    auto p = parser("a(");
+    auto e = p->statement();
+    EXPECT_TRUE(p->has_error());
+    EXPECT_TRUE(e.errored);
+    EXPECT_FALSE(e.matched);
+    EXPECT_EQ(p->error(), "1:3: expected ')' for function call");
 }
 
 TEST_F(ParserImplTest, Statement_Call_Missing_Semi) {
-  auto p = parser("a()");
-  auto e = p->statement();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(e.errored);
-  EXPECT_FALSE(e.matched);
-  EXPECT_EQ(p->error(), "1:4: expected ';' for function call");
+    auto p = parser("a()");
+    auto e = p->statement();
+    EXPECT_TRUE(p->has_error());
+    EXPECT_TRUE(e.errored);
+    EXPECT_FALSE(e.matched);
+    EXPECT_EQ(p->error(), "1:4: expected ';' for function call");
 }
 
 TEST_F(ParserImplTest, Statement_Call_Bad_ArgList) {
-  auto p = parser("a(b c);");
-  auto e = p->statement();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(e.errored);
-  EXPECT_FALSE(e.matched);
-  EXPECT_EQ(p->error(), "1:5: expected ')' for function call");
+    auto p = parser("a(b c);");
+    auto e = p->statement();
+    EXPECT_TRUE(p->has_error());
+    EXPECT_TRUE(e.errored);
+    EXPECT_FALSE(e.matched);
+    EXPECT_EQ(p->error(), "1:5: expected ')' for function call");
 }
 
 }  // namespace

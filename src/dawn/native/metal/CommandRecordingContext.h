@@ -22,37 +22,37 @@
 
 namespace dawn::native::metal {
 
-    // This class wraps a MTLCommandBuffer and tracks which Metal encoder is open.
-    // Only one encoder may be open at a time.
-    class CommandRecordingContext : NonMovable {
-      public:
-        CommandRecordingContext();
-        ~CommandRecordingContext();
+// This class wraps a MTLCommandBuffer and tracks which Metal encoder is open.
+// Only one encoder may be open at a time.
+class CommandRecordingContext : NonMovable {
+  public:
+    CommandRecordingContext();
+    ~CommandRecordingContext();
 
-        id<MTLCommandBuffer> GetCommands();
-        void MarkUsed();
-        bool WasUsed() const;
+    id<MTLCommandBuffer> GetCommands();
+    void MarkUsed();
+    bool WasUsed() const;
 
-        MaybeError PrepareNextCommandBuffer(id<MTLCommandQueue> queue);
-        NSPRef<id<MTLCommandBuffer>> AcquireCommands();
+    MaybeError PrepareNextCommandBuffer(id<MTLCommandQueue> queue);
+    NSPRef<id<MTLCommandBuffer>> AcquireCommands();
 
-        id<MTLBlitCommandEncoder> EnsureBlit();
-        void EndBlit();
+    id<MTLBlitCommandEncoder> EnsureBlit();
+    void EndBlit();
 
-        id<MTLComputeCommandEncoder> BeginCompute();
-        void EndCompute();
+    id<MTLComputeCommandEncoder> BeginCompute();
+    void EndCompute();
 
-        id<MTLRenderCommandEncoder> BeginRender(MTLRenderPassDescriptor* descriptor);
-        void EndRender();
+    id<MTLRenderCommandEncoder> BeginRender(MTLRenderPassDescriptor* descriptor);
+    void EndRender();
 
-      private:
-        NSPRef<id<MTLCommandBuffer>> mCommands;
-        NSPRef<id<MTLBlitCommandEncoder>> mBlit;
-        NSPRef<id<MTLComputeCommandEncoder>> mCompute;
-        NSPRef<id<MTLRenderCommandEncoder>> mRender;
-        bool mInEncoder = false;
-        bool mUsed = false;
-    };
+  private:
+    NSPRef<id<MTLCommandBuffer>> mCommands;
+    NSPRef<id<MTLBlitCommandEncoder>> mBlit;
+    NSPRef<id<MTLComputeCommandEncoder>> mCompute;
+    NSPRef<id<MTLRenderCommandEncoder>> mRender;
+    bool mInEncoder = false;
+    bool mUsed = false;
+};
 
 }  // namespace dawn::native::metal
 

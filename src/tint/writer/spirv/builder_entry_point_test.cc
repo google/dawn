@@ -35,29 +35,28 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, EntryPoint_Parameters) {
-  // @stage(fragment)
-  // fn frag_main(@builtin(position) coord : vec4<f32>,
-  //              @location(1) loc1 : f32) {
-  //   var col : f32 = (coord.x * loc1);
-  // }
-  auto* coord =
-      Param("coord", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)});
-  auto* loc1 = Param("loc1", ty.f32(), {Location(1u)});
-  auto* mul = Mul(Expr(MemberAccessor("coord", "x")), Expr("loc1"));
-  auto* col = Var("col", ty.f32(), ast::StorageClass::kNone, mul);
-  Func("frag_main", ast::VariableList{coord, loc1}, ty.void_(),
-       ast::StatementList{WrapInStatement(col)},
-       ast::AttributeList{
-           Stage(ast::PipelineStage::kFragment),
-       });
+    // @stage(fragment)
+    // fn frag_main(@builtin(position) coord : vec4<f32>,
+    //              @location(1) loc1 : f32) {
+    //   var col : f32 = (coord.x * loc1);
+    // }
+    auto* coord = Param("coord", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)});
+    auto* loc1 = Param("loc1", ty.f32(), {Location(1u)});
+    auto* mul = Mul(Expr(MemberAccessor("coord", "x")), Expr("loc1"));
+    auto* col = Var("col", ty.f32(), ast::StorageClass::kNone, mul);
+    Func("frag_main", ast::VariableList{coord, loc1}, ty.void_(),
+         ast::StatementList{WrapInStatement(col)},
+         ast::AttributeList{
+             Stage(ast::PipelineStage::kFragment),
+         });
 
-  spirv::Builder& b = SanitizeAndBuild();
+    spirv::Builder& b = SanitizeAndBuild();
 
-  ASSERT_TRUE(b.Build());
+    ASSERT_TRUE(b.Build());
 
-  // Test that "coord" and "loc1" get hoisted out to global variables with the
-  // Input storage class, retaining their decorations.
-  EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
+    // Test that "coord" and "loc1" get hoisted out to global variables with the
+    // Input storage class, retaining their decorations.
+    EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
 OpEntryPoint Fragment %19 "frag_main" %1 %5
 OpExecutionMode %19 OriginUpperLeft
@@ -100,38 +99,38 @@ OpReturn
 OpFunctionEnd
 )");
 
-  Validate(b);
+    Validate(b);
 }
 
 TEST_F(BuilderTest, EntryPoint_ReturnValue) {
-  // @stage(fragment)
-  // fn frag_main(@location(0) @interpolate(flat) loc_in : u32)
-  //     -> @location(0) f32 {
-  //   if (loc_in > 10) {
-  //     return 0.5;
-  //   }
-  //   return 1.0;
-  // }
-  auto* loc_in = Param("loc_in", ty.u32(), {Location(0), Flat()});
-  auto* cond = create<ast::BinaryExpression>(ast::BinaryOp::kGreaterThan,
-                                             Expr("loc_in"), Expr(10u));
-  Func("frag_main", ast::VariableList{loc_in}, ty.f32(),
-       ast::StatementList{
-           If(cond, Block(Return(0.5f))),
-           Return(1.0f),
-       },
-       ast::AttributeList{
-           Stage(ast::PipelineStage::kFragment),
-       },
-       ast::AttributeList{Location(0)});
+    // @stage(fragment)
+    // fn frag_main(@location(0) @interpolate(flat) loc_in : u32)
+    //     -> @location(0) f32 {
+    //   if (loc_in > 10) {
+    //     return 0.5;
+    //   }
+    //   return 1.0;
+    // }
+    auto* loc_in = Param("loc_in", ty.u32(), {Location(0), Flat()});
+    auto* cond =
+        create<ast::BinaryExpression>(ast::BinaryOp::kGreaterThan, Expr("loc_in"), Expr(10u));
+    Func("frag_main", ast::VariableList{loc_in}, ty.f32(),
+         ast::StatementList{
+             If(cond, Block(Return(0.5f))),
+             Return(1.0f),
+         },
+         ast::AttributeList{
+             Stage(ast::PipelineStage::kFragment),
+         },
+         ast::AttributeList{Location(0)});
 
-  spirv::Builder& b = SanitizeAndBuild();
+    spirv::Builder& b = SanitizeAndBuild();
 
-  ASSERT_TRUE(b.Build());
+    ASSERT_TRUE(b.Build());
 
-  // Test that the return value gets hoisted out to a global variable with the
-  // Output storage class, and the return statements are replaced with stores.
-  EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
+    // Test that the return value gets hoisted out to a global variable with the
+    // Output storage class, and the return statements are replaced with stores.
+    EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
 OpEntryPoint Fragment %21 "frag_main" %1 %4
 OpExecutionMode %21 OriginUpperLeft
@@ -177,49 +176,46 @@ OpReturn
 OpFunctionEnd
 )");
 
-  Validate(b);
+    Validate(b);
 }
 
 TEST_F(BuilderTest, EntryPoint_SharedStruct) {
-  // struct Interface {
-  //   @location(1) value : f32;
-  //   @builtin(position) pos : vec4<f32>;
-  // };
-  //
-  // @stage(vertex)
-  // fn vert_main() -> Interface {
-  //   return Interface(42.0, vec4<f32>());
-  // }
-  //
-  // @stage(fragment)
-  // fn frag_main(inputs : Interface) -> @builtin(frag_depth) f32 {
-  //   return inputs.value;
-  // }
+    // struct Interface {
+    //   @location(1) value : f32;
+    //   @builtin(position) pos : vec4<f32>;
+    // };
+    //
+    // @stage(vertex)
+    // fn vert_main() -> Interface {
+    //   return Interface(42.0, vec4<f32>());
+    // }
+    //
+    // @stage(fragment)
+    // fn frag_main(inputs : Interface) -> @builtin(frag_depth) f32 {
+    //   return inputs.value;
+    // }
 
-  auto* interface = Structure(
-      "Interface",
-      {
-          Member("value", ty.f32(), ast::AttributeList{Location(1u)}),
-          Member("pos", ty.vec4<f32>(),
-                 ast::AttributeList{Builtin(ast::Builtin::kPosition)}),
-      });
+    auto* interface = Structure(
+        "Interface",
+        {
+            Member("value", ty.f32(), ast::AttributeList{Location(1u)}),
+            Member("pos", ty.vec4<f32>(), ast::AttributeList{Builtin(ast::Builtin::kPosition)}),
+        });
 
-  auto* vert_retval =
-      Construct(ty.Of(interface), 42.f, Construct(ty.vec4<f32>()));
-  Func("vert_main", ast::VariableList{}, ty.Of(interface),
-       {Return(vert_retval)}, {Stage(ast::PipelineStage::kVertex)});
+    auto* vert_retval = Construct(ty.Of(interface), 42.f, Construct(ty.vec4<f32>()));
+    Func("vert_main", ast::VariableList{}, ty.Of(interface), {Return(vert_retval)},
+         {Stage(ast::PipelineStage::kVertex)});
 
-  auto* frag_inputs = Param("inputs", ty.Of(interface));
-  Func("frag_main", ast::VariableList{frag_inputs}, ty.f32(),
-       {Return(MemberAccessor(Expr("inputs"), "value"))},
-       {Stage(ast::PipelineStage::kFragment)},
-       {Builtin(ast::Builtin::kFragDepth)});
+    auto* frag_inputs = Param("inputs", ty.Of(interface));
+    Func("frag_main", ast::VariableList{frag_inputs}, ty.f32(),
+         {Return(MemberAccessor(Expr("inputs"), "value"))}, {Stage(ast::PipelineStage::kFragment)},
+         {Builtin(ast::Builtin::kFragDepth)});
 
-  spirv::Builder& b = SanitizeAndBuild();
+    spirv::Builder& b = SanitizeAndBuild();
 
-  ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.error();
 
-  EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
+    EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
 OpEntryPoint Vertex %23 "vert_main" %1 %5 %9
 OpEntryPoint Fragment %34 "frag_main" %10 %12 %14
@@ -300,23 +296,22 @@ OpReturn
 OpFunctionEnd
 )");
 
-  Validate(b);
+    Validate(b);
 }
 
 TEST_F(BuilderTest, SampleIndex_SampleRateShadingCapability) {
-  Func("main",
-       {Param("sample_index", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)})},
-       ty.void_(), {}, {Stage(ast::PipelineStage::kFragment)});
+    Func("main", {Param("sample_index", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)})},
+         ty.void_(), {}, {Stage(ast::PipelineStage::kFragment)});
 
-  spirv::Builder& b = SanitizeAndBuild();
+    spirv::Builder& b = SanitizeAndBuild();
 
-  ASSERT_TRUE(b.Build()) << b.error();
+    ASSERT_TRUE(b.Build()) << b.error();
 
-  // Make sure we generate the SampleRateShading capability.
-  EXPECT_EQ(DumpInstructions(b.capabilities()),
-            "OpCapability Shader\n"
-            "OpCapability SampleRateShading\n");
-  EXPECT_EQ(DumpInstructions(b.annots()), "OpDecorate %1 BuiltIn SampleId\n");
+    // Make sure we generate the SampleRateShading capability.
+    EXPECT_EQ(DumpInstructions(b.capabilities()),
+              "OpCapability Shader\n"
+              "OpCapability SampleRateShading\n");
+    EXPECT_EQ(DumpInstructions(b.annots()), "OpDecorate %1 BuiltIn SampleId\n");
 }
 
 }  // namespace

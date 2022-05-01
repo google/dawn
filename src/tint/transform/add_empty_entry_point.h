@@ -20,30 +20,26 @@
 namespace tint::transform {
 
 /// Add an empty entry point to the module, if no other entry points exist.
-class AddEmptyEntryPoint final
-    : public Castable<AddEmptyEntryPoint, Transform> {
- public:
-  /// Constructor
-  AddEmptyEntryPoint();
-  /// Destructor
-  ~AddEmptyEntryPoint() override;
+class AddEmptyEntryPoint final : public Castable<AddEmptyEntryPoint, Transform> {
+  public:
+    /// Constructor
+    AddEmptyEntryPoint();
+    /// Destructor
+    ~AddEmptyEntryPoint() override;
 
-  /// @param program the program to inspect
-  /// @param data optional extra transform-specific input data
-  /// @returns true if this transform should be run for the given program
-  bool ShouldRun(const Program* program,
-                 const DataMap& data = {}) const override;
+    /// @param program the program to inspect
+    /// @param data optional extra transform-specific input data
+    /// @returns true if this transform should be run for the given program
+    bool ShouldRun(const Program* program, const DataMap& data = {}) const override;
 
- protected:
-  /// Runs the transform using the CloneContext built for transforming a
-  /// program. Run() is responsible for calling Clone() on the CloneContext.
-  /// @param ctx the CloneContext primed with the input program and
-  /// ProgramBuilder
-  /// @param inputs optional extra transform-specific input data
-  /// @param outputs optional extra transform-specific output data
-  void Run(CloneContext& ctx,
-           const DataMap& inputs,
-           DataMap& outputs) const override;
+  protected:
+    /// Runs the transform using the CloneContext built for transforming a
+    /// program. Run() is responsible for calling Clone() on the CloneContext.
+    /// @param ctx the CloneContext primed with the input program and
+    /// ProgramBuilder
+    /// @param inputs optional extra transform-specific input data
+    /// @param outputs optional extra transform-specific output data
+    void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) const override;
 };
 
 }  // namespace tint::transform

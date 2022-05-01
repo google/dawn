@@ -29,119 +29,118 @@
 
 namespace dawn::native {
 
-    class DeviceBase;
+class DeviceBase;
 
-    MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
-                                                const RenderPipelineDescriptor* descriptor);
+MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
+                                            const RenderPipelineDescriptor* descriptor);
 
-    std::vector<StageAndDescriptor> GetRenderStagesAndSetPlaceholderShader(
-        DeviceBase* device,
-        const RenderPipelineDescriptor* descriptor);
+std::vector<StageAndDescriptor> GetRenderStagesAndSetPlaceholderShader(
+    DeviceBase* device,
+    const RenderPipelineDescriptor* descriptor);
 
-    size_t IndexFormatSize(wgpu::IndexFormat format);
+size_t IndexFormatSize(wgpu::IndexFormat format);
 
-    bool IsStripPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology);
+bool IsStripPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology);
 
-    bool StencilTestEnabled(const DepthStencilState* depthStencil);
+bool StencilTestEnabled(const DepthStencilState* depthStencil);
 
-    struct VertexAttributeInfo {
-        wgpu::VertexFormat format;
-        uint64_t offset;
-        VertexAttributeLocation shaderLocation;
-        VertexBufferSlot vertexBufferSlot;
+struct VertexAttributeInfo {
+    wgpu::VertexFormat format;
+    uint64_t offset;
+    VertexAttributeLocation shaderLocation;
+    VertexBufferSlot vertexBufferSlot;
+};
+
+struct VertexBufferInfo {
+    uint64_t arrayStride;
+    wgpu::VertexStepMode stepMode;
+    uint16_t usedBytesInStride;
+    // As indicated in the spec, the lastStride is max(attribute.offset +
+    // sizeof(attribute.format)) for each attribute in the buffer[slot]
+    uint64_t lastStride;
+};
+
+class RenderPipelineBase : public PipelineBase {
+  public:
+    RenderPipelineBase(DeviceBase* device, const RenderPipelineDescriptor* descriptor);
+    ~RenderPipelineBase() override;
+
+    static RenderPipelineBase* MakeError(DeviceBase* device);
+
+    ObjectType GetType() const override;
+
+    const ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>& GetAttributeLocationsUsed()
+        const;
+    const VertexAttributeInfo& GetAttribute(VertexAttributeLocation location) const;
+    const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>& GetVertexBufferSlotsUsed() const;
+    const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
+    GetVertexBufferSlotsUsedAsVertexBuffer() const;
+    const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
+    GetVertexBufferSlotsUsedAsInstanceBuffer() const;
+    const VertexBufferInfo& GetVertexBuffer(VertexBufferSlot slot) const;
+    uint32_t GetVertexBufferCount() const;
+
+    const ColorTargetState* GetColorTargetState(ColorAttachmentIndex attachmentSlot) const;
+    const DepthStencilState* GetDepthStencilState() const;
+    wgpu::PrimitiveTopology GetPrimitiveTopology() const;
+    wgpu::IndexFormat GetStripIndexFormat() const;
+    wgpu::CullMode GetCullMode() const;
+    wgpu::FrontFace GetFrontFace() const;
+    bool IsDepthBiasEnabled() const;
+    int32_t GetDepthBias() const;
+    float GetDepthBiasSlopeScale() const;
+    float GetDepthBiasClamp() const;
+    bool ShouldClampDepth() const;
+
+    ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> GetColorAttachmentsMask() const;
+    bool HasDepthStencilAttachment() const;
+    wgpu::TextureFormat GetColorAttachmentFormat(ColorAttachmentIndex attachment) const;
+    wgpu::TextureFormat GetDepthStencilFormat() const;
+    uint32_t GetSampleCount() const;
+    uint32_t GetSampleMask() const;
+    bool IsAlphaToCoverageEnabled() const;
+    bool WritesDepth() const;
+    bool WritesStencil() const;
+
+    const AttachmentState* GetAttachmentState() const;
+
+    // Functions necessary for the unordered_set<RenderPipelineBase*>-based cache.
+    size_t ComputeContentHash() override;
+
+    struct EqualityFunc {
+        bool operator()(const RenderPipelineBase* a, const RenderPipelineBase* b) const;
     };
 
-    struct VertexBufferInfo {
-        uint64_t arrayStride;
-        wgpu::VertexStepMode stepMode;
-        uint16_t usedBytesInStride;
-        // As indicated in the spec, the lastStride is max(attribute.offset +
-        // sizeof(attribute.format)) for each attribute in the buffer[slot]
-        uint64_t lastStride;
-    };
+  protected:
+    // Constructor used only for mocking and testing.
+    explicit RenderPipelineBase(DeviceBase* device);
+    void DestroyImpl() override;
 
-    class RenderPipelineBase : public PipelineBase {
-      public:
-        RenderPipelineBase(DeviceBase* device, const RenderPipelineDescriptor* descriptor);
-        ~RenderPipelineBase() override;
+  private:
+    RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
-        static RenderPipelineBase* MakeError(DeviceBase* device);
+    // Vertex state
+    uint32_t mVertexBufferCount;
+    ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> mAttributeLocationsUsed;
+    ityp::array<VertexAttributeLocation, VertexAttributeInfo, kMaxVertexAttributes> mAttributeInfos;
+    ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsed;
+    ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsedAsVertexBuffer;
+    ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsedAsInstanceBuffer;
+    ityp::array<VertexBufferSlot, VertexBufferInfo, kMaxVertexBuffers> mVertexBufferInfos;
 
-        ObjectType GetType() const override;
+    // Attachments
+    Ref<AttachmentState> mAttachmentState;
+    ityp::array<ColorAttachmentIndex, ColorTargetState, kMaxColorAttachments> mTargets;
+    ityp::array<ColorAttachmentIndex, BlendState, kMaxColorAttachments> mTargetBlend;
 
-        const ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>&
-        GetAttributeLocationsUsed() const;
-        const VertexAttributeInfo& GetAttribute(VertexAttributeLocation location) const;
-        const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>& GetVertexBufferSlotsUsed() const;
-        const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
-        GetVertexBufferSlotsUsedAsVertexBuffer() const;
-        const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
-        GetVertexBufferSlotsUsedAsInstanceBuffer() const;
-        const VertexBufferInfo& GetVertexBuffer(VertexBufferSlot slot) const;
-        uint32_t GetVertexBufferCount() const;
-
-        const ColorTargetState* GetColorTargetState(ColorAttachmentIndex attachmentSlot) const;
-        const DepthStencilState* GetDepthStencilState() const;
-        wgpu::PrimitiveTopology GetPrimitiveTopology() const;
-        wgpu::IndexFormat GetStripIndexFormat() const;
-        wgpu::CullMode GetCullMode() const;
-        wgpu::FrontFace GetFrontFace() const;
-        bool IsDepthBiasEnabled() const;
-        int32_t GetDepthBias() const;
-        float GetDepthBiasSlopeScale() const;
-        float GetDepthBiasClamp() const;
-        bool ShouldClampDepth() const;
-
-        ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> GetColorAttachmentsMask() const;
-        bool HasDepthStencilAttachment() const;
-        wgpu::TextureFormat GetColorAttachmentFormat(ColorAttachmentIndex attachment) const;
-        wgpu::TextureFormat GetDepthStencilFormat() const;
-        uint32_t GetSampleCount() const;
-        uint32_t GetSampleMask() const;
-        bool IsAlphaToCoverageEnabled() const;
-        bool WritesDepth() const;
-        bool WritesStencil() const;
-
-        const AttachmentState* GetAttachmentState() const;
-
-        // Functions necessary for the unordered_set<RenderPipelineBase*>-based cache.
-        size_t ComputeContentHash() override;
-
-        struct EqualityFunc {
-            bool operator()(const RenderPipelineBase* a, const RenderPipelineBase* b) const;
-        };
-
-      protected:
-        // Constructor used only for mocking and testing.
-        explicit RenderPipelineBase(DeviceBase* device);
-        void DestroyImpl() override;
-
-      private:
-        RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag);
-
-        // Vertex state
-        uint32_t mVertexBufferCount;
-        ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> mAttributeLocationsUsed;
-        ityp::array<VertexAttributeLocation, VertexAttributeInfo, kMaxVertexAttributes>
-            mAttributeInfos;
-        ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsed;
-        ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsedAsVertexBuffer;
-        ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsedAsInstanceBuffer;
-        ityp::array<VertexBufferSlot, VertexBufferInfo, kMaxVertexBuffers> mVertexBufferInfos;
-
-        // Attachments
-        Ref<AttachmentState> mAttachmentState;
-        ityp::array<ColorAttachmentIndex, ColorTargetState, kMaxColorAttachments> mTargets;
-        ityp::array<ColorAttachmentIndex, BlendState, kMaxColorAttachments> mTargetBlend;
-
-        // Other state
-        PrimitiveState mPrimitive;
-        DepthStencilState mDepthStencil;
-        MultisampleState mMultisample;
-        bool mClampDepth = false;
-        bool mWritesDepth = false;
-        bool mWritesStencil = false;
-    };
+    // Other state
+    PrimitiveState mPrimitive;
+    DepthStencilState mDepthStencil;
+    MultisampleState mMultisample;
+    bool mClampDepth = false;
+    bool mWritesDepth = false;
+    bool mWritesStencil = false;
+};
 
 }  // namespace dawn::native
 

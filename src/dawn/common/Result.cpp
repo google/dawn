@@ -17,14 +17,14 @@
 // Implementation details of the tagged pointer Results
 namespace detail {
 
-    intptr_t MakePayload(const void* pointer, PayloadType type) {
-        intptr_t payload = reinterpret_cast<intptr_t>(pointer);
-        ASSERT((payload & 3) == 0);
-        return payload | type;
-    }
+intptr_t MakePayload(const void* pointer, PayloadType type) {
+    intptr_t payload = reinterpret_cast<intptr_t>(pointer);
+    ASSERT((payload & 3) == 0);
+    return payload | type;
+}
 
-    PayloadType GetPayloadType(intptr_t payload) {
-        return static_cast<PayloadType>(payload & 3);
-    }
+PayloadType GetPayloadType(intptr_t payload) {
+    return static_cast<PayloadType>(payload & 3);
+}
 
 }  // namespace detail

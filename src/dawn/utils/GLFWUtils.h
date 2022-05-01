@@ -23,19 +23,19 @@ struct GLFWwindow;
 
 namespace utils {
 
-    // Adds all the necessary glfwWindowHint calls for the next GLFWwindow created to be used with
-    // the specified backend.
-    void SetupGLFWWindowHintsForBackend(wgpu::BackendType type);
+// Adds all the necessary glfwWindowHint calls for the next GLFWwindow created to be used with
+// the specified backend.
+void SetupGLFWWindowHintsForBackend(wgpu::BackendType type);
 
-    // Does the necessary setup on the GLFWwindow to allow creating a wgpu::Surface with it and
-    // calls `instance.CreateSurface` with the correct descriptor for this window.
-    // Returns a null wgpu::Surface on failure.
-    wgpu::Surface CreateSurfaceForWindow(const wgpu::Instance& instance, GLFWwindow* window);
+// Does the necessary setup on the GLFWwindow to allow creating a wgpu::Surface with it and
+// calls `instance.CreateSurface` with the correct descriptor for this window.
+// Returns a null wgpu::Surface on failure.
+wgpu::Surface CreateSurfaceForWindow(const wgpu::Instance& instance, GLFWwindow* window);
 
-    // Use for testing only. Does everything that CreateSurfaceForWindow does except the call to
-    // CreateSurface. Useful to be able to modify the descriptor for testing, or when trying to
-    // avoid using the global proc table.
-    std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptor(GLFWwindow* window);
+// Use for testing only. Does everything that CreateSurfaceForWindow does except the call to
+// CreateSurface. Useful to be able to modify the descriptor for testing, or when trying to
+// avoid using the global proc table.
+std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptor(GLFWwindow* window);
 
 }  // namespace utils
 

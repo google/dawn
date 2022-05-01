@@ -45,12 +45,8 @@ class RefCounted {
 template <typename T>
 struct RefCountedTraits {
     static constexpr T* kNullValue = nullptr;
-    static void Reference(T* value) {
-        value->Reference();
-    }
-    static void Release(T* value) {
-        value->Release();
-    }
+    static void Reference(T* value) { value->Reference(); }
+    static void Release(T* value) { value->Release(); }
 };
 
 template <typename T>

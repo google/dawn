@@ -16,9 +16,9 @@
 #include <array>
 #include <vector>
 
-#include "dawn/tests/DawnTest.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
+#include "dawn/tests/DawnTest.h"
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
@@ -325,13 +325,13 @@ class CopyTests_B2T : public CopyTests, public DawnTest {
 };
 
 namespace {
-    // The CopyTests Texture to Texture in this class will validate both CopyTextureToTexture and
-    // CopyTextureToTextureInternal.
-    using UsageCopySrc = bool;
-    DAWN_TEST_PARAM_STRUCT(CopyTestsParams, UsageCopySrc);
+// The CopyTests Texture to Texture in this class will validate both CopyTextureToTexture and
+// CopyTextureToTextureInternal.
+using UsageCopySrc = bool;
+DAWN_TEST_PARAM_STRUCT(CopyTestsParams, UsageCopySrc);
 
-    using SrcColorFormat = wgpu::TextureFormat;
-    DAWN_TEST_PARAM_STRUCT(SrcColorFormatParams, SrcColorFormat);
+using SrcColorFormat = wgpu::TextureFormat;
+DAWN_TEST_PARAM_STRUCT(SrcColorFormatParams, SrcColorFormat);
 }  // namespace
 
 template <typename Parent>

@@ -22,26 +22,26 @@
 
 namespace dawn::wire::client {
 
-    class ShaderModule final : public ObjectBase {
-      public:
-        using ObjectBase::ObjectBase;
-        ~ShaderModule();
+class ShaderModule final : public ObjectBase {
+  public:
+    using ObjectBase::ObjectBase;
+    ~ShaderModule();
 
-        void GetCompilationInfo(WGPUCompilationInfoCallback callback, void* userdata);
-        bool GetCompilationInfoCallback(uint64_t requestSerial,
-                                        WGPUCompilationInfoRequestStatus status,
-                                        const WGPUCompilationInfo* info);
+    void GetCompilationInfo(WGPUCompilationInfoCallback callback, void* userdata);
+    bool GetCompilationInfoCallback(uint64_t requestSerial,
+                                    WGPUCompilationInfoRequestStatus status,
+                                    const WGPUCompilationInfo* info);
 
-      private:
-        void CancelCallbacksForDisconnect() override;
-        void ClearAllCallbacks(WGPUCompilationInfoRequestStatus status);
+  private:
+    void CancelCallbacksForDisconnect() override;
+    void ClearAllCallbacks(WGPUCompilationInfoRequestStatus status);
 
-        struct CompilationInfoRequest {
-            WGPUCompilationInfoCallback callback = nullptr;
-            void* userdata = nullptr;
-        };
-        RequestTracker<CompilationInfoRequest> mCompilationInfoRequests;
+    struct CompilationInfoRequest {
+        WGPUCompilationInfoCallback callback = nullptr;
+        void* userdata = nullptr;
     };
+    RequestTracker<CompilationInfoRequest> mCompilationInfoRequests;
+};
 
 }  // namespace dawn::wire::client
 

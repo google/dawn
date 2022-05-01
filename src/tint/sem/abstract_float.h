@@ -24,24 +24,24 @@ namespace tint::sem {
 /// An abstract-float type.
 /// @see https://www.w3.org/TR/WGSL/#abstractFloat
 class AbstractFloat final : public Castable<AbstractFloat, AbstractNumeric> {
- public:
-  /// Constructor
-  AbstractFloat();
+  public:
+    /// Constructor
+    AbstractFloat();
 
-  /// Move constructor
-  AbstractFloat(AbstractFloat&&);
-  ~AbstractFloat() override;
+    /// Move constructor
+    AbstractFloat(AbstractFloat&&);
+    ~AbstractFloat() override;
 
-  /// @returns a hash of the type.
-  size_t Hash() const override;
+    /// @returns a hash of the type.
+    size_t Hash() const override;
 
-  /// @param other the other type to compare against
-  /// @returns true if this type is equal to the given type
-  bool Equals(const Type& other) const override;
+    /// @param other the other type to compare against
+    /// @returns true if this type is equal to the given type
+    bool Equals(const Type& other) const override;
 
-  /// @param symbols the program's symbol table
-  /// @returns the name for this type when printed in diagnostics.
-  std::string FriendlyName(const SymbolTable& symbols) const override;
+    /// @param symbols the program's symbol table
+    /// @returns the name for this type when printed in diagnostics.
+    std::string FriendlyName(const SymbolTable& symbols) const override;
 };
 
 }  // namespace tint::sem

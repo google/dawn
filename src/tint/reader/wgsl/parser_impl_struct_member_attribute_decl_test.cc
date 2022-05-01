@@ -18,34 +18,33 @@ namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, AttributeDecl_EmptyStr) {
-  auto p = parser("");
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(p->has_error());
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_EQ(attrs.value.size(), 0u);
+    auto p = parser("");
+    auto attrs = p->attribute_list();
+    EXPECT_FALSE(p->has_error());
+    EXPECT_FALSE(attrs.errored);
+    EXPECT_FALSE(attrs.matched);
+    EXPECT_EQ(attrs.value.size(), 0u);
 }
 
 TEST_F(ParserImplTest, AttributeDecl_Single) {
-  auto p = parser("@size(4)");
-  auto attrs = p->attribute_list();
-  EXPECT_FALSE(p->has_error());
-  EXPECT_FALSE(attrs.errored);
-  EXPECT_TRUE(attrs.matched);
-  ASSERT_EQ(attrs.value.size(), 1u);
-  auto* attr = attrs.value[0]->As<ast::Attribute>();
-  ASSERT_NE(attr, nullptr);
-  EXPECT_TRUE(attr->Is<ast::StructMemberSizeAttribute>());
+    auto p = parser("@size(4)");
+    auto attrs = p->attribute_list();
+    EXPECT_FALSE(p->has_error());
+    EXPECT_FALSE(attrs.errored);
+    EXPECT_TRUE(attrs.matched);
+    ASSERT_EQ(attrs.value.size(), 1u);
+    auto* attr = attrs.value[0]->As<ast::Attribute>();
+    ASSERT_NE(attr, nullptr);
+    EXPECT_TRUE(attr->Is<ast::StructMemberSizeAttribute>());
 }
 
 TEST_F(ParserImplTest, AttributeDecl_InvalidAttribute) {
-  auto p = parser("@size(nan)");
-  auto attrs = p->attribute_list();
-  EXPECT_TRUE(p->has_error()) << p->error();
-  EXPECT_TRUE(attrs.errored);
-  EXPECT_FALSE(attrs.matched);
-  EXPECT_EQ(p->error(),
-            "1:7: expected signed integer literal for size attribute");
+    auto p = parser("@size(nan)");
+    auto attrs = p->attribute_list();
+    EXPECT_TRUE(p->has_error()) << p->error();
+    EXPECT_TRUE(attrs.errored);
+    EXPECT_FALSE(attrs.matched);
+    EXPECT_EQ(p->error(), "1:7: expected signed integer literal for size attribute");
 }
 
 }  // namespace

@@ -24,8 +24,7 @@ class FeatureTests : public testing::Test {
     FeatureTests()
         : testing::Test(),
           mInstanceBase(dawn::native::InstanceBase::Create()),
-          mAdapterBase(mInstanceBase.Get()) {
-    }
+          mAdapterBase(mInstanceBase.Get()) {}
 
     std::vector<wgpu::FeatureName> GetAllFeatureNames() {
         std::vector<wgpu::FeatureName> allFeatureNames(kTotalFeaturesCount);

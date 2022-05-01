@@ -25,23 +25,23 @@ namespace tint::inspector {
 
 /// Utility class for running shaders in inspector tests
 class InspectorRunner {
- public:
-  InspectorRunner();
-  virtual ~InspectorRunner();
+  public:
+    InspectorRunner();
+    virtual ~InspectorRunner();
 
-  /// Create a Program with Inspector from the provided WGSL shader.
-  /// Should only be called once per test.
-  /// @param shader a WGSL shader
-  /// @returns a reference to the Inspector for the built Program.
-  Inspector& Initialize(std::string shader);
+    /// Create a Program with Inspector from the provided WGSL shader.
+    /// Should only be called once per test.
+    /// @param shader a WGSL shader
+    /// @returns a reference to the Inspector for the built Program.
+    Inspector& Initialize(std::string shader);
 
- protected:
-  /// File created from input shader and used to create Program.
-  std::unique_ptr<Source::File> file_;
-  /// Program created by this runner.
-  std::unique_ptr<Program> program_;
-  /// Inspector for |program_|
-  std::unique_ptr<Inspector> inspector_;
+  protected:
+    /// File created from input shader and used to create Program.
+    std::unique_ptr<Source::File> file_;
+    /// Program created by this runner.
+    std::unique_ptr<Program> program_;
+    /// Inspector for |program_|
+    std::unique_ptr<Inspector> inspector_;
 };
 
 }  // namespace tint::inspector

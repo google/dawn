@@ -20,23 +20,23 @@
 
 namespace dawn::native {
 
-    class BufferBase;
-    class CommandEncoder;
+class BufferBase;
+class CommandEncoder;
 
-    struct TimestampParams {
-        TimestampParams(uint32_t first, uint32_t count, uint32_t offset, float period);
+struct TimestampParams {
+    TimestampParams(uint32_t first, uint32_t count, uint32_t offset, float period);
 
-        uint32_t first;
-        uint32_t count;
-        uint32_t offset;
-        uint32_t multiplier;
-        uint32_t rightShift;
-    };
+    uint32_t first;
+    uint32_t count;
+    uint32_t offset;
+    uint32_t multiplier;
+    uint32_t rightShift;
+};
 
-    MaybeError EncodeConvertTimestampsToNanoseconds(CommandEncoder* encoder,
-                                                    BufferBase* timestamps,
-                                                    BufferBase* availability,
-                                                    BufferBase* params);
+MaybeError EncodeConvertTimestampsToNanoseconds(CommandEncoder* encoder,
+                                                BufferBase* timestamps,
+                                                BufferBase* availability,
+                                                BufferBase* params);
 
 }  // namespace dawn::native
 

@@ -21,14 +21,14 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Discard) {
-  auto* expr = create<ast::DiscardStatement>();
-  WrapInFunction(expr);
+    auto* expr = create<ast::DiscardStatement>();
+    WrapInFunction(expr);
 
-  spirv::Builder& b = Build();
+    spirv::Builder& b = Build();
 
-  b.push_function(Function{});
-  EXPECT_TRUE(b.GenerateStatement(expr)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpKill
+    b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateStatement(expr)) << b.error();
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpKill
 )");
 }
 

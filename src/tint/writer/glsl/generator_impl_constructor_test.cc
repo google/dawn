@@ -23,213 +23,202 @@ using ::testing::HasSubstr;
 using GlslGeneratorImplTest_Constructor = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Bool) {
-  WrapInFunction(Expr(false));
+    WrapInFunction(Expr(false));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("false"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("false"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Int) {
-  WrapInFunction(Expr(-12345));
+    WrapInFunction(Expr(-12345));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("-12345"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("-12345"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_UInt) {
-  WrapInFunction(Expr(56779u));
+    WrapInFunction(Expr(56779u));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("56779u"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("56779u"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Float) {
-  // Use a number close to 1<<30 but whose decimal representation ends in 0.
-  WrapInFunction(Expr(static_cast<float>((1 << 30) - 4)));
+    // Use a number close to 1<<30 but whose decimal representation ends in 0.
+    WrapInFunction(Expr(static_cast<float>((1 << 30) - 4)));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("1073741824.0f"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("1073741824.0f"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Float) {
-  WrapInFunction(Construct<f32>(-1.2e-5f));
+    WrapInFunction(Construct<f32>(-1.2e-5f));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("float(-0.000012f)"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("float(-0.000012f)"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Bool) {
-  WrapInFunction(Construct<bool>(true));
+    WrapInFunction(Construct<bool>(true));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("bool(true)"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("bool(true)"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Int) {
-  WrapInFunction(Construct<i32>(-12345));
+    WrapInFunction(Construct<i32>(-12345));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("int(-12345)"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("int(-12345)"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Uint) {
-  WrapInFunction(Construct<u32>(12345u));
+    WrapInFunction(Construct<u32>(12345u));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("uint(12345u)"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("uint(12345u)"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec) {
-  WrapInFunction(vec3<f32>(1.f, 2.f, 3.f));
+    WrapInFunction(vec3<f32>(1.f, 2.f, 3.f));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("vec3(1.0f, 2.0f, 3.0f)"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("vec3(1.0f, 2.0f, 3.0f)"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_Empty) {
-  WrapInFunction(vec3<f32>());
+    WrapInFunction(vec3<f32>());
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("vec3(0.0f, 0.0f, 0.0f)"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("vec3(0.0f, 0.0f, 0.0f)"));
 }
 
-TEST_F(GlslGeneratorImplTest_Constructor,
-       EmitConstructor_Type_Vec_SingleScalar_Float) {
-  WrapInFunction(vec3<f32>(2.0f));
+TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_SingleScalar_Float) {
+    WrapInFunction(vec3<f32>(2.0f));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("vec3(2.0f)"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("vec3(2.0f)"));
 }
 
-TEST_F(GlslGeneratorImplTest_Constructor,
-       EmitConstructor_Type_Vec_SingleScalar_Bool) {
-  WrapInFunction(vec3<bool>(true));
+TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_SingleScalar_Bool) {
+    WrapInFunction(vec3<bool>(true));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("bvec3(true)"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("bvec3(true)"));
 }
 
-TEST_F(GlslGeneratorImplTest_Constructor,
-       EmitConstructor_Type_Vec_SingleScalar_Int) {
-  WrapInFunction(vec3<i32>(2));
+TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_SingleScalar_Int) {
+    WrapInFunction(vec3<i32>(2));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("ivec3(2)"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("ivec3(2)"));
 }
 
-TEST_F(GlslGeneratorImplTest_Constructor,
-       EmitConstructor_Type_Vec_SingleScalar_UInt) {
-  WrapInFunction(vec3<u32>(2u));
+TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_SingleScalar_UInt) {
+    WrapInFunction(vec3<u32>(2u));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("uvec3(2u)"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("uvec3(2u)"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat) {
-  WrapInFunction(
-      mat2x3<f32>(vec3<f32>(1.f, 2.f, 3.f), vec3<f32>(3.f, 4.f, 5.f)));
+    WrapInFunction(mat2x3<f32>(vec3<f32>(1.f, 2.f, 3.f), vec3<f32>(3.f, 4.f, 5.f)));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.error();
 
-  EXPECT_THAT(
-      gen.result(),
-      HasSubstr("mat2x3(vec3(1.0f, 2.0f, 3.0f), vec3(3.0f, 4.0f, 5.0f))"));
+    EXPECT_THAT(gen.result(), HasSubstr("mat2x3(vec3(1.0f, 2.0f, 3.0f), vec3(3.0f, 4.0f, 5.0f))"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat_Empty) {
-  WrapInFunction(mat2x3<f32>());
+    WrapInFunction(mat2x3<f32>());
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
+    ASSERT_TRUE(gen.Generate()) << gen.error();
 
-  EXPECT_THAT(gen.result(),
-              HasSubstr("mat2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)"));
+    EXPECT_THAT(gen.result(), HasSubstr("mat2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array) {
-  WrapInFunction(Construct(ty.array(ty.vec3<f32>(), 3),
-                           vec3<f32>(1.f, 2.f, 3.f), vec3<f32>(4.f, 5.f, 6.f),
-                           vec3<f32>(7.f, 8.f, 9.f)));
+    WrapInFunction(Construct(ty.array(ty.vec3<f32>(), 3), vec3<f32>(1.f, 2.f, 3.f),
+                             vec3<f32>(4.f, 5.f, 6.f), vec3<f32>(7.f, 8.f, 9.f)));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("vec3[3](vec3(1.0f, 2.0f, 3.0f), "
-                                      "vec3(4.0f, 5.0f, 6.0f), "
-                                      "vec3(7.0f, 8.0f, 9.0f))"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("vec3[3](vec3(1.0f, 2.0f, 3.0f), "
+                                        "vec3(4.0f, 5.0f, 6.0f), "
+                                        "vec3(7.0f, 8.0f, 9.0f))"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array_Empty) {
-  WrapInFunction(Construct(ty.array(ty.vec3<f32>(), 3)));
+    WrapInFunction(Construct(ty.array(ty.vec3<f32>(), 3)));
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(
-      gen.result(),
-      HasSubstr("vec3[3](vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f),"
-                " vec3(0.0f, 0.0f, 0.0f))"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("vec3[3](vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f),"
+                                        " vec3(0.0f, 0.0f, 0.0f))"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct) {
-  auto* str = Structure("S", {
-                                 Member("a", ty.i32()),
-                                 Member("b", ty.f32()),
-                                 Member("c", ty.vec3<i32>()),
-                             });
+    auto* str = Structure("S", {
+                                   Member("a", ty.i32()),
+                                   Member("b", ty.f32()),
+                                   Member("c", ty.vec3<i32>()),
+                               });
 
-  WrapInFunction(Construct(ty.Of(str), 1, 2.0f, vec3<i32>(3, 4, 5)));
+    WrapInFunction(Construct(ty.Of(str), 1, 2.0f, vec3<i32>(3, 4, 5)));
 
-  GeneratorImpl& gen = SanitizeAndBuild();
+    GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("S(1, 2.0f, ivec3(3, 4, 5))"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("S(1, 2.0f, ivec3(3, 4, 5))"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct_Empty) {
-  auto* str = Structure("S", {
-                                 Member("a", ty.i32()),
-                                 Member("b", ty.f32()),
-                                 Member("c", ty.vec3<i32>()),
-                             });
+    auto* str = Structure("S", {
+                                   Member("a", ty.i32()),
+                                   Member("b", ty.f32()),
+                                   Member("c", ty.vec3<i32>()),
+                               });
 
-  WrapInFunction(Construct(ty.Of(str)));
+    WrapInFunction(Construct(ty.Of(str)));
 
-  GeneratorImpl& gen = SanitizeAndBuild();
+    GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("S(0"));
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("S(0"));
 }
 
 }  // namespace

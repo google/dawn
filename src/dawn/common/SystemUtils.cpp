@@ -18,17 +18,17 @@
 #include "dawn/common/Log.h"
 
 #if defined(DAWN_PLATFORM_WINDOWS)
-#    include <Windows.h>
-#    include <vector>
+#include <Windows.h>
+#include <vector>
 #elif defined(DAWN_PLATFORM_LINUX)
-#    include <dlfcn.h>
-#    include <limits.h>
-#    include <unistd.h>
-#    include <cstdlib>
+#include <dlfcn.h>
+#include <limits.h>
+#include <unistd.h>
+#include <cstdlib>
 #elif defined(DAWN_PLATFORM_MACOS) || defined(DAWN_PLATFORM_IOS)
-#    include <dlfcn.h>
-#    include <mach-o/dyld.h>
-#    include <vector>
+#include <dlfcn.h>
+#include <mach-o/dyld.h>
+#include <vector>
 #endif
 
 #include <array>
@@ -84,7 +84,7 @@ bool SetEnvironmentVar(const char* variableName, const char* value) {
     return setenv(variableName, value, 1) == 0;
 }
 #else
-#    error "Implement Get/SetEnvironmentVar for your platform."
+#error "Implement Get/SetEnvironmentVar for your platform."
 #endif
 
 #if defined(DAWN_PLATFORM_WINDOWS)
@@ -134,7 +134,7 @@ std::optional<std::string> GetExecutablePath() {
     return {};
 }
 #else
-#    error "Implement GetExecutablePath for your platform."
+#error "Implement GetExecutablePath for your platform."
 #endif
 
 std::optional<std::string> GetExecutableDirectory() {
@@ -168,15 +168,15 @@ std::optional<std::string> GetModulePath() {
     static int placeholderSymbol = 0;
     HMODULE module = nullptr;
 // GetModuleHandleEx is unavailable on UWP
-#    if defined(DAWN_IS_WINUWP)
+#if defined(DAWN_IS_WINUWP)
     return {};
-#    else
+#else
     if (!GetModuleHandleExA(
             GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
             reinterpret_cast<LPCSTR>(&placeholderSymbol), &module)) {
         return {};
     }
-#    endif
+#endif
     return GetHModulePath(module);
 }
 #elif defined(DAWN_PLATFORM_FUCHSIA)
@@ -188,7 +188,7 @@ std::optional<std::string> GetModulePath() {
     return {};
 }
 #else
-#    error "Implement GetModulePath for your platform."
+#error "Implement GetModulePath for your platform."
 #endif
 
 std::optional<std::string> GetModuleDirectory() {
@@ -208,8 +208,7 @@ std::optional<std::string> GetModuleDirectory() {
 ScopedEnvironmentVar::ScopedEnvironmentVar(const char* variableName, const char* value)
     : mName(variableName),
       mOriginalValue(GetEnvironmentVar(variableName)),
-      mIsSet(SetEnvironmentVar(variableName, value)) {
-}
+      mIsSet(SetEnvironmentVar(variableName, value)) {}
 
 ScopedEnvironmentVar::~ScopedEnvironmentVar() {
     if (mIsSet) {

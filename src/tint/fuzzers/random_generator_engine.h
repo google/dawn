@@ -23,37 +23,37 @@ namespace tint::fuzzers {
 
 /// Wrapper interface around STL random number engine
 class RandomGeneratorEngine {
- public:
-  /// Constructor
-  RandomGeneratorEngine();
+  public:
+    /// Constructor
+    RandomGeneratorEngine();
 
-  /// Destructor
-  virtual ~RandomGeneratorEngine();
+    /// Destructor
+    virtual ~RandomGeneratorEngine();
 
-  /// Move Constructor
-  RandomGeneratorEngine(RandomGeneratorEngine&&);
+    /// Move Constructor
+    RandomGeneratorEngine(RandomGeneratorEngine&&);
 
-  /// Generates a random uint32_t value from uniform distribution.
-  /// @param lower - lower bound of integer generated
-  /// @param upper - upper bound of integer generated
-  /// @returns i, where lower <= i < upper
-  virtual uint32_t RandomUInt32(uint32_t lower, uint32_t upper) = 0;
+    /// Generates a random uint32_t value from uniform distribution.
+    /// @param lower - lower bound of integer generated
+    /// @param upper - upper bound of integer generated
+    /// @returns i, where lower <= i < upper
+    virtual uint32_t RandomUInt32(uint32_t lower, uint32_t upper) = 0;
 
-  /// Generates a random uint64_t value from uniform distribution.
-  /// @param lower - lower bound of integer generated
-  /// @param upper - upper bound of integer generated
-  /// @returns i, where lower <= i < upper
-  virtual uint64_t RandomUInt64(uint64_t lower, uint64_t upper) = 0;
+    /// Generates a random uint64_t value from uniform distribution.
+    /// @param lower - lower bound of integer generated
+    /// @param upper - upper bound of integer generated
+    /// @returns i, where lower <= i < upper
+    virtual uint64_t RandomUInt64(uint64_t lower, uint64_t upper) = 0;
 
-  /// Generates N bytes of pseudo-random data
-  /// @param dest - memory location to store data
-  /// @param n - number of bytes of data to generate
-  virtual void RandomNBytes(uint8_t* dest, size_t n) = 0;
+    /// Generates N bytes of pseudo-random data
+    /// @param dest - memory location to store data
+    /// @param n - number of bytes of data to generate
+    virtual void RandomNBytes(uint8_t* dest, size_t n) = 0;
 
- private:
-  // Disallow copy & assign
-  RandomGeneratorEngine(const RandomGeneratorEngine&) = delete;
-  RandomGeneratorEngine& operator=(const RandomGeneratorEngine&) = delete;
+  private:
+    // Disallow copy & assign
+    RandomGeneratorEngine(const RandomGeneratorEngine&) = delete;
+    RandomGeneratorEngine& operator=(const RandomGeneratorEngine&) = delete;
 };  // class RandomGeneratorEngine
 
 }  // namespace tint::fuzzers

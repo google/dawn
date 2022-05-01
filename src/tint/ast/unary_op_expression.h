@@ -22,31 +22,31 @@ namespace tint::ast {
 
 /// A unary op expression
 class UnaryOpExpression final : public Castable<UnaryOpExpression, Expression> {
- public:
-  /// Constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the unary op expression source
-  /// @param op the op
-  /// @param expr the expr
-  UnaryOpExpression(ProgramID program_id,
-                    const Source& source,
-                    UnaryOp op,
-                    const Expression* expr);
-  /// Move constructor
-  UnaryOpExpression(UnaryOpExpression&&);
-  ~UnaryOpExpression() override;
+  public:
+    /// Constructor
+    /// @param program_id the identifier of the program that owns this node
+    /// @param source the unary op expression source
+    /// @param op the op
+    /// @param expr the expr
+    UnaryOpExpression(ProgramID program_id,
+                      const Source& source,
+                      UnaryOp op,
+                      const Expression* expr);
+    /// Move constructor
+    UnaryOpExpression(UnaryOpExpression&&);
+    ~UnaryOpExpression() override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const UnaryOpExpression* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const UnaryOpExpression* Clone(CloneContext* ctx) const override;
 
-  /// The op
-  const UnaryOp op;
+    /// The op
+    const UnaryOp op;
 
-  /// The expression
-  const Expression* const expr;
+    /// The expression
+    const Expression* const expr;
 };
 
 }  // namespace tint::ast

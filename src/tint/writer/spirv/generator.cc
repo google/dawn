@@ -25,28 +25,27 @@ Result::~Result() = default;
 Result::Result(const Result&) = default;
 
 Result Generate(const Program* program, const Options& options) {
-  Result result;
+    Result result;
 
-  // Sanitize the program.
-  auto sanitized_result = Sanitize(program, options);
-  if (!sanitized_result.program.IsValid()) {
-    result.success = false;
-    result.error = sanitized_result.program.Diagnostics().str();
+    // Sanitize the program.
+    auto sanitized_result = Sanitize(program, options);
+    if (!sanitized_result.program.IsValid()) {
+        result.success = false;
+        result.error = sanitized_result.program.Diagnostics().str();
+        return result;
+    }
+
+    // Generate the SPIR-V code.
+    bool zero_initialize_workgroup_memory =
+        !options.disable_workgroup_init && options.use_zero_initialize_workgroup_memory_extension;
+
+    auto impl = std::make_unique<GeneratorImpl>(&sanitized_result.program,
+                                                zero_initialize_workgroup_memory);
+    result.success = impl->Generate();
+    result.error = impl->error();
+    result.spirv = std::move(impl->result());
+
     return result;
-  }
-
-  // Generate the SPIR-V code.
-  bool zero_initialize_workgroup_memory =
-      !options.disable_workgroup_init &&
-      options.use_zero_initialize_workgroup_memory_extension;
-
-  auto impl = std::make_unique<GeneratorImpl>(&sanitized_result.program,
-                                              zero_initialize_workgroup_memory);
-  result.success = impl->Generate();
-  result.error = impl->error();
-  result.spirv = std::move(impl->result());
-
-  return result;
 }
 
 }  // namespace tint::writer::spirv

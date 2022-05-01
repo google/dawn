@@ -35,34 +35,32 @@ EntryPoint::EntryPoint(EntryPoint&) = default;
 EntryPoint::EntryPoint(EntryPoint&&) = default;
 EntryPoint::~EntryPoint() = default;
 
-InterpolationType ASTToInspectorInterpolationType(
-    ast::InterpolationType ast_type) {
-  switch (ast_type) {
-    case ast::InterpolationType::kPerspective:
-      return InterpolationType::kPerspective;
-    case ast::InterpolationType::kLinear:
-      return InterpolationType::kLinear;
-    case ast::InterpolationType::kFlat:
-      return InterpolationType::kFlat;
-  }
+InterpolationType ASTToInspectorInterpolationType(ast::InterpolationType ast_type) {
+    switch (ast_type) {
+        case ast::InterpolationType::kPerspective:
+            return InterpolationType::kPerspective;
+        case ast::InterpolationType::kLinear:
+            return InterpolationType::kLinear;
+        case ast::InterpolationType::kFlat:
+            return InterpolationType::kFlat;
+    }
 
-  return InterpolationType::kUnknown;
+    return InterpolationType::kUnknown;
 }
 
-InterpolationSampling ASTToInspectorInterpolationSampling(
-    ast::InterpolationSampling sampling) {
-  switch (sampling) {
-    case ast::InterpolationSampling::kNone:
-      return InterpolationSampling::kNone;
-    case ast::InterpolationSampling::kCenter:
-      return InterpolationSampling::kCenter;
-    case ast::InterpolationSampling::kCentroid:
-      return InterpolationSampling::kCentroid;
-    case ast::InterpolationSampling::kSample:
-      return InterpolationSampling::kSample;
-  }
+InterpolationSampling ASTToInspectorInterpolationSampling(ast::InterpolationSampling sampling) {
+    switch (sampling) {
+        case ast::InterpolationSampling::kNone:
+            return InterpolationSampling::kNone;
+        case ast::InterpolationSampling::kCenter:
+            return InterpolationSampling::kCenter;
+        case ast::InterpolationSampling::kCentroid:
+            return InterpolationSampling::kCentroid;
+        case ast::InterpolationSampling::kSample:
+            return InterpolationSampling::kSample;
+    }
 
-  return InterpolationSampling::kUnknown;
+    return InterpolationSampling::kUnknown;
 }
 
 }  // namespace tint::inspector

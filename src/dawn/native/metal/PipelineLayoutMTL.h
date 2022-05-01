@@ -25,37 +25,36 @@
 
 namespace dawn::native::metal {
 
-    class Device;
+class Device;
 
-    // The number of Metal buffers usable by applications in general
-    static constexpr size_t kMetalBufferTableSize = 31;
-    // The Metal buffer slot that Dawn reserves for its own use to pass more data to shaders
-    static constexpr size_t kBufferLengthBufferSlot = kMetalBufferTableSize - 1;
-    // The number of Metal buffers Dawn can use in a generic way (i.e. that aren't reserved)
-    static constexpr size_t kGenericMetalBufferSlots = kMetalBufferTableSize - 1;
+// The number of Metal buffers usable by applications in general
+static constexpr size_t kMetalBufferTableSize = 31;
+// The Metal buffer slot that Dawn reserves for its own use to pass more data to shaders
+static constexpr size_t kBufferLengthBufferSlot = kMetalBufferTableSize - 1;
+// The number of Metal buffers Dawn can use in a generic way (i.e. that aren't reserved)
+static constexpr size_t kGenericMetalBufferSlots = kMetalBufferTableSize - 1;
 
-    static constexpr BindGroupIndex kPullingBufferBindingSet = BindGroupIndex(kMaxBindGroups);
+static constexpr BindGroupIndex kPullingBufferBindingSet = BindGroupIndex(kMaxBindGroups);
 
-    class PipelineLayout final : public PipelineLayoutBase {
-      public:
-        static Ref<PipelineLayout> Create(Device* device,
-                                          const PipelineLayoutDescriptor* descriptor);
+class PipelineLayout final : public PipelineLayoutBase {
+  public:
+    static Ref<PipelineLayout> Create(Device* device, const PipelineLayoutDescriptor* descriptor);
 
-        using BindingIndexInfo =
-            ityp::array<BindGroupIndex,
-                        ityp::stack_vec<BindingIndex, uint32_t, kMaxOptimalBindingsPerGroup>,
-                        kMaxBindGroups>;
-        const BindingIndexInfo& GetBindingIndexInfo(SingleShaderStage stage) const;
+    using BindingIndexInfo =
+        ityp::array<BindGroupIndex,
+                    ityp::stack_vec<BindingIndex, uint32_t, kMaxOptimalBindingsPerGroup>,
+                    kMaxBindGroups>;
+    const BindingIndexInfo& GetBindingIndexInfo(SingleShaderStage stage) const;
 
-        // The number of Metal vertex stage buffers used for the whole pipeline layout.
-        uint32_t GetBufferBindingCount(SingleShaderStage stage);
+    // The number of Metal vertex stage buffers used for the whole pipeline layout.
+    uint32_t GetBufferBindingCount(SingleShaderStage stage);
 
-      private:
-        PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor);
-        ~PipelineLayout() override = default;
-        PerStage<BindingIndexInfo> mIndexInfo;
-        PerStage<uint32_t> mBufferBindingCount;
-    };
+  private:
+    PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor);
+    ~PipelineLayout() override = default;
+    PerStage<BindingIndexInfo> mIndexInfo;
+    PerStage<uint32_t> mBufferBindingCount;
+};
 
 }  // namespace dawn::native::metal
 

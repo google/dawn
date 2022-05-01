@@ -22,35 +22,35 @@ namespace tint::ast {
 
 /// A switch statement
 class SwitchStatement final : public Castable<SwitchStatement, Statement> {
- public:
-  /// Constructor
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param condition the switch condition
-  /// @param body the switch body
-  SwitchStatement(ProgramID pid,
-                  const Source& src,
-                  const Expression* condition,
-                  CaseStatementList body);
-  /// Move constructor
-  SwitchStatement(SwitchStatement&&);
-  ~SwitchStatement() override;
+  public:
+    /// Constructor
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param condition the switch condition
+    /// @param body the switch body
+    SwitchStatement(ProgramID pid,
+                    const Source& src,
+                    const Expression* condition,
+                    CaseStatementList body);
+    /// Move constructor
+    SwitchStatement(SwitchStatement&&);
+    ~SwitchStatement() override;
 
-  /// @returns true if this is a default statement
-  bool IsDefault() const { return condition == nullptr; }
+    /// @returns true if this is a default statement
+    bool IsDefault() const { return condition == nullptr; }
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const SwitchStatement* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const SwitchStatement* Clone(CloneContext* ctx) const override;
 
-  /// The switch condition or nullptr if none set
-  const Expression* const condition;
+    /// The switch condition or nullptr if none set
+    const Expression* const condition;
 
-  /// The Switch body
-  const CaseStatementList body;
-  SwitchStatement(const SwitchStatement&) = delete;
+    /// The Switch body
+    const CaseStatementList body;
+    SwitchStatement(const SwitchStatement&) = delete;
 };
 
 }  // namespace tint::ast

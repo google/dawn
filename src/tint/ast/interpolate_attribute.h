@@ -29,34 +29,33 @@ enum class InterpolationType { kPerspective, kLinear, kFlat };
 enum class InterpolationSampling { kNone = -1, kCenter, kCentroid, kSample };
 
 /// An interpolate attribute
-class InterpolateAttribute final
-    : public Castable<InterpolateAttribute, Attribute> {
- public:
-  /// Create an interpolate attribute.
-  /// @param pid the identifier of the program that owns this node
-  /// @param src the source of this node
-  /// @param type the interpolation type
-  /// @param sampling the interpolation sampling
-  InterpolateAttribute(ProgramID pid,
-                       const Source& src,
-                       InterpolationType type,
-                       InterpolationSampling sampling);
-  ~InterpolateAttribute() override;
+class InterpolateAttribute final : public Castable<InterpolateAttribute, Attribute> {
+  public:
+    /// Create an interpolate attribute.
+    /// @param pid the identifier of the program that owns this node
+    /// @param src the source of this node
+    /// @param type the interpolation type
+    /// @param sampling the interpolation sampling
+    InterpolateAttribute(ProgramID pid,
+                         const Source& src,
+                         InterpolationType type,
+                         InterpolationSampling sampling);
+    ~InterpolateAttribute() override;
 
-  /// @returns the WGSL name for the attribute
-  std::string Name() const override;
+    /// @returns the WGSL name for the attribute
+    std::string Name() const override;
 
-  /// Clones this node and all transitive child nodes using the `CloneContext`
-  /// `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned node
-  const InterpolateAttribute* Clone(CloneContext* ctx) const override;
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const InterpolateAttribute* Clone(CloneContext* ctx) const override;
 
-  /// The interpolation type
-  const InterpolationType type;
+    /// The interpolation type
+    const InterpolationType type;
 
-  /// The interpolation sampling
-  const InterpolationSampling sampling;
+    /// The interpolation sampling
+    const InterpolationSampling sampling;
 };
 
 /// @param out the std::ostream to write to

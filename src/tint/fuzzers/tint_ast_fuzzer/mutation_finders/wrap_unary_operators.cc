@@ -33,56 +33,54 @@ MutationList MutationFinderWrapUnaryOperators::FindMutations(
     const tint::Program& program,
     NodeIdMap* node_id_map,
     ProbabilityContext* probability_context) const {
-  MutationList result;
+    MutationList result;
 
-  ExpressionSize expression_size(program);
+    ExpressionSize expression_size(program);
 
-  // Iterate through all ast nodes and for each expression node, try to wrap
-  // the inside a valid unary operator based on the type of the expression.
-  for (const auto* node : program.ASTNodes().Objects()) {
-    const auto* expr_ast_node = tint::As<ast::Expression>(node);
+    // Iterate through all ast nodes and for each expression node, try to wrap
+    // the inside a valid unary operator based on the type of the expression.
+    for (const auto* node : program.ASTNodes().Objects()) {
+        const auto* expr_ast_node = tint::As<ast::Expression>(node);
 
-    // Transformation applies only when the node represents a valid expression.
-    if (!expr_ast_node) {
-      continue;
+        // Transformation applies only when the node represents a valid expression.
+        if (!expr_ast_node) {
+            continue;
+        }
+
+        if (expression_size(expr_ast_node) > kMaxExpressionSize) {
+            continue;
+        }
+
+        const auto* expr_sem_node = tint::As<sem::Expression>(program.Sem().Get(expr_ast_node));
+
+        // Transformation applies only when the semantic node for the given
+        // expression is present.
+        if (!expr_sem_node) {
+            continue;
+        }
+
+        std::vector<ast::UnaryOp> valid_operators =
+            MutationWrapUnaryOperator::GetValidUnaryWrapper(*expr_sem_node);
+
+        // Transformation only applies when there are available unary operators
+        // for the given expression.
+        if (valid_operators.empty()) {
+            continue;
+        }
+
+        ast::UnaryOp unary_op_wrapper =
+            valid_operators[probability_context->GetRandomIndex(valid_operators)];
+
+        result.push_back(std::make_unique<MutationWrapUnaryOperator>(
+            node_id_map->GetId(expr_ast_node), node_id_map->TakeFreshId(), unary_op_wrapper));
     }
 
-    if (expression_size(expr_ast_node) > kMaxExpressionSize) {
-      continue;
-    }
-
-    const auto* expr_sem_node =
-        tint::As<sem::Expression>(program.Sem().Get(expr_ast_node));
-
-    // Transformation applies only when the semantic node for the given
-    // expression is present.
-    if (!expr_sem_node) {
-      continue;
-    }
-
-    std::vector<ast::UnaryOp> valid_operators =
-        MutationWrapUnaryOperator::GetValidUnaryWrapper(*expr_sem_node);
-
-    // Transformation only applies when there are available unary operators
-    // for the given expression.
-    if (valid_operators.empty()) {
-      continue;
-    }
-
-    ast::UnaryOp unary_op_wrapper =
-        valid_operators[probability_context->GetRandomIndex(valid_operators)];
-
-    result.push_back(std::make_unique<MutationWrapUnaryOperator>(
-        node_id_map->GetId(expr_ast_node), node_id_map->TakeFreshId(),
-        unary_op_wrapper));
-  }
-
-  return result;
+    return result;
 }
 
 uint32_t MutationFinderWrapUnaryOperators::GetChanceOfApplyingMutation(
     ProbabilityContext* probability_context) const {
-  return probability_context->GetChanceOfWrappingUnaryOperators();
+    return probability_context->GetChanceOfWrappingUnaryOperators();
 }
 
 }  // namespace tint::fuzzers::ast_fuzzer

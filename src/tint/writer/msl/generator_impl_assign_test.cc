@@ -20,17 +20,17 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Assign) {
-  auto* lhs = Var("lhs", ty.i32());
-  auto* rhs = Var("rhs", ty.i32());
-  auto* assign = Assign(lhs, rhs);
-  WrapInFunction(lhs, rhs, assign);
+    auto* lhs = Var("lhs", ty.i32());
+    auto* rhs = Var("rhs", ty.i32());
+    auto* assign = Assign(lhs, rhs);
+    WrapInFunction(lhs, rhs, assign);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  gen.increment_indent();
+    gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(assign)) << gen.error();
-  EXPECT_EQ(gen.result(), "  lhs = rhs;\n");
+    ASSERT_TRUE(gen.EmitStatement(assign)) << gen.error();
+    EXPECT_EQ(gen.result(), "  lhs = rhs;\n");
 }
 
 }  // namespace

@@ -24,22 +24,22 @@ class DynamicLib;
 
 namespace dawn::native {
 
-    // A helper class that dynamically loads the x11-xcb library that contains XGetXCBConnection
-    // (and nothing else). This has to be dynamic because this libraries isn't present on all Linux
-    // deployment platforms that Chromium targets.
-    class XlibXcbFunctions {
-      public:
-        XlibXcbFunctions();
-        ~XlibXcbFunctions();
+// A helper class that dynamically loads the x11-xcb library that contains XGetXCBConnection
+// (and nothing else). This has to be dynamic because this libraries isn't present on all Linux
+// deployment platforms that Chromium targets.
+class XlibXcbFunctions {
+  public:
+    XlibXcbFunctions();
+    ~XlibXcbFunctions();
 
-        bool IsLoaded() const;
+    bool IsLoaded() const;
 
-        // Functions from x11-xcb
-        decltype(&::XGetXCBConnection) xGetXCBConnection = nullptr;
+    // Functions from x11-xcb
+    decltype(&::XGetXCBConnection) xGetXCBConnection = nullptr;
 
-      private:
-        DynamicLib mLib;
-    };
+  private:
+    DynamicLib mLib;
+};
 
 }  // namespace dawn::native
 

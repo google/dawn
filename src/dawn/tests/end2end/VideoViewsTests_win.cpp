@@ -29,13 +29,10 @@ using Microsoft::WRL::ComPtr;
 
 class PlatformTextureWin : public VideoViewsTestBackend::PlatformTexture {
   public:
-    explicit PlatformTextureWin(wgpu::Texture&& texture) : PlatformTexture(std::move(texture)) {
-    }
+    explicit PlatformTextureWin(wgpu::Texture&& texture) : PlatformTexture(std::move(texture)) {}
     ~PlatformTextureWin() override = default;
 
-    bool CanWrapAsWGPUTexture() override {
-        return true;
-    }
+    bool CanWrapAsWGPUTexture() override { return true; }
 };
 
 class VideoViewsTestBackendWin : public VideoViewsTestBackend {
@@ -173,8 +170,7 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
     }
 
     void DestroyVideoTextureForTest(
-        std::unique_ptr<VideoViewsTestBackend::PlatformTexture>&& PlatformTexture) override {
-    }
+        std::unique_ptr<VideoViewsTestBackend::PlatformTexture>&& PlatformTexture) override {}
 
     WGPUDevice mWGPUDevice = nullptr;
     ComPtr<ID3D11Device> mD3d11Device;

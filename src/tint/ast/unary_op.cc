@@ -17,29 +17,29 @@
 namespace tint::ast {
 
 std::ostream& operator<<(std::ostream& out, UnaryOp mod) {
-  switch (mod) {
-    case UnaryOp::kAddressOf: {
-      out << "address-of";
-      break;
+    switch (mod) {
+        case UnaryOp::kAddressOf: {
+            out << "address-of";
+            break;
+        }
+        case UnaryOp::kComplement: {
+            out << "complement";
+            break;
+        }
+        case UnaryOp::kIndirection: {
+            out << "indirection";
+            break;
+        }
+        case UnaryOp::kNegation: {
+            out << "negation";
+            break;
+        }
+        case UnaryOp::kNot: {
+            out << "not";
+            break;
+        }
     }
-    case UnaryOp::kComplement: {
-      out << "complement";
-      break;
-    }
-    case UnaryOp::kIndirection: {
-      out << "indirection";
-      break;
-    }
-    case UnaryOp::kNegation: {
-      out << "negation";
-      break;
-    }
-    case UnaryOp::kNot: {
-      out << "not";
-      break;
-    }
-  }
-  return out;
+    return out;
 }
 
 }  // namespace tint::ast

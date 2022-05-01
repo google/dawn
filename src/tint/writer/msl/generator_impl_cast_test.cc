@@ -20,36 +20,36 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Scalar) {
-  auto* cast = Construct<f32>(1);
-  WrapInFunction(cast);
+    auto* cast = Construct<f32>(1);
+    WrapInFunction(cast);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
-  EXPECT_EQ(out.str(), "float(1)");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
+    EXPECT_EQ(out.str(), "float(1)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Vector) {
-  auto* cast = vec3<f32>(vec3<i32>(1, 2, 3));
-  WrapInFunction(cast);
+    auto* cast = vec3<f32>(vec3<i32>(1, 2, 3));
+    WrapInFunction(cast);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
-  EXPECT_EQ(out.str(), "float3(int3(1, 2, 3))");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
+    EXPECT_EQ(out.str(), "float3(int3(1, 2, 3))");
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Cast_IntMin) {
-  auto* cast = Construct<u32>(std::numeric_limits<int32_t>::min());
-  WrapInFunction(cast);
+    auto* cast = Construct<u32>(std::numeric_limits<int32_t>::min());
+    WrapInFunction(cast);
 
-  GeneratorImpl& gen = Build();
+    GeneratorImpl& gen = Build();
 
-  std::stringstream out;
-  ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
-  EXPECT_EQ(out.str(), "uint((-2147483647 - 1))");
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
+    EXPECT_EQ(out.str(), "uint((-2147483647 - 1))");
 }
 
 }  // namespace

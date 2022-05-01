@@ -21,65 +21,64 @@ namespace tint::writer::spirv {
 namespace {
 
 std::string Disassemble(const std::vector<uint32_t>& data) {
-  std::string spv_errors;
-  spv_target_env target_env = SPV_ENV_UNIVERSAL_1_0;
+    std::string spv_errors;
+    spv_target_env target_env = SPV_ENV_UNIVERSAL_1_0;
 
-  auto msg_consumer = [&spv_errors](spv_message_level_t level, const char*,
-                                    const spv_position_t& position,
-                                    const char* message) {
-    switch (level) {
-      case SPV_MSG_FATAL:
-      case SPV_MSG_INTERNAL_ERROR:
-      case SPV_MSG_ERROR:
-        spv_errors += "error: line " + std::to_string(position.index) + ": " +
-                      message + "\n";
-        break;
-      case SPV_MSG_WARNING:
-        spv_errors += "warning: line " + std::to_string(position.index) + ": " +
-                      message + "\n";
-        break;
-      case SPV_MSG_INFO:
-        spv_errors += "info: line " + std::to_string(position.index) + ": " +
-                      message + "\n";
-        break;
-      case SPV_MSG_DEBUG:
-        break;
+    auto msg_consumer = [&spv_errors](spv_message_level_t level, const char*,
+                                      const spv_position_t& position, const char* message) {
+        switch (level) {
+            case SPV_MSG_FATAL:
+            case SPV_MSG_INTERNAL_ERROR:
+            case SPV_MSG_ERROR:
+                spv_errors +=
+                    "error: line " + std::to_string(position.index) + ": " + message + "\n";
+                break;
+            case SPV_MSG_WARNING:
+                spv_errors +=
+                    "warning: line " + std::to_string(position.index) + ": " + message + "\n";
+                break;
+            case SPV_MSG_INFO:
+                spv_errors +=
+                    "info: line " + std::to_string(position.index) + ": " + message + "\n";
+                break;
+            case SPV_MSG_DEBUG:
+                break;
+        }
+    };
+
+    spvtools::SpirvTools tools(target_env);
+    tools.SetMessageConsumer(msg_consumer);
+
+    std::string result;
+    if (!tools.Disassemble(data, &result, SPV_BINARY_TO_TEXT_OPTION_NO_HEADER)) {
+        return "*** Invalid SPIR-V ***\n" + spv_errors;
     }
-  };
-
-  spvtools::SpirvTools tools(target_env);
-  tools.SetMessageConsumer(msg_consumer);
-
-  std::string result;
-  if (!tools.Disassemble(data, &result, SPV_BINARY_TO_TEXT_OPTION_NO_HEADER)) {
-    return "*** Invalid SPIR-V ***\n" + spv_errors;
-  }
-  return result;
+    return result;
 }
 
 }  // namespace
 
 std::string DumpBuilder(Builder& builder) {
-  BinaryWriter writer;
-  writer.WriteHeader(builder.id_bound());
-  writer.WriteBuilder(&builder);
-  return Disassemble(writer.result());
+    BinaryWriter writer;
+    writer.WriteHeader(builder.id_bound());
+    writer.WriteBuilder(&builder);
+    return Disassemble(writer.result());
 }
 
 std::string DumpInstruction(const Instruction& inst) {
-  BinaryWriter writer;
-  writer.WriteHeader(kDefaultMaxIdBound);
-  writer.WriteInstruction(inst);
-  return Disassemble(writer.result());
+    BinaryWriter writer;
+    writer.WriteHeader(kDefaultMaxIdBound);
+    writer.WriteInstruction(inst);
+    return Disassemble(writer.result());
 }
 
 std::string DumpInstructions(const InstructionList& insts) {
-  BinaryWriter writer;
-  writer.WriteHeader(kDefaultMaxIdBound);
-  for (const auto& inst : insts) {
-    writer.WriteInstruction(inst);
-  }
-  return Disassemble(writer.result());
+    BinaryWriter writer;
+    writer.WriteHeader(kDefaultMaxIdBound);
+    for (const auto& inst : insts) {
+        writer.WriteInstruction(inst);
+    }
+    return Disassemble(writer.result());
 }
 
 }  // namespace tint::writer::spirv

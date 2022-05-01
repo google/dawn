@@ -22,30 +22,29 @@
 
 namespace dawn::native::opengl {
 
-    SwapChain::SwapChain(Device* device, const SwapChainDescriptor* descriptor)
-        : OldSwapChainBase(device, descriptor) {
-        const auto& im = GetImplementation();
-        im.Init(im.userData, nullptr);
-    }
+SwapChain::SwapChain(Device* device, const SwapChainDescriptor* descriptor)
+    : OldSwapChainBase(device, descriptor) {
+    const auto& im = GetImplementation();
+    im.Init(im.userData, nullptr);
+}
 
-    SwapChain::~SwapChain() {
-    }
+SwapChain::~SwapChain() {}
 
-    TextureBase* SwapChain::GetNextTextureImpl(const TextureDescriptor* descriptor) {
-        const auto& im = GetImplementation();
-        DawnSwapChainNextTexture next = {};
-        DawnSwapChainError error = im.GetNextTexture(im.userData, &next);
-        if (error) {
-            GetDevice()->HandleError(InternalErrorType::Internal, error);
-            return nullptr;
-        }
-        GLuint nativeTexture = next.texture.u32;
-        return new Texture(ToBackend(GetDevice()), descriptor, nativeTexture,
-                           TextureBase::TextureState::OwnedExternal);
+TextureBase* SwapChain::GetNextTextureImpl(const TextureDescriptor* descriptor) {
+    const auto& im = GetImplementation();
+    DawnSwapChainNextTexture next = {};
+    DawnSwapChainError error = im.GetNextTexture(im.userData, &next);
+    if (error) {
+        GetDevice()->HandleError(InternalErrorType::Internal, error);
+        return nullptr;
     }
+    GLuint nativeTexture = next.texture.u32;
+    return new Texture(ToBackend(GetDevice()), descriptor, nativeTexture,
+                       TextureBase::TextureState::OwnedExternal);
+}
 
-    MaybeError SwapChain::OnBeforePresent(TextureViewBase*) {
-        return {};
-    }
+MaybeError SwapChain::OnBeforePresent(TextureViewBase*) {
+    return {};
+}
 
 }  // namespace dawn::native::opengl

@@ -24,24 +24,22 @@
 
 namespace wgpu::binding {
 
-    // GPURenderBundle is an implementation of interop::GPURenderBundle that wraps a
-    // wgpu::RenderBundle.
-    class GPURenderBundle final : public interop::GPURenderBundle {
-      public:
-        explicit GPURenderBundle(wgpu::RenderBundle bundle);
+// GPURenderBundle is an implementation of interop::GPURenderBundle that wraps a
+// wgpu::RenderBundle.
+class GPURenderBundle final : public interop::GPURenderBundle {
+  public:
+    explicit GPURenderBundle(wgpu::RenderBundle bundle);
 
-        // Implicit cast operator to Dawn GPU object
-        inline operator const wgpu::RenderBundle&() const {
-            return bundle_;
-        }
+    // Implicit cast operator to Dawn GPU object
+    inline operator const wgpu::RenderBundle&() const { return bundle_; }
 
-        // interop::GPURenderBundle interface compliance
-        std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
-        void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
+    // interop::GPURenderBundle interface compliance
+    std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
+    void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
 
-      private:
-        wgpu::RenderBundle bundle_;
-    };
+  private:
+    wgpu::RenderBundle bundle_;
+};
 
 }  // namespace wgpu::binding
 

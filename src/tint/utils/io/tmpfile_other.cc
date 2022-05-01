@@ -21,7 +21,7 @@ TmpFile::TmpFile(std::string) {}
 TmpFile::~TmpFile() = default;
 
 bool TmpFile::Append(const void*, size_t) const {
-  return false;
+    return false;
 }
 
 }  // namespace tint::utils

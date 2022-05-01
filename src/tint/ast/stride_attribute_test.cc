@@ -20,17 +20,17 @@ namespace {
 using StrideAttributeTest = TestHelper;
 
 TEST_F(StrideAttributeTest, Creation) {
-  auto* d = create<StrideAttribute>(2);
-  EXPECT_EQ(2u, d->stride);
+    auto* d = create<StrideAttribute>(2);
+    EXPECT_EQ(2u, d->stride);
 }
 
 TEST_F(StrideAttributeTest, Source) {
-  auto* d = create<StrideAttribute>(
-      Source{Source::Range{Source::Location{1, 2}, Source::Location{3, 4}}}, 2);
-  EXPECT_EQ(d->source.range.begin.line, 1u);
-  EXPECT_EQ(d->source.range.begin.column, 2u);
-  EXPECT_EQ(d->source.range.end.line, 3u);
-  EXPECT_EQ(d->source.range.end.column, 4u);
+    auto* d = create<StrideAttribute>(
+        Source{Source::Range{Source::Location{1, 2}, Source::Location{3, 4}}}, 2);
+    EXPECT_EQ(d->source.range.begin.line, 1u);
+    EXPECT_EQ(d->source.range.begin.column, 2u);
+    EXPECT_EQ(d->source.range.end.line, 3u);
+    EXPECT_EQ(d->source.range.end.column, 4u);
 }
 
 }  // namespace

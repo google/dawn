@@ -26,33 +26,33 @@ namespace tint::sem {
 
 /// Holds semantic information about a loop statement
 class LoopStatement final : public Castable<LoopStatement, CompoundStatement> {
- public:
-  /// Constructor
-  /// @param declaration the AST node for this loop statement
-  /// @param parent the owning statement
-  /// @param function the owning function
-  LoopStatement(const ast::LoopStatement* declaration,
-                const CompoundStatement* parent,
-                const sem::Function* function);
+  public:
+    /// Constructor
+    /// @param declaration the AST node for this loop statement
+    /// @param parent the owning statement
+    /// @param function the owning function
+    LoopStatement(const ast::LoopStatement* declaration,
+                  const CompoundStatement* parent,
+                  const sem::Function* function);
 
-  /// Destructor
-  ~LoopStatement() override;
+    /// Destructor
+    ~LoopStatement() override;
 };
 
 /// Holds semantic information about a loop continuing block
 class LoopContinuingBlockStatement final
     : public Castable<LoopContinuingBlockStatement, BlockStatement> {
- public:
-  /// Constructor
-  /// @param declaration the AST node for this block statement
-  /// @param parent the owning statement
-  /// @param function the owning function
-  LoopContinuingBlockStatement(const ast::BlockStatement* declaration,
-                               const CompoundStatement* parent,
-                               const sem::Function* function);
+  public:
+    /// Constructor
+    /// @param declaration the AST node for this block statement
+    /// @param parent the owning statement
+    /// @param function the owning function
+    LoopContinuingBlockStatement(const ast::BlockStatement* declaration,
+                                 const CompoundStatement* parent,
+                                 const sem::Function* function);
 
-  /// Destructor
-  ~LoopContinuingBlockStatement() override;
+    /// Destructor
+    ~LoopContinuingBlockStatement() override;
 };
 
 }  // namespace tint::sem

@@ -29,16 +29,16 @@
 
 namespace dawn::native {
 
-    namespace {
+namespace {
 
-        // Assert the offsets in dawn::native::TimestampParams are same with the ones in the shader
-        static_assert(offsetof(dawn::native::TimestampParams, first) == 0);
-        static_assert(offsetof(dawn::native::TimestampParams, count) == 4);
-        static_assert(offsetof(dawn::native::TimestampParams, offset) == 8);
-        static_assert(offsetof(dawn::native::TimestampParams, multiplier) == 12);
-        static_assert(offsetof(dawn::native::TimestampParams, rightShift) == 16);
+// Assert the offsets in dawn::native::TimestampParams are same with the ones in the shader
+static_assert(offsetof(dawn::native::TimestampParams, first) == 0);
+static_assert(offsetof(dawn::native::TimestampParams, count) == 4);
+static_assert(offsetof(dawn::native::TimestampParams, offset) == 8);
+static_assert(offsetof(dawn::native::TimestampParams, multiplier) == 12);
+static_assert(offsetof(dawn::native::TimestampParams, rightShift) == 16);
 
-        static const char sConvertTimestampsToNanoseconds[] = R"(
+static const char sConvertTimestampsToNanoseconds[] = R"(
             struct Timestamp {
                 low  : u32;
                 high : u32;
@@ -116,103 +116,100 @@ namespace dawn::native {
             }
         )";
 
-        ResultOrError<ComputePipelineBase*> GetOrCreateTimestampComputePipeline(
-            DeviceBase* device) {
-            InternalPipelineStore* store = device->GetInternalPipelineStore();
+ResultOrError<ComputePipelineBase*> GetOrCreateTimestampComputePipeline(DeviceBase* device) {
+    InternalPipelineStore* store = device->GetInternalPipelineStore();
 
-            if (store->timestampComputePipeline == nullptr) {
-                // Create compute shader module if not cached before.
-                if (store->timestampCS == nullptr) {
-                    DAWN_TRY_ASSIGN(
-                        store->timestampCS,
-                        utils::CreateShaderModule(device, sConvertTimestampsToNanoseconds));
-                }
-
-                // Create binding group layout
-                Ref<BindGroupLayoutBase> bgl;
-                DAWN_TRY_ASSIGN(
-                    bgl, utils::MakeBindGroupLayout(
-                             device,
-                             {
-                                 {0, wgpu::ShaderStage::Compute, kInternalStorageBufferBinding},
-                                 {1, wgpu::ShaderStage::Compute,
-                                  wgpu::BufferBindingType::ReadOnlyStorage},
-                                 {2, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform},
-                             },
-                             /* allowInternalBinding */ true));
-
-                // Create pipeline layout
-                Ref<PipelineLayoutBase> layout;
-                DAWN_TRY_ASSIGN(layout, utils::MakeBasicPipelineLayout(device, bgl));
-
-                // Create ComputePipeline.
-                ComputePipelineDescriptor computePipelineDesc = {};
-                // Generate the layout based on shader module.
-                computePipelineDesc.layout = layout.Get();
-                computePipelineDesc.compute.module = store->timestampCS.Get();
-                computePipelineDesc.compute.entryPoint = "main";
-
-                DAWN_TRY_ASSIGN(store->timestampComputePipeline,
-                                device->CreateComputePipeline(&computePipelineDesc));
-            }
-
-            return store->timestampComputePipeline.Get();
+    if (store->timestampComputePipeline == nullptr) {
+        // Create compute shader module if not cached before.
+        if (store->timestampCS == nullptr) {
+            DAWN_TRY_ASSIGN(store->timestampCS,
+                            utils::CreateShaderModule(device, sConvertTimestampsToNanoseconds));
         }
 
-    }  // anonymous namespace
+        // Create binding group layout
+        Ref<BindGroupLayoutBase> bgl;
+        DAWN_TRY_ASSIGN(
+            bgl, utils::MakeBindGroupLayout(
+                     device,
+                     {
+                         {0, wgpu::ShaderStage::Compute, kInternalStorageBufferBinding},
+                         {1, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::ReadOnlyStorage},
+                         {2, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform},
+                     },
+                     /* allowInternalBinding */ true));
 
-    TimestampParams::TimestampParams(uint32_t first, uint32_t count, uint32_t offset, float period)
-        : first(first), count(count), offset(offset) {
-        // The overall conversion happening, if p is the period, m the multiplier, s the shift, is::
-        //
-        //   m = round(p * 2^s)
-        //
-        // Then in the shader we compute:
-        //
-        //   m / 2^s = round(p * 2^s) / 2*s ~= p
-        //
-        // The goal is to find the best shift to keep the precision of computations. The
-        // conversion shader uses chunks of 16 bits to compute the multiplication with the perios,
-        // so we need to keep the multiplier under 2^16. At the same time, the larger the
-        // multiplier, the better the precision, so we maximize the value of the right shift while
-        // keeping the multiplier under 2 ^ 16
-        uint32_t upperLog2 = ceil(log2(period));
+        // Create pipeline layout
+        Ref<PipelineLayoutBase> layout;
+        DAWN_TRY_ASSIGN(layout, utils::MakeBasicPipelineLayout(device, bgl));
 
-        // Clamp the shift to 16 because we're doing computations in 16bit chunks. The
-        // multiplication by the period will overflow the chunks, but timestamps are mostly
-        // informational so that's ok.
-        rightShift = 16u - std::min(upperLog2, 16u);
-        multiplier = uint32_t(period * (1 << rightShift));
+        // Create ComputePipeline.
+        ComputePipelineDescriptor computePipelineDesc = {};
+        // Generate the layout based on shader module.
+        computePipelineDesc.layout = layout.Get();
+        computePipelineDesc.compute.module = store->timestampCS.Get();
+        computePipelineDesc.compute.entryPoint = "main";
+
+        DAWN_TRY_ASSIGN(store->timestampComputePipeline,
+                        device->CreateComputePipeline(&computePipelineDesc));
     }
 
-    MaybeError EncodeConvertTimestampsToNanoseconds(CommandEncoder* encoder,
-                                                    BufferBase* timestamps,
-                                                    BufferBase* availability,
-                                                    BufferBase* params) {
-        DeviceBase* device = encoder->GetDevice();
+    return store->timestampComputePipeline.Get();
+}
 
-        ComputePipelineBase* pipeline;
-        DAWN_TRY_ASSIGN(pipeline, GetOrCreateTimestampComputePipeline(device));
+}  // anonymous namespace
 
-        // Prepare bind group layout.
-        Ref<BindGroupLayoutBase> layout;
-        DAWN_TRY_ASSIGN(layout, pipeline->GetBindGroupLayout(0));
+TimestampParams::TimestampParams(uint32_t first, uint32_t count, uint32_t offset, float period)
+    : first(first), count(count), offset(offset) {
+    // The overall conversion happening, if p is the period, m the multiplier, s the shift, is::
+    //
+    //   m = round(p * 2^s)
+    //
+    // Then in the shader we compute:
+    //
+    //   m / 2^s = round(p * 2^s) / 2*s ~= p
+    //
+    // The goal is to find the best shift to keep the precision of computations. The
+    // conversion shader uses chunks of 16 bits to compute the multiplication with the perios,
+    // so we need to keep the multiplier under 2^16. At the same time, the larger the
+    // multiplier, the better the precision, so we maximize the value of the right shift while
+    // keeping the multiplier under 2 ^ 16
+    uint32_t upperLog2 = ceil(log2(period));
 
-        // Create bind group after all binding entries are set.
-        Ref<BindGroupBase> bindGroup;
-        DAWN_TRY_ASSIGN(bindGroup,
-                        utils::MakeBindGroup(device, layout,
-                                             {{0, timestamps}, {1, availability}, {2, params}}));
+    // Clamp the shift to 16 because we're doing computations in 16bit chunks. The
+    // multiplication by the period will overflow the chunks, but timestamps are mostly
+    // informational so that's ok.
+    rightShift = 16u - std::min(upperLog2, 16u);
+    multiplier = uint32_t(period * (1 << rightShift));
+}
 
-        // Create compute encoder and issue dispatch.
-        Ref<ComputePassEncoder> pass = encoder->BeginComputePass();
-        pass->APISetPipeline(pipeline);
-        pass->APISetBindGroup(0, bindGroup.Get());
-        pass->APIDispatchWorkgroups(
-            static_cast<uint32_t>((timestamps->GetSize() / sizeof(uint64_t) + 7) / 8));
-        pass->APIEnd();
+MaybeError EncodeConvertTimestampsToNanoseconds(CommandEncoder* encoder,
+                                                BufferBase* timestamps,
+                                                BufferBase* availability,
+                                                BufferBase* params) {
+    DeviceBase* device = encoder->GetDevice();
 
-        return {};
-    }
+    ComputePipelineBase* pipeline;
+    DAWN_TRY_ASSIGN(pipeline, GetOrCreateTimestampComputePipeline(device));
+
+    // Prepare bind group layout.
+    Ref<BindGroupLayoutBase> layout;
+    DAWN_TRY_ASSIGN(layout, pipeline->GetBindGroupLayout(0));
+
+    // Create bind group after all binding entries are set.
+    Ref<BindGroupBase> bindGroup;
+    DAWN_TRY_ASSIGN(
+        bindGroup,
+        utils::MakeBindGroup(device, layout, {{0, timestamps}, {1, availability}, {2, params}}));
+
+    // Create compute encoder and issue dispatch.
+    Ref<ComputePassEncoder> pass = encoder->BeginComputePass();
+    pass->APISetPipeline(pipeline);
+    pass->APISetBindGroup(0, bindGroup.Get());
+    pass->APIDispatchWorkgroups(
+        static_cast<uint32_t>((timestamps->GetSize() / sizeof(uint64_t) + 7) / 8));
+    pass->APIEnd();
+
+    return {};
+}
 
 }  // namespace dawn::native

@@ -19,45 +19,45 @@
 
 namespace dawn::wire::client {
 
-    bool LimitsAndFeatures::GetLimits(WGPUSupportedLimits* limits) const {
-        ASSERT(limits != nullptr);
-        if (limits->nextInChain != nullptr) {
-            return false;
-        }
-        *limits = mLimits;
-        return true;
+bool LimitsAndFeatures::GetLimits(WGPUSupportedLimits* limits) const {
+    ASSERT(limits != nullptr);
+    if (limits->nextInChain != nullptr) {
+        return false;
     }
+    *limits = mLimits;
+    return true;
+}
 
-    bool LimitsAndFeatures::HasFeature(WGPUFeatureName feature) const {
-        return mFeatures.count(feature) != 0;
-    }
+bool LimitsAndFeatures::HasFeature(WGPUFeatureName feature) const {
+    return mFeatures.count(feature) != 0;
+}
 
-    size_t LimitsAndFeatures::EnumerateFeatures(WGPUFeatureName* features) const {
-        if (features != nullptr) {
-            for (WGPUFeatureName f : mFeatures) {
-                *features = f;
-                ++features;
-            }
-        }
-        return mFeatures.size();
-    }
-
-    void LimitsAndFeatures::SetLimits(const WGPUSupportedLimits* limits) {
-        ASSERT(limits != nullptr);
-        mLimits = *limits;
-        mLimits.nextInChain = nullptr;
-    }
-
-    void LimitsAndFeatures::SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount) {
-        ASSERT(features != nullptr || featuresCount == 0);
-        for (uint32_t i = 0; i < featuresCount; ++i) {
-            // Filter out features that the server supports, but the client does not.
-            // (Could be different versions)
-            if (!IsFeatureSupported(features[i])) {
-                continue;
-            }
-            mFeatures.insert(features[i]);
+size_t LimitsAndFeatures::EnumerateFeatures(WGPUFeatureName* features) const {
+    if (features != nullptr) {
+        for (WGPUFeatureName f : mFeatures) {
+            *features = f;
+            ++features;
         }
     }
+    return mFeatures.size();
+}
+
+void LimitsAndFeatures::SetLimits(const WGPUSupportedLimits* limits) {
+    ASSERT(limits != nullptr);
+    mLimits = *limits;
+    mLimits.nextInChain = nullptr;
+}
+
+void LimitsAndFeatures::SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount) {
+    ASSERT(features != nullptr || featuresCount == 0);
+    for (uint32_t i = 0; i < featuresCount; ++i) {
+        // Filter out features that the server supports, but the client does not.
+        // (Could be different versions)
+        if (!IsFeatureSupported(features[i])) {
+            continue;
+        }
+        mFeatures.insert(features[i]);
+    }
+}
 
 }  // namespace dawn::wire::client

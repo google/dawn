@@ -22,348 +22,341 @@ namespace {
 using ::testing::Eq;
 
 class SpvNamerTest : public testing::Test {
- public:
-  SpvNamerTest() : fail_stream_(&success_, &errors_) {}
+  public:
+    SpvNamerTest() : fail_stream_(&success_, &errors_) {}
 
-  /// @returns the accumulated diagnostic strings
-  std::string error() { return errors_.str(); }
+    /// @returns the accumulated diagnostic strings
+    std::string error() { return errors_.str(); }
 
- protected:
-  std::stringstream errors_;
-  bool success_ = true;
-  FailStream fail_stream_;
+  protected:
+    std::stringstream errors_;
+    bool success_ = true;
+    FailStream fail_stream_;
 };
 
 TEST_F(SpvNamerTest, SanitizeEmpty) {
-  EXPECT_THAT(Namer::Sanitize(""), Eq("empty"));
+    EXPECT_THAT(Namer::Sanitize(""), Eq("empty"));
 }
 
 TEST_F(SpvNamerTest, SanitizeLeadingUnderscore) {
-  EXPECT_THAT(Namer::Sanitize("_"), Eq("x_"));
+    EXPECT_THAT(Namer::Sanitize("_"), Eq("x_"));
 }
 
 TEST_F(SpvNamerTest, SanitizeLeadingDigit) {
-  EXPECT_THAT(Namer::Sanitize("7zip"), Eq("x7zip"));
+    EXPECT_THAT(Namer::Sanitize("7zip"), Eq("x7zip"));
 }
 
 TEST_F(SpvNamerTest, SanitizeOkChars) {
-  EXPECT_THAT(Namer::Sanitize("_abcdef12345"), Eq("x_abcdef12345"));
+    EXPECT_THAT(Namer::Sanitize("_abcdef12345"), Eq("x_abcdef12345"));
 }
 
 TEST_F(SpvNamerTest, SanitizeNonIdentifierChars) {
-  EXPECT_THAT(Namer::Sanitize("a:1.2'f\n"), "a_1_2_f_");
+    EXPECT_THAT(Namer::Sanitize("a:1.2'f\n"), "a_1_2_f_");
 }
 
 TEST_F(SpvNamerTest, NoFailureToStart) {
-  Namer namer(fail_stream_);
-  EXPECT_TRUE(success_);
-  EXPECT_TRUE(error().empty());
+    Namer namer(fail_stream_);
+    EXPECT_TRUE(success_);
+    EXPECT_TRUE(error().empty());
 }
 
 TEST_F(SpvNamerTest, FailLogsError) {
-  Namer namer(fail_stream_);
-  const bool converted_result = namer.Fail() << "st. johns wood";
-  EXPECT_FALSE(converted_result);
-  EXPECT_EQ(error(), "st. johns wood");
-  EXPECT_FALSE(success_);
+    Namer namer(fail_stream_);
+    const bool converted_result = namer.Fail() << "st. johns wood";
+    EXPECT_FALSE(converted_result);
+    EXPECT_EQ(error(), "st. johns wood");
+    EXPECT_FALSE(success_);
 }
 
 TEST_F(SpvNamerTest, NoNameRecorded) {
-  Namer namer(fail_stream_);
+    Namer namer(fail_stream_);
 
-  EXPECT_FALSE(namer.HasName(12));
-  EXPECT_TRUE(success_);
-  EXPECT_TRUE(error().empty());
+    EXPECT_FALSE(namer.HasName(12));
+    EXPECT_TRUE(success_);
+    EXPECT_TRUE(error().empty());
 }
 
 TEST_F(SpvNamerTest, FindUnusedDerivedName_NoRecordedName) {
-  Namer namer(fail_stream_);
-  EXPECT_THAT(namer.FindUnusedDerivedName("eleanor"), Eq("eleanor"));
-  // Prove that it wasn't registered when first found.
-  EXPECT_THAT(namer.FindUnusedDerivedName("eleanor"), Eq("eleanor"));
+    Namer namer(fail_stream_);
+    EXPECT_THAT(namer.FindUnusedDerivedName("eleanor"), Eq("eleanor"));
+    // Prove that it wasn't registered when first found.
+    EXPECT_THAT(namer.FindUnusedDerivedName("eleanor"), Eq("eleanor"));
 }
 
 TEST_F(SpvNamerTest, FindUnusedDerivedName_HasRecordedName) {
-  Namer namer(fail_stream_);
-  namer.Register(12, "rigby");
-  EXPECT_THAT(namer.FindUnusedDerivedName("rigby"), Eq("rigby_1"));
+    Namer namer(fail_stream_);
+    namer.Register(12, "rigby");
+    EXPECT_THAT(namer.FindUnusedDerivedName("rigby"), Eq("rigby_1"));
 }
 
 TEST_F(SpvNamerTest, FindUnusedDerivedName_HasMultipleConflicts) {
-  Namer namer(fail_stream_);
-  namer.Register(12, "rigby");
-  namer.Register(13, "rigby_1");
-  namer.Register(14, "rigby_3");
-  // It picks the first non-conflicting suffix.
-  EXPECT_THAT(namer.FindUnusedDerivedName("rigby"), Eq("rigby_2"));
+    Namer namer(fail_stream_);
+    namer.Register(12, "rigby");
+    namer.Register(13, "rigby_1");
+    namer.Register(14, "rigby_3");
+    // It picks the first non-conflicting suffix.
+    EXPECT_THAT(namer.FindUnusedDerivedName("rigby"), Eq("rigby_2"));
 }
 
 TEST_F(SpvNamerTest, IsRegistered_NoRecordedName) {
-  Namer namer(fail_stream_);
-  EXPECT_FALSE(namer.IsRegistered("abbey"));
+    Namer namer(fail_stream_);
+    EXPECT_FALSE(namer.IsRegistered("abbey"));
 }
 
 TEST_F(SpvNamerTest, IsRegistered_RegisteredById) {
-  Namer namer(fail_stream_);
-  namer.Register(1, "abbey");
-  EXPECT_TRUE(namer.IsRegistered("abbey"));
+    Namer namer(fail_stream_);
+    namer.Register(1, "abbey");
+    EXPECT_TRUE(namer.IsRegistered("abbey"));
 }
 
 TEST_F(SpvNamerTest, IsRegistered_RegisteredByDerivation) {
-  Namer namer(fail_stream_);
-  const auto got = namer.MakeDerivedName("abbey");
-  EXPECT_TRUE(namer.IsRegistered("abbey"));
-  EXPECT_EQ(got, "abbey");
+    Namer namer(fail_stream_);
+    const auto got = namer.MakeDerivedName("abbey");
+    EXPECT_TRUE(namer.IsRegistered("abbey"));
+    EXPECT_EQ(got, "abbey");
 }
 
 TEST_F(SpvNamerTest, MakeDerivedName_NoRecordedName) {
-  Namer namer(fail_stream_);
-  EXPECT_THAT(namer.MakeDerivedName("eleanor"), Eq("eleanor"));
-  // Prove that it was registered when first found.
-  EXPECT_THAT(namer.MakeDerivedName("eleanor"), Eq("eleanor_1"));
+    Namer namer(fail_stream_);
+    EXPECT_THAT(namer.MakeDerivedName("eleanor"), Eq("eleanor"));
+    // Prove that it was registered when first found.
+    EXPECT_THAT(namer.MakeDerivedName("eleanor"), Eq("eleanor_1"));
 }
 
 TEST_F(SpvNamerTest, MakeDerivedName_HasRecordedName) {
-  Namer namer(fail_stream_);
-  namer.Register(12, "rigby");
-  EXPECT_THAT(namer.MakeDerivedName("rigby"), Eq("rigby_1"));
+    Namer namer(fail_stream_);
+    namer.Register(12, "rigby");
+    EXPECT_THAT(namer.MakeDerivedName("rigby"), Eq("rigby_1"));
 }
 
 TEST_F(SpvNamerTest, MakeDerivedName_HasMultipleConflicts) {
-  Namer namer(fail_stream_);
-  namer.Register(12, "rigby");
-  namer.Register(13, "rigby_1");
-  namer.Register(14, "rigby_3");
-  // It picks the first non-conflicting suffix.
-  EXPECT_THAT(namer.MakeDerivedName("rigby"), Eq("rigby_2"));
+    Namer namer(fail_stream_);
+    namer.Register(12, "rigby");
+    namer.Register(13, "rigby_1");
+    namer.Register(14, "rigby_3");
+    // It picks the first non-conflicting suffix.
+    EXPECT_THAT(namer.MakeDerivedName("rigby"), Eq("rigby_2"));
 }
 
 TEST_F(SpvNamerTest, RegisterWithoutId_Once) {
-  Namer namer(fail_stream_);
+    Namer namer(fail_stream_);
 
-  const std::string n("abbey");
-  EXPECT_FALSE(namer.IsRegistered(n));
-  EXPECT_TRUE(namer.RegisterWithoutId(n));
-  EXPECT_TRUE(namer.IsRegistered(n));
-  EXPECT_TRUE(success_);
-  EXPECT_TRUE(error().empty());
+    const std::string n("abbey");
+    EXPECT_FALSE(namer.IsRegistered(n));
+    EXPECT_TRUE(namer.RegisterWithoutId(n));
+    EXPECT_TRUE(namer.IsRegistered(n));
+    EXPECT_TRUE(success_);
+    EXPECT_TRUE(error().empty());
 }
 
 TEST_F(SpvNamerTest, RegisterWithoutId_Twice) {
-  Namer namer(fail_stream_);
+    Namer namer(fail_stream_);
 
-  const std::string n("abbey");
-  EXPECT_FALSE(namer.IsRegistered(n));
-  EXPECT_TRUE(namer.RegisterWithoutId(n));
-  // Fails on second attempt.
-  EXPECT_FALSE(namer.RegisterWithoutId(n));
-  EXPECT_FALSE(success_);
-  EXPECT_EQ(error(), "internal error: name already registered: abbey");
+    const std::string n("abbey");
+    EXPECT_FALSE(namer.IsRegistered(n));
+    EXPECT_TRUE(namer.RegisterWithoutId(n));
+    // Fails on second attempt.
+    EXPECT_FALSE(namer.RegisterWithoutId(n));
+    EXPECT_FALSE(success_);
+    EXPECT_EQ(error(), "internal error: name already registered: abbey");
 }
 
 TEST_F(SpvNamerTest, RegisterWithoutId_ConflictsWithIdRegisteredName) {
-  Namer namer(fail_stream_);
+    Namer namer(fail_stream_);
 
-  const std::string n("abbey");
-  EXPECT_TRUE(namer.Register(1, n));
-  EXPECT_TRUE(namer.IsRegistered(n));
-  // Fails on attempt to register without ID.
-  EXPECT_FALSE(namer.RegisterWithoutId(n));
-  EXPECT_FALSE(success_);
-  EXPECT_EQ(error(), "internal error: name already registered: abbey");
+    const std::string n("abbey");
+    EXPECT_TRUE(namer.Register(1, n));
+    EXPECT_TRUE(namer.IsRegistered(n));
+    // Fails on attempt to register without ID.
+    EXPECT_FALSE(namer.RegisterWithoutId(n));
+    EXPECT_FALSE(success_);
+    EXPECT_EQ(error(), "internal error: name already registered: abbey");
 }
 
 TEST_F(SpvNamerTest, Register_Once) {
-  Namer namer(fail_stream_);
+    Namer namer(fail_stream_);
 
-  const uint32_t id = 9;
-  EXPECT_FALSE(namer.HasName(id));
-  const bool save_result = namer.Register(id, "abbey road");
-  EXPECT_TRUE(save_result);
-  EXPECT_TRUE(namer.HasName(id));
-  EXPECT_EQ(namer.GetName(id), "abbey road");
-  EXPECT_TRUE(success_);
-  EXPECT_TRUE(error().empty());
+    const uint32_t id = 9;
+    EXPECT_FALSE(namer.HasName(id));
+    const bool save_result = namer.Register(id, "abbey road");
+    EXPECT_TRUE(save_result);
+    EXPECT_TRUE(namer.HasName(id));
+    EXPECT_EQ(namer.GetName(id), "abbey road");
+    EXPECT_TRUE(success_);
+    EXPECT_TRUE(error().empty());
 }
 
 TEST_F(SpvNamerTest, Register_TwoIds) {
-  Namer namer(fail_stream_);
+    Namer namer(fail_stream_);
 
-  EXPECT_FALSE(namer.HasName(8));
-  EXPECT_FALSE(namer.HasName(9));
-  EXPECT_TRUE(namer.Register(8, "abbey road"));
-  EXPECT_TRUE(namer.Register(9, "rubber soul"));
-  EXPECT_TRUE(namer.HasName(8));
-  EXPECT_TRUE(namer.HasName(9));
-  EXPECT_EQ(namer.GetName(9), "rubber soul");
-  EXPECT_EQ(namer.GetName(8), "abbey road");
-  EXPECT_TRUE(success_);
-  EXPECT_TRUE(error().empty());
+    EXPECT_FALSE(namer.HasName(8));
+    EXPECT_FALSE(namer.HasName(9));
+    EXPECT_TRUE(namer.Register(8, "abbey road"));
+    EXPECT_TRUE(namer.Register(9, "rubber soul"));
+    EXPECT_TRUE(namer.HasName(8));
+    EXPECT_TRUE(namer.HasName(9));
+    EXPECT_EQ(namer.GetName(9), "rubber soul");
+    EXPECT_EQ(namer.GetName(8), "abbey road");
+    EXPECT_TRUE(success_);
+    EXPECT_TRUE(error().empty());
 }
 
 TEST_F(SpvNamerTest, Register_FailsDueToIdReuse) {
-  Namer namer(fail_stream_);
+    Namer namer(fail_stream_);
 
-  const uint32_t id = 9;
-  EXPECT_TRUE(namer.Register(id, "abbey road"));
-  EXPECT_FALSE(namer.Register(id, "rubber soul"));
-  EXPECT_TRUE(namer.HasName(id));
-  EXPECT_EQ(namer.GetName(id), "abbey road");
-  EXPECT_FALSE(success_);
-  EXPECT_FALSE(error().empty());
+    const uint32_t id = 9;
+    EXPECT_TRUE(namer.Register(id, "abbey road"));
+    EXPECT_FALSE(namer.Register(id, "rubber soul"));
+    EXPECT_TRUE(namer.HasName(id));
+    EXPECT_EQ(namer.GetName(id), "abbey road");
+    EXPECT_FALSE(success_);
+    EXPECT_FALSE(error().empty());
 }
 
 TEST_F(SpvNamerTest, SuggestSanitizedName_TakeSuggestionWhenNoConflict) {
-  Namer namer(fail_stream_);
+    Namer namer(fail_stream_);
 
-  EXPECT_TRUE(namer.SuggestSanitizedName(1, "father"));
-  EXPECT_THAT(namer.GetName(1), Eq("father"));
+    EXPECT_TRUE(namer.SuggestSanitizedName(1, "father"));
+    EXPECT_THAT(namer.GetName(1), Eq("father"));
 }
 
-TEST_F(SpvNamerTest,
-       SuggestSanitizedName_RejectSuggestionWhenConflictOnSameId) {
-  Namer namer(fail_stream_);
+TEST_F(SpvNamerTest, SuggestSanitizedName_RejectSuggestionWhenConflictOnSameId) {
+    Namer namer(fail_stream_);
 
-  namer.Register(1, "lennon");
-  EXPECT_FALSE(namer.SuggestSanitizedName(1, "mccartney"));
-  EXPECT_THAT(namer.GetName(1), Eq("lennon"));
+    namer.Register(1, "lennon");
+    EXPECT_FALSE(namer.SuggestSanitizedName(1, "mccartney"));
+    EXPECT_THAT(namer.GetName(1), Eq("lennon"));
 }
 
 TEST_F(SpvNamerTest, SuggestSanitizedName_SanitizeSuggestion) {
-  Namer namer(fail_stream_);
+    Namer namer(fail_stream_);
 
-  EXPECT_TRUE(namer.SuggestSanitizedName(9, "m:kenzie"));
-  EXPECT_THAT(namer.GetName(9), Eq("m_kenzie"));
+    EXPECT_TRUE(namer.SuggestSanitizedName(9, "m:kenzie"));
+    EXPECT_THAT(namer.GetName(9), Eq("m_kenzie"));
 }
 
-TEST_F(SpvNamerTest,
-       SuggestSanitizedName_GenerateNewNameWhenConflictOnDifferentId) {
-  Namer namer(fail_stream_);
+TEST_F(SpvNamerTest, SuggestSanitizedName_GenerateNewNameWhenConflictOnDifferentId) {
+    Namer namer(fail_stream_);
 
-  namer.Register(7, "rice");
-  EXPECT_TRUE(namer.SuggestSanitizedName(9, "rice"));
-  EXPECT_THAT(namer.GetName(9), Eq("rice_1"));
+    namer.Register(7, "rice");
+    EXPECT_TRUE(namer.SuggestSanitizedName(9, "rice"));
+    EXPECT_THAT(namer.GetName(9), Eq("rice_1"));
 }
 
 TEST_F(SpvNamerTest, GetMemberName_EmptyStringForUnvisitedStruct) {
-  Namer namer(fail_stream_);
-  EXPECT_THAT(namer.GetMemberName(1, 2), Eq(""));
+    Namer namer(fail_stream_);
+    EXPECT_THAT(namer.GetMemberName(1, 2), Eq(""));
 }
 
 TEST_F(SpvNamerTest, GetMemberName_EmptyStringForUnvisitedMember) {
-  Namer namer(fail_stream_);
-  namer.SuggestSanitizedMemberName(1, 2, "mother");
-  EXPECT_THAT(namer.GetMemberName(1, 0), Eq(""));
+    Namer namer(fail_stream_);
+    namer.SuggestSanitizedMemberName(1, 2, "mother");
+    EXPECT_THAT(namer.GetMemberName(1, 0), Eq(""));
 }
 
 TEST_F(SpvNamerTest, SuggestSanitizedMemberName_TakeSuggestionWhenNoConflict) {
-  Namer namer(fail_stream_);
-  EXPECT_TRUE(namer.SuggestSanitizedMemberName(1, 2, "mother"));
-  EXPECT_THAT(namer.GetMemberName(1, 2), Eq("mother"));
+    Namer namer(fail_stream_);
+    EXPECT_TRUE(namer.SuggestSanitizedMemberName(1, 2, "mother"));
+    EXPECT_THAT(namer.GetMemberName(1, 2), Eq("mother"));
 }
 
 TEST_F(SpvNamerTest, SuggestSanitizedMemberName_TakeSanitizedSuggestion) {
-  Namer namer(fail_stream_);
-  EXPECT_TRUE(namer.SuggestSanitizedMemberName(1, 2, "m:t%er"));
-  EXPECT_THAT(namer.GetMemberName(1, 2), Eq("m_t_er"));
+    Namer namer(fail_stream_);
+    EXPECT_TRUE(namer.SuggestSanitizedMemberName(1, 2, "m:t%er"));
+    EXPECT_THAT(namer.GetMemberName(1, 2), Eq("m_t_er"));
 }
 
 TEST_F(
     SpvNamerTest,
     SuggestSanitizedMemberName_TakeSuggestionWhenNoConflictAfterSuggestionForLowerMember) {  // NOLINT
-  Namer namer(fail_stream_);
-  EXPECT_TRUE(namer.SuggestSanitizedMemberName(1, 7, "mother"));
-  EXPECT_THAT(namer.GetMemberName(1, 2), Eq(""));
-  EXPECT_TRUE(namer.SuggestSanitizedMemberName(1, 2, "mary"));
-  EXPECT_THAT(namer.GetMemberName(1, 2), Eq("mary"));
+    Namer namer(fail_stream_);
+    EXPECT_TRUE(namer.SuggestSanitizedMemberName(1, 7, "mother"));
+    EXPECT_THAT(namer.GetMemberName(1, 2), Eq(""));
+    EXPECT_TRUE(namer.SuggestSanitizedMemberName(1, 2, "mary"));
+    EXPECT_THAT(namer.GetMemberName(1, 2), Eq("mary"));
 }
 
-TEST_F(SpvNamerTest,
-       SuggestSanitizedMemberName_RejectSuggestionIfConflictOnMember) {
-  Namer namer(fail_stream_);
-  EXPECT_TRUE(namer.SuggestSanitizedMemberName(1, 2, "mother"));
-  EXPECT_FALSE(namer.SuggestSanitizedMemberName(1, 2, "mary"));
-  EXPECT_THAT(namer.GetMemberName(1, 2), Eq("mother"));
+TEST_F(SpvNamerTest, SuggestSanitizedMemberName_RejectSuggestionIfConflictOnMember) {
+    Namer namer(fail_stream_);
+    EXPECT_TRUE(namer.SuggestSanitizedMemberName(1, 2, "mother"));
+    EXPECT_FALSE(namer.SuggestSanitizedMemberName(1, 2, "mary"));
+    EXPECT_THAT(namer.GetMemberName(1, 2), Eq("mother"));
 }
 
 TEST_F(SpvNamerTest, Name_GeneratesNameIfNoneRegistered) {
-  Namer namer(fail_stream_);
-  EXPECT_THAT(namer.Name(14), Eq("x_14"));
+    Namer namer(fail_stream_);
+    EXPECT_THAT(namer.Name(14), Eq("x_14"));
 }
 
 TEST_F(SpvNamerTest, Name_GeneratesNameWithoutConflict) {
-  Namer namer(fail_stream_);
-  namer.Register(42, "x_14");
-  EXPECT_THAT(namer.Name(14), Eq("x_14_1"));
+    Namer namer(fail_stream_);
+    namer.Register(42, "x_14");
+    EXPECT_THAT(namer.Name(14), Eq("x_14_1"));
 }
 
 TEST_F(SpvNamerTest, Name_ReturnsRegisteredName) {
-  Namer namer(fail_stream_);
-  namer.Register(14, "hello");
-  EXPECT_THAT(namer.Name(14), Eq("hello"));
+    Namer namer(fail_stream_);
+    namer.Register(14, "hello");
+    EXPECT_THAT(namer.Name(14), Eq("hello"));
 }
 
-TEST_F(SpvNamerTest,
-       ResolveMemberNamesForStruct_GeneratesRegularNamesOnItsOwn) {
-  Namer namer(fail_stream_);
-  namer.ResolveMemberNamesForStruct(2, 4);
-  EXPECT_THAT(namer.GetMemberName(2, 0), Eq("field0"));
-  EXPECT_THAT(namer.GetMemberName(2, 1), Eq("field1"));
-  EXPECT_THAT(namer.GetMemberName(2, 2), Eq("field2"));
-  EXPECT_THAT(namer.GetMemberName(2, 3), Eq("field3"));
+TEST_F(SpvNamerTest, ResolveMemberNamesForStruct_GeneratesRegularNamesOnItsOwn) {
+    Namer namer(fail_stream_);
+    namer.ResolveMemberNamesForStruct(2, 4);
+    EXPECT_THAT(namer.GetMemberName(2, 0), Eq("field0"));
+    EXPECT_THAT(namer.GetMemberName(2, 1), Eq("field1"));
+    EXPECT_THAT(namer.GetMemberName(2, 2), Eq("field2"));
+    EXPECT_THAT(namer.GetMemberName(2, 3), Eq("field3"));
 }
 
-TEST_F(SpvNamerTest,
-       ResolveMemberNamesForStruct_ResolvesConflictBetweenSuggestedNames) {
-  Namer namer(fail_stream_);
-  namer.SuggestSanitizedMemberName(2, 0, "apple");
-  namer.SuggestSanitizedMemberName(2, 1, "apple");
-  namer.ResolveMemberNamesForStruct(2, 2);
-  EXPECT_THAT(namer.GetMemberName(2, 0), Eq("apple"));
-  EXPECT_THAT(namer.GetMemberName(2, 1), Eq("apple_1"));
+TEST_F(SpvNamerTest, ResolveMemberNamesForStruct_ResolvesConflictBetweenSuggestedNames) {
+    Namer namer(fail_stream_);
+    namer.SuggestSanitizedMemberName(2, 0, "apple");
+    namer.SuggestSanitizedMemberName(2, 1, "apple");
+    namer.ResolveMemberNamesForStruct(2, 2);
+    EXPECT_THAT(namer.GetMemberName(2, 0), Eq("apple"));
+    EXPECT_THAT(namer.GetMemberName(2, 1), Eq("apple_1"));
 }
 
 TEST_F(SpvNamerTest, ResolveMemberNamesForStruct_FillsUnsuggestedGaps) {
-  Namer namer(fail_stream_);
-  namer.SuggestSanitizedMemberName(2, 1, "apple");
-  namer.SuggestSanitizedMemberName(2, 2, "core");
-  namer.ResolveMemberNamesForStruct(2, 4);
-  EXPECT_THAT(namer.GetMemberName(2, 0), Eq("field0"));
-  EXPECT_THAT(namer.GetMemberName(2, 1), Eq("apple"));
-  EXPECT_THAT(namer.GetMemberName(2, 2), Eq("core"));
-  EXPECT_THAT(namer.GetMemberName(2, 3), Eq("field3"));
+    Namer namer(fail_stream_);
+    namer.SuggestSanitizedMemberName(2, 1, "apple");
+    namer.SuggestSanitizedMemberName(2, 2, "core");
+    namer.ResolveMemberNamesForStruct(2, 4);
+    EXPECT_THAT(namer.GetMemberName(2, 0), Eq("field0"));
+    EXPECT_THAT(namer.GetMemberName(2, 1), Eq("apple"));
+    EXPECT_THAT(namer.GetMemberName(2, 2), Eq("core"));
+    EXPECT_THAT(namer.GetMemberName(2, 3), Eq("field3"));
 }
 
-TEST_F(SpvNamerTest,
-       ResolveMemberNamesForStruct_GeneratedNameAvoidsConflictWithSuggestion) {
-  Namer namer(fail_stream_);
-  namer.SuggestSanitizedMemberName(2, 0, "field1");
-  namer.ResolveMemberNamesForStruct(2, 2);
-  EXPECT_THAT(namer.GetMemberName(2, 0), Eq("field1"));
-  EXPECT_THAT(namer.GetMemberName(2, 1), Eq("field1_1"));
+TEST_F(SpvNamerTest, ResolveMemberNamesForStruct_GeneratedNameAvoidsConflictWithSuggestion) {
+    Namer namer(fail_stream_);
+    namer.SuggestSanitizedMemberName(2, 0, "field1");
+    namer.ResolveMemberNamesForStruct(2, 2);
+    EXPECT_THAT(namer.GetMemberName(2, 0), Eq("field1"));
+    EXPECT_THAT(namer.GetMemberName(2, 1), Eq("field1_1"));
 }
 
-TEST_F(SpvNamerTest,
-       ResolveMemberNamesForStruct_TruncatesOutOfBoundsSuggestion) {
-  Namer namer(fail_stream_);
-  namer.SuggestSanitizedMemberName(2, 3, "sitar");
-  EXPECT_THAT(namer.GetMemberName(2, 3), Eq("sitar"));
-  namer.ResolveMemberNamesForStruct(2, 2);
-  EXPECT_THAT(namer.GetMemberName(2, 0), Eq("field0"));
-  EXPECT_THAT(namer.GetMemberName(2, 1), Eq("field1"));
-  EXPECT_THAT(namer.GetMemberName(2, 3), Eq(""));
+TEST_F(SpvNamerTest, ResolveMemberNamesForStruct_TruncatesOutOfBoundsSuggestion) {
+    Namer namer(fail_stream_);
+    namer.SuggestSanitizedMemberName(2, 3, "sitar");
+    EXPECT_THAT(namer.GetMemberName(2, 3), Eq("sitar"));
+    namer.ResolveMemberNamesForStruct(2, 2);
+    EXPECT_THAT(namer.GetMemberName(2, 0), Eq("field0"));
+    EXPECT_THAT(namer.GetMemberName(2, 1), Eq("field1"));
+    EXPECT_THAT(namer.GetMemberName(2, 3), Eq(""));
 }
 
 using SpvNamerReservedWordTest = ::testing::TestWithParam<std::string>;
 
 TEST_P(SpvNamerReservedWordTest, ReservedWordsAreUsed) {
-  bool success;
-  std::stringstream errors;
-  FailStream fail_stream(&success, &errors);
-  Namer namer(fail_stream);
-  const std::string reserved = GetParam();
-  // Since it's reserved, it's marked as used, and we can't register an ID
-  EXPECT_THAT(namer.FindUnusedDerivedName(reserved), Eq(reserved + "_1"));
+    bool success;
+    std::stringstream errors;
+    FailStream fail_stream(&success, &errors);
+    Namer namer(fail_stream);
+    const std::string reserved = GetParam();
+    // Since it's reserved, it's marked as used, and we can't register an ID
+    EXPECT_THAT(namer.FindUnusedDerivedName(reserved), Eq(reserved + "_1"));
 }
 
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_ReservedWords,

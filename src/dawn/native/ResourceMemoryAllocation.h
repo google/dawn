@@ -19,61 +19,61 @@
 
 namespace dawn::native {
 
-    class ResourceHeapBase;
+class ResourceHeapBase;
 
-    // Allocation method determines how memory was sub-divided.
-    // Used by the device to get the allocator that was responsible for the allocation.
-    enum class AllocationMethod {
-        // Memory not sub-divided.
-        kDirect,
+// Allocation method determines how memory was sub-divided.
+// Used by the device to get the allocator that was responsible for the allocation.
+enum class AllocationMethod {
+    // Memory not sub-divided.
+    kDirect,
 
-        // Memory sub-divided using one or more blocks of various sizes.
-        kSubAllocated,
+    // Memory sub-divided using one or more blocks of various sizes.
+    kSubAllocated,
 
-        // Memory was allocated outside of Dawn.
-        kExternal,
+    // Memory was allocated outside of Dawn.
+    kExternal,
 
-        // Memory not allocated or freed.
-        kInvalid
-    };
+    // Memory not allocated or freed.
+    kInvalid
+};
 
-    // Metadata that describes how the allocation was allocated.
-    struct AllocationInfo {
-        // AllocationInfo contains a separate offset to not confuse block vs memory offsets.
-        // The block offset is within the entire allocator memory range and only required by the
-        // buddy sub-allocator to get the corresponding memory. Unlike the block offset, the
-        // allocation offset is always local to the memory.
-        uint64_t mBlockOffset = 0;
+// Metadata that describes how the allocation was allocated.
+struct AllocationInfo {
+    // AllocationInfo contains a separate offset to not confuse block vs memory offsets.
+    // The block offset is within the entire allocator memory range and only required by the
+    // buddy sub-allocator to get the corresponding memory. Unlike the block offset, the
+    // allocation offset is always local to the memory.
+    uint64_t mBlockOffset = 0;
 
-        AllocationMethod mMethod = AllocationMethod::kInvalid;
-    };
+    AllocationMethod mMethod = AllocationMethod::kInvalid;
+};
 
-    // Handle into a resource heap pool.
-    class ResourceMemoryAllocation {
-      public:
-        ResourceMemoryAllocation();
-        ResourceMemoryAllocation(const AllocationInfo& info,
-                                 uint64_t offset,
-                                 ResourceHeapBase* resourceHeap,
-                                 uint8_t* mappedPointer = nullptr);
-        virtual ~ResourceMemoryAllocation() = default;
+// Handle into a resource heap pool.
+class ResourceMemoryAllocation {
+  public:
+    ResourceMemoryAllocation();
+    ResourceMemoryAllocation(const AllocationInfo& info,
+                             uint64_t offset,
+                             ResourceHeapBase* resourceHeap,
+                             uint8_t* mappedPointer = nullptr);
+    virtual ~ResourceMemoryAllocation() = default;
 
-        ResourceMemoryAllocation(const ResourceMemoryAllocation&) = default;
-        ResourceMemoryAllocation& operator=(const ResourceMemoryAllocation&) = default;
+    ResourceMemoryAllocation(const ResourceMemoryAllocation&) = default;
+    ResourceMemoryAllocation& operator=(const ResourceMemoryAllocation&) = default;
 
-        ResourceHeapBase* GetResourceHeap() const;
-        uint64_t GetOffset() const;
-        uint8_t* GetMappedPointer() const;
-        AllocationInfo GetInfo() const;
+    ResourceHeapBase* GetResourceHeap() const;
+    uint64_t GetOffset() const;
+    uint8_t* GetMappedPointer() const;
+    AllocationInfo GetInfo() const;
 
-        virtual void Invalidate();
+    virtual void Invalidate();
 
-      private:
-        AllocationInfo mInfo;
-        uint64_t mOffset;
-        ResourceHeapBase* mResourceHeap;
-        uint8_t* mMappedPointer;
-    };
+  private:
+    AllocationInfo mInfo;
+    uint64_t mOffset;
+    ResourceHeapBase* mResourceHeap;
+    uint8_t* mMappedPointer;
+};
 }  // namespace dawn::native
 
 #endif  // SRC_DAWN_NATIVE_RESOURCEMEMORYALLOCATION_H_

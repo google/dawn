@@ -121,7 +121,7 @@ def _NonInclusiveFileFilter(file):
         "third_party/khronos/KHR/khrplatform.h",  # Third party file
         "tools/roll-all",  # Branch name
         "tools/src/container/key.go",  # External URL
-        "tools/src/go.sum",  # External URL
+        "go.sum",  # External URL
     ]
     return file.LocalPath() not in filter_list
 

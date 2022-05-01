@@ -18,52 +18,52 @@ namespace tint::reader::wgsl {
 namespace {
 
 TEST_F(ParserImplTest, LogicalAndExpression_Parses) {
-  auto p = parser("a && true");
-  auto e = p->logical_and_expression();
-  EXPECT_TRUE(e.matched);
-  EXPECT_FALSE(e.errored);
-  EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e.value, nullptr);
+    auto p = parser("a && true");
+    auto e = p->logical_and_expression();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
 
-  ASSERT_TRUE(e->Is<ast::BinaryExpression>());
-  auto* rel = e->As<ast::BinaryExpression>();
-  EXPECT_EQ(ast::BinaryOp::kLogicalAnd, rel->op);
+    ASSERT_TRUE(e->Is<ast::BinaryExpression>());
+    auto* rel = e->As<ast::BinaryExpression>();
+    EXPECT_EQ(ast::BinaryOp::kLogicalAnd, rel->op);
 
-  ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-  auto* ident = rel->lhs->As<ast::IdentifierExpression>();
-  EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+    ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
+    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
 
-  ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
-  ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
+    ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
+    ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
 }
 
 TEST_F(ParserImplTest, LogicalAndExpression_InvalidLHS) {
-  auto p = parser("if (a) {} && true");
-  auto e = p->logical_and_expression();
-  EXPECT_FALSE(e.matched);
-  EXPECT_FALSE(e.errored);
-  EXPECT_FALSE(p->has_error()) << p->error();
-  EXPECT_EQ(e.value, nullptr);
+    auto p = parser("if (a) {} && true");
+    auto e = p->logical_and_expression();
+    EXPECT_FALSE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    EXPECT_EQ(e.value, nullptr);
 }
 
 TEST_F(ParserImplTest, LogicalAndExpression_InvalidRHS) {
-  auto p = parser("true && if (a) {}");
-  auto e = p->logical_and_expression();
-  EXPECT_FALSE(e.matched);
-  EXPECT_TRUE(e.errored);
-  EXPECT_EQ(e.value, nullptr);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:9: unable to parse right side of && expression");
+    auto p = parser("true && if (a) {}");
+    auto e = p->logical_and_expression();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_EQ(e.value, nullptr);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:9: unable to parse right side of && expression");
 }
 
 TEST_F(ParserImplTest, LogicalAndExpression_NoOr_ReturnsLHS) {
-  auto p = parser("a true");
-  auto e = p->logical_and_expression();
-  EXPECT_TRUE(e.matched);
-  EXPECT_FALSE(e.errored);
-  EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_NE(e.value, nullptr);
-  ASSERT_TRUE(e->Is<ast::IdentifierExpression>());
+    auto p = parser("a true");
+    auto e = p->logical_and_expression();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::IdentifierExpression>());
 }
 
 }  // namespace

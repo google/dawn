@@ -178,303 +178,293 @@ Debugger parameters:
 )";
 
 void PrintHelpMessage(const char* help_message) {
-  std::cout << help_message << std::endl << kMutatorParameters << std::endl;
+    std::cout << help_message << std::endl << kMutatorParameters << std::endl;
 }
 
-[[noreturn]] void InvalidParameter(const char* help_message,
-                                   const char* param) {
-  std::cout << "Invalid value for " << param << std::endl;
-  PrintHelpMessage(help_message);
-  exit(1);
+[[noreturn]] void InvalidParameter(const char* help_message, const char* param) {
+    std::cout << "Invalid value for " << param << std::endl;
+    PrintHelpMessage(help_message);
+    exit(1);
 }
 
 bool ParseUint32(const char* param, uint32_t* out) {
-  uint64_t value = static_cast<uint64_t>(strtoul(param, nullptr, 10));
-  if (value > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max())) {
-    return false;
-  }
-  *out = static_cast<uint32_t>(value);
-  return true;
+    uint64_t value = static_cast<uint64_t>(strtoul(param, nullptr, 10));
+    if (value > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max())) {
+        return false;
+    }
+    *out = static_cast<uint32_t>(value);
+    return true;
 }
 
-std::vector<spvtools::fuzz::fuzzerutil::ModuleSupplier> ParseDonors(
-    const char* file_name) {
-  std::ifstream fin(file_name);
-  if (!fin) {
-    std::cout << "Can't open donors list file: " << file_name << std::endl;
-    exit(1);
-  }
-
-  std::vector<spvtools::fuzz::fuzzerutil::ModuleSupplier> result;
-  for (std::string donor_file_name; fin >> donor_file_name;) {
-    if (!std::ifstream(donor_file_name)) {
-      std::cout << "Can't open donor file: " << donor_file_name << std::endl;
-      exit(1);
+std::vector<spvtools::fuzz::fuzzerutil::ModuleSupplier> ParseDonors(const char* file_name) {
+    std::ifstream fin(file_name);
+    if (!fin) {
+        std::cout << "Can't open donors list file: " << file_name << std::endl;
+        exit(1);
     }
 
-    result.emplace_back([donor_file_name] {
-      std::vector<uint32_t> binary;
-      if (!util::ReadBinary(donor_file_name, &binary)) {
-        std::cout << "Failed to read donor from: " << donor_file_name
-                  << std::endl;
-        exit(1);
-      }
-      return spvtools::BuildModule(
-          kDefaultTargetEnv, spvtools::fuzz::fuzzerutil::kSilentMessageConsumer,
-          binary.data(), binary.size());
-    });
-  }
+    std::vector<spvtools::fuzz::fuzzerutil::ModuleSupplier> result;
+    for (std::string donor_file_name; fin >> donor_file_name;) {
+        if (!std::ifstream(donor_file_name)) {
+            std::cout << "Can't open donor file: " << donor_file_name << std::endl;
+            exit(1);
+        }
 
-  return result;
+        result.emplace_back([donor_file_name] {
+            std::vector<uint32_t> binary;
+            if (!util::ReadBinary(donor_file_name, &binary)) {
+                std::cout << "Failed to read donor from: " << donor_file_name << std::endl;
+                exit(1);
+            }
+            return spvtools::BuildModule(kDefaultTargetEnv,
+                                         spvtools::fuzz::fuzzerutil::kSilentMessageConsumer,
+                                         binary.data(), binary.size());
+        });
+    }
+
+    return result;
 }
 
-bool ParseRepeatedPassStrategy(const char* param,
-                               spvtools::fuzz::RepeatedPassStrategy* out) {
-  if (!strcmp(param, "simple")) {
-    *out = spvtools::fuzz::RepeatedPassStrategy::kSimple;
-  } else if (!strcmp(param, "looped")) {
-    *out = spvtools::fuzz::RepeatedPassStrategy::kLoopedWithRecommendations;
-  } else if (!strcmp(param, "random")) {
-    *out = spvtools::fuzz::RepeatedPassStrategy::kRandomWithRecommendations;
-  } else {
-    return false;
-  }
-  return true;
+bool ParseRepeatedPassStrategy(const char* param, spvtools::fuzz::RepeatedPassStrategy* out) {
+    if (!strcmp(param, "simple")) {
+        *out = spvtools::fuzz::RepeatedPassStrategy::kSimple;
+    } else if (!strcmp(param, "looped")) {
+        *out = spvtools::fuzz::RepeatedPassStrategy::kLoopedWithRecommendations;
+    } else if (!strcmp(param, "random")) {
+        *out = spvtools::fuzz::RepeatedPassStrategy::kRandomWithRecommendations;
+    } else {
+        return false;
+    }
+    return true;
 }
 
 bool ParseBool(const char* param, bool* out) {
-  if (!strcmp(param, "true")) {
-    *out = true;
-  } else if (!strcmp(param, "false")) {
-    *out = false;
-  } else {
-    return false;
-  }
-  return true;
+    if (!strcmp(param, "true")) {
+        *out = true;
+    } else if (!strcmp(param, "false")) {
+        *out = false;
+    } else {
+        return false;
+    }
+    return true;
 }
 
 bool ParseMutatorType(const char* param, MutatorType* out) {
-  if (!strcmp(param, "fuzz")) {
-    *out = MutatorType::kFuzz;
-  } else if (!strcmp(param, "opt")) {
-    *out = MutatorType::kOpt;
-  } else if (!strcmp(param, "reduce")) {
-    *out = MutatorType::kReduce;
-  } else {
-    return false;
-  }
-  return true;
+    if (!strcmp(param, "fuzz")) {
+        *out = MutatorType::kFuzz;
+    } else if (!strcmp(param, "opt")) {
+        *out = MutatorType::kOpt;
+    } else if (!strcmp(param, "reduce")) {
+        *out = MutatorType::kReduce;
+    } else {
+        return false;
+    }
+    return true;
 }
 
 bool ParseFuzzingTarget(const char* param, FuzzingTarget* out) {
-  if (!strcmp(param, "wgsl")) {
-    *out = FuzzingTarget::kWgsl;
-  } else if (!strcmp(param, "spv")) {
-    *out = FuzzingTarget::kSpv;
-  } else if (!strcmp(param, "msl")) {
-    *out = FuzzingTarget::kMsl;
-  } else if (!strcmp(param, "hlsl")) {
-    *out = FuzzingTarget::kHlsl;
-  } else {
-    return false;
-  }
-  return true;
+    if (!strcmp(param, "wgsl")) {
+        *out = FuzzingTarget::kWgsl;
+    } else if (!strcmp(param, "spv")) {
+        *out = FuzzingTarget::kSpv;
+    } else if (!strcmp(param, "msl")) {
+        *out = FuzzingTarget::kMsl;
+    } else if (!strcmp(param, "hlsl")) {
+        *out = FuzzingTarget::kHlsl;
+    } else {
+        return false;
+    }
+    return true;
 }
 
 bool HasPrefix(const char* str, const char* prefix) {
-  return strncmp(str, prefix, strlen(prefix)) == 0;
+    return strncmp(str, prefix, strlen(prefix)) == 0;
 }
 
-bool ParseMutatorCliParam(const char* param,
-                          const char* help_message,
-                          MutatorCliParams* out) {
-  if (HasPrefix(param, "-tint_transformation_batch_size=")) {
-    if (!ParseUint32(param + sizeof("-tint_transformation_batch_size=") - 1,
-                     &out->transformation_batch_size)) {
-      InvalidParameter(help_message, param);
+bool ParseMutatorCliParam(const char* param, const char* help_message, MutatorCliParams* out) {
+    if (HasPrefix(param, "-tint_transformation_batch_size=")) {
+        if (!ParseUint32(param + sizeof("-tint_transformation_batch_size=") - 1,
+                         &out->transformation_batch_size)) {
+            InvalidParameter(help_message, param);
+        }
+    } else if (HasPrefix(param, "-tint_reduction_batch_size=")) {
+        if (!ParseUint32(param + sizeof("-tint_reduction_batch_size=") - 1,
+                         &out->reduction_batch_size)) {
+            InvalidParameter(help_message, param);
+        }
+    } else if (HasPrefix(param, "-tint_opt_batch_size=")) {
+        if (!ParseUint32(param + sizeof("-tint_opt_batch_size=") - 1, &out->opt_batch_size)) {
+            InvalidParameter(help_message, param);
+        }
+    } else if (HasPrefix(param, "-tint_donors=")) {
+        out->donors = ParseDonors(param + sizeof("-tint_donors=") - 1);
+    } else if (HasPrefix(param, "-tint_repeated_pass_strategy=")) {
+        if (!ParseRepeatedPassStrategy(param + sizeof("-tint_repeated_pass_strategy=") - 1,
+                                       &out->repeated_pass_strategy)) {
+            InvalidParameter(help_message, param);
+        }
+    } else if (HasPrefix(param, "-tint_enable_all_fuzzer_passes=")) {
+        if (!ParseBool(param + sizeof("-tint_enable_all_fuzzer_passes=") - 1,
+                       &out->enable_all_fuzzer_passes)) {
+            InvalidParameter(help_message, param);
+        }
+    } else if (HasPrefix(param, "-tint_enable_all_reduce_passes=")) {
+        if (!ParseBool(param + sizeof("-tint_enable_all_reduce_passes=") - 1,
+                       &out->enable_all_reduce_passes)) {
+            InvalidParameter(help_message, param);
+        }
+    } else if (HasPrefix(param, "-tint_validate_after_each_opt_pass=")) {
+        if (!ParseBool(param + sizeof("-tint_validate_after_each_opt_pass=") - 1,
+                       &out->validate_after_each_opt_pass)) {
+            InvalidParameter(help_message, param);
+        }
+    } else if (HasPrefix(param, "-tint_validate_after_each_fuzzer_pass=")) {
+        if (!ParseBool(param + sizeof("-tint_validate_after_each_fuzzer_pass=") - 1,
+                       &out->validate_after_each_fuzzer_pass)) {
+            InvalidParameter(help_message, param);
+        }
+    } else if (HasPrefix(param, "-tint_validate_after_each_reduce_pass=")) {
+        if (!ParseBool(param + sizeof("-tint_validate_after_each_reduce_pass=") - 1,
+                       &out->validate_after_each_reduce_pass)) {
+            InvalidParameter(help_message, param);
+        }
+    } else {
+        return false;
     }
-  } else if (HasPrefix(param, "-tint_reduction_batch_size=")) {
-    if (!ParseUint32(param + sizeof("-tint_reduction_batch_size=") - 1,
-                     &out->reduction_batch_size)) {
-      InvalidParameter(help_message, param);
-    }
-  } else if (HasPrefix(param, "-tint_opt_batch_size=")) {
-    if (!ParseUint32(param + sizeof("-tint_opt_batch_size=") - 1,
-                     &out->opt_batch_size)) {
-      InvalidParameter(help_message, param);
-    }
-  } else if (HasPrefix(param, "-tint_donors=")) {
-    out->donors = ParseDonors(param + sizeof("-tint_donors=") - 1);
-  } else if (HasPrefix(param, "-tint_repeated_pass_strategy=")) {
-    if (!ParseRepeatedPassStrategy(
-            param + sizeof("-tint_repeated_pass_strategy=") - 1,
-            &out->repeated_pass_strategy)) {
-      InvalidParameter(help_message, param);
-    }
-  } else if (HasPrefix(param, "-tint_enable_all_fuzzer_passes=")) {
-    if (!ParseBool(param + sizeof("-tint_enable_all_fuzzer_passes=") - 1,
-                   &out->enable_all_fuzzer_passes)) {
-      InvalidParameter(help_message, param);
-    }
-  } else if (HasPrefix(param, "-tint_enable_all_reduce_passes=")) {
-    if (!ParseBool(param + sizeof("-tint_enable_all_reduce_passes=") - 1,
-                   &out->enable_all_reduce_passes)) {
-      InvalidParameter(help_message, param);
-    }
-  } else if (HasPrefix(param, "-tint_validate_after_each_opt_pass=")) {
-    if (!ParseBool(param + sizeof("-tint_validate_after_each_opt_pass=") - 1,
-                   &out->validate_after_each_opt_pass)) {
-      InvalidParameter(help_message, param);
-    }
-  } else if (HasPrefix(param, "-tint_validate_after_each_fuzzer_pass=")) {
-    if (!ParseBool(param + sizeof("-tint_validate_after_each_fuzzer_pass=") - 1,
-                   &out->validate_after_each_fuzzer_pass)) {
-      InvalidParameter(help_message, param);
-    }
-  } else if (HasPrefix(param, "-tint_validate_after_each_reduce_pass=")) {
-    if (!ParseBool(param + sizeof("-tint_validate_after_each_reduce_pass=") - 1,
-                   &out->validate_after_each_reduce_pass)) {
-      InvalidParameter(help_message, param);
-    }
-  } else {
-    return false;
-  }
-  return true;
+    return true;
 }
 
 }  // namespace
 
 FuzzerCliParams ParseFuzzerCliParams(int* argc, char** argv) {
-  FuzzerCliParams cli_params;
-  const auto* help_message = kFuzzerHelpMessage;
-  auto help = false;
+    FuzzerCliParams cli_params;
+    const auto* help_message = kFuzzerHelpMessage;
+    auto help = false;
 
-  for (int i = *argc - 1; i > 0; --i) {
-    auto param = argv[i];
-    auto recognized_param = true;
+    for (int i = *argc - 1; i > 0; --i) {
+        auto param = argv[i];
+        auto recognized_param = true;
 
-    if (HasPrefix(param, "-tint_mutator_cache_size=")) {
-      if (!ParseUint32(param + sizeof("-tint_mutator_cache_size=") - 1,
-                       &cli_params.mutator_cache_size)) {
-        InvalidParameter(help_message, param);
-      }
-    } else if (HasPrefix(param, "-tint_mutator_type=")) {
-      auto result = MutatorType::kNone;
+        if (HasPrefix(param, "-tint_mutator_cache_size=")) {
+            if (!ParseUint32(param + sizeof("-tint_mutator_cache_size=") - 1,
+                             &cli_params.mutator_cache_size)) {
+                InvalidParameter(help_message, param);
+            }
+        } else if (HasPrefix(param, "-tint_mutator_type=")) {
+            auto result = MutatorType::kNone;
 
-      std::stringstream ss(param + sizeof("-tint_mutator_type=") - 1);
-      for (std::string value; std::getline(ss, value, ',');) {
-        auto out = MutatorType::kNone;
-        if (!ParseMutatorType(value.c_str(), &out)) {
-          InvalidParameter(help_message, param);
+            std::stringstream ss(param + sizeof("-tint_mutator_type=") - 1);
+            for (std::string value; std::getline(ss, value, ',');) {
+                auto out = MutatorType::kNone;
+                if (!ParseMutatorType(value.c_str(), &out)) {
+                    InvalidParameter(help_message, param);
+                }
+                result = result | out;
+            }
+
+            if (result == MutatorType::kNone) {
+                InvalidParameter(help_message, param);
+            }
+
+            cli_params.mutator_type = result;
+        } else if (HasPrefix(param, "-tint_fuzzing_target=")) {
+            auto result = FuzzingTarget::kNone;
+
+            std::stringstream ss(param + sizeof("-tint_fuzzing_target=") - 1);
+            for (std::string value; std::getline(ss, value, ',');) {
+                auto tmp = FuzzingTarget::kNone;
+                if (!ParseFuzzingTarget(value.c_str(), &tmp)) {
+                    InvalidParameter(help_message, param);
+                }
+                result = result | tmp;
+            }
+
+            if (result == FuzzingTarget::kNone) {
+                InvalidParameter(help_message, param);
+            }
+
+            cli_params.fuzzing_target = result;
+        } else if (HasPrefix(param, "-tint_error_dir=")) {
+            cli_params.error_dir = param + sizeof("-tint_error_dir=") - 1;
+        } else if (!strcmp(param, "-tint_help")) {
+            help = true;
+        } else {
+            recognized_param =
+                ParseMutatorCliParam(param, help_message, &cli_params.mutator_params);
         }
-        result = result | out;
-      }
 
-      if (result == MutatorType::kNone) {
-        InvalidParameter(help_message, param);
-      }
-
-      cli_params.mutator_type = result;
-    } else if (HasPrefix(param, "-tint_fuzzing_target=")) {
-      auto result = FuzzingTarget::kNone;
-
-      std::stringstream ss(param + sizeof("-tint_fuzzing_target=") - 1);
-      for (std::string value; std::getline(ss, value, ',');) {
-        auto tmp = FuzzingTarget::kNone;
-        if (!ParseFuzzingTarget(value.c_str(), &tmp)) {
-          InvalidParameter(help_message, param);
+        if (recognized_param) {
+            // Remove the recognized parameter from the list of all parameters by
+            // swapping it with the last one. This will suppress warnings in the
+            // libFuzzer about unrecognized parameters. By default, libFuzzer thinks
+            // that all user-defined parameters start with two dashes. However, we are
+            // forced to use a single one to make the fuzzer compatible with the
+            // ClusterFuzz.
+            std::swap(argv[i], argv[*argc - 1]);
+            *argc -= 1;
         }
-        result = result | tmp;
-      }
-
-      if (result == FuzzingTarget::kNone) {
-        InvalidParameter(help_message, param);
-      }
-
-      cli_params.fuzzing_target = result;
-    } else if (HasPrefix(param, "-tint_error_dir=")) {
-      cli_params.error_dir = param + sizeof("-tint_error_dir=") - 1;
-    } else if (!strcmp(param, "-tint_help")) {
-      help = true;
-    } else {
-      recognized_param =
-          ParseMutatorCliParam(param, help_message, &cli_params.mutator_params);
     }
 
-    if (recognized_param) {
-      // Remove the recognized parameter from the list of all parameters by
-      // swapping it with the last one. This will suppress warnings in the
-      // libFuzzer about unrecognized parameters. By default, libFuzzer thinks
-      // that all user-defined parameters start with two dashes. However, we are
-      // forced to use a single one to make the fuzzer compatible with the
-      // ClusterFuzz.
-      std::swap(argv[i], argv[*argc - 1]);
-      *argc -= 1;
+    if (help) {
+        PrintHelpMessage(help_message);
+        exit(0);
     }
-  }
 
-  if (help) {
-    PrintHelpMessage(help_message);
-    exit(0);
-  }
-
-  return cli_params;
+    return cli_params;
 }
 
-MutatorDebuggerCliParams ParseMutatorDebuggerCliParams(
-    int argc,
-    const char* const* argv) {
-  MutatorDebuggerCliParams cli_params;
-  bool seed_param_present = false;
-  bool original_binary_param_present = false;
-  bool mutator_type_param_present = false;
-  const auto* help_message = kMutatorDebuggerHelpMessage;
-  auto help = false;
+MutatorDebuggerCliParams ParseMutatorDebuggerCliParams(int argc, const char* const* argv) {
+    MutatorDebuggerCliParams cli_params;
+    bool seed_param_present = false;
+    bool original_binary_param_present = false;
+    bool mutator_type_param_present = false;
+    const auto* help_message = kMutatorDebuggerHelpMessage;
+    auto help = false;
 
-  for (int i = 0; i < argc; ++i) {
-    auto param = argv[i];
-    ParseMutatorCliParam(param, help_message, &cli_params.mutator_params);
+    for (int i = 0; i < argc; ++i) {
+        auto param = argv[i];
+        ParseMutatorCliParam(param, help_message, &cli_params.mutator_params);
 
-    if (HasPrefix(param, "--mutator_type=")) {
-      if (!ParseMutatorType(param + sizeof("--mutator_type=") - 1,
-                            &cli_params.mutator_type)) {
-        InvalidParameter(help_message, param);
-      }
-      mutator_type_param_present = true;
-    } else if (HasPrefix(param, "--original_binary=")) {
-      if (!util::ReadBinary(param + sizeof("--original_binary=") - 1,
-                            &cli_params.original_binary)) {
-        InvalidParameter(help_message, param);
-      }
-      original_binary_param_present = true;
-    } else if (HasPrefix(param, "--seed=")) {
-      if (!ParseUint32(param + sizeof("--seed=") - 1, &cli_params.seed)) {
-        InvalidParameter(help_message, param);
-      }
-      seed_param_present = true;
-    } else if (!strcmp(param, "--help")) {
-      help = true;
+        if (HasPrefix(param, "--mutator_type=")) {
+            if (!ParseMutatorType(param + sizeof("--mutator_type=") - 1,
+                                  &cli_params.mutator_type)) {
+                InvalidParameter(help_message, param);
+            }
+            mutator_type_param_present = true;
+        } else if (HasPrefix(param, "--original_binary=")) {
+            if (!util::ReadBinary(param + sizeof("--original_binary=") - 1,
+                                  &cli_params.original_binary)) {
+                InvalidParameter(help_message, param);
+            }
+            original_binary_param_present = true;
+        } else if (HasPrefix(param, "--seed=")) {
+            if (!ParseUint32(param + sizeof("--seed=") - 1, &cli_params.seed)) {
+                InvalidParameter(help_message, param);
+            }
+            seed_param_present = true;
+        } else if (!strcmp(param, "--help")) {
+            help = true;
+        }
     }
-  }
 
-  if (help) {
-    PrintHelpMessage(help_message);
-    exit(0);
-  }
-
-  std::pair<bool, const char*> required_params[] = {
-      {seed_param_present, "--seed"},
-      {original_binary_param_present, "--original_binary"},
-      {mutator_type_param_present, "--mutator_type"}};
-
-  for (auto required_param : required_params) {
-    if (!required_param.first) {
-      std::cout << required_param.second << " is missing" << std::endl;
-      exit(1);
+    if (help) {
+        PrintHelpMessage(help_message);
+        exit(0);
     }
-  }
 
-  return cli_params;
+    std::pair<bool, const char*> required_params[] = {
+        {seed_param_present, "--seed"},
+        {original_binary_param_present, "--original_binary"},
+        {mutator_type_param_present, "--mutator_type"}};
+
+    for (auto required_param : required_params) {
+        if (!required_param.first) {
+            std::cout << required_param.second << " is missing" << std::endl;
+            exit(1);
+        }
+    }
+
+    return cli_params;
 }
 
 }  // namespace tint::fuzzers::spvtools_fuzzer

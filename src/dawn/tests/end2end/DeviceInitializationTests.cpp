@@ -21,13 +21,9 @@
 #include "dawn/utils/WGPUHelpers.h"
 
 class DeviceInitializationTest : public testing::Test {
-    void SetUp() override {
-        dawnProcSetProcs(&dawn::native::GetProcs());
-    }
+    void SetUp() override { dawnProcSetProcs(&dawn::native::GetProcs()); }
 
-    void TearDown() override {
-        dawnProcSetProcs(nullptr);
-    }
+    void TearDown() override { dawnProcSetProcs(nullptr); }
 };
 
 // Test that device operations are still valid if the reference to the instance

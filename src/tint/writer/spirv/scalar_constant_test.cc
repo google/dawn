@@ -21,35 +21,35 @@ namespace {
 using SpirvScalarConstantTest = TestHelper;
 
 TEST_F(SpirvScalarConstantTest, Equality) {
-  ScalarConstant a{};
-  ScalarConstant b{};
-  EXPECT_EQ(a, b);
+    ScalarConstant a{};
+    ScalarConstant b{};
+    EXPECT_EQ(a, b);
 
-  a.kind = ScalarConstant::Kind::kU32;
-  EXPECT_NE(a, b);
-  b.kind = ScalarConstant::Kind::kU32;
-  EXPECT_EQ(a, b);
+    a.kind = ScalarConstant::Kind::kU32;
+    EXPECT_NE(a, b);
+    b.kind = ScalarConstant::Kind::kU32;
+    EXPECT_EQ(a, b);
 
-  a.value.b = true;
-  EXPECT_NE(a, b);
-  b.value.b = true;
-  EXPECT_EQ(a, b);
+    a.value.b = true;
+    EXPECT_NE(a, b);
+    b.value.b = true;
+    EXPECT_EQ(a, b);
 
-  a.is_spec_op = true;
-  EXPECT_NE(a, b);
-  b.is_spec_op = true;
-  EXPECT_EQ(a, b);
+    a.is_spec_op = true;
+    EXPECT_NE(a, b);
+    b.is_spec_op = true;
+    EXPECT_EQ(a, b);
 
-  a.constant_id = 3;
-  EXPECT_NE(a, b);
-  b.constant_id = 3;
-  EXPECT_EQ(a, b);
+    a.constant_id = 3;
+    EXPECT_NE(a, b);
+    b.constant_id = 3;
+    EXPECT_EQ(a, b);
 }
 
 TEST_F(SpirvScalarConstantTest, U32) {
-  auto c = ScalarConstant::U32(123);
-  EXPECT_EQ(c.value.u32, 123u);
-  EXPECT_EQ(c.kind, ScalarConstant::Kind::kU32);
+    auto c = ScalarConstant::U32(123);
+    EXPECT_EQ(c.value.u32, 123u);
+    EXPECT_EQ(c.kind, ScalarConstant::Kind::kU32);
 }
 
 }  // namespace

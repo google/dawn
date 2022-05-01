@@ -22,22 +22,22 @@
 
 namespace dawn::native::d3d12 {
 
-    class Device;
+class Device;
 
-    class Queue final : public QueueBase {
-      public:
-        static Ref<Queue> Create(Device* device, const QueueDescriptor* descriptor);
+class Queue final : public QueueBase {
+  public:
+    static Ref<Queue> Create(Device* device, const QueueDescriptor* descriptor);
 
-      private:
-        Queue(Device* device, const QueueDescriptor* descriptor);
+  private:
+    Queue(Device* device, const QueueDescriptor* descriptor);
 
-        void Initialize();
+    void Initialize();
 
-        MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
+    MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
 
-        // Dawn API
-        void SetLabelImpl() override;
-    };
+    // Dawn API
+    void SetLabelImpl() override;
+};
 
 }  // namespace dawn::native::d3d12
 

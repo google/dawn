@@ -20,63 +20,54 @@
 
 namespace dawn::native {
 
-    template <typename T>
-    class EnumMaskIterator final {
-        static constexpr size_t N = EnumBitmaskSize<T>::value;
-        static_assert(N > 0);
+template <typename T>
+class EnumMaskIterator final {
+    static constexpr size_t N = EnumBitmaskSize<T>::value;
+    static_assert(N > 0);
 
-        using U = std::underlying_type_t<T>;
+    using U = std::underlying_type_t<T>;
 
+  public:
+    explicit EnumMaskIterator(const T& mask)
+        : mBitSetIterator(std::bitset<N>(static_cast<U>(mask))) {
+        // If you hit this ASSERT it means that you forgot to update EnumBitmaskSize<T>::value;
+        ASSERT(U(mask) == 0 || Log2(uint64_t(U(mask))) < N);
+    }
+
+    class Iterator final {
       public:
-        explicit EnumMaskIterator(const T& mask)
-            : mBitSetIterator(std::bitset<N>(static_cast<U>(mask))) {
-            // If you hit this ASSERT it means that you forgot to update EnumBitmaskSize<T>::value;
-            ASSERT(U(mask) == 0 || Log2(uint64_t(U(mask))) < N);
+        explicit Iterator(const typename BitSetIterator<N, U>::Iterator& iter) : mIter(iter) {}
+
+        Iterator& operator++() {
+            ++mIter;
+            return *this;
         }
 
-        class Iterator final {
-          public:
-            explicit Iterator(const typename BitSetIterator<N, U>::Iterator& iter) : mIter(iter) {
-            }
+        bool operator==(const Iterator& other) const { return mIter == other.mIter; }
 
-            Iterator& operator++() {
-                ++mIter;
-                return *this;
-            }
+        bool operator!=(const Iterator& other) const { return mIter != other.mIter; }
 
-            bool operator==(const Iterator& other) const {
-                return mIter == other.mIter;
-            }
-
-            bool operator!=(const Iterator& other) const {
-                return mIter != other.mIter;
-            }
-
-            T operator*() const {
-                U value = *mIter;
-                return static_cast<T>(U(1) << value);
-            }
-
-          private:
-            typename BitSetIterator<N, U>::Iterator mIter;
-        };
-
-        Iterator begin() const {
-            return Iterator(mBitSetIterator.begin());
-        }
-
-        Iterator end() const {
-            return Iterator(mBitSetIterator.end());
+        T operator*() const {
+            U value = *mIter;
+            return static_cast<T>(U(1) << value);
         }
 
       private:
-        BitSetIterator<N, U> mBitSetIterator;
+        typename BitSetIterator<N, U>::Iterator mIter;
     };
 
-    template <typename T>
-    EnumMaskIterator<T> IterateEnumMask(const T& mask) {
-        return EnumMaskIterator<T>(mask);
-    }
+    Iterator begin() const { return Iterator(mBitSetIterator.begin()); }
+
+    Iterator end() const { return Iterator(mBitSetIterator.end()); }
+
+  private:
+    BitSetIterator<N, U> mBitSetIterator;
+};
+
+template <typename T>
+EnumMaskIterator<T> IterateEnumMask(const T& mask) {
+    return EnumMaskIterator<T>(mask);
+}
 
 }  // namespace dawn::native
 

@@ -27,65 +27,59 @@
 
 namespace wgpu::binding {
 
-    // GPUBuffer is an implementation of interop::GPUBuffer that wraps a wgpu::Buffer.
-    class GPUBuffer final : public interop::GPUBuffer {
-      public:
-        GPUBuffer(wgpu::Buffer buffer,
-                  wgpu::BufferDescriptor desc,
-                  wgpu::Device device,
-                  std::shared_ptr<AsyncRunner> async);
+// GPUBuffer is an implementation of interop::GPUBuffer that wraps a wgpu::Buffer.
+class GPUBuffer final : public interop::GPUBuffer {
+  public:
+    GPUBuffer(wgpu::Buffer buffer,
+              wgpu::BufferDescriptor desc,
+              wgpu::Device device,
+              std::shared_ptr<AsyncRunner> async);
 
-        // Desc() returns the wgpu::BufferDescriptor used to construct the buffer
-        const wgpu::BufferDescriptor& Desc() const {
-            return desc_;
-        }
+    // Desc() returns the wgpu::BufferDescriptor used to construct the buffer
+    const wgpu::BufferDescriptor& Desc() const { return desc_; }
 
-        // Implicit cast operator to Dawn GPU object
-        inline operator const wgpu::Buffer&() const {
-            return buffer_;
-        }
+    // Implicit cast operator to Dawn GPU object
+    inline operator const wgpu::Buffer&() const { return buffer_; }
 
-        // interop::GPUBuffer interface compliance
-        interop::Promise<void> mapAsync(Napi::Env env,
-                                        interop::GPUMapModeFlags mode,
+    // interop::GPUBuffer interface compliance
+    interop::Promise<void> mapAsync(Napi::Env env,
+                                    interop::GPUMapModeFlags mode,
+                                    interop::GPUSize64 offset,
+                                    std::optional<interop::GPUSize64> size) override;
+    interop::ArrayBuffer getMappedRange(Napi::Env env,
                                         interop::GPUSize64 offset,
                                         std::optional<interop::GPUSize64> size) override;
-        interop::ArrayBuffer getMappedRange(Napi::Env env,
-                                            interop::GPUSize64 offset,
-                                            std::optional<interop::GPUSize64> size) override;
-        void unmap(Napi::Env) override;
-        void destroy(Napi::Env) override;
-        std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
-        void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
+    void unmap(Napi::Env) override;
+    void destroy(Napi::Env) override;
+    std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
+    void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
 
-      private:
-        void DetachMappings();
+  private:
+    void DetachMappings();
 
-        struct Mapping {
-            uint64_t start;
-            uint64_t end;
-            inline bool Intersects(uint64_t s, uint64_t e) const {
-                return s < end && e > start;
-            }
-            Napi::Reference<interop::ArrayBuffer> buffer;
-        };
-
-        // https://www.w3.org/TR/webgpu/#buffer-interface
-        enum class State {
-            Unmapped,
-            Mapped,
-            MappedAtCreation,
-            MappingPending,
-            Destroyed,
-        };
-
-        wgpu::Buffer buffer_;
-        wgpu::BufferDescriptor const desc_;
-        wgpu::Device const device_;
-        std::shared_ptr<AsyncRunner> async_;
-        State state_ = State::Unmapped;
-        std::vector<Mapping> mapped_;
+    struct Mapping {
+        uint64_t start;
+        uint64_t end;
+        inline bool Intersects(uint64_t s, uint64_t e) const { return s < end && e > start; }
+        Napi::Reference<interop::ArrayBuffer> buffer;
     };
+
+    // https://www.w3.org/TR/webgpu/#buffer-interface
+    enum class State {
+        Unmapped,
+        Mapped,
+        MappedAtCreation,
+        MappingPending,
+        Destroyed,
+    };
+
+    wgpu::Buffer buffer_;
+    wgpu::BufferDescriptor const desc_;
+    wgpu::Device const device_;
+    std::shared_ptr<AsyncRunner> async_;
+    State state_ = State::Unmapped;
+    std::vector<Mapping> mapped_;
+};
 
 }  // namespace wgpu::binding
 

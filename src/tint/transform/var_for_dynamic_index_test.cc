@@ -23,16 +23,16 @@ namespace {
 using VarForDynamicIndexTest = TransformTest;
 
 TEST_F(VarForDynamicIndexTest, EmptyModule) {
-  auto* src = "";
-  auto* expect = "";
+    auto* src = "";
+    auto* expect = "";
 
-  auto got = Run<ForLoopToLoop, VarForDynamicIndex>(src);
+    auto got = Run<ForLoopToLoop, VarForDynamicIndex>(src);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, ArrayIndexDynamic) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   let p = array<i32, 4>(1, 2, 3, 4);
@@ -40,7 +40,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i : i32;
   let p = array<i32, 4>(1, 2, 3, 4);
@@ -49,14 +49,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, MatrixIndexDynamic) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
@@ -64,7 +64,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i : i32;
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
@@ -73,14 +73,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, ArrayIndexDynamicChain) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   var j : i32;
@@ -89,12 +89,12 @@ fn f() {
 }
 )";
 
-  // TODO(bclayton): Optimize this case:
-  // This output is not as efficient as it could be.
-  // We only actually need to hoist the inner-most array to a `var`
-  // (`var_for_index`), as later indexing operations will be working with
-  // references, not values.
-  auto* expect = R"(
+    // TODO(bclayton): Optimize this case:
+    // This output is not as efficient as it could be.
+    // We only actually need to hoist the inner-most array to a `var`
+    // (`var_for_index`), as later indexing operations will be working with
+    // references, not values.
+    auto* expect = R"(
 fn f() {
   var i : i32;
   var j : i32;
@@ -105,14 +105,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, ArrayIndexInForLoopInit) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   let p = array<array<i32, 2>, 2>(array<i32, 2>(1, 2), array<i32, 2>(3, 4));
@@ -122,7 +122,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i : i32;
   let p = array<array<i32, 2>, 2>(array<i32, 2>(1, 2), array<i32, 2>(3, 4));
@@ -133,14 +133,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, MatrixIndexInForLoopInit) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
@@ -150,7 +150,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i : i32;
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
@@ -161,14 +161,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, ArrayIndexInForLoopCond) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   let p = array<i32, 2>(1, 2);
@@ -178,7 +178,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i : i32;
   let p = array<i32, 2>(1, 2);
@@ -194,14 +194,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, MatrixIndexInForLoopCond) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
@@ -211,7 +211,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i : i32;
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
@@ -227,14 +227,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, MatrixIndexInForLoopCondWithNestedIndex) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
@@ -247,7 +247,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i : i32;
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
@@ -267,14 +267,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, ArrayIndexInElseIf) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   let p = array<i32, 2>(1, 2);
@@ -286,7 +286,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i : i32;
   let p = array<i32, 2>(1, 2);
@@ -301,14 +301,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, ArrayIndexInElseIfChain) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   let p = array<i32, 2>(1, 2);
@@ -328,7 +328,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i : i32;
   let p = array<i32, 2>(1, 2);
@@ -354,14 +354,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, MatrixIndexInElseIf) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
@@ -373,7 +373,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i : i32;
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
@@ -388,14 +388,14 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, MatrixIndexInElseIfChain) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   var i : i32;
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
@@ -415,7 +415,7 @@ fn f() {
 }
 )";
 
-  auto* expect = R"(
+    auto* expect = R"(
 fn f() {
   var i : i32;
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
@@ -441,46 +441,46 @@ fn f() {
 }
 )";
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, ArrayIndexLiteral) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   let p = array<i32, 4>(1, 2, 3, 4);
   let x = p[1];
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, MatrixIndexLiteral) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
   let x = p[1];
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, ArrayIndexConstantLet) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   let p = array<i32, 4>(1, 2, 3, 4);
   let c = 1;
@@ -488,16 +488,16 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, MatrixIndexConstantLet) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
   let c = 1;
@@ -505,16 +505,16 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, ArrayIndexLiteralChain) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   let a = array<i32, 2>(1, 2);
   let b = array<i32, 2>(3, 4);
@@ -523,28 +523,28 @@ fn f() {
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VarForDynamicIndexTest, MatrixIndexLiteralChain) {
-  auto* src = R"(
+    auto* src = R"(
 fn f() {
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
   let x = p[0][1];
 }
 )";
 
-  auto* expect = src;
+    auto* expect = src;
 
-  DataMap data;
-  auto got = Run<VarForDynamicIndex>(src, data);
+    DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
 
-  EXPECT_EQ(expect, str(got));
+    EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

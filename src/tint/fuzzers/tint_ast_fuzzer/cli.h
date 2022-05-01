@@ -21,35 +21,35 @@ namespace tint::fuzzers::ast_fuzzer {
 
 /// The backend this fuzzer will test.
 enum class FuzzingTarget {
-  kNone = 0,
-  kHlsl = 1 << 0,
-  kMsl = 1 << 1,
-  kSpv = 1 << 2,
-  kWgsl = 1 << 3,
-  kAll = kHlsl | kMsl | kSpv | kWgsl
+    kNone = 0,
+    kHlsl = 1 << 0,
+    kMsl = 1 << 1,
+    kSpv = 1 << 2,
+    kWgsl = 1 << 3,
+    kAll = kHlsl | kMsl | kSpv | kWgsl
 };
 
 inline FuzzingTarget operator|(FuzzingTarget a, FuzzingTarget b) {
-  return static_cast<FuzzingTarget>(static_cast<int>(a) | static_cast<int>(b));
+    return static_cast<FuzzingTarget>(static_cast<int>(a) | static_cast<int>(b));
 }
 
 inline FuzzingTarget operator&(FuzzingTarget a, FuzzingTarget b) {
-  return static_cast<FuzzingTarget>(static_cast<int>(a) & static_cast<int>(b));
+    return static_cast<FuzzingTarget>(static_cast<int>(a) & static_cast<int>(b));
 }
 
 /// CLI parameters accepted by the fuzzer. Type -tint_help in the CLI to see the
 /// help message
 struct CliParams {
-  /// Whether to use all mutation finders or only a randomly selected subset of
-  /// them.
-  bool enable_all_mutations = false;
+    /// Whether to use all mutation finders or only a randomly selected subset of
+    /// them.
+    bool enable_all_mutations = false;
 
-  /// The maximum number of mutations applied during a single mutation session
-  /// (i.e. a call to `ast_fuzzer::Mutate` function).
-  uint32_t mutation_batch_size = 5;
+    /// The maximum number of mutations applied during a single mutation session
+    /// (i.e. a call to `ast_fuzzer::Mutate` function).
+    uint32_t mutation_batch_size = 5;
 
-  /// Compiler backends we want to fuzz.
-  FuzzingTarget fuzzing_target = FuzzingTarget::kAll;
+    /// Compiler backends we want to fuzz.
+    FuzzingTarget fuzzing_target = FuzzingTarget::kAll;
 };
 
 /// @brief Parses CLI parameters.

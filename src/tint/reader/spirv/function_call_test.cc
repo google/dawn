@@ -24,7 +24,7 @@ using ::testing::Eq;
 using ::testing::HasSubstr;
 
 std::string Preamble() {
-  return R"(
+    return R"(
      OpCapability Shader
      OpMemoryModel Logical Simple
      OpEntryPoint Fragment %100 "x_100"
@@ -33,7 +33,7 @@ std::string Preamble() {
 }
 
 TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
 
@@ -48,9 +48,9 @@ TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error();
-  const auto got = test::ToString(p->program());
-  const char* expect = R"(fn x_50() {
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error();
+    const auto got = test::ToString(p->program());
+    const char* expect = R"(fn x_50() {
   return;
 }
 
@@ -64,11 +64,11 @@ fn x_100() {
   x_100_1();
 }
 )";
-  EXPECT_EQ(expect, got);
+    EXPECT_EQ(expect, got);
 }
 
 TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %uint = OpTypeInt 32 0
@@ -86,27 +86,26 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  ast::StatementList f100;
-  {
-    auto fe = p->function_emitter(100);
-    EXPECT_TRUE(fe.EmitBody()) << p->error();
-    f100 = fe.ast_body();
-  }
-  ast::StatementList f50;
-  {
-    auto fe = p->function_emitter(50);
-    EXPECT_TRUE(fe.EmitBody()) << p->error();
-    f50 = fe.ast_body();
-  }
-  auto program = p->program();
-  EXPECT_THAT(test::ToString(program, f100),
-              HasSubstr("let x_1 : u32 = x_50();\nreturn;"));
-  EXPECT_THAT(test::ToString(program, f50), HasSubstr("return 42u;"));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    ast::StatementList f100;
+    {
+        auto fe = p->function_emitter(100);
+        EXPECT_TRUE(fe.EmitBody()) << p->error();
+        f100 = fe.ast_body();
+    }
+    ast::StatementList f50;
+    {
+        auto fe = p->function_emitter(50);
+        EXPECT_TRUE(fe.EmitBody()) << p->error();
+        f50 = fe.ast_body();
+    }
+    auto program = p->program();
+    EXPECT_THAT(test::ToString(program, f100), HasSubstr("let x_1 : u32 = x_50();\nreturn;"));
+    EXPECT_THAT(test::ToString(program, f50), HasSubstr("return 42u;"));
 }
 
 TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParamsUsedTwice) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %uint = OpTypeInt 32 0
@@ -128,31 +127,31 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParamsUsedTwice) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  ast::StatementList f100;
-  {
-    auto fe = p->function_emitter(100);
-    EXPECT_TRUE(fe.EmitBody()) << p->error();
-    f100 = fe.ast_body();
-  }
-  ast::StatementList f50;
-  {
-    auto fe = p->function_emitter(50);
-    EXPECT_TRUE(fe.EmitBody()) << p->error();
-    f50 = fe.ast_body();
-  }
-  auto program = p->program();
-  EXPECT_EQ(test::ToString(program, f100), R"(var x_10 : u32;
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    ast::StatementList f100;
+    {
+        auto fe = p->function_emitter(100);
+        EXPECT_TRUE(fe.EmitBody()) << p->error();
+        f100 = fe.ast_body();
+    }
+    ast::StatementList f50;
+    {
+        auto fe = p->function_emitter(50);
+        EXPECT_TRUE(fe.EmitBody()) << p->error();
+        f50 = fe.ast_body();
+    }
+    auto program = p->program();
+    EXPECT_EQ(test::ToString(program, f100), R"(var x_10 : u32;
 let x_1 : u32 = x_50();
 x_10 = x_1;
 x_10 = x_1;
 return;
 )");
-  EXPECT_THAT(test::ToString(program, f50), HasSubstr("return 42u;"));
+    EXPECT_THAT(test::ToString(program, f50), HasSubstr("return 42u;"));
 }
 
 TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
-  auto p = parser(test::Assemble(Preamble() + R"(
+    auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %uint = OpTypeInt 32 0
@@ -174,10 +173,10 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
      OpReturn
      OpFunctionEnd
   )"));
-  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error();
-  EXPECT_TRUE(p->error().empty());
-  const auto program_ast_str = test::ToString(p->program());
-  const std::string expected = R"(fn x_50(x_51 : u32, x_52 : u32) -> u32 {
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto program_ast_str = test::ToString(p->program());
+    const std::string expected = R"(fn x_50(x_51 : u32, x_52 : u32) -> u32 {
   return (x_51 + x_52);
 }
 
@@ -191,7 +190,7 @@ fn x_100() {
   x_100_1();
 }
 )";
-  EXPECT_EQ(program_ast_str, expected);
+    EXPECT_EQ(program_ast_str, expected);
 }
 
 }  // namespace

@@ -20,18 +20,18 @@
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace {
-    // https://github.com/gpuweb/gpuweb/issues/108
-    // Vulkan, Metal, and D3D11 have the same standard multisample pattern. D3D12 is the same as
-    // D3D11 but it was left out of the documentation.
-    // {0.375, 0.125}, {0.875, 0.375}, {0.125 0.625}, {0.625, 0.875}
-    // In this test, we store them in -1 to 1 space because it makes it
-    // simpler to upload vertex data. Y is flipped because there is a flip between clip space and
-    // rasterization space.
-    static constexpr std::array<std::array<float, 2>, 4> kSamplePositions = {
-        {{0.375 * 2 - 1, 1 - 0.125 * 2},
-         {0.875 * 2 - 1, 1 - 0.375 * 2},
-         {0.125 * 2 - 1, 1 - 0.625 * 2},
-         {0.625 * 2 - 1, 1 - 0.875 * 2}}};
+// https://github.com/gpuweb/gpuweb/issues/108
+// Vulkan, Metal, and D3D11 have the same standard multisample pattern. D3D12 is the same as
+// D3D11 but it was left out of the documentation.
+// {0.375, 0.125}, {0.875, 0.375}, {0.125 0.625}, {0.625, 0.875}
+// In this test, we store them in -1 to 1 space because it makes it
+// simpler to upload vertex data. Y is flipped because there is a flip between clip space and
+// rasterization space.
+static constexpr std::array<std::array<float, 2>, 4> kSamplePositions = {
+    {{0.375 * 2 - 1, 1 - 0.125 * 2},
+     {0.875 * 2 - 1, 1 - 0.375 * 2},
+     {0.125 * 2 - 1, 1 - 0.625 * 2},
+     {0.625 * 2 - 1, 1 - 0.875 * 2}}};
 }  // anonymous namespace
 
 class MultisampledSamplingTest : public DawnTest {

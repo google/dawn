@@ -21,19 +21,19 @@ namespace tint::diag {
 namespace {
 
 TEST(DiagListTest, OwnedFilesShared) {
-  auto file = std::make_shared<Source::File>("path", "content");
+    auto file = std::make_shared<Source::File>("path", "content");
 
-  diag::List list_a, list_b;
-  {
-    diag::Diagnostic diag{};
-    diag.source = Source{Source::Range{{0, 0}}, file.get()};
-    list_a.add(std::move(diag));
-  }
+    diag::List list_a, list_b;
+    {
+        diag::Diagnostic diag{};
+        diag.source = Source{Source::Range{{0, 0}}, file.get()};
+        list_a.add(std::move(diag));
+    }
 
-  list_b = list_a;
+    list_b = list_a;
 
-  ASSERT_EQ(list_b.count(), list_a.count());
-  EXPECT_EQ(list_b.begin()->source.file, file.get());
+    ASSERT_EQ(list_b.count(), list_a.count());
+    EXPECT_EQ(list_b.begin()->source.file, file.get());
 }
 
 }  // namespace

@@ -24,69 +24,67 @@
 
 namespace dawn::native::d3d12 {
 
-    class CommandRecordingContext;
-    class Device;
+class CommandRecordingContext;
+class Device;
 
-    class Buffer final : public BufferBase {
-      public:
-        static ResultOrError<Ref<Buffer>> Create(Device* device,
-                                                 const BufferDescriptor* descriptor);
+class Buffer final : public BufferBase {
+  public:
+    static ResultOrError<Ref<Buffer>> Create(Device* device, const BufferDescriptor* descriptor);
 
-        ID3D12Resource* GetD3D12Resource() const;
-        D3D12_GPU_VIRTUAL_ADDRESS GetVA() const;
+    ID3D12Resource* GetD3D12Resource() const;
+    D3D12_GPU_VIRTUAL_ADDRESS GetVA() const;
 
-        bool TrackUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
-                                             D3D12_RESOURCE_BARRIER* barrier,
-                                             wgpu::BufferUsage newUsage);
-        void TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,
-                                        wgpu::BufferUsage newUsage);
+    bool TrackUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
+                                         D3D12_RESOURCE_BARRIER* barrier,
+                                         wgpu::BufferUsage newUsage);
+    void TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,
+                                    wgpu::BufferUsage newUsage);
 
-        bool CheckAllocationMethodForTesting(AllocationMethod allocationMethod) const;
-        bool CheckIsResidentForTesting() const;
+    bool CheckAllocationMethodForTesting(AllocationMethod allocationMethod) const;
+    bool CheckIsResidentForTesting() const;
 
-        MaybeError EnsureDataInitialized(CommandRecordingContext* commandContext);
-        ResultOrError<bool> EnsureDataInitializedAsDestination(
-            CommandRecordingContext* commandContext,
-            uint64_t offset,
-            uint64_t size);
-        MaybeError EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
-                                                      const CopyTextureToBufferCmd* copy);
+    MaybeError EnsureDataInitialized(CommandRecordingContext* commandContext);
+    ResultOrError<bool> EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
+                                                           uint64_t offset,
+                                                           uint64_t size);
+    MaybeError EnsureDataInitializedAsDestination(CommandRecordingContext* commandContext,
+                                                  const CopyTextureToBufferCmd* copy);
 
-        // Dawn API
-        void SetLabelImpl() override;
+    // Dawn API
+    void SetLabelImpl() override;
 
-      private:
-        Buffer(Device* device, const BufferDescriptor* descriptor);
-        ~Buffer() override;
+  private:
+    Buffer(Device* device, const BufferDescriptor* descriptor);
+    ~Buffer() override;
 
-        MaybeError Initialize(bool mappedAtCreation);
-        MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
-        void UnmapImpl() override;
-        void DestroyImpl() override;
-        bool IsCPUWritableAtCreation() const override;
-        MaybeError MapAtCreationImpl() override;
-        void* GetMappedPointerImpl() override;
+    MaybeError Initialize(bool mappedAtCreation);
+    MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
+    void UnmapImpl() override;
+    void DestroyImpl() override;
+    bool IsCPUWritableAtCreation() const override;
+    MaybeError MapAtCreationImpl() override;
+    void* GetMappedPointerImpl() override;
 
-        MaybeError MapInternal(bool isWrite, size_t start, size_t end, const char* contextInfo);
+    MaybeError MapInternal(bool isWrite, size_t start, size_t end, const char* contextInfo);
 
-        bool TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
-                                                  D3D12_RESOURCE_BARRIER* barrier,
-                                                  wgpu::BufferUsage newUsage);
+    bool TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
+                                              D3D12_RESOURCE_BARRIER* barrier,
+                                              wgpu::BufferUsage newUsage);
 
-        MaybeError InitializeToZero(CommandRecordingContext* commandContext);
-        MaybeError ClearBuffer(CommandRecordingContext* commandContext,
-                               uint8_t clearValue,
-                               uint64_t offset = 0,
-                               uint64_t size = 0);
+    MaybeError InitializeToZero(CommandRecordingContext* commandContext);
+    MaybeError ClearBuffer(CommandRecordingContext* commandContext,
+                           uint8_t clearValue,
+                           uint64_t offset = 0,
+                           uint64_t size = 0);
 
-        ResourceHeapAllocation mResourceAllocation;
-        bool mFixedResourceState = false;
-        wgpu::BufferUsage mLastUsage = wgpu::BufferUsage::None;
-        ExecutionSerial mLastUsedSerial = std::numeric_limits<ExecutionSerial>::max();
+    ResourceHeapAllocation mResourceAllocation;
+    bool mFixedResourceState = false;
+    wgpu::BufferUsage mLastUsage = wgpu::BufferUsage::None;
+    ExecutionSerial mLastUsedSerial = std::numeric_limits<ExecutionSerial>::max();
 
-        D3D12_RANGE mWrittenMappedRange = {0, 0};
-        void* mMappedData = nullptr;
-    };
+    D3D12_RANGE mWrittenMappedRange = {0, 0};
+    void* mMappedData = nullptr;
+};
 
 }  // namespace dawn::native::d3d12
 

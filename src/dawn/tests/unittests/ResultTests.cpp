@@ -22,369 +22,365 @@
 
 namespace {
 
-    template <typename T, typename E>
-    void TestError(Result<T, E>* result, E expectedError) {
-        EXPECT_TRUE(result->IsError());
-        EXPECT_FALSE(result->IsSuccess());
+template <typename T, typename E>
+void TestError(Result<T, E>* result, E expectedError) {
+    EXPECT_TRUE(result->IsError());
+    EXPECT_FALSE(result->IsSuccess());
 
-        std::unique_ptr<E> storedError = result->AcquireError();
-        EXPECT_EQ(*storedError, expectedError);
-    }
+    std::unique_ptr<E> storedError = result->AcquireError();
+    EXPECT_EQ(*storedError, expectedError);
+}
 
-    template <typename T, typename E>
-    void TestSuccess(Result<T, E>* result, T expectedSuccess) {
-        EXPECT_FALSE(result->IsError());
-        EXPECT_TRUE(result->IsSuccess());
+template <typename T, typename E>
+void TestSuccess(Result<T, E>* result, T expectedSuccess) {
+    EXPECT_FALSE(result->IsError());
+    EXPECT_TRUE(result->IsSuccess());
 
-        const T storedSuccess = result->AcquireSuccess();
-        EXPECT_EQ(storedSuccess, expectedSuccess);
+    const T storedSuccess = result->AcquireSuccess();
+    EXPECT_EQ(storedSuccess, expectedSuccess);
 
-        // Once the success is acquired, result has an empty
-        // payload and is neither in the success nor error state.
-        EXPECT_FALSE(result->IsError());
-        EXPECT_FALSE(result->IsSuccess());
-    }
+    // Once the success is acquired, result has an empty
+    // payload and is neither in the success nor error state.
+    EXPECT_FALSE(result->IsError());
+    EXPECT_FALSE(result->IsSuccess());
+}
 
-    static int placeholderError = 0xbeef;
-    static float placeholderSuccess = 42.0f;
-    static const float placeholderConstSuccess = 42.0f;
+static int placeholderError = 0xbeef;
+static float placeholderSuccess = 42.0f;
+static const float placeholderConstSuccess = 42.0f;
 
-    class AClass : public RefCounted {
-      public:
-        int a = 0;
+class AClass : public RefCounted {
+  public:
+    int a = 0;
+};
+
+// Tests using the following overload of TestSuccess make
+// local Ref instances to placeholderSuccessObj. Tests should
+// ensure any local Ref objects made along the way continue
+// to point to placeholderSuccessObj.
+template <typename T, typename E>
+void TestSuccess(Result<Ref<T>, E>* result, T* expectedSuccess) {
+    EXPECT_FALSE(result->IsError());
+    EXPECT_TRUE(result->IsSuccess());
+
+    // AClass starts with a reference count of 1 and stored
+    // on the stack in the caller. The result parameter should
+    // hold the only other reference to the object.
+    EXPECT_EQ(expectedSuccess->GetRefCountForTesting(), 2u);
+
+    const Ref<T> storedSuccess = result->AcquireSuccess();
+    EXPECT_EQ(storedSuccess.Get(), expectedSuccess);
+
+    // Once the success is acquired, result has an empty
+    // payload and is neither in the success nor error state.
+    EXPECT_FALSE(result->IsError());
+    EXPECT_FALSE(result->IsSuccess());
+
+    // Once we call AcquireSuccess, result no longer stores
+    // the object. storedSuccess should contain the only other
+    // reference to the object.
+    EXPECT_EQ(storedSuccess->GetRefCountForTesting(), 2u);
+}
+
+// Result<void, E*>
+
+// Test constructing an error Result<void, E>
+TEST(ResultOnlyPointerError, ConstructingError) {
+    Result<void, int> result(std::make_unique<int>(placeholderError));
+    TestError(&result, placeholderError);
+}
+
+// Test moving an error Result<void, E>
+TEST(ResultOnlyPointerError, MovingError) {
+    Result<void, int> result(std::make_unique<int>(placeholderError));
+    Result<void, int> movedResult(std::move(result));
+    TestError(&movedResult, placeholderError);
+}
+
+// Test returning an error Result<void, E>
+TEST(ResultOnlyPointerError, ReturningError) {
+    auto CreateError = []() -> Result<void, int> {
+        return {std::make_unique<int>(placeholderError)};
     };
 
-    // Tests using the following overload of TestSuccess make
-    // local Ref instances to placeholderSuccessObj. Tests should
-    // ensure any local Ref objects made along the way continue
-    // to point to placeholderSuccessObj.
-    template <typename T, typename E>
-    void TestSuccess(Result<Ref<T>, E>* result, T* expectedSuccess) {
-        EXPECT_FALSE(result->IsError());
-        EXPECT_TRUE(result->IsSuccess());
+    Result<void, int> result = CreateError();
+    TestError(&result, placeholderError);
+}
 
-        // AClass starts with a reference count of 1 and stored
-        // on the stack in the caller. The result parameter should
-        // hold the only other reference to the object.
-        EXPECT_EQ(expectedSuccess->GetRefCountForTesting(), 2u);
+// Test constructing a success Result<void, E>
+TEST(ResultOnlyPointerError, ConstructingSuccess) {
+    Result<void, int> result;
+    EXPECT_TRUE(result.IsSuccess());
+    EXPECT_FALSE(result.IsError());
+}
 
-        const Ref<T> storedSuccess = result->AcquireSuccess();
-        EXPECT_EQ(storedSuccess.Get(), expectedSuccess);
+// Test moving a success Result<void, E>
+TEST(ResultOnlyPointerError, MovingSuccess) {
+    Result<void, int> result;
+    Result<void, int> movedResult(std::move(result));
+    EXPECT_TRUE(movedResult.IsSuccess());
+    EXPECT_FALSE(movedResult.IsError());
+}
 
-        // Once the success is acquired, result has an empty
-        // payload and is neither in the success nor error state.
-        EXPECT_FALSE(result->IsError());
-        EXPECT_FALSE(result->IsSuccess());
+// Test returning a success Result<void, E>
+TEST(ResultOnlyPointerError, ReturningSuccess) {
+    auto CreateError = []() -> Result<void, int> { return {}; };
 
-        // Once we call AcquireSuccess, result no longer stores
-        // the object. storedSuccess should contain the only other
-        // reference to the object.
-        EXPECT_EQ(storedSuccess->GetRefCountForTesting(), 2u);
-    }
+    Result<void, int> result = CreateError();
+    EXPECT_TRUE(result.IsSuccess());
+    EXPECT_FALSE(result.IsError());
+}
 
-    // Result<void, E*>
+// Result<T*, E*>
 
-    // Test constructing an error Result<void, E>
-    TEST(ResultOnlyPointerError, ConstructingError) {
-        Result<void, int> result(std::make_unique<int>(placeholderError));
-        TestError(&result, placeholderError);
-    }
+// Test constructing an error Result<T*, E>
+TEST(ResultBothPointer, ConstructingError) {
+    Result<float*, int> result(std::make_unique<int>(placeholderError));
+    TestError(&result, placeholderError);
+}
 
-    // Test moving an error Result<void, E>
-    TEST(ResultOnlyPointerError, MovingError) {
-        Result<void, int> result(std::make_unique<int>(placeholderError));
-        Result<void, int> movedResult(std::move(result));
-        TestError(&movedResult, placeholderError);
-    }
+// Test moving an error Result<T*, E>
+TEST(ResultBothPointer, MovingError) {
+    Result<float*, int> result(std::make_unique<int>(placeholderError));
+    Result<float*, int> movedResult(std::move(result));
+    TestError(&movedResult, placeholderError);
+}
 
-    // Test returning an error Result<void, E>
-    TEST(ResultOnlyPointerError, ReturningError) {
-        auto CreateError = []() -> Result<void, int> {
-            return {std::make_unique<int>(placeholderError)};
-        };
-
-        Result<void, int> result = CreateError();
-        TestError(&result, placeholderError);
-    }
-
-    // Test constructing a success Result<void, E>
-    TEST(ResultOnlyPointerError, ConstructingSuccess) {
-        Result<void, int> result;
-        EXPECT_TRUE(result.IsSuccess());
-        EXPECT_FALSE(result.IsError());
-    }
-
-    // Test moving a success Result<void, E>
-    TEST(ResultOnlyPointerError, MovingSuccess) {
-        Result<void, int> result;
-        Result<void, int> movedResult(std::move(result));
-        EXPECT_TRUE(movedResult.IsSuccess());
-        EXPECT_FALSE(movedResult.IsError());
-    }
-
-    // Test returning a success Result<void, E>
-    TEST(ResultOnlyPointerError, ReturningSuccess) {
-        auto CreateError = []() -> Result<void, int> { return {}; };
-
-        Result<void, int> result = CreateError();
-        EXPECT_TRUE(result.IsSuccess());
-        EXPECT_FALSE(result.IsError());
-    }
-
-    // Result<T*, E*>
-
-    // Test constructing an error Result<T*, E>
-    TEST(ResultBothPointer, ConstructingError) {
-        Result<float*, int> result(std::make_unique<int>(placeholderError));
-        TestError(&result, placeholderError);
-    }
-
-    // Test moving an error Result<T*, E>
-    TEST(ResultBothPointer, MovingError) {
-        Result<float*, int> result(std::make_unique<int>(placeholderError));
-        Result<float*, int> movedResult(std::move(result));
-        TestError(&movedResult, placeholderError);
-    }
-
-    // Test returning an error Result<T*, E>
-    TEST(ResultBothPointer, ReturningError) {
-        auto CreateError = []() -> Result<float*, int> {
-            return {std::make_unique<int>(placeholderError)};
-        };
-
-        Result<float*, int> result = CreateError();
-        TestError(&result, placeholderError);
-    }
-
-    // Test constructing a success Result<T*, E>
-    TEST(ResultBothPointer, ConstructingSuccess) {
-        Result<float*, int> result(&placeholderSuccess);
-        TestSuccess(&result, &placeholderSuccess);
-    }
-
-    // Test moving a success Result<T*, E>
-    TEST(ResultBothPointer, MovingSuccess) {
-        Result<float*, int> result(&placeholderSuccess);
-        Result<float*, int> movedResult(std::move(result));
-        TestSuccess(&movedResult, &placeholderSuccess);
-    }
-
-    // Test returning a success Result<T*, E>
-    TEST(ResultBothPointer, ReturningSuccess) {
-        auto CreateSuccess = []() -> Result<float*, int*> { return {&placeholderSuccess}; };
-
-        Result<float*, int*> result = CreateSuccess();
-        TestSuccess(&result, &placeholderSuccess);
-    }
-
-    // Tests converting from a Result<TChild*, E>
-    TEST(ResultBothPointer, ConversionFromChildClass) {
-        struct T {
-            int a;
-        };
-        struct TChild : T {};
-
-        TChild child;
-        T* childAsT = &child;
-        {
-            Result<T*, int> result(&child);
-            TestSuccess(&result, childAsT);
-        }
-        {
-            Result<TChild*, int> resultChild(&child);
-            Result<T*, int> result(std::move(resultChild));
-            TestSuccess(&result, childAsT);
-        }
-        {
-            Result<TChild*, int> resultChild(&child);
-            Result<T*, int> result = std::move(resultChild);
-            TestSuccess(&result, childAsT);
-        }
-    }
-
-    // Result<const T*, E>
-
-    // Test constructing an error Result<const T*, E>
-    TEST(ResultBothPointerWithConstResult, ConstructingError) {
-        Result<const float*, int> result(std::make_unique<int>(placeholderError));
-        TestError(&result, placeholderError);
-    }
-
-    // Test moving an error Result<const T*, E>
-    TEST(ResultBothPointerWithConstResult, MovingError) {
-        Result<const float*, int> result(std::make_unique<int>(placeholderError));
-        Result<const float*, int> movedResult(std::move(result));
-        TestError(&movedResult, placeholderError);
-    }
-
-    // Test returning an error Result<const T*, E*>
-    TEST(ResultBothPointerWithConstResult, ReturningError) {
-        auto CreateError = []() -> Result<const float*, int> {
-            return {std::make_unique<int>(placeholderError)};
-        };
-
-        Result<const float*, int> result = CreateError();
-        TestError(&result, placeholderError);
-    }
-
-    // Test constructing a success Result<const T*, E*>
-    TEST(ResultBothPointerWithConstResult, ConstructingSuccess) {
-        Result<const float*, int> result(&placeholderConstSuccess);
-        TestSuccess(&result, &placeholderConstSuccess);
-    }
-
-    // Test moving a success Result<const T*, E*>
-    TEST(ResultBothPointerWithConstResult, MovingSuccess) {
-        Result<const float*, int> result(&placeholderConstSuccess);
-        Result<const float*, int> movedResult(std::move(result));
-        TestSuccess(&movedResult, &placeholderConstSuccess);
-    }
-
-    // Test returning a success Result<const T*, E*>
-    TEST(ResultBothPointerWithConstResult, ReturningSuccess) {
-        auto CreateSuccess = []() -> Result<const float*, int> {
-            return {&placeholderConstSuccess};
-        };
-
-        Result<const float*, int> result = CreateSuccess();
-        TestSuccess(&result, &placeholderConstSuccess);
-    }
-
-    // Result<Ref<T>, E>
-
-    // Test constructing an error Result<Ref<T>, E>
-    TEST(ResultRefT, ConstructingError) {
-        Result<Ref<AClass>, int> result(std::make_unique<int>(placeholderError));
-        TestError(&result, placeholderError);
-    }
-
-    // Test moving an error Result<Ref<T>, E>
-    TEST(ResultRefT, MovingError) {
-        Result<Ref<AClass>, int> result(std::make_unique<int>(placeholderError));
-        Result<Ref<AClass>, int> movedResult(std::move(result));
-        TestError(&movedResult, placeholderError);
-    }
-
-    // Test returning an error Result<Ref<T>, E>
-    TEST(ResultRefT, ReturningError) {
-        auto CreateError = []() -> Result<Ref<AClass>, int> {
-            return {std::make_unique<int>(placeholderError)};
-        };
-
-        Result<Ref<AClass>, int> result = CreateError();
-        TestError(&result, placeholderError);
-    }
-
-    // Test constructing a success Result<Ref<T>, E>
-    TEST(ResultRefT, ConstructingSuccess) {
-        AClass success;
-
-        Ref<AClass> refObj(&success);
-        Result<Ref<AClass>, int> result(std::move(refObj));
-        TestSuccess(&result, &success);
-    }
-
-    // Test moving a success Result<Ref<T>, E>
-    TEST(ResultRefT, MovingSuccess) {
-        AClass success;
-
-        Ref<AClass> refObj(&success);
-        Result<Ref<AClass>, int> result(std::move(refObj));
-        Result<Ref<AClass>, int> movedResult(std::move(result));
-        TestSuccess(&movedResult, &success);
-    }
-
-    // Test returning a success Result<Ref<T>, E>
-    TEST(ResultRefT, ReturningSuccess) {
-        AClass success;
-        auto CreateSuccess = [&success]() -> Result<Ref<AClass>, int> {
-            return Ref<AClass>(&success);
-        };
-
-        Result<Ref<AClass>, int> result = CreateSuccess();
-        TestSuccess(&result, &success);
-    }
-
-    class OtherClass {
-      public:
-        int a = 0;
+// Test returning an error Result<T*, E>
+TEST(ResultBothPointer, ReturningError) {
+    auto CreateError = []() -> Result<float*, int> {
+        return {std::make_unique<int>(placeholderError)};
     };
-    class Base : public RefCounted {};
-    class Child : public OtherClass, public Base {};
 
-    // Test constructing a Result<Ref<TChild>, E>
-    TEST(ResultRefT, ConversionFromChildConstructor) {
-        Child child;
-        Ref<Child> refChild(&child);
+    Result<float*, int> result = CreateError();
+    TestError(&result, placeholderError);
+}
 
-        Result<Ref<Base>, int> result(std::move(refChild));
-        TestSuccess<Base>(&result, &child);
+// Test constructing a success Result<T*, E>
+TEST(ResultBothPointer, ConstructingSuccess) {
+    Result<float*, int> result(&placeholderSuccess);
+    TestSuccess(&result, &placeholderSuccess);
+}
+
+// Test moving a success Result<T*, E>
+TEST(ResultBothPointer, MovingSuccess) {
+    Result<float*, int> result(&placeholderSuccess);
+    Result<float*, int> movedResult(std::move(result));
+    TestSuccess(&movedResult, &placeholderSuccess);
+}
+
+// Test returning a success Result<T*, E>
+TEST(ResultBothPointer, ReturningSuccess) {
+    auto CreateSuccess = []() -> Result<float*, int*> { return {&placeholderSuccess}; };
+
+    Result<float*, int*> result = CreateSuccess();
+    TestSuccess(&result, &placeholderSuccess);
+}
+
+// Tests converting from a Result<TChild*, E>
+TEST(ResultBothPointer, ConversionFromChildClass) {
+    struct T {
+        int a;
+    };
+    struct TChild : T {};
+
+    TChild child;
+    T* childAsT = &child;
+    {
+        Result<T*, int> result(&child);
+        TestSuccess(&result, childAsT);
     }
-
-    // Test copy constructing Result<Ref<TChild>, E>
-    TEST(ResultRefT, ConversionFromChildCopyConstructor) {
-        Child child;
-        Ref<Child> refChild(&child);
-
-        Result<Ref<Child>, int> resultChild(std::move(refChild));
-        Result<Ref<Base>, int> result(std::move(resultChild));
-        TestSuccess<Base>(&result, &child);
+    {
+        Result<TChild*, int> resultChild(&child);
+        Result<T*, int> result(std::move(resultChild));
+        TestSuccess(&result, childAsT);
     }
-
-    // Test assignment operator for Result<Ref<TChild>, E>
-    TEST(ResultRefT, ConversionFromChildAssignmentOperator) {
-        Child child;
-        Ref<Child> refChild(&child);
-
-        Result<Ref<Child>, int> resultChild(std::move(refChild));
-        Result<Ref<Base>, int> result = std::move(resultChild);
-        TestSuccess<Base>(&result, &child);
+    {
+        Result<TChild*, int> resultChild(&child);
+        Result<T*, int> result = std::move(resultChild);
+        TestSuccess(&result, childAsT);
     }
+}
 
-    // Result<T, E>
+// Result<const T*, E>
 
-    // Test constructing an error Result<T, E>
-    TEST(ResultGeneric, ConstructingError) {
-        Result<std::vector<float>, int> result(std::make_unique<int>(placeholderError));
-        TestError(&result, placeholderError);
-    }
+// Test constructing an error Result<const T*, E>
+TEST(ResultBothPointerWithConstResult, ConstructingError) {
+    Result<const float*, int> result(std::make_unique<int>(placeholderError));
+    TestError(&result, placeholderError);
+}
 
-    // Test moving an error Result<T, E>
-    TEST(ResultGeneric, MovingError) {
-        Result<std::vector<float>, int> result(std::make_unique<int>(placeholderError));
-        Result<std::vector<float>, int> movedResult(std::move(result));
-        TestError(&movedResult, placeholderError);
-    }
+// Test moving an error Result<const T*, E>
+TEST(ResultBothPointerWithConstResult, MovingError) {
+    Result<const float*, int> result(std::make_unique<int>(placeholderError));
+    Result<const float*, int> movedResult(std::move(result));
+    TestError(&movedResult, placeholderError);
+}
 
-    // Test returning an error Result<T, E>
-    TEST(ResultGeneric, ReturningError) {
-        auto CreateError = []() -> Result<std::vector<float>, int> {
-            return {std::make_unique<int>(placeholderError)};
-        };
+// Test returning an error Result<const T*, E*>
+TEST(ResultBothPointerWithConstResult, ReturningError) {
+    auto CreateError = []() -> Result<const float*, int> {
+        return {std::make_unique<int>(placeholderError)};
+    };
 
-        Result<std::vector<float>, int> result = CreateError();
-        TestError(&result, placeholderError);
-    }
+    Result<const float*, int> result = CreateError();
+    TestError(&result, placeholderError);
+}
 
-    // Test constructing a success Result<T, E>
-    TEST(ResultGeneric, ConstructingSuccess) {
-        Result<std::vector<float>, int> result({1.0f});
-        TestSuccess(&result, {1.0f});
-    }
+// Test constructing a success Result<const T*, E*>
+TEST(ResultBothPointerWithConstResult, ConstructingSuccess) {
+    Result<const float*, int> result(&placeholderConstSuccess);
+    TestSuccess(&result, &placeholderConstSuccess);
+}
 
-    // Test moving a success Result<T, E>
-    TEST(ResultGeneric, MovingSuccess) {
-        Result<std::vector<float>, int> result({1.0f});
-        Result<std::vector<float>, int> movedResult(std::move(result));
-        TestSuccess(&movedResult, {1.0f});
-    }
+// Test moving a success Result<const T*, E*>
+TEST(ResultBothPointerWithConstResult, MovingSuccess) {
+    Result<const float*, int> result(&placeholderConstSuccess);
+    Result<const float*, int> movedResult(std::move(result));
+    TestSuccess(&movedResult, &placeholderConstSuccess);
+}
 
-    // Test returning a success Result<T, E>
-    TEST(ResultGeneric, ReturningSuccess) {
-        auto CreateSuccess = []() -> Result<std::vector<float>, int> { return {{1.0f}}; };
+// Test returning a success Result<const T*, E*>
+TEST(ResultBothPointerWithConstResult, ReturningSuccess) {
+    auto CreateSuccess = []() -> Result<const float*, int> { return {&placeholderConstSuccess}; };
 
-        Result<std::vector<float>, int> result = CreateSuccess();
-        TestSuccess(&result, {1.0f});
-    }
+    Result<const float*, int> result = CreateSuccess();
+    TestSuccess(&result, &placeholderConstSuccess);
+}
+
+// Result<Ref<T>, E>
+
+// Test constructing an error Result<Ref<T>, E>
+TEST(ResultRefT, ConstructingError) {
+    Result<Ref<AClass>, int> result(std::make_unique<int>(placeholderError));
+    TestError(&result, placeholderError);
+}
+
+// Test moving an error Result<Ref<T>, E>
+TEST(ResultRefT, MovingError) {
+    Result<Ref<AClass>, int> result(std::make_unique<int>(placeholderError));
+    Result<Ref<AClass>, int> movedResult(std::move(result));
+    TestError(&movedResult, placeholderError);
+}
+
+// Test returning an error Result<Ref<T>, E>
+TEST(ResultRefT, ReturningError) {
+    auto CreateError = []() -> Result<Ref<AClass>, int> {
+        return {std::make_unique<int>(placeholderError)};
+    };
+
+    Result<Ref<AClass>, int> result = CreateError();
+    TestError(&result, placeholderError);
+}
+
+// Test constructing a success Result<Ref<T>, E>
+TEST(ResultRefT, ConstructingSuccess) {
+    AClass success;
+
+    Ref<AClass> refObj(&success);
+    Result<Ref<AClass>, int> result(std::move(refObj));
+    TestSuccess(&result, &success);
+}
+
+// Test moving a success Result<Ref<T>, E>
+TEST(ResultRefT, MovingSuccess) {
+    AClass success;
+
+    Ref<AClass> refObj(&success);
+    Result<Ref<AClass>, int> result(std::move(refObj));
+    Result<Ref<AClass>, int> movedResult(std::move(result));
+    TestSuccess(&movedResult, &success);
+}
+
+// Test returning a success Result<Ref<T>, E>
+TEST(ResultRefT, ReturningSuccess) {
+    AClass success;
+    auto CreateSuccess = [&success]() -> Result<Ref<AClass>, int> { return Ref<AClass>(&success); };
+
+    Result<Ref<AClass>, int> result = CreateSuccess();
+    TestSuccess(&result, &success);
+}
+
+class OtherClass {
+  public:
+    int a = 0;
+};
+class Base : public RefCounted {};
+class Child : public OtherClass, public Base {};
+
+// Test constructing a Result<Ref<TChild>, E>
+TEST(ResultRefT, ConversionFromChildConstructor) {
+    Child child;
+    Ref<Child> refChild(&child);
+
+    Result<Ref<Base>, int> result(std::move(refChild));
+    TestSuccess<Base>(&result, &child);
+}
+
+// Test copy constructing Result<Ref<TChild>, E>
+TEST(ResultRefT, ConversionFromChildCopyConstructor) {
+    Child child;
+    Ref<Child> refChild(&child);
+
+    Result<Ref<Child>, int> resultChild(std::move(refChild));
+    Result<Ref<Base>, int> result(std::move(resultChild));
+    TestSuccess<Base>(&result, &child);
+}
+
+// Test assignment operator for Result<Ref<TChild>, E>
+TEST(ResultRefT, ConversionFromChildAssignmentOperator) {
+    Child child;
+    Ref<Child> refChild(&child);
+
+    Result<Ref<Child>, int> resultChild(std::move(refChild));
+    Result<Ref<Base>, int> result = std::move(resultChild);
+    TestSuccess<Base>(&result, &child);
+}
+
+// Result<T, E>
+
+// Test constructing an error Result<T, E>
+TEST(ResultGeneric, ConstructingError) {
+    Result<std::vector<float>, int> result(std::make_unique<int>(placeholderError));
+    TestError(&result, placeholderError);
+}
+
+// Test moving an error Result<T, E>
+TEST(ResultGeneric, MovingError) {
+    Result<std::vector<float>, int> result(std::make_unique<int>(placeholderError));
+    Result<std::vector<float>, int> movedResult(std::move(result));
+    TestError(&movedResult, placeholderError);
+}
+
+// Test returning an error Result<T, E>
+TEST(ResultGeneric, ReturningError) {
+    auto CreateError = []() -> Result<std::vector<float>, int> {
+        return {std::make_unique<int>(placeholderError)};
+    };
+
+    Result<std::vector<float>, int> result = CreateError();
+    TestError(&result, placeholderError);
+}
+
+// Test constructing a success Result<T, E>
+TEST(ResultGeneric, ConstructingSuccess) {
+    Result<std::vector<float>, int> result({1.0f});
+    TestSuccess(&result, {1.0f});
+}
+
+// Test moving a success Result<T, E>
+TEST(ResultGeneric, MovingSuccess) {
+    Result<std::vector<float>, int> result({1.0f});
+    Result<std::vector<float>, int> movedResult(std::move(result));
+    TestSuccess(&movedResult, {1.0f});
+}
+
+// Test returning a success Result<T, E>
+TEST(ResultGeneric, ReturningSuccess) {
+    auto CreateSuccess = []() -> Result<std::vector<float>, int> { return {{1.0f}}; };
+
+    Result<std::vector<float>, int> result = CreateSuccess();
+    TestSuccess(&result, {1.0f});
+}
 
 }  // anonymous namespace

@@ -33,160 +33,154 @@
 
 namespace dawn::native::utils {
 
-    ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(DeviceBase* device,
-                                                            const char* source) {
-        ShaderModuleWGSLDescriptor wgslDesc;
-        wgslDesc.source = source;
-        ShaderModuleDescriptor descriptor;
-        descriptor.nextInChain = &wgslDesc;
-        return device->CreateShaderModule(&descriptor);
+ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(DeviceBase* device, const char* source) {
+    ShaderModuleWGSLDescriptor wgslDesc;
+    wgslDesc.source = source;
+    ShaderModuleDescriptor descriptor;
+    descriptor.nextInChain = &wgslDesc;
+    return device->CreateShaderModule(&descriptor);
+}
+
+ResultOrError<Ref<BufferBase>> CreateBufferFromData(DeviceBase* device,
+                                                    wgpu::BufferUsage usage,
+                                                    const void* data,
+                                                    uint64_t size) {
+    BufferDescriptor descriptor;
+    descriptor.size = size;
+    descriptor.usage = usage;
+    descriptor.mappedAtCreation = true;
+    Ref<BufferBase> buffer;
+    DAWN_TRY_ASSIGN(buffer, device->CreateBuffer(&descriptor));
+    memcpy(buffer->GetMappedRange(0, size), data, size);
+    buffer->Unmap();
+    return buffer;
+}
+
+ResultOrError<Ref<PipelineLayoutBase>> MakeBasicPipelineLayout(
+    DeviceBase* device,
+    const Ref<BindGroupLayoutBase>& bindGroupLayout) {
+    PipelineLayoutDescriptor descriptor;
+    descriptor.bindGroupLayoutCount = 1;
+    BindGroupLayoutBase* bgl = bindGroupLayout.Get();
+    descriptor.bindGroupLayouts = &bgl;
+    return device->CreatePipelineLayout(&descriptor);
+}
+
+ResultOrError<Ref<BindGroupLayoutBase>> MakeBindGroupLayout(
+    DeviceBase* device,
+    std::initializer_list<BindingLayoutEntryInitializationHelper> entriesInitializer,
+    bool allowInternalBinding) {
+    std::vector<BindGroupLayoutEntry> entries;
+    for (const BindingLayoutEntryInitializationHelper& entry : entriesInitializer) {
+        entries.push_back(entry);
     }
 
-    ResultOrError<Ref<BufferBase>> CreateBufferFromData(DeviceBase* device,
-                                                        wgpu::BufferUsage usage,
-                                                        const void* data,
-                                                        uint64_t size) {
-        BufferDescriptor descriptor;
-        descriptor.size = size;
-        descriptor.usage = usage;
-        descriptor.mappedAtCreation = true;
-        Ref<BufferBase> buffer;
-        DAWN_TRY_ASSIGN(buffer, device->CreateBuffer(&descriptor));
-        memcpy(buffer->GetMappedRange(0, size), data, size);
-        buffer->Unmap();
-        return buffer;
+    BindGroupLayoutDescriptor descriptor;
+    descriptor.entryCount = static_cast<uint32_t>(entries.size());
+    descriptor.entries = entries.data();
+    return device->CreateBindGroupLayout(&descriptor, allowInternalBinding);
+}
+
+BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
+    uint32_t entryBinding,
+    wgpu::ShaderStage entryVisibility,
+    wgpu::BufferBindingType bufferType,
+    bool bufferHasDynamicOffset,
+    uint64_t bufferMinBindingSize) {
+    binding = entryBinding;
+    visibility = entryVisibility;
+    buffer.type = bufferType;
+    buffer.hasDynamicOffset = bufferHasDynamicOffset;
+    buffer.minBindingSize = bufferMinBindingSize;
+}
+
+BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
+    uint32_t entryBinding,
+    wgpu::ShaderStage entryVisibility,
+    wgpu::SamplerBindingType samplerType) {
+    binding = entryBinding;
+    visibility = entryVisibility;
+    sampler.type = samplerType;
+}
+
+BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
+    uint32_t entryBinding,
+    wgpu::ShaderStage entryVisibility,
+    wgpu::TextureSampleType textureSampleType,
+    wgpu::TextureViewDimension textureViewDimension,
+    bool textureMultisampled) {
+    binding = entryBinding;
+    visibility = entryVisibility;
+    texture.sampleType = textureSampleType;
+    texture.viewDimension = textureViewDimension;
+    texture.multisampled = textureMultisampled;
+}
+
+BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
+    uint32_t entryBinding,
+    wgpu::ShaderStage entryVisibility,
+    wgpu::StorageTextureAccess storageTextureAccess,
+    wgpu::TextureFormat format,
+    wgpu::TextureViewDimension textureViewDimension) {
+    binding = entryBinding;
+    visibility = entryVisibility;
+    storageTexture.access = storageTextureAccess;
+    storageTexture.format = format;
+    storageTexture.viewDimension = textureViewDimension;
+}
+
+BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
+    const BindGroupLayoutEntry& entry)
+    : BindGroupLayoutEntry(entry) {}
+
+BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
+                                                         const Ref<SamplerBase>& sampler)
+    : binding(binding), sampler(sampler) {}
+
+BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
+                                                         const Ref<TextureViewBase>& textureView)
+    : binding(binding), textureView(textureView) {}
+
+BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
+                                                         const Ref<BufferBase>& buffer,
+                                                         uint64_t offset,
+                                                         uint64_t size)
+    : binding(binding), buffer(buffer), offset(offset), size(size) {}
+
+BindingInitializationHelper::~BindingInitializationHelper() = default;
+
+BindGroupEntry BindingInitializationHelper::GetAsBinding() const {
+    BindGroupEntry result;
+
+    result.binding = binding;
+    result.sampler = sampler.Get();
+    result.textureView = textureView.Get();
+    result.buffer = buffer.Get();
+    result.offset = offset;
+    result.size = size;
+
+    return result;
+}
+
+ResultOrError<Ref<BindGroupBase>> MakeBindGroup(
+    DeviceBase* device,
+    const Ref<BindGroupLayoutBase>& layout,
+    std::initializer_list<BindingInitializationHelper> entriesInitializer) {
+    std::vector<BindGroupEntry> entries;
+    for (const BindingInitializationHelper& helper : entriesInitializer) {
+        entries.push_back(helper.GetAsBinding());
     }
 
-    ResultOrError<Ref<PipelineLayoutBase>> MakeBasicPipelineLayout(
-        DeviceBase* device,
-        const Ref<BindGroupLayoutBase>& bindGroupLayout) {
-        PipelineLayoutDescriptor descriptor;
-        descriptor.bindGroupLayoutCount = 1;
-        BindGroupLayoutBase* bgl = bindGroupLayout.Get();
-        descriptor.bindGroupLayouts = &bgl;
-        return device->CreatePipelineLayout(&descriptor);
-    }
+    BindGroupDescriptor descriptor;
+    descriptor.layout = layout.Get();
+    descriptor.entryCount = entries.size();
+    descriptor.entries = entries.data();
 
-    ResultOrError<Ref<BindGroupLayoutBase>> MakeBindGroupLayout(
-        DeviceBase* device,
-        std::initializer_list<BindingLayoutEntryInitializationHelper> entriesInitializer,
-        bool allowInternalBinding) {
-        std::vector<BindGroupLayoutEntry> entries;
-        for (const BindingLayoutEntryInitializationHelper& entry : entriesInitializer) {
-            entries.push_back(entry);
-        }
+    return device->CreateBindGroup(&descriptor);
+}
 
-        BindGroupLayoutDescriptor descriptor;
-        descriptor.entryCount = static_cast<uint32_t>(entries.size());
-        descriptor.entries = entries.data();
-        return device->CreateBindGroupLayout(&descriptor, allowInternalBinding);
-    }
-
-    BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
-        uint32_t entryBinding,
-        wgpu::ShaderStage entryVisibility,
-        wgpu::BufferBindingType bufferType,
-        bool bufferHasDynamicOffset,
-        uint64_t bufferMinBindingSize) {
-        binding = entryBinding;
-        visibility = entryVisibility;
-        buffer.type = bufferType;
-        buffer.hasDynamicOffset = bufferHasDynamicOffset;
-        buffer.minBindingSize = bufferMinBindingSize;
-    }
-
-    BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
-        uint32_t entryBinding,
-        wgpu::ShaderStage entryVisibility,
-        wgpu::SamplerBindingType samplerType) {
-        binding = entryBinding;
-        visibility = entryVisibility;
-        sampler.type = samplerType;
-    }
-
-    BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
-        uint32_t entryBinding,
-        wgpu::ShaderStage entryVisibility,
-        wgpu::TextureSampleType textureSampleType,
-        wgpu::TextureViewDimension textureViewDimension,
-        bool textureMultisampled) {
-        binding = entryBinding;
-        visibility = entryVisibility;
-        texture.sampleType = textureSampleType;
-        texture.viewDimension = textureViewDimension;
-        texture.multisampled = textureMultisampled;
-    }
-
-    BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
-        uint32_t entryBinding,
-        wgpu::ShaderStage entryVisibility,
-        wgpu::StorageTextureAccess storageTextureAccess,
-        wgpu::TextureFormat format,
-        wgpu::TextureViewDimension textureViewDimension) {
-        binding = entryBinding;
-        visibility = entryVisibility;
-        storageTexture.access = storageTextureAccess;
-        storageTexture.format = format;
-        storageTexture.viewDimension = textureViewDimension;
-    }
-
-    BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
-        const BindGroupLayoutEntry& entry)
-        : BindGroupLayoutEntry(entry) {
-    }
-
-    BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
-                                                             const Ref<SamplerBase>& sampler)
-        : binding(binding), sampler(sampler) {
-    }
-
-    BindingInitializationHelper::BindingInitializationHelper(
-        uint32_t binding,
-        const Ref<TextureViewBase>& textureView)
-        : binding(binding), textureView(textureView) {
-    }
-
-    BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
-                                                             const Ref<BufferBase>& buffer,
-                                                             uint64_t offset,
-                                                             uint64_t size)
-        : binding(binding), buffer(buffer), offset(offset), size(size) {
-    }
-
-    BindingInitializationHelper::~BindingInitializationHelper() = default;
-
-    BindGroupEntry BindingInitializationHelper::GetAsBinding() const {
-        BindGroupEntry result;
-
-        result.binding = binding;
-        result.sampler = sampler.Get();
-        result.textureView = textureView.Get();
-        result.buffer = buffer.Get();
-        result.offset = offset;
-        result.size = size;
-
-        return result;
-    }
-
-    ResultOrError<Ref<BindGroupBase>> MakeBindGroup(
-        DeviceBase* device,
-        const Ref<BindGroupLayoutBase>& layout,
-        std::initializer_list<BindingInitializationHelper> entriesInitializer) {
-        std::vector<BindGroupEntry> entries;
-        for (const BindingInitializationHelper& helper : entriesInitializer) {
-            entries.push_back(helper.GetAsBinding());
-        }
-
-        BindGroupDescriptor descriptor;
-        descriptor.layout = layout.Get();
-        descriptor.entryCount = entries.size();
-        descriptor.entries = entries.data();
-
-        return device->CreateBindGroup(&descriptor);
-    }
-
-    const char* GetLabelForTrace(const char* label) {
-        return (label == nullptr || strlen(label) == 0) ? "None" : label;
-    }
+const char* GetLabelForTrace(const char* label) {
+    return (label == nullptr || strlen(label) == 0) ? "None" : label;
+}
 
 }  // namespace dawn::native::utils

@@ -25,13 +25,11 @@ namespace tint::fuzzers::ast_fuzzer {
 /// For each expression in the module, try to wrap it within
 /// a unary operator.
 class MutationFinderWrapUnaryOperators : public MutationFinder {
- public:
-  MutationList FindMutations(
-      const tint::Program& program,
-      NodeIdMap* node_id_map,
-      ProbabilityContext* probability_context) const override;
-  uint32_t GetChanceOfApplyingMutation(
-      ProbabilityContext* probability_context) const override;
+  public:
+    MutationList FindMutations(const tint::Program& program,
+                               NodeIdMap* node_id_map,
+                               ProbabilityContext* probability_context) const override;
+    uint32_t GetChanceOfApplyingMutation(ProbabilityContext* probability_context) const override;
 };
 
 }  // namespace tint::fuzzers::ast_fuzzer

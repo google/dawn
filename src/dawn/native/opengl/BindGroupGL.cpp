@@ -20,46 +20,45 @@
 
 namespace dawn::native::opengl {
 
-    MaybeError ValidateGLBindGroupDescriptor(const BindGroupDescriptor* descriptor) {
-        const BindGroupLayoutBase::BindingMap& bindingMap = descriptor->layout->GetBindingMap();
-        for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
-            const BindGroupEntry& entry = descriptor->entries[i];
+MaybeError ValidateGLBindGroupDescriptor(const BindGroupDescriptor* descriptor) {
+    const BindGroupLayoutBase::BindingMap& bindingMap = descriptor->layout->GetBindingMap();
+    for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
+        const BindGroupEntry& entry = descriptor->entries[i];
 
-            const auto& it = bindingMap.find(BindingNumber(entry.binding));
-            BindingIndex bindingIndex = it->second;
-            ASSERT(bindingIndex < descriptor->layout->GetBindingCount());
+        const auto& it = bindingMap.find(BindingNumber(entry.binding));
+        BindingIndex bindingIndex = it->second;
+        ASSERT(bindingIndex < descriptor->layout->GetBindingCount());
 
-            const BindingInfo& bindingInfo = descriptor->layout->GetBindingInfo(bindingIndex);
-            if (bindingInfo.bindingType == BindingInfoType::StorageTexture) {
-                ASSERT(entry.textureView != nullptr);
-                const uint32_t textureViewLayerCount = entry.textureView->GetLayerCount();
-                DAWN_INVALID_IF(
-                    textureViewLayerCount != 1 &&
-                        textureViewLayerCount != entry.textureView->GetTexture()->GetArrayLayers(),
-                    "%s binds %u layers. Currently the OpenGL backend only supports either binding "
-                    "1 layer or the all layers (%u) for storage texture.",
-                    entry.textureView, textureViewLayerCount,
-                    entry.textureView->GetTexture()->GetArrayLayers());
-            }
+        const BindingInfo& bindingInfo = descriptor->layout->GetBindingInfo(bindingIndex);
+        if (bindingInfo.bindingType == BindingInfoType::StorageTexture) {
+            ASSERT(entry.textureView != nullptr);
+            const uint32_t textureViewLayerCount = entry.textureView->GetLayerCount();
+            DAWN_INVALID_IF(
+                textureViewLayerCount != 1 &&
+                    textureViewLayerCount != entry.textureView->GetTexture()->GetArrayLayers(),
+                "%s binds %u layers. Currently the OpenGL backend only supports either binding "
+                "1 layer or the all layers (%u) for storage texture.",
+                entry.textureView, textureViewLayerCount,
+                entry.textureView->GetTexture()->GetArrayLayers());
         }
-
-        return {};
     }
 
-    BindGroup::BindGroup(Device* device, const BindGroupDescriptor* descriptor)
-        : BindGroupBase(this, device, descriptor) {
-    }
+    return {};
+}
 
-    BindGroup::~BindGroup() = default;
+BindGroup::BindGroup(Device* device, const BindGroupDescriptor* descriptor)
+    : BindGroupBase(this, device, descriptor) {}
 
-    void BindGroup::DestroyImpl() {
-        BindGroupBase::DestroyImpl();
-        ToBackend(GetLayout())->DeallocateBindGroup(this);
-    }
+BindGroup::~BindGroup() = default;
 
-    // static
-    Ref<BindGroup> BindGroup::Create(Device* device, const BindGroupDescriptor* descriptor) {
-        return ToBackend(descriptor->layout)->AllocateBindGroup(device, descriptor);
-    }
+void BindGroup::DestroyImpl() {
+    BindGroupBase::DestroyImpl();
+    ToBackend(GetLayout())->DeallocateBindGroup(this);
+}
+
+// static
+Ref<BindGroup> BindGroup::Create(Device* device, const BindGroupDescriptor* descriptor) {
+    return ToBackend(descriptor->layout)->AllocateBindGroup(device, descriptor);
+}
 
 }  // namespace dawn::native::opengl

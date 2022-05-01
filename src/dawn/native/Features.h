@@ -26,58 +26,58 @@
 
 namespace dawn::native {
 
-    enum class Feature {
-        TextureCompressionBC,
-        TextureCompressionETC2,
-        TextureCompressionASTC,
-        ShaderFloat16,
-        PipelineStatisticsQuery,
-        TimestampQuery,
-        DepthClamping,
-        Depth24UnormStencil8,
-        Depth32FloatStencil8,
+enum class Feature {
+    TextureCompressionBC,
+    TextureCompressionETC2,
+    TextureCompressionASTC,
+    ShaderFloat16,
+    PipelineStatisticsQuery,
+    TimestampQuery,
+    DepthClamping,
+    Depth24UnormStencil8,
+    Depth32FloatStencil8,
 
-        // Dawn-specific
-        DawnInternalUsages,
-        MultiPlanarFormats,
-        DawnNative,
+    // Dawn-specific
+    DawnInternalUsages,
+    MultiPlanarFormats,
+    DawnNative,
 
-        EnumCount,
-        InvalidEnum = EnumCount,
-        FeatureMin = TextureCompressionBC,
-    };
+    EnumCount,
+    InvalidEnum = EnumCount,
+    FeatureMin = TextureCompressionBC,
+};
 
-    // A wrapper of the bitset to store if an feature is enabled or not. This wrapper provides the
-    // convenience to convert the enums of enum class Feature to the indices of a bitset.
-    struct FeaturesSet {
-        std::bitset<static_cast<size_t>(Feature::EnumCount)> featuresBitSet;
+// A wrapper of the bitset to store if an feature is enabled or not. This wrapper provides the
+// convenience to convert the enums of enum class Feature to the indices of a bitset.
+struct FeaturesSet {
+    std::bitset<static_cast<size_t>(Feature::EnumCount)> featuresBitSet;
 
-        void EnableFeature(Feature feature);
-        void EnableFeature(wgpu::FeatureName feature);
-        bool IsEnabled(Feature feature) const;
-        bool IsEnabled(wgpu::FeatureName feature) const;
-        // Returns |count|, the number of features. Writes out all |count| values if |features| is
-        // non-null.
-        size_t EnumerateFeatures(wgpu::FeatureName* features) const;
-        std::vector<const char*> GetEnabledFeatureNames() const;
-        void InitializeDeviceProperties(WGPUDeviceProperties* properties) const;
-    };
+    void EnableFeature(Feature feature);
+    void EnableFeature(wgpu::FeatureName feature);
+    bool IsEnabled(Feature feature) const;
+    bool IsEnabled(wgpu::FeatureName feature) const;
+    // Returns |count|, the number of features. Writes out all |count| values if |features| is
+    // non-null.
+    size_t EnumerateFeatures(wgpu::FeatureName* features) const;
+    std::vector<const char*> GetEnabledFeatureNames() const;
+    void InitializeDeviceProperties(WGPUDeviceProperties* properties) const;
+};
 
-    wgpu::FeatureName FeatureEnumToAPIFeature(Feature feature);
+wgpu::FeatureName FeatureEnumToAPIFeature(Feature feature);
 
-    class FeaturesInfo {
-      public:
-        FeaturesInfo();
+class FeaturesInfo {
+  public:
+    FeaturesInfo();
 
-        // Used to query the details of an feature. Return nullptr if featureName is not a valid
-        // name of an feature supported in Dawn
-        const FeatureInfo* GetFeatureInfo(wgpu::FeatureName feature) const;
-        Feature FeatureNameToEnum(const char* featureName) const;
-        wgpu::FeatureName FeatureNameToAPIEnum(const char* featureName) const;
+    // Used to query the details of an feature. Return nullptr if featureName is not a valid
+    // name of an feature supported in Dawn
+    const FeatureInfo* GetFeatureInfo(wgpu::FeatureName feature) const;
+    Feature FeatureNameToEnum(const char* featureName) const;
+    wgpu::FeatureName FeatureNameToAPIEnum(const char* featureName) const;
 
-      private:
-        std::unordered_map<std::string, Feature> mFeatureNameToEnumMap;
-    };
+  private:
+    std::unordered_map<std::string, Feature> mFeatureNameToEnumMap;
+};
 
 }  // namespace dawn::native
 

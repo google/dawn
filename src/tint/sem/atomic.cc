@@ -23,36 +23,36 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Atomic);
 namespace tint::sem {
 
 Atomic::Atomic(const sem::Type* subtype) : subtype_(subtype) {
-  TINT_ASSERT(AST, !subtype->Is<Reference>());
+    TINT_ASSERT(AST, !subtype->Is<Reference>());
 }
 
 size_t Atomic::Hash() const {
-  return utils::Hash(TypeInfo::Of<Atomic>().full_hashcode, subtype_);
+    return utils::Hash(TypeInfo::Of<Atomic>().full_hashcode, subtype_);
 }
 
 bool Atomic::Equals(const sem::Type& other) const {
-  if (auto* o = other.As<Atomic>()) {
-    return o->subtype_ == subtype_;
-  }
-  return false;
+    if (auto* o = other.As<Atomic>()) {
+        return o->subtype_ == subtype_;
+    }
+    return false;
 }
 
 std::string Atomic::FriendlyName(const SymbolTable& symbols) const {
-  std::ostringstream out;
-  out << "atomic<" << subtype_->FriendlyName(symbols) << ">";
-  return out.str();
+    std::ostringstream out;
+    out << "atomic<" << subtype_->FriendlyName(symbols) << ">";
+    return out.str();
 }
 
 uint32_t Atomic::Size() const {
-  return subtype_->Size();
+    return subtype_->Size();
 }
 
 uint32_t Atomic::Align() const {
-  return subtype_->Align();
+    return subtype_->Align();
 }
 
 bool Atomic::IsConstructible() const {
-  return false;
+    return false;
 }
 
 Atomic::Atomic(Atomic&&) = default;

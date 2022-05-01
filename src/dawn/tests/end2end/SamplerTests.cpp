@@ -25,28 +25,28 @@
 constexpr static unsigned int kRTSize = 64;
 
 namespace {
-    struct AddressModeTestCase {
-        wgpu::AddressMode mMode;
-        uint8_t mExpected2;
-        uint8_t mExpected3;
-    };
-    AddressModeTestCase addressModes[] = {
-        {
-            wgpu::AddressMode::Repeat,
-            0,
-            255,
-        },
-        {
-            wgpu::AddressMode::MirrorRepeat,
-            255,
-            0,
-        },
-        {
-            wgpu::AddressMode::ClampToEdge,
-            255,
-            255,
-        },
-    };
+struct AddressModeTestCase {
+    wgpu::AddressMode mMode;
+    uint8_t mExpected2;
+    uint8_t mExpected3;
+};
+AddressModeTestCase addressModes[] = {
+    {
+        wgpu::AddressMode::Repeat,
+        0,
+        255,
+    },
+    {
+        wgpu::AddressMode::MirrorRepeat,
+        255,
+        0,
+    },
+    {
+        wgpu::AddressMode::ClampToEdge,
+        255,
+        255,
+    },
+};
 }  // namespace
 
 class SamplerTest : public DawnTest {

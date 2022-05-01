@@ -29,70 +29,70 @@
 
 namespace dawn::native {
 
-    // Not a real WebGPU limit, but the sum of the two limits is useful for internal optimizations.
-    static constexpr uint32_t kMaxDynamicBuffersPerPipelineLayout =
-        kMaxDynamicUniformBuffersPerPipelineLayout + kMaxDynamicStorageBuffersPerPipelineLayout;
+// Not a real WebGPU limit, but the sum of the two limits is useful for internal optimizations.
+static constexpr uint32_t kMaxDynamicBuffersPerPipelineLayout =
+    kMaxDynamicUniformBuffersPerPipelineLayout + kMaxDynamicStorageBuffersPerPipelineLayout;
 
-    static constexpr BindingIndex kMaxDynamicBuffersPerPipelineLayoutTyped =
-        BindingIndex(kMaxDynamicBuffersPerPipelineLayout);
+static constexpr BindingIndex kMaxDynamicBuffersPerPipelineLayoutTyped =
+    BindingIndex(kMaxDynamicBuffersPerPipelineLayout);
 
-    // Not a real WebGPU limit, but used to optimize parts of Dawn which expect valid usage of the
-    // API. There should never be more bindings than the max per stage, for each stage.
-    static constexpr uint32_t kMaxBindingsPerPipelineLayout =
-        3 * (kMaxSampledTexturesPerShaderStage + kMaxSamplersPerShaderStage +
-             kMaxStorageBuffersPerShaderStage + kMaxStorageTexturesPerShaderStage +
-             kMaxUniformBuffersPerShaderStage);
+// Not a real WebGPU limit, but used to optimize parts of Dawn which expect valid usage of the
+// API. There should never be more bindings than the max per stage, for each stage.
+static constexpr uint32_t kMaxBindingsPerPipelineLayout =
+    3 * (kMaxSampledTexturesPerShaderStage + kMaxSamplersPerShaderStage +
+         kMaxStorageBuffersPerShaderStage + kMaxStorageTexturesPerShaderStage +
+         kMaxUniformBuffersPerShaderStage);
 
-    static constexpr BindingIndex kMaxBindingsPerPipelineLayoutTyped =
-        BindingIndex(kMaxBindingsPerPipelineLayout);
+static constexpr BindingIndex kMaxBindingsPerPipelineLayoutTyped =
+    BindingIndex(kMaxBindingsPerPipelineLayout);
 
-    // TODO(enga): Figure out a good number for this.
-    static constexpr uint32_t kMaxOptimalBindingsPerGroup = 32;
+// TODO(enga): Figure out a good number for this.
+static constexpr uint32_t kMaxOptimalBindingsPerGroup = 32;
 
-    enum class BindingInfoType { Buffer, Sampler, Texture, StorageTexture, ExternalTexture };
+enum class BindingInfoType { Buffer, Sampler, Texture, StorageTexture, ExternalTexture };
 
-    struct BindingInfo {
-        BindingNumber binding;
-        wgpu::ShaderStage visibility;
+struct BindingInfo {
+    BindingNumber binding;
+    wgpu::ShaderStage visibility;
 
-        BindingInfoType bindingType;
+    BindingInfoType bindingType;
 
-        // TODO(dawn:527): These four values could be made into a union.
-        BufferBindingLayout buffer;
-        SamplerBindingLayout sampler;
-        TextureBindingLayout texture;
-        StorageTextureBindingLayout storageTexture;
-    };
+    // TODO(dawn:527): These four values could be made into a union.
+    BufferBindingLayout buffer;
+    SamplerBindingLayout sampler;
+    TextureBindingLayout texture;
+    StorageTextureBindingLayout storageTexture;
+};
 
-    struct BindingSlot {
-        BindGroupIndex group;
-        BindingNumber binding;
-    };
+struct BindingSlot {
+    BindGroupIndex group;
+    BindingNumber binding;
+};
 
-    struct PerStageBindingCounts {
-        uint32_t sampledTextureCount;
-        uint32_t samplerCount;
-        uint32_t storageBufferCount;
-        uint32_t storageTextureCount;
-        uint32_t uniformBufferCount;
-        uint32_t externalTextureCount;
-    };
+struct PerStageBindingCounts {
+    uint32_t sampledTextureCount;
+    uint32_t samplerCount;
+    uint32_t storageBufferCount;
+    uint32_t storageTextureCount;
+    uint32_t uniformBufferCount;
+    uint32_t externalTextureCount;
+};
 
-    struct BindingCounts {
-        uint32_t totalCount;
-        uint32_t bufferCount;
-        uint32_t unverifiedBufferCount;  // Buffers with minimum buffer size unspecified
-        uint32_t dynamicUniformBufferCount;
-        uint32_t dynamicStorageBufferCount;
-        PerStage<PerStageBindingCounts> perStage;
-    };
+struct BindingCounts {
+    uint32_t totalCount;
+    uint32_t bufferCount;
+    uint32_t unverifiedBufferCount;  // Buffers with minimum buffer size unspecified
+    uint32_t dynamicUniformBufferCount;
+    uint32_t dynamicStorageBufferCount;
+    PerStage<PerStageBindingCounts> perStage;
+};
 
-    void IncrementBindingCounts(BindingCounts* bindingCounts, const BindGroupLayoutEntry& entry);
-    void AccumulateBindingCounts(BindingCounts* bindingCounts, const BindingCounts& rhs);
-    MaybeError ValidateBindingCounts(const BindingCounts& bindingCounts);
+void IncrementBindingCounts(BindingCounts* bindingCounts, const BindGroupLayoutEntry& entry);
+void AccumulateBindingCounts(BindingCounts* bindingCounts, const BindingCounts& rhs);
+MaybeError ValidateBindingCounts(const BindingCounts& bindingCounts);
 
-    // For buffer size validation
-    using RequiredBufferSizes = ityp::array<BindGroupIndex, std::vector<uint64_t>, kMaxBindGroups>;
+// For buffer size validation
+using RequiredBufferSizes = ityp::array<BindGroupIndex, std::vector<uint64_t>, kMaxBindGroups>;
 
 }  // namespace dawn::native
 

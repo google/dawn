@@ -21,20 +21,20 @@
 
 namespace dawn::native::d3d12 {
 
-    class Device;
+class Device;
 
-    // This class is used to represent ID3D12Heap allocations, as well as an implicit heap
-    // representing a directly allocated resource. It inherits from Pageable because each Heap must
-    // be represented in the ResidencyManager.
-    class Heap : public ResourceHeapBase, public Pageable {
-      public:
-        Heap(ComPtr<ID3D12Pageable> d3d12Pageable, MemorySegment memorySegment, uint64_t size);
+// This class is used to represent ID3D12Heap allocations, as well as an implicit heap
+// representing a directly allocated resource. It inherits from Pageable because each Heap must
+// be represented in the ResidencyManager.
+class Heap : public ResourceHeapBase, public Pageable {
+  public:
+    Heap(ComPtr<ID3D12Pageable> d3d12Pageable, MemorySegment memorySegment, uint64_t size);
 
-        ID3D12Heap* GetD3D12Heap() const;
+    ID3D12Heap* GetD3D12Heap() const;
 
-      private:
-        ComPtr<ID3D12Heap> mD3d12Heap;
-    };
+  private:
+    ComPtr<ID3D12Heap> mD3d12Heap;
+};
 }  // namespace dawn::native::d3d12
 
 #endif  // SRC_DAWN_NATIVE_D3D12_HEAPD3D12_H_

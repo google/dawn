@@ -34,56 +34,53 @@ namespace tint::transform {
 /// This transform helps with backends that cannot directly return arrays or use
 /// them as parameters.
 class WrapArraysInStructs : public Castable<WrapArraysInStructs, Transform> {
- public:
-  /// Constructor
-  WrapArraysInStructs();
+  public:
+    /// Constructor
+    WrapArraysInStructs();
 
-  /// Destructor
-  ~WrapArraysInStructs() override;
+    /// Destructor
+    ~WrapArraysInStructs() override;
 
-  /// @param program the program to inspect
-  /// @param data optional extra transform-specific input data
-  /// @returns true if this transform should be run for the given program
-  bool ShouldRun(const Program* program,
-                 const DataMap& data = {}) const override;
+    /// @param program the program to inspect
+    /// @param data optional extra transform-specific input data
+    /// @returns true if this transform should be run for the given program
+    bool ShouldRun(const Program* program, const DataMap& data = {}) const override;
 
- protected:
-  /// Runs the transform using the CloneContext built for transforming a
-  /// program. Run() is responsible for calling Clone() on the CloneContext.
-  /// @param ctx the CloneContext primed with the input program and
-  /// ProgramBuilder
-  /// @param inputs optional extra transform-specific input data
-  /// @param outputs optional extra transform-specific output data
-  void Run(CloneContext& ctx,
-           const DataMap& inputs,
-           DataMap& outputs) const override;
+  protected:
+    /// Runs the transform using the CloneContext built for transforming a
+    /// program. Run() is responsible for calling Clone() on the CloneContext.
+    /// @param ctx the CloneContext primed with the input program and
+    /// ProgramBuilder
+    /// @param inputs optional extra transform-specific input data
+    /// @param outputs optional extra transform-specific output data
+    void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) const override;
 
- private:
-  struct WrappedArrayInfo {
-    WrappedArrayInfo();
-    WrappedArrayInfo(const WrappedArrayInfo&);
-    ~WrappedArrayInfo();
+  private:
+    struct WrappedArrayInfo {
+        WrappedArrayInfo();
+        WrappedArrayInfo(const WrappedArrayInfo&);
+        ~WrappedArrayInfo();
 
-    Symbol wrapper_name;
-    std::function<const ast::Type*(CloneContext&)> array_type;
+        Symbol wrapper_name;
+        std::function<const ast::Type*(CloneContext&)> array_type;
 
-    operator bool() { return wrapper_name.IsValid(); }
-  };
+        operator bool() { return wrapper_name.IsValid(); }
+    };
 
-  /// WrapArray wraps the fixed-size array type in a new structure (if it hasn't
-  /// already been wrapped). WrapArray will recursively wrap arrays-of-arrays.
-  /// The new structure will be added to module-scope type declarations of
-  /// `ctx.dst`.
-  /// @param ctx the CloneContext
-  /// @param wrapped_arrays a map of src array type to the wrapped structure
-  /// name
-  /// @param array the array type
-  /// @return the name of the structure that wraps the array, or an invalid
-  /// Symbol if this array should not be wrapped
-  WrappedArrayInfo WrapArray(
-      CloneContext& ctx,
-      std::unordered_map<const sem::Array*, WrappedArrayInfo>& wrapped_arrays,
-      const sem::Array* array) const;
+    /// WrapArray wraps the fixed-size array type in a new structure (if it hasn't
+    /// already been wrapped). WrapArray will recursively wrap arrays-of-arrays.
+    /// The new structure will be added to module-scope type declarations of
+    /// `ctx.dst`.
+    /// @param ctx the CloneContext
+    /// @param wrapped_arrays a map of src array type to the wrapped structure
+    /// name
+    /// @param array the array type
+    /// @return the name of the structure that wraps the array, or an invalid
+    /// Symbol if this array should not be wrapped
+    WrappedArrayInfo WrapArray(
+        CloneContext& ctx,
+        std::unordered_map<const sem::Array*, WrappedArrayInfo>& wrapped_arrays,
+        const sem::Array* array) const;
 };
 
 }  // namespace tint::transform

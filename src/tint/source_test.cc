@@ -29,37 +29,37 @@ line three)";
 using SourceFileContentTest = testing::Test;
 
 TEST_F(SourceFileContentTest, Ctor) {
-  Source::FileContent fc(kSource);
-  EXPECT_EQ(fc.data, kSource);
-  EXPECT_EQ(fc.data_view, kSource);
-  ASSERT_EQ(fc.lines.size(), 3u);
-  EXPECT_EQ(fc.lines[0], "line one");
-  EXPECT_EQ(fc.lines[1], "line two");
-  EXPECT_EQ(fc.lines[2], "line three");
+    Source::FileContent fc(kSource);
+    EXPECT_EQ(fc.data, kSource);
+    EXPECT_EQ(fc.data_view, kSource);
+    ASSERT_EQ(fc.lines.size(), 3u);
+    EXPECT_EQ(fc.lines[0], "line one");
+    EXPECT_EQ(fc.lines[1], "line two");
+    EXPECT_EQ(fc.lines[2], "line three");
 }
 
 TEST_F(SourceFileContentTest, CopyCtor) {
-  auto src = std::make_unique<Source::FileContent>(kSource);
-  Source::FileContent fc{*src};
-  src.reset();
-  EXPECT_EQ(fc.data, kSource);
-  EXPECT_EQ(fc.data_view, kSource);
-  ASSERT_EQ(fc.lines.size(), 3u);
-  EXPECT_EQ(fc.lines[0], "line one");
-  EXPECT_EQ(fc.lines[1], "line two");
-  EXPECT_EQ(fc.lines[2], "line three");
+    auto src = std::make_unique<Source::FileContent>(kSource);
+    Source::FileContent fc{*src};
+    src.reset();
+    EXPECT_EQ(fc.data, kSource);
+    EXPECT_EQ(fc.data_view, kSource);
+    ASSERT_EQ(fc.lines.size(), 3u);
+    EXPECT_EQ(fc.lines[0], "line one");
+    EXPECT_EQ(fc.lines[1], "line two");
+    EXPECT_EQ(fc.lines[2], "line three");
 }
 
 TEST_F(SourceFileContentTest, MoveCtor) {
-  auto src = std::make_unique<Source::FileContent>(kSource);
-  Source::FileContent fc{std::move(*src)};
-  src.reset();
-  EXPECT_EQ(fc.data, kSource);
-  EXPECT_EQ(fc.data_view, kSource);
-  ASSERT_EQ(fc.lines.size(), 3u);
-  EXPECT_EQ(fc.lines[0], "line one");
-  EXPECT_EQ(fc.lines[1], "line two");
-  EXPECT_EQ(fc.lines[2], "line three");
+    auto src = std::make_unique<Source::FileContent>(kSource);
+    Source::FileContent fc{std::move(*src)};
+    src.reset();
+    EXPECT_EQ(fc.data, kSource);
+    EXPECT_EQ(fc.data_view, kSource);
+    ASSERT_EQ(fc.lines.size(), 3u);
+    EXPECT_EQ(fc.lines[0], "line one");
+    EXPECT_EQ(fc.lines[1], "line two");
+    EXPECT_EQ(fc.lines[2], "line three");
 }
 
 // Line break code points
@@ -73,31 +73,30 @@ TEST_F(SourceFileContentTest, MoveCtor) {
 
 using LineBreakTest = testing::TestWithParam<const char*>;
 TEST_P(LineBreakTest, Single) {
-  std::string src = "line one";
-  src += GetParam();
-  src += "line two";
+    std::string src = "line one";
+    src += GetParam();
+    src += "line two";
 
-  Source::FileContent fc(src);
-  EXPECT_EQ(fc.lines.size(), 2u);
-  EXPECT_EQ(fc.lines[0], "line one");
-  EXPECT_EQ(fc.lines[1], "line two");
+    Source::FileContent fc(src);
+    EXPECT_EQ(fc.lines.size(), 2u);
+    EXPECT_EQ(fc.lines[0], "line one");
+    EXPECT_EQ(fc.lines[1], "line two");
 }
 TEST_P(LineBreakTest, Double) {
-  std::string src = "line one";
-  src += GetParam();
-  src += GetParam();
-  src += "line two";
+    std::string src = "line one";
+    src += GetParam();
+    src += GetParam();
+    src += "line two";
 
-  Source::FileContent fc(src);
-  EXPECT_EQ(fc.lines.size(), 3u);
-  EXPECT_EQ(fc.lines[0], "line one");
-  EXPECT_EQ(fc.lines[1], "");
-  EXPECT_EQ(fc.lines[2], "line two");
+    Source::FileContent fc(src);
+    EXPECT_EQ(fc.lines.size(), 3u);
+    EXPECT_EQ(fc.lines[0], "line one");
+    EXPECT_EQ(fc.lines[1], "");
+    EXPECT_EQ(fc.lines[2], "line two");
 }
-INSTANTIATE_TEST_SUITE_P(
-    SourceFileContentTest,
-    LineBreakTest,
-    testing::Values(kVTab, kFF, kNL, kLS, kPS, kLF, kCR, kCR kLF));
+INSTANTIATE_TEST_SUITE_P(SourceFileContentTest,
+                         LineBreakTest,
+                         testing::Values(kVTab, kFF, kNL, kLS, kPS, kLF, kCR, kCR kLF));
 
 }  // namespace
 }  // namespace tint
