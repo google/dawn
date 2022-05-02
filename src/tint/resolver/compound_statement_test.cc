@@ -224,7 +224,7 @@ TEST_F(ResolverCompoundStatementTest, If) {
     auto* cond_b = Expr(true);
     auto* stmt_b = Ignore(1);
     auto* stmt_c = Ignore(1);
-    auto* if_stmt = If(cond_a, Block(stmt_a), If(cond_b, Block(stmt_b), Block(stmt_c)));
+    auto* if_stmt = If(cond_a, Block(stmt_a), Else(If(cond_b, Block(stmt_b), Else(Block(stmt_c)))));
     WrapInFunction(if_stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();

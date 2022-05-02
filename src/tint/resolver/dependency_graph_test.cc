@@ -1147,9 +1147,9 @@ TEST_P(ResolverDependencyShadowTest, Test) {
     helper.Add(inner_kind, symbol, Source{{56, 78}});
     auto* inner_var = helper.nested_statements.size()
                           ? helper.nested_statements[0]->As<ast::VariableDeclStatement>()->variable
-                      : helper.statements.size()
-                          ? helper.statements[0]->As<ast::VariableDeclStatement>()->variable
-                          : helper.parameters[0];
+                          : helper.statements.size()
+                                ? helper.statements[0]->As<ast::VariableDeclStatement>()->variable
+                                : helper.parameters[0];
     helper.Build();
 
     EXPECT_EQ(Build().shadows[inner_var], outer);
@@ -1218,8 +1218,8 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
                  Assign(V, V)),                         //
              If(V,                                      //
                 Block(Assign(V, V)),                    //
-                If(V,                                   //
-                   Block(Assign(V, V)))),               //
+                Else(If(V,                              //
+                        Block(Assign(V, V))))),         //
              Ignore(Bitcast(T, V)),                     //
              For(Decl(Var(Sym(), T, V)),                //
                  Equal(V, V),                           //

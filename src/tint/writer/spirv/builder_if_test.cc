@@ -106,7 +106,7 @@ TEST_F(BuilderTest, If_WithElse) {
     auto* body = Block(Assign("v", 2));
     auto* else_body = Block(Assign("v", 3));
 
-    auto* expr = If(true, body, else_body);
+    auto* expr = If(true, body, Else(else_body));
     WrapInFunction(expr);
 
     spirv::Builder& b = Build();
@@ -148,7 +148,7 @@ TEST_F(BuilderTest, If_WithElseIf) {
     auto* body = Block(Assign("v", 2));
     auto* else_body = Block(Assign("v", 3));
 
-    auto* expr = If(true, body, If(true, else_body));
+    auto* expr = If(true, body, Else(If(true, else_body)));
     WrapInFunction(expr);
 
     spirv::Builder& b = Build();
@@ -201,10 +201,10 @@ TEST_F(BuilderTest, If_WithMultiple) {
     auto* elseif_2_body = Block(Assign("v", 4));
     auto* else_body = Block(Assign("v", 5));
 
-    auto* expr = If(true, body,                  //
-                    If(true, elseif_1_body,      //
-                       If(false, elseif_2_body,  //
-                          else_body)));
+    auto* expr = If(true, body,                            //
+                    Else(If(true, elseif_1_body,           //
+                            Else(If(false, elseif_2_body,  //
+                                    Else(else_body))))));
     WrapInFunction(expr);
 
     spirv::Builder& b = Build();
@@ -305,7 +305,7 @@ TEST_F(BuilderTest, If_WithElseBreak) {
     // }
     auto* else_body = Block(Break());
 
-    auto* if_stmt = If(true, Block(), else_body);
+    auto* if_stmt = If(true, Block(), Else(else_body));
 
     auto* loop_body = Block(if_stmt);
 
@@ -349,7 +349,7 @@ TEST_F(BuilderTest, If_WithContinueAndBreak) {
     //   }
     // }
 
-    auto* if_stmt = If(true, Block(Continue()), Block(Break()));
+    auto* if_stmt = If(true, Block(Continue()), Else(Block(Break())));
 
     auto* expr = Loop(Block(if_stmt), Block());
     WrapInFunction(expr);
@@ -392,7 +392,7 @@ TEST_F(BuilderTest, If_WithElseContinue) {
     // }
     auto* else_body = Block(create<ast::ContinueStatement>());
 
-    auto* if_stmt = If(true, Block(), else_body);
+    auto* if_stmt = If(true, Block(), Else(else_body));
 
     auto* loop_body = Block(if_stmt, Break());
 
@@ -493,7 +493,7 @@ TEST_F(BuilderTest, IfElse_BothReturn) {
                     {
                         If(true,                 //
                            Block(Return(true)),  //
-                           Block(Return(true))),
+                           Else(Block(Return(true)))),
                     });
 
     spirv::Builder& b = Build();
@@ -589,7 +589,7 @@ TEST_F(BuilderTest, If_ElseIf_WithReturn) {
     //   return;
     // }
 
-    auto* if_stmt = If(false, Block(), If(true, Block(Return())));
+    auto* if_stmt = If(false, Block(), Else(If(true, Block(Return()))));
     auto* fn = Func("f", {}, ty.void_(), {if_stmt});
 
     spirv::Builder& b = Build();
@@ -627,7 +627,7 @@ TEST_F(BuilderTest, Loop_If_ElseIf_WithBreak) {
     //   }
     // }
 
-    auto* if_stmt = If(false, Block(), If(true, Block(Break())));
+    auto* if_stmt = If(false, Block(), Else(If(true, Block(Break()))));
     auto* fn = Func("f", {}, ty.void_(), {Loop(Block(if_stmt))});
 
     spirv::Builder& b = Build();

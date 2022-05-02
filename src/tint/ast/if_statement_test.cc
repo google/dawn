@@ -58,7 +58,7 @@ TEST_F(IfStatementTest, Assert_InvalidElse) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.If(b.Expr(true), b.Block(), b.CallStmt(b.Call("foo")));
+            b.If(b.Expr(true), b.Block(), b.Else(b.CallStmt(b.Call("foo"))));
         },
         "internal compiler error");
 }
@@ -88,7 +88,7 @@ TEST_F(IfStatementTest, Assert_DifferentProgramID_ElseStatement) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.If(b1.Expr(true), b1.Block(), b2.If(b2.Expr("ident"), b2.Block()));
+            b1.If(b1.Expr(true), b1.Block(), b2.Else(b2.If(b2.Expr("ident"), b2.Block())));
         },
         "internal compiler error");
 }

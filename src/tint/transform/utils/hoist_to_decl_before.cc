@@ -123,7 +123,7 @@ class HoistToDeclBefore::State {
             // Move the 'else-if' into the new `else` block as a plain 'if'.
             auto* cond = ctx.Clone(else_if->condition);
             auto* body = ctx.Clone(else_if->body);
-            auto* new_if = b.If(cond, body, ctx.Clone(else_if->else_statement));
+            auto* new_if = b.If(cond, body, b.Else(ctx.Clone(else_if->else_statement)));
             body_stmts.emplace_back(new_if);
 
             // Replace the 'else-if' with the new 'else' block.

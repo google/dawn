@@ -38,7 +38,7 @@ TEST_F(MslGeneratorImplTest, Emit_If) {
 TEST_F(MslGeneratorImplTest, Emit_IfWithElseIf) {
     auto* cond = Var("cond", ty.bool_());
     auto* else_cond = Var("else_cond", ty.bool_());
-    auto* i = If(cond, Block(Return()), If(else_cond, Block(Return())));
+    auto* i = If(cond, Block(Return()), Else(If(else_cond, Block(Return()))));
     WrapInFunction(cond, else_cond, i);
 
     GeneratorImpl& gen = Build();
@@ -58,7 +58,7 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElseIf) {
 
 TEST_F(MslGeneratorImplTest, Emit_IfWithElse) {
     auto* cond = Var("cond", ty.bool_());
-    auto* i = If(cond, Block(Return()), Block(Return()));
+    auto* i = If(cond, Block(Return()), Else(Block(Return())));
     WrapInFunction(cond, i);
 
     GeneratorImpl& gen = Build();
@@ -77,7 +77,8 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElse) {
 TEST_F(MslGeneratorImplTest, Emit_IfWithMultiple) {
     auto* cond = Var("cond", ty.bool_());
     auto* else_cond = Var("else_cond", ty.bool_());
-    auto* i = If(cond, Block(Return()), If(else_cond, Block(Return()), Block(Return())));
+    auto* i =
+        If(cond, Block(Return()), Else(If(else_cond, Block(Return()), Else(Block(Return())))));
     WrapInFunction(cond, else_cond, i);
 
     GeneratorImpl& gen = Build();

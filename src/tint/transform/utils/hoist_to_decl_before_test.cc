@@ -184,9 +184,9 @@ TEST_F(HoistToDeclBeforeTest, ElseIf) {
     ProgramBuilder b;
     auto* var = b.Decl(b.Var("a", b.ty.bool_()));
     auto* expr = b.Expr("a");
-    auto* s = b.If(b.Expr(true), b.Block(),  //
-                   b.If(expr, b.Block(),     //
-                        b.Block()));
+    auto* s = b.If(b.Expr(true), b.Block(),      //
+                   b.Else(b.If(expr, b.Block(),  //
+                               b.Else(b.Block()))));
     b.Func("f", {}, b.ty.void_(), {var, s});
 
     Program original(std::move(b));
@@ -378,9 +378,9 @@ TEST_F(HoistToDeclBeforeTest, Prepare_ElseIf) {
     ProgramBuilder b;
     auto* var = b.Decl(b.Var("a", b.ty.bool_()));
     auto* expr = b.Expr("a");
-    auto* s = b.If(b.Expr(true), b.Block(),  //
-                   b.If(expr, b.Block(),     //
-                        b.Block()));
+    auto* s = b.If(b.Expr(true), b.Block(),      //
+                   b.Else(b.If(expr, b.Block(),  //
+                               b.Else(b.Block()))));
     b.Func("f", {}, b.ty.void_(), {var, s});
 
     Program original(std::move(b));
@@ -552,9 +552,9 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ElseIf) {
     ProgramBuilder b;
     b.Func("foo", {}, b.ty.void_(), {});
     auto* var = b.Decl(b.Var("a", b.ty.bool_()));
-    auto* elseif = b.If(b.Expr("a"), b.Block(), b.Block());
+    auto* elseif = b.If(b.Expr("a"), b.Block(), b.Else(b.Block()));
     auto* s = b.If(b.Expr(true), b.Block(),  //
-                   elseif);
+                   b.Else(elseif));
     b.Func("f", {}, b.ty.void_(), {var, s});
 
     Program original(std::move(b));

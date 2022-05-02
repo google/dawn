@@ -168,7 +168,7 @@ TEST_F(ResolverTest, Stmt_If) {
     auto* assign = Assign(lhs, rhs);
     auto* body = Block(assign);
     auto* cond = Expr(true);
-    auto* stmt = If(cond, body, else_stmt);
+    auto* stmt = If(cond, body, Else(else_stmt));
     WrapInFunction(v, stmt);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

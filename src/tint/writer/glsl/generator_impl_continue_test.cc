@@ -20,8 +20,7 @@ namespace {
 using GlslGeneratorImplTest_Continue = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_Continue, Emit_Continue) {
-    auto* loop = Loop(Block(If(false, Block(Break())),  //
-                            Continue()));
+    auto* loop = Loop(Block(If(false, Block(Break())), Continue()));
     WrapInFunction(loop);
 
     GeneratorImpl& gen = Build();

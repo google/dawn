@@ -268,7 +268,7 @@ TEST_F(BuilderTest, Loop_WithContinuing_BreakUnless) {
     //     if (true) {} else { break; }
     //   }
     // }
-    auto* if_stmt = If(Expr(true), Block(), Block(Break()));
+    auto* if_stmt = If(Expr(true), Block(), Else(Block(Break())));
     auto* continuing = Block(if_stmt);
     auto* loop = Loop(Block(), continuing);
     WrapInFunction(loop);
@@ -341,7 +341,7 @@ TEST_F(BuilderTest, Loop_WithContinuing_BreakUnless_ConditionIsVar) {
     //   }
     // }
     auto* cond_var = Decl(Var("cond", nullptr, Expr(true)));
-    auto* if_stmt = If(Expr("cond"), Block(), Block(Break()));
+    auto* if_stmt = If(Expr("cond"), Block(), Else(Block(Break())));
     auto* continuing = Block(cond_var, if_stmt);
     auto* loop = Loop(Block(), continuing);
     WrapInFunction(loop);
@@ -437,11 +437,11 @@ TEST_F(BuilderTest, Loop_WithContinuing_BreakUnless_Nested) {
     //   }
     // }
 
-    auto* inner_if_stmt = If(Expr(true), Block(), Block(Break()));
+    auto* inner_if_stmt = If(Expr(true), Block(), Else(Block(Break())));
     auto* inner_continuing = Block(inner_if_stmt);
     auto* inner_loop = Loop(Block(), inner_continuing);
 
-    auto* outer_if_stmt = If(Expr(true), Block(), Block(Break()));
+    auto* outer_if_stmt = If(Expr(true), Block(), Else(Block(Break())));
     auto* outer_continuing = Block(inner_loop, outer_if_stmt);
     auto* outer_loop = Loop(Block(), outer_continuing);
 
