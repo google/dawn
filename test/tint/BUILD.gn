@@ -379,6 +379,7 @@ tint_unittests_source_set("tint_unittests_utils_src") {
 tint_unittests_source_set("tint_unittests_writer_src") {
   sources = [
     "../../src/tint/writer/append_vector_test.cc",
+    "../../src/tint/writer/flatten_bindings_test.cc",
     "../../src/tint/writer/float_to_string_test.cc",
     "../../src/tint/writer/generate_external_texture_bindings_test.cc",
     "../../src/tint/writer/text_generator_test.cc",

@@ -530,6 +530,8 @@ libtint_source_set("libtint_core_all_src") {
     "writer/append_vector.h",
     "writer/array_length_from_uniform_options.cc",
     "writer/array_length_from_uniform_options.h",
+    "writer/flatten_bindings.cc",
+    "writer/flatten_bindings.h",
     "writer/float_to_string.cc",
     "writer/float_to_string.h",
     "writer/generate_external_texture_bindings.cc",

@@ -31,6 +31,7 @@
 #include "src/tint/diagnostic/formatter.h"
 #include "src/tint/program.h"
 #include "src/tint/utils/hash.h"
+#include "src/tint/writer/flatten_bindings.h"
 
 namespace tint::fuzzers {
 
@@ -257,10 +258,18 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
         }
         case OutputFormat::kMSL: {
 #if TINT_BUILD_MSL_WRITER
-            auto result = writer::msl::Generate(&program, options_msl_);
+            // Remap resource numbers to a flat namespace.
+            // TODO(crbug.com/tint/1501): Do this via Options::BindingMap.
+            auto input_program = &program;
+            auto flattened = tint::writer::FlattenBindings(&program);
+            if (flattened) {
+                input_program = &*flattened;
+            }
+
+            auto result = writer::msl::Generate(input_program, options_msl_);
             generated_msl_ = std::move(result.msl);
             if (!result.success) {
-                VALIDITY_ERROR(program.Diagnostics(),
+                VALIDITY_ERROR(input_program->Diagnostics(),
                                "MSL writer errored on validated input:\n" + result.error);
             }
 #endif  // TINT_BUILD_MSL_WRITER
