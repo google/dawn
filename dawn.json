@@ -1333,6 +1333,14 @@
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "plane 0", "type": "texture view"},
             {"name": "plane 1", "type": "texture view", "optional": true},
+            {"name": "yuv to rgb conversion matrix", "type": "float", "annotation": "const*",
+                "length": 12, "optional": true},
+            {"name": "src transfer function parameters", "type": "float", "annotation": "const*",
+                "length": 7, "optional": true},
+            {"name": "dst transfer function parameters", "type": "float", "annotation": "const*",
+                "length": 7, "optional": true},
+            {"name": "gamut conversion matrix", "type": "float", "annotation": "const*",
+                "length": 9, "optional": true},
             {"name": "color space", "type": "predefined color space", "default": "srgb"}
         ]
     },
