@@ -112,7 +112,7 @@ func (r *ResultSource) GetResults(ctx context.Context, cfg Config, auth auth.Opt
 		if err != nil {
 			return nil, err
 		}
-		ps, err := gerrit.LatestPatchest(strconv.Itoa(ps.Change))
+		ps, err = gerrit.LatestPatchest(strconv.Itoa(ps.Change))
 		if err != nil {
 			err := fmt.Errorf("failed to find latest patchset of change %v: %w",
 				ps.Change, err)
@@ -220,12 +220,6 @@ func GetResults(
 			}
 		}
 
-		if fr := rpb.GetFailureReason(); fr != nil {
-			if strings.Contains(fr.GetPrimaryErrorMessage(), "asyncio.exceptions.TimeoutError") {
-				status = result.Slow
-			}
-		}
-
 		duration := rpb.GetDuration().AsDuration()
 		if status == result.Pass && duration > cfg.Test.SlowThreshold {
 			status = result.Slow
@@ -247,11 +241,8 @@ func GetResults(
 		return nil, err
 	}
 
-	// Expand any aliased tags
-	ExpandAliasedTags(cfg, results)
-
-	// Remove any duplicates from the results.
-	results = results.ReplaceDuplicates(result.Deduplicate)
+	// Expand aliased tags, remove specific tags
+	CleanTags(cfg, &results)
 
 	results.Sort()
 	return results, err
@@ -329,21 +320,38 @@ func MostRecentResultsForChange(
 	return nil, gerrit.Patchset{}, fmt.Errorf("no builds found for change %v", change)
 }
 
-// ExpandAliasedTags modifies each result so that tags which are found in
+// CleanTags modifies each result so that tags which are found in
 // cfg.TagAliases are expanded to include all the tag aliases.
-// This is bodge for crbug.com/dawn/1387.
-func ExpandAliasedTags(cfg Config, results result.List) {
-	// Build the result sets
-	sets := make([]result.Tags, len(cfg.TagAliases))
-	for i, l := range cfg.TagAliases {
-		sets[i] = result.NewTags(l...)
+// Tags in cfg.Tag.Remove are also removed.
+// Finally, duplicate results are removed by erring towards Failure.
+// See: crbug.com/dawn/1387, crbug.com/dawn/1401
+func CleanTags(cfg Config, results *result.List) {
+	remove := result.NewTags(cfg.Tag.Remove...)
+	aliases := make([]result.Tags, len(cfg.Tag.Aliases))
+	for i, l := range cfg.Tag.Aliases {
+		aliases[i] = result.NewTags(l...)
 	}
 	// Expand the result tags for the aliased tag sets
-	for _, r := range results {
-		for _, set := range sets {
+	for _, r := range *results {
+		for _, set := range aliases {
 			if r.Tags.ContainsAny(set) {
 				r.Tags.AddAll(set)
 			}
 		}
+		r.Tags.RemoveAll(remove)
 	}
+	*results = results.ReplaceDuplicates(func(s result.Statuses) result.Status {
+		// If all results have the same status, then use that.
+		if len(s) == 1 {
+			return s.One()
+		}
+		// Mixed statuses. Replace with something appropriate.
+		switch {
+		case s.Contains(result.Crash):
+			return result.Crash
+		case s.Contains(result.Abort):
+			return result.Abort
+		}
+		return result.Failure
+	})
 }

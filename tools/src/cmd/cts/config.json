@@ -39,13 +39,19 @@
       "Builder": "linux-dawn-rel"
     }
   },
-  "TagAliases": [
-    [
-      // crbug.com/dawn/1387
-      "intel-0x5912",
-      "intel-0x3e92"
-    ]
-  ],
+  "Tag": {
+    "Aliases": [
+      [
+        // crbug.com/dawn/1387
+        "intel-0x5912",
+        "intel-0x3e92"
+      ]
+    ],
+    "Remove": [
+      // crbug.com/dawn/1401
+      "release-x64"
+    ],
+  },
   "Sheets": {
     // Spreadsheet to export results data to
     // https://docs.google.com/spreadsheets/d/1OFsh-r_njG5pKDwjL1HOvLJKDRC4FgO-LE9Kw7WPQcc

@@ -53,10 +53,16 @@ type Config struct {
 	// Builders is a map of builder name (as displayed in the UI) to buildbucket
 	// builder information.
 	Builders map[string]buildbucket.Builder
-	// TagAliases is a list of tags which are treated as equivalent.
-	// For example, some GPUs are similar enough to be considered equivalent.
-	// See crbug.com/dawn/1387 for more information.
-	TagAliases [][]string
+	// Tags holds configuration data for cleaning result tags before processing
+	Tag struct {
+		// TagAliases is a list of tags which are treated as equivalent.
+		// For example, some GPUs are similar enough to be considered equivalent.
+		// See crbug.com/dawn/1387 for more information.
+		Aliases [][]string
+		// Remove holds tags that should be removed before processing.
+		// See crbug.com/dawn/1401 for more information.
+		Remove []string
+	}
 	// Sheets holds information about the Google Sheets document used for
 	// tracking CTS statistics.
 	Sheets struct {
