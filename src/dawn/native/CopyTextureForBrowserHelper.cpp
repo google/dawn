@@ -130,13 +130,14 @@ static const char sCopyTextureForBrowserShader[] = R"(
                 // Clamp the texcoord and discard the out-of-bound pixels.
                 var clampedTexcoord =
                     clamp(texcoord, vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0));
-                if (!all(clampedTexcoord == texcoord)) {
-                    discard;
-                }
 
                 // Swizzling of texture formats when sampling / rendering is handled by the
                 // hardware so we don't need special logic in this shader. This is covered by tests.
                 var color = textureSample(myTexture, mySampler, texcoord);
+
+                if (!all(clampedTexcoord == texcoord)) {
+                    discard;
+                }
 
                 let kUnpremultiplyStep = 0x01u;
                 let kDecodeToLinearStep = 0x02u;
