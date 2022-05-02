@@ -39,32 +39,32 @@ namespace {
 
 static const char sCopyTextureForBrowserShader[] = R"(
             struct GammaTransferParams {
-                G: f32;
-                A: f32;
-                B: f32;
-                C: f32;
-                D: f32;
-                E: f32;
-                F: f32;
-                padding: u32;
+                G: f32,
+                A: f32,
+                B: f32,
+                C: f32,
+                D: f32,
+                E: f32,
+                F: f32,
+                padding: u32,
             };
 
             struct Uniforms {                                            // offset   align   size
-                scale: vec2<f32>;                                        // 0        8       8
-                offset: vec2<f32>;                                       // 8        8       8
-                steps_mask: u32;                                         // 16       4       4
+                scale: vec2<f32>,                                        // 0        8       8
+                offset: vec2<f32>,                                       // 8        8       8
+                steps_mask: u32,                                         // 16       4       4
                 // implicit padding;                                     // 20               12
-                conversion_matrix: mat3x3<f32>;                          // 32       16      48
-                gamma_decoding_params: GammaTransferParams;              // 80       4       32
-                gamma_encoding_params: GammaTransferParams;              // 112      4       32
-                gamma_decoding_for_dst_srgb_params: GammaTransferParams; // 144      4       32
+                conversion_matrix: mat3x3<f32>,                          // 32       16      48
+                gamma_decoding_params: GammaTransferParams,              // 80       4       32
+                gamma_encoding_params: GammaTransferParams,              // 112      4       32
+                gamma_decoding_for_dst_srgb_params: GammaTransferParams, // 144      4       32
             };
 
             @binding(0) @group(0) var<uniform> uniforms : Uniforms;
 
             struct VertexOutputs {
-                @location(0) texcoords : vec2<f32>;
-                @builtin(position) position : vec4<f32>;
+                @location(0) texcoords : vec2<f32>,
+                @builtin(position) position : vec4<f32>,
             };
 
             // Chromium uses unified equation to construct gamma decoding function
