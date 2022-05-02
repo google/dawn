@@ -63,6 +63,8 @@
 # tags: [ webgpu-adapter-default webgpu-adapter-swiftshader ]
 # END TAG HEADER
 
+# Last rolled: 2022-05-01 07:58:31PM
+
 ################################################################################
 # webgpu:shader,execution,zero_init:compute,zero_init failures on intel-0x5912
 # KEEP
@@ -83,10 +85,10 @@ crbug.com/dawn/1111 [ intel-0x5912 ] webgpu:shader,execution,zero_init:compute,z
 # KEEP
 ################################################################################
 crbug.com/dawn/1388 [ linux ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth24unorm-stencil8" [ Failure ]
-crbug.com/dawn/1388 [ linux ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth24unorm-stencil8" [ Failure ]
 crbug.com/dawn/1388 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth24unorm-stencil8" [ Failure ]
-crbug.com/dawn/1388 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth24unorm-stencil8" [ Failure ]
 crbug.com/dawn/1388 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth24unorm-stencil8" [ Failure ]
+crbug.com/dawn/1388 [ linux ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth24unorm-stencil8" [ Failure ]
+crbug.com/dawn/1388 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth24unorm-stencil8" [ Failure ]
 crbug.com/dawn/1388 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth24unorm-stencil8" [ Failure ]
 
 ################################################################################
@@ -95,15 +97,15 @@ crbug.com/dawn/1388 [ win ] webgpu:api,operation,resource_init,texture_zero:unin
 # KEEP
 ################################################################################
 crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth16unorm" [ Failure ]
-crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth16unorm" [ Failure ]
-crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth16unorm" [ Failure ]
 crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth32float-stencil8" [ Failure ]
+crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
+crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth16unorm" [ Failure ]
 crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="depth32float-stencil8" [ Failure ]
+crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
+crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth16unorm" [ Failure ]
 crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="depth24plus-stencil8" [ Failure ]
 crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="depth24unorm-stencil8" [ Failure ]
-crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
-crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
+crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="depth32float-stencil8" [ Failure ]
 crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="stencil8" [ Failure ]
 
 ################################################################################
@@ -111,19 +113,19 @@ crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:unin
 # Unexpected failures on windows.
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";* [ Failure ]
 crbug.com/dawn/0000 [ intel win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth16unorm" [ Failure ]
+crbug.com/dawn/0000 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth32float-stencil8" [ Failure ]
 crbug.com/dawn/0000 [ intel win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rgba32float" [ Failure ]
-crbug.com/dawn/0000 [ intel win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rgba32float" [ Failure ]
-crbug.com/dawn/0000 [ intel win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rgba32float" [ Failure ]
 crbug.com/dawn/0000 [ intel win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation intel win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
+crbug.com/dawn/0000 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth32float-stencil8" [ Failure ]
+crbug.com/dawn/0000 [ intel win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rgba32float" [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
+crbug.com/dawn/0000 [ dawn-no-backend-validation intel win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth24plus-stencil8" [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth24unorm-stencil8" [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth32float-stencil8" [ Failure ]
+crbug.com/dawn/0000 [ intel win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rgba32float" [ Failure ]
+crbug.com/dawn/0000 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";* [ Failure ]
 
 ################################################################################
 # webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas
@@ -315,6 +317,29 @@ crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,call,builtin,fi
 crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,call,builtin,insertBits:* [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,call,builtin,ldexp:* [ Failure ]
 crbug.com/tint/1500 [ nvidia release win ] webgpu:shader,execution,shader_io,compute_builtins:inputs:* [ Failure ]
+crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="comment" [ Failure ]
+crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="eol" [ Failure ]
+crbug.com/tint/0000 webgpu:shader,validation,parse,identifiers:identifiers:* [ Failure ]
+crbug.com/tint/1502 webgpu:shader,validation,parse,literal:abstract_float:val=".1h" [ Failure ]
+crbug.com/tint/1502 webgpu:shader,validation,parse,literal:abstract_float:val="0X3h" [ Failure ]
+crbug.com/tint/1502 webgpu:shader,validation,parse,literal:abstract_float:val="0h" [ Failure ]
+crbug.com/tint/1502 webgpu:shader,validation,parse,literal:abstract_float:val="0x3.2p%2B2h" [ Failure ]
+crbug.com/tint/1502 webgpu:shader,validation,parse,literal:abstract_float:val="0x3p%2B2h" [ Failure ]
+crbug.com/tint/1502 webgpu:shader,validation,parse,literal:abstract_float:val="0xEp-2h" [ Failure ]
+crbug.com/tint/1502 webgpu:shader,validation,parse,literal:abstract_float:val="0xep2h" [ Failure ]
+crbug.com/tint/1502 webgpu:shader,validation,parse,literal:abstract_float:val="1.1E%2B2h" [ Failure ]
+crbug.com/tint/1502 webgpu:shader,validation,parse,literal:abstract_float:val="1.1e2h" [ Failure ]
+crbug.com/tint/1502 webgpu:shader,validation,parse,literal:abstract_float:val="1h" [ Failure ]
+crbug.com/tint/1502 webgpu:shader,validation,parse,literal:abstract_float:val="2.4e-2h" [ Failure ]
+crbug.com/tint/1525 webgpu:shader,validation,parse,literal:f32:val="-1" [ Failure ]
+crbug.com/tint/1525 webgpu:shader,validation,parse,literal:f32:val="1" [ Failure ]
+crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="-2147483648" [ Failure ]
+crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="0" [ Failure ]
+crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="0x123" [ Failure ]
+crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="0x3f" [ Failure ]
+crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="123" [ Failure ]
+crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="2147483647" [ Failure ]
+crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="4294967295" [ Failure ]
 
 ################################################################################
 # webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed failures
@@ -369,22 +394,8 @@ crbug.com/dawn/0000 webgpu:api,validation,createRenderPipeline:pipeline_output_t
 crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,binary,f32_arithmetic:* [ Slow ]
 crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,binary,f32_logical:* [ Slow ]
 
-# New flakes. Please triage:
-crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x3e9b ] webgpu:shader,execution,zero_init:compute,zero_init:storageClass="workgroup";workgroupSize=[1,47,1];batch__=12 [ RetryOnFailure ]
-
 # New failures. Please triage:
 crbug.com/dawn/0000 webgpu:api,validation,createView:array_layers:textureDimension="2d";viewDimension="_undef_" [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,parse,blankspace:blankspace:blankspace=["%C2%85","next_line"] [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,parse,blankspace:blankspace:blankspace=["%E2%80%8E","left_to_right_mark"] [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,parse,blankspace:blankspace:blankspace=["%E2%80%8F","right_to_left_mark"] [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,parse,blankspace:blankspace:blankspace=["%E2%80%A8","line_separator"] [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,parse,blankspace:blankspace:blankspace=["%E2%80%A9","paragraph_separator"] [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="comment" [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="eol" [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,parse,comments:line_comment_terminators:blankspace=["%C2%85","next_line"] [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,parse,comments:line_comment_terminators:blankspace=["%E2%80%A8","line_separator"] [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,validation,parse,comments:line_comment_terminators:blankspace=["%E2%80%A9","paragraph_separator"] [ Failure ]
-crbug.com/dawn/0000 [ bigsur ] webgpu:shader,validation,parse,identifiers:* [ Failure ]
-crbug.com/dawn/0000 [ monterey ] webgpu:shader,validation,parse,identifiers:* [ Failure ]
-crbug.com/dawn/0000 [ ubuntu ] webgpu:shader,validation,parse,identifiers:* [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:shader,validation,parse,identifiers:* [ Failure ]
+crbug.com/dawn/0000 webgpu:api,operation,render_pipeline,pipeline_output_targets:color,attachments:format="bgra8unorm-srgb" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,operation,render_pipeline,pipeline_output_targets:color,attachments:format="rgb10a2unorm" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,operation,render_pipeline,pipeline_output_targets:color,attachments:format="rgba8unorm-srgb" [ Failure ]
