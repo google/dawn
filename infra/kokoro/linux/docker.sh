@@ -90,7 +90,7 @@ status "Checking for CRLF"
 ./tools/check-no-crlf
 
 status "Fetching dependencies"
-cp scripts/standalone.gclient .gclient
+cp scripts/standalone-with-node.gclient .gclient
 with_retry gclient sync
 
 status "Linting"
@@ -158,6 +158,12 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
     status "Building dawn in '${BUILD_DIR}'"
     show_cmds
         cmake ${SRC_DIR} ${CMAKE_FLAGS} ${COMMON_CMAKE_FLAGS}
+        cmake --build . -- --jobs=$(nproc)
+    hide_cmds
+
+    status "Re-building dawn in '${BUILD_DIR}' with dawn/node enabled"
+    show_cmds
+        cmake ${SRC_DIR} ${CMAKE_FLAGS} ${COMMON_CMAKE_FLAGS} -DDAWN_BUILD_NODE_BINDINGS=1 -DDAWN_ENABLE_PIC=1 -DDAWN_USE_X11=OFF
         cmake --build . -- --jobs=$(nproc)
     hide_cmds
 

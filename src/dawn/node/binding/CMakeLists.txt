@@ -73,7 +73,7 @@ target_include_directories(dawn_node_binding
         "${CMAKE_SOURCE_DIR}"
         "${DAWN_THIRD_PARTY_DIR}"
         "${NODE_API_HEADERS_DIR}/include"
-        "${GEN_DIR}"
+        "${DAWN_NODE_GEN_DIR}"
 )
 
 target_link_libraries(dawn_node_binding

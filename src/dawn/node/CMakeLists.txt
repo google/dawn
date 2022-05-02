@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(GEN_DIR         "${CMAKE_CURRENT_BINARY_DIR}/gen")
-set(IDLGEN_TOOL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tools/src/cmd/idlgen")
+set(DAWN_NODE_GEN_DIR "${DAWN_BUILD_GEN_DIR}/node")
+set(IDLGEN_TOOL_DIR   "${CMAKE_CURRENT_SOURCE_DIR}/tools/src/cmd/idlgen")
 
 # idlgen() is a function that uses the tools/cmd/idlgen/main.go tool to generate
 # code from an IDL file and template.
@@ -75,7 +75,7 @@ target_include_directories(dawn_node PRIVATE
     "${CMAKE_SOURCE_DIR}"
     "${DAWN_THIRD_PARTY_DIR}"
     "${NODE_API_HEADERS_DIR}/include"
-    "${GEN_DIR}"
+    "${DAWN_NODE_GEN_DIR}"
 )
 
 # To reduce the build dependencies for compiling the dawn.node targets, we do
@@ -92,14 +92,14 @@ string(REGEX MATCHALL "napi_[a-z0-9_]*" NAPI_SYMBOLS "${NAPI_SYMBOLS_JS_CONTENT}
 
 if (WIN32)
     # Generate the NapiSymbols.def file from the Napi symbol list
-    set(NAPI_SYMBOLS_DEF "${GEN_DIR}/NapiSymbols.def")
+    set(NAPI_SYMBOLS_DEF "${DAWN_NODE_GEN_DIR}/NapiSymbols.def")
     list(TRANSFORM NAPI_SYMBOLS PREPEND "  ")
     list(TRANSFORM NAPI_SYMBOLS APPEND "\n")
     string(REPLACE ";" "" NAPI_SYMBOLS "${NAPI_SYMBOLS}")
     string(PREPEND NAPI_SYMBOLS "LIBRARY node.exe\nEXPORTS\n")
     file(GENERATE OUTPUT "${NAPI_SYMBOLS_DEF}" CONTENT "${NAPI_SYMBOLS}")
     # Generate the NapiSymbols.lib from the NapiSymbols.def file
-    set(NAPI_SYMBOLS_LIB "${GEN_DIR}/NapiSymbols.lib")
+    set(NAPI_SYMBOLS_LIB "${DAWN_NODE_GEN_DIR}/NapiSymbols.lib")
     # Resolve path to lib.exe
     get_filename_component(VS_BIN_DIR "${CMAKE_LINKER}" DIRECTORY)
     set(LIB_EXE "${VS_BIN_DIR}/lib.exe")
@@ -116,7 +116,7 @@ if (WIN32)
     target_link_libraries(dawn_node "${NAPI_SYMBOLS_LIB}")
 else()
     # Generate the NapiSymbols.h file from the Napi symbol list
-    set(NAPI_SYMBOLS_H "${GEN_DIR}/NapiSymbols.h")
+    set(NAPI_SYMBOLS_H "${DAWN_NODE_GEN_DIR}/NapiSymbols.h")
     list(TRANSFORM NAPI_SYMBOLS PREPEND "NAPI_SYMBOL(")
     list(TRANSFORM NAPI_SYMBOLS APPEND ")\n")
     string(REPLACE ";" "" NAPI_SYMBOLS "${NAPI_SYMBOLS}")
