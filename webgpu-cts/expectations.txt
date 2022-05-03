@@ -167,6 +167,7 @@ crbug.com/dawn/0000 [ linux ] webgpu:api,operation,command_buffer,image_copy:ori
 crbug.com/dawn/0000 [ mac ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ RetryOnFailure ]
 crbug.com/dawn/0000 [ win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ RetryOnFailure ]
 crbug.com/dawn/0000 [ win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ RetryOnFailure ]
+crbug.com/dawn/0000 webgpu:api,operation,adapter,requestDevice_limits:supported_limits:* [ RetryOnFailure ]
 
 ################################################################################
 # webgpu:shader,execution,robust_access
