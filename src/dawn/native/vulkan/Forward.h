@@ -26,6 +26,7 @@ class Buffer;
 class CommandBuffer;
 class ComputePipeline;
 class Device;
+class PipelineCache;
 class PipelineLayout;
 class QuerySet;
 class Queue;
@@ -46,6 +47,7 @@ struct VulkanBackendTraits {
     using CommandBufferType = CommandBuffer;
     using ComputePipelineType = ComputePipeline;
     using DeviceType = Device;
+    using PipelineCacheType = PipelineCache;
     using PipelineLayoutType = PipelineLayout;
     using QuerySetType = QuerySet;
     using QueueType = Queue;

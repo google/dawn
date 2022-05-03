@@ -195,6 +195,8 @@ class DeviceBase : public RefCounted {
     Ref<AttachmentState> GetOrCreateAttachmentState(const RenderPassDescriptor* descriptor);
     void UncacheAttachmentState(AttachmentState* obj);
 
+    Ref<PipelineCacheBase> GetOrCreatePipelineCache(const CacheKey& key);
+
     // Object creation methods that be used in a reentrant manner.
     ResultOrError<Ref<BindGroupBase>> CreateBindGroup(const BindGroupDescriptor* descriptor);
     ResultOrError<Ref<BindGroupLayoutBase>> CreateBindGroupLayout(
@@ -441,6 +443,7 @@ class DeviceBase : public RefCounted {
     Ref<ComputePipelineBase> AddOrGetCachedComputePipeline(
         Ref<ComputePipelineBase> computePipeline);
     Ref<RenderPipelineBase> AddOrGetCachedRenderPipeline(Ref<RenderPipelineBase> renderPipeline);
+    virtual Ref<PipelineCacheBase> GetOrCreatePipelineCacheImpl(const CacheKey& key);
     virtual void InitializeComputePipelineAsyncImpl(Ref<ComputePipelineBase> computePipeline,
                                                     WGPUCreateComputePipelineAsyncCallback callback,
                                                     void* userdata);

@@ -75,7 +75,7 @@ enum class InterpolationSampling {
     Sample,
 };
 
-using PipelineLayoutEntryPointPair = std::pair<PipelineLayoutBase*, std::string>;
+using PipelineLayoutEntryPointPair = std::pair<const PipelineLayoutBase*, std::string>;
 struct PipelineLayoutEntryPointPairHashFunc {
     size_t operator()(const PipelineLayoutEntryPointPair& pair) const;
 };

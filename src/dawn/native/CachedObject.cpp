@@ -46,8 +46,4 @@ const CacheKey& CachedObject::GetCacheKey() const {
     return mCacheKey;
 }
 
-CacheKey* CachedObject::GetCacheKey() {
-    return &mCacheKey;
-}
-
 }  // namespace dawn::native

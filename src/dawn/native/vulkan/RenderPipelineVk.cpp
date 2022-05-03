@@ -21,6 +21,7 @@
 #include "dawn/native/CreatePipelineAsyncTask.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
+#include "dawn/native/vulkan/PipelineCacheVk.h"
 #include "dawn/native/vulkan/PipelineLayoutVk.h"
 #include "dawn/native/vulkan/RenderPassCache.h"
 #include "dawn/native/vulkan/ShaderModuleVk.h"
@@ -331,7 +332,10 @@ Ref<RenderPipeline> RenderPipeline::CreateUninitialized(
 
 MaybeError RenderPipeline::Initialize() {
     Device* device = ToBackend(GetDevice());
-    PipelineLayout* layout = ToBackend(GetLayout());
+    const PipelineLayout* layout = ToBackend(GetLayout());
+
+    // Vulkan devices need cache UUID field to be serialized into pipeline cache keys.
+    mCacheKey.Record(device->GetDeviceInfo().properties.pipelineCacheUUID);
 
     // There are at most 2 shader stages in render pipeline, i.e. vertex and fragment
     std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
@@ -381,7 +385,7 @@ MaybeError RenderPipeline::Initialize() {
         stageCount++;
 
         // Record cache key for each shader since it will become inaccessible later on.
-        GetCacheKey()->Record(stage).RecordIterable(*spirv);
+        mCacheKey.Record(stage).RecordIterable(*spirv);
     }
 
     PipelineVertexInputStateCreateInfoTemporaryAllocations tempAllocations;
@@ -528,7 +532,7 @@ MaybeError RenderPipeline::Initialize() {
 
         query.SetSampleCount(GetSampleCount());
 
-        GetCacheKey()->Record(query);
+        mCacheKey.Record(query);
         DAWN_TRY_ASSIGN(renderPass, device->GetRenderPassCache()->GetRenderPass(query));
     }
 
@@ -557,13 +561,16 @@ MaybeError RenderPipeline::Initialize() {
     createInfo.basePipelineIndex = -1;
 
     // Record cache key information now since createInfo is not stored.
-    GetCacheKey()->Record(createInfo,
-                          static_cast<const RenderPipeline*>(this)->GetLayout()->GetCacheKey());
+    mCacheKey.Record(createInfo, layout->GetCacheKey());
 
+    // Try to see if we have anything in the blob cache.
+    Ref<PipelineCache> cache = ToBackend(GetDevice()->GetOrCreatePipelineCache(GetCacheKey()));
     DAWN_TRY(
-        CheckVkSuccess(device->fn.CreateGraphicsPipelines(device->GetVkDevice(), VkPipelineCache{},
+        CheckVkSuccess(device->fn.CreateGraphicsPipelines(device->GetVkDevice(), cache->GetHandle(),
                                                           1, &createInfo, nullptr, &*mHandle),
-                       "CreateGraphicsPipeline"));
+                       "CreateGraphicsPipelines"));
+    // TODO(dawn:549): Flush is currently in the same thread, but perhaps deferrable.
+    DAWN_TRY(cache->FlushIfNeeded());
 
     SetLabelImpl();
 

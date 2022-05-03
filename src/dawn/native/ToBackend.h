@@ -59,6 +59,11 @@ struct ToBackendTraits<DeviceBase, BackendTraits> {
 };
 
 template <typename BackendTraits>
+struct ToBackendTraits<PipelineCacheBase, BackendTraits> {
+    using BackendType = typename BackendTraits::PipelineCacheType;
+};
+
+template <typename BackendTraits>
 struct ToBackendTraits<PipelineLayoutBase, BackendTraits> {
     using BackendType = typename BackendTraits::PipelineLayoutType;
 };

@@ -117,7 +117,7 @@ MaybeError BindGroupLayout::Initialize() {
     createInfo.pBindings = bindings.data();
 
     // Record cache key information now since the createInfo is not stored.
-    GetCacheKey()->Record(createInfo);
+    mCacheKey.Record(createInfo);
 
     Device* device = ToBackend(GetDevice());
     DAWN_TRY(CheckVkSuccess(device->fn.CreateDescriptorSetLayout(device->GetVkDevice(), &createInfo,

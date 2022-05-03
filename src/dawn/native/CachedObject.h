@@ -43,8 +43,8 @@ class CachedObject {
     const CacheKey& GetCacheKey() const;
 
   protected:
-    // Protected accessor for derived classes to access and modify the key.
-    CacheKey* GetCacheKey();
+    // Cache key member is protected so that derived classes can modify it.
+    CacheKey mCacheKey;
 
   private:
     friend class DeviceBase;
@@ -57,7 +57,6 @@ class CachedObject {
 
     size_t mContentHash = 0;
     bool mIsContentHashInitialized = false;
-    CacheKey mCacheKey;
 };
 
 }  // namespace dawn::native

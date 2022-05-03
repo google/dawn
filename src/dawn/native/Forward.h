@@ -35,6 +35,7 @@ class ComputePassEncoder;
 class ExternalTextureBase;
 class InstanceBase;
 class PipelineBase;
+class PipelineCacheBase;
 class PipelineLayoutBase;
 class QuerySetBase;
 class QueueBase;

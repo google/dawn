@@ -21,8 +21,9 @@
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/VulkanError.h"
 
-namespace {
+namespace dawn::native::vulkan {
 
+namespace {
 class VulkanErrorInjectorTests : public DawnTest {
   public:
     void SetUp() override {
@@ -35,7 +36,6 @@ class VulkanErrorInjectorTests : public DawnTest {
   protected:
     dawn::native::vulkan::Device* mDeviceVk;
 };
-
 }  // anonymous namespace
 
 TEST_P(VulkanErrorInjectorTests, InjectErrorOnCreateBuffer) {
@@ -49,15 +49,15 @@ TEST_P(VulkanErrorInjectorTests, InjectErrorOnCreateBuffer) {
     {
         VkBuffer buffer = VK_NULL_HANDLE;
         EXPECT_EQ(
-            mDeviceVk->fn.CreateBuffer(mDeviceVk->GetVkDevice(), &createInfo, nullptr, &buffer),
+            mDeviceVk->fn.CreateBuffer(mDeviceVk->GetVkDevice(), &createInfo, nullptr, &*buffer),
             VK_SUCCESS);
         mDeviceVk->fn.DestroyBuffer(mDeviceVk->GetVkDevice(), buffer, nullptr);
     }
 
     auto CreateTestBuffer = [&]() -> bool {
         VkBuffer buffer = VK_NULL_HANDLE;
-        dawn::native::MaybeError err = CheckVkSuccess(
-            mDeviceVk->fn.CreateBuffer(mDeviceVk->GetVkDevice(), &createInfo, nullptr, &buffer),
+        MaybeError err = CheckVkSuccess(
+            mDeviceVk->fn.CreateBuffer(mDeviceVk->GetVkDevice(), &createInfo, nullptr, &*buffer),
             "vkCreateBuffer");
         if (err.IsError()) {
             // The handle should never be written to, even for mock failures.
@@ -78,47 +78,49 @@ TEST_P(VulkanErrorInjectorTests, InjectErrorOnCreateBuffer) {
         EXPECT_TRUE(CreateTestBuffer());
 
         // The error injector call count should be empty
-        EXPECT_EQ(dawn::native::AcquireErrorInjectorCallCount(), 0u);
+        EXPECT_EQ(AcquireErrorInjectorCallCount(), 0u);
     }
 
     // Test error injection works.
-    dawn::native::EnableErrorInjector();
+    EnableErrorInjector();
     {
         EXPECT_TRUE(CreateTestBuffer());
         EXPECT_TRUE(CreateTestBuffer());
 
         // The error injector call count should be two.
-        EXPECT_EQ(dawn::native::AcquireErrorInjectorCallCount(), 2u);
+        EXPECT_EQ(AcquireErrorInjectorCallCount(), 2u);
 
         // Inject an error at index 0. The first should fail, the second succeed.
         {
-            dawn::native::InjectErrorAt(0u);
+            InjectErrorAt(0u);
             EXPECT_FALSE(CreateTestBuffer());
             EXPECT_TRUE(CreateTestBuffer());
 
-            dawn::native::ClearErrorInjector();
+            ClearErrorInjector();
         }
 
         // Inject an error at index 1. The second should fail, the first succeed.
         {
-            dawn::native::InjectErrorAt(1u);
+            InjectErrorAt(1u);
             EXPECT_TRUE(CreateTestBuffer());
             EXPECT_FALSE(CreateTestBuffer());
 
-            dawn::native::ClearErrorInjector();
+            ClearErrorInjector();
         }
 
         // Inject an error and then clear the injector. Calls should be successful.
         {
-            dawn::native::InjectErrorAt(0u);
-            dawn::native::DisableErrorInjector();
+            InjectErrorAt(0u);
+            DisableErrorInjector();
 
             EXPECT_TRUE(CreateTestBuffer());
             EXPECT_TRUE(CreateTestBuffer());
 
-            dawn::native::ClearErrorInjector();
+            ClearErrorInjector();
         }
     }
 }
 
 DAWN_INSTANTIATE_TEST(VulkanErrorInjectorTests, VulkanBackend());
+
+}  // namespace dawn::native::vulkan

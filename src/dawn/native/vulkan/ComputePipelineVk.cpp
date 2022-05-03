@@ -21,6 +21,7 @@
 #include "dawn/native/CreatePipelineAsyncTask.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
+#include "dawn/native/vulkan/PipelineCacheVk.h"
 #include "dawn/native/vulkan/PipelineLayoutVk.h"
 #include "dawn/native/vulkan/ShaderModuleVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
@@ -36,12 +37,18 @@ Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
 }
 
 MaybeError ComputePipeline::Initialize() {
+    Device* device = ToBackend(GetDevice());
+    const PipelineLayout* layout = ToBackend(GetLayout());
+
+    // Vulkan devices need cache UUID field to be serialized into pipeline cache keys.
+    mCacheKey.Record(device->GetDeviceInfo().properties.pipelineCacheUUID);
+
     VkComputePipelineCreateInfo createInfo;
     createInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
     createInfo.pNext = nullptr;
     createInfo.flags = 0;
-    createInfo.layout = ToBackend(GetLayout())->GetHandle();
-    createInfo.basePipelineHandle = ::VK_NULL_HANDLE;
+    createInfo.layout = layout->GetHandle();
+    createInfo.basePipelineHandle = VkPipeline{};
     createInfo.basePipelineIndex = -1;
 
     createInfo.stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -51,7 +58,6 @@ MaybeError ComputePipeline::Initialize() {
     // Generate a new VkShaderModule with BindingRemapper tint transform for each pipeline
     const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
     ShaderModule* module = ToBackend(computeStage.module.Get());
-    PipelineLayout* layout = ToBackend(GetLayout());
     const ShaderModule::Spirv* spirv;
     DAWN_TRY_ASSIGN((std::tie(createInfo.stage.module, spirv)),
                     module->GetHandleAndSpirv(computeStage.entryPoint.c_str(), layout));
@@ -63,8 +69,6 @@ MaybeError ComputePipeline::Initialize() {
     VkSpecializationInfo specializationInfo{};
     createInfo.stage.pSpecializationInfo = GetVkSpecializationInfo(
         computeStage, &specializationInfo, &specializationDataEntries, &specializationMapEntries);
-
-    Device* device = ToBackend(GetDevice());
 
     PNextChainBuilder stageExtChain(&createInfo.stage);
 
@@ -79,14 +83,16 @@ MaybeError ComputePipeline::Initialize() {
     }
 
     // Record cache key information now since the createInfo is not stored.
-    GetCacheKey()
-        ->Record(createInfo, static_cast<const ComputePipeline*>(this)->GetLayout())
-        .RecordIterable(*spirv);
+    mCacheKey.Record(createInfo, layout).RecordIterable(*spirv);
 
+    // Try to see if we have anything in the blob cache.
+    Ref<PipelineCache> cache = ToBackend(GetDevice()->GetOrCreatePipelineCache(GetCacheKey()));
     DAWN_TRY(
-        CheckVkSuccess(device->fn.CreateComputePipelines(device->GetVkDevice(), ::VK_NULL_HANDLE, 1,
-                                                         &createInfo, nullptr, &*mHandle),
+        CheckVkSuccess(device->fn.CreateComputePipelines(device->GetVkDevice(), cache->GetHandle(),
+                                                         1, &createInfo, nullptr, &*mHandle),
                        "CreateComputePipeline"));
+    // TODO(dawn:549): Flush is currently in the same thread, but perhaps deferrable.
+    DAWN_TRY(cache->FlushIfNeeded());
 
     SetLabelImpl();
 

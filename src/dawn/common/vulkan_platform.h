@@ -117,8 +117,6 @@ class alignas(detail::kNativeVkHandleAlignment) VkHandle {
 };
 }  // namespace detail
 
-static constexpr std::nullptr_t VK_NULL_HANDLE = nullptr;
-
 template <typename Tag, typename HandleType>
 HandleType* AsVkArray(detail::VkHandle<Tag, HandleType>* handle) {
     return reinterpret_cast<HandleType*>(handle);
@@ -179,12 +177,6 @@ HandleType* AsVkArray(detail::VkHandle<Tag, HandleType>* handle) {
 
 // Redefine VK_NULL_HANDLE for better type safety where possible.
 #undef VK_NULL_HANDLE
-#if defined(DAWN_PLATFORM_64_BIT)
 static constexpr std::nullptr_t VK_NULL_HANDLE = nullptr;
-#elif defined(DAWN_PLATFORM_32_BIT)
-static constexpr uint64_t VK_NULL_HANDLE = 0;
-#else
-#error "Unsupported platform"
-#endif
 
 #endif  // SRC_DAWN_COMMON_VULKAN_PLATFORM_H_
