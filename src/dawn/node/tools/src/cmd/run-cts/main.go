@@ -234,6 +234,7 @@ func run() error {
 			return fmt.Sprintf(`require('./src/common/tools/setup-ts-in-node.js');require('./src/common/runtime/%v.ts');`, main)
 		},
 		stdout: stdout,
+		colors: colors,
 	}
 
 	if logFilename != "" {
@@ -333,7 +334,7 @@ type logger struct {
 
 // newLogger creates a new logger instance.
 func newLogger(writer io.Writer) logger {
-	return logger{writer, 0, map[int]result{}}
+	return logger{colorable.NewNonColorable(writer), 0, map[int]result{}}
 }
 
 // logResult writes the test results to the log file in sequential order.
@@ -348,7 +349,7 @@ func (l *logger) logResults(res result) {
 		if !ok {
 			break
 		}
-		fmt.Fprintf(l.writer, "%v [%v]\n", logRes.testcase, logRes.status)
+		fmt.Fprintf(l.writer, "%v [%v]\n%v", logRes.testcase, logRes.status, logRes.message)
 		l.idx++
 	}
 }
@@ -390,6 +391,7 @@ type runner struct {
 	results                  testcaseStatuses
 	log                      logger
 	stdout                   io.WriteCloser
+	colors                   bool // Colors enabled?
 }
 
 // scanSourceTimestamps scans all the .js and .ts files in all subdirectories of
@@ -609,6 +611,9 @@ func (r *runner) runServer(id int, caseIndices <-chan int, results chan<- result
 			// Actual arguments begin here
 			"--gpu-provider", r.dawnNode,
 		}
+		if r.colors {
+			args = append(args, "--colors")
+		}
 		for _, f := range r.flags {
 			args = append(args, "--gpu-provider-flag", f)
 		}
@@ -644,8 +649,6 @@ func (r *runner) runServer(id int, caseIndices <-chan int, results chan<- result
 		case <-ctx.Done(): // cancelled
 			return ctx.Err()
 		}
-
-		return nil
 	}
 	stopServer = func() {
 		if port > 0 {
@@ -949,6 +952,9 @@ func (r *runner) runTestcase(query string) result {
 		"--gpu-provider", r.dawnNode,
 		"--verbose",
 		"--quiet",
+	}
+	if r.colors {
+		args = append(args, "--colors")
 	}
 	for _, f := range r.flags {
 		args = append(args, "--gpu-provider-flag", f)
