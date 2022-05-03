@@ -63,7 +63,7 @@
 # tags: [ webgpu-adapter-default webgpu-adapter-swiftshader ]
 # END TAG HEADER
 
-# Last rolled: 2022-05-01 07:58:31PM
+# Last rolled: 2022-05-03 05:22:44PM
 
 ################################################################################
 # webgpu:shader,execution,zero_init:compute,zero_init failures on intel-0x5912
@@ -255,11 +255,11 @@ crbug.com/dawn/0000 webgpu:api,operation,buffers,map_oom:mappedAtCreation,smalle
 crbug.com/dawn/0000 [ bigsur intel-0x3e9b ] webgpu:api,validation,image_copy,texture_related:format:* [ Failure ]
 
 ################################################################################
-# webgpu:api,validation,encoding,cmds,copyTextureToTexture:texture_format_compatibility
+# webgpu:api,validation,encoding,cmds,copyTextureToTexture:texture_format_compatibility:*
 # Partial failures across all platforms failures
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 webgpu:api,validation,encoding,cmds,copyTextureToTexture:texture_format_compatibility: [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,cmds,copyTextureToTexture:texture_format_compatibility:* [ Failure ]
 
 ################################################################################
 # texel_data failures
@@ -295,15 +295,15 @@ crbug.com/1234041 [ linux ] webgpu:api,validation,queue,copyToTexture,CopyExtern
 # createTexture validation failures
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="2d" [ Failure ]
-crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="3d" [ Failure ]
-crbug.com/dawn/0000 [ win ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="3d" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ linux ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="2d" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="2d" [ Failure ]
-crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="3d" [ Failure ]
-crbug.com/dawn/0000 [ linux ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="_undef_" [ Failure ]
-crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="_undef_" [ Failure ]
+crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="2d";* [ Failure ]
+crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="3d";* [ Failure ]
+crbug.com/dawn/0000 [ win ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="3d";* [ RetryOnFailure ]
+crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="_undef_";* [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="2d";* [ RetryOnFailure ]
+crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="2d";* [ Failure ]
+crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="3d";* [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="_undef_";* [ Failure ]
+crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="_undef_";* [ Failure ]
 crbug.com/dawn/0000 [ linux ] webgpu:api,validation,createTexture:texture_size,2d_texture,compressed_format:dimension="2d";format="astc-4x4-unorm-srgb";size=[1,8192,1] [ RetryOnFailure ]
 
 ################################################################################
@@ -393,6 +393,13 @@ crbug.com/dawn/0000 webgpu:api,validation,createRenderPipeline:pipeline_output_t
 crbug.com/dawn/0000 webgpu:api,validation,createRenderPipeline:pipeline_output_targets,blend_min_max:isAsync=true;component="color" [ Slow ]
 crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,binary,f32_arithmetic:* [ Slow ]
 crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,binary,f32_logical:* [ Slow ]
+
+################################################################################
+# Hang forever - crbug.com/1322180
+# KEEP
+################################################################################
+crbug.com/1322180 webgpu:api,operation,adapter,requestDevice_limits:worse_than_default:limit="minStorageBufferOffsetAlignment" [ Skip ]
+crbug.com/1322180 webgpu:api,operation,adapter,requestDevice_limits:worse_than_default:limit="minUniformBufferOffsetAlignment" [ Skip ]
 
 # New failures. Please triage:
 crbug.com/dawn/0000 webgpu:api,validation,createView:array_layers:textureDimension="2d";viewDimension="_undef_" [ Failure ]
