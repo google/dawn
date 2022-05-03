@@ -35,12 +35,11 @@ interop::Interface<interop::GPUBindGroupLayout> GPUComputePipeline::getBindGroup
         env, pipeline_.GetBindGroupLayout(index));
 }
 
-std::variant<std::string, interop::UndefinedType> GPUComputePipeline::getLabel(Napi::Env) {
+std::string GPUComputePipeline::getLabel(Napi::Env) {
     UNIMPLEMENTED();
 }
 
-void GPUComputePipeline::setLabel(Napi::Env,
-                                  std::variant<std::string, interop::UndefinedType> value) {
+void GPUComputePipeline::setLabel(Napi::Env, std::string value) {
     UNIMPLEMENTED();
 }
 

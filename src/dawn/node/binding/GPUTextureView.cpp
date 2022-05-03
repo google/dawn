@@ -25,11 +25,11 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 GPUTextureView::GPUTextureView(wgpu::TextureView view) : view_(std::move(view)) {}
 
-std::variant<std::string, interop::UndefinedType> GPUTextureView::getLabel(Napi::Env) {
+std::string GPUTextureView::getLabel(Napi::Env) {
     UNIMPLEMENTED();
 }
 
-void GPUTextureView::setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) {
+void GPUTextureView::setLabel(Napi::Env, std::string value) {
     UNIMPLEMENTED();
 }
 

@@ -235,6 +235,8 @@ class Converter {
 
     [[nodiscard]] bool Convert(wgpu::FilterMode& out, const interop::GPUFilterMode& in);
 
+    [[nodiscard]] bool Convert(wgpu::FilterMode& out, const interop::GPUMipmapFilterMode& in);
+
     [[nodiscard]] bool Convert(wgpu::ComputePipelineDescriptor& out,
                                const interop::GPUComputePipelineDescriptor& in);
 

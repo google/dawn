@@ -241,12 +241,11 @@ void GPURenderPassEncoder::drawIndexedIndirect(
     enc_.DrawIndexedIndirect(b, o);
 }
 
-std::variant<std::string, interop::UndefinedType> GPURenderPassEncoder::getLabel(Napi::Env) {
+std::string GPURenderPassEncoder::getLabel(Napi::Env) {
     UNIMPLEMENTED();
 }
 
-void GPURenderPassEncoder::setLabel(Napi::Env,
-                                    std::variant<std::string, interop::UndefinedType> value) {
+void GPURenderPassEncoder::setLabel(Napi::Env, std::string value) {
     UNIMPLEMENTED();
 }
 

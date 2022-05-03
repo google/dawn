@@ -28,11 +28,11 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 GPURenderBundle::GPURenderBundle(wgpu::RenderBundle bundle) : bundle_(std::move(bundle)) {}
 
-std::variant<std::string, interop::UndefinedType> GPURenderBundle::getLabel(Napi::Env) {
+std::string GPURenderBundle::getLabel(Napi::Env) {
     UNIMPLEMENTED();
 }
 
-void GPURenderBundle::setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) {
+void GPURenderBundle::setLabel(Napi::Env, std::string value) {
     UNIMPLEMENTED();
 }
 

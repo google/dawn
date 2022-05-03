@@ -474,11 +474,11 @@ interop::Promise<std::optional<interop::GPUError>> GPUDevice::popErrorScope(Napi
     return promise;
 }
 
-std::variant<std::string, interop::UndefinedType> GPUDevice::getLabel(Napi::Env) {
+std::string GPUDevice::getLabel(Napi::Env) {
     UNIMPLEMENTED();
 }
 
-void GPUDevice::setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) {
+void GPUDevice::setLabel(Napi::Env, std::string value) {
     UNIMPLEMENTED();
 }
 

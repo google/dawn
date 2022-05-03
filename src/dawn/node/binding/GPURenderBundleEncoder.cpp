@@ -181,12 +181,11 @@ void GPURenderBundleEncoder::drawIndexedIndirect(
     enc_.DrawIndexedIndirect(b, o);
 }
 
-std::variant<std::string, interop::UndefinedType> GPURenderBundleEncoder::getLabel(Napi::Env) {
+std::string GPURenderBundleEncoder::getLabel(Napi::Env) {
     UNIMPLEMENTED();
 }
 
-void GPURenderBundleEncoder::setLabel(Napi::Env,
-                                      std::variant<std::string, interop::UndefinedType> value) {
+void GPURenderBundleEncoder::setLabel(Napi::Env, std::string value) {
     UNIMPLEMENTED();
 }
 

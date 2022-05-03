@@ -51,8 +51,8 @@ class GPUQueue final : public interop::GPUQueue {
                                     interop::GPUImageCopyExternalImage source,
                                     interop::GPUImageCopyTextureTagged destination,
                                     interop::GPUExtent3D copySize) override;
-    std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
-    void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
+    std::string getLabel(Napi::Env) override;
+    void setLabel(Napi::Env, std::string value) override;
 
   private:
     wgpu::Queue queue_;

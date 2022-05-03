@@ -84,8 +84,8 @@ class GPUDevice final : public interop::GPUDevice {
         Napi::Env env) override;
     void pushErrorScope(Napi::Env, interop::GPUErrorFilter filter) override;
     interop::Promise<std::optional<interop::GPUError>> popErrorScope(Napi::Env env) override;
-    std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
-    void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
+    std::string getLabel(Napi::Env) override;
+    void setLabel(Napi::Env, std::string value) override;
     interop::Interface<interop::EventHandler> getOnuncapturederror(Napi::Env) override;
     void setOnuncapturederror(Napi::Env, interop::Interface<interop::EventHandler> value) override;
     void addEventListener(

@@ -169,11 +169,11 @@ void GPUBuffer::DetachMappings() {
     mapped_.clear();
 }
 
-std::variant<std::string, interop::UndefinedType> GPUBuffer::getLabel(Napi::Env) {
+std::string GPUBuffer::getLabel(Napi::Env) {
     UNIMPLEMENTED();
 }
 
-void GPUBuffer::setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) {
+void GPUBuffer::setLabel(Napi::Env, std::string value) {
     UNIMPLEMENTED();
 }
 

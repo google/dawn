@@ -34,8 +34,8 @@ class GPUTextureView final : public interop::GPUTextureView {
     inline operator const wgpu::TextureView&() const { return view_; }
 
     // interop::GPUTextureView interface compliance
-    std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
-    void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
+    std::string getLabel(Napi::Env) override;
+    void setLabel(Napi::Env, std::string value) override;
 
   private:
     wgpu::TextureView view_;

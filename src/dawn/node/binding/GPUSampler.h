@@ -32,8 +32,8 @@ class GPUSampler final : public interop::GPUSampler {
     inline operator const wgpu::Sampler&() const { return sampler_; }
 
     // interop::GPUSampler interface compliance
-    std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
-    void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
+    std::string getLabel(Napi::Env) override;
+    void setLabel(Napi::Env, std::string value) override;
 
   private:
     wgpu::Sampler sampler_;

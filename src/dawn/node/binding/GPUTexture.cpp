@@ -54,11 +54,11 @@ void GPUTexture::destroy(Napi::Env) {
     texture_.Destroy();
 }
 
-std::variant<std::string, interop::UndefinedType> GPUTexture::getLabel(Napi::Env) {
+std::string GPUTexture::getLabel(Napi::Env) {
     UNIMPLEMENTED();
 }
 
-void GPUTexture::setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) {
+void GPUTexture::setLabel(Napi::Env, std::string value) {
     UNIMPLEMENTED();
 }
 

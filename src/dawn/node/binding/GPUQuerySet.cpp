@@ -29,11 +29,11 @@ void GPUQuerySet::destroy(Napi::Env) {
     query_set_.Destroy();
 }
 
-std::variant<std::string, interop::UndefinedType> GPUQuerySet::getLabel(Napi::Env) {
+std::string GPUQuerySet::getLabel(Napi::Env) {
     UNIMPLEMENTED();
 }
 
-void GPUQuerySet::setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) {
+void GPUQuerySet::setLabel(Napi::Env, std::string value) {
     UNIMPLEMENTED();
 }
 

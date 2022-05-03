@@ -35,12 +35,11 @@ interop::Interface<interop::GPUBindGroupLayout> GPURenderPipeline::getBindGroupL
         env, pipeline_.GetBindGroupLayout(index));
 }
 
-std::variant<std::string, interop::UndefinedType> GPURenderPipeline::getLabel(Napi::Env) {
+std::string GPURenderPipeline::getLabel(Napi::Env) {
     UNIMPLEMENTED();
 }
 
-void GPURenderPipeline::setLabel(Napi::Env,
-                                 std::variant<std::string, interop::UndefinedType> value) {
+void GPURenderPipeline::setLabel(Napi::Env, std::string value) {
     UNIMPLEMENTED();
 }
 

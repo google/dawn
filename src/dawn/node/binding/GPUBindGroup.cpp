@@ -25,11 +25,11 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 GPUBindGroup::GPUBindGroup(wgpu::BindGroup group) : group_(std::move(group)) {}
 
-std::variant<std::string, interop::UndefinedType> GPUBindGroup::getLabel(Napi::Env) {
+std::string GPUBindGroup::getLabel(Napi::Env) {
     UNIMPLEMENTED();
 }
 
-void GPUBindGroup::setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) {
+void GPUBindGroup::setLabel(Napi::Env, std::string value) {
     UNIMPLEMENTED();
 }
 

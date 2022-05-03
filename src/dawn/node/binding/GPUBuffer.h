@@ -51,8 +51,8 @@ class GPUBuffer final : public interop::GPUBuffer {
                                         std::optional<interop::GPUSize64> size) override;
     void unmap(Napi::Env) override;
     void destroy(Napi::Env) override;
-    std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
-    void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
+    std::string getLabel(Napi::Env) override;
+    void setLabel(Napi::Env, std::string value) override;
 
   private:
     void DetachMappings();

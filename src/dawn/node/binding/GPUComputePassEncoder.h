@@ -36,13 +36,13 @@ class GPUComputePassEncoder final : public interop::GPUComputePassEncoder {
 
     // interop::GPUComputePassEncoder interface compliance
     void setPipeline(Napi::Env, interop::Interface<interop::GPUComputePipeline> pipeline) override;
-    void dispatch(Napi::Env,
-                  interop::GPUSize32 workgroupCountX,
-                  interop::GPUSize32 workgroupCountY,
-                  interop::GPUSize32 workgroupCountZ) override;
-    void dispatchIndirect(Napi::Env,
-                          interop::Interface<interop::GPUBuffer> indirectBuffer,
-                          interop::GPUSize64 indirectOffset) override;
+    void dispatchWorkgroups(Napi::Env,
+                            interop::GPUSize32 workgroupCountX,
+                            interop::GPUSize32 workgroupCountY,
+                            interop::GPUSize32 workgroupCountZ) override;
+    void dispatchWorkgroupsIndirect(Napi::Env,
+                                    interop::Interface<interop::GPUBuffer> indirectBuffer,
+                                    interop::GPUSize64 indirectOffset) override;
     void end(Napi::Env) override;
     void setBindGroup(Napi::Env,
                       interop::GPUIndex32 index,
@@ -57,8 +57,8 @@ class GPUComputePassEncoder final : public interop::GPUComputePassEncoder {
     void pushDebugGroup(Napi::Env, std::string groupLabel) override;
     void popDebugGroup(Napi::Env) override;
     void insertDebugMarker(Napi::Env, std::string markerLabel) override;
-    std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
-    void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
+    std::string getLabel(Napi::Env) override;
+    void setLabel(Napi::Env, std::string value) override;
 
   private:
     wgpu::ComputePassEncoder enc_;

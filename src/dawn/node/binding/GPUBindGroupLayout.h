@@ -34,8 +34,8 @@ class GPUBindGroupLayout final : public interop::GPUBindGroupLayout {
     inline operator const wgpu::BindGroupLayout&() const { return layout_; }
 
     // interop::GPUBindGroupLayout interface compliance
-    std::variant<std::string, interop::UndefinedType> getLabel(Napi::Env) override;
-    void setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) override;
+    std::string getLabel(Napi::Env) override;
+    void setLabel(Napi::Env, std::string value) override;
 
   private:
     wgpu::BindGroupLayout layout_;

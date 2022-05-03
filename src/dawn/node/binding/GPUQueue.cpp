@@ -148,11 +148,11 @@ void GPUQueue::copyExternalImageToTexture(Napi::Env,
     UNIMPLEMENTED();
 }
 
-std::variant<std::string, interop::UndefinedType> GPUQueue::getLabel(Napi::Env) {
+std::string GPUQueue::getLabel(Napi::Env) {
     UNIMPLEMENTED();
 }
 
-void GPUQueue::setLabel(Napi::Env, std::variant<std::string, interop::UndefinedType> value) {
+void GPUQueue::setLabel(Napi::Env, std::string value) {
     UNIMPLEMENTED();
 }
 

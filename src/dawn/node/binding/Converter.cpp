@@ -1184,6 +1184,20 @@ bool Converter::Convert(wgpu::FilterMode& out, const interop::GPUFilterMode& in)
     return false;
 }
 
+bool Converter::Convert(wgpu::FilterMode& out, const interop::GPUMipmapFilterMode& in) {
+    out = wgpu::FilterMode::Nearest;
+    switch (in) {
+        case interop::GPUMipmapFilterMode::kNearest:
+            out = wgpu::FilterMode::Nearest;
+            return true;
+        case interop::GPUMipmapFilterMode::kLinear:
+            out = wgpu::FilterMode::Linear;
+            return true;
+    }
+    Napi::Error::New(env, "invalid value for GPUFilterMode").ThrowAsJavaScriptException();
+    return false;
+}
+
 bool Converter::Convert(wgpu::ComputePipelineDescriptor& out,
                         const interop::GPUComputePipelineDescriptor& in) {
     return Convert(out.label, in.label) &&    //
