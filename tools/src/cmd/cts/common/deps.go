@@ -57,10 +57,6 @@ func UpdateCTSHashInDeps(deps, newCTSHash string) (newDEPS, oldCTSHash string, e
 	b.WriteString(deps[end:])
 
 	newDEPS = b.String()
-	if deps == newDEPS {
-		fmt.Println("CTS is already up to date")
-		return "", "", nil
-	}
 
 	if s := container.NewSet(oldCTSHashes...); len(s) > 1 {
 		fmt.Println("DEPS contained multiple hashes for CTS, using first for logs")

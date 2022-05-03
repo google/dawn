@@ -30,6 +30,7 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/buildbucket"
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
+	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/cts/expectations"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
 	"dawn.googlesource.com/dawn/tools/src/gerrit"
@@ -56,6 +57,7 @@ type rollerFlags struct {
 	tscPath  string
 	auth     authcli.Flags
 	cacheDir string
+	force    bool // Create a new roll, even if CTS is up to date
 	rebuild  bool // Rebuild the expectations file from scratch
 	preserve bool // If false, abandon past roll changes
 }
@@ -79,6 +81,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.StringVar(&c.flags.gitPath, "git", gitPath, "path to git")
 	flag.StringVar(&c.flags.tscPath, "tsc", tscPath, "path to tsc")
 	flag.StringVar(&c.flags.cacheDir, "cache", common.DefaultCacheDir, "path to the results cache")
+	flag.BoolVar(&c.flags.force, "force", false, "create a new roll, even if CTS is up to date")
 	flag.BoolVar(&c.flags.rebuild, "rebuild", false, "rebuild the expectation file from scratch")
 	flag.BoolVar(&c.flags.preserve, "preserve", false, "do not abandon existing rolls")
 
@@ -179,8 +182,9 @@ func (r *roller) roll(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	if updatedDEPS == "" {
+	if newCTSHash == oldCTSHash && !r.flags.force {
 		// Already up to date
+		fmt.Println("CTS is already up to date")
 		return nil
 	}
 
@@ -421,6 +425,29 @@ func (r *roller) rollCommitMessage(
 	msg.WriteString("\n")
 	msg.WriteString("Created with './tools/run cts roll'")
 	msg.WriteString("\n")
+	msg.WriteString("\n")
+	if len(r.cfg.Builders) > 0 {
+		msg.WriteString("Cq-Include-Trybots: ")
+		buildersByBucket := container.NewMap[string, []string]()
+		for _, build := range r.cfg.Builders {
+			key := fmt.Sprintf("luci.%v.%v", build.Project, build.Bucket)
+			buildersByBucket[key] = append(buildersByBucket[key], build.Builder)
+		}
+		first := true
+		for _, bucket := range buildersByBucket.Keys() {
+			// Cq-Include-Trybots: luci.chromium.try:win-dawn-rel;luci.dawn.try:mac-dbg,mac-rel
+			if !first {
+				msg.WriteString(";")
+			}
+			first = false
+			msg.WriteString(bucket)
+			msg.WriteString(":")
+			builders := buildersByBucket[bucket]
+			sort.Strings(builders)
+			msg.WriteString(strings.Join(builders, ","))
+		}
+		msg.WriteString("\n")
+	}
 	if changeID != "" {
 		msg.WriteString("Change-Id: ")
 		msg.WriteString(changeID)

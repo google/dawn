@@ -62,9 +62,11 @@ func (r *ResultSource) RegisterFlags(cfg Config) {
 }
 
 // GetResults loads or fetches the results, based on the values of r.
+// GetResults will update the ResultSource with the inferred patchset, if a file
+// and specific patchset was not specified.
 func (r *ResultSource) GetResults(ctx context.Context, cfg Config, auth auth.Options) (result.List, error) {
 	// Check that File and Patchset weren't both specified
-	ps := r.Patchset
+	ps := &r.Patchset
 	if r.File != "" && ps.Change != 0 {
 		fmt.Fprintln(flag.CommandLine.Output(), "only one of --results and --cl can be specified")
 		return nil, subcmd.ErrInvalidCLA
@@ -97,7 +99,9 @@ func (r *ResultSource) GetResults(ctx context.Context, cfg Config, auth auth.Opt
 		if err != nil {
 			return nil, err
 		}
-		results, ps, err := MostRecentResultsForChange(ctx, cfg, r.CacheDir, gerrit, bb, rdb, latest.Number)
+		fmt.Printf("scanning for latest patchset of %v...\n", latest.Number)
+		var results result.List
+		results, *ps, err = MostRecentResultsForChange(ctx, cfg, r.CacheDir, gerrit, bb, rdb, latest.Number)
 		if err != nil {
 			return nil, err
 		}
@@ -112,7 +116,7 @@ func (r *ResultSource) GetResults(ctx context.Context, cfg Config, auth auth.Opt
 		if err != nil {
 			return nil, err
 		}
-		ps, err = gerrit.LatestPatchest(strconv.Itoa(ps.Change))
+		*ps, err = gerrit.LatestPatchest(strconv.Itoa(ps.Change))
 		if err != nil {
 			err := fmt.Errorf("failed to find latest patchset of change %v: %w",
 				ps.Change, err)
@@ -123,12 +127,12 @@ func (r *ResultSource) GetResults(ctx context.Context, cfg Config, auth auth.Opt
 	// Obtain the patchset's results, kicking a build if there are no results
 	// already available.
 	log.Printf("fetching results from cl %v ps %v...", ps.Change, ps.Patchset)
-	builds, err := GetOrStartBuildsAndWait(ctx, cfg, ps, bb, false)
+	builds, err := GetOrStartBuildsAndWait(ctx, cfg, *ps, bb, false)
 	if err != nil {
 		return nil, err
 	}
 
-	results, err := CacheResults(ctx, cfg, ps, r.CacheDir, rdb, builds)
+	results, err := CacheResults(ctx, cfg, *ps, r.CacheDir, rdb, builds)
 	if err != nil {
 		return nil, err
 	}

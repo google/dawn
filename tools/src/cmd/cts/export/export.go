@@ -26,13 +26,10 @@ import (
 	"strings"
 	"time"
 
-	"dawn.googlesource.com/dawn/tools/src/buildbucket"
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
-	"dawn.googlesource.com/dawn/tools/src/gerrit"
 	"dawn.googlesource.com/dawn/tools/src/git"
 	"dawn.googlesource.com/dawn/tools/src/gitiles"
-	"dawn.googlesource.com/dawn/tools/src/resultsdb"
 	"dawn.googlesource.com/dawn/tools/src/utils"
 	"go.chromium.org/luci/auth/client/authcli"
 	"golang.org/x/oauth2"
@@ -46,8 +43,8 @@ func init() {
 
 type cmd struct {
 	flags struct {
-		auth     authcli.Flags
-		cacheDir string
+		auth    authcli.Flags
+		results common.ResultSource
 	}
 }
 
@@ -61,7 +58,7 @@ func (cmd) Desc() string {
 
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
 	c.flags.auth.Register(flag.CommandLine, common.DefaultAuthOptions())
-	flag.StringVar(&c.flags.cacheDir, "cache", common.DefaultCacheDir, "path to the results cache")
+	c.flags.results.RegisterFlags(cfg)
 	return nil, nil
 }
 
@@ -114,34 +111,17 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	// Fetch the table column names
 	columns, err := fetchRow[string](s, spreadsheet, dataSheet, 0)
 
-	// Create a gerrit client, and find the latest CTS roll
-	gerrit, err := gerrit.New(cfg.Gerrit.Host, gerrit.Credentials{})
-	if err != nil {
-		return err
-	}
-	latestRoll, err := common.LatestCTSRoll(gerrit)
-	if err != nil {
-		return err
-	}
-
-	// Grab the results from the latest CTS roll
-	bb, err := buildbucket.New(ctx, auth)
-	if err != nil {
-		return err
-	}
-	rdb, err := resultsdb.New(ctx, auth)
-	if err != nil {
-		return err
-	}
-	results, ps, err := common.MostRecentResultsForChange(ctx, cfg, c.flags.cacheDir, gerrit, bb, rdb, latestRoll.Number)
+	// Grab the results
+	results, err := c.flags.results.GetResults(ctx, cfg, auth)
 	if err != nil {
 		return err
 	}
 	if len(results) == 0 {
 		return fmt.Errorf("no results found")
 	}
+	ps := c.flags.results.Patchset
 
-	// Find the CTS revision from the latest CTS roll
+	// Find the CTS revision
 	dawn, err := gitiles.New(ctx, cfg.Git.Dawn.Host, cfg.Git.Dawn.Project)
 	if err != nil {
 		return fmt.Errorf("failed to open dawn host: %w", err)
@@ -187,10 +167,20 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		}
 	}
 
+	// Insert a blank row under the column header row
+	if err := insertBlankRows(s, spreadsheet, dataSheet, 1, 1); err != nil {
+		return err
+	}
+
 	// Add a new row to the spreadsheet
-	_, err = s.Spreadsheets.Values.Append(spreadsheet.SpreadsheetId, "Data", &sheets.ValueRange{
-		Values: [][]any{data},
-	}).ValueInputOption("RAW").Do()
+	_, err = s.Spreadsheets.Values.BatchUpdate(spreadsheet.SpreadsheetId,
+		&sheets.BatchUpdateValuesRequest{
+			ValueInputOption: "RAW",
+			Data: []*sheets.ValueRange{{
+				Range:  rowRange(1, dataSheet),
+				Values: [][]any{data},
+			}},
+		}).Do()
 	if err != nil {
 		return fmt.Errorf("failed to update spreadsheet: %v", err)
 	}
@@ -230,6 +220,26 @@ func fetchRow[T any](srv *sheets.Service, spreadsheet *sheets.Spreadsheet, sheet
 		out[column] = val
 	}
 	return out, nil
+}
+
+// insertBlankRows inserts blank rows into the given sheet.
+func insertBlankRows(srv *sheets.Service, spreadsheet *sheets.Spreadsheet, sheet *sheets.Sheet, aboveRow, count int) error {
+	req := sheets.BatchUpdateSpreadsheetRequest{
+		Requests: []*sheets.Request{{
+			InsertRange: &sheets.InsertRangeRequest{
+				Range: &sheets.GridRange{
+					SheetId:       sheet.Properties.SheetId,
+					StartRowIndex: int64(aboveRow),
+					EndRowIndex:   int64(aboveRow + count),
+				},
+				ShiftDimension: "ROWS",
+			}},
+		},
+	}
+	if _, err := srv.Spreadsheets.BatchUpdate(spreadsheet.SpreadsheetId, &req).Do(); err != nil {
+		return fmt.Errorf("BatchUpdate failed: %v", err)
+	}
+	return nil
 }
 
 // countUnimplementedTests checks out the WebGPU CTS at ctsHash, builds the node

@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
@@ -337,10 +338,27 @@ func (u *updater) expectation(in Expectation, keep bool) []Expectation {
 	if keep { // Expectation chunk was marked with 'KEEP'
 		// Add a diagnostic if all tests of the expectation were 'Pass'
 		if s := results.Statuses(); len(s) == 1 && s.One() == result.Pass {
-			if c := len(results); c > 1 {
-				u.diag(Note, in.Line, "all %d tests now pass", len(results))
+			if ex := container.NewSet(in.Status...); len(ex) == 1 && ex.One() == string(result.Slow) {
+				// Expectation was 'Slow'. Give feedback on actual time taken.
+				var longest, average time.Duration
+				for _, r := range results {
+					if r.Duration > longest {
+						longest = r.Duration
+					}
+					average += r.Duration
+				}
+				if c := len(results); c > 1 {
+					average /= time.Duration(c)
+					u.diag(Note, in.Line, "longest test took %v (average %v)", longest, average)
+				} else {
+					u.diag(Note, in.Line, "test took %v", longest)
+				}
 			} else {
-				u.diag(Note, in.Line, "test now passes")
+				if c := len(results); c > 1 {
+					u.diag(Note, in.Line, "all %d tests now pass", len(results))
+				} else {
+					u.diag(Note, in.Line, "test now passes")
+				}
 			}
 		}
 		return []Expectation{in}
