@@ -41,8 +41,7 @@ size_t CachingInterfaceMock::GetNumEntries() const {
     return mCache.size();
 }
 
-size_t CachingInterfaceMock::LoadDataDefault(const WGPUDevice device,
-                                             const void* key,
+size_t CachingInterfaceMock::LoadDataDefault(const void* key,
                                              size_t keySize,
                                              void* value,
                                              size_t valueSize) {
@@ -63,8 +62,7 @@ size_t CachingInterfaceMock::LoadDataDefault(const WGPUDevice device,
     return entry->second.size();
 }
 
-void CachingInterfaceMock::StoreDataDefault(const WGPUDevice device,
-                                            const void* key,
+void CachingInterfaceMock::StoreDataDefault(const void* key,
                                             size_t keySize,
                                             const void* value,
                                             size_t valueSize) {

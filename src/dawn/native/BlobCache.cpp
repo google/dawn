@@ -70,11 +70,11 @@ CachedBlob BlobCache::LoadInternal(const CacheKey& key) {
     if (mCache == nullptr) {
         return result;
     }
-    const size_t expectedSize = mCache->LoadData(nullptr, key.data(), key.size(), nullptr, 0);
+    const size_t expectedSize = mCache->LoadData(key.data(), key.size(), nullptr, 0);
     if (expectedSize > 0) {
         result.Reset(expectedSize);
         const size_t actualSize =
-            mCache->LoadData(nullptr, key.data(), key.size(), result.Data(), expectedSize);
+            mCache->LoadData(key.data(), key.size(), result.Data(), expectedSize);
         ASSERT(expectedSize == actualSize);
     }
     return result;
@@ -86,7 +86,7 @@ void BlobCache::StoreInternal(const CacheKey& key, size_t valueSize, const void*
     if (mCache == nullptr) {
         return;
     }
-    mCache->StoreData(nullptr, key.data(), key.size(), value, valueSize);
+    mCache->StoreData(key.data(), key.size(), value, valueSize);
 }
 
 }  // namespace dawn::native

@@ -47,26 +47,12 @@ class CachingInterfaceMock : public dawn::platform::CachingInterface {
     // Returns the number of entries in the cache.
     size_t GetNumEntries() const;
 
-    MOCK_METHOD(size_t,
-                LoadData,
-                (const WGPUDevice, const void*, size_t, void*, size_t),
-                (override));
-    MOCK_METHOD(void,
-                StoreData,
-                (const WGPUDevice, const void*, size_t, const void*, size_t),
-                (override));
+    MOCK_METHOD(size_t, LoadData, (const void*, size_t, void*, size_t), (override));
+    MOCK_METHOD(void, StoreData, (const void*, size_t, const void*, size_t), (override));
 
   private:
-    size_t LoadDataDefault(const WGPUDevice device,
-                           const void* key,
-                           size_t keySize,
-                           void* value,
-                           size_t valueSize);
-    void StoreDataDefault(const WGPUDevice device,
-                          const void* key,
-                          size_t keySize,
-                          const void* value,
-                          size_t valueSize);
+    size_t LoadDataDefault(const void* key, size_t keySize, void* value, size_t valueSize);
+    void StoreDataDefault(const void* key, size_t keySize, const void* value, size_t valueSize);
 
     bool mEnabled = true;
     size_t mHitCount = 0;

@@ -64,10 +64,6 @@ class BlobCache {
 
     // Protects thread safety of access to mCache.
     std::mutex mMutex;
-
-    // TODO(dawn:549): Current CachingInterface declaration requires passing a device to each
-    //   call, but this might be unnecessary. This class just passes nullptr for those calls
-    //   right now. Eventually we can just change the interface to be more generic.
     dawn::platform::CachingInterface* mCache;
 };
 

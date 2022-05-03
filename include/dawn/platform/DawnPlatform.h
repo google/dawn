@@ -42,15 +42,10 @@ class DAWN_PLATFORM_EXPORT CachingInterface {
     // size returned. The second mode is used to query for the existence of
     // the |key| where |valueOut| is nullptr and |valueSize| must be 0.
     // The return size is non-zero if the |key| exists.
-    virtual size_t LoadData(const WGPUDevice device,
-                            const void* key,
-                            size_t keySize,
-                            void* valueOut,
-                            size_t valueSize) = 0;
+    virtual size_t LoadData(const void* key, size_t keySize, void* valueOut, size_t valueSize) = 0;
 
     // StoreData puts a |value| in the cache which corresponds to the |key|.
-    virtual void StoreData(const WGPUDevice device,
-                           const void* key,
+    virtual void StoreData(const void* key,
                            size_t keySize,
                            const void* value,
                            size_t valueSize) = 0;
