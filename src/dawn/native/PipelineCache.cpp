@@ -21,7 +21,7 @@ PipelineCacheBase::PipelineCacheBase(BlobCache* cache, const CacheKey& key)
 
 CachedBlob PipelineCacheBase::Initialize() {
     ASSERT(!mInitialized);
-    CachedBlob blob = mCache->Load(mKey);
+    CachedBlob blob = mCache != nullptr ? mCache->Load(mKey) : CachedBlob();
     mCacheHit = !blob.Empty();
     mInitialized = true;
     return blob;
@@ -33,6 +33,9 @@ bool PipelineCacheBase::CacheHit() const {
 }
 
 MaybeError PipelineCacheBase::Flush() {
+    if (mCache == nullptr) {
+        return {};
+    }
     // Try to write the data out to the persistent cache.
     CachedBlob blob;
     DAWN_TRY_ASSIGN(blob, SerializeToBlobImpl());

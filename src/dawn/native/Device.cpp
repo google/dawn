@@ -568,7 +568,10 @@ bool DeviceBase::APIPopErrorScope(wgpu::ErrorCallback callback, void* userdata) 
 }
 
 BlobCache* DeviceBase::GetBlobCache() {
-    return mInstance->GetBlobCache();
+    if (IsToggleEnabled(Toggle::EnableBlobCache)) {
+        return mInstance->GetBlobCache();
+    }
+    return nullptr;
 }
 
 MaybeError DeviceBase::ValidateObject(const ApiObjectBase* object) const {
