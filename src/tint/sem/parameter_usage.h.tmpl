@@ -16,9 +16,9 @@ namespace tint::sem {
 /// ParameterUsage is extra metadata for identifying a parameter based on its
 /// overload position
 enum class ParameterUsage {
-  kNone = -1,
+    kNone = -1,
 {{- range .Sem.UniqueParameterNames  }}
-  k{{PascalCase .}},
+    k{{PascalCase .}},
 {{- end  }}
 };
 

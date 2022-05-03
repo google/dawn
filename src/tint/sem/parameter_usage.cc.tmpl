@@ -13,15 +13,15 @@ See:
 namespace tint::sem {
 
 const char* str(ParameterUsage usage) {
-  switch (usage) {
-    case ParameterUsage::kNone:
-      return "none";
+    switch (usage) {
+        case ParameterUsage::kNone:
+            return "none";
 {{- range .Sem.UniqueParameterNames  }}
-    case ParameterUsage::k{{PascalCase .}}:
-      return "{{.}}";
+        case ParameterUsage::k{{PascalCase .}}:
+            return "{{.}}";
 {{- end  }}
-  }
-  return "<unknown>";
+    }
+    return "<unknown>";
 }
 
 }  // namespace tint::sem

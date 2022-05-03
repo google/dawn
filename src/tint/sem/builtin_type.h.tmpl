@@ -18,9 +18,9 @@ namespace tint::sem {
 
 /// Enumerator of all builtin functions
 enum class BuiltinType {
-  kNone = -1,
+    kNone = -1,
 {{- range .Sem.Functions }}
-  k{{Title .Name}},
+    k{{Title .Name}},
 {{- end }}
 };
 

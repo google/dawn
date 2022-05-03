@@ -16,28 +16,28 @@ namespace tint::sem {
 
 BuiltinType ParseBuiltinType(const std::string& name) {
 {{- range .Sem.Functions  }}
-  if (name == "{{.Name}}") {
-    return BuiltinType::k{{Title .Name}};
-  }
+    if (name == "{{.Name}}") {
+        return BuiltinType::k{{Title .Name}};
+    }
 {{- end  }}
-  return BuiltinType::kNone;
+    return BuiltinType::kNone;
 }
 
 const char* str(BuiltinType i) {
-  switch (i) {
-    case BuiltinType::kNone:
-      return "<none>";
+    switch (i) {
+        case BuiltinType::kNone:
+            return "<none>";
 {{- range .Sem.Functions  }}
-    case BuiltinType::k{{Title .Name}}:
-      return "{{.Name}}";
+        case BuiltinType::k{{Title .Name}}:
+            return "{{.Name}}";
 {{- end  }}
-  }
-  return "<unknown>";
+    }
+    return "<unknown>";
 }
 
 std::ostream& operator<<(std::ostream& out, BuiltinType i) {
-  out << str(i);
-  return out;
+    out << str(i);
+    return out;
 }
 
 }  // namespace tint::sem
