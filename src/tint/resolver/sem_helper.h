@@ -62,10 +62,6 @@ class SemHelper {
     /// @param expr the expression
     sem::Type* TypeOf(const ast::Expression* expr) const;
 
-    /// @returns the semantic type of the AST literal `lit`
-    /// @param lit the literal
-    sem::Type* TypeOf(const ast::LiteralExpression* lit);
-
     /// @returns the type name of the given semantic type, unwrapping
     /// references.
     /// @param ty the type to look up

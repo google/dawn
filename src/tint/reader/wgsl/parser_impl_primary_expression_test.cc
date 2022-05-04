@@ -44,17 +44,25 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
 
     ASSERT_EQ(call->args.size(), 4u);
     const auto& val = call->args;
-    ASSERT_TRUE(val[0]->Is<ast::SintLiteralExpression>());
-    EXPECT_EQ(val[0]->As<ast::SintLiteralExpression>()->value, 1);
+    ASSERT_TRUE(val[0]->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(val[0]->As<ast::IntLiteralExpression>()->value, 1);
+    EXPECT_EQ(val[0]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
-    ASSERT_TRUE(val[1]->Is<ast::SintLiteralExpression>());
-    EXPECT_EQ(val[1]->As<ast::SintLiteralExpression>()->value, 2);
+    ASSERT_TRUE(val[1]->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(val[1]->As<ast::IntLiteralExpression>()->value, 2);
+    EXPECT_EQ(val[1]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
-    ASSERT_TRUE(val[2]->Is<ast::SintLiteralExpression>());
-    EXPECT_EQ(val[2]->As<ast::SintLiteralExpression>()->value, 3);
+    ASSERT_TRUE(val[2]->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(val[2]->As<ast::IntLiteralExpression>()->value, 3);
+    EXPECT_EQ(val[2]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
-    ASSERT_TRUE(val[3]->Is<ast::SintLiteralExpression>());
-    EXPECT_EQ(val[3]->As<ast::SintLiteralExpression>()->value, 4);
+    ASSERT_TRUE(val[3]->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(val[3]->As<ast::IntLiteralExpression>()->value, 4);
+    EXPECT_EQ(val[3]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_ZeroConstructor) {
@@ -158,8 +166,10 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_NotEmpty) {
 
     ASSERT_EQ(call->args.size(), 2u);
 
-    ASSERT_TRUE(call->args[0]->Is<ast::UintLiteralExpression>());
-    EXPECT_EQ(call->args[0]->As<ast::UintLiteralExpression>()->value, 1u);
+    ASSERT_TRUE(call->args[0]->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(call->args[0]->As<ast::IntLiteralExpression>()->value, 1u);
+    EXPECT_EQ(call->args[0]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kU);
 
     ASSERT_TRUE(call->args[1]->Is<ast::FloatLiteralExpression>());
     EXPECT_EQ(call->args[1]->As<ast::FloatLiteralExpression>()->value, 2.f);

@@ -3042,13 +3042,18 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
             }
             return true;
         },
-        [&](const ast::SintLiteralExpression* sl) {
-            out << sl->value;
-            return true;
-        },
-        [&](const ast::UintLiteralExpression* ul) {
-            out << ul->value << "u";
-            return true;
+        [&](const ast::IntLiteralExpression* i) {
+            out << i->value;
+            switch (i->suffix) {
+                case ast::IntLiteralExpression::Suffix::kNone:
+                case ast::IntLiteralExpression::Suffix::kI:
+                    return true;
+                case ast::IntLiteralExpression::Suffix::kU:
+                    out << "u";
+                    return true;
+            }
+            diagnostics_.add_error(diag::System::Writer, "unknown integer literal suffix type");
+            return false;
         },
         [&](Default) {
             diagnostics_.add_error(diag::System::Writer, "unknown literal type");

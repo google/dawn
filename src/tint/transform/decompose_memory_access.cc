@@ -320,11 +320,9 @@ struct DecomposeMemoryAccess::State {
     /// @param expr the expression to convert to an Offset
     /// @returns an Offset for the given ast::Expression
     const Offset* ToOffset(const ast::Expression* expr) {
-        if (auto* u32 = expr->As<ast::UintLiteralExpression>()) {
-            return offsets_.Create<OffsetLiteral>(u32->value);
-        } else if (auto* i32 = expr->As<ast::SintLiteralExpression>()) {
-            if (i32->value > 0) {
-                return offsets_.Create<OffsetLiteral>(i32->value);
+        if (auto* lit = expr->As<ast::IntLiteralExpression>()) {
+            if (lit->value > 0) {
+                return offsets_.Create<OffsetLiteral>(static_cast<uint32_t>(lit->value));
             }
         }
         return offsets_.Create<OffsetExpr>(expr);

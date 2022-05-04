@@ -30,8 +30,6 @@
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/module.h"
-#include "src/tint/ast/sint_literal_expression.h"
-#include "src/tint/ast/uint_literal_expression.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/void.h"
 #include "src/tint/sem/array.h"
@@ -1523,24 +1521,31 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
             }
             return true;
         },
-        [&](const ast::SintLiteralExpression* l) {
-            // MSL (and C++) parse `-2147483648` as a `long` because it parses
-            // unary minus and `2147483648` as separate tokens, and the latter
-            // doesn't fit into an (32-bit) `int`. WGSL, OTOH, parses this as an
-            // `i32`. To avoid issues with `long` to `int` casts, emit
-            // `(2147483647 - 1)` instead, which ensures the expression type is
-            // `int`.
-            const auto int_min = std::numeric_limits<int32_t>::min();
-            if (l->ValueAsI32() == int_min) {
-                out << "(" << int_min + 1 << " - 1)";
-            } else {
-                out << l->value;
+        [&](const ast::IntLiteralExpression* i) {
+            switch (i->suffix) {
+                case ast::IntLiteralExpression::Suffix::kNone:
+                case ast::IntLiteralExpression::Suffix::kI: {
+                    // MSL (and C++) parse `-2147483648` as a `long` because it parses
+                    // unary minus and `2147483648` as separate tokens, and the latter
+                    // doesn't fit into an (32-bit) `int`. WGSL, OTOH, parses this as an
+                    // `i32`. To avoid issues with `long` to `int` casts, emit
+                    // `(2147483647 - 1)` instead, which ensures the expression type is
+                    // `int`.
+                    const auto int_min = std::numeric_limits<int32_t>::min();
+                    if (i->value == int_min) {
+                        out << "(" << int_min + 1 << " - 1)";
+                    } else {
+                        out << i->value;
+                    }
+                    return true;
+                }
+                case ast::IntLiteralExpression::Suffix::kU: {
+                    out << i->value << "u";
+                    return true;
+                }
             }
-            return true;
-        },
-        [&](const ast::UintLiteralExpression* l) {
-            out << l->value << "u";
-            return true;
+            diagnostics_.add_error(diag::System::Writer, "unknown integer literal suffix type");
+            return false;
         },
         [&](Default) {
             diagnostics_.add_error(diag::System::Writer, "unknown literal type");

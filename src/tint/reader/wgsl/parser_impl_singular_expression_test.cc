@@ -32,8 +32,10 @@ TEST_F(ParserImplTest, SingularExpression_Array_ConstantIndex) {
     auto* ident = idx->object->As<ast::IdentifierExpression>();
     EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
 
-    ASSERT_TRUE(idx->index->Is<ast::SintLiteralExpression>());
-    EXPECT_EQ(idx->index->As<ast::SintLiteralExpression>()->value, 1);
+    ASSERT_TRUE(idx->index->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(idx->index->As<ast::IntLiteralExpression>()->value, 1);
+    EXPECT_EQ(idx->index->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 }
 
 TEST_F(ParserImplTest, SingularExpression_Array_ExpressionIndex) {

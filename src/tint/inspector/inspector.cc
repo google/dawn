@@ -24,8 +24,6 @@
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/location_attribute.h"
 #include "src/tint/ast/module.h"
-#include "src/tint/ast/sint_literal_expression.h"
-#include "src/tint/ast/uint_literal_expression.h"
 #include "src/tint/sem/array.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/depth_multisampled_texture.h"
@@ -248,14 +246,16 @@ std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
             continue;
         }
 
-        if (auto* l = literal->As<ast::UintLiteralExpression>()) {
-            result[constant_id] = Scalar(l->value);
-            continue;
-        }
-
-        if (auto* l = literal->As<ast::SintLiteralExpression>()) {
-            result[constant_id] = Scalar(l->value);
-            continue;
+        if (auto* l = literal->As<ast::IntLiteralExpression>()) {
+            switch (l->suffix) {
+                case ast::IntLiteralExpression::Suffix::kNone:
+                case ast::IntLiteralExpression::Suffix::kI:
+                    result[constant_id] = Scalar(static_cast<int32_t>(l->value));
+                    continue;
+                case ast::IntLiteralExpression::Suffix::kU:
+                    result[constant_id] = Scalar(static_cast<uint32_t>(l->value));
+                    continue;
+            }
         }
 
         if (auto* l = literal->As<ast::FloatLiteralExpression>()) {

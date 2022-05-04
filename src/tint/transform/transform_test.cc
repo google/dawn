@@ -73,7 +73,7 @@ TEST_F(CreateASTTypeForTest, ArrayImplicitStride) {
 
     auto* size = arr->As<ast::Array>()->count->As<ast::IntLiteralExpression>();
     ASSERT_NE(size, nullptr);
-    EXPECT_EQ(size->ValueAsI32(), 2);
+    EXPECT_EQ(size->value, 2);
 }
 
 TEST_F(CreateASTTypeForTest, ArrayNonImplicitStride) {
@@ -88,7 +88,7 @@ TEST_F(CreateASTTypeForTest, ArrayNonImplicitStride) {
 
     auto* size = arr->As<ast::Array>()->count->As<ast::IntLiteralExpression>();
     ASSERT_NE(size, nullptr);
-    EXPECT_EQ(size->ValueAsI32(), 2);
+    EXPECT_EQ(size->value, 2);
 }
 
 TEST_F(CreateASTTypeForTest, Struct) {

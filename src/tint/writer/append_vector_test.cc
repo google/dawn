@@ -453,7 +453,7 @@ TEST_F(AppendVectorTest, ZeroVec3i32_i32) {
     ASSERT_NE(vec_0004, nullptr);
     ASSERT_EQ(vec_0004->args.size(), 4u);
     for (size_t i = 0; i < 3; i++) {
-        auto* literal = As<ast::SintLiteralExpression>(vec_0004->args[i]);
+        auto* literal = As<ast::IntLiteralExpression>(vec_0004->args[i]);
         ASSERT_NE(literal, nullptr);
         EXPECT_EQ(literal->value, 0);
     }

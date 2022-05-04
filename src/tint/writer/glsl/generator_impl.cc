@@ -2164,26 +2164,34 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
 }
 
 bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression* lit) {
-    if (auto* l = lit->As<ast::BoolLiteralExpression>()) {
-        out << (l->value ? "true" : "false");
-    } else if (auto* fl = lit->As<ast::FloatLiteralExpression>()) {
-        if (std::isinf(fl->value)) {
-            out << (fl->value >= 0 ? "uintBitsToFloat(0x7f800000u)"
-                                   : "uintBitsToFloat(0xff800000u)");
-        } else if (std::isnan(fl->value)) {
-            out << "uintBitsToFloat(0x7fc00000u)";
-        } else {
-            out << FloatToString(fl->value) << "f";
-        }
-    } else if (auto* sl = lit->As<ast::SintLiteralExpression>()) {
-        out << sl->value;
-    } else if (auto* ul = lit->As<ast::UintLiteralExpression>()) {
-        out << ul->value << "u";
-    } else {
-        diagnostics_.add_error(diag::System::Writer, "unknown literal type");
-        return false;
-    }
-    return true;
+    return Switch(
+        lit,
+        [&](const ast::BoolLiteralExpression* l) {
+            out << (l->value ? "true" : "false");
+            return true;
+        },
+        [&](const ast::FloatLiteralExpression* l) {
+            if (std::isinf(l->value)) {
+                out << (l->value >= 0 ? "uintBitsToFloat(0x7f800000u)"
+                                      : "uintBitsToFloat(0xff800000u)");
+            } else if (std::isnan(l->value)) {
+                out << "uintBitsToFloat(0x7fc00000u)";
+            } else {
+                out << FloatToString(l->value) << "f";
+            }
+            return true;
+        },
+        [&](const ast::IntLiteralExpression* l) {
+            out << l->value;
+            if (l->suffix == ast::IntLiteralExpression::Suffix::kU) {
+                out << "u";
+            }
+            return true;
+        },
+        [&](Default) {
+            diagnostics_.add_error(diag::System::Writer, "unknown literal type");
+            return false;
+        });
 }
 
 bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {

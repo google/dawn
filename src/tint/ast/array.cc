@@ -29,7 +29,7 @@ std::string SizeExprToString(const Expression* size, const SymbolTable& symbols)
         return symbols.NameFor(ident->symbol);
     }
     if (auto* literal = size->As<IntLiteralExpression>()) {
-        return std::to_string(literal->ValueAsU32());
+        return std::to_string(literal->value);
     }
     // This will never be exposed to the user as the Resolver will reject this
     // expression for array size.

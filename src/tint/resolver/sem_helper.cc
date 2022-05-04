@@ -36,17 +36,4 @@ sem::Type* SemHelper::TypeOf(const ast::Expression* expr) const {
     return sem ? const_cast<sem::Type*>(sem->Type()) : nullptr;
 }
 
-sem::Type* SemHelper::TypeOf(const ast::LiteralExpression* lit) {
-    return Switch(
-        lit, [&](const ast::SintLiteralExpression*) { return builder_->create<sem::I32>(); },
-        [&](const ast::UintLiteralExpression*) { return builder_->create<sem::U32>(); },
-        [&](const ast::FloatLiteralExpression*) { return builder_->create<sem::F32>(); },
-        [&](const ast::BoolLiteralExpression*) { return builder_->create<sem::Bool>(); },
-        [&](Default) {
-            TINT_UNREACHABLE(Resolver, builder_->Diagnostics())
-                << "Unhandled literal type: " << lit->TypeInfo().name;
-            return nullptr;
-        });
-}
-
 }  // namespace tint::resolver

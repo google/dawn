@@ -113,7 +113,7 @@ TEST_F(ResolverTest, Stmt_Case) {
     auto* assign = Assign(lhs, rhs);
     auto* block = Block(assign);
     ast::CaseSelectorList lit;
-    lit.push_back(create<ast::SintLiteralExpression>(3));
+    lit.push_back(Expr(3));
     auto* cse = create<ast::CaseStatement>(lit, block);
     auto* cond_var = Var("c", ty.i32());
     auto* sw = Switch(cond_var, cse, DefaultCase());
@@ -1922,8 +1922,8 @@ TEST_F(ResolverTest, ASTNodeNotReached) {
             b.Expr("expr");
             Resolver(&b).Resolve();
         },
-        "internal compiler error: AST node 'tint::ast::IdentifierExpression' was "
-        "not reached by the resolver");
+        "internal compiler error: AST node 'tint::ast::IdentifierExpression' was not reached by "
+        "the resolver");
 }
 
 TEST_F(ResolverTest, ASTNodeReachedTwice) {
@@ -1935,8 +1935,8 @@ TEST_F(ResolverTest, ASTNodeReachedTwice) {
             b.Global("b", b.ty.i32(), ast::StorageClass::kPrivate, expr);
             Resolver(&b).Resolve();
         },
-        "internal compiler error: AST node 'tint::ast::SintLiteralExpression' "
-        "was encountered twice in the same AST of a Program");
+        "internal compiler error: AST node 'tint::ast::IntLiteralExpression' was encountered twice "
+        "in the same AST of a Program");
 }
 
 TEST_F(ResolverTest, UnaryOp_Not) {

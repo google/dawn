@@ -19,23 +19,46 @@
 
 namespace tint::ast {
 
-/// An integer literal. This could be either signed or unsigned.
+/// An integer literal. The literal may have an 'i', 'u' or no suffix.
 class IntLiteralExpression : public Castable<IntLiteralExpression, LiteralExpression> {
   public:
-    ~IntLiteralExpression() override;
+    /// Literal suffix
+    enum class Suffix {
+        /// No suffix
+        kNone,
+        /// 'i' suffix (i32)
+        kI,
+        /// 'u' suffix (u32)
+        kU,
+    };
 
-    /// @returns the literal value as a u32
-    virtual uint32_t ValueAsU32() const = 0;
-
-    /// @returns the literal value as an i32
-    int32_t ValueAsI32() const { return static_cast<int32_t>(ValueAsU32()); }
-
-  protected:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
     /// @param src the source of this node
-    IntLiteralExpression(ProgramID pid, const Source& src);
-};  // namespace ast
+    /// @param val the literal value
+    /// @param suf the literal suffix
+    IntLiteralExpression(ProgramID pid, const Source& src, int64_t val, Suffix suf);
+
+    ~IntLiteralExpression() override;
+
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const IntLiteralExpression* Clone(CloneContext* ctx) const override;
+
+    /// The literal value
+    const int64_t value;
+
+    /// The literal suffix
+    const Suffix suffix;
+};
+
+/// Writes the integer literal suffix to the std::ostream.
+/// @param out the std::ostream to write to
+/// @param suffix the suffix to write
+/// @returns out so calls can be chained
+std::ostream& operator<<(std::ostream& out, IntLiteralExpression::Suffix suffix);
 
 }  // namespace tint::ast
 

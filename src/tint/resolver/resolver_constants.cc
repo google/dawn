@@ -39,20 +39,20 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::Expression* expr, const
 
 sem::Constant Resolver::EvaluateConstantValue(const ast::LiteralExpression* literal,
                                               const sem::Type* type) {
-    if (auto* lit = literal->As<ast::SintLiteralExpression>()) {
-        return {type, {lit->ValueAsI32()}};
-    }
-    if (auto* lit = literal->As<ast::UintLiteralExpression>()) {
-        return {type, {lit->ValueAsU32()}};
-    }
-    if (auto* lit = literal->As<ast::FloatLiteralExpression>()) {
-        return {type, {lit->value}};
-    }
-    if (auto* lit = literal->As<ast::BoolLiteralExpression>()) {
-        return {type, {lit->value}};
-    }
-    TINT_UNREACHABLE(Resolver, builder_->Diagnostics());
-    return {};
+    return Switch(
+        literal,
+        [&](const ast::IntLiteralExpression* lit) {
+            if (lit->suffix == ast::IntLiteralExpression::Suffix::kU) {
+                return sem::Constant{type, {static_cast<uint32_t>(lit->value)}};
+            }
+            return sem::Constant{type, {static_cast<int32_t>(lit->value)}};
+        },
+        [&](const ast::FloatLiteralExpression* lit) {
+            return sem::Constant{type, {lit->value}};
+        },
+        [&](const ast::BoolLiteralExpression* lit) {
+            return sem::Constant{type, {lit->value}};
+        });
 }
 
 sem::Constant Resolver::EvaluateConstantValue(const ast::CallExpression* call,

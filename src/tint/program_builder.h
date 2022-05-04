@@ -61,7 +61,6 @@
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/sampled_texture.h"
 #include "src/tint/ast/sampler.h"
-#include "src/tint/ast/sint_literal_expression.h"
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/stride_attribute.h"
@@ -71,7 +70,6 @@
 #include "src/tint/ast/switch_statement.h"
 #include "src/tint/ast/type_name.h"
 #include "src/tint/ast/u32.h"
-#include "src/tint/ast/uint_literal_expression.h"
 #include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/vector.h"
@@ -1018,27 +1016,29 @@ class ProgramBuilder {
     /// @param source the source information
     /// @param value the integer value
     /// @return a Scalar constructor for the given value
-    const ast::SintLiteralExpression* Expr(const Source& source, i32 value) {
-        return create<ast::SintLiteralExpression>(source, value);
+    const ast::IntLiteralExpression* Expr(const Source& source, i32 value) {
+        return create<ast::IntLiteralExpression>(source, value,
+                                                 ast::IntLiteralExpression::Suffix::kNone);
     }
 
     /// @param value the integer value
     /// @return a Scalar constructor for the given value
-    const ast::SintLiteralExpression* Expr(i32 value) {
-        return create<ast::SintLiteralExpression>(value);
+    const ast::IntLiteralExpression* Expr(i32 value) {
+        return create<ast::IntLiteralExpression>(value, ast::IntLiteralExpression::Suffix::kNone);
     }
 
     /// @param source the source information
     /// @param value the unsigned int value
     /// @return a Scalar constructor for the given value
-    const ast::UintLiteralExpression* Expr(const Source& source, u32 value) {
-        return create<ast::UintLiteralExpression>(source, value);
+    const ast::IntLiteralExpression* Expr(const Source& source, u32 value) {
+        return create<ast::IntLiteralExpression>(source, value,
+                                                 ast::IntLiteralExpression::Suffix::kU);
     }
 
     /// @param value the unsigned int value
     /// @return a Scalar constructor for the given value
-    const ast::UintLiteralExpression* Expr(u32 value) {
-        return create<ast::UintLiteralExpression>(value);
+    const ast::IntLiteralExpression* Expr(u32 value) {
+        return create<ast::IntLiteralExpression>(value, ast::IntLiteralExpression::Suffix::kU);
     }
 
     /// Converts `arg` to an `ast::Expression` using `Expr()`, then appends it to

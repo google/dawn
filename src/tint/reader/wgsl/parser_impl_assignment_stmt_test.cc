@@ -34,8 +34,10 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
     auto* ident = a->lhs->As<ast::IdentifierExpression>();
     EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
 
-    ASSERT_TRUE(a->rhs->Is<ast::SintLiteralExpression>());
-    EXPECT_EQ(a->rhs->As<ast::SintLiteralExpression>()->value, 123);
+    ASSERT_TRUE(a->rhs->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(a->rhs->As<ast::IntLiteralExpression>()->value, 123);
+    EXPECT_EQ(a->rhs->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
@@ -51,8 +53,10 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
     ASSERT_NE(a->lhs, nullptr);
     ASSERT_NE(a->rhs, nullptr);
 
-    ASSERT_TRUE(a->rhs->Is<ast::SintLiteralExpression>());
-    EXPECT_EQ(a->rhs->As<ast::SintLiteralExpression>()->value, 123);
+    ASSERT_TRUE(a->rhs->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(a->rhs->As<ast::IntLiteralExpression>()->value, 123);
+    EXPECT_EQ(a->rhs->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
     ASSERT_TRUE(a->lhs->Is<ast::MemberAccessorExpression>());
     auto* mem = a->lhs->As<ast::MemberAccessorExpression>();
@@ -65,8 +69,8 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
     auto* idx = mem->structure->As<ast::IndexAccessorExpression>();
 
     ASSERT_NE(idx->index, nullptr);
-    ASSERT_TRUE(idx->index->Is<ast::SintLiteralExpression>());
-    EXPECT_EQ(idx->index->As<ast::SintLiteralExpression>()->value, 2);
+    ASSERT_TRUE(idx->index->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(idx->index->As<ast::IntLiteralExpression>()->value, 2);
 
     ASSERT_TRUE(idx->object->Is<ast::MemberAccessorExpression>());
     mem = idx->object->As<ast::MemberAccessorExpression>();
@@ -87,7 +91,7 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToPhony) {
-    auto p = parser("_ = 123");
+    auto p = parser("_ = 123i");
     auto e = p->assignment_stmt();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
@@ -99,14 +103,16 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToPhony) {
     ASSERT_NE(a->lhs, nullptr);
     ASSERT_NE(a->rhs, nullptr);
 
-    ASSERT_TRUE(a->rhs->Is<ast::SintLiteralExpression>());
-    EXPECT_EQ(a->rhs->As<ast::SintLiteralExpression>()->value, 123);
+    ASSERT_TRUE(a->rhs->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(a->rhs->As<ast::IntLiteralExpression>()->value, 123);
+    EXPECT_EQ(a->rhs->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kI);
 
     ASSERT_TRUE(a->lhs->Is<ast::PhonyExpression>());
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_Parses_CompoundOp) {
-    auto p = parser("a += 123");
+    auto p = parser("a += 123u");
     auto e = p->assignment_stmt();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
@@ -123,8 +129,10 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_CompoundOp) {
     auto* ident = a->lhs->As<ast::IdentifierExpression>();
     EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
 
-    ASSERT_TRUE(a->rhs->Is<ast::SintLiteralExpression>());
-    EXPECT_EQ(a->rhs->As<ast::SintLiteralExpression>()->value, 123);
+    ASSERT_TRUE(a->rhs->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(a->rhs->As<ast::IntLiteralExpression>()->value, 123);
+    EXPECT_EQ(a->rhs->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kU);
 }
 
 TEST_F(ParserImplTest, AssignmentStmt_MissingEqual) {

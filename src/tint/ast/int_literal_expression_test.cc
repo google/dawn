@@ -19,14 +19,25 @@ namespace {
 
 using IntLiteralExpressionTest = TestHelper;
 
-TEST_F(IntLiteralExpressionTest, Sint_IsInt) {
-    auto* i = create<SintLiteralExpression>(47);
+TEST_F(IntLiteralExpressionTest, SuffixNone) {
+    auto* i = create<IntLiteralExpression>(42, IntLiteralExpression::Suffix::kNone);
     ASSERT_TRUE(i->Is<IntLiteralExpression>());
+    EXPECT_EQ(i->value, 42);
+    EXPECT_EQ(i->suffix, IntLiteralExpression::Suffix::kNone);
 }
 
-TEST_F(IntLiteralExpressionTest, Uint_IsInt) {
-    auto* i = create<UintLiteralExpression>(42);
-    EXPECT_TRUE(i->Is<IntLiteralExpression>());
+TEST_F(IntLiteralExpressionTest, SuffixI) {
+    auto* i = create<IntLiteralExpression>(42, IntLiteralExpression::Suffix::kI);
+    ASSERT_TRUE(i->Is<IntLiteralExpression>());
+    EXPECT_EQ(i->value, 42);
+    EXPECT_EQ(i->suffix, IntLiteralExpression::Suffix::kI);
+}
+
+TEST_F(IntLiteralExpressionTest, SuffixU) {
+    auto* i = create<IntLiteralExpression>(42, IntLiteralExpression::Suffix::kU);
+    ASSERT_TRUE(i->Is<IntLiteralExpression>());
+    EXPECT_EQ(i->value, 42);
+    EXPECT_EQ(i->suffix, IntLiteralExpression::Suffix::kU);
 }
 
 }  // namespace

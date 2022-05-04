@@ -37,7 +37,6 @@
 #include "src/tint/ast/multisampled_texture.h"
 #include "src/tint/ast/pointer.h"
 #include "src/tint/ast/sampled_texture.h"
-#include "src/tint/ast/sint_literal_expression.h"
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/stride_attribute.h"
@@ -46,7 +45,6 @@
 #include "src/tint/ast/struct_member_size_attribute.h"
 #include "src/tint/ast/type_name.h"
 #include "src/tint/ast/u32.h"
-#include "src/tint/ast/uint_literal_expression.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/vector.h"
 #include "src/tint/ast/void.h"
@@ -259,20 +257,16 @@ bool GeneratorImpl::EmitCall(std::ostream& out, const ast::CallExpression* expr)
 bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression* lit) {
     return Switch(
         lit,
-        [&](const ast::BoolLiteralExpression* bl) {  //
-            out << (bl->value ? "true" : "false");
+        [&](const ast::BoolLiteralExpression* l) {  //
+            out << (l->value ? "true" : "false");
             return true;
         },
-        [&](const ast::FloatLiteralExpression* fl) {  //
-            out << FloatToBitPreservingString(fl->value);
+        [&](const ast::FloatLiteralExpression* l) {  //
+            out << FloatToBitPreservingString(l->value);
             return true;
         },
-        [&](const ast::SintLiteralExpression* sl) {  //
-            out << sl->value;
-            return true;
-        },
-        [&](const ast::UintLiteralExpression* ul) {  //
-            out << ul->value << "u";
+        [&](const ast::IntLiteralExpression* l) {  //
+            out << l->value << l->suffix;
             return true;
         },
         [&](Default) {  //

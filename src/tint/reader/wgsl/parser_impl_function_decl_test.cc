@@ -116,13 +116,19 @@ TEST_F(ParserImplTest, FunctionDecl_AttributeList) {
     auto values = attributes[0]->As<ast::WorkgroupAttribute>()->Values();
 
     ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->value, 2);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
     ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 3u);
+    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->value, 3);
+    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
     ASSERT_TRUE(values[2]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
+    EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->value, 4);
+    EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
     auto* body = f->body;
     ASSERT_EQ(body->statements.size(), 1u);
@@ -155,13 +161,19 @@ fn main() { return; })");
     auto values = attributes[0]->As<ast::WorkgroupAttribute>()->Values();
 
     ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->value, 2);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
     ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 3u);
+    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->value, 3);
+    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
     ASSERT_TRUE(values[2]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
+    EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->value, 4);
+    EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
     ASSERT_TRUE(attributes[1]->Is<ast::StageAttribute>());
     EXPECT_EQ(attributes[1]->As<ast::StageAttribute>()->stage, ast::PipelineStage::kCompute);
@@ -198,13 +210,19 @@ fn main() { return; })");
     auto values = attrs[0]->As<ast::WorkgroupAttribute>()->Values();
 
     ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->value, 2);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
     ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 3u);
+    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->value, 3);
+    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
     ASSERT_TRUE(values[2]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
+    EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->value, 4);
+    EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
     ASSERT_TRUE(attrs[1]->Is<ast::StageAttribute>());
     EXPECT_EQ(attrs[1]->As<ast::StageAttribute>()->stage, ast::PipelineStage::kCompute);

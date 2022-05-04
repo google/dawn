@@ -174,8 +174,6 @@ set(TINT_LIB_SRCS
   ast/sampled_texture.h
   ast/sampler.cc
   ast/sampler.h
-  ast/sint_literal_expression.cc
-  ast/sint_literal_expression.h
   ast/stage_attribute.cc
   ast/stage_attribute.h
   ast/statement.cc
@@ -211,8 +209,6 @@ set(TINT_LIB_SRCS
   ast/type_name.h
   ast/u32.cc
   ast/u32.h
-  ast/uint_literal_expression.cc
-  ast/uint_literal_expression.h
   ast/unary_op_expression.cc
   ast/unary_op_expression.h
   ast/unary_op.cc
@@ -711,7 +707,6 @@ if(TINT_BUILD_TESTS)
     ast/return_statement_test.cc
     ast/sampled_texture_test.cc
     ast/sampler_test.cc
-    ast/sint_literal_expression_test.cc
     ast/stage_attribute_test.cc
     ast/storage_texture_test.cc
     ast/stride_attribute_test.cc
@@ -725,7 +720,6 @@ if(TINT_BUILD_TESTS)
     ast/texture_test.cc
     ast/traverse_expressions_test.cc
     ast/u32_test.cc
-    ast/uint_literal_expression_test.cc
     ast/unary_op_expression_test.cc
     ast/variable_decl_statement_test.cc
     ast/variable_test.cc

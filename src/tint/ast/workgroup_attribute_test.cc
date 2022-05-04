@@ -27,7 +27,7 @@ TEST_F(WorkgroupAttributeTest, Creation_1param) {
     auto values = d->Values();
 
     ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->value, 2);
 
     EXPECT_EQ(values[1], nullptr);
     EXPECT_EQ(values[2], nullptr);
@@ -37,10 +37,10 @@ TEST_F(WorkgroupAttributeTest, Creation_2param) {
     auto values = d->Values();
 
     ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->value, 2);
 
     ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
+    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->value, 4);
 
     EXPECT_EQ(values[2], nullptr);
 }
@@ -50,13 +50,13 @@ TEST_F(WorkgroupAttributeTest, Creation_3param) {
     auto values = d->Values();
 
     ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->value, 2);
 
     ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
+    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->value, 4);
 
     ASSERT_TRUE(values[2]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->ValueAsU32(), 6u);
+    EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->value, 6);
 }
 
 TEST_F(WorkgroupAttributeTest, Creation_WithIdentifier) {
@@ -64,10 +64,10 @@ TEST_F(WorkgroupAttributeTest, Creation_WithIdentifier) {
     auto values = d->Values();
 
     ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 2u);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->value, 2);
 
     ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
+    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->value, 4);
 
     auto* z_ident = As<ast::IdentifierExpression>(values[2]);
     ASSERT_TRUE(z_ident);

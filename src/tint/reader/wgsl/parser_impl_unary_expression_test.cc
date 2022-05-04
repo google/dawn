@@ -32,8 +32,10 @@ TEST_F(ParserImplTest, UnaryExpression_Postix) {
     auto* ident = idx->object->As<ast::IdentifierExpression>();
     EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
 
-    ASSERT_TRUE(idx->index->Is<ast::SintLiteralExpression>());
-    ASSERT_EQ(idx->index->As<ast::SintLiteralExpression>()->value, 2);
+    ASSERT_TRUE(idx->index->Is<ast::IntLiteralExpression>());
+    ASSERT_EQ(idx->index->As<ast::IntLiteralExpression>()->value, 2);
+    ASSERT_EQ(idx->index->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Minus) {
@@ -48,8 +50,10 @@ TEST_F(ParserImplTest, UnaryExpression_Minus) {
     auto* u = e->As<ast::UnaryOpExpression>();
     ASSERT_EQ(u->op, ast::UnaryOp::kNegation);
 
-    ASSERT_TRUE(u->expr->Is<ast::SintLiteralExpression>());
-    EXPECT_EQ(u->expr->As<ast::SintLiteralExpression>()->value, 1);
+    ASSERT_TRUE(u->expr->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(u->expr->As<ast::IntLiteralExpression>()->value, 1);
+    ASSERT_EQ(u->expr->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_AddressOf) {
@@ -130,8 +134,10 @@ TEST_F(ParserImplTest, UnaryExpression_Bang) {
     auto* u = e->As<ast::UnaryOpExpression>();
     ASSERT_EQ(u->op, ast::UnaryOp::kNot);
 
-    ASSERT_TRUE(u->expr->Is<ast::SintLiteralExpression>());
-    EXPECT_EQ(u->expr->As<ast::SintLiteralExpression>()->value, 1);
+    ASSERT_TRUE(u->expr->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(u->expr->As<ast::IntLiteralExpression>()->value, 1);
+    ASSERT_EQ(u->expr->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_Bang_InvalidRHS) {
@@ -156,8 +162,10 @@ TEST_F(ParserImplTest, UnaryExpression_Tilde) {
     auto* u = e->As<ast::UnaryOpExpression>();
     ASSERT_EQ(u->op, ast::UnaryOp::kComplement);
 
-    ASSERT_TRUE(u->expr->Is<ast::SintLiteralExpression>());
-    EXPECT_EQ(u->expr->As<ast::SintLiteralExpression>()->value, 1);
+    ASSERT_TRUE(u->expr->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(u->expr->As<ast::IntLiteralExpression>()->value, 1);
+    ASSERT_EQ(u->expr->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 }
 
 TEST_F(ParserImplTest, UnaryExpression_PrefixPlusPlus) {

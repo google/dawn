@@ -859,7 +859,9 @@ sem::CaseStatement* Resolver::CaseStatement(const ast::CaseStatement* stmt) {
         builder_->create<sem::CaseStatement>(stmt, current_compound_statement_, current_function_);
     return StatementScope(stmt, sem, [&] {
         for (auto* sel : stmt->selectors) {
-            Mark(sel);
+            if (!Expression(sel)) {
+                return false;
+            }
         }
         Mark(stmt->body);
         auto* body = BlockStatement(stmt->body);
@@ -1525,8 +1527,27 @@ sem::Call* Resolver::TypeConstructor(const ast::CallExpression* expr,
 }
 
 sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
-    auto* ty = sem_.TypeOf(literal);
-    if (!ty) {
+    auto* ty = Switch(
+        literal,
+        [&](const ast::IntLiteralExpression* i) -> sem::Type* {
+            switch (i->suffix) {
+                case ast::IntLiteralExpression::Suffix::kNone:
+                // TODO(crbug.com/tint/1504): This will need to become abstract-int.
+                // For now, treat as 'i32'.
+                case ast::IntLiteralExpression::Suffix::kI:
+                    return builder_->create<sem::I32>();
+                case ast::IntLiteralExpression::Suffix::kU:
+                    return builder_->create<sem::U32>();
+            }
+            return nullptr;
+        },
+        [&](const ast::FloatLiteralExpression*) { return builder_->create<sem::F32>(); },
+        [&](const ast::BoolLiteralExpression*) { return builder_->create<sem::Bool>(); },
+        [&](Default) { return nullptr; });
+
+    if (ty == nullptr) {
+        TINT_UNREACHABLE(Resolver, builder_->Diagnostics())
+            << "Unhandled literal type: " << literal->TypeInfo().name;
         return nullptr;
     }
 

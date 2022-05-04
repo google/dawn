@@ -2772,20 +2772,22 @@ Maybe<const ast::Statement*> ParserImpl::assignment_stmt() {
 
 // const_literal
 //   : INT_LITERAL
-//   | UINT_LITERAL
 //   | FLOAT_LITERAL
 //   | TRUE
 //   | FALSE
 Maybe<const ast::LiteralExpression*> ParserImpl::const_literal() {
     auto t = peek();
     if (match(Token::Type::kIntLiteral)) {
-        return create<ast::SintLiteralExpression>(t.source(), static_cast<int32_t>(t.to_i64()));
+        return create<ast::IntLiteralExpression>(t.source(), t.to_i64(),
+                                                 ast::IntLiteralExpression::Suffix::kNone);
     }
     if (match(Token::Type::kIntILiteral)) {
-        return create<ast::SintLiteralExpression>(t.source(), static_cast<int32_t>(t.to_i64()));
+        return create<ast::IntLiteralExpression>(t.source(), t.to_i64(),
+                                                 ast::IntLiteralExpression::Suffix::kI);
     }
     if (match(Token::Type::kIntULiteral)) {
-        return create<ast::UintLiteralExpression>(t.source(), static_cast<uint32_t>(t.to_i64()));
+        return create<ast::IntLiteralExpression>(t.source(), t.to_i64(),
+                                                 ast::IntLiteralExpression::Suffix::kU);
     }
     if (match(Token::Type::kFloatLiteral)) {
         return create<ast::FloatLiteralExpression>(t.source(), t.to_f32());

@@ -2178,7 +2178,7 @@ bool Validator::SwitchStatement(const ast::SwitchStatement* s) {
     }
 
     bool has_default = false;
-    std::unordered_map<uint32_t, Source> selectors;
+    std::unordered_map<int64_t, Source> selectors;
 
     for (auto* case_stmt : s->body) {
         if (case_stmt->IsDefault()) {
@@ -2200,17 +2200,14 @@ bool Validator::SwitchStatement(const ast::SwitchStatement* s) {
                 return false;
             }
 
-            auto v = selector->ValueAsU32();
-            auto it = selectors.find(v);
+            auto it = selectors.find(selector->value);
             if (it != selectors.end()) {
-                auto val = selector->Is<ast::IntLiteralExpression>()
-                               ? std::to_string(selector->ValueAsI32())
-                               : std::to_string(selector->ValueAsU32());
+                auto val = std::to_string(selector->value);
                 AddError("duplicate switch case '" + val + "'", selector->source);
                 AddNote("previous case declared here", it->second);
                 return false;
             }
-            selectors.emplace(v, selector->source);
+            selectors.emplace(selector->value, selector->source);
         }
     }
 

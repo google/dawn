@@ -98,8 +98,8 @@ TEST_F(ParserImplTest, IncrementDecrementStmt_ToMember) {
     auto* idx = mem->structure->As<ast::IndexAccessorExpression>();
 
     ASSERT_NE(idx->index, nullptr);
-    ASSERT_TRUE(idx->index->Is<ast::SintLiteralExpression>());
-    EXPECT_EQ(idx->index->As<ast::SintLiteralExpression>()->value, 2);
+    ASSERT_TRUE(idx->index->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(idx->index->As<ast::IntLiteralExpression>()->value, 2);
 
     ASSERT_TRUE(idx->object->Is<ast::MemberAccessorExpression>());
     mem = idx->object->As<ast::MemberAccessorExpression>();

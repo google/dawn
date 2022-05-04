@@ -49,8 +49,10 @@ TEST_F(ParserImplTest, ConstLiteral_Int) {
         EXPECT_FALSE(c.errored);
         EXPECT_FALSE(p->has_error()) << p->error();
         ASSERT_NE(c.value, nullptr);
-        ASSERT_TRUE(c->Is<ast::SintLiteralExpression>());
-        EXPECT_EQ(c->As<ast::SintLiteralExpression>()->value, 234);
+        ASSERT_TRUE(c->Is<ast::IntLiteralExpression>());
+        EXPECT_EQ(c->As<ast::IntLiteralExpression>()->value, 234);
+        EXPECT_EQ(c->As<ast::IntLiteralExpression>()->suffix,
+                  ast::IntLiteralExpression::Suffix::kNone);
         EXPECT_EQ(c->source.range, (Source::Range{{1u, 1u}, {1u, 4u}}));
     }
     {
@@ -60,8 +62,10 @@ TEST_F(ParserImplTest, ConstLiteral_Int) {
         EXPECT_FALSE(c.errored);
         EXPECT_FALSE(p->has_error()) << p->error();
         ASSERT_NE(c.value, nullptr);
-        ASSERT_TRUE(c->Is<ast::SintLiteralExpression>());
-        EXPECT_EQ(c->As<ast::SintLiteralExpression>()->value, 234);
+        ASSERT_TRUE(c->Is<ast::IntLiteralExpression>());
+        EXPECT_EQ(c->As<ast::IntLiteralExpression>()->value, 234);
+        EXPECT_EQ(c->As<ast::IntLiteralExpression>()->suffix,
+                  ast::IntLiteralExpression::Suffix::kI);
         EXPECT_EQ(c->source.range, (Source::Range{{1u, 1u}, {1u, 5u}}));
     }
     {
@@ -71,8 +75,10 @@ TEST_F(ParserImplTest, ConstLiteral_Int) {
         EXPECT_FALSE(c.errored);
         EXPECT_FALSE(p->has_error()) << p->error();
         ASSERT_NE(c.value, nullptr);
-        ASSERT_TRUE(c->Is<ast::SintLiteralExpression>());
-        EXPECT_EQ(c->As<ast::SintLiteralExpression>()->value, -234);
+        ASSERT_TRUE(c->Is<ast::IntLiteralExpression>());
+        EXPECT_EQ(c->As<ast::IntLiteralExpression>()->value, -234);
+        EXPECT_EQ(c->As<ast::IntLiteralExpression>()->suffix,
+                  ast::IntLiteralExpression::Suffix::kNone);
         EXPECT_EQ(c->source.range, (Source::Range{{1u, 1u}, {1u, 5u}}));
     }
     {
@@ -82,8 +88,10 @@ TEST_F(ParserImplTest, ConstLiteral_Int) {
         EXPECT_FALSE(c.errored);
         EXPECT_FALSE(p->has_error()) << p->error();
         ASSERT_NE(c.value, nullptr);
-        ASSERT_TRUE(c->Is<ast::SintLiteralExpression>());
-        EXPECT_EQ(c->As<ast::SintLiteralExpression>()->value, -234);
+        ASSERT_TRUE(c->Is<ast::IntLiteralExpression>());
+        EXPECT_EQ(c->As<ast::IntLiteralExpression>()->value, -234);
+        EXPECT_EQ(c->As<ast::IntLiteralExpression>()->suffix,
+                  ast::IntLiteralExpression::Suffix::kI);
         EXPECT_EQ(c->source.range, (Source::Range{{1u, 1u}, {1u, 6u}}));
     }
 }
@@ -95,8 +103,9 @@ TEST_F(ParserImplTest, ConstLiteral_Uint) {
     EXPECT_FALSE(c.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(c.value, nullptr);
-    ASSERT_TRUE(c->Is<ast::UintLiteralExpression>());
-    EXPECT_EQ(c->As<ast::UintLiteralExpression>()->value, 234u);
+    ASSERT_TRUE(c->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(c->As<ast::IntLiteralExpression>()->value, 234);
+    EXPECT_EQ(c->As<ast::IntLiteralExpression>()->suffix, ast::IntLiteralExpression::Suffix::kU);
     EXPECT_EQ(c->source.range, (Source::Range{{1u, 1u}, {1u, 5u}}));
 }
 

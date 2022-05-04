@@ -33,7 +33,9 @@ TEST_F(ParserImplTest, Attribute_Workgroup) {
     auto values = func_attr->As<ast::WorkgroupAttribute>()->Values();
 
     ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->value, 4);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
     EXPECT_EQ(values[1], nullptr);
     EXPECT_EQ(values[2], nullptr);
@@ -53,10 +55,14 @@ TEST_F(ParserImplTest, Attribute_Workgroup_2Param) {
     auto values = func_attr->As<ast::WorkgroupAttribute>()->Values();
 
     ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->value, 4);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
     ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 5u);
+    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->value, 5);
+    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
     EXPECT_EQ(values[2], nullptr);
 }
@@ -75,13 +81,19 @@ TEST_F(ParserImplTest, Attribute_Workgroup_3Param) {
     auto values = func_attr->As<ast::WorkgroupAttribute>()->Values();
 
     ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->value, 4);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
     ASSERT_TRUE(values[1]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->ValueAsU32(), 5u);
+    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->value, 5);
+    EXPECT_EQ(values[1]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
     ASSERT_TRUE(values[2]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->ValueAsU32(), 6u);
+    EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->value, 6);
+    EXPECT_EQ(values[2]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 }
 
 TEST_F(ParserImplTest, Attribute_Workgroup_WithIdent) {
@@ -98,7 +110,9 @@ TEST_F(ParserImplTest, Attribute_Workgroup_WithIdent) {
     auto values = func_attr->As<ast::WorkgroupAttribute>()->Values();
 
     ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
-    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->ValueAsU32(), 4u);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->value, 4);
+    EXPECT_EQ(values[0]->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
 
     ASSERT_NE(values[1], nullptr);
     auto* y_ident = values[1]->As<ast::IdentifierExpression>();

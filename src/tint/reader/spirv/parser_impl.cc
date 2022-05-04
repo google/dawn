@@ -1327,18 +1327,25 @@ bool ParserImpl::EmitScalarSpecConstants() {
             case SpvOpSpecConstant: {
                 ast_type = ConvertType(inst.type_id());
                 const uint32_t literal_value = inst.GetSingleWordInOperand(0);
-                if (ast_type->Is<I32>()) {
-                    ast_expr = create<ast::SintLiteralExpression>(
-                        Source{}, static_cast<int32_t>(literal_value));
-                } else if (ast_type->Is<U32>()) {
-                    ast_expr = create<ast::UintLiteralExpression>(
-                        Source{}, static_cast<uint32_t>(literal_value));
-                } else if (ast_type->Is<F32>()) {
-                    float float_value;
-                    // Copy the bits so we can read them as a float.
-                    std::memcpy(&float_value, &literal_value, sizeof(float_value));
-                    ast_expr = create<ast::FloatLiteralExpression>(Source{}, float_value);
-                } else {
+                ast_expr = Switch(
+                    ast_type,  //
+                    [&](const I32*) {
+                        return create<ast::IntLiteralExpression>(
+                            Source{}, static_cast<int64_t>(literal_value),
+                            ast::IntLiteralExpression::Suffix::kNone);
+                    },
+                    [&](const U32*) {
+                        return create<ast::IntLiteralExpression>(
+                            Source{}, static_cast<uint64_t>(literal_value),
+                            ast::IntLiteralExpression::Suffix::kU);
+                    },
+                    [&](const F32*) {
+                        float float_value;
+                        // Copy the bits so we can read them as a float.
+                        std::memcpy(&float_value, &literal_value, sizeof(float_value));
+                        return create<ast::FloatLiteralExpression>(Source{}, float_value);
+                    });
+                if (ast_expr == nullptr) {
                     return Fail() << " invalid result type for OpSpecConstant "
                                   << inst.PrettyPrint();
                 }
@@ -1895,22 +1902,31 @@ TypedExpression ParserImpl::MakeConstantExpressionForScalarSpirvConstant(
     // So canonicalization should map that way too.
     // Currently "null<type>" is missing from the WGSL parser.
     // See https://bugs.chromium.org/p/tint/issues/detail?id=34
-    if (ast_type->Is<U32>()) {
-        return {ty_.U32(), create<ast::UintLiteralExpression>(source, spirv_const->GetU32())};
-    }
-    if (ast_type->Is<I32>()) {
-        return {ty_.I32(), create<ast::SintLiteralExpression>(source, spirv_const->GetS32())};
-    }
-    if (ast_type->Is<F32>()) {
-        return {ty_.F32(), create<ast::FloatLiteralExpression>(source, spirv_const->GetFloat())};
-    }
-    if (ast_type->Is<Bool>()) {
-        const bool value =
-            spirv_const->AsNullConstant() ? false : spirv_const->AsBoolConstant()->value();
-        return {ty_.Bool(), create<ast::BoolLiteralExpression>(source, value)};
-    }
-    Fail() << "expected scalar constant";
-    return {};
+    return Switch(
+        ast_type,
+        [&](const I32*) {
+            return TypedExpression{ty_.I32(), create<ast::IntLiteralExpression>(
+                                                  source, spirv_const->GetS32(),
+                                                  ast::IntLiteralExpression::Suffix::kNone)};
+        },
+        [&](const U32*) {
+            return TypedExpression{ty_.U32(), create<ast::IntLiteralExpression>(
+                                                  source, spirv_const->GetU32(),
+                                                  ast::IntLiteralExpression::Suffix::kU)};
+        },
+        [&](const F32*) {
+            return TypedExpression{
+                ty_.F32(), create<ast::FloatLiteralExpression>(source, spirv_const->GetFloat())};
+        },
+        [&](const Bool*) {
+            const bool value =
+                spirv_const->AsNullConstant() ? false : spirv_const->AsBoolConstant()->value();
+            return TypedExpression{ty_.Bool(), create<ast::BoolLiteralExpression>(source, value)};
+        },
+        [&](Default) {
+            Fail() << "expected scalar constant";
+            return TypedExpression{};
+        });
 }
 
 const ast::Expression* ParserImpl::MakeNullValue(const Type* type) {
@@ -1927,31 +1943,33 @@ const ast::Expression* ParserImpl::MakeNullValue(const Type* type) {
     auto* original_type = type;
     type = type->UnwrapAlias();
 
-    if (type->Is<Bool>()) {
-        return create<ast::BoolLiteralExpression>(Source{}, false);
-    }
-    if (type->Is<U32>()) {
-        return create<ast::UintLiteralExpression>(Source{}, 0u);
-    }
-    if (type->Is<I32>()) {
-        return create<ast::SintLiteralExpression>(Source{}, 0);
-    }
-    if (type->Is<F32>()) {
-        return create<ast::FloatLiteralExpression>(Source{}, 0.0f);
-    }
-    if (type->IsAnyOf<Vector, Matrix, Array>()) {
-        return builder_.Construct(Source{}, type->Build(builder_));
-    }
-    if (auto* struct_ty = type->As<Struct>()) {
-        ast::ExpressionList ast_components;
-        for (auto* member : struct_ty->members) {
-            ast_components.emplace_back(MakeNullValue(member));
-        }
-        return builder_.Construct(Source{}, original_type->Build(builder_),
-                                  std::move(ast_components));
-    }
-    Fail() << "can't make null value for type: " << type->TypeInfo().name;
-    return nullptr;
+    return Switch(
+        type,  //
+        [&](const I32*) {
+            return create<ast::IntLiteralExpression>(Source{}, 0,
+                                                     ast::IntLiteralExpression::Suffix::kNone);
+        },
+        [&](const U32*) {
+            return create<ast::IntLiteralExpression>(Source{}, 0,
+                                                     ast::IntLiteralExpression::Suffix::kU);
+        },
+        [&](const F32*) { return create<ast::FloatLiteralExpression>(Source{}, 0.0f); },
+        [&](const Vector*) { return builder_.Construct(Source{}, type->Build(builder_)); },
+        [&](const Matrix*) { return builder_.Construct(Source{}, type->Build(builder_)); },
+        [&](const Array*) { return builder_.Construct(Source{}, type->Build(builder_)); },
+        [&](const Bool*) { return create<ast::BoolLiteralExpression>(Source{}, false); },
+        [&](const Struct* struct_ty) {
+            ast::ExpressionList ast_components;
+            for (auto* member : struct_ty->members) {
+                ast_components.emplace_back(MakeNullValue(member));
+            }
+            return builder_.Construct(Source{}, original_type->Build(builder_),
+                                      std::move(ast_components));
+        },
+        [&](Default) {
+            Fail() << "can't make null value for type: " << type->TypeInfo().name;
+            return nullptr;
+        });
 }
 
 TypedExpression ParserImpl::MakeNullExpression(const Type* type) {

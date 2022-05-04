@@ -70,7 +70,7 @@ TEST_F(BuilderTest, Literal_Bool_Dedup) {
 }
 
 TEST_F(BuilderTest, Literal_I32) {
-    auto* i = create<ast::SintLiteralExpression>(-23);
+    auto* i = Expr(-23);
     WrapInFunction(i);
     spirv::Builder& b = Build();
 
@@ -84,8 +84,8 @@ TEST_F(BuilderTest, Literal_I32) {
 }
 
 TEST_F(BuilderTest, Literal_I32_Dedup) {
-    auto* i1 = create<ast::SintLiteralExpression>(-23);
-    auto* i2 = create<ast::SintLiteralExpression>(-23);
+    auto* i1 = Expr(-23);
+    auto* i2 = Expr(-23);
     WrapInFunction(i1, i2);
 
     spirv::Builder& b = Build();
@@ -100,7 +100,7 @@ TEST_F(BuilderTest, Literal_I32_Dedup) {
 }
 
 TEST_F(BuilderTest, Literal_U32) {
-    auto* i = create<ast::UintLiteralExpression>(23);
+    auto* i = Expr(23u);
     WrapInFunction(i);
 
     spirv::Builder& b = Build();
@@ -115,8 +115,8 @@ TEST_F(BuilderTest, Literal_U32) {
 }
 
 TEST_F(BuilderTest, Literal_U32_Dedup) {
-    auto* i1 = create<ast::UintLiteralExpression>(23);
-    auto* i2 = create<ast::UintLiteralExpression>(23);
+    auto* i1 = Expr(23u);
+    auto* i2 = Expr(23u);
     WrapInFunction(i1, i2);
 
     spirv::Builder& b = Build();

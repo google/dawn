@@ -2986,9 +2986,12 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
                 // The Tint AST handles 32-bit values.
                 const uint32_t value32 = uint32_t(value & 0xFFFFFFFF);
                 if (selector.type->IsUnsignedScalarOrVector()) {
-                    selectors.emplace_back(create<ast::UintLiteralExpression>(Source{}, value32));
+                    selectors.emplace_back(create<ast::IntLiteralExpression>(
+                        Source{}, value32, ast::IntLiteralExpression::Suffix::kU));
                 } else {
-                    selectors.emplace_back(create<ast::SintLiteralExpression>(Source{}, value32));
+                    selectors.emplace_back(create<ast::IntLiteralExpression>(
+                        Source{}, static_cast<int32_t>(value32),
+                        ast::IntLiteralExpression::Suffix::kNone));
                 }
             }
         }
@@ -4298,7 +4301,8 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
     auto current_type_id = composite_type_id;
 
     auto make_index = [this](uint32_t literal) {
-        return create<ast::UintLiteralExpression>(Source{}, literal);
+        return create<ast::IntLiteralExpression>(Source{}, literal,
+                                                 ast::IntLiteralExpression::Suffix::kU);
     };
 
     // Build up a nested expression for the decomposition by walking down the type
