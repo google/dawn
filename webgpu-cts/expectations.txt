@@ -162,9 +162,6 @@ crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,canvas:color_spa
 # Flaky tests
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 [ linux ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:* [ RetryOnFailure ]
-crbug.com/dawn/0000 [ linux ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:* [ RetryOnFailure ]
-crbug.com/dawn/0000 [ mac ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ RetryOnFailure ]
 crbug.com/dawn/0000 [ win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ RetryOnFailure ]
 crbug.com/dawn/0000 [ win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ RetryOnFailure ]
 crbug.com/dawn/0000 webgpu:api,operation,adapter,requestDevice_limits:supported_limits:* [ RetryOnFailure ]
@@ -250,19 +247,6 @@ crbug.com/dawn/0000 webgpu:api,operation,buffers,map_oom:mappedAtCreation,smalle
 crbug.com/dawn/0000 webgpu:api,operation,buffers,map_oom:mappedAtCreation,smaller_getMappedRange:oom=true;size=9007199254740984 [ Failure ]
 
 ################################################################################
-# webgpu:api,validation,image_copy,texture_related:format failures (mac intel)
-# KEEP
-################################################################################
-crbug.com/dawn/0000 [ bigsur intel-0x3e9b ] webgpu:api,validation,image_copy,texture_related:format:* [ Failure ]
-
-################################################################################
-# webgpu:api,validation,encoding,cmds,copyTextureToTexture:texture_format_compatibility:*
-# Partial failures across all platforms failures
-# KEEP
-################################################################################
-crbug.com/dawn/0000 webgpu:api,validation,encoding,cmds,copyTextureToTexture:texture_format_compatibility:* [ Failure ]
-
-################################################################################
 # texel_data failures
 ################################################################################
 crbug.com/dawn/0000 webgpu:util,texture,texel_data:ufloat_texel_data_in_shader:* [ Failure ]
@@ -291,21 +275,6 @@ crbug.com/dawn/0000 webgpu:api,validation,buffer,create:createBuffer_invalid_and
 # KEEP
 ################################################################################
 crbug.com/1234041 [ linux ] webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:* [ Skip ]
-
-################################################################################
-# createTexture validation failures
-# KEEP
-################################################################################
-crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="2d";* [ Failure ]
-crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="3d";* [ Failure ]
-crbug.com/dawn/0000 [ win ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="3d";* [ RetryOnFailure ]
-crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:mipLevelCount,format:dimension="_undef_";* [ Failure ]
-crbug.com/dawn/0000 [ linux ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="2d";* [ RetryOnFailure ]
-crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="2d";* [ Failure ]
-crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="3d";* [ Failure ]
-crbug.com/dawn/0000 [ linux ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="_undef_";* [ Failure ]
-crbug.com/dawn/0000 [ mac ] webgpu:api,validation,createTexture:sampleCount,valid_sampleCount_with_other_parameter_varies:dimension="_undef_";* [ Failure ]
-crbug.com/dawn/0000 [ linux ] webgpu:api,validation,createTexture:texture_size,2d_texture,compressed_format:dimension="2d";format="astc-4x4-unorm-srgb";size=[1,8192,1] [ RetryOnFailure ]
 
 ################################################################################
 # shader execution failures
@@ -353,7 +322,6 @@ crbug.com/dawn/0000 [ win ] webgpu:api,operation,command_buffer,copyTextureToTex
 # crbug.com/dawn/1325 render pass/bundle and render pipeline depth/stencil read only and write states validation
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 webgpu:api,validation,attachment_compatibility:render_pass_and_bundle,color_format: [ RetryOnFailure ]
 crbug.com/dawn/1325 webgpu:api,validation,attachment_compatibility:render_pass_or_bundle_and_pipeline,depth_stencil_read_only_write_state:* [ Failure ]
 
 ################################################################################
@@ -363,19 +331,11 @@ crbug.com/dawn/1325 webgpu:api,validation,attachment_compatibility:render_pass_o
 crbug.com/dawn/0000 [ mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth32float" [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,render_pass,resolve:* [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,render_pipeline,pipeline_output_targets:color,component_count,blend:format="rg8unorm" [ Failure ]
-crbug.com/dawn/0000 [ win ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=true;drawCallTestParameter="baseVertex";* [ Failure ]
 crbug.com/1236130 [ linux ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Skip ] # crashes (skip because there are very many)
 crbug.com/dawn/0000 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Failure ]
 crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Skip ] # crashes (skip because there are very many)
 crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ] # crashes (skip because there are very many)
 crbug.com/dawn/0000 [ mac ] worker_webgpu:api,operation,render_pass,storeOp:render_pass_store_op,depth_stencil_attachment_only:depthStencilFormat="stencil8";* [ Failure ]
-
-################################################################################
-# vertex_state flakes
-# KEEP
-################################################################################
-crbug.com/dawn/0000 webgpu:api,validation,vertex_state:vertex_attribute_contained_in_stride:* [ RetryOnFailure ]
-crbug.com/dawn/0000 webgpu:api,validation,vertex_state:vertex_attribute_shaderLocation_unique: [ RetryOnFailure ]
 
 ################################################################################
 # webgpu:shader,execution,memory_model
