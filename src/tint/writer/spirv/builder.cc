@@ -4143,4 +4143,8 @@ Builder::Backedge::Backedge(const Builder::Backedge& other) = default;
 Builder::Backedge& Builder::Backedge::operator=(const Builder::Backedge& other) = default;
 Builder::Backedge::~Backedge() = default;
 
+Builder::Scope::Scope() = default;
+Builder::Scope::Scope(const Scope&) = default;
+Builder::Scope::~Scope() = default;
+
 }  // namespace tint::writer::spirv

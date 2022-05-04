@@ -45,7 +45,7 @@ const IfStatement* IfStatement::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
     auto* cond = ctx->Clone(condition);
     auto* b = ctx->Clone(body);
-    auto el = ctx->Clone(else_statement);
+    auto* el = ctx->Clone(else_statement);
     return ctx->dst->create<IfStatement>(src, cond, b, el);
 }
 

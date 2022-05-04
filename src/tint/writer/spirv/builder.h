@@ -602,6 +602,9 @@ class Builder {
 
     // Scope holds per-block information
     struct Scope {
+        Scope();
+        Scope(const Scope&);
+        ~Scope();
         std::unordered_map<OperandListKey, uint32_t> type_ctor_to_id_;
     };
 

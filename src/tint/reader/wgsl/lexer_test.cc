@@ -140,7 +140,7 @@ using LineCommentTerminatorTest = testing::TestWithParam<const char*>;
 TEST_P(LineCommentTerminatorTest, Terminators) {
     // Test that line comments are ended by blankspace characters other than
     // space, horizontal tab, left-to-right mark, and right-to-left mark.
-    auto c = GetParam();
+    auto* c = GetParam();
     std::string src = "let// This is a comment";
     src += c;
     src += "ident";

@@ -31,7 +31,7 @@ TEST_F(EnableDirectiveTest, Valid) {
     EXPECT_EQ(ast.Extensions(),
               ast::ExtensionSet{ast::Enable::ExtensionKind::kInternalExtensionForTesting});
     EXPECT_EQ(ast.GlobalDeclarations().size(), 1u);
-    auto node = ast.GlobalDeclarations()[0]->As<ast::Enable>();
+    auto* node = ast.GlobalDeclarations()[0]->As<ast::Enable>();
     EXPECT_TRUE(node != nullptr);
     EXPECT_EQ(node->name, "InternalExtensionForTesting");
     EXPECT_EQ(node->kind, ast::Enable::ExtensionKind::kInternalExtensionForTesting);
@@ -50,11 +50,11 @@ enable InternalExtensionForTesting;
     EXPECT_EQ(ast.Extensions(),
               ast::ExtensionSet{ast::Enable::ExtensionKind::kInternalExtensionForTesting});
     EXPECT_EQ(ast.GlobalDeclarations().size(), 2u);
-    auto node1 = ast.GlobalDeclarations()[0]->As<ast::Enable>();
+    auto* node1 = ast.GlobalDeclarations()[0]->As<ast::Enable>();
     EXPECT_TRUE(node1 != nullptr);
     EXPECT_EQ(node1->name, "InternalExtensionForTesting");
     EXPECT_EQ(node1->kind, ast::Enable::ExtensionKind::kInternalExtensionForTesting);
-    auto node2 = ast.GlobalDeclarations()[1]->As<ast::Enable>();
+    auto* node2 = ast.GlobalDeclarations()[1]->As<ast::Enable>();
     EXPECT_TRUE(node2 != nullptr);
     EXPECT_EQ(node2->name, "InternalExtensionForTesting");
     EXPECT_EQ(node2->kind, ast::Enable::ExtensionKind::kInternalExtensionForTesting);
