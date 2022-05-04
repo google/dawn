@@ -1024,6 +1024,10 @@ TEST_P(CopyTests_T2B, BytesPerRowShouldNotCauseBufferOOBIfCopyHeightIsOne) {
 // A regression test for a bug on D3D12 backend that causes crash when doing texture-to-texture
 // copy one row with the texture format Depth32Float.
 TEST_P(CopyTests_T2B, CopyOneRowWithDepth32Float) {
+    // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support reading
+    // depth.
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_read"));
+
     // TODO(crbug.com/dawn/727): currently this test fails on many D3D12 drivers.
     DAWN_SUPPRESS_TEST_IF(IsD3D12());
 
