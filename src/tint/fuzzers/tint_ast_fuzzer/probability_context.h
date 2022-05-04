@@ -56,6 +56,11 @@ class ProbabilityContext {
         return chance_of_changing_binary_operators_;
     }
 
+    /// @return the probability of changing operator for an unary expression.
+    uint32_t GetChanceOfChangingUnaryOperators() const {
+        return chance_of_changing_unary_operators_;
+    }
+
     /// @return the probability of replacing some identifier with some other one.
     uint32_t GetChanceOfReplacingIdentifiers() const { return chance_of_replacing_identifiers_; }
 
@@ -72,6 +77,7 @@ class ProbabilityContext {
     RandomGenerator* generator_;
 
     uint32_t chance_of_changing_binary_operators_;
+    uint32_t chance_of_changing_unary_operators_;
     uint32_t chance_of_replacing_identifiers_;
     uint32_t chance_of_wrapping_unary_operators_;
 };

@@ -17,6 +17,7 @@
 #include <cassert>
 
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutations/change_binary_operator.h"
+#include "src/tint/fuzzers/tint_ast_fuzzer/mutations/change_unary_operator.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutations/replace_identifier.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutations/wrap_unary_operator.h"
 
@@ -26,6 +27,8 @@ Mutation::~Mutation() = default;
 
 std::unique_ptr<Mutation> Mutation::FromMessage(const protobufs::Mutation& message) {
     switch (message.mutation_case()) {
+        case protobufs::Mutation::kChangeUnaryOperator:
+            return std::make_unique<MutationChangeUnaryOperator>(message.change_unary_operator());
         case protobufs::Mutation::kReplaceIdentifier:
             return std::make_unique<MutationReplaceIdentifier>(message.replace_identifier());
         case protobufs::Mutation::kChangeBinaryOperator:

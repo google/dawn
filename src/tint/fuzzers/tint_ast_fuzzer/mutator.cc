@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutation_finders/change_binary_operators.h"
+#include "src/tint/fuzzers/tint_ast_fuzzer/mutation_finders/change_unary_operators.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutation_finders/replace_identifiers.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutation_finders/wrap_unary_operators.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/node_id_map.h"
@@ -45,6 +46,8 @@ MutationFinderList CreateMutationFinders(ProbabilityContext* probability_context
     do {
         MaybeAddFinder<MutationFinderChangeBinaryOperators>(enable_all_mutations,
                                                             probability_context, &result);
+        MaybeAddFinder<MutationFinderChangeUnaryOperators>(enable_all_mutations,
+                                                           probability_context, &result);
         MaybeAddFinder<MutationFinderReplaceIdentifiers>(enable_all_mutations, probability_context,
                                                          &result);
         MaybeAddFinder<MutationFinderWrapUnaryOperators>(enable_all_mutations, probability_context,
