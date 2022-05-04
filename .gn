@@ -24,6 +24,7 @@ default_args = {
   angle_standalone = false
   angle_build_all = false
   angle_has_rapidjson = false
+  angle_use_wayland = false
   angle_vulkan_headers_dir = "//third_party/vulkan-deps/vulkan-headers/src"
   angle_vulkan_loader_dir = "//third_party/vulkan-deps/vulkan-loader/src"
   angle_vulkan_tools_dir = "//third_party/vulkan-deps/vulkan-tools/src"
