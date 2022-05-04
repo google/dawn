@@ -1,6 +1,6 @@
 fn f_1() {
-  var v : i32 = 0;
-  var n : i32 = 0;
+  var v : i32 = 0i;
+  var n : i32 = 0i;
   var offset_1 : u32 = 0u;
   var count : u32 = 0u;
   let x_17 : i32 = v;

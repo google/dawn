@@ -1332,7 +1332,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
                     [&](const I32*) {
                         return create<ast::IntLiteralExpression>(
                             Source{}, static_cast<int64_t>(literal_value),
-                            ast::IntLiteralExpression::Suffix::kNone);
+                            ast::IntLiteralExpression::Suffix::kI);
                     },
                     [&](const U32*) {
                         return create<ast::IntLiteralExpression>(
@@ -1907,7 +1907,7 @@ TypedExpression ParserImpl::MakeConstantExpressionForScalarSpirvConstant(
         [&](const I32*) {
             return TypedExpression{ty_.I32(), create<ast::IntLiteralExpression>(
                                                   source, spirv_const->GetS32(),
-                                                  ast::IntLiteralExpression::Suffix::kNone)};
+                                                  ast::IntLiteralExpression::Suffix::kI)};
         },
         [&](const U32*) {
             return TypedExpression{ty_.U32(), create<ast::IntLiteralExpression>(
@@ -1947,7 +1947,7 @@ const ast::Expression* ParserImpl::MakeNullValue(const Type* type) {
         type,  //
         [&](const I32*) {
             return create<ast::IntLiteralExpression>(Source{}, 0,
-                                                     ast::IntLiteralExpression::Suffix::kNone);
+                                                     ast::IntLiteralExpression::Suffix::kI);
         },
         [&](const U32*) {
             return create<ast::IntLiteralExpression>(Source{}, 0,

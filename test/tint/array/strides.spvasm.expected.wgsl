@@ -22,11 +22,11 @@ struct S {
 
 fn f_1() {
   let x_19 : Arr_2 = s.a;
-  let x_24 : Arr_1 = s.a[3].el;
-  let x_28 : Arr = s.a[3].el[2];
-  let x_32 : f32 = s.a[3].el[2][1].el;
+  let x_24 : Arr_1 = s.a[3i].el;
+  let x_28 : Arr = s.a[3i].el[2i];
+  let x_32 : f32 = s.a[3i].el[2i][1i].el;
   s.a = array<strided_arr_1, 4u>();
-  s.a[3].el[2][1].el = 5.0;
+  s.a[3i].el[2i][1i].el = 5.0;
   return;
 }
 

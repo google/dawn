@@ -60,7 +60,7 @@ fn coordsInBounds_vi2_vi2_(coord : ptr<function, vec2<i32>>, shape : ptr<functio
   var x_87 : bool;
   var x_88_phi : bool;
   let x_76 : vec2<i32> = *(coord);
-  let x_81 : bool = all((x_76 >= vec2<i32>(0, 0)));
+  let x_81 : bool = all((x_76 >= vec2<i32>(0i, 0i)));
   x_88_phi = x_81;
   if (x_81) {
     let x_84 : vec2<i32> = *(coord);
@@ -136,7 +136,7 @@ fn getOutputFlatIndex_vi3_(coords : ptr<function, vec3<i32>>) -> i32 {
   let x_99 : vec3<i32> = *(coords);
   let x_105 : i32 = x_48.outShapeStrides.x;
   let x_107 : i32 = x_48.outShapeStrides.y;
-  return i32(dot(vec3<f32>(x_99), vec3<f32>(vec3<i32>(x_105, x_107, 1))));
+  return i32(dot(vec3<f32>(x_99), vec3<f32>(vec3<i32>(x_105, x_107, 1i))));
 }
 
 fn setOutput_i1_f1_(flatIndex : ptr<function, i32>, value : ptr<function, f32>) {
@@ -223,26 +223,26 @@ fn mm_matMul_i1_i1_i1_(dimAOuter : ptr<function, i32>, dimInner : ptr<function, 
   var param_8 : i32;
   var param_9 : f32;
   let x_132 : u32 = gl_LocalInvocationID.y;
-  tileRow = (bitcast<i32>(x_132) * 1);
+  tileRow = (bitcast<i32>(x_132) * 1i);
   let x_137 : u32 = gl_LocalInvocationID.x;
-  tileCol = (bitcast<i32>(x_137) * 1);
+  tileCol = (bitcast<i32>(x_137) * 1i);
   let x_143 : u32 = gl_GlobalInvocationID.y;
-  globalRow = (bitcast<i32>(x_143) * 1);
+  globalRow = (bitcast<i32>(x_143) * 1i);
   let x_148 : u32 = gl_GlobalInvocationID.x;
-  globalCol = (bitcast<i32>(x_148) * 1);
+  globalCol = (bitcast<i32>(x_148) * 1i);
   let x_152 : i32 = *(dimInner);
-  numTiles = (((x_152 - 1) / 64) + 1);
-  innerRow = 0;
+  numTiles = (((x_152 - 1i) / 64i) + 1i);
+  innerRow = 0i;
   loop {
     let x_163 : i32 = innerRow;
-    if ((x_163 < 1)) {
+    if ((x_163 < 1i)) {
     } else {
       break;
     }
-    innerCol = 0;
+    innerCol = 0i;
     loop {
       let x_171 : i32 = innerCol;
-      if ((x_171 < 1)) {
+      if ((x_171 < 1i)) {
       } else {
         break;
       }
@@ -252,20 +252,20 @@ fn mm_matMul_i1_i1_i1_(dimAOuter : ptr<function, i32>, dimInner : ptr<function, 
 
       continuing {
         let x_181 : i32 = innerCol;
-        innerCol = (x_181 + 1);
+        innerCol = (x_181 + 1i);
       }
     }
 
     continuing {
       let x_183 : i32 = innerRow;
-      innerRow = (x_183 + 1);
+      innerRow = (x_183 + 1i);
     }
   }
   let x_187 : u32 = gl_LocalInvocationID.x;
-  tileColA = (bitcast<i32>(x_187) * 64);
+  tileColA = (bitcast<i32>(x_187) * 64i);
   let x_192 : u32 = gl_LocalInvocationID.y;
-  tileRowB = (bitcast<i32>(x_192) * 1);
-  t = 0;
+  tileRowB = (bitcast<i32>(x_192) * 1i);
+  t = 0i;
   loop {
     let x_201 : i32 = t;
     let x_202 : i32 = numTiles;
@@ -273,17 +273,17 @@ fn mm_matMul_i1_i1_i1_(dimAOuter : ptr<function, i32>, dimInner : ptr<function, 
     } else {
       break;
     }
-    innerRow_1 = 0;
+    innerRow_1 = 0i;
     loop {
       let x_210 : i32 = innerRow_1;
-      if ((x_210 < 1)) {
+      if ((x_210 < 1i)) {
       } else {
         break;
       }
-      innerCol_1 = 0;
+      innerCol_1 = 0i;
       loop {
         let x_218 : i32 = innerCol_1;
-        if ((x_218 < 64)) {
+        if ((x_218 < 64i)) {
         } else {
           break;
         }
@@ -300,32 +300,32 @@ fn mm_matMul_i1_i1_i1_(dimAOuter : ptr<function, i32>, dimInner : ptr<function, 
         let x_238 : i32 = t;
         let x_240 : i32 = inputCol;
         param_3 = (x_235 + x_236);
-        param_4 = ((x_238 * 64) + x_240);
+        param_4 = ((x_238 * 64i) + x_240);
         let x_244 : f32 = mm_readA_i1_i1_(&(param_3), &(param_4));
         mm_Asub[x_233][x_234] = x_244;
 
         continuing {
           let x_247 : i32 = innerCol_1;
-          innerCol_1 = (x_247 + 1);
+          innerCol_1 = (x_247 + 1i);
         }
       }
 
       continuing {
         let x_249 : i32 = innerRow_1;
-        innerRow_1 = (x_249 + 1);
+        innerRow_1 = (x_249 + 1i);
       }
     }
-    innerRow_2 = 0;
+    innerRow_2 = 0i;
     loop {
       let x_257 : i32 = innerRow_2;
-      if ((x_257 < 1)) {
+      if ((x_257 < 1i)) {
       } else {
         break;
       }
-      innerCol_2 = 0;
+      innerCol_2 = 0i;
       loop {
         let x_265 : i32 = innerCol_2;
-        if ((x_265 < 1)) {
+        if ((x_265 < 1i)) {
         } else {
           break;
         }
@@ -341,34 +341,34 @@ fn mm_matMul_i1_i1_i1_(dimAOuter : ptr<function, i32>, dimInner : ptr<function, 
         let x_282 : i32 = inputRow_1;
         let x_284 : i32 = globalCol;
         let x_285 : i32 = innerCol_2;
-        param_5 = ((x_280 * 64) + x_282);
+        param_5 = ((x_280 * 64i) + x_282);
         param_6 = (x_284 + x_285);
         let x_289 : f32 = mm_readB_i1_i1_(&(param_5), &(param_6));
         mm_Bsub[x_278][x_279] = x_289;
 
         continuing {
           let x_291 : i32 = innerCol_2;
-          innerCol_2 = (x_291 + 1);
+          innerCol_2 = (x_291 + 1i);
         }
       }
 
       continuing {
         let x_293 : i32 = innerRow_2;
-        innerRow_2 = (x_293 + 1);
+        innerRow_2 = (x_293 + 1i);
       }
     }
     workgroupBarrier();
-    k = 0;
+    k = 0i;
     loop {
       let x_302 : i32 = k;
-      if ((x_302 < 64)) {
+      if ((x_302 < 64i)) {
       } else {
         break;
       }
-      inner = 0;
+      inner = 0i;
       loop {
         let x_310 : i32 = inner;
-        if ((x_310 < 1)) {
+        if ((x_310 < 1i)) {
         } else {
           break;
         }
@@ -381,13 +381,13 @@ fn mm_matMul_i1_i1_i1_(dimAOuter : ptr<function, i32>, dimInner : ptr<function, 
 
         continuing {
           let x_322 : i32 = inner;
-          inner = (x_322 + 1);
+          inner = (x_322 + 1i);
         }
       }
-      innerRow_3 = 0;
+      innerRow_3 = 0i;
       loop {
         let x_330 : i32 = innerRow_3;
-        if ((x_330 < 1)) {
+        if ((x_330 < 1i)) {
         } else {
           break;
         }
@@ -396,10 +396,10 @@ fn mm_matMul_i1_i1_i1_(dimAOuter : ptr<function, i32>, dimInner : ptr<function, 
         let x_336 : i32 = k;
         let x_338 : f32 = mm_Asub[(x_333 + x_334)][x_336];
         ACached = x_338;
-        innerCol_3 = 0;
+        innerCol_3 = 0i;
         loop {
           let x_345 : i32 = innerCol_3;
-          if ((x_345 < 1)) {
+          if ((x_345 < 1i)) {
           } else {
             break;
           }
@@ -413,41 +413,41 @@ fn mm_matMul_i1_i1_i1_(dimAOuter : ptr<function, i32>, dimInner : ptr<function, 
 
           continuing {
             let x_358 : i32 = innerCol_3;
-            innerCol_3 = (x_358 + 1);
+            innerCol_3 = (x_358 + 1i);
           }
         }
 
         continuing {
           let x_360 : i32 = innerRow_3;
-          innerRow_3 = (x_360 + 1);
+          innerRow_3 = (x_360 + 1i);
         }
       }
 
       continuing {
         let x_362 : i32 = k;
-        k = (x_362 + 1);
+        k = (x_362 + 1i);
       }
     }
     workgroupBarrier();
 
     continuing {
       let x_364 : i32 = t;
-      t = (x_364 + 1);
+      t = (x_364 + 1i);
     }
   }
-  innerRow_4 = 0;
+  innerRow_4 = 0i;
   loop {
     let x_372 : i32 = innerRow_4;
-    if ((x_372 < 1)) {
+    if ((x_372 < 1i)) {
     } else {
       break;
     }
-    innerCol_4 = 0;
+    innerCol_4 = 0i;
     loop {
       var x_393 : bool;
       var x_394_phi : bool;
       let x_380 : i32 = innerCol_4;
-      if ((x_380 < 1)) {
+      if ((x_380 < 1i)) {
       } else {
         break;
       }
@@ -480,13 +480,13 @@ fn mm_matMul_i1_i1_i1_(dimAOuter : ptr<function, i32>, dimInner : ptr<function, 
 
       continuing {
         let x_411 : i32 = innerCol_4;
-        innerCol_4 = (x_411 + 1);
+        innerCol_4 = (x_411 + 1i);
       }
     }
 
     continuing {
       let x_413 : i32 = innerRow_4;
-      innerRow_4 = (x_413 + 1);
+      innerRow_4 = (x_413 + 1i);
     }
   }
   return;

@@ -885,7 +885,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarInitializers) {
 
 var<private> x_2 : bool = false;
 
-var<private> x_3 : i32 = -1;
+var<private> x_3 : i32 = -1i;
 
 var<private> x_4 : u32 = 1u;
 
@@ -910,7 +910,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarNullInitializers) {
     const auto module_str = test::ToString(p->program());
     EXPECT_THAT(module_str, HasSubstr(R"(var<private> x_1 : bool = false;
 
-var<private> x_2 : i32 = 0;
+var<private> x_2 : i32 = 0i;
 
 var<private> x_3 : u32 = 0u;
 
@@ -935,7 +935,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarUndefInitializers) {
     const auto module_str = test::ToString(p->program());
     EXPECT_THAT(module_str, HasSubstr(R"(var<private> x_1 : bool = false;
 
-var<private> x_2 : i32 = 0;
+var<private> x_2 : i32 = 0i;
 
 var<private> x_3 : u32 = 0u;
 
@@ -1550,7 +1550,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_I32) {
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
-    EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : i32 = 42;")) << module_str;
+    EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : i32 = 42i;")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_F32) {
@@ -1985,7 +1985,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_Direct) {
     const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
 
 fn main_1() {
-  let x_3 : u32 = x_1[0];
+  let x_3 : u32 = x_1[0i];
   return;
 }
 
@@ -2017,7 +2017,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_CopyObject) {
     const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
 
 fn main_1() {
-  let x_4 : u32 = x_1[0];
+  let x_4 : u32 = x_1[0i];
   return;
 }
 
@@ -2049,7 +2049,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_AccessChain) {
     const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
 
 fn main_1() {
-  let x_4 : u32 = x_1[0];
+  let x_4 : u32 = x_1[0i];
   return;
 }
 
@@ -2080,7 +2080,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_Direct) {
     const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
 
 fn main_1() {
-  let x_3 : i32 = x_1[0];
+  let x_3 : i32 = x_1[0i];
   return;
 }
 
@@ -2112,7 +2112,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_CopyObject) {
     const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
 
 fn main_1() {
-  let x_4 : i32 = x_1[0];
+  let x_4 : i32 = x_1[0i];
   return;
 }
 
@@ -2144,7 +2144,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_AccessChain) {
     const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
 
 fn main_1() {
-  let x_4 : i32 = x_1[0];
+  let x_4 : i32 = x_1[0i];
   return;
 }
 
@@ -2193,7 +2193,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_Direct) {
     const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
 
 fn main_1() {
-  x_1[0] = 0u;
+  x_1[0i] = 0u;
   return;
 }
 
@@ -2230,7 +2230,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_CopyObject) {
     const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
 
 fn main_1() {
-  x_1[0] = 0u;
+  x_1[0i] = 0u;
   return;
 }
 
@@ -2267,7 +2267,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_AccessChain) {
     const std::string expected = R"(var<private> x_1 : array<u32, 1u>;
 
 fn main_1() {
-  x_1[0] = 0u;
+  x_1[0i] = 0u;
   return;
 }
 
@@ -2303,7 +2303,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_Direct) {
     const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
 
 fn main_1() {
-  x_1[0] = 12;
+  x_1[0i] = 12i;
   return;
 }
 
@@ -2340,7 +2340,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_CopyObject) {
     const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
 
 fn main_1() {
-  x_1[0] = 12;
+  x_1[0i] = 12i;
   return;
 }
 
@@ -2377,7 +2377,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_AccessChain) {
     const std::string expected = R"(var<private> x_1 : array<i32, 1u>;
 
 fn main_1() {
-  x_1[0] = 12;
+  x_1[0i] = 12i;
   return;
 }
 
@@ -2421,7 +2421,7 @@ type Arr_3 = @stride(4) array<i32, 2u>;
 var<private> x_1 : Arr;
 
 fn main_1() {
-  let x_3 : u32 = x_1[0];
+  let x_3 : u32 = x_1[0i];
   return;
 }
 
@@ -2460,7 +2460,7 @@ type Arr_3 = @stride(4) array<i32, 2u>;
 var<private> x_1 : Arr;
 
 fn main_1() {
-  x_1[0] = 0u;
+  x_1[0i] = 0u;
   return;
 }
 
@@ -3467,7 +3467,7 @@ TEST_F(SpvModuleScopeVarParserTest, Builtin_Output_Initializer_OppositeSignednes
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
     EXPECT_TRUE(p->error().empty());
     const auto got = test::ToString(p->program());
-    const std::string expected = "var<private> x_1 : array<i32, 1u> = array<i32, 1u>(14);";
+    const std::string expected = "var<private> x_1 : array<i32, 1u> = array<i32, 1u>(14i);";
     EXPECT_THAT(got, HasSubstr(expected)) << got;
 }
 

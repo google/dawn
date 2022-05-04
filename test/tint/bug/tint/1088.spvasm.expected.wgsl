@@ -36,7 +36,7 @@ fn main_1() {
   let x_21 : vec4<f32> = q;
   p = vec3<f32>(x_21.x, x_21.y, x_21.z);
   let x_27 : f32 = p.x;
-  let x_41 : f32 = x_14.test[0].el;
+  let x_41 : f32 = x_14.test[0i].el;
   let x_45 : f32 = position.y;
   let x_49 : f32 = x_14.time;
   p.x = (x_27 + sin(((x_41 * x_45) + x_49)));

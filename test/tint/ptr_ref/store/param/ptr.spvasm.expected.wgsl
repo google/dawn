@@ -4,9 +4,9 @@ fn func(value : i32, pointer : ptr<function, i32>) {
 }
 
 fn main_1() {
-  var i : i32 = 0;
-  i = 123;
-  func(123, &(i));
+  var i : i32 = 0i;
+  i = 123i;
+  func(123i, &(i));
   return;
 }
 

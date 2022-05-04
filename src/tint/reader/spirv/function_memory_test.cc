@@ -107,8 +107,9 @@ TEST_F(SpvParserMemoryTest, EmitStatement_StoreIntConst) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody());
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(x_1 = 42;
-x_1 = 0;
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(x_1 = 42i;
+x_1 = 0i;
+return;
 )"));
 }
 

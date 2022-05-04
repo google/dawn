@@ -74,7 +74,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_BeforeFunction_Scalar) {
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(let x_11 : bool = false;
 let x_12 : u32 = 0u;
-let x_13 : i32 = 0;
+let x_13 : i32 = 0i;
 let x_14 : f32 = 0.0;
 )"));
 }
@@ -132,7 +132,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Scalar) {
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(let x_11 : bool = false;
 let x_12 : u32 = 0u;
-let x_13 : i32 = 0;
+let x_13 : i32 = 0i;
 let x_14 : f32 = 0.0;
 )"));
 }
@@ -224,7 +224,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_11 : S = S(false, 0u, 0, 0.0);"));
+                HasSubstr("let x_11 : S = S(false, 0u, 0i, 0.0);"));
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpNop) {

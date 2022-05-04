@@ -9392,14 +9392,14 @@ TEST_F(SpvParserCFGTest, EmitBody_Switch_Case_SintValue) {
     auto ast_body = fe.ast_body();
     auto got = test::ToString(p->program(), ast_body);
     auto* expect = R"(var_1 = 1u;
-switch(42) {
-  case -294967296: {
+switch(42i) {
+  case -294967296i: {
     var_1 = 40u;
   }
-  case 2000000000: {
+  case 2000000000i: {
     var_1 = 30u;
   }
-  case 20: {
+  case 20i: {
     var_1 = 20u;
   }
   default: {

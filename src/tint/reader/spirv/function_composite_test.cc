@@ -97,7 +97,7 @@ TEST_F(SpvParserTest_Composite_Construct, Vector) {
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
                 HasSubstr(R"(let x_1 : vec2<u32> = vec2<u32>(10u, 20u);
-let x_2 : vec2<i32> = vec2<i32>(30, 40);
+let x_2 : vec2<i32> = vec2<i32>(30i, 40i);
 let x_3 : vec2<f32> = vec2<f32>(50.0, 60.0);
 )"));
 }
@@ -153,7 +153,7 @@ TEST_F(SpvParserTest_Composite_Construct, Struct) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : S = S(vec2<f32>(50.0, 60.0), 5u, 30);"));
+                HasSubstr("let x_1 : S = S(vec2<f32>(50.0, 60.0), 5u, 30i);"));
 }
 
 TEST_F(SpvParserTest_Composite_Construct, ConstantComposite_Struct_NoDeduplication) {
@@ -608,7 +608,7 @@ TEST_F(SpvParserTest_CompositeInsert, Struct) {
     EXPECT_THAT(body_str, HasSubstr(R"(var x_36 : S;
 let x_1 : S = x_36;
 var x_2_1 : S = x_1;
-x_2_1.field2 = 30;
+x_2_1.field2 = 30i;
 let x_2 : S = x_2_1;
 )")) << body_str;
 }

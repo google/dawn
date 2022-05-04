@@ -2989,9 +2989,9 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
                     selectors.emplace_back(create<ast::IntLiteralExpression>(
                         Source{}, value32, ast::IntLiteralExpression::Suffix::kU));
                 } else {
-                    selectors.emplace_back(create<ast::IntLiteralExpression>(
-                        Source{}, static_cast<int32_t>(value32),
-                        ast::IntLiteralExpression::Suffix::kNone));
+                    selectors.emplace_back(
+                        create<ast::IntLiteralExpression>(Source{}, static_cast<int32_t>(value32),
+                                                          ast::IntLiteralExpression::Suffix::kI));
                 }
             }
         }

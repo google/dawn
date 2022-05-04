@@ -5,7 +5,7 @@ struct S {
 var<private> V : S;
 
 fn main_1() {
-  V.i = 5;
+  V.i = 5i;
   return;
 }
 

@@ -94,22 +94,22 @@ std::string AstFor(std::string assembly) {
         return "bitcast<vec2<i32>>(vec2<u32>(20u, 10u))";
     }
     if (assembly == "cast_int_30") {
-        return "bitcast<u32>(30)";
+        return "bitcast<u32>(30i)";
     }
     if (assembly == "cast_int_40") {
-        return "bitcast<u32>(40)";
+        return "bitcast<u32>(40i)";
     }
     if (assembly == "v2int_30_40") {
-        return "vec2<i32>(30, 40)";
+        return "vec2<i32>(30i, 40i)";
     }
     if (assembly == "cast_v2int_30_40") {
-        return "bitcast<vec2<u32>>(vec2<i32>(30, 40))";
+        return "bitcast<vec2<u32>>(vec2<i32>(30i, 40i))";
     }
     if (assembly == "v2int_40_30") {
-        return "vec2<i32>(40, 30)";
+        return "vec2<i32>(40i, 30i)";
     }
     if (assembly == "cast_v2int_40_30") {
-        return "bitcast<vec2<u32>>(vec2<i32>(40, 30))";
+        return "bitcast<vec2<u32>>(vec2<i32>(40i, 30i))";
     }
     if (assembly == "v2float_50_60") {
         return "vec2<f32>(50.0, 60.0)";
@@ -202,12 +202,12 @@ INSTANTIATE_TEST_SUITE_P(
         // uint uint
         BinaryData{"bool", "uint_10", "OpIEqual", "uint_20", "bool", "10u", "==", "20u"},
         // int int
-        BinaryData{"bool", "int_30", "OpIEqual", "int_40", "bool", "30", "==", "40"},
+        BinaryData{"bool", "int_30", "OpIEqual", "int_40", "bool", "30i", "==", "40i"},
         // uint int
         BinaryData{"bool", "uint_10", "OpIEqual", "int_40", "bool", "10u",
-                   "==", "bitcast<u32>(40)"},
+                   "==", "bitcast<u32>(40i)"},
         // int uint
-        BinaryData{"bool", "int_40", "OpIEqual", "uint_10", "bool", "40",
+        BinaryData{"bool", "int_40", "OpIEqual", "uint_10", "bool", "40i",
                    "==", "bitcast<i32>(10u)"},
         // v2uint v2uint
         BinaryData{"v2bool", "v2uint_10_20", "OpIEqual", "v2uint_20_10", "vec2<bool>",
@@ -232,12 +232,12 @@ INSTANTIATE_TEST_SUITE_P(
         // Both uint
         BinaryData{"bool", "uint_10", "OpINotEqual", "uint_20", "bool", "10u", "!=", "20u"},
         // Both int
-        BinaryData{"bool", "int_30", "OpINotEqual", "int_40", "bool", "30", "!=", "40"},
+        BinaryData{"bool", "int_30", "OpINotEqual", "int_40", "bool", "30i", "!=", "40i"},
         // uint int
         BinaryData{"bool", "uint_10", "OpINotEqual", "int_40", "bool", "10u",
-                   "!=", "bitcast<u32>(40)"},
+                   "!=", "bitcast<u32>(40i)"},
         // int uint
-        BinaryData{"bool", "int_40", "OpINotEqual", "uint_10", "bool", "40",
+        BinaryData{"bool", "int_40", "OpINotEqual", "uint_10", "bool", "40i",
                    "!=", "bitcast<i32>(10u)"},
         // Both v2uint
         BinaryData{"v2bool", "v2uint_10_20", "OpINotEqual", "v2uint_20_10", "vec2<bool>",
@@ -416,12 +416,12 @@ INSTANTIATE_TEST_SUITE_P(
     SpvBinaryLogicalTest,
     ::testing::Values(
         // Both signed
-        BinaryData{"bool", "int_30", "OpSGreaterThan", "int_40", "bool", "30", ">", "40"},
+        BinaryData{"bool", "int_30", "OpSGreaterThan", "int_40", "bool", "30i", ">", "40i"},
         // First arg unsigned
         BinaryData{"bool", "uint_10", "OpSGreaterThan", "int_40", "bool", AstFor("cast_uint_10"),
-                   ">", "40"},
+                   ">", "40i"},
         // Second arg unsigned
-        BinaryData{"bool", "int_30", "OpSGreaterThan", "uint_20", "bool", "30", ">",
+        BinaryData{"bool", "int_30", "OpSGreaterThan", "uint_20", "bool", "30i", ">",
                    AstFor("cast_uint_20")},
         // Vector, both signed
         BinaryData{"v2bool", "v2int_30_40", "OpSGreaterThan", "v2int_40_30", "vec2<bool>",
@@ -438,12 +438,12 @@ INSTANTIATE_TEST_SUITE_P(
     SpvBinaryLogicalTest,
     ::testing::Values(
         // Both signed
-        BinaryData{"bool", "int_30", "OpSGreaterThanEqual", "int_40", "bool", "30", ">=", "40"},
+        BinaryData{"bool", "int_30", "OpSGreaterThanEqual", "int_40", "bool", "30i", ">=", "40i"},
         // First arg unsigned
         BinaryData{"bool", "uint_10", "OpSGreaterThanEqual", "int_40", "bool",
-                   AstFor("cast_uint_10"), ">=", "40"},
+                   AstFor("cast_uint_10"), ">=", "40i"},
         // Second arg unsigned
-        BinaryData{"bool", "int_30", "OpSGreaterThanEqual", "uint_20", "bool", "30",
+        BinaryData{"bool", "int_30", "OpSGreaterThanEqual", "uint_20", "bool", "30i",
                    ">=", AstFor("cast_uint_20")},
         // Vector, both signed
         BinaryData{"v2bool", "v2int_30_40", "OpSGreaterThanEqual", "v2int_40_30", "vec2<bool>",
@@ -460,12 +460,12 @@ INSTANTIATE_TEST_SUITE_P(
     SpvBinaryLogicalTest,
     ::testing::Values(
         // Both signed
-        BinaryData{"bool", "int_30", "OpSLessThan", "int_40", "bool", "30", "<", "40"},
+        BinaryData{"bool", "int_30", "OpSLessThan", "int_40", "bool", "30i", "<", "40i"},
         // First arg unsigned
         BinaryData{"bool", "uint_10", "OpSLessThan", "int_40", "bool", AstFor("cast_uint_10"), "<",
-                   "40"},
+                   "40i"},
         // Second arg unsigned
-        BinaryData{"bool", "int_30", "OpSLessThan", "uint_20", "bool", "30", "<",
+        BinaryData{"bool", "int_30", "OpSLessThan", "uint_20", "bool", "30i", "<",
                    AstFor("cast_uint_20")},
         // Vector, both signed
         BinaryData{"v2bool", "v2int_30_40", "OpSLessThan", "v2int_40_30", "vec2<bool>",
@@ -482,12 +482,12 @@ INSTANTIATE_TEST_SUITE_P(
     SpvBinaryLogicalTest,
     ::testing::Values(
         // Both signed
-        BinaryData{"bool", "int_30", "OpSLessThanEqual", "int_40", "bool", "30", "<=", "40"},
+        BinaryData{"bool", "int_30", "OpSLessThanEqual", "int_40", "bool", "30i", "<=", "40i"},
         // First arg unsigned
         BinaryData{"bool", "uint_10", "OpSLessThanEqual", "int_40", "bool", AstFor("cast_uint_10"),
-                   "<=", "40"},
+                   "<=", "40i"},
         // Second arg unsigned
-        BinaryData{"bool", "int_30", "OpSLessThanEqual", "uint_20", "bool", "30",
+        BinaryData{"bool", "int_30", "OpSLessThanEqual", "uint_20", "bool", "30i",
                    "<=", AstFor("cast_uint_20")},
         // Vector, both signed
         BinaryData{"v2bool", "v2int_30_40", "OpSLessThanEqual", "v2int_40_30", "vec2<bool>",

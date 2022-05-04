@@ -1,8 +1,8 @@
-var<private> I : i32 = 0;
+var<private> I : i32 = 0i;
 
 fn main_1() {
   let x_9 : i32 = I;
-  let x_11 : i32 = (x_9 + 1);
+  let x_11 : i32 = (x_9 + 1i);
   return;
 }
 

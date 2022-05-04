@@ -60,7 +60,7 @@ fn main_1() {
   var param_1 : f32;
   let x_54 : u32 = gl_GlobalInvocationID.x;
   index = bitcast<i32>(x_54);
-  a_1 = -10;
+  a_1 = -10i;
   let x_63 : i32 = index;
   param = -4.0;
   param_1 = -3.0;

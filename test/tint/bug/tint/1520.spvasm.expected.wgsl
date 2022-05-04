@@ -33,20 +33,20 @@ fn test_int_S1_c0_b() -> bool {
   ok = true;
   x_41_phi = false;
   if (true) {
-    x_40 = all(((vec4<i32>(0, 0, 0, 0) / vec4<i32>(x_27, x_27, x_27, x_27)) == vec4<i32>(0, 0, 0, 0)));
+    x_40 = all(((vec4<i32>(0i, 0i, 0i, 0i) / vec4<i32>(x_27, x_27, x_27, x_27)) == vec4<i32>(0i, 0i, 0i, 0i)));
     x_41_phi = x_40;
   }
   let x_41 : bool = x_41_phi;
   ok = x_41;
   let x_44 : vec4<i32> = vec4<i32>(x_27, x_27, x_27, x_27);
   val = x_44;
-  let x_47 : vec4<i32> = (x_44 + vec4<i32>(1, 1, 1, 1));
+  let x_47 : vec4<i32> = (x_44 + vec4<i32>(1i, 1i, 1i, 1i));
   val = x_47;
-  let x_48 : vec4<i32> = (x_47 - vec4<i32>(1, 1, 1, 1));
+  let x_48 : vec4<i32> = (x_47 - vec4<i32>(1i, 1i, 1i, 1i));
   val = x_48;
-  let x_49 : vec4<i32> = (x_48 + vec4<i32>(1, 1, 1, 1));
+  let x_49 : vec4<i32> = (x_48 + vec4<i32>(1i, 1i, 1i, 1i));
   val = x_49;
-  let x_50 : vec4<i32> = (x_49 - vec4<i32>(1, 1, 1, 1));
+  let x_50 : vec4<i32> = (x_49 - vec4<i32>(1i, 1i, 1i, 1i));
   val = x_50;
   x_55_phi = false;
   if (x_41) {
@@ -55,13 +55,13 @@ fn test_int_S1_c0_b() -> bool {
   }
   let x_55 : bool = x_55_phi;
   ok = x_55;
-  let x_58 : vec4<i32> = (x_50 * vec4<i32>(2, 2, 2, 2));
+  let x_58 : vec4<i32> = (x_50 * vec4<i32>(2i, 2i, 2i, 2i));
   val = x_58;
-  let x_59 : vec4<i32> = (x_58 / vec4<i32>(2, 2, 2, 2));
+  let x_59 : vec4<i32> = (x_58 / vec4<i32>(2i, 2i, 2i, 2i));
   val = x_59;
-  let x_60 : vec4<i32> = (x_59 * vec4<i32>(2, 2, 2, 2));
+  let x_60 : vec4<i32> = (x_59 * vec4<i32>(2i, 2i, 2i, 2i));
   val = x_60;
-  let x_61 : vec4<i32> = (x_60 / vec4<i32>(2, 2, 2, 2));
+  let x_61 : vec4<i32> = (x_60 / vec4<i32>(2i, 2i, 2i, 2i));
   val = x_61;
   x_66_phi = false;
   if (x_55) {

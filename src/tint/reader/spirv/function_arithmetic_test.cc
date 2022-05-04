@@ -81,16 +81,16 @@ std::string AstFor(std::string assembly) {
         return "vec2<u32>(20u, 10u)";
     }
     if (assembly == "v2int_30_40") {
-        return "vec2<i32>(30, 40)";
+        return "vec2<i32>(30i, 40i)";
     }
     if (assembly == "v2int_40_30") {
-        return "vec2<i32>(40, 30)";
+        return "vec2<i32>(40i, 30i)";
     }
     if (assembly == "cast_int_v2uint_10_20") {
         return "bitcast<vec2<i32>>(vec2<u32>(10u, 20u))";
     }
     if (assembly == "cast_uint_v2int_40_30") {
-        return "bitcast<vec2<u32>>(vec2<i32>(40, 30))";
+        return "bitcast<vec2<u32>>(vec2<i32>(40i, 30i))";
     }
     if (assembly == "v2float_50_60") {
         return "vec2<f32>(50.0, 60.0)";
@@ -116,7 +116,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Int) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 : i32 = -(30);"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 : i32 = -(30i);"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_Int_Uint) {
@@ -150,7 +150,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Int) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : u32 = bitcast<u32>(-(30));"));
+                HasSubstr("let x_1 : u32 = bitcast<u32>(-(30i));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_Uint_Uint) {
@@ -184,7 +184,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_SignedVec) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<i32> = -(vec2<i32>(30, 40));"));
+                HasSubstr("let x_1 : vec2<i32> = -(vec2<i32>(30i, 40i));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
@@ -218,7 +218,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<u32> = bitcast<vec2<u32>>(-(vec2<i32>(30, 40)));"));
+                HasSubstr("let x_1 : vec2<u32> = bitcast<vec2<u32>>(-(vec2<i32>(30i, 40i)));"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
@@ -359,7 +359,7 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Both uint
         BinaryData{"uint", "uint_10", "OpIAdd", "uint_20", "u32", "10u", "+", "20u"},  // Both int
-        BinaryData{"int", "int_30", "OpIAdd", "int_40", "i32", "30", "+", "40"},  // Both v2uint
+        BinaryData{"int", "int_30", "OpIAdd", "int_40", "i32", "30i", "+", "40i"},  // Both v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpIAdd", "v2uint_20_10", "vec2<u32>",
                    AstFor("v2uint_10_20"), "+", AstFor("v2uint_20_10")},
         // Both v2int
@@ -372,22 +372,23 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Mixed, uint <- int uint
         BinaryDataGeneral{"uint", "int_30", "OpIAdd", "uint_10", "u32",
-                          "bitcast<u32>((30 + bitcast<i32>(10u)))"},
+                          "bitcast<u32>((30i + bitcast<i32>(10u)))"},
         // Mixed, int <- int uint
-        BinaryDataGeneral{"int", "int_30", "OpIAdd", "uint_10", "i32", "(30 + bitcast<i32>(10u))"},
+        BinaryDataGeneral{"int", "int_30", "OpIAdd", "uint_10", "i32", "(30i + bitcast<i32>(10u))"},
         // Mixed, uint <- uint int
-        BinaryDataGeneral{"uint", "uint_10", "OpIAdd", "int_30", "u32", "(10u + bitcast<u32>(30))"},
+        BinaryDataGeneral{"uint", "uint_10", "OpIAdd", "int_30", "u32",
+                          "(10u + bitcast<u32>(30i))"},
         // Mixed, int <- uint uint
         BinaryDataGeneral{"int", "uint_20", "OpIAdd", "uint_10", "i32",
                           "bitcast<i32>((20u + 10u))"},
         // Mixed, returning v2uint
         BinaryDataGeneral{
             "v2uint", "v2int_30_40", "OpIAdd", "v2uint_10_20", "vec2<u32>",
-            R"(bitcast<vec2<u32>>((vec2<i32>(30, 40) + bitcast<vec2<i32>>(vec2<u32>(10u, 20u)))))"},
+            R"(bitcast<vec2<u32>>((vec2<i32>(30i, 40i) + bitcast<vec2<i32>>(vec2<u32>(10u, 20u)))))"},
         // Mixed, returning v2int
         BinaryDataGeneral{
             "v2int", "v2uint_10_20", "OpIAdd", "v2int_40_30", "vec2<i32>",
-            R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) + bitcast<vec2<u32>>(vec2<i32>(40, 30)))))"}));
+            R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) + bitcast<vec2<u32>>(vec2<i32>(40i, 30i)))))"}));
 
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FAdd,
                          SpvBinaryArithTest,
@@ -405,7 +406,7 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Both uint
         BinaryData{"uint", "uint_10", "OpISub", "uint_20", "u32", "10u", "-", "20u"},  // Both int
-        BinaryData{"int", "int_30", "OpISub", "int_40", "i32", "30", "-", "40"},  // Both v2uint
+        BinaryData{"int", "int_30", "OpISub", "int_40", "i32", "30i", "-", "40i"},  // Both v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpISub", "v2uint_20_10", "vec2<u32>",
                    AstFor("v2uint_10_20"), "-", AstFor("v2uint_20_10")},
         // Both v2int
@@ -418,22 +419,23 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Mixed, uint <- int uint
         BinaryDataGeneral{"uint", "int_30", "OpISub", "uint_10", "u32",
-                          R"(bitcast<u32>((30 - bitcast<i32>(10u))))"},
+                          R"(bitcast<u32>((30i - bitcast<i32>(10u))))"},
         // Mixed, int <- int uint
-        BinaryDataGeneral{"int", "int_30", "OpISub", "uint_10", "i32", "(30 - bitcast<i32>(10u))"},
+        BinaryDataGeneral{"int", "int_30", "OpISub", "uint_10", "i32", "(30i - bitcast<i32>(10u))"},
         // Mixed, uint <- uint int
-        BinaryDataGeneral{"uint", "uint_10", "OpISub", "int_30", "u32", "(10u - bitcast<u32>(30))"},
+        BinaryDataGeneral{"uint", "uint_10", "OpISub", "int_30", "u32",
+                          "(10u - bitcast<u32>(30i))"},
         // Mixed, int <- uint uint
         BinaryDataGeneral{"int", "uint_20", "OpISub", "uint_10", "i32",
                           "bitcast<i32>((20u - 10u))"},
         // Mixed, returning v2uint
         BinaryDataGeneral{
             "v2uint", "v2int_30_40", "OpISub", "v2uint_10_20", "vec2<u32>",
-            R"(bitcast<vec2<u32>>((vec2<i32>(30, 40) - bitcast<vec2<i32>>(vec2<u32>(10u, 20u)))))"},
+            R"(bitcast<vec2<u32>>((vec2<i32>(30i, 40i) - bitcast<vec2<i32>>(vec2<u32>(10u, 20u)))))"},
         // Mixed, returning v2int
         BinaryDataGeneral{
             "v2int", "v2uint_10_20", "OpISub", "v2int_40_30", "vec2<i32>",
-            R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) - bitcast<vec2<u32>>(vec2<i32>(40, 30)))))"}));
+            R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) - bitcast<vec2<u32>>(vec2<i32>(40i, 30i)))))"}));
 
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FSub,
                          SpvBinaryArithTest,
@@ -451,7 +453,7 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Both uint
         BinaryData{"uint", "uint_10", "OpIMul", "uint_20", "u32", "10u", "*", "20u"},  // Both int
-        BinaryData{"int", "int_30", "OpIMul", "int_40", "i32", "30", "*", "40"},  // Both v2uint
+        BinaryData{"int", "int_30", "OpIMul", "int_40", "i32", "30i", "*", "40i"},  // Both v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpIMul", "v2uint_20_10", "vec2<u32>",
                    AstFor("v2uint_10_20"), "*", AstFor("v2uint_20_10")},
         // Both v2int
@@ -464,22 +466,23 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Mixed, uint <- int uint
         BinaryDataGeneral{"uint", "int_30", "OpIMul", "uint_10", "u32",
-                          "bitcast<u32>((30 * bitcast<i32>(10u)))"},
+                          "bitcast<u32>((30i * bitcast<i32>(10u)))"},
         // Mixed, int <- int uint
-        BinaryDataGeneral{"int", "int_30", "OpIMul", "uint_10", "i32", "(30 * bitcast<i32>(10u))"},
+        BinaryDataGeneral{"int", "int_30", "OpIMul", "uint_10", "i32", "(30i * bitcast<i32>(10u))"},
         // Mixed, uint <- uint int
-        BinaryDataGeneral{"uint", "uint_10", "OpIMul", "int_30", "u32", "(10u * bitcast<u32>(30))"},
+        BinaryDataGeneral{"uint", "uint_10", "OpIMul", "int_30", "u32",
+                          "(10u * bitcast<u32>(30i))"},
         // Mixed, int <- uint uint
         BinaryDataGeneral{"int", "uint_20", "OpIMul", "uint_10", "i32",
                           "bitcast<i32>((20u * 10u))"},
         // Mixed, returning v2uint
         BinaryDataGeneral{
             "v2uint", "v2int_30_40", "OpIMul", "v2uint_10_20", "vec2<u32>",
-            R"(bitcast<vec2<u32>>((vec2<i32>(30, 40) * bitcast<vec2<i32>>(vec2<u32>(10u, 20u)))))"},
+            R"(bitcast<vec2<u32>>((vec2<i32>(30i, 40i) * bitcast<vec2<i32>>(vec2<u32>(10u, 20u)))))"},
         // Mixed, returning v2int
         BinaryDataGeneral{
             "v2int", "v2uint_10_20", "OpIMul", "v2int_40_30", "vec2<i32>",
-            R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) * bitcast<vec2<u32>>(vec2<i32>(40, 30)))))"}));
+            R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) * bitcast<vec2<u32>>(vec2<i32>(40i, 30i)))))"}));
 
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FMul,
                          SpvBinaryArithTest,
@@ -506,7 +509,7 @@ INSTANTIATE_TEST_SUITE_P(
     SpvBinaryArithTest,
     ::testing::Values(
         // Both int
-        BinaryData{"int", "int_30", "OpSDiv", "int_40", "i32", "30", "/", "40"},  // Both v2int
+        BinaryData{"int", "int_30", "OpSDiv", "int_40", "i32", "30i", "/", "40i"},  // Both v2int
         BinaryData{"v2int", "v2int_30_40", "OpSDiv", "v2int_40_30", "vec2<i32>",
                    AstFor("v2int_30_40"), "/", AstFor("v2int_40_30")}));
 
@@ -515,10 +518,10 @@ INSTANTIATE_TEST_SUITE_P(
     SpvBinaryArithTest,
     ::testing::Values(
         // Mixed, returning int, second arg uint
-        BinaryData{"int", "int_30", "OpSDiv", "uint_10", "i32", "30", "/", "bitcast<i32>(10u)"},
+        BinaryData{"int", "int_30", "OpSDiv", "uint_10", "i32", "30i", "/", "bitcast<i32>(10u)"},
         // Mixed, returning int, first arg uint
         BinaryData{"int", "uint_10", "OpSDiv", "int_30", "i32", "bitcast<i32>(10u)", "/",
-                   "30"},  // Mixed, returning v2int, first arg v2uint
+                   "30i"},  // Mixed, returning v2int, first arg v2uint
         BinaryData{"v2int", "v2uint_10_20", "OpSDiv", "v2int_30_40", "vec2<i32>",
                    AstFor("cast_int_v2uint_10_20"), "/", AstFor("v2int_30_40")},
         // Mixed, returning v2int, second arg v2uint
@@ -543,7 +546,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Scalar_UnsignedResult) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : u32 = bitcast<u32>((30 / 40));"));
+                HasSubstr("let x_1 : u32 = bitcast<u32>((30i / 40i));"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, SDiv_Vector_UnsignedResult) {
@@ -566,7 +569,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Vector_UnsignedResult) {
     EXPECT_THAT(
         test::ToString(p->program(), ast_body),
         HasSubstr(
-            R"(let x_1 : vec2<u32> = bitcast<vec2<u32>>((vec2<i32>(30, 40) / vec2<i32>(40, 30)));)"));
+            R"(let x_1 : vec2<u32> = bitcast<vec2<u32>>((vec2<i32>(30i, 40i) / vec2<i32>(40i, 30i)));)"));
 }
 
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FDiv,
@@ -597,7 +600,7 @@ INSTANTIATE_TEST_SUITE_P(
     SpvBinaryArithTest,
     ::testing::Values(
         // Both int
-        BinaryData{"int", "int_30", "OpSMod", "int_40", "i32", "30", "%", "40"},  // Both v2int
+        BinaryData{"int", "int_30", "OpSMod", "int_40", "i32", "30i", "%", "40i"},  // Both v2int
         BinaryData{"v2int", "v2int_30_40", "OpSMod", "v2int_40_30", "vec2<i32>",
                    AstFor("v2int_30_40"), "%", AstFor("v2int_40_30")}));
 
@@ -606,10 +609,10 @@ INSTANTIATE_TEST_SUITE_P(
     SpvBinaryArithTest,
     ::testing::Values(
         // Mixed, returning int, second arg uint
-        BinaryData{"int", "int_30", "OpSMod", "uint_10", "i32", "30", "%", "bitcast<i32>(10u)"},
+        BinaryData{"int", "int_30", "OpSMod", "uint_10", "i32", "30i", "%", "bitcast<i32>(10u)"},
         // Mixed, returning int, first arg uint
         BinaryData{"int", "uint_10", "OpSMod", "int_30", "i32", "bitcast<i32>(10u)", "%",
-                   "30"},  // Mixed, returning v2int, first arg v2uint
+                   "30i"},  // Mixed, returning v2int, first arg v2uint
         BinaryData{"v2int", "v2uint_10_20", "OpSMod", "v2int_30_40", "vec2<i32>",
                    AstFor("cast_int_v2uint_10_20"), "%", AstFor("v2int_30_40")},
         // Mixed, returning v2int, second arg v2uint
@@ -634,7 +637,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Scalar_UnsignedResult) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : u32 = bitcast<u32>((30 % 40));"));
+                HasSubstr("let x_1 : u32 = bitcast<u32>((30i % 40i));"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, SMod_Vector_UnsignedResult) {
@@ -657,7 +660,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Vector_UnsignedResult) {
     EXPECT_THAT(
         test::ToString(p->program(), ast_body),
         HasSubstr(
-            R"(let x_1 : vec2<u32> = bitcast<vec2<u32>>((vec2<i32>(30, 40) % vec2<i32>(40, 30)));)"));
+            R"(let x_1 : vec2<u32> = bitcast<vec2<u32>>((vec2<i32>(30i, 40i) % vec2<i32>(40i, 30i)));)"));
 }
 
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FRem,

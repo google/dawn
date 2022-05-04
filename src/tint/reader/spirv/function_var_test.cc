@@ -182,7 +182,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ScalarInitializers) {
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(var a : bool = true;
 var b : bool = false;
-var c : i32 = -1;
+var c : i32 = -1i;
 var d : u32 = 1u;
 var e : f32 = 1.5;
 )"));
@@ -210,7 +210,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ScalarNullInitializers) {
 
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(var a : bool = false;
-var b : i32 = 0;
+var b : i32 = 0i;
 var c : u32 = 0u;
 var d : f32 = 0.0;
 )"));
@@ -1506,7 +1506,7 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Hoist_CompositeInsert) {
     const auto* expected = R"(var x_200 : vec2<i32>;
 if (true) {
   x_200 = vec2<i32>();
-  x_200.x = 0;
+  x_200.x = 0i;
 } else {
   return;
 }
@@ -1549,7 +1549,7 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Hoist_VectorInsertDynamic) {
     const auto* expected = R"(var x_200 : vec2<i32>;
 if (true) {
   x_200 = vec2<i32>();
-  x_200[1] = 3;
+  x_200[1i] = 3i;
 } else {
   return;
 }
@@ -1597,7 +1597,7 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Hoist_UsedAsNonPtrArg) {
     const auto got = test::ToString(p->program(), ast_body);
     const auto* expected = R"(var x_200 : i32;
 if (true) {
-  x_200 = 1;
+  x_200 = 1i;
 } else {
   return;
 }

@@ -4,7 +4,7 @@ struct S {
 
 fn main_1() {
   var V : S;
-  V.i = 5;
+  V.i = 5i;
   return;
 }
 

@@ -72,10 +72,10 @@ std::string AstFor(std::string assembly) {
         return "vec2<u32>(20u, 10u)";
     }
     if (assembly == "v2int_30_40") {
-        return "vec2<i32>(30, 40)";
+        return "vec2<i32>(30i, 40i)";
     }
     if (assembly == "v2int_40_30") {
-        return "vec2<i32>(40, 30)";
+        return "vec2<i32>(40i, 30i)";
     }
     if (assembly == "cast_int_v2uint_10_20") {
         return "bitcast<vec2<i32>(vec2<u32>(10u, 20u))";
@@ -177,7 +177,7 @@ INSTANTIATE_TEST_SUITE_P(
         // uint uint -> uint
         BinaryData{"uint", "uint_10", "OpShiftLeftLogical", "uint_20", "u32", "10u", "<<", "20u"},
         // int, uint -> int
-        BinaryData{"int", "int_30", "OpShiftLeftLogical", "uint_20", "i32", "30", "<<", "20u"},
+        BinaryData{"int", "int_30", "OpShiftLeftLogical", "uint_20", "i32", "30i", "<<", "20u"},
         // v2uint v2uint -> v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpShiftLeftLogical", "v2uint_20_10", "vec2<u32>",
                    AstFor("v2uint_10_20"), "<<", AstFor("v2uint_20_10")},
@@ -192,16 +192,16 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // int, int -> int
         BinaryDataGeneral{"int", "int_30", "OpShiftLeftLogical", "int_40", "i32",
-                          "(30 << bitcast<u32>(40))"},
+                          "(30i << bitcast<u32>(40i))"},
         // uint, int -> uint
         BinaryDataGeneral{"uint", "uint_10", "OpShiftLeftLogical", "int_40", "u32",
-                          "(10u << bitcast<u32>(40))"},
+                          "(10u << bitcast<u32>(40i))"},
         // v2uint, v2int -> v2uint
         BinaryDataGeneral{"v2uint", "v2uint_10_20", "OpShiftLeftLogical", "v2uint_20_10",
                           "vec2<u32>", "(vec2<u32>(10u, 20u) << vec2<u32>(20u, 10u))"},
         // v2int, v2int -> v2int
         BinaryDataGeneral{"v2int", "v2int_30_40", "OpShiftLeftLogical", "v2int_40_30", "vec2<i32>",
-                          "(vec2<i32>(30, 40) << bitcast<vec2<u32>>(vec2<i32>(40, 30)))"}));
+                          "(vec2<i32>(30i, 40i) << bitcast<vec2<u32>>(vec2<i32>(40i, 30i)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_ShiftLeftLogical_BitcastResult,
@@ -209,11 +209,11 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // int, int -> uint
         BinaryDataGeneral{"uint", "int_30", "OpShiftLeftLogical", "uint_10", "u32",
-                          "bitcast<u32>((30 << 10u))"},
+                          "bitcast<u32>((30i << 10u))"},
         // v2uint, v2int -> v2uint
         BinaryDataGeneral{"v2uint", "v2int_30_40", "OpShiftLeftLogical", "v2uint_20_10",
                           "vec2<u32>",
-                          "bitcast<vec2<u32>>((vec2<i32>(30, 40) << vec2<u32>(20u, 10u)))"}));
+                          "bitcast<vec2<u32>>((vec2<i32>(30i, 40i) << vec2<u32>(20u, 10u)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_ShiftRightLogical_Arg2Unsigned,
@@ -224,14 +224,14 @@ INSTANTIATE_TEST_SUITE_P(
                           "(10u >> 20u)"},
         // int, uint -> int
         BinaryDataGeneral{"int", "int_30", "OpShiftRightLogical", "uint_20", "i32",
-                          "bitcast<i32>((bitcast<u32>(30) >> 20u))"},
+                          "bitcast<i32>((bitcast<u32>(30i) >> 20u))"},
         // v2uint, v2uint -> v2uint
         BinaryDataGeneral{"v2uint", "v2uint_10_20", "OpShiftRightLogical", "v2uint_20_10",
                           "vec2<u32>", "(vec2<u32>(10u, 20u) >> vec2<u32>(20u, 10u))"},
         // v2int, v2uint -> v2int
         BinaryDataGeneral{
             "v2int", "v2int_30_40", "OpShiftRightLogical", "v2uint_10_20", "vec2<i32>",
-            R"(bitcast<vec2<i32>>((bitcast<vec2<u32>>(vec2<i32>(30, 40)) >> vec2<u32>(10u, 20u))))"}));
+            R"(bitcast<vec2<i32>>((bitcast<vec2<u32>>(vec2<i32>(30i, 40i)) >> vec2<u32>(10u, 20u))))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_ShiftRightLogical_Arg2Signed,
@@ -239,18 +239,18 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // uint, int -> uint
         BinaryDataGeneral{"uint", "uint_10", "OpShiftRightLogical", "int_30", "u32",
-                          "(10u >> bitcast<u32>(30))"},
+                          "(10u >> bitcast<u32>(30i))"},
         // int, int -> int
         BinaryDataGeneral{"int", "int_30", "OpShiftRightLogical", "int_40", "i32",
-                          "bitcast<i32>((bitcast<u32>(30) >> bitcast<u32>(40)))"},
+                          "bitcast<i32>((bitcast<u32>(30i) >> bitcast<u32>(40i)))"},
         // v2uint, v2int -> v2uint
         BinaryDataGeneral{"v2uint", "v2uint_10_20", "OpShiftRightLogical", "v2int_30_40",
                           "vec2<u32>",
-                          "(vec2<u32>(10u, 20u) >> bitcast<vec2<u32>>(vec2<i32>(30, 40)))"},
+                          "(vec2<u32>(10u, 20u) >> bitcast<vec2<u32>>(vec2<i32>(30i, 40i)))"},
         // v2int, v2int -> v2int
         BinaryDataGeneral{
             "v2int", "v2int_40_30", "OpShiftRightLogical", "v2int_30_40", "vec2<i32>",
-            R"(bitcast<vec2<i32>>((bitcast<vec2<u32>>(vec2<i32>(40, 30)) >> bitcast<vec2<u32>>(vec2<i32>(30, 40)))))"}));
+            R"(bitcast<vec2<i32>>((bitcast<vec2<u32>>(vec2<i32>(40i, 30i)) >> bitcast<vec2<u32>>(vec2<i32>(30i, 40i)))))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_ShiftRightLogical_BitcastResult,
@@ -273,14 +273,14 @@ INSTANTIATE_TEST_SUITE_P(
                           "bitcast<u32>((bitcast<i32>(10u) >> 20u))"},
         // int, uint -> int
         BinaryDataGeneral{"int", "int_30", "OpShiftRightArithmetic", "uint_10", "i32",
-                          "(30 >> 10u)"},
+                          "(30i >> 10u)"},
         // v2uint, v2uint -> v2uint
         BinaryDataGeneral{
             "v2uint", "v2uint_10_20", "OpShiftRightArithmetic", "v2uint_20_10", "vec2<u32>",
             R"(bitcast<vec2<u32>>((bitcast<vec2<i32>>(vec2<u32>(10u, 20u)) >> vec2<u32>(20u, 10u))))"},
         // v2int, v2uint -> v2int
         BinaryDataGeneral{"v2int", "v2int_40_30", "OpShiftRightArithmetic", "v2uint_20_10",
-                          "vec2<i32>", "(vec2<i32>(40, 30) >> vec2<u32>(20u, 10u))"}));
+                          "vec2<i32>", "(vec2<i32>(40i, 30i) >> vec2<u32>(20u, 10u))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_ShiftRightArithmetic_Arg2Signed,
@@ -288,18 +288,18 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // uint, int -> uint
         BinaryDataGeneral{"uint", "uint_10", "OpShiftRightArithmetic", "int_30", "u32",
-                          "bitcast<u32>((bitcast<i32>(10u) >> bitcast<u32>(30)))"},
+                          "bitcast<u32>((bitcast<i32>(10u) >> bitcast<u32>(30i)))"},
         // int, int -> int
         BinaryDataGeneral{"int", "int_30", "OpShiftRightArithmetic", "int_40", "i32",
-                          "(30 >> bitcast<u32>(40))"},
+                          "(30i >> bitcast<u32>(40i))"},
         // v2uint, v2int -> v2uint
         BinaryDataGeneral{
             "v2uint", "v2uint_10_20", "OpShiftRightArithmetic", "v2int_30_40", "vec2<u32>",
-            R"(bitcast<vec2<u32>>((bitcast<vec2<i32>>(vec2<u32>(10u, 20u)) >> bitcast<vec2<u32>>(vec2<i32>(30, 40)))))"},
+            R"(bitcast<vec2<u32>>((bitcast<vec2<i32>>(vec2<u32>(10u, 20u)) >> bitcast<vec2<u32>>(vec2<i32>(30i, 40i)))))"},
         // v2int, v2int -> v2int
         BinaryDataGeneral{"v2int", "v2int_40_30", "OpShiftRightArithmetic", "v2int_30_40",
                           "vec2<i32>",
-                          "(vec2<i32>(40, 30) >> bitcast<vec2<u32>>(vec2<i32>(30, 40)))"}));
+                          "(vec2<i32>(40i, 30i) >> bitcast<vec2<u32>>(vec2<i32>(30i, 40i)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_ShiftRightArithmetic_BitcastResult,
@@ -307,11 +307,11 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // int, uint -> uint
         BinaryDataGeneral{"uint", "int_30", "OpShiftRightArithmetic", "uint_10", "u32",
-                          "bitcast<u32>((30 >> 10u))"},
+                          "bitcast<u32>((30i >> 10u))"},
         // v2int, v2uint -> v2uint
         BinaryDataGeneral{"v2uint", "v2int_30_40", "OpShiftRightArithmetic", "v2uint_20_10",
                           "vec2<u32>",
-                          "bitcast<vec2<u32>>((vec2<i32>(30, 40) >> vec2<u32>(20u, 10u)))"}));
+                          "bitcast<vec2<u32>>((vec2<i32>(30i, 40i) >> vec2<u32>(20u, 10u)))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_BitwiseAnd,
@@ -320,7 +320,7 @@ INSTANTIATE_TEST_SUITE_P(
         // Both uint
         BinaryData{"uint", "uint_10", "OpBitwiseAnd", "uint_20", "u32", "10u", "&", "20u"},
         // Both int
-        BinaryData{"int", "int_30", "OpBitwiseAnd", "int_40", "i32", "30", "&", "40"},
+        BinaryData{"int", "int_30", "OpBitwiseAnd", "int_40", "i32", "30i", "&", "40i"},
         // TODO(crbug.com/tint/678): Resolver fails on vector bitwise operations
         // Both v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpBitwiseAnd", "v2uint_20_10", "vec2<u32>",
@@ -335,24 +335,24 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Mixed, uint <- int uint
         BinaryDataGeneral{"uint", "int_30", "OpBitwiseAnd", "uint_10", "u32",
-                          "bitcast<u32>((30 & bitcast<i32>(10u)))"},
+                          "bitcast<u32>((30i & bitcast<i32>(10u)))"},
         // Mixed, int <- int uint
         BinaryDataGeneral{"int", "int_30", "OpBitwiseAnd", "uint_10", "i32",
-                          "(30 & bitcast<i32>(10u))"},
+                          "(30i & bitcast<i32>(10u))"},
         // Mixed, uint <- uint int
         BinaryDataGeneral{"uint", "uint_10", "OpBitwiseAnd", "int_30", "u32",
-                          "(10u & bitcast<u32>(30))"},
+                          "(10u & bitcast<u32>(30i))"},
         // Mixed, int <- uint uint
         BinaryDataGeneral{"int", "uint_20", "OpBitwiseAnd", "uint_10", "i32",
                           "bitcast<i32>((20u & 10u))"},
         // Mixed, returning v2uint
         BinaryDataGeneral{
             "v2uint", "v2int_30_40", "OpBitwiseAnd", "v2uint_10_20", "vec2<u32>",
-            R"(bitcast<vec2<u32>>((vec2<i32>(30, 40) & bitcast<vec2<i32>>(vec2<u32>(10u, 20u)))))"},
+            R"(bitcast<vec2<u32>>((vec2<i32>(30i, 40i) & bitcast<vec2<i32>>(vec2<u32>(10u, 20u)))))"},
         // Mixed, returning v2int
         BinaryDataGeneral{
             "v2int", "v2uint_10_20", "OpBitwiseAnd", "v2int_40_30", "vec2<i32>",
-            R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) & bitcast<vec2<u32>>(vec2<i32>(40, 30)))))"}));
+            R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) & bitcast<vec2<u32>>(vec2<i32>(40i, 30i)))))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_BitwiseOr,
@@ -361,7 +361,7 @@ INSTANTIATE_TEST_SUITE_P(
         // Both uint
         BinaryData{"uint", "uint_10", "OpBitwiseOr", "uint_20", "u32", "10u", "|", "20u"},
         // Both int
-        BinaryData{"int", "int_30", "OpBitwiseOr", "int_40", "i32", "30", "|", "40"},
+        BinaryData{"int", "int_30", "OpBitwiseOr", "int_40", "i32", "30i", "|", "40i"},
         // TODO(crbug.com/tint/678): Resolver fails on vector bitwise operations
         // Both v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpBitwiseOr", "v2uint_20_10", "vec2<u32>",
@@ -376,24 +376,24 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Mixed, uint <- int uint
         BinaryDataGeneral{"uint", "int_30", "OpBitwiseOr", "uint_10", "u32",
-                          "bitcast<u32>((30 | bitcast<i32>(10u)))"},
+                          "bitcast<u32>((30i | bitcast<i32>(10u)))"},
         // Mixed, int <- int uint
         BinaryDataGeneral{"int", "int_30", "OpBitwiseOr", "uint_10", "i32",
-                          "(30 | bitcast<i32>(10u))"},
+                          "(30i | bitcast<i32>(10u))"},
         // Mixed, uint <- uint int
         BinaryDataGeneral{"uint", "uint_10", "OpBitwiseOr", "int_30", "u32",
-                          "(10u | bitcast<u32>(30))"},
+                          "(10u | bitcast<u32>(30i))"},
         // Mixed, int <- uint uint
         BinaryDataGeneral{"int", "uint_20", "OpBitwiseOr", "uint_10", "i32",
                           "bitcast<i32>((20u | 10u))"},
         // Mixed, returning v2uint
         BinaryDataGeneral{
             "v2uint", "v2int_30_40", "OpBitwiseOr", "v2uint_10_20", "vec2<u32>",
-            R"(bitcast<vec2<u32>>((vec2<i32>(30, 40) | bitcast<vec2<i32>>(vec2<u32>(10u, 20u)))))"},
+            R"(bitcast<vec2<u32>>((vec2<i32>(30i, 40i) | bitcast<vec2<i32>>(vec2<u32>(10u, 20u)))))"},
         // Mixed, returning v2int
         BinaryDataGeneral{
             "v2int", "v2uint_10_20", "OpBitwiseOr", "v2int_40_30", "vec2<i32>",
-            R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) | bitcast<vec2<u32>>(vec2<i32>(40, 30)))))"}));
+            R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) | bitcast<vec2<u32>>(vec2<i32>(40i, 30i)))))"}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_BitwiseXor,
@@ -402,7 +402,7 @@ INSTANTIATE_TEST_SUITE_P(
         // Both uint
         BinaryData{"uint", "uint_10", "OpBitwiseXor", "uint_20", "u32", "10u", "^", "20u"},
         // Both int
-        BinaryData{"int", "int_30", "OpBitwiseXor", "int_40", "i32", "30", "^", "40"},
+        BinaryData{"int", "int_30", "OpBitwiseXor", "int_40", "i32", "30i", "^", "40i"},
         // TODO(crbug.com/tint/678): Resolver fails on vector bitwise operations
         // Both v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpBitwiseXor", "v2uint_20_10", "vec2<u32>",
@@ -417,24 +417,24 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Mixed, uint <- int uint
         BinaryDataGeneral{"uint", "int_30", "OpBitwiseXor", "uint_10", "u32",
-                          "bitcast<u32>((30 ^ bitcast<i32>(10u)))"},
+                          "bitcast<u32>((30i ^ bitcast<i32>(10u)))"},
         // Mixed, int <- int uint
         BinaryDataGeneral{"int", "int_30", "OpBitwiseXor", "uint_10", "i32",
-                          "(30 ^ bitcast<i32>(10u))"},
+                          "(30i ^ bitcast<i32>(10u))"},
         // Mixed, uint <- uint int
         BinaryDataGeneral{"uint", "uint_10", "OpBitwiseXor", "int_30", "u32",
-                          "(10u ^ bitcast<u32>(30))"},
+                          "(10u ^ bitcast<u32>(30i))"},
         // Mixed, int <- uint uint
         BinaryDataGeneral{"int", "uint_20", "OpBitwiseXor", "uint_10", "i32",
                           "bitcast<i32>((20u ^ 10u))"},
         // Mixed, returning v2uint
         BinaryDataGeneral{
             "v2uint", "v2int_30_40", "OpBitwiseXor", "v2uint_10_20", "vec2<u32>",
-            R"(bitcast<vec2<u32>>((vec2<i32>(30, 40) ^ bitcast<vec2<i32>>(vec2<u32>(10u, 20u)))))"},
+            R"(bitcast<vec2<u32>>((vec2<i32>(30i, 40i) ^ bitcast<vec2<i32>>(vec2<u32>(10u, 20u)))))"},
         // Mixed, returning v2int
         BinaryDataGeneral{
             "v2int", "v2uint_10_20", "OpBitwiseXor", "v2int_40_30", "vec2<i32>",
-            R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) ^ bitcast<vec2<u32>>(vec2<i32>(40, 30)))))"}));
+            R"(bitcast<vec2<i32>>((vec2<u32>(10u, 20u) ^ bitcast<vec2<u32>>(vec2<i32>(40i, 30i)))))"}));
 
 TEST_F(SpvUnaryBitTest, Not_Int_Int) {
     const auto assembly = SimplePreamble() + R"(
@@ -450,7 +450,7 @@ TEST_F(SpvUnaryBitTest, Not_Int_Int) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : i32 = ~(30);"));
+    EXPECT_THAT(body, HasSubstr("let x_1 : i32 = ~(30i);"));
 }
 
 TEST_F(SpvUnaryBitTest, Not_Int_Uint) {
@@ -484,7 +484,7 @@ TEST_F(SpvUnaryBitTest, Not_Uint_Int) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : u32 = bitcast<u32>(~(30));"));
+    EXPECT_THAT(body, HasSubstr("let x_1 : u32 = bitcast<u32>(~(30i));"));
 }
 
 TEST_F(SpvUnaryBitTest, Not_Uint_Uint) {
@@ -518,7 +518,7 @@ TEST_F(SpvUnaryBitTest, Not_SignedVec_SignedVec) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = ~(vec2<i32>(30, 40));"));
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = ~(vec2<i32>(30i, 40i));"));
 }
 
 TEST_F(SpvUnaryBitTest, Not_SignedVec_UnsignedVec) {
@@ -553,7 +553,8 @@ TEST_F(SpvUnaryBitTest, Not_UnsignedVec_SignedVec) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<u32> = bitcast<vec2<u32>>(~(vec2<i32>(30, 40)));"));
+    EXPECT_THAT(body,
+                HasSubstr("let x_1 : vec2<u32> = bitcast<vec2<u32>>(~(vec2<i32>(30i, 40i)));"));
 }
 TEST_F(SpvUnaryBitTest, Not_UnsignedVec_UnsignedVec) {
     const auto assembly = SimplePreamble() + R"(
@@ -840,7 +841,7 @@ TEST_F(SpvUnaryBitTest, InsertBits_Int) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = insertBits(30, 40, 10u, 20u);")) << body;
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = insertBits(30i, 40i, 10u, 20u);")) << body;
 }
 
 TEST_F(SpvUnaryBitTest, InsertBits_IntVector) {
@@ -858,7 +859,7 @@ TEST_F(SpvUnaryBitTest, InsertBits_IntVector) {
     EXPECT_THAT(
         body,
         HasSubstr(
-            R"(let x_1 : vec2<i32> = insertBits(vec2<i32>(30, 40), vec2<i32>(40, 30), 10u, 20u);)"))
+            R"(let x_1 : vec2<i32> = insertBits(vec2<i32>(30i, 40i), vec2<i32>(40i, 30i), 10u, 20u);)"))
         << body;
 }
 
@@ -908,7 +909,7 @@ TEST_F(SpvUnaryBitTest, ExtractBits_Int) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = extractBits(30, 10u, 20u);")) << body;
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = extractBits(30i, 10u, 20u);")) << body;
 }
 
 TEST_F(SpvUnaryBitTest, ExtractBits_IntVector) {
@@ -923,7 +924,8 @@ TEST_F(SpvUnaryBitTest, ExtractBits_IntVector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<i32> = extractBits(vec2<i32>(30, 40), 10u, 20u);"))
+    EXPECT_THAT(body,
+                HasSubstr("let x_1 : vec2<i32> = extractBits(vec2<i32>(30i, 40i), 10u, 20u);"))
         << body;
 }
 

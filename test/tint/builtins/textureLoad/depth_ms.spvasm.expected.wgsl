@@ -4,7 +4,7 @@ var<private> tint_symbol_1 : vec4<f32> = vec4<f32>();
 
 fn textureLoad_6273b1() {
   var res : f32 = 0.0;
-  let x_17 : vec4<f32> = vec4<f32>(textureLoad(arg_0, vec2<i32>(), 1), 0.0, 0.0, 0.0);
+  let x_17 : vec4<f32> = vec4<f32>(textureLoad(arg_0, vec2<i32>(), 1i), 0.0, 0.0, 0.0);
   res = x_17.x;
   return;
 }
