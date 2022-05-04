@@ -20,19 +20,21 @@ namespace tint::reader::wgsl {
 std::string_view Token::TypeToName(Type type) {
     switch (type) {
         case Token::Type::kError:
-            return "kError";
+            return "error";
         case Token::Type::kEOF:
-            return "kEOF";
+            return "end of file";
         case Token::Type::kIdentifier:
-            return "kIdentifier";
+            return "identifier";
         case Token::Type::kFloatLiteral:
-            return "kFloatLiteral";
-        case Token::Type::kSintLiteral:
-            return "kSintLiteral";
-        case Token::Type::kUintLiteral:
-            return "kUintLiteral";
+            return "float literal";
+        case Token::Type::kIntLiteral:
+            return "abstract integer literal";
+        case Token::Type::kIntILiteral:
+            return "'i'-suffixed integer literal";
+        case Token::Type::kIntULiteral:
+            return "'u'-suffixed integer literal";
         case Token::Type::kUninitialized:
-            return "kUninitialized";
+            return "uninitialized";
 
         case Token::Type::kAnd:
             return "&";
@@ -273,11 +275,8 @@ Token::Token(Type type, const Source& source, const std::string& str)
 Token::Token(Type type, const Source& source, const char* str)
     : type_(type), source_(source), value_(std::string_view(str)) {}
 
-Token::Token(const Source& source, uint32_t val)
-    : type_(Type::kUintLiteral), source_(source), value_(val) {}
-
-Token::Token(const Source& source, int32_t val)
-    : type_(Type::kSintLiteral), source_(source), value_(val) {}
+Token::Token(Type type, const Source& source, int64_t val)
+    : type_(type), source_(source), value_(val) {}
 
 Token::Token(const Source& source, float val)
     : type_(Type::kFloatLiteral), source_(source), value_(val) {}
@@ -306,10 +305,12 @@ std::string Token::to_str() const {
     switch (type_) {
         case Type::kFloatLiteral:
             return std::to_string(std::get<float>(value_));
-        case Type::kSintLiteral:
-            return std::to_string(std::get<int32_t>(value_));
-        case Type::kUintLiteral:
-            return std::to_string(std::get<uint32_t>(value_));
+        case Type::kIntLiteral:
+            return std::to_string(std::get<int64_t>(value_));
+        case Type::kIntILiteral:
+            return std::to_string(std::get<int64_t>(value_)) + "i";
+        case Type::kIntULiteral:
+            return std::to_string(std::get<int64_t>(value_)) + "u";
         case Type::kIdentifier:
         case Type::kError:
             if (auto* view = std::get_if<std::string_view>(&value_)) {
@@ -325,12 +326,8 @@ float Token::to_f32() const {
     return std::get<float>(value_);
 }
 
-uint32_t Token::to_u32() const {
-    return std::get<uint32_t>(value_);
-}
-
-int32_t Token::to_i32() const {
-    return std::get<int32_t>(value_);
+int64_t Token::to_i64() const {
+    return std::get<int64_t>(value_);
 }
 
 }  // namespace tint::reader::wgsl

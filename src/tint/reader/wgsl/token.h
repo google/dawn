@@ -40,10 +40,12 @@ class Token {
         kIdentifier,
         /// A float value
         kFloatLiteral,
-        /// An signed int value
-        kSintLiteral,
-        /// A unsigned int value
-        kUintLiteral,
+        /// An integer literal with no suffix
+        kIntLiteral,
+        /// An integer literal with an 'i' suffix
+        kIntILiteral,
+        /// An integer literal with a 'u' suffix
+        kIntULiteral,
 
         /// A '&'
         kAnd,
@@ -297,14 +299,11 @@ class Token {
     /// @param source the source of the token
     /// @param str the source string for the token
     Token(Type type, const Source& source, const char* str);
-    /// Create a unsigned integer Token
+    /// Create a integer Token of the given type
+    /// @param type the Token::Type of the token
     /// @param source the source of the token
     /// @param val the source unsigned for the token
-    Token(const Source& source, uint32_t val);
-    /// Create a signed integer Token
-    /// @param source the source of the token
-    /// @param val the source integer for the token
-    Token(const Source& source, int32_t val);
+    Token(Type type, const Source& source, int64_t val);
     /// Create a float Token
     /// @param source the source of the token
     /// @param val the source float for the token
@@ -340,8 +339,9 @@ class Token {
     bool IsIdentifier() const { return type_ == Type::kIdentifier; }
     /// @returns true if the token is a literal
     bool IsLiteral() const {
-        return type_ == Type::kSintLiteral || type_ == Type::kFalse ||
-               type_ == Type::kUintLiteral || type_ == Type::kTrue || type_ == Type::kFloatLiteral;
+        return type_ == Type::kIntLiteral || type_ == Type::kIntILiteral ||
+               type_ == Type::kIntULiteral || type_ == Type::kFalse || type_ == Type::kTrue ||
+               type_ == Type::kFloatLiteral;
     }
     /// @returns true if token is a 'matNxM'
     bool IsMatrix() const {
@@ -381,14 +381,10 @@ class Token {
     /// contain a float value.
     /// @return float
     float to_f32() const;
-    /// Returns the uint32 value of the token. 0 is returned if the token does not
-    /// contain a unsigned integer value.
-    /// @return uint32_t
-    uint32_t to_u32() const;
-    /// Returns the int32 value of the token. 0 is returned if the token does not
-    /// contain a signed integer value.
-    /// @return int32_t
-    int32_t to_i32() const;
+    /// Returns the int64_t value of the token. 0 is returned if the token does
+    /// not contain an integer value.
+    /// @return int64_t
+    int64_t to_i64() const;
 
     /// @returns the token type as string
     std::string_view to_name() const { return Token::TypeToName(type_); }
@@ -399,7 +395,7 @@ class Token {
     /// The source where the token appeared
     Source source_;
     /// The value represented by the token
-    std::variant<int32_t, uint32_t, float, std::string, std::string_view> value_;
+    std::variant<int64_t, float, std::string, std::string_view> value_;
 };
 
 #ifndef NDEBUG

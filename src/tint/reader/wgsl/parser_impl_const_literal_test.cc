@@ -105,7 +105,7 @@ TEST_F(ParserImplTest, ConstLiteral_Uint_Negative) {
     auto c = p->const_literal();
     EXPECT_FALSE(c.matched);
     EXPECT_TRUE(c.errored);
-    EXPECT_EQ(p->error(), "1:1: u32 (-234) must not be negative");
+    EXPECT_EQ(p->error(), "1:1: unsigned literal cannot be negative");
     ASSERT_EQ(c.value, nullptr);
 }
 

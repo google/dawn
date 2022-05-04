@@ -20,6 +20,7 @@
 #include <limits>
 #include <optional>  // NOLINT(build/include_order)
 #include <tuple>
+#include <type_traits>
 #include <utility>
 
 #include "src/tint/debug.h"
@@ -77,6 +78,29 @@ uint32_t hex_value(char c) {
         return 0xA + static_cast<uint32_t>(c - 'A');
     }
     return 0;
+}
+
+/// LimitCheck is the enumerator result of check_limits().
+enum class LimitCheck {
+    /// The value was within the limits of the data type.
+    kWithinLimits,
+    /// The value was too small to fit within the data type.
+    kTooSmall,
+    /// The value was too large to fit within the data type.
+    kTooLarge,
+};
+
+/// Checks whether the value fits within the integer type `T`
+template <typename T>
+LimitCheck check_limits(int64_t value) {
+    static_assert(std::is_integral_v<T>, "T must be an integer");
+    if (value < static_cast<int64_t>(std::numeric_limits<T>::min())) {
+        return LimitCheck::kTooSmall;
+    }
+    if (value > static_cast<int64_t>(std::numeric_limits<T>::max())) {
+        return LimitCheck::kTooLarge;
+    }
+    return LimitCheck::kWithinLimits;
 }
 
 }  // namespace
@@ -665,37 +689,49 @@ Token Lexer::build_token_from_int_if_possible(Source source,
                                               size_t start,
                                               size_t end,
                                               int32_t base) {
-    auto res = strtoll(&at(start), nullptr, base);
+    int64_t res = strtoll(&at(start), nullptr, base);
+
+    auto str = [&] { return std::string{substr(start, end - start)}; };
 
     if (matches(pos(), "u")) {
-        if (res < 0) {
-            return {Token::Type::kError, source,
-                    "u32 (" + std::string{substr(start, end - start)} + ") must not be negative"};
+        switch (check_limits<uint32_t>(res)) {
+            case LimitCheck::kTooSmall:
+                return {Token::Type::kError, source, "unsigned literal cannot be negative"};
+            case LimitCheck::kTooLarge:
+                return {Token::Type::kError, source, str() + " too large for u32"};
+            default:
+                advance(1);
+                end_source(source);
+                return {Token::Type::kIntULiteral, source, res};
         }
-        if (static_cast<uint64_t>(res) >
-            static_cast<uint64_t>(std::numeric_limits<uint32_t>::max())) {
-            return {Token::Type::kError, source,
-                    "u32 (" + std::string{substr(start, end - start)} + ") too large"};
-        }
-        advance(1);
-        end_source(source);
-        return {source, static_cast<uint32_t>(res)};
     }
 
     if (matches(pos(), "i")) {
+        switch (check_limits<int32_t>(res)) {
+            case LimitCheck::kTooSmall:
+                return {Token::Type::kError, source, str() + " too small for i32"};
+            case LimitCheck::kTooLarge:
+                return {Token::Type::kError, source, str() + " too large for i32"};
+            default:
+                break;
+        }
         advance(1);
+        end_source(source);
+        return {Token::Type::kIntILiteral, source, res};
     }
 
-    if (res < static_cast<int64_t>(std::numeric_limits<int32_t>::min())) {
-        return {Token::Type::kError, source,
-                "i32 (" + std::string{substr(start, end - start)} + ") too small"};
+    // TODO(crbug.com/tint/1504): Properly support abstract int:
+    // Change `AbstractIntType` to `int64_t`, update errors to say 'abstract int'.
+    using AbstractIntType = int32_t;
+    switch (check_limits<AbstractIntType>(res)) {
+        case LimitCheck::kTooSmall:
+            return {Token::Type::kError, source, str() + " too small for i32"};
+        case LimitCheck::kTooLarge:
+            return {Token::Type::kError, source, str() + " too large for i32"};
+        default:
+            end_source(source);
+            return {Token::Type::kIntLiteral, source, res};
     }
-    if (res > static_cast<int64_t>(std::numeric_limits<int32_t>::max())) {
-        return {Token::Type::kError, source,
-                "i32 (" + std::string{substr(start, end - start)} + ") too large"};
-    }
-    end_source(source);
-    return {source, static_cast<int32_t>(res)};
 }
 
 Token Lexer::try_hex_integer() {

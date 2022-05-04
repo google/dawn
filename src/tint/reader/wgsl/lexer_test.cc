@@ -588,18 +588,31 @@ inline std::ostream& operator<<(std::ostream& out, HexSignedIntData data) {
 }
 
 using IntegerTest_HexSigned = testing::TestWithParam<HexSignedIntData>;
-TEST_P(IntegerTest_HexSigned, Matches) {
+TEST_P(IntegerTest_HexSigned, NoSuffix) {
     auto params = GetParam();
     Source::File file("", params.input);
     Lexer l(&file);
 
     auto t = l.next();
-    EXPECT_TRUE(t.Is(Token::Type::kSintLiteral));
+    EXPECT_TRUE(t.Is(Token::Type::kIntLiteral));
     EXPECT_EQ(t.source().range.begin.line, 1u);
     EXPECT_EQ(t.source().range.begin.column, 1u);
     EXPECT_EQ(t.source().range.end.line, 1u);
     EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
-    EXPECT_EQ(t.to_i32(), params.result);
+    EXPECT_EQ(t.to_i64(), params.result);
+}
+TEST_P(IntegerTest_HexSigned, ISuffix) {
+    auto params = GetParam();
+    Source::File file("", std::string(params.input) + "i");
+    Lexer l(&file);
+
+    auto t = l.next();
+    EXPECT_TRUE(t.Is(Token::Type::kIntILiteral));
+    EXPECT_EQ(t.source().range.begin.line, 1u);
+    EXPECT_EQ(t.source().range.begin.column, 1u);
+    EXPECT_EQ(t.source().range.end.line, 1u);
+    EXPECT_EQ(t.source().range.end.column, 2u + strlen(params.input));
+    EXPECT_EQ(t.to_i64(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
     LexerTest,
@@ -663,7 +676,7 @@ TEST_F(LexerTest, IntegerTest_HexSignedTooLarge) {
 
     auto t = l.next();
     ASSERT_TRUE(t.Is(Token::Type::kError));
-    EXPECT_EQ(t.to_str(), "i32 (0x80000000) too large");
+    EXPECT_EQ(t.to_str(), "0x80000000 too large for i32");
 }
 
 TEST_F(LexerTest, IntegerTest_HexSignedTooSmall) {
@@ -672,7 +685,7 @@ TEST_F(LexerTest, IntegerTest_HexSignedTooSmall) {
 
     auto t = l.next();
     ASSERT_TRUE(t.Is(Token::Type::kError));
-    EXPECT_EQ(t.to_str(), "i32 (-0x8000000F) too small");
+    EXPECT_EQ(t.to_str(), "-0x8000000F too small for i32");
 }
 
 TEST_F(LexerTest, IntegerTest_HexSignedTooManyDigits) {
@@ -703,18 +716,19 @@ inline std::ostream& operator<<(std::ostream& out, HexUnsignedIntData data) {
     return out;
 }
 using IntegerTest_HexUnsigned = testing::TestWithParam<HexUnsignedIntData>;
+// TODO(crbug.com/tint/1504): Split into NoSuffix and USuffix
 TEST_P(IntegerTest_HexUnsigned, Matches) {
     auto params = GetParam();
     Source::File file("", params.input);
     Lexer l(&file);
 
     auto t = l.next();
-    EXPECT_TRUE(t.Is(Token::Type::kUintLiteral));
+    EXPECT_TRUE(t.Is(Token::Type::kIntULiteral));
     EXPECT_EQ(t.source().range.begin.line, 1u);
     EXPECT_EQ(t.source().range.begin.column, 1u);
     EXPECT_EQ(t.source().range.end.line, 1u);
     EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
-    EXPECT_EQ(t.to_u32(), params.result);
+    EXPECT_EQ(t.to_i64(), params.result);
 
     t = l.next();
     EXPECT_TRUE(t.IsEof());
@@ -752,8 +766,8 @@ TEST_P(IntegerTest_Unsigned, Matches) {
     Lexer l(&file);
 
     auto t = l.next();
-    EXPECT_TRUE(t.Is(Token::Type::kUintLiteral));
-    EXPECT_EQ(t.to_u32(), params.result);
+    EXPECT_TRUE(t.Is(Token::Type::kIntULiteral));
+    EXPECT_EQ(t.to_i64(), params.result);
     EXPECT_EQ(t.source().range.begin.line, 1u);
     EXPECT_EQ(t.source().range.begin.column, 1u);
     EXPECT_EQ(t.source().range.end.line, 1u);
@@ -789,8 +803,8 @@ TEST_P(IntegerTest_Signed, Matches) {
     Lexer l(&file);
 
     auto t = l.next();
-    EXPECT_TRUE(t.Is(Token::Type::kSintLiteral));
-    EXPECT_EQ(t.to_i32(), params.result);
+    EXPECT_TRUE(t.Is(Token::Type::kIntLiteral));
+    EXPECT_EQ(t.to_i64(), params.result);
     EXPECT_EQ(t.source().range.begin.line, 1u);
     EXPECT_EQ(t.source().range.begin.column, 1u);
     EXPECT_EQ(t.source().range.end.line, 1u);
@@ -820,8 +834,9 @@ TEST_P(IntegerTest_Invalid, Parses) {
     Lexer l(&file);
 
     auto t = l.next();
-    EXPECT_FALSE(t.Is(Token::Type::kSintLiteral));
-    EXPECT_FALSE(t.Is(Token::Type::kUintLiteral));
+    EXPECT_FALSE(t.Is(Token::Type::kIntLiteral));
+    EXPECT_FALSE(t.Is(Token::Type::kIntULiteral));
+    EXPECT_FALSE(t.Is(Token::Type::kIntILiteral));
 }
 INSTANTIATE_TEST_SUITE_P(
     LexerTest,

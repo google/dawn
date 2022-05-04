@@ -14,6 +14,8 @@
 
 #include "src/tint/reader/wgsl/parser_impl.h"
 
+#include <limits>
+
 #include "src/tint/ast/array.h"
 #include "src/tint/ast/assignment_statement.h"
 #include "src/tint/ast/bitcast_expression.h"
@@ -2776,20 +2778,23 @@ Maybe<const ast::Statement*> ParserImpl::assignment_stmt() {
 //   | FALSE
 Maybe<const ast::LiteralExpression*> ParserImpl::const_literal() {
     auto t = peek();
+    if (match(Token::Type::kIntLiteral)) {
+        return create<ast::SintLiteralExpression>(t.source(), static_cast<int32_t>(t.to_i64()));
+    }
+    if (match(Token::Type::kIntILiteral)) {
+        return create<ast::SintLiteralExpression>(t.source(), static_cast<int32_t>(t.to_i64()));
+    }
+    if (match(Token::Type::kIntULiteral)) {
+        return create<ast::UintLiteralExpression>(t.source(), static_cast<uint32_t>(t.to_i64()));
+    }
+    if (match(Token::Type::kFloatLiteral)) {
+        return create<ast::FloatLiteralExpression>(t.source(), t.to_f32());
+    }
     if (match(Token::Type::kTrue)) {
         return create<ast::BoolLiteralExpression>(t.source(), true);
     }
     if (match(Token::Type::kFalse)) {
         return create<ast::BoolLiteralExpression>(t.source(), false);
-    }
-    if (match(Token::Type::kSintLiteral)) {
-        return create<ast::SintLiteralExpression>(t.source(), t.to_i32());
-    }
-    if (match(Token::Type::kUintLiteral)) {
-        return create<ast::UintLiteralExpression>(t.source(), t.to_u32());
-    }
-    if (match(Token::Type::kFloatLiteral)) {
-        return create<ast::FloatLiteralExpression>(t.source(), t.to_f32());
     }
     if (handle_error(t)) {
         return Failure::kErrored;
@@ -3119,11 +3124,19 @@ bool ParserImpl::expect(std::string_view use, Token::Type tok) {
 
 Expect<int32_t> ParserImpl::expect_sint(std::string_view use) {
     auto t = peek();
-    if (!t.Is(Token::Type::kSintLiteral))
+    if (!t.Is(Token::Type::kIntLiteral) && !t.Is(Token::Type::kIntILiteral)) {
         return add_error(t.source(), "expected signed integer literal", use);
+    }
+
+    int64_t val = t.to_i64();
+    if ((val > std::numeric_limits<int32_t>::max()) ||
+        (val < std::numeric_limits<int32_t>::min())) {
+        // TODO(crbug.com/tint/1504): Test this when abstract int is implemented
+        return add_error(t.source(), "value overflows i32", use);
+    }
 
     next();
-    return {t.to_i32(), t.source()};
+    return {static_cast<int32_t>(t.to_i64()), t.source()};
 }
 
 Expect<uint32_t> ParserImpl::expect_positive_sint(std::string_view use) {
