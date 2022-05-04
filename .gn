@@ -34,10 +34,7 @@ default_args = {
   vma_vulkan_headers_dir = "//third_party/vulkan-deps/vulkan-headers/src"
 }
 
-check_targets = [
-  # Everything in BUILD.gn
-  "//:*",
-
-  # Everything in third_party/BUILD.gn
-  "//third_party/:*",
+no_check_targets = [
+  # TODO(crbug.com/dawn/1404): Issue with the Absl headers
+  "//src/dawn/tests:dawn_unittests",
 ]
