@@ -16,6 +16,7 @@
 #define SRC_TINT_UTILS_BLOCK_ALLOCATOR_H_
 
 #include <array>
+#include <cstring>
 #include <utility>
 
 #include "src/tint/utils/math.h"
@@ -230,7 +231,14 @@ class BlockAllocator {
         }
 
         auto* base = &block_.current->data[0];
-        auto* ptr = reinterpret_cast<TYPE*>(base + block_.current_offset);
+        auto* addr = static_cast<void*>(base + block_.current_offset);
+        // Use a memcpy to reinterpret 'void* addr' as 'TYPE* ptr'.
+        // This is done without using a static_cast, as Clang's Control Flow Integrity checks can
+        // trigger for this cast, as we're casting from uint8_t* to TYPE*.
+        // See: crbug.com/dawn/1406
+        // See: https://clang.llvm.org/docs/ControlFlowIntegrity.html#bad-cast-checking
+        TYPE* ptr;
+        memcpy(&ptr, &addr, sizeof(addr));
         block_.current_offset += sizeof(TYPE);
         return ptr;
     }
