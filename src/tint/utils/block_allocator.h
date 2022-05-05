@@ -19,6 +19,7 @@
 #include <cstring>
 #include <utility>
 
+#include "src/tint/utils/bitcast.h"
 #include "src/tint/utils/math.h"
 
 namespace tint::utils {
@@ -231,14 +232,7 @@ class BlockAllocator {
         }
 
         auto* base = &block_.current->data[0];
-        auto* addr = static_cast<void*>(base + block_.current_offset);
-        // Use a memcpy to reinterpret 'void* addr' as 'TYPE* ptr'.
-        // This is done without using a static_cast, as Clang's Control Flow Integrity checks can
-        // trigger for this cast, as we're casting from uint8_t* to TYPE*.
-        // See: crbug.com/dawn/1406
-        // See: https://clang.llvm.org/docs/ControlFlowIntegrity.html#bad-cast-checking
-        TYPE* ptr;
-        memcpy(&ptr, &addr, sizeof(addr));
+        auto* ptr = utils::Bitcast<TYPE*>(base + block_.current_offset);
         block_.current_offset += sizeof(TYPE);
         return ptr;
     }

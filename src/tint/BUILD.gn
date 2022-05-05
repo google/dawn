@@ -510,6 +510,7 @@ libtint_source_set("libtint_core_all_src") {
     "transform/wrap_arrays_in_structs.h",
     "transform/zero_init_workgroup_memory.cc",
     "transform/zero_init_workgroup_memory.h",
+    "utils/bitcast.h",
     "utils/block_allocator.h",
     "utils/crc32.h",
     "utils/debugger.cc",

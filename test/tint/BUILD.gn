@@ -357,6 +357,7 @@ tint_unittests_source_set("tint_unittests_transform_src") {
 
 tint_unittests_source_set("tint_unittests_utils_src") {
   sources = [
+    "../../src/tint/utils/bitcast_test.cc",
     "../../src/tint/utils/crc32_test.cc",
     "../../src/tint/utils/defer_test.cc",
     "../../src/tint/utils/enum_set_test.cc",

@@ -440,6 +440,7 @@ set(TINT_LIB_SRCS
   sem/vector.h
   sem/void.cc
   sem/void.h
+  utils/bitcast.h
   utils/block_allocator.h
   utils/crc32.h
   utils/enum_set.h
@@ -806,6 +807,7 @@ if(TINT_BUILD_TESTS)
     text/unicode_test.cc
     traits_test.cc
     transform/transform_test.cc
+    utils/bitcast_test.cc
     utils/block_allocator_test.cc
     utils/crc32_test.cc
     utils/defer_test.cc
