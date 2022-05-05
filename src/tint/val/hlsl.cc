@@ -30,7 +30,8 @@ namespace tint::val {
 
 Result HlslUsingDXC(const std::string& dxc_path,
                     const std::string& source,
-                    const EntryPointList& entry_points) {
+                    const EntryPointList& entry_points,
+                    const std::vector<std::string>& overrides) {
     Result result;
 
     auto dxc = utils::Command(dxc_path);
@@ -69,7 +70,13 @@ Result HlslUsingDXC(const std::string& dxc_path,
             "/Zpr "  // D3DCOMPILE_PACK_MATRIX_ROW_MAJOR
             "/Gis";  // D3DCOMPILE_IEEE_STRICTNESS
 
-        auto res = dxc(profile, "-E " + ep.first, compileFlags, file.Path());
+        std::string defs;
+        defs.reserve(overrides.size() * 20);
+        for (auto& o : overrides) {
+            defs += "/D" + o + " ";
+        }
+
+        auto res = dxc(profile, "-E " + ep.first, compileFlags, file.Path(), defs);
         if (!res.out.empty()) {
             if (!result.output.empty()) {
                 result.output += "\n";
@@ -95,7 +102,9 @@ Result HlslUsingDXC(const std::string& dxc_path,
 }
 
 #ifdef _WIN32
-Result HlslUsingFXC(const std::string& source, const EntryPointList& entry_points) {
+Result HlslUsingFXC(const std::string& source,
+                    const EntryPointList& entry_points,
+                    const std::vector<std::string>& overrides) {
     Result result;
 
     // This library leaks if an error happens in this function, but it is ok
@@ -139,12 +148,26 @@ Result HlslUsingFXC(const std::string& source, const EntryPointList& entry_point
         UINT compileFlags = D3DCOMPILE_OPTIMIZATION_LEVEL0 | D3DCOMPILE_PACK_MATRIX_ROW_MAJOR |
                             D3DCOMPILE_IEEE_STRICTNESS;
 
+        auto overrides_copy = overrides;  // Copy so that we can replace '=' with '\0'
+        std::vector<D3D_SHADER_MACRO> macros;
+        macros.reserve(overrides_copy.size() * 2);
+        for (auto& o : overrides_copy) {
+            if (auto sep = o.find_first_of('='); sep != std::string::npos) {
+                // Replace '=' with '\0' so we can point directly into the allocated string buffer
+                o[sep] = '\0';
+                macros.push_back(D3D_SHADER_MACRO{&o[0], &o[sep + 1]});
+            } else {
+                macros.emplace_back(D3D_SHADER_MACRO{o.c_str(), NULL});
+            }
+        }
+        macros.emplace_back(D3D_SHADER_MACRO{NULL, NULL});
+
         ComPtr<ID3DBlob> compiledShader;
         ComPtr<ID3DBlob> errors;
         HRESULT cr = d3dCompile(source.c_str(),    // pSrcData
                                 source.length(),   // SrcDataSize
                                 nullptr,           // pSourceName
-                                nullptr,           // pDefines
+                                macros.data(),     // pDefines
                                 nullptr,           // pInclude
                                 ep.first.c_str(),  // pEntrypoint
                                 profile,           // pTarget

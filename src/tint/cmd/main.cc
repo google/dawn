@@ -85,6 +85,7 @@ struct Options {
     bool use_fxc = false;
     std::string dxc_path;
     std::string xcrun_path;
+    std::vector<std::string> overrides;
 };
 
 const char kUsage[] = R"(Usage: tint [options] <input-file>
@@ -117,7 +118,8 @@ ${transforms}
   --dxc                     -- Path to DXC executable, used to validate HLSL output.
                                When specified, automatically enables --validate
   --xcrun                   -- Path to xcrun executable, used to validate MSL output.
-                               When specified, automatically enables --validate)";
+                               When specified, automatically enables --validate
+  --overrides               -- Pipeline overrides as NAME=VALUE, comma-separated.)";
 
 Format parse_format(const std::string& fmt) {
     (void)fmt;
@@ -200,7 +202,7 @@ Format infer_format(const std::string& filename) {
     return Format::kNone;
 }
 
-std::vector<std::string> split_transform_names(std::string list) {
+std::vector<std::string> split_on_comma(std::string list) {
     std::vector<std::string> res;
 
     std::stringstream str(list);
@@ -357,7 +359,7 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
                 std::cerr << "Missing value for " << arg << std::endl;
                 return false;
             }
-            opts->transforms = split_transform_names(args[i]);
+            opts->transforms = split_on_comma(args[i]);
         } else if (arg == "--parse-only") {
             opts->parse_only = true;
         } else if (arg == "--disable-workgroup-init") {
@@ -387,6 +389,13 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
             }
             opts->xcrun_path = args[i];
             opts->validate = true;
+        } else if (arg == "--overrides") {
+            ++i;
+            if (i >= args.size()) {
+                std::cerr << "Missing value for " << arg << std::endl;
+                return false;
+            }
+            opts->overrides = split_on_comma(args[i]);
         } else if (!arg.empty()) {
             if (arg[0] == '-') {
                 std::cerr << "Unrecognized option: " << arg << std::endl;
@@ -723,7 +732,7 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
         tint::val::Result res;
         if (options.use_fxc) {
 #ifdef _WIN32
-            res = tint::val::HlslUsingFXC(result.hlsl, result.entry_points);
+            res = tint::val::HlslUsingFXC(result.hlsl, result.entry_points, options.overrides);
 #else
             res.failed = true;
             res.output = "FXC can only be used on Windows. Sorry :X";
@@ -732,7 +741,8 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
             auto dxc =
                 tint::utils::Command::LookPath(options.dxc_path.empty() ? "dxc" : options.dxc_path);
             if (dxc.Found()) {
-                res = tint::val::HlslUsingDXC(dxc.Path(), result.hlsl, result.entry_points);
+                res = tint::val::HlslUsingDXC(dxc.Path(), result.hlsl, result.entry_points,
+                                              options.overrides);
             } else {
                 res.failed = true;
                 res.output = "DXC executable not found. Cannot validate";
