@@ -141,6 +141,9 @@ void SetDebugName(Device* device,
                          label);
 }
 
+std::string GetNextDeviceDebugPrefix();
+std::string GetDeviceDebugPrefixFromDebugName(const char* debugName);
+
 // Returns nullptr or &specializationInfo
 // specializationInfo, specializationDataEntries, specializationMapEntries needs to
 // be alive at least until VkSpecializationInfo is passed into Vulkan Create*Pipelines

@@ -14,11 +14,13 @@
 
 #include "dawn/native/vulkan/DeviceVk.h"
 
+#include "dawn/common/Log.h"
 #include "dawn/common/Platform.h"
 #include "dawn/native/BackendConnection.h"
 #include "dawn/native/ChainUtils_autogen.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/ErrorData.h"
+#include "dawn/native/Instance.h"
 #include "dawn/native/VulkanBackend.h"
 #include "dawn/native/vulkan/AdapterVk.h"
 #include "dawn/native/vulkan/BackendVk.h"
@@ -53,7 +55,7 @@ ResultOrError<Ref<Device>> Device::Create(Adapter* adapter, const DeviceDescript
 }
 
 Device::Device(Adapter* adapter, const DeviceDescriptor* descriptor)
-    : DeviceBase(adapter, descriptor) {
+    : DeviceBase(adapter, descriptor), mDebugPrefix(GetNextDeviceDebugPrefix()) {
     InitTogglesFromDriver();
 }
 
@@ -102,6 +104,8 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
     ApplyUseZeroInitializeWorkgroupMemoryExtensionToggle();
 
     SetLabelImpl();
+
+    ToBackend(GetAdapter())->GetVulkanInstance()->StartListeningForDeviceMessages(this);
 
     return DeviceBase::Initialize(Queue::Create(this, &descriptor->defaultQueue));
 }
@@ -199,6 +203,8 @@ MaybeError Device::TickImpl() {
     if (mRecordingContext.used) {
         DAWN_TRY(SubmitPendingCommands());
     }
+
+    DAWN_TRY(CheckDebugLayerAndGenerateErrors());
 
     return {};
 }
@@ -876,6 +882,33 @@ uint32_t Device::GetComputeSubgroupSize() const {
     return mComputeSubgroupSize;
 }
 
+void Device::OnDebugMessage(std::string message) {
+    mDebugMessages.push_back(std::move(message));
+}
+
+MaybeError Device::CheckDebugLayerAndGenerateErrors() {
+    if (!GetAdapter()->GetInstance()->IsBackendValidationEnabled() || mDebugMessages.empty()) {
+        return {};
+    }
+
+    auto error = DAWN_INTERNAL_ERROR("The Vulkan validation layer reported uncaught errors.");
+
+    AppendDebugLayerMessages(error.get());
+
+    return error;
+}
+
+void Device::AppendDebugLayerMessages(ErrorData* error) {
+    if (!GetAdapter()->GetInstance()->IsBackendValidationEnabled()) {
+        return;
+    }
+
+    while (!mDebugMessages.empty()) {
+        error->AppendBackendMessage(std::move(mDebugMessages.back()));
+        mDebugMessages.pop_back();
+    }
+}
+
 MaybeError Device::WaitForIdleForDestruction() {
     // Immediately tag the recording context as unused so we don't try to submit it in Tick.
     // Move the mRecordingContext.used to mUnusedCommands so it can be cleaned up in
@@ -946,6 +979,8 @@ void Device::DestroyImpl() {
 
     // Enough of the Device's initialization happened that we can now do regular robust
     // deinitialization.
+
+    ToBackend(GetAdapter())->GetVulkanInstance()->StopListeningForDeviceMessages(this);
 
     // Immediately tag the recording context as unused so we don't try to submit it in Tick.
     mRecordingContext.used = false;

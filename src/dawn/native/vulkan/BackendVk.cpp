@@ -23,6 +23,7 @@
 #include "dawn/native/Instance.h"
 #include "dawn/native/VulkanBackend.h"
 #include "dawn/native/vulkan/AdapterVk.h"
+#include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
 
@@ -108,10 +109,33 @@ VKAPI_ATTR VkBool32 VKAPI_CALL
 OnDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                      VkDebugUtilsMessageTypeFlagsEXT /* messageTypes */,
                      const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-                     void* /* pUserData */) {
+                     void* pUserData) {
     if (ShouldReportDebugMessage(pCallbackData->pMessageIdName, pCallbackData->pMessage)) {
-        dawn::WarningLog() << pCallbackData->pMessage;
-        ASSERT((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) == 0);
+        if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+            dawn::ErrorLog() << pCallbackData->pMessage;
+
+            if (pUserData != nullptr) {
+                // Look through all the object labels attached to the debug message and try to parse
+                // a device debug prefix out of one of them. If a debug prefix is found and matches
+                // a registered device, forward the message on to it.
+                for (uint32_t i = 0; i < pCallbackData->objectCount; ++i) {
+                    const VkDebugUtilsObjectNameInfoEXT& object = pCallbackData->pObjects[i];
+                    std::string deviceDebugPrefix =
+                        GetDeviceDebugPrefixFromDebugName(object.pObjectName);
+                    if (deviceDebugPrefix.empty()) {
+                        continue;
+                    }
+
+                    VulkanInstance* instance = reinterpret_cast<VulkanInstance*>(pUserData);
+                    if (instance->HandleDeviceMessage(std::move(deviceDebugPrefix),
+                                                      pCallbackData->pMessage)) {
+                        return VK_FALSE;
+                    }
+                }
+            }
+        } else {
+            dawn::WarningLog() << pCallbackData->pMessage;
+        }
     }
     return VK_FALSE;
 }
@@ -133,6 +157,8 @@ OnInstanceCreationDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT mess
 VulkanInstance::VulkanInstance() = default;
 
 VulkanInstance::~VulkanInstance() {
+    ASSERT(mMessageListenerDevices.empty());
+
     if (mDebugUtilsMessenger != VK_NULL_HANDLE) {
         mFunctions.DestroyDebugUtilsMessengerEXT(mInstance, mDebugUtilsMessenger, nullptr);
         mDebugUtilsMessenger = VK_NULL_HANDLE;
@@ -373,11 +399,29 @@ MaybeError VulkanInstance::RegisterDebugUtils() {
     createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
                              VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
     createInfo.pfnUserCallback = OnDebugUtilsCallback;
-    createInfo.pUserData = nullptr;
+    createInfo.pUserData = this;
 
     return CheckVkSuccess(mFunctions.CreateDebugUtilsMessengerEXT(mInstance, &createInfo, nullptr,
                                                                   &*mDebugUtilsMessenger),
                           "vkCreateDebugUtilsMessengerEXT");
+}
+
+void VulkanInstance::StartListeningForDeviceMessages(Device* device) {
+    std::lock_guard<std::mutex> lock(mMessageListenerDevicesMutex);
+    mMessageListenerDevices.insert({device->GetDebugPrefix(), device});
+}
+void VulkanInstance::StopListeningForDeviceMessages(Device* device) {
+    std::lock_guard<std::mutex> lock(mMessageListenerDevicesMutex);
+    mMessageListenerDevices.erase(device->GetDebugPrefix());
+}
+bool VulkanInstance::HandleDeviceMessage(std::string deviceDebugPrefix, std::string message) {
+    std::lock_guard<std::mutex> lock(mMessageListenerDevicesMutex);
+    auto it = mMessageListenerDevices.find(deviceDebugPrefix);
+    if (it != mMessageListenerDevices.end()) {
+        it->second->OnDebugMessage(std::move(message));
+        return true;
+    }
+    return false;
 }
 
 Backend::Backend(InstanceBase* instance) : BackendConnection(instance, wgpu::BackendType::Vulkan) {}

@@ -15,6 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_BACKENDVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_BACKENDVK_H_
 
+#include <mutex>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "dawn/native/BackendConnection.h"
@@ -31,6 +34,8 @@ enum class ICD {
     None,
     SwiftShader,
 };
+
+class Device;
 
 // VulkanInstance holds the reference to the Vulkan library, the VkInstance, VkPhysicalDevices
 // on that instance, Vulkan functions loaded from the library, and global information
@@ -50,6 +55,12 @@ class VulkanInstance : public RefCounted {
     const VulkanGlobalInfo& GetGlobalInfo() const;
     const std::vector<VkPhysicalDevice>& GetPhysicalDevices() const;
 
+    // TODO(dawn:831): This set of functions guards may need to be adjusted when Dawn is updated
+    // to support multithreading.
+    void StartListeningForDeviceMessages(Device* device);
+    void StopListeningForDeviceMessages(Device* device);
+    bool HandleDeviceMessage(std::string deviceDebugPrefix, std::string message);
+
   private:
     VulkanInstance();
 
@@ -66,6 +77,11 @@ class VulkanInstance : public RefCounted {
     VkDebugUtilsMessengerEXT mDebugUtilsMessenger = VK_NULL_HANDLE;
 
     std::vector<VkPhysicalDevice> mPhysicalDevices;
+
+    // Devices keep the VulkanInstance alive, so as long as devices remove themselves from this
+    // map on destruction the pointers it contains should remain valid.
+    std::unordered_map<std::string, Device*> mMessageListenerDevices;
+    std::mutex mMessageListenerDevicesMutex;
 };
 
 class Backend : public BackendConnection {

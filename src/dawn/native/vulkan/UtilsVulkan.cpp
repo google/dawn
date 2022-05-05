@@ -26,6 +26,9 @@
 
 namespace dawn::native::vulkan {
 
+constexpr char kDeviceDebugPrefix[] = "DawnDbg=";
+constexpr char kDeviceDebugSeparator[] = ";";
+
 #define VK_OBJECT_TYPE_GETTER(object, objectType)         \
     template <>                                           \
     VkObjectType GetVkObjectType<object>(object handle) { \
@@ -216,18 +219,42 @@ void SetDebugNameInternal(Device* device,
         objectNameInfo.objectType = objectType;
         objectNameInfo.objectHandle = objectHandle;
 
-        if (label.empty() || !device->IsToggleEnabled(Toggle::UseUserDefinedLabelsInBackend)) {
-            objectNameInfo.pObjectName = prefix;
-            device->fn.SetDebugUtilsObjectNameEXT(device->GetVkDevice(), &objectNameInfo);
-            return;
+        std::ostringstream objectNameStream;
+        // Prefix with the device's message ID so that if this label appears in a validation
+        // message it can be parsed out and the message can be associated with the right device.
+        objectNameStream << device->GetDebugPrefix() << kDeviceDebugSeparator << prefix;
+        if (!label.empty() && device->IsToggleEnabled(Toggle::UseUserDefinedLabelsInBackend)) {
+            objectNameStream << "_" << label;
         }
-
-        std::string objectName = prefix;
-        objectName += "_";
-        objectName += label;
+        std::string objectName = objectNameStream.str();
         objectNameInfo.pObjectName = objectName.c_str();
         device->fn.SetDebugUtilsObjectNameEXT(device->GetVkDevice(), &objectNameInfo);
     }
+}
+
+std::string GetNextDeviceDebugPrefix() {
+    static uint64_t nextDeviceDebugId = 1;
+    std::ostringstream objectName;
+    objectName << kDeviceDebugPrefix << nextDeviceDebugId++;
+    return objectName.str();
+}
+
+std::string GetDeviceDebugPrefixFromDebugName(const char* debugName) {
+    if (debugName == nullptr) {
+        return {};
+    }
+
+    if (strncmp(debugName, kDeviceDebugPrefix, sizeof(kDeviceDebugPrefix) - 1) != 0) {
+        return {};
+    }
+
+    const char* separator = strstr(debugName + sizeof(kDeviceDebugPrefix), kDeviceDebugSeparator);
+    if (separator == nullptr) {
+        return {};
+    }
+
+    size_t length = separator - debugName;
+    return std::string(debugName, length);
 }
 
 VkSpecializationInfo* GetVkSpecializationInfo(
