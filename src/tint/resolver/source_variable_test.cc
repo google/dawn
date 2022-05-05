@@ -17,6 +17,8 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/member_accessor_expression.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -190,12 +192,12 @@ TEST_F(ResolverSourceVariableTest, LetCopyVar) {
 }
 
 TEST_F(ResolverSourceVariableTest, ThroughIndexAccessor) {
-    // var<private> a : array<f32, 4>;
+    // var<private> a : array<f32, 4u>;
     // {
-    //   a[2]
+    //   a[2i]
     // }
-    auto* a = Global("a", ty.array(ty.f32(), 4), ast::StorageClass::kPrivate);
-    auto* expr = IndexAccessor(a, 2);
+    auto* a = Global("a", ty.array(ty.f32(), 4_u), ast::StorageClass::kPrivate);
+    auto* expr = IndexAccessor(a, 2_i);
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

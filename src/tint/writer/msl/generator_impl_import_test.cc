@@ -15,6 +15,8 @@
 #include "src/tint/sem/call.h"
 #include "src/tint/writer/msl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::msl {
 namespace {
 
@@ -74,7 +76,7 @@ INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                                          MslImportData{"trunc", "trunc"}));
 
 TEST_F(MslGeneratorImplTest, MslImportData_SingleParamTest_IntScalar) {
-    auto* expr = Call("abs", 1);
+    auto* expr = Call("abs", 1_i);
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
@@ -156,7 +158,7 @@ using MslImportData_DualParam_Int_Test = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_DualParam_Int_Test, IntScalar) {
     auto param = GetParam();
 
-    auto* expr = Call(param.name, 1, 2);
+    auto* expr = Call(param.name, 1_i, 2_i);
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
@@ -217,7 +219,7 @@ using MslImportData_TripleParam_Int_Test = TestParamHelper<MslImportData>;
 TEST_P(MslImportData_TripleParam_Int_Test, IntScalar) {
     auto param = GetParam();
 
-    auto* expr = Call(param.name, 1, 2, 3);
+    auto* expr = Call(param.name, 1_i, 2_i, 3_i);
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();

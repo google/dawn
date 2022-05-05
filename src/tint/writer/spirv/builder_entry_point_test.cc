@@ -29,6 +29,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 namespace {
 
@@ -113,7 +115,7 @@ TEST_F(BuilderTest, EntryPoint_ReturnValue) {
     // }
     auto* loc_in = Param("loc_in", ty.u32(), {Location(0), Flat()});
     auto* cond =
-        create<ast::BinaryExpression>(ast::BinaryOp::kGreaterThan, Expr("loc_in"), Expr(10u));
+        create<ast::BinaryExpression>(ast::BinaryOp::kGreaterThan, Expr("loc_in"), Expr(10_u));
     Func("frag_main", ast::VariableList{loc_in}, ty.f32(),
          ast::StatementList{
              If(cond, Block(Return(0.5f))),

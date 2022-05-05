@@ -15,6 +15,8 @@
 #include "gmock/gmock.h"
 #include "src/tint/writer/msl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::msl {
 namespace {
 
@@ -32,7 +34,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Bool) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Int) {
-    WrapInFunction(Expr(-12345));
+    WrapInFunction(Expr(i32(-12345)));
 
     GeneratorImpl& gen = Build();
 
@@ -41,7 +43,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Int) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_UInt) {
-    WrapInFunction(Expr(56779u));
+    WrapInFunction(Expr(56779_u));
 
     GeneratorImpl& gen = Build();
 
@@ -78,7 +80,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Bool) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Int) {
-    WrapInFunction(Construct<i32>(-12345));
+    WrapInFunction(Construct<i32>(i32(-12345)));
 
     GeneratorImpl& gen = Build();
 
@@ -87,7 +89,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Int) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Uint) {
-    WrapInFunction(Construct<u32>(12345u));
+    WrapInFunction(Construct<u32>(12345_u));
 
     GeneratorImpl& gen = Build();
 
@@ -137,7 +139,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat_Empty) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Array) {
-    WrapInFunction(Construct(ty.array(ty.vec3<f32>(), 3), vec3<f32>(1.0f, 2.0f, 3.0f),
+    WrapInFunction(Construct(ty.array(ty.vec3<f32>(), 3_u), vec3<f32>(1.0f, 2.0f, 3.0f),
                              vec3<f32>(4.0f, 5.0f, 6.0f), vec3<f32>(7.0f, 8.0f, 9.0f)));
 
     GeneratorImpl& gen = Build();
@@ -154,7 +156,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Struct) {
                                    Member("c", ty.vec3<i32>()),
                                });
 
-    WrapInFunction(Construct(ty.Of(str), 1, 2.0f, vec3<i32>(3, 4, 5)));
+    WrapInFunction(Construct(ty.Of(str), 1_i, 2.0f, vec3<i32>(3_i, 4_i, 5_i)));
 
     GeneratorImpl& gen = Build();
 

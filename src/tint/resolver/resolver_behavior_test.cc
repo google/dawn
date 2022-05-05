@@ -20,6 +20,8 @@
 #include "src/tint/sem/for_loop_statement.h"
 #include "src/tint/sem/if_statement.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -32,13 +34,13 @@ class ResolverBehaviorTest : public ResolverTest {
         Func("DiscardOrNext", {}, ty.i32(),
              {
                  If(true, Block(Discard())),
-                 Return(1),
+                 Return(1_i),
              });
     }
 };
 
 TEST_F(ResolverBehaviorTest, ExprBinaryOp_LHS) {
-    auto* stmt = Decl(Var("lhs", ty.i32(), Add(Call("DiscardOrNext"), 1)));
+    auto* stmt = Decl(Var("lhs", ty.i32(), Add(Call("DiscardOrNext"), 1_i)));
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -48,7 +50,7 @@ TEST_F(ResolverBehaviorTest, ExprBinaryOp_LHS) {
 }
 
 TEST_F(ResolverBehaviorTest, ExprBinaryOp_RHS) {
-    auto* stmt = Decl(Var("lhs", ty.i32(), Add(1, Call("DiscardOrNext"))));
+    auto* stmt = Decl(Var("lhs", ty.i32(), Add(1_i, Call("DiscardOrNext"))));
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -74,7 +76,7 @@ TEST_F(ResolverBehaviorTest, ExprIndex_Arr) {
              Return(Construct(ty.array<i32, 4>())),
          });
 
-    auto* stmt = Decl(Var("lhs", ty.i32(), IndexAccessor(Call("ArrayDiscardOrNext"), 1)));
+    auto* stmt = Decl(Var("lhs", ty.i32(), IndexAccessor(Call("ArrayDiscardOrNext"), 1_i)));
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -119,7 +121,7 @@ TEST_F(ResolverBehaviorTest, StmtAssign) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtAssign_LHSDiscardOrNext) {
-    auto* stmt = Assign(IndexAccessor("lhs", Call("DiscardOrNext")), 1);
+    auto* stmt = Assign(IndexAccessor("lhs", Call("DiscardOrNext")), 1_i);
     WrapInFunction(Decl(Var("lhs", ty.array<i32, 4>())),  //
                    stmt);
 
@@ -302,7 +304,7 @@ TEST_F(ResolverBehaviorTest, StmtForLoopEmpty_CondTrue) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtForLoopEmpty_CondCallFuncMayDiscard) {
-    auto* stmt = For(nullptr, Equal(Call("DiscardOrNext"), 1), nullptr, Block());
+    auto* stmt = For(nullptr, Equal(Call("DiscardOrNext"), 1_i), nullptr, Block());
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -352,7 +354,7 @@ TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenDiscard_ElseDiscard) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtIfCallFuncMayDiscard_ThenEmptyBlock) {
-    auto* stmt = If(Equal(Call("DiscardOrNext"), 1), Block());
+    auto* stmt = If(Equal(Call("DiscardOrNext"), 1_i), Block());
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -363,7 +365,7 @@ TEST_F(ResolverBehaviorTest, StmtIfCallFuncMayDiscard_ThenEmptyBlock) {
 
 TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenEmptyBlock_ElseCallFuncMayDiscard) {
     auto* stmt = If(true, Block(),  //
-                    Else(If(Equal(Call("DiscardOrNext"), 1), Block())));
+                    Else(If(Equal(Call("DiscardOrNext"), 1_i), Block())));
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -373,7 +375,7 @@ TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenEmptyBlock_ElseCallFuncMayDiscard) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtLetDecl) {
-    auto* stmt = Decl(Let("v", ty.i32(), Expr(1)));
+    auto* stmt = Decl(Let("v", ty.i32(), Expr(1_i)));
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -477,7 +479,7 @@ TEST_F(ResolverBehaviorTest, StmtReturn_DiscardOrNext) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondTrue_DefaultEmpty) {
-    auto* stmt = Switch(1, DefaultCase(Block()));
+    auto* stmt = Switch(1_i, DefaultCase(Block()));
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -487,7 +489,7 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondTrue_DefaultEmpty) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_DefaultEmpty) {
-    auto* stmt = Switch(1, DefaultCase(Block()));
+    auto* stmt = Switch(1_i, DefaultCase(Block()));
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -497,7 +499,7 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_DefaultEmpty) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_DefaultDiscard) {
-    auto* stmt = Switch(1, DefaultCase(Block(Discard())));
+    auto* stmt = Switch(1_i, DefaultCase(Block(Discard())));
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -507,7 +509,7 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_DefaultDiscard) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_DefaultReturn) {
-    auto* stmt = Switch(1, DefaultCase(Block(Return())));
+    auto* stmt = Switch(1_i, DefaultCase(Block(Return())));
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -517,7 +519,7 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_DefaultReturn) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Empty_DefaultEmpty) {
-    auto* stmt = Switch(1, Case(Expr(0), Block()), DefaultCase(Block()));
+    auto* stmt = Switch(1_i, Case(Expr(0_i), Block()), DefaultCase(Block()));
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -527,7 +529,7 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Empty_DefaultEmpty) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Empty_DefaultDiscard) {
-    auto* stmt = Switch(1, Case(Expr(0), Block()), DefaultCase(Block(Discard())));
+    auto* stmt = Switch(1_i, Case(Expr(0_i), Block()), DefaultCase(Block(Discard())));
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -537,7 +539,7 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Empty_DefaultDiscard) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Empty_DefaultReturn) {
-    auto* stmt = Switch(1, Case(Expr(0), Block()), DefaultCase(Block(Return())));
+    auto* stmt = Switch(1_i, Case(Expr(0_i), Block()), DefaultCase(Block(Return())));
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -547,7 +549,7 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Empty_DefaultReturn) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_DefaultEmpty) {
-    auto* stmt = Switch(1, Case(Expr(0), Block(Discard())), DefaultCase(Block()));
+    auto* stmt = Switch(1_i, Case(Expr(0_i), Block(Discard())), DefaultCase(Block()));
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -557,7 +559,7 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_DefaultEmpty) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_DefaultDiscard) {
-    auto* stmt = Switch(1, Case(Expr(0), Block(Discard())), DefaultCase(Block(Discard())));
+    auto* stmt = Switch(1_i, Case(Expr(0_i), Block(Discard())), DefaultCase(Block(Discard())));
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -567,7 +569,7 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_DefaultDiscard)
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_DefaultReturn) {
-    auto* stmt = Switch(1, Case(Expr(0), Block(Discard())), DefaultCase(Block(Return())));
+    auto* stmt = Switch(1_i, Case(Expr(0_i), Block(Discard())), DefaultCase(Block(Return())));
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -577,9 +579,9 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_DefaultReturn) 
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_Case1Return_DefaultEmpty) {
-    auto* stmt = Switch(1,                                //
-                        Case(Expr(0), Block(Discard())),  //
-                        Case(Expr(1), Block(Return())),   //
+    auto* stmt = Switch(1_i,                                //
+                        Case(Expr(0_i), Block(Discard())),  //
+                        Case(Expr(1_i), Block(Return())),   //
                         DefaultCase(Block()));
     WrapInFunction(stmt);
 

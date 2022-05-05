@@ -473,7 +473,7 @@ fn main() {
     auto* expect = R"(
 fn main() {
   var v : i32;
-  v = (v + 1);
+  v = (v + 1i);
 }
 )";
 
@@ -513,7 +513,7 @@ fn main() {
     auto* expect = R"(
 fn main() {
   var v : i32;
-  v = (v - 1);
+  v = (v - 1i);
 }
 )";
 
@@ -556,7 +556,7 @@ fn main() {
   var v : i32;
   let p = &(v);
   let tint_symbol = &(*(p));
-  *(tint_symbol) = (*(tint_symbol) + 1);
+  *(tint_symbol) = (*(tint_symbol) + 1i);
 }
 )";
 
@@ -584,7 +584,7 @@ struct S {
 
 fn main() {
   var s : S;
-  s.m = (s.m + 1);
+  s.m = (s.m + 1i);
 }
 )";
 
@@ -617,7 +617,7 @@ fn idx() -> i32 {
 
 fn main() {
   let tint_symbol = &(a[idx()]);
-  *(tint_symbol) = (*(tint_symbol) + 1);
+  *(tint_symbol) = (*(tint_symbol) + 1i);
 }
 )";
 
@@ -651,7 +651,7 @@ fn idx() -> i32 {
 fn main() {
   let tint_symbol = &(v);
   let tint_symbol_1 = idx();
-  (*(tint_symbol))[tint_symbol_1] = ((*(tint_symbol))[tint_symbol_1] + 1);
+  (*(tint_symbol))[tint_symbol_1] = ((*(tint_symbol))[tint_symbol_1] + 1i);
 }
 )";
 
@@ -671,7 +671,7 @@ fn main() {
     auto* expect = R"(
 fn main() {
   var v : vec4<i32>;
-  v.y = (v.y + 1);
+  v.y = (v.y + 1i);
 }
 )";
 
@@ -727,7 +727,7 @@ fn main() {
     continuing {
       let tint_symbol = &(a[idx1()]);
       let tint_symbol_1 = idx2();
-      (*(tint_symbol))[tint_symbol_1] = ((*(tint_symbol))[tint_symbol_1] + 1);
+      (*(tint_symbol))[tint_symbol_1] = ((*(tint_symbol))[tint_symbol_1] + 1i);
     }
   }
 }

@@ -21,6 +21,8 @@
 #include "src/tint/sem/call.h"
 #include "src/tint/utils/map.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 TINT_INSTANTIATE_TYPEINFO(tint::transform::BuiltinPolyfill);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::BuiltinPolyfill::Config);
 
@@ -57,7 +59,7 @@ struct BuiltinPolyfill::State {
             return b.ty.vec<u32>(width);
         };
         auto V = [&](uint32_t value) -> const ast::Expression* {
-            return ScalarOrVector(width, value);
+            return ScalarOrVector(width, u32(value));
         };
         b.Func(
             name, {b.Param("v", T(ty))}, T(ty),
@@ -112,7 +114,7 @@ struct BuiltinPolyfill::State {
             return b.ty.vec<u32>(width);
         };
         auto V = [&](uint32_t value) -> const ast::Expression* {
-            return ScalarOrVector(width, value);
+            return ScalarOrVector(width, u32(value));
         };
         auto B = [&](const ast::Expression* value) -> const ast::Expression* {
             if (width == 1) {
@@ -175,13 +177,13 @@ struct BuiltinPolyfill::State {
         };
 
         ast::StatementList body = {
-            b.Decl(b.Let("s", nullptr, b.Call("min", "offset", W))),
-            b.Decl(b.Let("e", nullptr, b.Call("min", W, b.Add("s", "count")))),
+            b.Decl(b.Let("s", nullptr, b.Call("min", "offset", u32(W)))),
+            b.Decl(b.Let("e", nullptr, b.Call("min", u32(W), b.Add("s", "count")))),
         };
 
         switch (polyfill.extract_bits) {
             case Level::kFull:
-                body.emplace_back(b.Decl(b.Let("shl", nullptr, b.Sub(W, "e"))));
+                body.emplace_back(b.Decl(b.Let("shl", nullptr, b.Sub(u32(W), "e"))));
                 body.emplace_back(b.Decl(b.Let("shr", nullptr, b.Add("shl", "s"))));
                 body.emplace_back(
                     b.Return(b.Shr(b.Shl("v", vecN_u32(b.Expr("shl"))), vecN_u32(b.Expr("shr")))));
@@ -221,7 +223,7 @@ struct BuiltinPolyfill::State {
             return b.ty.vec<u32>(width);
         };
         auto V = [&](uint32_t value) -> const ast::Expression* {
-            return ScalarOrVector(width, value);
+            return ScalarOrVector(width, u32(value));
         };
         auto B = [&](const ast::Expression* value) -> const ast::Expression* {
             if (width == 1) {
@@ -238,7 +240,7 @@ struct BuiltinPolyfill::State {
             x = b.Call("select",                             //
                        b.Construct(U(), "v"),                //
                        b.Construct(U(), b.Complement("v")),  //
-                       b.LessThan("v", ScalarOrVector(width, 0)));
+                       b.LessThan("v", ScalarOrVector(width, 0_i)));
         }
 
         b.Func(
@@ -295,7 +297,7 @@ struct BuiltinPolyfill::State {
             return b.ty.vec<u32>(width);
         };
         auto V = [&](uint32_t value) -> const ast::Expression* {
-            return ScalarOrVector(width, value);
+            return ScalarOrVector(width, u32(value));
         };
         auto B = [&](const ast::Expression* value) -> const ast::Expression* {
             if (width == 1) {
@@ -368,15 +370,16 @@ struct BuiltinPolyfill::State {
         };
 
         ast::StatementList body = {
-            b.Decl(b.Let("s", nullptr, b.Call("min", "offset", W))),
-            b.Decl(b.Let("e", nullptr, b.Call("min", W, b.Add("s", "count")))),
+            b.Decl(b.Let("s", nullptr, b.Call("min", "offset", u32(W)))),
+            b.Decl(b.Let("e", nullptr, b.Call("min", u32(W), b.Add("s", "count")))),
         };
 
         switch (polyfill.insert_bits) {
             case Level::kFull:
                 // let mask = ((1 << s) - 1) ^ ((1 << e) - 1)
-                body.emplace_back(b.Decl(b.Let(
-                    "mask", nullptr, b.Xor(b.Sub(b.Shl(1u, "s"), 1u), b.Sub(b.Shl(1u, "e"), 1u)))));
+                body.emplace_back(
+                    b.Decl(b.Let("mask", nullptr,
+                                 b.Xor(b.Sub(b.Shl(1_u, "s"), 1_u), b.Sub(b.Shl(1_u, "e"), 1_u)))));
                 // return ((n << s) & mask) | (v & ~mask)
                 body.emplace_back(b.Return(b.Or(b.And(b.Shl("n", U("s")), V("mask")),
                                                 b.And("v", V(b.Complement("mask"))))));
@@ -403,10 +406,6 @@ struct BuiltinPolyfill::State {
     }
 
   private:
-    /// Aliases
-    using u32 = ProgramBuilder::u32;
-    using i32 = ProgramBuilder::i32;
-
     /// @returns the AST type for the given sem type
     const ast::Type* T(const sem::Type* ty) const { return CreateASTTypeFor(ctx, ty); }
 

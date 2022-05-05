@@ -17,6 +17,8 @@
 #include "src/tint/sem/sampled_texture.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::wgsl {
 namespace {
 
@@ -35,25 +37,25 @@ TEST_F(WgslGeneratorImplTest, EmitType_Alias) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array) {
-    auto* arr = ty.array<bool, 4>();
+    auto* arr = ty.array<bool, 4u>();
     Alias("make_type_reachable", arr);
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
     ASSERT_TRUE(gen.EmitType(out, arr)) << gen.error();
-    EXPECT_EQ(out.str(), "array<bool, 4>");
+    EXPECT_EQ(out.str(), "array<bool, 4u>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array_Attribute) {
-    auto* a = ty.array(ty.bool_(), 4, 16u);
+    auto* a = ty.array(ty.bool_(), 4_u, 16u);
     Alias("make_type_reachable", a);
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
     ASSERT_TRUE(gen.EmitType(out, a)) << gen.error();
-    EXPECT_EQ(out.str(), "@stride(16) array<bool, 4>");
+    EXPECT_EQ(out.str(), "@stride(16) array<bool, 4u>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_RuntimeArray) {

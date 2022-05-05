@@ -30,7 +30,7 @@ fn f_1() {
   return;
 }
 
-@stage(compute) @workgroup_size(1, 1, 1)
+@stage(compute) @workgroup_size(1i, 1i, 1i)
 fn f() {
   f_1();
 }

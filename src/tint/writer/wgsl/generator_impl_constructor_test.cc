@@ -15,10 +15,12 @@
 #include "gmock/gmock.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
+using ::testing::HasSubstr;
+
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::wgsl {
 namespace {
-
-using ::testing::HasSubstr;
 
 using WgslGeneratorImplTest = TestHelper;
 
@@ -32,7 +34,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Bool) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Int) {
-    WrapInFunction(Expr(-12345));
+    WrapInFunction(Expr(i32(-12345)));
 
     GeneratorImpl& gen = Build();
 
@@ -41,7 +43,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Int) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_UInt) {
-    WrapInFunction(Expr(56779u));
+    WrapInFunction(Expr(56779_u));
 
     GeneratorImpl& gen = Build();
 
@@ -51,7 +53,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_UInt) {
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Float) {
     // Use a number close to 1<<30 but whose decimal representation ends in 0.
-    WrapInFunction(Expr(static_cast<float>((1 << 30) - 4)));
+    WrapInFunction(Expr(f32((1 << 30) - 4)));
 
     GeneratorImpl& gen = Build();
 
@@ -78,16 +80,16 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Bool) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Int) {
-    WrapInFunction(Construct<i32>(-12345));
+    WrapInFunction(Construct<i32>(i32(-12345)));
 
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("i32(-12345)"));
+    EXPECT_THAT(gen.result(), HasSubstr("i32(-12345i)"));
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Uint) {
-    WrapInFunction(Construct<u32>(12345u));
+    WrapInFunction(Construct<u32>(12345_u));
 
     GeneratorImpl& gen = Build();
 
@@ -115,13 +117,13 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Mat) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Array) {
-    WrapInFunction(Construct(ty.array(ty.vec3<f32>(), 3), vec3<f32>(1.0f, 2.0f, 3.0f),
+    WrapInFunction(Construct(ty.array(ty.vec3<f32>(), 3_u), vec3<f32>(1.0f, 2.0f, 3.0f),
                              vec3<f32>(4.0f, 5.0f, 6.0f), vec3<f32>(7.0f, 8.0f, 9.0f)));
 
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("array<vec3<f32>, 3>(vec3<f32>(1.0, 2.0, 3.0), "
+    EXPECT_THAT(gen.result(), HasSubstr("array<vec3<f32>, 3u>(vec3<f32>(1.0, 2.0, 3.0), "
                                         "vec3<f32>(4.0, 5.0, 6.0), vec3<f32>(7.0, 8.0, 9.0))"));
 }
 

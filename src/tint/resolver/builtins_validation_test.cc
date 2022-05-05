@@ -15,6 +15,8 @@
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -26,9 +28,6 @@ template <typename T>
 using vec3 = builder::vec3<T>;
 template <typename T>
 using vec4 = builder::vec4<T>;
-using f32 = builder::f32;
-using i32 = builder::i32;
-using u32 = builder::u32;
 
 class ResolverBuiltinsValidationTest : public resolver::TestHelper, public testing::Test {};
 namespace StageTest {
@@ -106,7 +105,7 @@ TEST_P(ResolverBuiltinsStageTest, All_input) {
             break;
         case ast::PipelineStage::kCompute:
             Func("main", {input}, ty.void_(), {},
-                 ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+                 ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
             break;
         default:
             break;
@@ -243,7 +242,7 @@ TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_Struct_Fail) {
 TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_ReturnType_Fail) {
     // @stage(fragment)
     // fn main() -> @builtin(sample_mask) i32 { return 1; }
-    Func("main", {}, ty.i32(), {Return(1)}, {Stage(ast::PipelineStage::kFragment)},
+    Func("main", {}, ty.i32(), {Return(1_i)}, {Stage(ast::PipelineStage::kFragment)},
          {Builtin(Source{{12, 34}}, ast::Builtin::kSampleMask)});
 
     EXPECT_FALSE(r()->Resolve());
@@ -414,7 +413,7 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_Pass) {
 
     Func("main", ast::VariableList{li_id, li_index, gi, wi, nwgs}, ty.void_(), {},
          ast::AttributeList{Stage(ast::PipelineStage::kCompute),
-                            WorkgroupSize(Expr(Source{Source::Location{12, 34}}, 2))});
+                            WorkgroupSize(Expr(Source{Source::Location{12, 34}}, 2_i))});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -424,7 +423,7 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_WorkGroupIdNotVec3U32) {
                      ast::AttributeList{Builtin(Source{{12, 34}}, ast::Builtin::kWorkgroupId)});
     Func("main", ast::VariableList{wi}, ty.void_(), {},
          ast::AttributeList{Stage(ast::PipelineStage::kCompute),
-                            WorkgroupSize(Expr(Source{Source::Location{12, 34}}, 2))});
+                            WorkgroupSize(Expr(Source{Source::Location{12, 34}}, 2_i))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -437,7 +436,7 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_NumWorkgroupsNotVec3U32) {
                        ast::AttributeList{Builtin(Source{{12, 34}}, ast::Builtin::kNumWorkgroups)});
     Func("main", ast::VariableList{nwgs}, ty.void_(), {},
          ast::AttributeList{Stage(ast::PipelineStage::kCompute),
-                            WorkgroupSize(Expr(Source{Source::Location{12, 34}}, 2))});
+                            WorkgroupSize(Expr(Source{Source::Location{12, 34}}, 2_i))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -451,7 +450,7 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_GlobalInvocationNotVec3U32
               ast::AttributeList{Builtin(Source{{12, 34}}, ast::Builtin::kGlobalInvocationId)});
     Func("main", ast::VariableList{gi}, ty.void_(), {},
          ast::AttributeList{Stage(ast::PipelineStage::kCompute),
-                            WorkgroupSize(Expr(Source{Source::Location{12, 34}}, 2))});
+                            WorkgroupSize(Expr(Source{Source::Location{12, 34}}, 2_i))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -465,7 +464,7 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_LocalInvocationIndexNotU32
               ast::AttributeList{Builtin(Source{{12, 34}}, ast::Builtin::kLocalInvocationIndex)});
     Func("main", ast::VariableList{li_index}, ty.void_(), {},
          ast::AttributeList{Stage(ast::PipelineStage::kCompute),
-                            WorkgroupSize(Expr(Source{Source::Location{12, 34}}, 2))});
+                            WorkgroupSize(Expr(Source{Source::Location{12, 34}}, 2_i))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -479,7 +478,7 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_LocalInvocationNotVec3U32)
               ast::AttributeList{Builtin(Source{{12, 34}}, ast::Builtin::kLocalInvocationId)});
     Func("main", ast::VariableList{li_id}, ty.void_(), {},
          ast::AttributeList{Stage(ast::PipelineStage::kCompute),
-                            WorkgroupSize(Expr(Source{Source::Location{12, 34}}, 2))});
+                            WorkgroupSize(Expr(Source{Source::Location{12, 34}}, 2_i))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -791,7 +790,7 @@ TEST_F(ResolverBuiltinsValidationTest, Select_Float_Scalar) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Select_Integer_Scalar) {
-    auto* builtin = Call("select", Expr(1), Expr(1), Expr(true));
+    auto* builtin = Call("select", Expr(1_i), Expr(1_i), Expr(true));
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -813,7 +812,8 @@ TEST_F(ResolverBuiltinsValidationTest, Select_Float_Vec2) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Select_Integer_Vec2) {
-    auto* builtin = Call("select", vec2<int>(1, 1), vec2<int>(1, 1), vec2<bool>(true, true));
+    auto* builtin =
+        Call("select", vec2<i32>(1_i, 1_i), vec2<i32>(1_i, 1_i), vec2<bool>(true, true));
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -950,7 +950,7 @@ TEST_P(IntegerAllMatching, ScalarUnsigned) {
 
     ast::ExpressionList params;
     for (uint32_t i = 0; i < num_params; ++i) {
-        params.push_back(Construct<uint32_t>(1));
+        params.push_back(Construct<u32>(1_i));
     }
     auto* builtin = Call(name, params);
     WrapInFunction(builtin);
@@ -965,7 +965,7 @@ TEST_P(IntegerAllMatching, Vec2Unsigned) {
 
     ast::ExpressionList params;
     for (uint32_t i = 0; i < num_params; ++i) {
-        params.push_back(vec2<uint32_t>(1u, 1u));
+        params.push_back(vec2<u32>(1_u, 1_u));
     }
     auto* builtin = Call(name, params);
     WrapInFunction(builtin);
@@ -980,7 +980,7 @@ TEST_P(IntegerAllMatching, Vec3Unsigned) {
 
     ast::ExpressionList params;
     for (uint32_t i = 0; i < num_params; ++i) {
-        params.push_back(vec3<uint32_t>(1u, 1u, 1u));
+        params.push_back(vec3<u32>(1_u, 1_u, 1_u));
     }
     auto* builtin = Call(name, params);
     WrapInFunction(builtin);
@@ -995,7 +995,7 @@ TEST_P(IntegerAllMatching, Vec4Unsigned) {
 
     ast::ExpressionList params;
     for (uint32_t i = 0; i < num_params; ++i) {
-        params.push_back(vec4<uint32_t>(1u, 1u, 1u, 1u));
+        params.push_back(vec4<u32>(1_u, 1_u, 1_u, 1_u));
     }
     auto* builtin = Call(name, params);
     WrapInFunction(builtin);
@@ -1010,7 +1010,7 @@ TEST_P(IntegerAllMatching, ScalarSigned) {
 
     ast::ExpressionList params;
     for (uint32_t i = 0; i < num_params; ++i) {
-        params.push_back(Construct<int32_t>(1));
+        params.push_back(Construct<i32>(1_i));
     }
     auto* builtin = Call(name, params);
     WrapInFunction(builtin);
@@ -1025,7 +1025,7 @@ TEST_P(IntegerAllMatching, Vec2Signed) {
 
     ast::ExpressionList params;
     for (uint32_t i = 0; i < num_params; ++i) {
-        params.push_back(vec2<int32_t>(1, 1));
+        params.push_back(vec2<i32>(1_i, 1_i));
     }
     auto* builtin = Call(name, params);
     WrapInFunction(builtin);
@@ -1040,7 +1040,7 @@ TEST_P(IntegerAllMatching, Vec3Signed) {
 
     ast::ExpressionList params;
     for (uint32_t i = 0; i < num_params; ++i) {
-        params.push_back(vec3<int32_t>(1, 1, 1));
+        params.push_back(vec3<i32>(1_i, 1_i, 1_i));
     }
     auto* builtin = Call(name, params);
     WrapInFunction(builtin);
@@ -1055,7 +1055,7 @@ TEST_P(IntegerAllMatching, Vec4Signed) {
 
     ast::ExpressionList params;
     for (uint32_t i = 0; i < num_params; ++i) {
-        params.push_back(vec4<int32_t>(1, 1, 1, 1));
+        params.push_back(vec4<i32>(1_i, 1_i, 1_i, 1_i));
     }
     auto* builtin = Call(name, params);
     WrapInFunction(builtin);

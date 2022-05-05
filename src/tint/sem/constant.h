@@ -25,34 +25,30 @@ namespace tint::sem {
 /// A Constant is compile-time known expression value, expressed as a flattened
 /// list of scalar values. Value may be of a scalar or vector type.
 class Constant {
-    using i32 = ProgramBuilder::i32;
-    using u32 = ProgramBuilder::u32;
-    using f32 = ProgramBuilder::f32;
-
   public:
     /// Scalar holds a single constant scalar value, as a union of an i32, u32,
     /// f32 or boolean.
     union Scalar {
         /// The scalar value as a i32
-        int32_t i32;
+        tint::i32 i32;
         /// The scalar value as a u32
-        uint32_t u32;
+        tint::u32 u32;
         /// The scalar value as a f32
-        float f32;
+        tint::f32 f32;
         /// The scalar value as a bool
         bool bool_;
 
         /// Constructs the scalar with the i32 value `v`
         /// @param v the value of the Scalar
-        Scalar(ProgramBuilder::i32 v) : i32(v) {}  // NOLINT
+        Scalar(tint::i32 v) : i32(v) {}  // NOLINT
 
         /// Constructs the scalar with the u32 value `v`
         /// @param v the value of the Scalar
-        Scalar(ProgramBuilder::u32 v) : u32(v) {}  // NOLINT
+        Scalar(tint::u32 v) : u32(v) {}  // NOLINT
 
         /// Constructs the scalar with the f32 value `v`
         /// @param v the value of the Scalar
-        Scalar(ProgramBuilder::f32 v) : f32(v) {}  // NOLINT
+        Scalar(tint::f32 v) : f32(v) {}  // NOLINT
 
         /// Constructs the scalar with the bool value `v`
         /// @param v the value of the Scalar
@@ -106,22 +102,18 @@ class Constant {
     /// @return the value returned by func.
     template <typename Func>
     auto WithScalarAt(size_t index, Func&& func) const {
-        auto* elem_type = ElementType();
-        if (elem_type->Is<I32>()) {
-            return func(elems_[index].i32);
-        }
-        if (elem_type->Is<U32>()) {
-            return func(elems_[index].u32);
-        }
-        if (elem_type->Is<F32>()) {
-            return func(elems_[index].f32);
-        }
-        if (elem_type->Is<Bool>()) {
-            return func(elems_[index].bool_);
-        }
-        diag::List diags;
-        TINT_UNREACHABLE(Semantic, diags) << "invalid scalar type " << type_->TypeInfo().name;
-        return func(~0);
+        return Switch(
+            ElementType(),  //
+            [&](const I32*) { return func(elems_[index].i32); },
+            [&](const U32*) { return func(elems_[index].u32); },
+            [&](const F32*) { return func(elems_[index].f32); },
+            [&](const Bool*) { return func(elems_[index].bool_); },
+            [&](Default) {
+                diag::List diags;
+                TINT_UNREACHABLE(Semantic, diags)
+                    << "invalid scalar type " << type_->TypeInfo().name;
+                return func(u32(0u));
+            });
     }
 
     /// @param index the index of the scalar value

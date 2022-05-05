@@ -18,14 +18,9 @@
 #include "src/tint/sem/type_constructor.h"
 #include "src/tint/utils/map.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
-namespace {
-
-using i32 = ProgramBuilder::i32;
-using u32 = ProgramBuilder::u32;
-using f32 = ProgramBuilder::f32;
-
-}  // namespace
 
 sem::Constant Resolver::EvaluateConstantValue(const ast::Expression* expr, const sem::Type* type) {
     if (auto* e = expr->As<ast::LiteralExpression>()) {
@@ -43,9 +38,9 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::LiteralExpression* lite
         literal,
         [&](const ast::IntLiteralExpression* lit) {
             if (lit->suffix == ast::IntLiteralExpression::Suffix::kU) {
-                return sem::Constant{type, {static_cast<uint32_t>(lit->value)}};
+                return sem::Constant{type, {u32(static_cast<uint32_t>(lit->value))}};
             }
-            return sem::Constant{type, {static_cast<int32_t>(lit->value)}};
+            return sem::Constant{type, {i32(static_cast<int32_t>(lit->value))}};
         },
         [&](const ast::FloatLiteralExpression* lit) {
             return sem::Constant{type, {lit->value}};
@@ -70,10 +65,10 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::CallExpression* call,
     // For zero value init, return 0s
     if (call->args.empty()) {
         if (elem_type->Is<sem::I32>()) {
-            return sem::Constant(type, sem::Constant::Scalars(result_size, 0));
+            return sem::Constant(type, sem::Constant::Scalars(result_size, 0_i));
         }
         if (elem_type->Is<sem::U32>()) {
-            return sem::Constant(type, sem::Constant::Scalars(result_size, 0u));
+            return sem::Constant(type, sem::Constant::Scalars(result_size, 0_u));
         }
         if (elem_type->Is<sem::F32>()) {
             return sem::Constant(type, sem::Constant::Scalars(result_size, 0.f));
@@ -113,16 +108,34 @@ sem::Constant Resolver::ConstantCast(const sem::Constant& value,
 
     sem::Constant::Scalars elems;
     for (size_t i = 0; i < value.Elements().size(); ++i) {
-        if (target_elem_type->Is<sem::I32>()) {
-            elems.emplace_back(value.WithScalarAt(i, [](auto&& s) { return static_cast<i32>(s); }));
-        } else if (target_elem_type->Is<sem::U32>()) {
-            elems.emplace_back(value.WithScalarAt(i, [](auto&& s) { return static_cast<u32>(s); }));
-        } else if (target_elem_type->Is<sem::F32>()) {
-            elems.emplace_back(value.WithScalarAt(i, [](auto&& s) { return static_cast<f32>(s); }));
-        } else if (target_elem_type->Is<sem::Bool>()) {
-            elems.emplace_back(
-                value.WithScalarAt(i, [](auto&& s) { return static_cast<bool>(s); }));
-        }
+        elems.emplace_back(Switch<sem::Constant::Scalar>(
+            target_elem_type,
+            [&](const sem::I32*) {
+                return value.WithScalarAt(i, [](auto&& s) {  //
+                    return i32(static_cast<int32_t>(s));
+                });
+            },
+            [&](const sem::U32*) {
+                return value.WithScalarAt(i, [](auto&& s) {  //
+                    return u32(static_cast<uint32_t>(s));
+                });
+            },
+            [&](const sem::F32*) {
+                return value.WithScalarAt(i, [](auto&& s) {  //
+                    return static_cast<f32>(s);
+                });
+            },
+            [&](const sem::Bool*) {
+                return value.WithScalarAt(i, [](auto&& s) {  //
+                    return static_cast<bool>(s);
+                });
+            },
+            [&](Default) {
+                diag::List diags;
+                TINT_UNREACHABLE(Semantic, diags)
+                    << "invalid element type " << target_elem_type->TypeInfo().name;
+                return sem::Constant::Scalar(false);
+            }));
     }
 
     auto* target_type =

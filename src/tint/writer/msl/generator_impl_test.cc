@@ -15,6 +15,8 @@
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/writer/msl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::msl {
 namespace {
 
@@ -24,7 +26,7 @@ TEST_F(MslGeneratorImplTest, Generate) {
     Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
          ast::AttributeList{
              Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(1),
+             WorkgroupSize(1_i),
          });
 
     GeneratorImpl& gen = Build();
@@ -132,7 +134,7 @@ vertex Out vert_main() {
 TEST_F(MslGeneratorImplTest, WorkgroupMatrix) {
     Global("m", ty.mat2x2<f32>(), ast::StorageClass::kWorkgroup);
     Func("comp_main", ast::VariableList{}, ty.void_(), {Decl(Let("x", nullptr, Expr("m")))},
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -167,9 +169,9 @@ kernel void comp_main(threadgroup tint_symbol_3* tint_symbol_2 [[threadgroup(0)]
 }
 
 TEST_F(MslGeneratorImplTest, WorkgroupMatrixInArray) {
-    Global("m", ty.array(ty.mat2x2<f32>(), 4), ast::StorageClass::kWorkgroup);
+    Global("m", ty.array(ty.mat2x2<f32>(), 4_i), ast::StorageClass::kWorkgroup);
     Func("comp_main", ast::VariableList{}, ty.void_(), {Decl(Let("x", nullptr, Expr("m")))},
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -218,7 +220,7 @@ TEST_F(MslGeneratorImplTest, WorkgroupMatrixInStruct) {
                     });
     Global("s", ty.type_name("S2"), ast::StorageClass::kWorkgroup);
     Func("comp_main", ast::VariableList{}, ty.void_(), {Decl(Let("x", nullptr, Expr("s")))},
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -278,23 +280,23 @@ TEST_F(MslGeneratorImplTest, WorkgroupMatrix_Multiples) {
              Decl(Let("a2", nullptr, Expr("m2"))),
              Decl(Let("a3", nullptr, Expr("m3"))),
          },
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
     Func("main2", ast::VariableList{}, ty.void_(),
          {
              Decl(Let("a1", nullptr, Expr("m4"))),
              Decl(Let("a2", nullptr, Expr("m5"))),
              Decl(Let("a3", nullptr, Expr("m6"))),
          },
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
     Func("main3", ast::VariableList{}, ty.void_(),
          {
              Decl(Let("a1", nullptr, Expr("m7"))),
              Decl(Let("a2", nullptr, Expr("m8"))),
              Decl(Let("a3", nullptr, Expr("m9"))),
          },
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
     Func("main4_no_usages", ast::VariableList{}, ty.void_(), {},
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     GeneratorImpl& gen = SanitizeAndBuild();
 

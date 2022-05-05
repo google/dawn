@@ -28,6 +28,8 @@
 #include "src/tint/sem/variable.h"
 #include "tint/tint.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::inspector {
 namespace {
 
@@ -175,7 +177,7 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
                                  });
 
     MakeEmptyBodyFunction(
-        "bar", ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+        "bar", ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     // TODO(dsinclair): Update to run the namer transform when available.
 
@@ -197,7 +199,8 @@ TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
     MakeEmptyBodyFunction("func", {});
 
     MakeCallerBodyFunction(
-        "foo", {"func"}, ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+        "foo", {"func"},
+        ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     MakeCallerBodyFunction("bar", {"func"},
                            ast::AttributeList{
@@ -221,8 +224,8 @@ TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
 }
 
 TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
-    MakeEmptyBodyFunction(
-        "foo", ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(8, 2, 1)});
+    MakeEmptyBodyFunction("foo", ast::AttributeList{Stage(ast::PipelineStage::kCompute),
+                                                    WorkgroupSize(8_i, 2_i, 1_i)});
 
     Inspector& inspector = Build();
 
@@ -238,7 +241,8 @@ TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
 }
 
 TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
-    MakeEmptyBodyFunction("foo", {Stage(ast::PipelineStage::kCompute), WorkgroupSize(8, 2, 1)});
+    MakeEmptyBodyFunction("foo",
+                          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(8_i, 2_i, 1_i)});
 
     Inspector& inspector = Build();
 
@@ -529,7 +533,7 @@ TEST_F(InspectorGetEntryPointTest, MixInOutVariablesAndStruct) {
 
 TEST_F(InspectorGetEntryPointTest, OverridableConstantUnreferenced) {
     AddOverridableConstantWithoutID("foo", ty.f32(), nullptr);
-    MakeEmptyBodyFunction("ep_func", {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+    MakeEmptyBodyFunction("ep_func", {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     Inspector& inspector = Build();
 
@@ -542,7 +546,7 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantUnreferenced) {
 TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByEntryPoint) {
     AddOverridableConstantWithoutID("foo", ty.f32(), nullptr);
     MakePlainGlobalReferenceBodyFunction("ep_func", "foo", ty.f32(),
-                                         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+                                         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     Inspector& inspector = Build();
 
@@ -557,7 +561,7 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByCallee) {
     AddOverridableConstantWithoutID("foo", ty.f32(), nullptr);
     MakePlainGlobalReferenceBodyFunction("callee_func", "foo", ty.f32(), {});
     MakeCallerBodyFunction("ep_func", {"callee_func"},
-                           {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+                           {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     Inspector& inspector = Build();
 
@@ -573,7 +577,7 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantSomeReferenced) {
     AddOverridableConstantWithID("bar", 2, ty.f32(), nullptr);
     MakePlainGlobalReferenceBodyFunction("callee_func", "foo", ty.f32(), {});
     MakeCallerBodyFunction("ep_func", {"callee_func"},
-                           {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+                           {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     Inspector& inspector = Build();
 
@@ -597,7 +601,7 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantTypes) {
     MakePlainGlobalReferenceBodyFunction("i32_func", "i32_var", ty.i32(), {});
 
     MakeCallerBodyFunction("ep_func", {"bool_func", "float_func", "u32_func", "i32_func"},
-                           {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+                           {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     Inspector& inspector = Build();
 
@@ -621,7 +625,7 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantTypes) {
 TEST_F(InspectorGetEntryPointTest, OverridableConstantInitialized) {
     AddOverridableConstantWithoutID("foo", ty.f32(), Expr(0.0f));
     MakePlainGlobalReferenceBodyFunction("ep_func", "foo", ty.f32(),
-                                         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+                                         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     Inspector& inspector = Build();
 
@@ -636,7 +640,7 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantInitialized) {
 TEST_F(InspectorGetEntryPointTest, OverridableConstantUninitialized) {
     AddOverridableConstantWithoutID("foo", ty.f32(), nullptr);
     MakePlainGlobalReferenceBodyFunction("ep_func", "foo", ty.f32(),
-                                         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+                                         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     Inspector& inspector = Build();
 
@@ -657,7 +661,7 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantNumericIDSpecified) {
     MakePlainGlobalReferenceBodyFunction("id_func", "foo_id", ty.f32(), {});
 
     MakeCallerBodyFunction("ep_func", {"no_id_func", "id_func"},
-                           {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+                           {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     Inspector& inspector = Build();
 
@@ -848,7 +852,7 @@ TEST_F(InspectorGetEntryPointTest, SampleIndexStructReferenced) {
 TEST_F(InspectorGetEntryPointTest, NumWorkgroupsSimpleReferenced) {
     auto* in_var = Param("in_var", ty.vec3<u32>(), {Builtin(ast::Builtin::kNumWorkgroups)});
     Func("ep_func", {in_var}, ty.void_(), {Return()},
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)}, {});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)}, {});
 
     Inspector& inspector = Build();
 
@@ -866,7 +870,7 @@ TEST_F(InspectorGetEntryPointTest, NumWorkgroupsStructReferenced) {
     auto* in_var = Param("in_var", ty.type_name("in_struct"), {});
 
     Func("ep_func", {in_var}, ty.void_(), {Return()},
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)}, {});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)}, {});
 
     Inspector& inspector = Build();
 
@@ -970,7 +974,7 @@ TEST_F(InspectorGetConstantIDsTest, Bool) {
 
 TEST_F(InspectorGetConstantIDsTest, U32) {
     AddOverridableConstantWithID("foo", 1, ty.u32(), nullptr);
-    AddOverridableConstantWithID("bar", 20, ty.u32(), Expr(42u));
+    AddOverridableConstantWithID("bar", 20, ty.u32(), Expr(42_u));
 
     Inspector& inspector = Build();
 
@@ -987,8 +991,8 @@ TEST_F(InspectorGetConstantIDsTest, U32) {
 
 TEST_F(InspectorGetConstantIDsTest, I32) {
     AddOverridableConstantWithID("foo", 1, ty.i32(), nullptr);
-    AddOverridableConstantWithID("bar", 20, ty.i32(), Expr(-42));
-    AddOverridableConstantWithID("baz", 300, ty.i32(), Expr(42));
+    AddOverridableConstantWithID("bar", 20, ty.i32(), Expr(i32(-42)));
+    AddOverridableConstantWithID("baz", 300, ty.i32(), Expr(42_i));
 
     Inspector& inspector = Build();
 
@@ -1071,7 +1075,7 @@ TEST_F(InspectorGetConstantNameToIdMapTest, WithAndWithoutIds) {
 
 TEST_F(InspectorGetStorageSizeTest, Empty) {
     MakeEmptyBodyFunction(
-        "ep_func", ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+        "ep_func", ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
     Inspector& inspector = Build();
     EXPECT_EQ(0u, inspector.GetStorageSize("ep_func"));
 }
@@ -1086,7 +1090,7 @@ TEST_F(InspectorGetStorageSizeTest, Simple_NonStruct) {
              Decl(Let("sb", nullptr, Expr("sb_var"))),
              Decl(Let("rosb", nullptr, Expr("rosb_var"))),
          },
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     Inspector& inspector = Build();
 
@@ -1109,7 +1113,7 @@ TEST_F(InspectorGetStorageSizeTest, Simple_Struct) {
     MakeCallerBodyFunction("ep_func", {"ub_func", "sb_func", "rosb_func"},
                            ast::AttributeList{
                                Stage(ast::PipelineStage::kCompute),
-                               WorkgroupSize(1),
+                               WorkgroupSize(1_i),
                            });
 
     Inspector& inspector = Build();
@@ -1123,7 +1127,7 @@ TEST_F(InspectorGetStorageSizeTest, NonStructVec3) {
          {
              Decl(Let("ub", nullptr, Expr("ub_var"))),
          },
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     Inspector& inspector = Build();
 
@@ -1137,7 +1141,7 @@ TEST_F(InspectorGetStorageSizeTest, StructVec3) {
          {
              Decl(Let("ub", nullptr, Expr("ub_var"))),
          },
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     Inspector& inspector = Build();
 
@@ -1441,7 +1445,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
     // with elem stride of 16, and that is 16-byte aligned within the struct)
     auto* foo_struct_type = Structure(
         "foo_type", {Member("0i32", ty.i32()),
-                     Member("b", ty.array(ty.u32(), 4, /*stride*/ 16), {MemberAlign(16)})});
+                     Member("b", ty.array(ty.u32(), 4_u, /*stride*/ 16), {MemberAlign(16)})});
 
     AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
@@ -2741,7 +2745,7 @@ fn direct(@location(0) fragUV: vec2<f32>,
 
 TEST_F(InspectorGetWorkgroupStorageSizeTest, Empty) {
     MakeEmptyBodyFunction(
-        "ep_func", ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+        "ep_func", ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
     Inspector& inspector = Build();
     EXPECT_EQ(0u, inspector.GetWorkgroupStorageSize("ep_func"));
 }
@@ -2753,7 +2757,7 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, Simple) {
     MakeCallerBodyFunction("ep_func", {"f32_func"},
                            ast::AttributeList{
                                Stage(ast::PipelineStage::kCompute),
-                               WorkgroupSize(1),
+                               WorkgroupSize(1_i),
                            });
 
     Inspector& inspector = Build();
@@ -2764,7 +2768,7 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, CompoundTypes) {
     // This struct should occupy 68 bytes. 4 from the i32 field, and another 64
     // from the 4-element array with 16-byte stride.
     auto* wg_struct_type =
-        MakeStructType("WgStruct", {ty.i32(), ty.array(ty.i32(), 4, /*stride=*/16)});
+        MakeStructType("WgStruct", {ty.i32(), ty.array(ty.i32(), 4_u, /*stride=*/16)});
     AddWorkgroupStorage("wg_struct_var", ty.Of(wg_struct_type));
     MakeStructVariableReferenceBodyFunction("wg_struct_func", "wg_struct_var", {{0, ty.i32()}});
 
@@ -2775,7 +2779,7 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, CompoundTypes) {
     MakeCallerBodyFunction("ep_func", {"wg_struct_func", "f32_func"},
                            ast::AttributeList{
                                Stage(ast::PipelineStage::kCompute),
-                               WorkgroupSize(1),
+                               WorkgroupSize(1_i),
                            });
 
     Inspector& inspector = Build();
@@ -2791,7 +2795,7 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, AlignmentPadding) {
     MakeCallerBodyFunction("ep_func", {"wg_func"},
                            ast::AttributeList{
                                Stage(ast::PipelineStage::kCompute),
-                               WorkgroupSize(1),
+                               WorkgroupSize(1_i),
                            });
 
     Inspector& inspector = Build();
@@ -2812,7 +2816,7 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, StructAlignment) {
     MakeCallerBodyFunction("ep_func", {"wg_struct_func"},
                            ast::AttributeList{
                                Stage(ast::PipelineStage::kCompute),
-                               WorkgroupSize(1),
+                               WorkgroupSize(1_i),
                            });
 
     Inspector& inspector = Build();

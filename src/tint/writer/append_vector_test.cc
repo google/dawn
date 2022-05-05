@@ -19,6 +19,8 @@
 
 #include "gtest/gtest.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer {
 namespace {
 
@@ -26,9 +28,9 @@ class AppendVectorTest : public ::testing::Test, public ProgramBuilder {};
 
 // AppendVector(vec2<i32>(1, 2), 3) -> vec3<i32>(1, 2, 3)
 TEST_F(AppendVectorTest, Vec2i32_i32) {
-    auto* scalar_1 = Expr(1);
-    auto* scalar_2 = Expr(2);
-    auto* scalar_3 = Expr(3);
+    auto* scalar_1 = Expr(1_i);
+    auto* scalar_2 = Expr(2_i);
+    auto* scalar_3 = Expr(3_i);
     auto* vec_12 = vec2<i32>(scalar_1, scalar_2);
     WrapInFunction(vec_12, scalar_3);
 
@@ -66,9 +68,9 @@ TEST_F(AppendVectorTest, Vec2i32_i32) {
 
 // AppendVector(vec2<i32>(1, 2), 3u) -> vec3<i32>(1, 2, i32(3u))
 TEST_F(AppendVectorTest, Vec2i32_u32) {
-    auto* scalar_1 = Expr(1);
-    auto* scalar_2 = Expr(2);
-    auto* scalar_3 = Expr(3u);
+    auto* scalar_1 = Expr(1_i);
+    auto* scalar_2 = Expr(2_i);
+    auto* scalar_3 = Expr(3_u);
     auto* vec_12 = vec2<i32>(scalar_1, scalar_2);
     WrapInFunction(vec_12, scalar_3);
 
@@ -111,9 +113,9 @@ TEST_F(AppendVectorTest, Vec2i32_u32) {
 // AppendVector(vec2<i32>(vec2<u32>(1u, 2u)), 3u) ->
 //    vec3<i32>(vec2<i32>(vec2<u32>(1u, 2u)), i32(3u))
 TEST_F(AppendVectorTest, Vec2i32FromVec2u32_u32) {
-    auto* scalar_1 = Expr(1u);
-    auto* scalar_2 = Expr(2u);
-    auto* scalar_3 = Expr(3u);
+    auto* scalar_1 = Expr(1_u);
+    auto* scalar_2 = Expr(2_u);
+    auto* scalar_3 = Expr(3_u);
     auto* uvec_12 = vec2<u32>(scalar_1, scalar_2);
     auto* vec_12 = vec2<i32>(uvec_12);
     WrapInFunction(vec_12, scalar_3);
@@ -160,8 +162,8 @@ TEST_F(AppendVectorTest, Vec2i32FromVec2u32_u32) {
 
 // AppendVector(vec2<i32>(1, 2), 3.0f) -> vec3<i32>(1, 2, i32(3.0f))
 TEST_F(AppendVectorTest, Vec2i32_f32) {
-    auto* scalar_1 = Expr(1);
-    auto* scalar_2 = Expr(2);
+    auto* scalar_1 = Expr(1_i);
+    auto* scalar_2 = Expr(2_i);
     auto* scalar_3 = Expr(3.0f);
     auto* vec_12 = vec2<i32>(scalar_1, scalar_2);
     WrapInFunction(vec_12, scalar_3);
@@ -204,10 +206,10 @@ TEST_F(AppendVectorTest, Vec2i32_f32) {
 
 // AppendVector(vec3<i32>(1, 2, 3), 4) -> vec4<i32>(1, 2, 3, 4)
 TEST_F(AppendVectorTest, Vec3i32_i32) {
-    auto* scalar_1 = Expr(1);
-    auto* scalar_2 = Expr(2);
-    auto* scalar_3 = Expr(3);
-    auto* scalar_4 = Expr(4);
+    auto* scalar_1 = Expr(1_i);
+    auto* scalar_2 = Expr(2_i);
+    auto* scalar_3 = Expr(3_i);
+    auto* scalar_4 = Expr(4_i);
     auto* vec_123 = vec3<i32>(scalar_1, scalar_2, scalar_3);
     WrapInFunction(vec_123, scalar_4);
 
@@ -250,7 +252,7 @@ TEST_F(AppendVectorTest, Vec3i32_i32) {
 TEST_F(AppendVectorTest, Vec2i32Var_i32) {
     Global("vec_12", ty.vec2<i32>(), ast::StorageClass::kPrivate);
     auto* vec_12 = Expr("vec_12");
-    auto* scalar_3 = Expr(3);
+    auto* scalar_3 = Expr(3_i);
     WrapInFunction(vec_12, scalar_3);
 
     resolver::Resolver resolver(this);
@@ -285,8 +287,8 @@ TEST_F(AppendVectorTest, Vec2i32Var_i32) {
 // AppendVector(1, 2, scalar_3) -> vec3<i32>(1, 2, scalar_3)
 TEST_F(AppendVectorTest, Vec2i32_i32Var) {
     Global("scalar_3", ty.i32(), ast::StorageClass::kPrivate);
-    auto* scalar_1 = Expr(1);
-    auto* scalar_2 = Expr(2);
+    auto* scalar_1 = Expr(1_i);
+    auto* scalar_2 = Expr(2_i);
     auto* scalar_3 = Expr("scalar_3");
     auto* vec_12 = vec2<i32>(scalar_1, scalar_2);
     WrapInFunction(vec_12, scalar_3);
@@ -440,7 +442,7 @@ TEST_F(AppendVectorTest, Vec2boolVar_boolVar) {
 
 // AppendVector(vec3<i32>(), 4) -> vec3<bool>(0, 0, 0, 4)
 TEST_F(AppendVectorTest, ZeroVec3i32_i32) {
-    auto* scalar = Expr(4);
+    auto* scalar = Expr(4_i);
     auto* vec000 = vec3<i32>();
     WrapInFunction(vec000, scalar);
 

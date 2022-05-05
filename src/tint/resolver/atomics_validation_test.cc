@@ -19,6 +19,8 @@
 
 #include "gmock/gmock.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -131,10 +133,10 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_ArrayOfStruct) {
     // struct S{
     //   m: atomic<u32>;
     // };
-    // var<private> v: array<S, 5>;
+    // var<private> v: array<S, 5u>;
 
     auto* s = Structure("S", {Member("m", ty.atomic<u32>())});
-    Global(Source{{56, 78}}, "v", ty.array(ty.Of(s), 5), ast::StorageClass::kPrivate);
+    Global(Source{{56, 78}}, "v", ty.array(ty.Of(s), 5_u), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -144,16 +146,16 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_ArrayOfStruct) {
 }
 
 TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_ArrayOfStructOfArray) {
-    // type AtomicArray = array<atomic<i32>, 5>;
+    // type AtomicArray = array<atomic<i32>, 5u>;
     // struct S{
     //   m: AtomicArray;
     // };
-    // var<private> v: array<S, 5>;
+    // var<private> v: array<S, 5u>;
 
     auto* atomic_array =
         Alias(Source{{12, 34}}, "AtomicArray", ty.atomic(Source{{12, 34}}, ty.i32()));
     auto* s = Structure("S", {Member("m", ty.Of(atomic_array))});
-    Global(Source{{56, 78}}, "v", ty.array(ty.Of(s), 5), ast::StorageClass::kPrivate);
+    Global(Source{{56, 78}}, "v", ty.array(ty.Of(s), 5_u), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -163,14 +165,14 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_ArrayOfStructOfArray) {
 }
 
 TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_Complex) {
-    // type AtomicArray = array<atomic<i32>, 5>;
+    // type AtomicArray = array<atomic<i32>, 5u>;
     // struct S6 { x: array<i32, 4>; };
     // struct S5 { x: S6;
     //             y: AtomicArray;
-    //             z: array<atomic<u32>, 8>; };
+    //             z: array<atomic<u32>, 8u>; };
     // struct S4 { x: S6;
     //             y: S5;
-    //             z: array<atomic<i32>, 4>; };
+    //             z: array<atomic<i32>, 4u>; };
     // struct S3 { x: S4; };
     // struct S2 { x: S3; };
     // struct S1 { x: S2; };
@@ -179,9 +181,9 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_Complex) {
 
     auto* atomic_array =
         Alias(Source{{12, 34}}, "AtomicArray", ty.atomic(Source{{12, 34}}, ty.i32()));
-    auto* array_i32_4 = ty.array(ty.i32(), 4);
-    auto* array_atomic_u32_8 = ty.array(ty.atomic(ty.u32()), 8);
-    auto* array_atomic_i32_4 = ty.array(ty.atomic(ty.i32()), 4);
+    auto* array_i32_4 = ty.array(ty.i32(), 4_u);
+    auto* array_atomic_u32_8 = ty.array(ty.atomic(ty.u32()), 8_u);
+    auto* array_atomic_i32_4 = ty.array(ty.atomic(ty.i32()), 4_u);
 
     auto* s6 = Structure("S6", {Member("x", array_i32_4)});
     auto* s5 = Structure("S5", {Member("x", ty.Of(s6)),             //
@@ -263,13 +265,13 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_StructOfStructOfArray) {
 
 TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_Complex) {
     // type AtomicArray = array<atomic<i32>, 5>;
-    // struct S6 { x: array<i32, 4>; };
+    // struct S6 { x: array<i32, 4u>; };
     // struct S5 { x: S6;
     //             y: AtomicArray;
-    //             z: array<atomic<u32>, 8>; };
+    //             z: array<atomic<u32>, 8u>; };
     // struct S4 { x: S6;
     //             y: S5;
-    //             z: array<atomic<i32>, 4>; };
+    //             z: array<atomic<i32>, 4u>; };
     // struct S3 { x: S4; };
     // struct S2 { x: S3; };
     // struct S1 { x: S2; };
@@ -278,9 +280,9 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_Complex) {
 
     auto* atomic_array =
         Alias(Source{{12, 34}}, "AtomicArray", ty.atomic(Source{{12, 34}}, ty.i32()));
-    auto* array_i32_4 = ty.array(ty.i32(), 4);
-    auto* array_atomic_u32_8 = ty.array(ty.atomic(ty.u32()), 8);
-    auto* array_atomic_i32_4 = ty.array(ty.atomic(ty.i32()), 4);
+    auto* array_i32_4 = ty.array(ty.i32(), 4_u);
+    auto* array_atomic_u32_8 = ty.array(ty.atomic(ty.u32()), 8_u);
+    auto* array_atomic_i32_4 = ty.array(ty.atomic(ty.i32()), 4_u);
 
     auto* s6 = Structure("S6", {Member("x", array_i32_4)});
     auto* s5 = Structure("S5", {Member("x", ty.Of(s6)),             //

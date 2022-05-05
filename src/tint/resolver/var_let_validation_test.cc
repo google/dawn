@@ -17,6 +17,8 @@
 
 #include "gmock/gmock.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -86,7 +88,7 @@ TEST_F(ResolverVarLetValidationTest, LetTypeNotConstructible) {
 
 TEST_F(ResolverVarLetValidationTest, LetConstructorWrongType) {
     // var v : i32 = 2u
-    WrapInFunction(Let(Source{{3, 3}}, "v", ty.i32(), Expr(2u)));
+    WrapInFunction(Let(Source{{3, 3}}, "v", ty.i32(), Expr(2_u)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -95,7 +97,7 @@ TEST_F(ResolverVarLetValidationTest, LetConstructorWrongType) {
 
 TEST_F(ResolverVarLetValidationTest, VarConstructorWrongType) {
     // var v : i32 = 2u
-    WrapInFunction(Var(Source{{3, 3}}, "v", ty.i32(), ast::StorageClass::kNone, Expr(2u)));
+    WrapInFunction(Var(Source{{3, 3}}, "v", ty.i32(), ast::StorageClass::kNone, Expr(2_u)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -104,7 +106,7 @@ TEST_F(ResolverVarLetValidationTest, VarConstructorWrongType) {
 
 TEST_F(ResolverVarLetValidationTest, LetConstructorWrongTypeViaAlias) {
     auto* a = Alias("I32", ty.i32());
-    WrapInFunction(Let(Source{{3, 3}}, "v", ty.Of(a), Expr(2u)));
+    WrapInFunction(Let(Source{{3, 3}}, "v", ty.Of(a), Expr(2_u)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -113,7 +115,7 @@ TEST_F(ResolverVarLetValidationTest, LetConstructorWrongTypeViaAlias) {
 
 TEST_F(ResolverVarLetValidationTest, VarConstructorWrongTypeViaAlias) {
     auto* a = Alias("I32", ty.i32());
-    WrapInFunction(Var(Source{{3, 3}}, "v", ty.Of(a), ast::StorageClass::kNone, Expr(2u)));
+    WrapInFunction(Var(Source{{3, 3}}, "v", ty.Of(a), ast::StorageClass::kNone, Expr(2_u)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -139,7 +141,7 @@ TEST_F(ResolverVarLetValidationTest, LocalLetRedeclared) {
     // let l : f32 = 1.;
     // let l : i32 = 0;
     auto* l1 = Let("l", ty.f32(), Expr(1.f));
-    auto* l2 = Let(Source{{12, 34}}, "l", ty.i32(), Expr(0));
+    auto* l2 = Let(Source{{12, 34}}, "l", ty.i32(), Expr(0_i));
     WrapInFunction(l1, l2);
 
     EXPECT_FALSE(r()->Resolve());
@@ -204,7 +206,7 @@ TEST_F(ResolverVarLetValidationTest, InferredPtrStorageAccessMismatch) {
     // }
     // @group(0) @binding(0) var<storage> s : S;
     // fn f() {
-    //   let p : pointer<storage, i32, read_write> = &s.inner.arr[2];
+    //   let p : pointer<storage, i32, read_write> = &s.inner.arr[2i];
     // }
     auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
     auto* buf = Structure("S", {Member("inner", ty.Of(inner))});
@@ -214,7 +216,7 @@ TEST_F(ResolverVarLetValidationTest, InferredPtrStorageAccessMismatch) {
                                create<ast::GroupAttribute>(0),
                            });
 
-    auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 4);
+    auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 2_i);
     auto* ptr =
         Let(Source{{12, 34}}, "p",
             ty.pointer<i32>(ast::StorageClass::kStorage, ast::Access::kReadWrite), AddressOf(expr));

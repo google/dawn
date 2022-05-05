@@ -17,6 +17,8 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::glsl {
 namespace {
 
@@ -153,8 +155,8 @@ void main() {
 }
 
 TEST_F(GlslSanitizerTest, PromoteArrayInitializerToConstVar) {
-    auto* array_init = array<i32, 4>(1, 2, 3, 4);
-    auto* array_index = IndexAccessor(array_init, 3);
+    auto* array_init = array<i32, 4>(1_i, 2_i, 3_i, 4_i);
+    auto* array_index = IndexAccessor(array_init, 3_i);
     auto* pos = Var("pos", ty.i32(), ast::StorageClass::kNone, array_index);
 
     Func("main", ast::VariableList{}, ty.void_(),
@@ -192,7 +194,7 @@ TEST_F(GlslSanitizerTest, PromoteStructInitializerToConstVar) {
                                    Member("b", ty.vec3<f32>()),
                                    Member("c", ty.i32()),
                                });
-    auto* struct_init = Construct(ty.Of(str), 1, vec3<f32>(2.f, 3.f, 4.f), 4);
+    auto* struct_init = Construct(ty.Of(str), 1_i, vec3<f32>(2.f, 3.f, 4.f), 4_i);
     auto* struct_access = MemberAccessor(struct_init, "b");
     auto* pos = Var("pos", ty.vec3<f32>(), ast::StorageClass::kNone, struct_access);
 
@@ -271,18 +273,18 @@ void main() {
 }
 
 TEST_F(GlslSanitizerTest, InlinePtrLetsComplexChain) {
-    // var a : array<mat4x4<f32>, 4>;
-    // let ap : ptr<function, array<mat4x4<f32>, 4>> = &a;
-    // let mp : ptr<function, mat4x4<f32>> = &(*ap)[3];
-    // let vp : ptr<function, vec4<f32>> = &(*mp)[2];
+    // var a : array<mat4x4<f32>, 4u>;
+    // let ap : ptr<function, array<mat4x4<f32>, 4u>> = &a;
+    // let mp : ptr<function, mat4x4<f32>> = &(*ap)[3i];
+    // let vp : ptr<function, vec4<f32>> = &(*mp)[2i];
     // let v : vec4<f32> = *vp;
-    auto* a = Var("a", ty.array(ty.mat4x4<f32>(), 4));
-    auto* ap = Let("ap", ty.pointer(ty.array(ty.mat4x4<f32>(), 4), ast::StorageClass::kFunction),
+    auto* a = Var("a", ty.array(ty.mat4x4<f32>(), 4_u));
+    auto* ap = Let("ap", ty.pointer(ty.array(ty.mat4x4<f32>(), 4_u), ast::StorageClass::kFunction),
                    AddressOf(a));
     auto* mp = Let("mp", ty.pointer(ty.mat4x4<f32>(), ast::StorageClass::kFunction),
-                   AddressOf(IndexAccessor(Deref(ap), 3)));
+                   AddressOf(IndexAccessor(Deref(ap), 3_i)));
     auto* vp = Let("vp", ty.pointer(ty.vec4<f32>(), ast::StorageClass::kFunction),
-                   AddressOf(IndexAccessor(Deref(mp), 2)));
+                   AddressOf(IndexAccessor(Deref(mp), 2_i)));
     auto* v = Var("v", ty.vec4<f32>(), ast::StorageClass::kNone, Deref(vp));
 
     Func("main", ast::VariableList{}, ty.void_(),

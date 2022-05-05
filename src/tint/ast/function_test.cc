@@ -18,6 +18,8 @@
 #include "src/tint/ast/test_helper.h"
 #include "src/tint/ast/workgroup_attribute.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::ast {
 namespace {
 
@@ -105,7 +107,7 @@ TEST_F(FunctionTest, Assert_DifferentProgramID_Attr) {
             ProgramBuilder b2;
             b1.Func("func", VariableList{}, b1.ty.void_(), StatementList{},
                     AttributeList{
-                        b2.WorkgroupSize(2, 4, 6),
+                        b2.WorkgroupSize(2_i, 4_i, 6_i),
                     });
         },
         "internal compiler error");
@@ -118,7 +120,7 @@ TEST_F(FunctionTest, Assert_DifferentProgramID_ReturnAttr) {
             ProgramBuilder b2;
             b1.Func("func", VariableList{}, b1.ty.void_(), StatementList{}, AttributeList{},
                     AttributeList{
-                        b2.WorkgroupSize(2, 4, 6),
+                        b2.WorkgroupSize(2_i, 4_i, 6_i),
                     });
         },
         "internal compiler error");

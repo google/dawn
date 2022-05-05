@@ -18,6 +18,8 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/struct.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -137,9 +139,9 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferVector) {
 }
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferArray) {
-    // var<storage, read> g : array<S, 3>;
+    // var<storage, read> g : array<S, 3u>;
     auto* s = Structure("S", {Member("a", ty.f32())});
-    auto* a = ty.array(ty.Of(s), 3);
+    auto* a = ty.array(ty.Of(s), 3_u);
     Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage, ast::Access::kRead,
            ast::AttributeList{
                create<ast::BindingAttribute>(0),
@@ -285,9 +287,9 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferArray) {
     // struct S {
     //   @size(16) f : f32;
     // }
-    // var<uniform> g : array<S, 3>;
+    // var<uniform> g : array<S, 3u>;
     auto* s = Structure("S", {Member("a", ty.f32(), {MemberSize(16)})});
-    auto* a = ty.array(ty.Of(s), 3);
+    auto* a = ty.array(ty.Of(s), 3_u);
     Global(Source{{56, 78}}, "g", a, ast::StorageClass::kUniform,
            ast::AttributeList{
                create<ast::BindingAttribute>(0),

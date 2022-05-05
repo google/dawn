@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/hlsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::hlsl {
 namespace {
 
@@ -21,7 +23,7 @@ using HlslGeneratorImplTest_Expression = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Expression, IndexAccessor) {
     Global("ary", ty.array<i32, 10>(), ast::StorageClass::kPrivate);
-    auto* expr = IndexAccessor("ary", 5);
+    auto* expr = IndexAccessor("ary", 5_i);
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();

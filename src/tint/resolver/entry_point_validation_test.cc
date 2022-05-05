@@ -21,6 +21,8 @@
 
 #include "gmock/gmock.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -41,9 +43,6 @@ template <typename T>
 using mat4x4 = builder::mat4x4<T>;
 template <typename T>
 using alias = builder::alias<T>;
-using f32 = builder::f32;
-using i32 = builder::i32;
-using u32 = builder::u32;
 
 class ResolverEntryPointValidationTest : public TestHelper, public testing::Test {};
 
@@ -648,9 +647,9 @@ TEST_F(LocationAttributeTests, ReturnType_Struct_RuntimeArray) {
 }
 
 TEST_F(LocationAttributeTests, ComputeShaderLocation_Input) {
-    Func("main", {}, ty.i32(), {Return(Expr(1))},
+    Func("main", {}, ty.i32(), {Return(Expr(1_i))},
          {Stage(ast::PipelineStage::kCompute),
-          create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1))},
+          create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1_i))},
          ast::AttributeList{Location(Source{{12, 34}}, 1)});
 
     EXPECT_FALSE(r()->Resolve());
@@ -661,7 +660,7 @@ TEST_F(LocationAttributeTests, ComputeShaderLocation_Output) {
     auto* input = Param("input", ty.i32(), ast::AttributeList{Location(Source{{12, 34}}, 0u)});
     Func("main", {input}, ty.void_(), {},
          {Stage(ast::PipelineStage::kCompute),
-          create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1))});
+          create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1_i))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for compute shader inputs");
@@ -673,7 +672,7 @@ TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Output) {
     Func(Source{{56, 78}}, "main", {}, ty.Of(s),
          ast::StatementList{Return(Expr(Construct(ty.Of(s))))},
          {Stage(ast::PipelineStage::kCompute),
-          create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1))});
+          create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1_i))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -687,7 +686,7 @@ TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Input) {
     auto* input = Param("input", ty.Of(s));
     Func(Source{{56, 78}}, "main", {input}, ty.void_(), {},
          {Stage(ast::PipelineStage::kCompute),
-          create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1))});
+          create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1_i))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

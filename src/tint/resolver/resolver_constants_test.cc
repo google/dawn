@@ -18,6 +18,8 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/expression.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -26,7 +28,7 @@ using Scalar = sem::Constant::Scalar;
 using ResolverConstantsTest = ResolverTest;
 
 TEST_F(ResolverConstantsTest, Scalar_i32) {
-    auto* expr = Expr(99);
+    auto* expr = Expr(99_i);
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -41,7 +43,7 @@ TEST_F(ResolverConstantsTest, Scalar_i32) {
 }
 
 TEST_F(ResolverConstantsTest, Scalar_u32) {
-    auto* expr = Expr(99u);
+    auto* expr = Expr(99_u);
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -162,7 +164,7 @@ TEST_F(ResolverConstantsTest, Vec3_ZeroInit_bool) {
 }
 
 TEST_F(ResolverConstantsTest, Vec3_Splat_i32) {
-    auto* expr = vec3<i32>(99);
+    auto* expr = vec3<i32>(99_i);
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -181,7 +183,7 @@ TEST_F(ResolverConstantsTest, Vec3_Splat_i32) {
 }
 
 TEST_F(ResolverConstantsTest, Vec3_Splat_u32) {
-    auto* expr = vec3<u32>(99u);
+    auto* expr = vec3<u32>(99_u);
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -238,7 +240,7 @@ TEST_F(ResolverConstantsTest, Vec3_Splat_bool) {
 }
 
 TEST_F(ResolverConstantsTest, Vec3_FullConstruct_i32) {
-    auto* expr = vec3<i32>(1, 2, 3);
+    auto* expr = vec3<i32>(1_i, 2_i, 3_i);
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -257,7 +259,7 @@ TEST_F(ResolverConstantsTest, Vec3_FullConstruct_i32) {
 }
 
 TEST_F(ResolverConstantsTest, Vec3_FullConstruct_u32) {
-    auto* expr = vec3<u32>(1u, 2u, 3u);
+    auto* expr = vec3<u32>(1_u, 2_u, 3_u);
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -314,7 +316,7 @@ TEST_F(ResolverConstantsTest, Vec3_FullConstruct_bool) {
 }
 
 TEST_F(ResolverConstantsTest, Vec3_MixConstruct_i32) {
-    auto* expr = vec3<i32>(1, vec2<i32>(2, 3));
+    auto* expr = vec3<i32>(1_i, vec2<i32>(2_i, 3_i));
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -333,7 +335,7 @@ TEST_F(ResolverConstantsTest, Vec3_MixConstruct_i32) {
 }
 
 TEST_F(ResolverConstantsTest, Vec3_MixConstruct_u32) {
-    auto* expr = vec3<u32>(vec2<u32>(1u, 2u), 3u);
+    auto* expr = vec3<u32>(vec2<u32>(1_u, 2_u), 3_u);
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -409,7 +411,7 @@ TEST_F(ResolverConstantsTest, Vec3_Cast_f32_to_32) {
 }
 
 TEST_F(ResolverConstantsTest, Vec3_Cast_u32_to_f32) {
-    auto* expr = vec3<f32>(vec3<u32>(10u, 20u, 30u));
+    auto* expr = vec3<f32>(vec3<u32>(10_u, 20_u, 30_u));
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

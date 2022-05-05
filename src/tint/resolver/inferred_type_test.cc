@@ -17,6 +17,8 @@
 
 #include "gmock/gmock.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -37,9 +39,6 @@ template <typename T>
 using mat4x4 = builder::mat4x4<T>;
 template <typename T>
 using alias = builder::alias<T>;
-using f32 = builder::f32;
-using i32 = builder::i32;
-using u32 = builder::u32;
 
 struct ResolverInferredTypeTest : public resolver::TestHelper, public testing::Test {};
 
@@ -133,7 +132,7 @@ TEST_P(ResolverInferredTypeParamTest, LocalVar_Pass) {
 INSTANTIATE_TEST_SUITE_P(ResolverTest, ResolverInferredTypeParamTest, testing::ValuesIn(all_cases));
 
 TEST_F(ResolverInferredTypeTest, InferArray_Pass) {
-    auto* type = ty.array(ty.u32(), 10);
+    auto* type = ty.array(ty.u32(), 10_u);
     auto* expected_type = create<sem::Array>(create<sem::U32>(), 10u, 4u, 4u * 10u, 4u, 4u);
 
     auto* ctor_expr = Construct(type);

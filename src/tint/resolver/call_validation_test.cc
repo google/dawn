@@ -18,6 +18,8 @@
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -25,7 +27,7 @@ using ResolverCallValidationTest = ResolverTest;
 
 TEST_F(ResolverCallValidationTest, TooFewArgs) {
     Func("foo", {Param(Sym(), ty.i32()), Param(Sym(), ty.f32())}, ty.void_(), {Return()});
-    auto* call = Call(Source{{12, 34}}, "foo", 1);
+    auto* call = Call(Source{{12, 34}}, "foo", 1_i);
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
@@ -34,7 +36,7 @@ TEST_F(ResolverCallValidationTest, TooFewArgs) {
 
 TEST_F(ResolverCallValidationTest, TooManyArgs) {
     Func("foo", {Param(Sym(), ty.i32()), Param(Sym(), ty.f32())}, ty.void_(), {Return()});
-    auto* call = Call(Source{{12, 34}}, "foo", 1, 1.0f, 1.0f);
+    auto* call = Call(Source{{12, 34}}, "foo", 1_i, 1.0f, 1.0f);
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
@@ -70,14 +72,14 @@ TEST_F(ResolverCallValidationTest, UnusedRetval) {
 TEST_F(ResolverCallValidationTest, PointerArgument_VariableIdentExpr) {
     // fn foo(p: ptr<function, i32>) {}
     // fn main() {
-    //   var z: i32 = 1;
+    //   var z: i32 = 1i;
     //   foo(&z);
     // }
     auto* param = Param("p", ty.pointer<i32>(ast::StorageClass::kFunction));
     Func("foo", {param}, ty.void_(), {});
     Func("main", {}, ty.void_(),
          {
-             Decl(Var("z", ty.i32(), Expr(1))),
+             Decl(Var("z", ty.i32(), Expr(1_i))),
              CallStmt(Call("foo", AddressOf(Source{{12, 34}}, Expr("z")))),
          });
 
@@ -87,14 +89,14 @@ TEST_F(ResolverCallValidationTest, PointerArgument_VariableIdentExpr) {
 TEST_F(ResolverCallValidationTest, PointerArgument_ConstIdentExpr) {
     // fn foo(p: ptr<function, i32>) {}
     // fn main() {
-    //   let z: i32 = 1;
+    //   let z: i32 = 1i;
     //   foo(&z);
     // }
     auto* param = Param("p", ty.pointer<i32>(ast::StorageClass::kFunction));
     Func("foo", {param}, ty.void_(), {});
     Func("main", {}, ty.void_(),
          {
-             Decl(Let("z", ty.i32(), Expr(1))),
+             Decl(Let("z", ty.i32(), Expr(1_i))),
              CallStmt(Call("foo", AddressOf(Expr(Source{{12, 34}}, "z")))),
          });
 
@@ -171,7 +173,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_FunctionParamWithMain) {
          ast::StatementList{CallStmt(Call("foo", Expr("p")))});
     Func("main", ast::VariableList{}, ty.void_(),
          {
-             Decl(Var("v", ty.i32(), Expr(1))),
+             Decl(Var("v", ty.i32(), Expr(1_i))),
              CallStmt(Call("foo", AddressOf(Expr("v")))),
          },
          {

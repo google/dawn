@@ -1026,11 +1026,11 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
                 Switch(
                     current_type,
                     [&](const Matrix* matrix_type) {
-                        store_dest = builder_.IndexAccessor(store_dest, builder_.Expr(index));
+                        store_dest = builder_.IndexAccessor(store_dest, builder_.Expr(i32(index)));
                         current_type = ty_.Vector(matrix_type->type, matrix_type->rows);
                     },
                     [&](const Array* array_type) {
-                        store_dest = builder_.IndexAccessor(store_dest, builder_.Expr(index));
+                        store_dest = builder_.IndexAccessor(store_dest, builder_.Expr(i32(index)));
                         current_type = array_type->type->UnwrapAlias();
                     },
                     [&](const Struct* struct_type) {
@@ -1169,11 +1169,13 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
                 Switch(
                     current_type,
                     [&](const Matrix* matrix_type) {
-                        load_source = builder_.IndexAccessor(load_source, builder_.Expr(index));
+                        load_source =
+                            builder_.IndexAccessor(load_source, builder_.Expr(i32(index)));
                         current_type = ty_.Vector(matrix_type->type, matrix_type->rows);
                     },
                     [&](const Array* array_type) {
-                        load_source = builder_.IndexAccessor(load_source, builder_.Expr(index));
+                        load_source =
+                            builder_.IndexAccessor(load_source, builder_.Expr(i32(index)));
                         current_type = array_type->type->UnwrapAlias();
                     },
                     [&](const Struct* struct_type) {
@@ -1356,9 +1358,9 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
     if (ep_info_->stage == ast::PipelineStage::kCompute) {
         auto& size = ep_info_->workgroup_size;
         if (size.x != 0 && size.y != 0 && size.z != 0) {
-            const ast::Expression* x = builder_.Expr(static_cast<int>(size.x));
-            const ast::Expression* y = size.y ? builder_.Expr(static_cast<int>(size.y)) : nullptr;
-            const ast::Expression* z = size.z ? builder_.Expr(static_cast<int>(size.z)) : nullptr;
+            const ast::Expression* x = builder_.Expr(i32(size.x));
+            const ast::Expression* y = size.y ? builder_.Expr(i32(size.y)) : nullptr;
+            const ast::Expression* z = size.z ? builder_.Expr(i32(size.z)) : nullptr;
             fn_attrs.emplace_back(create<ast::WorkgroupAttribute>(Source{}, x, y, z));
         }
     }

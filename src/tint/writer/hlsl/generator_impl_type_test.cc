@@ -22,10 +22,12 @@
 #include "src/tint/sem/storage_texture.h"
 #include "src/tint/writer/hlsl/test_helper.h"
 
+using ::testing::HasSubstr;
+
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::hlsl {
 namespace {
-
-using ::testing::HasSubstr;
 
 using HlslGeneratorImplTest_Type = TestHelper;
 
@@ -43,7 +45,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Array) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
-    auto* arr = ty.array(ty.array<bool, 4>(), 5);
+    auto* arr = ty.array(ty.array<bool, 4>(), 5_u);
     Global("G", arr, ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
@@ -56,7 +58,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
-    auto* arr = ty.array(ty.array(ty.array<bool, 4>(), 5), 6);
+    auto* arr = ty.array(ty.array(ty.array<bool, 4>(), 5_u), 6_u);
     Global("G", arr, ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();

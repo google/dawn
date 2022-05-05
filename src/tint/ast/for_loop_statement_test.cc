@@ -16,6 +16,8 @@
 #include "src/tint/ast/binary_expression.h"
 #include "src/tint/ast/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::ast {
 namespace {
 
@@ -23,8 +25,8 @@ using ForLoopStatementTest = TestHelper;
 
 TEST_F(ForLoopStatementTest, Creation) {
     auto* init = Decl(Var("i", ty.u32()));
-    auto* cond = create<BinaryExpression>(BinaryOp::kLessThan, Expr("i"), Expr(5u));
-    auto* cont = Assign("i", Add("i", 1));
+    auto* cond = create<BinaryExpression>(BinaryOp::kLessThan, Expr("i"), Expr(5_u));
+    auto* cont = Assign("i", Add("i", 1_u));
     auto* body = Block(Return());
     auto* l = For(init, cond, cont, body);
 

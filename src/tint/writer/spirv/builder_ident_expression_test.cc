@@ -15,6 +15,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 namespace {
 
@@ -136,7 +138,7 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
-    auto* var = GlobalConst("var", ty.i32(), Expr(2));
+    auto* var = GlobalConst("var", ty.i32(), Expr(2_i));
 
     auto* expr = Add("var", "var");
     WrapInFunction(expr);

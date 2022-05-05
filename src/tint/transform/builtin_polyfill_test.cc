@@ -604,7 +604,7 @@ fn f() {
 
     auto* expect = R"(
 fn tint_first_leading_bit(v : i32) -> i32 {
-  var x = select(u32(v), u32(~(v)), (v < 0));
+  var x = select(u32(v), u32(~(v)), (v < 0i));
   let b16 = select(0u, 16u, bool((x & 4294901760u)));
   x = (x >> b16);
   let b8 = select(0u, 8u, bool((x & 65280u)));
@@ -670,7 +670,7 @@ fn f() {
 
     auto* expect = R"(
 fn tint_first_leading_bit(v : vec3<i32>) -> vec3<i32> {
-  var x = select(vec3<u32>(v), vec3<u32>(~(v)), (v < vec3<i32>(0)));
+  var x = select(vec3<u32>(v), vec3<u32>(~(v)), (v < vec3<i32>(0i)));
   let b16 = select(vec3<u32>(0u), vec3<u32>(16u), vec3<bool>((x & vec3<u32>(4294901760u))));
   x = (x >> b16);
   let b8 = select(vec3<u32>(0u), vec3<u32>(8u), vec3<bool>((x & vec3<u32>(65280u))));

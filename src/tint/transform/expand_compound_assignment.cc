@@ -27,6 +27,8 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::ExpandCompoundAssignment);
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::transform {
 
 ExpandCompoundAssignment::ExpandCompoundAssignment() = default;
@@ -172,8 +174,8 @@ void ExpandCompoundAssignment::Run(CloneContext& ctx, const DataMap&, DataMap&) 
             auto* sem_lhs = ctx.src->Sem().Get(inc_dec->lhs);
             const ast::IntLiteralExpression* one =
                 sem_lhs->Type()->UnwrapRef()->is_signed_integer_scalar()
-                    ? ctx.dst->Expr(1)->As<ast::IntLiteralExpression>()
-                    : ctx.dst->Expr(1u)->As<ast::IntLiteralExpression>();
+                    ? ctx.dst->Expr(1_i)->As<ast::IntLiteralExpression>()
+                    : ctx.dst->Expr(1_u)->As<ast::IntLiteralExpression>();
             auto op = inc_dec->increment ? ast::BinaryOp::kAdd : ast::BinaryOp::kSubtract;
             state.Expand(inc_dec, inc_dec->lhs, one, op);
         }

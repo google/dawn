@@ -16,6 +16,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 namespace {
 
@@ -210,7 +212,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
                  Decl(var),
                  Return(),
              },
-             ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+             ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
     }
 
     {
@@ -221,7 +223,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
                  Decl(var),
                  Return(),
              },
-             ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+             ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
     }
 
     spirv::Builder& b = SanitizeAndBuild();

@@ -83,7 +83,7 @@ TEST_F(MslUnaryOpTest, Negation) {
 
 TEST_F(MslUnaryOpTest, NegationOfIntMin) {
     auto* op = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation,
-                                              Expr(std::numeric_limits<int32_t>::min()));
+                                              Expr(i32(std::numeric_limits<int32_t>::min())));
     WrapInFunction(op);
 
     GeneratorImpl& gen = Build();

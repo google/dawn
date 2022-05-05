@@ -16,6 +16,8 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/writer/hlsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::hlsl {
 namespace {
 
@@ -319,11 +321,11 @@ if (!tint_tmp) {
 
 TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
     // if (a && b) {
-    //   return 1;
+    //   return 1i;
     // } else if (b || c) {
-    //   return 2;
+    //   return 2i;
     // } else {
-    //   return 3;
+    //   return 3i;
     // }
 
     Global("a", ty.bool_(), ast::StorageClass::kPrivate);
@@ -332,9 +334,9 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
 
     auto* expr =
         If(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
-           Block(Return(1)),
+           Block(Return(1_i)),
            Else(If(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"), Expr("c")),
-                   Block(Return(2)), Else(Block(Return(3))))));
+                   Block(Return(2_i)), Else(Block(Return(3_i))))));
     Func("func", {}, ty.i32(), {WrapInStatement(expr)});
 
     GeneratorImpl& gen = Build();
@@ -531,7 +533,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_i32) {
     Func("fn", {}, ty.void_(),
          {
              Decl(Var("a", ty.i32())),
-             Decl(Let("r", nullptr, Op("a", 0))),
+             Decl(Let("r", nullptr, Op("a", 0_i))),
          });
 
     GeneratorImpl& gen = Build();
@@ -549,7 +551,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_u32) {
     Func("fn", {}, ty.void_(),
          {
              Decl(Var("a", ty.u32())),
-             Decl(Let("r", nullptr, Op("a", 0u))),
+             Decl(Let("r", nullptr, Op("a", 0_u))),
          });
 
     GeneratorImpl& gen = Build();
@@ -566,8 +568,8 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_u32) {
 TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_vec_by_vec_i32) {
     Func("fn", {}, ty.void_(),
          {
-             Decl(Var("a", nullptr, vec4<i32>(100, 100, 100, 100))),
-             Decl(Let("r", nullptr, Op("a", vec4<i32>(50, 0, 25, 0)))),
+             Decl(Var("a", nullptr, vec4<i32>(100_i, 100_i, 100_i, 100_i))),
+             Decl(Let("r", nullptr, Op("a", vec4<i32>(50_i, 0_i, 25_i, 0_i)))),
          });
 
     GeneratorImpl& gen = Build();
@@ -584,8 +586,8 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_vec_by_vec_i32) {
 TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_vec_by_scalar_i32) {
     Func("fn", {}, ty.void_(),
          {
-             Decl(Var("a", nullptr, vec4<i32>(100, 100, 100, 100))),
-             Decl(Let("r", nullptr, Op("a", 0))),
+             Decl(Var("a", nullptr, vec4<i32>(100_i, 100_i, 100_i, 100_i))),
+             Decl(Let("r", nullptr, Op("a", 0_i))),
          });
 
     GeneratorImpl& gen = Build();
@@ -674,7 +676,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_vec_by_scalar_i32) {
 TEST_P(HlslGeneratorDivModTest, DivOrModByExpression_i32) {
     Func("zero", {}, ty.i32(),
          {
-             Return(Expr(0)),
+             Return(Expr(0_i)),
          });
 
     Func("fn", {}, ty.void_(),
@@ -705,7 +707,7 @@ void fn() {
 TEST_P(HlslGeneratorDivModTest, DivOrModByExpression_u32) {
     Func("zero", {}, ty.u32(),
          {
-             Return(Expr(0u)),
+             Return(Expr(0_u)),
          });
 
     Func("fn", {}, ty.void_(),
@@ -736,7 +738,7 @@ void fn() {
 TEST_P(HlslGeneratorDivModTest, DivOrModByExpression_vec_by_vec_i32) {
     Func("zero", {}, ty.vec3<i32>(),
          {
-             Return(vec3<i32>(0, 0, 0)),
+             Return(vec3<i32>(0_i, 0_i, 0_i)),
          });
 
     Func("fn", {}, ty.void_(),
@@ -767,7 +769,7 @@ void fn() {
 TEST_P(HlslGeneratorDivModTest, DivOrModByExpression_vec_by_scalar_i32) {
     Func("zero", {}, ty.i32(),
          {
-             Return(0),
+             Return(0_i),
          });
 
     Func("fn", {}, ty.void_(),

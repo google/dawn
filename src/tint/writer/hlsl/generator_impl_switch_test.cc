@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/hlsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::hlsl {
 namespace {
 
@@ -21,9 +23,9 @@ using HlslGeneratorImplTest_Switch = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
     Global("cond", ty.i32(), ast::StorageClass::kPrivate);
-    auto* s = Switch(                   //
-        Expr("cond"),                   //
-        Case(Expr(5), Block(Break())),  //
+    auto* s = Switch(                     //
+        Expr("cond"),                     //
+        Case(Expr(5_i), Block(Break())),  //
         DefaultCase());
     WrapInFunction(s);
 
@@ -48,7 +50,7 @@ TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch_OnlyDefaultCase) {
     Global("a", ty.i32(), ast::StorageClass::kPrivate);
     auto* s = Switch(  //
         Expr("cond"),  //
-        DefaultCase(Block(Assign(Expr("a"), Expr(42)))));
+        DefaultCase(Block(Assign(Expr("a"), Expr(42_i)))));
     WrapInFunction(s);
 
     GeneratorImpl& gen = Build();

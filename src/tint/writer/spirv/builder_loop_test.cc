@@ -15,6 +15,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 namespace {
 
@@ -48,12 +50,12 @@ OpBranch %1
 
 TEST_F(BuilderTest, Loop_WithoutContinuing) {
     // loop {
-    //   v = 2;
+    //   v = 2i;
     //   break;
     // }
 
     auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-    auto* body = Block(Assign("v", 2),  //
+    auto* body = Block(Assign("v", 2_i),  //
                        Break());
 
     auto* loop = Loop(body, Block());
@@ -87,17 +89,17 @@ OpBranch %5
 
 TEST_F(BuilderTest, Loop_WithContinuing) {
     // loop {
-    //   a = 2;
+    //   a = 2i;
     //   break;
     //   continuing {
-    //     a = 3;
+    //     a = 3i;
     //   }
     // }
 
     auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-    auto* body = Block(Assign("v", 2),  //
+    auto* body = Block(Assign("v", 2_i),  //
                        Break());
-    auto* continuing = Block(Assign("v", 3));
+    auto* continuing = Block(Assign("v", 3_i));
 
     auto* loop = Loop(body, continuing);
     WrapInFunction(loop);
@@ -135,13 +137,13 @@ TEST_F(BuilderTest, Loop_WithBodyVariableAccessInContinuing) {
     //   var a : i32;
     //   break;
     //   continuing {
-    //     a = 3;
+    //     a = 3i;
     //   }
     // }
 
     auto* body = Block(Decl(Var("a", ty.i32())),  //
                        Break());
-    auto* continuing = Block(Assign("a", 3));
+    auto* continuing = Block(Assign("a", 3_i));
 
     auto* loop = Loop(body, continuing);
     WrapInFunction(loop);

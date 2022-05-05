@@ -41,6 +41,8 @@
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -169,7 +171,7 @@ TEST_F(ResolverValidationTest, AssignmentStmt_InvalidLHS_BuiltinFunctionName) {
     // normalize = 2;
 
     auto* lhs = Expr(Source{{12, 34}}, "normalize");
-    auto* rhs = Expr(2);
+    auto* rhs = Expr(2_i);
     auto* assign = Assign(lhs, rhs);
     WrapInFunction(assign);
 
@@ -181,7 +183,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariable_Fail) {
     // b = 2;
 
     auto* lhs = Expr(Source{{12, 34}}, "b");
-    auto* rhs = Expr(2);
+    auto* rhs = Expr(2_i);
     auto* assign = Assign(lhs, rhs);
     WrapInFunction(assign);
 
@@ -195,7 +197,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableInBlockStatement_Fail) {
     // }
 
     auto* lhs = Expr(Source{{12, 34}}, "b");
-    auto* rhs = Expr(2);
+    auto* rhs = Expr(2_i);
 
     auto* body = Block(Assign(lhs, rhs));
     WrapInFunction(body);
@@ -444,7 +446,7 @@ TEST_F(ResolverValidationTest,
 
     auto error_loc = Source{{12, 34}};
     auto* body = Block(Continue(), Decl(error_loc, Var("z", ty.i32(), ast::StorageClass::kNone)));
-    auto* continuing = Block(Assign(Expr("z"), 2));
+    auto* continuing = Block(Assign(Expr("z"), 2_i));
     auto* loop_stmt = Loop(body, continuing);
     WrapInFunction(loop_stmt);
 
@@ -464,14 +466,14 @@ TEST_F(ResolverValidationTest, Stmt_Loop_ContinueInLoopBodyAfterDecl_UsageInCont
     //     continue; // Ok
     //
     //     continuing {
-    //         z = 2;
+    //         z = 2i;
     //     }
     // }
 
     auto* body =
         Block(If(false, Block(Break())),  //
               Decl(Var("z", ty.i32(), ast::StorageClass::kNone)), Block(Block(Block(Continue()))));
-    auto* continuing = Block(Assign(Expr("z"), 2));
+    auto* continuing = Block(Assign(Expr("z"), 2_i));
     auto* loop_stmt = Loop(body, continuing);
     WrapInFunction(loop_stmt);
 
@@ -485,7 +487,7 @@ TEST_F(ResolverValidationTest, Stmt_Loop_ContinueInLoopBodySubscopeBeforeDecl_Us
     //     }
     //     var z : i32;
     //     continuing {
-    //         z = 2;
+    //         z = 2i;
     //     }
     // }
 
@@ -494,7 +496,7 @@ TEST_F(ResolverValidationTest, Stmt_Loop_ContinueInLoopBodySubscopeBeforeDecl_Us
     auto ref_loc = Source{{90, 12}};
     auto* body = Block(If(Expr(true), Block(Continue(cont_loc))),
                        Decl(Var(decl_loc, "z", ty.i32(), ast::StorageClass::kNone)));
-    auto* continuing = Block(Assign(Expr(ref_loc, "z"), 2));
+    auto* continuing = Block(Assign(Expr(ref_loc, "z"), 2_i));
     auto* loop_stmt = Loop(body, continuing);
     WrapInFunction(loop_stmt);
 
@@ -514,7 +516,7 @@ TEST_F(ResolverValidationTest,
     //     var z : i32;
     //     continuing {
     //         if (true) {
-    //             z = 2; // Must fail even if z is in a sub-scope
+    //             z = 2i; // Must fail even if z is in a sub-scope
     //         }
     //     }
     // }
@@ -525,7 +527,7 @@ TEST_F(ResolverValidationTest,
     auto* body = Block(If(Expr(true), Block(Continue(cont_loc))),
                        Decl(Var(decl_loc, "z", ty.i32(), ast::StorageClass::kNone)));
 
-    auto* continuing = Block(If(Expr(true), Block(Assign(Expr(ref_loc, "z"), 2))));
+    auto* continuing = Block(If(Expr(true), Block(Assign(Expr(ref_loc, "z"), 2_i))));
     auto* loop_stmt = Loop(body, continuing);
     WrapInFunction(loop_stmt);
 
@@ -545,7 +547,7 @@ TEST_F(ResolverValidationTest, Stmt_Loop_ContinueInLoopBodySubscopeBeforeDecl_Us
     //     continuing {
     //         // Must fail even if z is used in an expression that isn't
     //         // directly contained inside a block.
-    //         if (z < 2) {
+    //         if (z < 2i) {
     //         }
     //     }
     // }
@@ -556,7 +558,7 @@ TEST_F(ResolverValidationTest, Stmt_Loop_ContinueInLoopBodySubscopeBeforeDecl_Us
     auto* body = Block(If(Expr(true), Block(Continue(cont_loc))),
                        Decl(Var(decl_loc, "z", ty.i32(), ast::StorageClass::kNone)));
     auto* compare =
-        create<ast::BinaryExpression>(ast::BinaryOp::kLessThan, Expr(ref_loc, "z"), Expr(2));
+        create<ast::BinaryExpression>(ast::BinaryOp::kLessThan, Expr(ref_loc, "z"), Expr(2_i));
     auto* continuing = Block(If(compare, Block()));
     auto* loop_stmt = Loop(body, continuing);
     WrapInFunction(loop_stmt);
@@ -577,7 +579,7 @@ TEST_F(ResolverValidationTest,
     //     var z : i32;
     //     continuing {
     //         loop {
-    //             z = 2; // Must fail even if z is in a sub-scope
+    //             z = 2i; // Must fail even if z is in a sub-scope
     //         }
     //     }
     // }
@@ -588,7 +590,7 @@ TEST_F(ResolverValidationTest,
     auto* body = Block(If(Expr(true), Block(Continue(cont_loc))),
                        Decl(Var(decl_loc, "z", ty.i32(), ast::StorageClass::kNone)));
 
-    auto* continuing = Block(Loop(Block(Assign(Expr(ref_loc, "z"), 2))));
+    auto* continuing = Block(Loop(Block(Assign(Expr(ref_loc, "z"), 2_i))));
     auto* loop_stmt = Loop(body, continuing);
     WrapInFunction(loop_stmt);
 
@@ -608,7 +610,7 @@ TEST_F(ResolverValidationTest, Stmt_Loop_ContinueInNestedLoopBodyBeforeDecl_Usag
     //     var z : i32;
     //     break;
     //     continuing {
-    //         z = 2;
+    //         z = 2i;
     //     }
     // }
 
@@ -618,7 +620,7 @@ TEST_F(ResolverValidationTest, Stmt_Loop_ContinueInNestedLoopBodyBeforeDecl_Usag
     auto* body = Block(inner_loop,                                          //
                        Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),  //
                        Break());
-    auto* continuing = Block(Assign("z", 2));
+    auto* continuing = Block(Assign("z", 2_i));
     auto* loop_stmt = Loop(body, continuing);
     WrapInFunction(loop_stmt);
 
@@ -636,7 +638,7 @@ TEST_F(ResolverValidationTest,
     //     break;
     //     continuing {
     //         if (true) {
-    //             z = 2;
+    //             z = 2i;
     //         }
     //     }
     // }
@@ -646,7 +648,7 @@ TEST_F(ResolverValidationTest,
     auto* body = Block(inner_loop,                                          //
                        Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),  //
                        Break());
-    auto* continuing = Block(If(Expr(true), Block(Assign("z", 2))));
+    auto* continuing = Block(If(Expr(true), Block(Assign("z", 2_i))));
     auto* loop_stmt = Loop(body, continuing);
     WrapInFunction(loop_stmt);
 
@@ -663,7 +665,7 @@ TEST_F(ResolverValidationTest, Stmt_Loop_ContinueInNestedLoopBodyBeforeDecl_Usag
     //     break;
     //     continuing {
     //         loop {
-    //             z = 2;
+    //             z = 2i;
     //             break;
     //         }
     //     }
@@ -674,7 +676,7 @@ TEST_F(ResolverValidationTest, Stmt_Loop_ContinueInNestedLoopBodyBeforeDecl_Usag
     auto* body = Block(inner_loop,                                          //
                        Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),  //
                        Break());
-    auto* continuing = Block(Loop(Block(Assign("z", 2),  //
+    auto* continuing = Block(Loop(Block(Assign("z", 2_i),  //
                                         Break())));
     auto* loop_stmt = Loop(body, continuing);
     WrapInFunction(loop_stmt);
@@ -688,7 +690,7 @@ TEST_F(ResolverTest, Stmt_Loop_ContinueInLoopBodyAfterDecl_UsageInContinuing) {
     //     if (true) { continue; }
     //     break;
     //     continuing {
-    //         z = 2;
+    //         z = 2i;
     //     }
     // }
 
@@ -696,7 +698,7 @@ TEST_F(ResolverTest, Stmt_Loop_ContinueInLoopBodyAfterDecl_UsageInContinuing) {
     auto* body =
         Block(Decl(Var("z", ty.i32(), ast::StorageClass::kNone)), If(true, Block(Continue())),  //
               Break());
-    auto* continuing = Block(Assign(Expr(error_loc, "z"), 2));
+    auto* continuing = Block(Assign(Expr(error_loc, "z"), 2_i));
     auto* loop_stmt = Loop(body, continuing);
     WrapInFunction(loop_stmt);
 
@@ -988,8 +990,8 @@ TEST_F(ResolverValidationTest, Stmt_BreakInLoop) {
 }
 
 TEST_F(ResolverValidationTest, Stmt_BreakInSwitch) {
-    WrapInFunction(Loop(Block(Switch(Expr(1),               //
-                                     Case(Expr(1),          //
+    WrapInFunction(Loop(Block(Switch(Expr(1_i),             //
+                                     Case(Expr(1_i),        //
                                           Block(Break())),  //
                                      DefaultCase()),        //
                               Break())));                   //
@@ -1051,7 +1053,7 @@ TEST_F(ResolverValidationTest, Stmt_BreakInIfInIfInContinuing) {
 TEST_F(ResolverValidationTest, Stmt_BreakInIfTrueMultipleStmtsInContinuing) {
     auto* cont = Block(                             // continuing {
         If(true, Block(Source{{56, 78}},            //   if(true) {
-                       Assign(Phony(), 1),          //     _ = 1;
+                       Assign(Phony(), 1_i),        //     _ = 1i;
                        Break(Source{{12, 34}}))));  //     break;
                                                     //   }
                                                     // }
@@ -1068,7 +1070,7 @@ TEST_F(ResolverValidationTest, Stmt_BreakInIfElseMultipleStmtsInContinuing) {
     auto* cont = Block(                             // continuing {
         If(true, Block(),                           //   if(true) {
            Else(Block(Source{{56, 78}},             //   } else {
-                      Assign(Phony(), 1),           //     _ = 1;
+                      Assign(Phony(), 1_i),         //     _ = 1i;
                       Break(Source{{12, 34}})))));  //     break;
                                                     //   }
                                                     // }
@@ -1098,13 +1100,13 @@ TEST_F(ResolverValidationTest, Stmt_BreakInIfElseIfInContinuing) {
 }
 
 TEST_F(ResolverValidationTest, Stmt_BreakInIfNonEmptyElseInContinuing) {
-    auto* cont = Block(                        // continuing {
-        If(true,                               //   if(true) {
-           Block(Break(Source{{12, 34}})),     //     break;
-           Else(Block(Source{{56, 78}},        //   } else {
-                      Assign(Phony(), 1)))));  //     _ = 1;
-                                               //   }
-                                               // }
+    auto* cont = Block(                          // continuing {
+        If(true,                                 //   if(true) {
+           Block(Break(Source{{12, 34}})),       //     break;
+           Else(Block(Source{{56, 78}},          //   } else {
+                      Assign(Phony(), 1_i)))));  //     _ = 1i;
+                                                 //   }
+                                                 // }
     WrapInFunction(Loop(Block(), cont));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1115,13 +1117,13 @@ TEST_F(ResolverValidationTest, Stmt_BreakInIfNonEmptyElseInContinuing) {
 }
 
 TEST_F(ResolverValidationTest, Stmt_BreakInIfElseNonEmptyTrueInContinuing) {
-    auto* cont = Block(                                  // continuing {
-        If(true,                                         //   if(true) {
-           Block(Source{{56, 78}}, Assign(Phony(), 1)),  //     _ = 1;
-           Else(Block(                                   //   } else {
-               Break(Source{{12, 34}})))));              //     break;
-                                                         //   }
-                                                         // }
+    auto* cont = Block(                                    // continuing {
+        If(true,                                           //   if(true) {
+           Block(Source{{56, 78}}, Assign(Phony(), 1_i)),  //     _ = 1i;
+           Else(Block(                                     //   } else {
+               Break(Source{{12, 34}})))));                //     break;
+                                                           //   }
+                                                           // }
     WrapInFunction(Loop(Block(), cont));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1136,7 +1138,7 @@ TEST_F(ResolverValidationTest, Stmt_BreakInIfInContinuingNotLast) {
         If(Source{{56, 78}}, true,           //   if(true) {
            Block(Break(Source{{12, 34}}))),  //     break;
                                              //   }
-        Assign(Phony(), 1));                 //   _ = 1;
+        Assign(Phony(), 1_i));               //   _ = 1i;
                                              // }
     WrapInFunction(Loop(Block(), cont));
     EXPECT_FALSE(r()->Resolve());

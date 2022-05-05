@@ -678,7 +678,7 @@ fn frag_main() -> FragOutput {
 
 @builtin(frag_depth) @internal(disable_validation__ignore_storage_class) var<out> depth_1 : f32;
 
-@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<out> mask_1 : array<u32, 1>;
+@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<out> mask_1 : array<u32, 1u>;
 
 struct FragOutput {
   color : vec4<f32>,
@@ -699,7 +699,7 @@ fn frag_main() {
   let inner_result = frag_main_inner();
   color_1 = inner_result.color;
   depth_1 = inner_result.depth;
-  mask_1[0] = inner_result.mask;
+  mask_1[0i] = inner_result.mask;
 }
 )";
 
@@ -733,7 +733,7 @@ struct FragOutput {
 
 @builtin(frag_depth) @internal(disable_validation__ignore_storage_class) var<out> depth_1 : f32;
 
-@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<out> mask_1 : array<u32, 1>;
+@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<out> mask_1 : array<u32, 1u>;
 
 fn frag_main_inner() -> FragOutput {
   var output : FragOutput;
@@ -748,7 +748,7 @@ fn frag_main() {
   let inner_result = frag_main_inner();
   color_1 = inner_result.color;
   depth_1 = inner_result.depth;
-  mask_1[0] = inner_result.mask;
+  mask_1[0i] = inner_result.mask;
 }
 
 struct FragOutput {
@@ -3870,9 +3870,9 @@ fn main(@builtin(sample_index) sample_index : u32,
     auto* expect = R"(
 @builtin(sample_index) @internal(disable_validation__ignore_storage_class) var<in> sample_index_1 : u32;
 
-@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<in> mask_in_1 : array<u32, 1>;
+@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<in> mask_in_1 : array<u32, 1u>;
 
-@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<out> value : array<u32, 1>;
+@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<out> value : array<u32, 1u>;
 
 fn main_inner(sample_index : u32, mask_in : u32) -> u32 {
   return mask_in;
@@ -3880,8 +3880,8 @@ fn main_inner(sample_index : u32, mask_in : u32) -> u32 {
 
 @stage(fragment)
 fn main() {
-  let inner_result = main_inner(sample_index_1, mask_in_1[0]);
-  value[0] = inner_result;
+  let inner_result = main_inner(sample_index_1, mask_in_1[0i]);
+  value[0i] = inner_result;
 }
 )";
 
@@ -3905,9 +3905,9 @@ fn fragment_main(@builtin(sample_index) sample_index : u32,
     auto* expect = R"(
 @builtin(sample_index) @internal(disable_validation__ignore_storage_class) var<in> gl_SampleID : i32;
 
-@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<in> gl_SampleMaskIn : array<i32, 1>;
+@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<in> gl_SampleMaskIn : array<i32, 1u>;
 
-@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<out> gl_SampleMask : array<i32, 1>;
+@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<out> gl_SampleMask : array<i32, 1u>;
 
 fn fragment_main(sample_index : u32, mask_in : u32) -> u32 {
   return mask_in;
@@ -3915,8 +3915,8 @@ fn fragment_main(sample_index : u32, mask_in : u32) -> u32 {
 
 @stage(fragment)
 fn main() {
-  let inner_result = fragment_main(bitcast<u32>(gl_SampleID), bitcast<u32>(gl_SampleMaskIn[0]));
-  gl_SampleMask[0] = bitcast<i32>(inner_result);
+  let inner_result = fragment_main(bitcast<u32>(gl_SampleID), bitcast<u32>(gl_SampleMaskIn[0i]));
+  gl_SampleMask[0i] = bitcast<i32>(inner_result);
 }
 )";
 

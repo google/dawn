@@ -37,7 +37,7 @@ fn f() {
 )";
 
     auto* expect = R"(
-var<private> a : i32 = 123;
+var<private> a : i32 = 123i;
 
 var<private> b : u32 = 123u;
 
@@ -66,7 +66,7 @@ fn f() {
 )";
 
     auto* expect = R"(
-var<private> a : i32 = 123;
+var<private> a : i32 = 123i;
 
 var<private> b : u32 = 123u;
 
@@ -95,7 +95,7 @@ fn f() {
 )";
 
     auto* expect = R"(
-var<private> a : i32 = 123;
+var<private> a : i32 = 123i;
 
 var<private> b : u32 = 123u;
 
@@ -124,7 +124,7 @@ fn f() {
 )";
 
     auto* expect = R"(
-var<private> a : vec3<i32> = vec3<i32>(123);
+var<private> a : vec3<i32> = vec3<i32>(123i);
 
 var<private> b : vec3<u32> = vec3<u32>(123u);
 
@@ -153,7 +153,7 @@ fn f() {
 )";
 
     auto* expect = R"(
-var<private> a : vec3<i32> = vec3<i32>(123);
+var<private> a : vec3<i32> = vec3<i32>(123i);
 
 var<private> b : vec3<u32> = vec3<u32>(123u);
 
@@ -182,7 +182,7 @@ fn f() {
 )";
 
     auto* expect = R"(
-var<private> a : vec3<i32> = vec3<i32>(123);
+var<private> a : vec3<i32> = vec3<i32>(123i);
 
 var<private> b : vec3<u32> = vec3<u32>(123u);
 
@@ -212,13 +212,13 @@ fn f() {
 )";
 
     auto* expect = R"(
-var<private> a : vec4<i32> = vec4<i32>(1, 2, 3, 4);
+var<private> a : vec4<i32> = vec4<i32>(1i, 2i, 3i, 4i);
 
-var<private> b : vec4<i32> = vec4<i32>(1, 2, 4, 5);
+var<private> b : vec4<i32> = vec4<i32>(1i, 2i, 4i, 5i);
 
-var<private> c : vec4<i32> = vec4<i32>(1, 2, 3, 4);
+var<private> c : vec4<i32> = vec4<i32>(1i, 2i, 3i, 4i);
 
-var<private> d : vec4<i32> = vec4<i32>(1, 2, 3, 4);
+var<private> d : vec4<i32> = vec4<i32>(1i, 2i, 3i, 4i);
 
 var<private> e : vec4<bool> = vec4<bool>(false, true, false, true);
 
@@ -243,7 +243,7 @@ fn f() {
 
     auto* expect = R"(
 fn f() {
-  var a : i32 = 123;
+  var a : i32 = 123i;
   var b : u32 = 123u;
   var c : f32 = 123.0;
   var d : bool = true;
@@ -267,7 +267,7 @@ fn f() {
 
     auto* expect = R"(
 fn f() {
-  var a : i32 = 123;
+  var a : i32 = 123i;
   var b : u32 = 123u;
   var c : f32 = 123.0;
   var d : bool = true;
@@ -291,7 +291,7 @@ fn f() {
 
     auto* expect = R"(
 fn f() {
-  var a : i32 = 123;
+  var a : i32 = 123i;
   var b : u32 = 123u;
   var c : f32 = 123.0;
   var d : bool = true;
@@ -306,7 +306,7 @@ fn f() {
 TEST_F(FoldConstantsTest, Function_Vector_NoConversion) {
     auto* src = R"(
 fn f() {
-  var a : vec3<i32> = vec3<i32>(123);
+  var a : vec3<i32> = vec3<i32>(123i);
   var b : vec3<u32> = vec3<u32>(123u);
   var c : vec3<f32> = vec3<f32>(123.0);
   var d : vec3<bool> = vec3<bool>(true);
@@ -315,7 +315,7 @@ fn f() {
 
     auto* expect = R"(
 fn f() {
-  var a : vec3<i32> = vec3<i32>(123);
+  var a : vec3<i32> = vec3<i32>(123i);
   var b : vec3<u32> = vec3<u32>(123u);
   var c : vec3<f32> = vec3<f32>(123.0);
   var d : vec3<bool> = vec3<bool>(true);
@@ -339,7 +339,7 @@ fn f() {
 
     auto* expect = R"(
 fn f() {
-  var a : vec3<i32> = vec3<i32>(123);
+  var a : vec3<i32> = vec3<i32>(123i);
   var b : vec3<u32> = vec3<u32>(123u);
   var c : vec3<f32> = vec3<f32>(123.0);
   var d : vec3<bool> = vec3<bool>(true);
@@ -363,7 +363,7 @@ fn f() {
 
     auto* expect = R"(
 fn f() {
-  var a : vec3<i32> = vec3<i32>(123);
+  var a : vec3<i32> = vec3<i32>(123i);
   var b : vec3<u32> = vec3<u32>(123u);
   var c : vec3<f32> = vec3<f32>(123.0);
   var d : vec3<bool> = vec3<bool>(true);
@@ -388,10 +388,10 @@ fn f() {
 
     auto* expect = R"(
 fn f() {
-  var a : vec4<i32> = vec4<i32>(1, 2, 3, 4);
-  var b : vec4<i32> = vec4<i32>(1, 2, 4, 5);
-  var c : vec4<i32> = vec4<i32>(1, 2, 3, 4);
-  var d : vec4<i32> = vec4<i32>(1, 2, 3, 4);
+  var a : vec4<i32> = vec4<i32>(1i, 2i, 3i, 4i);
+  var b : vec4<i32> = vec4<i32>(1i, 2i, 4i, 5i);
+  var c : vec4<i32> = vec4<i32>(1i, 2i, 3i, 4i);
+  var d : vec4<i32> = vec4<i32>(1i, 2i, 3i, 4i);
   var e : vec4<bool> = vec4<bool>(false, true, false, true);
 }
 )";

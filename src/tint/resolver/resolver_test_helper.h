@@ -119,10 +119,6 @@ class ResolverTestWithParam : public TestHelper, public testing::TestWithParam<T
 
 namespace builder {
 
-using i32 = ProgramBuilder::i32;
-using u32 = ProgramBuilder::u32;
-using f32 = ProgramBuilder::f32;
-
 template <uint32_t N, typename T>
 struct vec {};
 
@@ -409,7 +405,7 @@ struct DataType<array<N, T>> {
     /// @param b the ProgramBuilder
     /// @return a new AST array type
     static inline const ast::Type* AST(ProgramBuilder& b) {
-        return b.ty.array(DataType<T>::AST(b), N);
+        return b.ty.array(DataType<T>::AST(b), u32(N));
     }
     /// @param b the ProgramBuilder
     /// @return the semantic array type

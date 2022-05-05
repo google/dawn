@@ -15,13 +15,15 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 namespace {
 
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, UnaryOp_Negation_Integer) {
-    auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(1));
+    auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(1_i));
     WrapInFunction(expr);
 
     spirv::Builder& b = Build();
@@ -53,7 +55,7 @@ TEST_F(BuilderTest, UnaryOp_Negation_Float) {
 }
 
 TEST_F(BuilderTest, UnaryOp_Complement) {
-    auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement, Expr(1));
+    auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement, Expr(1_i));
     WrapInFunction(expr);
 
     spirv::Builder& b = Build();

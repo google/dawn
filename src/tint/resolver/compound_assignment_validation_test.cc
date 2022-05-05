@@ -18,6 +18,8 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/storage_texture.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -26,8 +28,8 @@ using ResolverCompoundAssignmentValidationTest = ResolverTest;
 TEST_F(ResolverCompoundAssignmentValidationTest, CompatibleTypes) {
     // var a : i32 = 2;
     // a += 2
-    auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
-    WrapInFunction(var, CompoundAssign(Source{{12, 34}}, "a", 2, ast::BinaryOp::kAdd));
+    auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2_i));
+    WrapInFunction(var, CompoundAssign(Source{{12, 34}}, "a", 2_i, ast::BinaryOp::kAdd));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -37,8 +39,8 @@ TEST_F(ResolverCompoundAssignmentValidationTest, CompatibleTypesThroughAlias) {
     // var a : myint = 2;
     // a += 2
     auto* myint = Alias("myint", ty.i32());
-    auto* var = Var("a", ty.Of(myint), ast::StorageClass::kNone, Expr(2));
-    WrapInFunction(var, CompoundAssign(Source{{12, 34}}, "a", 2, ast::BinaryOp::kAdd));
+    auto* var = Var("a", ty.Of(myint), ast::StorageClass::kNone, Expr(2_i));
+    WrapInFunction(var, CompoundAssign(Source{{12, 34}}, "a", 2_i, ast::BinaryOp::kAdd));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -48,10 +50,10 @@ TEST_F(ResolverCompoundAssignmentValidationTest, CompatibleTypesAssignThroughPoi
     // let b : ptr<function,i32> = &a;
     // *b += 2;
     const auto func = ast::StorageClass::kFunction;
-    auto* var_a = Var("a", ty.i32(), func, Expr(2));
-    auto* var_b = Let("b", ty.pointer<int>(func), AddressOf(Expr("a")));
+    auto* var_a = Var("a", ty.i32(), func, Expr(2_i));
+    auto* var_b = Let("b", ty.pointer<i32>(func), AddressOf(Expr("a")));
     WrapInFunction(var_a, var_b,
-                   CompoundAssign(Source{{12, 34}}, Deref("b"), 2, ast::BinaryOp::kAdd));
+                   CompoundAssign(Source{{12, 34}}, Deref("b"), 2_i, ast::BinaryOp::kAdd));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -62,7 +64,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, IncompatibleTypes) {
     //   a += 2.3;
     // }
 
-    auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
+    auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2_i));
 
     auto* assign = CompoundAssign(Source{{12, 34}}, "a", 2.3f, ast::BinaryOp::kAdd);
     WrapInFunction(var, assign);
@@ -217,9 +219,9 @@ TEST_F(ResolverCompoundAssignmentValidationTest, MatrixVector_Fail) {
 
 TEST_F(ResolverCompoundAssignmentValidationTest, Phony) {
     // {
-    //   _ += 1;
+    //   _ += 1i;
     // }
-    WrapInFunction(CompoundAssign(Source{{56, 78}}, Phony(), 1, ast::BinaryOp::kAdd));
+    WrapInFunction(CompoundAssign(Source{{56, 78}}, Phony(), 1_i, ast::BinaryOp::kAdd));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "56:78 error: compound assignment operand types are invalid: void "
@@ -229,11 +231,11 @@ TEST_F(ResolverCompoundAssignmentValidationTest, Phony) {
 TEST_F(ResolverCompoundAssignmentValidationTest, ReadOnlyBuffer) {
     // @group(0) @binding(0) var<storage,read> a : i32;
     // {
-    //   a += 1;
+    //   a += 1i;
     // }
     Global(Source{{12, 34}}, "a", ty.i32(), ast::StorageClass::kStorage, ast::Access::kRead,
            GroupAndBinding(0, 0));
-    WrapInFunction(CompoundAssign(Source{{56, 78}}, "a", 1, ast::BinaryOp::kAdd));
+    WrapInFunction(CompoundAssign(Source{{56, 78}}, "a", 1_i, ast::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -242,10 +244,10 @@ TEST_F(ResolverCompoundAssignmentValidationTest, ReadOnlyBuffer) {
 }
 
 TEST_F(ResolverCompoundAssignmentValidationTest, LhsConstant) {
-    // let a = 1;
-    // a += 1;
-    auto* a = Let(Source{{12, 34}}, "a", nullptr, Expr(1));
-    WrapInFunction(a, CompoundAssign(Expr(Source{{56, 78}}, "a"), 1, ast::BinaryOp::kAdd));
+    // let a = 1i;
+    // a += 1i;
+    auto* a = Let(Source{{12, 34}}, "a", nullptr, Expr(1_i));
+    WrapInFunction(a, CompoundAssign(Expr(Source{{56, 78}}, "a"), 1_i, ast::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(56:78 error: cannot assign to const
@@ -253,8 +255,8 @@ TEST_F(ResolverCompoundAssignmentValidationTest, LhsConstant) {
 }
 
 TEST_F(ResolverCompoundAssignmentValidationTest, LhsLiteral) {
-    // 1 += 1;
-    WrapInFunction(CompoundAssign(Expr(Source{{56, 78}}, 1), 1, ast::BinaryOp::kAdd));
+    // 1i += 1i;
+    WrapInFunction(CompoundAssign(Expr(Source{{56, 78}}, 1_i), 1_i, ast::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "56:78 error: cannot assign to value of type 'i32'");

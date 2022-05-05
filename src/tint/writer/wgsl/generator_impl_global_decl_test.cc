@@ -17,6 +17,8 @@
 #include "src/tint/sem/sampled_texture.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::wgsl {
 namespace {
 
@@ -33,7 +35,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
     gen.increment_indent();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_EQ(gen.result(), R"(  @stage(compute) @workgroup_size(1, 1, 1)
+    EXPECT_EQ(gen.result(), R"(  @stage(compute) @workgroup_size(1i, 1i, 1i)
   fn test_function() {
     var a : f32;
   }
@@ -65,7 +67,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
          },
          ast::AttributeList{
              Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(1),
+             WorkgroupSize(1_i),
          });
 
     GeneratorImpl& gen = Build();
@@ -89,7 +91,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
     a : i32,
   }
 
-  @stage(compute) @workgroup_size(1)
+  @stage(compute) @workgroup_size(1i)
   fn main() {
     var s0 : S0;
     var s1 : S1;

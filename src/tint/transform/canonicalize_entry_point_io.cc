@@ -25,6 +25,8 @@
 #include "src/tint/sem/function.h"
 #include "src/tint/transform/unshadow.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 TINT_INSTANTIATE_TYPEINFO(tint::transform::CanonicalizeEntryPointIO);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::CanonicalizeEntryPointIO::Config);
 
@@ -190,8 +192,8 @@ struct CanonicalizeEntryPointIO::State {
                 } else if (builtin->builtin == ast::Builtin::kSampleMask) {
                     // Vulkan requires the type of a SampleMask builtin to be an array.
                     // Declare it as array<u32, 1> and then load the first element.
-                    ast_type = ctx.dst->ty.array(ast_type, 1);
-                    value = ctx.dst->IndexAccessor(value, 0);
+                    ast_type = ctx.dst->ty.array(ast_type, 1_u);
+                    value = ctx.dst->IndexAccessor(value, 0_i);
                 }
             }
             ctx.dst->Global(symbol, ast_type, ast::StorageClass::kInput, std::move(attributes));
@@ -356,7 +358,7 @@ struct CanonicalizeEntryPointIO::State {
         for (auto& outval : wrapper_output_values) {
             if (HasSampleMask(outval.attributes)) {
                 // Combine the authored sample mask with the fixed mask.
-                outval.value = ctx.dst->And(outval.value, cfg.fixed_sample_mask);
+                outval.value = ctx.dst->And(outval.value, u32(cfg.fixed_sample_mask));
                 return;
             }
         }
@@ -365,7 +367,7 @@ struct CanonicalizeEntryPointIO::State {
         // using the fixed sample mask.
         AddOutput("fixed_sample_mask", ctx.dst->create<sem::U32>(),
                   {ctx.dst->Builtin(ast::Builtin::kSampleMask)},
-                  ctx.dst->Expr(cfg.fixed_sample_mask));
+                  ctx.dst->Expr(u32(cfg.fixed_sample_mask)));
     }
 
     /// Add a point size builtin to the wrapper function output.
@@ -458,8 +460,8 @@ struct CanonicalizeEntryPointIO::State {
             if (HasSampleMask(attributes)) {
                 // Vulkan requires the type of a SampleMask builtin to be an array.
                 // Declare it as array<u32, 1> and then store to the first element.
-                type = ctx.dst->ty.array(type, 1);
-                lhs = ctx.dst->IndexAccessor(lhs, 0);
+                type = ctx.dst->ty.array(type, 1_u);
+                lhs = ctx.dst->IndexAccessor(lhs, 0_i);
             }
             ctx.dst->Global(name, type, ast::StorageClass::kOutput, std::move(attributes));
             wrapper_body.push_back(ctx.dst->Assign(lhs, outval.value));
@@ -668,9 +670,9 @@ struct CanonicalizeEntryPointIO::State {
             case ast::Builtin::kSampleMask:
                 // gl_SampleMask is an array of i32. Retrieve the first element and
                 // bitcast it to u32.
-                value = ctx.dst->IndexAccessor(value, 0);
+                value = ctx.dst->IndexAccessor(value, 0_i);
                 value = ctx.dst->Bitcast(ast_type, value);
-                ast_type = ctx.dst->ty.array(ctx.dst->ty.i32(), 1);
+                ast_type = ctx.dst->ty.array(ctx.dst->ty.i32(), 1_u);
                 break;
             default:
                 break;

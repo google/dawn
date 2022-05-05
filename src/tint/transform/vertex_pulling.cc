@@ -28,6 +28,8 @@
 TINT_INSTANTIATE_TYPEINFO(tint::transform::VertexPulling);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::VertexPulling::Config);
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::transform {
 
 namespace {
@@ -250,11 +252,11 @@ struct State {
     void AddVertexStorageBuffers() {
         // Creating the struct type
         static const char kStructName[] = "TintVertexData";
-        auto* struct_type = ctx.dst->Structure(
-            ctx.dst->Symbols().New(kStructName),
-            {
-                ctx.dst->Member(GetStructBufferName(), ctx.dst->ty.array<ProgramBuilder::u32>()),
-            });
+        auto* struct_type =
+            ctx.dst->Structure(ctx.dst->Symbols().New(kStructName),
+                               {
+                                   ctx.dst->Member(GetStructBufferName(), ctx.dst->ty.array<u32>()),
+                               });
         for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
             // The decorated variable with struct type
             ctx.dst->Global(GetVertexBufferName(i), ctx.dst->ty.Of(struct_type),
@@ -297,7 +299,7 @@ struct State {
 
             auto* attribute_offset = index_expr;
             if (buffer_layout.array_stride != 4) {
-                attribute_offset = ctx.dst->Mul(index_expr, buffer_layout.array_stride / 4u);
+                attribute_offset = ctx.dst->Mul(index_expr, u32(buffer_layout.array_stride / 4u));
             }
 
             // let pulling_offset_n = <attribute_offset>
@@ -359,13 +361,13 @@ struct State {
                         case BaseType::kI32:
                             ty = ctx.dst->ty.i32();
                             for (uint32_t i = fmt_dt.width; i < var_dt.width; i++) {
-                                values.emplace_back(ctx.dst->Expr((i == 3) ? 1 : 0));
+                                values.emplace_back(ctx.dst->Expr(i32((i == 3) ? 1 : 0)));
                             }
                             break;
                         case BaseType::kU32:
                             ty = ctx.dst->ty.u32();
                             for (uint32_t i = fmt_dt.width; i < var_dt.width; i++) {
-                                values.emplace_back(ctx.dst->Expr((i == 3) ? 1u : 0u));
+                                values.emplace_back(ctx.dst->Expr(u32((i == 3) ? 1u : 0u)));
                             }
                             break;
                         case BaseType::kF32:
@@ -403,10 +405,6 @@ struct State {
                                  uint32_t offset,
                                  uint32_t buffer,
                                  VertexFormat format) {
-        using u32 = ProgramBuilder::u32;
-        using i32 = ProgramBuilder::i32;
-        using f32 = ProgramBuilder::f32;
-
         // Returns a u32 loaded from buffer_base + offset.
         auto load_u32 = [&] {
             return LoadPrimitive(array_base, offset, buffer, VertexFormat::kUint32);
@@ -433,17 +431,17 @@ struct State {
                 LoadPrimitive(array_base, low_u32_offset, buffer, VertexFormat::kUint32);
             switch (offset & 3) {
                 case 0:
-                    return ctx.dst->Shl(low_u32, 16u);
+                    return ctx.dst->Shl(low_u32, 16_u);
                 case 1:
-                    return ctx.dst->And(ctx.dst->Shl(low_u32, 8u), 0xffff0000u);
+                    return ctx.dst->And(ctx.dst->Shl(low_u32, 8_u), 0xffff0000_u);
                 case 2:
-                    return ctx.dst->And(low_u32, 0xffff0000u);
+                    return ctx.dst->And(low_u32, 0xffff0000_u);
                 default: {  // 3:
                     auto* high_u32 = LoadPrimitive(array_base, low_u32_offset + 4, buffer,
                                                    VertexFormat::kUint32);
-                    auto* shr = ctx.dst->Shr(low_u32, 8u);
-                    auto* shl = ctx.dst->Shl(high_u32, 24u);
-                    return ctx.dst->And(ctx.dst->Or(shl, shr), 0xffff0000u);
+                    auto* shr = ctx.dst->Shr(low_u32, 8_u);
+                    auto* shl = ctx.dst->Shl(high_u32, 24_u);
+                    return ctx.dst->And(ctx.dst->Or(shl, shr), 0xffff0000_u);
                 }
             }
         };
@@ -456,17 +454,17 @@ struct State {
                 LoadPrimitive(array_base, low_u32_offset, buffer, VertexFormat::kUint32);
             switch (offset & 3) {
                 case 0:
-                    return ctx.dst->And(low_u32, 0xffffu);
+                    return ctx.dst->And(low_u32, 0xffff_u);
                 case 1:
-                    return ctx.dst->And(ctx.dst->Shr(low_u32, 8u), 0xffffu);
+                    return ctx.dst->And(ctx.dst->Shr(low_u32, 8_u), 0xffff_u);
                 case 2:
-                    return ctx.dst->Shr(low_u32, 16u);
+                    return ctx.dst->Shr(low_u32, 16_u);
                 default: {  // 3:
                     auto* high_u32 = LoadPrimitive(array_base, low_u32_offset + 4, buffer,
                                                    VertexFormat::kUint32);
-                    auto* shr = ctx.dst->Shr(low_u32, 24u);
-                    auto* shl = ctx.dst->Shl(high_u32, 8u);
-                    return ctx.dst->And(ctx.dst->Or(shl, shr), 0xffffu);
+                    auto* shr = ctx.dst->Shr(low_u32, 24_u);
+                    auto* shl = ctx.dst->Shl(high_u32, 8_u);
+                    return ctx.dst->And(ctx.dst->Or(shl, shr), 0xffff_u);
                 }
             }
         };
@@ -517,25 +515,25 @@ struct State {
                 // yyxx0000, yyxx0000
                 auto* u16s = ctx.dst->vec2<u32>(load_u16_h());
                 // xx000000, yyxx0000
-                auto* shl = ctx.dst->Shl(u16s, ctx.dst->vec2<u32>(8u, 0u));
+                auto* shl = ctx.dst->Shl(u16s, ctx.dst->vec2<u32>(8_u, 0_u));
                 // 000000xx, 000000yy
-                return ctx.dst->Shr(shl, ctx.dst->vec2<u32>(24u));
+                return ctx.dst->Shr(shl, ctx.dst->vec2<u32>(24_u));
             }
             case VertexFormat::kUint8x4: {
                 // wwzzyyxx, wwzzyyxx, wwzzyyxx, wwzzyyxx
                 auto* u32s = ctx.dst->vec4<u32>(load_u32());
                 // xx000000, yyxx0000, zzyyxx00, wwzzyyxx
-                auto* shl = ctx.dst->Shl(u32s, ctx.dst->vec4<u32>(24u, 16u, 8u, 0u));
+                auto* shl = ctx.dst->Shl(u32s, ctx.dst->vec4<u32>(24_u, 16_u, 8_u, 0_u));
                 // 000000xx, 000000yy, 000000zz, 000000ww
-                return ctx.dst->Shr(shl, ctx.dst->vec4<u32>(24u));
+                return ctx.dst->Shr(shl, ctx.dst->vec4<u32>(24_u));
             }
             case VertexFormat::kUint16x2: {
                 // yyyyxxxx, yyyyxxxx
                 auto* u32s = ctx.dst->vec2<u32>(load_u32());
                 // xxxx0000, yyyyxxxx
-                auto* shl = ctx.dst->Shl(u32s, ctx.dst->vec2<u32>(16u, 0u));
+                auto* shl = ctx.dst->Shl(u32s, ctx.dst->vec2<u32>(16_u, 0_u));
                 // 0000xxxx, 0000yyyy
-                return ctx.dst->Shr(shl, ctx.dst->vec2<u32>(16u));
+                return ctx.dst->Shr(shl, ctx.dst->vec2<u32>(16_u));
             }
             case VertexFormat::kUint16x4: {
                 // yyyyxxxx, wwwwzzzz
@@ -543,33 +541,33 @@ struct State {
                 // yyyyxxxx, yyyyxxxx, wwwwzzzz, wwwwzzzz
                 auto* xxyy = ctx.dst->MemberAccessor(u32s, "xxyy");
                 // xxxx0000, yyyyxxxx, zzzz0000, wwwwzzzz
-                auto* shl = ctx.dst->Shl(xxyy, ctx.dst->vec4<u32>(16u, 0u, 16u, 0u));
+                auto* shl = ctx.dst->Shl(xxyy, ctx.dst->vec4<u32>(16_u, 0_u, 16_u, 0_u));
                 // 0000xxxx, 0000yyyy, 0000zzzz, 0000wwww
-                return ctx.dst->Shr(shl, ctx.dst->vec4<u32>(16u));
+                return ctx.dst->Shr(shl, ctx.dst->vec4<u32>(16_u));
             }
             case VertexFormat::kSint8x2: {
                 // yyxx0000, yyxx0000
                 auto* i16s = ctx.dst->vec2<i32>(load_i16_h());
                 // xx000000, yyxx0000
-                auto* shl = ctx.dst->Shl(i16s, ctx.dst->vec2<u32>(8u, 0u));
+                auto* shl = ctx.dst->Shl(i16s, ctx.dst->vec2<u32>(8_u, 0_u));
                 // ssssssxx, ssssssyy
-                return ctx.dst->Shr(shl, ctx.dst->vec2<u32>(24u));
+                return ctx.dst->Shr(shl, ctx.dst->vec2<u32>(24_u));
             }
             case VertexFormat::kSint8x4: {
                 // wwzzyyxx, wwzzyyxx, wwzzyyxx, wwzzyyxx
                 auto* i32s = ctx.dst->vec4<i32>(load_i32());
                 // xx000000, yyxx0000, zzyyxx00, wwzzyyxx
-                auto* shl = ctx.dst->Shl(i32s, ctx.dst->vec4<u32>(24u, 16u, 8u, 0u));
+                auto* shl = ctx.dst->Shl(i32s, ctx.dst->vec4<u32>(24_u, 16_u, 8_u, 0_u));
                 // ssssssxx, ssssssyy, sssssszz, ssssssww
-                return ctx.dst->Shr(shl, ctx.dst->vec4<u32>(24u));
+                return ctx.dst->Shr(shl, ctx.dst->vec4<u32>(24_u));
             }
             case VertexFormat::kSint16x2: {
                 // yyyyxxxx, yyyyxxxx
                 auto* i32s = ctx.dst->vec2<i32>(load_i32());
                 // xxxx0000, yyyyxxxx
-                auto* shl = ctx.dst->Shl(i32s, ctx.dst->vec2<u32>(16u, 0u));
+                auto* shl = ctx.dst->Shl(i32s, ctx.dst->vec2<u32>(16_u, 0_u));
                 // ssssxxxx, ssssyyyy
-                return ctx.dst->Shr(shl, ctx.dst->vec2<u32>(16u));
+                return ctx.dst->Shr(shl, ctx.dst->vec2<u32>(16_u));
             }
             case VertexFormat::kSint16x4: {
                 // yyyyxxxx, wwwwzzzz
@@ -577,9 +575,9 @@ struct State {
                 // yyyyxxxx, yyyyxxxx, wwwwzzzz, wwwwzzzz
                 auto* xxyy = ctx.dst->MemberAccessor(i32s, "xxyy");
                 // xxxx0000, yyyyxxxx, zzzz0000, wwwwzzzz
-                auto* shl = ctx.dst->Shl(xxyy, ctx.dst->vec4<u32>(16u, 0u, 16u, 0u));
+                auto* shl = ctx.dst->Shl(xxyy, ctx.dst->vec4<u32>(16_u, 0_u, 16_u, 0_u));
                 // ssssxxxx, ssssyyyy, sssszzzz, sssswwww
-                return ctx.dst->Shr(shl, ctx.dst->vec4<u32>(16u));
+                return ctx.dst->Shr(shl, ctx.dst->vec4<u32>(16_u));
             }
             case VertexFormat::kUnorm8x2:
                 return ctx.dst->MemberAccessor(ctx.dst->Call("unpack4x8unorm", load_u16_l()), "xy");
@@ -623,17 +621,17 @@ struct State {
                                          uint32_t offset,
                                          uint32_t buffer,
                                          VertexFormat format) {
-        const ast::Expression* u32 = nullptr;
+        const ast::Expression* u = nullptr;
         if ((offset & 3) == 0) {
             // Aligned load.
 
             const ast ::Expression* index = nullptr;
             if (offset > 0) {
-                index = ctx.dst->Add(array_base, offset / 4);
+                index = ctx.dst->Add(array_base, u32(offset / 4));
             } else {
                 index = ctx.dst->Expr(array_base);
             }
-            u32 = ctx.dst->IndexAccessor(
+            u = ctx.dst->IndexAccessor(
                 ctx.dst->MemberAccessor(GetVertexBufferName(buffer), GetStructBufferName()), index);
 
         } else {
@@ -645,18 +643,18 @@ struct State {
 
             uint32_t shift = 8u * (offset & 3u);
 
-            auto* low_shr = ctx.dst->Shr(low, shift);
-            auto* high_shl = ctx.dst->Shl(high, 32u - shift);
-            u32 = ctx.dst->Or(low_shr, high_shl);
+            auto* low_shr = ctx.dst->Shr(low, u32(shift));
+            auto* high_shl = ctx.dst->Shl(high, u32(32u - shift));
+            u = ctx.dst->Or(low_shr, high_shl);
         }
 
         switch (format) {
             case VertexFormat::kUint32:
-                return u32;
+                return u;
             case VertexFormat::kSint32:
-                return ctx.dst->Bitcast(ctx.dst->ty.i32(), u32);
+                return ctx.dst->Bitcast(ctx.dst->ty.i32(), u);
             case VertexFormat::kFloat32:
-                return ctx.dst->Bitcast(ctx.dst->ty.f32(), u32);
+                return ctx.dst->Bitcast(ctx.dst->ty.f32(), u);
             default:
                 break;
         }

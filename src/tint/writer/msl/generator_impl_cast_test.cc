@@ -14,13 +14,15 @@
 
 #include "src/tint/writer/msl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::msl {
 namespace {
 
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Scalar) {
-    auto* cast = Construct<f32>(1);
+    auto* cast = Construct<f32>(1_i);
     WrapInFunction(cast);
 
     GeneratorImpl& gen = Build();
@@ -31,7 +33,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Scalar) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Vector) {
-    auto* cast = vec3<f32>(vec3<i32>(1, 2, 3));
+    auto* cast = vec3<f32>(vec3<i32>(1_i, 2_i, 3_i));
     WrapInFunction(cast);
 
     GeneratorImpl& gen = Build();
@@ -42,7 +44,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Vector) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Cast_IntMin) {
-    auto* cast = Construct<u32>(std::numeric_limits<int32_t>::min());
+    auto* cast = Construct<u32>(i32(std::numeric_limits<int32_t>::min()));
     WrapInFunction(cast);
 
     GeneratorImpl& gen = Build();

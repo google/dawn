@@ -15,13 +15,15 @@
 #include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/writer/hlsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::hlsl {
 namespace {
 
 using HlslGeneratorImplTest_Case = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case) {
-    auto* s = Switch(1, Case(Expr(5), Block(create<ast::BreakStatement>())), DefaultCase());
+    auto* s = Switch(1_i, Case(Expr(5_i), Block(create<ast::BreakStatement>())), DefaultCase());
     WrapInFunction(s);
 
     GeneratorImpl& gen = Build();
@@ -36,7 +38,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case) {
 }
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
-    auto* s = Switch(1, Case(Expr(5), Block()), DefaultCase());
+    auto* s = Switch(1_i, Case(Expr(5_i), Block()), DefaultCase());
     WrapInFunction(s);
 
     GeneratorImpl& gen = Build();
@@ -51,9 +53,9 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
 }
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
-    auto* s = Switch(1,                                                          //
-                     Case(Expr(4), Block(create<ast::FallthroughStatement>())),  //
-                     Case(Expr(5), Block(create<ast::ReturnStatement>())),       //
+    auto* s = Switch(1_i,                                                          //
+                     Case(Expr(4_i), Block(create<ast::FallthroughStatement>())),  //
+                     Case(Expr(5_i), Block(create<ast::ReturnStatement>())),       //
                      DefaultCase());
     WrapInFunction(s);
 
@@ -73,8 +75,8 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
 }
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_MultipleSelectors) {
-    auto* s =
-        Switch(1, Case({Expr(5), Expr(6)}, Block(create<ast::BreakStatement>())), DefaultCase());
+    auto* s = Switch(1_i, Case({Expr(5_i), Expr(6_i)}, Block(create<ast::BreakStatement>())),
+                     DefaultCase());
     WrapInFunction(s);
 
     GeneratorImpl& gen = Build();
@@ -90,14 +92,14 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_MultipleSelectors) {
 }
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_Default) {
-    auto* s = Switch(1, DefaultCase(Block(create<ast::BreakStatement>())));
+    auto* s = Switch(1_i, DefaultCase(Block(create<ast::BreakStatement>())));
     WrapInFunction(s);
 
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitCase(s, 0)) << gen.error();
+    ASSERT_TRUE(gen.EmitCase(s, 0_i)) << gen.error();
     EXPECT_EQ(gen.result(), R"(  default: {
     break;
   }

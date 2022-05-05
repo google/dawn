@@ -15,6 +15,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 namespace {
 
@@ -33,8 +35,8 @@ using BinaryArithSignedIntegerTest = TestParamHelper<BinaryData>;
 TEST_P(BinaryArithSignedIntegerTest, Scalar) {
     auto param = GetParam();
 
-    auto* lhs = Expr(3);
-    auto* rhs = Expr(4);
+    auto* lhs = Expr(3_i);
+    auto* rhs = Expr(4_i);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -62,8 +64,8 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
         return;
     }
 
-    auto* lhs = vec3<i32>(1, 1, 1);
-    auto* rhs = vec3<i32>(1, 1, 1);
+    auto* lhs = vec3<i32>(1_i, 1_i, 1_i);
+    auto* rhs = vec3<i32>(1_i, 1_i, 1_i);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -127,8 +129,8 @@ using BinaryArithUnsignedIntegerTest = TestParamHelper<BinaryData>;
 TEST_P(BinaryArithUnsignedIntegerTest, Scalar) {
     auto param = GetParam();
 
-    auto* lhs = Expr(3u);
-    auto* rhs = Expr(4u);
+    auto* lhs = Expr(3_u);
+    auto* rhs = Expr(4_u);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -155,8 +157,8 @@ TEST_P(BinaryArithUnsignedIntegerTest, Vector) {
         return;
     }
 
-    auto* lhs = vec3<u32>(1u, 1u, 1u);
-    auto* rhs = vec3<u32>(1u, 1u, 1u);
+    auto* lhs = vec3<u32>(1_u, 1_u, 1_u);
+    auto* rhs = vec3<u32>(1_u, 1_u, 1_u);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -304,8 +306,8 @@ using BinaryCompareUnsignedIntegerTest = TestParamHelper<BinaryData>;
 TEST_P(BinaryCompareUnsignedIntegerTest, Scalar) {
     auto param = GetParam();
 
-    auto* lhs = Expr(3u);
-    auto* rhs = Expr(4u);
+    auto* lhs = Expr(3_u);
+    auto* rhs = Expr(4_u);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -328,8 +330,8 @@ TEST_P(BinaryCompareUnsignedIntegerTest, Scalar) {
 TEST_P(BinaryCompareUnsignedIntegerTest, Vector) {
     auto param = GetParam();
 
-    auto* lhs = vec3<u32>(1u, 1u, 1u);
-    auto* rhs = vec3<u32>(1u, 1u, 1u);
+    auto* lhs = vec3<u32>(1_u, 1_u, 1_u);
+    auto* rhs = vec3<u32>(1_u, 1_u, 1_u);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -364,8 +366,8 @@ using BinaryCompareSignedIntegerTest = TestParamHelper<BinaryData>;
 TEST_P(BinaryCompareSignedIntegerTest, Scalar) {
     auto param = GetParam();
 
-    auto* lhs = Expr(3);
-    auto* rhs = Expr(4);
+    auto* lhs = Expr(3_i);
+    auto* rhs = Expr(4_i);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -388,8 +390,8 @@ TEST_P(BinaryCompareSignedIntegerTest, Scalar) {
 TEST_P(BinaryCompareSignedIntegerTest, Vector) {
     auto param = GetParam();
 
-    auto* lhs = vec3<i32>(1, 1, 1);
-    auto* rhs = vec3<i32>(1, 1, 1);
+    auto* lhs = vec3<i32>(1_i, 1_i, 1_i);
+    auto* rhs = vec3<i32>(1_i, 1_i, 1_i);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -666,9 +668,9 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
 }
 
 TEST_F(BuilderTest, Binary_LogicalAnd) {
-    auto* lhs = create<ast::BinaryExpression>(ast::BinaryOp::kEqual, Expr(1), Expr(2));
+    auto* lhs = create<ast::BinaryExpression>(ast::BinaryOp::kEqual, Expr(1_i), Expr(2_i));
 
-    auto* rhs = create<ast::BinaryExpression>(ast::BinaryOp::kEqual, Expr(3), Expr(4));
+    auto* rhs = create<ast::BinaryExpression>(ast::BinaryOp::kEqual, Expr(3_i), Expr(4_i));
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, lhs, rhs);
 
@@ -819,9 +821,9 @@ OpBranch %4
 }
 
 TEST_F(BuilderTest, Binary_LogicalOr) {
-    auto* lhs = create<ast::BinaryExpression>(ast::BinaryOp::kEqual, Expr(1), Expr(2));
+    auto* lhs = create<ast::BinaryExpression>(ast::BinaryOp::kEqual, Expr(1_i), Expr(2_i));
 
-    auto* rhs = create<ast::BinaryExpression>(ast::BinaryOp::kEqual, Expr(3), Expr(4));
+    auto* rhs = create<ast::BinaryExpression>(ast::BinaryOp::kEqual, Expr(3_i), Expr(4_i));
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, lhs, rhs);
 
@@ -897,11 +899,11 @@ enum class Type { f32, i32, u32 };
 static const ast::Expression* MakeVectorExpr(ProgramBuilder* builder, Type type) {
     switch (type) {
         case Type::f32:
-            return builder->vec3<ProgramBuilder::f32>(1.f, 1.f, 1.f);
+            return builder->vec3<f32>(1.f, 1.f, 1.f);
         case Type::i32:
-            return builder->vec3<ProgramBuilder::i32>(1, 1, 1);
+            return builder->vec3<i32>(1_i, 1_i, 1_i);
         case Type::u32:
-            return builder->vec3<ProgramBuilder::u32>(1u, 1u, 1u);
+            return builder->vec3<u32>(1_u, 1_u, 1_u);
     }
     return nullptr;
 }
@@ -910,9 +912,9 @@ static const ast::Expression* MakeScalarExpr(ProgramBuilder* builder, Type type)
         case Type::f32:
             return builder->Expr(1.f);
         case Type::i32:
-            return builder->Expr(1);
+            return builder->Expr(1_i);
         case Type::u32:
-            return builder->Expr(1u);
+            return builder->Expr(1_u);
     }
     return nullptr;
 }

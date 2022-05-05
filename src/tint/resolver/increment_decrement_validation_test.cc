@@ -17,6 +17,8 @@
 #include "gmock/gmock.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -25,7 +27,7 @@ using ResolverIncrementDecrementValidationTest = ResolverTest;
 TEST_F(ResolverIncrementDecrementValidationTest, Increment_Signed) {
     // var a : i32 = 2;
     // a++;
-    auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
+    auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2_i));
     WrapInFunction(var, Increment(Source{{12, 34}}, "a"));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -34,7 +36,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, Increment_Signed) {
 TEST_F(ResolverIncrementDecrementValidationTest, Decrement_Signed) {
     // var a : i32 = 2;
     // a--;
-    auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
+    auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2_i));
     WrapInFunction(var, Decrement(Source{{12, 34}}, "a"));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -43,7 +45,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, Decrement_Signed) {
 TEST_F(ResolverIncrementDecrementValidationTest, Increment_Unsigned) {
     // var a : u32 = 2u;
     // a++;
-    auto* var = Var("a", ty.u32(), ast::StorageClass::kNone, Expr(2u));
+    auto* var = Var("a", ty.u32(), ast::StorageClass::kNone, Expr(2_u));
     WrapInFunction(var, Increment(Source{{12, 34}}, "a"));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -52,7 +54,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, Increment_Unsigned) {
 TEST_F(ResolverIncrementDecrementValidationTest, Decrement_Unsigned) {
     // var a : u32 = 2u;
     // a--;
-    auto* var = Var("a", ty.u32(), ast::StorageClass::kNone, Expr(2u));
+    auto* var = Var("a", ty.u32(), ast::StorageClass::kNone, Expr(2_u));
     WrapInFunction(var, Decrement(Source{{12, 34}}, "a"));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -63,26 +65,26 @@ TEST_F(ResolverIncrementDecrementValidationTest, ThroughPointer) {
     // let b : ptr<function,i32> = &a;
     // *b++;
     auto* var_a = Var("a", ty.i32(), ast::StorageClass::kFunction);
-    auto* var_b = Let("b", ty.pointer<int>(ast::StorageClass::kFunction), AddressOf(Expr("a")));
+    auto* var_b = Let("b", ty.pointer<i32>(ast::StorageClass::kFunction), AddressOf(Expr("a")));
     WrapInFunction(var_a, var_b, Increment(Source{{12, 34}}, Deref("b")));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverIncrementDecrementValidationTest, ThroughArray) {
-    // var a : array<i32, 4>;
-    // a[1]++;
-    auto* var_a = Var("a", ty.array(ty.i32(), 4), ast::StorageClass::kNone);
-    WrapInFunction(var_a, Increment(Source{{12, 34}}, IndexAccessor("a", 1)));
+    // var a : array<i32, 4_u>;
+    // a[1i]++;
+    auto* var_a = Var("a", ty.array(ty.i32(), 4_u), ast::StorageClass::kNone);
+    WrapInFunction(var_a, Increment(Source{{12, 34}}, IndexAccessor("a", 1_i)));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverIncrementDecrementValidationTest, ThroughVector_Index) {
     // var a : vec4<i32>;
-    // a.y++;
+    // a[1i]++;
     auto* var_a = Var("a", ty.vec4(ty.i32()), ast::StorageClass::kNone);
-    WrapInFunction(var_a, Increment(Source{{12, 34}}, IndexAccessor("a", 1)));
+    WrapInFunction(var_a, Increment(Source{{12, 34}}, IndexAccessor("a", 1_i)));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -136,7 +138,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, Atomic) {
 
 TEST_F(ResolverIncrementDecrementValidationTest, Literal) {
     // 1++;
-    WrapInFunction(Increment(Expr(Source{{56, 78}}, 1)));
+    WrapInFunction(Increment(Expr(Source{{56, 78}}, 1_i)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "56:78 error: cannot modify value of type 'i32'");
@@ -145,7 +147,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, Literal) {
 TEST_F(ResolverIncrementDecrementValidationTest, Constant) {
     // let a = 1;
     // a++;
-    auto* a = Let(Source{{12, 34}}, "a", nullptr, Expr(1));
+    auto* a = Let(Source{{12, 34}}, "a", nullptr, Expr(1_i));
     WrapInFunction(a, Increment(Expr(Source{{56, 78}}, "a")));
 
     EXPECT_FALSE(r()->Resolve());
@@ -173,7 +175,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, ReturnValue) {
     // {
     //   a++;
     // }
-    Func("func", {}, ty.i32(), {Return(0)});
+    Func("func", {}, ty.i32(), {Return(0_i)});
     WrapInFunction(Increment(Call(Source{{56, 78}}, "func")));
 
     EXPECT_FALSE(r()->Resolve());
@@ -205,7 +207,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, InForLoopInit) {
     // for (a++; ; ) {
     //   break;
     // }
-    auto* a = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
+    auto* a = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2_i));
     auto* loop = For(Increment(Source{{56, 78}}, "a"), nullptr, nullptr, Block(Break()));
     WrapInFunction(a, loop);
 
@@ -217,7 +219,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, InForLoopCont) {
     // for (; ; a++) {
     //   break;
     // }
-    auto* a = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
+    auto* a = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2_i));
     auto* loop = For(nullptr, nullptr, Increment(Source{{56, 78}}, "a"), Block(Break()));
     WrapInFunction(a, loop);
 

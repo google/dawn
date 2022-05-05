@@ -15,6 +15,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 
 using BuilderTest = TestHelper;
@@ -70,7 +72,7 @@ TEST_F(BuilderTest, Literal_Bool_Dedup) {
 }
 
 TEST_F(BuilderTest, Literal_I32) {
-    auto* i = Expr(-23);
+    auto* i = Expr(i32(-23));
     WrapInFunction(i);
     spirv::Builder& b = Build();
 
@@ -84,8 +86,8 @@ TEST_F(BuilderTest, Literal_I32) {
 }
 
 TEST_F(BuilderTest, Literal_I32_Dedup) {
-    auto* i1 = Expr(-23);
-    auto* i2 = Expr(-23);
+    auto* i1 = Expr(i32(-23));
+    auto* i2 = Expr(i32(-23));
     WrapInFunction(i1, i2);
 
     spirv::Builder& b = Build();
@@ -100,7 +102,7 @@ TEST_F(BuilderTest, Literal_I32_Dedup) {
 }
 
 TEST_F(BuilderTest, Literal_U32) {
-    auto* i = Expr(23u);
+    auto* i = Expr(23_u);
     WrapInFunction(i);
 
     spirv::Builder& b = Build();
@@ -115,8 +117,8 @@ TEST_F(BuilderTest, Literal_U32) {
 }
 
 TEST_F(BuilderTest, Literal_U32_Dedup) {
-    auto* i1 = Expr(23u);
-    auto* i2 = Expr(23u);
+    auto* i1 = Expr(23_u);
+    auto* i2 = Expr(23_u);
     WrapInFunction(i1, i2);
 
     spirv::Builder& b = Build();

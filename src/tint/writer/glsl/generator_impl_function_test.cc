@@ -20,6 +20,8 @@
 
 using ::testing::HasSubstr;
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::glsl {
 namespace {
 
@@ -739,7 +741,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_Compute) {
          {
              Return(),
          },
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     GeneratorImpl& gen = Build();
 
@@ -757,7 +759,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_Compute_WithWor
     Func("main", ast::VariableList{}, ty.void_(), {},
          {
              Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(2, 4, 6),
+             WorkgroupSize(2_i, 4_i, 6_i),
          });
 
     GeneratorImpl& gen = Build();
@@ -773,9 +775,9 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_Compute_WithWorkgroup_Const) {
-    GlobalConst("width", ty.i32(), Construct(ty.i32(), 2));
-    GlobalConst("height", ty.i32(), Construct(ty.i32(), 3));
-    GlobalConst("depth", ty.i32(), Construct(ty.i32(), 4));
+    GlobalConst("width", ty.i32(), Construct(ty.i32(), 2_i));
+    GlobalConst("height", ty.i32(), Construct(ty.i32(), 3_i));
+    GlobalConst("depth", ty.i32(), Construct(ty.i32(), 4_i));
     Func("main", ast::VariableList{}, ty.void_(), {},
          {
              Stage(ast::PipelineStage::kCompute),
@@ -799,9 +801,9 @@ void main() {
 
 TEST_F(GlslGeneratorImplTest_Function,
        Emit_Attribute_EntryPoint_Compute_WithWorkgroup_OverridableConst) {
-    Override("width", ty.i32(), Construct(ty.i32(), 2), {Id(7u)});
-    Override("height", ty.i32(), Construct(ty.i32(), 3), {Id(8u)});
-    Override("depth", ty.i32(), Construct(ty.i32(), 4), {Id(9u)});
+    Override("width", ty.i32(), Construct(ty.i32(), 2_i), {Id(7u)});
+    Override("height", ty.i32(), Construct(ty.i32(), 3_i), {Id(8u)});
+    Override("depth", ty.i32(), Construct(ty.i32(), 4_i), {Id(9u)});
     Func("main", ast::VariableList{}, ty.void_(), {},
          {
              Stage(ast::PipelineStage::kCompute),
@@ -903,7 +905,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Multiple_EntryPoint_With_Same_Module
                  Decl(var),
                  Return(),
              },
-             {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+             {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
     }
 
     {
@@ -914,7 +916,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Multiple_EntryPoint_With_Same_Module
                  Decl(var),
                  Return(),
              },
-             {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+             {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
     }
 
     GeneratorImpl& gen = SanitizeAndBuild();

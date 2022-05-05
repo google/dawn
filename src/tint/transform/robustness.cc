@@ -28,6 +28,8 @@
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Robustness);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Robustness::Config);
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::transform {
 
 /// State holds the current transform state
@@ -59,7 +61,6 @@ struct Robustness::State {
         auto* ret_unwrapped = ret_type->UnwrapRef();
 
         ProgramBuilder& b = *ctx.dst;
-        using u32 = ProgramBuilder::u32;
 
         struct Value {
             const ast::Expression* expr = nullptr;  // If null, then is a constant
@@ -103,7 +104,7 @@ struct Robustness::State {
         limit.is_signed = false;  // Like size, limit is always unsigned.
         if (size.expr) {
             // Dynamic size
-            limit.expr = b.Sub(size.expr, 1u);
+            limit.expr = b.Sub(size.expr, 1_u);
         } else {
             // Constant size
             limit.u32 = size.u32 - 1u;
@@ -158,10 +159,10 @@ struct Robustness::State {
 
             // Convert idx and limit to expressions, so we can emit `min(idx, limit)`.
             if (!idx.expr) {
-                idx.expr = b.Expr(idx.u32);
+                idx.expr = b.Expr(u32(idx.u32));
             }
             if (!limit.expr) {
-                limit.expr = b.Expr(limit.u32);
+                limit.expr = b.Expr(u32(limit.u32));
             }
 
             // Perform the clamp with `min(idx, limit)`
@@ -182,8 +183,8 @@ struct Robustness::State {
 
         // Convert idx to an expression, so we can emit the new accessor.
         if (!idx.expr) {
-            idx.expr = idx.is_signed ? static_cast<const ast::Expression*>(b.Expr(idx.i32))
-                                     : static_cast<const ast::Expression*>(b.Expr(idx.u32));
+            idx.expr = idx.is_signed ? static_cast<const ast::Expression*>(b.Expr(i32(idx.i32)))
+                                     : static_cast<const ast::Expression*>(b.Expr(u32(idx.u32)));
         }
 
         // Clone arguments outside of create() call to have deterministic ordering
@@ -236,8 +237,8 @@ struct Robustness::State {
             level_arg = [&] {
                 auto* arg = expr->args[level_idx];
                 auto* num_levels = b.Call("textureNumLevels", ctx.Clone(texture_arg));
-                auto* zero = b.Expr(0);
-                auto* max = ctx.dst->Sub(num_levels, 1);
+                auto* zero = b.Expr(0_i);
+                auto* max = ctx.dst->Sub(num_levels, 1_i);
                 auto* clamped = b.Call("clamp", ctx.Clone(arg), zero, max);
                 return clamped;
             };
@@ -250,7 +251,7 @@ struct Robustness::State {
                           : b.Call("textureDimensions", ctx.Clone(texture_arg));
             auto* zero = b.Construct(CreateASTTypeFor(ctx, coords_ty));
             auto* max =
-                ctx.dst->Sub(texture_dims, b.Construct(CreateASTTypeFor(ctx, coords_ty), 1));
+                ctx.dst->Sub(texture_dims, b.Construct(CreateASTTypeFor(ctx, coords_ty), 1_i));
             auto* clamped_coords = b.Call("clamp", ctx.Clone(coords_arg), zero, max);
             ctx.Replace(coords_arg, clamped_coords);
         }
@@ -259,8 +260,8 @@ struct Robustness::State {
         if (array_idx >= 0) {
             auto* arg = expr->args[array_idx];
             auto* num_layers = b.Call("textureNumLayers", ctx.Clone(texture_arg));
-            auto* zero = b.Expr(0);
-            auto* max = ctx.dst->Sub(num_layers, 1);
+            auto* zero = b.Expr(0_i);
+            auto* max = ctx.dst->Sub(num_layers, 1_i);
             auto* clamped = b.Call("clamp", ctx.Clone(arg), zero, max);
             ctx.Replace(arg, clamped);
         }
@@ -268,7 +269,7 @@ struct Robustness::State {
         // Clamp the level argument, if provided
         if (level_idx >= 0) {
             auto* arg = expr->args[level_idx];
-            ctx.Replace(arg, level_arg ? level_arg() : ctx.dst->Expr(0));
+            ctx.Replace(arg, level_arg ? level_arg() : ctx.dst->Expr(0_i));
         }
 
         return nullptr;  // Clone, which will use the argument replacements above.

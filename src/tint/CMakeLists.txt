@@ -232,6 +232,7 @@ set(TINT_LIB_SRCS
   clone_context.h
   demangler.cc
   demangler.h
+  number.h
   inspector/entry_point.cc
   inspector/entry_point.h
   inspector/inspector.cc
@@ -1043,6 +1044,7 @@ if(TINT_BUILD_TESTS)
       transform/decompose_memory_access_test.cc
       transform/decompose_strided_array_test.cc
       transform/decompose_strided_matrix_test.cc
+      transform/expand_compound_assignment_test.cc
       transform/first_index_offset_test.cc
       transform/fold_constants_test.cc
       transform/fold_trivial_single_use_lets_test.cc

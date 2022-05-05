@@ -63,9 +63,9 @@ bool Constant::AnyZero() const {
     for (size_t i = 0; i < Elements().size(); ++i) {
         if (WithScalarAt(i, [&](auto&& s) {
                 // Use std::equal_to to work around -Wfloat-equal warnings
-                auto equals_to = std::equal_to<std::remove_reference_t<decltype(s)>>{};
-
-                if (equals_to(s, 0)) {
+                using T = std::remove_reference_t<decltype(s)>;
+                auto equal_to = std::equal_to<T>{};
+                if (equal_to(s, T(0))) {
                     return true;
                 }
                 return false;

@@ -14,20 +14,22 @@
 
 #include "src/tint/writer/wgsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::wgsl {
 namespace {
 
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Bitcast) {
-    auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr(1));
+    auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr(1_i));
     WrapInFunction(bitcast);
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
     ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.error();
-    EXPECT_EQ(out.str(), "bitcast<f32>(1)");
+    EXPECT_EQ(out.str(), "bitcast<f32>(1i)");
 }
 
 }  // namespace

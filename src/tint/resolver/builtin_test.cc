@@ -39,6 +39,8 @@
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -331,7 +333,7 @@ TEST_F(ResolverBuiltinTest, Select_Error_NoParams) {
 }
 
 TEST_F(ResolverBuiltinTest, Select_Error_SelectorInt) {
-    auto* expr = Call("select", 1, 1, 1);
+    auto* expr = Call("select", 1_i, 1_i, 1_i);
     WrapInFunction(expr);
 
     EXPECT_FALSE(r()->Resolve());
@@ -456,8 +458,8 @@ TEST_P(ResolverBuiltinTest_DataPacking, Error_IncorrectParamType) {
     bool pack4 =
         param.builtin == BuiltinType::kPack4x8snorm || param.builtin == BuiltinType::kPack4x8unorm;
 
-    auto* call =
-        pack4 ? Call(param.name, vec4<i32>(1, 2, 3, 4)) : Call(param.name, vec2<i32>(1, 2));
+    auto* call = pack4 ? Call(param.name, vec4<i32>(1_i, 2_i, 3_i, 4_i))
+                       : Call(param.name, vec2<i32>(1_i, 2_i));
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
@@ -507,7 +509,7 @@ TEST_P(ResolverBuiltinTest_DataUnpacking, InferType) {
     bool pack4 = param.builtin == BuiltinType::kUnpack4x8snorm ||
                  param.builtin == BuiltinType::kUnpack4x8unorm;
 
-    auto* call = Call(param.name, 1u);
+    auto* call = Call(param.name, 1_u);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -573,7 +575,7 @@ TEST_P(ResolverBuiltinTest_SingleParam, Error_NoParams) {
 TEST_P(ResolverBuiltinTest_SingleParam, Error_TooManyParams) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, 1, 2, 3);
+    auto* call = Call(param.name, 1_i, 2_i, 3_i);
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
@@ -630,7 +632,7 @@ TEST_F(ResolverBuiltinDataTest, ArrayLength_Vector) {
 }
 
 TEST_F(ResolverBuiltinDataTest, ArrayLength_Error_ArraySized) {
-    Global("arr", ty.array<int, 4>(), ast::StorageClass::kPrivate);
+    Global("arr", ty.array<i32, 4>(), ast::StorageClass::kPrivate);
     auto* call = Call("arrayLength", AddressOf("arr"));
     WrapInFunction(call);
 
@@ -732,7 +734,7 @@ TEST_F(ResolverBuiltinDataTest, FrexpVector) {
 
 TEST_F(ResolverBuiltinDataTest, Frexp_Error_FirstParamInt) {
     Global("v", ty.i32(), ast::StorageClass::kWorkgroup);
-    auto* call = Call("frexp", 1, AddressOf("v"));
+    auto* call = Call("frexp", 1_i, AddressOf("v"));
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
@@ -763,7 +765,7 @@ TEST_F(ResolverBuiltinDataTest, Frexp_Error_SecondParamFloatPtr) {
 }
 
 TEST_F(ResolverBuiltinDataTest, Frexp_Error_SecondParamNotAPointer) {
-    auto* call = Call("frexp", 1.0f, 1);
+    auto* call = Call("frexp", 1.0f, 1_i);
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
@@ -856,7 +858,7 @@ TEST_F(ResolverBuiltinDataTest, ModfVector) {
 
 TEST_F(ResolverBuiltinDataTest, Modf_Error_FirstParamInt) {
     Global("whole", ty.f32(), ast::StorageClass::kWorkgroup);
-    auto* call = Call("modf", 1, AddressOf("whole"));
+    auto* call = Call("modf", 1_i, AddressOf("whole"));
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
@@ -945,7 +947,7 @@ TEST_P(ResolverBuiltinTest_SingleParam_FloatOrInt, Float_Vector) {
 TEST_P(ResolverBuiltinTest_SingleParam_FloatOrInt, Sint_Scalar) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, -1);
+    auto* call = Call(param.name, i32(-1));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -957,7 +959,7 @@ TEST_P(ResolverBuiltinTest_SingleParam_FloatOrInt, Sint_Scalar) {
 TEST_P(ResolverBuiltinTest_SingleParam_FloatOrInt, Sint_Vector) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, vec3<i32>(1, 1, 3));
+    auto* call = Call(param.name, vec3<i32>(1_i, 1_i, 3_i));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -970,7 +972,7 @@ TEST_P(ResolverBuiltinTest_SingleParam_FloatOrInt, Sint_Vector) {
 TEST_P(ResolverBuiltinTest_SingleParam_FloatOrInt, Uint_Scalar) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, 1u);
+    auto* call = Call(param.name, 1_u);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -982,7 +984,7 @@ TEST_P(ResolverBuiltinTest_SingleParam_FloatOrInt, Uint_Scalar) {
 TEST_P(ResolverBuiltinTest_SingleParam_FloatOrInt, Uint_Vector) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, vec3<u32>(1u, 1u, 3u));
+    auto* call = Call(param.name, vec3<u32>(1_u, 1_u, 3_u));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1061,7 +1063,7 @@ TEST_P(ResolverBuiltinTest_TwoParam, Vector) {
 TEST_P(ResolverBuiltinTest_TwoParam, Error_NoTooManyParams) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, 1, 2, 3);
+    auto* call = Call(param.name, 1_i, 2_i, 3_i);
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
@@ -1152,7 +1154,7 @@ TEST_F(ResolverBuiltinTest, Cross_Error_Scalar) {
 }
 
 TEST_F(ResolverBuiltinTest, Cross_Error_Vec3Int) {
-    auto* call = Call("cross", vec3<i32>(1, 2, 3), vec3<i32>(1, 2, 3));
+    auto* call = Call("cross", vec3<i32>(1_i, 2_i, 3_i), vec3<i32>(1_i, 2_i, 3_i));
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
@@ -1295,7 +1297,7 @@ TEST_P(ResolverBuiltinTest_ThreeParam_FloatOrInt, Float_Vector) {
 TEST_P(ResolverBuiltinTest_ThreeParam_FloatOrInt, Sint_Scalar) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, 1, 1, 1);
+    auto* call = Call(param.name, 1_i, 1_i, 1_i);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1307,7 +1309,8 @@ TEST_P(ResolverBuiltinTest_ThreeParam_FloatOrInt, Sint_Scalar) {
 TEST_P(ResolverBuiltinTest_ThreeParam_FloatOrInt, Sint_Vector) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, vec3<i32>(1, 1, 3), vec3<i32>(1, 1, 3), vec3<i32>(1, 1, 3));
+    auto* call = Call(param.name, vec3<i32>(1_i, 1_i, 3_i), vec3<i32>(1_i, 1_i, 3_i),
+                      vec3<i32>(1_i, 1_i, 3_i));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1320,7 +1323,7 @@ TEST_P(ResolverBuiltinTest_ThreeParam_FloatOrInt, Sint_Vector) {
 TEST_P(ResolverBuiltinTest_ThreeParam_FloatOrInt, Uint_Scalar) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, 1u, 1u, 1u);
+    auto* call = Call(param.name, 1_u, 1_u, 1_u);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1332,8 +1335,8 @@ TEST_P(ResolverBuiltinTest_ThreeParam_FloatOrInt, Uint_Scalar) {
 TEST_P(ResolverBuiltinTest_ThreeParam_FloatOrInt, Uint_Vector) {
     auto param = GetParam();
 
-    auto* call =
-        Call(param.name, vec3<u32>(1u, 1u, 3u), vec3<u32>(1u, 1u, 3u), vec3<u32>(1u, 1u, 3u));
+    auto* call = Call(param.name, vec3<u32>(1_u, 1_u, 3_u), vec3<u32>(1_u, 1_u, 3_u),
+                      vec3<u32>(1_u, 1_u, 3_u));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1369,7 +1372,7 @@ using ResolverBuiltinTest_Int_SingleParam = ResolverTestWithParam<BuiltinData>;
 TEST_P(ResolverBuiltinTest_Int_SingleParam, Scalar) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, 1);
+    auto* call = Call(param.name, 1_i);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1381,7 +1384,7 @@ TEST_P(ResolverBuiltinTest_Int_SingleParam, Scalar) {
 TEST_P(ResolverBuiltinTest_Int_SingleParam, Vector) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, vec3<i32>(1, 1, 3));
+    auto* call = Call(param.name, vec3<i32>(1_i, 1_i, 3_i));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1416,7 +1419,7 @@ using ResolverBuiltinTest_FloatOrInt_TwoParam = ResolverTestWithParam<BuiltinDat
 TEST_P(ResolverBuiltinTest_FloatOrInt_TwoParam, Scalar_Signed) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, 1, 1);
+    auto* call = Call(param.name, 1_i, 1_i);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1428,7 +1431,7 @@ TEST_P(ResolverBuiltinTest_FloatOrInt_TwoParam, Scalar_Signed) {
 TEST_P(ResolverBuiltinTest_FloatOrInt_TwoParam, Scalar_Unsigned) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, 1u, 1u);
+    auto* call = Call(param.name, 1_u, 1_u);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1452,7 +1455,7 @@ TEST_P(ResolverBuiltinTest_FloatOrInt_TwoParam, Scalar_Float) {
 TEST_P(ResolverBuiltinTest_FloatOrInt_TwoParam, Vector_Signed) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, vec3<i32>(1, 1, 3), vec3<i32>(1, 1, 3));
+    auto* call = Call(param.name, vec3<i32>(1_i, 1_i, 3_i), vec3<i32>(1_i, 1_i, 3_i));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1465,7 +1468,7 @@ TEST_P(ResolverBuiltinTest_FloatOrInt_TwoParam, Vector_Signed) {
 TEST_P(ResolverBuiltinTest_FloatOrInt_TwoParam, Vector_Unsigned) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, vec3<u32>(1u, 1u, 3u), vec3<u32>(1u, 1u, 3u));
+    auto* call = Call(param.name, vec3<u32>(1_u, 1_u, 3_u), vec3<u32>(1_u, 1_u, 3_u));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

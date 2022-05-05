@@ -40,8 +40,7 @@ struct MatrixInfo {
     /// @returns a new ast::Array that holds an vector column for each row of the
     /// matrix.
     const ast::Array* array(ProgramBuilder* b) const {
-        return b->ty.array(b->ty.vec<ProgramBuilder::f32>(matrix->rows()), matrix->columns(),
-                           stride);
+        return b->ty.array(b->ty.vec<f32>(matrix->rows()), u32(matrix->columns()), stride);
     }
 
     /// Equality operator
@@ -172,7 +171,7 @@ void DecomposeStridedMatrix::Run(CloneContext& ctx, const DataMap&, DataMap&) co
                 auto mat = ctx.dst->Sym("m");
                 ast::ExpressionList columns(info.matrix->columns());
                 for (uint32_t i = 0; i < static_cast<uint32_t>(columns.size()); i++) {
-                    columns[i] = ctx.dst->IndexAccessor(mat, i);
+                    columns[i] = ctx.dst->IndexAccessor(mat, u32(i));
                 }
                 ctx.dst->Func(name,
                               {
@@ -213,7 +212,7 @@ void DecomposeStridedMatrix::Run(CloneContext& ctx, const DataMap&, DataMap&) co
                 auto arr = ctx.dst->Sym("arr");
                 ast::ExpressionList columns(info.matrix->columns());
                 for (uint32_t i = 0; i < static_cast<uint32_t>(columns.size()); i++) {
-                    columns[i] = ctx.dst->IndexAccessor(arr, i);
+                    columns[i] = ctx.dst->IndexAccessor(arr, u32(i));
                 }
                 ctx.dst->Func(name,
                               {

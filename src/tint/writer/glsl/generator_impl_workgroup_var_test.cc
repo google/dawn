@@ -17,9 +17,12 @@
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
+using ::testing::HasSubstr;
+
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::glsl {
 namespace {
-using ::testing::HasSubstr;
 
 using GlslGeneratorImplTest_WorkgroupVar = TestHelper;
 
@@ -29,7 +32,7 @@ TEST_F(GlslGeneratorImplTest_WorkgroupVar, Basic) {
     Func("main", {}, ty.void_(), {Assign("wg", 1.2f)},
          {
              Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(1),
+             WorkgroupSize(1_i),
          });
     GeneratorImpl& gen = Build();
 
@@ -45,7 +48,7 @@ TEST_F(GlslGeneratorImplTest_WorkgroupVar, Aliased) {
     Func("main", {}, ty.void_(), {Assign("wg", 1.2f)},
          {
              Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(1),
+             WorkgroupSize(1_i),
          });
     GeneratorImpl& gen = Build();
 

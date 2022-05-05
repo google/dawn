@@ -17,6 +17,8 @@
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::wgsl {
 namespace {
 
@@ -63,7 +65,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize) {
     auto* func = Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{Return()},
                       ast::AttributeList{
                           Stage(ast::PipelineStage::kCompute),
-                          WorkgroupSize(2, 4, 6),
+                          WorkgroupSize(2_i, 4_i, 6_i),
                       });
 
     GeneratorImpl& gen = Build();
@@ -71,7 +73,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize) {
     gen.increment_indent();
 
     ASSERT_TRUE(gen.EmitFunction(func));
-    EXPECT_EQ(gen.result(), R"(  @stage(compute) @workgroup_size(2, 4, 6)
+    EXPECT_EQ(gen.result(), R"(  @stage(compute) @workgroup_size(2i, 4i, 6i)
   fn my_func() {
     return;
   }
@@ -79,11 +81,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize_WithIdent) {
-    GlobalConst("height", ty.i32(), Expr(2));
+    GlobalConst("height", ty.i32(), Expr(2_i));
     auto* func = Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{Return()},
                       ast::AttributeList{
                           Stage(ast::PipelineStage::kCompute),
-                          WorkgroupSize(2, "height"),
+                          WorkgroupSize(2_i, "height"),
                       });
 
     GeneratorImpl& gen = Build();
@@ -91,7 +93,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize_WithIden
     gen.increment_indent();
 
     ASSERT_TRUE(gen.EmitFunction(func));
-    EXPECT_EQ(gen.result(), R"(  @stage(compute) @workgroup_size(2, height)
+    EXPECT_EQ(gen.result(), R"(  @stage(compute) @workgroup_size(2i, height)
   fn my_func() {
     return;
   }
@@ -177,7 +179,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_Module
              },
              ast::AttributeList{
                  Stage(ast::PipelineStage::kCompute),
-                 WorkgroupSize(1),
+                 WorkgroupSize(1_i),
              });
     }
 
@@ -191,7 +193,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_Module
              },
              ast::AttributeList{
                  Stage(ast::PipelineStage::kCompute),
-                 WorkgroupSize(1),
+                 WorkgroupSize(1_i),
              });
     }
 
@@ -204,13 +206,13 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_Module
 
 @binding(0) @group(0) var<storage, read_write> data : Data;
 
-@stage(compute) @workgroup_size(1)
+@stage(compute) @workgroup_size(1i)
 fn a() {
   var v : f32 = data.d;
   return;
 }
 
-@stage(compute) @workgroup_size(1)
+@stage(compute) @workgroup_size(1i)
 fn b() {
   var v : f32 = data.d;
   return;

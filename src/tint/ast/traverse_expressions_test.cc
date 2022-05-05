@@ -16,15 +16,17 @@
 #include "gmock/gmock.h"
 #include "src/tint/ast/test_helper.h"
 
+using ::testing::ElementsAre;
+
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::ast {
 namespace {
-
-using ::testing::ElementsAre;
 
 using TraverseExpressionsTest = TestHelper;
 
 TEST_F(TraverseExpressionsTest, DescendIndexAccessor) {
-    std::vector<const ast::Expression*> e = {Expr(1), Expr(1), Expr(1), Expr(1)};
+    std::vector<const ast::Expression*> e = {Expr(1_i), Expr(1_i), Expr(1_i), Expr(1_i)};
     std::vector<const ast::Expression*> i = {IndexAccessor(e[0], e[1]), IndexAccessor(e[2], e[3])};
     auto* root = IndexAccessor(i[0], i[1]);
     {
@@ -48,7 +50,7 @@ TEST_F(TraverseExpressionsTest, DescendIndexAccessor) {
 }
 
 TEST_F(TraverseExpressionsTest, DescendBinaryExpression) {
-    std::vector<const ast::Expression*> e = {Expr(1), Expr(1), Expr(1), Expr(1)};
+    std::vector<const ast::Expression*> e = {Expr(1_i), Expr(1_i), Expr(1_i), Expr(1_i)};
     std::vector<const ast::Expression*> i = {Add(e[0], e[1]), Sub(e[2], e[3])};
     auto* root = Mul(i[0], i[1]);
     {
@@ -72,7 +74,7 @@ TEST_F(TraverseExpressionsTest, DescendBinaryExpression) {
 }
 
 TEST_F(TraverseExpressionsTest, DescendBitcastExpression) {
-    auto* e = Expr(1);
+    auto* e = Expr(1_i);
     auto* b0 = Bitcast<i32>(e);
     auto* b1 = Bitcast<i32>(b0);
     auto* b2 = Bitcast<i32>(b1);
@@ -98,7 +100,7 @@ TEST_F(TraverseExpressionsTest, DescendBitcastExpression) {
 }
 
 TEST_F(TraverseExpressionsTest, DescendCallExpression) {
-    std::vector<const ast::Expression*> e = {Expr(1), Expr(1), Expr(1), Expr(1)};
+    std::vector<const ast::Expression*> e = {Expr(1_i), Expr(1_i), Expr(1_i), Expr(1_i)};
     std::vector<const ast::Expression*> c = {Call("a", e[0], e[1]), Call("b", e[2], e[3])};
     auto* root = Call("c", c[0], c[1]);
     {
@@ -124,7 +126,7 @@ TEST_F(TraverseExpressionsTest, DescendCallExpression) {
 // TODO(crbug.com/tint/1257): Test ignores member accessor 'member' field.
 // Replace with the test below when fixed.
 TEST_F(TraverseExpressionsTest, DescendMemberIndexExpression) {
-    auto* e = Expr(1);
+    auto* e = Expr(1_i);
     auto* m = MemberAccessor(e, Expr("a"));
     auto* root = MemberAccessor(m, Expr("b"));
     {
@@ -149,7 +151,7 @@ TEST_F(TraverseExpressionsTest, DescendMemberIndexExpression) {
 
 // TODO(crbug.com/tint/1257): The correct test for DescendMemberIndexExpression.
 TEST_F(TraverseExpressionsTest, DISABLED_DescendMemberIndexExpression) {
-    auto* e = Expr(1);
+    auto* e = Expr(1_i);
     std::vector<const ast::IdentifierExpression*> i = {Expr("a"), Expr("b")};
     auto* m = MemberAccessor(e, i[0]);
     auto* root = MemberAccessor(m, i[1]);
@@ -174,7 +176,7 @@ TEST_F(TraverseExpressionsTest, DISABLED_DescendMemberIndexExpression) {
 }
 
 TEST_F(TraverseExpressionsTest, DescendUnaryExpression) {
-    auto* e = Expr(1);
+    auto* e = Expr(1_i);
     auto* u0 = AddressOf(e);
     auto* u1 = Deref(u0);
     auto* u2 = AddressOf(u1);
@@ -200,7 +202,7 @@ TEST_F(TraverseExpressionsTest, DescendUnaryExpression) {
 }
 
 TEST_F(TraverseExpressionsTest, Skip) {
-    std::vector<const ast::Expression*> e = {Expr(1), Expr(1), Expr(1), Expr(1)};
+    std::vector<const ast::Expression*> e = {Expr(1_i), Expr(1_i), Expr(1_i), Expr(1_i)};
     std::vector<const ast::Expression*> i = {IndexAccessor(e[0], e[1]), IndexAccessor(e[2], e[3])};
     auto* root = IndexAccessor(i[0], i[1]);
     std::vector<const ast::Expression*> order;
@@ -213,7 +215,7 @@ TEST_F(TraverseExpressionsTest, Skip) {
 }
 
 TEST_F(TraverseExpressionsTest, Stop) {
-    std::vector<const ast::Expression*> e = {Expr(1), Expr(1), Expr(1), Expr(1)};
+    std::vector<const ast::Expression*> e = {Expr(1_i), Expr(1_i), Expr(1_i), Expr(1_i)};
     std::vector<const ast::Expression*> i = {IndexAccessor(e[0], e[1]), IndexAccessor(e[2], e[3])};
     auto* root = IndexAccessor(i[0], i[1]);
     std::vector<const ast::Expression*> order;

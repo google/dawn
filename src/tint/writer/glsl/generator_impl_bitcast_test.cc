@@ -14,13 +14,15 @@
 
 #include "src/tint/writer/glsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::glsl {
 namespace {
 
 using GlslGeneratorImplTest_Bitcast = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Float) {
-    auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr(1));
+    auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr(1_i));
     WrapInFunction(bitcast);
 
     GeneratorImpl& gen = Build();
@@ -31,7 +33,7 @@ TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Float) {
 }
 
 TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
-    auto* bitcast = create<ast::BitcastExpression>(ty.i32(), Expr(1u));
+    auto* bitcast = create<ast::BitcastExpression>(ty.i32(), Expr(1_u));
     WrapInFunction(bitcast);
 
     GeneratorImpl& gen = Build();
@@ -42,7 +44,7 @@ TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Int) {
 }
 
 TEST_F(GlslGeneratorImplTest_Bitcast, EmitExpression_Bitcast_Uint) {
-    auto* bitcast = create<ast::BitcastExpression>(ty.u32(), Expr(1));
+    auto* bitcast = create<ast::BitcastExpression>(ty.u32(), Expr(1_i));
     WrapInFunction(bitcast);
 
     GeneratorImpl& gen = Build();

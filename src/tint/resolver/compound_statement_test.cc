@@ -22,6 +22,8 @@
 #include "src/tint/sem/loop_statement.h"
 #include "src/tint/sem/switch_statement.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -87,7 +89,7 @@ TEST_F(ResolverCompoundStatementTest, Loop) {
     //   }
     // }
     auto* brk = Break();
-    auto* stmt = Ignore(1);
+    auto* stmt = Ignore(1_i);
     auto* loop = Loop(Block(brk), Block(stmt));
     auto* f = Func("F", {}, ty.void_(), {loop});
 
@@ -150,7 +152,7 @@ TEST_F(ResolverCompoundStatementTest, ForLoop) {
     // }
     auto* init = Decl(Var("i", ty.u32()));
     auto* cond = Expr(true);
-    auto* cont = Assign("i", Add("i", 1u));
+    auto* cont = Assign("i", Add("i", 1_u));
     auto* stmt = Return();
     auto* body = Block(stmt);
     auto* for_ = For(init, cond, cont, body);
@@ -220,10 +222,10 @@ TEST_F(ResolverCompoundStatementTest, If) {
     // }
 
     auto* cond_a = Expr(true);
-    auto* stmt_a = Ignore(1);
+    auto* stmt_a = Ignore(1_i);
     auto* cond_b = Expr(true);
-    auto* stmt_b = Ignore(1);
-    auto* stmt_c = Ignore(1);
+    auto* stmt_b = Ignore(1_i);
+    auto* stmt_c = Ignore(1_i);
     auto* if_stmt = If(cond_a, Block(stmt_a), Else(If(cond_b, Block(stmt_b), Else(Block(stmt_c)))));
     WrapInFunction(if_stmt);
 
@@ -293,10 +295,10 @@ TEST_F(ResolverCompoundStatementTest, If) {
 TEST_F(ResolverCompoundStatementTest, Switch) {
     // fn F() {
     //   switch (expr) {
-    //     case 1: {
+    //     case 1i: {
     //        stmt_a;
     //     }
-    //     case 2: {
+    //     case 2i: {
     //        stmt_b;
     //     }
     //     default: {
@@ -305,11 +307,11 @@ TEST_F(ResolverCompoundStatementTest, Switch) {
     //   }
     // }
 
-    auto* expr = Expr(5);
-    auto* stmt_a = Ignore(1);
-    auto* stmt_b = Ignore(1);
-    auto* stmt_c = Ignore(1);
-    auto* swi = Switch(expr, Case(Expr(1), Block(stmt_a)), Case(Expr(2), Block(stmt_b)),
+    auto* expr = Expr(5_i);
+    auto* stmt_a = Ignore(1_i);
+    auto* stmt_b = Ignore(1_i);
+    auto* stmt_c = Ignore(1_i);
+    auto* swi = Switch(expr, Case(Expr(1_i), Block(stmt_a)), Case(Expr(2_i), Block(stmt_b)),
                        DefaultCase(Block(stmt_c)));
     WrapInFunction(swi);
 

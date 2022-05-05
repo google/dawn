@@ -24,10 +24,12 @@
 #include "src/tint/sem/storage_texture.h"
 #include "src/tint/writer/msl/test_helper.h"
 
+using ::testing::HasSubstr;
+
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::msl {
 namespace {
-
-using ::testing::HasSubstr;
 
 #define CHECK_TYPE_SIZE_AND_ALIGN(TYPE, SIZE, ALIGN)      \
     static_assert(sizeof(TYPE) == SIZE, "Bad type size"); \
@@ -72,7 +74,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Array) {
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
     auto* a = ty.array<bool, 4>();
-    auto* b = ty.array(a, 5);
+    auto* b = ty.array(a, 5_u);
     Global("G", b, ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
@@ -84,8 +86,8 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
     auto* a = ty.array<bool, 4>();
-    auto* b = ty.array(a, 5);
-    auto* c = ty.array(b, 6);
+    auto* b = ty.array(a, 5_u);
+    auto* c = ty.array(b, 6_u);
     Global("G", c, ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
@@ -412,7 +414,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
     auto* array_x = ty.array<f32, 7>();
 
     // array_y: size(4096), align(512)
-    auto* array_y = ty.array(ty.Of(inner), 4);
+    auto* array_y = ty.array(ty.Of(inner), 4_u);
 
     // array_z: size(4), align(4)
     auto* array_z = ty.array<f32>();
@@ -500,7 +502,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
     // array: size(64), align(16)
-    auto* array = ty.array(ty.vec3<f32>(), 4);
+    auto* array = ty.array(ty.vec3<f32>(), 4_u);
 
     auto* s = Structure("S", {
                                  Member("a", ty.i32()),

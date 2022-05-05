@@ -14,13 +14,15 @@
 
 #include "src/tint/writer/wgsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::wgsl {
 namespace {
 
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Case) {
-    auto* s = Switch(1, Case(Expr(5), Block(create<ast::BreakStatement>())), DefaultCase());
+    auto* s = Switch(1_i, Case(Expr(5_i), Block(create<ast::BreakStatement>())), DefaultCase());
     WrapInFunction(s);
 
     GeneratorImpl& gen = Build();
@@ -28,15 +30,15 @@ TEST_F(WgslGeneratorImplTest, Emit_Case) {
     gen.increment_indent();
 
     ASSERT_TRUE(gen.EmitCase(s->body[0])) << gen.error();
-    EXPECT_EQ(gen.result(), R"(  case 5: {
+    EXPECT_EQ(gen.result(), R"(  case 5i: {
     break;
   }
 )");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Case_MultipleSelectors) {
-    auto* s =
-        Switch(1, Case({Expr(5), Expr(6)}, Block(create<ast::BreakStatement>())), DefaultCase());
+    auto* s = Switch(1_i, Case({Expr(5_i), Expr(6_i)}, Block(create<ast::BreakStatement>())),
+                     DefaultCase());
     WrapInFunction(s);
 
     GeneratorImpl& gen = Build();
@@ -44,14 +46,14 @@ TEST_F(WgslGeneratorImplTest, Emit_Case_MultipleSelectors) {
     gen.increment_indent();
 
     ASSERT_TRUE(gen.EmitCase(s->body[0])) << gen.error();
-    EXPECT_EQ(gen.result(), R"(  case 5, 6: {
+    EXPECT_EQ(gen.result(), R"(  case 5i, 6i: {
     break;
   }
 )");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Case_Default) {
-    auto* s = Switch(1, DefaultCase(Block(create<ast::BreakStatement>())));
+    auto* s = Switch(1_i, DefaultCase(Block(create<ast::BreakStatement>())));
     WrapInFunction(s);
 
     GeneratorImpl& gen = Build();

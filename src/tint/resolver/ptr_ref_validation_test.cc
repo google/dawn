@@ -19,6 +19,8 @@
 
 #include "gmock/gmock.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -27,7 +29,7 @@ struct ResolverPtrRefValidationTest : public resolver::TestHelper, public testin
 TEST_F(ResolverPtrRefValidationTest, AddressOfLiteral) {
     // &1
 
-    auto* expr = AddressOf(Expr(Source{{12, 34}}, 1));
+    auto* expr = AddressOf(Expr(Source{{12, 34}}, 1_i));
 
     WrapInFunction(expr);
 
@@ -39,7 +41,7 @@ TEST_F(ResolverPtrRefValidationTest, AddressOfLiteral) {
 TEST_F(ResolverPtrRefValidationTest, AddressOfLet) {
     // let l : i32 = 1;
     // &l
-    auto* l = Let("l", ty.i32(), Expr(1));
+    auto* l = Let("l", ty.i32(), Expr(1_i));
     auto* expr = AddressOf(Expr(Source{{12, 34}}, "l"));
 
     WrapInFunction(l, expr);
@@ -77,9 +79,9 @@ TEST_F(ResolverPtrRefValidationTest, AddressOfVectorComponent_MemberAccessor) {
 
 TEST_F(ResolverPtrRefValidationTest, AddressOfVectorComponent_IndexAccessor) {
     // var v : vec4<i32>;
-    // &v[2]
+    // &v[2i]
     auto* v = Var("v", ty.vec4<i32>());
-    auto* expr = AddressOf(IndexAccessor(Source{{12, 34}}, "v", 2));
+    auto* expr = AddressOf(IndexAccessor(Source{{12, 34}}, "v", 2_i));
 
     WrapInFunction(v, expr);
 
@@ -104,7 +106,7 @@ TEST_F(ResolverPtrRefValidationTest, IndirectOfAddressOfHandle) {
 TEST_F(ResolverPtrRefValidationTest, DerefOfLiteral) {
     // *1
 
-    auto* expr = Deref(Expr(Source{{12, 34}}, 1));
+    auto* expr = Deref(Expr(Source{{12, 34}}, 1_i));
 
     WrapInFunction(expr);
 
@@ -114,8 +116,8 @@ TEST_F(ResolverPtrRefValidationTest, DerefOfLiteral) {
 }
 
 TEST_F(ResolverPtrRefValidationTest, DerefOfVar) {
-    // var v : i32 = 1;
-    // *1
+    // var v : i32;
+    // *v
     auto* v = Var("v", ty.i32());
     auto* expr = Deref(Expr(Source{{12, 34}}, "v"));
 
@@ -128,14 +130,14 @@ TEST_F(ResolverPtrRefValidationTest, DerefOfVar) {
 
 TEST_F(ResolverPtrRefValidationTest, InferredPtrAccessMismatch) {
     // struct Inner {
-    //    arr: array<i32, 4>;
+    //    arr: array<i32, 4u>;
     // }
     // struct S {
     //    inner: Inner;
     // }
     // @group(0) @binding(0) var<storage, read_write> s : S;
     // fn f() {
-    //   let p : pointer<storage, i32> = &s.inner.arr[2];
+    //   let p : pointer<storage, i32> = &s.inner.arr[2i];
     // }
     auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
     auto* buf = Structure("S", {Member("inner", ty.Of(inner))});
@@ -145,7 +147,7 @@ TEST_F(ResolverPtrRefValidationTest, InferredPtrAccessMismatch) {
                                create<ast::GroupAttribute>(0),
                            });
 
-    auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 4);
+    auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 2_i);
     auto* ptr =
         Let(Source{{12, 34}}, "p", ty.pointer<i32>(ast::StorageClass::kStorage), AddressOf(expr));
 

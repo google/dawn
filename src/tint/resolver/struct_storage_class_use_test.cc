@@ -20,6 +20,8 @@
 
 using ::testing::UnorderedElementsAre;
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -97,7 +99,7 @@ TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalStruct) {
 
 TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalArray) {
     auto* s = Structure("S", {Member("a", ty.f32())});
-    auto* a = ty.array(ty.Of(s), 3);
+    auto* a = ty.array(ty.Of(s), 3_u);
     Global("g", a, ast::StorageClass::kPrivate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -145,7 +147,7 @@ TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalStruct) {
 
 TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalArray) {
     auto* s = Structure("S", {Member("a", ty.f32())});
-    auto* a = ty.array(ty.Of(s), 3);
+    auto* a = ty.array(ty.Of(s), 3_u);
     WrapInFunction(Var("g", a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();

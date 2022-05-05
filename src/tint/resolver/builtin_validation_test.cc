@@ -15,6 +15,8 @@
 #include "src/tint/ast/builtin_texture_helper_test.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -37,7 +39,7 @@ TEST_F(ResolverBuiltinValidationTest, InvalidPipelineStageDirect) {
     auto* dpdx =
         create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"), ast::ExpressionList{Expr(1.0f)});
     Func(Source{{1, 2}}, "func", ast::VariableList{}, ty.void_(), {CallStmt(dpdx)},
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "3:4 error: built-in cannot be used by compute pipeline stage");
@@ -58,7 +60,7 @@ TEST_F(ResolverBuiltinValidationTest, InvalidPipelineStageIndirect) {
     Func(Source{{5, 6}}, "f2", {}, ty.void_(), {CallStmt(Call("f1"))});
 
     Func(Source{{7, 8}}, "main", {}, ty.void_(), {CallStmt(Call("f2"))},
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -78,7 +80,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsFunction) {
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalLet) {
-    GlobalConst(Source{{12, 34}}, "mix", ty.i32(), Expr(1));
+    GlobalConst(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -86,7 +88,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalLet) {
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVar) {
-    Global(Source{{12, 34}}, "mix", ty.i32(), Expr(1), ast::StorageClass::kPrivate);
+    Global(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -115,9 +117,6 @@ using TextureOverloadCase = ast::builtin::test::TextureOverloadCase;
 using ValidTextureOverload = ast::builtin::test::ValidTextureOverload;
 using TextureKind = ast::builtin::test::TextureKind;
 using TextureDataType = ast::builtin::test::TextureDataType;
-using u32 = ProgramBuilder::u32;
-using i32 = ProgramBuilder::i32;
-using f32 = ProgramBuilder::f32;
 
 static std::vector<TextureOverloadCase> TextureCases(
     std::unordered_set<ValidTextureOverload> overloads) {
@@ -160,17 +159,18 @@ class Constexpr {
     const ast::Expression* operator()(Source src, ProgramBuilder& b) {
         switch (kind) {
             case Kind::kScalar:
-                return b.Expr(src, values[0]);
+                return b.Expr(src, i32(values[0]));
             case Kind::kVec2:
-                return b.Construct(src, b.ty.vec2<i32>(), values[0], values[1]);
+                return b.Construct(src, b.ty.vec2<i32>(), i32(values[0]), i32(values[1]));
             case Kind::kVec3:
-                return b.Construct(src, b.ty.vec3<i32>(), values[0], values[1], values[2]);
+                return b.Construct(src, b.ty.vec3<i32>(), i32(values[0]), i32(values[1]),
+                                   i32(values[2]));
             case Kind::kVec3_Scalar_Vec2:
-                return b.Construct(src, b.ty.vec3<i32>(), values[0],
-                                   b.vec2<i32>(values[1], values[2]));
+                return b.Construct(src, b.ty.vec3<i32>(), i32(values[0]),
+                                   b.vec2<i32>(i32(values[1]), i32(values[2])));
             case Kind::kVec3_Vec2_Scalar:
-                return b.Construct(src, b.ty.vec3<i32>(), b.vec2<i32>(values[0], values[1]),
-                                   values[2]);
+                return b.Construct(src, b.ty.vec3<i32>(),
+                                   b.vec2<i32>(i32(values[0]), i32(values[1])), i32(values[2]));
             case Kind::kEmptyVec2:
                 return b.Construct(src, b.ty.vec2<i32>());
             case Kind::kEmptyVec3:

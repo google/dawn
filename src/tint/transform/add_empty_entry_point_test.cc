@@ -42,7 +42,7 @@ TEST_F(AddEmptyEntryPointTest, EmptyModule) {
     auto* src = R"()";
 
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@stage(compute) @workgroup_size(1i)
 fn unused_entry_point() {
 }
 )";
@@ -70,7 +70,7 @@ TEST_F(AddEmptyEntryPointTest, NameClash) {
     auto* src = R"(var<private> unused_entry_point : f32;)";
 
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@stage(compute) @workgroup_size(1i)
 fn unused_entry_point_1() {
 }
 

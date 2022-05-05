@@ -17,6 +17,8 @@
 #include "gmock/gmock.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -140,7 +142,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
 
 // Detect unaligned array member for uniform buffers
 TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_UnalignedMember_Array) {
-    // type Inner = @stride(16) array<f32, 10>;
+    // type Inner = @stride(16) array<f32, 10u>;
     //
     // struct Outer {
     //   scalar : f32;
@@ -149,7 +151,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_UnalignedMember_A
     //
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
-    Alias("Inner", ty.array(ty.f32(), 10, 16));
+    Alias("Inner", ty.array(ty.f32(), 10_u, 16));
 
     Structure(Source{{12, 34}}, "Outer",
               {
@@ -173,7 +175,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_UnalignedMember_A
 }
 
 TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_UnalignedMember_Array_SuggestedFix) {
-    // type Inner = @stride(16) array<f32, 10>;
+    // type Inner = @stride(16) array<f32, 10u>;
     //
     // struct Outer {
     //   scalar : f32;
@@ -182,7 +184,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_UnalignedMember_A
     //
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
-    Alias("Inner", ty.array(ty.f32(), 10, 16));
+    Alias("Inner", ty.array(ty.f32(), 10_u, 16));
 
     Structure(Source{{12, 34}}, "Outer",
               {
@@ -347,7 +349,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_Vec3MemberOffset_
 
 // Detect array stride must be a multiple of 16 bytes for uniform buffers
 TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStride_Scalar) {
-    // type Inner = array<f32, 10>;
+    // type Inner = array<f32, 10u>;
     //
     // struct Outer {
     //   inner : Inner;
@@ -357,7 +359,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
 
-    Alias("Inner", ty.array(ty.f32(), 10));
+    Alias("Inner", ty.array(ty.f32(), 10_u));
 
     Structure(Source{{12, 34}}, "Outer",
               {
@@ -381,7 +383,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 }
 
 TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStride_Vector) {
-    // type Inner = array<vec2<f32>, 10>;
+    // type Inner = array<vec2<f32>, 10u>;
     //
     // struct Outer {
     //   inner : Inner;
@@ -391,7 +393,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
 
-    Alias("Inner", ty.array(ty.vec2<f32>(), 10));
+    Alias("Inner", ty.array(ty.vec2<f32>(), 10_u));
 
     Structure(Source{{12, 34}}, "Outer",
               {
@@ -420,7 +422,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     //   a : f32;
     //   b : i32;
     // }
-    // type Inner = array<ArrayElem, 10>;
+    // type Inner = array<ArrayElem, 10u>;
     //
     // struct Outer {
     //   inner : Inner;
@@ -434,7 +436,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
                                                   Member("a", ty.f32()),
                                                   Member("b", ty.i32()),
                                               });
-    Alias("Inner", ty.array(ty.Of(array_elem), 10));
+    Alias("Inner", ty.array(ty.Of(array_elem), 10_u));
 
     Structure(Source{{12, 34}}, "Outer",
               {
@@ -459,8 +461,8 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 
 TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStride_TopLevelArray) {
     // @group(0) @binding(0)
-    // var<uniform> a : array<f32, 4>;
-    Global(Source{{78, 90}}, "a", ty.array(Source{{34, 56}}, ty.f32(), 4),
+    // var<uniform> a : array<f32, 4u>;
+    Global(Source{{78, 90}}, "a", ty.array(Source{{34, 56}}, ty.f32(), 4_u),
            ast::StorageClass::kUniform, GroupAndBinding(0, 0));
 
     ASSERT_FALSE(r()->Resolve());
@@ -471,15 +473,15 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 
 TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStride_NestedArray) {
     // struct Outer {
-    //   inner : array<array<f32, 4>, 4>
+    //   inner : array<array<f32, 4u>, 4u>
     // };
     //
     // @group(0) @binding(0)
-    // var<uniform> a : array<Outer, 4>;
+    // var<uniform> a : array<Outer, 4u>;
 
     Structure(Source{{12, 34}}, "Outer",
               {
-                  Member("inner", ty.array(Source{{34, 56}}, ty.array(ty.f32(), 4), 4)),
+                  Member("inner", ty.array(Source{{34, 56}}, ty.array(ty.f32(), 4_u), 4_u)),
               });
 
     Global(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform,
@@ -497,7 +499,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 }
 
 TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStride_SuggestedFix) {
-    // type Inner = @stride(16) array<f32, 10>;
+    // type Inner = @stride(16) array<f32, 10u>;
     //
     // struct Outer {
     //   inner : Inner;
@@ -507,7 +509,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
 
-    Alias("Inner", ty.array(ty.f32(), 10, 16));
+    Alias("Inner", ty.array(ty.f32(), 10_u, 16));
 
     Structure(Source{{12, 34}}, "Outer",
               {

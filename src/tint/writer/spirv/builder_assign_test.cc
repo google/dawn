@@ -15,6 +15,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 namespace {
 
@@ -282,7 +284,7 @@ TEST_F(BuilderTest, Assign_Vector_MemberByIndex) {
 
     auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
-    auto* assign = Assign(IndexAccessor("var", 1), Expr(1.f));
+    auto* assign = Assign(IndexAccessor("var", 1_i), Expr(1.f));
 
     WrapInFunction(assign);
 

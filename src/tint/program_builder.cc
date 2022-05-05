@@ -22,6 +22,8 @@
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/variable.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint {
 
 ProgramBuilder::VarOptionals::~VarOptionals() = default;
@@ -126,7 +128,7 @@ const ast::Statement* ProgramBuilder::WrapInStatement(const ast::Statement* stmt
 const ast::Function* ProgramBuilder::WrapInFunction(const ast::StatementList stmts) {
     return Func(
         "test_function", {}, ty.void_(), std::move(stmts),
-        {create<ast::StageAttribute>(ast::PipelineStage::kCompute), WorkgroupSize(1, 1, 1)});
+        {create<ast::StageAttribute>(ast::PipelineStage::kCompute), WorkgroupSize(1_i, 1_i, 1_i)});
 }
 
 }  // namespace tint

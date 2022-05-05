@@ -14,31 +14,33 @@
 
 #include "src/tint/writer/wgsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::wgsl {
 namespace {
 
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Scalar) {
-    auto* cast = Construct<f32>(1);
+    auto* cast = Construct<f32>(1_i);
     WrapInFunction(cast);
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
     ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
-    EXPECT_EQ(out.str(), "f32(1)");
+    EXPECT_EQ(out.str(), "f32(1i)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Vector) {
-    auto* cast = vec3<f32>(vec3<i32>(1, 2, 3));
+    auto* cast = vec3<f32>(vec3<i32>(1_i, 2_i, 3_i));
     WrapInFunction(cast);
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
     ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
-    EXPECT_EQ(out.str(), "vec3<f32>(vec3<i32>(1, 2, 3))");
+    EXPECT_EQ(out.str(), "vec3<f32>(vec3<i32>(1i, 2i, 3i))");
 }
 
 }  // namespace

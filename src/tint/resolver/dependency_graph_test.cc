@@ -20,6 +20,8 @@
 #include "src/tint/resolver/dependency_graph.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -425,7 +427,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolDeclKind kind, Symbol symbol, Sourc
         case SymbolDeclKind::GlobalVar:
             return b.Global(source, symbol, b.ty.i32(), ast::StorageClass::kPrivate);
         case SymbolDeclKind::GlobalConst:
-            return b.GlobalConst(source, symbol, b.ty.i32(), b.Expr(1));
+            return b.GlobalConst(source, symbol, b.ty.i32(), b.Expr(1_i));
         case SymbolDeclKind::Alias:
             return b.Alias(source, symbol, b.ty.i32());
         case SymbolDeclKind::Struct:
@@ -443,7 +445,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolDeclKind kind, Symbol symbol, Sourc
             return node;
         }
         case SymbolDeclKind::LocalLet: {
-            auto* node = b.Let(source, symbol, b.ty.i32(), b.Expr(1));
+            auto* node = b.Let(source, symbol, b.ty.i32(), b.Expr(1_i));
             statements.emplace_back(b.Decl(node));
             return node;
         }
@@ -453,7 +455,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolDeclKind kind, Symbol symbol, Sourc
             return node;
         }
         case SymbolDeclKind::NestedLocalLet: {
-            auto* node = b.Let(source, symbol, b.ty.i32(), b.Expr(1));
+            auto* node = b.Let(source, symbol, b.ty.i32(), b.Expr(1_i));
             nested_statements.emplace_back(b.Decl(node));
             return node;
         }
@@ -471,7 +473,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
         }
         case SymbolUseKind::GlobalVarArrayElemType: {
             auto* node = b.ty.type_name(source, symbol);
-            b.Global(b.Sym(), b.ty.array(node, 4), ast::StorageClass::kPrivate);
+            b.Global(b.Sym(), b.ty.array(node, 4_i), ast::StorageClass::kPrivate);
             return node;
         }
         case SymbolUseKind::GlobalVarArraySizeValue: {
@@ -506,27 +508,27 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
         }
         case SymbolUseKind::GlobalLetType: {
             auto* node = b.ty.type_name(source, symbol);
-            b.GlobalConst(b.Sym(), node, b.Expr(1));
+            b.GlobalConst(b.Sym(), node, b.Expr(1_i));
             return node;
         }
         case SymbolUseKind::GlobalLetArrayElemType: {
             auto* node = b.ty.type_name(source, symbol);
-            b.GlobalConst(b.Sym(), b.ty.array(node, 4), b.Expr(1));
+            b.GlobalConst(b.Sym(), b.ty.array(node, 4_i), b.Expr(1_i));
             return node;
         }
         case SymbolUseKind::GlobalLetArraySizeValue: {
             auto* node = b.Expr(source, symbol);
-            b.GlobalConst(b.Sym(), b.ty.array(b.ty.i32(), node), b.Expr(1));
+            b.GlobalConst(b.Sym(), b.ty.array(b.ty.i32(), node), b.Expr(1_i));
             return node;
         }
         case SymbolUseKind::GlobalLetVectorElemType: {
             auto* node = b.ty.type_name(source, symbol);
-            b.GlobalConst(b.Sym(), b.ty.vec3(node), b.Expr(1));
+            b.GlobalConst(b.Sym(), b.ty.vec3(node), b.Expr(1_i));
             return node;
         }
         case SymbolUseKind::GlobalLetMatrixElemType: {
             auto* node = b.ty.type_name(source, symbol);
-            b.GlobalConst(b.Sym(), b.ty.mat3x4(node), b.Expr(1));
+            b.GlobalConst(b.Sym(), b.ty.mat3x4(node), b.Expr(1_i));
             return node;
         }
         case SymbolUseKind::GlobalLetValue: {
@@ -561,13 +563,13 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
         }
         case SymbolUseKind::LocalVarArrayElemType: {
             auto* node = b.ty.type_name(source, symbol);
-            statements.emplace_back(b.Decl(b.Var(b.Sym(), b.ty.array(node, 4), b.Expr(1))));
+            statements.emplace_back(b.Decl(b.Var(b.Sym(), b.ty.array(node, 4_u), b.Expr(1_i))));
             return node;
         }
         case SymbolUseKind::LocalVarArraySizeValue: {
             auto* node = b.Expr(source, symbol);
             statements.emplace_back(
-                b.Decl(b.Var(b.Sym(), b.ty.array(b.ty.i32(), node), b.Expr(1))));
+                b.Decl(b.Var(b.Sym(), b.ty.array(b.ty.i32(), node), b.Expr(1_i))));
             return node;
         }
         case SymbolUseKind::LocalVarVectorElemType: {
@@ -587,7 +589,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
         }
         case SymbolUseKind::LocalLetType: {
             auto* node = b.ty.type_name(source, symbol);
-            statements.emplace_back(b.Decl(b.Let(b.Sym(), node, b.Expr(1))));
+            statements.emplace_back(b.Decl(b.Let(b.Sym(), node, b.Expr(1_i))));
             return node;
         }
         case SymbolUseKind::LocalLetValue: {
@@ -607,7 +609,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
         }
         case SymbolUseKind::NestedLocalLetType: {
             auto* node = b.ty.type_name(source, symbol);
-            nested_statements.emplace_back(b.Decl(b.Let(b.Sym(), node, b.Expr(1))));
+            nested_statements.emplace_back(b.Decl(b.Let(b.Sym(), node, b.Expr(1_i))));
             return node;
         }
         case SymbolUseKind::NestedLocalLetValue: {
@@ -617,7 +619,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
         }
         case SymbolUseKind::WorkgroupSizeValue: {
             auto* node = b.Expr(source, symbol);
-            func_attrs.emplace_back(b.WorkgroupSize(1, node, 2));
+            func_attrs.emplace_back(b.WorkgroupSize(1_i, node, 2_i));
             return node;
         }
     }
@@ -767,27 +769,27 @@ using ResolverDependencyGraphDeclSelfUse = ResolverDependencyGraphTest;
 
 TEST_F(ResolverDependencyGraphDeclSelfUse, GlobalVar) {
     const Symbol symbol = Sym("SYMBOL");
-    Global(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123));
+    Global(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123_i));
     Build(R"(error: cyclic dependency found: 'SYMBOL' -> 'SYMBOL'
 12:34 note: var 'SYMBOL' references var 'SYMBOL' here)");
 }
 
 TEST_F(ResolverDependencyGraphDeclSelfUse, GlobalConst) {
     const Symbol symbol = Sym("SYMBOL");
-    GlobalConst(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123));
+    GlobalConst(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123_i));
     Build(R"(error: cyclic dependency found: 'SYMBOL' -> 'SYMBOL'
 12:34 note: let 'SYMBOL' references let 'SYMBOL' here)");
 }
 
 TEST_F(ResolverDependencyGraphDeclSelfUse, LocalVar) {
     const Symbol symbol = Sym("SYMBOL");
-    WrapInFunction(Decl(Var(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123))));
+    WrapInFunction(Decl(Var(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123_i))));
     Build("12:34 error: unknown identifier: 'SYMBOL'");
 }
 
 TEST_F(ResolverDependencyGraphDeclSelfUse, LocalLet) {
     const Symbol symbol = Sym("SYMBOL");
-    WrapInFunction(Decl(Let(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123))));
+    WrapInFunction(Decl(Let(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123_i))));
     Build("12:34 error: unknown identifier: 'SYMBOL'");
 }
 
@@ -1229,9 +1231,9 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
              Loop(Block(Assign(V, V)),                  //
                   Block(Assign(V, V))),                 //
              Switch(V,                                  //
-                    Case(Expr(1),                       //
+                    Case(Expr(1_i),                     //
                          Block(Assign(V, V))),          //
-                    Case(Expr(2),                       //
+                    Case(Expr(2_i),                     //
                          Block(Fallthrough())),         //
                     DefaultCase(Block(Assign(V, V)))),  //
              Return(V),                                 //
@@ -1270,10 +1272,10 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
 
 TEST_F(ResolverDependencyGraphTraversalTest, InferredType) {
     // Check that the nullptr of the var / let type doesn't make things explode
-    Global("a", nullptr, Expr(1));
-    GlobalConst("b", nullptr, Expr(1));
-    WrapInFunction(Var("c", nullptr, Expr(1)),  //
-                   Let("d", nullptr, Expr(1)));
+    Global("a", nullptr, Expr(1_i));
+    GlobalConst("b", nullptr, Expr(1_i));
+    WrapInFunction(Var("c", nullptr, Expr(1_i)),  //
+                   Let("d", nullptr, Expr(1_i)));
     Build();
 }
 

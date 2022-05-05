@@ -26,6 +26,8 @@
 TINT_INSTANTIATE_TYPEINFO(tint::transform::MultiplanarExternalTexture);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::MultiplanarExternalTexture::NewBindingPoints);
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::transform {
 namespace {
 
@@ -261,7 +263,6 @@ struct MultiplanarExternalTexture::State {
     /// Creates the gammaCorrection function if needed and returns a call
     /// expression to it.
     void createGammaCorrectionFn() {
-        using f32 = ProgramBuilder::f32;
         ast::VariableList varList = {b.Param("v", b.ty.vec3<f32>()),
                                      b.Param("params", b.ty.type_name(gamma_transfer_struct_sym))};
 
@@ -298,7 +299,6 @@ struct MultiplanarExternalTexture::State {
     /// @param call_type determines which function body to generate
     /// @returns a statement list that makes of the body of the chosen function
     ast::StatementList createTexFnExtStatementList(sem::BuiltinType call_type) {
-        using f32 = ProgramBuilder::f32;
         const ast::CallExpression* single_plane_call = nullptr;
         const ast::CallExpression* plane_0_call = nullptr;
         const ast::CallExpression* plane_1_call = nullptr;
@@ -311,11 +311,11 @@ struct MultiplanarExternalTexture::State {
             plane_1_call = b.Call("textureSampleLevel", "plane1", "smp", "coord", 0.0f);
         } else if (call_type == sem::BuiltinType::kTextureLoad) {
             // textureLoad(plane0, coords.xy, 0);
-            single_plane_call = b.Call("textureLoad", "plane0", "coord", 0);
+            single_plane_call = b.Call("textureLoad", "plane0", "coord", 0_i);
             // textureLoad(plane0, coords.xy, 0);
-            plane_0_call = b.Call("textureLoad", "plane0", "coord", 0);
+            plane_0_call = b.Call("textureLoad", "plane0", "coord", 0_i);
             // textureLoad(plane1, coords.xy, 0);
-            plane_1_call = b.Call("textureLoad", "plane1", "coord", 0);
+            plane_1_call = b.Call("textureLoad", "plane1", "coord", 0_i);
         } else {
             TINT_ICE(Transform, b.Diagnostics()) << "unhandled builtin: " << call_type;
         }
@@ -325,7 +325,7 @@ struct MultiplanarExternalTexture::State {
             b.Decl(b.Var("color", b.ty.vec3(b.ty.f32()))),
             // if ((params.numPlanes == 1u))
             b.If(b.create<ast::BinaryExpression>(
-                     ast::BinaryOp::kEqual, b.MemberAccessor("params", "numPlanes"), b.Expr(1u)),
+                     ast::BinaryOp::kEqual, b.MemberAccessor("params", "numPlanes"), b.Expr(1_u)),
                  b.Block(
                      // color = textureLoad(plane0, coord, 0).rgb;
                      b.Assign("color", b.MemberAccessor(single_plane_call, "rgb"))),

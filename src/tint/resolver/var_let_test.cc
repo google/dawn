@@ -18,6 +18,8 @@
 
 #include "gmock/gmock.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -95,12 +97,12 @@ TEST_F(ResolverVarLetTest, VarDeclWithConstructor) {
     auto* S = Structure("S", {Member("i", ty.i32())});
     auto* A = Alias("A", ty.Of(S));
 
-    auto* i_c = Expr(1);
-    auto* u_c = Expr(1u);
+    auto* i_c = Expr(1_i);
+    auto* u_c = Expr(1_u);
     auto* f_c = Expr(1.f);
     auto* b_c = Expr(true);
-    auto* s_c = Construct(ty.Of(S), Expr(1));
-    auto* a_c = Construct(ty.Of(A), Expr(1));
+    auto* s_c = Construct(ty.Of(S), Expr(1_i));
+    auto* a_c = Construct(ty.Of(A), Expr(1_i));
 
     auto* i = Var("i", ty.i32(), ast::StorageClass::kNone, i_c);
     auto* u = Var("u", ty.u32(), ast::StorageClass::kNone, u_c);
@@ -148,7 +150,7 @@ TEST_F(ResolverVarLetTest, LetDecl) {
     // struct S { i : i32; }
     // fn F(){
     //   var v : i32;
-    //   let i : i32 = 1;
+    //   let i : i32 = 1i;
     //   let u : u32 = 1u;
     //   let f : f32 = 1.;
     //   let b : bool = true;
@@ -161,12 +163,12 @@ TEST_F(ResolverVarLetTest, LetDecl) {
     auto* A = Alias("A", ty.Of(S));
     auto* v = Var("v", ty.i32(), ast::StorageClass::kNone);
 
-    auto* i_c = Expr(1);
-    auto* u_c = Expr(1u);
+    auto* i_c = Expr(1_i);
+    auto* u_c = Expr(1_u);
     auto* f_c = Expr(1.f);
     auto* b_c = Expr(true);
-    auto* s_c = Construct(ty.Of(S), Expr(1));
-    auto* a_c = Construct(ty.Of(A), Expr(1));
+    auto* s_c = Construct(ty.Of(S), Expr(1_i));
+    auto* a_c = Construct(ty.Of(A), Expr(1_i));
     auto* p_c = AddressOf(v);
 
     auto* i = Let("i", ty.i32(), i_c);
@@ -278,7 +280,7 @@ TEST_F(ResolverVarLetTest, LetInheritsAccessFromOriginatingVariable) {
     // }
     // @group(0) @binding(0) var<storage, read_write> s : S;
     // fn f() {
-    //   let p = &s.inner.arr[2];
+    //   let p = &s.inner.arr[4];
     // }
     auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
     auto* buf = Structure("S", {Member("inner", ty.Of(inner))});
@@ -288,7 +290,7 @@ TEST_F(ResolverVarLetTest, LetInheritsAccessFromOriginatingVariable) {
                                create<ast::GroupAttribute>(0),
                            });
 
-    auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 4);
+    auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 4_i);
     auto* ptr = Let("p", nullptr, AddressOf(expr));
 
     WrapInFunction(ptr);
@@ -444,7 +446,7 @@ TEST_F(ResolverVarLetTest, LocalShadowsGlobalLet) {
     //   let a = (a == 321);
     // }
 
-    auto* g = GlobalConst("a", ty.i32(), Expr(1));
+    auto* g = GlobalConst("a", ty.i32(), Expr(1_i));
     auto* v = Var("a", nullptr, Expr("a"));
     auto* l = Let("a", nullptr, Expr("a"));
     Func("X", {}, ty.void_(), {Decl(v)});
@@ -483,7 +485,7 @@ TEST_F(ResolverVarLetTest, LocalShadowsLocalVar) {
     //   }
     // }
 
-    auto* s = Var("a", ty.i32(), Expr(1));
+    auto* s = Var("a", ty.i32(), Expr(1_i));
     auto* v = Var("a", nullptr, Expr("a"));
     auto* l = Let("a", nullptr, Expr("a"));
     Func("X", {}, ty.void_(), {Decl(s), Block(Decl(v)), Block(Decl(l))});
@@ -522,7 +524,7 @@ TEST_F(ResolverVarLetTest, LocalShadowsLocalLet) {
     //   }
     // }
 
-    auto* s = Let("a", ty.i32(), Expr(1));
+    auto* s = Let("a", ty.i32(), Expr(1_i));
     auto* v = Var("a", nullptr, Expr("a"));
     auto* l = Let("a", nullptr, Expr("a"));
     Func("X", {}, ty.void_(), {Decl(s), Block(Decl(v)), Block(Decl(l))});
@@ -633,7 +635,7 @@ TEST_F(ResolverVarLetTest, ParamShadowsGlobalLet) {
     // fn F(a : bool) {
     // }
 
-    auto* g = GlobalConst("a", ty.i32(), Expr(1));
+    auto* g = GlobalConst("a", ty.i32(), Expr(1_i));
     auto* p = Param("a", ty.bool_());
     Func("F", {p}, ty.void_(), {});
 

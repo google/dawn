@@ -1991,7 +1991,7 @@ fn main_1() {
 
 @stage(fragment)
 fn main(@builtin(sample_mask) x_1_param : u32) {
-  x_1[0] = x_1_param;
+  x_1[0i] = x_1_param;
   main_1();
 }
 )";
@@ -2023,7 +2023,7 @@ fn main_1() {
 
 @stage(fragment)
 fn main(@builtin(sample_mask) x_1_param : u32) {
-  x_1[0] = x_1_param;
+  x_1[0i] = x_1_param;
   main_1();
 }
 )";
@@ -2055,7 +2055,7 @@ fn main_1() {
 
 @stage(fragment)
 fn main(@builtin(sample_mask) x_1_param : u32) {
-  x_1[0] = x_1_param;
+  x_1[0i] = x_1_param;
   main_1();
 }
 )";
@@ -2086,7 +2086,7 @@ fn main_1() {
 
 @stage(fragment)
 fn main(@builtin(sample_mask) x_1_param : u32) {
-  x_1[0] = bitcast<i32>(x_1_param);
+  x_1[0i] = bitcast<i32>(x_1_param);
   main_1();
 }
 )";
@@ -2118,7 +2118,7 @@ fn main_1() {
 
 @stage(fragment)
 fn main(@builtin(sample_mask) x_1_param : u32) {
-  x_1[0] = bitcast<i32>(x_1_param);
+  x_1[0i] = bitcast<i32>(x_1_param);
   main_1();
 }
 )";
@@ -2150,7 +2150,7 @@ fn main_1() {
 
 @stage(fragment)
 fn main(@builtin(sample_mask) x_1_param : u32) {
-  x_1[0] = bitcast<i32>(x_1_param);
+  x_1[0i] = bitcast<i32>(x_1_param);
   main_1();
 }
 )";
@@ -2205,7 +2205,7 @@ struct main_out {
 @stage(fragment)
 fn main() -> main_out {
   main_1();
-  return main_out(x_1[0]);
+  return main_out(x_1[0i]);
 }
 )";
     EXPECT_EQ(module_str, expected);
@@ -2242,7 +2242,7 @@ struct main_out {
 @stage(fragment)
 fn main() -> main_out {
   main_1();
-  return main_out(x_1[0]);
+  return main_out(x_1[0i]);
 }
 )";
     EXPECT_EQ(module_str, expected);
@@ -2279,7 +2279,7 @@ struct main_out {
 @stage(fragment)
 fn main() -> main_out {
   main_1();
-  return main_out(x_1[0]);
+  return main_out(x_1[0i]);
 }
 )";
     EXPECT_EQ(module_str, expected);
@@ -2315,7 +2315,7 @@ struct main_out {
 @stage(fragment)
 fn main() -> main_out {
   main_1();
-  return main_out(bitcast<u32>(x_1[0]));
+  return main_out(bitcast<u32>(x_1[0i]));
 }
 )";
     EXPECT_EQ(module_str, expected);
@@ -2352,7 +2352,7 @@ struct main_out {
 @stage(fragment)
 fn main() -> main_out {
   main_1();
-  return main_out(bitcast<u32>(x_1[0]));
+  return main_out(bitcast<u32>(x_1[0i]));
 }
 )";
     EXPECT_EQ(module_str, expected);
@@ -2389,7 +2389,7 @@ struct main_out {
 @stage(fragment)
 fn main() -> main_out {
   main_1();
-  return main_out(bitcast<u32>(x_1[0]));
+  return main_out(bitcast<u32>(x_1[0i]));
 }
 )";
     EXPECT_EQ(module_str, expected);
@@ -2427,7 +2427,7 @@ fn main_1() {
 
 @stage(fragment)
 fn main(@builtin(sample_mask) x_1_param : u32) {
-  x_1[0] = x_1_param;
+  x_1[0i] = x_1_param;
   main_1();
 }
 )";
@@ -2472,7 +2472,7 @@ struct main_out {
 @stage(fragment)
 fn main() -> main_out {
   main_1();
-  return main_out(x_1[0]);
+  return main_out(x_1[0i]);
 }
 )";
     EXPECT_EQ(module_str, expected);
@@ -3149,7 +3149,7 @@ fn main_1() {
   return;
 }
 
-@stage(compute) @workgroup_size(1, 1, 1)
+@stage(compute) @workgroup_size(1i, 1i, 1i)
 fn main(@builtin(${wgsl_builtin}) x_1_param : ${unsigned_wgsl_type}) {
   x_1 = ${assignment_value};
   main_1();
@@ -3195,7 +3195,7 @@ fn main_1() {
   return;
 }
 
-@stage(compute) @workgroup_size(1, 1, 1)
+@stage(compute) @workgroup_size(1i, 1i, 1i)
 fn main(@builtin(${wgsl_builtin}) x_1_param : ${unsigned_wgsl_type}) {
   x_1 = ${assignment_value};
   main_1();
@@ -3240,7 +3240,7 @@ fn main_1() {
   return;
 }
 
-@stage(compute) @workgroup_size(1, 1, 1)
+@stage(compute) @workgroup_size(1i, 1i, 1i)
 fn main(@builtin(${wgsl_builtin}) x_1_param : ${unsigned_wgsl_type}) {
   x_1 = ${assignment_value};
   main_1();
@@ -3694,7 +3694,7 @@ fn main_1() {
 
 @stage(fragment)
 fn main(@builtin(sample_mask) x_1_param : u32) {
-  x_1[0] = x_1_param;
+  x_1[0i] = x_1_param;
   main_1();
 }
 )";
@@ -3732,7 +3732,7 @@ fn main_1() {
 
 @stage(fragment)
 fn main(@builtin(sample_mask) x_1_param : u32) {
-  x_1[0] = bitcast<i32>(x_1_param);
+  x_1[0i] = bitcast<i32>(x_1_param);
   main_1();
 }
 )";
@@ -3779,7 +3779,7 @@ struct main_out {
 @stage(fragment)
 fn main() -> main_out {
   main_1();
-  return main_out(x_1[0]);
+  return main_out(x_1[0i]);
 }
 )";
     EXPECT_EQ(got, expected) << got;
@@ -3825,7 +3825,7 @@ struct main_out {
 @stage(fragment)
 fn main() -> main_out {
   main_1();
-  return main_out(bitcast<u32>(x_1[0]));
+  return main_out(bitcast<u32>(x_1[0i]));
 }
 )";
     EXPECT_EQ(got, expected) << got;
@@ -4027,9 +4027,9 @@ struct main_out {
 
 @stage(vertex)
 fn main(@location(4) x_1_param : f32, @location(5) x_1_param_1 : f32, @location(6) x_1_param_2 : f32) -> main_out {
-  x_1[0] = x_1_param;
-  x_1[1] = x_1_param_1;
-  x_1[2] = x_1_param_2;
+  x_1[0i] = x_1_param;
+  x_1[1i] = x_1_param_1;
+  x_1[2i] = x_1_param_2;
   main_1();
   return main_out(x_2);
 }
@@ -4085,8 +4085,8 @@ struct main_out {
 
 @stage(vertex)
 fn main(@location(9) x_1_param : vec4<f32>, @location(10) x_1_param_1 : vec4<f32>) -> main_out {
-  x_1[0] = x_1_param;
-  x_1[1] = x_1_param_1;
+  x_1[0i] = x_1_param;
+  x_1[1i] = x_1_param_1;
   main_1();
   return main_out(x_2);
 }
@@ -4211,10 +4211,10 @@ struct main_out {
 
 @stage(vertex)
 fn main(@location(7) x_1_param : vec4<f32>, @location(8) x_1_param_1 : vec4<f32>, @location(9) x_1_param_2 : vec4<f32>, @location(10) x_1_param_3 : vec4<f32>) -> main_out {
-  x_1[0][0] = x_1_param;
-  x_1[0][1] = x_1_param_1;
-  x_1[1][0] = x_1_param_2;
-  x_1[1][1] = x_1_param_3;
+  x_1[0i][0i] = x_1_param;
+  x_1[0i][1i] = x_1_param_1;
+  x_1[1i][0i] = x_1_param_2;
+  x_1[1i][1i] = x_1_param_3;
   main_1();
   return main_out(x_2);
 }
@@ -4279,7 +4279,7 @@ struct main_out {
 @stage(vertex)
 fn main() -> main_out {
   main_1();
-  return main_out(x_1[0], x_1[1], x_1[2], x_2);
+  return main_out(x_1[0i], x_1[1i], x_1[2i], x_2);
 }
 )";
     EXPECT_EQ(got, expected) << got;
@@ -4338,7 +4338,7 @@ struct main_out {
 @stage(vertex)
 fn main() -> main_out {
   main_1();
-  return main_out(x_1[0], x_1[1], x_2);
+  return main_out(x_1[0i], x_1[1i], x_2);
 }
 )";
     EXPECT_EQ(got, expected) << got;
@@ -4705,8 +4705,8 @@ fn main_1() {
 
 @stage(fragment)
 fn main(@location(1) @interpolate(flat) x_1_param : f32, @location(2) @interpolate(flat) x_1_param_1 : f32, @location(5) @interpolate(flat) x_2_param : f32, @location(6) @interpolate(flat) x_2_param_1 : f32) {
-  x_1[0] = x_1_param;
-  x_1[1] = x_1_param_1;
+  x_1[0i] = x_1_param;
+  x_1[1i] = x_1_param_1;
   x_2.field0 = x_2_param;
   x_2.field1 = x_2_param_1;
   main_1();

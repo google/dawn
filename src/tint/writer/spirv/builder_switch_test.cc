@@ -16,17 +16,19 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 namespace {
 
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Switch_Empty) {
-    // switch (1) {
+    // switch (1i) {
     //   default: {}
     // }
 
-    auto* expr = Switch(1, DefaultCase());
+    auto* expr = Switch(1_i, DefaultCase());
     WrapInFunction(expr);
 
     spirv::Builder& b = Build();
@@ -48,10 +50,10 @@ OpBranch %1
 
 TEST_F(BuilderTest, Switch_WithCase) {
     // switch(a) {
-    //   case 1:
-    //     v = 1;
-    //   case 2:
-    //     v = 2;
+    //   case 1i:
+    //     v = 1i;
+    //   case 2i:
+    //     v = 2i;
     //   default: {}
     // }
 
@@ -60,9 +62,9 @@ TEST_F(BuilderTest, Switch_WithCase) {
 
     auto* func = Func("a_func", {}, ty.void_(),
                       {
-                          Switch("a",                                   //
-                                 Case(Expr(1), Block(Assign("v", 1))),  //
-                                 Case(Expr(2), Block(Assign("v", 2))),  //
+                          Switch("a",                                       //
+                                 Case(Expr(1_i), Block(Assign("v", 1_i))),  //
+                                 Case(Expr(2_i), Block(Assign("v", 2_i))),  //
                                  DefaultCase()),
                       });
 
@@ -106,9 +108,9 @@ OpFunctionEnd
 TEST_F(BuilderTest, Switch_WithCase_Unsigned) {
     // switch(a) {
     //   case 1u:
-    //     v = 1;
+    //     v = 1i;
     //   case 2u:
-    //     v = 2;
+    //     v = 2i;
     //   default: {}
     // }
 
@@ -117,9 +119,9 @@ TEST_F(BuilderTest, Switch_WithCase_Unsigned) {
 
     auto* func = Func("a_func", {}, ty.void_(),
                       {
-                          Switch("a",                                    //
-                                 Case(Expr(1u), Block(Assign("v", 1))),  //
-                                 Case(Expr(2u), Block(Assign("v", 2))),  //
+                          Switch("a",                                       //
+                                 Case(Expr(1_u), Block(Assign("v", 1_i))),  //
+                                 Case(Expr(2_u), Block(Assign("v", 2_i))),  //
                                  DefaultCase()),
                       });
 
@@ -166,7 +168,7 @@ OpFunctionEnd
 TEST_F(BuilderTest, Switch_WithDefault) {
     // switch(true) {
     //   default: {}
-    //     v = 1;
+    //     v = 1i;
     //  }
 
     auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
@@ -174,8 +176,8 @@ TEST_F(BuilderTest, Switch_WithDefault) {
 
     auto* func = Func("a_func", {}, ty.void_(),
                       {
-                          Switch("a",                                  //
-                                 DefaultCase(Block(Assign("v", 1)))),  //
+                          Switch("a",                                    //
+                                 DefaultCase(Block(Assign("v", 1_i)))),  //
                       });
 
     spirv::Builder& b = Build();
@@ -211,12 +213,12 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
     // switch(a) {
-    //   case 1:
-    //      v = 1;
-    //   case 2, 3:
-    //      v = 2;
+    //   case 1i:
+    //      v = 1i;
+    //   case 2i, 3i:
+    //      v = 2i;
     //   default: {}
-    //      v = 3;
+    //      v = 3i;
     //  }
 
     auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
@@ -224,12 +226,12 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
 
     auto* func = Func("a_func", {}, ty.void_(),
                       {
-                          Switch(Expr("a"),                    //
-                                 Case(Expr(1),                 //
-                                      Block(Assign("v", 1))),  //
-                                 Case({Expr(2), Expr(3)},      //
-                                      Block(Assign("v", 2))),  //
-                                 DefaultCase(Block(Assign("v", 3)))),
+                          Switch(Expr("a"),                      //
+                                 Case(Expr(1_i),                 //
+                                      Block(Assign("v", 1_i))),  //
+                                 Case({Expr(2_i), Expr(3_i)},    //
+                                      Block(Assign("v", 2_i))),  //
+                                 DefaultCase(Block(Assign("v", 3_i)))),
                       });
 
     spirv::Builder& b = Build();
@@ -273,13 +275,13 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
     // switch(a) {
-    //   case 1:
-    //      v = 1;
+    //   case 1i:
+    //      v = 1i;
     //      fallthrough;
-    //   case 2:
-    //      v = 2;
+    //   case 2i:
+    //      v = 2i;
     //   default: {}
-    //      v = 3;
+    //      v = 3i;
     //  }
 
     auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
@@ -287,12 +289,12 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
 
     auto* func = Func("a_func", {}, ty.void_(),
                       {
-                          Switch(Expr("a"),                                   //
-                                 Case(Expr(1),                                //
-                                      Block(Assign("v", 1), Fallthrough())),  //
-                                 Case(Expr(2),                                //
-                                      Block(Assign("v", 2))),                 //
-                                 DefaultCase(Block(Assign("v", 3)))),
+                          Switch(Expr("a"),                                     //
+                                 Case(Expr(1_i),                                //
+                                      Block(Assign("v", 1_i), Fallthrough())),  //
+                                 Case(Expr(2_i),                                //
+                                      Block(Assign("v", 2_i))),                 //
+                                 DefaultCase(Block(Assign("v", 3_i)))),
                       });
 
     spirv::Builder& b = Build();
@@ -340,22 +342,22 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
     //     if (true) {
     //       break;
     //     }
-    //     v = 1;
+    //     v = 1i;
     //   default: {}
     // }
 
     auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
     auto* a = Global("a", ty.i32(), ast::StorageClass::kPrivate);
 
-    auto* func = Func(
-        "a_func", {}, ty.void_(),
-        {
-            Switch("a",           //
-                   Case(Expr(1),  //
-                        Block(    //
-                            If(Expr(true), Block(create<ast::BreakStatement>())), Assign("v", 1))),
-                   DefaultCase()),
-        });
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Switch("a",             //
+                                 Case(Expr(1_i),  //
+                                      Block(      //
+                                          If(Expr(true), Block(create<ast::BreakStatement>())),
+                                          Assign("v", 1_i))),
+                                 DefaultCase()),
+                      });
 
     spirv::Builder& b = Build();
 
@@ -398,24 +400,24 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Switch_AllReturn) {
-    // switch (1) {
-    //   case 1: {
-    //     return 1;
+    // switch (1i) {
+    //   case 1i: {
+    //     return 1i;
     //   }
-    //   case 2: {
+    //   case 2i: {
     //     fallthrough;
     //   }
     //   default: {
-    //     return 3;
+    //     return 3i;
     //   }
     // }
 
     auto* fn = Func("f", {}, ty.i32(),
                     {
-                        Switch(1,                                    //
-                               Case(Expr(1), Block(Return(1))),      //
-                               Case(Expr(2), Block(Fallthrough())),  //
-                               DefaultCase(Block(Return(3)))),
+                        Switch(1_i,                                    //
+                               Case(Expr(1_i), Block(Return(1_i))),    //
+                               Case(Expr(2_i), Block(Fallthrough())),  //
+                               DefaultCase(Block(Return(3_i)))),
                     });
 
     spirv::Builder& b = Build();

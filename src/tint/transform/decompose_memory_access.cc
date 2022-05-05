@@ -38,6 +38,8 @@
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeMemoryAccess);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::DecomposeMemoryAccess::Intrinsic);
 
@@ -63,7 +65,7 @@ struct OffsetExpr : Offset {
         auto* type = ctx.src->Sem().Get(expr)->Type()->UnwrapRef();
         auto* res = ctx.Clone(expr);
         if (!type->Is<sem::U32>()) {
-            res = ctx.dst->Construct<ProgramBuilder::u32>(res);
+            res = ctx.dst->Construct<u32>(res);
         }
         return res;
     }
@@ -77,7 +79,7 @@ struct OffsetLiteral : Castable<OffsetLiteral, Offset> {
     explicit OffsetLiteral(uint32_t lit) : literal(lit) {}
 
     const ast::Expression* Build(CloneContext& ctx) const override {
-        return ctx.dst->Expr(literal);
+        return ctx.dst->Expr(u32(literal));
     }
 };
 
@@ -467,13 +469,13 @@ struct DecomposeMemoryAccess::State {
                 // }
                 auto load = LoadFunc(buf_ty, arr_ty->ElemType()->UnwrapRef(), var_user);
                 auto* arr = b.Var(b.Symbols().New("arr"), CreateASTTypeFor(ctx, arr_ty));
-                auto* i = b.Var(b.Symbols().New("i"), nullptr, b.Expr(0u));
+                auto* i = b.Var(b.Symbols().New("i"), nullptr, b.Expr(0_u));
                 auto* for_init = b.Decl(i);
                 auto* for_cond = b.create<ast::BinaryExpression>(
-                    ast::BinaryOp::kLessThan, b.Expr(i), b.Expr(arr_ty->Count()));
-                auto* for_cont = b.Assign(i, b.Add(i, 1u));
+                    ast::BinaryOp::kLessThan, b.Expr(i), b.Expr(u32(arr_ty->Count())));
+                auto* for_cont = b.Assign(i, b.Add(i, 1_u));
                 auto* arr_el = b.IndexAccessor(arr, i);
-                auto* el_offset = b.Add(b.Expr("offset"), b.Mul(i, arr_ty->Stride()));
+                auto* el_offset = b.Add(b.Expr("offset"), b.Mul(i, u32(arr_ty->Stride())));
                 auto* el_val = b.Call(load, "buffer", el_offset);
                 auto* for_loop =
                     b.For(for_init, for_cond, for_cont, b.Block(b.Assign(arr_el, el_val)));
@@ -490,12 +492,12 @@ struct DecomposeMemoryAccess::State {
                     auto* vec_ty = mat_ty->ColumnType();
                     Symbol load = LoadFunc(buf_ty, vec_ty, var_user);
                     for (uint32_t i = 0; i < mat_ty->columns(); i++) {
-                        auto* offset = b.Add("offset", i * mat_ty->ColumnStride());
+                        auto* offset = b.Add("offset", u32(i * mat_ty->ColumnStride()));
                         values.emplace_back(b.Call(load, "buffer", offset));
                     }
                 } else if (auto* str = el_ty->As<sem::Struct>()) {
                     for (auto* member : str->Members()) {
-                        auto* offset = b.Add("offset", member->Offset());
+                        auto* offset = b.Add("offset", u32(member->Offset()));
                         Symbol load = LoadFunc(buf_ty, member->Type()->UnwrapRef(), var_user);
                         values.emplace_back(b.Call(load, "buffer", offset));
                     }
@@ -561,13 +563,13 @@ struct DecomposeMemoryAccess::State {
                     // }
                     auto* array = b.Var(b.Symbols().New("array"), nullptr, b.Expr("value"));
                     auto store = StoreFunc(buf_ty, arr_ty->ElemType()->UnwrapRef(), var_user);
-                    auto* i = b.Var(b.Symbols().New("i"), nullptr, b.Expr(0u));
+                    auto* i = b.Var(b.Symbols().New("i"), nullptr, b.Expr(0_u));
                     auto* for_init = b.Decl(i);
                     auto* for_cond = b.create<ast::BinaryExpression>(
-                        ast::BinaryOp::kLessThan, b.Expr(i), b.Expr(arr_ty->Count()));
-                    auto* for_cont = b.Assign(i, b.Add(i, 1u));
+                        ast::BinaryOp::kLessThan, b.Expr(i), b.Expr(u32(arr_ty->Count())));
+                    auto* for_cont = b.Assign(i, b.Add(i, 1_u));
                     auto* arr_el = b.IndexAccessor(array, i);
-                    auto* el_offset = b.Add(b.Expr("offset"), b.Mul(i, arr_ty->Stride()));
+                    auto* el_offset = b.Add(b.Expr("offset"), b.Mul(i, u32(arr_ty->Stride())));
                     auto* store_stmt = b.CallStmt(b.Call(store, "buffer", el_offset, arr_el));
                     auto* for_loop = b.For(for_init, for_cond, for_cont, b.Block(store_stmt));
 
@@ -576,14 +578,14 @@ struct DecomposeMemoryAccess::State {
                     auto* vec_ty = mat_ty->ColumnType();
                     Symbol store = StoreFunc(buf_ty, vec_ty, var_user);
                     for (uint32_t i = 0; i < mat_ty->columns(); i++) {
-                        auto* offset = b.Add("offset", i * mat_ty->ColumnStride());
-                        auto* access = b.IndexAccessor("value", i);
+                        auto* offset = b.Add("offset", u32(i * mat_ty->ColumnStride()));
+                        auto* access = b.IndexAccessor("value", u32(i));
                         auto* call = b.Call(store, "buffer", offset, access);
                         body.emplace_back(b.CallStmt(call));
                     }
                 } else if (auto* str = el_ty->As<sem::Struct>()) {
                     for (auto* member : str->Members()) {
-                        auto* offset = b.Add("offset", member->Offset());
+                        auto* offset = b.Add("offset", u32(member->Offset()));
                         auto* access =
                             b.MemberAccessor("value", ctx.Clone(member->Declaration()->symbol));
                         Symbol store = StoreFunc(buf_ty, member->Type()->UnwrapRef(), var_user);

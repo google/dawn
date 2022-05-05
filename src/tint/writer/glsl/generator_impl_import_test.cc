@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/glsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::glsl {
 namespace {
 
@@ -72,7 +74,7 @@ using GlslImportData_SingleIntParamTest = TestParamHelper<GlslImportData>;
 TEST_P(GlslImportData_SingleIntParamTest, IntScalar) {
     auto param = GetParam();
 
-    auto* expr = Call(param.name, Expr(1));
+    auto* expr = Call(param.name, Expr(1_i));
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
@@ -177,7 +179,7 @@ using GlslImportData_DualParam_Int_Test = TestParamHelper<GlslImportData>;
 TEST_P(GlslImportData_DualParam_Int_Test, IntScalar) {
     auto param = GetParam();
 
-    auto* expr = Call(param.name, 1, 2);
+    auto* expr = Call(param.name, 1_i, 2_i);
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
@@ -240,7 +242,7 @@ using GlslImportData_TripleParam_Int_Test = TestParamHelper<GlslImportData>;
 TEST_P(GlslImportData_TripleParam_Int_Test, IntScalar) {
     auto param = GetParam();
 
-    auto* expr = Call(param.name, 1, 2, 3);
+    auto* expr = Call(param.name, 1_i, 2_i, 3_i);
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();

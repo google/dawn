@@ -16,6 +16,8 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/writer/msl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::msl {
 namespace {
 
@@ -641,7 +643,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_ModuleV
              },
              {
                  Stage(ast::PipelineStage::kCompute),
-                 WorkgroupSize(1),
+                 WorkgroupSize(1_i),
              });
     }
 
@@ -651,7 +653,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_ModuleV
         Func("b", ast::VariableList{}, ty.void_(), ast::StatementList{Decl(var), Return()},
              {
                  Stage(ast::PipelineStage::kCompute),
-                 WorkgroupSize(1),
+                 WorkgroupSize(1_i),
              });
     }
 

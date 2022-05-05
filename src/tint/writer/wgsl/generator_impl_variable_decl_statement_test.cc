@@ -15,6 +15,8 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/writer/wgsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::wgsl {
 namespace {
 
@@ -35,7 +37,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_InferredType) {
-    auto* var = Var("a", nullptr, ast::StorageClass::kNone, Expr(123));
+    auto* var = Var("a", nullptr, ast::StorageClass::kNone, Expr(123_i));
 
     auto* stmt = Decl(var);
     WrapInFunction(stmt);
@@ -45,7 +47,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_InferredType) {
     gen.increment_indent();
 
     ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-    EXPECT_EQ(gen.result(), "  var a = 123;\n");
+    EXPECT_EQ(gen.result(), "  var a = 123i;\n");
 }
 
 }  // namespace

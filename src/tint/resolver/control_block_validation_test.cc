@@ -18,6 +18,8 @@
 #include "src/tint/ast/switch_statement.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -46,11 +48,11 @@ TEST_F(ResolverControlBlockValidationTest, SwitchWithoutDefault_Fail) {
     // switch (a) {
     //   case 1: {}
     // }
-    auto* var = Var("a", ty.i32(), Expr(2));
+    auto* var = Var("a", ty.i32(), Expr(2_i));
 
     auto* block = Block(Decl(var),                     //
                         Switch(Source{{12, 34}}, "a",  //
-                               Case(Expr(1))));
+                               Case(Expr(1_i))));
 
     WrapInFunction(block);
 
@@ -65,12 +67,12 @@ TEST_F(ResolverControlBlockValidationTest, SwitchWithTwoDefault_Fail) {
     //   case 1: {}
     //   default: {}
     // }
-    auto* var = Var("a", ty.i32(), Expr(2));
+    auto* var = Var("a", ty.i32(), Expr(2_i));
 
-    auto* block = Block(Decl(var),             //
-                        Switch("a",            //
-                               DefaultCase(),  //
-                               Case(Expr(1)),  //
+    auto* block = Block(Decl(var),               //
+                        Switch("a",              //
+                               DefaultCase(),    //
+                               Case(Expr(1_i)),  //
                                DefaultCase(Source{{12, 34}})));
 
     WrapInFunction(block);
@@ -88,7 +90,7 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_Loop_continue) {
     // }
     auto* decl_z = Decl(Var("z", ty.i32()));
     auto* cont = Continue();
-    auto* assign_z = Assign(Source{{12, 34}}, "z", 1);
+    auto* assign_z = Assign(Source{{12, 34}}, "z", 1_i);
     WrapInFunction(Loop(Block(If(false, Block(Break())), decl_z, cont, assign_z)));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -107,7 +109,7 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_Loop_continue_InBlock
     // }
     auto* decl_z = Decl(Var("z", ty.i32()));
     auto* cont = Continue();
-    auto* assign_z = Assign(Source{{12, 34}}, "z", 1);
+    auto* assign_z = Assign(Source{{12, 34}}, "z", 1_i);
     WrapInFunction(
         Loop(Block(If(false, Block(Break())), decl_z, Block(Block(Block(cont))), assign_z)));
 
@@ -126,7 +128,7 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_ForLoop_continue) {
     // }
     auto* decl_z = Decl(Var("z", ty.i32()));
     auto* cont = Continue();
-    auto* assign_z = Assign(Source{{12, 34}}, "z", 1);
+    auto* assign_z = Assign(Source{{12, 34}}, "z", 1_i);
     WrapInFunction(For(nullptr, false, nullptr,  //
                        Block(decl_z, cont, assign_z)));
 
@@ -145,7 +147,7 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_ForLoop_continue_InBl
     // }
     auto* decl_z = Decl(Var("z", ty.i32()));
     auto* cont = Continue();
-    auto* assign_z = Assign(Source{{12, 34}}, "z", 1);
+    auto* assign_z = Assign(Source{{12, 34}}, "z", 1_i);
     WrapInFunction(
         For(nullptr, false, nullptr, Block(decl_z, Block(Block(Block(cont))), assign_z)));
 
@@ -157,19 +159,19 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_ForLoop_continue_InBl
 }
 
 TEST_F(ResolverControlBlockValidationTest, UnreachableCode_break) {
-    // switch (1) {
-    //   case 1: {
+    // switch (1i) {
+    //   case 1i: {
     //     var z: i32;
     //     break;
-    //     z = 1;
+    //     z = 1i;
     //   default: {}
     // }
     auto* decl_z = Decl(Var("z", ty.i32()));
     auto* brk = Break();
-    auto* assign_z = Assign(Source{{12, 34}}, "z", 1);
-    WrapInFunction(                                                //
-        Block(Switch(1,                                            //
-                     Case(Expr(1), Block(decl_z, brk, assign_z)),  //
+    auto* assign_z = Assign(Source{{12, 34}}, "z", 1_i);
+    WrapInFunction(                                                  //
+        Block(Switch(1_i,                                            //
+                     Case(Expr(1_i), Block(decl_z, brk, assign_z)),  //
                      DefaultCase())));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -181,18 +183,18 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_break) {
 
 TEST_F(ResolverControlBlockValidationTest, UnreachableCode_break_InBlocks) {
     // loop {
-    //   switch (1) {
-    //     case 1: { {{{break;}}} var a : u32 = 2;}
+    //   switch (1i) {
+    //     case 1i: { {{{break;}}} var a : u32 = 2;}
     //     default: {}
     //   }
     //   break;
     // }
     auto* decl_z = Decl(Var("z", ty.i32()));
     auto* brk = Break();
-    auto* assign_z = Assign(Source{{12, 34}}, "z", 1);
+    auto* assign_z = Assign(Source{{12, 34}}, "z", 1_i);
     WrapInFunction(
-        Loop(Block(Switch(1,  //
-                          Case(Expr(1), Block(decl_z, Block(Block(Block(brk))), assign_z)),
+        Loop(Block(Switch(1_i,  //
+                          Case(Expr(1_i), Block(decl_z, Block(Block(Block(brk))), assign_z)),
                           DefaultCase()),  //
                    Break())));
 
@@ -206,13 +208,13 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_break_InBlocks) {
 TEST_F(ResolverControlBlockValidationTest, SwitchConditionTypeMustMatchSelectorType2_Fail) {
     // var a : u32 = 2;
     // switch (a) {
-    //   case 1: {}
+    //   case 1i: {}
     //   default: {}
     // }
-    auto* var = Var("a", ty.i32(), Expr(2));
+    auto* var = Var("a", ty.i32(), Expr(2_i));
 
-    auto* block = Block(Decl(var), Switch("a",                                 //
-                                          Case(Source{{12, 34}}, {Expr(1u)}),  //
+    auto* block = Block(Decl(var), Switch("a",                                  //
+                                          Case(Source{{12, 34}}, {Expr(1_u)}),  //
                                           DefaultCase()));
     WrapInFunction(block);
 
@@ -225,14 +227,14 @@ TEST_F(ResolverControlBlockValidationTest, SwitchConditionTypeMustMatchSelectorT
 TEST_F(ResolverControlBlockValidationTest, SwitchConditionTypeMustMatchSelectorType_Fail) {
     // var a : u32 = 2;
     // switch (a) {
-    //   case -1: {}
+    //   case -1i: {}
     //   default: {}
     // }
-    auto* var = Var("a", ty.u32(), Expr(2u));
+    auto* var = Var("a", ty.u32(), Expr(2_u));
 
-    auto* block = Block(Decl(var),                                  //
-                        Switch("a",                                 //
-                               Case(Source{{12, 34}}, {Expr(-1)}),  //
+    auto* block = Block(Decl(var),                                       //
+                        Switch("a",                                      //
+                               Case(Source{{12, 34}}, {Expr(i32(-1))}),  //
                                DefaultCase()));
     WrapInFunction(block);
 
@@ -249,15 +251,15 @@ TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelectorValueUint_Fail) 
     //   case 2u, 3u, 2u: {}
     //   default: {}
     // }
-    auto* var = Var("a", ty.u32(), Expr(3u));
+    auto* var = Var("a", ty.u32(), Expr(3_u));
 
     auto* block = Block(Decl(var),   //
                         Switch("a",  //
-                               Case(Expr(0u)),
+                               Case(Expr(0_u)),
                                Case({
-                                   Expr(Source{{12, 34}}, 2u),
-                                   Expr(3u),
-                                   Expr(Source{{56, 78}}, 2u),
+                                   Expr(Source{{12, 34}}, 2_u),
+                                   Expr(3_u),
+                                   Expr(Source{{56, 78}}, 2_u),
                                }),
                                DefaultCase()));
     WrapInFunction(block);
@@ -275,16 +277,16 @@ TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelectorValueSint_Fail) 
     //   case 0,1,2,-10: {}
     //   default: {}
     // }
-    auto* var = Var("a", ty.i32(), Expr(2));
+    auto* var = Var("a", ty.i32(), Expr(2_i));
 
     auto* block = Block(Decl(var),   //
                         Switch("a",  //
-                               Case(Expr(Source{{12, 34}}, -10)),
+                               Case(Expr(Source{{12, 34}}, i32(-10))),
                                Case({
-                                   Expr(0),
-                                   Expr(1),
-                                   Expr(2),
-                                   Expr(Source{{56, 78}}, -10),
+                                   Expr(0_i),
+                                   Expr(1_i),
+                                   Expr(2_i),
+                                   Expr(Source{{56, 78}}, i32(-10)),
                                }),
                                DefaultCase()));
     WrapInFunction(block);
@@ -300,7 +302,7 @@ TEST_F(ResolverControlBlockValidationTest, LastClauseLastStatementIsFallthrough_
     // switch (a) {
     //   default: { fallthrough; }
     // }
-    auto* var = Var("a", ty.i32(), Expr(2));
+    auto* var = Var("a", ty.i32(), Expr(2_i));
     auto* fallthrough = create<ast::FallthroughStatement>(Source{{12, 34}});
     auto* block = Block(Decl(var),   //
                         Switch("a",  //
@@ -319,12 +321,12 @@ TEST_F(ResolverControlBlockValidationTest, SwitchCase_Pass) {
     //   default: {}
     //   case 5: {}
     // }
-    auto* var = Var("a", ty.i32(), Expr(2));
+    auto* var = Var("a", ty.i32(), Expr(2_i));
 
     auto* block = Block(Decl(var),                             //
                         Switch("a",                            //
                                DefaultCase(Source{{12, 34}}),  //
-                               Case(Expr(5))));
+                               Case(Expr(5_i))));
     WrapInFunction(block);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -338,7 +340,7 @@ TEST_F(ResolverControlBlockValidationTest, SwitchCaseAlias_Pass) {
     // }
 
     auto* my_int = Alias("MyInt", ty.u32());
-    auto* var = Var("a", ty.Of(my_int), Expr(2u));
+    auto* var = Var("a", ty.Of(my_int), Expr(2_u));
     auto* block = Block(Decl(var),  //
                         Switch("a", DefaultCase(Source{{12, 34}})));
 

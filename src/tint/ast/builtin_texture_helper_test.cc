@@ -18,11 +18,9 @@
 #include "src/tint/sem/multisampled_texture.h"
 #include "src/tint/sem/sampled_texture.h"
 
-namespace tint::ast::builtin::test {
+using namespace tint::number_suffixes;  // NOLINT
 
-using u32 = ProgramBuilder::u32;
-using i32 = ProgramBuilder::i32;
-using f32 = ProgramBuilder::f32;
+namespace tint::ast::builtin::test {
 
 TextureOverloadCase::TextureOverloadCase(ValidTextureOverload o,
                                          const char* desc,
@@ -214,7 +212,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             ast::TextureDimension::k2d,
             TextureDataType::kF32,
             "textureDimensions",
-            [](ProgramBuilder* b) { return b->ExprList("texture", 1); },
+            [](ProgramBuilder* b) { return b->ExprList("texture", 1_i); },
         },
         {
             ValidTextureOverload::kDimensions2dArray,
@@ -235,7 +233,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             ast::TextureDimension::k2dArray,
             TextureDataType::kF32,
             "textureDimensions",
-            [](ProgramBuilder* b) { return b->ExprList("texture", 1); },
+            [](ProgramBuilder* b) { return b->ExprList("texture", 1_i); },
         },
         {
             ValidTextureOverload::kDimensions3d,
@@ -256,7 +254,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             ast::TextureDimension::k3d,
             TextureDataType::kF32,
             "textureDimensions",
-            [](ProgramBuilder* b) { return b->ExprList("texture", 1); },
+            [](ProgramBuilder* b) { return b->ExprList("texture", 1_i); },
         },
         {
             ValidTextureOverload::kDimensionsCube,
@@ -277,7 +275,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             ast::TextureDimension::kCube,
             TextureDataType::kF32,
             "textureDimensions",
-            [](ProgramBuilder* b) { return b->ExprList("texture", 1); },
+            [](ProgramBuilder* b) { return b->ExprList("texture", 1_i); },
         },
         {
             ValidTextureOverload::kDimensionsCubeArray,
@@ -298,7 +296,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             ast::TextureDimension::kCubeArray,
             TextureDataType::kF32,
             "textureDimensions",
-            [](ProgramBuilder* b) { return b->ExprList("texture", 1); },
+            [](ProgramBuilder* b) { return b->ExprList("texture", 1_i); },
         },
         {
             ValidTextureOverload::kDimensionsMultisampled2d,
@@ -329,7 +327,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             ast::TextureDimension::k2d,
             TextureDataType::kF32,
             "textureDimensions",
-            [](ProgramBuilder* b) { return b->ExprList("texture", 1); },
+            [](ProgramBuilder* b) { return b->ExprList("texture", 1_i); },
         },
         {
             ValidTextureOverload::kDimensionsDepth2dArray,
@@ -350,7 +348,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             ast::TextureDimension::k2dArray,
             TextureDataType::kF32,
             "textureDimensions",
-            [](ProgramBuilder* b) { return b->ExprList("texture", 1); },
+            [](ProgramBuilder* b) { return b->ExprList("texture", 1_i); },
         },
         {
             ValidTextureOverload::kDimensionsDepthCube,
@@ -371,7 +369,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             ast::TextureDimension::kCube,
             TextureDataType::kF32,
             "textureDimensions",
-            [](ProgramBuilder* b) { return b->ExprList("texture", 1); },
+            [](ProgramBuilder* b) { return b->ExprList("texture", 1_i); },
         },
         {
             ValidTextureOverload::kDimensionsDepthCubeArray,
@@ -392,7 +390,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             ast::TextureDimension::kCubeArray,
             TextureDataType::kF32,
             "textureDimensions",
-            [](ProgramBuilder* b) { return b->ExprList("texture", 1); },
+            [](ProgramBuilder* b) { return b->ExprList("texture", 1_i); },
         },
         {
             ValidTextureOverload::kDimensionsDepthMultisampled2d,
@@ -460,7 +458,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureGather",
             [](ProgramBuilder* b) {
-                return b->ExprList(0,                        // component
+                return b->ExprList(0_i,                      // component
                                    "texture",                // t
                                    "sampler",                // s
                                    b->vec2<f32>(1.f, 2.f));  // coords
@@ -479,11 +477,11 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureGather",
             [](ProgramBuilder* b) {
-                return b->ExprList(0,                       // component
-                                   "texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   b->vec2<i32>(3, 4));     // offset
+                return b->ExprList(0_i,                      // component
+                                   "texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   b->vec2<i32>(3_i, 4_i));  // offset
             },
         },
         {
@@ -499,11 +497,11 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureGather",
             [](ProgramBuilder* b) {
-                return b->ExprList(0,                       // component
+                return b->ExprList(0_i,                     // component
                                    "texture",               // t
                                    "sampler",               // s
                                    b->vec2<f32>(1.f, 2.f),  // coords
-                                   3);                      // array index
+                                   3_i);                    // array index
             },
         },
         {
@@ -520,12 +518,12 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureGather",
             [](ProgramBuilder* b) {
-                return b->ExprList(0,                       // component
-                                   "texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   3,                       // array_index
-                                   b->vec2<i32>(4, 5));     // offset
+                return b->ExprList(0_i,                      // component
+                                   "texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   3_i,                      // array_index
+                                   b->vec2<i32>(4_i, 5_i));  // offset
             },
         },
         {
@@ -540,7 +538,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureGather",
             [](ProgramBuilder* b) {
-                return b->ExprList(0,                             // component
+                return b->ExprList(0_i,                           // component
                                    "texture",                     // t
                                    "sampler",                     // s
                                    b->vec3<f32>(1.f, 2.f, 3.f));  // coords
@@ -559,11 +557,11 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureGather",
             [](ProgramBuilder* b) {
-                return b->ExprList(0,                            // component
+                return b->ExprList(0_i,                          // component
                                    "texture",                    // t
                                    "sampler",                    // s
                                    b->vec3<f32>(1.f, 2.f, 3.f),  // coords
-                                   4);                           // array_index
+                                   4_i);                         // array_index
             },
         },
         {
@@ -594,10 +592,10 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureGather",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   b->vec2<i32>(3, 4));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   b->vec2<i32>(3_i, 4_i));  // offset
             },
         },
         {
@@ -615,7 +613,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",               // t
                                    "sampler",               // s
                                    b->vec2<f32>(1.f, 2.f),  // coords
-                                   3);                      // array_index
+                                   3_i);                    // array_index
             },
         },
         {
@@ -631,11 +629,11 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureGather",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   3,                       // array_index
-                                   b->vec2<i32>(4, 5));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   3_i,                      // array_index
+                                   b->vec2<i32>(4_i, 5_i));  // offset
             },
         },
         {
@@ -669,7 +667,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",                    // t
                                    "sampler",                    // s
                                    b->vec3<f32>(1.f, 2.f, 3.f),  // coords
-                                   4);                           // array_index
+                                   4_i);                         // array_index
             },
         },
         {
@@ -703,11 +701,11 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureGatherCompare",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   3.f,                     // depth_ref
-                                   b->vec2<i32>(4, 5));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   3.f,                      // depth_ref
+                                   b->vec2<i32>(4_i, 5_i));  // offset
             },
         },
         {
@@ -726,7 +724,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",               // t
                                    "sampler",               // s
                                    b->vec2<f32>(1.f, 2.f),  // coords
-                                   3,                       // array_index
+                                   3_i,                     // array_index
                                    4.f);                    // depth_ref
             },
         },
@@ -744,12 +742,12 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureGatherCompare",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   3,                       // array_index
-                                   4.f,                     // depth_ref
-                                   b->vec2<i32>(5, 6));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   3_i,                      // array_index
+                                   4.f,                      // depth_ref
+                                   b->vec2<i32>(5_i, 6_i));  // offset
             },
         },
         {
@@ -786,7 +784,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",                    // t
                                    "sampler",                    // s
                                    b->vec3<f32>(1.f, 2.f, 3.f),  // coords
-                                   4,                            // array_index
+                                   4_i,                          // array_index
                                    5.f);                         // depth_ref
             },
         },
@@ -984,10 +982,10 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSample",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   b->vec2<i32>(3, 4));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   b->vec2<i32>(3_i, 4_i));  // offset
             },
         },
         {
@@ -1005,7 +1003,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",               // t
                                    "sampler",               // s
                                    b->vec2<f32>(1.f, 2.f),  // coords
-                                   3);                      // array_index
+                                   3_i);                    // array_index
             },
         },
         {
@@ -1021,11 +1019,11 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSample",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   3,                       // array_index
-                                   b->vec2<i32>(4, 5));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   3_i,                      // array_index
+                                   b->vec2<i32>(4_i, 5_i));  // offset
             },
         },
         {
@@ -1056,10 +1054,10 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSample",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",                    // t
-                                   "sampler",                    // s
-                                   b->vec3<f32>(1.f, 2.f, 3.f),  // coords
-                                   b->vec3<i32>(4, 5, 6));       // offset
+                return b->ExprList("texture",                     // t
+                                   "sampler",                     // s
+                                   b->vec3<f32>(1.f, 2.f, 3.f),   // coords
+                                   b->vec3<i32>(4_i, 5_i, 6_i));  // offset
             },
         },
         {
@@ -1093,7 +1091,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",                    // t
                                    "sampler",                    // s
                                    b->vec3<f32>(1.f, 2.f, 3.f),  // coords
-                                   4);                           // array_index
+                                   4_i);                         // array_index
             },
         },
         {
@@ -1124,10 +1122,10 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSample",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   b->vec2<i32>(3, 4));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   b->vec2<i32>(3_i, 4_i));  // offset
             },
         },
         {
@@ -1145,7 +1143,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",               // t
                                    "sampler",               // s
                                    b->vec2<f32>(1.f, 2.f),  // coords
-                                   3);                      // array_index
+                                   3_i);                    // array_index
             },
         },
         {
@@ -1161,11 +1159,11 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSample",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   3,                       // array_index
-                                   b->vec2<i32>(4, 5));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   3_i,                      // array_index
+                                   b->vec2<i32>(4_i, 5_i));  // offset
             },
         },
         {
@@ -1199,7 +1197,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",                    // t
                                    "sampler",                    // s
                                    b->vec3<f32>(1.f, 2.f, 3.f),  // coords
-                                   4);                           // array_index
+                                   4_i);                         // array_index
             },
         },
         {
@@ -1233,11 +1231,11 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSampleBias",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   3.f,                     // bias
-                                   b->vec2<i32>(4, 5));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   3.f,                      // bias
+                                   b->vec2<i32>(4_i, 5_i));  // offset
             },
         },
         {
@@ -1256,7 +1254,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",               // t
                                    "sampler",               // s
                                    b->vec2<f32>(1.f, 2.f),  // coords
-                                   4,                       // array_index
+                                   4_i,                     // array_index
                                    3.f);                    // bias
             },
         },
@@ -1274,12 +1272,12 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSampleBias",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   3,                       // array_index
-                                   4.f,                     // bias
-                                   b->vec2<i32>(5, 6));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   3_i,                      // array_index
+                                   4.f,                      // bias
+                                   b->vec2<i32>(5_i, 6_i));  // offset
             },
         },
         {
@@ -1313,11 +1311,11 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSampleBias",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",                    // t
-                                   "sampler",                    // s
-                                   b->vec3<f32>(1.f, 2.f, 3.f),  // coords
-                                   4.f,                          // bias
-                                   b->vec3<i32>(5, 6, 7));       // offset
+                return b->ExprList("texture",                     // t
+                                   "sampler",                     // s
+                                   b->vec3<f32>(1.f, 2.f, 3.f),   // coords
+                                   4.f,                           // bias
+                                   b->vec3<i32>(5_i, 6_i, 7_i));  // offset
             },
         },
         {
@@ -1354,7 +1352,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",                    // t
                                    "sampler",                    // s
                                    b->vec3<f32>(1.f, 2.f, 3.f),  // coords
-                                   3,                            // array_index
+                                   3_i,                          // array_index
                                    4.f);                         // bias
             },
         },
@@ -1389,11 +1387,11 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSampleLevel",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   3.f,                     // level
-                                   b->vec2<i32>(4, 5));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   3.f,                      // level
+                                   b->vec2<i32>(4_i, 5_i));  // offset
             },
         },
         {
@@ -1412,7 +1410,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",               // t
                                    "sampler",               // s
                                    b->vec2<f32>(1.f, 2.f),  // coords
-                                   3,                       // array_index
+                                   3_i,                     // array_index
                                    4.f);                    // level
             },
         },
@@ -1430,12 +1428,12 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSampleLevel",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   3,                       // array_index
-                                   4.f,                     // level
-                                   b->vec2<i32>(5, 6));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   3_i,                      // array_index
+                                   4.f,                      // level
+                                   b->vec2<i32>(5_i, 6_i));  // offset
             },
         },
         {
@@ -1469,11 +1467,11 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSampleLevel",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",                    // t
-                                   "sampler",                    // s
-                                   b->vec3<f32>(1.f, 2.f, 3.f),  // coords
-                                   4.f,                          // level
-                                   b->vec3<i32>(5, 6, 7));       // offset
+                return b->ExprList("texture",                     // t
+                                   "sampler",                     // s
+                                   b->vec3<f32>(1.f, 2.f, 3.f),   // coords
+                                   4.f,                           // level
+                                   b->vec3<i32>(5_i, 6_i, 7_i));  // offset
             },
         },
         {
@@ -1510,7 +1508,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",                    // t
                                    "sampler",                    // s
                                    b->vec3<f32>(1.f, 2.f, 3.f),  // coords
-                                   4,                            // array_index
+                                   4_i,                          // array_index
                                    5.f);                         // level
             },
         },
@@ -1529,7 +1527,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",               // t
                                    "sampler",               // s
                                    b->vec2<f32>(1.f, 2.f),  // coords
-                                   3);                      // level
+                                   3_i);                    // level
             },
         },
         {
@@ -1545,11 +1543,11 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSampleLevel",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   3,                       // level
-                                   b->vec2<i32>(4, 5));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   3_i,                      // level
+                                   b->vec2<i32>(4_i, 5_i));  // offset
             },
         },
         {
@@ -1568,8 +1566,8 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",               // t
                                    "sampler",               // s
                                    b->vec2<f32>(1.f, 2.f),  // coords
-                                   3,                       // array_index
-                                   4);                      // level
+                                   3_i,                     // array_index
+                                   4_i);                    // level
             },
         },
         {
@@ -1586,12 +1584,12 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSampleLevel",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   3,                       // array_index
-                                   4,                       // level
-                                   b->vec2<i32>(5, 6));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   3_i,                      // array_index
+                                   4_i,                      // level
+                                   b->vec2<i32>(5_i, 6_i));  // offset
             },
         },
         {
@@ -1609,7 +1607,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",                    // t
                                    "sampler",                    // s
                                    b->vec3<f32>(1.f, 2.f, 3.f),  // coords
-                                   4);                           // level
+                                   4_i);                         // level
             },
         },
         {
@@ -1628,8 +1626,8 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",                    // t
                                    "sampler",                    // s
                                    b->vec3<f32>(1.f, 2.f, 3.f),  // coords
-                                   4,                            // array_index
-                                   5);                           // level
+                                   4_i,                          // array_index
+                                   5_i);                         // level
             },
         },
         {
@@ -1666,12 +1664,12 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSampleGrad",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   b->vec2<f32>(3.f, 4.f),  // ddx
-                                   b->vec2<f32>(5.f, 6.f),  // ddy
-                                   b->vec2<i32>(7, 7));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   b->vec2<f32>(3.f, 4.f),   // ddx
+                                   b->vec2<f32>(5.f, 6.f),   // ddy
+                                   b->vec2<i32>(7_i, 7_i));  // offset
             },
         },
         {
@@ -1691,7 +1689,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",                // t
                                    "sampler",                // s
                                    b->vec2<f32>(1.f, 2.f),   // coords
-                                   3,                        // array_index
+                                   3_i,                      // array_index
                                    b->vec2<f32>(4.f, 5.f),   // ddx
                                    b->vec2<f32>(6.f, 7.f));  // ddy
             },
@@ -1711,13 +1709,13 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSampleGrad",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   3,                       // array_index
-                                   b->vec2<f32>(4.f, 5.f),  // ddx
-                                   b->vec2<f32>(6.f, 7.f),  // ddy
-                                   b->vec2<i32>(6, 7));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   3_i,                      // array_index
+                                   b->vec2<f32>(4.f, 5.f),   // ddx
+                                   b->vec2<f32>(6.f, 7.f),   // ddy
+                                   b->vec2<i32>(6_i, 7_i));  // offset
             },
         },
         {
@@ -1754,12 +1752,12 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSampleGrad",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",                    // t
-                                   "sampler",                    // s
-                                   b->vec3<f32>(1.f, 2.f, 3.f),  // coords
-                                   b->vec3<f32>(4.f, 5.f, 6.f),  // ddx
-                                   b->vec3<f32>(7.f, 8.f, 9.f),  // ddy
-                                   b->vec3<i32>(0, 1, 2));       // offset
+                return b->ExprList("texture",                     // t
+                                   "sampler",                     // s
+                                   b->vec3<f32>(1.f, 2.f, 3.f),   // coords
+                                   b->vec3<f32>(4.f, 5.f, 6.f),   // ddx
+                                   b->vec3<f32>(7.f, 8.f, 9.f),   // ddy
+                                   b->vec3<i32>(0_i, 1_i, 2_i));  // offset
             },
         },
         {
@@ -1799,7 +1797,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",                      // t
                                    "sampler",                      // s
                                    b->vec3<f32>(1.f, 2.f, 3.f),    // coords
-                                   4,                              // array_index
+                                   4_i,                            // array_index
                                    b->vec3<f32>(5.f, 6.f, 7.f),    // ddx
                                    b->vec3<f32>(8.f, 9.f, 10.f));  // ddy
             },
@@ -1835,11 +1833,11 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSampleCompare",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   3.f,                     // depth_ref
-                                   b->vec2<i32>(4, 5));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   3.f,                      // depth_ref
+                                   b->vec2<i32>(4_i, 5_i));  // offset
             },
         },
         {
@@ -1858,7 +1856,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",               // t
                                    "sampler",               // s
                                    b->vec2<f32>(1.f, 2.f),  // coords
-                                   4,                       // array_index
+                                   4_i,                     // array_index
                                    3.f);                    // depth_ref
             },
         },
@@ -1876,12 +1874,12 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureSampleCompare",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",               // t
-                                   "sampler",               // s
-                                   b->vec2<f32>(1.f, 2.f),  // coords
-                                   4,                       // array_index
-                                   3.f,                     // depth_ref
-                                   b->vec2<i32>(5, 6));     // offset
+                return b->ExprList("texture",                // t
+                                   "sampler",                // s
+                                   b->vec2<f32>(1.f, 2.f),   // coords
+                                   4_i,                      // array_index
+                                   3.f,                      // depth_ref
+                                   b->vec2<i32>(5_i, 6_i));  // offset
             },
         },
         {
@@ -1918,7 +1916,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
                 return b->ExprList("texture",                    // t
                                    "sampler",                    // s
                                    b->vec3<f32>(1.f, 2.f, 3.f),  // coords
-                                   4,                            // array_index
+                                   4_i,                          // array_index
                                    5.f);                         // depth_ref
             },
         },
@@ -1933,8 +1931,8 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             "textureLoad",
             [](ProgramBuilder* b) {
                 return b->ExprList("texture",  // t
-                                   1,          // coords
-                                   3);         // level
+                                   1_i,        // coords
+                                   3_i);       // level
             },
         },
         {
@@ -1948,8 +1946,8 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             "textureLoad",
             [](ProgramBuilder* b) {
                 return b->ExprList("texture",  // t
-                                   1,          // coords
-                                   3);         // level
+                                   1_i,        // coords
+                                   3_i);       // level
             },
         },
         {
@@ -1963,8 +1961,8 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             "textureLoad",
             [](ProgramBuilder* b) {
                 return b->ExprList("texture",  // t
-                                   1,          // coords
-                                   3);         // level
+                                   1_i,        // coords
+                                   3_i);       // level
             },
         },
         {
@@ -1977,9 +1975,9 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureLoad",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",           // t
-                                   b->vec2<i32>(1, 2),  // coords
-                                   3);                  // level
+                return b->ExprList("texture",               // t
+                                   b->vec2<i32>(1_i, 2_i),  // coords
+                                   3_i);                    // level
             },
         },
         {
@@ -1992,9 +1990,9 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kU32,
             "textureLoad",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",           // t
-                                   b->vec2<i32>(1, 2),  // coords
-                                   3);                  // level
+                return b->ExprList("texture",               // t
+                                   b->vec2<i32>(1_i, 2_i),  // coords
+                                   3_i);                    // level
             },
         },
         {
@@ -2007,9 +2005,9 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kI32,
             "textureLoad",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",           // t
-                                   b->vec2<i32>(1, 2),  // coords
-                                   3);                  // level
+                return b->ExprList("texture",               // t
+                                   b->vec2<i32>(1_i, 2_i),  // coords
+                                   3_i);                    // level
             },
         },
         {
@@ -2023,10 +2021,10 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureLoad",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",           // t
-                                   b->vec2<i32>(1, 2),  // coords
-                                   3,                   // array_index
-                                   4);                  // level
+                return b->ExprList("texture",               // t
+                                   b->vec2<i32>(1_i, 2_i),  // coords
+                                   3_i,                     // array_index
+                                   4_i);                    // level
             },
         },
         {
@@ -2040,10 +2038,10 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kU32,
             "textureLoad",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",           // t
-                                   b->vec2<i32>(1, 2),  // coords
-                                   3,                   // array_index
-                                   4);                  // level
+                return b->ExprList("texture",               // t
+                                   b->vec2<i32>(1_i, 2_i),  // coords
+                                   3_i,                     // array_index
+                                   4_i);                    // level
             },
         },
         {
@@ -2057,10 +2055,10 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kI32,
             "textureLoad",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",           // t
-                                   b->vec2<i32>(1, 2),  // coords
-                                   3,                   // array_index
-                                   4);                  // level
+                return b->ExprList("texture",               // t
+                                   b->vec2<i32>(1_i, 2_i),  // coords
+                                   3_i,                     // array_index
+                                   4_i);                    // level
             },
         },
         {
@@ -2073,9 +2071,9 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureLoad",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",              // t
-                                   b->vec3<i32>(1, 2, 3),  // coords
-                                   4);                     // level
+                return b->ExprList("texture",                    // t
+                                   b->vec3<i32>(1_i, 2_i, 3_i),  // coords
+                                   4_i);                         // level
             },
         },
         {
@@ -2088,9 +2086,9 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kU32,
             "textureLoad",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",              // t
-                                   b->vec3<i32>(1, 2, 3),  // coords
-                                   4);                     // level
+                return b->ExprList("texture",                    // t
+                                   b->vec3<i32>(1_i, 2_i, 3_i),  // coords
+                                   4_i);                         // level
             },
         },
         {
@@ -2103,9 +2101,9 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kI32,
             "textureLoad",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",              // t
-                                   b->vec3<i32>(1, 2, 3),  // coords
-                                   4);                     // level
+                return b->ExprList("texture",                    // t
+                                   b->vec3<i32>(1_i, 2_i, 3_i),  // coords
+                                   4_i);                         // level
             },
         },
         {
@@ -2118,9 +2116,9 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureLoad",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",           // t
-                                   b->vec2<i32>(1, 2),  // coords
-                                   3);                  // sample_index
+                return b->ExprList("texture",               // t
+                                   b->vec2<i32>(1_i, 2_i),  // coords
+                                   3_i);                    // sample_index
             },
         },
         {
@@ -2133,9 +2131,9 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kU32,
             "textureLoad",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",           // t
-                                   b->vec2<i32>(1, 2),  // coords
-                                   3);                  // sample_index
+                return b->ExprList("texture",               // t
+                                   b->vec2<i32>(1_i, 2_i),  // coords
+                                   3_i);                    // sample_index
             },
         },
         {
@@ -2148,9 +2146,9 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kI32,
             "textureLoad",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",           // t
-                                   b->vec2<i32>(1, 2),  // coords
-                                   3);                  // sample_index
+                return b->ExprList("texture",               // t
+                                   b->vec2<i32>(1_i, 2_i),  // coords
+                                   3_i);                    // sample_index
             },
         },
         {
@@ -2163,9 +2161,9 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureLoad",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",           // t
-                                   b->vec2<i32>(1, 2),  // coords
-                                   3);                  // level
+                return b->ExprList("texture",               // t
+                                   b->vec2<i32>(1_i, 2_i),  // coords
+                                   3_i);                    // level
             },
         },
         {
@@ -2179,10 +2177,10 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             TextureDataType::kF32,
             "textureLoad",
             [](ProgramBuilder* b) {
-                return b->ExprList("texture",           // t
-                                   b->vec2<i32>(1, 2),  // coords
-                                   3,                   // array_index
-                                   4);                  // level
+                return b->ExprList("texture",               // t
+                                   b->vec2<i32>(1_i, 2_i),  // coords
+                                   3_i,                     // array_index
+                                   4_i);                    // level
             },
         },
         {
@@ -2197,7 +2195,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             "textureStore",
             [](ProgramBuilder* b) {
                 return b->ExprList("texture",                          // t
-                                   1,                                  // coords
+                                   1_i,                                // coords
                                    b->vec4<f32>(2.f, 3.f, 4.f, 5.f));  // value
             },
         },
@@ -2213,7 +2211,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             "textureStore",
             [](ProgramBuilder* b) {
                 return b->ExprList("texture",                          // t
-                                   b->vec2<i32>(1, 2),                 // coords
+                                   b->vec2<i32>(1_i, 2_i),             // coords
                                    b->vec4<f32>(3.f, 4.f, 5.f, 6.f));  // value
             },
         },
@@ -2230,8 +2228,8 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             "textureStore",
             [](ProgramBuilder* b) {
                 return b->ExprList("texture",                          // t
-                                   b->vec2<i32>(1, 2),                 // coords
-                                   3,                                  // array_index
+                                   b->vec2<i32>(1_i, 2_i),             // coords
+                                   3_i,                                // array_index
                                    b->vec4<f32>(4.f, 5.f, 6.f, 7.f));  // value
             },
         },
@@ -2247,7 +2245,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             "textureStore",
             [](ProgramBuilder* b) {
                 return b->ExprList("texture",                          // t
-                                   b->vec3<i32>(1, 2, 3),              // coords
+                                   b->vec3<i32>(1_i, 2_i, 3_i),        // coords
                                    b->vec4<f32>(4.f, 5.f, 6.f, 7.f));  // value
             },
         },

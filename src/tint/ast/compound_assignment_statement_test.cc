@@ -17,6 +17,8 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::ast {
 namespace {
 
@@ -57,7 +59,7 @@ TEST_F(CompoundAssignmentStatementTest, Assert_Null_LHS) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<CompoundAssignmentStatement>(nullptr, b.Expr(1), BinaryOp::kAdd);
+            b.create<CompoundAssignmentStatement>(nullptr, b.Expr(1_i), BinaryOp::kAdd);
         },
         "internal compiler error");
 }
@@ -66,7 +68,7 @@ TEST_F(CompoundAssignmentStatementTest, Assert_Null_RHS) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<CompoundAssignmentStatement>(b.Expr(1), nullptr, BinaryOp::kAdd);
+            b.create<CompoundAssignmentStatement>(b.Expr(1_i), nullptr, BinaryOp::kAdd);
         },
         "internal compiler error");
 }

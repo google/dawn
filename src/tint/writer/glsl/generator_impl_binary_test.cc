@@ -16,6 +16,8 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::glsl {
 namespace {
 
@@ -329,11 +331,11 @@ if (!tint_tmp) {
 
 TEST_F(GlslGeneratorImplTest_Binary, If_WithLogical) {
     // if (a && b) {
-    //   return 1;
+    //   return 1i;
     // } else if (b || c) {
-    //   return 2;
+    //   return 2i;
     // } else {
-    //   return 3;
+    //   return 3i;
     // }
 
     Global("a", ty.bool_(), ast::StorageClass::kPrivate);
@@ -342,9 +344,9 @@ TEST_F(GlslGeneratorImplTest_Binary, If_WithLogical) {
 
     auto* expr =
         If(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
-           Block(Return(1)),
+           Block(Return(1_i)),
            Else(If(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"), Expr("c")),
-                   Block(Return(2)), Else(Block(Return(3))))));
+                   Block(Return(2_i)), Else(Block(Return(3_i))))));
     Func("func", {}, ty.i32(), {WrapInStatement(expr)});
 
     GeneratorImpl& gen = Build();

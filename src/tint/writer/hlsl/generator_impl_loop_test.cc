@@ -15,6 +15,8 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/writer/hlsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::hlsl {
 namespace {
 
@@ -256,12 +258,12 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtCond) {
 }
 
 TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleCont) {
-    // for(; ; i = i + 1) {
+    // for(; ; i = i + 1i) {
     //   return;
     // }
 
     auto* v = Decl(Var("i", ty.i32()));
-    auto* f = For(nullptr, nullptr, Assign("i", Add("i", 1)), Block(Return()));
+    auto* f = For(nullptr, nullptr, Assign("i", Add("i", 1_i)), Block(Return()));
     WrapInFunction(v, f);
 
     GeneratorImpl& gen = Build();
@@ -307,11 +309,11 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtCont) {
 }
 
 TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithSimpleInitCondCont) {
-    // for(var i : i32; true; i = i + 1) {
+    // for(var i : i32; true; i = i + 1i) {
     //   return;
     // }
 
-    auto* f = For(Decl(Var("i", ty.i32())), true, Assign("i", Add("i", 1)), Block(Return()));
+    auto* f = For(Decl(Var("i", ty.i32())), true, Assign("i", Add("i", 1_i)), Block(Return()));
     WrapInFunction(f);
 
     GeneratorImpl& gen = Build();

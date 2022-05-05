@@ -18,6 +18,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 namespace {
 
@@ -64,7 +66,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
 }
 
 TEST_F(BuilderTest_Type, GenerateArray) {
-    auto* ary = ty.array(ty.i32(), 4);
+    auto* ary = ty.array(ty.i32(), 4_u);
     Global("a", ary, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
@@ -81,7 +83,7 @@ TEST_F(BuilderTest_Type, GenerateArray) {
 }
 
 TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
-    auto* ary = ty.array(ty.i32(), 4, 16u);
+    auto* ary = ty.array(ty.i32(), 4_u, 16u);
     Global("a", ary, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
@@ -101,7 +103,7 @@ TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
-    auto* ary = ty.array(ty.i32(), 4);
+    auto* ary = ty.array(ty.i32(), 4_u);
     Global("a", ary, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
@@ -383,9 +385,9 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
     // We have to infer layout for matrix when it also has an offset.
     // The decoration goes on the struct member, even if the matrix is buried
     // in levels of arrays.
-    auto* arr_mat2x2 = ty.array(ty.mat2x2<f32>(), 1);      // Singly nested array
-    auto* arr_arr_mat2x3 = ty.array(ty.mat2x3<f32>(), 1);  // Doubly nested array
-    auto* rtarr_mat4x4 = ty.array(ty.mat4x4<f32>());       // Runtime array
+    auto* arr_mat2x2 = ty.array(ty.mat2x2<f32>(), 1_u);      // Singly nested array
+    auto* arr_arr_mat2x3 = ty.array(ty.mat2x3<f32>(), 1_u);  // Doubly nested array
+    auto* rtarr_mat4x4 = ty.array(ty.mat4x4<f32>());         // Runtime array
 
     auto* s = Structure("S", {
                                  Member("a", arr_mat2x2),

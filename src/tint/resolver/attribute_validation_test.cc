@@ -19,6 +19,8 @@
 
 #include "gmock/gmock.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 
 // Helpers and typedefs
@@ -44,9 +46,6 @@ template <typename T>
 using alias2 = builder::alias2<T>;
 template <typename T>
 using alias3 = builder::alias3<T>;
-using f32 = builder::f32;
-using i32 = builder::i32;
-using u32 = builder::u32;
 
 namespace AttributeTests {
 namespace {
@@ -115,10 +114,10 @@ static ast::AttributeList createAttributes(const Source& source,
         case AttributeKind::kStride:
             return {builder.create<ast::StrideAttribute>(source, 4u)};
         case AttributeKind::kWorkgroup:
-            return {builder.create<ast::WorkgroupAttribute>(source, builder.Expr(1))};
+            return {builder.create<ast::WorkgroupAttribute>(source, builder.Expr(1_i))};
         case AttributeKind::kBindingAndGroup:
-            return {builder.create<ast::BindingAttribute>(source, 1u),
-                    builder.create<ast::GroupAttribute>(source, 1u)};
+            return {builder.create<ast::BindingAttribute>(source, 1_u),
+                    builder.create<ast::GroupAttribute>(source, 1_u)};
     }
     return {};
 }
@@ -198,7 +197,7 @@ TEST_P(ComputeShaderParameterAttributeTest, IsValid) {
     auto& params = GetParam();
     auto* p = Param("a", ty.vec4<f32>(), createAttributes(Source{{12, 34}}, *this, params.kind));
     Func("main", ast::VariableList{p}, ty.void_(), {},
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -318,7 +317,7 @@ using ComputeShaderReturnTypeAttributeTest = TestWithParams;
 TEST_P(ComputeShaderReturnTypeAttributeTest, IsValid) {
     auto& params = GetParam();
     Func("main", ast::VariableList{}, ty.vec4<f32>(), {Return(Construct(ty.vec4<f32>(), 1.f))},
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)},
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)},
          createAttributes(Source{{12, 34}}, *this, params.kind));
 
     if (params.should_pass) {
@@ -493,7 +492,7 @@ TEST_F(EntryPointReturnTypeAttributeTest, DuplicateAttribute) {
 }
 
 TEST_F(EntryPointReturnTypeAttributeTest, DuplicateInternalAttribute) {
-    Func("f", {}, ty.i32(), {Return(1)}, {Stage(ast::PipelineStage::kFragment)},
+    Func("f", {}, ty.i32(), {Return(1_i)}, {Stage(ast::PipelineStage::kFragment)},
          ast::AttributeList{
              Disable(ast::DisabledValidation::kBindingPointCollision),
              Disable(ast::DisabledValidation::kEntryPointParameter),
@@ -794,7 +793,7 @@ TEST_P(ArrayStrideTest, All) {
        << ", should_pass: " << params.should_pass;
     SCOPED_TRACE(ss.str());
 
-    auto* arr = ty.array(Source{{12, 34}}, el_ty, 4, params.stride);
+    auto* arr = ty.array(Source{{12, 34}}, el_ty, 4_u, params.stride);
 
     Global("myarray", arr, ast::StorageClass::kPrivate);
 
@@ -873,10 +872,10 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                              ParamsFor<mat4x4<f32>>((default_mat4x4.align - 1) * 7, false)));
 
 TEST_F(ArrayStrideTest, DuplicateAttribute) {
-    auto* arr = ty.array(Source{{12, 34}}, ty.i32(), 4,
+    auto* arr = ty.array(Source{{12, 34}}, ty.i32(), 4_u,
                          {
-                             create<ast::StrideAttribute>(Source{{12, 34}}, 4),
-                             create<ast::StrideAttribute>(Source{{56, 78}}, 4),
+                             create<ast::StrideAttribute>(Source{{12, 34}}, 4_i),
+                             create<ast::StrideAttribute>(Source{{56, 78}}, 4_i),
                          });
 
     Global("myarray", arr, ast::StorageClass::kPrivate);
@@ -968,9 +967,9 @@ TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByEntryPoint) {
     Func("F", {}, ty.void_(),
          {
              Decl(Var("a", ty.vec4<f32>(), ast::StorageClass::kNone,
-                      Call("textureLoad", "A", vec2<i32>(1, 2), 0))),
+                      Call("textureLoad", "A", vec2<i32>(1_i, 2_i), 0_i))),
              Decl(Var("b", ty.vec4<f32>(), ast::StorageClass::kNone,
-                      Call("textureLoad", "B", vec2<i32>(1, 2), 0))),
+                      Call("textureLoad", "B", vec2<i32>(1_i, 2_i), 0_i))),
          },
          {Stage(ast::PipelineStage::kFragment)});
 
@@ -998,13 +997,13 @@ TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByDifferentEntryPoints) {
     Func("F_A", {}, ty.void_(),
          {
              Decl(Var("a", ty.vec4<f32>(), ast::StorageClass::kNone,
-                      Call("textureLoad", "A", vec2<i32>(1, 2), 0))),
+                      Call("textureLoad", "A", vec2<i32>(1_i, 2_i), 0_i))),
          },
          {Stage(ast::PipelineStage::kFragment)});
     Func("F_B", {}, ty.void_(),
          {
              Decl(Var("b", ty.vec4<f32>(), ast::StorageClass::kNone,
-                      Call("textureLoad", "B", vec2<i32>(1, 2), 0))),
+                      Call("textureLoad", "B", vec2<i32>(1_i, 2_i), 0_i))),
          },
          {Stage(ast::PipelineStage::kFragment)});
 
@@ -1065,7 +1064,7 @@ using WorkgroupAttribute = ResolverTest;
 TEST_F(WorkgroupAttribute, ComputeShaderPass) {
     Func("main", {}, ty.void_(), {},
          {Stage(ast::PipelineStage::kCompute),
-          create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1))});
+          create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1_i))});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -1080,7 +1079,8 @@ TEST_F(WorkgroupAttribute, Missing) {
 }
 
 TEST_F(WorkgroupAttribute, NotAnEntryPoint) {
-    Func("main", {}, ty.void_(), {}, {create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1))});
+    Func("main", {}, ty.void_(), {},
+         {create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1_i))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1091,7 +1091,7 @@ TEST_F(WorkgroupAttribute, NotAnEntryPoint) {
 TEST_F(WorkgroupAttribute, NotAComputeShader) {
     Func("main", {}, ty.void_(), {},
          {Stage(ast::PipelineStage::kFragment),
-          create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1))});
+          create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1_i))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1103,8 +1103,8 @@ TEST_F(WorkgroupAttribute, DuplicateAttribute) {
     Func(Source{{12, 34}}, "main", {}, ty.void_(), {},
          {
              Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(Source{{12, 34}}, 1, nullptr, nullptr),
-             WorkgroupSize(Source{{56, 78}}, 2, nullptr, nullptr),
+             WorkgroupSize(Source{{12, 34}}, 1_i, nullptr, nullptr),
+             WorkgroupSize(Source{{56, 78}}, 2_i, nullptr, nullptr),
          });
 
     EXPECT_FALSE(r()->Resolve());

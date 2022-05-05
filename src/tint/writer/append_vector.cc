@@ -23,6 +23,8 @@
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/utils/transform.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer {
 namespace {
 
@@ -45,9 +47,9 @@ VectorConstructorInfo AsVectorConstructor(const sem::Expression* expr) {
 const sem::Expression* Zero(ProgramBuilder& b, const sem::Type* ty, const sem::Statement* stmt) {
     const ast::Expression* expr = nullptr;
     if (ty->Is<sem::I32>()) {
-        expr = b.Expr(0);
+        expr = b.Expr(0_i);
     } else if (ty->Is<sem::U32>()) {
-        expr = b.Expr(0u);
+        expr = b.Expr(0_u);
     } else if (ty->Is<sem::F32>()) {
         expr = b.Expr(0.0f);
     } else if (ty->Is<sem::Bool>()) {

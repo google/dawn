@@ -138,7 +138,7 @@ TEST_F(RobustnessTest, Array_Idx_Scalar) {
 var<private> a : array<f32, 3>;
 
 fn f() {
-  var b : f32 = a[1];
+  var b : f32 = a[1i];
 }
 )";
 
@@ -146,7 +146,7 @@ fn f() {
 var<private> a : array<f32, 3>;
 
 fn f() {
-  var b : f32 = a[1];
+  var b : f32 = a[1i];
 }
 )";
 
@@ -158,7 +158,7 @@ fn f() {
 TEST_F(RobustnessTest, Array_Idx_Scalar_OutOfOrder) {
     auto* src = R"(
 fn f() {
-  var b : f32 = a[1];
+  var b : f32 = a[1i];
 }
 
 var<private> a : array<f32, 3>;
@@ -166,7 +166,7 @@ var<private> a : array<f32, 3>;
 
     auto* expect = R"(
 fn f() {
-  var b : f32 = a[1];
+  var b : f32 = a[1i];
 }
 
 var<private> a : array<f32, 3>;
@@ -242,7 +242,7 @@ fn f() {
 var<private> a : array<f32, 3>;
 
 fn f() {
-  var b : f32 = a[0];
+  var b : f32 = a[0i];
 }
 )";
 
@@ -262,7 +262,7 @@ var<private> a : array<f32, 3>;
 
     auto* expect = R"(
 fn f() {
-  var b : f32 = a[0];
+  var b : f32 = a[0i];
 }
 
 var<private> a : array<f32, 3>;
@@ -286,7 +286,7 @@ fn f() {
 var<private> a : array<f32, 3>;
 
 fn f() {
-  var b : f32 = a[2];
+  var b : f32 = a[2i];
 }
 )";
 
@@ -306,7 +306,7 @@ var<private> a : array<f32, 3>;
 
     auto* expect = R"(
 fn f() {
-  var b : f32 = a[2];
+  var b : f32 = a[2i];
 }
 
 var<private> a : array<f32, 3>;
@@ -402,7 +402,7 @@ TEST_F(RobustnessTest, Vector_Idx_Scalar) {
 var<private> a : vec3<f32>;
 
 fn f() {
-  var b : f32 = a[1];
+  var b : f32 = a[1i];
 }
 )";
 
@@ -410,7 +410,7 @@ fn f() {
 var<private> a : vec3<f32>;
 
 fn f() {
-  var b : f32 = a[1];
+  var b : f32 = a[1i];
 }
 )";
 
@@ -422,7 +422,7 @@ fn f() {
 TEST_F(RobustnessTest, Vector_Idx_Scalar_OutOfOrder) {
     auto* src = R"(
 fn f() {
-  var b : f32 = a[1];
+  var b : f32 = a[1i];
 }
 
 var<private> a : vec3<f32>;
@@ -430,7 +430,7 @@ var<private> a : vec3<f32>;
 
     auto* expect = R"(
 fn f() {
-  var b : f32 = a[1];
+  var b : f32 = a[1i];
 }
 
 var<private> a : vec3<f32>;
@@ -506,7 +506,7 @@ fn f() {
 var<private> a : vec3<f32>;
 
 fn f() {
-  var b : f32 = a.xy[1];
+  var b : f32 = a.xy[1i];
 }
 )";
 
@@ -526,7 +526,7 @@ var<private> a : vec3<f32>;
 
     auto* expect = R"(
 fn f() {
-  var b : f32 = a.xy[1];
+  var b : f32 = a.xy[1i];
 }
 
 var<private> a : vec3<f32>;
@@ -654,7 +654,7 @@ fn f() {
 var<private> a : vec3<f32>;
 
 fn f() {
-  var b : f32 = a[0];
+  var b : f32 = a[0i];
 }
 )";
 
@@ -674,7 +674,7 @@ var<private> a : vec3<f32>;
 
     auto* expect = R"(
 fn f() {
-  var b : f32 = a[0];
+  var b : f32 = a[0i];
 }
 
 var<private> a : vec3<f32>;
@@ -698,7 +698,7 @@ fn f() {
 var<private> a : vec3<f32>;
 
 fn f() {
-  var b : f32 = a[2];
+  var b : f32 = a[2i];
 }
 )";
 
@@ -718,7 +718,7 @@ var<private> a : vec3<f32>;
 
     auto* expect = R"(
 fn f() {
-  var b : f32 = a[2];
+  var b : f32 = a[2i];
 }
 
 var<private> a : vec3<f32>;
@@ -734,7 +734,7 @@ TEST_F(RobustnessTest, Matrix_Idx_Scalar) {
 var<private> a : mat3x2<f32>;
 
 fn f() {
-  var b : f32 = a[2][1];
+  var b : f32 = a[2i][1i];
 }
 )";
 
@@ -742,7 +742,7 @@ fn f() {
 var<private> a : mat3x2<f32>;
 
 fn f() {
-  var b : f32 = a[2][1];
+  var b : f32 = a[2i][1i];
 }
 )";
 
@@ -754,7 +754,7 @@ fn f() {
 TEST_F(RobustnessTest, Matrix_Idx_Scalar_OutOfOrder) {
     auto* src = R"(
 fn f() {
-  var b : f32 = a[2][1];
+  var b : f32 = a[2i][1i];
 }
 
 var<private> a : mat3x2<f32>;
@@ -762,7 +762,7 @@ var<private> a : mat3x2<f32>;
 
     auto* expect = R"(
 fn f() {
-  var b : f32 = a[2][1];
+  var b : f32 = a[2i][1i];
 }
 
 var<private> a : mat3x2<f32>;
@@ -790,7 +790,7 @@ var<private> a : mat3x2<f32>;
 var<private> c : i32;
 
 fn f() {
-  var b : f32 = a[min(u32(((c + 2) - 3)), 2u)][1];
+  var b : f32 = a[min(u32(((c + 2) - 3)), 2u)][1i];
 }
 )";
 
@@ -812,7 +812,7 @@ var<private> a : mat3x2<f32>;
 
     auto* expect = R"(
 fn f() {
-  var b : f32 = a[min(u32(((c + 2) - 3)), 2u)][1];
+  var b : f32 = a[min(u32(((c + 2) - 3)), 2u)][1i];
 }
 
 var<private> c : i32;
@@ -842,7 +842,7 @@ var<private> a : mat3x2<f32>;
 var<private> c : i32;
 
 fn f() {
-  var b : f32 = a[1][min(u32(((c + 2) - 3)), 1u)];
+  var b : f32 = a[1i][min(u32(((c + 2) - 3)), 1u)];
 }
 )";
 
@@ -864,7 +864,7 @@ var<private> a : mat3x2<f32>;
 
     auto* expect = R"(
 fn f() {
-  var b : f32 = a[1][min(u32(((c + 2) - 3)), 1u)];
+  var b : f32 = a[1i][min(u32(((c + 2) - 3)), 1u)];
 }
 
 var<private> c : i32;
@@ -890,7 +890,7 @@ fn f() {
 var<private> a : mat3x2<f32>;
 
 fn f() {
-  var b : f32 = a[0][1];
+  var b : f32 = a[0i][1i];
 }
 )";
 
@@ -910,7 +910,7 @@ var<private> a : mat3x2<f32>;
 
     auto* expect = R"(
 fn f() {
-  var b : f32 = a[0][1];
+  var b : f32 = a[0i][1i];
 }
 
 var<private> a : mat3x2<f32>;
@@ -934,7 +934,7 @@ fn f() {
 var<private> a : mat3x2<f32>;
 
 fn f() {
-  var b : f32 = a[2][0];
+  var b : f32 = a[2i][0i];
 }
 )";
 
@@ -954,7 +954,7 @@ var<private> a : mat3x2<f32>;
 
     auto* expect = R"(
 fn f() {
-  var b : f32 = a[2][0];
+  var b : f32 = a[2i][0i];
 }
 
 var<private> a : mat3x2<f32>;
@@ -978,7 +978,7 @@ fn f() {
 var<private> a : mat3x2<f32>;
 
 fn f() {
-  var b : f32 = a[2][1];
+  var b : f32 = a[2i][1i];
 }
 )";
 
@@ -998,7 +998,7 @@ var<private> a : mat3x2<f32>;
 
     auto* expect = R"(
 fn f() {
-  var b : f32 = a[2][1];
+  var b : f32 = a[2i][1i];
 }
 
 var<private> a : mat3x2<f32>;
@@ -1022,7 +1022,7 @@ fn f() {
 var<private> a : mat3x2<f32>;
 
 fn f() {
-  var b : f32 = a[2][1];
+  var b : f32 = a[2i][1i];
 }
 )";
 
@@ -1042,7 +1042,7 @@ var<private> a : mat3x2<f32>;
 
     auto* expect = R"(
 fn f() {
-  var b : f32 = a[2][1];
+  var b : f32 = a[2i][1i];
 }
 
 var<private> a : mat3x2<f32>;
@@ -1202,14 +1202,14 @@ fn f() {
   var array_idx : i32;
   var level_idx : i32;
   var sample_idx : i32;
-  textureLoad(tex_1d, clamp(1, i32(), (textureDimensions(tex_1d, clamp(level_idx, 0, (textureNumLevels(tex_1d) - 1))) - i32(1))), clamp(level_idx, 0, (textureNumLevels(tex_1d) - 1)));
-  textureLoad(tex_2d, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_2d, clamp(level_idx, 0, (textureNumLevels(tex_2d) - 1))) - vec2<i32>(1))), clamp(level_idx, 0, (textureNumLevels(tex_2d) - 1)));
-  textureLoad(tex_2d_arr, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_2d_arr, clamp(level_idx, 0, (textureNumLevels(tex_2d_arr) - 1))) - vec2<i32>(1))), clamp(array_idx, 0, (textureNumLayers(tex_2d_arr) - 1)), clamp(level_idx, 0, (textureNumLevels(tex_2d_arr) - 1)));
-  textureLoad(tex_3d, clamp(vec3<i32>(1, 2, 3), vec3<i32>(), (textureDimensions(tex_3d, clamp(level_idx, 0, (textureNumLevels(tex_3d) - 1))) - vec3<i32>(1))), clamp(level_idx, 0, (textureNumLevels(tex_3d) - 1)));
-  textureLoad(tex_ms_2d, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_ms_2d) - vec2<i32>(1))), sample_idx);
-  textureLoad(tex_depth_2d, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_depth_2d, clamp(level_idx, 0, (textureNumLevels(tex_depth_2d) - 1))) - vec2<i32>(1))), clamp(level_idx, 0, (textureNumLevels(tex_depth_2d) - 1)));
-  textureLoad(tex_depth_2d_arr, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_depth_2d_arr, clamp(level_idx, 0, (textureNumLevels(tex_depth_2d_arr) - 1))) - vec2<i32>(1))), clamp(array_idx, 0, (textureNumLayers(tex_depth_2d_arr) - 1)), clamp(level_idx, 0, (textureNumLevels(tex_depth_2d_arr) - 1)));
-  textureLoad(tex_external, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_external) - vec2<i32>(1))));
+  textureLoad(tex_1d, clamp(1, i32(), (textureDimensions(tex_1d, clamp(level_idx, 0i, (textureNumLevels(tex_1d) - 1i))) - i32(1i))), clamp(level_idx, 0i, (textureNumLevels(tex_1d) - 1i)));
+  textureLoad(tex_2d, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_2d, clamp(level_idx, 0i, (textureNumLevels(tex_2d) - 1i))) - vec2<i32>(1i))), clamp(level_idx, 0i, (textureNumLevels(tex_2d) - 1i)));
+  textureLoad(tex_2d_arr, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_2d_arr, clamp(level_idx, 0i, (textureNumLevels(tex_2d_arr) - 1i))) - vec2<i32>(1i))), clamp(array_idx, 0i, (textureNumLayers(tex_2d_arr) - 1i)), clamp(level_idx, 0i, (textureNumLevels(tex_2d_arr) - 1i)));
+  textureLoad(tex_3d, clamp(vec3<i32>(1, 2, 3), vec3<i32>(), (textureDimensions(tex_3d, clamp(level_idx, 0i, (textureNumLevels(tex_3d) - 1i))) - vec3<i32>(1i))), clamp(level_idx, 0i, (textureNumLevels(tex_3d) - 1i)));
+  textureLoad(tex_ms_2d, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_ms_2d) - vec2<i32>(1i))), sample_idx);
+  textureLoad(tex_depth_2d, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_depth_2d, clamp(level_idx, 0i, (textureNumLevels(tex_depth_2d) - 1i))) - vec2<i32>(1i))), clamp(level_idx, 0i, (textureNumLevels(tex_depth_2d) - 1i)));
+  textureLoad(tex_depth_2d_arr, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_depth_2d_arr, clamp(level_idx, 0i, (textureNumLevels(tex_depth_2d_arr) - 1i))) - vec2<i32>(1i))), clamp(array_idx, 0i, (textureNumLayers(tex_depth_2d_arr) - 1i)), clamp(level_idx, 0i, (textureNumLevels(tex_depth_2d_arr) - 1i)));
+  textureLoad(tex_external, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_external) - vec2<i32>(1i))));
 }
 )";
 
@@ -1252,14 +1252,14 @@ fn f() {
   var array_idx : i32;
   var level_idx : i32;
   var sample_idx : i32;
-  textureLoad(tex_1d, clamp(1, i32(), (textureDimensions(tex_1d, clamp(level_idx, 0, (textureNumLevels(tex_1d) - 1))) - i32(1))), clamp(level_idx, 0, (textureNumLevels(tex_1d) - 1)));
-  textureLoad(tex_2d, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_2d, clamp(level_idx, 0, (textureNumLevels(tex_2d) - 1))) - vec2<i32>(1))), clamp(level_idx, 0, (textureNumLevels(tex_2d) - 1)));
-  textureLoad(tex_2d_arr, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_2d_arr, clamp(level_idx, 0, (textureNumLevels(tex_2d_arr) - 1))) - vec2<i32>(1))), clamp(array_idx, 0, (textureNumLayers(tex_2d_arr) - 1)), clamp(level_idx, 0, (textureNumLevels(tex_2d_arr) - 1)));
-  textureLoad(tex_3d, clamp(vec3<i32>(1, 2, 3), vec3<i32>(), (textureDimensions(tex_3d, clamp(level_idx, 0, (textureNumLevels(tex_3d) - 1))) - vec3<i32>(1))), clamp(level_idx, 0, (textureNumLevels(tex_3d) - 1)));
-  textureLoad(tex_ms_2d, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_ms_2d) - vec2<i32>(1))), sample_idx);
-  textureLoad(tex_depth_2d, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_depth_2d, clamp(level_idx, 0, (textureNumLevels(tex_depth_2d) - 1))) - vec2<i32>(1))), clamp(level_idx, 0, (textureNumLevels(tex_depth_2d) - 1)));
-  textureLoad(tex_depth_2d_arr, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_depth_2d_arr, clamp(level_idx, 0, (textureNumLevels(tex_depth_2d_arr) - 1))) - vec2<i32>(1))), clamp(array_idx, 0, (textureNumLayers(tex_depth_2d_arr) - 1)), clamp(level_idx, 0, (textureNumLevels(tex_depth_2d_arr) - 1)));
-  textureLoad(tex_external, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_external) - vec2<i32>(1))));
+  textureLoad(tex_1d, clamp(1, i32(), (textureDimensions(tex_1d, clamp(level_idx, 0i, (textureNumLevels(tex_1d) - 1i))) - i32(1i))), clamp(level_idx, 0i, (textureNumLevels(tex_1d) - 1i)));
+  textureLoad(tex_2d, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_2d, clamp(level_idx, 0i, (textureNumLevels(tex_2d) - 1i))) - vec2<i32>(1i))), clamp(level_idx, 0i, (textureNumLevels(tex_2d) - 1i)));
+  textureLoad(tex_2d_arr, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_2d_arr, clamp(level_idx, 0i, (textureNumLevels(tex_2d_arr) - 1i))) - vec2<i32>(1i))), clamp(array_idx, 0i, (textureNumLayers(tex_2d_arr) - 1i)), clamp(level_idx, 0i, (textureNumLevels(tex_2d_arr) - 1i)));
+  textureLoad(tex_3d, clamp(vec3<i32>(1, 2, 3), vec3<i32>(), (textureDimensions(tex_3d, clamp(level_idx, 0i, (textureNumLevels(tex_3d) - 1i))) - vec3<i32>(1i))), clamp(level_idx, 0i, (textureNumLevels(tex_3d) - 1i)));
+  textureLoad(tex_ms_2d, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_ms_2d) - vec2<i32>(1i))), sample_idx);
+  textureLoad(tex_depth_2d, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_depth_2d, clamp(level_idx, 0i, (textureNumLevels(tex_depth_2d) - 1i))) - vec2<i32>(1i))), clamp(level_idx, 0i, (textureNumLevels(tex_depth_2d) - 1i)));
+  textureLoad(tex_depth_2d_arr, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_depth_2d_arr, clamp(level_idx, 0i, (textureNumLevels(tex_depth_2d_arr) - 1i))) - vec2<i32>(1i))), clamp(array_idx, 0i, (textureNumLayers(tex_depth_2d_arr) - 1i)), clamp(level_idx, 0i, (textureNumLevels(tex_depth_2d_arr) - 1i)));
+  textureLoad(tex_external, clamp(vec2<i32>(1, 2), vec2<i32>(), (textureDimensions(tex_external) - vec2<i32>(1i))));
 }
 
 @group(0) @binding(0) var tex_1d : texture_1d<f32>;
@@ -1313,10 +1313,10 @@ fn f() {
 @group(0) @binding(3) var tex3d : texture_storage_3d<rgba8sint, write>;
 
 fn f() {
-  textureStore(tex1d, clamp(10, i32(), (textureDimensions(tex1d) - i32(1))), vec4<i32>());
-  textureStore(tex2d, clamp(vec2<i32>(10, 20), vec2<i32>(), (textureDimensions(tex2d) - vec2<i32>(1))), vec4<i32>());
-  textureStore(tex2d_arr, clamp(vec2<i32>(10, 20), vec2<i32>(), (textureDimensions(tex2d_arr) - vec2<i32>(1))), clamp(50, 0, (textureNumLayers(tex2d_arr) - 1)), vec4<i32>());
-  textureStore(tex3d, clamp(vec3<i32>(10, 20, 30), vec3<i32>(), (textureDimensions(tex3d) - vec3<i32>(1))), vec4<i32>());
+  textureStore(tex1d, clamp(10, i32(), (textureDimensions(tex1d) - i32(1i))), vec4<i32>());
+  textureStore(tex2d, clamp(vec2<i32>(10, 20), vec2<i32>(), (textureDimensions(tex2d) - vec2<i32>(1i))), vec4<i32>());
+  textureStore(tex2d_arr, clamp(vec2<i32>(10, 20), vec2<i32>(), (textureDimensions(tex2d_arr) - vec2<i32>(1i))), clamp(50, 0i, (textureNumLayers(tex2d_arr) - 1i)), vec4<i32>());
+  textureStore(tex3d, clamp(vec3<i32>(10, 20, 30), vec3<i32>(), (textureDimensions(tex3d) - vec3<i32>(1i))), vec4<i32>());
 }
 )";
 
@@ -1347,10 +1347,10 @@ fn f() {
 
     auto* expect = R"(
 fn f() {
-  textureStore(tex1d, clamp(10, i32(), (textureDimensions(tex1d) - i32(1))), vec4<i32>());
-  textureStore(tex2d, clamp(vec2<i32>(10, 20), vec2<i32>(), (textureDimensions(tex2d) - vec2<i32>(1))), vec4<i32>());
-  textureStore(tex2d_arr, clamp(vec2<i32>(10, 20), vec2<i32>(), (textureDimensions(tex2d_arr) - vec2<i32>(1))), clamp(50, 0, (textureNumLayers(tex2d_arr) - 1)), vec4<i32>());
-  textureStore(tex3d, clamp(vec3<i32>(10, 20, 30), vec3<i32>(), (textureDimensions(tex3d) - vec3<i32>(1))), vec4<i32>());
+  textureStore(tex1d, clamp(10, i32(), (textureDimensions(tex1d) - i32(1i))), vec4<i32>());
+  textureStore(tex2d, clamp(vec2<i32>(10, 20), vec2<i32>(), (textureDimensions(tex2d) - vec2<i32>(1i))), vec4<i32>());
+  textureStore(tex2d_arr, clamp(vec2<i32>(10, 20), vec2<i32>(), (textureDimensions(tex2d_arr) - vec2<i32>(1i))), clamp(50, 0i, (textureNumLayers(tex2d_arr) - 1i)), vec4<i32>());
+  textureStore(tex3d, clamp(vec3<i32>(10, 20, 30), vec3<i32>(), (textureDimensions(tex3d) - vec3<i32>(1i))), vec4<i32>());
 }
 
 @group(0) @binding(0) var tex1d : texture_storage_1d<rgba8sint, write>;
@@ -1498,21 +1498,21 @@ struct U {
 @group(1) @binding(0) var<uniform> u : U;
 
 fn f() {
-  var i32_sa1 : f32 = s.a[3];
-  var i32_sa2 : f32 = s.a[1];
-  var i32_sa3 : f32 = s.a[0];
-  var i32_sa4 : f32 = s.a[0];
-  var i32_sa5 : f32 = s.a[0];
+  var i32_sa1 : f32 = s.a[3i];
+  var i32_sa2 : f32 = s.a[1i];
+  var i32_sa3 : f32 = s.a[0i];
+  var i32_sa4 : f32 = s.a[0i];
+  var i32_sa5 : f32 = s.a[0i];
   var i32_sb1 : f32 = s.b[min(4u, (arrayLength(&(s.b)) - 1u))];
   var i32_sb2 : f32 = s.b[min(1u, (arrayLength(&(s.b)) - 1u))];
   var i32_sb3 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
   var i32_sb4 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
   var i32_sb5 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];
-  var i32_ua1 : f32 = u.a[3].x;
-  var i32_ua2 : f32 = u.a[1].x;
-  var i32_ua3 : f32 = u.a[0].x;
-  var i32_ua4 : f32 = u.a[0].x;
-  var i32_ua5 : f32 = u.a[0].x;
+  var i32_ua1 : f32 = u.a[3i].x;
+  var i32_ua2 : f32 = u.a[1i].x;
+  var i32_ua3 : f32 = u.a[0i].x;
+  var i32_ua4 : f32 = u.a[0i].x;
+  var i32_ua5 : f32 = u.a[0i].x;
   var u32_sa1 : f32 = s.a[0u];
   var u32_sa2 : f32 = s.a[1u];
   var u32_sa3 : f32 = s.a[3u];
@@ -1571,11 +1571,11 @@ fn f() {
   var i32_sb3 : f32 = s.b[0];
   var i32_sb4 : f32 = s.b[-1];
   var i32_sb5 : f32 = s.b[-4];
-  var i32_ua1 : f32 = u.a[3].x;
-  var i32_ua2 : f32 = u.a[1].x;
-  var i32_ua3 : f32 = u.a[0].x;
-  var i32_ua4 : f32 = u.a[0].x;
-  var i32_ua5 : f32 = u.a[0].x;
+  var i32_ua1 : f32 = u.a[3i].x;
+  var i32_ua2 : f32 = u.a[1i].x;
+  var i32_ua3 : f32 = u.a[0i].x;
+  var i32_ua4 : f32 = u.a[0i].x;
+  var i32_ua5 : f32 = u.a[0i].x;
   var u32_sa1 : f32 = s.a[0u];
   var u32_sa2 : f32 = s.a[1u];
   var u32_sa3 : f32 = s.a[3u];
@@ -1626,11 +1626,11 @@ struct U {
 @group(1) @binding(0) var<uniform> u : U;
 
 fn f() {
-  var i32_sa1 : f32 = s.a[3];
-  var i32_sa2 : f32 = s.a[1];
-  var i32_sa3 : f32 = s.a[0];
-  var i32_sa4 : f32 = s.a[0];
-  var i32_sa5 : f32 = s.a[0];
+  var i32_sa1 : f32 = s.a[3i];
+  var i32_sa2 : f32 = s.a[1i];
+  var i32_sa3 : f32 = s.a[0i];
+  var i32_sa4 : f32 = s.a[0i];
+  var i32_sa5 : f32 = s.a[0i];
   var i32_sb1 : f32 = s.b[min(4u, (arrayLength(&(s.b)) - 1u))];
   var i32_sb2 : f32 = s.b[min(1u, (arrayLength(&(s.b)) - 1u))];
   var i32_sb3 : f32 = s.b[min(0u, (arrayLength(&(s.b)) - 1u))];

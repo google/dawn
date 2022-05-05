@@ -73,6 +73,8 @@
 #include "src/tint/writer/float_to_string.h"
 #include "src/tint/writer/generate_external_texture_bindings.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::hlsl {
 namespace {
 
@@ -656,9 +658,9 @@ bool GeneratorImpl::EmitExpressionOrOneIfZero(std::ostream& out, const ast::Expr
                 }
                 if (!val.WithScalarAt(i, [&](auto&& s) -> bool {
                         // Use std::equal_to to work around -Wfloat-equal warnings
-                        auto equals_to = std::equal_to<std::remove_reference_t<decltype(s)>>{};
-
-                        bool is_zero = equals_to(s, 0);
+                        using T = std::remove_reference_t<decltype(s)>;
+                        auto equal_to = std::equal_to<T>{};
+                        bool is_zero = equal_to(s, T(0));
                         return EmitValue(out, elem_ty, is_zero ? 1 : static_cast<int>(s));
                     })) {
                     return false;
@@ -2329,7 +2331,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
 
     auto emit_vector_appended_with_i32_zero = [&](const ast::Expression* vector) {
         auto* i32 = builder_.create<sem::I32>();
-        auto* zero = builder_.Expr(0);
+        auto* zero = builder_.Expr(0_i);
         auto* stmt = builder_.Sem().Get(vector)->Stmt();
         builder_.Sem().Add(zero, builder_.create<sem::Expression>(zero, i32, stmt, sem::Constant{},
                                                                   /* has_side_effects */ false));

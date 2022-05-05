@@ -17,6 +17,8 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/ast/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::ast {
 namespace {
 
@@ -24,7 +26,7 @@ using SwitchStatementTest = TestHelper;
 
 TEST_F(SwitchStatementTest, Creation) {
     CaseSelectorList lit;
-    lit.push_back(Expr(1));
+    lit.push_back(Expr(1_u));
 
     auto* ident = Expr("ident");
     CaseStatementList body;
@@ -49,7 +51,7 @@ TEST_F(SwitchStatementTest, Creation_WithSource) {
 
 TEST_F(SwitchStatementTest, IsSwitch) {
     CaseSelectorList lit;
-    lit.push_back(Expr(2));
+    lit.push_back(Expr(2_i));
 
     auto* ident = Expr("ident");
     CaseStatementList body;
@@ -64,7 +66,7 @@ TEST_F(SwitchStatementTest, Assert_Null_Condition) {
         {
             ProgramBuilder b;
             CaseStatementList cases;
-            cases.push_back(b.create<CaseStatement>(CaseSelectorList{b.Expr(1)}, b.Block()));
+            cases.push_back(b.create<CaseStatement>(CaseSelectorList{b.Expr(1_i)}, b.Block()));
             b.create<SwitchStatement>(nullptr, cases);
         },
         "internal compiler error");
@@ -87,7 +89,7 @@ TEST_F(SwitchStatementTest, Assert_DifferentProgramID_Condition) {
             b1.create<SwitchStatement>(b2.Expr(true), CaseStatementList{
                                                           b1.create<CaseStatement>(
                                                               CaseSelectorList{
-                                                                  b1.Expr(1),
+                                                                  b1.Expr(1_i),
                                                               },
                                                               b1.Block()),
                                                       });
@@ -103,7 +105,7 @@ TEST_F(SwitchStatementTest, Assert_DifferentProgramID_CaseStatement) {
             b1.create<SwitchStatement>(b1.Expr(true), CaseStatementList{
                                                           b2.create<CaseStatement>(
                                                               CaseSelectorList{
-                                                                  b2.Expr(1),
+                                                                  b2.Expr(1_i),
                                                               },
                                                               b2.Block()),
                                                       });

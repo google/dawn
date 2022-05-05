@@ -21,6 +21,8 @@
 
 using ::testing::UnorderedElementsAre;
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -120,7 +122,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsComputeShaderParam) {
         Structure("S", {Member("a", ty.u32(), {Builtin(ast::Builtin::kLocalInvocationIndex)})});
 
     Func("main", {Param("param", ty.Of(s))}, ty.void_(), {},
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 

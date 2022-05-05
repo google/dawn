@@ -20,6 +20,8 @@
 #include "src/tint/transform/test_helper.h"
 #include "src/tint/transform/utils/get_insertion_point.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::transform {
 namespace {
 
@@ -27,10 +29,10 @@ using GetInsertionPointTest = ::testing::Test;
 
 TEST_F(GetInsertionPointTest, Block) {
     // fn f() {
-    //     var a = 1;
+    //     var a = 1i;
     // }
     ProgramBuilder b;
-    auto* expr = b.Expr(1);
+    auto* expr = b.Expr(1_i);
     auto* var = b.Decl(b.Var("a", nullptr, expr));
     auto* block = b.Block(var);
     b.Func("f", {}, b.ty.void_(), {block});
@@ -48,11 +50,11 @@ TEST_F(GetInsertionPointTest, Block) {
 
 TEST_F(GetInsertionPointTest, ForLoopInit) {
     // fn f() {
-    //     for(var a = 1; true; ) {
+    //     for(var a = 1i; true; ) {
     //     }
     // }
     ProgramBuilder b;
-    auto* expr = b.Expr(1);
+    auto* expr = b.Expr(1_i);
     auto* var = b.Decl(b.Var("a", nullptr, expr));
     auto* fl = b.For(var, b.Expr(true), {}, b.Block());
     auto* func_block = b.Block(fl);
@@ -70,11 +72,11 @@ TEST_F(GetInsertionPointTest, ForLoopInit) {
 
 TEST_F(GetInsertionPointTest, ForLoopCont_Invalid) {
     // fn f() {
-    //     for(; true; var a = 1) {
+    //     for(; true; var a = 1i) {
     //     }
     // }
     ProgramBuilder b;
-    auto* expr = b.Expr(1);
+    auto* expr = b.Expr(1_i);
     auto* var = b.Decl(b.Var("a", nullptr, expr));
     auto* s = b.For({}, b.Expr(true), var, b.Block());
     b.Func("f", {}, b.ty.void_(), {s});

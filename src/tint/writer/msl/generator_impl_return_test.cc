@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/msl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::msl {
 namespace {
 
@@ -32,7 +34,7 @@ TEST_F(MslGeneratorImplTest, Emit_Return) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_ReturnWithValue) {
-    auto* r = Return(123);
+    auto* r = Return(123_i);
     Func("f", {}, ty.i32(), {r});
 
     GeneratorImpl& gen = Build();

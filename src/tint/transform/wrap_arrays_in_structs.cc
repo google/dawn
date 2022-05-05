@@ -143,7 +143,7 @@ WrapArraysInStructs::WrappedArrayInfo WrapArraysInStructs::WrapArray(
             if (!array->IsStrideImplicit()) {
                 attrs.emplace_back(c.dst->create<ast::StrideAttribute>(array->Stride()));
             }
-            return c.dst->ty.array(el_type(c), array->Count(), std::move(attrs));
+            return c.dst->ty.array(el_type(c), u32(array->Count()), std::move(attrs));
         };
 
         // Structure() will create and append the ast::Struct to the

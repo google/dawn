@@ -51,9 +51,6 @@ template <typename T>
 using alias2 = builder::alias2<T>;
 template <typename T>
 using alias3 = builder::alias3<T>;
-using f32 = builder::f32;
-using i32 = builder::i32;
-using u32 = builder::u32;
 
 using ResolverCallTest = ResolverTest;
 

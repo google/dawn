@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/glsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::glsl {
 namespace {
 
@@ -26,7 +28,7 @@ TEST_F(GlslGeneratorImplTest_Switch, Emit_Switch) {
     auto* def = create<ast::CaseStatement>(ast::CaseSelectorList{}, def_body);
 
     ast::CaseSelectorList case_val;
-    case_val.push_back(Expr(5));
+    case_val.push_back(Expr(5_i));
 
     auto* case_body = Block(create<ast::BreakStatement>());
 

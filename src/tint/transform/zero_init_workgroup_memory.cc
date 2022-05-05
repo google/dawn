@@ -208,10 +208,10 @@ struct ZeroInitWorkgroupMemory::State {
                 auto idx = b.Symbols().New("idx");
                 auto* init = b.Decl(b.Var(idx, b.ty.u32(), local_index()));
                 auto* cond = b.create<ast::BinaryExpression>(ast::BinaryOp::kLessThan, b.Expr(idx),
-                                                             b.Expr(num_iterations));
-                auto* cont =
-                    b.Assign(idx, b.Add(idx, workgroup_size_const ? b.Expr(workgroup_size_const)
-                                                                  : workgroup_size_expr()));
+                                                             b.Expr(u32(num_iterations)));
+                auto* cont = b.Assign(
+                    idx, b.Add(idx, workgroup_size_const ? b.Expr(u32(workgroup_size_const))
+                                                         : workgroup_size_expr()));
 
                 auto block =
                     DeclareArrayIndices(num_iterations, array_indices, [&] { return b.Expr(idx); });
@@ -227,8 +227,8 @@ struct ZeroInitWorkgroupMemory::State {
                 //  if (local_index < num_iterations) {
                 //    ...
                 //  }
-                auto* cond = b.create<ast::BinaryExpression>(ast::BinaryOp::kLessThan,
-                                                             local_index(), b.Expr(num_iterations));
+                auto* cond = b.create<ast::BinaryExpression>(
+                    ast::BinaryOp::kLessThan, local_index(), b.Expr(u32(num_iterations)));
                 auto block = DeclareArrayIndices(num_iterations, array_indices,
                                                  [&] { return b.Expr(local_index()); });
                 for (auto& s : stmts) {
@@ -337,9 +337,9 @@ struct ZeroInitWorkgroupMemory::State {
             auto name = array_index_names.at(index);
             auto* mod = (num_iterations > index.modulo)
                             ? b.create<ast::BinaryExpression>(ast::BinaryOp::kModulo, iteration(),
-                                                              b.Expr(index.modulo))
+                                                              b.Expr(u32(index.modulo)))
                             : iteration();
-            auto* div = (index.division != 1u) ? b.Div(mod, index.division) : mod;
+            auto* div = (index.division != 1u) ? b.Div(mod, u32(index.division)) : mod;
             auto* decl = b.Decl(b.Let(name, b.ty.u32(), div));
             stmts.emplace_back(decl);
         }
@@ -371,7 +371,7 @@ struct ZeroInitWorkgroupMemory::State {
             workgroup_size_expr = [this, expr, size = workgroup_size_expr] {
                 auto* e = ctx.Clone(expr);
                 if (ctx.src->TypeOf(expr)->UnwrapRef()->Is<sem::I32>()) {
-                    e = b.Construct<ProgramBuilder::u32>(e);
+                    e = b.Construct<u32>(e);
                 }
                 return size ? b.Mul(size(), e) : e;
             };
@@ -381,8 +381,8 @@ struct ZeroInitWorkgroupMemory::State {
                 // Fold workgroup_size_const in to workgroup_size_expr
                 workgroup_size_expr = [this, is_signed, const_size = workgroup_size_const,
                                        expr_size = workgroup_size_expr] {
-                    return is_signed ? b.Mul(expr_size(), static_cast<int32_t>(const_size))
-                                     : b.Mul(expr_size(), const_size);
+                    return is_signed ? b.Mul(expr_size(), i32(const_size))
+                                     : b.Mul(expr_size(), u32(const_size));
                 };
             }
             // Indicate that workgroup_size_expr should be used instead of the

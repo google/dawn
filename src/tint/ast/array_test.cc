@@ -16,6 +16,8 @@
 
 #include "src/tint/ast/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::ast {
 namespace {
 
@@ -23,7 +25,7 @@ using AstArrayTest = TestHelper;
 
 TEST_F(AstArrayTest, CreateSizedArray) {
     auto* u32 = create<U32>();
-    auto* count = Expr(3);
+    auto* count = Expr(3_u);
     auto* arr = create<Array>(u32, count, AttributeList{});
     EXPECT_EQ(arr->type, u32);
     EXPECT_EQ(arr->count, count);
@@ -48,7 +50,7 @@ TEST_F(AstArrayTest, FriendlyName_RuntimeSized) {
 
 TEST_F(AstArrayTest, FriendlyName_LiteralSized) {
     auto* i32 = create<I32>();
-    auto* arr = create<Array>(i32, Expr(5), AttributeList{});
+    auto* arr = create<Array>(i32, Expr(5_u), AttributeList{});
     EXPECT_EQ(arr->FriendlyName(Symbols()), "array<i32, 5>");
 }
 
@@ -60,7 +62,7 @@ TEST_F(AstArrayTest, FriendlyName_ConstantSized) {
 
 TEST_F(AstArrayTest, FriendlyName_WithStride) {
     auto* i32 = create<I32>();
-    auto* arr = create<Array>(i32, Expr(5), AttributeList{create<StrideAttribute>(32)});
+    auto* arr = create<Array>(i32, Expr(5_u), AttributeList{create<StrideAttribute>(32)});
     EXPECT_EQ(arr->FriendlyName(Symbols()), "@stride(32) array<i32, 5>");
 }
 

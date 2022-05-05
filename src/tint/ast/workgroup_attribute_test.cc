@@ -17,13 +17,15 @@
 #include "src/tint/ast/stage_attribute.h"
 #include "src/tint/ast/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::ast {
 namespace {
 
 using WorkgroupAttributeTest = TestHelper;
 
 TEST_F(WorkgroupAttributeTest, Creation_1param) {
-    auto* d = WorkgroupSize(2);
+    auto* d = WorkgroupSize(2_i);
     auto values = d->Values();
 
     ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
@@ -33,7 +35,7 @@ TEST_F(WorkgroupAttributeTest, Creation_1param) {
     EXPECT_EQ(values[2], nullptr);
 }
 TEST_F(WorkgroupAttributeTest, Creation_2param) {
-    auto* d = WorkgroupSize(2, 4);
+    auto* d = WorkgroupSize(2_i, 4_i);
     auto values = d->Values();
 
     ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
@@ -46,7 +48,7 @@ TEST_F(WorkgroupAttributeTest, Creation_2param) {
 }
 
 TEST_F(WorkgroupAttributeTest, Creation_3param) {
-    auto* d = WorkgroupSize(2, 4, 6);
+    auto* d = WorkgroupSize(2_i, 4_i, 6_i);
     auto values = d->Values();
 
     ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());
@@ -60,7 +62,7 @@ TEST_F(WorkgroupAttributeTest, Creation_3param) {
 }
 
 TEST_F(WorkgroupAttributeTest, Creation_WithIdentifier) {
-    auto* d = WorkgroupSize(2, 4, "depth");
+    auto* d = WorkgroupSize(2_i, 4_i, "depth");
     auto values = d->Values();
 
     ASSERT_TRUE(values[0]->Is<ast::IntLiteralExpression>());

@@ -18,12 +18,14 @@
 #include "src/tint/sem/call.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
+using ::testing::HasSubstr;
+
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::glsl {
 namespace {
 
 using BuiltinType = sem::BuiltinType;
-
-using ::testing::HasSubstr;
 
 using GlslGeneratorImplTest_Builtin = TestHelper;
 
@@ -267,7 +269,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Select_Scalar) {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Select_Vector) {
-    auto* call = Call("select", vec2<i32>(1, 2), vec2<i32>(3, 4), vec2<bool>(true, false));
+    auto* call = Call("select", vec2<i32>(1_i, 2_i), vec2<i32>(3_i, 4_i), vec2<bool>(true, false));
     WrapInFunction(CallStmt(call));
     GeneratorImpl& gen = Build();
 
@@ -766,7 +768,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, StorageBarrier) {
     Func("main", {}, ty.void_(), {CallStmt(Call("storageBarrier"))},
          {
              Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(1),
+             WorkgroupSize(1_i),
          });
 
     GeneratorImpl& gen = Build();
@@ -786,7 +788,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, WorkgroupBarrier) {
     Func("main", {}, ty.void_(), {CallStmt(Call("workgroupBarrier"))},
          {
              Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(1),
+             WorkgroupSize(1_i),
          });
 
     GeneratorImpl& gen = Build();

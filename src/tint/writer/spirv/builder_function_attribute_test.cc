@@ -17,6 +17,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 namespace {
 
@@ -62,7 +64,7 @@ TEST_P(Attribute_StageTest, Emit) {
 
     auto deco_list = ast::AttributeList{Stage(params.stage)};
     if (params.stage == ast::PipelineStage::kCompute) {
-        deco_list.push_back(WorkgroupSize(1));
+        deco_list.push_back(WorkgroupSize(1_i));
     }
 
     auto* func = Func("main", {}, ret_type, body, deco_list, ret_type_attrs);
@@ -104,7 +106,7 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_Fragment_OriginUpperLeft) {
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Default) {
     auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
-                      ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1)});
+                      ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     spirv::Builder& b = Build();
 
@@ -117,7 +119,7 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Default) {
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Literals) {
     auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
                       ast::AttributeList{
-                          WorkgroupSize(2, 4, 6),
+                          WorkgroupSize(2_i, 4_i, 6_i),
                           Stage(ast::PipelineStage::kCompute),
                       });
 
@@ -130,9 +132,9 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Literals) {
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Const) {
-    GlobalConst("width", ty.i32(), Construct(ty.i32(), 2));
-    GlobalConst("height", ty.i32(), Construct(ty.i32(), 3));
-    GlobalConst("depth", ty.i32(), Construct(ty.i32(), 4));
+    GlobalConst("width", ty.i32(), Construct(ty.i32(), 2_i));
+    GlobalConst("height", ty.i32(), Construct(ty.i32(), 3_i));
+    GlobalConst("depth", ty.i32(), Construct(ty.i32(), 4_i));
     auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
                       ast::AttributeList{
                           WorkgroupSize("width", "height", "depth"),
@@ -148,9 +150,9 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Const) {
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_OverridableConst) {
-    Override("width", ty.i32(), Construct(ty.i32(), 2), {Id(7u)});
-    Override("height", ty.i32(), Construct(ty.i32(), 3), {Id(8u)});
-    Override("depth", ty.i32(), Construct(ty.i32(), 4), {Id(9u)});
+    Override("width", ty.i32(), Construct(ty.i32(), 2_i), {Id(7u)});
+    Override("height", ty.i32(), Construct(ty.i32(), 3_i), {Id(8u)});
+    Override("depth", ty.i32(), Construct(ty.i32(), 4_i), {Id(9u)});
     auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
                       ast::AttributeList{
                           WorkgroupSize("width", "height", "depth"),
@@ -178,11 +180,11 @@ OpDecorate %3 BuiltIn WorkgroupSize
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_LiteralAndConst) {
-    Override("height", ty.i32(), Construct(ty.i32(), 2), {Id(7u)});
-    GlobalConst("depth", ty.i32(), Construct(ty.i32(), 3));
+    Override("height", ty.i32(), Construct(ty.i32(), 2_i), {Id(7u)});
+    GlobalConst("depth", ty.i32(), Construct(ty.i32(), 3_i));
     auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
                       ast::AttributeList{
-                          WorkgroupSize(4, "height", "depth"),
+                          WorkgroupSize(4_i, "height", "depth"),
                           Stage(ast::PipelineStage::kCompute),
                       });
 

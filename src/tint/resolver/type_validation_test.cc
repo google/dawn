@@ -22,6 +22,8 @@
 
 #include "gmock/gmock.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -50,9 +52,6 @@ template <typename T>
 using alias2 = builder::alias2<T>;
 template <typename T>
 using alias3 = builder::alias3<T>;
-using f32 = builder::f32;
-using i32 = builder::i32;
-using u32 = builder::u32;
 
 class ResolverTypeValidationTest : public resolver::TestHelper, public testing::Test {};
 
@@ -63,7 +62,7 @@ TEST_F(ResolverTypeValidationTest, VariableDeclNoConstructor_Pass) {
     // }
     auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, nullptr);
     auto* lhs = Expr("a");
-    auto* rhs = Expr(2);
+    auto* rhs = Expr(2_i);
 
     auto* body = Block(Decl(var), Assign(Source{Source::Location{12, 34}}, lhs, rhs));
 
@@ -191,49 +190,49 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierDifferentFunctions_Pass) 
 
 TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedLiteral_Pass) {
     // var<private> a : array<f32, 4u>;
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 4u)), ast::StorageClass::kPrivate);
+    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 4_u)), ast::StorageClass::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Pass) {
-    // var<private> a : array<f32, 4>;
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 4)), ast::StorageClass::kPrivate);
+    // var<private> a : array<f32, 4i>;
+    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 4_i)), ast::StorageClass::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedConstant_Pass) {
     // let size = 4u;
     // var<private> a : array<f32, size>;
-    GlobalConst("size", nullptr, Expr(4u));
+    GlobalConst("size", nullptr, Expr(4_u));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedConstant_Pass) {
-    // let size = 4;
+    // let size = 4i;
     // var<private> a : array<f32, size>;
-    GlobalConst("size", nullptr, Expr(4));
+    GlobalConst("size", nullptr, Expr(4_i));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedLiteral_Zero) {
     // var<private> a : array<f32, 0u>;
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0u)), ast::StorageClass::kPrivate);
+    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_u)), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size must be at least 1");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Zero) {
-    // var<private> a : array<f32, 0>;
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0)), ast::StorageClass::kPrivate);
+    // var<private> a : array<f32, 0i>;
+    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_i)), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size must be at least 1");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Negative) {
-    // var<private> a : array<f32, -10>;
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, -10)), ast::StorageClass::kPrivate);
+    // var<private> a : array<f32, -10i>;
+    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, i32(-10))), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size must be at least 1");
 }
@@ -241,25 +240,25 @@ TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Negative) {
 TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedConstant_Zero) {
     // let size = 0u;
     // var<private> a : array<f32, size>;
-    GlobalConst("size", nullptr, Expr(0u));
+    GlobalConst("size", nullptr, Expr(0_u));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size must be at least 1");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedConstant_Zero) {
-    // let size = 0;
+    // let size = 0i;
     // var<private> a : array<f32, size>;
-    GlobalConst("size", nullptr, Expr(0));
+    GlobalConst("size", nullptr, Expr(0_i));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size must be at least 1");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedConstant_Negative) {
-    // let size = -10;
+    // let size = -10i;
     // var<private> a : array<f32, size>;
-    GlobalConst("size", nullptr, Expr(-10));
+    GlobalConst("size", nullptr, Expr(i32(-10)));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size must be at least 1");
@@ -274,7 +273,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FloatLiteral) {
 
 TEST_F(ResolverTypeValidationTest, ArraySize_IVecLiteral) {
     // var<private> a : array<f32, vec2<i32>(10, 10)>;
-    Global("a", ty.array(ty.f32(), Construct(Source{{12, 34}}, ty.vec2<i32>(), 10, 10)),
+    Global("a", ty.array(ty.f32(), Construct(Source{{12, 34}}, ty.vec2<i32>(), 10_i, 10_i)),
            ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size must be integer scalar");
@@ -292,15 +291,15 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FloatConstant) {
 TEST_F(ResolverTypeValidationTest, ArraySize_IVecConstant) {
     // let size = vec2<i32>(100, 100);
     // var<private> a : array<f32, size>;
-    GlobalConst("size", nullptr, Construct(ty.vec2<i32>(), 100, 100));
+    GlobalConst("size", nullptr, Construct(ty.vec2<i32>(), 100_i, 100_i));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size must be integer scalar");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ImplicitStride) {
-    // var<private> a : array<f32, 0x40000000>;
-    Global("a", ty.array(Source{{12, 34}}, ty.f32(), 0x40000000), ast::StorageClass::kPrivate);
+    // var<private> a : array<f32, 0x40000000u>;
+    Global("a", ty.array(Source{{12, 34}}, ty.f32(), 0x40000000_u), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: array size in bytes must not exceed 0xffffffff, but "
@@ -308,8 +307,8 @@ TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ImplicitStride) {
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ExplicitStride) {
-    // var<private> a : @stride(8) array<f32, 0x20000000>;
-    Global("a", ty.array(Source{{12, 34}}, ty.f32(), 0x20000000, 8), ast::StorageClass::kPrivate);
+    // var<private> a : @stride(8) array<f32, 0x20000000u>;
+    Global("a", ty.array(Source{{12, 34}}, ty.f32(), 0x20000000_u, 8), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: array size in bytes must not exceed 0xffffffff, but "
@@ -317,18 +316,18 @@ TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ExplicitStride) {
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_OverridableConstant) {
-    // override size = 10;
+    // override size = 10i;
     // var<private> a : array<f32, size>;
-    Override("size", nullptr, Expr(10));
+    Override("size", nullptr, Expr(10_i));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size expression must not be pipeline-overridable");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_ModuleVar) {
-    // var<private> size : i32 = 10;
+    // var<private> size : i32 = 10i;
     // var<private> a : array<f32, size>;
-    Global("size", ty.i32(), Expr(10), ast::StorageClass::kPrivate);
+    Global("size", ty.i32(), Expr(10_i), ast::StorageClass::kPrivate);
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size identifier must be a module-scope constant");
@@ -339,7 +338,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FunctionConstant) {
     //   let size = 10;
     //   var a : array<f32, size>;
     // }
-    auto* size = Let("size", nullptr, Expr(10));
+    auto* size = Let("size", nullptr, Expr(10_i));
     auto* a = Var("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")));
     WrapInFunction(Block(Decl(size), Decl(a)));
     EXPECT_FALSE(r()->Resolve());
@@ -347,10 +346,9 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FunctionConstant) {
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_InvalidExpr) {
-    // var a : array<f32, i32(4)>;
-    auto* size = Let("size", nullptr, Expr(10));
-    auto* a = Var("a", ty.array(ty.f32(), Construct(Source{{12, 34}}, ty.i32(), 4)));
-    WrapInFunction(Block(Decl(size), Decl(a)));
+    // var a : array<f32, i32(4i)>;
+    auto* a = Var("a", ty.array(ty.f32(), Construct(Source{{12, 34}}, ty.i32(), 4_i)));
+    WrapInFunction(Block(Decl(a)));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: array size expression must be either a literal or a "
@@ -457,10 +455,10 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsLast_Pass) {
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayInArray) {
     // struct Foo {
-    //   rt : array<array<f32>, 4>;
+    //   rt : array<array<f32>, 4u>;
     // };
 
-    Structure("Foo", {Member("rt", ty.array(Source{{12, 34}}, ty.array<f32>(), 4))});
+    Structure("Foo", {Member("rt", ty.array(Source{{12, 34}}, ty.array<f32>(), 4_u))});
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
@@ -475,7 +473,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInStructInArray) {
     // var<private> a : array<Foo, 4>;
 
     auto* foo = Structure("Foo", {Member("rt", ty.array<f32>())});
-    Global("v", ty.array(Source{{12, 34}}, ty.Of(foo), 4), ast::StorageClass::kPrivate);
+    Global("v", ty.array(Source{{12, 34}}, ty.Of(foo), 4_u), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
@@ -624,7 +622,7 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
 
 TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableType) {
     auto* tex_ty = ty.sampled_texture(ast::TextureDimension::k2d, ty.f32());
-    Global("arr", ty.array(Source{{12, 34}}, tex_ty, 4), ast::StorageClass::kPrivate);
+    Global("arr", ty.array(Source{{12, 34}}, tex_ty, 4_i), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

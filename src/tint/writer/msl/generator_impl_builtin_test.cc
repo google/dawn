@@ -16,6 +16,8 @@
 #include "src/tint/sem/call.h"
 #include "src/tint/writer/msl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::msl {
 namespace {
 
@@ -460,10 +462,10 @@ TEST_F(MslGeneratorImplTest, Ignore) {
     Func("f", {Param("a", ty.i32()), Param("b", ty.i32()), Param("c", ty.i32())}, ty.i32(),
          {Return(Mul(Add("a", "b"), "c"))});
 
-    Func("func", {}, ty.void_(), {CallStmt(Call("f", 1, 2, 3))},
+    Func("func", {}, ty.void_(), {CallStmt(Call("f", 1_i, 2_i, 3_i))},
          {
              Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(1),
+             WorkgroupSize(1_i),
          });
 
     GeneratorImpl& gen = Build();

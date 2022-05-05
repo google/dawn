@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/wgsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::wgsl {
 namespace {
 
@@ -21,8 +23,8 @@ using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Fallthrough) {
     auto* f = create<ast::FallthroughStatement>();
-    WrapInFunction(Switch(1,                        //
-                          Case(Expr(1), Block(f)),  //
+    WrapInFunction(Switch(1_i,                        //
+                          Case(Expr(1_i), Block(f)),  //
                           DefaultCase()));
 
     GeneratorImpl& gen = Build();

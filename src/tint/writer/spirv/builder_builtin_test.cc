@@ -19,6 +19,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 namespace {
 
@@ -962,7 +964,7 @@ OpFunctionEnd
 using Builtin_Builtin_SingleParam_Sint_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_SingleParam_Sint_Test, Call_Scalar) {
     auto param = GetParam();
-    auto* expr = Call(param.name, 1);
+    auto* expr = Call(param.name, 1_i);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -989,7 +991,7 @@ OpFunctionEnd
 
 TEST_P(Builtin_Builtin_SingleParam_Sint_Test, Call_Vector) {
     auto param = GetParam();
-    auto* expr = Call(param.name, vec2<i32>(1, 1));
+    auto* expr = Call(param.name, vec2<i32>(1_i, 1_i));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -1022,7 +1024,7 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
 // Calling abs() on an unsigned integer scalar / vector is a no-op.
 using Builtin_Builtin_Abs_Uint_Test = BuiltinBuilderTest;
 TEST_F(Builtin_Builtin_Abs_Uint_Test, Call_Scalar) {
-    auto* expr = Call("abs", 1u);
+    auto* expr = Call("abs", 1_u);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -1045,7 +1047,7 @@ OpFunctionEnd
 }
 
 TEST_F(Builtin_Builtin_Abs_Uint_Test, Call_Vector) {
-    auto* expr = Call("abs", vec2<u32>(1u, 1u));
+    auto* expr = Call("abs", vec2<u32>(1_u, 1_u));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -1072,7 +1074,7 @@ OpFunctionEnd
 using Builtin_Builtin_DualParam_SInt_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_DualParam_SInt_Test, Call_Scalar) {
     auto param = GetParam();
-    auto* expr = Call(param.name, 1, 1);
+    auto* expr = Call(param.name, 1_i, 1_i);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -1099,7 +1101,7 @@ OpFunctionEnd
 
 TEST_P(Builtin_Builtin_DualParam_SInt_Test, Call_Vector) {
     auto param = GetParam();
-    auto* expr = Call(param.name, vec2<i32>(1, 1), vec2<i32>(1, 1));
+    auto* expr = Call(param.name, vec2<i32>(1_i, 1_i), vec2<i32>(1_i, 1_i));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -1132,7 +1134,7 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
 using Builtin_Builtin_DualParam_UInt_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_DualParam_UInt_Test, Call_Scalar) {
     auto param = GetParam();
-    auto* expr = Call(param.name, 1u, 1u);
+    auto* expr = Call(param.name, 1_u, 1_u);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -1159,7 +1161,7 @@ OpFunctionEnd
 
 TEST_P(Builtin_Builtin_DualParam_UInt_Test, Call_Vector) {
     auto param = GetParam();
-    auto* expr = Call(param.name, vec2<u32>(1u, 1u), vec2<u32>(1u, 1u));
+    auto* expr = Call(param.name, vec2<u32>(1_u, 1_u), vec2<u32>(1_u, 1_u));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -1192,7 +1194,7 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
 using Builtin_Builtin_ThreeParam_Sint_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_ThreeParam_Sint_Test, Call_Scalar) {
     auto param = GetParam();
-    auto* expr = Call(param.name, 1, 1, 1);
+    auto* expr = Call(param.name, 1_i, 1_i, 1_i);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -1219,7 +1221,7 @@ OpFunctionEnd
 
 TEST_P(Builtin_Builtin_ThreeParam_Sint_Test, Call_Vector) {
     auto param = GetParam();
-    auto* expr = Call(param.name, vec2<i32>(1, 1), vec2<i32>(1, 1), vec2<i32>(1, 1));
+    auto* expr = Call(param.name, vec2<i32>(1_i, 1_i), vec2<i32>(1_i, 1_i), vec2<i32>(1_i, 1_i));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -1252,7 +1254,7 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
 using Builtin_Builtin_ThreeParam_Uint_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_ThreeParam_Uint_Test, Call_Scalar) {
     auto param = GetParam();
-    auto* expr = Call(param.name, 1u, 1u, 1u);
+    auto* expr = Call(param.name, 1_u, 1_u, 1_u);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -1279,7 +1281,7 @@ OpFunctionEnd
 
 TEST_P(Builtin_Builtin_ThreeParam_Uint_Test, Call_Vector) {
     auto param = GetParam();
-    auto* expr = Call(param.name, vec2<u32>(1u, 1u), vec2<u32>(1u, 1u), vec2<u32>(1u, 1u));
+    auto* expr = Call(param.name, vec2<u32>(1_u, 1_u), vec2<u32>(1_u, 1_u), vec2<u32>(1_u, 1_u));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -1475,7 +1477,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1_u);
 
     auto* expected_types = R"(%5 = OpTypeFloat 32
 %4 = OpTypeRuntimeArray %5
@@ -1522,7 +1524,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1_u);
 
     auto* expected_types = R"(%4 = OpTypeFloat 32
 %5 = OpTypeRuntimeArray %4
@@ -1571,7 +1573,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1_u);
 
     auto* expected_types = R"(%5 = OpTypeFloat 32
 %4 = OpTypeRuntimeArray %5
@@ -1633,7 +1635,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1_u);
 
     auto* expected_types = R"(%5 = OpTypeFloat 32
 %4 = OpTypeRuntimeArray %5
@@ -1689,7 +1691,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicLoad) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1_u);
 
     auto* expected_types = R"(%4 = OpTypeInt 32 0
 %5 = OpTypeInt 32 1
@@ -1727,7 +1729,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicStore) {
     // @binding(1) @group(2) var<storage, read_write> b : S;
     //
     // fn a_func() {
-    //   var u = 1u;
+    //   var u = 1_u;
     //   var i = 2;
     //   atomicStore(&b.u, u);
     //   atomicStore(&b.i, i);
@@ -1744,8 +1746,8 @@ TEST_F(BuiltinBuilderTest, Call_AtomicStore) {
 
     Func("a_func", {}, ty.void_(),
          ast::StatementList{
-             Decl(Var("u", nullptr, Expr(1u))),
-             Decl(Var("i", nullptr, Expr(2))),
+             Decl(Var("u", nullptr, Expr(1_u))),
+             Decl(Var("i", nullptr, Expr(2_i))),
              CallStmt(Call("atomicStore", AddressOf(MemberAccessor("b", "u")), "u")),
              CallStmt(Call("atomicStore", AddressOf(MemberAccessor("b", "i")), "i")),
          },
@@ -1755,7 +1757,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicStore) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1_u);
 
     auto* expected_types = R"(%4 = OpTypeInt 32 0
 %5 = OpTypeInt 32 1
@@ -1816,7 +1818,7 @@ TEST_P(Builtin_Builtin_AtomicRMW_i32, Test) {
 
     Func("a_func", {}, ty.void_(),
          ast::StatementList{
-             Decl(Var("v", nullptr, Expr(10))),
+             Decl(Var("v", nullptr, Expr(10_i))),
              Decl(Let("x", ty.i32(),
                       Call(GetParam().name, AddressOf(MemberAccessor("b", "v")), "v"))),
          },
@@ -1826,7 +1828,7 @@ TEST_P(Builtin_Builtin_AtomicRMW_i32, Test) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1_u);
 
     std::string expected_types = R"(%4 = OpTypeInt 32 1
 %3 = OpTypeStruct %4
@@ -1889,7 +1891,7 @@ TEST_P(Builtin_Builtin_AtomicRMW_u32, Test) {
 
     Func("a_func", {}, ty.void_(),
          ast::StatementList{
-             Decl(Var("v", nullptr, Expr(10u))),
+             Decl(Var("v", nullptr, Expr(10_u))),
              Decl(Let("x", ty.u32(),
                       Call(GetParam().name, AddressOf(MemberAccessor("b", "v")), "v"))),
          },
@@ -1899,7 +1901,7 @@ TEST_P(Builtin_Builtin_AtomicRMW_u32, Test) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1_u);
 
     std::string expected_types = R"(%4 = OpTypeInt 32 0
 %3 = OpTypeStruct %4
@@ -1948,7 +1950,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicExchange) {
     //
     // fn a_func() {
     //   var u = 10u;
-    //   var i = 10;
+    //   var i = 10i;
     //   let r : u32 = atomicExchange(&b.u, u);
     //   let s : i32 = atomicExchange(&b.i, i);
     // }
@@ -1964,8 +1966,8 @@ TEST_F(BuiltinBuilderTest, Call_AtomicExchange) {
 
     Func("a_func", {}, ty.void_(),
          ast::StatementList{
-             Decl(Var("u", nullptr, Expr(10u))),
-             Decl(Var("i", nullptr, Expr(10))),
+             Decl(Var("u", nullptr, Expr(10_u))),
+             Decl(Var("i", nullptr, Expr(10_i))),
              Decl(Let("r", ty.u32(),
                       Call("atomicExchange", AddressOf(MemberAccessor("b", "u")), "u"))),
              Decl(Let("s", ty.i32(),
@@ -1977,7 +1979,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicExchange) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1_u);
 
     auto* expected_types = R"(%4 = OpTypeInt 32 0
 %5 = OpTypeInt 32 1
@@ -2040,12 +2042,12 @@ TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
 
     Func("a_func", {}, ty.void_(),
          ast::StatementList{
-             Decl(Let(
-                 "u", ty.vec2<u32>(),
-                 Call("atomicCompareExchangeWeak", AddressOf(MemberAccessor("b", "u")), 10u, 20u))),
-             Decl(Let(
-                 "i", ty.vec2<i32>(),
-                 Call("atomicCompareExchangeWeak", AddressOf(MemberAccessor("b", "i")), 10, 20))),
+             Decl(Let("u", ty.vec2<u32>(),
+                      Call("atomicCompareExchangeWeak", AddressOf(MemberAccessor("b", "u")), 10_u,
+                           20_u))),
+             Decl(Let("i", ty.vec2<i32>(),
+                      Call("atomicCompareExchangeWeak", AddressOf(MemberAccessor("b", "i")), 10_i,
+                           20_i))),
          },
          ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
 
@@ -2053,7 +2055,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1_u);
 
     auto* expected_types = R"(%4 = OpTypeInt 32 0
 %5 = OpTypeInt 32 1
@@ -2160,7 +2162,7 @@ TEST_P(Builtin_Builtin_DataUnpacking_Test, Binary) {
     auto param = GetParam();
 
     bool pack4 = param.name == "unpack4x8snorm" || param.name == "unpack4x8unorm";
-    auto* func = Func("a_func", {}, ty.void_(), {CallStmt(Call(param.name, 1u))});
+    auto* func = Func("a_func", {}, ty.void_(), {CallStmt(Call(param.name, 1_u))});
 
     spirv::Builder& b = Build();
 
@@ -2216,14 +2218,14 @@ TEST_F(BuiltinBuilderTest, Call_WorkgroupBarrier) {
          },
          ast::AttributeList{
              Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(1),
+             WorkgroupSize(1_i),
          });
 
     spirv::Builder& b = Build();
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1_u);
 
     auto* expected_types = R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -2250,14 +2252,14 @@ TEST_F(BuiltinBuilderTest, Call_StorageBarrier) {
          },
          ast::AttributeList{
              Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(1),
+             WorkgroupSize(1_i),
          });
 
     spirv::Builder& b = Build();
 
     ASSERT_TRUE(b.Build()) << b.error();
 
-    ASSERT_EQ(b.functions().size(), 1u);
+    ASSERT_EQ(b.functions().size(), 1_u);
 
     auto* expected_types = R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2

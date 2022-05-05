@@ -14,13 +14,15 @@
 
 #include "src/tint/writer/glsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::glsl {
 namespace {
 
 using GlslGeneratorImplTest_Cast = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_Cast, EmitExpression_Cast_Scalar) {
-    auto* cast = Construct<f32>(1);
+    auto* cast = Construct<f32>(1_i);
     WrapInFunction(cast);
 
     GeneratorImpl& gen = Build();
@@ -31,7 +33,7 @@ TEST_F(GlslGeneratorImplTest_Cast, EmitExpression_Cast_Scalar) {
 }
 
 TEST_F(GlslGeneratorImplTest_Cast, EmitExpression_Cast_Vector) {
-    auto* cast = vec3<f32>(vec3<i32>(1, 2, 3));
+    auto* cast = vec3<f32>(vec3<i32>(1_i, 2_i, 3_i));
     WrapInFunction(cast);
 
     GeneratorImpl& gen = Build();

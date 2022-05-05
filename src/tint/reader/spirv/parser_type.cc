@@ -196,7 +196,7 @@ Array::Array(const Array&) = default;
 
 const ast::Type* Array::Build(ProgramBuilder& b) const {
     if (size > 0) {
-        return b.ty.array(type->Build(b), size, stride);
+        return b.ty.array(type->Build(b), u32(size), stride);
     } else {
         return b.ty.array(type->Build(b), nullptr, stride);
     }

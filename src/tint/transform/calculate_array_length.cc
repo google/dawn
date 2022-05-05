@@ -33,6 +33,8 @@
 TINT_INSTANTIATE_TYPEINFO(tint::transform::CalculateArrayLength);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::CalculateArrayLength::BufferSizeIntrinsic);
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::transform {
 
 namespace {
@@ -168,7 +170,7 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) cons
                             // RWByteAddressBuffer.GetDimensions()
                             auto* buffer_size_result = ctx.dst->Decl(
                                 ctx.dst->Var(ctx.dst->Sym(), ctx.dst->ty.u32(),
-                                             ast::StorageClass::kNone, ctx.dst->Expr(0u)));
+                                             ast::StorageClass::kNone, ctx.dst->Expr(0_u)));
 
                             // Call storage_buffer.GetDimensions(&buffer_size_result)
                             auto* call_get_dims = ctx.dst->CallStmt(ctx.dst->Call(
@@ -192,7 +194,8 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) cons
                                 // the array member.
                                 auto* array_member_sem = str->Members().back();
                                 array_type = array_member_sem->Type()->As<sem::Array>();
-                                total_size = ctx.dst->Sub(total_size, array_member_sem->Offset());
+                                total_size =
+                                    ctx.dst->Sub(total_size, u32(array_member_sem->Offset()));
                             } else if (auto* arr = storage_buffer_type->As<sem::Array>()) {
                                 array_type = arr;
                             } else {
@@ -202,8 +205,9 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) cons
                                 return name;
                             }
                             uint32_t array_stride = array_type->Size();
-                            auto* array_length_var = ctx.dst->Decl(ctx.dst->Let(
-                                name, ctx.dst->ty.u32(), ctx.dst->Div(total_size, array_stride)));
+                            auto* array_length_var = ctx.dst->Decl(
+                                ctx.dst->Let(name, ctx.dst->ty.u32(),
+                                             ctx.dst->Div(total_size, u32(array_stride))));
 
                             // Insert the array length calculations at the top of the block
                             ctx.InsertBefore(block->statements, block->statements[0],

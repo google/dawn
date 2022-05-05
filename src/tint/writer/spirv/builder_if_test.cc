@@ -15,6 +15,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 namespace {
 
@@ -67,7 +69,7 @@ TEST_F(BuilderTest, If_WithStatements) {
     // }
 
     auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-    auto* body = Block(Assign("v", 2));
+    auto* body = Block(Assign("v", 2_i));
     auto* expr = If(true, body);
     WrapInFunction(expr);
 
@@ -97,14 +99,14 @@ OpBranch %7
 
 TEST_F(BuilderTest, If_WithElse) {
     // if (true) {
-    //   v = 2;
+    //   v = 2i;
     // } else {
-    //   v = 3;
+    //   v = 3i;
     // }
 
     auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-    auto* body = Block(Assign("v", 2));
-    auto* else_body = Block(Assign("v", 3));
+    auto* body = Block(Assign("v", 2_i));
+    auto* else_body = Block(Assign("v", 3_i));
 
     auto* expr = If(true, body, Else(else_body));
     WrapInFunction(expr);
@@ -139,14 +141,14 @@ OpBranch %7
 
 TEST_F(BuilderTest, If_WithElseIf) {
     // if (true) {
-    //   v = 2;
+    //   v = 2i;
     // } else if (true) {
-    //   v = 3;
+    //   v = 3i;
     // }
 
     auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-    auto* body = Block(Assign("v", 2));
-    auto* else_body = Block(Assign("v", 3));
+    auto* body = Block(Assign("v", 2_i));
+    auto* else_body = Block(Assign("v", 3_i));
 
     auto* expr = If(true, body, Else(If(true, else_body)));
     WrapInFunction(expr);
@@ -186,20 +188,20 @@ OpBranch %7
 
 TEST_F(BuilderTest, If_WithMultiple) {
     // if (true) {
-    //   v = 2;
+    //   v = 2i;
     // } else if (true) {
-    //   v = 3;
+    //   v = 3i;
     // } else if (false) {
-    //   v = 4;
+    //   v = 4i;
     // } else {
-    //   v = 5;
+    //   v = 5i;
     // }
 
     auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-    auto* body = Block(Assign("v", 2));
-    auto* elseif_1_body = Block(Assign("v", 3));
-    auto* elseif_2_body = Block(Assign("v", 4));
-    auto* else_body = Block(Assign("v", 5));
+    auto* body = Block(Assign("v", 2_i));
+    auto* elseif_1_body = Block(Assign("v", 3_i));
+    auto* elseif_2_body = Block(Assign("v", 4_i));
+    auto* else_body = Block(Assign("v", 5_i));
 
     auto* expr = If(true, body,                            //
                     Else(If(true, elseif_1_body,           //

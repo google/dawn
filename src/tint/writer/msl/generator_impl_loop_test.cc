@@ -15,6 +15,8 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/writer/msl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::msl {
 namespace {
 
@@ -175,7 +177,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtInit) {
     // fn f(i : i32) {}
     //
     // var<workgroup> a : atomic<i32>;
-    // for({f(1); f(2);}; ; ) {
+    // for({f(1i); f(2i);}; ; ) {
     //   return;
     // }
 
@@ -183,7 +185,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtInit) {
     auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
 
     Global("a", ty.atomic<i32>(), ast::StorageClass::kWorkgroup);
-    auto* multi_stmt = Block(f(1), f(2));
+    auto* multi_stmt = Block(f(1_i), f(2_i));
     auto* loop = For(multi_stmt, nullptr, nullptr,  //
                      Block(Return()));
     WrapInFunction(loop);
@@ -231,7 +233,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleCont) {
     // }
 
     auto* v = Decl(Var("i", ty.i32()));
-    auto* f = For(nullptr, nullptr, Assign("i", Add("i", 1)),  //
+    auto* f = For(nullptr, nullptr, Assign("i", Add("i", 1_i)),  //
                   Block(Return()));
     WrapInFunction(v, f);
 
@@ -251,7 +253,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtCont) {
     // fn f(i : i32) {}
     //
     // var<workgroup> a : atomic<i32>;
-    // for(; ; { f(1); f(2); }) {
+    // for(; ; { f(1i); f(2i); }) {
     //   return;
     // }
 
@@ -259,7 +261,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtCont) {
     auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
 
     Global("a", ty.atomic<i32>(), ast::StorageClass::kWorkgroup);
-    auto* multi_stmt = Block(f(1), f(2));
+    auto* multi_stmt = Block(f(1_i), f(2_i));
     auto* loop = For(nullptr, nullptr, multi_stmt,  //
                      Block(Return()));
     WrapInFunction(loop);
@@ -286,7 +288,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleInitCondCont) {
 
     Func("a_statement", {}, ty.void_(), {});
 
-    auto* f = For(Decl(Var("i", ty.i32())), true, Assign("i", Add("i", 1)),
+    auto* f = For(Decl(Var("i", ty.i32())), true, Assign("i", Add("i", 1_i)),
                   Block(CallStmt(Call("a_statement"))));
     WrapInFunction(f);
 
@@ -306,7 +308,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtInitCondCont) {
     // fn f(i : i32) {}
     //
     // var<workgroup> a : atomic<i32>;
-    // for({ f(1); f(2); }; true; { f(3); f(4); }) {
+    // for({ f(1i); f(2i); }; true; { f(3i); f(4i); }) {
     //   return;
     // }
 
@@ -314,8 +316,8 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtInitCondCont) {
     auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
 
     Global("a", ty.atomic<i32>(), ast::StorageClass::kWorkgroup);
-    auto* multi_stmt_a = Block(f(1), f(2));
-    auto* multi_stmt_b = Block(f(3), f(4));
+    auto* multi_stmt_a = Block(f(1_i), f(2_i));
+    auto* multi_stmt_b = Block(f(3_i), f(4_i));
     auto* loop = For(multi_stmt_a, Expr(true), multi_stmt_b,  //
                      Block(Return()));
     WrapInFunction(loop);

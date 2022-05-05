@@ -19,6 +19,8 @@
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::ast {
 namespace {
 
@@ -26,7 +28,7 @@ using CaseStatementTest = TestHelper;
 
 TEST_F(CaseStatementTest, Creation_i32) {
     CaseSelectorList b;
-    auto* selector = Expr(2);
+    auto* selector = Expr(2_i);
     b.push_back(selector);
 
     auto* discard = create<DiscardStatement>();
@@ -41,7 +43,7 @@ TEST_F(CaseStatementTest, Creation_i32) {
 
 TEST_F(CaseStatementTest, Creation_u32) {
     CaseSelectorList b;
-    auto* selector = Expr(2u);
+    auto* selector = Expr(2_u);
     b.push_back(selector);
 
     auto* discard = create<DiscardStatement>();
@@ -56,7 +58,7 @@ TEST_F(CaseStatementTest, Creation_u32) {
 
 TEST_F(CaseStatementTest, Creation_WithSource) {
     CaseSelectorList b;
-    b.push_back(Expr(2));
+    b.push_back(Expr(2_i));
 
     auto* body = create<BlockStatement>(StatementList{
         create<DiscardStatement>(),
@@ -77,7 +79,7 @@ TEST_F(CaseStatementTest, IsDefault_WithoutSelectors) {
 
 TEST_F(CaseStatementTest, IsDefault_WithSelectors) {
     CaseSelectorList b;
-    b.push_back(Expr(2));
+    b.push_back(Expr(2_i));
 
     auto* c = create<CaseStatement>(b, create<BlockStatement>(StatementList{}));
     EXPECT_FALSE(c->IsDefault());
@@ -123,7 +125,7 @@ TEST_F(CaseStatementTest, Assert_DifferentProgramID_Selector) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<CaseStatement>(CaseSelectorList{b2.Expr(2)},
+            b1.create<CaseStatement>(CaseSelectorList{b2.Expr(2_i)},
                                      b1.create<BlockStatement>(StatementList{}));
         },
         "internal compiler error");

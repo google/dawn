@@ -19,6 +19,8 @@
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/member_accessor_expression.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -52,7 +54,7 @@ struct SideEffectsTest : ResolverTest {
 
 TEST_F(SideEffectsTest, Phony) {
     auto* expr = Phony();
-    auto* body = Assign(expr, 1);
+    auto* body = Assign(expr, 1_i);
     WrapInFunction(body);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -62,7 +64,7 @@ TEST_F(SideEffectsTest, Phony) {
 }
 
 TEST_F(SideEffectsTest, Literal) {
-    auto* expr = Expr(1);
+    auto* expr = Expr(1_i);
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -111,7 +113,7 @@ TEST_F(SideEffectsTest, Call_Builtin_NoSE_WithSEArg) {
 
 TEST_F(SideEffectsTest, Call_Builtin_SE) {
     Global("a", ty.atomic(ty.i32()), ast::StorageClass::kWorkgroup);
-    auto* expr = Call("atomicAdd", AddressOf("a"), 1);
+    auto* expr = Call("atomicAdd", AddressOf("a"), 1_i);
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -122,7 +124,7 @@ TEST_F(SideEffectsTest, Call_Builtin_SE) {
 }
 
 TEST_F(SideEffectsTest, Call_Function) {
-    Func("f", {}, ty.i32(), {Return(1)});
+    Func("f", {}, ty.i32(), {Return(1_i)});
     auto* expr = Call("f");
     WrapInFunction(expr);
 
@@ -313,7 +315,7 @@ TEST_F(SideEffectsTest, Unary_SE) {
 
 TEST_F(SideEffectsTest, IndexAccessor_NoSE) {
     auto* var = Decl(Var("a", ty.array<i32, 10>()));
-    auto* expr = IndexAccessor("a", 0);
+    auto* expr = IndexAccessor("a", 0_i);
     WrapInFunction(var, expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -324,7 +326,7 @@ TEST_F(SideEffectsTest, IndexAccessor_NoSE) {
 
 TEST_F(SideEffectsTest, IndexAccessor_ObjSE) {
     MakeSideEffectFunc("se", [&] { return ty.array<i32, 10>(); });
-    auto* expr = IndexAccessor(Call("se"), 0);
+    auto* expr = IndexAccessor(Call("se"), 0_i);
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

@@ -75,6 +75,7 @@
 #include "src/tint/ast/vector.h"
 #include "src/tint/ast/void.h"
 #include "src/tint/ast/workgroup_attribute.h"
+#include "src/tint/number.h"
 #include "src/tint/program.h"
 #include "src/tint/program_id.h"
 #include "src/tint/sem/array.h"
@@ -152,23 +153,6 @@ class ProgramBuilder {
 
     /// SemNodeAllocator is an alias to BlockAllocator<sem::Node>
     using SemNodeAllocator = utils::BlockAllocator<sem::Node>;
-
-    /// `i32` is a type alias to `int`.
-    /// Useful for passing to template methods such as `vec2<i32>()` to imitate
-    /// WGSL syntax.
-    /// Note: this is intentionally not aliased to uint32_t as we want integer
-    /// literals passed to the builder to match WGSL's integer literal types.
-    using i32 = decltype(1);
-    /// `u32` is a type alias to `unsigned int`.
-    /// Useful for passing to template methods such as `vec2<u32>()` to imitate
-    /// WGSL syntax.
-    /// Note: this is intentionally not aliased to uint32_t as we want integer
-    /// literals passed to the builder to match WGSL's integer literal types.
-    using u32 = decltype(1u);
-    /// `f32` is a type alias to `float`
-    /// Useful for passing to template methods such as `vec2<f32>()` to imitate
-    /// WGSL syntax.
-    using f32 = float;
 
     /// Constructor
     ProgramBuilder();
@@ -672,7 +656,7 @@ class ProgramBuilder {
         /// @return the tint AST type for an array of size `N` of type `T`
         template <typename T, int N>
         const ast::Array* array() const {
-            return array(Of<T>(), builder->Expr(N));
+            return array(Of<T>(), builder->Expr(tint::u32(N)));
         }
 
         /// @param stride the array stride
@@ -686,7 +670,7 @@ class ProgramBuilder {
         /// @return the tint AST type for an array of size `N` of type `T`
         template <typename T, int N>
         const ast::Array* array(uint32_t stride) const {
-            return array(Of<T>(), builder->Expr(N), stride);
+            return array(Of<T>(), builder->Expr(tint::u32(N)), stride);
         }
 
         /// Creates a type name
@@ -1015,28 +999,28 @@ class ProgramBuilder {
 
     /// @param source the source information
     /// @param value the integer value
-    /// @return a Scalar constructor for the given value
+    /// @return a 'i'-suffixed IntLiteralExpression for the given value
     const ast::IntLiteralExpression* Expr(const Source& source, i32 value) {
         return create<ast::IntLiteralExpression>(source, value,
-                                                 ast::IntLiteralExpression::Suffix::kNone);
+                                                 ast::IntLiteralExpression::Suffix::kI);
     }
 
     /// @param value the integer value
-    /// @return a Scalar constructor for the given value
+    /// @return a 'i'-suffixed IntLiteralExpression for the given value
     const ast::IntLiteralExpression* Expr(i32 value) {
-        return create<ast::IntLiteralExpression>(value, ast::IntLiteralExpression::Suffix::kNone);
+        return create<ast::IntLiteralExpression>(value, ast::IntLiteralExpression::Suffix::kI);
     }
 
     /// @param source the source information
     /// @param value the unsigned int value
-    /// @return a Scalar constructor for the given value
+    /// @return a 'u'-suffixed IntLiteralExpression for the given value
     const ast::IntLiteralExpression* Expr(const Source& source, u32 value) {
         return create<ast::IntLiteralExpression>(source, value,
                                                  ast::IntLiteralExpression::Suffix::kU);
     }
 
     /// @param value the unsigned int value
-    /// @return a Scalar constructor for the given value
+    /// @return a 'u'-suffixed IntLiteralExpression for the given value
     const ast::IntLiteralExpression* Expr(u32 value) {
         return create<ast::IntLiteralExpression>(value, ast::IntLiteralExpression::Suffix::kU);
     }
@@ -2643,15 +2627,15 @@ class ProgramBuilder {
 //! @cond Doxygen_Suppress
 // Various template specializations for ProgramBuilder::TypesBuilder::CToAST.
 template <>
-struct ProgramBuilder::TypesBuilder::CToAST<ProgramBuilder::i32> {
+struct ProgramBuilder::TypesBuilder::CToAST<i32> {
     static const ast::Type* get(const ProgramBuilder::TypesBuilder* t) { return t->i32(); }
 };
 template <>
-struct ProgramBuilder::TypesBuilder::CToAST<ProgramBuilder::u32> {
+struct ProgramBuilder::TypesBuilder::CToAST<u32> {
     static const ast::Type* get(const ProgramBuilder::TypesBuilder* t) { return t->u32(); }
 };
 template <>
-struct ProgramBuilder::TypesBuilder::CToAST<ProgramBuilder::f32> {
+struct ProgramBuilder::TypesBuilder::CToAST<f32> {
     static const ast::Type* get(const ProgramBuilder::TypesBuilder* t) { return t->f32(); }
 };
 template <>
