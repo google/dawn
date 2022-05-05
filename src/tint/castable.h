@@ -21,7 +21,9 @@
 #include <utility>
 
 #include "src/tint/traits.h"
+#include "src/tint/utils/bitcast.h"
 #include "src/tint/utils/crc32.h"
+#include "src/tint/utils/defer.h"
 
 #if defined(__clang__)
 /// Temporarily disable certain warnings when using Castable API
@@ -588,7 +590,7 @@ inline bool NonDefaultCases(T* object,
         if (type->Is(&TypeInfo::Of<CaseType>())) {
             auto* ptr = static_cast<CaseType*>(object);
             if constexpr (kHasReturnType) {
-                *result = static_cast<RETURN_TYPE>(std::get<0>(cases)(ptr));
+                new (result) RETURN_TYPE(static_cast<RETURN_TYPE>(std::get<0>(cases)(ptr)));
             } else {
                 std::get<0>(cases)(ptr);
             }
@@ -617,36 +619,61 @@ inline bool NonDefaultCases(T* object,
 template <typename T, typename RETURN_TYPE, typename... CASES>
 inline void SwitchCases(T* object, RETURN_TYPE* result, std::tuple<CASES...>&& cases) {
     using Cases = std::tuple<CASES...>;
+
     static constexpr int kDefaultIndex = detail::IndexOfDefaultCase<Cases>();
-    static_assert(kDefaultIndex == -1 || kDefaultIndex == std::tuple_size_v<Cases> - 1,
-                  "Default case must be last in Switch()");
     static constexpr bool kHasDefaultCase = kDefaultIndex >= 0;
     static constexpr bool kHasReturnType = !std::is_same_v<RETURN_TYPE, void>;
 
-    if (object) {
-        auto* type = &object->TypeInfo();
-        if constexpr (kHasDefaultCase) {
-            // Evaluate non-default cases.
-            if (!detail::NonDefaultCases<T>(object, type, result,
-                                            traits::Slice<0, kDefaultIndex>(cases))) {
-                // Nothing matched. Evaluate default case.
-                if constexpr (kHasReturnType) {
-                    *result = static_cast<RETURN_TYPE>(std::get<kDefaultIndex>(cases)({}));
-                } else {
-                    std::get<kDefaultIndex>(cases)({});
+    // Static assertions
+    static constexpr bool kDefaultIsOK =
+        kDefaultIndex == -1 || kDefaultIndex == std::tuple_size_v<Cases> - 1;
+    static constexpr bool kReturnIsOK =
+        kHasDefaultCase || !kHasReturnType || std::is_constructible_v<RETURN_TYPE>;
+    static_assert(kDefaultIsOK, "Default case must be last in Switch()");
+    static_assert(kReturnIsOK,
+                  "Switch() requires either a Default case or a return type that is either void or "
+                  "default-constructable");
+
+    // If the static asserts have fired, don't bother spewing more errors below
+    static constexpr bool kAllOK = kDefaultIsOK && kReturnIsOK;
+    if constexpr (kAllOK) {
+        if (object) {
+            auto* type = &object->TypeInfo();
+            if constexpr (kHasDefaultCase) {
+                // Evaluate non-default cases.
+                if (!detail::NonDefaultCases<T>(object, type, result,
+                                                traits::Slice<0, kDefaultIndex>(cases))) {
+                    // Nothing matched. Evaluate default case.
+                    if constexpr (kHasReturnType) {
+                        new (result) RETURN_TYPE(
+                            static_cast<RETURN_TYPE>(std::get<kDefaultIndex>(cases)({})));
+                    } else {
+                        std::get<kDefaultIndex>(cases)({});
+                    }
+                }
+            } else {
+                if (!detail::NonDefaultCases<T>(object, type, result, std::move(cases))) {
+                    // Nothing matched. No default case.
+                    if constexpr (kHasReturnType) {
+                        new (result) RETURN_TYPE();
+                    }
                 }
             }
         } else {
-            detail::NonDefaultCases<T>(object, type, result, std::move(cases));
-        }
-    } else {
-        // Object is nullptr, so no cases can match
-        if constexpr (kHasDefaultCase) {
-            // Evaluate default case.
-            if constexpr (kHasReturnType) {
-                *result = static_cast<RETURN_TYPE>(std::get<kDefaultIndex>(cases)({}));
+            // Object is nullptr, so no cases can match
+            if constexpr (kHasDefaultCase) {
+                // Evaluate default case.
+                if constexpr (kHasReturnType) {
+                    new (result)
+                        RETURN_TYPE(static_cast<RETURN_TYPE>(std::get<kDefaultIndex>(cases)({})));
+                } else {
+                    std::get<kDefaultIndex>(cases)({});
+                }
             } else {
-                std::get<kDefaultIndex>(cases)({});
+                // No default case, no case can match.
+                if constexpr (kHasReturnType) {
+                    new (result) RETURN_TYPE();
+                }
             }
         }
     }
@@ -760,9 +787,15 @@ inline auto Switch(T* object, CASES&&... cases) {
     static constexpr bool kHasReturnType = !std::is_same_v<ReturnType, void>;
 
     if constexpr (kHasReturnType) {
-        ReturnType res = {};
-        detail::SwitchCases(object, &res, std::forward_as_tuple(std::forward<CASES>(cases)...));
-        return res;
+        // Replacement for std::aligned_storage as this is broken on earlier versions of MSVC.
+        struct alignas(alignof(ReturnType)) ReturnStorage {
+            uint8_t data[sizeof(ReturnType)];
+        };
+        ReturnStorage storage;
+        auto* res = utils::Bitcast<ReturnType*>(&storage);
+        TINT_DEFER(res->~ReturnType());
+        detail::SwitchCases(object, res, std::forward_as_tuple(std::forward<CASES>(cases)...));
+        return *res;
     } else {
         detail::SwitchCases<T, void>(object, nullptr,
                                      std::forward_as_tuple(std::forward<CASES>(cases)...));

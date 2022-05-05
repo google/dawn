@@ -710,6 +710,32 @@ TEST(Castable, SwitchNullNoDefault) {
     EXPECT_TRUE(default_called);
 }
 
+TEST(Castable, SwitchReturnNoDefaultConstructor) {
+    struct Object {
+        explicit Object(int v) : value(v) {}
+        int value;
+    };
+
+    std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+    {
+        auto result = Switch(
+            frog.get(),                            //
+            [](Mammal*) { return Object(1); },     //
+            [](Amphibian*) { return Object(2); },  //
+            [](Default) { return Object(3); });
+        static_assert(std::is_same_v<decltype(result), Object>);
+        EXPECT_EQ(result.value, 2);
+    }
+    {
+        auto result = Switch(
+            frog.get(),                         //
+            [](Mammal*) { return Object(1); },  //
+            [](Default) { return Object(3); });
+        static_assert(std::is_same_v<decltype(result), Object>);
+        EXPECT_EQ(result.value, 3);
+    }
+}
+
 // IsCastable static tests
 static_assert(IsCastable<CastableBase>);
 static_assert(IsCastable<Animal>);
