@@ -53,8 +53,14 @@ class ParamGenerator {
         }
     }
 
-    class Iterator : public std::iterator<std::forward_iterator_tag, ParamStruct, size_t> {
+    class Iterator {
       public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = ParamStruct;
+        using difference_type = size_t;
+        using pointer = ParamStruct*;
+        using reference = ParamStruct&;
+
         Iterator& operator++() {
             // Increment the Index by 1. If the i'th place reaches the maximum,
             // reset it to 0 and continue with the i+1'th place.
