@@ -223,9 +223,6 @@ set(TINT_LIB_SRCS
   ast/void.h
   ast/workgroup_attribute.cc
   ast/workgroup_attribute.h
-  builtin_table.cc
-  builtin_table.h
-  builtin_table.inl
   castable.cc
   castable.h
   clone_context.cc
@@ -251,6 +248,9 @@ set(TINT_LIB_SRCS
   reader/reader.h
   resolver/dependency_graph.cc
   resolver/dependency_graph.h
+  resolver/intrinsic_table.cc
+  resolver/intrinsic_table.h
+  resolver/intrinsic_table.inl
   resolver/resolver.cc
   resolver/resolver_constants.cc
   resolver/resolver.h
@@ -727,7 +727,6 @@ if(TINT_BUILD_TESTS)
     ast/variable_test.cc
     ast/vector_test.cc
     ast/workgroup_attribute_test.cc
-    builtin_table_test.cc
     castable_test.cc
     clone_context_test.cc
     debug_test.cc
@@ -756,6 +755,7 @@ if(TINT_BUILD_TESTS)
     resolver/host_shareable_validation_test.cc
     resolver/increment_decrement_validation_test.cc
     resolver/inferred_type_test.cc
+    resolver/intrinsic_table_test.cc
     resolver/is_host_shareable_test.cc
     resolver/is_storeable_test.cc
     resolver/pipeline_overridable_constant_test.cc

@@ -17,8 +17,8 @@ package parser_test
 import (
 	"testing"
 
-	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/ast"
-	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/parser"
+	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/ast"
+	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/parser"
 )
 
 func TestParser(t *testing.T) {

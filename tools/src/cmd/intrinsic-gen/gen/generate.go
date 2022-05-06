@@ -22,7 +22,7 @@ import (
 	"text/template"
 	"unicode"
 
-	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/sem"
+	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/sem"
 )
 
 type generator struct {

@@ -17,7 +17,7 @@ package sem
 import (
 	"fmt"
 
-	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/ast"
+	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/ast"
 )
 
 // Sem is the root of the semantic tree

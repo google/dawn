@@ -17,7 +17,7 @@ package gen
 import (
 	"fmt"
 
-	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/sem"
+	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/sem"
 	"dawn.googlesource.com/dawn/tools/src/list"
 	"dawn.googlesource.com/dawn/tools/src/lut"
 )

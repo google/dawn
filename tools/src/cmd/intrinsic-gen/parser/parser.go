@@ -19,9 +19,9 @@ package parser
 import (
 	"fmt"
 
-	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/ast"
-	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/lexer"
-	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/tok"
+	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/ast"
+	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/lexer"
+	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/tok"
 )
 
 // Parse produces a list of tokens for the given source code

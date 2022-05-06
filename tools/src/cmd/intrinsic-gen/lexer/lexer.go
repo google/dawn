@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"unicode"
 
-	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/tok"
+	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/tok"
 )
 
 // Lex produces a list of tokens for the given source code

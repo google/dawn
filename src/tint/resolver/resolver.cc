@@ -84,7 +84,7 @@ namespace tint::resolver {
 Resolver::Resolver(ProgramBuilder* builder)
     : builder_(builder),
       diagnostics_(builder->Diagnostics()),
-      builtin_table_(BuiltinTable::Create(*builder)),
+      intrinsic_table_(IntrinsicTable::Create(*builder)),
       sem_(builder, dependencies_),
       validator_(builder, sem_) {}
 
@@ -1292,7 +1292,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
                                  sem::BuiltinType builtin_type,
                                  const std::vector<const sem::Expression*> args,
                                  const std::vector<const sem::Type*> arg_tys) {
-    auto* builtin = builtin_table_->Lookup(builtin_type, std::move(arg_tys), expr->source);
+    auto* builtin = intrinsic_table_->Lookup(builtin_type, std::move(arg_tys), expr->source);
     if (!builtin) {
         return nullptr;
     }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/builtin_table.h"
+#include "src/tint/resolver/intrinsic_table.h"
 
 #include <algorithm>
 #include <limits>
@@ -770,7 +770,7 @@ struct BuiltinInfo {
     OverloadInfo const* const overloads;
 };
 
-#include "builtin_table.inl"
+#include "intrinsic_table.inl"
 
 /// BuiltinPrototype describes a fully matched builtin function, which is
 /// used as a lookup for building unique sem::Builtin instances.
@@ -820,8 +820,8 @@ bool operator==(const BuiltinPrototype& a, const BuiltinPrototype& b) {
     return true;
 }
 
-/// Impl is the private implementation of the BuiltinTable interface.
-class Impl : public BuiltinTable {
+/// Impl is the private implementation of the IntrinsicTable interface.
+class Impl : public IntrinsicTable {
   public:
     explicit Impl(ProgramBuilder& builder);
 
@@ -1116,11 +1116,11 @@ std::string MatchState::NumName() {
 
 }  // namespace
 
-std::unique_ptr<BuiltinTable> BuiltinTable::Create(ProgramBuilder& builder) {
+std::unique_ptr<IntrinsicTable> IntrinsicTable::Create(ProgramBuilder& builder) {
     return std::make_unique<Impl>(builder);
 }
 
-BuiltinTable::~BuiltinTable() = default;
+IntrinsicTable::~IntrinsicTable() = default;
 
 /// TypeInfo for the Any type declared in the anonymous namespace above
 TINT_INSTANTIATE_TYPEINFO(Any);

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_BUILTIN_TABLE_H_
-#define SRC_TINT_BUILTIN_TABLE_H_
+#ifndef SRC_TINT_RESOLVER_INTRINSIC_TABLE_H_
+#define SRC_TINT_RESOLVER_INTRINSIC_TABLE_H_
 
 #include <memory>
 #include <string>
@@ -28,15 +28,15 @@ class ProgramBuilder;
 
 namespace tint {
 
-/// BuiltinTable is a lookup table of all the WGSL builtin functions
-class BuiltinTable {
+/// IntrinsicTable is a lookup table of all the WGSL builtin functions
+class IntrinsicTable {
   public:
     /// @param builder the program builder
-    /// @return a pointer to a newly created BuiltinTable
-    static std::unique_ptr<BuiltinTable> Create(ProgramBuilder& builder);
+    /// @return a pointer to a newly created IntrinsicTable
+    static std::unique_ptr<IntrinsicTable> Create(ProgramBuilder& builder);
 
     /// Destructor
-    virtual ~BuiltinTable();
+    virtual ~IntrinsicTable();
 
     /// Lookup looks for the builtin overload with the given signature, raising
     /// an error diagnostic if the builtin was not found.
@@ -51,4 +51,4 @@ class BuiltinTable {
 
 }  // namespace tint
 
-#endif  // SRC_TINT_BUILTIN_TABLE_H_
+#endif  // SRC_TINT_RESOLVER_INTRINSIC_TABLE_H_

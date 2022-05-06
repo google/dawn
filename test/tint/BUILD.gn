@@ -252,6 +252,7 @@ tint_unittests_source_set("tint_unittests_resolver_src") {
     "../../src/tint/resolver/function_validation_test.cc",
     "../../src/tint/resolver/host_shareable_validation_test.cc",
     "../../src/tint/resolver/increment_decrement_validation_test.cc",
+    "../../src/tint/resolver/intrinsic_table_test.cc",
     "../../src/tint/resolver/is_host_shareable_test.cc",
     "../../src/tint/resolver/is_storeable_test.cc",
     "../../src/tint/resolver/pipeline_overridable_constant_test.cc",
@@ -713,7 +714,6 @@ tint_unittests_source_set("tint_unittests_glsl_writer_src") {
 
 tint_unittests_source_set("tint_unittests_core_src") {
   sources = [
-    "../../src/tint/builtin_table_test.cc",
     "../../src/tint/castable_test.cc",
     "../../src/tint/clone_context_test.cc",
     "../../src/tint/debug_test.cc",

@@ -18,9 +18,9 @@ import (
 	"fmt"
 	"sort"
 
-	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/ast"
-	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/sem"
-	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/tok"
+	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/ast"
+	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/sem"
+	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/tok"
 )
 
 type resolver struct {

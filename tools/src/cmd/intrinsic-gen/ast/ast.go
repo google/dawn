@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strings"
 
-	"dawn.googlesource.com/dawn/tools/src/cmd/builtin-gen/tok"
+	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/tok"
 )
 
 // AST is the parsed syntax tree of the intrinsic definition file
