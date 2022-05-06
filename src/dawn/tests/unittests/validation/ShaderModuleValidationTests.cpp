@@ -659,3 +659,11 @@ TEST_F(ShaderModuleValidationTest, MissingDecorations) {
         }
     )"));
 }
+
+// Test that WGSL extension used by enable directives must be allowed by WebGPU.
+TEST_F(ShaderModuleValidationTest, ExtensionMustBeAllowed) {
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+enable InternalExtensionForTesting;
+
+@stage(compute) @workgroup_size(1) fn main() {})"));
+}

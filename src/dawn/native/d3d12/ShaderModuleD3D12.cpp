@@ -729,20 +729,23 @@ MaybeError CompileShader(dawn::platform::Platform* platform,
 }  // anonymous namespace
 
 // static
-ResultOrError<Ref<ShaderModule>> ShaderModule::Create(Device* device,
-                                                      const ShaderModuleDescriptor* descriptor,
-                                                      ShaderModuleParseResult* parseResult) {
+ResultOrError<Ref<ShaderModule>> ShaderModule::Create(
+    Device* device,
+    const ShaderModuleDescriptor* descriptor,
+    ShaderModuleParseResult* parseResult,
+    OwnedCompilationMessages* compilationMessages) {
     Ref<ShaderModule> module = AcquireRef(new ShaderModule(device, descriptor));
-    DAWN_TRY(module->Initialize(parseResult));
+    DAWN_TRY(module->Initialize(parseResult, compilationMessages));
     return module;
 }
 
 ShaderModule::ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor)
     : ShaderModuleBase(device, descriptor) {}
 
-MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
+MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult,
+                                    OwnedCompilationMessages* compilationMessages) {
     ScopedTintICEHandler scopedICEHandler(GetDevice());
-    return InitializeBase(parseResult);
+    return InitializeBase(parseResult, compilationMessages);
 }
 
 ResultOrError<CompiledShader> ShaderModule::Compile(const ProgrammableStage& programmableStage,

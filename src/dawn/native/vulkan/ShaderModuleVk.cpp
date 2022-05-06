@@ -73,11 +73,13 @@ ShaderModule::ModuleAndSpirv ShaderModule::ConcurrentTransformedShaderModuleCach
 }
 
 // static
-ResultOrError<Ref<ShaderModule>> ShaderModule::Create(Device* device,
-                                                      const ShaderModuleDescriptor* descriptor,
-                                                      ShaderModuleParseResult* parseResult) {
+ResultOrError<Ref<ShaderModule>> ShaderModule::Create(
+    Device* device,
+    const ShaderModuleDescriptor* descriptor,
+    ShaderModuleParseResult* parseResult,
+    OwnedCompilationMessages* compilationMessages) {
     Ref<ShaderModule> module = AcquireRef(new ShaderModule(device, descriptor));
-    DAWN_TRY(module->Initialize(parseResult));
+    DAWN_TRY(module->Initialize(parseResult, compilationMessages));
     return module;
 }
 
@@ -86,7 +88,8 @@ ShaderModule::ShaderModule(Device* device, const ShaderModuleDescriptor* descrip
       mTransformedShaderModuleCache(
           std::make_unique<ConcurrentTransformedShaderModuleCache>(device)) {}
 
-MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
+MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult,
+                                    OwnedCompilationMessages* compilationMessages) {
     if (GetDevice()->IsRobustnessEnabled()) {
         ScopedTintICEHandler scopedICEHandler(GetDevice());
 
@@ -100,7 +103,7 @@ MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
         parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
     }
 
-    return InitializeBase(parseResult);
+    return InitializeBase(parseResult, compilationMessages);
 }
 
 void ShaderModule::DestroyImpl() {

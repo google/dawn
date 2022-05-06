@@ -18,6 +18,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -53,6 +54,8 @@ class OwnedCompilationMessages;
 struct CallbackTask;
 struct InternalPipelineStore;
 struct ShaderModuleParseResult;
+
+using WGSLExtensionsSet = std::unordered_set<std::string>;
 
 class DeviceBase : public RefCounted {
   public:
@@ -316,6 +319,7 @@ class DeviceBase : public RefCounted {
     std::mutex* GetObjectListMutex(ObjectType type);
 
     std::vector<const char*> GetTogglesUsed() const;
+    WGSLExtensionsSet GetWGSLExtensionAllowList() const;
     bool IsFeatureEnabled(Feature feature) const;
     bool IsToggleEnabled(Toggle toggle) const;
     bool IsValidationEnabled() const;
@@ -412,7 +416,8 @@ class DeviceBase : public RefCounted {
         const SamplerDescriptor* descriptor) = 0;
     virtual ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleImpl(
         const ShaderModuleDescriptor* descriptor,
-        ShaderModuleParseResult* parseResult) = 0;
+        ShaderModuleParseResult* parseResult,
+        OwnedCompilationMessages* compilationMessages) = 0;
     virtual ResultOrError<Ref<SwapChainBase>> CreateSwapChainImpl(
         const SwapChainDescriptor* descriptor) = 0;
     // Note that previousSwapChain may be nullptr, or come from a different backend.
@@ -455,6 +460,8 @@ class DeviceBase : public RefCounted {
     void ApplyFeatures(const DeviceDescriptor* deviceDescriptor);
 
     void SetDefaultToggles();
+
+    void SetWGSLExtensionAllowList();
 
     void ConsumeError(std::unique_ptr<ErrorData> error);
 
@@ -542,6 +549,7 @@ class DeviceBase : public RefCounted {
 
     CombinedLimits mLimits;
     FeaturesSet mEnabledFeatures;
+    WGSLExtensionsSet mWGSLExtensionAllowList;
 
     std::unique_ptr<InternalPipelineStore> mInternalPipelineStore;
 

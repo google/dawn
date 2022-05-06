@@ -155,9 +155,10 @@ ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescripto
 }
 ResultOrError<Ref<ShaderModuleBase>> Device::CreateShaderModuleImpl(
     const ShaderModuleDescriptor* descriptor,
-    ShaderModuleParseResult* parseResult) {
+    ShaderModuleParseResult* parseResult,
+    OwnedCompilationMessages* compilationMessages) {
     Ref<ShaderModule> module = AcquireRef(new ShaderModule(this, descriptor));
-    DAWN_TRY(module->Initialize(parseResult));
+    DAWN_TRY(module->Initialize(parseResult, compilationMessages));
     return module;
 }
 ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(
@@ -429,8 +430,9 @@ void SwapChain::DetachFromSurfaceImpl() {
 
 // ShaderModule
 
-MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
-    return InitializeBase(parseResult);
+MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult,
+                                    OwnedCompilationMessages* compilationMessages) {
+    return InitializeBase(parseResult, compilationMessages);
 }
 
 // OldSwapChain

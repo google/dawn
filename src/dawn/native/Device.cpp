@@ -199,6 +199,8 @@ DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor)
     mFormatTable = BuildFormatTable(this);
     SetDefaultToggles();
 
+    SetWGSLExtensionAllowList();
+
     if (descriptor->label != nullptr && strlen(descriptor->label) != 0) {
         mLabel = descriptor->label;
     }
@@ -914,13 +916,13 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::GetOrCreateShaderModule(
         if (!parseResult->HasParsedShader()) {
             // We skip the parse on creation if validation isn't enabled which let's us quickly
             // lookup in the cache without validating and parsing. We need the parsed module
-            // now, so call validate. Most of |ValidateShaderModuleDescriptor| is parsing, but
-            // we can consider splitting it if additional validation is added.
+            // now.
             ASSERT(!IsValidationEnabled());
             DAWN_TRY(
-                ValidateShaderModuleDescriptor(this, descriptor, parseResult, compilationMessages));
+                ValidateAndParseShaderModule(this, descriptor, parseResult, compilationMessages));
         }
-        DAWN_TRY_ASSIGN(result, CreateShaderModuleImpl(descriptor, parseResult));
+        DAWN_TRY_ASSIGN(result,
+                        CreateShaderModuleImpl(descriptor, parseResult, compilationMessages));
         result->SetIsCachedReference();
         result->SetContentHash(blueprintHash);
         mCaches->shaderModules.insert(result.Get());
@@ -1119,7 +1121,8 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
         result = ShaderModuleBase::MakeError(this);
     }
     // Move compilation messages into ShaderModuleBase and emit tint errors and warnings
-    // after all other operations are finished successfully.
+    // after all other operations are finished, even if any of them is failed and result
+    // is an error shader module.
     result->InjectCompilationMessages(std::move(compilationMessages));
 
     return result.Detach();
@@ -1227,6 +1230,16 @@ void DeviceBase::ApplyFeatures(const DeviceDescriptor* deviceDescriptor) {
 
 bool DeviceBase::IsFeatureEnabled(Feature feature) const {
     return mEnabledFeatures.IsEnabled(feature);
+}
+
+void DeviceBase::SetWGSLExtensionAllowList() {
+    // Set the WGSL extensions allow list based on device's enabled features and other
+    // propority. For example:
+    //     mWGSLExtensionAllowList.insert("InternalExtensionForTesting");
+}
+
+WGSLExtensionsSet DeviceBase::GetWGSLExtensionAllowList() const {
+    return mWGSLExtensionAllowList;
 }
 
 bool DeviceBase::IsValidationEnabled() const {
@@ -1589,7 +1602,7 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
 
     if (IsValidationEnabled()) {
         DAWN_TRY_CONTEXT(
-            ValidateShaderModuleDescriptor(this, descriptor, &parseResult, compilationMessages),
+            ValidateAndParseShaderModule(this, descriptor, &parseResult, compilationMessages),
             "validating %s", descriptor);
     }
 

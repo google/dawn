@@ -40,7 +40,8 @@ class ShaderModule final : public ShaderModuleBase {
 
     static ResultOrError<Ref<ShaderModule>> Create(Device* device,
                                                    const ShaderModuleDescriptor* descriptor,
-                                                   ShaderModuleParseResult* parseResult);
+                                                   ShaderModuleParseResult* parseResult,
+                                                   OwnedCompilationMessages* compilationMessages);
 
     ResultOrError<ModuleAndSpirv> GetHandleAndSpirv(const char* entryPointName,
                                                     const PipelineLayout* layout);
@@ -48,7 +49,8 @@ class ShaderModule final : public ShaderModuleBase {
   private:
     ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
     ~ShaderModule() override;
-    MaybeError Initialize(ShaderModuleParseResult* parseResult);
+    MaybeError Initialize(ShaderModuleParseResult* parseResult,
+                          OwnedCompilationMessages* compilationMessages);
     void DestroyImpl() override;
 
     // New handles created by GetHandleAndSpirv at pipeline creation time.

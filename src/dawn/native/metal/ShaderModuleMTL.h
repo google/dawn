@@ -35,7 +35,8 @@ class ShaderModule final : public ShaderModuleBase {
   public:
     static ResultOrError<Ref<ShaderModule>> Create(Device* device,
                                                    const ShaderModuleDescriptor* descriptor,
-                                                   ShaderModuleParseResult* parseResult);
+                                                   ShaderModuleParseResult* parseResult,
+                                                   OwnedCompilationMessages* compilationMessages);
 
     struct MetalFunctionData {
         NSPRef<id<MTLFunction>> function;
@@ -65,7 +66,8 @@ class ShaderModule final : public ShaderModuleBase {
                                               std::vector<uint32_t>* workgroupAllocations);
     ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
     ~ShaderModule() override = default;
-    MaybeError Initialize(ShaderModuleParseResult* parseResult);
+    MaybeError Initialize(ShaderModuleParseResult* parseResult,
+                          OwnedCompilationMessages* compilationMessages);
 };
 
 }  // namespace dawn::native::metal

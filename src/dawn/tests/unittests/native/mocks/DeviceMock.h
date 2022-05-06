@@ -90,7 +90,9 @@ class DeviceMock : public DeviceBase {
                 (override));
     MOCK_METHOD(ResultOrError<Ref<ShaderModuleBase>>,
                 CreateShaderModuleImpl,
-                (const ShaderModuleDescriptor*, ShaderModuleParseResult*),
+                (const ShaderModuleDescriptor*,
+                 ShaderModuleParseResult*,
+                 OwnedCompilationMessages*),
                 (override));
     MOCK_METHOD(ResultOrError<Ref<SwapChainBase>>,
                 CreateSwapChainImpl,

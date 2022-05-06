@@ -56,7 +56,8 @@ class ShaderModule final : public ShaderModuleBase {
   public:
     static ResultOrError<Ref<ShaderModule>> Create(Device* device,
                                                    const ShaderModuleDescriptor* descriptor,
-                                                   ShaderModuleParseResult* parseResult);
+                                                   ShaderModuleParseResult* parseResult,
+                                                   OwnedCompilationMessages* compilationMessages);
 
     ResultOrError<std::string> TranslateToGLSL(const char* entryPointName,
                                                SingleShaderStage stage,
@@ -67,7 +68,8 @@ class ShaderModule final : public ShaderModuleBase {
   private:
     ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
     ~ShaderModule() override = default;
-    MaybeError Initialize(ShaderModuleParseResult* parseResult);
+    MaybeError Initialize(ShaderModuleParseResult* parseResult,
+                          OwnedCompilationMessages* compilationMessages);
 };
 
 }  // namespace dawn::native::opengl

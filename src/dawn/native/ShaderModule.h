@@ -53,6 +53,7 @@ class VertexPulling;
 
 namespace dawn::native {
 
+using WGSLExtensionsSet = std::unordered_set<std::string>;
 struct EntryPointMetadata;
 
 // Base component type of an inter-stage variable
@@ -99,10 +100,10 @@ struct ShaderModuleParseResult {
     std::unique_ptr<TintSource> tintSource;
 };
 
-MaybeError ValidateShaderModuleDescriptor(DeviceBase* device,
-                                          const ShaderModuleDescriptor* descriptor,
-                                          ShaderModuleParseResult* parseResult,
-                                          OwnedCompilationMessages* outMessages);
+MaybeError ValidateAndParseShaderModule(DeviceBase* device,
+                                        const ShaderModuleDescriptor* descriptor,
+                                        ShaderModuleParseResult* parseResult,
+                                        OwnedCompilationMessages* outMessages);
 MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
                                                    const EntryPointMetadata& entryPoint,
                                                    const PipelineLayoutBase* layout);
@@ -289,7 +290,8 @@ class ShaderModuleBase : public ApiObjectBase, public CachedObject {
     explicit ShaderModuleBase(DeviceBase* device);
     void DestroyImpl() override;
 
-    MaybeError InitializeBase(ShaderModuleParseResult* parseResult);
+    MaybeError InitializeBase(ShaderModuleParseResult* parseResult,
+                              OwnedCompilationMessages* compilationMessages);
 
     static void AddExternalTextureTransform(const PipelineLayoutBase* layout,
                                             tint::transform::Manager* transformManager,
@@ -305,6 +307,7 @@ class ShaderModuleBase : public ApiObjectBase, public CachedObject {
     std::string mWgsl;
 
     EntryPointMetadataTable mEntryPoints;
+    WGSLExtensionsSet mEnabledWGSLExtensions;
     std::unique_ptr<tint::Program> mTintProgram;
     std::unique_ptr<TintSource> mTintSource;  // Keep the tint::Source::File alive
 

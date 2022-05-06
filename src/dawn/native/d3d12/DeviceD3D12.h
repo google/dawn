@@ -170,7 +170,8 @@ class Device final : public DeviceBase {
     ResultOrError<Ref<SamplerBase>> CreateSamplerImpl(const SamplerDescriptor* descriptor) override;
     ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleImpl(
         const ShaderModuleDescriptor* descriptor,
-        ShaderModuleParseResult* parseResult) override;
+        ShaderModuleParseResult* parseResult,
+        OwnedCompilationMessages* compilationMessages) override;
     ResultOrError<Ref<SwapChainBase>> CreateSwapChainImpl(
         const SwapChainDescriptor* descriptor) override;
     ResultOrError<Ref<NewSwapChainBase>> CreateSwapChainImpl(

@@ -260,8 +260,9 @@ ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescripto
 }
 ResultOrError<Ref<ShaderModuleBase>> Device::CreateShaderModuleImpl(
     const ShaderModuleDescriptor* descriptor,
-    ShaderModuleParseResult* parseResult) {
-    return ShaderModule::Create(this, descriptor, parseResult);
+    ShaderModuleParseResult* parseResult,
+    OwnedCompilationMessages* compilationMessages) {
+    return ShaderModule::Create(this, descriptor, parseResult, compilationMessages);
 }
 ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(
     const SwapChainDescriptor* descriptor) {
