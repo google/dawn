@@ -44,6 +44,8 @@ class SwapChain final : public NewSwapChainBase {
                                                 Surface* surface,
                                                 NewSwapChainBase* previousSwapChain,
                                                 const SwapChainDescriptor* descriptor);
+
+    SwapChain(DeviceBase* device, Surface* surface, const SwapChainDescriptor* descriptor);
     ~SwapChain() override;
 
   private:

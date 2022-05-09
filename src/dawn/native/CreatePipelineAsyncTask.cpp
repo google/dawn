@@ -30,6 +30,8 @@ CreatePipelineAsyncCallbackTaskBase::CreatePipelineAsyncCallbackTaskBase(std::st
                                                                          void* userdata)
     : mErrorMessage(errorMessage), mUserData(userdata) {}
 
+CreatePipelineAsyncCallbackTaskBase::~CreatePipelineAsyncCallbackTaskBase() = default;
+
 CreateComputePipelineAsyncCallbackTask::CreateComputePipelineAsyncCallbackTask(
     Ref<ComputePipelineBase> pipeline,
     std::string errorMessage,
@@ -38,6 +40,8 @@ CreateComputePipelineAsyncCallbackTask::CreateComputePipelineAsyncCallbackTask(
     : CreatePipelineAsyncCallbackTaskBase(errorMessage, userdata),
       mPipeline(std::move(pipeline)),
       mCreateComputePipelineAsyncCallback(callback) {}
+
+CreateComputePipelineAsyncCallbackTask::~CreateComputePipelineAsyncCallbackTask() = default;
 
 void CreateComputePipelineAsyncCallbackTask::Finish() {
     ASSERT(mCreateComputePipelineAsyncCallback != nullptr);
@@ -74,6 +78,8 @@ CreateRenderPipelineAsyncCallbackTask::CreateRenderPipelineAsyncCallbackTask(
       mPipeline(std::move(pipeline)),
       mCreateRenderPipelineAsyncCallback(callback) {}
 
+CreateRenderPipelineAsyncCallbackTask::~CreateRenderPipelineAsyncCallbackTask() = default;
+
 void CreateRenderPipelineAsyncCallbackTask::Finish() {
     ASSERT(mCreateRenderPipelineAsyncCallback != nullptr);
 
@@ -109,6 +115,8 @@ CreateComputePipelineAsyncTask::CreateComputePipelineAsyncTask(
       mUserdata(userdata) {
     ASSERT(mComputePipeline != nullptr);
 }
+
+CreateComputePipelineAsyncTask::~CreateComputePipelineAsyncTask() = default;
 
 void CreateComputePipelineAsyncTask::Run() {
     const char* eventLabel = utils::GetLabelForTrace(mComputePipeline->GetLabel().c_str());
@@ -159,6 +167,8 @@ CreateRenderPipelineAsyncTask::CreateRenderPipelineAsyncTask(
       mUserdata(userdata) {
     ASSERT(mRenderPipeline != nullptr);
 }
+
+CreateRenderPipelineAsyncTask::~CreateRenderPipelineAsyncTask() = default;
 
 void CreateRenderPipelineAsyncTask::Run() {
     const char* eventLabel = utils::GetLabelForTrace(mRenderPipeline->GetLabel().c_str());

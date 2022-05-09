@@ -59,6 +59,8 @@ uint64_t Buffer::QueryMaxBufferLength(id<MTLDevice> mtlDevice) {
 #endif
 }
 
+Buffer::Buffer(DeviceBase* dev, const BufferDescriptor* desc) : BufferBase(dev, desc) {}
+
 MaybeError Buffer::Initialize(bool mappedAtCreation) {
     MTLResourceOptions storageMode;
     if (GetUsage() & kMappableBufferUsages) {

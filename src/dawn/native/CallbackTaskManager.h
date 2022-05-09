@@ -31,6 +31,9 @@ struct CallbackTask {
 
 class CallbackTaskManager {
   public:
+    CallbackTaskManager();
+    ~CallbackTaskManager();
+
     void AddCallbackTask(std::unique_ptr<CallbackTask> callbackTask);
     bool IsEmpty();
     std::vector<std::unique_ptr<CallbackTask>> AcquireCallbackTasks();

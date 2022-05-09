@@ -38,6 +38,9 @@ class ErrorScope {
 
 class ErrorScopeStack {
   public:
+    ErrorScopeStack();
+    ~ErrorScopeStack();
+
     void Push(wgpu::ErrorFilter errorFilter);
     ErrorScope Pop();
 

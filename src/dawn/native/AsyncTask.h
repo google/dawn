@@ -47,6 +47,9 @@ class AsyncTaskManager {
   private:
     class WaitableTask : public RefCounted {
       public:
+        WaitableTask();
+        ~WaitableTask();
+
         AsyncTask asyncTask;
         AsyncTaskManager* taskManager;
         std::unique_ptr<dawn::platform::WaitableEvent> waitableEvent;

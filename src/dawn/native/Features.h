@@ -68,6 +68,7 @@ wgpu::FeatureName FeatureEnumToAPIFeature(Feature feature);
 class FeaturesInfo {
   public:
     FeaturesInfo();
+    ~FeaturesInfo();
 
     // Used to query the details of an feature. Return nullptr if featureName is not a valid
     // name of an feature supported in Dawn

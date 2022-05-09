@@ -608,6 +608,8 @@ Backend::Backend(InstanceBase* instance) : BackendConnection(instance, wgpu::Bac
     }
 }
 
+Backend::~Backend() = default;
+
 std::vector<Ref<AdapterBase>> Backend::DiscoverDefaultAdapters() {
     AdapterDiscoveryOptions options;
     auto result = DiscoverAdapters(&options);

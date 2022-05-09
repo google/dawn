@@ -28,6 +28,7 @@ class Device;
 class StagingBuffer : public StagingBufferBase {
   public:
     StagingBuffer(size_t size, Device* device);
+    ~StagingBuffer() override;
 
     id<MTLBuffer> GetBufferHandle() const;
 

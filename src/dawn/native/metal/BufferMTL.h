@@ -29,6 +29,9 @@ class Device;
 class Buffer final : public BufferBase {
   public:
     static ResultOrError<Ref<Buffer>> Create(Device* device, const BufferDescriptor* descriptor);
+
+    Buffer(DeviceBase* device, const BufferDescriptor* descriptor);
+
     id<MTLBuffer> GetMTLBuffer() const;
 
     bool EnsureDataInitialized(CommandRecordingContext* commandContext);
@@ -45,6 +48,7 @@ class Buffer final : public BufferBase {
     MaybeError Initialize(bool mappedAtCreation);
 
     ~Buffer() override;
+
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
     void UnmapImpl() override;
     void DestroyImpl() override;

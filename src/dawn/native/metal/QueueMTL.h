@@ -24,6 +24,7 @@ class Device;
 class Queue final : public QueueBase {
   public:
     Queue(Device* device, const QueueDescriptor* descriptor);
+    ~Queue() override;
 
   private:
     MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;

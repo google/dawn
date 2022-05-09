@@ -30,14 +30,17 @@ class QuerySet final : public QuerySetBase {
     static ResultOrError<Ref<QuerySet>> Create(Device* device,
                                                const QuerySetDescriptor* descriptor);
 
+    QuerySet(DeviceBase* device, const QuerySetDescriptor* descriptor);
+
     id<MTLBuffer> GetVisibilityBuffer() const;
     id<MTLCounterSampleBuffer> GetCounterSampleBuffer() const
         API_AVAILABLE(macos(10.15), ios(14.0));
 
   private:
-    ~QuerySet() override;
     using QuerySetBase::QuerySetBase;
     MaybeError Initialize();
+
+    ~QuerySet() override;
 
     // Dawn API
     void DestroyImpl() override;

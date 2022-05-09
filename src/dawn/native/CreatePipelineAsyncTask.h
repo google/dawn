@@ -34,6 +34,7 @@ struct FlatComputePipelineDescriptor;
 
 struct CreatePipelineAsyncCallbackTaskBase : CallbackTask {
     CreatePipelineAsyncCallbackTaskBase(std::string errorMessage, void* userData);
+    ~CreatePipelineAsyncCallbackTaskBase();
 
   protected:
     std::string mErrorMessage;
@@ -45,6 +46,7 @@ struct CreateComputePipelineAsyncCallbackTask : CreatePipelineAsyncCallbackTaskB
                                            std::string errorMessage,
                                            WGPUCreateComputePipelineAsyncCallback callback,
                                            void* userdata);
+    ~CreateComputePipelineAsyncCallbackTask() override;
 
     void Finish() override;
     void HandleShutDown() final;
@@ -60,6 +62,7 @@ struct CreateRenderPipelineAsyncCallbackTask : CreatePipelineAsyncCallbackTaskBa
                                           std::string errorMessage,
                                           WGPUCreateRenderPipelineAsyncCallback callback,
                                           void* userdata);
+    ~CreateRenderPipelineAsyncCallbackTask() override;
 
     void Finish() override;
     void HandleShutDown() final;
@@ -77,6 +80,7 @@ class CreateComputePipelineAsyncTask {
     CreateComputePipelineAsyncTask(Ref<ComputePipelineBase> nonInitializedComputePipeline,
                                    WGPUCreateComputePipelineAsyncCallback callback,
                                    void* userdata);
+    ~CreateComputePipelineAsyncTask();
 
     void Run();
 
@@ -95,6 +99,7 @@ class CreateRenderPipelineAsyncTask {
     CreateRenderPipelineAsyncTask(Ref<RenderPipelineBase> nonInitializedRenderPipeline,
                                   WGPUCreateRenderPipelineAsyncCallback callback,
                                   void* userdata);
+    ~CreateRenderPipelineAsyncTask();
 
     void Run();
 

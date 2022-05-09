@@ -42,6 +42,8 @@ ResultOrError<Ref<ShaderModule>> ShaderModule::Create(
 ShaderModule::ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor)
     : ShaderModuleBase(device, descriptor) {}
 
+ShaderModule::~ShaderModule() = default;
+
 MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult,
                                     OwnedCompilationMessages* compilationMessages) {
     ScopedTintICEHandler scopedICEHandler(GetDevice());

@@ -32,6 +32,8 @@ Adapter::Adapter(InstanceBase* instance,
       mPhysicalDevice(physicalDevice),
       mVulkanInstance(vulkanInstance) {}
 
+Adapter::~Adapter() = default;
+
 const VulkanDeviceInfo& Adapter::GetDeviceInfo() const {
     return mDeviceInfo;
 }

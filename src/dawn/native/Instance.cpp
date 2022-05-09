@@ -122,6 +122,10 @@ Ref<InstanceBase> InstanceBase::Create(const InstanceDescriptor* descriptor) {
     return instance;
 }
 
+InstanceBase::InstanceBase() = default;
+
+InstanceBase::~InstanceBase() = default;
+
 // TODO(crbug.com/dawn/832): make the platform an initialization parameter of the instance.
 MaybeError InstanceBase::Initialize(const InstanceDescriptor* descriptor) {
     DAWN_TRY(ValidateSingleSType(descriptor->nextInChain, wgpu::SType::DawnInstanceDescriptor));

@@ -27,8 +27,10 @@ namespace dawn::wire {
 
 class ChunkedCommandHandler : public CommandHandler {
   public:
-    const volatile char* HandleCommands(const volatile char* commands, size_t size) override;
+    ChunkedCommandHandler();
     ~ChunkedCommandHandler() override;
+
+    const volatile char* HandleCommands(const volatile char* commands, size_t size) override;
 
   protected:
     enum class ChunkedCommandsResult {

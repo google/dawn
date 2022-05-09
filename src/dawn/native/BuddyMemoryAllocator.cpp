@@ -34,6 +34,8 @@ BuddyMemoryAllocator::BuddyMemoryAllocator(uint64_t maxSystemSize,
     mTrackedSubAllocations.resize(maxSystemSize / mMemoryBlockSize);
 }
 
+BuddyMemoryAllocator::~BuddyMemoryAllocator() = default;
+
 uint64_t BuddyMemoryAllocator::GetMemoryIndex(uint64_t offset) const {
     ASSERT(offset != BuddyAllocator::kInvalidOffset);
     return offset / mMemoryBlockSize;

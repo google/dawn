@@ -72,6 +72,9 @@ ResultOrError<Ref<SwapChain>> SwapChain::Create(Device* device,
     return swapchain;
 }
 
+SwapChain::SwapChain(DeviceBase* dev, Surface* sur, const SwapChainDescriptor* desc)
+    : NewSwapChainBase(dev, sur, desc) {}
+
 SwapChain::~SwapChain() = default;
 
 void SwapChain::DestroyImpl() {

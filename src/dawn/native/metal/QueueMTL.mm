@@ -28,6 +28,8 @@ namespace dawn::native::metal {
 
 Queue::Queue(Device* device, const QueueDescriptor* descriptor) : QueueBase(device, descriptor) {}
 
+Queue::~Queue() = default;
+
 MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
     Device* device = ToBackend(GetDevice());
 

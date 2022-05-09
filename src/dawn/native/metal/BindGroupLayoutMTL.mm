@@ -32,6 +32,8 @@ BindGroupLayout::BindGroupLayout(DeviceBase* device,
     : BindGroupLayoutBase(device, descriptor, pipelineCompatibilityToken),
       mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {}
 
+BindGroupLayout::~BindGroupLayout() = default;
+
 Ref<BindGroup> BindGroupLayout::AllocateBindGroup(Device* device,
                                                   const BindGroupDescriptor* descriptor) {
     return AcquireRef(mBindGroupAllocator.Allocate(device, descriptor));

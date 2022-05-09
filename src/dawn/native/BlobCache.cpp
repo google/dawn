@@ -27,6 +27,12 @@ CachedBlob::CachedBlob(size_t size) {
     }
 }
 
+CachedBlob::CachedBlob(CachedBlob&&) = default;
+
+CachedBlob::~CachedBlob() = default;
+
+CachedBlob& CachedBlob::operator=(CachedBlob&&) = default;
+
 bool CachedBlob::Empty() const {
     return mSize == 0;
 }

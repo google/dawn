@@ -36,7 +36,7 @@ class BindGroupLayout final : public BindGroupLayoutBase {
     BindGroupLayout(DeviceBase* device,
                     const BindGroupLayoutDescriptor* descriptor,
                     PipelineCompatibilityToken pipelineCompatibilityToken);
-    ~BindGroupLayout() override = default;
+    ~BindGroupLayout() override;
 
     SlabAllocator<BindGroup> mBindGroupAllocator;
 };

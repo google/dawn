@@ -310,6 +310,11 @@ Ref<RenderPipelineBase> RenderPipeline::CreateUninitialized(
     return AcquireRef(new RenderPipeline(device, descriptor));
 }
 
+RenderPipeline::RenderPipeline(DeviceBase* dev, const RenderPipelineDescriptor* desc)
+    : RenderPipelineBase(dev, desc) {}
+
+RenderPipeline::~RenderPipeline() = default;
+
 MaybeError RenderPipeline::Initialize() {
     mMtlPrimitiveTopology = MTLPrimitiveTopology(GetPrimitiveTopology());
     mMtlFrontFace = MTLFrontFace(GetFrontFace());

@@ -45,6 +45,10 @@ const char* ErrorScope::GetErrorMessage() const {
     return mErrorMessage.c_str();
 }
 
+ErrorScopeStack::ErrorScopeStack() = default;
+
+ErrorScopeStack::~ErrorScopeStack() = default;
+
 void ErrorScopeStack::Push(wgpu::ErrorFilter filter) {
     mScopes.push_back(ErrorScope(filter));
 }

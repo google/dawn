@@ -313,6 +313,10 @@ const char* ToggleEnumToName(Toggle toggle) {
     return toggleNameAndInfo.info.name;
 }
 
+TogglesInfo::TogglesInfo() = default;
+
+TogglesInfo::~TogglesInfo() = default;
+
 const ToggleInfo* TogglesInfo::GetToggleInfo(const char* toggleName) {
     ASSERT(toggleName);
 

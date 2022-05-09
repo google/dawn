@@ -232,6 +232,8 @@ FeaturesInfo::FeaturesInfo() {
     }
 }
 
+FeaturesInfo::~FeaturesInfo() = default;
+
 const FeatureInfo* FeaturesInfo::GetFeatureInfo(wgpu::FeatureName feature) const {
     Feature f = FromAPIFeature(feature);
     if (f == Feature::InvalidEnum) {

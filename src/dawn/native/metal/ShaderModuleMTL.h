@@ -65,7 +65,7 @@ class ShaderModule final : public ShaderModuleBase {
                                               bool* hasInvariantAttribute,
                                               std::vector<uint32_t>* workgroupAllocations);
     ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
-    ~ShaderModule() override = default;
+    ~ShaderModule() override;
     MaybeError Initialize(ShaderModuleParseResult* parseResult,
                           OwnedCompilationMessages* compilationMessages);
 };

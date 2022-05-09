@@ -22,6 +22,8 @@
 
 namespace dawn::wire {
 
+ChunkedCommandHandler::ChunkedCommandHandler() = default;
+
 ChunkedCommandHandler::~ChunkedCommandHandler() = default;
 
 const volatile char* ChunkedCommandHandler::HandleCommands(const volatile char* commands,

@@ -29,6 +29,11 @@ Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
     return AcquireRef(new ComputePipeline(device, descriptor));
 }
 
+ComputePipeline::ComputePipeline(DeviceBase* dev, const ComputePipelineDescriptor* desc)
+    : ComputePipelineBase(dev, desc) {}
+
+ComputePipeline::~ComputePipeline() = default;
+
 MaybeError ComputePipeline::Initialize() {
     auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
 

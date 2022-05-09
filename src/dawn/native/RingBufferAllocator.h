@@ -26,11 +26,12 @@ namespace dawn::native {
 
 class RingBufferAllocator {
   public:
-    RingBufferAllocator() = default;
+    RingBufferAllocator();
     explicit RingBufferAllocator(uint64_t maxSize);
-    ~RingBufferAllocator() = default;
-    RingBufferAllocator(const RingBufferAllocator&) = default;
-    RingBufferAllocator& operator=(const RingBufferAllocator&) = default;
+    RingBufferAllocator(const RingBufferAllocator&);
+    ~RingBufferAllocator();
+
+    RingBufferAllocator& operator=(const RingBufferAllocator&);
 
     uint64_t Allocate(uint64_t allocationSize, ExecutionSerial serial);
     void Deallocate(ExecutionSerial lastCompletedSerial);

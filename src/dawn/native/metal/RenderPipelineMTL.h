@@ -33,6 +33,9 @@ class RenderPipeline final : public RenderPipelineBase {
                                 WGPUCreateRenderPipelineAsyncCallback callback,
                                 void* userdata);
 
+    RenderPipeline(DeviceBase* device, const RenderPipelineDescriptor* descriptor);
+    ~RenderPipeline() override;
+
     MTLPrimitiveType GetMTLPrimitiveTopology() const;
     MTLWinding GetMTLFrontFace() const;
     MTLCullMode GetMTLCullMode() const;

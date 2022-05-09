@@ -64,6 +64,10 @@ ResultOrError<Ref<Sampler>> Sampler::Create(Device* device, const SamplerDescrip
     return sampler;
 }
 
+Sampler::Sampler(DeviceBase* dev, const SamplerDescriptor* desc) : SamplerBase(dev, desc) {}
+
+Sampler::~Sampler() = default;
+
 MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {
     NSRef<MTLSamplerDescriptor> mtlDescRef = AcquireNSRef([MTLSamplerDescriptor new]);
     MTLSamplerDescriptor* mtlDesc = mtlDescRef.Get();

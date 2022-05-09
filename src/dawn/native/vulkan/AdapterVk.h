@@ -30,7 +30,7 @@ class Adapter : public AdapterBase {
     Adapter(InstanceBase* instance,
             VulkanInstance* vulkanInstance,
             VkPhysicalDevice physicalDevice);
-    ~Adapter() override = default;
+    ~Adapter() override;
 
     // AdapterBase Implementation
     bool SupportsExternalImages() const override;

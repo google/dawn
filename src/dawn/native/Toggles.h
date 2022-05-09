@@ -91,6 +91,9 @@ const char* ToggleEnumToName(Toggle toggle);
 
 class TogglesInfo {
   public:
+    TogglesInfo();
+    ~TogglesInfo();
+
     // Used to query the details of a toggle. Return nullptr if toggleName is not a valid name
     // of a toggle supported in Dawn.
     const ToggleInfo* GetToggleInfo(const char* toggleName);

@@ -68,6 +68,8 @@ ResultOrError<Ref<QuerySet>> QuerySet::Create(Device* device,
     return queryset;
 }
 
+QuerySet::QuerySet(DeviceBase* dev, const QuerySetDescriptor* desc) : QuerySetBase(dev, desc) {}
+
 MaybeError QuerySet::Initialize() {
     Device* device = ToBackend(GetDevice());
 

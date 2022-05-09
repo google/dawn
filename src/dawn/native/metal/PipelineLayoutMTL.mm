@@ -70,6 +70,8 @@ PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDescriptor* d
     }
 }
 
+PipelineLayout::~PipelineLayout() = default;
+
 const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo(
     SingleShaderStage stage) const {
     return mIndexInfo[stage];

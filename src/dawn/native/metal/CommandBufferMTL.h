@@ -47,6 +47,9 @@ class CommandBuffer final : public CommandBufferBase {
     static Ref<CommandBuffer> Create(CommandEncoder* encoder,
                                      const CommandBufferDescriptor* descriptor);
 
+    CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
+    ~CommandBuffer();
+
     MaybeError FillCommands(CommandRecordingContext* commandContext);
 
   private:

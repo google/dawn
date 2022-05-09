@@ -35,6 +35,9 @@ class ComputePipeline final : public ComputePipelineBase {
                                 WGPUCreateComputePipelineAsyncCallback callback,
                                 void* userdata);
 
+    ComputePipeline(DeviceBase* device, const ComputePipelineDescriptor* descriptor);
+    ~ComputePipeline() override;
+
     void Encode(id<MTLComputeCommandEncoder> encoder);
     MTLSize GetLocalWorkGroupSize() const;
     bool RequiresStorageBufferLength() const;

@@ -51,7 +51,7 @@ class PipelineLayout final : public PipelineLayoutBase {
 
   private:
     PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor);
-    ~PipelineLayout() override = default;
+    ~PipelineLayout() override;
     PerStage<BindingIndexInfo> mIndexInfo;
     PerStage<uint32_t> mBufferBindingCount;
 };

@@ -45,6 +45,8 @@ class Texture final : public TextureBase {
                                        const TextureDescriptor* descriptor,
                                        NSPRef<id<MTLTexture>> wrapped);
 
+    Texture(DeviceBase* device, const TextureDescriptor* descriptor, TextureState state);
+
     id<MTLTexture> GetMTLTexture() const;
     IOSurfaceRef GetIOSurface();
     NSPRef<id<MTLTexture>> CreateFormatView(wgpu::TextureFormat format);

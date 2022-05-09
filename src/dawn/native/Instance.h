@@ -93,8 +93,8 @@ class InstanceBase final : public RefCounted {
     Surface* APICreateSurface(const SurfaceDescriptor* descriptor);
 
   private:
-    InstanceBase() = default;
-    ~InstanceBase() override = default;
+    InstanceBase();
+    ~InstanceBase() override;
 
     InstanceBase(const InstanceBase& other) = delete;
     InstanceBase& operator=(const InstanceBase& other) = delete;

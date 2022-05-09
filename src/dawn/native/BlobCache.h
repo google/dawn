@@ -31,6 +31,10 @@ class InstanceBase;
 class CachedBlob {
   public:
     explicit CachedBlob(size_t size = 0);
+    CachedBlob(CachedBlob&&);
+    ~CachedBlob();
+
+    CachedBlob& operator=(CachedBlob&&);
 
     bool Empty() const;
     const uint8_t* Data() const;

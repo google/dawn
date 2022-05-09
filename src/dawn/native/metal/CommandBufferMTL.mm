@@ -577,6 +577,11 @@ Ref<CommandBuffer> CommandBuffer::Create(CommandEncoder* encoder,
     return AcquireRef(new CommandBuffer(encoder, descriptor));
 }
 
+CommandBuffer::CommandBuffer(CommandEncoder* enc, const CommandBufferDescriptor* desc)
+    : CommandBufferBase(enc, desc) {}
+
+CommandBuffer::~CommandBuffer() = default;
+
 MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) {
     size_t nextComputePassNumber = 0;
     size_t nextRenderPassNumber = 0;

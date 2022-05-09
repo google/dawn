@@ -18,6 +18,10 @@
 
 namespace dawn::native {
 
+CallbackTaskManager::CallbackTaskManager() = default;
+
+CallbackTaskManager::~CallbackTaskManager() = default;
+
 bool CallbackTaskManager::IsEmpty() {
     std::lock_guard<std::mutex> lock(mCallbackTaskQueueMutex);
     return mCallbackTaskQueue.empty();

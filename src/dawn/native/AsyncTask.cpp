@@ -77,4 +77,8 @@ void AsyncTaskManager::DoWaitableTask(void* task) {
     waitableTask->taskManager->HandleTaskCompletion(waitableTask.Get());
 }
 
+AsyncTaskManager::WaitableTask::WaitableTask() = default;
+
+AsyncTaskManager::WaitableTask::~WaitableTask() = default;
+
 }  // namespace dawn::native

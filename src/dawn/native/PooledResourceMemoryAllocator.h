@@ -32,7 +32,7 @@ class DeviceBase;
 class PooledResourceMemoryAllocator : public ResourceHeapAllocator {
   public:
     explicit PooledResourceMemoryAllocator(ResourceHeapAllocator* heapAllocator);
-    ~PooledResourceMemoryAllocator() override = default;
+    ~PooledResourceMemoryAllocator() override;
 
     ResultOrError<std::unique_ptr<ResourceHeapBase>> AllocateResourceHeap(uint64_t size) override;
     void DeallocateResourceHeap(std::unique_ptr<ResourceHeapBase> allocation) override;

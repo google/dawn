@@ -29,6 +29,9 @@ class Sampler final : public SamplerBase {
   public:
     static ResultOrError<Ref<Sampler>> Create(Device* device, const SamplerDescriptor* descriptor);
 
+    Sampler(DeviceBase* device, const SamplerDescriptor* descriptor);
+    ~Sampler() override;
+
     id<MTLSamplerState> GetMTLSamplerState();
 
   private:

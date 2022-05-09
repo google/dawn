@@ -20,6 +20,8 @@ namespace dawn::native::metal {
 StagingBuffer::StagingBuffer(size_t size, Device* device)
     : StagingBufferBase(size), mDevice(device) {}
 
+StagingBuffer::~StagingBuffer() = default;
+
 MaybeError StagingBuffer::Initialize() {
     const size_t bufferSize = GetSize();
     mBuffer =

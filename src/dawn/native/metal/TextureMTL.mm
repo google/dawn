@@ -772,6 +772,9 @@ MaybeError Texture::InitializeFromIOSurface(const ExternalImageDescriptor* descr
     return {};
 }
 
+Texture::Texture(DeviceBase* dev, const TextureDescriptor* desc, TextureState st)
+    : TextureBase(dev, desc, st) {}
+
 Texture::~Texture() {}
 
 void Texture::DestroyImpl() {

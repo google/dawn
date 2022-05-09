@@ -42,7 +42,7 @@ class BuddyMemoryAllocator {
     BuddyMemoryAllocator(uint64_t maxSystemSize,
                          uint64_t memoryBlockSize,
                          ResourceHeapAllocator* heapAllocator);
-    ~BuddyMemoryAllocator() = default;
+    ~BuddyMemoryAllocator();
 
     ResultOrError<ResourceMemoryAllocation> Allocate(uint64_t allocationSize, uint64_t alignment);
     void Deallocate(const ResourceMemoryAllocation& allocation);

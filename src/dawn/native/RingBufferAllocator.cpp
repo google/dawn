@@ -30,7 +30,15 @@
 // used bytes.
 namespace dawn::native {
 
+RingBufferAllocator::RingBufferAllocator() = default;
+
 RingBufferAllocator::RingBufferAllocator(uint64_t maxSize) : mMaxBlockSize(maxSize) {}
+
+RingBufferAllocator::RingBufferAllocator(const RingBufferAllocator&) = default;
+
+RingBufferAllocator::~RingBufferAllocator() = default;
+
+RingBufferAllocator& RingBufferAllocator::operator=(const RingBufferAllocator&) = default;
 
 void RingBufferAllocator::Deallocate(ExecutionSerial lastCompletedSerial) {
     // Reclaim memory from previously recorded blocks.
