@@ -354,7 +354,7 @@ class DawnTestBase {
     // Mock callbacks tracking errors and destruction. Device lost is a nice mock since tests that
     // do not care about device destruction can ignore the callback entirely.
     testing::MockCallback<WGPUErrorCallback> mDeviceErrorCallback;
-    testing::NiceMock<testing::MockCallback<WGPUDeviceLostCallback>> mDeviceLostCallback;
+    testing::MockCallback<WGPUDeviceLostCallback> mDeviceLostCallback;
 
     // Helper methods to implement the EXPECT_ macros
     std::ostringstream& AddBufferExpectation(const char* file,
