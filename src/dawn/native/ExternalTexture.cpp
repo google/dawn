@@ -57,10 +57,6 @@ MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
     wgpu::TextureFormat plane0Format = descriptor->plane0->GetFormat().format;
 
     if (descriptor->plane1) {
-        DAWN_INVALID_IF(
-            device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs),
-            "Bi-planar external textures are disabled until the implementation is completed.");
-
         DAWN_INVALID_IF(descriptor->colorSpace != wgpu::PredefinedColorSpace::Srgb,
                         "The specified color space (%s) is not %s.", descriptor->colorSpace,
                         wgpu::PredefinedColorSpace::Srgb);
