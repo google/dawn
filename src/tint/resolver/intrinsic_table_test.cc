@@ -576,5 +576,69 @@ TEST_F(IntrinsicTableTest, SameOverloadReturnsSameBuiltinPointer) {
     EXPECT_NE(b, c);
 }
 
+TEST_F(IntrinsicTableTest, MatchBinaryOp) {
+    auto* i32 = create<sem::I32>();
+    auto* vec3_i32 = create<sem::Vector>(i32, 3u);
+    auto result = table->Lookup(ast::BinaryOp::kMultiply, i32, vec3_i32, Source{{12, 34}},
+                                /* is_compound */ false);
+    EXPECT_EQ(result.result, vec3_i32);
+    EXPECT_EQ(result.lhs, i32);
+    EXPECT_EQ(result.rhs, vec3_i32);
+    EXPECT_EQ(Diagnostics().str(), "");
+}
+
+TEST_F(IntrinsicTableTest, MismatchBinaryOp) {
+    auto* f32 = create<sem::F32>();
+    auto* bool_ = create<sem::Bool>();
+    auto result = table->Lookup(ast::BinaryOp::kMultiply, f32, bool_, Source{{12, 34}},
+                                /* is_compound */ false);
+    ASSERT_EQ(result.result, nullptr);
+    EXPECT_EQ(Diagnostics().str(), R"(12:34 error: no matching overload for operator * (f32, bool)
+
+9 candidate operators:
+  operator * (T, T) -> T  where: T is f32, i32 or u32
+  operator * (vecN<T>, T) -> vecN<T>  where: T is f32, i32 or u32
+  operator * (T, vecN<T>) -> vecN<T>  where: T is f32, i32 or u32
+  operator * (f32, matNxM<f32>) -> matNxM<f32>
+  operator * (vecN<T>, vecN<T>) -> vecN<T>  where: T is f32, i32 or u32
+  operator * (matNxM<f32>, f32) -> matNxM<f32>
+  operator * (matCxR<f32>, vecC<f32>) -> vecR<f32>
+  operator * (vecR<f32>, matCxR<f32>) -> vecC<f32>
+  operator * (matKxR<f32>, matCxK<f32>) -> matCxR<f32>
+)");
+}
+
+TEST_F(IntrinsicTableTest, MatchCompoundOp) {
+    auto* i32 = create<sem::I32>();
+    auto* vec3_i32 = create<sem::Vector>(i32, 3u);
+    auto result = table->Lookup(ast::BinaryOp::kMultiply, i32, vec3_i32, Source{{12, 34}},
+                                /* is_compound */ true);
+    EXPECT_EQ(result.result, vec3_i32);
+    EXPECT_EQ(result.lhs, i32);
+    EXPECT_EQ(result.rhs, vec3_i32);
+    EXPECT_EQ(Diagnostics().str(), "");
+}
+
+TEST_F(IntrinsicTableTest, MismatchCompoundOp) {
+    auto* f32 = create<sem::F32>();
+    auto* bool_ = create<sem::Bool>();
+    auto result = table->Lookup(ast::BinaryOp::kMultiply, f32, bool_, Source{{12, 34}},
+                                /* is_compound */ true);
+    ASSERT_EQ(result.result, nullptr);
+    EXPECT_EQ(Diagnostics().str(), R"(12:34 error: no matching overload for operator *= (f32, bool)
+
+9 candidate operators:
+  operator *= (T, T) -> T  where: T is f32, i32 or u32
+  operator *= (vecN<T>, T) -> vecN<T>  where: T is f32, i32 or u32
+  operator *= (T, vecN<T>) -> vecN<T>  where: T is f32, i32 or u32
+  operator *= (f32, matNxM<f32>) -> matNxM<f32>
+  operator *= (vecN<T>, vecN<T>) -> vecN<T>  where: T is f32, i32 or u32
+  operator *= (matNxM<f32>, f32) -> matNxM<f32>
+  operator *= (matCxR<f32>, vecC<f32>) -> vecR<f32>
+  operator *= (vecR<f32>, matCxR<f32>) -> vecC<f32>
+  operator *= (matKxR<f32>, matCxK<f32>) -> matCxR<f32>
+)");
+}
+
 }  // namespace
 }  // namespace tint

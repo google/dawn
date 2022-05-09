@@ -1746,12 +1746,8 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
     auto* lhs_ty = lhs->Type()->UnwrapRef();
     auto* rhs_ty = rhs->Type()->UnwrapRef();
 
-    auto* ty = BinaryOpType(lhs_ty, rhs_ty, expr->op);
+    auto* ty = intrinsic_table_->Lookup(expr->op, lhs_ty, rhs_ty, expr->source, false).result;
     if (!ty) {
-        AddError("Binary expression operand types are invalid for this operation: " +
-                     sem_.TypeNameOf(lhs_ty) + " " + FriendlyName(expr->op) + " " +
-                     sem_.TypeNameOf(rhs_ty),
-                 expr->source);
         return nullptr;
     }
 
@@ -1762,160 +1758,6 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
     sem->Behaviors() = lhs->Behaviors() + rhs->Behaviors();
 
     return sem;
-}
-
-const sem::Type* Resolver::BinaryOpType(const sem::Type* lhs_ty,
-                                        const sem::Type* rhs_ty,
-                                        ast::BinaryOp op) {
-    using Bool = sem::Bool;
-    using F32 = sem::F32;
-    using I32 = sem::I32;
-    using U32 = sem::U32;
-    using Matrix = sem::Matrix;
-    using Vector = sem::Vector;
-
-    auto* lhs_vec = lhs_ty->As<Vector>();
-    auto* lhs_vec_elem_type = lhs_vec ? lhs_vec->type() : nullptr;
-    auto* rhs_vec = rhs_ty->As<Vector>();
-    auto* rhs_vec_elem_type = rhs_vec ? rhs_vec->type() : nullptr;
-
-    const bool matching_vec_elem_types = lhs_vec_elem_type && rhs_vec_elem_type &&
-                                         (lhs_vec_elem_type == rhs_vec_elem_type) &&
-                                         (lhs_vec->Width() == rhs_vec->Width());
-
-    const bool matching_types = matching_vec_elem_types || (lhs_ty == rhs_ty);
-
-    // Binary logical expressions
-    if (op == ast::BinaryOp::kLogicalAnd || op == ast::BinaryOp::kLogicalOr) {
-        if (matching_types && lhs_ty->Is<Bool>()) {
-            return lhs_ty;
-        }
-    }
-    if (op == ast::BinaryOp::kOr || op == ast::BinaryOp::kAnd) {
-        if (matching_types && lhs_ty->Is<Bool>()) {
-            return lhs_ty;
-        }
-        if (matching_types && lhs_vec_elem_type && lhs_vec_elem_type->Is<Bool>()) {
-            return lhs_ty;
-        }
-    }
-
-    // Arithmetic expressions
-    if (ast::IsArithmetic(op)) {
-        // Binary arithmetic expressions over scalars
-        if (matching_types && lhs_ty->is_numeric_scalar()) {
-            return lhs_ty;
-        }
-
-        // Binary arithmetic expressions over vectors
-        if (matching_types && lhs_vec_elem_type && lhs_vec_elem_type->is_numeric_scalar()) {
-            return lhs_ty;
-        }
-
-        // Binary arithmetic expressions with mixed scalar and vector operands
-        if (lhs_vec_elem_type && (lhs_vec_elem_type == rhs_ty) && rhs_ty->is_numeric_scalar()) {
-            return lhs_ty;
-        }
-        if (rhs_vec_elem_type && (rhs_vec_elem_type == lhs_ty) && lhs_ty->is_numeric_scalar()) {
-            return rhs_ty;
-        }
-    }
-
-    // Matrix arithmetic
-    auto* lhs_mat = lhs_ty->As<Matrix>();
-    auto* lhs_mat_elem_type = lhs_mat ? lhs_mat->type() : nullptr;
-    auto* rhs_mat = rhs_ty->As<Matrix>();
-    auto* rhs_mat_elem_type = rhs_mat ? rhs_mat->type() : nullptr;
-    // Addition and subtraction of float matrices
-    if ((op == ast::BinaryOp::kAdd || op == ast::BinaryOp::kSubtract) && lhs_mat_elem_type &&
-        lhs_mat_elem_type->Is<F32>() && rhs_mat_elem_type && rhs_mat_elem_type->Is<F32>() &&
-        (lhs_mat->columns() == rhs_mat->columns()) && (lhs_mat->rows() == rhs_mat->rows())) {
-        return rhs_ty;
-    }
-    if (op == ast::BinaryOp::kMultiply) {
-        // Multiplication of a matrix and a scalar
-        if (lhs_ty->Is<F32>() && rhs_mat_elem_type && rhs_mat_elem_type->Is<F32>()) {
-            return rhs_ty;
-        }
-        if (lhs_mat_elem_type && lhs_mat_elem_type->Is<F32>() && rhs_ty->Is<F32>()) {
-            return lhs_ty;
-        }
-
-        // Vector times matrix
-        if (lhs_vec_elem_type && lhs_vec_elem_type->Is<F32>() && rhs_mat_elem_type &&
-            rhs_mat_elem_type->Is<F32>() && (lhs_vec->Width() == rhs_mat->rows())) {
-            return builder_->create<sem::Vector>(lhs_vec->type(), rhs_mat->columns());
-        }
-
-        // Matrix times vector
-        if (lhs_mat_elem_type && lhs_mat_elem_type->Is<F32>() && rhs_vec_elem_type &&
-            rhs_vec_elem_type->Is<F32>() && (lhs_mat->columns() == rhs_vec->Width())) {
-            return builder_->create<sem::Vector>(rhs_vec->type(), lhs_mat->rows());
-        }
-
-        // Matrix times matrix
-        if (lhs_mat_elem_type && lhs_mat_elem_type->Is<F32>() && rhs_mat_elem_type &&
-            rhs_mat_elem_type->Is<F32>() && (lhs_mat->columns() == rhs_mat->rows())) {
-            return builder_->create<sem::Matrix>(
-                builder_->create<sem::Vector>(lhs_mat_elem_type, lhs_mat->rows()),
-                rhs_mat->columns());
-        }
-    }
-
-    // Comparison expressions
-    if (ast::IsComparison(op)) {
-        if (matching_types) {
-            // Special case for bools: only == and !=
-            if (lhs_ty->Is<Bool>() &&
-                (op == ast::BinaryOp::kEqual || op == ast::BinaryOp::kNotEqual)) {
-                return builder_->create<sem::Bool>();
-            }
-
-            // For the rest, we can compare i32, u32, and f32
-            if (lhs_ty->IsAnyOf<I32, U32, F32>()) {
-                return builder_->create<sem::Bool>();
-            }
-        }
-
-        // Same for vectors
-        if (matching_vec_elem_types) {
-            if (lhs_vec_elem_type->Is<Bool>() &&
-                (op == ast::BinaryOp::kEqual || op == ast::BinaryOp::kNotEqual)) {
-                return builder_->create<sem::Vector>(builder_->create<sem::Bool>(),
-                                                     lhs_vec->Width());
-            }
-
-            if (lhs_vec_elem_type->is_numeric_scalar()) {
-                return builder_->create<sem::Vector>(builder_->create<sem::Bool>(),
-                                                     lhs_vec->Width());
-            }
-        }
-    }
-
-    // Binary bitwise operations
-    if (ast::IsBitwise(op)) {
-        if (matching_types && lhs_ty->is_integer_scalar_or_vector()) {
-            return lhs_ty;
-        }
-    }
-
-    // Bit shift expressions
-    if (ast::IsBitshift(op)) {
-        // Type validation rules are the same for left or right shift, despite
-        // differences in computation rules (i.e. right shift can be arithmetic or
-        // logical depending on lhs type).
-
-        if (lhs_ty->IsAnyOf<I32, U32>() && rhs_ty->Is<U32>()) {
-            return lhs_ty;
-        }
-
-        if (lhs_vec_elem_type && lhs_vec_elem_type->IsAnyOf<I32, U32>() && rhs_vec_elem_type &&
-            rhs_vec_elem_type->Is<U32>()) {
-            return lhs_ty;
-        }
-    }
-
-    return nullptr;
 }
 
 sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
@@ -2472,11 +2314,8 @@ sem::Statement* Resolver::CompoundAssignmentStatement(
 
         auto* lhs_ty = lhs->Type()->UnwrapRef();
         auto* rhs_ty = rhs->Type()->UnwrapRef();
-        auto* ty = BinaryOpType(lhs_ty, rhs_ty, stmt->op);
+        auto* ty = intrinsic_table_->Lookup(stmt->op, lhs_ty, rhs_ty, stmt->source, true).result;
         if (!ty) {
-            AddError("compound assignment operand types are invalid: " + sem_.TypeNameOf(lhs_ty) +
-                         " " + FriendlyName(stmt->op) + " " + sem_.TypeNameOf(rhs_ty),
-                     stmt->source);
             return false;
         }
         return validator_.Assignment(stmt, ty);

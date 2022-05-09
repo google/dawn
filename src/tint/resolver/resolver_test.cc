@@ -1570,11 +1570,7 @@ TEST_P(Expr_Binary_Test_Invalid, All) {
     WrapInFunction(expr);
 
     ASSERT_FALSE(r()->Resolve());
-    ASSERT_EQ(r()->error(),
-              "12:34 error: Binary expression operand types are invalid for "
-              "this operation: " +
-                  FriendlyName(lhs_type) + " " + ast::FriendlyName(expr->op) + " " +
-                  FriendlyName(rhs_type));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching overload for operator "));
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          Expr_Binary_Test_Invalid,
@@ -1618,11 +1614,7 @@ TEST_P(Expr_Binary_Test_Invalid_VectorMatrixMultiply, All) {
         ASSERT_TRUE(TypeOf(expr) == result_type);
     } else {
         ASSERT_FALSE(r()->Resolve());
-        ASSERT_EQ(r()->error(),
-                  "12:34 error: Binary expression operand types are invalid for "
-                  "this operation: " +
-                      FriendlyName(lhs_type) + " " + ast::FriendlyName(expr->op) + " " +
-                      FriendlyName(rhs_type));
+        EXPECT_THAT(r()->error(), HasSubstr("no matching overload for operator *"));
     }
 }
 auto all_dimension_values = testing::Values(2u, 3u, 4u);
@@ -1660,11 +1652,7 @@ TEST_P(Expr_Binary_Test_Invalid_MatrixMatrixMultiply, All) {
         ASSERT_TRUE(TypeOf(expr) == result_type);
     } else {
         ASSERT_FALSE(r()->Resolve());
-        ASSERT_EQ(r()->error(),
-                  "12:34 error: Binary expression operand types are invalid for "
-                  "this operation: " +
-                      FriendlyName(lhs_type) + " " + ast::FriendlyName(expr->op) + " " +
-                      FriendlyName(rhs_type));
+        EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching overload for operator * "));
     }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTest,

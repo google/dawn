@@ -119,6 +119,23 @@ constexpr IntrinsicInfo kBuiltins[] = {
 {{- end }}
 };
 
+constexpr IntrinsicInfo kOperators[] = {
+{{- range $i, $o := .Operators }}
+  {
+    /* [{{$i}}] */
+{{-   range $o.OverloadDescriptions }}
+    /* {{.}} */
+{{-   end }}
+    /* num overloads */ {{$o.NumOverloads}},
+    /* overloads */ &kOverloads[{{$o.OverloadsOffset}}],
+  },
+{{- end }}
+};
+
+{{- range $i, $o := .Operators }}
+constexpr uint8_t kOperator{{template "OperatorName" $o.Name}} = {{$i}};
+{{- end }}
+
 // clang-format on
 {{ end -}}
 
@@ -397,5 +414,31 @@ Matchers::~Matchers() = default;
 {{-     if $i }} + ", " + {{.Name}}
 {{-     else }} + {{.Name}}
 {{-     end -}}
+{{-   end -}}
+{{- end -}}
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                          define "OperatorName"                           -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-        if eq . "<<" -}}ShiftLeft
+{{-   else if eq . "&"  -}}And
+{{-   else if eq . "|"  -}}Or
+{{-   else if eq . "^"  -}}Xor
+{{-   else if eq . "&&" -}}LogicalAnd
+{{-   else if eq . "||" -}}LogicalOr
+{{-   else if eq . "==" -}}Equal
+{{-   else if eq . "!=" -}}NotEqual
+{{-   else if eq . "<"  -}}LessThan
+{{-   else if eq . ">"  -}}GreaterThan
+{{-   else if eq . "<=" -}}LessThanEqual
+{{-   else if eq . ">=" -}}GreaterThanEqual
+{{-   else if eq . "<<" -}}ShiftLeft
+{{-   else if eq . ">>" -}}ShiftRight
+{{-   else if eq . "+"  -}}Plus
+{{-   else if eq . "-"  -}}Minus
+{{-   else if eq . "*"  -}}Star
+{{-   else if eq . "/"  -}}Divide
+{{-   else if eq . "%"  -}}Modulo
+{{-   else -}}<unknown-{{.}}>
 {{-   end -}}
 {{- end -}}

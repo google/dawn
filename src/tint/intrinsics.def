@@ -558,3 +558,91 @@ fn textureLoad(texture: texture_external, coords: vec2<i32>) -> vec4<f32>
 [[stage("fragment", "compute")]] fn atomicXor<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
 [[stage("fragment", "compute")]] fn atomicExchange<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
 [[stage("fragment", "compute")]] fn atomicCompareExchangeWeak<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T, T) -> vec2<T>
+
+////////////////////////////////////////////////////////////////////////////////
+// Operators                                                                  //
+//                                                                            //
+// The operator declarations below declare all the unary and binary operators //
+// supported by the WGSL language (with exception for address-of and          //
+// dereference unary operators).                                              //
+//                                                                            //
+// The syntax is almost identical to builtin functions, except we use 'op'    //
+// instead of 'fn'. The resolving rules are identical to builtins, which is   //
+// described in detail above.                                                 //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+// Binary Operators                                                           //
+////////////////////////////////////////////////////////////////////////////////
+op + <T: fiu32>(T, T) -> T
+op + <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+op + <T: fiu32, N: num> (vec<N, T>, T) -> vec<N, T>
+op + <T: fiu32, N: num> (T, vec<N, T>) -> vec<N, T>
+op + <N: num, M: num> (mat<N, M, f32>, mat<N, M, f32>) -> mat<N, M, f32>
+
+op - <T: fiu32>(T, T) -> T
+op - <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+op - <T: fiu32, N: num> (vec<N, T>, T) -> vec<N, T>
+op - <T: fiu32, N: num> (T, vec<N, T>) -> vec<N, T>
+op - <N: num, M: num> (mat<N, M, f32>, mat<N, M, f32>) -> mat<N, M, f32>
+
+op * <T: fiu32>(T, T) -> T
+op * <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+op * <T: fiu32, N: num> (vec<N, T>, T) -> vec<N, T>
+op * <T: fiu32, N: num> (T, vec<N, T>) -> vec<N, T>
+op * <N: num, M: num> (f32, mat<N, M, f32>) -> mat<N, M, f32>
+op * <N: num, M: num> (mat<N, M, f32>, f32) -> mat<N, M, f32>
+op * <C: num, R: num> (mat<C, R, f32>, vec<C, f32>) -> vec<R, f32>
+op * <C: num, R: num> (vec<R, f32>, mat<C, R, f32>) -> vec<C, f32>
+op * <K: num, C: num, R: num> (mat<K, R, f32>, mat<C, K, f32>) -> mat<C, R, f32>
+
+op / <T: fiu32>(T, T) -> T
+op / <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+op / <T: fiu32, N: num> (vec<N, T>, T) -> vec<N, T>
+op / <T: fiu32, N: num> (T, vec<N, T>) -> vec<N, T>
+
+op % <T: fiu32>(T, T) -> T
+op % <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+op % <T: fiu32, N: num> (vec<N, T>, T) -> vec<N, T>
+op % <T: fiu32, N: num> (T, vec<N, T>) -> vec<N, T>
+
+op ^ <T: iu32>(T, T) -> T
+op ^ <T: iu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+
+op & (bool, bool) -> bool
+op & <N: num> (vec<N, bool>, vec<N, bool>) -> vec<N, bool>
+op & <T: iu32>(T, T) -> T
+op & <T: iu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+
+op | (bool, bool) -> bool
+op | <N: num> (vec<N, bool>, vec<N, bool>) -> vec<N, bool>
+op | <T: iu32>(T, T) -> T
+op | <T: iu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+
+op && (bool, bool) -> bool
+op || (bool, bool) -> bool
+
+op == <T: scalar>(T, T) -> bool
+op == <T: scalar, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+
+op != <T: scalar>(T, T) -> bool
+op != <T: scalar, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+
+op < <T: fiu32>(T, T) -> bool
+op < <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+
+op > <T: fiu32>(T, T) -> bool
+op > <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+
+op <= <T: fiu32>(T, T) -> bool
+op <= <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+
+op >= <T: fiu32>(T, T) -> bool
+op >= <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+
+op << <T: iu32>(T, u32) -> T
+op << <T: iu32, N: num> (vec<N, T>, vec<N, u32>) -> vec<N, T>
+
+op >> <T: iu32>(T, u32) -> T
+op >> <T: iu32, N: num> (vec<N, T>, vec<N, u32>) -> vec<N, T>
