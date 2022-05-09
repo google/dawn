@@ -19,6 +19,10 @@
 
 namespace dawn::wire::client {
 
+LimitsAndFeatures::LimitsAndFeatures() = default;
+
+LimitsAndFeatures::~LimitsAndFeatures() = default;
+
 bool LimitsAndFeatures::GetLimits(WGPUSupportedLimits* limits) const {
     ASSERT(limits != nullptr);
     if (limits->nextInChain != nullptr) {

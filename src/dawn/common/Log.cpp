@@ -66,6 +66,10 @@ android_LogPriority AndroidLogPriority(LogSeverity severity) {
 
 LogMessage::LogMessage(LogSeverity severity) : mSeverity(severity) {}
 
+LogMessage::LogMessage(LogMessage&& other) = default;
+
+LogMessage& LogMessage::operator=(LogMessage&& other) = default;
+
 LogMessage::~LogMessage() {
     std::string fullMessage = mStream.str();
 

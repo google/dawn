@@ -42,6 +42,8 @@ OwnedCompilationMessages::OwnedCompilationMessages() {
     mCompilationInfo.messages = nullptr;
 }
 
+OwnedCompilationMessages::~OwnedCompilationMessages() = default;
+
 void OwnedCompilationMessages::AddMessageForTesting(std::string message,
                                                     wgpu::CompilationMessageType type,
                                                     uint64_t lineNum,

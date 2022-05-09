@@ -58,8 +58,8 @@ struct ComputePassResourceUsage {
     // Somehow without this defaulted constructor, MSVC or its STDlib have an issue where they
     // use the copy constructor (that's deleted) when doing operations on a
     // vector<ComputePassResourceUsage>
-    ComputePassResourceUsage(ComputePassResourceUsage&&) = default;
-    ComputePassResourceUsage() = default;
+    ComputePassResourceUsage(ComputePassResourceUsage&&);
+    ComputePassResourceUsage();
 
     std::vector<SyncScopeResourceUsage> dispatchUsages;
 

@@ -70,6 +70,20 @@ static constexpr CommandBufferStateTracker::ValidationAspects kLazyAspects =
     1 << VALIDATION_ASPECT_BIND_GROUPS | 1 << VALIDATION_ASPECT_VERTEX_BUFFERS |
     1 << VALIDATION_ASPECT_INDEX_BUFFER;
 
+CommandBufferStateTracker::CommandBufferStateTracker() = default;
+
+CommandBufferStateTracker::CommandBufferStateTracker(const CommandBufferStateTracker&) = default;
+
+CommandBufferStateTracker::CommandBufferStateTracker(CommandBufferStateTracker&&) = default;
+
+CommandBufferStateTracker::~CommandBufferStateTracker() = default;
+
+CommandBufferStateTracker& CommandBufferStateTracker::operator=(const CommandBufferStateTracker&) =
+    default;
+
+CommandBufferStateTracker& CommandBufferStateTracker::operator=(CommandBufferStateTracker&&) =
+    default;
+
 MaybeError CommandBufferStateTracker::ValidateCanDispatch() {
     return ValidateOperation(kDispatchAspects);
 }

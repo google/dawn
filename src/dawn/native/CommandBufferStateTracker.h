@@ -28,6 +28,14 @@ namespace dawn::native {
 
 class CommandBufferStateTracker {
   public:
+    CommandBufferStateTracker();
+    CommandBufferStateTracker(const CommandBufferStateTracker&);
+    CommandBufferStateTracker(CommandBufferStateTracker&&);
+    ~CommandBufferStateTracker();
+
+    CommandBufferStateTracker& operator=(const CommandBufferStateTracker&);
+    CommandBufferStateTracker& operator=(CommandBufferStateTracker&&);
+
     // Non-state-modifying validation functions
     MaybeError ValidateCanDispatch();
     MaybeError ValidateCanDraw();

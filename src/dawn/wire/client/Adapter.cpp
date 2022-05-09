@@ -19,6 +19,8 @@
 
 namespace dawn::wire::client {
 
+Adapter::Adapter(Client* c, uint32_t r, uint32_t i) : ObjectBase(c, r, i) {}
+
 Adapter::~Adapter() {
     mRequestDeviceRequests.CloseAll([](RequestDeviceData* request) {
         request->callback(WGPURequestDeviceStatus_Unknown, nullptr,

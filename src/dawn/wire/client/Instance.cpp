@@ -18,6 +18,8 @@
 
 namespace dawn::wire::client {
 
+Instance::Instance(Client* c, uint32_t r, uint32_t i) : ObjectBase(c, r, i) {}
+
 Instance::~Instance() {
     mRequestAdapterRequests.CloseAll([](RequestAdapterData* request) {
         request->callback(WGPURequestAdapterStatus_Unknown, nullptr,

@@ -118,6 +118,8 @@ ComboRenderPassDescriptor::ComboRenderPassDescriptor(
     }
 }
 
+ComboRenderPassDescriptor::~ComboRenderPassDescriptor() = default;
+
 ComboRenderPassDescriptor::ComboRenderPassDescriptor(const ComboRenderPassDescriptor& other) {
     *this = other;
 }
@@ -348,6 +350,11 @@ BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
                                                          uint64_t offset,
                                                          uint64_t size)
     : binding(binding), buffer(buffer), offset(offset), size(size) {}
+
+BindingInitializationHelper::BindingInitializationHelper(const BindingInitializationHelper&) =
+    default;
+
+BindingInitializationHelper::~BindingInitializationHelper() = default;
 
 wgpu::BindGroupEntry BindingInitializationHelper::GetAsBinding() const {
     wgpu::BindGroupEntry result;

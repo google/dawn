@@ -62,8 +62,8 @@ class LogMessage {
     explicit LogMessage(LogSeverity severity);
     ~LogMessage();
 
-    LogMessage(LogMessage&& other) = default;
-    LogMessage& operator=(LogMessage&& other) = default;
+    LogMessage(LogMessage&& other);
+    LogMessage& operator=(LogMessage&& other);
 
     template <typename T>
     LogMessage& operator<<(T&& value) {

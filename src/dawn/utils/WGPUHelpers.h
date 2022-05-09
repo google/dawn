@@ -59,6 +59,7 @@ struct ComboRenderPassDescriptor : public wgpu::RenderPassDescriptor {
   public:
     ComboRenderPassDescriptor(std::initializer_list<wgpu::TextureView> colorAttachmentInfo,
                               wgpu::TextureView depthStencil = wgpu::TextureView());
+    ~ComboRenderPassDescriptor();
 
     ComboRenderPassDescriptor(const ComboRenderPassDescriptor& otherRenderPass);
     const ComboRenderPassDescriptor& operator=(const ComboRenderPassDescriptor& otherRenderPass);
@@ -158,6 +159,8 @@ struct BindingInitializationHelper {
                                 const wgpu::Buffer& buffer,
                                 uint64_t offset = 0,
                                 uint64_t size = wgpu::kWholeSize);
+    BindingInitializationHelper(const BindingInitializationHelper&);
+    ~BindingInitializationHelper();
 
     wgpu::BindGroupEntry GetAsBinding() const;
 

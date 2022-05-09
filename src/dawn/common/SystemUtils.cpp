@@ -205,6 +205,8 @@ std::optional<std::string> GetModuleDirectory() {
 
 // ScopedEnvironmentVar
 
+ScopedEnvironmentVar::ScopedEnvironmentVar() = default;
+
 ScopedEnvironmentVar::ScopedEnvironmentVar(const char* variableName, const char* value)
     : mName(variableName),
       mOriginalValue(GetEnvironmentVar(variableName)),

@@ -546,6 +546,8 @@ TextureBase::TextureBase(DeviceBase* device,
     TrackInDevice();
 }
 
+TextureBase::~TextureBase() = default;
+
 static Format kUnusedFormat;
 
 TextureBase::TextureBase(DeviceBase* device, TextureState state)
@@ -788,6 +790,8 @@ TextureViewBase::TextureViewBase(TextureBase* texture)
 
 TextureViewBase::TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag)
     : ApiObjectBase(device, tag), mFormat(kUnusedFormat) {}
+
+TextureViewBase::~TextureViewBase() = default;
 
 void TextureViewBase::DestroyImpl() {}
 

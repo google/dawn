@@ -33,6 +33,7 @@ class Buffer final : public ObjectBase {
     static WGPUBuffer Create(Device* device, const WGPUBufferDescriptor* descriptor);
     static WGPUBuffer CreateError(Device* device);
 
+    Buffer(Client* client, uint32_t refcount, uint32_t id);
     ~Buffer();
 
     bool OnMapAsyncCallback(uint64_t requestSerial,

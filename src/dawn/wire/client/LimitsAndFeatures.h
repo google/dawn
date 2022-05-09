@@ -23,6 +23,9 @@ namespace dawn::wire::client {
 
 class LimitsAndFeatures {
   public:
+    LimitsAndFeatures();
+    ~LimitsAndFeatures();
+
     bool GetLimits(WGPUSupportedLimits* limits) const;
     bool HasFeature(WGPUFeatureName feature) const;
     size_t EnumerateFeatures(WGPUFeatureName* features) const;

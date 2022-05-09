@@ -32,7 +32,7 @@ namespace dawn::native {
 class OwnedCompilationMessages : public NonCopyable {
   public:
     OwnedCompilationMessages();
-    ~OwnedCompilationMessages() = default;
+    ~OwnedCompilationMessages();
 
     void AddMessageForTesting(
         std::string message,

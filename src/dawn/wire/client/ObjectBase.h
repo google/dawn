@@ -30,10 +30,8 @@ class Client;
 //  - An ID that is used to refer to this object when talking with the server side
 //  - A next/prev pointer. They are part of a linked list of objects of the same type.
 struct ObjectBase : public LinkNode<ObjectBase> {
-    ObjectBase(Client* client, uint32_t refcount, uint32_t id)
-        : client(client), refcount(refcount), id(id) {}
-
-    ~ObjectBase() { RemoveFromList(); }
+    ObjectBase(Client* client, uint32_t refcount, uint32_t id);
+    ~ObjectBase();
 
     virtual void CancelCallbacksForDisconnect() {}
 

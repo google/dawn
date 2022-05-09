@@ -36,6 +36,12 @@ using QueryAvailabilityMap = std::map<QuerySetBase*, std::vector<bool>>;
 // Helper class to build SyncScopeResourceUsages
 class SyncScopeUsageTracker {
   public:
+    SyncScopeUsageTracker();
+    SyncScopeUsageTracker(SyncScopeUsageTracker&&);
+    ~SyncScopeUsageTracker();
+
+    SyncScopeUsageTracker& operator=(SyncScopeUsageTracker&&);
+
     void BufferUsedAs(BufferBase* buffer, wgpu::BufferUsage usage);
     void TextureViewUsedAs(TextureViewBase* texture, wgpu::TextureUsage usage);
     void AddRenderBundleTextureUsage(TextureBase* texture,
@@ -56,6 +62,9 @@ class SyncScopeUsageTracker {
 // Helper class to build ComputePassResourceUsages
 class ComputePassResourceUsageTracker {
   public:
+    ComputePassResourceUsageTracker();
+    ~ComputePassResourceUsageTracker();
+
     void AddDispatch(SyncScopeResourceUsage scope);
     void AddReferencedBuffer(BufferBase* buffer);
     void AddResourcesReferencedByBindGroup(BindGroupBase* group);
@@ -69,6 +78,12 @@ class ComputePassResourceUsageTracker {
 // Helper class to build RenderPassResourceUsages
 class RenderPassResourceUsageTracker : public SyncScopeUsageTracker {
   public:
+    RenderPassResourceUsageTracker();
+    RenderPassResourceUsageTracker(RenderPassResourceUsageTracker&&);
+    ~RenderPassResourceUsageTracker();
+
+    RenderPassResourceUsageTracker& operator=(RenderPassResourceUsageTracker&&);
+
     void TrackQueryAvailability(QuerySetBase* querySet, uint32_t queryIndex);
     const QueryAvailabilityMap& GetQueryAvailabilityMap() const;
 

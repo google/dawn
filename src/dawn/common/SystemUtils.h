@@ -40,7 +40,7 @@ bool IsMacOSVersionAtLeast(uint32_t majorVersion, uint32_t minorVersion = 0);
 
 class ScopedEnvironmentVar {
   public:
-    ScopedEnvironmentVar() = default;
+    ScopedEnvironmentVar();
     ScopedEnvironmentVar(const char* variableName, const char* value);
     ~ScopedEnvironmentVar();
 

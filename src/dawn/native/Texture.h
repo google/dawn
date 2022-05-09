@@ -46,7 +46,9 @@ class TextureBase : public ApiObjectBase {
   public:
     enum class TextureState { OwnedInternal, OwnedExternal, Destroyed };
     enum class ClearValue { Zero, NonZero };
+
     TextureBase(DeviceBase* device, const TextureDescriptor* descriptor, TextureState state);
+    ~TextureBase() override;
 
     static TextureBase* MakeError(DeviceBase* device);
 
@@ -124,6 +126,7 @@ class TextureBase : public ApiObjectBase {
 class TextureViewBase : public ApiObjectBase {
   public:
     TextureViewBase(TextureBase* texture, const TextureViewDescriptor* descriptor);
+    ~TextureViewBase() override;
 
     static TextureViewBase* MakeError(DeviceBase* device);
 

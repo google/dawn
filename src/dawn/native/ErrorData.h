@@ -41,6 +41,7 @@ class [[nodiscard]] ErrorData {
                                                            const char* function,
                                                            int line);
     ErrorData(InternalErrorType type, std::string message);
+    ~ErrorData();
 
     struct BacktraceRecord {
         const char* file;

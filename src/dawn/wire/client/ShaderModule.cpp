@@ -18,6 +18,8 @@
 
 namespace dawn::wire::client {
 
+ShaderModule::ShaderModule(Client* c, uint32_t r, uint32_t i) : ObjectBase(c, r, i) {}
+
 ShaderModule::~ShaderModule() {
     ClearAllCallbacks(WGPUCompilationInfoRequestStatus_Unknown);
 }

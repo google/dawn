@@ -26,6 +26,14 @@
 
 namespace dawn::native {
 
+SyncScopeUsageTracker::SyncScopeUsageTracker() = default;
+
+SyncScopeUsageTracker::SyncScopeUsageTracker(SyncScopeUsageTracker&&) = default;
+
+SyncScopeUsageTracker::~SyncScopeUsageTracker() = default;
+
+SyncScopeUsageTracker& SyncScopeUsageTracker::operator=(SyncScopeUsageTracker&&) = default;
+
 void SyncScopeUsageTracker::BufferUsedAs(BufferBase* buffer, wgpu::BufferUsage usage) {
     // std::map's operator[] will create the key and return 0 if the key didn't exist
     // before.
@@ -165,6 +173,10 @@ SyncScopeResourceUsage SyncScopeUsageTracker::AcquireSyncScopeUsage() {
     return result;
 }
 
+ComputePassResourceUsageTracker::ComputePassResourceUsageTracker() = default;
+
+ComputePassResourceUsageTracker::~ComputePassResourceUsageTracker() = default;
+
 void ComputePassResourceUsageTracker::AddDispatch(SyncScopeResourceUsage scope) {
     mUsage.dispatchUsages.push_back(std::move(scope));
 }
@@ -205,6 +217,16 @@ void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGrou
 ComputePassResourceUsage ComputePassResourceUsageTracker::AcquireResourceUsage() {
     return std::move(mUsage);
 }
+
+RenderPassResourceUsageTracker::RenderPassResourceUsageTracker() = default;
+
+RenderPassResourceUsageTracker::RenderPassResourceUsageTracker(RenderPassResourceUsageTracker&&) =
+    default;
+
+RenderPassResourceUsageTracker::~RenderPassResourceUsageTracker() = default;
+
+RenderPassResourceUsageTracker& RenderPassResourceUsageTracker::operator=(
+    RenderPassResourceUsageTracker&&) = default;
 
 RenderPassResourceUsage RenderPassResourceUsageTracker::AcquireResourceUsage() {
     RenderPassResourceUsage result;
