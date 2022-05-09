@@ -23,7 +23,7 @@ See:
 {{    end -}}
 {{- end -}}
 
-{{- with BuiltinTable -}}
+{{- with IntrinsicTable -}}
 {{- template "Matchers" . }}
 
 constexpr MatcherIndex kMatcherIndices[] = {
@@ -106,15 +106,15 @@ constexpr OverloadInfo kOverloads[] = {
 {{- end }}
 };
 
-constexpr BuiltinInfo kBuiltins[] = {
-{{- range $i, $f := .Functions }}
+constexpr IntrinsicInfo kBuiltins[] = {
+{{- range $i, $b := .Builtins }}
   {
     /* [{{$i}}] */
-{{-   range $f.OverloadDescriptions }}
+{{-   range $b.OverloadDescriptions }}
     /* {{.}} */
 {{-   end }}
-    /* num overloads */ {{$f.NumOverloads}},
-    /* overloads */ &kOverloads[{{$f.OverloadsOffset}}],
+    /* num overloads */ {{$b.NumOverloads}},
+    /* overloads */ &kOverloads[{{$b.OverloadsOffset}}],
   },
 {{- end }}
 };

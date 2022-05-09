@@ -52,10 +52,6 @@ func (l *lexer) lex() error {
 			l.next()
 		case '\n':
 			l.next()
-		case '<':
-			l.tok(1, tok.Lt)
-		case '>':
-			l.tok(1, tok.Gt)
 		case '(':
 			l.tok(1, tok.Lparen)
 		case ')':
@@ -68,8 +64,14 @@ func (l *lexer) lex() error {
 			l.tok(1, tok.Colon)
 		case ',':
 			l.tok(1, tok.Comma)
-		case '|':
-			l.tok(1, tok.Or)
+		case '*':
+			l.tok(1, tok.Star)
+		case '+':
+			l.tok(1, tok.Plus)
+		case '%':
+			l.tok(1, tok.Modulo)
+		case '^':
+			l.tok(1, tok.Xor)
 		case '"':
 			start := l.loc
 			l.next() // Skip opening quote
@@ -81,13 +83,16 @@ func (l *lexer) lex() error {
 			l.next() // Skip closing quote
 		default:
 			switch {
-			case l.peek(1) == '/':
+			case l.peek(0) == '/' && l.peek(1) == '/':
 				l.skip(l.count(toFirst('\n')))
 				l.next() // Consume newline
+			case l.match("/", tok.Divide):
 			case l.match("[[", tok.Ldeco):
 			case l.match("]]", tok.Rdeco):
 			case l.match("->", tok.Arrow):
+			case l.match("-", tok.Minus):
 			case l.match("fn", tok.Function):
+			case l.match("op", tok.Operator):
 			case l.match("enum", tok.Enum):
 			case l.match("type", tok.Type):
 			case l.match("match", tok.Match):
@@ -95,6 +100,19 @@ func (l *lexer) lex() error {
 				l.tok(l.count(alphaNumericOrUnderscore), tok.Identifier)
 			case unicode.IsNumber(l.peek(0)):
 				l.tok(l.count(unicode.IsNumber), tok.Integer)
+			case l.match("&&", tok.AndAnd):
+			case l.match("&", tok.And):
+			case l.match("||", tok.OrOr):
+			case l.match("|", tok.Or):
+			case l.match("!=", tok.NotEqual):
+			case l.match("==", tok.Equal):
+			case l.match("=", tok.Assign):
+			case l.match("<<", tok.Shl):
+			case l.match("<=", tok.Le):
+			case l.match("<", tok.Lt):
+			case l.match(">=", tok.Ge):
+			case l.match(">>", tok.Shr):
+			case l.match(">", tok.Gt):
 			default:
 				return fmt.Errorf("%v: unexpected '%v'", l.loc, string(l.runes[0]))
 			}

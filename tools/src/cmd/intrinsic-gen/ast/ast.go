@@ -28,7 +28,8 @@ type AST struct {
 	Enums     []EnumDecl
 	Types     []TypeDecl
 	Matchers  []MatcherDecl
-	Functions []FunctionDecl
+	Builtins  []IntrinsicDecl
+	Operators []IntrinsicDecl
 }
 
 func (a AST) String() string {
@@ -45,8 +46,12 @@ func (a AST) String() string {
 		fmt.Fprintf(&sb, "%v", m)
 		fmt.Fprintln(&sb)
 	}
-	for _, f := range a.Functions {
-		fmt.Fprintf(&sb, "%v", f)
+	for _, b := range a.Builtins {
+		fmt.Fprintf(&sb, "%v", b)
+		fmt.Fprintln(&sb)
+	}
+	for _, o := range a.Operators {
+		fmt.Fprintf(&sb, "%v", o)
 		fmt.Fprintln(&sb)
 	}
 	return sb.String()
@@ -98,9 +103,18 @@ func (m MatcherDecl) Format(w fmt.State, verb rune) {
 	m.Options.Format(w, verb)
 }
 
-// FunctionDecl describes a function declaration
-type FunctionDecl struct {
+// IntrinsicKind is either a Builtin or Operator
+type IntrinsicKind string
+
+const (
+	Builtin  IntrinsicKind = "builtin"
+	Operator IntrinsicKind = "operator"
+)
+
+// IntrinsicDecl describes a builtin or operator declaration
+type IntrinsicDecl struct {
 	Source         tok.Source
+	Kind           IntrinsicKind
 	Name           string
 	Decorations    Decorations
 	TemplateParams TemplateParams
@@ -109,13 +123,19 @@ type FunctionDecl struct {
 }
 
 // Format implements the fmt.Formatter interface
-func (f FunctionDecl) Format(w fmt.State, verb rune) {
-	fmt.Fprintf(w, "fn %v", f.Name)
-	f.TemplateParams.Format(w, verb)
-	f.Parameters.Format(w, verb)
-	if f.ReturnType != nil {
+func (i IntrinsicDecl) Format(w fmt.State, verb rune) {
+	switch i.Kind {
+	case Builtin:
+		fmt.Fprintf(w, "fn ")
+	case Operator:
+		fmt.Fprintf(w, "op ")
+	}
+	fmt.Fprintf(w, "%v", i.Name)
+	i.TemplateParams.Format(w, verb)
+	i.Parameters.Format(w, verb)
+	if i.ReturnType != nil {
 		fmt.Fprintf(w, " -> ")
-		f.ReturnType.Format(w, verb)
+		i.ReturnType.Format(w, verb)
 	}
 }
 

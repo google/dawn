@@ -26,7 +26,8 @@ type Sem struct {
 	Types        []*Type
 	TypeMatchers []*TypeMatcher
 	EnumMatchers []*EnumMatcher
-	Functions    []*Function
+	Builtins     []*Intrinsic
+	Operators    []*Intrinsic
 	// Maximum number of open-types used across all builtins
 	MaxOpenTypes int
 	// Maximum number of open-numbers used across all builtins
@@ -42,7 +43,8 @@ func New() *Sem {
 		Types:        []*Type{},
 		TypeMatchers: []*TypeMatcher{},
 		EnumMatchers: []*EnumMatcher{},
-		Functions:    []*Function{},
+		Builtins:     []*Intrinsic{},
+		Operators:    []*Intrinsic{},
 	}
 }
 
@@ -121,16 +123,16 @@ type TemplateNumberParam struct {
 	Name string
 }
 
-// Function describes the overloads of a builtin function
-type Function struct {
+// Intrinsic describes the overloads of a builtin or operator
+type Intrinsic struct {
 	Name      string
 	Overloads []*Overload
 }
 
-// Overload describes a single overload of a function
+// Overload describes a single overload of a builtin or operator
 type Overload struct {
-	Decl             ast.FunctionDecl
-	Function         *Function
+	Decl             ast.IntrinsicDecl
+	Intrinsic        *Intrinsic
 	TemplateParams   []TemplateParam
 	OpenTypes        []*TemplateTypeParam
 	OpenNumbers      []TemplateParam
@@ -164,7 +166,13 @@ func (u StageUses) List() []string {
 
 // Format implements the fmt.Formatter interface
 func (o Overload) Format(w fmt.State, verb rune) {
-	fmt.Fprintf(w, "fn %v", o.Function.Name)
+	switch o.Decl.Kind {
+	case ast.Builtin:
+		fmt.Fprintf(w, "fn ")
+	case ast.Operator:
+		fmt.Fprintf(w, "op ")
+	}
+	fmt.Fprintf(w, "%v", o.Intrinsic.Name)
 	if len(o.TemplateParams) > 0 {
 		fmt.Fprintf(w, "<")
 		for i, t := range o.TemplateParams {

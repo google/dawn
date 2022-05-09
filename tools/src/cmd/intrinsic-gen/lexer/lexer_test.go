@@ -52,6 +52,9 @@ func TestLexTokens(t *testing.T) {
 		{"fn", tok.Token{Kind: tok.Function, Runes: []rune("fn"), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 3, 2),
 		}}},
+		{"op", tok.Token{Kind: tok.Operator, Runes: []rune("op"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 3, 2),
+		}}},
 		{"type", tok.Token{Kind: tok.Type, Runes: []rune("type"), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 5, 4),
 		}}},
@@ -76,6 +79,45 @@ func TestLexTokens(t *testing.T) {
 		{"}", tok.Token{Kind: tok.Rbrace, Runes: []rune("}"), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 2, 1),
 		}}},
+		{"&&", tok.Token{Kind: tok.AndAnd, Runes: []rune("&&"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 3, 2),
+		}}},
+		{"&", tok.Token{Kind: tok.And, Runes: []rune("&"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 2, 1),
+		}}},
+		{"||", tok.Token{Kind: tok.OrOr, Runes: []rune("||"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 3, 2),
+		}}},
+		{"|", tok.Token{Kind: tok.Or, Runes: []rune("|"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 2, 1),
+		}}},
+		{"!=", tok.Token{Kind: tok.NotEqual, Runes: []rune("!="), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 3, 2),
+		}}},
+		{"==", tok.Token{Kind: tok.Equal, Runes: []rune("=="), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 3, 2),
+		}}},
+		{"=", tok.Token{Kind: tok.Assign, Runes: []rune("="), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 2, 1),
+		}}},
+		{"<<", tok.Token{Kind: tok.Shl, Runes: []rune("<<"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 3, 2),
+		}}},
+		{"<=", tok.Token{Kind: tok.Le, Runes: []rune("<="), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 3, 2),
+		}}},
+		{"<", tok.Token{Kind: tok.Lt, Runes: []rune("<"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 2, 1),
+		}}},
+		{">=", tok.Token{Kind: tok.Ge, Runes: []rune(">="), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 3, 2),
+		}}},
+		{">>", tok.Token{Kind: tok.Shr, Runes: []rune(">>"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 3, 2),
+		}}},
+		{">", tok.Token{Kind: tok.Gt, Runes: []rune(">"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 2, 1),
+		}}},
 		{"[[", tok.Token{Kind: tok.Ldeco, Runes: []rune("[["), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 3, 2),
 		}}},
@@ -89,6 +131,9 @@ func TestLexTokens(t *testing.T) {
 			S: loc(1, 1, 0), E: loc(1, 2, 1),
 		}}},
 		{"|", tok.Token{Kind: tok.Or, Runes: []rune("|"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 2, 1),
+		}}},
+		{"*", tok.Token{Kind: tok.Star, Runes: []rune("*"), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 2, 1),
 		}}},
 		{"->", tok.Token{Kind: tok.Arrow, Runes: []rune("->"), Source: tok.Source{
@@ -134,10 +179,14 @@ func TestErrors(t *testing.T) {
 	for _, test := range []test{
 		{" \"abc", "test.txt:1:2 unterminated string"},
 		{" \"abc\n", "test.txt:1:2 unterminated string"},
-		{"*", "test.txt:1:1: unexpected '*'"},
+		{"£", "test.txt:1:1: unexpected '£'"},
 	} {
 		got, err := lexer.Lex([]rune(test.src), "test.txt")
-		if gotErr := err.Error(); test.expect != gotErr {
+		gotErr := "<nil>"
+		if err != nil {
+			gotErr = err.Error()
+		}
+		if test.expect != gotErr {
 			t.Errorf(`Lex() returned error "%+v", expected error "%+v"`, gotErr, test.expect)
 		}
 		if got != nil {

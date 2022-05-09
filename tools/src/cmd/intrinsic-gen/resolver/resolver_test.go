@@ -139,7 +139,7 @@ fn f<E: m>()`,
 			`
 type f32
 type T<x>
-fn f(T<T<f32>>)`,
+fn f(T< T<f32> >)`,
 			success,
 		}, {
 			`enum E {A A}`,
@@ -297,6 +297,70 @@ enum E { a b }
 match m: a | b
 fn f<M: m>(P<M>)`,
 			`file.txt:4:14 cannot use template enum 'E' as template number`,
+		}, {
+			`
+type i
+enum e { a }
+op << (i) -> e`,
+			`file.txt:3:14 cannot use 'e' as return type. Must be a type or template type`,
+		}, {
+			`
+type T<x>
+op << (T<u>)`,
+			`file.txt:2:10 cannot resolve 'u'`,
+		}, {
+			`
+op << ()`,
+			`file.txt:1:4 operators must have either 1 or 2 parameters`,
+		}, {
+			`
+type i
+op << (i, i, i)`,
+			`file.txt:2:4 operators must have either 1 or 2 parameters`,
+		}, {
+			`
+type x
+op << <T>(T<x>)`,
+			`file.txt:2:11 'T' template parameters do not accept template arguments`,
+		}, {
+			`
+type A<N: num>
+type B
+op << (A<B>)`,
+			`file.txt:3:10 cannot use type 'B' as template number`,
+		}, {
+			`
+type A<N>
+enum E { b }
+op << (A<b>)`,
+			`file.txt:3:10 cannot use enum entry 'E.b' as template type`,
+		}, {
+			`
+type T
+type P<N: num>
+match m: T
+op << (P<m>)`,
+			`file.txt:4:10 cannot use type matcher 'm' as template number`,
+		}, {
+			`
+type P<N: num>
+enum E { b }
+op << (P<E>)`,
+			`file.txt:3:10 cannot use enum 'E' as template number`,
+		}, {
+			`
+type P<N: num>
+enum E { a b }
+match m: a | b
+op << (P<m>)`,
+			`file.txt:4:10 cannot use enum matcher 'm' as template number`,
+		}, {
+			`
+type P<N: num>
+enum E { a b }
+match m: a | b
+op << <M: m>(P<M>)`,
+			`file.txt:4:16 cannot use template enum 'E' as template number`,
 		}, {
 			`
 enum E { a }

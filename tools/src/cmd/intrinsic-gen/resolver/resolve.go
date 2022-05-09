@@ -28,7 +28,8 @@ type resolver struct {
 	s *sem.Sem
 
 	globals           scope
-	functions         map[string]*sem.Function
+	builtins          map[string]*sem.Intrinsic
+	operators         map[string]*sem.Intrinsic
 	enumEntryMatchers map[*sem.EnumEntry]*sem.EnumMatcher
 }
 
@@ -38,7 +39,8 @@ func Resolve(a *ast.AST) (*sem.Sem, error) {
 		a:                 a,
 		s:                 sem.New(),
 		globals:           newScope(nil),
-		functions:         map[string]*sem.Function{},
+		builtins:          map[string]*sem.Intrinsic{},
+		operators:         map[string]*sem.Intrinsic{},
 		enumEntryMatchers: map[*sem.EnumEntry]*sem.EnumMatcher{},
 	}
 	// Declare and resolve all the enumerators
@@ -59,9 +61,15 @@ func Resolve(a *ast.AST) (*sem.Sem, error) {
 			return nil, err
 		}
 	}
-	// Declare and resolve the functions
-	for _, f := range a.Functions {
-		if err := r.function(f); err != nil {
+	// Declare and resolve the builtins
+	for _, f := range a.Builtins {
+		if err := r.intrinsic(f, r.builtins, &r.s.Builtins); err != nil {
+			return nil, err
+		}
+	}
+	// Declare and resolve the operators
+	for _, o := range a.Operators {
+		if err := r.intrinsic(o, r.operators, &r.s.Operators); err != nil {
 			return nil, err
 		}
 	}
@@ -220,18 +228,21 @@ func (r *resolver) matcher(a ast.MatcherDecl) error {
 	return fmt.Errorf("'%v' cannot be used for matcher", a.Name)
 }
 
-// function() resolves a function overload declaration.
-// The the first overload for the function creates and appends the sem.Function
-// to Sem.Functions. Subsequent overloads append their resolved overload to the
-// sem.Function.Overloads list.
-func (r *resolver) function(a ast.FunctionDecl) error {
-	// If this is the first overload of the function, create and register the
-	// semantic function.
-	f := r.functions[a.Name]
-	if f == nil {
-		f = &sem.Function{Name: a.Name}
-		r.functions[a.Name] = f
-		r.s.Functions = append(r.s.Functions, f)
+// intrinsic() resolves a intrinsic overload declaration.
+// The the first overload for the intrinsic creates and appends the sem.Intrinsic
+// to Sem.Intrinsics. Subsequent overloads append their resolved overload to the
+// sem.intrinsic.Overloads list.
+func (r *resolver) intrinsic(
+	a ast.IntrinsicDecl,
+	intrinsicsByName map[string]*sem.Intrinsic,
+	semIntrinsics *[]*sem.Intrinsic) error {
+	// If this is the first overload of the intrinsic, create and register the
+	// semantic intrinsic.
+	intrinsic := intrinsicsByName[a.Name]
+	if intrinsic == nil {
+		intrinsic = &sem.Intrinsic{Name: a.Name}
+		intrinsicsByName[a.Name] = intrinsic
+		*semIntrinsics = append(*semIntrinsics, intrinsic)
 	}
 
 	// Create a new scope for resolving template parameters
@@ -246,7 +257,7 @@ func (r *resolver) function(a ast.FunctionDecl) error {
 	// Construct the semantic overload
 	overload := &sem.Overload{
 		Decl:           a,
-		Function:       f,
+		Intrinsic:      intrinsic,
 		Parameters:     make([]sem.Parameter, len(a.Parameters)),
 		TemplateParams: templateParams,
 	}
@@ -285,8 +296,8 @@ func (r *resolver) function(a ast.FunctionDecl) error {
 		return fmt.Errorf("%v unknown decoration", a.Decorations[0].Source)
 	}
 
-	// Append the overload to the function
-	f.Overloads = append(f.Overloads, overload)
+	// Append the overload to the intrinsic
+	intrinsic.Overloads = append(intrinsic.Overloads, overload)
 
 	// Sort the template parameters by resolved type. Append these to
 	// sem.Overload.OpenTypes or sem.Overload.OpenNumbers based on their kind.
@@ -305,6 +316,10 @@ func (r *resolver) function(a ast.FunctionDecl) error {
 	}
 	if r.s.MaxOpenNumbers < len(overload.OpenNumbers) {
 		r.s.MaxOpenNumbers = len(overload.OpenNumbers)
+	}
+
+	if a.Kind == ast.Operator && (len(a.Parameters) < 1 || len(a.Parameters) > 2) {
+		return fmt.Errorf("%v operators must have either 1 or 2 parameters", a.Source)
 	}
 
 	// Resolve the parameters
@@ -495,11 +510,11 @@ func (r *resolver) lookupNamed(s *scope, a ast.TemplatedName) (sem.Named, error)
 }
 
 // calculateUniqueParameterNames() iterates over all the parameters of all
-// overloads, calculating the list of unique parameter names
+// builtin overloads, calculating the list of unique parameter names
 func (r *resolver) calculateUniqueParameterNames() []string {
 	set := map[string]struct{}{"": {}}
 	names := []string{}
-	for _, f := range r.s.Functions {
+	for _, f := range r.s.Builtins {
 		for _, o := range f.Overloads {
 			for _, p := range o.Parameters {
 				if _, dup := set[p.Name]; !dup {

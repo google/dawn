@@ -29,8 +29,8 @@ type generator struct {
 	s      *sem.Sem
 	t      *template.Template
 	cached struct {
-		builtinTable *BuiltinTable // lazily built by builtinTable()
-		permuter     *Permuter     // lazily built by permute()
+		intrinsicTable *IntrinsicTable // lazily built by intrinsicTable()
+		permuter       *Permuter       // lazily built by permute()
 	}
 }
 
@@ -73,7 +73,7 @@ func (g *generator) generate(tmpl string, w io.Writer, writeFile WriteFile) erro
 		"IsDeclarable":          isDeclarable,
 		"IsFirstIn":             isFirstIn,
 		"IsLastIn":              isLastIn,
-		"BuiltinTable":          g.builtinTable,
+		"IntrinsicTable":        g.intrinsicTable,
 		"Permute":               g.permute,
 		"Eval":                  g.eval,
 		"WriteFile":             func(relpath, content string) (string, error) { return "", writeFile(relpath, content) },
@@ -121,17 +121,17 @@ func (g *generator) eval(template string, args ...interface{}) (string, error) {
 	return sb.String(), nil
 }
 
-// builtinTable lazily calls and returns the result of buildBuiltinTable(),
+// intrinsicTable lazily calls and returns the result of buildIntrinsicTable(),
 // caching the result for repeated calls.
-func (g *generator) builtinTable() (*BuiltinTable, error) {
-	if g.cached.builtinTable == nil {
+func (g *generator) intrinsicTable() (*IntrinsicTable, error) {
+	if g.cached.intrinsicTable == nil {
 		var err error
-		g.cached.builtinTable, err = buildBuiltinTable(g.s)
+		g.cached.intrinsicTable, err = buildIntrinsicTable(g.s)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return g.cached.builtinTable, nil
+	return g.cached.intrinsicTable, nil
 }
 
 // permute lazily calls buildPermuter(), caching the result for repeated

@@ -22,8 +22,8 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/lut"
 )
 
-// BuiltinTable holds data specific to the intrinsic_table.inl.tmpl template
-type BuiltinTable struct {
+// IntrinsicTable holds data specific to the intrinsic_table.inl.tmpl template
+type IntrinsicTable struct {
 	// The semantic info
 	Sem *sem.Sem
 
@@ -42,7 +42,8 @@ type BuiltinTable struct {
 	OpenNumbers    []OpenNumber // kOpenNumbers table content
 	Parameters     []Parameter  // kParameters table content
 	Overloads      []Overload   // kOverloads table content
-	Functions      []Function   // kBuiltins table content
+	Builtins       []Intrinsic  // kBuiltins table content
+	Operators      []Intrinsic  // kOperators table content
 }
 
 // OpenType is used to create the C++ OpenTypeInfo structure
@@ -68,9 +69,9 @@ type Parameter struct {
 	// The parameter usage (parameter name)
 	Usage string
 
-	// Index into BuiltinTable.MatcherIndices, beginning the list of matchers
+	// Index into IntrinsicTable.MatcherIndices, beginning the list of matchers
 	// required to match the parameter type. The matcher indices index
-	// into BuiltinTable::TMatchers and / or BuiltinTable::NMatchers.
+	// into IntrinsicTable::TMatchers and / or IntrinsicTable::NMatchers.
 	// These indices are consumed by the matchers themselves.
 	// The first index is always a TypeMatcher.
 	MatcherIndicesOffset *int
@@ -84,15 +85,15 @@ type Overload struct {
 	NumOpenTypes int
 	// Total number of open numbers for the overload
 	NumOpenNumbers int
-	// Index to the first open type in BuiltinTable.OpenTypes
+	// Index to the first open type in IntrinsicTable.OpenTypes
 	OpenTypesOffset *int
-	// Index to the first open number in BuiltinTable.OpenNumbers
+	// Index to the first open number in IntrinsicTable.OpenNumbers
 	OpenNumbersOffset *int
-	// Index to the first parameter in BuiltinTable.Parameters
+	// Index to the first parameter in IntrinsicTable.Parameters
 	ParametersOffset *int
-	// Index into BuiltinTable.MatcherIndices, beginning the list of matchers
+	// Index into IntrinsicTable.MatcherIndices, beginning the list of matchers
 	// required to match the return type. The matcher indices index
-	// into BuiltinTable::TMatchers and / or BuiltinTable::NMatchers.
+	// into IntrinsicTable::TMatchers and / or IntrinsicTable::NMatchers.
 	// These indices are consumed by the matchers themselves.
 	// The first index is always a TypeMatcher.
 	ReturnMatcherIndicesOffset *int
@@ -102,17 +103,18 @@ type Overload struct {
 	IsDeprecated bool
 }
 
-// Function is used to create the C++ IntrinsicInfo structure
-type Function struct {
+// Intrinsic is used to create the C++ IntrinsicInfo structure
+type Intrinsic struct {
+	Name                 string
 	OverloadDescriptions []string
 	NumOverloads         int
 	OverloadsOffset      *int
 }
 
-// Helper for building the BuiltinTable
-type BuiltinTableBuilder struct {
+// Helper for building the IntrinsicTable
+type IntrinsicTableBuilder struct {
 	// The output of the builder
-	BuiltinTable
+	IntrinsicTable
 
 	// Lookup tables.
 	// These are packed (compressed) once all the entries have been added.
@@ -127,7 +129,7 @@ type BuiltinTableBuilder struct {
 
 // Helper for building a single overload
 type overloadBuilder struct {
-	*BuiltinTableBuilder
+	*IntrinsicTableBuilder
 	// Maps TemplateParam to index in openTypes
 	openTypeIndex map[sem.TemplateParam]int
 	// Maps TemplateParam to index in openNumbers
@@ -138,9 +140,9 @@ type overloadBuilder struct {
 	openNumbers []OpenNumber
 	// All parameters declared by the overload
 	parameters []Parameter
-	// Index into BuiltinTable.MatcherIndices, beginning the list of matchers
+	// Index into IntrinsicTable.MatcherIndices, beginning the list of matchers
 	// required to match the return type. The matcher indices index
-	// into BuiltinTable::TMatchers and / or BuiltinTable::NMatchers.
+	// into IntrinsicTable::TMatchers and / or IntrinsicTable::NMatchers.
 	// These indices are consumed by the matchers themselves.
 	// The first index is always a TypeMatcher.
 	returnTypeMatcherIndicesOffset *int
@@ -148,7 +150,7 @@ type overloadBuilder struct {
 
 // layoutMatchers assigns each of the TMatchers and NMatchers a unique index
 // in the C++ Matchers::type and Matchers::number arrays, respectively.
-func (b *BuiltinTableBuilder) layoutMatchers(s *sem.Sem) {
+func (b *IntrinsicTableBuilder) layoutMatchers(s *sem.Sem) {
 	// First MaxOpenTypes of TMatchers are open types
 	b.TMatchers = make([]sem.Named, s.MaxOpenTypes)
 	for _, m := range s.Types {
@@ -169,11 +171,11 @@ func (b *BuiltinTableBuilder) layoutMatchers(s *sem.Sem) {
 }
 
 // buildOverload constructs an Overload for a sem.Overload
-func (b *BuiltinTableBuilder) buildOverload(o *sem.Overload) (Overload, error) {
+func (b *IntrinsicTableBuilder) buildOverload(o *sem.Overload) (Overload, error) {
 	ob := overloadBuilder{
-		BuiltinTableBuilder: b,
-		openTypeIndex:       map[sem.TemplateParam]int{},
-		openNumberIndex:     map[sem.TemplateParam]int{},
+		IntrinsicTableBuilder: b,
+		openTypeIndex:         map[sem.TemplateParam]int{},
+		openNumberIndex:       map[sem.TemplateParam]int{},
 	}
 
 	if err := ob.buildOpenTypes(o); err != nil {
@@ -279,7 +281,7 @@ func (b *overloadBuilder) buildReturnType(o *sem.Overload) error {
 }
 
 // matcherIndex returns the index of TMatcher or NMatcher in
-// BuiltinTable.TMatcher or BuiltinTable.NMatcher, respectively.
+// IntrinsicTable.TMatcher or IntrinsicTable.NMatcher, respectively.
 func (b *overloadBuilder) matcherIndex(n sem.Named) (int, error) {
 	switch n := n.(type) {
 	case *sem.Type, *sem.TypeMatcher:
@@ -342,10 +344,10 @@ func (b *overloadBuilder) collectMatcherIndices(fqn sem.FullyQualifiedName) ([]i
 	return out, nil
 }
 
-// buildBuiltinTable builds the BuiltinTable from the semantic info
-func buildBuiltinTable(s *sem.Sem) (*BuiltinTable, error) {
-	b := BuiltinTableBuilder{
-		BuiltinTable: BuiltinTable{
+// buildIntrinsicTable builds the IntrinsicTable from the semantic info
+func buildIntrinsicTable(s *sem.Sem) (*IntrinsicTable, error) {
+	b := IntrinsicTableBuilder{
+		IntrinsicTable: IntrinsicTable{
 			Sem:           s,
 			TMatcherIndex: map[sem.Named]int{},
 			NMatcherIndex: map[sem.Named]int{},
@@ -359,22 +361,34 @@ func buildBuiltinTable(s *sem.Sem) (*BuiltinTable, error) {
 
 	b.layoutMatchers(s)
 
-	for _, f := range s.Functions {
-		overloads := make([]Overload, len(f.Overloads))
-		overloadDescriptions := make([]string, len(f.Overloads))
-		for i, o := range f.Overloads {
-			overloadDescriptions[i] = fmt.Sprint(o.Decl)
-			var err error
-			if overloads[i], err = b.buildOverload(o); err != nil {
-				return nil, err
+	buildIntrinsics := func(in []*sem.Intrinsic) ([]Intrinsic, error) {
+		out := make([]Intrinsic, len(in))
+		for i, f := range in {
+			overloads := make([]Overload, len(f.Overloads))
+			overloadDescriptions := make([]string, len(f.Overloads))
+			for i, o := range f.Overloads {
+				overloadDescriptions[i] = fmt.Sprint(o.Decl)
+				var err error
+				if overloads[i], err = b.buildOverload(o); err != nil {
+					return nil, err
+				}
+			}
+			out[i] = Intrinsic{
+				Name:                 f.Name,
+				OverloadDescriptions: overloadDescriptions,
+				NumOverloads:         len(overloads),
+				OverloadsOffset:      b.lut.overloads.Add(overloads),
 			}
 		}
+		return out, nil
+	}
 
-		b.Functions = append(b.Functions, Function{
-			OverloadDescriptions: overloadDescriptions,
-			NumOverloads:         len(overloads),
-			OverloadsOffset:      b.lut.overloads.Add(overloads),
-		})
+	var err error
+	if b.Builtins, err = buildIntrinsics(s.Builtins); err != nil {
+		return nil, err
+	}
+	if b.Operators, err = buildIntrinsics(s.Operators); err != nil {
+		return nil, err
 	}
 
 	b.lut.matcherIndices.Compact()
@@ -383,5 +397,5 @@ func buildBuiltinTable(s *sem.Sem) (*BuiltinTable, error) {
 	b.lut.parameters.Compact()
 	b.lut.overloads.Compact()
 
-	return &b.BuiltinTable, nil
+	return &b.IntrinsicTable, nil
 }

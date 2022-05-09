@@ -66,7 +66,10 @@ func (p *parser) parse() (*ast.AST, error) {
 			out.Types = append(out.Types, p.typeDecl(decorations))
 			decorations = nil
 		case tok.Function:
-			out.Functions = append(out.Functions, p.functionDecl(decorations))
+			out.Builtins = append(out.Builtins, p.builtinDecl(decorations))
+			decorations = nil
+		case tok.Operator:
+			out.Operators = append(out.Operators, p.operatorDecl(decorations))
 			decorations = nil
 		default:
 			p.err = fmt.Errorf("%v unexpected token '%v'", t.Source, t.Kind)
@@ -153,11 +156,12 @@ func (p *parser) decorations() ast.Decorations {
 	return out
 }
 
-func (p *parser) functionDecl(decos ast.Decorations) ast.FunctionDecl {
+func (p *parser) builtinDecl(decos ast.Decorations) ast.IntrinsicDecl {
 	p.expect(tok.Function, "function declaration")
 	name := p.expect(tok.Identifier, "function name")
-	f := ast.FunctionDecl{
+	f := ast.IntrinsicDecl{
 		Source:      name.Source,
+		Kind:        ast.Builtin,
 		Decorations: decos,
 		Name:        string(name.Runes),
 	}
@@ -172,6 +176,25 @@ func (p *parser) functionDecl(decos ast.Decorations) ast.FunctionDecl {
 	return f
 }
 
+func (p *parser) operatorDecl(decos ast.Decorations) ast.IntrinsicDecl {
+	p.expect(tok.Operator, "operator declaration")
+	name := p.next()
+	f := ast.IntrinsicDecl{
+		Source:      name.Source,
+		Kind:        ast.Operator,
+		Decorations: decos,
+		Name:        string(name.Runes),
+	}
+	if p.peekIs(0, tok.Lt) {
+		f.TemplateParams = p.templateParams()
+	}
+	f.Parameters = p.parameters()
+	if p.match(tok.Arrow) != nil {
+		ret := p.templatedName()
+		f.ReturnType = &ret
+	}
+	return f
+}
 func (p *parser) parameters() ast.Parameters {
 	l := ast.Parameters{}
 	p.expect(tok.Lparen, "function parameter list")
@@ -270,20 +293,6 @@ func (p *parser) ident(use string) string {
 	return string(p.expect(tok.Identifier, use).Runes)
 }
 
-// TODO(bclayton): Currently unused, but will be needed for integer bounds
-// func (p *parser) integer(use string) int {
-// 	t := p.expect(tok.Integer, use)
-// 	if t.Kind != tok.Integer {
-// 		return 0
-// 	}
-// 	i, err := strconv.Atoi(string(t.Runes))
-// 	if err != nil {
-// 		p.err = err
-// 		return 0
-// 	}
-// 	return i
-// }
-
 func (p *parser) match(kind tok.Kind) *tok.Token {
 	if p.err != nil || len(p.tokens) == 0 {
 		return nil
@@ -292,6 +301,18 @@ func (p *parser) match(kind tok.Kind) *tok.Token {
 	if t.Kind != kind {
 		return nil
 	}
+	p.tokens = p.tokens[1:]
+	return &t
+}
+
+func (p *parser) next() *tok.Token {
+	if p.err != nil {
+		return nil
+	}
+	if len(p.tokens) == 0 {
+		p.err = fmt.Errorf("reached end of file")
+	}
+	t := p.tokens[0]
 	p.tokens = p.tokens[1:]
 	return &t
 }

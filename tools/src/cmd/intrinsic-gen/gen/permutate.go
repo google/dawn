@@ -74,7 +74,7 @@ func (p *Permuter) Permute(overload *sem.Overload) ([]Permutation, error) {
 	permutate := func() error {
 		o := sem.Overload{
 			Decl:             overload.Decl,
-			Function:         overload.Function,
+			Intrinsic:        overload.Intrinsic,
 			CanBeUsedInStage: overload.CanBeUsedInStage,
 		}
 		for i, p := range overload.Parameters {

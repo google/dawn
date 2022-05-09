@@ -9,15 +9,15 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
-{{- /* For each permutation of each overload of each function... */ -}}
-{{- range .Sem.Functions -}}
+{{- /* For each permutation of each overload of each builtin... */ -}}
+{{- range .Sem.Builtins -}}
 {{- /* TODO(crbug.com/tint/1483): Remove the bodge below after smoothStep is removed from builtins.def */}}
 {{- if not (eq .Name "smoothStep") }}
 {{-   range .Overloads  -}}
 {{-     range Permute . -}}
 {{- /*    Generate a ./gen/<function>/<permuataion-hash>.wgsl file using
           the Permutation macro defined below                             */ -}}
-{{-       $file := printf "./gen/%v/%v.wgsl" .Function.Name .Hash -}}
+{{-       $file := printf "./gen/%v/%v.wgsl" .Intrinsic.Name .Hash -}}
 {{-       $content := Eval "Permutation" . -}}
 {{-       WriteFile $file $content -}}
 {{-     end  }}
@@ -30,8 +30,8 @@ See:
 {{-                          define "Permutation"                            -}}
 {{- /* Emits the body of the intrinsic permuation .wgsl file              */ -}}
 {{- /* ------------------------------------------------------------------ */ -}}
-{{-   $function    := .Function.Name -}}
-{{-   $permutation := printf "%v_%v" $function .Hash -}}
+{{-   $builtin     := .Intrinsic.Name -}}
+{{-   $permutation := printf "%v_%v" $builtin .Hash -}}
 {{-   $args        := Map -}}
 
 {{- /* Generate RW storage buffer parameters */ -}}
@@ -125,7 +125,7 @@ fn {{$permutation}}() {
 {{-   if .ReturnType -}}
   var res{{if IsDeclarable .ReturnType}}: {{template "Type" .ReturnType}}{{end}} = {{/* preserve space after = */ -}}
 {{-   end -}}
-  {{$function}}(
+  {{$builtin}}(
 {{-   range $i, $p := .Parameters -}}
 {{-     if $i -}}, {{end}}{{$args.Get $i -}}
 {{-   end -}}

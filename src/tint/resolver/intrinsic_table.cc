@@ -762,9 +762,9 @@ struct OverloadInfo {
     bool is_deprecated;
 };
 
-/// BuiltinInfo describes a builtin function
-struct BuiltinInfo {
-    /// Number of overloads of the builtin function
+/// IntrinsicInfo describes a builtin function
+struct IntrinsicInfo {
+    /// Number of overloads of the intrinsic
     const uint8_t num_overloads;
     /// Pointer to the start of the overloads for the function
     OverloadInfo const* const overloads;
@@ -772,9 +772,8 @@ struct BuiltinInfo {
 
 #include "intrinsic_table.inl"
 
-/// BuiltinPrototype describes a fully matched builtin function, which is
-/// used as a lookup for building unique sem::Builtin instances.
-struct BuiltinPrototype {
+/// IntrinsicPrototype describes a fully matched intrinsic.
+struct IntrinsicPrototype {
     /// Parameter describes a single parameter
     struct Parameter {
         /// Parameter type
@@ -783,11 +782,11 @@ struct BuiltinPrototype {
         ParameterUsage const usage = ParameterUsage::kNone;
     };
 
-    /// Hasher provides a hash function for the BuiltinPrototype
+    /// Hasher provides a hash function for the IntrinsicPrototype
     struct Hasher {
-        /// @param i the BuiltinPrototype to create a hash for
+        /// @param i the IntrinsicPrototype to create a hash for
         /// @return the hash value
-        inline std::size_t operator()(const BuiltinPrototype& i) const {
+        inline std::size_t operator()(const IntrinsicPrototype& i) const {
             size_t hash = utils::Hash(i.parameters.size());
             for (auto& p : i.parameters) {
                 utils::HashCombine(&hash, p.type, p.usage);
@@ -803,8 +802,8 @@ struct BuiltinPrototype {
     bool is_deprecated = false;
 };
 
-/// Equality operator for BuiltinPrototype
-bool operator==(const BuiltinPrototype& a, const BuiltinPrototype& b) {
+/// Equality operator for IntrinsicPrototype
+bool operator==(const IntrinsicPrototype& a, const IntrinsicPrototype& b) {
     if (a.type != b.type || a.supported_stages != b.supported_stages ||
         a.return_type != b.return_type || a.is_deprecated != b.is_deprecated ||
         a.parameters.size() != b.parameters.size()) {
@@ -845,7 +844,7 @@ class Impl : public IntrinsicTable {
 
     ProgramBuilder& builder;
     Matchers matchers;
-    std::unordered_map<BuiltinPrototype, sem::Builtin*, BuiltinPrototype::Hasher> builtins;
+    std::unordered_map<IntrinsicPrototype, sem::Builtin*, IntrinsicPrototype::Hasher> builtins;
 };
 
 /// @return a string representing a call to a builtin with the given argument
@@ -949,7 +948,7 @@ const sem::Builtin* Impl::Match(sem::BuiltinType builtin_type,
 
     ClosedState closed(builder);
 
-    std::vector<BuiltinPrototype::Parameter> parameters;
+    std::vector<IntrinsicPrototype::Parameter> parameters;
 
     auto num_params = std::min(num_parameters, num_arguments);
     for (uint32_t p = 0; p < num_params; p++) {
@@ -957,7 +956,7 @@ const sem::Builtin* Impl::Match(sem::BuiltinType builtin_type,
         auto* indices = parameter.matcher_indices;
         auto* type = Match(closed, overload, indices).Type(args[p]->UnwrapRef());
         if (type) {
-            parameters.emplace_back(BuiltinPrototype::Parameter{type, parameter.usage});
+            parameters.emplace_back(IntrinsicPrototype::Parameter{type, parameter.usage});
             match_score += kScorePerMatchedParam;
         } else {
             overload_matched = false;
@@ -1014,7 +1013,7 @@ const sem::Builtin* Impl::Match(sem::BuiltinType builtin_type,
         return_type = builder.create<sem::Void>();
     }
 
-    BuiltinPrototype builtin;
+    IntrinsicPrototype builtin;
     builtin.type = builtin_type;
     builtin.return_type = return_type;
     builtin.parameters = std::move(parameters);
