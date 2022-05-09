@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn Authors
+// Copyright 2022 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,24 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_BINDGROUPMOCK_H_
-#define SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_BINDGROUPMOCK_H_
-
-#include "gmock/gmock.h"
-
-#include "dawn/native/BindGroup.h"
-#include "dawn/native/Device.h"
+#include "dawn/tests/unittests/native/mocks/TextureMock.h"
 
 namespace dawn::native {
 
-class BindGroupMock : public BindGroupBase {
-  public:
-    explicit BindGroupMock(DeviceBase* device);
-    ~BindGroupMock() override;
+TextureMock::TextureMock(DeviceBase* device, TextureBase::TextureState state)
+    : TextureBase(device, state) {
+    ON_CALL(*this, DestroyImpl).WillByDefault([this]() { this->TextureBase::DestroyImpl(); });
+}
 
-    MOCK_METHOD(void, DestroyImpl, (), (override));
-};
+TextureMock::~TextureMock() = default;
+
+TextureViewMock::TextureViewMock(TextureBase* texture) : TextureViewBase(texture) {}
+
+TextureViewMock::~TextureViewMock() = default;
 
 }  // namespace dawn::native
-
-#endif  // SRC_DAWN_TESTS_UNITTESTS_NATIVE_MOCKS_BINDGROUPMOCK_H_

@@ -24,12 +24,8 @@ namespace dawn::native {
 
 class PipelineLayoutMock : public PipelineLayoutBase {
   public:
-    explicit PipelineLayoutMock(DeviceBase* device) : PipelineLayoutBase(device) {
-        ON_CALL(*this, DestroyImpl).WillByDefault([this]() {
-            this->PipelineLayoutBase::DestroyImpl();
-        });
-    }
-    ~PipelineLayoutMock() override = default;
+    explicit PipelineLayoutMock(DeviceBase* device);
+    ~PipelineLayoutMock() override;
 
     MOCK_METHOD(void, DestroyImpl, (), (override));
 };

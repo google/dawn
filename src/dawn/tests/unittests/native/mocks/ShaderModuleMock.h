@@ -28,7 +28,7 @@ namespace dawn::native {
 class ShaderModuleMock : public ShaderModuleBase {
   public:
     explicit ShaderModuleMock(DeviceBase* device);
-    ~ShaderModuleMock() override = default;
+    ~ShaderModuleMock() override;
 
     MOCK_METHOD(void, DestroyImpl, (), (override));
 

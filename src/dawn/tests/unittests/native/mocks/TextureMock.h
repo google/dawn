@@ -24,18 +24,16 @@ namespace dawn::native {
 
 class TextureMock : public TextureBase {
   public:
-    TextureMock(DeviceBase* device, TextureBase::TextureState state) : TextureBase(device, state) {
-        ON_CALL(*this, DestroyImpl).WillByDefault([this]() { this->TextureBase::DestroyImpl(); });
-    }
-    ~TextureMock() override = default;
+    TextureMock(DeviceBase* device, TextureBase::TextureState state);
+    ~TextureMock() override;
 
     MOCK_METHOD(void, DestroyImpl, (), (override));
 };
 
 class TextureViewMock : public TextureViewBase {
   public:
-    explicit TextureViewMock(TextureBase* texture) : TextureViewBase(texture) {}
-    ~TextureViewMock() override = default;
+    explicit TextureViewMock(TextureBase* texture);
+    ~TextureViewMock() override;
 
     MOCK_METHOD(void, DestroyImpl, (), (override));
 };

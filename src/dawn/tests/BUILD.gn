@@ -157,19 +157,32 @@ source_set("native_mocks_sources") {
   configs += [ "${dawn_root}/src/dawn/native:internal" ]
 
   sources = [
+    "unittests/native/mocks/BindGroupLayoutMock.cpp",
     "unittests/native/mocks/BindGroupLayoutMock.h",
+    "unittests/native/mocks/BindGroupMock.cpp",
     "unittests/native/mocks/BindGroupMock.h",
+    "unittests/native/mocks/BufferMock.cpp",
+    "unittests/native/mocks/BufferMock.h",
+    "unittests/native/mocks/CommandBufferMock.cpp",
     "unittests/native/mocks/CommandBufferMock.h",
+    "unittests/native/mocks/ComputePipelineMock.cpp",
     "unittests/native/mocks/ComputePipelineMock.h",
     "unittests/native/mocks/DeviceMock.h",
+    "unittests/native/mocks/ExternalTextureMock.cpp",
     "unittests/native/mocks/ExternalTextureMock.h",
+    "unittests/native/mocks/PipelineLayoutMock.cpp",
     "unittests/native/mocks/PipelineLayoutMock.h",
+    "unittests/native/mocks/QuerySetMock.cpp",
     "unittests/native/mocks/QuerySetMock.h",
+    "unittests/native/mocks/RenderPipelineMock.cpp",
     "unittests/native/mocks/RenderPipelineMock.h",
+    "unittests/native/mocks/SamplerMock.cpp",
     "unittests/native/mocks/SamplerMock.h",
     "unittests/native/mocks/ShaderModuleMock.cpp",
     "unittests/native/mocks/ShaderModuleMock.h",
+    "unittests/native/mocks/SwapChainMock.cpp",
     "unittests/native/mocks/SwapChainMock.h",
+    "unittests/native/mocks/TextureMock.cpp",
     "unittests/native/mocks/TextureMock.h",
   ]
 }
