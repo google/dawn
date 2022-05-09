@@ -33,7 +33,7 @@ class DeviceBase;
 class AdapterBase : public RefCounted {
   public:
     AdapterBase(InstanceBase* instance, wgpu::BackendType backend);
-    virtual ~AdapterBase() = default;
+    ~AdapterBase() override = default;
 
     MaybeError Initialize();
 

@@ -24,7 +24,7 @@ namespace dawn::native::vulkan {
 class ResourceHeap : public ResourceHeapBase {
   public:
     ResourceHeap(VkDeviceMemory memory, size_t memoryType);
-    ~ResourceHeap() = default;
+    ~ResourceHeap() override = default;
 
     VkDeviceMemory GetMemory() const;
     size_t GetMemoryType() const;

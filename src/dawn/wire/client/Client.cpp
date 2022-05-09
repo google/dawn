@@ -28,7 +28,7 @@ class NoopCommandSerializer final : public CommandSerializer {
         return &gNoopCommandSerializer;
     }
 
-    ~NoopCommandSerializer() = default;
+    ~NoopCommandSerializer() override = default;
 
     size_t GetMaximumAllocationSize() const final { return 0; }
     void* GetCmdSpace(size_t size) final { return nullptr; }

@@ -48,7 +48,7 @@ void* WireDeserializeAllocator::GetSpace(size_t size) {
 }
 
 void WireDeserializeAllocator::Reset() {
-    for (auto allocation : mAllocations) {
+    for (auto* allocation : mAllocations) {
         free(allocation);
     }
     mAllocations.clear();

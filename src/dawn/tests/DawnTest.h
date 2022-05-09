@@ -790,7 +790,7 @@ extern template class ExpectBetweenColors<RGBA8>;
 
 class CustomTextureExpectation : public Expectation {
   public:
-    virtual ~CustomTextureExpectation() = default;
+    ~CustomTextureExpectation() override = default;
     virtual uint32_t DataSize() = 0;
 };
 

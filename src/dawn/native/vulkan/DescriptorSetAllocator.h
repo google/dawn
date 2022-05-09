@@ -45,7 +45,7 @@ class DescriptorSetAllocator : public ObjectBase {
   private:
     DescriptorSetAllocator(BindGroupLayout* layout,
                            std::map<VkDescriptorType, uint32_t> descriptorCountPerType);
-    ~DescriptorSetAllocator();
+    ~DescriptorSetAllocator() override;
 
     MaybeError AllocateDescriptorPool();
 

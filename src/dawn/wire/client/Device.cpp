@@ -254,7 +254,7 @@ bool Device::OnCreateComputePipelineAsyncCallback(uint64_t requestSerial,
         return false;
     }
 
-    auto pipelineAllocation =
+    auto* pipelineAllocation =
         client->ComputePipelineAllocator().GetObject(request.pipelineObjectID);
 
     // If the return status is a failure we should give a null pipeline to the callback and
@@ -305,7 +305,8 @@ bool Device::OnCreateRenderPipelineAsyncCallback(uint64_t requestSerial,
         return false;
     }
 
-    auto pipelineAllocation = client->RenderPipelineAllocator().GetObject(request.pipelineObjectID);
+    auto* pipelineAllocation =
+        client->RenderPipelineAllocator().GetObject(request.pipelineObjectID);
 
     // If the return status is a failure we should give a null pipeline to the callback and
     // free the allocation.

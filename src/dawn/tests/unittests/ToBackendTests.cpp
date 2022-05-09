@@ -41,7 +41,7 @@ TEST(ToBackend, Pointers) {
         MyAdapter* adapter = new MyAdapter;
         const AdapterBase* base = adapter;
 
-        auto backendAdapter = ToBackend(base);
+        auto* backendAdapter = ToBackend(base);
         static_assert(std::is_same<decltype(backendAdapter), const MyAdapter*>::value);
         ASSERT_EQ(adapter, backendAdapter);
 
@@ -51,7 +51,7 @@ TEST(ToBackend, Pointers) {
         MyAdapter* adapter = new MyAdapter;
         AdapterBase* base = adapter;
 
-        auto backendAdapter = ToBackend(base);
+        auto* backendAdapter = ToBackend(base);
         static_assert(std::is_same<decltype(backendAdapter), MyAdapter*>::value);
         ASSERT_EQ(adapter, backendAdapter);
 

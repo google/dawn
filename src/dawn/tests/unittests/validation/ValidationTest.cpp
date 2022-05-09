@@ -229,7 +229,7 @@ WGPUDevice ValidationTest::CreateTestDevice() {
 // static
 void ValidationTest::OnDeviceError(WGPUErrorType type, const char* message, void* userdata) {
     ASSERT(type != WGPUErrorType_NoError);
-    auto self = static_cast<ValidationTest*>(userdata);
+    auto* self = static_cast<ValidationTest*>(userdata);
     self->mDeviceErrorMessage = message;
 
     ASSERT_TRUE(self->mExpectError) << "Got unexpected device error: " << message;
@@ -243,7 +243,7 @@ void ValidationTest::OnDeviceError(WGPUErrorType type, const char* message, void
 void ValidationTest::OnDeviceLost(WGPUDeviceLostReason reason,
                                   const char* message,
                                   void* userdata) {
-    auto self = static_cast<ValidationTest*>(userdata);
+    auto* self = static_cast<ValidationTest*>(userdata);
     if (self->mExpectDestruction) {
         EXPECT_EQ(reason, WGPUDeviceLostReason_Destroyed);
         return;

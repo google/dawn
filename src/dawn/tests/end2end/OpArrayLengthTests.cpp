@@ -21,7 +21,7 @@
 
 class OpArrayLengthTest : public DawnTest {
   protected:
-    void SetUp() {
+    void SetUp() override {
         DawnTest::SetUp();
 
         // Create buffers of various size to check the length() implementation

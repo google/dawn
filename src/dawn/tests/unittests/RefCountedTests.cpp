@@ -45,7 +45,7 @@ struct RCTestDerived : public RCTest {
 // Test that RCs start with one ref, and removing it destroys the object.
 TEST(RefCounted, StartsWithOneRef) {
     bool deleted = false;
-    auto test = new RCTest(&deleted);
+    auto* test = new RCTest(&deleted);
 
     test->Release();
     EXPECT_TRUE(deleted);
@@ -54,7 +54,7 @@ TEST(RefCounted, StartsWithOneRef) {
 // Test adding refs keep the RC alive.
 TEST(RefCounted, AddingRefKeepsAlive) {
     bool deleted = false;
-    auto test = new RCTest(&deleted);
+    auto* test = new RCTest(&deleted);
 
     test->Reference();
     test->Release();

@@ -154,7 +154,7 @@ SyncScopeResourceUsage SyncScopeUsageTracker::AcquireSyncScopeUsage() {
         result.textureUsages.push_back(std::move(usage));
     }
 
-    for (auto& it : mExternalTextureUsages) {
+    for (auto* const it : mExternalTextureUsages) {
         result.externalTextures.push_back(it);
     }
 

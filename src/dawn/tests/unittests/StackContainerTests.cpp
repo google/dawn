@@ -19,7 +19,7 @@ class Placeholder : public RefCounted {
     explicit Placeholder(int* alive) : mAlive(alive) { ++*mAlive; }
 
   private:
-    ~Placeholder() { --*mAlive; }
+    ~Placeholder() override { --*mAlive; }
 
     int* const mAlive;
 };
