@@ -828,6 +828,8 @@ class Impl : public IntrinsicTable {
                                const std::vector<const sem::Type*>& args,
                                const Source& source) override;
 
+    UnaryOperator Lookup(ast::UnaryOp op, const sem::Type* arg, const Source& source) override;
+
     BinaryOperator Lookup(ast::BinaryOp op,
                           const sem::Type* lhs,
                           const sem::Type* rhs,
@@ -945,6 +947,61 @@ const sem::Builtin* Impl::Lookup(sem::BuiltinType builtin_type,
     return nullptr;
 }
 
+IntrinsicTable::UnaryOperator Impl::Lookup(ast::UnaryOp op,
+                                           const sem::Type* arg,
+                                           const Source& source) {
+    // The list of failed matches that had promise.
+    std::vector<Candidate> candidates;
+
+    auto [intrinsic_index, intrinsic_name] = [&]() -> std::pair<uint32_t, const char*> {
+        switch (op) {
+            case ast::UnaryOp::kComplement:
+                return {kOperatorComplement, "operator ~ "};
+            case ast::UnaryOp::kNegation:
+                return {kOperatorMinus, "operator - "};
+            case ast::UnaryOp::kNot:
+                return {kOperatorNot, "operator ! "};
+            default:
+                return {0, "<unknown>"};
+        }
+    }();
+
+    auto& builtin = kOperators[intrinsic_index];
+    for (uint32_t o = 0; o < builtin.num_overloads; o++) {
+        int match_score = 1000;
+        auto& overload = builtin.overloads[o];
+        if (overload.num_parameters == 1) {
+            auto match = Match(intrinsic_name, intrinsic_index, overload, {arg}, match_score);
+            if (match.return_type) {
+                return UnaryOperator{match.return_type, match.parameters[0].type};
+            }
+            if (match_score > 0) {
+                candidates.emplace_back(Candidate{&overload, match_score});
+            }
+        }
+    }
+
+    // Sort the candidates with the most promising first
+    std::stable_sort(candidates.begin(), candidates.end(),
+                     [](const Candidate& a, const Candidate& b) { return a.score > b.score; });
+
+    // Generate an error message
+    std::stringstream ss;
+    ss << "no matching overload for " << CallSignature(builder, intrinsic_name, {arg}) << std::endl;
+    if (!candidates.empty()) {
+        ss << std::endl;
+        ss << candidates.size() << " candidate operator" << (candidates.size() > 1 ? "s:" : ":")
+           << std::endl;
+        for (auto& candidate : candidates) {
+            ss << "  ";
+            PrintOverload(ss, *candidate.overload, intrinsic_name);
+            ss << std::endl;
+        }
+    }
+    builder.Diagnostics().add_error(diag::System::Resolver, ss.str(), source);
+    return {};
+}
+
 IntrinsicTable::BinaryOperator Impl::Lookup(ast::BinaryOp op,
                                             const sem::Type* lhs,
                                             const sem::Type* rhs,
@@ -1000,13 +1057,15 @@ IntrinsicTable::BinaryOperator Impl::Lookup(ast::BinaryOp op,
     for (uint32_t o = 0; o < builtin.num_overloads; o++) {
         int match_score = 1000;
         auto& overload = builtin.overloads[o];
-        auto match = Match(intrinsic_name, intrinsic_index, overload, {lhs, rhs}, match_score);
-        if (match.return_type) {
-            return BinaryOperator{match.return_type, match.parameters[0].type,
-                                  match.parameters[1].type};
-        }
-        if (match_score > 0) {
-            candidates.emplace_back(Candidate{&overload, match_score});
+        if (overload.num_parameters == 2) {
+            auto match = Match(intrinsic_name, intrinsic_index, overload, {lhs, rhs}, match_score);
+            if (match.return_type) {
+                return BinaryOperator{match.return_type, match.parameters[0].type,
+                                      match.parameters[1].type};
+            }
+            if (match_score > 0) {
+                candidates.emplace_back(Candidate{&overload, match_score});
+            }
         }
     }
 

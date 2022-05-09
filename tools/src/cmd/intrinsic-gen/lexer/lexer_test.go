@@ -91,6 +91,9 @@ func TestLexTokens(t *testing.T) {
 		{"|", tok.Token{Kind: tok.Or, Runes: []rune("|"), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 2, 1),
 		}}},
+		{"!", tok.Token{Kind: tok.Not, Runes: []rune("!"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 2, 1),
+		}}},
 		{"!=", tok.Token{Kind: tok.NotEqual, Runes: []rune("!="), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 3, 2),
 		}}},

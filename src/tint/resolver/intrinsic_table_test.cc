@@ -576,6 +576,27 @@ TEST_F(IntrinsicTableTest, SameOverloadReturnsSameBuiltinPointer) {
     EXPECT_NE(b, c);
 }
 
+TEST_F(IntrinsicTableTest, MatchUnaryOp) {
+    auto* i32 = create<sem::I32>();
+    auto* vec3_i32 = create<sem::Vector>(i32, 3u);
+    auto result = table->Lookup(ast::UnaryOp::kNegation, vec3_i32, Source{{12, 34}});
+    EXPECT_EQ(result.result, vec3_i32);
+    EXPECT_EQ(result.result, vec3_i32);
+    EXPECT_EQ(Diagnostics().str(), "");
+}
+
+TEST_F(IntrinsicTableTest, MismatchUnaryOp) {
+    auto* bool_ = create<sem::Bool>();
+    auto result = table->Lookup(ast::UnaryOp::kNegation, bool_, Source{{12, 34}});
+    ASSERT_EQ(result.result, nullptr);
+    EXPECT_EQ(Diagnostics().str(), R"(12:34 error: no matching overload for operator - (bool)
+
+2 candidate operators:
+  operator - (T) -> T  where: T is f32 or i32
+  operator - (vecN<T>) -> vecN<T>  where: T is f32 or i32
+)");
+}
+
 TEST_F(IntrinsicTableTest, MatchBinaryOp) {
     auto* i32 = create<sem::I32>();
     auto* vec3_i32 = create<sem::Vector>(i32, 3u);

@@ -1771,38 +1771,6 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
     const sem::Variable* source_var = nullptr;
 
     switch (unary->op) {
-        case ast::UnaryOp::kNot:
-            // Result type matches the deref'd inner type.
-            ty = expr_ty->UnwrapRef();
-            if (!ty->Is<sem::Bool>() && !ty->is_bool_vector()) {
-                AddError("cannot logical negate expression of type '" + sem_.TypeNameOf(expr_ty),
-                         unary->expr->source);
-                return nullptr;
-            }
-            break;
-
-        case ast::UnaryOp::kComplement:
-            // Result type matches the deref'd inner type.
-            ty = expr_ty->UnwrapRef();
-            if (!ty->is_integer_scalar_or_vector()) {
-                AddError(
-                    "cannot bitwise complement expression of type '" + sem_.TypeNameOf(expr_ty),
-                    unary->expr->source);
-                return nullptr;
-            }
-            break;
-
-        case ast::UnaryOp::kNegation:
-            // Result type matches the deref'd inner type.
-            ty = expr_ty->UnwrapRef();
-            if (!(ty->IsAnyOf<sem::F32, sem::I32>() || ty->is_signed_integer_vector() ||
-                  ty->is_float_vector())) {
-                AddError("cannot negate expression of type '" + sem_.TypeNameOf(expr_ty),
-                         unary->expr->source);
-                return nullptr;
-            }
-            break;
-
         case ast::UnaryOp::kAddressOf:
             if (auto* ref = expr_ty->As<sem::Reference>()) {
                 if (ref->StoreType()->UnwrapRef()->is_handle()) {
@@ -1840,6 +1808,13 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
                 return nullptr;
             }
             break;
+
+        default: {
+            ty = intrinsic_table_->Lookup(unary->op, expr_ty, unary->source).result;
+            if (!ty) {
+                return nullptr;
+            }
+        }
     }
 
     auto val = EvaluateConstantValue(unary, ty);

@@ -1932,7 +1932,7 @@ TEST_F(ResolverTest, UnaryOp_Not) {
     WrapInFunction(der);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: cannot logical negate expression of type 'vec4<f32>");
+    EXPECT_THAT(r()->error(), HasSubstr("error: no matching overload for operator ! (vec4<f32>)"));
 }
 
 TEST_F(ResolverTest, UnaryOp_Complement) {
@@ -1942,7 +1942,7 @@ TEST_F(ResolverTest, UnaryOp_Complement) {
     WrapInFunction(der);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: cannot bitwise complement expression of type 'vec4<f32>");
+    EXPECT_THAT(r()->error(), HasSubstr("error: no matching overload for operator ~ (vec4<f32>)"));
 }
 
 TEST_F(ResolverTest, UnaryOp_Negation) {
@@ -1952,7 +1952,7 @@ TEST_F(ResolverTest, UnaryOp_Negation) {
     WrapInFunction(der);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: cannot negate expression of type 'u32");
+    EXPECT_THAT(r()->error(), HasSubstr("error: no matching overload for operator - (u32)"));
 }
 
 TEST_F(ResolverTest, TextureSampler_TextureSample) {

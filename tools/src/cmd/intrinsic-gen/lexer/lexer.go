@@ -72,6 +72,8 @@ func (l *lexer) lex() error {
 			l.tok(1, tok.Modulo)
 		case '^':
 			l.tok(1, tok.Xor)
+		case '~':
+			l.tok(1, tok.Complement)
 		case '"':
 			start := l.loc
 			l.next() // Skip opening quote
@@ -105,6 +107,7 @@ func (l *lexer) lex() error {
 			case l.match("||", tok.OrOr):
 			case l.match("|", tok.Or):
 			case l.match("!=", tok.NotEqual):
+			case l.match("!", tok.Not):
 			case l.match("==", tok.Equal):
 			case l.match("=", tok.Assign):
 			case l.match("<<", tok.Shl):

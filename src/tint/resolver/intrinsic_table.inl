@@ -1191,8 +1191,39 @@ std::string Fiu32::String(MatchState&) const {
   return "f32, i32 or u32";
 }
 
-/// TypeMatcher for 'match iu32'
+/// TypeMatcher for 'match fi32'
 /// @see src/tint/intrinsics.def:112:7
+class Fi32 : public TypeMatcher {
+ public:
+  /// Checks whether the given type matches the matcher rules, and returns the
+  /// expected, canonicalized type on success.
+  /// Match may close open types and numbers in state.
+  /// @param state the MatchState
+  /// @param type the type to match
+  /// @returns the canonicalized type on match, otherwise nullptr
+  const sem::Type* Match(MatchState& state,
+                         const sem::Type* type) const override;
+  /// @param state the MatchState
+  /// @return a string representation of the matcher.
+  std::string String(MatchState& state) const override;
+};
+
+const sem::Type* Fi32::Match(MatchState& state, const sem::Type* ty) const {
+  if (match_f32(ty)) {
+    return build_f32(state);
+  }
+  if (match_i32(ty)) {
+    return build_i32(state);
+  }
+  return nullptr;
+}
+
+std::string Fi32::String(MatchState&) const {
+  return "f32 or i32";
+}
+
+/// TypeMatcher for 'match iu32'
+/// @see src/tint/intrinsics.def:113:7
 class Iu32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -1223,7 +1254,7 @@ std::string Iu32::String(MatchState&) const {
 }
 
 /// TypeMatcher for 'match scalar'
-/// @see src/tint/intrinsics.def:113:7
+/// @see src/tint/intrinsics.def:114:7
 class Scalar : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -1260,7 +1291,7 @@ std::string Scalar::String(MatchState&) const {
 }
 
 /// EnumMatcher for 'match f32_texel_format'
-/// @see src/tint/intrinsics.def:124:7
+/// @see src/tint/intrinsics.def:125:7
 class F32TexelFormat : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -1293,7 +1324,7 @@ std::string F32TexelFormat::String(MatchState&) const {
 }
 
 /// EnumMatcher for 'match i32_texel_format'
-/// @see src/tint/intrinsics.def:126:7
+/// @see src/tint/intrinsics.def:127:7
 class I32TexelFormat : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -1325,7 +1356,7 @@ std::string I32TexelFormat::String(MatchState&) const {
 }
 
 /// EnumMatcher for 'match u32_texel_format'
-/// @see src/tint/intrinsics.def:128:7
+/// @see src/tint/intrinsics.def:129:7
 class U32TexelFormat : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -1357,7 +1388,7 @@ std::string U32TexelFormat::String(MatchState&) const {
 }
 
 /// EnumMatcher for 'match write_only'
-/// @see src/tint/intrinsics.def:131:7
+/// @see src/tint/intrinsics.def:132:7
 class WriteOnly : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -1383,7 +1414,7 @@ std::string WriteOnly::String(MatchState&) const {
 }
 
 /// EnumMatcher for 'match function_private_workgroup'
-/// @see src/tint/intrinsics.def:133:7
+/// @see src/tint/intrinsics.def:134:7
 class FunctionPrivateWorkgroup : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -1413,7 +1444,7 @@ std::string FunctionPrivateWorkgroup::String(MatchState&) const {
 }
 
 /// EnumMatcher for 'match workgroup_or_storage'
-/// @see src/tint/intrinsics.def:134:7
+/// @see src/tint/intrinsics.def:135:7
 class WorkgroupOrStorage : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -1559,6 +1590,7 @@ class Matchers {
   FrexpResult FrexpResult_;
   FrexpResultVec FrexpResultVec_;
   Fiu32 Fiu32_;
+  Fi32 Fi32_;
   Iu32 Iu32_;
   Scalar Scalar_;
   F32TexelFormat F32TexelFormat_;
@@ -1578,7 +1610,7 @@ class Matchers {
   ~Matchers();
 
   /// The open-types, types, and type matchers
-  TypeMatcher const* const type[39] = {
+  TypeMatcher const* const type[40] = {
     /* [0] */ &open_type_0_,
     /* [1] */ &Bool_,
     /* [2] */ &F32_,
@@ -1616,8 +1648,9 @@ class Matchers {
     /* [34] */ &FrexpResult_,
     /* [35] */ &FrexpResultVec_,
     /* [36] */ &Fiu32_,
-    /* [37] */ &Iu32_,
-    /* [38] */ &Scalar_,
+    /* [37] */ &Fi32_,
+    /* [38] */ &Iu32_,
+    /* [39] */ &Scalar_,
   };
 
   /// The open-numbers, and number matchers
@@ -1641,8 +1674,8 @@ Matchers::Matchers() = default;
 Matchers::~Matchers() = default;
 
 constexpr MatcherIndex kMatcherIndices[] = {
-  /* [0] */ 27,
-  /* [1] */ 3,
+  /* [0] */ 30,
+  /* [1] */ 5,
   /* [2] */ 10,
   /* [3] */ 0,
   /* [4] */ 11,
@@ -1682,112 +1715,112 @@ constexpr MatcherIndex kMatcherIndices[] = {
   /* [38] */ 8,
   /* [39] */ 0,
   /* [40] */ 0,
-  /* [41] */ 29,
-  /* [42] */ 0,
-  /* [43] */ 1,
-  /* [44] */ 30,
+  /* [41] */ 8,
+  /* [42] */ 1,
+  /* [43] */ 2,
+  /* [44] */ 8,
   /* [45] */ 0,
-  /* [46] */ 1,
+  /* [46] */ 3,
   /* [47] */ 8,
-  /* [48] */ 1,
-  /* [49] */ 2,
-  /* [50] */ 28,
-  /* [51] */ 0,
-  /* [52] */ 1,
-  /* [53] */ 27,
-  /* [54] */ 0,
-  /* [55] */ 1,
-  /* [56] */ 8,
-  /* [57] */ 0,
-  /* [58] */ 3,
-  /* [59] */ 8,
-  /* [60] */ 0,
-  /* [61] */ 4,
-  /* [62] */ 28,
-  /* [63] */ 3,
+  /* [48] */ 0,
+  /* [49] */ 4,
+  /* [50] */ 29,
+  /* [51] */ 5,
+  /* [52] */ 10,
+  /* [53] */ 28,
+  /* [54] */ 5,
+  /* [55] */ 10,
+  /* [56] */ 27,
+  /* [57] */ 5,
+  /* [58] */ 10,
+  /* [59] */ 30,
+  /* [60] */ 4,
+  /* [61] */ 10,
+  /* [62] */ 29,
+  /* [63] */ 4,
   /* [64] */ 10,
-  /* [65] */ 29,
-  /* [66] */ 3,
+  /* [65] */ 28,
+  /* [66] */ 4,
   /* [67] */ 10,
-  /* [68] */ 30,
-  /* [69] */ 3,
+  /* [68] */ 27,
+  /* [69] */ 4,
   /* [70] */ 10,
-  /* [71] */ 27,
-  /* [72] */ 4,
+  /* [71] */ 30,
+  /* [72] */ 3,
   /* [73] */ 10,
-  /* [74] */ 30,
-  /* [75] */ 5,
+  /* [74] */ 29,
+  /* [75] */ 3,
   /* [76] */ 10,
   /* [77] */ 28,
-  /* [78] */ 4,
+  /* [78] */ 3,
   /* [79] */ 10,
-  /* [80] */ 29,
-  /* [81] */ 5,
+  /* [80] */ 27,
+  /* [81] */ 3,
   /* [82] */ 10,
   /* [83] */ 29,
-  /* [84] */ 4,
-  /* [85] */ 10,
-  /* [86] */ 28,
-  /* [87] */ 5,
-  /* [88] */ 10,
-  /* [89] */ 27,
-  /* [90] */ 5,
-  /* [91] */ 10,
-  /* [92] */ 30,
-  /* [93] */ 4,
-  /* [94] */ 10,
-  /* [95] */ 21,
-  /* [96] */ 0,
+  /* [84] */ 0,
+  /* [85] */ 1,
+  /* [86] */ 30,
+  /* [87] */ 0,
+  /* [88] */ 1,
+  /* [89] */ 28,
+  /* [90] */ 0,
+  /* [91] */ 1,
+  /* [92] */ 27,
+  /* [93] */ 0,
+  /* [94] */ 1,
+  /* [95] */ 5,
+  /* [96] */ 3,
   /* [97] */ 6,
-  /* [98] */ 3,
-  /* [99] */ 7,
-  /* [100] */ 3,
-  /* [101] */ 7,
-  /* [102] */ 4,
-  /* [103] */ 5,
-  /* [104] */ 3,
-  /* [105] */ 15,
+  /* [98] */ 2,
+  /* [99] */ 35,
+  /* [100] */ 0,
+  /* [101] */ 5,
+  /* [102] */ 0,
+  /* [103] */ 7,
+  /* [104] */ 2,
+  /* [105] */ 7,
   /* [106] */ 0,
-  /* [107] */ 7,
+  /* [107] */ 21,
   /* [108] */ 0,
-  /* [109] */ 16,
-  /* [110] */ 0,
-  /* [111] */ 7,
-  /* [112] */ 2,
+  /* [109] */ 6,
+  /* [110] */ 3,
+  /* [111] */ 18,
+  /* [112] */ 0,
   /* [113] */ 17,
   /* [114] */ 0,
-  /* [115] */ 5,
-  /* [116] */ 2,
-  /* [117] */ 18,
+  /* [115] */ 16,
+  /* [116] */ 0,
+  /* [117] */ 15,
   /* [118] */ 0,
-  /* [119] */ 33,
-  /* [120] */ 0,
-  /* [121] */ 6,
-  /* [122] */ 2,
-  /* [123] */ 20,
+  /* [119] */ 7,
+  /* [120] */ 4,
+  /* [121] */ 7,
+  /* [122] */ 3,
+  /* [123] */ 5,
   /* [124] */ 2,
-  /* [125] */ 19,
+  /* [125] */ 33,
   /* [126] */ 0,
   /* [127] */ 19,
-  /* [128] */ 2,
+  /* [128] */ 0,
   /* [129] */ 20,
   /* [130] */ 0,
-  /* [131] */ 18,
+  /* [131] */ 20,
   /* [132] */ 2,
-  /* [133] */ 17,
+  /* [133] */ 19,
   /* [134] */ 2,
-  /* [135] */ 5,
-  /* [136] */ 0,
-  /* [137] */ 35,
-  /* [138] */ 0,
+  /* [135] */ 18,
+  /* [136] */ 2,
+  /* [137] */ 17,
+  /* [138] */ 2,
   /* [139] */ 16,
   /* [140] */ 2,
   /* [141] */ 15,
   /* [142] */ 2,
-  /* [143] */ 23,
+  /* [143] */ 24,
   /* [144] */ 13,
-  /* [145] */ 24,
-  /* [146] */ 25,
+  /* [145] */ 25,
+  /* [146] */ 23,
   /* [147] */ 22,
   /* [148] */ 26,
   /* [149] */ 14,
@@ -1806,7 +1839,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [0] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[133],
+    /* matcher indices */ &kMatcherIndices[137],
   },
   {
     /* [1] */
@@ -1816,32 +1849,32 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [2] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [3] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [4] */
     /* usage */ ParameterUsage::kDdx,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [5] */
     /* usage */ ParameterUsage::kDdy,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [6] */
     /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [7] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[123],
+    /* matcher indices */ &kMatcherIndices[137],
   },
   {
     /* [8] */
@@ -1851,267 +1884,267 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [9] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [10] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [11] */
-    /* usage */ ParameterUsage::kDdx,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* usage */ ParameterUsage::kLevel,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [12] */
-    /* usage */ ParameterUsage::kDdy,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* usage */ ParameterUsage::kOffset,
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [13] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[139],
+    /* matcher indices */ &kMatcherIndices[146],
   },
   {
     /* [14] */
     /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
+    /* matcher indices */ &kMatcherIndices[149],
   },
   {
     /* [15] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [16] */
-    /* usage */ ParameterUsage::kDdx,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [17] */
-    /* usage */ ParameterUsage::kDdy,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* usage */ ParameterUsage::kDepthRef,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [18] */
     /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [19] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[143],
+    /* matcher indices */ &kMatcherIndices[139],
   },
   {
     /* [20] */
     /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[149],
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [21] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [22] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kDdx,
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [23] */
-    /* usage */ ParameterUsage::kDepthRef,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kDdy,
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [24] */
     /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [25] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[143],
+    /* matcher indices */ &kMatcherIndices[131],
   },
   {
     /* [26] */
     /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[149],
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [27] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [28] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [29] */
-    /* usage */ ParameterUsage::kDepthRef,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kDdx,
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [30] */
-    /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* usage */ ParameterUsage::kDdy,
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [31] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[143],
+    /* matcher indices */ &kMatcherIndices[146],
   },
   {
     /* [32] */
     /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[149],
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [33] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [34] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [35] */
-    /* usage */ ParameterUsage::kDepthRef,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kLevel,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [36] */
     /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [37] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[133],
+    /* matcher indices */ &kMatcherIndices[146],
   },
   {
     /* [38] */
     /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
+    /* matcher indices */ &kMatcherIndices[149],
   },
   {
     /* [39] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [40] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [41] */
-    /* usage */ ParameterUsage::kDdx,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* usage */ ParameterUsage::kDepthRef,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [42] */
-    /* usage */ ParameterUsage::kDdy,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* usage */ ParameterUsage::kOffset,
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [43] */
-    /* usage */ ParameterUsage::kComponent,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kTexture,
+    /* matcher indices */ &kMatcherIndices[135],
   },
   {
     /* [44] */
-    /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[113],
-  },
-  {
-    /* [45] */
     /* usage */ ParameterUsage::kSampler,
     /* matcher indices */ &kMatcherIndices[144],
   },
   {
-    /* [46] */
+    /* [45] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[97],
+  },
+  {
+    /* [46] */
+    /* usage */ ParameterUsage::kDdx,
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [47] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kDdy,
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [48] */
     /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[109],
   },
   {
     /* [49] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[133],
+    /* matcher indices */ &kMatcherIndices[146],
   },
   {
     /* [50] */
     /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
+    /* matcher indices */ &kMatcherIndices[149],
   },
   {
     /* [51] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [52] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [53] */
-    /* usage */ ParameterUsage::kLevel,
+    /* usage */ ParameterUsage::kDepthRef,
     /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [54] */
     /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [55] */
-    /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[143],
+    /* usage */ ParameterUsage::kComponent,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [56] */
+    /* usage */ ParameterUsage::kTexture,
+    /* matcher indices */ &kMatcherIndices[113],
+  },
+  {
+    /* [57] */
     /* usage */ ParameterUsage::kSampler,
     /* matcher indices */ &kMatcherIndices[144],
   },
   {
-    /* [57] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
-  },
-  {
     /* [58] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [59] */
-    /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [60] */
     /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [61] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[131],
+    /* matcher indices */ &kMatcherIndices[137],
   },
   {
     /* [62] */
@@ -2121,27 +2154,27 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [63] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [64] */
-    /* usage */ ParameterUsage::kDdx,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [65] */
-    /* usage */ ParameterUsage::kDdy,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* usage */ ParameterUsage::kBias,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [66] */
     /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[97],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [67] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[133],
+    /* matcher indices */ &kMatcherIndices[137],
   },
   {
     /* [68] */
@@ -2151,27 +2184,27 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [69] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [70] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [71] */
-    /* usage */ ParameterUsage::kBias,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kDdx,
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [72] */
-    /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* usage */ ParameterUsage::kDdy,
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [73] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[131],
+    /* matcher indices */ &kMatcherIndices[135],
   },
   {
     /* [74] */
@@ -2181,7 +2214,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [75] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [76] */
@@ -2191,12 +2224,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [77] */
     /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[97],
+    /* matcher indices */ &kMatcherIndices[109],
   },
   {
     /* [78] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[127],
+    /* matcher indices */ &kMatcherIndices[135],
   },
   {
     /* [79] */
@@ -2206,47 +2239,47 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [80] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [81] */
-    /* usage */ ParameterUsage::kDdx,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* usage */ ParameterUsage::kLevel,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [82] */
-    /* usage */ ParameterUsage::kDdy,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* usage */ ParameterUsage::kOffset,
+    /* matcher indices */ &kMatcherIndices[109],
   },
   {
     /* [83] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[139],
+    /* matcher indices */ &kMatcherIndices[146],
   },
   {
     /* [84] */
     /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
+    /* matcher indices */ &kMatcherIndices[149],
   },
   {
     /* [85] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [86] */
-    /* usage */ ParameterUsage::kBias,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [87] */
-    /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* usage */ ParameterUsage::kDepthRef,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [88] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[133],
+    /* matcher indices */ &kMatcherIndices[139],
   },
   {
     /* [89] */
@@ -2256,22 +2289,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [90] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [91] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
-  },
-  {
-    /* [92] */
     /* usage */ ParameterUsage::kBias,
     /* matcher indices */ &kMatcherIndices[15],
   },
   {
+    /* [92] */
+    /* usage */ ParameterUsage::kOffset,
+    /* matcher indices */ &kMatcherIndices[95],
+  },
+  {
     /* [93] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[143],
+    /* matcher indices */ &kMatcherIndices[137],
   },
   {
     /* [94] */
@@ -2281,22 +2314,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [95] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [96] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [97] */
-    /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* usage */ ParameterUsage::kBias,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [98] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[139],
+    /* matcher indices */ &kMatcherIndices[146],
   },
   {
     /* [99] */
@@ -2306,47 +2339,47 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [100] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [101] */
-    /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [102] */
     /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [103] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[131],
+    /* matcher indices */ &kMatcherIndices[146],
   },
   {
     /* [104] */
     /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
+    /* matcher indices */ &kMatcherIndices[149],
   },
   {
     /* [105] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [106] */
-    /* usage */ ParameterUsage::kDdx,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [107] */
-    /* usage */ ParameterUsage::kDdy,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* usage */ ParameterUsage::kDepthRef,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [108] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[133],
+    /* matcher indices */ &kMatcherIndices[139],
   },
   {
     /* [109] */
@@ -2356,22 +2389,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [110] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [111] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kDdx,
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [112] */
-    /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kDdy,
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [113] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[131],
+    /* matcher indices */ &kMatcherIndices[135],
   },
   {
     /* [114] */
@@ -2381,47 +2414,47 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [115] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [116] */
-    /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kDdx,
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [117] */
-    /* usage */ ParameterUsage::kOffset,
+    /* usage */ ParameterUsage::kDdy,
     /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [118] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[123],
+    /* matcher indices */ &kMatcherIndices[145],
   },
   {
     /* [119] */
     /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
+    /* matcher indices */ &kMatcherIndices[149],
   },
   {
     /* [120] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [121] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [122] */
-    /* usage */ ParameterUsage::kLevel,
+    /* usage */ ParameterUsage::kDepthRef,
     /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [123] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[123],
+    /* matcher indices */ &kMatcherIndices[131],
   },
   {
     /* [124] */
@@ -2431,12 +2464,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [125] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [126] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [127] */
@@ -2446,32 +2479,32 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [128] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[143],
+    /* matcher indices */ &kMatcherIndices[145],
   },
   {
     /* [129] */
     /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[149],
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [130] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [131] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [132] */
-    /* usage */ ParameterUsage::kDepthRef,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kLevel,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [133] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[146],
+    /* matcher indices */ &kMatcherIndices[145],
   },
   {
     /* [134] */
@@ -2481,12 +2514,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [135] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [136] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [137] */
@@ -2496,32 +2529,32 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [138] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[139],
+    /* matcher indices */ &kMatcherIndices[146],
   },
   {
     /* [139] */
     /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
+    /* matcher indices */ &kMatcherIndices[149],
   },
   {
     /* [140] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [141] */
-    /* usage */ ParameterUsage::kDdx,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [142] */
-    /* usage */ ParameterUsage::kDdy,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* usage */ ParameterUsage::kDepthRef,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [143] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[146],
+    /* matcher indices */ &kMatcherIndices[147],
   },
   {
     /* [144] */
@@ -2531,22 +2564,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [145] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [146] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
-  },
-  {
-    /* [147] */
     /* usage */ ParameterUsage::kDepthRef,
     /* matcher indices */ &kMatcherIndices[15],
   },
   {
+    /* [147] */
+    /* usage */ ParameterUsage::kOffset,
+    /* matcher indices */ &kMatcherIndices[95],
+  },
+  {
     /* [148] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[147],
+    /* matcher indices */ &kMatcherIndices[137],
   },
   {
     /* [149] */
@@ -2556,22 +2589,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [150] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [151] */
-    /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [152] */
     /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [153] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[143],
+    /* matcher indices */ &kMatcherIndices[133],
   },
   {
     /* [154] */
@@ -2581,17 +2614,17 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [155] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [156] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kDdx,
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [157] */
-    /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kDdy,
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [158] */
@@ -2606,7 +2639,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [160] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [161] */
@@ -2616,12 +2649,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [162] */
     /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [163] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[143],
+    /* matcher indices */ &kMatcherIndices[145],
   },
   {
     /* [164] */
@@ -2631,12 +2664,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [165] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [166] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [167] */
@@ -2651,22 +2684,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [169] */
     /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[149],
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [170] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [171] */
-    /* usage */ ParameterUsage::kDepthRef,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kLevel,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [172] */
     /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [173] */
@@ -2676,27 +2709,27 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [174] */
     /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[149],
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [175] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [176] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [177] */
-    /* usage */ ParameterUsage::kDepthRef,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kLevel,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [178] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[143],
+    /* matcher indices */ &kMatcherIndices[146],
   },
   {
     /* [179] */
@@ -2706,22 +2739,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [180] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [181] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [182] */
     /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [183] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[146],
+    /* matcher indices */ &kMatcherIndices[139],
   },
   {
     /* [184] */
@@ -2731,72 +2764,72 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [185] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [186] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kLevel,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [187] */
-    /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kOffset,
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [188] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[133],
+    /* matcher indices */ &kMatcherIndices[147],
   },
   {
     /* [189] */
     /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
+    /* matcher indices */ &kMatcherIndices[149],
   },
   {
     /* [190] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [191] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
-  },
-  {
-    /* [192] */
-    /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
-  },
-  {
-    /* [193] */
-    /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[147],
-  },
-  {
-    /* [194] */
-    /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[149],
-  },
-  {
-    /* [195] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
-  },
-  {
-    /* [196] */
     /* usage */ ParameterUsage::kDepthRef,
     /* matcher indices */ &kMatcherIndices[15],
   },
   {
-    /* [197] */
+    /* [192] */
     /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
+  },
+  {
+    /* [193] */
+    /* usage */ ParameterUsage::kTexture,
+    /* matcher indices */ &kMatcherIndices[137],
+  },
+  {
+    /* [194] */
+    /* usage */ ParameterUsage::kSampler,
+    /* matcher indices */ &kMatcherIndices[144],
+  },
+  {
+    /* [195] */
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[123],
+  },
+  {
+    /* [196] */
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
+  },
+  {
+    /* [197] */
+    /* usage */ ParameterUsage::kLevel,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [198] */
     /* usage */ ParameterUsage::kComponent,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [199] */
@@ -2811,22 +2844,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [201] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [202] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [203] */
     /* usage */ ParameterUsage::kComponent,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [204] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[109],
+    /* matcher indices */ &kMatcherIndices[115],
   },
   {
     /* [205] */
@@ -2836,17 +2869,17 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [206] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [207] */
     /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [208] */
     /* usage */ ParameterUsage::kComponent,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [209] */
@@ -2861,67 +2894,67 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [211] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [212] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [213] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[143],
+    /* matcher indices */ &kMatcherIndices[131],
   },
   {
     /* [214] */
     /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[149],
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [215] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [216] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [217] */
-    /* usage */ ParameterUsage::kDepthRef,
+    /* usage */ ParameterUsage::kLevel,
     /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [218] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[38],
+    /* usage */ ParameterUsage::kComponent,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [219] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[38],
+    /* usage */ ParameterUsage::kTexture,
+    /* matcher indices */ &kMatcherIndices[127],
   },
   {
     /* [220] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[61],
+    /* usage */ ParameterUsage::kSampler,
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [221] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[61],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [222] */
     /* usage */ ParameterUsage::kComponent,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [223] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[109],
+    /* matcher indices */ &kMatcherIndices[115],
   },
   {
     /* [224] */
@@ -2931,32 +2964,32 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [225] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [226] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[65],
+    /* matcher indices */ &kMatcherIndices[147],
   },
   {
     /* [227] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* usage */ ParameterUsage::kSampler,
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [228] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [229] */
-    /* usage */ ParameterUsage::kValue,
-    /* matcher indices */ &kMatcherIndices[111],
+    /* usage */ ParameterUsage::kOffset,
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [230] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[147],
+    /* matcher indices */ &kMatcherIndices[146],
   },
   {
     /* [231] */
@@ -2966,17 +2999,17 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [232] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [233] */
-    /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [234] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[143],
+    /* matcher indices */ &kMatcherIndices[145],
   },
   {
     /* [235] */
@@ -2986,17 +3019,17 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [236] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [237] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [238] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[145],
+    /* matcher indices */ &kMatcherIndices[143],
   },
   {
     /* [239] */
@@ -3006,7 +3039,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [240] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [241] */
@@ -3016,22 +3049,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [242] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[83],
+    /* matcher indices */ &kMatcherIndices[147],
   },
   {
     /* [243] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* usage */ ParameterUsage::kSampler,
+    /* matcher indices */ &kMatcherIndices[149],
   },
   {
     /* [244] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [245] */
-    /* usage */ ParameterUsage::kValue,
-    /* matcher indices */ &kMatcherIndices[99],
+    /* usage */ ParameterUsage::kDepthRef,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [246] */
@@ -3046,7 +3079,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [248] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [249] */
@@ -3056,7 +3089,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [250] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[146],
+    /* matcher indices */ &kMatcherIndices[143],
   },
   {
     /* [251] */
@@ -3066,17 +3099,17 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [252] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [253] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kLevel,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [254] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[147],
+    /* matcher indices */ &kMatcherIndices[143],
   },
   {
     /* [255] */
@@ -3086,7 +3119,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [256] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [257] */
@@ -3096,27 +3129,27 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [258] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[133],
+    /* matcher indices */ &kMatcherIndices[147],
   },
   {
     /* [259] */
     /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
+    /* matcher indices */ &kMatcherIndices[149],
   },
   {
     /* [260] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [261] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kDepthRef,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [262] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[145],
+    /* matcher indices */ &kMatcherIndices[143],
   },
   {
     /* [263] */
@@ -3126,7 +3159,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [264] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [265] */
@@ -3136,7 +3169,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [266] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[139],
+    /* matcher indices */ &kMatcherIndices[147],
   },
   {
     /* [267] */
@@ -3146,137 +3179,137 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [268] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [269] */
-    /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* usage */ ParameterUsage::kLevel,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [270] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[80],
+    /* matcher indices */ &kMatcherIndices[135],
   },
   {
     /* [271] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* usage */ ParameterUsage::kSampler,
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [272] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [273] */
-    /* usage */ ParameterUsage::kValue,
-    /* matcher indices */ &kMatcherIndices[101],
+    /* usage */ ParameterUsage::kLevel,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [274] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[113],
+    /* matcher indices */ &kMatcherIndices[133],
   },
   {
     /* [275] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* usage */ ParameterUsage::kSampler,
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [276] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [277] */
-    /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kBias,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [278] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[143],
+    /* matcher indices */ &kMatcherIndices[133],
   },
   {
     /* [279] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* usage */ ParameterUsage::kSampler,
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [280] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [281] */
     /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [282] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[145],
+    /* matcher indices */ &kMatcherIndices[135],
   },
   {
     /* [283] */
     /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[149],
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [284] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [285] */
-    /* usage */ ParameterUsage::kDepthRef,
+    /* usage */ ParameterUsage::kBias,
     /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [286] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[147],
+    /* matcher indices */ &kMatcherIndices[146],
   },
   {
     /* [287] */
-    /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[149],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [288] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [289] */
-    /* usage */ ParameterUsage::kDepthRef,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kLevel,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [290] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[127],
+    /* matcher indices */ &kMatcherIndices[113],
   },
   {
     /* [291] */
-    /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [292] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [293] */
-    /* usage */ ParameterUsage::kBias,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kLevel,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [294] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[131],
+    /* matcher indices */ &kMatcherIndices[145],
   },
   {
     /* [295] */
@@ -3286,37 +3319,37 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [296] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [297] */
-    /* usage */ ParameterUsage::kBias,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [298] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[145],
+    /* matcher indices */ &kMatcherIndices[50],
   },
   {
     /* [299] */
-    /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [300] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [301] */
-    /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kValue,
+    /* matcher indices */ &kMatcherIndices[119],
   },
   {
     /* [302] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[131],
+    /* matcher indices */ &kMatcherIndices[146],
   },
   {
     /* [303] */
@@ -3326,12 +3359,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [304] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [305] */
-    /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[97],
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [306] */
@@ -3346,37 +3379,37 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [308] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [309] */
-    /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kOffset,
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [310] */
-    /* usage */ ParameterUsage::kComponent,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kTexture,
+    /* matcher indices */ &kMatcherIndices[131],
   },
   {
     /* [311] */
-    /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[125],
-  },
-  {
-    /* [312] */
     /* usage */ ParameterUsage::kSampler,
     /* matcher indices */ &kMatcherIndices[144],
   },
   {
-    /* [313] */
+    /* [312] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[97],
+  },
+  {
+    /* [313] */
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [314] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[139],
+    /* matcher indices */ &kMatcherIndices[135],
   },
   {
     /* [315] */
@@ -3386,32 +3419,32 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [316] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [317] */
-    /* usage */ ParameterUsage::kBias,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kOffset,
+    /* matcher indices */ &kMatcherIndices[109],
   },
   {
     /* [318] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[146],
+    /* matcher indices */ &kMatcherIndices[62],
   },
   {
     /* [319] */
-    /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [320] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [321] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kValue,
+    /* matcher indices */ &kMatcherIndices[121],
   },
   {
     /* [322] */
@@ -3426,7 +3459,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [324] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [325] */
@@ -3436,47 +3469,47 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [326] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[143],
+    /* matcher indices */ &kMatcherIndices[74],
   },
   {
     /* [327] */
-    /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [328] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* usage */ ParameterUsage::kArrayIndex,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [329] */
-    /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kValue,
+    /* matcher indices */ &kMatcherIndices[103],
   },
   {
     /* [330] */
-    /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[127],
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [331] */
-    /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [332] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[49],
   },
   {
     /* [333] */
-    /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[49],
   },
   {
     /* [334] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[147],
+    /* matcher indices */ &kMatcherIndices[139],
   },
   {
     /* [335] */
@@ -3486,17 +3519,17 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [336] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [337] */
     /* usage */ ParameterUsage::kOffset,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [338] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[123],
+    /* matcher indices */ &kMatcherIndices[137],
   },
   {
     /* [339] */
@@ -3506,127 +3539,127 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [340] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [341] */
     /* usage */ ParameterUsage::kArrayIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [342] */
-    /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[131],
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [343] */
-    /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [344] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[49],
   },
   {
     /* [345] */
-    /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[49],
   },
   {
     /* [346] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[3],
+    /* usage */ ParameterUsage::kTexture,
+    /* matcher indices */ &kMatcherIndices[139],
   },
   {
     /* [347] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[3],
+    /* usage */ ParameterUsage::kSampler,
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [348] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[61],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [349] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[61],
+    /* usage */ ParameterUsage::kBias,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [350] */
-    /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[127],
-  },
-  {
-    /* [351] */
-    /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
-  },
-  {
-    /* [352] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
-  },
-  {
-    /* [353] */
-    /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[147],
-  },
-  {
-    /* [354] */
-    /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
-  },
-  {
-    /* [355] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
-  },
-  {
-    /* [356] */
     /* usage */ ParameterUsage::kNone,
     /* matcher indices */ &kMatcherIndices[2],
   },
   {
-    /* [357] */
+    /* [351] */
     /* usage */ ParameterUsage::kNone,
     /* matcher indices */ &kMatcherIndices[3],
+  },
+  {
+    /* [352] */
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[3],
+  },
+  {
+    /* [353] */
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[32],
+  },
+  {
+    /* [354] */
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[32],
+  },
+  {
+    /* [355] */
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[32],
+  },
+  {
+    /* [356] */
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[15],
+  },
+  {
+    /* [357] */
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [358] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[3],
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [359] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[145],
+    /* matcher indices */ &kMatcherIndices[68],
   },
   {
     /* [360] */
-    /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [361] */
-    /* usage */ ParameterUsage::kCoords,
+    /* usage */ ParameterUsage::kValue,
     /* matcher indices */ &kMatcherIndices[121],
   },
   {
     /* [362] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[3],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [363] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[3],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [364] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[3],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [365] */
@@ -3636,32 +3669,32 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [366] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[38],
+    /* matcher indices */ &kMatcherIndices[49],
   },
   {
     /* [367] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[38],
+    /* matcher indices */ &kMatcherIndices[49],
   },
   {
     /* [368] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* usage */ ParameterUsage::kTexture,
+    /* matcher indices */ &kMatcherIndices[147],
   },
   {
     /* [369] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* usage */ ParameterUsage::kSampler,
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [370] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [371] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[141],
+    /* matcher indices */ &kMatcherIndices[143],
   },
   {
     /* [372] */
@@ -3671,37 +3704,37 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [373] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [374] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[139],
+    /* matcher indices */ &kMatcherIndices[80],
   },
   {
     /* [375] */
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[46],
+  },
+  {
+    /* [376] */
+    /* usage */ ParameterUsage::kValue,
+    /* matcher indices */ &kMatcherIndices[103],
+  },
+  {
+    /* [377] */
+    /* usage */ ParameterUsage::kTexture,
+    /* matcher indices */ &kMatcherIndices[135],
+  },
+  {
+    /* [378] */
     /* usage */ ParameterUsage::kSampler,
     /* matcher indices */ &kMatcherIndices[144],
   },
   {
-    /* [376] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
-  },
-  {
-    /* [377] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
-  },
-  {
-    /* [378] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
-  },
-  {
     /* [379] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [380] */
@@ -3711,12 +3744,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [381] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [382] */
     /* usage */ ParameterUsage::kSampleIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [383] */
@@ -3735,48 +3768,48 @@ constexpr ParameterInfo kParameters[] = {
   },
   {
     /* [386] */
-    /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[131],
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [387] */
-    /* usage */ ParameterUsage::kSampler,
-    /* matcher indices */ &kMatcherIndices[144],
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [388] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [389] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [390] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [391] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [392] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [393] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [394] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [395] */
@@ -3831,117 +3864,117 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [405] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [406] */
     /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [407] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[95],
+    /* matcher indices */ &kMatcherIndices[107],
   },
   {
     /* [408] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [409] */
     /* usage */ ParameterUsage::kSampleIndex,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [410] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[117],
+    /* matcher indices */ &kMatcherIndices[111],
   },
   {
     /* [411] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[97],
+    /* matcher indices */ &kMatcherIndices[109],
   },
   {
     /* [412] */
     /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [413] */
-    /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[0],
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [414] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [415] */
-    /* usage */ ParameterUsage::kValue,
-    /* matcher indices */ &kMatcherIndices[111],
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [416] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[109],
+    /* matcher indices */ &kMatcherIndices[115],
   },
   {
     /* [417] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [418] */
     /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [419] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[105],
+    /* matcher indices */ &kMatcherIndices[117],
   },
   {
     /* [420] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [421] */
     /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [422] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[74],
+    /* matcher indices */ &kMatcherIndices[0],
   },
   {
     /* [423] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[97],
+    /* matcher indices */ &kMatcherIndices[109],
   },
   {
     /* [424] */
     /* usage */ ParameterUsage::kValue,
-    /* matcher indices */ &kMatcherIndices[101],
+    /* matcher indices */ &kMatcherIndices[119],
   },
   {
     /* [425] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* usage */ ParameterUsage::kTexture,
+    /* matcher indices */ &kMatcherIndices[143],
   },
   {
     /* [426] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* usage */ ParameterUsage::kSampler,
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [427] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [428] */
@@ -3960,53 +3993,53 @@ constexpr ParameterInfo kParameters[] = {
   },
   {
     /* [431] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[38],
+    /* usage */ ParameterUsage::kTexture,
+    /* matcher indices */ &kMatcherIndices[147],
   },
   {
     /* [432] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[61],
+    /* usage */ ParameterUsage::kSampler,
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [433] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[61],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [434] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[86],
+    /* matcher indices */ &kMatcherIndices[53],
   },
   {
     /* [435] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [436] */
     /* usage */ ParameterUsage::kValue,
-    /* matcher indices */ &kMatcherIndices[101],
+    /* matcher indices */ &kMatcherIndices[119],
   },
   {
     /* [437] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[89],
+    /* matcher indices */ &kMatcherIndices[56],
   },
   {
     /* [438] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [439] */
     /* usage */ ParameterUsage::kValue,
-    /* matcher indices */ &kMatcherIndices[101],
+    /* matcher indices */ &kMatcherIndices[119],
   },
   {
     /* [440] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[150],
+    /* matcher indices */ &kMatcherIndices[133],
   },
   {
     /* [441] */
@@ -4016,7 +4049,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [442] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [443] */
@@ -4036,22 +4069,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [446] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[92],
+    /* matcher indices */ &kMatcherIndices[59],
   },
   {
     /* [447] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[97],
+    /* matcher indices */ &kMatcherIndices[109],
   },
   {
     /* [448] */
     /* usage */ ParameterUsage::kValue,
-    /* matcher indices */ &kMatcherIndices[99],
+    /* matcher indices */ &kMatcherIndices[121],
   },
   {
     /* [449] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[145],
+    /* matcher indices */ &kMatcherIndices[141],
   },
   {
     /* [450] */
@@ -4061,37 +4094,37 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [451] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [452] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[77],
+    /* matcher indices */ &kMatcherIndices[65],
   },
   {
     /* [453] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [454] */
     /* usage */ ParameterUsage::kValue,
-    /* matcher indices */ &kMatcherIndices[99],
+    /* matcher indices */ &kMatcherIndices[121],
   },
   {
     /* [455] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[71],
+    /* matcher indices */ &kMatcherIndices[150],
   },
   {
     /* [456] */
-    /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* usage */ ParameterUsage::kSampler,
+    /* matcher indices */ &kMatcherIndices[144],
   },
   {
     /* [457] */
-    /* usage */ ParameterUsage::kValue,
-    /* matcher indices */ &kMatcherIndices[99],
+    /* usage */ ParameterUsage::kCoords,
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [458] */
@@ -4141,22 +4174,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [467] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[68],
+    /* matcher indices */ &kMatcherIndices[71],
   },
   {
     /* [468] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[97],
+    /* matcher indices */ &kMatcherIndices[109],
   },
   {
     /* [469] */
     /* usage */ ParameterUsage::kValue,
-    /* matcher indices */ &kMatcherIndices[111],
+    /* matcher indices */ &kMatcherIndices[103],
   },
   {
     /* [470] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[147],
+    /* matcher indices */ &kMatcherIndices[139],
   },
   {
     /* [471] */
@@ -4166,22 +4199,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [472] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [473] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[62],
+    /* matcher indices */ &kMatcherIndices[77],
   },
   {
     /* [474] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [475] */
     /* usage */ ParameterUsage::kValue,
-    /* matcher indices */ &kMatcherIndices[111],
+    /* matcher indices */ &kMatcherIndices[103],
   },
   {
     /* [476] */
@@ -4191,12 +4224,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [477] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[61],
+    /* matcher indices */ &kMatcherIndices[49],
   },
   {
     /* [478] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[61],
+    /* matcher indices */ &kMatcherIndices[49],
   },
   {
     /* [479] */
@@ -4206,7 +4239,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [480] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[59],
+    /* matcher indices */ &kMatcherIndices[47],
   },
   {
     /* [481] */
@@ -4231,22 +4264,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [485] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[38],
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [486] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[38],
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [487] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[3],
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [488] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[3],
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [489] */
@@ -4266,7 +4299,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [492] */
     /* usage */ ParameterUsage::kCoords,
-    /* matcher indices */ &kMatcherIndices[103],
+    /* matcher indices */ &kMatcherIndices[95],
   },
   {
     /* [493] */
@@ -4346,7 +4379,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [508] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [509] */
@@ -4451,12 +4484,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [529] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[105],
+    /* matcher indices */ &kMatcherIndices[117],
   },
   {
     /* [530] */
     /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [531] */
@@ -4471,12 +4504,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [533] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[109],
+    /* matcher indices */ &kMatcherIndices[115],
   },
   {
     /* [534] */
     /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [535] */
@@ -4496,7 +4529,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [538] */
     /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [539] */
@@ -4511,12 +4544,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [541] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[117],
+    /* matcher indices */ &kMatcherIndices[111],
   },
   {
     /* [542] */
     /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [543] */
@@ -4531,12 +4564,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [545] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[125],
+    /* matcher indices */ &kMatcherIndices[127],
   },
   {
     /* [546] */
     /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [547] */
@@ -4556,17 +4589,17 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [550] */
     /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [551] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[3],
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [552] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[3],
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [553] */
@@ -4586,7 +4619,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [556] */
     /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [557] */
@@ -4601,12 +4634,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [559] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[143],
+    /* matcher indices */ &kMatcherIndices[146],
   },
   {
     /* [560] */
     /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [561] */
@@ -4621,12 +4654,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [563] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[145],
+    /* matcher indices */ &kMatcherIndices[143],
   },
   {
     /* [564] */
     /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [565] */
@@ -4641,12 +4674,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [567] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[146],
+    /* matcher indices */ &kMatcherIndices[145],
   },
   {
     /* [568] */
     /* usage */ ParameterUsage::kLevel,
-    /* matcher indices */ &kMatcherIndices[1],
+    /* matcher indices */ &kMatcherIndices[46],
   },
   {
     /* [569] */
@@ -4671,7 +4704,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [573] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[47],
+    /* matcher indices */ &kMatcherIndices[41],
   },
   {
     /* [574] */
@@ -4691,22 +4724,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [577] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[3],
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [578] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[3],
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [579] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[38],
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [580] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[38],
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [581] */
@@ -4841,12 +4874,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [607] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [608] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[121],
+    /* matcher indices */ &kMatcherIndices[97],
   },
   {
     /* [609] */
@@ -5076,7 +5109,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [654] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[61],
+    /* matcher indices */ &kMatcherIndices[49],
   },
   {
     /* [655] */
@@ -5086,7 +5119,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [656] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[59],
+    /* matcher indices */ &kMatcherIndices[47],
   },
   {
     /* [657] */
@@ -5096,7 +5129,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [658] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[61],
+    /* matcher indices */ &kMatcherIndices[49],
   },
   {
     /* [659] */
@@ -5106,17 +5139,17 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [660] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[56],
+    /* matcher indices */ &kMatcherIndices[44],
   },
   {
     /* [661] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[38],
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [662] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[38],
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [663] */
@@ -5126,22 +5159,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [664] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[95],
+    /* matcher indices */ &kMatcherIndices[107],
   },
   {
     /* [665] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[146],
+    /* matcher indices */ &kMatcherIndices[145],
   },
   {
     /* [666] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[145],
+    /* matcher indices */ &kMatcherIndices[143],
   },
   {
     /* [667] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[143],
+    /* matcher indices */ &kMatcherIndices[146],
   },
   {
     /* [668] */
@@ -5156,47 +5189,47 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [670] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[125],
+    /* matcher indices */ &kMatcherIndices[127],
   },
   {
     /* [671] */
-    /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* usage */ ParameterUsage::kTexture,
+    /* matcher indices */ &kMatcherIndices[111],
   },
   {
     /* [672] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[117],
+    /* matcher indices */ &kMatcherIndices[113],
   },
   {
     /* [673] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[113],
+    /* matcher indices */ &kMatcherIndices[115],
   },
   {
     /* [674] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[109],
+    /* matcher indices */ &kMatcherIndices[117],
   },
   {
     /* [675] */
-    /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[105],
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [676] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[41],
+    /* matcher indices */ &kMatcherIndices[83],
   },
   {
     /* [677] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[146],
+    /* matcher indices */ &kMatcherIndices[145],
   },
   {
     /* [678] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[143],
+    /* matcher indices */ &kMatcherIndices[146],
   },
   {
     /* [679] */
@@ -5216,22 +5249,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [682] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[44],
+    /* matcher indices */ &kMatcherIndices[86],
   },
   {
     /* [683] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[41],
+    /* matcher indices */ &kMatcherIndices[83],
   },
   {
     /* [684] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[50],
+    /* matcher indices */ &kMatcherIndices[89],
   },
   {
     /* [685] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[53],
+    /* matcher indices */ &kMatcherIndices[92],
   },
   {
     /* [686] */
@@ -5241,17 +5274,17 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [687] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[146],
+    /* matcher indices */ &kMatcherIndices[145],
   },
   {
     /* [688] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[145],
+    /* matcher indices */ &kMatcherIndices[143],
   },
   {
     /* [689] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[143],
+    /* matcher indices */ &kMatcherIndices[146],
   },
   {
     /* [690] */
@@ -5261,7 +5294,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [691] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[95],
+    /* matcher indices */ &kMatcherIndices[107],
   },
   {
     /* [692] */
@@ -5271,12 +5304,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [693] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[125],
+    /* matcher indices */ &kMatcherIndices[127],
   },
   {
     /* [694] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[117],
+    /* matcher indices */ &kMatcherIndices[111],
   },
   {
     /* [695] */
@@ -5286,12 +5319,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [696] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[109],
+    /* matcher indices */ &kMatcherIndices[115],
   },
   {
     /* [697] */
     /* usage */ ParameterUsage::kTexture,
-    /* matcher indices */ &kMatcherIndices[105],
+    /* matcher indices */ &kMatcherIndices[117],
   },
   {
     /* [698] */
@@ -5301,27 +5334,27 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [699] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[61],
+    /* matcher indices */ &kMatcherIndices[49],
   },
   {
     /* [700] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[61],
+    /* matcher indices */ &kMatcherIndices[49],
   },
   {
     /* [701] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[61],
+    /* matcher indices */ &kMatcherIndices[49],
   },
   {
     /* [702] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[61],
+    /* matcher indices */ &kMatcherIndices[49],
   },
   {
     /* [703] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[61],
+    /* matcher indices */ &kMatcherIndices[49],
   },
   {
     /* [704] */
@@ -5331,12 +5364,12 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [705] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* matcher indices */ &kMatcherIndices[20],
   },
   {
     /* [706] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[20],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [707] */
@@ -5431,27 +5464,27 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [725] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[111],
+    /* matcher indices */ &kMatcherIndices[103],
   },
   {
     /* [726] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[111],
+    /* matcher indices */ &kMatcherIndices[103],
   },
   {
     /* [727] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [728] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [729] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[115],
+    /* matcher indices */ &kMatcherIndices[123],
   },
   {
     /* [730] */
@@ -5541,32 +5574,32 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [747] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* matcher indices */ &kMatcherIndices[17],
   },
   {
     /* [748] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* matcher indices */ &kMatcherIndices[35],
   },
   {
     /* [749] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [750] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [751] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [752] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [753] */
@@ -5581,22 +5614,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [755] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[38],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [756] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[3],
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [757] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[38],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [758] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[3],
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [759] */
@@ -5611,22 +5644,22 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [761] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [762] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [763] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [764] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [765] */
@@ -5641,27 +5674,27 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [767] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [768] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [769] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [770] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [771] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [772] */
@@ -5676,77 +5709,77 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [774] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[12],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [775] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [776] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [777] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[38],
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [778] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[3],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [779] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[38],
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [780] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[3],
+    /* matcher indices */ &kMatcherIndices[12],
   },
   {
     /* [781] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[38],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [782] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[3],
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [783] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [784] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [785] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [786] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [787] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* matcher indices */ &kMatcherIndices[38],
   },
   {
     /* [788] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[15],
+    /* matcher indices */ &kMatcherIndices[3],
   },
   {
     /* [789] */
@@ -5771,37 +5804,67 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [793] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[7],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [794] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[35],
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [795] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[17],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [796] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[35],
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [797] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[17],
+    /* matcher indices */ &kMatcherIndices[32],
   },
   {
     /* [798] */
     /* usage */ ParameterUsage::kNone,
-    /* matcher indices */ &kMatcherIndices[32],
+    /* matcher indices */ &kMatcherIndices[15],
   },
   {
     /* [799] */
     /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[7],
+  },
+  {
+    /* [800] */
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[35],
+  },
+  {
+    /* [801] */
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[17],
+  },
+  {
+    /* [802] */
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[35],
+  },
+  {
+    /* [803] */
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[17],
+  },
+  {
+    /* [804] */
+    /* usage */ ParameterUsage::kNone,
     /* matcher indices */ &kMatcherIndices[32],
+  },
+  {
+    /* [805] */
+    /* usage */ ParameterUsage::kNone,
+    /* matcher indices */ &kMatcherIndices[15],
   },
 };
 
@@ -5814,7 +5877,7 @@ constexpr OpenTypeInfo kOpenTypes[] = {
   {
     /* [1] */
     /* name */ "T",
-    /* matcher index */ 37,
+    /* matcher index */ 38,
   },
   {
     /* [2] */
@@ -5824,7 +5887,12 @@ constexpr OpenTypeInfo kOpenTypes[] = {
   {
     /* [3] */
     /* name */ "T",
-    /* matcher index */ 38,
+    /* matcher index */ 39,
+  },
+  {
+    /* [4] */
+    /* name */ "T",
+    /* matcher index */ 37,
   },
 };
 
@@ -5890,7 +5958,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[697],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -5902,7 +5970,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[529],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -5914,7 +5982,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[696],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -5926,7 +5994,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[533],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -5938,7 +6006,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[695],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -5950,7 +6018,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[537],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -5962,7 +6030,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[694],
-    /* return matcher indices */ &kMatcherIndices[97],
+    /* return matcher indices */ &kMatcherIndices[109],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -5974,7 +6042,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[541],
-    /* return matcher indices */ &kMatcherIndices[97],
+    /* return matcher indices */ &kMatcherIndices[109],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -5986,7 +6054,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[693],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -5998,7 +6066,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[545],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6010,7 +6078,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[692],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6022,7 +6090,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[549],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6034,7 +6102,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[691],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6043,10 +6111,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[690],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6055,10 +6123,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[555],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6067,10 +6135,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[689],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6079,10 +6147,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[559],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6091,10 +6159,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[688],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6103,10 +6171,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[563],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6115,10 +6183,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[687],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6127,10 +6195,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[567],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6139,10 +6207,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[686],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6151,10 +6219,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 2,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[3],
     /* parameters */ &kParameters[685],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6163,10 +6231,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 2,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[3],
     /* parameters */ &kParameters[684],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6175,10 +6243,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 2,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[3],
     /* parameters */ &kParameters[683],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6187,10 +6255,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 2,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[3],
     /* parameters */ &kParameters[682],
-    /* return matcher indices */ &kMatcherIndices[97],
+    /* return matcher indices */ &kMatcherIndices[109],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6199,83 +6267,83 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[681],
-    /* return matcher indices */ &kMatcherIndices[103],
+    /* return matcher indices */ &kMatcherIndices[95],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [27] */
-    /* num parameters */ 4,
+    /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[322],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* parameters */ &kParameters[449],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
     /* [28] */
-    /* num parameters */ 5,
+    /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[98],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* parameters */ &kParameters[470],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
     /* [29] */
-    /* num parameters */ 5,
+    /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[108],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* parameters */ &kParameters[334],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
     /* [30] */
-    /* num parameters */ 6,
+    /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[49],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* parameters */ &kParameters[338],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
     /* [31] */
-    /* num parameters */ 4,
+    /* num parameters */ 5,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[342],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* parameters */ &kParameters[148],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
     /* [32] */
-    /* num parameters */ 5,
+    /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[113],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* parameters */ &kParameters[377],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
@@ -6283,23 +6351,23 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[330],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* parameters */ &kParameters[314],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
     /* [34] */
-    /* num parameters */ 5,
+    /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[118],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* parameters */ &kParameters[440],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
@@ -6307,155 +6375,155 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[306],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* parameters */ &kParameters[310],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
     /* [36] */
-    /* num parameters */ 5,
+    /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[148],
+    /* parameters */ &kParameters[431],
     /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
     /* [37] */
-    /* num parameters */ 5,
+    /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[153],
+    /* parameters */ &kParameters[306],
     /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
     /* [38] */
-    /* num parameters */ 6,
+    /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[55],
+    /* parameters */ &kParameters[302],
     /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
     /* [39] */
-    /* num parameters */ 4,
+    /* num parameters */ 5,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[298],
+    /* parameters */ &kParameters[98],
     /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
     /* [40] */
-    /* num parameters */ 5,
+    /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[183],
+    /* parameters */ &kParameters[425],
     /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
     /* [41] */
-    /* num parameters */ 3,
+    /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[440],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* parameters */ &kParameters[294],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
     /* [42] */
-    /* num parameters */ 3,
+    /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[371],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* parameters */ &kParameters[322],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [43] */
-    /* num parameters */ 3,
+    /* num parameters */ 5,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[374],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* parameters */ &kParameters[183],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [44] */
-    /* num parameters */ 4,
+    /* num parameters */ 5,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[266],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* parameters */ &kParameters[193],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [45] */
-    /* num parameters */ 4,
+    /* num parameters */ 6,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[258],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* parameters */ &kParameters[7],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [46] */
-    /* num parameters */ 5,
+    /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[188],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* parameters */ &kParameters[270],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [47] */
-    /* num parameters */ 3,
+    /* num parameters */ 5,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[386],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* parameters */ &kParameters[78],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
@@ -6463,23 +6531,23 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[302],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* parameters */ &kParameters[278],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [49] */
-    /* num parameters */ 3,
+    /* num parameters */ 5,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[350],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* parameters */ &kParameters[213],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
@@ -6487,83 +6555,83 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[338],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* parameters */ &kParameters[266],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [51] */
-    /* num parameters */ 3,
+    /* num parameters */ 5,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[353],
+    /* parameters */ &kParameters[168],
     /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [52] */
-    /* num parameters */ 4,
+    /* num parameters */ 5,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[334],
+    /* parameters */ &kParameters[173],
     /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [53] */
-    /* num parameters */ 4,
+    /* num parameters */ 6,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[326],
+    /* parameters */ &kParameters[31],
     /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [54] */
-    /* num parameters */ 5,
+    /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[93],
+    /* parameters */ &kParameters[250],
     /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [55] */
-    /* num parameters */ 3,
+    /* num parameters */ 5,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[359],
+    /* parameters */ &kParameters[128],
     /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [56] */
-    /* num parameters */ 4,
+    /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[318],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* parameters */ &kParameters[455],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
@@ -6571,9 +6639,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[413],
+    /* parameters */ &kParameters[374],
     /* return matcher indices */ nullptr,
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -6583,7 +6651,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[473],
     /* return matcher indices */ nullptr,
@@ -6595,9 +6663,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[226],
+    /* parameters */ &kParameters[326],
     /* return matcher indices */ nullptr,
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -6607,7 +6675,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[467],
     /* return matcher indices */ nullptr,
@@ -6619,9 +6687,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[455],
+    /* parameters */ &kParameters[359],
     /* return matcher indices */ nullptr,
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -6631,7 +6699,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[452],
     /* return matcher indices */ nullptr,
@@ -6643,9 +6711,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[242],
+    /* parameters */ &kParameters[318],
     /* return matcher indices */ nullptr,
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -6655,7 +6723,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[446],
     /* return matcher indices */ nullptr,
@@ -6667,7 +6735,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[437],
     /* return matcher indices */ nullptr,
@@ -6679,7 +6747,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[434],
     /* return matcher indices */ nullptr,
@@ -6691,9 +6759,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[270],
+    /* parameters */ &kParameters[298],
     /* return matcher indices */ nullptr,
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -6703,7 +6771,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[422],
     /* return matcher indices */ nullptr,
@@ -6718,7 +6786,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[222],
-    /* return matcher indices */ &kMatcherIndices[107],
+    /* return matcher indices */ &kMatcherIndices[105],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6730,7 +6798,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[203],
-    /* return matcher indices */ &kMatcherIndices[107],
+    /* return matcher indices */ &kMatcherIndices[105],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6742,7 +6810,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[208],
-    /* return matcher indices */ &kMatcherIndices[107],
+    /* return matcher indices */ &kMatcherIndices[105],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6753,8 +6821,8 @@ constexpr OverloadInfo kOverloads[] = {
     /* num open numbers */ 0,
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[43],
-    /* return matcher indices */ &kMatcherIndices[107],
+    /* parameters */ &kParameters[55],
+    /* return matcher indices */ &kMatcherIndices[105],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6765,8 +6833,8 @@ constexpr OverloadInfo kOverloads[] = {
     /* num open numbers */ 0,
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[310],
-    /* return matcher indices */ &kMatcherIndices[107],
+    /* parameters */ &kParameters[218],
+    /* return matcher indices */ &kMatcherIndices[105],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6778,7 +6846,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[198],
-    /* return matcher indices */ &kMatcherIndices[107],
+    /* return matcher indices */ &kMatcherIndices[105],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6787,10 +6855,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[470],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[368],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6799,10 +6867,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[230],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[226],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6811,10 +6879,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[234],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[230],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6823,10 +6891,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 5,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[178],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6835,10 +6903,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[449],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[371],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6847,10 +6915,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[250],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[234],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6861,8 +6929,8 @@ constexpr OverloadInfo kOverloads[] = {
     /* num open numbers */ 0,
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[675],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* parameters */ &kParameters[674],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6873,8 +6941,8 @@ constexpr OverloadInfo kOverloads[] = {
     /* num open numbers */ 0,
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[674],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* parameters */ &kParameters[673],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6885,8 +6953,8 @@ constexpr OverloadInfo kOverloads[] = {
     /* num open numbers */ 0,
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[673],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* parameters */ &kParameters[672],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6897,8 +6965,8 @@ constexpr OverloadInfo kOverloads[] = {
     /* num open numbers */ 0,
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[672],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* parameters */ &kParameters[671],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6910,7 +6978,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[670],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6922,7 +6990,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[669],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6931,10 +6999,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[668],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6943,10 +7011,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[667],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6955,10 +7023,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[666],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6967,10 +7035,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[665],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -6981,7 +7049,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num open numbers */ 0,
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[551],
+    /* parameters */ &kParameters[661],
     /* return matcher indices */ &kMatcherIndices[3],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -6993,7 +7061,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num open numbers */ 1,
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[661],
+    /* parameters */ &kParameters[551],
     /* return matcher indices */ &kMatcherIndices[38],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -7027,7 +7095,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 2,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
     /* parameters */ &kParameters[565],
     /* return matcher indices */ &kMatcherIndices[20],
@@ -7039,7 +7107,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 2,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
     /* parameters */ &kParameters[569],
     /* return matcher indices */ &kMatcherIndices[20],
@@ -7051,10 +7119,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 2,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[1],
     /* parameters */ &kParameters[571],
-    /* return matcher indices */ &kMatcherIndices[47],
+    /* return matcher indices */ &kMatcherIndices[41],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -7063,7 +7131,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 2,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[1],
     /* parameters */ &kParameters[573],
     /* return matcher indices */ &kMatcherIndices[32],
@@ -7075,7 +7143,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 3,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[0],
     /* parameters */ &kParameters[575],
     /* return matcher indices */ &kMatcherIndices[28],
@@ -7090,7 +7158,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[419],
-    /* return matcher indices */ &kMatcherIndices[107],
+    /* return matcher indices */ &kMatcherIndices[105],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -7102,7 +7170,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[416],
-    /* return matcher indices */ &kMatcherIndices[107],
+    /* return matcher indices */ &kMatcherIndices[105],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -7113,8 +7181,8 @@ constexpr OverloadInfo kOverloads[] = {
     /* num open numbers */ 0,
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[274],
-    /* return matcher indices */ &kMatcherIndices[107],
+    /* parameters */ &kParameters[290],
+    /* return matcher indices */ &kMatcherIndices[105],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -7126,7 +7194,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[410],
-    /* return matcher indices */ &kMatcherIndices[107],
+    /* return matcher indices */ &kMatcherIndices[105],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -7138,7 +7206,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[407],
-    /* return matcher indices */ &kMatcherIndices[107],
+    /* return matcher indices */ &kMatcherIndices[105],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -7147,7 +7215,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[404],
     /* return matcher indices */ &kMatcherIndices[15],
@@ -7159,9 +7227,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[278],
+    /* parameters */ &kParameters[286],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -7171,7 +7239,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[380],
     /* return matcher indices */ &kMatcherIndices[15],
@@ -7183,10 +7251,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[491],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -7195,10 +7263,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 5,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[138],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[108],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -7207,10 +7275,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 6,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[13],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[19],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -7219,10 +7287,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 6,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[37],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[67],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -7231,10 +7299,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 7,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[0],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -7243,10 +7311,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 5,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[103],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[113],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -7255,10 +7323,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 6,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[61],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[43],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -7267,10 +7335,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 5,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[78],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[153],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -7279,10 +7347,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 6,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[7],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[25],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -7291,10 +7359,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[314],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[346],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
@@ -7303,10 +7371,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 5,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[83],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[88],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
@@ -7315,10 +7383,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 5,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[88],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[93],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
@@ -7327,10 +7395,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 6,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[67],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[61],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
@@ -7339,10 +7407,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[294],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[282],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
@@ -7351,10 +7419,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 5,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[73],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
@@ -7363,10 +7431,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 4,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[290],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* parameters */ &kParameters[274],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
@@ -7375,231 +7443,39 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 5,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[123],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
     /* [125] */
-    /* num parameters */ 4,
-    /* num open types */ 0,
+    /* num parameters */ 1,
+    /* num open types */ 1,
     /* num open numbers */ 0,
     /* open types */ &kOpenTypes[4],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[246],
-    /* return matcher indices */ &kMatcherIndices[15],
+    /* parameters */ &kParameters[751],
+    /* return matcher indices */ &kMatcherIndices[3],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [126] */
-    /* num parameters */ 5,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
+    /* num parameters */ 1,
+    /* num open types */ 1,
+    /* num open numbers */ 1,
     /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[168],
-    /* return matcher indices */ &kMatcherIndices[15],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[752],
+    /* return matcher indices */ &kMatcherIndices[38],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [127] */
-    /* num parameters */ 5,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[163],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [128] */
-    /* num parameters */ 6,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[25],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [129] */
-    /* num parameters */ 4,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[262],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [130] */
-    /* num parameters */ 5,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[143],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [131] */
-    /* num parameters */ 4,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[286],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [132] */
-    /* num parameters */ 5,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[193],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [133] */
-    /* num parameters */ 5,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[128],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [134] */
-    /* num parameters */ 6,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[19],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [135] */
-    /* num parameters */ 4,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[238],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [136] */
-    /* num parameters */ 5,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[173],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [137] */
-    /* num parameters */ 4,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[254],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [138] */
-    /* num parameters */ 5,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[158],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [139] */
-    /* num parameters */ 5,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[213],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [140] */
-    /* num parameters */ 6,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[31],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [141] */
-    /* num parameters */ 4,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[282],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [142] */
-    /* num parameters */ 5,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[133],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [143] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 0,
@@ -7611,7 +7487,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [144] */
+    /* [128] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -7623,7 +7499,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [145] */
+    /* [129] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -7635,7 +7511,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [146] */
+    /* [130] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -7647,11 +7523,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [147] */
+    /* [131] */
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 2,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
     /* parameters */ &kParameters[527],
     /* return matcher indices */ &kMatcherIndices[20],
@@ -7659,7 +7535,223 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
+    /* [132] */
+    /* num parameters */ 4,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[242],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [133] */
+    /* num parameters */ 5,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[158],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [134] */
+    /* num parameters */ 5,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[83],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [135] */
+    /* num parameters */ 6,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[37],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [136] */
+    /* num parameters */ 4,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[254],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [137] */
+    /* num parameters */ 5,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[133],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [138] */
+    /* num parameters */ 4,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[246],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [139] */
+    /* num parameters */ 5,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[143],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [140] */
+    /* num parameters */ 5,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[138],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [141] */
+    /* num parameters */ 6,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[49],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [142] */
+    /* num parameters */ 4,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[262],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [143] */
+    /* num parameters */ 5,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[118],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [144] */
+    /* num parameters */ 4,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[258],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [145] */
+    /* num parameters */ 5,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[188],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [146] */
+    /* num parameters */ 5,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[103],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [147] */
+    /* num parameters */ 6,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[13],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* is_deprecated */ false,
+  },
+  {
     /* [148] */
+    /* num parameters */ 4,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[238],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [149] */
+    /* num parameters */ 5,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[163],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [150] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 0,
@@ -7671,7 +7763,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [149] */
+    /* [151] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -7683,7 +7775,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [150] */
+    /* [152] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -7695,7 +7787,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [151] */
+    /* [153] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -7707,11 +7799,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [152] */
+    /* [154] */
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 2,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
     /* parameters */ &kParameters[547],
     /* return matcher indices */ &kMatcherIndices[20],
@@ -7719,50 +7811,26 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [153] */
+    /* [155] */
     /* num parameters */ 1,
     /* num open types */ 1,
     /* num open numbers */ 0,
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[680],
-    /* return matcher indices */ &kMatcherIndices[1],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [154] */
-    /* num parameters */ 1,
-    /* num open types */ 1,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[0],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[679],
-    /* return matcher indices */ &kMatcherIndices[1],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [155] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[678],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [156] */
     /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num open types */ 1,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[677],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* parameters */ &kParameters[679],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -7770,28 +7838,52 @@ constexpr OverloadInfo kOverloads[] = {
     /* [157] */
     /* num parameters */ 1,
     /* num open types */ 0,
-    /* num open numbers */ 2,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[3],
-    /* parameters */ &kParameters[676],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[678],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [158] */
-    /* num parameters */ 2,
-    /* num open types */ 1,
+    /* num parameters */ 1,
+    /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[0],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[577],
-    /* return matcher indices */ &kMatcherIndices[3],
+    /* parameters */ &kParameters[677],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [159] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 2,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[3],
+    /* parameters */ &kParameters[676],
+    /* return matcher indices */ &kMatcherIndices[46],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [160] */
+    /* num parameters */ 2,
+    /* num open types */ 1,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[0],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[579],
+    /* return matcher indices */ &kMatcherIndices[3],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [161] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -7803,7 +7895,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [160] */
+    /* [162] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -7815,7 +7907,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [161] */
+    /* [163] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -7827,7 +7919,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [162] */
+    /* [164] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 0,
@@ -7839,7 +7931,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [163] */
+    /* [165] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -7851,7 +7943,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [164] */
+    /* [166] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -7863,7 +7955,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [165] */
+    /* [167] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -7875,11 +7967,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [166] */
+    /* [168] */
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[605],
     /* return matcher indices */ &kMatcherIndices[17],
@@ -7887,11 +7979,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [167] */
+    /* [169] */
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
     /* parameters */ &kParameters[609],
     /* return matcher indices */ &kMatcherIndices[35],
@@ -7899,7 +7991,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [168] */
+    /* [170] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 0,
@@ -7911,7 +8003,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [169] */
+    /* [171] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -7923,11 +8015,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [170] */
+    /* [172] */
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[613],
     /* return matcher indices */ &kMatcherIndices[17],
@@ -7935,11 +8027,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [171] */
+    /* [173] */
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
     /* parameters */ &kParameters[615],
     /* return matcher indices */ &kMatcherIndices[35],
@@ -7947,7 +8039,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [172] */
+    /* [174] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 0,
@@ -7959,7 +8051,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [173] */
+    /* [175] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -7971,43 +8063,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [174] */
-    /* num parameters */ 3,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[395],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [175] */
-    /* num parameters */ 3,
-    /* num open types */ 0,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[398],
-    /* return matcher indices */ &kMatcherIndices[32],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
     /* [176] */
-    /* num parameters */ 3,
-    /* num open types */ 0,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[401],
-    /* return matcher indices */ &kMatcherIndices[32],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [177] */
     /* num parameters */ 3,
     /* num open types */ 1,
     /* num open numbers */ 0,
@@ -8019,7 +8075,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [178] */
+    /* [177] */
     /* num parameters */ 3,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -8031,7 +8087,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [179] */
+    /* [178] */
     /* num parameters */ 3,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -8043,25 +8099,37 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [180] */
-    /* num parameters */ 1,
+    /* [179] */
+    /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[738],
+    /* parameters */ &kParameters[395],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
-    /* [181] */
-    /* num parameters */ 1,
+    /* [180] */
+    /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[737],
+    /* parameters */ &kParameters[398],
+    /* return matcher indices */ &kMatcherIndices[32],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [181] */
+    /* num parameters */ 3,
+    /* num open types */ 0,
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[401],
     /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -8071,11 +8139,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[767],
+    /* parameters */ &kParameters[735],
     /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
@@ -8083,11 +8151,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[799],
+    /* parameters */ &kParameters[734],
     /* return matcher indices */ &kMatcherIndices[32],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
@@ -8095,9 +8163,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[766],
+    /* parameters */ &kParameters[773],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
@@ -8107,9 +8175,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[765],
+    /* parameters */ &kParameters[772],
     /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
@@ -8119,9 +8187,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[764],
+    /* parameters */ &kParameters[805],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
@@ -8131,9 +8199,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[763],
+    /* parameters */ &kParameters[771],
     /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
@@ -8143,11 +8211,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[762],
+    /* parameters */ &kParameters[770],
     /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
@@ -8155,11 +8223,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[761],
+    /* parameters */ &kParameters[769],
     /* return matcher indices */ &kMatcherIndices[32],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
@@ -8167,9 +8235,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[760],
+    /* parameters */ &kParameters[768],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -8179,15 +8247,39 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[759],
+    /* parameters */ &kParameters[767],
     /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [192] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[766],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [193] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[765],
+    /* return matcher indices */ &kMatcherIndices[32],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [194] */
     /* num parameters */ 3,
     /* num open types */ 1,
     /* num open numbers */ 0,
@@ -8199,19 +8291,19 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [193] */
+    /* [195] */
     /* num parameters */ 3,
     /* num open types */ 1,
     /* num open numbers */ 1,
     /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[431],
+    /* parameters */ &kParameters[365],
     /* return matcher indices */ &kMatcherIndices[38],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
-    /* [194] */
+    /* [196] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 0,
@@ -8223,7 +8315,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [195] */
+    /* [197] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -8235,7 +8327,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [196] */
+    /* [198] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 0,
@@ -8247,7 +8339,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [197] */
+    /* [199] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -8259,97 +8351,73 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [198] */
-    /* num parameters */ 1,
-    /* num open types */ 1,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[1],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[756],
-    /* return matcher indices */ &kMatcherIndices[3],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [199] */
-    /* num parameters */ 1,
-    /* num open types */ 1,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[1],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[755],
-    /* return matcher indices */ &kMatcherIndices[38],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
     /* [200] */
     /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num open types */ 1,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[754],
-    /* return matcher indices */ &kMatcherIndices[15],
+    /* parameters */ &kParameters[762],
+    /* return matcher indices */ &kMatcherIndices[3],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [201] */
     /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num open types */ 1,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[753],
-    /* return matcher indices */ &kMatcherIndices[32],
+    /* parameters */ &kParameters[761],
+    /* return matcher indices */ &kMatcherIndices[38],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [202] */
-    /* num parameters */ 3,
+    /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[377],
+    /* parameters */ &kParameters[760],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [203] */
-    /* num parameters */ 3,
+    /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[368],
+    /* parameters */ &kParameters[759],
     /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [204] */
-    /* num parameters */ 1,
+    /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[752],
+    /* parameters */ &kParameters[356],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [205] */
-    /* num parameters */ 1,
+    /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[751],
+    /* parameters */ &kParameters[353],
     /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -8359,10 +8427,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[750],
-    /* return matcher indices */ &kMatcherIndices[152],
+    /* parameters */ &kParameters[758],
+    /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -8371,10 +8439,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[749],
-    /* return matcher indices */ &kMatcherIndices[137],
+    /* parameters */ &kParameters[757],
+    /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -8383,11 +8451,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[748],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* parameters */ &kParameters[756],
+    /* return matcher indices */ &kMatcherIndices[152],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
@@ -8395,11 +8463,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[747],
-    /* return matcher indices */ &kMatcherIndices[32],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* parameters */ &kParameters[755],
+    /* return matcher indices */ &kMatcherIndices[99],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
@@ -8407,9 +8475,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[746],
+    /* parameters */ &kParameters[754],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
@@ -8419,9 +8487,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[745],
+    /* parameters */ &kParameters[753],
     /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
@@ -8431,9 +8499,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[744],
+    /* parameters */ &kParameters[746],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
@@ -8443,7 +8511,31 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[745],
+    /* return matcher indices */ &kMatcherIndices[32],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [214] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[744],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [215] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
     /* parameters */ &kParameters[743],
     /* return matcher indices */ &kMatcherIndices[32],
@@ -8451,35 +8543,35 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [214] */
+    /* [216] */
     /* num parameters */ 4,
     /* num open types */ 1,
     /* num open numbers */ 0,
     /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[346],
+    /* parameters */ &kParameters[342],
     /* return matcher indices */ &kMatcherIndices[3],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
-    /* [215] */
+    /* [217] */
     /* num parameters */ 4,
     /* num open types */ 1,
     /* num open numbers */ 1,
     /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[218],
+    /* parameters */ &kParameters[330],
     /* return matcher indices */ &kMatcherIndices[38],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
-    /* [216] */
+    /* [218] */
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[742],
     /* return matcher indices */ &kMatcherIndices[15],
@@ -8487,11 +8579,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [217] */
+    /* [219] */
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
     /* parameters */ &kParameters[741],
     /* return matcher indices */ &kMatcherIndices[32],
@@ -8499,11 +8591,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [218] */
+    /* [220] */
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[507],
     /* return matcher indices */ &kMatcherIndices[15],
@@ -8511,38 +8603,14 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [219] */
+    /* [221] */
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
     /* parameters */ &kParameters[659],
     /* return matcher indices */ &kMatcherIndices[32],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [220] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[740],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [221] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[739],
-    /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -8551,11 +8619,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[769],
+    /* parameters */ &kParameters[740],
     /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
@@ -8563,11 +8631,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[768],
-    /* return matcher indices */ &kMatcherIndices[32],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* parameters */ &kParameters[739],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
@@ -8575,9 +8643,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[735],
+    /* parameters */ &kParameters[738],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -8587,15 +8655,39 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[734],
+    /* parameters */ &kParameters[737],
     /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [226] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[775],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [227] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[774],
+    /* return matcher indices */ &kMatcherIndices[32],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [228] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 0,
@@ -8607,63 +8699,39 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [227] */
+    /* [229] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
     /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[579],
+    /* parameters */ &kParameters[487],
     /* return matcher indices */ &kMatcherIndices[38],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
-    /* [228] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[771],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [229] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[770],
-    /* return matcher indices */ &kMatcherIndices[32],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
-    /* is_deprecated */ false,
-  },
-  {
     /* [230] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num parameters */ 2,
+    /* num open types */ 1,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[773],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* parameters */ &kParameters[485],
+    /* return matcher indices */ &kMatcherIndices[3],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [231] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num parameters */ 2,
+    /* num open types */ 1,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[772],
-    /* return matcher indices */ &kMatcherIndices[32],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* parameters */ &kParameters[577],
+    /* return matcher indices */ &kMatcherIndices[38],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
@@ -8671,11 +8739,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[732],
-    /* return matcher indices */ &kMatcherIndices[151],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* parameters */ &kParameters[777],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
@@ -8683,15 +8751,39 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[731],
-    /* return matcher indices */ &kMatcherIndices[119],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* parameters */ &kParameters[776],
+    /* return matcher indices */ &kMatcherIndices[32],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
     /* is_deprecated */ false,
   },
   {
     /* [234] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[732],
+    /* return matcher indices */ &kMatcherIndices[151],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [235] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[731],
+    /* return matcher indices */ &kMatcherIndices[125],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [236] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 0,
@@ -8703,7 +8795,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [235] */
+    /* [237] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -8715,7 +8807,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [236] */
+    /* [238] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 0,
@@ -8727,7 +8819,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [237] */
+    /* [239] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -8739,7 +8831,31 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [238] */
+    /* [240] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[779],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [241] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[778],
+    /* return matcher indices */ &kMatcherIndices[32],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kFragment),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [242] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 0,
@@ -8751,7 +8867,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [239] */
+    /* [243] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -8763,31 +8879,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [240] */
-    /* num parameters */ 2,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[599],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [241] */
-    /* num parameters */ 2,
-    /* num open types */ 0,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[597],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [242] */
+    /* [244] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 0,
@@ -8799,7 +8891,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [243] */
+    /* [245] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -8811,7 +8903,79 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [244] */
+    /* [246] */
+    /* num parameters */ 2,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[599],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [247] */
+    /* num parameters */ 2,
+    /* num open types */ 0,
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[597],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [248] */
+    /* num parameters */ 2,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[483],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [249] */
+    /* num parameters */ 2,
+    /* num open types */ 0,
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[481],
+    /* return matcher indices */ &kMatcherIndices[32],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [250] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[724],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [251] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[723],
+    /* return matcher indices */ &kMatcherIndices[32],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [252] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 0,
@@ -8823,7 +8987,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [245] */
+    /* [253] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -8835,103 +8999,31 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [246] */
-    /* num parameters */ 2,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[483],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [247] */
-    /* num parameters */ 2,
-    /* num open types */ 0,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[481],
-    /* return matcher indices */ &kMatcherIndices[32],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [248] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[724],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [249] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[723],
-    /* return matcher indices */ &kMatcherIndices[32],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [250] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[776],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [251] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[775],
-    /* return matcher indices */ &kMatcherIndices[32],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [252] */
-    /* num parameters */ 1,
-    /* num open types */ 1,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[0],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[733],
-    /* return matcher indices */ &kMatcherIndices[3],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [253] */
-    /* num parameters */ 1,
-    /* num open types */ 1,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[0],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[698],
-    /* return matcher indices */ &kMatcherIndices[38],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
     /* [254] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[782],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [255] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[781],
+    /* return matcher indices */ &kMatcherIndices[32],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [256] */
     /* num parameters */ 1,
     /* num open types */ 1,
     /* num open numbers */ 0,
@@ -8943,7 +9035,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [255] */
+    /* [257] */
     /* num parameters */ 1,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -8955,11 +9047,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [256] */
+    /* [258] */
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[720],
     /* return matcher indices */ &kMatcherIndices[15],
@@ -8967,11 +9059,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [257] */
+    /* [259] */
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
     /* parameters */ &kParameters[719],
     /* return matcher indices */ &kMatcherIndices[32],
@@ -8979,50 +9071,26 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [258] */
-    /* num parameters */ 1,
-    /* num open types */ 1,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[1],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[778],
-    /* return matcher indices */ &kMatcherIndices[3],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [259] */
-    /* num parameters */ 1,
-    /* num open types */ 1,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[1],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[777],
-    /* return matcher indices */ &kMatcherIndices[38],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
     /* [260] */
     /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num open types */ 1,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[718],
-    /* return matcher indices */ &kMatcherIndices[15],
+    /* parameters */ &kParameters[733],
+    /* return matcher indices */ &kMatcherIndices[3],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [261] */
     /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num open types */ 1,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[717],
-    /* return matcher indices */ &kMatcherIndices[32],
+    /* parameters */ &kParameters[698],
+    /* return matcher indices */ &kMatcherIndices[38],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -9031,9 +9099,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[716],
+    /* parameters */ &kParameters[718],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -9043,9 +9111,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[715],
+    /* parameters */ &kParameters[717],
     /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -9055,9 +9123,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[714],
+    /* parameters */ &kParameters[716],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -9067,33 +9135,33 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[713],
+    /* parameters */ &kParameters[715],
     /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [266] */
-    /* num parameters */ 3,
+    /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[428],
+    /* parameters */ &kParameters[714],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [267] */
-    /* num parameters */ 3,
+    /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[392],
+    /* parameters */ &kParameters[713],
     /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -9103,19 +9171,43 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[389],
+    /* parameters */ &kParameters[428],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ true,
+    /* is_deprecated */ false,
   },
   {
     /* [269] */
     /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[389],
+    /* return matcher indices */ &kMatcherIndices[32],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [270] */
+    /* num parameters */ 3,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[386],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ true,
+  },
+  {
+    /* [271] */
+    /* num parameters */ 3,
+    /* num open types */ 0,
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
     /* parameters */ &kParameters[383],
     /* return matcher indices */ &kMatcherIndices[32],
@@ -9123,11 +9215,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ true,
   },
   {
-    /* [270] */
+    /* [272] */
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[712],
     /* return matcher indices */ &kMatcherIndices[15],
@@ -9135,11 +9227,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [271] */
+    /* [273] */
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
     /* parameters */ &kParameters[711],
     /* return matcher indices */ &kMatcherIndices[32],
@@ -9147,11 +9239,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [272] */
+    /* [274] */
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[495],
     /* return matcher indices */ &kMatcherIndices[15],
@@ -9159,11 +9251,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [273] */
+    /* [275] */
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
     /* parameters */ &kParameters[497],
     /* return matcher indices */ &kMatcherIndices[32],
@@ -9171,50 +9263,26 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [274] */
-    /* num parameters */ 1,
-    /* num open types */ 1,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[1],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[780],
-    /* return matcher indices */ &kMatcherIndices[3],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [275] */
-    /* num parameters */ 1,
-    /* num open types */ 1,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[1],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[779],
-    /* return matcher indices */ &kMatcherIndices[38],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
     /* [276] */
     /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num open types */ 1,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[709],
-    /* return matcher indices */ &kMatcherIndices[15],
+    /* parameters */ &kParameters[784],
+    /* return matcher indices */ &kMatcherIndices[3],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [277] */
     /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num open types */ 1,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[708],
-    /* return matcher indices */ &kMatcherIndices[32],
+    /* parameters */ &kParameters[783],
+    /* return matcher indices */ &kMatcherIndices[38],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -9223,9 +9291,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[707],
+    /* parameters */ &kParameters[709],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -9235,9 +9303,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[671],
+    /* parameters */ &kParameters[708],
     /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -9245,48 +9313,48 @@ constexpr OverloadInfo kOverloads[] = {
   {
     /* [280] */
     /* num parameters */ 1,
-    /* num open types */ 1,
+    /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[1],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[782],
-    /* return matcher indices */ &kMatcherIndices[3],
+    /* parameters */ &kParameters[707],
+    /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [281] */
     /* num parameters */ 1,
-    /* num open types */ 1,
+    /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[1],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[781],
-    /* return matcher indices */ &kMatcherIndices[38],
+    /* parameters */ &kParameters[706],
+    /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [282] */
     /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num open types */ 1,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[705],
-    /* return matcher indices */ &kMatcherIndices[15],
+    /* parameters */ &kParameters[786],
+    /* return matcher indices */ &kMatcherIndices[3],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [283] */
     /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num open types */ 1,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[704],
-    /* return matcher indices */ &kMatcherIndices[32],
+    /* parameters */ &kParameters[785],
+    /* return matcher indices */ &kMatcherIndices[38],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -9295,9 +9363,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[784],
+    /* parameters */ &kParameters[675],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -9307,130 +9375,130 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[783],
+    /* parameters */ &kParameters[704],
     /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [286] */
-    /* num parameters */ 2,
+    /* num parameters */ 1,
     /* num open types */ 1,
     /* num open numbers */ 0,
     /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[657],
+    /* parameters */ &kParameters[749],
     /* return matcher indices */ &kMatcherIndices[3],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [287] */
-    /* num parameters */ 2,
+    /* num parameters */ 1,
     /* num open types */ 1,
     /* num open numbers */ 1,
     /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[479],
+    /* parameters */ &kParameters[750],
     /* return matcher indices */ &kMatcherIndices[38],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [288] */
-    /* num parameters */ 3,
-    /* num open types */ 1,
+    /* num parameters */ 1,
+    /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[0],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[362],
-    /* return matcher indices */ &kMatcherIndices[3],
+    /* parameters */ &kParameters[747],
+    /* return matcher indices */ &kMatcherIndices[17],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [289] */
-    /* num parameters */ 3,
-    /* num open types */ 1,
+    /* num parameters */ 1,
+    /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[0],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[365],
-    /* return matcher indices */ &kMatcherIndices[38],
+    /* parameters */ &kParameters[748],
+    /* return matcher indices */ &kMatcherIndices[35],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [290] */
     /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num open types */ 1,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[788],
-    /* return matcher indices */ &kMatcherIndices[15],
+    /* return matcher indices */ &kMatcherIndices[3],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [291] */
     /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num open types */ 1,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[6],
     /* parameters */ &kParameters[787],
-    /* return matcher indices */ &kMatcherIndices[32],
+    /* return matcher indices */ &kMatcherIndices[38],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [292] */
-    /* num parameters */ 2,
+    /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[633],
+    /* parameters */ &kParameters[792],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [293] */
-    /* num parameters */ 2,
+    /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[631],
+    /* parameters */ &kParameters[791],
     /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [294] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num parameters */ 3,
+    /* num open types */ 1,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[790],
-    /* return matcher indices */ &kMatcherIndices[15],
+    /* parameters */ &kParameters[413],
+    /* return matcher indices */ &kMatcherIndices[3],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [295] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num parameters */ 3,
+    /* num open types */ 1,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[789],
-    /* return matcher indices */ &kMatcherIndices[32],
+    /* parameters */ &kParameters[392],
+    /* return matcher indices */ &kMatcherIndices[38],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -9439,9 +9507,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[792],
+    /* parameters */ &kParameters[794],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -9451,15 +9519,87 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[791],
+    /* parameters */ &kParameters[793],
     /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [298] */
+    /* num parameters */ 2,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[633],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [299] */
+    /* num parameters */ 2,
+    /* num open types */ 0,
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[631],
+    /* return matcher indices */ &kMatcherIndices[32],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [300] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[796],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [301] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[795],
+    /* return matcher indices */ &kMatcherIndices[32],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [302] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[798],
+    /* return matcher indices */ &kMatcherIndices[15],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [303] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[797],
+    /* return matcher indices */ &kMatcherIndices[32],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [304] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 0,
@@ -9471,7 +9611,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [299] */
+    /* [305] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -9483,86 +9623,14 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [300] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[795],
-    /* return matcher indices */ &kMatcherIndices[17],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [301] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[794],
-    /* return matcher indices */ &kMatcherIndices[17],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [302] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[797],
-    /* return matcher indices */ &kMatcherIndices[17],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [303] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[796],
-    /* return matcher indices */ &kMatcherIndices[17],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [304] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[710],
-    /* return matcher indices */ &kMatcherIndices[15],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [305] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[798],
-    /* return matcher indices */ &kMatcherIndices[32],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
     /* [306] */
     /* num parameters */ 1,
-    /* num open types */ 1,
+    /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[0],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[664],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* parameters */ &kParameters[801],
+    /* return matcher indices */ &kMatcherIndices[17],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -9570,23 +9638,23 @@ constexpr OverloadInfo kOverloads[] = {
     /* [307] */
     /* num parameters */ 1,
     /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[663],
-    /* return matcher indices */ &kMatcherIndices[1],
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[800],
+    /* return matcher indices */ &kMatcherIndices[17],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [308] */
     /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num open types */ 1,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[0],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[786],
-    /* return matcher indices */ &kMatcherIndices[15],
+    /* parameters */ &kParameters[664],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -9594,59 +9662,59 @@ constexpr OverloadInfo kOverloads[] = {
     /* [309] */
     /* num parameters */ 1,
     /* num open types */ 0,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[785],
-    /* return matcher indices */ &kMatcherIndices[32],
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[663],
+    /* return matcher indices */ &kMatcherIndices[46],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [310] */
-    /* num parameters */ 2,
-    /* num open types */ 1,
+    /* num parameters */ 1,
+    /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[0],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[487],
-    /* return matcher indices */ &kMatcherIndices[3],
+    /* parameters */ &kParameters[803],
+    /* return matcher indices */ &kMatcherIndices[17],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [311] */
-    /* num parameters */ 2,
-    /* num open types */ 1,
+    /* num parameters */ 1,
+    /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[0],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[485],
-    /* return matcher indices */ &kMatcherIndices[38],
+    /* parameters */ &kParameters[802],
+    /* return matcher indices */ &kMatcherIndices[17],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [312] */
     /* num parameters */ 1,
-    /* num open types */ 1,
+    /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[1],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[758],
-    /* return matcher indices */ &kMatcherIndices[3],
+    /* parameters */ &kParameters[710],
+    /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [313] */
     /* num parameters */ 1,
-    /* num open types */ 1,
+    /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[1],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[757],
-    /* return matcher indices */ &kMatcherIndices[38],
+    /* parameters */ &kParameters[804],
+    /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -9654,11 +9722,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* [314] */
     /* num parameters */ 1,
     /* num open types */ 0,
-    /* num open numbers */ 2,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[5],
-    /* parameters */ &kParameters[706],
-    /* return matcher indices */ &kMatcherIndices[16],
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[790],
+    /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -9666,52 +9734,100 @@ constexpr OverloadInfo kOverloads[] = {
     /* [315] */
     /* num parameters */ 1,
     /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[700],
-    /* return matcher indices */ &kMatcherIndices[111],
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[789],
+    /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [316] */
     /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num open types */ 1,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[701],
-    /* return matcher indices */ &kMatcherIndices[115],
+    /* parameters */ &kParameters[764],
+    /* return matcher indices */ &kMatcherIndices[3],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [317] */
     /* num parameters */ 1,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[702],
-    /* return matcher indices */ &kMatcherIndices[115],
+    /* num open types */ 1,
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[1],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[763],
+    /* return matcher indices */ &kMatcherIndices[38],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [318] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
+    /* num parameters */ 2,
+    /* num open types */ 1,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[703],
-    /* return matcher indices */ &kMatcherIndices[115],
+    /* parameters */ &kParameters[657],
+    /* return matcher indices */ &kMatcherIndices[3],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [319] */
+    /* num parameters */ 2,
+    /* num open types */ 1,
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[1],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[479],
+    /* return matcher indices */ &kMatcherIndices[38],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [320] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 2,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[5],
+    /* parameters */ &kParameters[705],
+    /* return matcher indices */ &kMatcherIndices[16],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [321] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[700],
+    /* return matcher indices */ &kMatcherIndices[103],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [322] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[701],
+    /* return matcher indices */ &kMatcherIndices[123],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [323] */
     /* num parameters */ 1,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -9723,7 +9839,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [320] */
+    /* [324] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -9735,7 +9851,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [321] */
+    /* [325] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -9747,7 +9863,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [322] */
+    /* [326] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -9759,7 +9875,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [323] */
+    /* [327] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -9771,7 +9887,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [324] */
+    /* [328] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -9783,7 +9899,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [325] */
+    /* [329] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -9795,7 +9911,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [326] */
+    /* [330] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -9807,7 +9923,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [327] */
+    /* [331] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -9819,7 +9935,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [328] */
+    /* [332] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -9831,63 +9947,15 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [329] */
+    /* [333] */
     /* num parameters */ 3,
     /* num open types */ 1,
     /* num open numbers */ 1,
     /* open types */ &kOpenTypes[1],
     /* open numbers */ &kOpenNumbers[9],
-    /* parameters */ &kParameters[356],
-    /* return matcher indices */ &kMatcherIndices[135],
+    /* parameters */ &kParameters[350],
+    /* return matcher indices */ &kMatcherIndices[101],
     /* supported_stages */ PipelineStageSet(PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [330] */
-    /* num parameters */ 1,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[699],
-    /* return matcher indices */ &kMatcherIndices[111],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [331] */
-    /* num parameters */ 0,
-    /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[800],
-    /* return matcher indices */ nullptr,
-    /* supported_stages */ PipelineStageSet(PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [332] */
-    /* num parameters */ 3,
-    /* num open types */ 0,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[443],
-    /* return matcher indices */ &kMatcherIndices[32],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
-    /* is_deprecated */ false,
-  },
-  {
-    /* [333] */
-    /* num parameters */ 2,
-    /* num open types */ 0,
-    /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[505],
-    /* return matcher indices */ &kMatcherIndices[32],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
@@ -9895,10 +9963,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[725],
-    /* return matcher indices */ &kMatcherIndices[61],
+    /* parameters */ &kParameters[702],
+    /* return matcher indices */ &kMatcherIndices[123],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -9907,10 +9975,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[726],
-    /* return matcher indices */ &kMatcherIndices[61],
+    /* parameters */ &kParameters[703],
+    /* return matcher indices */ &kMatcherIndices[123],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -9919,34 +9987,34 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[727],
-    /* return matcher indices */ &kMatcherIndices[61],
+    /* parameters */ &kParameters[699],
+    /* return matcher indices */ &kMatcherIndices[103],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [337] */
-    /* num parameters */ 1,
+    /* num parameters */ 0,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[728],
-    /* return matcher indices */ &kMatcherIndices[61],
-    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* parameters */ &kParameters[806],
+    /* return matcher indices */ nullptr,
+    /* supported_stages */ PipelineStageSet(PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
     /* [338] */
-    /* num parameters */ 2,
+    /* num parameters */ 3,
     /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[621],
-    /* return matcher indices */ &kMatcherIndices[17],
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[443],
+    /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -9954,11 +10022,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* [339] */
     /* num parameters */ 2,
     /* num open types */ 0,
-    /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
-    /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[623],
-    /* return matcher indices */ &kMatcherIndices[17],
+    /* num open numbers */ 1,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[6],
+    /* parameters */ &kParameters[505],
+    /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -9967,10 +10035,10 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[729],
-    /* return matcher indices */ &kMatcherIndices[61],
+    /* parameters */ &kParameters[725],
+    /* return matcher indices */ &kMatcherIndices[49],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
@@ -9978,8 +10046,80 @@ constexpr OverloadInfo kOverloads[] = {
     /* [341] */
     /* num parameters */ 1,
     /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[726],
+    /* return matcher indices */ &kMatcherIndices[49],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [342] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[727],
+    /* return matcher indices */ &kMatcherIndices[49],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [343] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[728],
+    /* return matcher indices */ &kMatcherIndices[49],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [344] */
+    /* num parameters */ 2,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[621],
+    /* return matcher indices */ &kMatcherIndices[17],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [345] */
+    /* num parameters */ 2,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[623],
+    /* return matcher indices */ &kMatcherIndices[17],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [346] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
+    /* num open numbers */ 0,
+    /* open types */ &kOpenTypes[5],
+    /* open numbers */ &kOpenNumbers[10],
+    /* parameters */ &kParameters[729],
+    /* return matcher indices */ &kMatcherIndices[49],
+    /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
+    /* is_deprecated */ false,
+  },
+  {
+    /* [347] */
+    /* num parameters */ 1,
+    /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
     /* parameters */ &kParameters[730],
     /* return matcher indices */ &kMatcherIndices[32],
@@ -9987,31 +10127,31 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [342] */
+    /* [348] */
     /* num parameters */ 2,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
     /* parameters */ &kParameters[607],
-    /* return matcher indices */ &kMatcherIndices[121],
+    /* return matcher indices */ &kMatcherIndices[97],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
-    /* [343] */
+    /* [349] */
     /* num parameters */ 3,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[425],
+    /* parameters */ &kParameters[362],
     /* return matcher indices */ &kMatcherIndices[32],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
-    /* [344] */
+    /* [350] */
     /* num parameters */ 2,
     /* num open types */ 1,
     /* num open numbers */ 1,
@@ -10023,37 +10163,37 @@ constexpr OverloadInfo kOverloads[] = {
     /* is_deprecated */ false,
   },
   {
-    /* [345] */
+    /* [351] */
     /* num parameters */ 1,
     /* num open types */ 0,
     /* num open numbers */ 1,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[6],
-    /* parameters */ &kParameters[774],
+    /* parameters */ &kParameters[780],
     /* return matcher indices */ &kMatcherIndices[15],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
-    /* [346] */
+    /* [352] */
     /* num parameters */ 1,
     /* num open types */ 1,
     /* num open numbers */ 1,
     /* open types */ &kOpenTypes[2],
     /* open numbers */ &kOpenNumbers[8],
-    /* parameters */ &kParameters[793],
-    /* return matcher indices */ &kMatcherIndices[61],
+    /* parameters */ &kParameters[799],
+    /* return matcher indices */ &kMatcherIndices[49],
     /* supported_stages */ PipelineStageSet(PipelineStage::kVertex, PipelineStage::kFragment, PipelineStage::kCompute),
     /* is_deprecated */ false,
   },
   {
-    /* [347] */
+    /* [353] */
     /* num parameters */ 0,
     /* num open types */ 0,
     /* num open numbers */ 0,
-    /* open types */ &kOpenTypes[4],
+    /* open types */ &kOpenTypes[5],
     /* open numbers */ &kOpenNumbers[10],
-    /* parameters */ &kParameters[800],
+    /* parameters */ &kParameters[806],
     /* return matcher indices */ nullptr,
     /* supported_stages */ PipelineStageSet(PipelineStage::kCompute),
     /* is_deprecated */ false,
@@ -10066,324 +10206,324 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* fn abs<T : fiu32>(T) -> T */
     /* fn abs<N : num, T : fiu32>(vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[252],
+    /* overloads */ &kOverloads[260],
   },
   {
     /* [1] */
     /* fn acos(f32) -> f32 */
     /* fn acos<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[304],
+    /* overloads */ &kOverloads[312],
   },
   {
     /* [2] */
     /* fn all(bool) -> bool */
     /* fn all<N : num>(vec<N, bool>) -> bool */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[302],
+    /* overloads */ &kOverloads[310],
   },
   {
     /* [3] */
     /* fn any(bool) -> bool */
     /* fn any<N : num>(vec<N, bool>) -> bool */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[300],
+    /* overloads */ &kOverloads[306],
   },
   {
     /* [4] */
     /* fn arrayLength<T, A : access>(ptr<storage, array<T>, A>) -> u32 */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[346],
+    /* overloads */ &kOverloads[352],
   },
   {
     /* [5] */
     /* fn asin(f32) -> f32 */
     /* fn asin<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[296],
+    /* overloads */ &kOverloads[302],
   },
   {
     /* [6] */
     /* fn atan(f32) -> f32 */
     /* fn atan<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[294],
+    /* overloads */ &kOverloads[300],
   },
   {
     /* [7] */
     /* fn atan2(f32, f32) -> f32 */
     /* fn atan2<N : num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[292],
+    /* overloads */ &kOverloads[298],
   },
   {
     /* [8] */
     /* fn ceil(f32) -> f32 */
     /* fn ceil<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[290],
+    /* overloads */ &kOverloads[296],
   },
   {
     /* [9] */
     /* fn clamp<T : fiu32>(T, T, T) -> T */
     /* fn clamp<N : num, T : fiu32>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[288],
+    /* overloads */ &kOverloads[294],
   },
   {
     /* [10] */
     /* fn cos(f32) -> f32 */
     /* fn cos<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[308],
+    /* overloads */ &kOverloads[292],
   },
   {
     /* [11] */
     /* fn cosh(f32) -> f32 */
     /* fn cosh<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[284],
+    /* overloads */ &kOverloads[314],
   },
   {
     /* [12] */
     /* fn countLeadingZeros<T : iu32>(T) -> T */
     /* fn countLeadingZeros<N : num, T : iu32>(vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[280],
+    /* overloads */ &kOverloads[290],
   },
   {
     /* [13] */
     /* fn countOneBits<T : iu32>(T) -> T */
     /* fn countOneBits<N : num, T : iu32>(vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[274],
+    /* overloads */ &kOverloads[282],
   },
   {
     /* [14] */
     /* fn countTrailingZeros<T : iu32>(T) -> T */
     /* fn countTrailingZeros<N : num, T : iu32>(vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[258],
+    /* overloads */ &kOverloads[276],
   },
   {
     /* [15] */
     /* fn cross(vec3<f32>, vec3<f32>) -> vec3<f32> */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[342],
+    /* overloads */ &kOverloads[348],
   },
   {
     /* [16] */
     /* fn degrees(f32) -> f32 */
     /* fn degrees<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[250],
+    /* overloads */ &kOverloads[254],
   },
   {
     /* [17] */
     /* fn determinant<N : num>(mat<N, N, f32>) -> f32 */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[345],
+    /* overloads */ &kOverloads[351],
   },
   {
     /* [18] */
     /* fn distance(f32, f32) -> f32 */
     /* fn distance<N : num>(vec<N, f32>, vec<N, f32>) -> f32 */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[240],
+    /* overloads */ &kOverloads[246],
   },
   {
     /* [19] */
     /* fn dot<N : num, T : fiu32>(vec<N, T>, vec<N, T>) -> T */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[344],
+    /* overloads */ &kOverloads[350],
   },
   {
     /* [20] */
     /* fn dpdx(f32) -> f32 */
     /* fn dpdx<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[230],
+    /* overloads */ &kOverloads[240],
   },
   {
     /* [21] */
     /* fn dpdxCoarse(f32) -> f32 */
     /* fn dpdxCoarse<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[228],
+    /* overloads */ &kOverloads[232],
   },
   {
     /* [22] */
     /* fn dpdxFine(f32) -> f32 */
     /* fn dpdxFine<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[222],
+    /* overloads */ &kOverloads[226],
   },
   {
     /* [23] */
     /* fn dpdy(f32) -> f32 */
     /* fn dpdy<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[182],
+    /* overloads */ &kOverloads[184],
   },
   {
     /* [24] */
     /* fn dpdyCoarse(f32) -> f32 */
     /* fn dpdyCoarse<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[184],
+    /* overloads */ &kOverloads[186],
   },
   {
     /* [25] */
     /* fn dpdyFine(f32) -> f32 */
     /* fn dpdyFine<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[186],
+    /* overloads */ &kOverloads[188],
   },
   {
     /* [26] */
     /* fn exp(f32) -> f32 */
     /* fn exp<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[188],
+    /* overloads */ &kOverloads[190],
   },
   {
     /* [27] */
     /* fn exp2(f32) -> f32 */
     /* fn exp2<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[190],
+    /* overloads */ &kOverloads[192],
   },
   {
     /* [28] */
     /* fn extractBits<T : iu32>(T, u32, u32) -> T */
     /* fn extractBits<N : num, T : iu32>(vec<N, T>, u32, u32) -> vec<N, T> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[192],
+    /* overloads */ &kOverloads[194],
   },
   {
     /* [29] */
     /* fn faceForward<N : num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[343],
+    /* overloads */ &kOverloads[349],
   },
   {
     /* [30] */
     /* fn firstLeadingBit<T : iu32>(T) -> T */
     /* fn firstLeadingBit<N : num, T : iu32>(vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[312],
+    /* overloads */ &kOverloads[316],
   },
   {
     /* [31] */
     /* fn firstTrailingBit<T : iu32>(T) -> T */
     /* fn firstTrailingBit<N : num, T : iu32>(vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[198],
+    /* overloads */ &kOverloads[200],
   },
   {
     /* [32] */
     /* fn floor(f32) -> f32 */
     /* fn floor<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[200],
+    /* overloads */ &kOverloads[202],
   },
   {
     /* [33] */
     /* fn fma(f32, f32, f32) -> f32 */
     /* fn fma<N : num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[202],
+    /* overloads */ &kOverloads[204],
   },
   {
     /* [34] */
     /* fn fract(f32) -> f32 */
     /* fn fract<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[204],
+    /* overloads */ &kOverloads[206],
   },
   {
     /* [35] */
     /* fn frexp(f32) -> __frexp_result */
     /* fn frexp<N : num>(vec<N, f32>) -> __frexp_result_vec<N> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[206],
+    /* overloads */ &kOverloads[208],
   },
   {
     /* [36] */
     /* fn fwidth(f32) -> f32 */
     /* fn fwidth<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[208],
+    /* overloads */ &kOverloads[210],
   },
   {
     /* [37] */
     /* fn fwidthCoarse(f32) -> f32 */
     /* fn fwidthCoarse<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[210],
+    /* overloads */ &kOverloads[212],
   },
   {
     /* [38] */
     /* fn fwidthFine(f32) -> f32 */
     /* fn fwidthFine<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[212],
+    /* overloads */ &kOverloads[214],
   },
   {
     /* [39] */
     /* fn insertBits<T : iu32>(T, T, u32, u32) -> T */
     /* fn insertBits<N : num, T : iu32>(vec<N, T>, vec<N, T>, u32, u32) -> vec<N, T> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[214],
+    /* overloads */ &kOverloads[216],
   },
   {
     /* [40] */
     /* fn inverseSqrt(f32) -> f32 */
     /* fn inverseSqrt<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[216],
+    /* overloads */ &kOverloads[218],
   },
   {
     /* [41] */
     /* fn ldexp(f32, i32) -> f32 */
     /* fn ldexp<N : num>(vec<N, f32>, vec<N, i32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[218],
+    /* overloads */ &kOverloads[220],
   },
   {
     /* [42] */
     /* fn length(f32) -> f32 */
     /* fn length<N : num>(vec<N, f32>) -> f32 */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[220],
+    /* overloads */ &kOverloads[222],
   },
   {
     /* [43] */
     /* fn log(f32) -> f32 */
     /* fn log<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[180],
+    /* overloads */ &kOverloads[224],
   },
   {
     /* [44] */
     /* fn log2(f32) -> f32 */
     /* fn log2<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[224],
+    /* overloads */ &kOverloads[182],
   },
   {
     /* [45] */
     /* fn max<T : fiu32>(T, T) -> T */
     /* fn max<N : num, T : fiu32>(vec<N, T>, vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[226],
+    /* overloads */ &kOverloads[228],
   },
   {
     /* [46] */
     /* fn min<T : fiu32>(T, T) -> T */
     /* fn min<N : num, T : fiu32>(vec<N, T>, vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[310],
+    /* overloads */ &kOverloads[230],
   },
   {
     /* [47] */
@@ -10391,90 +10531,90 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* fn mix<N : num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32> */
     /* fn mix<N : num>(vec<N, f32>, vec<N, f32>, f32) -> vec<N, f32> */
     /* num overloads */ 3,
-    /* overloads */ &kOverloads[174],
+    /* overloads */ &kOverloads[179],
   },
   {
     /* [48] */
     /* fn modf(f32) -> __modf_result */
     /* fn modf<N : num>(vec<N, f32>) -> __modf_result_vec<N> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[232],
+    /* overloads */ &kOverloads[234],
   },
   {
     /* [49] */
     /* fn normalize<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[341],
+    /* overloads */ &kOverloads[347],
   },
   {
     /* [50] */
     /* fn pack2x16float(vec2<f32>) -> u32 */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[340],
+    /* overloads */ &kOverloads[346],
   },
   {
     /* [51] */
     /* fn pack2x16snorm(vec2<f32>) -> u32 */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[337],
+    /* overloads */ &kOverloads[343],
   },
   {
     /* [52] */
     /* fn pack2x16unorm(vec2<f32>) -> u32 */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[336],
+    /* overloads */ &kOverloads[342],
   },
   {
     /* [53] */
     /* fn pack4x8snorm(vec4<f32>) -> u32 */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[335],
+    /* overloads */ &kOverloads[341],
   },
   {
     /* [54] */
     /* fn pack4x8unorm(vec4<f32>) -> u32 */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[334],
+    /* overloads */ &kOverloads[340],
   },
   {
     /* [55] */
     /* fn pow(f32, f32) -> f32 */
     /* fn pow<N : num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[246],
+    /* overloads */ &kOverloads[248],
   },
   {
     /* [56] */
     /* fn radians(f32) -> f32 */
     /* fn radians<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[248],
+    /* overloads */ &kOverloads[250],
   },
   {
     /* [57] */
     /* fn reflect<N : num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[333],
+    /* overloads */ &kOverloads[339],
   },
   {
     /* [58] */
     /* fn refract<N : num>(vec<N, f32>, vec<N, f32>, f32) -> vec<N, f32> */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[332],
+    /* overloads */ &kOverloads[338],
   },
   {
     /* [59] */
     /* fn reverseBits<T : iu32>(T) -> T */
     /* fn reverseBits<N : num, T : iu32>(vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[254],
+    /* overloads */ &kOverloads[256],
   },
   {
     /* [60] */
     /* fn round(f32) -> f32 */
     /* fn round<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[256],
+    /* overloads */ &kOverloads[258],
   },
   {
     /* [61] */
@@ -10482,125 +10622,125 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* fn select<T : scalar, N : num>(vec<N, T>, vec<N, T>, bool) -> vec<N, T> */
     /* fn select<N : num, T : scalar>(vec<N, T>, vec<N, T>, vec<N, bool>) -> vec<N, T> */
     /* num overloads */ 3,
-    /* overloads */ &kOverloads[177],
+    /* overloads */ &kOverloads[176],
   },
   {
     /* [62] */
     /* fn sign(f32) -> f32 */
     /* fn sign<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[260],
+    /* overloads */ &kOverloads[262],
   },
   {
     /* [63] */
     /* fn sin(f32) -> f32 */
     /* fn sin<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[262],
+    /* overloads */ &kOverloads[264],
   },
   {
     /* [64] */
     /* fn sinh(f32) -> f32 */
     /* fn sinh<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[264],
+    /* overloads */ &kOverloads[266],
   },
   {
     /* [65] */
     /* fn smoothstep(f32, f32, f32) -> f32 */
     /* fn smoothstep<N : num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[266],
+    /* overloads */ &kOverloads[268],
   },
   {
     /* [66] */
     /* fn smoothStep(f32, f32, f32) -> f32 */
     /* fn smoothStep<N : num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[268],
+    /* overloads */ &kOverloads[270],
   },
   {
     /* [67] */
     /* fn sqrt(f32) -> f32 */
     /* fn sqrt<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[270],
+    /* overloads */ &kOverloads[272],
   },
   {
     /* [68] */
     /* fn step(f32, f32) -> f32 */
     /* fn step<N : num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[272],
+    /* overloads */ &kOverloads[274],
   },
   {
     /* [69] */
     /* fn storageBarrier() */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[331],
+    /* overloads */ &kOverloads[337],
   },
   {
     /* [70] */
     /* fn tan(f32) -> f32 */
     /* fn tan<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[276],
+    /* overloads */ &kOverloads[278],
   },
   {
     /* [71] */
     /* fn tanh(f32) -> f32 */
     /* fn tanh<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[278],
+    /* overloads */ &kOverloads[280],
   },
   {
     /* [72] */
     /* fn transpose<M : num, N : num>(mat<M, N, f32>) -> mat<N, M, f32> */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[314],
+    /* overloads */ &kOverloads[320],
   },
   {
     /* [73] */
     /* fn trunc(f32) -> f32 */
     /* fn trunc<N : num>(vec<N, f32>) -> vec<N, f32> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[282],
+    /* overloads */ &kOverloads[284],
   },
   {
     /* [74] */
     /* fn unpack2x16float(u32) -> vec2<f32> */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[318],
+    /* overloads */ &kOverloads[335],
   },
   {
     /* [75] */
     /* fn unpack2x16snorm(u32) -> vec2<f32> */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[317],
+    /* overloads */ &kOverloads[334],
   },
   {
     /* [76] */
     /* fn unpack2x16unorm(u32) -> vec2<f32> */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[316],
+    /* overloads */ &kOverloads[322],
   },
   {
     /* [77] */
     /* fn unpack4x8snorm(u32) -> vec4<f32> */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[315],
+    /* overloads */ &kOverloads[321],
   },
   {
     /* [78] */
     /* fn unpack4x8unorm(u32) -> vec4<f32> */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[330],
+    /* overloads */ &kOverloads[336],
   },
   {
     /* [79] */
     /* fn workgroupBarrier() */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[347],
+    /* overloads */ &kOverloads[353],
   },
   {
     /* [80] */
@@ -10660,7 +10800,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* fn textureGatherCompare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> vec4<f32> */
     /* fn textureGatherCompare(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: i32, depth_ref: f32) -> vec4<f32> */
     /* num overloads */ 6,
-    /* overloads */ &kOverloads[137],
+    /* overloads */ &kOverloads[132],
   },
   {
     /* [83] */
@@ -10670,7 +10810,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* fn textureNumLayers(texture: texture_depth_cube_array) -> i32 */
     /* fn textureNumLayers<F : texel_format, A : write_only>(texture: texture_storage_2d_array<F, A>) -> i32 */
     /* num overloads */ 5,
-    /* overloads */ &kOverloads[153],
+    /* overloads */ &kOverloads[155],
   },
   {
     /* [84] */
@@ -10692,7 +10832,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* fn textureNumSamples<T : fiu32>(texture: texture_multisampled_2d<T>) -> i32 */
     /* fn textureNumSamples(texture: texture_depth_multisampled_2d) -> i32 */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[306],
+    /* overloads */ &kOverloads[308],
   },
   {
     /* [86] */
@@ -10712,7 +10852,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* fn textureSample(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>) -> f32 */
     /* fn textureSample(texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: i32) -> f32 */
     /* num overloads */ 15,
-    /* overloads */ &kOverloads[42],
+    /* overloads */ &kOverloads[27],
   },
   {
     /* [87] */
@@ -10736,7 +10876,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* fn textureSampleCompare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> f32 */
     /* fn textureSampleCompare(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: i32, depth_ref: f32) -> f32 */
     /* num overloads */ 6,
-    /* overloads */ &kOverloads[131],
+    /* overloads */ &kOverloads[144],
   },
   {
     /* [89] */
@@ -10747,7 +10887,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* fn textureSampleCompareLevel(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> f32 */
     /* fn textureSampleCompareLevel(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: i32, depth_ref: f32) -> f32 */
     /* num overloads */ 6,
-    /* overloads */ &kOverloads[125],
+    /* overloads */ &kOverloads[138],
   },
   {
     /* [90] */
@@ -10780,7 +10920,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* fn textureSampleLevel(texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: i32, level: i32) -> f32 */
     /* fn textureSampleLevel(texture: texture_external, sampler: sampler, coords: vec2<f32>) -> vec4<f32> */
     /* num overloads */ 15,
-    /* overloads */ &kOverloads[27],
+    /* overloads */ &kOverloads[42],
   },
   {
     /* [92] */
@@ -10817,93 +10957,109 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* [94] */
     /* fn atomicLoad<T : iu32, S : workgroup_or_storage>(ptr<S, atomic<T>, read_write>) -> T */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[319],
+    /* overloads */ &kOverloads[323],
   },
   {
     /* [95] */
     /* fn atomicStore<T : iu32, S : workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[320],
+    /* overloads */ &kOverloads[324],
   },
   {
     /* [96] */
     /* fn atomicAdd<T : iu32, S : workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[321],
+    /* overloads */ &kOverloads[325],
   },
   {
     /* [97] */
     /* fn atomicSub<T : iu32, S : workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[322],
+    /* overloads */ &kOverloads[326],
   },
   {
     /* [98] */
     /* fn atomicMax<T : iu32, S : workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[323],
+    /* overloads */ &kOverloads[327],
   },
   {
     /* [99] */
     /* fn atomicMin<T : iu32, S : workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[324],
+    /* overloads */ &kOverloads[328],
   },
   {
     /* [100] */
     /* fn atomicAnd<T : iu32, S : workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[325],
+    /* overloads */ &kOverloads[329],
   },
   {
     /* [101] */
     /* fn atomicOr<T : iu32, S : workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[326],
+    /* overloads */ &kOverloads[330],
   },
   {
     /* [102] */
     /* fn atomicXor<T : iu32, S : workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[327],
+    /* overloads */ &kOverloads[331],
   },
   {
     /* [103] */
     /* fn atomicExchange<T : iu32, S : workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[328],
+    /* overloads */ &kOverloads[332],
   },
   {
     /* [104] */
     /* fn atomicCompareExchangeWeak<T : iu32, S : workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T, T) -> vec2<T> */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[329],
+    /* overloads */ &kOverloads[333],
   },
 };
 
 constexpr IntrinsicInfo kOperators[] = {
   {
     /* [0] */
+    /* op !(bool) -> bool */
+    /* op !<N : num>(vec<N, bool>) -> vec<N, bool> */
+    /* num overloads */ 2,
+    /* overloads */ &kOverloads[288],
+  },
+  {
+    /* [1] */
+    /* op ~<T : iu32>(T) -> T */
+    /* op ~<T : iu32, N : num>(vec<N, T>) -> vec<N, T> */
+    /* num overloads */ 2,
+    /* overloads */ &kOverloads[286],
+  },
+  {
+    /* [2] */
+    /* op -<T : fi32>(T) -> T */
+    /* op -<T : fi32, N : num>(vec<N, T>) -> vec<N, T> */
+    /* op -<T : fiu32>(T, T) -> T */
+    /* op -<T : fiu32, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
+    /* op -<T : fiu32, N : num>(vec<N, T>, T) -> vec<N, T> */
+    /* op -<T : fiu32, N : num>(T, vec<N, T>) -> vec<N, T> */
+    /* op -<N : num, M : num>(mat<N, M, f32>, mat<N, M, f32>) -> mat<N, M, f32> */
+    /* num overloads */ 7,
+    /* overloads */ &kOverloads[125],
+  },
+  {
+    /* [3] */
     /* op +<T : fiu32>(T, T) -> T */
     /* op +<T : fiu32, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
     /* op +<T : fiu32, N : num>(vec<N, T>, T) -> vec<N, T> */
     /* op +<T : fiu32, N : num>(T, vec<N, T>) -> vec<N, T> */
     /* op +<N : num, M : num>(mat<N, M, f32>, mat<N, M, f32>) -> mat<N, M, f32> */
     /* num overloads */ 5,
-    /* overloads */ &kOverloads[143],
+    /* overloads */ &kOverloads[150],
   },
   {
-    /* [1] */
-    /* op -<T : fiu32>(T, T) -> T */
-    /* op -<T : fiu32, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
-    /* op -<T : fiu32, N : num>(vec<N, T>, T) -> vec<N, T> */
-    /* op -<T : fiu32, N : num>(T, vec<N, T>) -> vec<N, T> */
-    /* op -<N : num, M : num>(mat<N, M, f32>, mat<N, M, f32>) -> mat<N, M, f32> */
-    /* num overloads */ 5,
-    /* overloads */ &kOverloads[148],
-  },
-  {
-    /* [2] */
+    /* [4] */
     /* op *<T : fiu32>(T, T) -> T */
     /* op *<T : fiu32, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
     /* op *<T : fiu32, N : num>(vec<N, T>, T) -> vec<N, T> */
@@ -10917,134 +11073,136 @@ constexpr IntrinsicInfo kOperators[] = {
     /* overloads */ &kOverloads[91],
   },
   {
-    /* [3] */
+    /* [5] */
     /* op /<T : fiu32>(T, T) -> T */
     /* op /<T : fiu32, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
     /* op /<T : fiu32, N : num>(vec<N, T>, T) -> vec<N, T> */
     /* op /<T : fiu32, N : num>(T, vec<N, T>) -> vec<N, T> */
     /* num overloads */ 4,
-    /* overloads */ &kOverloads[158],
+    /* overloads */ &kOverloads[160],
   },
   {
-    /* [4] */
+    /* [6] */
     /* op %<T : fiu32>(T, T) -> T */
     /* op %<T : fiu32, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
     /* op %<T : fiu32, N : num>(vec<N, T>, T) -> vec<N, T> */
     /* op %<T : fiu32, N : num>(T, vec<N, T>) -> vec<N, T> */
     /* num overloads */ 4,
-    /* overloads */ &kOverloads[162],
+    /* overloads */ &kOverloads[164],
   },
   {
-    /* [5] */
+    /* [7] */
     /* op ^<T : iu32>(T, T) -> T */
     /* op ^<T : iu32, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[242],
+    /* overloads */ &kOverloads[244],
   },
   {
-    /* [6] */
+    /* [8] */
     /* op &(bool, bool) -> bool */
     /* op &<N : num>(vec<N, bool>, vec<N, bool>) -> vec<N, bool> */
     /* op &<T : iu32>(T, T) -> T */
     /* op &<T : iu32, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
     /* num overloads */ 4,
-    /* overloads */ &kOverloads[166],
+    /* overloads */ &kOverloads[168],
   },
   {
-    /* [7] */
+    /* [9] */
     /* op |(bool, bool) -> bool */
     /* op |<N : num>(vec<N, bool>, vec<N, bool>) -> vec<N, bool> */
     /* op |<T : iu32>(T, T) -> T */
     /* op |<T : iu32, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
     /* num overloads */ 4,
-    /* overloads */ &kOverloads[170],
-  },
-  {
-    /* [8] */
-    /* op &&(bool, bool) -> bool */
-    /* num overloads */ 1,
-    /* overloads */ &kOverloads[338],
-  },
-  {
-    /* [9] */
-    /* op ||(bool, bool) -> bool */
-    /* num overloads */ 1,
-    /* overloads */ &kOverloads[339],
+    /* overloads */ &kOverloads[172],
   },
   {
     /* [10] */
-    /* op ==<T : scalar>(T, T) -> bool */
-    /* op ==<T : scalar, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
-    /* num overloads */ 2,
-    /* overloads */ &kOverloads[236],
+    /* op &&(bool, bool) -> bool */
+    /* num overloads */ 1,
+    /* overloads */ &kOverloads[344],
   },
   {
     /* [11] */
-    /* op !=<T : scalar>(T, T) -> bool */
-    /* op !=<T : scalar, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
-    /* num overloads */ 2,
-    /* overloads */ &kOverloads[234],
+    /* op ||(bool, bool) -> bool */
+    /* num overloads */ 1,
+    /* overloads */ &kOverloads[345],
   },
   {
     /* [12] */
-    /* op <<T : fiu32>(T, T) -> bool */
-    /* op <<T : fiu32, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
-    /* num overloads */ 2,
-    /* overloads */ &kOverloads[196],
-  },
-  {
-    /* [13] */
-    /* op ><T : fiu32>(T, T) -> bool */
-    /* op ><T : fiu32, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
-    /* num overloads */ 2,
-    /* overloads */ &kOverloads[194],
-  },
-  {
-    /* [14] */
-    /* op <=<T : fiu32>(T, T) -> bool */
-    /* op <=<T : fiu32, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
+    /* op ==<T : scalar>(T, T) -> bool */
+    /* op ==<T : scalar, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[238],
   },
   {
-    /* [15] */
-    /* op >=<T : fiu32>(T, T) -> bool */
-    /* op >=<T : fiu32, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
+    /* [13] */
+    /* op !=<T : scalar>(T, T) -> bool */
+    /* op !=<T : scalar, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[244],
+    /* overloads */ &kOverloads[236],
+  },
+  {
+    /* [14] */
+    /* op <<T : fiu32>(T, T) -> bool */
+    /* op <<T : fiu32, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
+    /* num overloads */ 2,
+    /* overloads */ &kOverloads[198],
+  },
+  {
+    /* [15] */
+    /* op ><T : fiu32>(T, T) -> bool */
+    /* op ><T : fiu32, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
+    /* num overloads */ 2,
+    /* overloads */ &kOverloads[196],
   },
   {
     /* [16] */
-    /* op <<<T : iu32>(T, u32) -> T */
-    /* op <<<T : iu32, N : num>(vec<N, T>, vec<N, u32>) -> vec<N, T> */
+    /* op <=<T : fiu32>(T, T) -> bool */
+    /* op <=<T : fiu32, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[298],
+    /* overloads */ &kOverloads[242],
   },
   {
     /* [17] */
+    /* op >=<T : fiu32>(T, T) -> bool */
+    /* op >=<T : fiu32, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
+    /* num overloads */ 2,
+    /* overloads */ &kOverloads[252],
+  },
+  {
+    /* [18] */
+    /* op <<<T : iu32>(T, u32) -> T */
+    /* op <<<T : iu32, N : num>(vec<N, T>, vec<N, u32>) -> vec<N, T> */
+    /* num overloads */ 2,
+    /* overloads */ &kOverloads[304],
+  },
+  {
+    /* [19] */
     /* op >><T : iu32>(T, u32) -> T */
     /* op >><T : iu32, N : num>(vec<N, T>, vec<N, u32>) -> vec<N, T> */
     /* num overloads */ 2,
-    /* overloads */ &kOverloads[286],
+    /* overloads */ &kOverloads[318],
   },
 };
-constexpr uint8_t kOperatorPlus = 0;
-constexpr uint8_t kOperatorMinus = 1;
-constexpr uint8_t kOperatorStar = 2;
-constexpr uint8_t kOperatorDivide = 3;
-constexpr uint8_t kOperatorModulo = 4;
-constexpr uint8_t kOperatorXor = 5;
-constexpr uint8_t kOperatorAnd = 6;
-constexpr uint8_t kOperatorOr = 7;
-constexpr uint8_t kOperatorLogicalAnd = 8;
-constexpr uint8_t kOperatorLogicalOr = 9;
-constexpr uint8_t kOperatorEqual = 10;
-constexpr uint8_t kOperatorNotEqual = 11;
-constexpr uint8_t kOperatorLessThan = 12;
-constexpr uint8_t kOperatorGreaterThan = 13;
-constexpr uint8_t kOperatorLessThanEqual = 14;
-constexpr uint8_t kOperatorGreaterThanEqual = 15;
-constexpr uint8_t kOperatorShiftLeft = 16;
-constexpr uint8_t kOperatorShiftRight = 17;
+constexpr uint8_t kOperatorNot = 0;
+constexpr uint8_t kOperatorComplement = 1;
+constexpr uint8_t kOperatorMinus = 2;
+constexpr uint8_t kOperatorPlus = 3;
+constexpr uint8_t kOperatorStar = 4;
+constexpr uint8_t kOperatorDivide = 5;
+constexpr uint8_t kOperatorModulo = 6;
+constexpr uint8_t kOperatorXor = 7;
+constexpr uint8_t kOperatorAnd = 8;
+constexpr uint8_t kOperatorOr = 9;
+constexpr uint8_t kOperatorLogicalAnd = 10;
+constexpr uint8_t kOperatorLogicalOr = 11;
+constexpr uint8_t kOperatorEqual = 12;
+constexpr uint8_t kOperatorNotEqual = 13;
+constexpr uint8_t kOperatorLessThan = 14;
+constexpr uint8_t kOperatorGreaterThan = 15;
+constexpr uint8_t kOperatorLessThanEqual = 16;
+constexpr uint8_t kOperatorGreaterThanEqual = 17;
+constexpr uint8_t kOperatorShiftLeft = 18;
+constexpr uint8_t kOperatorShiftRight = 19;
 
 // clang-format on

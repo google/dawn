@@ -38,6 +38,14 @@ class IntrinsicTable {
     /// Destructor
     virtual ~IntrinsicTable();
 
+    /// UnaryOperator describes a resolved unary operator
+    struct UnaryOperator {
+        /// The result type of the unary operator
+        const sem::Type* result;
+        /// The type of the arg of the unary operator
+        const sem::Type* arg;
+    };
+
     /// BinaryOperator describes a resolved binary operator
     struct BinaryOperator {
         /// The result type of the binary operator
@@ -57,6 +65,15 @@ class IntrinsicTable {
     virtual const sem::Builtin* Lookup(sem::BuiltinType type,
                                        const std::vector<const sem::Type*>& args,
                                        const Source& source) = 0;
+
+    /// Lookup looks for the unary op overload with the given signature, raising an error
+    /// diagnostic if the operator was not found.
+    /// @param op the unary operator
+    /// @param arg the type of the expression passed to the operator
+    /// @param source the source of the operator call
+    /// @return the operator call target signature. If the operator was not found
+    ///         UnaryOperator::result will be nullptr.
+    virtual UnaryOperator Lookup(ast::UnaryOp op, const sem::Type* arg, const Source& source) = 0;
 
     /// Lookup looks for the binary op overload with the given signature, raising an error
     /// diagnostic if the operator was not found.
