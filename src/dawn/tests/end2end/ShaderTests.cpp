@@ -732,6 +732,35 @@ fn main(@builtin(vertex_index) VertexIndex : u32)
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(255, 255, 255, 255), renderPass.color, 0, 0);
 }
 
+// This is a regression test for crbug.com/dawn:1363 where the BindingRemapper transform was run
+// before the SingleEntryPoint transform, causing one of the other entry points to have conflicting
+// bindings.
+TEST_P(ShaderTests, ConflictingBindingsDueToTransformOrder) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var<uniform> b0 : u32;
+        @group(0) @binding(1) var<uniform> b1 : u32;
+
+        @stage(vertex) fn vertex() -> @builtin(position) vec4<f32> {
+            _ = b0;
+            return vec4<f32>(0.0);
+        }
+
+        @stage(fragment) fn fragment() -> @location(0) vec4<f32> {
+            _ = b0;
+            _ = b1;
+            return vec4<f32>(0.0);
+        }
+    )");
+
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = module;
+    desc.vertex.entryPoint = "vertex";
+    desc.cFragment.module = module;
+    desc.cFragment.entryPoint = "fragment";
+
+    device.CreateRenderPipeline(&desc);
+}
+
 // TODO(tint:1155): Test overridable constants used for workgroup size
 
 DAWN_INSTANTIATE_TEST(ShaderTests,

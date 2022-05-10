@@ -159,15 +159,16 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     }
 
     tint::transform::Manager transformManager;
-    transformManager.append(std::make_unique<tint::transform::BindingRemapper>());
     // Many Vulkan drivers can't handle multi-entrypoint shader modules.
     transformManager.append(std::make_unique<tint::transform::SingleEntryPoint>());
+    // Run the binding remapper after SingleEntryPoint to avoid collisions with unused entryPoints.
+    transformManager.append(std::make_unique<tint::transform::BindingRemapper>());
 
     tint::transform::DataMap transformInputs;
+    transformInputs.Add<tint::transform::SingleEntryPoint::Config>(entryPointName);
     transformInputs.Add<BindingRemapper::Remappings>(std::move(bindingPoints),
                                                      std::move(accessControls),
                                                      /* mayCollide */ false);
-    transformInputs.Add<tint::transform::SingleEntryPoint::Config>(entryPointName);
 
     // Transform external textures into the binding locations specified in the bgl
     // TODO(dawn:1082): Replace this block with ShaderModuleBase::AddExternalTextureTransform.
