@@ -1006,6 +1006,35 @@ class ProgramBuilder {
 
     /// @param source the source information
     /// @param value the integer value
+    /// @return an unsuffixed IntLiteralExpression for the AInt value
+    const ast::IntLiteralExpression* Expr(const Source& source, AInt value) {
+        return create<ast::IntLiteralExpression>(source, value,
+                                                 ast::IntLiteralExpression::Suffix::kNone);
+    }
+
+    /// @param value the integer value
+    /// @return an unsuffixed IntLiteralExpression for the AInt value
+    const ast::IntLiteralExpression* Expr(AInt value) {
+        return create<ast::IntLiteralExpression>(value, ast::IntLiteralExpression::Suffix::kNone);
+    }
+
+    /// @param source the source information
+    /// @param value the integer value
+    /// @return an unsuffixed FloatLiteralExpression for the AFloat value
+    const ast::FloatLiteralExpression* Expr(const Source& source, AFloat value) {
+        return create<ast::FloatLiteralExpression>(source, value.value,
+                                                   ast::FloatLiteralExpression::Suffix::kNone);
+    }
+
+    /// @param value the integer value
+    /// @return an unsuffixed FloatLiteralExpression for the AFloat value
+    const ast::FloatLiteralExpression* Expr(AFloat value) {
+        return create<ast::FloatLiteralExpression>(value.value,
+                                                   ast::FloatLiteralExpression::Suffix::kNone);
+    }
+
+    /// @param source the source information
+    /// @param value the integer value
     /// @return a signed 'i'-suffixed IntLiteralExpression for the i32 value
     const ast::IntLiteralExpression* Expr(const Source& source, i32 value) {
         return create<ast::IntLiteralExpression>(source, value,
