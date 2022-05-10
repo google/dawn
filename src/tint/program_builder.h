@@ -974,13 +974,18 @@ class ProgramBuilder {
     /// @param source the source information
     /// @param value the boolean value
     /// @return a Scalar constructor for the given value
-    const ast::BoolLiteralExpression* Expr(const Source& source, bool value) {
+    template <typename BOOL>
+    std::enable_if_t<std::is_same_v<BOOL, bool>, const ast::BoolLiteralExpression*> Expr(
+        const Source& source,
+        BOOL value) {
         return create<ast::BoolLiteralExpression>(source, value);
     }
 
     /// @param value the boolean value
     /// @return a Scalar constructor for the given value
-    const ast::BoolLiteralExpression* Expr(bool value) {
+    template <typename BOOL>
+    std::enable_if_t<std::is_same_v<BOOL, bool>, const ast::BoolLiteralExpression*> Expr(
+        BOOL value) {
         return create<ast::BoolLiteralExpression>(value);
     }
 

@@ -139,7 +139,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_AddressOfMemberAccessor) {
     Func("main", {}, ty.void_(),
          {
              Decl(Let("v", ty.Of(S), Construct(ty.Of(S)))),
-             CallStmt(Call("foo", AddressOf(Expr(Source{{12, 34}}, MemberAccessor("v", "m"))))),
+             CallStmt(Call("foo", AddressOf(MemberAccessor(Source{{12, 34}}, "v", "m")))),
          });
 
     EXPECT_FALSE(r()->Resolve());
