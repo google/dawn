@@ -374,7 +374,7 @@ struct CanonicalizeEntryPointIO::State {
     void AddVertexPointSize() {
         // Create a new output value and assign it a literal 1.0 value.
         AddOutput("vertex_point_size", ctx.dst->create<sem::F32>(),
-                  {ctx.dst->Builtin(ast::Builtin::kPointSize)}, ctx.dst->Expr(1.f));
+                  {ctx.dst->Builtin(ast::Builtin::kPointSize)}, ctx.dst->Expr(1_f));
     }
 
     /// Create an expression for gl_Position.[component]
@@ -580,7 +580,7 @@ struct CanonicalizeEntryPointIO::State {
                 ctx.dst->create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, GLPosition("y"));
             wrapper_body.push_back(ctx.dst->Assign(pos_y, negate_pos_y));
 
-            auto* two_z = ctx.dst->Mul(ctx.dst->Expr(2.0f), GLPosition("z"));
+            auto* two_z = ctx.dst->Mul(ctx.dst->Expr(2_f), GLPosition("z"));
             auto* fixed_z = ctx.dst->Sub(two_z, GLPosition("w"));
             wrapper_body.push_back(ctx.dst->Assign(GLPosition("z"), fixed_z));
         }

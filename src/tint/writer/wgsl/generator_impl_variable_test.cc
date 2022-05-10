@@ -14,6 +14,8 @@
 
 #include "src/tint/writer/wgsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::wgsl {
 namespace {
 
@@ -99,7 +101,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
-    auto* v = Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr(1.0f));
+    auto* v = Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr(1_f));
 
     GeneratorImpl& gen = Build();
 
@@ -109,7 +111,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
-    auto* v = Let("a", ty.f32(), Expr(1.0f));
+    auto* v = Let("a", ty.f32(), Expr(1_f));
     WrapInFunction(Decl(v));
 
     GeneratorImpl& gen = Build();

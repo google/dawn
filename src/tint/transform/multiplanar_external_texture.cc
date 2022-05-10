@@ -304,11 +304,11 @@ struct MultiplanarExternalTexture::State {
         const ast::CallExpression* plane_1_call = nullptr;
         if (call_type == sem::BuiltinType::kTextureSampleLevel) {
             // textureSampleLevel(plane0, smp, coord.xy, 0.0);
-            single_plane_call = b.Call("textureSampleLevel", "plane0", "smp", "coord", 0.0f);
+            single_plane_call = b.Call("textureSampleLevel", "plane0", "smp", "coord", 0_f);
             // textureSampleLevel(plane0, smp, coord.xy, 0.0);
-            plane_0_call = b.Call("textureSampleLevel", "plane0", "smp", "coord", 0.0f);
+            plane_0_call = b.Call("textureSampleLevel", "plane0", "smp", "coord", 0_f);
             // textureSampleLevel(plane1, smp, coord.xy, 0.0);
-            plane_1_call = b.Call("textureSampleLevel", "plane1", "smp", "coord", 0.0f);
+            plane_1_call = b.Call("textureSampleLevel", "plane1", "smp", "coord", 0_f);
         } else if (call_type == sem::BuiltinType::kTextureLoad) {
             // textureLoad(plane0, coords.xy, 0);
             single_plane_call = b.Call("textureLoad", "plane0", "coord", 0_i);
@@ -334,7 +334,7 @@ struct MultiplanarExternalTexture::State {
                      //         params.yuvToRgbConversionMatrix;
                      b.Assign("color",
                               b.Mul(b.vec4<f32>(b.MemberAccessor(plane_0_call, "r"),
-                                                b.MemberAccessor(plane_1_call, "rg"), 1.0f),
+                                                b.MemberAccessor(plane_1_call, "rg"), 1_f),
                                     b.MemberAccessor("params", "yuvToRgbConversionMatrix")))))),
             // color = gammaConversion(color, gammaDecodeParams);
             b.Assign("color", b.Call("gammaCorrection", "color",
@@ -344,8 +344,8 @@ struct MultiplanarExternalTexture::State {
             // color = gammaConversion(color, gammaEncodeParams);
             b.Assign("color", b.Call("gammaCorrection", "color",
                                      b.MemberAccessor("params", "gammaEncodeParams"))),
-            // return vec4<f32>(color, 1.0f);
-            b.Return(b.vec4<f32>("color", 1.0f))};
+            // return vec4<f32>(color, 1.f);
+            b.Return(b.vec4<f32>("color", 1_f))};
     }
 
     /// Creates the textureSampleExternal function if needed and returns a call

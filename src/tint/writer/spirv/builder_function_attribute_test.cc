@@ -244,7 +244,7 @@ OpFunctionEnd
 TEST_F(BuilderTest, Decoration_ExecutionMode_FragDepth) {
     Func("main", ast::VariableList{}, ty.f32(),
          ast::StatementList{
-             Return(Expr(1.f)),
+             Return(Expr(1_f)),
          },
          ast::AttributeList{Stage(ast::PipelineStage::kFragment)},
          ast::AttributeList{

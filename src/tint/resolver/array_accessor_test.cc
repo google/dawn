@@ -27,7 +27,7 @@ using ResolverIndexAccessorTest = ResolverTest;
 
 TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic_F32) {
     Global("my_var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
-    auto* acc = IndexAccessor("my_var", Expr(Source{{12, 34}}, 1.0f));
+    auto* acc = IndexAccessor("my_var", Expr(Source{{12, 34}}, 1_f));
     WrapInFunction(acc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -116,7 +116,7 @@ TEST_F(ResolverIndexAccessorTest, Matrix_BothDimensions) {
 
 TEST_F(ResolverIndexAccessorTest, Vector_F32) {
     Global("my_var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
-    auto* acc = IndexAccessor("my_var", Expr(Source{{12, 34}}, 2.0f));
+    auto* acc = IndexAccessor("my_var", Expr(Source{{12, 34}}, 2_f));
     WrapInFunction(acc);
 
     EXPECT_FALSE(r()->Resolve());
@@ -224,7 +224,7 @@ TEST_F(ResolverIndexAccessorTest, Array_Literal_F32) {
     // let a : array<f32, 3>;
     // var f : f32 = a[2.0f];
     auto* a = Let("a", ty.array<f32, 3>(), array<f32, 3>());
-    auto* f = Var("a_2", ty.f32(), IndexAccessor("a", Expr(Source{{12, 34}}, 2.0f)));
+    auto* f = Var("a_2", ty.f32(), IndexAccessor("a", Expr(Source{{12, 34}}, 2_f)));
     Func("my_func", ast::VariableList{}, ty.void_(),
          {
              Decl(a),

@@ -140,7 +140,7 @@ TEST_F(ResolverVarLetValidationTest, LetOfPtrConstructedWithRef) {
 TEST_F(ResolverVarLetValidationTest, LocalLetRedeclared) {
     // let l : f32 = 1.;
     // let l : i32 = 0;
-    auto* l1 = Let("l", ty.f32(), Expr(1.f));
+    auto* l1 = Let("l", ty.f32(), Expr(1_f));
     auto* l2 = Let(Source{{12, 34}}, "l", ty.i32(), Expr(0_i));
     WrapInFunction(l1, l2);
 
@@ -156,9 +156,9 @@ TEST_F(ResolverVarLetValidationTest, GlobalVarRedeclaredAsLocal) {
     //   return 0;
     // }
 
-    Global("v", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1f));
+    Global("v", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1_f));
 
-    WrapInFunction(Var(Source{{12, 34}}, "v", ty.f32(), ast::StorageClass::kNone, Expr(2.0f)));
+    WrapInFunction(Var(Source{{12, 34}}, "v", ty.f32(), ast::StorageClass::kNone, Expr(2_f)));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -183,9 +183,9 @@ TEST_F(ResolverVarLetValidationTest, VarRedeclaredInIfBlock) {
     //   var v : f32 = 3.14;
     //   if (true) { var v : f32 = 2.0; }
     // }
-    auto* var_a_float = Var("v", ty.f32(), ast::StorageClass::kNone, Expr(3.1f));
+    auto* var_a_float = Var("v", ty.f32(), ast::StorageClass::kNone, Expr(3.1_f));
 
-    auto* var = Var(Source{{12, 34}}, "v", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
+    auto* var = Var(Source{{12, 34}}, "v", ty.f32(), ast::StorageClass::kNone, Expr(2_f));
 
     auto* cond = Expr(true);
     auto* body = Block(Decl(var));
@@ -274,7 +274,7 @@ TEST_F(ResolverVarLetValidationTest, NonConstructibleType_InferredType) {
 
 TEST_F(ResolverVarLetValidationTest, InvalidStorageClassForInitializer) {
     // var<workgroup> v : f32 = 1.23;
-    Global(Source{{12, 34}}, "v", ty.f32(), ast::StorageClass::kWorkgroup, Expr(1.23f));
+    Global(Source{{12, 34}}, "v", ty.f32(), ast::StorageClass::kWorkgroup, Expr(1.23_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

@@ -71,7 +71,7 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::CallExpression* call,
             return sem::Constant(type, sem::Constant::Scalars(result_size, 0_u));
         }
         if (elem_type->Is<sem::F32>()) {
-            return sem::Constant(type, sem::Constant::Scalars(result_size, 0._f));
+            return sem::Constant(type, sem::Constant::Scalars(result_size, 0_f));
         }
         if (elem_type->Is<sem::Bool>()) {
             return sem::Constant(type, sem::Constant::Scalars(result_size, false));

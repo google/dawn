@@ -288,7 +288,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionTypeMustMatchReturnStatementTypeF
     // fn func() -> f32 { return 2.0; }
     Func("func", ast::VariableList{}, ty.f32(),
          ast::StatementList{
-             Return(Source{{12, 34}}, Expr(2.f)),
+             Return(Source{{12, 34}}, Expr(2_f)),
          },
          ast::AttributeList{});
 
@@ -315,7 +315,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionTypeMustMatchReturnStatementTypeF
     auto* myf32 = Alias("myf32", ty.f32());
     Func("func", ast::VariableList{}, ty.Of(myf32),
          ast::StatementList{
-             Return(Source{{12, 34}}, Expr(2.f)),
+             Return(Source{{12, 34}}, Expr(2_f)),
          },
          ast::AttributeList{});
 
@@ -539,7 +539,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_BadType) {
     // fn main() {}
 
     Func("main", {}, ty.void_(), {},
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Expr(Source{{12, 34}}, 64.f))});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Expr(Source{{12, 34}}, 64_f))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -573,7 +573,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_BadType) {
     // let x = 64.0;
     // @stage(compute) @workgroup_size(x)
     // fn main() {}
-    GlobalConst("x", ty.f32(), Expr(64.f));
+    GlobalConst("x", ty.f32(), Expr(64_f));
     Func("main", {}, ty.void_(), {},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Expr(Source{{12, 34}}, "x"))});
 

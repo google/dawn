@@ -53,7 +53,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_UInt) {
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Float) {
     // Use a number close to 1<<30 but whose decimal representation ends in 0.
-    WrapInFunction(Expr(static_cast<float>((1 << 30) - 4)));
+    WrapInFunction(Expr(f32((1 << 30) - 4)));
 
     GeneratorImpl& gen = Build();
 
@@ -62,7 +62,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Float) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Float) {
-    WrapInFunction(Construct<f32>(-1.2e-5f));
+    WrapInFunction(Construct<f32>(-1.2e-5_f));
 
     GeneratorImpl& gen = Build();
 
@@ -98,7 +98,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Uint) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec) {
-    WrapInFunction(vec3<f32>(1.f, 2.f, 3.f));
+    WrapInFunction(vec3<f32>(1_f, 2_f, 3_f));
 
     GeneratorImpl& gen = Build();
 
@@ -116,8 +116,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_Empty) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat) {
-    WrapInFunction(
-        Construct(ty.mat2x3<f32>(), vec3<f32>(1.0f, 2.0f, 3.0f), vec3<f32>(3.0f, 4.0f, 5.0f)));
+    WrapInFunction(Construct(ty.mat2x3<f32>(), vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(3_f, 4_f, 5_f)));
 
     GeneratorImpl& gen = Build();
 
@@ -139,8 +138,8 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat_Empty) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Array) {
-    WrapInFunction(Construct(ty.array(ty.vec3<f32>(), 3_u), vec3<f32>(1.0f, 2.0f, 3.0f),
-                             vec3<f32>(4.0f, 5.0f, 6.0f), vec3<f32>(7.0f, 8.0f, 9.0f)));
+    WrapInFunction(Construct(ty.array(ty.vec3<f32>(), 3_u), vec3<f32>(1_f, 2_f, 3_f),
+                             vec3<f32>(4_f, 5_f, 6_f), vec3<f32>(7_f, 8_f, 9_f)));
 
     GeneratorImpl& gen = Build();
 
@@ -156,7 +155,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Struct) {
                                    Member("c", ty.vec3<i32>()),
                                });
 
-    WrapInFunction(Construct(ty.Of(str), 1_i, 2.0f, vec3<i32>(3_i, 4_i, 5_i)));
+    WrapInFunction(Construct(ty.Of(str), 1_i, 2_f, vec3<i32>(3_i, 4_i, 5_i)));
 
     GeneratorImpl& gen = Build();
 

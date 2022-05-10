@@ -72,6 +72,8 @@
 #include "src/tint/writer/float_to_string.h"
 #include "src/tint/writer/generate_external_texture_bindings.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace {
 
 bool IsRelational(tint::ast::BinaryOp op) {
@@ -1296,7 +1298,7 @@ bool GeneratorImpl::EmitBarrierCall(std::ostream& out, const sem::Builtin* built
 }
 
 const ast::Expression* GeneratorImpl::CreateF32Zero(const sem::Statement* stmt) {
-    auto* zero = builder_.Expr(0.0f);
+    auto* zero = builder_.Expr(0_f);
     auto* f32 = builder_.create<sem::F32>();
     auto* sem_zero = builder_.create<sem::Expression>(zero, f32, stmt, sem::Constant{},
                                                       /* has_side_effects */ false);

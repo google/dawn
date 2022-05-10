@@ -116,7 +116,7 @@ TEST_F(ResolverValidationTest, UnhandledStmt) {
 TEST_F(ResolverValidationTest, Stmt_If_NonBool) {
     // if (1.23f) {}
 
-    WrapInFunction(If(Expr(Source{{12, 34}}, 1.23f), Block()));
+    WrapInFunction(If(Expr(Source{{12, 34}}, 1.23_f), Block()));
 
     EXPECT_FALSE(r()->Resolve());
 
@@ -126,7 +126,7 @@ TEST_F(ResolverValidationTest, Stmt_If_NonBool) {
 TEST_F(ResolverValidationTest, Stmt_ElseIf_NonBool) {
     // else if (1.23f) {}
 
-    WrapInFunction(If(Expr(true), Block(), Else(If(Expr(Source{{12, 34}}, 1.23f), Block()))));
+    WrapInFunction(If(Expr(true), Block(), Else(If(Expr(Source{{12, 34}}, 1.23_f), Block()))));
 
     EXPECT_FALSE(r()->Resolve());
 
@@ -213,11 +213,11 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariable_Pass) {
     //   return;
     // }
 
-    Global("global_var", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1f));
+    Global("global_var", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1_f));
 
     Func("my_func", ast::VariableList{}, ty.void_(),
          {
-             Assign(Expr(Source{{12, 34}}, "global_var"), 3.14f),
+             Assign(Expr(Source{{12, 34}}, "global_var"), 3.14_f),
              Return(),
          });
 
@@ -229,14 +229,14 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableInnerScope_Fail) {
     //   if (true) { var a : f32 = 2.0; }
     //   a = 3.14;
     // }
-    auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
+    auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2_f));
 
     auto* cond = Expr(true);
     auto* body = Block(Decl(var));
 
     SetSource(Source{{12, 34}});
     auto* lhs = Expr(Source{{12, 34}}, "a");
-    auto* rhs = Expr(3.14f);
+    auto* rhs = Expr(3.14_f);
 
     auto* outer_body = Block(If(cond, body), Assign(lhs, rhs));
 
@@ -251,10 +251,10 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableOuterScope_Pass) {
     //   var a : f32 = 2.0;
     //   if (true) { a = 3.14; }
     // }
-    auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
+    auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2_f));
 
     auto* lhs = Expr(Source{{12, 34}}, "a");
-    auto* rhs = Expr(3.14f);
+    auto* rhs = Expr(3.14_f);
 
     auto* cond = Expr(true);
     auto* body = Block(Assign(lhs, rhs));
@@ -271,11 +271,11 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableDifferentScope_Fail) {
     //  { var a : f32 = 2.0; }
     //  { a = 3.14; }
     // }
-    auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
+    auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2_f));
     auto* first_body = Block(Decl(var));
 
     auto* lhs = Expr(Source{{12, 34}}, "a");
-    auto* rhs = Expr(3.14f);
+    auto* rhs = Expr(3.14_f);
     auto* second_body = Block(Assign(lhs, rhs));
 
     auto* outer_body = Block(first_body, second_body);
@@ -966,7 +966,7 @@ TEST_F(ResolverTest, Stmt_ForLoop_CondIsNotBool) {
     // for (; 1.0f; ) {
     // }
 
-    WrapInFunction(For(nullptr, Expr(Source{{12, 34}}, 1.0f), nullptr, Block()));
+    WrapInFunction(For(nullptr, Expr(Source{{12, 34}}, 1_f), nullptr, Block()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: for-loop condition must be bool, got f32");

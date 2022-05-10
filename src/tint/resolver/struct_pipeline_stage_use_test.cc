@@ -53,7 +53,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsNonEntryPointParam) {
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsNonEntryPointReturnType) {
     auto* s = Structure("S", {Member("a", ty.f32(), {Location(0)})});
 
-    Func("foo", {}, ty.Of(s), {Return(Construct(ty.Of(s), Expr(0.f)))}, {});
+    Func("foo", {}, ty.Of(s), {Return(Construct(ty.Of(s), Expr(0_f)))}, {});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -106,7 +106,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderParam) {
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderReturnType) {
     auto* s = Structure("S", {Member("a", ty.f32(), {Location(0)})});
 
-    Func("main", {}, ty.Of(s), {Return(Construct(ty.Of(s), Expr(0.f)))},
+    Func("main", {}, ty.Of(s), {Return(Construct(ty.Of(s), Expr(0_f)))},
          {Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -169,7 +169,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderReturnTypeViaAlias) {
     auto* s = Structure("S", {Member("a", ty.f32(), {Location(0)})});
     auto* s_alias = Alias("S_alias", ty.Of(s));
 
-    Func("main", {}, ty.Of(s_alias), {Return(Construct(ty.Of(s_alias), Expr(0.f)))},
+    Func("main", {}, ty.Of(s_alias), {Return(Construct(ty.Of(s_alias), Expr(0_f)))},
          {Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();

@@ -15,13 +15,15 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 namespace {
 
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Bitcast) {
-    auto* bitcast = create<ast::BitcastExpression>(ty.u32(), Expr(2.4f));
+    auto* bitcast = create<ast::BitcastExpression>(ty.u32(), Expr(2.4_f));
 
     WrapInFunction(bitcast);
 
@@ -40,7 +42,7 @@ TEST_F(BuilderTest, Bitcast) {
 }
 
 TEST_F(BuilderTest, Bitcast_DuplicateType) {
-    auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr(2.4f));
+    auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr(2.4_f));
 
     WrapInFunction(bitcast);
 

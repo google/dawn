@@ -194,7 +194,7 @@ TEST_F(GlslSanitizerTest, PromoteStructInitializerToConstVar) {
                                    Member("b", ty.vec3<f32>()),
                                    Member("c", ty.i32()),
                                });
-    auto* struct_init = Construct(ty.Of(str), 1_i, vec3<f32>(2.f, 3.f, 4.f), 4_i);
+    auto* struct_init = Construct(ty.Of(str), 1_i, vec3<f32>(2_f, 3_f, 4_f), 4_i);
     auto* struct_access = MemberAccessor(struct_init, "b");
     auto* pos = Var("pos", ty.vec3<f32>(), ast::StorageClass::kNone, struct_access);
 

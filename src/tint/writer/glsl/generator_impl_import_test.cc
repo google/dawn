@@ -35,7 +35,7 @@ TEST_P(GlslImportData_SingleParamTest, FloatScalar) {
     auto param = GetParam();
 
     auto* ident = Expr(param.name);
-    auto* expr = Call(ident, 1.f);
+    auto* expr = Call(ident, 1_f);
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
@@ -92,7 +92,7 @@ TEST_P(GlslImportData_SingleVectorParamTest, FloatVector) {
     auto param = GetParam();
 
     auto* ident = Expr(param.name);
-    auto* expr = Call(ident, vec3<f32>(1.f, 2.f, 3.f));
+    auto* expr = Call(ident, vec3<f32>(1_f, 2_f, 3_f));
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
@@ -132,7 +132,7 @@ using GlslImportData_DualParam_ScalarTest = TestParamHelper<GlslImportData>;
 TEST_P(GlslImportData_DualParam_ScalarTest, Float) {
     auto param = GetParam();
 
-    auto* expr = Call(param.name, 1.f, 2.f);
+    auto* expr = Call(param.name, 1_f, 2_f);
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
@@ -154,7 +154,7 @@ using GlslImportData_DualParam_VectorTest = TestParamHelper<GlslImportData>;
 TEST_P(GlslImportData_DualParam_VectorTest, Float) {
     auto param = GetParam();
 
-    auto* expr = Call(param.name, vec3<f32>(1.f, 2.f, 3.f), vec3<f32>(4.f, 5.f, 6.f));
+    auto* expr = Call(param.name, vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(4_f, 5_f, 6_f));
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
@@ -197,7 +197,7 @@ using GlslImportData_TripleParam_ScalarTest = TestParamHelper<GlslImportData>;
 TEST_P(GlslImportData_TripleParam_ScalarTest, Float) {
     auto param = GetParam();
 
-    auto* expr = Call(param.name, 1.f, 2.f, 3.f);
+    auto* expr = Call(param.name, 1_f, 2_f, 3_f);
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
@@ -216,8 +216,8 @@ using GlslImportData_TripleParam_VectorTest = TestParamHelper<GlslImportData>;
 TEST_P(GlslImportData_TripleParam_VectorTest, Float) {
     auto param = GetParam();
 
-    auto* expr = Call(param.name, vec3<f32>(1.f, 2.f, 3.f), vec3<f32>(4.f, 5.f, 6.f),
-                      vec3<f32>(7.f, 8.f, 9.f));
+    auto* expr = Call(param.name, vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(4_f, 5_f, 6_f),
+                      vec3<f32>(7_f, 8_f, 9_f));
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();

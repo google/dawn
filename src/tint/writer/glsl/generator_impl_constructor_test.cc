@@ -62,7 +62,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Float) {
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Float) {
-    WrapInFunction(Construct<f32>(-1.2e-5f));
+    WrapInFunction(Construct<f32>(-1.2e-5_f));
 
     GeneratorImpl& gen = Build();
 
@@ -98,7 +98,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Uint) {
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec) {
-    WrapInFunction(vec3<f32>(1.f, 2.f, 3.f));
+    WrapInFunction(vec3<f32>(1_f, 2_f, 3_f));
 
     GeneratorImpl& gen = Build();
 
@@ -116,7 +116,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_Empty) {
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_SingleScalar_Float) {
-    WrapInFunction(vec3<f32>(2.0f));
+    WrapInFunction(vec3<f32>(2_f));
 
     GeneratorImpl& gen = Build();
 
@@ -152,7 +152,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_SingleScalar_
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat) {
-    WrapInFunction(mat2x3<f32>(vec3<f32>(1.f, 2.f, 3.f), vec3<f32>(3.f, 4.f, 5.f)));
+    WrapInFunction(mat2x3<f32>(vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(3_f, 4_f, 5_f)));
 
     GeneratorImpl& gen = Build();
 
@@ -172,8 +172,8 @@ TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat_Empty) {
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array) {
-    WrapInFunction(Construct(ty.array(ty.vec3<f32>(), 3_u), vec3<f32>(1.f, 2.f, 3.f),
-                             vec3<f32>(4.f, 5.f, 6.f), vec3<f32>(7.f, 8.f, 9.f)));
+    WrapInFunction(Construct(ty.array(ty.vec3<f32>(), 3_u), vec3<f32>(1_f, 2_f, 3_f),
+                             vec3<f32>(4_f, 5_f, 6_f), vec3<f32>(7_f, 8_f, 9_f)));
 
     GeneratorImpl& gen = Build();
 
@@ -200,7 +200,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct) {
                                    Member("c", ty.vec3<i32>()),
                                });
 
-    WrapInFunction(Construct(ty.Of(str), 1_i, 2.0f, vec3<i32>(3_i, 4_i, 5_i)));
+    WrapInFunction(Construct(ty.Of(str), 1_i, 2_f, vec3<i32>(3_i, 4_i, 5_i)));
 
     GeneratorImpl& gen = SanitizeAndBuild();
 

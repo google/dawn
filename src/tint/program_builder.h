@@ -991,21 +991,6 @@ class ProgramBuilder {
 
     /// @param source the source information
     /// @param value the float value
-    /// @return a unsuffixed FloatLiteralExpression for the float value
-    const ast::FloatLiteralExpression* Expr(const Source& source, float value) {
-        return create<ast::FloatLiteralExpression>(source, static_cast<double>(value),
-                                                   ast::FloatLiteralExpression::Suffix::kNone);
-    }
-
-    /// @param value the float value
-    /// @return a unsuffixed FloatLiteralExpression for the float value
-    const ast::FloatLiteralExpression* Expr(float value) {
-        return create<ast::FloatLiteralExpression>(static_cast<double>(value),
-                                                   ast::FloatLiteralExpression::Suffix::kNone);
-    }
-
-    /// @param source the source information
-    /// @param value the float value
     /// @return a 'f'-suffixed FloatLiteralExpression for the f32 value
     const ast::FloatLiteralExpression* Expr(const Source& source, f32 value) {
         return create<ast::FloatLiteralExpression>(source, static_cast<double>(value.value),

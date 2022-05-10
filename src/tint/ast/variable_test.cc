@@ -17,6 +17,8 @@
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::ast {
 namespace {
 
@@ -84,7 +86,7 @@ TEST_F(VariableTest, Assert_DifferentProgramID_Constructor) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.Var("x", b1.ty.f32(), StorageClass::kNone, b2.Expr(1.2f));
+            b1.Var("x", b1.ty.f32(), StorageClass::kNone, b2.Expr(1.2_f));
         },
         "internal compiler error");
 }

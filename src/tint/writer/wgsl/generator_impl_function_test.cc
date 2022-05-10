@@ -123,7 +123,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
 TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_ReturnValue) {
     auto* func = Func("frag_main", ast::VariableList{}, ty.f32(),
                       ast::StatementList{
-                          Return(1.f),
+                          Return(1_f),
                       },
                       ast::AttributeList{
                           Stage(ast::PipelineStage::kFragment),

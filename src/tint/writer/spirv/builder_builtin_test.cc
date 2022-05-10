@@ -463,8 +463,8 @@ TEST_F(BuiltinBuilderTest, Call_TextureSampleCompare_Twice) {
                                create<ast::GroupAttribute>(0),
                            });
 
-    auto* expr1 = Call("textureSampleCompare", "texture", "sampler", vec2<f32>(1.0f, 2.0f), 2.0f);
-    auto* expr2 = Call("textureSampleCompare", "texture", "sampler", vec2<f32>(1.0f, 2.0f), 2.0f);
+    auto* expr1 = Call("textureSampleCompare", "texture", "sampler", vec2<f32>(1_f, 2_f), 2_f);
+    auto* expr2 = Call("textureSampleCompare", "texture", "sampler", vec2<f32>(1_f, 2_f), 2_f);
 
     Func("f1", {}, ty.void_(), {CallStmt(expr1)}, {});
     Func("f2", {}, ty.void_(), {CallStmt(expr2)}, {});
@@ -539,7 +539,7 @@ OpFunctionEnd
 using Builtin_Builtin_SingleParam_Float_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_SingleParam_Float_Test, Call_Scalar) {
     auto param = GetParam();
-    auto* expr = Call(param.name, 1.0f);
+    auto* expr = Call(param.name, 1_f);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -566,7 +566,7 @@ OpFunctionEnd
 
 TEST_P(Builtin_Builtin_SingleParam_Float_Test, Call_Vector) {
     auto param = GetParam();
-    auto* expr = Call(param.name, vec2<f32>(1.0f, 1.0f));
+    auto* expr = Call(param.name, vec2<f32>(1_f, 1_f));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -620,7 +620,7 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                                          BuiltinData{"trunc", "Trunc"}));
 
 TEST_F(BuiltinBuilderTest, Call_Length_Scalar) {
-    auto* expr = Call("length", 1.0f);
+    auto* expr = Call("length", 1_f);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -645,7 +645,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Length_Vector) {
-    auto* expr = Call("length", vec2<f32>(1.0f, 1.0f));
+    auto* expr = Call("length", vec2<f32>(1_f, 1_f));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -672,7 +672,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Normalize) {
-    auto* expr = Call("normalize", vec2<f32>(1.0f, 1.0f));
+    auto* expr = Call("normalize", vec2<f32>(1_f, 1_f));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -701,7 +701,7 @@ OpFunctionEnd
 using Builtin_Builtin_DualParam_Float_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_DualParam_Float_Test, Call_Scalar) {
     auto param = GetParam();
-    auto* expr = Call(param.name, 1.0f, 1.0f);
+    auto* expr = Call(param.name, 1_f, 1_f);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -728,7 +728,7 @@ OpFunctionEnd
 
 TEST_P(Builtin_Builtin_DualParam_Float_Test, Call_Vector) {
     auto param = GetParam();
-    auto* expr = Call(param.name, vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
+    auto* expr = Call(param.name, vec2<f32>(1_f, 1_f), vec2<f32>(1_f, 1_f));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -763,7 +763,7 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                                          BuiltinData{"step", "Step"}));
 
 TEST_F(BuiltinBuilderTest, Call_Reflect_Vector) {
-    auto* expr = Call("reflect", vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
+    auto* expr = Call("reflect", vec2<f32>(1_f, 1_f), vec2<f32>(1_f, 1_f));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -790,7 +790,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Distance_Scalar) {
-    auto* expr = Call("distance", 1.0f, 1.0f);
+    auto* expr = Call("distance", 1_f, 1_f);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -815,7 +815,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Distance_Vector) {
-    auto* expr = Call("distance", vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
+    auto* expr = Call("distance", vec2<f32>(1_f, 1_f), vec2<f32>(1_f, 1_f));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -842,7 +842,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Cross) {
-    auto* expr = Call("cross", vec3<f32>(1.0f, 1.0f, 1.0f), vec3<f32>(1.0f, 1.0f, 1.0f));
+    auto* expr = Call("cross", vec3<f32>(1_f, 1_f, 1_f), vec3<f32>(1_f, 1_f, 1_f));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -871,7 +871,7 @@ OpFunctionEnd
 using Builtin_Builtin_ThreeParam_Float_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_ThreeParam_Float_Test, Call_Scalar) {
     auto param = GetParam();
-    auto* expr = Call(param.name, 1.0f, 1.0f, 1.0f);
+    auto* expr = Call(param.name, 1_f, 1_f, 1_f);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -898,8 +898,7 @@ OpFunctionEnd
 
 TEST_P(Builtin_Builtin_ThreeParam_Float_Test, Call_Vector) {
     auto param = GetParam();
-    auto* expr =
-        Call(param.name, vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
+    auto* expr = Call(param.name, vec2<f32>(1_f, 1_f), vec2<f32>(1_f, 1_f), vec2<f32>(1_f, 1_f));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -934,8 +933,7 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                                          BuiltinData{"smoothstep", "SmoothStep"}));
 
 TEST_F(BuiltinBuilderTest, Call_FaceForward_Vector) {
-    auto* expr =
-        Call("faceForward", vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f));
+    auto* expr = Call("faceForward", vec2<f32>(1_f, 1_f), vec2<f32>(1_f, 1_f), vec2<f32>(1_f, 1_f));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -1312,7 +1310,7 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          testing::Values(BuiltinData{"clamp", "UClamp"}));
 
 TEST_F(BuiltinBuilderTest, Call_Modf) {
-    auto* expr = Call("modf", vec2<f32>(1.0f, 2.0f));
+    auto* expr = Call("modf", vec2<f32>(1_f, 2_f));
     Func("a_func", {}, ty.void_(), {CallStmt(expr)}, {Stage(ast::PipelineStage::kFragment)});
 
     spirv::Builder& b = Build();
@@ -1350,7 +1348,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Frexp) {
-    auto* expr = Call("frexp", vec2<f32>(1.0f, 2.0f));
+    auto* expr = Call("frexp", vec2<f32>(1_f, 2_f));
     Func("a_func", {}, ty.void_(), {CallStmt(expr)}, {Stage(ast::PipelineStage::kFragment)});
 
     spirv::Builder& b = Build();
@@ -2104,8 +2102,8 @@ TEST_P(Builtin_Builtin_DataPacking_Test, Binary) {
     auto param = GetParam();
 
     bool pack4 = param.name == "pack4x8snorm" || param.name == "pack4x8unorm";
-    auto* call = pack4 ? Call(param.name, vec4<f32>(1.0f, 1.0f, 1.0f, 1.0f))
-                       : Call(param.name, vec2<f32>(1.0f, 1.0f));
+    auto* call = pack4 ? Call(param.name, vec4<f32>(1_f, 1_f, 1_f, 1_f))
+                       : Call(param.name, vec2<f32>(1_f, 1_f));
     auto* func = Func("a_func", {}, ty.void_(), {CallStmt(call)});
 
     spirv::Builder& b = Build();

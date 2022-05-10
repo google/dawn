@@ -37,7 +37,7 @@ TEST_F(ResolverBuiltinValidationTest, InvalidPipelineStageDirect) {
     // @stage(compute) @workgroup_size(1) fn func { return dpdx(1.0); }
 
     auto* dpdx =
-        create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"), ast::ExpressionList{Expr(1.0f)});
+        create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"), ast::ExpressionList{Expr(1_f)});
     Func(Source{{1, 2}}, "func", ast::VariableList{}, ty.void_(), {CallStmt(dpdx)},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
@@ -52,7 +52,7 @@ TEST_F(ResolverBuiltinValidationTest, InvalidPipelineStageIndirect) {
     // @stage(compute) @workgroup_size(1) fn main { return f2(); }
 
     auto* dpdx =
-        create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"), ast::ExpressionList{Expr(1.0f)});
+        create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"), ast::ExpressionList{Expr(1_f)});
     Func(Source{{1, 2}}, "f0", {}, ty.void_(), {CallStmt(dpdx)});
 
     Func(Source{{3, 4}}, "f1", {}, ty.void_(), {CallStmt(Call("f0"))});

@@ -161,7 +161,7 @@ using FunctionReturnTypeAttributeTest = TestWithParams;
 TEST_P(FunctionReturnTypeAttributeTest, IsValid) {
     auto& params = GetParam();
 
-    Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1.f)}, {},
+    Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1_f)}, {},
          createAttributes({}, *this, params.kind));
 
     if (params.should_pass) {
@@ -316,7 +316,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
 using ComputeShaderReturnTypeAttributeTest = TestWithParams;
 TEST_P(ComputeShaderReturnTypeAttributeTest, IsValid) {
     auto& params = GetParam();
-    Func("main", ast::VariableList{}, ty.vec4<f32>(), {Return(Construct(ty.vec4<f32>(), 1.f))},
+    Func("main", ast::VariableList{}, ty.vec4<f32>(), {Return(Construct(ty.vec4<f32>(), 1_f))},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)},
          createAttributes(Source{{12, 34}}, *this, params.kind));
 
@@ -450,7 +450,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
 
 using EntryPointParameterAttributeTest = TestWithParams;
 TEST_F(EntryPointParameterAttributeTest, DuplicateAttribute) {
-    Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1.f)},
+    Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1_f)},
          {Stage(ast::PipelineStage::kFragment)},
          {
              Location(Source{{12, 34}}, 2),
@@ -478,7 +478,7 @@ TEST_F(EntryPointParameterAttributeTest, DuplicateInternalAttribute) {
 
 using EntryPointReturnTypeAttributeTest = ResolverTest;
 TEST_F(EntryPointReturnTypeAttributeTest, DuplicateAttribute) {
-    Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1.f)},
+    Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1_f)},
          ast::AttributeList{Stage(ast::PipelineStage::kFragment)},
          ast::AttributeList{
              Location(Source{{12, 34}}, 2),
@@ -721,7 +721,8 @@ using ConstantAttributeTest = TestWithParams;
 TEST_P(ConstantAttributeTest, IsValid) {
     auto& params = GetParam();
 
-    GlobalConst("a", ty.f32(), Expr(1.23f), createAttributes(Source{{12, 34}}, *this, params.kind));
+    GlobalConst("a", ty.f32(), Expr(1.23_f),
+                createAttributes(Source{{12, 34}}, *this, params.kind));
 
     WrapInFunction();
 
@@ -750,7 +751,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                                          TestParams{AttributeKind::kBindingAndGroup, false}));
 
 TEST_F(ConstantAttributeTest, DuplicateAttribute) {
-    GlobalConst("a", ty.f32(), Expr(1.23f),
+    GlobalConst("a", ty.f32(), Expr(1.23_f),
                 ast::AttributeList{
                     create<ast::IdAttribute>(Source{{12, 34}}, 0),
                     create<ast::IdAttribute>(Source{{56, 78}}, 1),

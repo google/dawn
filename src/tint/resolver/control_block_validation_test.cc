@@ -30,7 +30,7 @@ TEST_F(ResolverControlBlockValidationTest, SwitchSelectorExpressionNoneIntegerTy
     // switch (a) {
     //   default: {}
     // }
-    auto* var = Var("a", ty.f32(), Expr(3.14f));
+    auto* var = Var("a", ty.f32(), Expr(3.14_f));
 
     auto* block = Block(Decl(var), Switch(Expr(Source{{12, 34}}, "a"),  //
                                           DefaultCase()));

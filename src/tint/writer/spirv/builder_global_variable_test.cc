@@ -17,6 +17,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 namespace {
 
@@ -38,7 +40,7 @@ TEST_F(BuilderTest, GlobalVar_WithStorageClass) {
 }
 
 TEST_F(BuilderTest, GlobalVar_WithConstructor) {
-    auto* init = vec3<f32>(1.f, 1.f, 3.f);
+    auto* init = vec3<f32>(1_f, 1_f, 3_f);
 
     auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate, init);
 
@@ -60,7 +62,7 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Const) {
-    auto* init = vec3<f32>(1.f, 1.f, 3.f);
+    auto* init = vec3<f32>(1_f, 1_f, 3_f);
 
     auto* v = GlobalConst("var", ty.vec3<f32>(), init);
 
@@ -80,7 +82,7 @@ TEST_F(BuilderTest, GlobalVar_Const) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
-    auto* init = vec3<f32>(ast::ExpressionList{Expr(1.f), Expr(2.f), Expr(3.f)});
+    auto* init = vec3<f32>(1_f, 2_f, 3_f);
 
     auto* v = GlobalConst("var", ty.vec3<f32>(), init);
 
@@ -99,7 +101,7 @@ TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
-    auto* init = vec3<f32>(vec2<f32>(1.f, 2.f), 3.f);
+    auto* init = vec3<f32>(vec2<f32>(1_f, 2_f), 3_f);
 
     auto* v = GlobalConst("var", ty.vec3<f32>(), init);
 
@@ -201,7 +203,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Bool_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar) {
-    auto* v = Override("var", ty.f32(), Expr(2.f),
+    auto* v = Override("var", ty.f32(), Expr(2_f),
                        ast::AttributeList{
                            Id(0),
                        });

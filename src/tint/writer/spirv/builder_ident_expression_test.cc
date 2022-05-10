@@ -23,7 +23,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
-    auto* init = vec3<f32>(1.f, 1.f, 3.f);
+    auto* init = vec3<f32>(1_f, 1_f, 3_f);
 
     auto* v = GlobalConst("var", ty.vec3<f32>(), init);
 
@@ -67,7 +67,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
-    auto* init = vec3<f32>(1.f, 1.f, 3.f);
+    auto* init = vec3<f32>(1_f, 1_f, 3_f);
 
     auto* v = Let("var", ty.vec3<f32>(), init);
 

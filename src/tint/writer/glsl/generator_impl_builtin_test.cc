@@ -258,7 +258,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Builtin_Call) {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Select_Scalar) {
-    auto* call = Call("select", 1.0f, 2.0f, true);
+    auto* call = Call("select", 1_f, 2_f, true);
     WrapInFunction(CallStmt(call));
     GeneratorImpl& gen = Build();
 
@@ -280,7 +280,7 @@ TEST_F(GlslGeneratorImplTest_Builtin, Select_Vector) {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Modf_Scalar) {
-    auto* call = Call("modf", 1.0f);
+    auto* call = Call("modf", 1_f);
     WrapInFunction(CallStmt(call));
 
     GeneratorImpl& gen = SanitizeAndBuild();
@@ -346,7 +346,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Frexp_Scalar_i32) {
-    auto* call = Call("frexp", 1.0f);
+    auto* call = Call("frexp", 1_f);
     WrapInFunction(CallStmt(call));
 
     GeneratorImpl& gen = SanitizeAndBuild();

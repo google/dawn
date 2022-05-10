@@ -15,6 +15,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 namespace {
 
@@ -23,9 +25,9 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, Block) {
     // Note, this test uses shadow variables which aren't allowed in WGSL but
     // serves to prove the block code is pushing new scopes as needed.
-    auto* inner = Block(Decl(Var("var", ty.f32(), ast::StorageClass::kNone)), Assign("var", 2.f));
-    auto* outer = Block(Decl(Var("var", ty.f32(), ast::StorageClass::kNone)), Assign("var", 1.f),
-                        inner, Assign("var", 3.f));
+    auto* inner = Block(Decl(Var("var", ty.f32(), ast::StorageClass::kNone)), Assign("var", 2_f));
+    auto* outer = Block(Decl(Var("var", ty.f32(), ast::StorageClass::kNone)), Assign("var", 1_f),
+                        inner, Assign("var", 3_f));
 
     WrapInFunction(outer);
 

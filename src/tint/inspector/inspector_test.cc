@@ -623,7 +623,7 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantTypes) {
 }
 
 TEST_F(InspectorGetEntryPointTest, OverridableConstantInitialized) {
-    AddOverridableConstantWithoutID("foo", ty.f32(), Expr(0.0f));
+    AddOverridableConstantWithoutID("foo", ty.f32(), Expr(0_f));
     MakePlainGlobalReferenceBodyFunction("ep_func", "foo", ty.f32(),
                                          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
@@ -1013,9 +1013,9 @@ TEST_F(InspectorGetConstantIDsTest, I32) {
 
 TEST_F(InspectorGetConstantIDsTest, Float) {
     AddOverridableConstantWithID("foo", 1, ty.f32(), nullptr);
-    AddOverridableConstantWithID("bar", 20, ty.f32(), Expr(0.0f));
-    AddOverridableConstantWithID("baz", 300, ty.f32(), Expr(-10.0f));
-    AddOverridableConstantWithID("x", 4000, ty.f32(), Expr(15.0f));
+    AddOverridableConstantWithID("bar", 20, ty.f32(), Expr(0_f));
+    AddOverridableConstantWithID("baz", 300, ty.f32(), Expr(-10_f));
+    AddOverridableConstantWithID("x", 4000, ty.f32(), Expr(15_f));
 
     Inspector& inspector = Build();
 

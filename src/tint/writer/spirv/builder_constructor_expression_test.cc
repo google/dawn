@@ -23,7 +23,7 @@ namespace {
 using SpvBuilderConstructorTest = TestHelper;
 
 TEST_F(SpvBuilderConstructorTest, Const) {
-    auto* c = Expr(42.2f);
+    auto* c = Expr(42.2_f);
     auto* g = Global("g", ty.f32(), c, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
@@ -50,7 +50,7 @@ TEST_F(SpvBuilderConstructorTest, Type_WithCasts_OutsideFunction_IsError) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type) {
-    auto* t = vec3<f32>(1.0f, 1.0f, 3.0f);
+    auto* t = vec3<f32>(1_f, 1_f, 3_f);
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
@@ -94,7 +94,7 @@ TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
     // cast<Int>(2.3f)
 
     auto* alias = Alias("Int", ty.i32());
-    auto* cast = Construct(ty.Of(alias), 2.3f);
+    auto* cast = Construct(ty.Of(alias), 2.3_f);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -114,7 +114,7 @@ TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
 TEST_F(SpvBuilderConstructorTest, Type_IdentifierExpression_Param) {
     auto* var = Var("ident", ty.f32());
 
-    auto* t = vec2<f32>(1.0f, "ident");
+    auto* t = vec2<f32>(1_f, "ident");
     WrapInFunction(var, t);
 
     spirv::Builder& b = Build();
@@ -213,7 +213,7 @@ TEST_F(SpvBuilderConstructorTest, Type_U32_With_U32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_F32_With_F32) {
-    auto* cast = Construct<f32>(2.0f);
+    auto* cast = Construct<f32>(2_f);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -269,7 +269,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_Bool_Var) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_Literal) {
-    auto* cast = vec2<f32>(2.0f);
+    auto* cast = vec2<f32>(2_f);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -286,7 +286,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_Literal) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_Var) {
-    auto* var = Var("v", nullptr, Expr(2.0f));
+    auto* var = Var("v", nullptr, Expr(2_f));
     auto* cast = vec2<f32>(var);
     WrapInFunction(var, cast);
 
@@ -309,7 +309,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_Var) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_F32) {
-    auto* cast = vec2<f32>(2.0f, 2.0f);
+    auto* cast = vec2<f32>(2_f, 2_f);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -325,7 +325,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_Vec2) {
-    auto* value = vec2<f32>(2.0f, 2.0f);
+    auto* value = vec2<f32>(2_f, 2_f);
     auto* cast = vec2<f32>(value);
     WrapInFunction(cast);
 
@@ -343,7 +343,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32) {
-    auto* cast = vec3<f32>(2.0f);
+    auto* cast = vec3<f32>(2_f);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -375,7 +375,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Bool) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_F32_F32) {
-    auto* cast = vec3<f32>(2.0f, 2.0f, 2.0f);
+    auto* cast = vec3<f32>(2_f, 2_f, 2_f);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -391,7 +391,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_F32_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_Vec2) {
-    auto* cast = vec3<f32>(2.0f, vec2<f32>(2.0f, 2.0f));
+    auto* cast = vec3<f32>(2_f, vec2<f32>(2_f, 2_f));
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -413,7 +413,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec2_F32) {
-    auto* cast = vec3<f32>(vec2<f32>(2.0f, 2.0f), 2.0f);
+    auto* cast = vec3<f32>(vec2<f32>(2_f, 2_f), 2_f);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -435,7 +435,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec2_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec3) {
-    auto* value = vec3<f32>(2.0f, 2.0f, 2.0f);
+    auto* value = vec3<f32>(2_f, 2_f, 2_f);
     auto* cast = vec3<f32>(value);
     WrapInFunction(cast);
 
@@ -469,7 +469,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Bool) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32) {
-    auto* cast = vec4<f32>(2.0f);
+    auto* cast = vec4<f32>(2_f);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -485,7 +485,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_F32_F32) {
-    auto* cast = vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f);
+    auto* cast = vec4<f32>(2_f, 2_f, 2_f, 2_f);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -501,7 +501,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_F32_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_Vec2) {
-    auto* cast = vec4<f32>(2.0f, 2.0f, vec2<f32>(2.0f, 2.0f));
+    auto* cast = vec4<f32>(2_f, 2_f, vec2<f32>(2_f, 2_f));
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -523,7 +523,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec2_F32) {
-    auto* cast = vec4<f32>(2.0f, vec2<f32>(2.0f, 2.0f), 2.0f);
+    auto* cast = vec4<f32>(2_f, vec2<f32>(2_f, 2_f), 2_f);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -545,7 +545,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec2_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_F32_F32) {
-    auto* cast = vec4<f32>(vec2<f32>(2.0f, 2.0f), 2.0f, 2.0f);
+    auto* cast = vec4<f32>(vec2<f32>(2_f, 2_f), 2_f, 2_f);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -567,7 +567,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_F32_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_Vec2) {
-    auto* cast = vec4<f32>(vec2<f32>(2.0f, 2.0f), vec2<f32>(2.0f, 2.0f));
+    auto* cast = vec4<f32>(vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f));
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -591,7 +591,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec3) {
-    auto* cast = vec4<f32>(2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
+    auto* cast = vec4<f32>(2_f, vec3<f32>(2_f, 2_f, 2_f));
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -614,7 +614,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec3) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec3_F32) {
-    auto* cast = vec4<f32>(vec3<f32>(2.0f, 2.0f, 2.0f), 2.0f);
+    auto* cast = vec4<f32>(vec3<f32>(2_f, 2_f, 2_f), 2_f);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -637,7 +637,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec3_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec4) {
-    auto* value = vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f);
+    auto* value = vec4<f32>(2_f, 2_f, 2_f, 2_f);
     auto* cast = vec4<f32>(value);
     WrapInFunction(cast);
 
@@ -655,7 +655,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec4) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_F32_With_F32) {
-    auto* ctor = Construct<f32>(2.0f);
+    auto* ctor = Construct<f32>(2_f);
     GlobalConst("g", ty.f32(), ctor);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -670,7 +670,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_F32_With_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_U32_With_F32) {
-    auto* ctor = Construct<u32>(1.5f);
+    auto* ctor = Construct<u32>(1.5_f);
     GlobalConst("g", ty.u32(), ctor);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -685,7 +685,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_U32_With_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec2_With_F32) {
-    auto* cast = vec2<f32>(2.0f);
+    auto* cast = vec2<f32>(2_f);
     auto* g = Global("g", ty.vec2<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
@@ -701,7 +701,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec2_With_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec2_With_Vec2) {
-    auto* cast = vec2<f32>(vec2<f32>(2.0f, 2.0f));
+    auto* cast = vec2<f32>(vec2<f32>(2_f, 2_f));
     GlobalConst("a", ty.vec2<f32>(), cast);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -719,7 +719,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec2_With_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_Vec3) {
-    auto* cast = vec3<f32>(vec3<f32>(2.0f, 2.0f, 2.0f));
+    auto* cast = vec3<f32>(vec3<f32>(2_f, 2_f, 2_f));
     GlobalConst("a", ty.vec3<f32>(), cast);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -737,7 +737,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_Vec3) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec4) {
-    auto* cast = vec4<f32>(vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f));
+    auto* cast = vec4<f32>(vec4<f32>(2_f, 2_f, 2_f, 2_f));
     GlobalConst("a", ty.vec4<f32>(), cast);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -755,7 +755,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec4) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_F32) {
-    auto* cast = vec3<f32>(2.0f);
+    auto* cast = vec3<f32>(2_f);
     auto* g = Global("g", ty.vec3<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
@@ -771,7 +771,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_F32_Vec2) {
-    auto* cast = vec3<f32>(2.0f, vec2<f32>(2.0f, 2.0f));
+    auto* cast = vec3<f32>(2_f, vec2<f32>(2_f, 2_f));
     auto* g = Global("g", ty.vec3<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
@@ -794,7 +794,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_F32_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_Vec2_F32) {
-    auto* cast = vec3<f32>(vec2<f32>(2.0f, 2.0f), 2.0f);
+    auto* cast = vec3<f32>(vec2<f32>(2_f, 2_f), 2_f);
     auto* g = Global("g", ty.vec3<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
@@ -817,7 +817,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_Vec2_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32) {
-    auto* cast = vec4<f32>(2.0f);
+    auto* cast = vec4<f32>(2_f);
     auto* g = Global("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
@@ -833,7 +833,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_F32_Vec2) {
-    auto* cast = vec4<f32>(2.0f, 2.0f, vec2<f32>(2.0f, 2.0f));
+    auto* cast = vec4<f32>(2_f, 2_f, vec2<f32>(2_f, 2_f));
     auto* g = Global("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
@@ -856,7 +856,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_F32_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_Vec2_F32) {
-    auto* cast = vec4<f32>(2.0f, vec2<f32>(2.0f, 2.0f), 2.0f);
+    auto* cast = vec4<f32>(2_f, vec2<f32>(2_f, 2_f), 2_f);
     auto* g = Global("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
@@ -879,7 +879,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_Vec2_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec2_F32_F32) {
-    auto* cast = vec4<f32>(vec2<f32>(2.0f, 2.0f), 2.0f, 2.0f);
+    auto* cast = vec4<f32>(vec2<f32>(2_f, 2_f), 2_f, 2_f);
     auto* g = Global("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
@@ -902,7 +902,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec2_F32_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec2_Vec2) {
-    auto* cast = vec4<f32>(vec2<f32>(2.0f, 2.0f), vec2<f32>(2.0f, 2.0f));
+    auto* cast = vec4<f32>(vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f));
     auto* g = Global("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
@@ -927,7 +927,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec2_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_Vec3) {
-    auto* cast = vec4<f32>(2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
+    auto* cast = vec4<f32>(2_f, vec3<f32>(2_f, 2_f, 2_f));
     auto* g = Global("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
@@ -952,7 +952,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_Vec3) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec3_F32) {
-    auto* cast = vec4<f32>(vec3<f32>(2.0f, 2.0f, 2.0f), 2.0f);
+    auto* cast = vec4<f32>(vec3<f32>(2_f, 2_f, 2_f), 2_f);
     auto* g = Global("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
@@ -977,7 +977,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec3_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat2x2_With_Vec2_Vec2) {
-    auto* cast = mat2x2<f32>(vec2<f32>(2.0f, 2.0f), vec2<f32>(2.0f, 2.0f));
+    auto* cast = mat2x2<f32>(vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f));
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -995,7 +995,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat2x2_With_Vec2_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat3x2_With_Vec2_Vec2_Vec2) {
-    auto* cast = mat3x2<f32>(vec2<f32>(2.0f, 2.0f), vec2<f32>(2.0f, 2.0f), vec2<f32>(2.0f, 2.0f));
+    auto* cast = mat3x2<f32>(vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f));
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -1013,8 +1013,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat3x2_With_Vec2_Vec2_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat4x2_With_Vec2_Vec2_Vec2_Vec2) {
-    auto* cast = mat4x2<f32>(vec2<f32>(2.0f, 2.0f), vec2<f32>(2.0f, 2.0f), vec2<f32>(2.0f, 2.0f),
-                             vec2<f32>(2.0f, 2.0f));
+    auto* cast = mat4x2<f32>(vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f),
+                             vec2<f32>(2_f, 2_f));
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -1032,7 +1032,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat4x2_With_Vec2_Vec2_Vec2_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat2x3_With_Vec3_Vec3) {
-    auto* cast = mat2x3<f32>(vec3<f32>(2.0f, 2.0f, 2.0f), vec3<f32>(2.0f, 2.0f, 2.0f));
+    auto* cast = mat2x3<f32>(vec3<f32>(2_f, 2_f, 2_f), vec3<f32>(2_f, 2_f, 2_f));
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -1050,8 +1050,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat2x3_With_Vec3_Vec3) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat3x3_With_Vec3_Vec3_Vec3) {
-    auto* cast = mat3x3<f32>(vec3<f32>(2.0f, 2.0f, 2.0f), vec3<f32>(2.0f, 2.0f, 2.0f),
-                             vec3<f32>(2.0f, 2.0f, 2.0f));
+    auto* cast =
+        mat3x3<f32>(vec3<f32>(2_f, 2_f, 2_f), vec3<f32>(2_f, 2_f, 2_f), vec3<f32>(2_f, 2_f, 2_f));
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -1069,8 +1069,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat3x3_With_Vec3_Vec3_Vec3) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat4x3_With_Vec3_Vec3_Vec3_Vec3) {
-    auto* cast = mat4x3<f32>(vec3<f32>(2.0f, 2.0f, 2.0f), vec3<f32>(2.0f, 2.0f, 2.0f),
-                             vec3<f32>(2.0f, 2.0f, 2.0f), vec3<f32>(2.0f, 2.0f, 2.0f));
+    auto* cast = mat4x3<f32>(vec3<f32>(2_f, 2_f, 2_f), vec3<f32>(2_f, 2_f, 2_f),
+                             vec3<f32>(2_f, 2_f, 2_f), vec3<f32>(2_f, 2_f, 2_f));
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -1088,7 +1088,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat4x3_With_Vec3_Vec3_Vec3_Vec3) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat2x4_With_Vec4_Vec4) {
-    auto* cast = mat2x4<f32>(vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f), vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f));
+    auto* cast = mat2x4<f32>(vec4<f32>(2_f, 2_f, 2_f, 2_f), vec4<f32>(2_f, 2_f, 2_f, 2_f));
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -1106,8 +1106,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat2x4_With_Vec4_Vec4) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat3x4_With_Vec4_Vec4_Vec4) {
-    auto* cast = mat3x4<f32>(vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f), vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f),
-                             vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f));
+    auto* cast = mat3x4<f32>(vec4<f32>(2_f, 2_f, 2_f, 2_f), vec4<f32>(2_f, 2_f, 2_f, 2_f),
+                             vec4<f32>(2_f, 2_f, 2_f, 2_f));
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -1125,8 +1125,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat3x4_With_Vec4_Vec4_Vec4) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat4x4_With_Vec4_Vec4_Vec4_Vec4) {
-    auto* cast = mat4x4<f32>(vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f), vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f),
-                             vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f), vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f));
+    auto* cast = mat4x4<f32>(vec4<f32>(2_f, 2_f, 2_f, 2_f), vec4<f32>(2_f, 2_f, 2_f, 2_f),
+                             vec4<f32>(2_f, 2_f, 2_f, 2_f), vec4<f32>(2_f, 2_f, 2_f, 2_f));
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -1144,7 +1144,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat4x4_With_Vec4_Vec4_Vec4_Vec4) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Array_5_F32) {
-    auto* cast = array<f32, 5>(2.0f, 2.0f, 2.0f, 2.0f, 2.0f);
+    auto* cast = array<f32, 5>(2_f, 2_f, 2_f, 2_f, 2_f);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -1162,8 +1162,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_5_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3) {
-    auto* first = vec3<f32>(1.f, 2.f, 3.f);
-    auto* second = vec3<f32>(1.f, 2.f, 3.f);
+    auto* first = vec3<f32>(1_f, 2_f, 3_f);
+    auto* second = vec3<f32>(1_f, 2_f, 3_f);
     auto* t = Construct(ty.array(ty.vec3<f32>(), 2_u), first, second);
     WrapInFunction(t);
     spirv::Builder& b = Build();
@@ -1184,8 +1184,8 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3) {
 }
 
 TEST_F(SpvBuilderConstructorTest, CommonInitializer_TwoVectors) {
-    auto* v1 = vec3<f32>(2.0f, 2.0f, 2.0f);
-    auto* v2 = vec3<f32>(2.0f, 2.0f, 2.0f);
+    auto* v1 = vec3<f32>(2_f, 2_f, 2_f);
+    auto* v2 = vec3<f32>(2_f, 2_f, 2_f);
     ast::StatementList stmts = {
         WrapInStatement(v1),
         WrapInStatement(v2),
@@ -1206,8 +1206,8 @@ TEST_F(SpvBuilderConstructorTest, CommonInitializer_TwoVectors) {
 }
 
 TEST_F(SpvBuilderConstructorTest, CommonInitializer_TwoArrays) {
-    auto* a1 = array<f32, 3>(2.0f, 2.0f, 2.0f);
-    auto* a2 = array<f32, 3>(2.0f, 2.0f, 2.0f);
+    auto* a1 = array<f32, 3>(2_f, 2_f, 2_f);
+    auto* a2 = array<f32, 3>(2_f, 2_f, 2_f);
     ast::StatementList stmts = {
         WrapInStatement(a1),
         WrapInStatement(a2),
@@ -1233,8 +1233,8 @@ TEST_F(SpvBuilderConstructorTest, CommonInitializer_Array_VecArray) {
     // Test that initializers of different types with the same values produce
     // different OpConstantComposite instructions.
     // crbug.com/tint/777
-    auto* a1 = array<f32, 2>(1.0f, 2.0f);
-    auto* a2 = vec2<f32>(1.0f, 2.0f);
+    auto* a1 = array<f32, 2>(1_f, 2_f);
+    auto* a2 = vec2<f32>(1_f, 2_f);
     ast::StatementList stmts = {
         WrapInStatement(a1),
         WrapInStatement(a2),
@@ -1264,7 +1264,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Struct) {
                                          Member("b", ty.vec3<f32>()),
                                      });
 
-    auto* t = Construct(ty.Of(s), 2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
+    auto* t = Construct(ty.Of(s), 2_f, vec3<f32>(2_f, 2_f, 2_f));
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
@@ -1463,7 +1463,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_U32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_I32) {
-    auto* cast = Construct<i32>(2.4f);
+    auto* cast = Construct<i32>(2.4_f);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -1481,7 +1481,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_I32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_U32) {
-    auto* cast = Construct<u32>(2.4f);
+    auto* cast = Construct<u32>(2.4_f);
     WrapInFunction(cast);
 
     spirv::Builder& b = Build();
@@ -1692,7 +1692,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F32) {
 
 TEST_F(SpvBuilderConstructorTest, IsConstructorConst_GlobalVectorWithAllConstConstructors) {
     // vec3<f32>(1.0, 2.0, 3.0)  -> true
-    auto* t = vec3<f32>(1.f, 2.f, 3.f);
+    auto* t = vec3<f32>(1_f, 2_f, 3_f);
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
@@ -1704,8 +1704,8 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_GlobalVectorWithAllConstCon
 TEST_F(SpvBuilderConstructorTest, IsConstructorConst_GlobalArrayWithAllConstConstructors) {
     // array<vec3<f32>, 2u>(vec3<f32>(1.0, 2.0, 3.0), vec3<f32>(1.0, 2.0, 3.0))
     //   -> true
-    auto* t = Construct(ty.array(ty.vec3<f32>(), 2_u), vec3<f32>(1.f, 2.f, 3.f),
-                        vec3<f32>(1.f, 2.f, 3.f));
+    auto* t = Construct(ty.array(ty.vec3<f32>(), 2_u), vec3<f32>(1_f, 2_f, 3_f),
+                        vec3<f32>(1_f, 2_f, 3_f));
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
@@ -1717,7 +1717,7 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_GlobalArrayWithAllConstCons
 TEST_F(SpvBuilderConstructorTest, IsConstructorConst_GlobalVectorWithMatchingTypeConstructors) {
     // vec2<f32>(f32(1.0), f32(2.0))  -> false
 
-    auto* t = vec2<f32>(Construct<f32>(1.f), Construct<f32>(2.f));
+    auto* t = vec2<f32>(Construct<f32>(1_f), Construct<f32>(2_f));
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
@@ -1741,7 +1741,7 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_GlobalWithTypeConversionCon
 TEST_F(SpvBuilderConstructorTest, IsConstructorConst_VectorWithAllConstConstructors) {
     // vec3<f32>(1.0, 2.0, 3.0)  -> true
 
-    auto* t = vec3<f32>(1.f, 2.f, 3.f);
+    auto* t = vec3<f32>(1_f, 2_f, 3_f);
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
@@ -1770,8 +1770,8 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_ArrayWithAllConstConstructo
     // array<vec3<f32>, 2u>(vec3<f32>(1.0, 2.0, 3.0), vec3<f32>(1.0, 2.0, 3.0))
     //   -> true
 
-    auto* first = vec3<f32>(1.f, 2.f, 3.f);
-    auto* second = vec3<f32>(1.f, 2.f, 3.f);
+    auto* first = vec3<f32>(1_f, 2_f, 3_f);
+    auto* second = vec3<f32>(1_f, 2_f, 3_f);
 
     auto* t = Construct(ty.array(ty.vec3<f32>(), 2_u), first, second);
     WrapInFunction(t);
@@ -1810,7 +1810,7 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
                                          Member("b", ty.vec3<f32>()),
                                      });
 
-    auto* t = Construct(ty.Of(s), 2.f, vec3<f32>(2.f, 2.f, 2.f));
+    auto* t = Construct(ty.Of(s), 2_f, vec3<f32>(2_f, 2_f, 2_f));
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
@@ -1843,8 +1843,8 @@ TEST_F(SpvBuilderConstructorTest, ConstantCompositeScoping) {
     // }
     // let y = vec3<f32>(1.0, 2.0, 3.0); // Reuses the ID 'x'
 
-    WrapInFunction(If(true, Block(Decl(Let("x", nullptr, vec3<f32>(1.f, 2.f, 3.f))))),
-                   Decl(Let("y", nullptr, vec3<f32>(1.f, 2.f, 3.f))));
+    WrapInFunction(If(true, Block(Decl(Let("x", nullptr, vec3<f32>(1_f, 2_f, 3_f))))),
+                   Decl(Let("y", nullptr, vec3<f32>(1_f, 2_f, 3_f))));
 
     spirv::Builder& b = SanitizeAndBuild();
     ASSERT_TRUE(b.Build());
@@ -1887,9 +1887,9 @@ TEST_F(SpvBuilderConstructorTest, CompositeConstructScoping) {
     // }
     // let y = vec3<f32>(one, 2.0, 3.0); // Mustn't reuse the ID 'x'
 
-    WrapInFunction(Decl(Var("one", nullptr, Expr(1.f))),
-                   If(true, Block(Decl(Let("x", nullptr, vec3<f32>("one", 2.f, 3.f))))),
-                   Decl(Let("y", nullptr, vec3<f32>("one", 2.f, 3.f))));
+    WrapInFunction(Decl(Var("one", nullptr, Expr(1_f))),
+                   If(true, Block(Decl(Let("x", nullptr, vec3<f32>("one", 2_f, 3_f))))),
+                   Decl(Let("y", nullptr, vec3<f32>("one", 2_f, 3_f))));
 
     spirv::Builder& b = SanitizeAndBuild();
     ASSERT_TRUE(b.Build());

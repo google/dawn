@@ -141,8 +141,8 @@ INSTANTIATE_TEST_SUITE_P(
                                BinaryData::Types::Float}));
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar) {
-    auto* lhs = vec3<f32>(1.f, 1.f, 1.f);
-    auto* rhs = Expr(1.f);
+    auto* lhs = vec3<f32>(1_f, 1_f, 1_f);
+    auto* rhs = Expr(1_f);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
@@ -158,8 +158,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
-    auto* lhs = Expr(1.f);
-    auto* rhs = vec3<f32>(1.f, 1.f, 1.f);
+    auto* lhs = Expr(1_f);
+    auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
@@ -177,7 +177,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
     Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
     auto* lhs = Expr("mat");
-    auto* rhs = Expr(1.f);
+    auto* rhs = Expr(1_f);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
     WrapInFunction(expr);
@@ -191,7 +191,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
     Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
-    auto* lhs = Expr(1.f);
+    auto* lhs = Expr(1_f);
     auto* rhs = Expr("mat");
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
@@ -207,7 +207,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
     Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
     auto* lhs = Expr("mat");
-    auto* rhs = vec3<f32>(1.f, 1.f, 1.f);
+    auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
     WrapInFunction(expr);
@@ -221,7 +221,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
     Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
-    auto* lhs = vec3<f32>(1.f, 1.f, 1.f);
+    auto* lhs = vec3<f32>(1_f, 1_f, 1_f);
     auto* rhs = Expr("mat");
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);

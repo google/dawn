@@ -350,8 +350,8 @@ TEST_F(DecomposeStridedArrayTest, WriteStorageStridedArray) {
            {
                b.Assign(b.MemberAccessor("s", "a"), b.Construct(b.ty.array<f32, 4u>(32))),
                b.Assign(b.MemberAccessor("s", "a"),
-                        b.Construct(b.ty.array<f32, 4u>(32), 1.0f, 2.0f, 3.0f, 4.0f)),
-               b.Assign(b.IndexAccessor(b.MemberAccessor("s", "a"), 1_i), 5.0f),
+                        b.Construct(b.ty.array<f32, 4u>(32), 1_f, 2_f, 3_f, 4_f)),
+               b.Assign(b.IndexAccessor(b.MemberAccessor("s", "a"), 1_i), 5_f),
            },
            {
                b.Stage(ast::PipelineStage::kCompute),
@@ -404,8 +404,8 @@ TEST_F(DecomposeStridedArrayTest, WriteStorageDefaultStridedArray) {
            {
                b.Assign(b.MemberAccessor("s", "a"), b.Construct(b.ty.array<f32, 4u>(4))),
                b.Assign(b.MemberAccessor("s", "a"),
-                        b.Construct(b.ty.array<f32, 4u>(4), 1.0f, 2.0f, 3.0f, 4.0f)),
-               b.Assign(b.IndexAccessor(b.MemberAccessor("s", "a"), 1_i), 5.0f),
+                        b.Construct(b.ty.array<f32, 4u>(4), 1_f, 2_f, 3_f, 4_f)),
+               b.Assign(b.IndexAccessor(b.MemberAccessor("s", "a"), 1_i), 5_f),
            },
            {
                b.Stage(ast::PipelineStage::kCompute),
@@ -458,8 +458,8 @@ TEST_F(DecomposeStridedArrayTest, ReadWriteViaPointerLets) {
                b.Decl(b.Let("b", nullptr, b.AddressOf(b.Deref(b.AddressOf(b.Deref("a")))))),
                b.Decl(b.Let("c", nullptr, b.Deref("b"))),
                b.Decl(b.Let("d", nullptr, b.IndexAccessor(b.Deref("b"), 1_i))),
-               b.Assign(b.Deref("b"), b.Construct(b.ty.array<f32, 4u>(32), 1.0f, 2.0f, 3.0f, 4.0f)),
-               b.Assign(b.IndexAccessor(b.Deref("b"), 1_i), 5.0f),
+               b.Assign(b.Deref("b"), b.Construct(b.ty.array<f32, 4u>(32), 1_f, 2_f, 3_f, 4_f)),
+               b.Assign(b.IndexAccessor(b.Deref("b"), 1_i), 5_f),
            },
            {
                b.Stage(ast::PipelineStage::kCompute),
@@ -519,8 +519,8 @@ TEST_F(DecomposeStridedArrayTest, PrivateAliasedStridedArray) {
                b.Decl(b.Let("b", b.ty.f32(), b.IndexAccessor(b.MemberAccessor("s", "a"), 1_i))),
                b.Assign(b.MemberAccessor("s", "a"), b.Construct(b.ty.type_name("ARR"))),
                b.Assign(b.MemberAccessor("s", "a"),
-                        b.Construct(b.ty.type_name("ARR"), 1.0f, 2.0f, 3.0f, 4.0f)),
-               b.Assign(b.IndexAccessor(b.MemberAccessor("s", "a"), 1_i), 5.0f),
+                        b.Construct(b.ty.type_name("ARR"), 1_f, 2_f, 3_f, 4_f)),
+               b.Assign(b.IndexAccessor(b.MemberAccessor("s", "a"), 1_i), 5_f),
            },
            {
                b.Stage(ast::PipelineStage::kCompute),
@@ -612,7 +612,7 @@ TEST_F(DecomposeStridedArrayTest, PrivateNestedStridedArray) {
                                     3_i),
                                 2_i),
                             1_i),
-                        5.0f),
+                        5_f),
            },
            {
                b.Stage(ast::PipelineStage::kCompute),

@@ -15,6 +15,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 namespace {
 
@@ -42,7 +44,7 @@ TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
 }
 
 TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
-    auto* init = vec3<f32>(1.f, 1.f, 3.f);
+    auto* init = vec3<f32>(1_f, 1_f, 3_f);
     auto* v = Var("var", ty.vec3<f32>(), ast::StorageClass::kFunction, init);
     WrapInFunction(v);
 
@@ -71,7 +73,7 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
 }
 
 TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
-    auto* init = vec2<f32>(1.f, Add(3.f, 3.f));
+    auto* init = vec2<f32>(1_f, Add(3_f, 3_f));
 
     auto* v = Var("var", ty.vec2<f32>(), ast::StorageClass::kNone, init);
     WrapInFunction(v);
@@ -105,7 +107,7 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructorLoadedFromVar) {
     // var v : f32 = 1.0;
     // var v2 : f32 = v; // Should generate the load and store automatically.
 
-    auto* v = Var("v", ty.f32(), ast::StorageClass::kNone, Expr(1.f));
+    auto* v = Var("v", ty.f32(), ast::StorageClass::kNone, Expr(1_f));
 
     auto* v2 = Var("v2", ty.f32(), ast::StorageClass::kNone, Expr("v"));
     WrapInFunction(v, v2);
@@ -140,7 +142,7 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
     // var v : f32 = 1.0;
     // let v2 : f32 = v; // Should generate the load
 
-    auto* v = Var("v", ty.f32(), ast::StorageClass::kNone, Expr(1.f));
+    auto* v = Var("v", ty.f32(), ast::StorageClass::kNone, Expr(1_f));
 
     auto* v2 = Var("v2", ty.f32(), ast::StorageClass::kNone, Expr("v"));
     WrapInFunction(v, v2);
@@ -172,7 +174,7 @@ OpStore %7 %6
 }
 
 TEST_F(BuilderTest, FunctionVar_Const) {
-    auto* init = vec3<f32>(1.f, 1.f, 3.f);
+    auto* init = vec3<f32>(1_f, 1_f, 3_f);
 
     auto* v = Let("var", ty.vec3<f32>(), init);
 

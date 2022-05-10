@@ -15,13 +15,15 @@
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/writer/msl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::msl {
 namespace {
 
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
-    auto* var = GlobalConst("pos", ty.array<f32, 3>(), array<f32, 3>(1.f, 2.f, 3.f));
+    auto* var = GlobalConst("pos", ty.array<f32, 3>(), array<f32, 3>(1_f, 2_f, 3_f));
 
     GeneratorImpl& gen = Build();
 
@@ -30,7 +32,7 @@ TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
-    auto* var = Override("pos", ty.f32(), Expr(3.f),
+    auto* var = Override("pos", ty.f32(), Expr(3_f),
                          ast::AttributeList{
                              Id(23),
                          });

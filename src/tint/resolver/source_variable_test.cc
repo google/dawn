@@ -81,7 +81,7 @@ TEST_F(ResolverSourceVariableTest, GlobalTextureVar) {
 }
 
 TEST_F(ResolverSourceVariableTest, GlobalOverride) {
-    auto* a = Override("a", ty.f32(), Expr(1.f));
+    auto* a = Override("a", ty.f32(), Expr(1_f));
     auto* expr = Expr(a);
     WrapInFunction(expr);
 
@@ -92,7 +92,7 @@ TEST_F(ResolverSourceVariableTest, GlobalOverride) {
 }
 
 TEST_F(ResolverSourceVariableTest, GlobalConst) {
-    auto* a = GlobalConst("a", ty.f32(), Expr(1.f));
+    auto* a = GlobalConst("a", ty.f32(), Expr(1_f));
     auto* expr = Expr(a);
     WrapInFunction(expr);
 
@@ -114,7 +114,7 @@ TEST_F(ResolverSourceVariableTest, FunctionVar) {
 }
 
 TEST_F(ResolverSourceVariableTest, FunctionLet) {
-    auto* a = Let("a", ty.f32(), Expr(1.f));
+    auto* a = Let("a", ty.f32(), Expr(1_f));
     auto* expr = Expr(a);
     WrapInFunction(a, expr);
 
@@ -250,7 +250,7 @@ TEST_F(ResolverSourceVariableTest, ThroughPointers) {
 }
 
 TEST_F(ResolverSourceVariableTest, Literal) {
-    auto* expr = Expr(1.f);
+    auto* expr = Expr(1_f);
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -259,7 +259,7 @@ TEST_F(ResolverSourceVariableTest, Literal) {
 }
 
 TEST_F(ResolverSourceVariableTest, FunctionReturnValue) {
-    auto* expr = Call("min", 1.f, 2.f);
+    auto* expr = Call("min", 1_f, 2_f);
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -269,7 +269,7 @@ TEST_F(ResolverSourceVariableTest, FunctionReturnValue) {
 
 TEST_F(ResolverSourceVariableTest, BinaryExpression) {
     auto* a = Var("a", ty.f32(), ast::StorageClass::kNone);
-    auto* expr = Add(a, Expr(1.f));
+    auto* expr = Add(a, Expr(1_f));
     WrapInFunction(a, expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

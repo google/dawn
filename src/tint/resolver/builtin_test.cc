@@ -287,7 +287,7 @@ TEST_F(ResolverBuiltinTest, Dot_Vec4) {
 }
 
 TEST_F(ResolverBuiltinTest, Dot_Error_Scalar) {
-    auto* expr = Call("dot", 1.0f, 1.0f);
+    auto* expr = Call("dot", 1_f, 1_f);
     WrapInFunction(expr);
 
     EXPECT_FALSE(r()->Resolve());
@@ -349,8 +349,8 @@ TEST_F(ResolverBuiltinTest, Select_Error_SelectorInt) {
 }
 
 TEST_F(ResolverBuiltinTest, Select_Error_Matrix) {
-    auto* expr = Call("select", mat2x2<f32>(vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f)),
-                      mat2x2<f32>(vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f)), Expr(true));
+    auto* expr = Call("select", mat2x2<f32>(vec2<f32>(1_f, 1_f), vec2<f32>(1_f, 1_f)),
+                      mat2x2<f32>(vec2<f32>(1_f, 1_f), vec2<f32>(1_f, 1_f)), Expr(true));
     WrapInFunction(expr);
 
     EXPECT_FALSE(r()->Resolve());
@@ -366,7 +366,7 @@ TEST_F(ResolverBuiltinTest, Select_Error_Matrix) {
 }
 
 TEST_F(ResolverBuiltinTest, Select_Error_MismatchTypes) {
-    auto* expr = Call("select", 1.0f, vec2<f32>(2.0f, 3.0f), Expr(true));
+    auto* expr = Call("select", 1_f, vec2<f32>(2_f, 3_f), Expr(true));
     WrapInFunction(expr);
 
     EXPECT_FALSE(r()->Resolve());
@@ -382,7 +382,7 @@ TEST_F(ResolverBuiltinTest, Select_Error_MismatchTypes) {
 }
 
 TEST_F(ResolverBuiltinTest, Select_Error_MismatchVectorSize) {
-    auto* expr = Call("select", vec2<f32>(1.0f, 2.0f), vec3<f32>(3.0f, 4.0f, 5.0f), Expr(true));
+    auto* expr = Call("select", vec2<f32>(1_f, 2_f), vec3<f32>(3_f, 4_f, 5_f), Expr(true));
     WrapInFunction(expr);
 
     EXPECT_FALSE(r()->Resolve());
@@ -422,7 +422,7 @@ TEST_P(ResolverBuiltinTest_Barrier, InferType) {
 TEST_P(ResolverBuiltinTest_Barrier, Error_TooManyParams) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, vec4<f32>(1.f, 2.f, 3.f, 4.f), 1.0f);
+    auto* call = Call(param.name, vec4<f32>(1_f, 2_f, 3_f, 4_f), 1_f);
     WrapInFunction(CallStmt(call));
 
     EXPECT_FALSE(r()->Resolve());
@@ -443,8 +443,8 @@ TEST_P(ResolverBuiltinTest_DataPacking, InferType) {
     bool pack4 =
         param.builtin == BuiltinType::kPack4x8snorm || param.builtin == BuiltinType::kPack4x8unorm;
 
-    auto* call = pack4 ? Call(param.name, vec4<f32>(1.f, 2.f, 3.f, 4.f))
-                       : Call(param.name, vec2<f32>(1.f, 2.f));
+    auto* call = pack4 ? Call(param.name, vec4<f32>(1_f, 2_f, 3_f, 4_f))
+                       : Call(param.name, vec2<f32>(1_f, 2_f));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -484,8 +484,8 @@ TEST_P(ResolverBuiltinTest_DataPacking, Error_TooManyParams) {
     bool pack4 =
         param.builtin == BuiltinType::kPack4x8snorm || param.builtin == BuiltinType::kPack4x8unorm;
 
-    auto* call = pack4 ? Call(param.name, vec4<f32>(1.f, 2.f, 3.f, 4.f), 1.0f)
-                       : Call(param.name, vec2<f32>(1.f, 2.f), 1.0f);
+    auto* call = pack4 ? Call(param.name, vec4<f32>(1_f, 2_f, 3_f, 4_f), 1_f)
+                       : Call(param.name, vec2<f32>(1_f, 2_f), 1_f);
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
@@ -535,7 +535,7 @@ using ResolverBuiltinTest_SingleParam = ResolverTestWithParam<BuiltinData>;
 TEST_P(ResolverBuiltinTest_SingleParam, Scalar) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, 1.f);
+    auto* call = Call(param.name, 1_f);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -547,7 +547,7 @@ TEST_P(ResolverBuiltinTest_SingleParam, Scalar) {
 TEST_P(ResolverBuiltinTest_SingleParam, Vector) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, vec3<f32>(1.0f, 1.0f, 3.0f));
+    auto* call = Call(param.name, vec3<f32>(1_f, 1_f, 3_f));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -647,7 +647,7 @@ TEST_F(ResolverBuiltinDataTest, ArrayLength_Error_ArraySized) {
 }
 
 TEST_F(ResolverBuiltinDataTest, Normalize_Vector) {
-    auto* call = Call("normalize", vec3<f32>(1.0f, 1.0f, 3.0f));
+    auto* call = Call("normalize", vec3<f32>(1_f, 1_f, 3_f));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -671,7 +671,7 @@ TEST_F(ResolverBuiltinDataTest, Normalize_Error_NoParams) {
 }
 
 TEST_F(ResolverBuiltinDataTest, FrexpScalar) {
-    auto* call = Call("frexp", 1.0f);
+    auto* call = Call("frexp", 1_f);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -750,7 +750,7 @@ TEST_F(ResolverBuiltinDataTest, Frexp_Error_FirstParamInt) {
 
 TEST_F(ResolverBuiltinDataTest, Frexp_Error_SecondParamFloatPtr) {
     Global("v", ty.f32(), ast::StorageClass::kWorkgroup);
-    auto* call = Call("frexp", 1.0f, AddressOf("v"));
+    auto* call = Call("frexp", 1_f, AddressOf("v"));
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
@@ -765,7 +765,7 @@ TEST_F(ResolverBuiltinDataTest, Frexp_Error_SecondParamFloatPtr) {
 }
 
 TEST_F(ResolverBuiltinDataTest, Frexp_Error_SecondParamNotAPointer) {
-    auto* call = Call("frexp", 1.0f, 1_i);
+    auto* call = Call("frexp", 1_f, 1_i);
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
@@ -780,7 +780,7 @@ TEST_F(ResolverBuiltinDataTest, Frexp_Error_SecondParamNotAPointer) {
 
 TEST_F(ResolverBuiltinDataTest, Frexp_Error_VectorSizesDontMatch) {
     Global("v", ty.vec4<i32>(), ast::StorageClass::kWorkgroup);
-    auto* call = Call("frexp", vec2<f32>(1.0f, 2.0f), AddressOf("v"));
+    auto* call = Call("frexp", vec2<f32>(1_f, 2_f), AddressOf("v"));
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
@@ -795,7 +795,7 @@ TEST_F(ResolverBuiltinDataTest, Frexp_Error_VectorSizesDontMatch) {
 }
 
 TEST_F(ResolverBuiltinDataTest, ModfScalar) {
-    auto* call = Call("modf", 1.0f);
+    auto* call = Call("modf", 1_f);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -874,7 +874,7 @@ TEST_F(ResolverBuiltinDataTest, Modf_Error_FirstParamInt) {
 
 TEST_F(ResolverBuiltinDataTest, Modf_Error_SecondParamIntPtr) {
     Global("whole", ty.i32(), ast::StorageClass::kWorkgroup);
-    auto* call = Call("modf", 1.0f, AddressOf("whole"));
+    auto* call = Call("modf", 1_f, AddressOf("whole"));
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
@@ -889,7 +889,7 @@ TEST_F(ResolverBuiltinDataTest, Modf_Error_SecondParamIntPtr) {
 }
 
 TEST_F(ResolverBuiltinDataTest, Modf_Error_SecondParamNotAPointer) {
-    auto* call = Call("modf", 1.0f, 1.0f);
+    auto* call = Call("modf", 1_f, 1_f);
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
@@ -904,7 +904,7 @@ TEST_F(ResolverBuiltinDataTest, Modf_Error_SecondParamNotAPointer) {
 
 TEST_F(ResolverBuiltinDataTest, Modf_Error_VectorSizesDontMatch) {
     Global("whole", ty.vec4<f32>(), ast::StorageClass::kWorkgroup);
-    auto* call = Call("modf", vec2<f32>(1.0f, 2.0f), AddressOf("whole"));
+    auto* call = Call("modf", vec2<f32>(1_f, 2_f), AddressOf("whole"));
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
@@ -922,7 +922,7 @@ using ResolverBuiltinTest_SingleParam_FloatOrInt = ResolverTestWithParam<Builtin
 TEST_P(ResolverBuiltinTest_SingleParam_FloatOrInt, Float_Scalar) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, 1.f);
+    auto* call = Call(param.name, 1_f);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -934,7 +934,7 @@ TEST_P(ResolverBuiltinTest_SingleParam_FloatOrInt, Float_Scalar) {
 TEST_P(ResolverBuiltinTest_SingleParam_FloatOrInt, Float_Vector) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, vec3<f32>(1.0f, 1.0f, 3.0f));
+    auto* call = Call(param.name, vec3<f32>(1_f, 1_f, 3_f));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1015,7 +1015,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          testing::Values(BuiltinData{"abs", BuiltinType::kAbs}));
 
 TEST_F(ResolverBuiltinTest, Length_Scalar) {
-    auto* call = Call("length", 1.f);
+    auto* call = Call("length", 1_f);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1025,7 +1025,7 @@ TEST_F(ResolverBuiltinTest, Length_Scalar) {
 }
 
 TEST_F(ResolverBuiltinTest, Length_FloatVector) {
-    auto* call = Call("length", vec3<f32>(1.0f, 1.0f, 3.0f));
+    auto* call = Call("length", vec3<f32>(1_f, 1_f, 3_f));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1038,7 +1038,7 @@ using ResolverBuiltinTest_TwoParam = ResolverTestWithParam<BuiltinData>;
 TEST_P(ResolverBuiltinTest_TwoParam, Scalar) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, 1.f, 1.f);
+    auto* call = Call(param.name, 1_f, 1_f);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1050,7 +1050,7 @@ TEST_P(ResolverBuiltinTest_TwoParam, Scalar) {
 TEST_P(ResolverBuiltinTest_TwoParam, Vector) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
+    auto* call = Call(param.name, vec3<f32>(1_f, 1_f, 3_f), vec3<f32>(1_f, 1_f, 3_f));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1097,7 +1097,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
                                          BuiltinData{"step", BuiltinType::kStep}));
 
 TEST_F(ResolverBuiltinTest, Distance_Scalar) {
-    auto* call = Call("distance", 1.f, 1.f);
+    auto* call = Call("distance", 1_f, 1_f);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1107,7 +1107,7 @@ TEST_F(ResolverBuiltinTest, Distance_Scalar) {
 }
 
 TEST_F(ResolverBuiltinTest, Distance_Vector) {
-    auto* call = Call("distance", vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
+    auto* call = Call("distance", vec3<f32>(1_f, 1_f, 3_f), vec3<f32>(1_f, 1_f, 3_f));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1117,7 +1117,7 @@ TEST_F(ResolverBuiltinTest, Distance_Vector) {
 }
 
 TEST_F(ResolverBuiltinTest, Cross) {
-    auto* call = Call("cross", vec3<f32>(1.0f, 2.0f, 3.0f), vec3<f32>(1.0f, 2.0f, 3.0f));
+    auto* call = Call("cross", vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(1_f, 2_f, 3_f));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1141,7 +1141,7 @@ TEST_F(ResolverBuiltinTest, Cross_Error_NoArgs) {
 }
 
 TEST_F(ResolverBuiltinTest, Cross_Error_Scalar) {
-    auto* call = Call("cross", 1.0f, 1.0f);
+    auto* call = Call("cross", 1_f, 1_f);
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
@@ -1168,8 +1168,7 @@ TEST_F(ResolverBuiltinTest, Cross_Error_Vec3Int) {
 }
 
 TEST_F(ResolverBuiltinTest, Cross_Error_Vec4) {
-    auto* call =
-        Call("cross", vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f), vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f));
+    auto* call = Call("cross", vec4<f32>(1_f, 2_f, 3_f, 4_f), vec4<f32>(1_f, 2_f, 3_f, 4_f));
 
     WrapInFunction(call);
 
@@ -1184,8 +1183,8 @@ TEST_F(ResolverBuiltinTest, Cross_Error_Vec4) {
 }
 
 TEST_F(ResolverBuiltinTest, Cross_Error_TooManyParams) {
-    auto* call = Call("cross", vec3<f32>(1.0f, 2.0f, 3.0f), vec3<f32>(1.0f, 2.0f, 3.0f),
-                      vec3<f32>(1.0f, 2.0f, 3.0f));
+    auto* call =
+        Call("cross", vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(1_f, 2_f, 3_f));
 
     WrapInFunction(call);
 
@@ -1199,7 +1198,7 @@ TEST_F(ResolverBuiltinTest, Cross_Error_TooManyParams) {
 )");
 }
 TEST_F(ResolverBuiltinTest, Normalize) {
-    auto* call = Call("normalize", vec3<f32>(1.0f, 1.0f, 3.0f));
+    auto* call = Call("normalize", vec3<f32>(1_f, 1_f, 3_f));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1226,7 +1225,7 @@ using ResolverBuiltinTest_ThreeParam = ResolverTestWithParam<BuiltinData>;
 TEST_P(ResolverBuiltinTest_ThreeParam, Scalar) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, 1.f, 1.f, 1.f);
+    auto* call = Call(param.name, 1_f, 1_f, 1_f);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1238,8 +1237,8 @@ TEST_P(ResolverBuiltinTest_ThreeParam, Scalar) {
 TEST_P(ResolverBuiltinTest_ThreeParam, Vector) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f),
-                      vec3<f32>(1.0f, 1.0f, 3.0f));
+    auto* call = Call(param.name, vec3<f32>(1_f, 1_f, 3_f), vec3<f32>(1_f, 1_f, 3_f),
+                      vec3<f32>(1_f, 1_f, 3_f));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1271,7 +1270,7 @@ using ResolverBuiltinTest_ThreeParam_FloatOrInt = ResolverTestWithParam<BuiltinD
 TEST_P(ResolverBuiltinTest_ThreeParam_FloatOrInt, Float_Scalar) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, 1.f, 1.f, 1.f);
+    auto* call = Call(param.name, 1_f, 1_f, 1_f);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1283,8 +1282,8 @@ TEST_P(ResolverBuiltinTest_ThreeParam_FloatOrInt, Float_Scalar) {
 TEST_P(ResolverBuiltinTest_ThreeParam_FloatOrInt, Float_Vector) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f),
-                      vec3<f32>(1.0f, 1.0f, 3.0f));
+    auto* call = Call(param.name, vec3<f32>(1_f, 1_f, 3_f), vec3<f32>(1_f, 1_f, 3_f),
+                      vec3<f32>(1_f, 1_f, 3_f));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1443,7 +1442,7 @@ TEST_P(ResolverBuiltinTest_FloatOrInt_TwoParam, Scalar_Unsigned) {
 TEST_P(ResolverBuiltinTest_FloatOrInt_TwoParam, Scalar_Float) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, 1.0f, 1.0f);
+    auto* call = Call(param.name, 1_f, 1_f);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1481,7 +1480,7 @@ TEST_P(ResolverBuiltinTest_FloatOrInt_TwoParam, Vector_Unsigned) {
 TEST_P(ResolverBuiltinTest_FloatOrInt_TwoParam, Vector_Float) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, vec3<f32>(1.f, 1.f, 3.f), vec3<f32>(1.f, 1.f, 3.f));
+    auto* call = Call(param.name, vec3<f32>(1_f, 1_f, 3_f), vec3<f32>(1_f, 1_f, 3_f));
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

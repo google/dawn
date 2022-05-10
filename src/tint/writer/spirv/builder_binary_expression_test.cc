@@ -195,8 +195,8 @@ using BinaryArithFloatTest = TestParamHelper<BinaryData>;
 TEST_P(BinaryArithFloatTest, Scalar) {
     auto param = GetParam();
 
-    auto* lhs = Expr(3.2f);
-    auto* rhs = Expr(4.5f);
+    auto* lhs = Expr(3.2_f);
+    auto* rhs = Expr(4.5_f);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -218,8 +218,8 @@ TEST_P(BinaryArithFloatTest, Scalar) {
 TEST_P(BinaryArithFloatTest, Vector) {
     auto param = GetParam();
 
-    auto* lhs = vec3<f32>(1.f, 1.f, 1.f);
-    auto* rhs = vec3<f32>(1.f, 1.f, 1.f);
+    auto* lhs = vec3<f32>(1_f, 1_f, 1_f);
+    auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -426,8 +426,8 @@ using BinaryCompareFloatTest = TestParamHelper<BinaryData>;
 TEST_P(BinaryCompareFloatTest, Scalar) {
     auto param = GetParam();
 
-    auto* lhs = Expr(3.2f);
-    auto* rhs = Expr(4.5f);
+    auto* lhs = Expr(3.2_f);
+    auto* rhs = Expr(4.5_f);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -450,8 +450,8 @@ TEST_P(BinaryCompareFloatTest, Scalar) {
 TEST_P(BinaryCompareFloatTest, Vector) {
     auto param = GetParam();
 
-    auto* lhs = vec3<f32>(1.f, 1.f, 1.f);
-    auto* rhs = vec3<f32>(1.f, 1.f, 1.f);
+    auto* lhs = vec3<f32>(1_f, 1_f, 1_f);
+    auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
 
     auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
 
@@ -483,8 +483,8 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryData{ast::BinaryOp::kNotEqual, "OpFOrdNotEqual"}));
 
 TEST_F(BuilderTest, Binary_Multiply_VectorScalar) {
-    auto* lhs = vec3<f32>(1.f, 1.f, 1.f);
-    auto* rhs = Expr(1.f);
+    auto* lhs = vec3<f32>(1_f, 1_f, 1_f);
+    auto* rhs = Expr(1_f);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
@@ -506,8 +506,8 @@ TEST_F(BuilderTest, Binary_Multiply_VectorScalar) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_ScalarVector) {
-    auto* lhs = Expr(1.f);
-    auto* rhs = vec3<f32>(1.f, 1.f, 1.f);
+    auto* lhs = Expr(1_f);
+    auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
@@ -531,7 +531,7 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarVector) {
 TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
     auto* var = Var("mat", ty.mat3x3<f32>());
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("mat"), Expr(1.f));
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("mat"), Expr(1_f));
 
     WrapInFunction(var, expr);
 
@@ -558,7 +558,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
 TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
     auto* var = Var("mat", ty.mat3x3<f32>());
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr(1.f), Expr("mat"));
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr(1_f), Expr("mat"));
 
     WrapInFunction(var, expr);
 
@@ -584,7 +584,7 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
     auto* var = Var("mat", ty.mat3x3<f32>());
-    auto* rhs = vec3<f32>(1.f, 1.f, 1.f);
+    auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("mat"), rhs);
 
@@ -613,7 +613,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
 
 TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
     auto* var = Var("mat", ty.mat3x3<f32>());
-    auto* lhs = vec3<f32>(1.f, 1.f, 1.f);
+    auto* lhs = vec3<f32>(1_f, 1_f, 1_f);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, Expr("mat"));
 
@@ -899,7 +899,7 @@ enum class Type { f32, i32, u32 };
 static const ast::Expression* MakeVectorExpr(ProgramBuilder* builder, Type type) {
     switch (type) {
         case Type::f32:
-            return builder->vec3<f32>(1.f, 1.f, 1.f);
+            return builder->vec3<f32>(1_f, 1_f, 1_f);
         case Type::i32:
             return builder->vec3<i32>(1_i, 1_i, 1_i);
         case Type::u32:
@@ -910,7 +910,7 @@ static const ast::Expression* MakeVectorExpr(ProgramBuilder* builder, Type type)
 static const ast::Expression* MakeScalarExpr(ProgramBuilder* builder, Type type) {
     switch (type) {
         case Type::f32:
-            return builder->Expr(1.f);
+            return builder->Expr(1_f);
         case Type::i32:
             return builder->Expr(1_i);
         case Type::u32:

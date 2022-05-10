@@ -101,7 +101,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, ThroughVector_Member) {
 TEST_F(ResolverIncrementDecrementValidationTest, Float) {
     // var a : f32 = 2.0;
     // a++;
-    auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.f));
+    auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2_f));
     auto* inc = Increment(Expr(Source{{12, 34}}, "a"));
     WrapInFunction(var, inc);
 

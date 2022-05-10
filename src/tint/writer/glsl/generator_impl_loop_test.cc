@@ -114,8 +114,8 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
 
     Global("rhs", ty.f32(), ast::StorageClass::kPrivate);
 
-    auto* body = Block(Decl(Var("lhs", ty.f32(), Expr(2.4f))),  //
-                       Decl(Var("other", ty.f32())),            //
+    auto* body = Block(Decl(Var("lhs", ty.f32(), Expr(2.4_f))),  //
+                       Decl(Var("other", ty.f32())),             //
                        Break());
     auto* continuing = Block(Assign("lhs", "rhs"));
     auto* outer = Loop(body, continuing);

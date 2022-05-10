@@ -16,6 +16,8 @@
 
 #include "src/tint/writer/wgsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::wgsl {
 namespace {
 
@@ -23,7 +25,7 @@ namespace {
 // - 0 sign if sign is 0, 1 otherwise
 // - 'exponent_bits' is placed in the exponent space.
 //   So, the exponent bias must already be included.
-float MakeFloat(int sign, int biased_exponent, int mantissa) {
+f32 MakeFloat(int sign, int biased_exponent, int mantissa) {
     const uint32_t sign_bit = sign ? 0x80000000u : 0u;
     // The binary32 exponent is 8 bits, just below the sign.
     const uint32_t exponent_bits = (biased_exponent & 0xffu) << 23;
@@ -35,11 +37,11 @@ float MakeFloat(int sign, int biased_exponent, int mantissa) {
     static_assert(sizeof(result) == sizeof(bits),
                   "expected float and uint32_t to be the same size");
     std::memcpy(&result, &bits, sizeof(bits));
-    return result;
+    return f32(result);
 }
 
 struct FloatData {
-    float value;
+    f32 value;
     std::string expected;
 };
 inline std::ostream& operator<<(std::ostream& out, FloatData data) {
@@ -62,15 +64,15 @@ TEST_P(WgslGenerator_FloatLiteralTest, Emit) {
 
 INSTANTIATE_TEST_SUITE_P(Zero,
                          WgslGenerator_FloatLiteralTest,
-                         ::testing::ValuesIn(std::vector<FloatData>{{0.0f, "0.0"},
+                         ::testing::ValuesIn(std::vector<FloatData>{{0_f, "0.0"},
                                                                     {MakeFloat(0, 0, 0), "0.0"},
                                                                     {MakeFloat(1, 0, 0), "-0.0"}}));
 
 INSTANTIATE_TEST_SUITE_P(Normal,
                          WgslGenerator_FloatLiteralTest,
-                         ::testing::ValuesIn(std::vector<FloatData>{{1.0f, "1.0"},
-                                                                    {-1.0f, "-1.0"},
-                                                                    {101.375, "101.375"}}));
+                         ::testing::ValuesIn(std::vector<FloatData>{{1_f, "1.0"},
+                                                                    {-1_f, "-1.0"},
+                                                                    {101.375_f, "101.375"}}));
 
 INSTANTIATE_TEST_SUITE_P(Subnormal,
                          WgslGenerator_FloatLiteralTest,

@@ -68,7 +68,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, IncompatibleTypes) {
 
     auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2_i));
 
-    auto* assign = CompoundAssign(Source{{12, 34}}, "a", 2.3f, ast::BinaryOp::kAdd);
+    auto* assign = CompoundAssign(Source{{12, 34}}, "a", 2.3_f, ast::BinaryOp::kAdd);
     WrapInFunction(var, assign);
 
     ASSERT_FALSE(r()->Resolve());
@@ -83,9 +83,9 @@ TEST_F(ResolverCompoundAssignmentValidationTest, IncompatibleOp) {
     //   a |= 2.0;
     // }
 
-    auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(1.f));
+    auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(1_f));
 
-    auto* assign = CompoundAssign(Source{{12, 34}}, "a", 2.0f, ast::BinaryOp::kOr);
+    auto* assign = CompoundAssign(Source{{12, 34}}, "a", 2_f, ast::BinaryOp::kOr);
     WrapInFunction(var, assign);
 
     ASSERT_FALSE(r()->Resolve());
@@ -102,7 +102,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, VectorScalar_Pass) {
 
     auto* var = Var("a", ty.vec4<f32>(), ast::StorageClass::kNone);
 
-    auto* assign = CompoundAssign(Source{{12, 34}}, "a", 1.f, ast::BinaryOp::kAdd);
+    auto* assign = CompoundAssign(Source{{12, 34}}, "a", 1_f, ast::BinaryOp::kAdd);
     WrapInFunction(var, assign);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -132,7 +132,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, MatrixScalar_Pass) {
 
     auto* var = Var("a", ty.mat4x4<f32>(), ast::StorageClass::kNone);
 
-    auto* assign = CompoundAssign(Source{{12, 34}}, "a", 2.f, ast::BinaryOp::kMultiply);
+    auto* assign = CompoundAssign(Source{{12, 34}}, "a", 2_f, ast::BinaryOp::kMultiply);
     WrapInFunction(var, assign);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

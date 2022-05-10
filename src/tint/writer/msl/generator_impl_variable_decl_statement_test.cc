@@ -16,6 +16,8 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/writer/msl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::msl {
 namespace {
 
@@ -122,7 +124,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
-    GlobalConst("initializer", ty.f32(), Expr(0.f));
+    GlobalConst("initializer", ty.f32(), Expr(0_f));
     Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr("initializer"));
 
     WrapInFunction(Expr("a"));

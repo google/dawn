@@ -88,7 +88,7 @@ using Op = ast::BinaryOp;
 TEST_F(ResolverTest, Stmt_Assign) {
     auto* v = Var("v", ty.f32());
     auto* lhs = Expr("v");
-    auto* rhs = Expr(2.3f);
+    auto* rhs = Expr(2.3_f);
 
     auto* assign = Assign(lhs, rhs);
     WrapInFunction(v, assign);
@@ -107,7 +107,7 @@ TEST_F(ResolverTest, Stmt_Assign) {
 TEST_F(ResolverTest, Stmt_Case) {
     auto* v = Var("v", ty.f32());
     auto* lhs = Expr("v");
-    auto* rhs = Expr(2.3f);
+    auto* rhs = Expr(2.3_f);
 
     auto* assign = Assign(lhs, rhs);
     auto* block = Block(assign);
@@ -132,7 +132,7 @@ TEST_F(ResolverTest, Stmt_Case) {
 TEST_F(ResolverTest, Stmt_Block) {
     auto* v = Var("v", ty.f32());
     auto* lhs = Expr("v");
-    auto* rhs = Expr(2.3f);
+    auto* rhs = Expr(2.3_f);
 
     auto* assign = Assign(lhs, rhs);
     auto* block = Block(assign);
@@ -154,7 +154,7 @@ TEST_F(ResolverTest, Stmt_Block) {
 TEST_F(ResolverTest, Stmt_If) {
     auto* v = Var("v", ty.f32());
     auto* else_lhs = Expr("v");
-    auto* else_rhs = Expr(2.3f);
+    auto* else_rhs = Expr(2.3_f);
 
     auto* else_body = Block(Assign(else_lhs, else_rhs));
 
@@ -162,7 +162,7 @@ TEST_F(ResolverTest, Stmt_If) {
     auto* else_stmt = If(else_cond, else_body);
 
     auto* lhs = Expr("v");
-    auto* rhs = Expr(2.3f);
+    auto* rhs = Expr(2.3_f);
 
     auto* assign = Assign(lhs, rhs);
     auto* body = Block(assign);
@@ -195,11 +195,11 @@ TEST_F(ResolverTest, Stmt_If) {
 TEST_F(ResolverTest, Stmt_Loop) {
     auto* v = Var("v", ty.f32());
     auto* body_lhs = Expr("v");
-    auto* body_rhs = Expr(2.3f);
+    auto* body_rhs = Expr(2.3_f);
 
     auto* body = Block(Assign(body_lhs, body_rhs), Break());
     auto* continuing_lhs = Expr("v");
-    auto* continuing_rhs = Expr(2.3f);
+    auto* continuing_rhs = Expr(2.3_f);
 
     auto* continuing = Block(Assign(continuing_lhs, continuing_rhs));
     auto* stmt = Loop(body, continuing);
@@ -243,7 +243,7 @@ TEST_F(ResolverTest, Stmt_Return_WithoutValue) {
 TEST_F(ResolverTest, Stmt_Switch) {
     auto* v = Var("v", ty.f32());
     auto* lhs = Expr("v");
-    auto* rhs = Expr(2.3f);
+    auto* rhs = Expr(2.3_f);
     auto* case_block = Block(Assign(lhs, rhs));
     auto* stmt = Switch(Expr(2_i), Case(Expr(3_i), case_block), DefaultCase());
     WrapInFunction(v, stmt);
@@ -340,7 +340,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
     auto* inner = Block(foo_i32_decl, bar_i32_decl);
 
     // Declare f32 "foo" at function scope
-    auto* foo_f32 = Var("foo", ty.f32(), ast::StorageClass::kNone, Expr(2.f));
+    auto* foo_f32 = Var("foo", ty.f32(), ast::StorageClass::kNone, Expr(2_f));
     auto* foo_f32_init = foo_f32->constructor;
     auto* foo_f32_decl = Decl(foo_f32);
 
@@ -390,7 +390,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
     Func("func_i32", params, ty.void_(), {fn_i32_decl}, ast::AttributeList{});
 
     // Declare f32 "foo" at module scope
-    auto* mod_f32 = Var("foo", ty.f32(), ast::StorageClass::kPrivate, Expr(2.f));
+    auto* mod_f32 = Var("foo", ty.f32(), ast::StorageClass::kPrivate, Expr(2_f));
     auto* mod_init = mod_f32->constructor;
     AST().AddGlobalVariable(mod_f32);
 
@@ -486,7 +486,7 @@ TEST_F(ResolverTest, Expr_Bitcast) {
 
 TEST_F(ResolverTest, Expr_Call) {
     ast::VariableList params;
-    Func("my_func", params, ty.f32(), {Return(0.0f)}, ast::AttributeList{});
+    Func("my_func", params, ty.f32(), {Return(0_f)}, ast::AttributeList{});
 
     auto* call = Call("my_func");
     WrapInFunction(call);
@@ -499,7 +499,7 @@ TEST_F(ResolverTest, Expr_Call) {
 
 TEST_F(ResolverTest, Expr_Call_InBinaryOp) {
     ast::VariableList params;
-    Func("func", params, ty.f32(), {Return(0.0f)}, ast::AttributeList{});
+    Func("func", params, ty.f32(), {Return(0_f)}, ast::AttributeList{});
 
     auto* expr = Add(Call("func"), Call("func"));
     WrapInFunction(expr);
@@ -513,10 +513,10 @@ TEST_F(ResolverTest, Expr_Call_InBinaryOp) {
 TEST_F(ResolverTest, Expr_Call_WithParams) {
     Func("my_func", {Param(Sym(), ty.f32())}, ty.f32(),
          {
-             Return(1.2f),
+             Return(1.2_f),
          });
 
-    auto* param = Expr(2.4f);
+    auto* param = Expr(2.4_f);
 
     auto* call = Call("my_func", param);
     WrapInFunction(call);
@@ -528,7 +528,7 @@ TEST_F(ResolverTest, Expr_Call_WithParams) {
 }
 
 TEST_F(ResolverTest, Expr_Call_Builtin) {
-    auto* call = Call("round", 2.4f);
+    auto* call = Call("round", 2.4_f);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -550,7 +550,7 @@ TEST_F(ResolverTest, Expr_Cast) {
 }
 
 TEST_F(ResolverTest, Expr_Constructor_Scalar) {
-    auto* s = Expr(1.0f);
+    auto* s = Expr(1_f);
     WrapInFunction(s);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -560,7 +560,7 @@ TEST_F(ResolverTest, Expr_Constructor_Scalar) {
 }
 
 TEST_F(ResolverTest, Expr_Constructor_Type_Vec2) {
-    auto* tc = vec2<f32>(1.0f, 1.0f);
+    auto* tc = vec2<f32>(1_f, 1_f);
     WrapInFunction(tc);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -572,7 +572,7 @@ TEST_F(ResolverTest, Expr_Constructor_Type_Vec2) {
 }
 
 TEST_F(ResolverTest, Expr_Constructor_Type_Vec3) {
-    auto* tc = vec3<f32>(1.0f, 1.0f, 1.0f);
+    auto* tc = vec3<f32>(1_f, 1_f, 1_f);
     WrapInFunction(tc);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -584,7 +584,7 @@ TEST_F(ResolverTest, Expr_Constructor_Type_Vec3) {
 }
 
 TEST_F(ResolverTest, Expr_Constructor_Type_Vec4) {
-    auto* tc = vec4<f32>(1.0f, 1.0f, 1.0f, 1.0f);
+    auto* tc = vec4<f32>(1_f, 1_f, 1_f, 1_f);
     WrapInFunction(tc);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -703,7 +703,7 @@ TEST_F(ResolverTest, Expr_Identifier_Function_Ptr) {
     auto* p = Expr("p");
     auto* v_decl = Decl(Var("v", ty.f32()));
     auto* p_decl = Decl(Let("p", ty.pointer<f32>(ast::StorageClass::kFunction), AddressOf(v)));
-    auto* assign = Assign(Deref(p), 1.23f);
+    auto* assign = Assign(Deref(p), 1.23_f);
     Func("my_func", ast::VariableList{}, ty.void_(),
          {
              v_decl,
@@ -725,7 +725,7 @@ TEST_F(ResolverTest, Expr_Identifier_Function_Ptr) {
 }
 
 TEST_F(ResolverTest, Expr_Call_Function) {
-    Func("my_func", ast::VariableList{}, ty.f32(), {Return(0.0f)}, ast::AttributeList{});
+    Func("my_func", ast::VariableList{}, ty.f32(), {Return(0_f)}, ast::AttributeList{});
 
     auto* call = Call("my_func");
     WrapInFunction(call);
@@ -815,7 +815,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
 
     Func("my_func", ast::VariableList{}, ty.f32(),
          {Assign("wg_var", "wg_var"), Assign("sb_var", "sb_var"), Assign("priv_var", "priv_var"),
-          Return(0.0f)},
+          Return(0_f)},
          ast::AttributeList{});
 
     auto* func2 = Func("func", ast::VariableList{}, ty.void_(),
@@ -841,7 +841,7 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionVariable) {
     auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
                       {
                           Decl(Var("var", ty.f32())),
-                          Assign("var", 1.f),
+                          Assign("var", 1_f),
                       });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1795,11 +1795,11 @@ TEST_F(ResolverTest, Function_EntryPoints_StageAttribute) {
     Global("call_c", ty.f32(), ast::StorageClass::kPrivate);
 
     ast::VariableList params;
-    auto* func_b = Func("b", params, ty.f32(), {Return(0.0f)}, ast::AttributeList{});
-    auto* func_c = Func("c", params, ty.f32(), {Assign("second", Call("b")), Return(0.0f)},
+    auto* func_b = Func("b", params, ty.f32(), {Return(0_f)}, ast::AttributeList{});
+    auto* func_c = Func("c", params, ty.f32(), {Assign("second", Call("b")), Return(0_f)},
                         ast::AttributeList{});
 
-    auto* func_a = Func("a", params, ty.f32(), {Assign("first", Call("c")), Return(0.0f)},
+    auto* func_a = Func("a", params, ty.f32(), {Assign("first", Call("c")), Return(0_f)},
                         ast::AttributeList{});
 
     auto* ep_1 = Func("ep_1", params, ty.void_(),
@@ -1959,7 +1959,7 @@ TEST_F(ResolverTest, TextureSampler_TextureSample) {
     Global("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), GroupAndBinding(1, 1));
     Global("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(1, 2));
 
-    auto* call = CallStmt(Call("textureSample", "t", "s", vec2<f32>(1.0f, 2.0f)));
+    auto* call = CallStmt(Call("textureSample", "t", "s", vec2<f32>(1_f, 2_f)));
     const ast::Function* f =
         Func("test_function", {}, ty.void_(), {call}, {Stage(ast::PipelineStage::kFragment)});
 
@@ -1976,7 +1976,7 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleInFunction) {
     Global("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), GroupAndBinding(1, 1));
     Global("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(1, 2));
 
-    auto* inner_call = CallStmt(Call("textureSample", "t", "s", vec2<f32>(1.0f, 2.0f)));
+    auto* inner_call = CallStmt(Call("textureSample", "t", "s", vec2<f32>(1_f, 2_f)));
     const ast::Function* inner_func = Func("inner_func", {}, ty.void_(), {inner_call});
     auto* outer_call = CallStmt(Call("inner_func"));
     const ast::Function* outer_func =
@@ -1999,9 +1999,9 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondSameVariables) {
     Global("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), GroupAndBinding(1, 1));
     Global("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(1, 2));
 
-    auto* inner_call_1 = CallStmt(Call("textureSample", "t", "s", vec2<f32>(1.0f, 2.0f)));
+    auto* inner_call_1 = CallStmt(Call("textureSample", "t", "s", vec2<f32>(1_f, 2_f)));
     const ast::Function* inner_func_1 = Func("inner_func_1", {}, ty.void_(), {inner_call_1});
-    auto* inner_call_2 = CallStmt(Call("textureSample", "t", "s", vec2<f32>(3.0f, 4.0f)));
+    auto* inner_call_2 = CallStmt(Call("textureSample", "t", "s", vec2<f32>(3_f, 4_f)));
     const ast::Function* inner_func_2 = Func("inner_func_2", {}, ty.void_(), {inner_call_2});
     auto* outer_call_1 = CallStmt(Call("inner_func_1"));
     auto* outer_call_2 = CallStmt(Call("inner_func_2"));
@@ -2032,9 +2032,9 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondDifferentVariabl
     Global("t2", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), GroupAndBinding(1, 2));
     Global("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(1, 3));
 
-    auto* inner_call_1 = CallStmt(Call("textureSample", "t1", "s", vec2<f32>(1.0f, 2.0f)));
+    auto* inner_call_1 = CallStmt(Call("textureSample", "t1", "s", vec2<f32>(1_f, 2_f)));
     const ast::Function* inner_func_1 = Func("inner_func_1", {}, ty.void_(), {inner_call_1});
-    auto* inner_call_2 = CallStmt(Call("textureSample", "t2", "s", vec2<f32>(3.0f, 4.0f)));
+    auto* inner_call_2 = CallStmt(Call("textureSample", "t2", "s", vec2<f32>(3_f, 4_f)));
     const ast::Function* inner_func_2 = Func("inner_func_2", {}, ty.void_(), {inner_call_2});
     auto* outer_call_1 = CallStmt(Call("inner_func_1"));
     auto* outer_call_2 = CallStmt(Call("inner_func_2"));

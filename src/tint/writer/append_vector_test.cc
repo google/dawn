@@ -164,7 +164,7 @@ TEST_F(AppendVectorTest, Vec2i32FromVec2u32_u32) {
 TEST_F(AppendVectorTest, Vec2i32_f32) {
     auto* scalar_1 = Expr(1_i);
     auto* scalar_2 = Expr(2_i);
-    auto* scalar_3 = Expr(3.0f);
+    auto* scalar_3 = Expr(3_f);
     auto* vec_12 = vec2<i32>(scalar_1, scalar_2);
     WrapInFunction(vec_12, scalar_3);
 

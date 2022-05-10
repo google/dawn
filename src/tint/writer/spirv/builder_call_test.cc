@@ -17,6 +17,8 @@
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::spirv {
 namespace {
 
@@ -28,7 +30,7 @@ TEST_F(BuilderTest, Expression_Call) {
     func_params.push_back(Param("b", ty.f32()));
 
     auto* a_func = Func("a_func", func_params, ty.f32(), {Return(Add("a", "b"))});
-    auto* func = Func("main", {}, ty.void_(), {Assign(Phony(), Call("a_func", 1.f, 1.f))});
+    auto* func = Func("main", {}, ty.void_(), {Assign(Phony(), Call("a_func", 1_f, 1_f))});
 
     spirv::Builder& b = Build();
 
@@ -66,7 +68,7 @@ TEST_F(BuilderTest, Statement_Call) {
 
     auto* a_func = Func("a_func", func_params, ty.f32(), {Return(Add("a", "b"))});
 
-    auto* func = Func("main", {}, ty.void_(), {CallStmt(Call("a_func", 1.f, 1.f))});
+    auto* func = Func("main", {}, ty.void_(), {CallStmt(Call("a_func", 1_f, 1_f))});
 
     spirv::Builder& b = Build();
 

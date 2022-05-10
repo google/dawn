@@ -717,9 +717,10 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, VarUsed) {
     // }
     // var G: f32 = 2.1;
 
-    Func("F", ast::VariableList{}, ty.void_(), {Block(Assign(Expr(Source{{12, 34}}, "G"), 3.14f))});
+    Func("F", ast::VariableList{}, ty.void_(),
+         {Block(Assign(Expr(Source{{12, 34}}, "G"), 3.14_f))});
 
-    Global(Source{{56, 78}}, "G", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1f));
+    Global(Source{{56, 78}}, "G", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1_f));
 
     Build();
 }

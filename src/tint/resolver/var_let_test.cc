@@ -99,7 +99,7 @@ TEST_F(ResolverVarLetTest, VarDeclWithConstructor) {
 
     auto* i_c = Expr(1_i);
     auto* u_c = Expr(1_u);
-    auto* f_c = Expr(1.f);
+    auto* f_c = Expr(1_f);
     auto* b_c = Expr(true);
     auto* s_c = Construct(ty.Of(S), Expr(1_i));
     auto* a_c = Construct(ty.Of(A), Expr(1_i));
@@ -165,7 +165,7 @@ TEST_F(ResolverVarLetTest, LetDecl) {
 
     auto* i_c = Expr(1_i);
     auto* u_c = Expr(1_u);
-    auto* f_c = Expr(1.f);
+    auto* f_c = Expr(1_f);
     auto* b_c = Expr(true);
     auto* s_c = Construct(ty.Of(S), Expr(1_i));
     auto* a_c = Construct(ty.Of(A), Expr(1_i));

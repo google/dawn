@@ -15,13 +15,15 @@
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::glsl {
 namespace {
 
 using GlslGeneratorImplTest_ModuleConstant = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
-    auto* var = Let("pos", ty.array<f32, 3>(), array<f32, 3>(1.f, 2.f, 3.f));
+    auto* var = Let("pos", ty.array<f32, 3>(), array<f32, 3>(1_f, 2_f, 3_f));
     WrapInFunction(Decl(var));
 
     GeneratorImpl& gen = Build();
@@ -31,7 +33,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
 }
 
 TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
-    auto* var = Override("pos", ty.f32(), Expr(3.0f),
+    auto* var = Override("pos", ty.f32(), Expr(3_f),
                          ast::AttributeList{
                              Id(23),
                          });
@@ -63,11 +65,11 @@ const float pos = WGSL_SPEC_CONSTANT_23;
 }
 
 TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoId) {
-    auto* a = Override("a", ty.f32(), Expr(3.0f),
+    auto* a = Override("a", ty.f32(), Expr(3_f),
                        ast::AttributeList{
                            Id(0),
                        });
-    auto* b = Override("b", ty.f32(), Expr(2.0f));
+    auto* b = Override("b", ty.f32(), Expr(2_f));
 
     GeneratorImpl& gen = Build();
 

@@ -312,7 +312,7 @@ TEST_F(BuilderTest, MemberAccessor_NonPointer) {
                                          Member("b", ty.f32()),
                                      });
 
-    auto* var = Let("ident", ty.Of(s), Construct(ty.Of(s), 0.f, 0.f));
+    auto* var = Let("ident", ty.Of(s), Construct(ty.Of(s), 0_f, 0_f));
 
     auto* expr = MemberAccessor("ident", "b");
     WrapInFunction(var, expr);
@@ -353,7 +353,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_NonPointer) {
     auto* s_type = Structure("my_struct", {Member("inner", ty.Of(inner_struct))});
 
     auto* var = Let("ident", ty.Of(s_type),
-                    Construct(ty.Of(s_type), Construct(ty.Of(inner_struct), 0.f, 0.f)));
+                    Construct(ty.Of(s_type), Construct(ty.Of(inner_struct), 0_f, 0_f)));
     auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "b");
     WrapInFunction(var, expr);
 
@@ -443,7 +443,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
     auto* s_type = Structure("my_struct", {Member("inner", ty.Of(inner_struct))});
 
     auto* var = Var("ident", ty.Of(s_type));
-    auto* expr = Assign(MemberAccessor(MemberAccessor("ident", "inner"), "a"), Expr(2.0f));
+    auto* expr = Assign(MemberAccessor(MemberAccessor("ident", "inner"), "a"), Expr(2_f));
     WrapInFunction(var, expr);
 
     spirv::Builder& b = Build();
@@ -753,8 +753,8 @@ TEST_F(BuilderTest, IndexAccessor_Of_Vec) {
     // pos[1u]
 
     auto* var = Let("pos", ty.array(ty.vec2<f32>(), 3_u),
-                    Construct(ty.array(ty.vec2<f32>(), 3_u), vec2<f32>(0.0f, 0.5f),
-                              vec2<f32>(-0.5f, -0.5f), vec2<f32>(0.5f, -0.5f)));
+                    Construct(ty.array(ty.vec2<f32>(), 3_u), vec2<f32>(0_f, 0.5_f),
+                              vec2<f32>(-0.5_f, -0.5_f), vec2<f32>(0.5_f, -0.5_f)));
 
     auto* expr = IndexAccessor("pos", 1_u);
     WrapInFunction(var, expr);
@@ -796,8 +796,8 @@ TEST_F(BuilderTest, IndexAccessor_Of_Array_Of_f32) {
     // pos[2u][1u]
 
     auto* var = Let("pos", ty.array(ty.vec2<f32>(), 3_u),
-                    Construct(ty.array(ty.vec2<f32>(), 3_u), vec2<f32>(0.0f, 0.5f),
-                              vec2<f32>(-0.5f, -0.5f), vec2<f32>(0.5f, -0.5f)));
+                    Construct(ty.array(ty.vec2<f32>(), 3_u), vec2<f32>(0_f, 0.5_f),
+                              vec2<f32>(-0.5_f, -0.5_f), vec2<f32>(0.5_f, -0.5_f)));
 
     auto* expr = IndexAccessor(IndexAccessor("pos", 2_u), 1_u);
     WrapInFunction(var, expr);
@@ -837,7 +837,7 @@ TEST_F(BuilderTest, IndexAccessor_Vec_Literal) {
     // let pos : vec2<f32> = vec2<f32>(0.0, 0.5);
     // pos[1]
 
-    auto* var = Let("pos", ty.vec2<f32>(), vec2<f32>(0.0f, 0.5f));
+    auto* var = Let("pos", ty.vec2<f32>(), vec2<f32>(0_f, 0.5_f));
 
     auto* expr = IndexAccessor("pos", 1_u);
     WrapInFunction(var, expr);
@@ -867,7 +867,7 @@ TEST_F(BuilderTest, IndexAccessor_Vec_Dynamic) {
     // idx : i32
     // pos[idx]
 
-    auto* var = Let("pos", ty.vec2<f32>(), vec2<f32>(0.0f, 0.5f));
+    auto* var = Let("pos", ty.vec2<f32>(), vec2<f32>(0_f, 0.5_f));
     auto* idx = Var("idx", ty.i32());
     auto* expr = IndexAccessor("pos", idx);
 
@@ -902,7 +902,7 @@ TEST_F(BuilderTest, IndexAccessor_Array_Literal) {
     // let a : array<f32, 3u>;
     // a[2i]
 
-    auto* var = Let("a", ty.array<f32, 3>(), Construct(ty.array<f32, 3>(), 0.0f, 0.5f, 1.0f));
+    auto* var = Let("a", ty.array<f32, 3>(), Construct(ty.array<f32, 3>(), 0_f, 0.5_f, 1_f));
     auto* expr = IndexAccessor("a", 2_i);
     WrapInFunction(var, expr);
 
@@ -937,7 +937,7 @@ TEST_F(BuilderTest, IndexAccessor_Array_Dynamic) {
     // idx : i32
     // a[idx]
 
-    auto* var = Let("a", ty.array<f32, 3>(), Construct(ty.array<f32, 3>(), 0.0f, 0.5f, 1.0f));
+    auto* var = Let("a", ty.array<f32, 3>(), Construct(ty.array<f32, 3>(), 0_f, 0.5_f, 1_f));
 
     auto* idx = Var("idx", ty.i32());
     auto* expr = IndexAccessor("a", idx);
@@ -986,8 +986,8 @@ TEST_F(BuilderTest, IndexAccessor_Matrix_Dynamic) {
     // a[idx]
 
     auto* var = Let("a", ty.mat2x2<f32>(),
-                    Construct(ty.mat2x2<f32>(), Construct(ty.vec2<f32>(), 1.f, 2.f),
-                              Construct(ty.vec2<f32>(), 3.f, 4.f)));
+                    Construct(ty.mat2x2<f32>(), Construct(ty.vec2<f32>(), 1_f, 2_f),
+                              Construct(ty.vec2<f32>(), 3_f, 4_f)));
 
     auto* idx = Var("idx", ty.i32());
     auto* expr = IndexAccessor("a", idx);

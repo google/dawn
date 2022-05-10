@@ -15,13 +15,15 @@
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::writer::glsl {
 namespace {
 
 using GlslGeneratorImplTest_Call = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
-    Func("my_func", {}, ty.f32(), {Return(1.23f)});
+    Func("my_func", {}, ty.f32(), {Return(1.23_f)});
 
     auto* call = Call("my_func");
     WrapInFunction(call);
@@ -39,7 +41,7 @@ TEST_F(GlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
              Param(Sym(), ty.f32()),
              Param(Sym(), ty.f32()),
          },
-         ty.f32(), {Return(1.23f)});
+         ty.f32(), {Return(1.23_f)});
     Global("param1", ty.f32(), ast::StorageClass::kPrivate);
     Global("param2", ty.f32(), ast::StorageClass::kPrivate);
 

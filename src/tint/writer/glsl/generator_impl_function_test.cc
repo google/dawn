@@ -193,8 +193,8 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_SharedStruct_Di
                      });
 
     Func("vert_main", {}, ty.Of(interface_struct),
-         {Return(Construct(ty.Of(interface_struct), Construct(ty.vec4<f32>()), Expr(0.5f),
-                           Expr(0.25f)))},
+         {Return(Construct(ty.Of(interface_struct), Construct(ty.vec4<f32>()), Expr(0.5_f),
+                           Expr(0.25_f)))},
          {Stage(ast::PipelineStage::kVertex)});
 
     Func("frag_main", {Param("inputs", ty.Of(interface_struct))}, ty.void_(),
@@ -271,17 +271,17 @@ TEST_F(GlslGeneratorImplTest_Function,
 
   Func("foo", {Param("x", ty.f32())}, ty.Of(vertex_output_struct),
        {Return(Construct(ty.Of(vertex_output_struct),
-                         Construct(ty.vec4<f32>(), "x", "x", "x", Expr(1.f))))},
+                         Construct(ty.vec4<f32>(), "x", "x", "x", Expr(1_f))))},
        {});
 
   Func("vert_main1", {}, ty.Of(vertex_output_struct),
        {Return(Construct(ty.Of(vertex_output_struct),
-                         Expr(Call("foo", Expr(0.5f)))))},
+                         Expr(Call("foo", Expr(0.5_f)))))},
        {Stage(ast::PipelineStage::kVertex)});
 
   Func("vert_main2", {}, ty.Of(vertex_output_struct),
        {Return(Construct(ty.Of(vertex_output_struct),
-                         Expr(Call("foo", Expr(0.25f)))))},
+                         Expr(Call("foo", Expr(0.25_f)))))},
        {Stage(ast::PipelineStage::kVertex)});
 
   GeneratorImpl& gen = SanitizeAndBuild();
@@ -336,7 +336,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_Uniform) {
              Return(MemberAccessor(MemberAccessor(ubo, "coord"), "x")),
          });
 
-    auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, Call("sub_func", 1.0f));
+    auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, Call("sub_func", 1_f));
 
     Func("frag_main", {}, ty.void_(),
          {
@@ -529,7 +529,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_WO_Storage
 
     Func("frag_main", ast::VariableList{}, ty.void_(),
          {
-             Assign(MemberAccessor("coord", "b"), Expr(2.0f)),
+             Assign(MemberAccessor("coord", "b"), Expr(2_f)),
              Return(),
          },
          {
@@ -577,7 +577,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_StorageBuf
 
     Func("frag_main", ast::VariableList{}, ty.void_(),
          {
-             Assign(MemberAccessor("coord", "b"), Expr(2.0f)),
+             Assign(MemberAccessor("coord", "b"), Expr(2_f)),
              Return(),
          },
          {
@@ -624,7 +624,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_Called_By_EntryPoint_With_
              Return(MemberAccessor("coord", "x")),
          });
 
-    auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, Call("sub_func", 1.0f));
+    auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, Call("sub_func", 1_f));
 
     Func("frag_main", ast::VariableList{}, ty.void_(),
          {
@@ -673,7 +673,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_Called_By_EntryPoint_With_
              Return(MemberAccessor("coord", "x")),
          });
 
-    auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, Call("sub_func", 1.0f));
+    auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, Call("sub_func", 1_f));
 
     Func("frag_main", ast::VariableList{}, ty.void_(),
          {

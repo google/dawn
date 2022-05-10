@@ -39,7 +39,7 @@ TEST_F(BuilderTest, UnaryOp_Negation_Integer) {
 }
 
 TEST_F(BuilderTest, UnaryOp_Negation_Float) {
-    auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(1.f));
+    auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(1_f));
     WrapInFunction(expr);
 
     spirv::Builder& b = Build();

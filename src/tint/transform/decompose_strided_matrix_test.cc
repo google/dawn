@@ -354,7 +354,7 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageMatrix) {
     b.Func("f", {}, b.ty.void_(),
            {
                b.Assign(b.MemberAccessor("s", "m"),
-                        b.mat2x2<f32>(b.vec2<f32>(1.0f, 2.0f), b.vec2<f32>(3.0f, 4.0f))),
+                        b.mat2x2<f32>(b.vec2<f32>(1_f, 2_f), b.vec2<f32>(3_f, 4_f))),
            },
            {
                b.Stage(ast::PipelineStage::kCompute),
@@ -411,7 +411,7 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageColumn) {
              b.GroupAndBinding(0, 0));
     b.Func("f", {}, b.ty.void_(),
            {
-               b.Assign(b.IndexAccessor(b.MemberAccessor("s", "m"), 1_i), b.vec2<f32>(1.0f, 2.0f)),
+               b.Assign(b.IndexAccessor(b.MemberAccessor("s", "m"), 1_i), b.vec2<f32>(1_f, 2_f)),
            },
            {
                b.Stage(ast::PipelineStage::kCompute),
@@ -468,21 +468,20 @@ TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
              });
     b.Global("s", b.ty.Of(S), ast::StorageClass::kStorage, ast::Access::kReadWrite,
              b.GroupAndBinding(0, 0));
-    b.Func(
-        "f", {}, b.ty.void_(),
-        {
-            b.Decl(b.Let("a", nullptr, b.AddressOf(b.MemberAccessor("s", "m")))),
-            b.Decl(b.Let("b", nullptr, b.AddressOf(b.Deref(b.AddressOf(b.Deref("a")))))),
-            b.Decl(b.Let("x", nullptr, b.Deref("b"))),
-            b.Decl(b.Let("y", nullptr, b.IndexAccessor(b.Deref("b"), 1_i))),
-            b.Decl(b.Let("z", nullptr, b.IndexAccessor("x", 1_i))),
-            b.Assign(b.Deref("b"), b.mat2x2<f32>(b.vec2<f32>(1.0f, 2.0f), b.vec2<f32>(3.0f, 4.0f))),
-            b.Assign(b.IndexAccessor(b.Deref("b"), 1_i), b.vec2<f32>(5.0f, 6.0f)),
-        },
-        {
-            b.Stage(ast::PipelineStage::kCompute),
-            b.WorkgroupSize(1_i),
-        });
+    b.Func("f", {}, b.ty.void_(),
+           {
+               b.Decl(b.Let("a", nullptr, b.AddressOf(b.MemberAccessor("s", "m")))),
+               b.Decl(b.Let("b", nullptr, b.AddressOf(b.Deref(b.AddressOf(b.Deref("a")))))),
+               b.Decl(b.Let("x", nullptr, b.Deref("b"))),
+               b.Decl(b.Let("y", nullptr, b.IndexAccessor(b.Deref("b"), 1_i))),
+               b.Decl(b.Let("z", nullptr, b.IndexAccessor("x", 1_i))),
+               b.Assign(b.Deref("b"), b.mat2x2<f32>(b.vec2<f32>(1_f, 2_f), b.vec2<f32>(3_f, 4_f))),
+               b.Assign(b.IndexAccessor(b.Deref("b"), 1_i), b.vec2<f32>(5_f, 6_f)),
+           },
+           {
+               b.Stage(ast::PipelineStage::kCompute),
+               b.WorkgroupSize(1_i),
+           });
 
     auto* expect = R"(
 struct S {
@@ -595,7 +594,7 @@ TEST_F(DecomposeStridedMatrixTest, WritePrivateMatrix) {
     b.Func("f", {}, b.ty.void_(),
            {
                b.Assign(b.MemberAccessor("s", "m"),
-                        b.mat2x2<f32>(b.vec2<f32>(1.0f, 2.0f), b.vec2<f32>(3.0f, 4.0f))),
+                        b.mat2x2<f32>(b.vec2<f32>(1_f, 2_f), b.vec2<f32>(3_f, 4_f))),
            },
            {
                b.Stage(ast::PipelineStage::kCompute),

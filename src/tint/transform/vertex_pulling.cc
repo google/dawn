@@ -361,19 +361,19 @@ struct State {
                         case BaseType::kI32:
                             ty = ctx.dst->ty.i32();
                             for (uint32_t i = fmt_dt.width; i < var_dt.width; i++) {
-                                values.emplace_back(ctx.dst->Expr(i32((i == 3) ? 1 : 0)));
+                                values.emplace_back(ctx.dst->Expr((i == 3) ? 1_i : 0_i));
                             }
                             break;
                         case BaseType::kU32:
                             ty = ctx.dst->ty.u32();
                             for (uint32_t i = fmt_dt.width; i < var_dt.width; i++) {
-                                values.emplace_back(ctx.dst->Expr(u32((i == 3) ? 1u : 0u)));
+                                values.emplace_back(ctx.dst->Expr((i == 3) ? 1_u : 0_u));
                             }
                             break;
                         case BaseType::kF32:
                             ty = ctx.dst->ty.f32();
                             for (uint32_t i = fmt_dt.width; i < var_dt.width; i++) {
-                                values.emplace_back(ctx.dst->Expr((i == 3) ? 1.f : 0.f));
+                                values.emplace_back(ctx.dst->Expr((i == 3) ? 1_f : 0_f));
                             }
                             break;
                         default:

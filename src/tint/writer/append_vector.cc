@@ -51,7 +51,7 @@ const sem::Expression* Zero(ProgramBuilder& b, const sem::Type* ty, const sem::S
     } else if (ty->Is<sem::U32>()) {
         expr = b.Expr(0_u);
     } else if (ty->Is<sem::F32>()) {
-        expr = b.Expr(0.0f);
+        expr = b.Expr(0_f);
     } else if (ty->Is<sem::Bool>()) {
         expr = b.Expr(false);
     } else {

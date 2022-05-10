@@ -91,7 +91,7 @@ TEST_F(ResolverTypeValidationTest, GlobalConstantWithStorageClass_Fail) {
     // const<private> global_var: f32;
     AST().AddGlobalVariable(create<ast::Variable>(
         Source{{12, 34}}, Symbols().Register("global_var"), ast::StorageClass::kPrivate,
-        ast::Access::kUndefined, ty.f32(), true, false, Expr(1.23f), ast::AttributeList{}));
+        ast::Access::kUndefined, ty.f32(), true, false, Expr(1.23_f), ast::AttributeList{}));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: global constants shouldn't have a storage class");
@@ -108,9 +108,9 @@ TEST_F(ResolverTypeValidationTest, GlobalVariableUnique_Pass) {
     // var global_var0 : f32 = 0.1;
     // var global_var1 : i32 = 0;
 
-    Global("global_var0", ty.f32(), ast::StorageClass::kPrivate, Expr(0.1f));
+    Global("global_var0", ty.f32(), ast::StorageClass::kPrivate, Expr(0.1_f));
 
-    Global(Source{{12, 34}}, "global_var1", ty.f32(), ast::StorageClass::kPrivate, Expr(1.0f));
+    Global(Source{{12, 34}}, "global_var1", ty.f32(), ast::StorageClass::kPrivate, Expr(1_f));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -121,11 +121,11 @@ TEST_F(ResolverTypeValidationTest, GlobalVariableFunctionVariableNotUnique_Pass)
     // }
     // var a: f32 = 2.1;
 
-    auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
+    auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2_f));
 
     Func("my_func", ast::VariableList{}, ty.void_(), {Decl(var)});
 
-    Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1f));
+    Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1_f));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -135,12 +135,12 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierInnerScope_Pass) {
     // if (true) { var a : f32 = 2.0; }
     // var a : f32 = 3.14;
     // }
-    auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
+    auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2_f));
 
     auto* cond = Expr(true);
     auto* body = Block(Decl(var));
 
-    auto* var_a_float = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(3.1f));
+    auto* var_a_float = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(3.1_f));
 
     auto* outer_body = Block(If(cond, body), Decl(Source{{12, 34}}, var_a_float));
 
@@ -168,9 +168,9 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierInnerScopeBlock_Pass) {
 TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierDifferentFunctions_Pass) {
     // func0 { var a : f32 = 2.0; return; }
     // func1 { var a : f32 = 3.0; return; }
-    auto* var0 = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
+    auto* var0 = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2_f));
 
-    auto* var1 = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(1.0f));
+    auto* var1 = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(1_f));
 
     Func("func0", ast::VariableList{}, ty.void_(),
          ast::StatementList{
@@ -266,7 +266,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_SignedConstant_Negative) {
 
 TEST_F(ResolverTypeValidationTest, ArraySize_FloatLiteral) {
     // var<private> a : array<f32, 10.0>;
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 10.f)), ast::StorageClass::kPrivate);
+    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 10_f)), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size must be integer scalar");
 }
@@ -282,7 +282,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_IVecLiteral) {
 TEST_F(ResolverTypeValidationTest, ArraySize_FloatConstant) {
     // let size = 10.0;
     // var<private> a : array<f32, size>;
-    GlobalConst("size", nullptr, Expr(10.f));
+    GlobalConst("size", nullptr, Expr(10_f));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size must be integer scalar");

@@ -52,7 +52,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignIncompatibleTypes) {
 
     auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2_i));
 
-    auto* assign = Assign(Source{{12, 34}}, "a", 2.3f);
+    auto* assign = Assign(Source{{12, 34}}, "a", 2.3_f);
     WrapInFunction(var, assign);
 
     ASSERT_FALSE(r()->Resolve());
@@ -118,7 +118,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignIncompatibleTypesInBlockStatement
     // }
 
     auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2_i));
-    WrapInFunction(var, Assign(Source{{12, 34}}, "a", 2.3f));
+    WrapInFunction(var, Assign(Source{{12, 34}}, "a", 2.3_f));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -134,7 +134,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignIncompatibleTypesInNestedBlockSta
     // }
 
     auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2_i));
-    auto* inner_block = Block(Decl(var), Assign(Source{{12, 34}}, "a", 2.3f));
+    auto* inner_block = Block(Decl(var), Assign(Source{{12, 34}}, "a", 2.3_f));
     auto* outer_block = Block(inner_block);
     WrapInFunction(outer_block);
 
@@ -353,7 +353,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_Pass) {
 
     WrapInFunction(Assign(Phony(), 1_i),                                    //
                    Assign(Phony(), 2_u),                                    //
-                   Assign(Phony(), 3.f),                                    //
+                   Assign(Phony(), 3_f),                                    //
                    Assign(Phony(), vec2<bool>()),                           //
                    Assign(Phony(), "tex"),                                  //
                    Assign(Phony(), "smp"),                                  //

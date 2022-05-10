@@ -18,6 +18,8 @@
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 // Helpers and typedefs
@@ -86,7 +88,7 @@ TEST_F(ResolverCallTest, Valid) {
         args.push_back(p.create_value(*this, 0));
     }
 
-    auto* func = Func("foo", std::move(params), ty.f32(), {Return(1.23f)});
+    auto* func = Func("foo", std::move(params), ty.f32(), {Return(1.23_f)});
     auto* call_expr = Call("foo", std::move(args));
     WrapInFunction(call_expr);
 

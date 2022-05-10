@@ -118,8 +118,8 @@ TEST_F(BuilderTest, EntryPoint_ReturnValue) {
         create<ast::BinaryExpression>(ast::BinaryOp::kGreaterThan, Expr("loc_in"), Expr(10_u));
     Func("frag_main", ast::VariableList{loc_in}, ty.f32(),
          ast::StatementList{
-             If(cond, Block(Return(0.5f))),
-             Return(1.0f),
+             If(cond, Block(Return(0.5_f))),
+             Return(1_f),
          },
          ast::AttributeList{
              Stage(ast::PipelineStage::kFragment),
@@ -204,7 +204,7 @@ TEST_F(BuilderTest, EntryPoint_SharedStruct) {
             Member("pos", ty.vec4<f32>(), ast::AttributeList{Builtin(ast::Builtin::kPosition)}),
         });
 
-    auto* vert_retval = Construct(ty.Of(interface), 42.f, Construct(ty.vec4<f32>()));
+    auto* vert_retval = Construct(ty.Of(interface), 42_f, Construct(ty.vec4<f32>()));
     Func("vert_main", ast::VariableList{}, ty.Of(interface), {Return(vert_retval)},
          {Stage(ast::PipelineStage::kVertex)});
 

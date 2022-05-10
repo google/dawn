@@ -16,6 +16,8 @@
 
 #include "src/tint/resolver/resolver_test_helper.h"
 
+using namespace tint::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
 
@@ -36,7 +38,7 @@ class ResolverPipelineOverridableConstantTest : public ResolverTest {
 };
 
 TEST_F(ResolverPipelineOverridableConstantTest, NonOverridable) {
-    auto* a = GlobalConst("a", ty.f32(), Expr(1.f));
+    auto* a = GlobalConst("a", ty.f32(), Expr(1_f));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -48,7 +50,7 @@ TEST_F(ResolverPipelineOverridableConstantTest, NonOverridable) {
 }
 
 TEST_F(ResolverPipelineOverridableConstantTest, WithId) {
-    auto* a = Override("a", ty.f32(), Expr(1.f), {Id(7u)});
+    auto* a = Override("a", ty.f32(), Expr(1_f), {Id(7u)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -56,7 +58,7 @@ TEST_F(ResolverPipelineOverridableConstantTest, WithId) {
 }
 
 TEST_F(ResolverPipelineOverridableConstantTest, WithoutId) {
-    auto* a = Override("a", ty.f32(), Expr(1.f));
+    auto* a = Override("a", ty.f32(), Expr(1_f));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -65,12 +67,12 @@ TEST_F(ResolverPipelineOverridableConstantTest, WithoutId) {
 
 TEST_F(ResolverPipelineOverridableConstantTest, WithAndWithoutIds) {
     std::vector<ast::Variable*> variables;
-    auto* a = Override("a", ty.f32(), Expr(1.f));
-    auto* b = Override("b", ty.f32(), Expr(1.f));
-    auto* c = Override("c", ty.f32(), Expr(1.f), {Id(2u)});
-    auto* d = Override("d", ty.f32(), Expr(1.f), {Id(4u)});
-    auto* e = Override("e", ty.f32(), Expr(1.f));
-    auto* f = Override("f", ty.f32(), Expr(1.f), {Id(1u)});
+    auto* a = Override("a", ty.f32(), Expr(1_f));
+    auto* b = Override("b", ty.f32(), Expr(1_f));
+    auto* c = Override("c", ty.f32(), Expr(1_f), {Id(2u)});
+    auto* d = Override("d", ty.f32(), Expr(1_f), {Id(4u)});
+    auto* e = Override("e", ty.f32(), Expr(1_f));
+    auto* f = Override("f", ty.f32(), Expr(1_f), {Id(1u)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -84,8 +86,8 @@ TEST_F(ResolverPipelineOverridableConstantTest, WithAndWithoutIds) {
 }
 
 TEST_F(ResolverPipelineOverridableConstantTest, DuplicateIds) {
-    Override("a", ty.f32(), Expr(1.f), {Id(Source{{12, 34}}, 7u)});
-    Override("b", ty.f32(), Expr(1.f), {Id(Source{{56, 78}}, 7u)});
+    Override("a", ty.f32(), Expr(1_f), {Id(Source{{12, 34}}, 7u)});
+    Override("b", ty.f32(), Expr(1_f), {Id(Source{{56, 78}}, 7u)});
 
     EXPECT_FALSE(r()->Resolve());
 
@@ -94,7 +96,7 @@ TEST_F(ResolverPipelineOverridableConstantTest, DuplicateIds) {
 }
 
 TEST_F(ResolverPipelineOverridableConstantTest, IdTooLarge) {
-    Override("a", ty.f32(), Expr(1.f), {Id(Source{{12, 34}}, 65536u)});
+    Override("a", ty.f32(), Expr(1_f), {Id(Source{{12, 34}}, 65536u)});
 
     EXPECT_FALSE(r()->Resolve());
 
