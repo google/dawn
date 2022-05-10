@@ -79,6 +79,18 @@ SampleTypeBit SampleTypeToSampleTypeBit(wgpu::TextureSampleType sampleType) {
     return static_cast<SampleTypeBit>(1 << (static_cast<uint32_t>(sampleType) - 1));
 }
 
+Format::Format() = default;
+
+Format::Format(const Format&) = default;
+
+Format::Format(Format&&) = default;
+
+Format::~Format() = default;
+
+Format& Format::operator=(const Format&) = default;
+
+Format& Format::operator=(Format&&) = default;
+
 bool Format::IsColor() const {
     return aspects == Aspect::Color;
 }

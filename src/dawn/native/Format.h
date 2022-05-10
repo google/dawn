@@ -88,6 +88,14 @@ using FormatTable = ityp::array<FormatIndex, Format, kKnownFormatCount>;
 
 // A wgpu::TextureFormat along with all the information about it necessary for validation.
 struct Format {
+    Format();
+    Format(const Format&);
+    Format(Format&&);
+    ~Format();
+
+    Format& operator=(const Format&);
+    Format& operator=(Format&&);
+
     wgpu::TextureFormat format;
 
     // TODO(crbug.com/dawn/1332): These members could be stored in a Format capability matrix.

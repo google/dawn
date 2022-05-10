@@ -361,4 +361,76 @@ void SkipCommand(CommandIterator* commands, Command type) {
     }
 }
 
+TimestampWrite::TimestampWrite(const Ref<QuerySetBase>& set, uint32_t idx)
+    : querySet(set), queryIndex(idx) {}
+TimestampWrite::TimestampWrite(TimestampWrite&&) = default;
+TimestampWrite::~TimestampWrite() = default;
+
+BeginComputePassCmd::BeginComputePassCmd() = default;
+BeginComputePassCmd::~BeginComputePassCmd() = default;
+
+BeginOcclusionQueryCmd::BeginOcclusionQueryCmd() = default;
+BeginOcclusionQueryCmd::~BeginOcclusionQueryCmd() = default;
+
+RenderPassColorAttachmentInfo::RenderPassColorAttachmentInfo() = default;
+RenderPassColorAttachmentInfo::~RenderPassColorAttachmentInfo() = default;
+
+RenderPassDepthStencilAttachmentInfo::RenderPassDepthStencilAttachmentInfo() = default;
+RenderPassDepthStencilAttachmentInfo::~RenderPassDepthStencilAttachmentInfo() = default;
+
+BeginRenderPassCmd::BeginRenderPassCmd() = default;
+BeginRenderPassCmd::~BeginRenderPassCmd() = default;
+
+BufferCopy::BufferCopy() = default;
+BufferCopy::~BufferCopy() = default;
+
+TextureCopy::TextureCopy() = default;
+TextureCopy::TextureCopy(const TextureCopy&) = default;
+TextureCopy::~TextureCopy() = default;
+
+CopyBufferToBufferCmd::CopyBufferToBufferCmd() = default;
+CopyBufferToBufferCmd::~CopyBufferToBufferCmd() = default;
+
+DispatchIndirectCmd::DispatchIndirectCmd() = default;
+DispatchIndirectCmd::~DispatchIndirectCmd() = default;
+
+DrawIndirectCmd::DrawIndirectCmd() = default;
+DrawIndirectCmd::~DrawIndirectCmd() = default;
+
+EndComputePassCmd::EndComputePassCmd() = default;
+EndComputePassCmd::~EndComputePassCmd() = default;
+
+EndOcclusionQueryCmd::EndOcclusionQueryCmd() = default;
+EndOcclusionQueryCmd::~EndOcclusionQueryCmd() = default;
+
+EndRenderPassCmd::EndRenderPassCmd() = default;
+EndRenderPassCmd::~EndRenderPassCmd() = default;
+
+ClearBufferCmd::ClearBufferCmd() = default;
+ClearBufferCmd::~ClearBufferCmd() = default;
+
+ResolveQuerySetCmd::ResolveQuerySetCmd() = default;
+ResolveQuerySetCmd::~ResolveQuerySetCmd() = default;
+
+SetComputePipelineCmd::SetComputePipelineCmd() = default;
+SetComputePipelineCmd::~SetComputePipelineCmd() = default;
+
+SetRenderPipelineCmd::SetRenderPipelineCmd() = default;
+SetRenderPipelineCmd::~SetRenderPipelineCmd() = default;
+
+SetBindGroupCmd::SetBindGroupCmd() = default;
+SetBindGroupCmd::~SetBindGroupCmd() = default;
+
+SetIndexBufferCmd::SetIndexBufferCmd() = default;
+SetIndexBufferCmd::~SetIndexBufferCmd() = default;
+
+SetVertexBufferCmd::SetVertexBufferCmd() = default;
+SetVertexBufferCmd::~SetVertexBufferCmd() = default;
+
+WriteBufferCmd::WriteBufferCmd() = default;
+WriteBufferCmd::~WriteBufferCmd() = default;
+
+WriteTimestampCmd::WriteTimestampCmd() = default;
+WriteTimestampCmd::~WriteTimestampCmd() = default;
+
 }  // namespace dawn::native
