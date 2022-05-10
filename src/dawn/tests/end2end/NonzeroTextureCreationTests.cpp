@@ -68,9 +68,6 @@ class ExpectNonZero : public detail::CustomTextureExpectation {
     }
 };
 
-#define EXPECT_TEXTURE_NONZERO(T, ...) \
-    AddTextureExpectation(__FILE__, __LINE__, new ExpectNonZero<T>(), __VA_ARGS__)
-
 class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
   protected:
     constexpr static uint32_t kSize = 128;
