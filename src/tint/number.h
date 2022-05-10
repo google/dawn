@@ -16,6 +16,7 @@
 #define SRC_TINT_NUMBER_H_
 
 #include <stdint.h>
+#include <functional>
 
 namespace tint {
 
@@ -27,7 +28,13 @@ struct Number {
 
     /// Constructor.
     /// @param v the value to initialize this Number to
-    explicit Number(T v) : value(v) {}
+    template <typename U>
+    explicit Number(U v) : value(static_cast<T>(v)) {}
+
+    /// Constructor.
+    /// @param v the value to initialize this Number to
+    template <typename U>
+    explicit Number(Number<U> v) : value(static_cast<T>(v.value)) {}
 
     /// Conversion operator
     /// @returns the value as T
@@ -47,25 +54,26 @@ struct Number {
 
 template <typename A, typename B>
 bool operator==(Number<A> a, Number<B> b) {
-    return a.value == b.value;
+    using T = decltype(a.value + b.value);
+    return std::equal_to<T>()(a.value, b.value);
 }
 
 template <typename A, typename B>
 bool operator==(Number<A> a, B b) {
-    return a.value == b;
+    return a == Number<B>(b);
 }
 
 template <typename A, typename B>
 bool operator==(A a, Number<B> b) {
-    return a == b.value;
+    return Number<A>(a) == b;
 }
 
 /// `i32` is a type alias to `Number<int32_t>`.
 using i32 = Number<int32_t>;
 /// `u32` is a type alias to `Number<uint32_t>`.
 using u32 = Number<uint32_t>;
-/// `f32` is a type alias to `float`
-using f32 = float;
+/// `f32` is a type alias to `Number<float>`
+using f32 = Number<float>;
 
 }  // namespace tint
 
@@ -79,6 +87,16 @@ inline i32 operator"" _i(unsigned long long int value) {  // NOLINT
 /// Literal suffix for u32 literals
 inline u32 operator"" _u(unsigned long long int value) {  // NOLINT
     return u32(static_cast<uint32_t>(value));
+}
+
+/// Literal suffix for f32 literals
+inline f32 operator"" _f(long double value) {  // NOLINT
+    return f32(static_cast<double>(value));
+}
+
+/// Literal suffix for f32 literals
+inline f32 operator"" _f(unsigned long long int value) {  // NOLINT
+    return f32(static_cast<double>(value));
 }
 
 }  // namespace tint::number_suffixes

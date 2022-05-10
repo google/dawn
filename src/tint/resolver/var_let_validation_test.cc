@@ -127,7 +127,7 @@ TEST_F(ResolverVarLetValidationTest, LetOfPtrConstructedWithRef) {
     // let b : ptr<function,f32> = a;
     const auto priv = ast::StorageClass::kFunction;
     auto* var_a = Var("a", ty.f32(), priv);
-    auto* var_b = Let(Source{{12, 34}}, "b", ty.pointer<float>(priv), Expr("a"), {});
+    auto* var_b = Let(Source{{12, 34}}, "b", ty.pointer<f32>(priv), Expr("a"), {});
     WrapInFunction(var_a, var_b);
 
     ASSERT_FALSE(r()->Resolve());

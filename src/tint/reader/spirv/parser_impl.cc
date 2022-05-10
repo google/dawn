@@ -1343,7 +1343,9 @@ bool ParserImpl::EmitScalarSpecConstants() {
                         float float_value;
                         // Copy the bits so we can read them as a float.
                         std::memcpy(&float_value, &literal_value, sizeof(float_value));
-                        return create<ast::FloatLiteralExpression>(Source{}, float_value);
+                        return create<ast::FloatLiteralExpression>(
+                            Source{}, static_cast<double>(float_value),
+                            ast::FloatLiteralExpression::Suffix::kF);
                     });
                 if (ast_expr == nullptr) {
                     return Fail() << " invalid result type for OpSpecConstant "
@@ -1905,18 +1907,22 @@ TypedExpression ParserImpl::MakeConstantExpressionForScalarSpirvConstant(
     return Switch(
         ast_type,
         [&](const I32*) {
-            return TypedExpression{ty_.I32(), create<ast::IntLiteralExpression>(
-                                                  source, spirv_const->GetS32(),
-                                                  ast::IntLiteralExpression::Suffix::kI)};
+            return TypedExpression{ty_.I32(),
+                                   create<ast::IntLiteralExpression>(
+                                       source, static_cast<int64_t>(spirv_const->GetS32()),
+                                       ast::IntLiteralExpression::Suffix::kI)};
         },
         [&](const U32*) {
-            return TypedExpression{ty_.U32(), create<ast::IntLiteralExpression>(
-                                                  source, spirv_const->GetU32(),
-                                                  ast::IntLiteralExpression::Suffix::kU)};
+            return TypedExpression{ty_.U32(),
+                                   create<ast::IntLiteralExpression>(
+                                       source, static_cast<int64_t>(spirv_const->GetU32()),
+                                       ast::IntLiteralExpression::Suffix::kU)};
         },
         [&](const F32*) {
-            return TypedExpression{
-                ty_.F32(), create<ast::FloatLiteralExpression>(source, spirv_const->GetFloat())};
+            return TypedExpression{ty_.F32(),
+                                   create<ast::FloatLiteralExpression>(
+                                       source, static_cast<double>(spirv_const->GetFloat()),
+                                       ast::FloatLiteralExpression::Suffix::kF)};
         },
         [&](const Bool*) {
             const bool value =
@@ -1953,7 +1959,10 @@ const ast::Expression* ParserImpl::MakeNullValue(const Type* type) {
             return create<ast::IntLiteralExpression>(Source{}, 0,
                                                      ast::IntLiteralExpression::Suffix::kU);
         },
-        [&](const F32*) { return create<ast::FloatLiteralExpression>(Source{}, 0.0f); },
+        [&](const F32*) {
+            return create<ast::FloatLiteralExpression>(Source{}, 0,
+                                                       ast::FloatLiteralExpression::Suffix::kF);
+        },
         [&](const Vector*) { return builder_.Construct(Source{}, type->Build(builder_)); },
         [&](const Matrix*) { return builder_.Construct(Source{}, type->Build(builder_)); },
         [&](const Array*) { return builder_.Construct(Source{}, type->Build(builder_)); },

@@ -38,8 +38,10 @@ class Token {
 
         /// An identifier
         kIdentifier,
-        /// A float value
+        /// A float literal with no suffix
         kFloatLiteral,
+        /// A float literal with an 'f' suffix
+        kFloatFLiteral,
         /// An integer literal with no suffix
         kIntLiteral,
         /// An integer literal with an 'i' suffix
@@ -304,10 +306,11 @@ class Token {
     /// @param source the source of the token
     /// @param val the source unsigned for the token
     Token(Type type, const Source& source, int64_t val);
-    /// Create a float Token
+    /// Create a double Token
+    /// @param type the Token::Type of the token
     /// @param source the source of the token
-    /// @param val the source float for the token
-    Token(const Source& source, float val);
+    /// @param val the source double for the token
+    Token(Type type, const Source& source, double val);
     /// Move constructor
     Token(Token&&);
     /// Copy constructor
@@ -341,7 +344,7 @@ class Token {
     bool IsLiteral() const {
         return type_ == Type::kIntLiteral || type_ == Type::kIntILiteral ||
                type_ == Type::kIntULiteral || type_ == Type::kFalse || type_ == Type::kTrue ||
-               type_ == Type::kFloatLiteral;
+               type_ == Type::kFloatLiteral || type_ == Type::kFloatFLiteral;
     }
     /// @returns true if token is a 'matNxM'
     bool IsMatrix() const {
@@ -379,8 +382,8 @@ class Token {
     std::string to_str() const;
     /// Returns the float value of the token. 0 is returned if the token does not
     /// contain a float value.
-    /// @return float
-    float to_f32() const;
+    /// @return double
+    double to_f64() const;
     /// Returns the int64_t value of the token. 0 is returned if the token does
     /// not contain an integer value.
     /// @return int64_t
@@ -395,7 +398,7 @@ class Token {
     /// The source where the token appeared
     Source source_;
     /// The value represented by the token
-    std::variant<int64_t, float, std::string, std::string_view> value_;
+    std::variant<int64_t, double, std::string, std::string_view> value_;
 };
 
 #ifndef NDEBUG

@@ -25,8 +25,8 @@
 %out_var_SV_TARGET = OpVariable %_ptr_Private_v4float Private %5
        %void = OpTypeVoid
           %8 = OpTypeFunction %void
-%float_0x1_1p_128 = OpConstant %float 0x1.1p+128
-         %13 = OpConstantComposite %v4float %float_0x1_1p_128 %float_0x1_1p_128 %float_0x1_1p_128 %float_0x1_1p_128
+%float_0x1_9p_128 = OpConstant %float 0x1.9p+128
+         %13 = OpConstantComposite %v4float %float_0x1_9p_128 %float_0x1_9p_128 %float_0x1_9p_128 %float_0x1_9p_128
    %main_out = OpTypeStruct %v4float
          %14 = OpTypeFunction %main_out
      %main_1 = OpFunction %void None %8

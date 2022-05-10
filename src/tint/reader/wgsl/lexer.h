@@ -43,7 +43,8 @@ class Lexer {
     /// @returns uninitialized token on success, or error
     Token skip_comment();
 
-    Token build_token_from_int_if_possible(Source source, size_t start, size_t end, int32_t base);
+    Token build_token_from_int_if_possible(Source source, size_t start, int32_t base);
+
     Token check_keyword(const Source&, std::string_view);
 
     /// The try_* methods have the following in common:

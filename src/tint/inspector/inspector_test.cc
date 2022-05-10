@@ -1027,15 +1027,15 @@ TEST_F(InspectorGetConstantIDsTest, Float) {
 
     ASSERT_TRUE(result.find(20) != result.end());
     EXPECT_TRUE(result[20].IsFloat());
-    EXPECT_FLOAT_EQ(0.0, result[20].AsFloat());
+    EXPECT_FLOAT_EQ(0.0f, result[20].AsFloat());
 
     ASSERT_TRUE(result.find(300) != result.end());
     EXPECT_TRUE(result[300].IsFloat());
-    EXPECT_FLOAT_EQ(-10.0, result[300].AsFloat());
+    EXPECT_FLOAT_EQ(-10.0f, result[300].AsFloat());
 
     ASSERT_TRUE(result.find(4000) != result.end());
     EXPECT_TRUE(result[4000].IsFloat());
-    EXPECT_FLOAT_EQ(15.0, result[4000].AsFloat());
+    EXPECT_FLOAT_EQ(15.0f, result[4000].AsFloat());
 }
 
 TEST_F(InspectorGetConstantNameToIdMapTest, WithAndWithoutIds) {

@@ -259,7 +259,7 @@ std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
         }
 
         if (auto* l = literal->As<ast::FloatLiteralExpression>()) {
-            result[constant_id] = Scalar(l->value);
+            result[constant_id] = Scalar(static_cast<float>(l->value));
             continue;
         }
 

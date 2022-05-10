@@ -2790,7 +2790,12 @@ Maybe<const ast::LiteralExpression*> ParserImpl::const_literal() {
                                                  ast::IntLiteralExpression::Suffix::kU);
     }
     if (match(Token::Type::kFloatLiteral)) {
-        return create<ast::FloatLiteralExpression>(t.source(), t.to_f32());
+        return create<ast::FloatLiteralExpression>(t.source(), t.to_f64(),
+                                                   ast::FloatLiteralExpression::Suffix::kNone);
+    }
+    if (match(Token::Type::kFloatFLiteral)) {
+        return create<ast::FloatLiteralExpression>(t.source(), t.to_f64(),
+                                                   ast::FloatLiteralExpression::Suffix::kF);
     }
     if (match(Token::Type::kTrue)) {
         return create<ast::BoolLiteralExpression>(t.source(), true);

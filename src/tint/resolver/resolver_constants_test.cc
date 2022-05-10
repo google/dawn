@@ -139,9 +139,9 @@ TEST_F(ResolverConstantsTest, Vec3_ZeroInit_f32) {
     EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::F32>());
     ASSERT_EQ(sem->ConstantValue().Elements().size(), 3u);
-    EXPECT_EQ(sem->ConstantValue().Elements()[0].f32, 0u);
-    EXPECT_EQ(sem->ConstantValue().Elements()[1].f32, 0u);
-    EXPECT_EQ(sem->ConstantValue().Elements()[2].f32, 0u);
+    EXPECT_EQ(sem->ConstantValue().Elements()[0].f32, 0.0f);
+    EXPECT_EQ(sem->ConstantValue().Elements()[1].f32, 0.0f);
+    EXPECT_EQ(sem->ConstantValue().Elements()[2].f32, 0.0f);
 }
 
 TEST_F(ResolverConstantsTest, Vec3_ZeroInit_bool) {

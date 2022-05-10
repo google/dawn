@@ -746,7 +746,8 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
             init_id = Switch(
                 type,  //
                 [&](const sem::F32*) {
-                    ast::FloatLiteralExpression l(ProgramID{}, Source{}, 0.0f);
+                    ast::FloatLiteralExpression l(ProgramID{}, Source{}, 0,
+                                                  ast::FloatLiteralExpression::Suffix::kF);
                     return GenerateLiteralIfNeeded(var, &l);
                 },
                 [&](const sem::U32*) {
@@ -1621,8 +1622,13 @@ uint32_t Builder::GenerateLiteralIfNeeded(const ast::Variable* var,
             }
         },
         [&](const ast::FloatLiteralExpression* f) {
-            constant.kind = ScalarConstant::Kind::kF32;
-            constant.value.f32 = f->value;
+            switch (f->suffix) {
+                case ast::FloatLiteralExpression::Suffix::kNone:
+                case ast::FloatLiteralExpression::Suffix::kF:
+                    constant.kind = ScalarConstant::Kind::kF32;
+                    constant.value.f32 = static_cast<float>(f->value);
+                    return;
+            }
         },
         [&](Default) { error_ = "unknown literal type"; });
 
@@ -2878,7 +2884,8 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             }
             spirv_params.emplace_back(gen_arg(Usage::kDepthRef));
 
-            ast::FloatLiteralExpression float_0(ProgramID(), Source{}, 0.0);
+            ast::FloatLiteralExpression float_0(ProgramID(), Source{}, 0.0,
+                                                ast::FloatLiteralExpression::Suffix::kF);
             image_operands.emplace_back(ImageOperand{
                 SpvImageOperandsLodMask, Operand(GenerateLiteralIfNeeded(nullptr, &float_0))});
             break;

@@ -501,7 +501,7 @@ TEST_F(LocationAttributeTests, BadType_Input_Struct_RuntimeArray) {
     // @stage(fragment)
     // fn main(param : Input) {}
     auto* input =
-        Structure("Input", {Member(Source{{13, 43}}, "a", ty.array<float>(), {Location(0)})});
+        Structure("Input", {Member(Source{{13, 43}}, "a", ty.array<f32>(), {Location(0)})});
     auto* param = Param("param", ty.Of(input));
     Func(Source{{12, 34}}, "main", {param}, ty.void_(), {}, {Stage(ast::PipelineStage::kFragment)});
 
@@ -633,7 +633,7 @@ TEST_F(LocationAttributeTests, ReturnType_Struct_RuntimeArray) {
     // fn main() -> Output {
     //   return Output();
     // }
-    auto* output = Structure("Output", {Member(Source{{13, 43}}, "a", ty.array<float>(),
+    auto* output = Structure("Output", {Member(Source{{13, 43}}, "a", ty.array<f32>(),
                                                {Location(Source{{12, 34}}, 0)})});
     Func(Source{{12, 34}}, "main", {}, ty.Of(output), {Return(Construct(ty.Of(output)))},
          {Stage(ast::PipelineStage::kFragment)});

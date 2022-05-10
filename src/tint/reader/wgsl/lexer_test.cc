@@ -303,7 +303,7 @@ TEST_F(LexerTest, Null_InIdentifier_IsError) {
 
 struct FloatData {
     const char* input;
-    float result;
+    double result;
 };
 inline std::ostream& operator<<(std::ostream& out, FloatData data) {
     out << std::string(data.input);
@@ -316,8 +316,12 @@ TEST_P(FloatTest, Parse) {
     Lexer l(&file);
 
     auto t = l.next();
-    EXPECT_TRUE(t.Is(Token::Type::kFloatLiteral));
-    EXPECT_EQ(t.to_f32(), params.result);
+    if (std::string(params.input).back() == 'f') {
+        EXPECT_TRUE(t.Is(Token::Type::kFloatFLiteral));
+    } else {
+        EXPECT_TRUE(t.Is(Token::Type::kFloatLiteral));
+    }
+    EXPECT_EQ(t.to_f64(), params.result);
     EXPECT_EQ(t.source().range.begin.line, 1u);
     EXPECT_EQ(t.source().range.begin.column, 1u);
     EXPECT_EQ(t.source().range.end.line, 1u);
@@ -330,63 +334,63 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                          FloatTest,
                          testing::Values(
                              // No decimal, with 'f' suffix
-                             FloatData{"0f", 0.0f},
-                             FloatData{"1f", 1.0f},
-                             FloatData{"-0f", 0.0f},
-                             FloatData{"-1f", -1.0f},
+                             FloatData{"0f", 0.0},
+                             FloatData{"1f", 1.0},
+                             FloatData{"-0f", 0.0},
+                             FloatData{"-1f", -1.0},
 
                              // Zero, with decimal.
-                             FloatData{"0.0", 0.0f},
-                             FloatData{"0.", 0.0f},
-                             FloatData{".0", 0.0f},
-                             FloatData{"-0.0", 0.0f},
-                             FloatData{"-0.", 0.0f},
-                             FloatData{"-.0", 0.0f},
+                             FloatData{"0.0", 0.0},
+                             FloatData{"0.", 0.0},
+                             FloatData{".0", 0.0},
+                             FloatData{"-0.0", 0.0},
+                             FloatData{"-0.", 0.0},
+                             FloatData{"-.0", 0.0},
                              // Zero, with decimal and 'f' suffix
-                             FloatData{"0.0f", 0.0f},
-                             FloatData{"0.f", 0.0f},
-                             FloatData{".0f", 0.0f},
-                             FloatData{"-0.0f", 0.0f},
-                             FloatData{"-0.f", 0.0f},
-                             FloatData{"-.0", 0.0f},
+                             FloatData{"0.0f", 0.0},
+                             FloatData{"0.f", 0.0},
+                             FloatData{".0f", 0.0},
+                             FloatData{"-0.0f", 0.0},
+                             FloatData{"-0.f", 0.0},
+                             FloatData{"-.0", 0.0},
 
                              // Non-zero with decimal
-                             FloatData{"5.7", 5.7f},
-                             FloatData{"5.", 5.f},
-                             FloatData{".7", .7f},
-                             FloatData{"-5.7", -5.7f},
-                             FloatData{"-5.", -5.f},
-                             FloatData{"-.7", -.7f},
+                             FloatData{"5.7", 5.7},
+                             FloatData{"5.", 5.},
+                             FloatData{".7", .7},
+                             FloatData{"-5.7", -5.7},
+                             FloatData{"-5.", -5.},
+                             FloatData{"-.7", -.7},
                              // Non-zero with decimal and 'f' suffix
-                             FloatData{"5.7f", 5.7f},
-                             FloatData{"5.f", 5.f},
-                             FloatData{".7f", .7f},
-                             FloatData{"-5.7f", -5.7f},
-                             FloatData{"-5.f", -5.f},
-                             FloatData{"-.7f", -.7f},
+                             FloatData{"5.7f", 5.7},
+                             FloatData{"5.f", 5.},
+                             FloatData{".7f", .7},
+                             FloatData{"-5.7f", -5.7},
+                             FloatData{"-5.f", -5.},
+                             FloatData{"-.7f", -.7},
 
                              // No decimal, with exponent
-                             FloatData{"1e5", 1e5f},
-                             FloatData{"1E5", 1e5f},
-                             FloatData{"1e-5", 1e-5f},
-                             FloatData{"1E-5", 1e-5f},
+                             FloatData{"1e5", 1e5},
+                             FloatData{"1E5", 1e5},
+                             FloatData{"1e-5", 1e-5},
+                             FloatData{"1E-5", 1e-5},
                              // No decimal, with exponent and 'f' suffix
-                             FloatData{"1e5f", 1e5f},
-                             FloatData{"1E5f", 1e5f},
-                             FloatData{"1e-5f", 1e-5f},
-                             FloatData{"1E-5f", 1e-5f},
+                             FloatData{"1e5f", 1e5},
+                             FloatData{"1E5f", 1e5},
+                             FloatData{"1e-5f", 1e-5},
+                             FloatData{"1E-5f", 1e-5},
                              // With decimal and exponents
-                             FloatData{"0.2e+12", 0.2e12f},
-                             FloatData{"1.2e-5", 1.2e-5f},
-                             FloatData{"2.57e23", 2.57e23f},
-                             FloatData{"2.5e+0", 2.5f},
-                             FloatData{"2.5e-0", 2.5f},
+                             FloatData{"0.2e+12", 0.2e12},
+                             FloatData{"1.2e-5", 1.2e-5},
+                             FloatData{"2.57e23", 2.57e23},
+                             FloatData{"2.5e+0", 2.5},
+                             FloatData{"2.5e-0", 2.5},
                              // With decimal and exponents and 'f' suffix
-                             FloatData{"0.2e+12f", 0.2e12f},
-                             FloatData{"1.2e-5f", 1.2e-5f},
-                             FloatData{"2.57e23f", 2.57e23f},
-                             FloatData{"2.5e+0f", 2.5f},
-                             FloatData{"2.5e-0f", 2.5f}));
+                             FloatData{"0.2e+12f", 0.2e12},
+                             FloatData{"1.2e-5f", 1.2e-5},
+                             FloatData{"2.57e23f", 2.57e23},
+                             FloatData{"2.5e+0f", 2.5},
+                             FloatData{"2.5e-0f", 2.5}));
 
 using FloatTest_Invalid = testing::TestWithParam<const char*>;
 TEST_P(FloatTest_Invalid, Handles) {
@@ -676,7 +680,7 @@ TEST_F(LexerTest, IntegerTest_HexSignedTooLarge) {
 
     auto t = l.next();
     ASSERT_TRUE(t.Is(Token::Type::kError));
-    EXPECT_EQ(t.to_str(), "0x80000000 too large for i32");
+    EXPECT_EQ(t.to_str(), "value too large for i32");
 }
 
 TEST_F(LexerTest, IntegerTest_HexSignedTooSmall) {
@@ -685,7 +689,7 @@ TEST_F(LexerTest, IntegerTest_HexSignedTooSmall) {
 
     auto t = l.next();
     ASSERT_TRUE(t.Is(Token::Type::kError));
-    EXPECT_EQ(t.to_str(), "-0x8000000F too small for i32");
+    EXPECT_EQ(t.to_str(), "value too small for i32");
 }
 
 TEST_F(LexerTest, IntegerTest_HexSignedTooManyDigits) {

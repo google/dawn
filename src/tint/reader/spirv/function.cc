@@ -2499,7 +2499,8 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
             return source_expr;
         }
         case SkipReason::kPointSizeBuiltinValue: {
-            return {ty_.F32(), create<ast::FloatLiteralExpression>(Source{}, 1.0f)};
+            return {ty_.F32(), create<ast::FloatLiteralExpression>(
+                                   Source{}, 1.0, ast::FloatLiteralExpression::Suffix::kF)};
         }
         case SkipReason::kPointSizeBuiltinPointer:
             Fail() << "unhandled use of a pointer to the PointSize builtin, with ID: " << id;
@@ -3982,13 +3983,13 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(const spvtools::opt::Inst
                     return {};
                 }
                 const Type* f32 = eta.type;
-                return {f32,
-                        builder_.MemberAccessor(
-                            builder_.Call(Source{}, "refract",
-                                          ast::ExpressionList{
-                                              builder_.vec2<float>(incident.expr, 0.0f),
-                                              builder_.vec2<float>(normal.expr, 0.0f), eta.expr}),
-                            "x")};
+                return {f32, builder_.MemberAccessor(
+                                 builder_.Call(
+                                     Source{}, "refract",
+                                     ast::ExpressionList{
+                                         builder_.vec2<tint::f32>(incident.expr, 0.0f),
+                                         builder_.vec2<tint::f32>(normal.expr, 0.0f), eta.expr}),
+                                 "x")};
             }
             default:
                 break;

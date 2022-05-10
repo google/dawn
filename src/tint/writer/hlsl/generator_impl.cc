@@ -3040,7 +3040,7 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
             } else if (std::isnan(fl->value)) {
                 out << "asfloat(0x7fc00000u)";
             } else {
-                out << FloatToString(fl->value) << "f";
+                out << FloatToString(static_cast<float>(fl->value)) << "f";
             }
             return true;
         },

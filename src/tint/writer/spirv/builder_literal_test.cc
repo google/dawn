@@ -133,7 +133,7 @@ TEST_F(BuilderTest, Literal_U32_Dedup) {
 }
 
 TEST_F(BuilderTest, Literal_F32) {
-    auto* i = create<ast::FloatLiteralExpression>(23.245f);
+    auto* i = create<ast::FloatLiteralExpression>(23.245, ast::FloatLiteralExpression::Suffix::kF);
     WrapInFunction(i);
 
     spirv::Builder& b = Build();
@@ -148,8 +148,8 @@ TEST_F(BuilderTest, Literal_F32) {
 }
 
 TEST_F(BuilderTest, Literal_F32_Dedup) {
-    auto* i1 = create<ast::FloatLiteralExpression>(23.245f);
-    auto* i2 = create<ast::FloatLiteralExpression>(23.245f);
+    auto* i1 = create<ast::FloatLiteralExpression>(23.245, ast::FloatLiteralExpression::Suffix::kF);
+    auto* i2 = create<ast::FloatLiteralExpression>(23.245, ast::FloatLiteralExpression::Suffix::kF);
     WrapInFunction(i1, i2);
 
     spirv::Builder& b = Build();

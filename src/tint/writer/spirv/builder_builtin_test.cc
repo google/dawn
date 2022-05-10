@@ -2104,8 +2104,8 @@ TEST_P(Builtin_Builtin_DataPacking_Test, Binary) {
     auto param = GetParam();
 
     bool pack4 = param.name == "pack4x8snorm" || param.name == "pack4x8unorm";
-    auto* call = pack4 ? Call(param.name, vec4<float>(1.0f, 1.0f, 1.0f, 1.0f))
-                       : Call(param.name, vec2<float>(1.0f, 1.0f));
+    auto* call = pack4 ? Call(param.name, vec4<f32>(1.0f, 1.0f, 1.0f, 1.0f))
+                       : Call(param.name, vec2<f32>(1.0f, 1.0f));
     auto* func = Func("a_func", {}, ty.void_(), {CallStmt(call)});
 
     spirv::Builder& b = Build();

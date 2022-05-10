@@ -986,41 +986,58 @@ class ProgramBuilder {
 
     /// @param source the source information
     /// @param value the float value
-    /// @return a Scalar constructor for the given value
-    const ast::FloatLiteralExpression* Expr(const Source& source, f32 value) {
-        return create<ast::FloatLiteralExpression>(source, value);
+    /// @return a unsuffixed FloatLiteralExpression for the float value
+    const ast::FloatLiteralExpression* Expr(const Source& source, float value) {
+        return create<ast::FloatLiteralExpression>(source, static_cast<double>(value),
+                                                   ast::FloatLiteralExpression::Suffix::kNone);
     }
 
     /// @param value the float value
-    /// @return a Scalar constructor for the given value
+    /// @return a unsuffixed FloatLiteralExpression for the float value
+    const ast::FloatLiteralExpression* Expr(float value) {
+        return create<ast::FloatLiteralExpression>(static_cast<double>(value),
+                                                   ast::FloatLiteralExpression::Suffix::kNone);
+    }
+
+    /// @param source the source information
+    /// @param value the float value
+    /// @return a 'f'-suffixed FloatLiteralExpression for the f32 value
+    const ast::FloatLiteralExpression* Expr(const Source& source, f32 value) {
+        return create<ast::FloatLiteralExpression>(source, static_cast<double>(value.value),
+                                                   ast::FloatLiteralExpression::Suffix::kF);
+    }
+
+    /// @param value the float value
+    /// @return a 'f'-suffixed FloatLiteralExpression for the f32 value
     const ast::FloatLiteralExpression* Expr(f32 value) {
-        return create<ast::FloatLiteralExpression>(value);
+        return create<ast::FloatLiteralExpression>(static_cast<double>(value.value),
+                                                   ast::FloatLiteralExpression::Suffix::kF);
     }
 
     /// @param source the source information
     /// @param value the integer value
-    /// @return a 'i'-suffixed IntLiteralExpression for the given value
+    /// @return a signed 'i'-suffixed IntLiteralExpression for the i32 value
     const ast::IntLiteralExpression* Expr(const Source& source, i32 value) {
         return create<ast::IntLiteralExpression>(source, value,
                                                  ast::IntLiteralExpression::Suffix::kI);
     }
 
     /// @param value the integer value
-    /// @return a 'i'-suffixed IntLiteralExpression for the given value
+    /// @return a signed 'i'-suffixed IntLiteralExpression for the i32 value
     const ast::IntLiteralExpression* Expr(i32 value) {
         return create<ast::IntLiteralExpression>(value, ast::IntLiteralExpression::Suffix::kI);
     }
 
     /// @param source the source information
     /// @param value the unsigned int value
-    /// @return a 'u'-suffixed IntLiteralExpression for the given value
+    /// @return an unsigned 'u'-suffixed IntLiteralExpression for the u32 value
     const ast::IntLiteralExpression* Expr(const Source& source, u32 value) {
         return create<ast::IntLiteralExpression>(source, value,
                                                  ast::IntLiteralExpression::Suffix::kU);
     }
 
     /// @param value the unsigned int value
-    /// @return a 'u'-suffixed IntLiteralExpression for the given value
+    /// @return an unsigned 'u'-suffixed IntLiteralExpression for the u32 value
     const ast::IntLiteralExpression* Expr(u32 value) {
         return create<ast::IntLiteralExpression>(value, ast::IntLiteralExpression::Suffix::kU);
     }

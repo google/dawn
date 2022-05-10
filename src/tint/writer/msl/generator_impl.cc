@@ -1517,7 +1517,7 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
             } else if (std::isnan(l->value)) {
                 out << "NAN";
             } else {
-                out << FloatToString(l->value) << "f";
+                out << FloatToString(static_cast<float>(l->value)) << "f";
             }
             return true;
         },

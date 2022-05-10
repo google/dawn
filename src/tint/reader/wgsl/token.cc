@@ -26,7 +26,9 @@ std::string_view Token::TypeToName(Type type) {
         case Token::Type::kIdentifier:
             return "identifier";
         case Token::Type::kFloatLiteral:
-            return "float literal";
+            return "abstract float literal";
+        case Token::Type::kFloatFLiteral:
+            return "'f'-suffixed float literal";
         case Token::Type::kIntLiteral:
             return "abstract integer literal";
         case Token::Type::kIntILiteral:
@@ -278,8 +280,8 @@ Token::Token(Type type, const Source& source, const char* str)
 Token::Token(Type type, const Source& source, int64_t val)
     : type_(type), source_(source), value_(val) {}
 
-Token::Token(const Source& source, float val)
-    : type_(Type::kFloatLiteral), source_(source), value_(val) {}
+Token::Token(Type type, const Source& source, double val)
+    : type_(type), source_(source), value_(val) {}
 
 Token::Token(Type type, const Source& source) : type_(type), source_(source) {}
 
@@ -304,7 +306,9 @@ bool Token::operator==(std::string_view ident) {
 std::string Token::to_str() const {
     switch (type_) {
         case Type::kFloatLiteral:
-            return std::to_string(std::get<float>(value_));
+            return std::to_string(std::get<double>(value_));
+        case Type::kFloatFLiteral:
+            return std::to_string(std::get<double>(value_)) + "f";
         case Type::kIntLiteral:
             return std::to_string(std::get<int64_t>(value_));
         case Type::kIntILiteral:
@@ -322,8 +326,8 @@ std::string Token::to_str() const {
     }
 }
 
-float Token::to_f32() const {
-    return std::get<float>(value_);
+double Token::to_f64() const {
+    return std::get<double>(value_);
 }
 
 int64_t Token::to_i64() const {

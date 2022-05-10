@@ -94,10 +94,23 @@ enum class LimitCheck {
 template <typename T>
 LimitCheck check_limits(int64_t value) {
     static_assert(std::is_integral_v<T>, "T must be an integer");
-    if (value < static_cast<int64_t>(std::numeric_limits<T>::min())) {
+    if (value < static_cast<int64_t>(std::numeric_limits<T>::lowest())) {
         return LimitCheck::kTooSmall;
     }
     if (value > static_cast<int64_t>(std::numeric_limits<T>::max())) {
+        return LimitCheck::kTooLarge;
+    }
+    return LimitCheck::kWithinLimits;
+}
+
+/// Checks whether the value fits within the floating point type `T`
+template <typename T>
+LimitCheck check_limits(double value) {
+    static_assert(std::is_floating_point_v<T>, "T must be a floating point");
+    if (value < static_cast<double>(std::numeric_limits<T>::lowest())) {
+        return LimitCheck::kTooSmall;
+    }
+    if (value > static_cast<double>(std::numeric_limits<T>::max())) {
         return LimitCheck::kTooLarge;
     }
     return LimitCheck::kWithinLimits;
@@ -378,23 +391,40 @@ Token Lexer::try_float() {
     advance(end - start);
     end_source(source);
 
-    auto res = strtod(&at(start), nullptr);
-    // This errors out if a non-zero magnitude is too small to represent in a
-    // float. It can't be represented faithfully in an f32.
-    const auto magnitude = std::fabs(res);
-    if (0.0 < magnitude && magnitude < static_cast<double>(std::numeric_limits<float>::min())) {
-        return {Token::Type::kError, source,
-                "f32 (" + str + ") magnitude too small, not representable"};
-    }
-    // This handles if the number is really large negative number
-    if (res < static_cast<double>(std::numeric_limits<float>::lowest())) {
-        return {Token::Type::kError, source, "f32 (" + str + ") too large (negative)"};
-    }
-    if (res > static_cast<double>(std::numeric_limits<float>::max())) {
-        return {Token::Type::kError, source, "f32 (" + str + ") too large (positive)"};
+    double value = strtod(&at(start), nullptr);
+    const double magnitude = std::abs(value);
+
+    if (has_f_suffix) {
+        // This errors out if a non-zero magnitude is too small to represent in a
+        // float. It can't be represented faithfully in an f32.
+        if (0.0 < magnitude && magnitude < static_cast<double>(std::numeric_limits<float>::min())) {
+            return {Token::Type::kError, source, "magnitude too small to be represented as f32"};
+        }
+        switch (check_limits<float>(value)) {
+            case LimitCheck::kTooSmall:
+                return {Token::Type::kError, source, "value too small for f32"};
+            case LimitCheck::kTooLarge:
+                return {Token::Type::kError, source, "value too large for f32"};
+            default:
+                return {Token::Type::kFloatFLiteral, source, value};
+        }
     }
 
-    return {source, static_cast<float>(res)};
+    // TODO(crbug.com/tint/1504): Properly support abstract float:
+    // Change `AbstractFloatType` to `double`, update errors to say 'abstract int'.
+    using AbstractFloatType = float;
+    if (0.0 < magnitude &&
+        magnitude < static_cast<double>(std::numeric_limits<AbstractFloatType>::min())) {
+        return {Token::Type::kError, source, "magnitude too small to be represented as f32"};
+    }
+    switch (check_limits<AbstractFloatType>(value)) {
+        case LimitCheck::kTooSmall:
+            return {Token::Type::kError, source, "value too small for f32"};
+        case LimitCheck::kTooLarge:
+            return {Token::Type::kError, source, "value too large for f32"};
+        default:
+            return {Token::Type::kFloatLiteral, source, value};
+    }
 }
 
 Token Lexer::try_hex_float() {
@@ -566,6 +596,7 @@ Token Lexer::try_hex_float() {
     uint32_t input_exponent = 0;  // Defaults to 0 if not present
     int32_t exponent_sign = 1;
     // If the 'p' part is present, the rest of the exponent must exist.
+    bool has_f_suffix = false;
     if (has_exponent) {
         // Parse the rest of the exponent.
         // (+|-)?
@@ -597,6 +628,7 @@ Token Lexer::try_hex_float() {
         // when the exponent is present. Otherwise it will look like
         // one of the mantissa digits.
         if (end < length() && matches(end, "f")) {
+            has_f_suffix = true;
             end++;
         }
 
@@ -680,25 +712,22 @@ Token Lexer::try_hex_float() {
     result_u32 |= (static_cast<uint32_t>(signed_exponent) & kExponentMask) << kExponentLeftShift;
 
     // Reinterpret as float and return
-    float result;
-    std::memcpy(&result, &result_u32, sizeof(result));
-    return {source, static_cast<float>(result)};
+    float result_f32;
+    std::memcpy(&result_f32, &result_u32, sizeof(result_f32));
+    double result_f64 = static_cast<double>(result_f32);
+    return {has_f_suffix ? Token::Type::kFloatFLiteral : Token::Type::kFloatLiteral, source,
+            result_f64};
 }
 
-Token Lexer::build_token_from_int_if_possible(Source source,
-                                              size_t start,
-                                              size_t end,
-                                              int32_t base) {
+Token Lexer::build_token_from_int_if_possible(Source source, size_t start, int32_t base) {
     int64_t res = strtoll(&at(start), nullptr, base);
-
-    auto str = [&] { return std::string{substr(start, end - start)}; };
 
     if (matches(pos(), "u")) {
         switch (check_limits<uint32_t>(res)) {
             case LimitCheck::kTooSmall:
                 return {Token::Type::kError, source, "unsigned literal cannot be negative"};
             case LimitCheck::kTooLarge:
-                return {Token::Type::kError, source, str() + " too large for u32"};
+                return {Token::Type::kError, source, "value too large for u32"};
             default:
                 advance(1);
                 end_source(source);
@@ -709,9 +738,9 @@ Token Lexer::build_token_from_int_if_possible(Source source,
     if (matches(pos(), "i")) {
         switch (check_limits<int32_t>(res)) {
             case LimitCheck::kTooSmall:
-                return {Token::Type::kError, source, str() + " too small for i32"};
+                return {Token::Type::kError, source, "value too small for i32"};
             case LimitCheck::kTooLarge:
-                return {Token::Type::kError, source, str() + " too large for i32"};
+                return {Token::Type::kError, source, "value too large for i32"};
             default:
                 break;
         }
@@ -725,9 +754,9 @@ Token Lexer::build_token_from_int_if_possible(Source source,
     using AbstractIntType = int32_t;
     switch (check_limits<AbstractIntType>(res)) {
         case LimitCheck::kTooSmall:
-            return {Token::Type::kError, source, str() + " too small for i32"};
+            return {Token::Type::kError, source, "value too small for i32"};
         case LimitCheck::kTooLarge:
-            return {Token::Type::kError, source, str() + " too large for i32"};
+            return {Token::Type::kError, source, "value too large for i32"};
         default:
             end_source(source);
             return {Token::Type::kIntLiteral, source, res};
@@ -769,7 +798,7 @@ Token Lexer::try_hex_integer() {
 
     advance(end - start);
 
-    return build_token_from_int_if_possible(source, start, end, 16);
+    return build_token_from_int_if_possible(source, start, 16);
 }
 
 Token Lexer::try_integer() {
@@ -812,7 +841,7 @@ Token Lexer::try_integer() {
 
     advance(end - start);
 
-    return build_token_from_int_if_possible(source, start, end, 10);
+    return build_token_from_int_if_possible(source, start, 10);
 }
 
 Token Lexer::try_ident() {

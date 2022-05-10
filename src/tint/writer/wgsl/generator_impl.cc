@@ -262,7 +262,7 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
             return true;
         },
         [&](const ast::FloatLiteralExpression* l) {  //
-            out << FloatToBitPreservingString(l->value);
+            out << FloatToBitPreservingString(static_cast<float>(l->value));
             return true;
         },
         [&](const ast::IntLiteralExpression* l) {  //
