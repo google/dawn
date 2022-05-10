@@ -70,12 +70,6 @@ std::vector<const char*> GetTogglesUsed(WGPUDevice device) {
     return FromAPI(device)->GetTogglesUsed();
 }
 
-// DawnDeviceDescriptor
-
-DawnDeviceDescriptor::DawnDeviceDescriptor() = default;
-
-DawnDeviceDescriptor::~DawnDeviceDescriptor() = default;
-
 // Adapter
 
 Adapter::Adapter() = default;

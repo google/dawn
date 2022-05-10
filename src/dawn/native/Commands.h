@@ -70,33 +70,20 @@ enum class Command {
 };
 
 struct TimestampWrite {
-    TimestampWrite(const Ref<QuerySetBase>& set, uint32_t idx);
-    TimestampWrite(TimestampWrite&&);
-    ~TimestampWrite();
-
     Ref<QuerySetBase> querySet;
     uint32_t queryIndex;
 };
 
 struct BeginComputePassCmd {
-    BeginComputePassCmd();
-    ~BeginComputePassCmd();
-
     std::vector<TimestampWrite> timestampWrites;
 };
 
 struct BeginOcclusionQueryCmd {
-    BeginOcclusionQueryCmd();
-    ~BeginOcclusionQueryCmd();
-
     Ref<QuerySetBase> querySet;
     uint32_t queryIndex;
 };
 
 struct RenderPassColorAttachmentInfo {
-    RenderPassColorAttachmentInfo();
-    ~RenderPassColorAttachmentInfo();
-
     Ref<TextureViewBase> view;
     Ref<TextureViewBase> resolveTarget;
     wgpu::LoadOp loadOp;
@@ -105,9 +92,6 @@ struct RenderPassColorAttachmentInfo {
 };
 
 struct RenderPassDepthStencilAttachmentInfo {
-    RenderPassDepthStencilAttachmentInfo();
-    ~RenderPassDepthStencilAttachmentInfo();
-
     Ref<TextureViewBase> view;
     wgpu::LoadOp depthLoadOp;
     wgpu::StoreOp depthStoreOp;
@@ -120,9 +104,6 @@ struct RenderPassDepthStencilAttachmentInfo {
 };
 
 struct BeginRenderPassCmd {
-    BeginRenderPassCmd();
-    ~BeginRenderPassCmd();
-
     Ref<AttachmentState> attachmentState;
     ityp::array<ColorAttachmentIndex, RenderPassColorAttachmentInfo, kMaxColorAttachments>
         colorAttachments;
@@ -137,9 +118,6 @@ struct BeginRenderPassCmd {
 };
 
 struct BufferCopy {
-    BufferCopy();
-    ~BufferCopy();
-
     Ref<BufferBase> buffer;
     uint64_t offset;
     uint32_t bytesPerRow;
@@ -147,10 +125,6 @@ struct BufferCopy {
 };
 
 struct TextureCopy {
-    TextureCopy();
-    TextureCopy(const TextureCopy&);
-    ~TextureCopy();
-
     Ref<TextureBase> texture;
     uint32_t mipLevel;
     Origin3D origin;  // Texels / array layer
@@ -158,9 +132,6 @@ struct TextureCopy {
 };
 
 struct CopyBufferToBufferCmd {
-    CopyBufferToBufferCmd();
-    ~CopyBufferToBufferCmd();
-
     Ref<BufferBase> source;
     uint64_t sourceOffset;
     Ref<BufferBase> destination;
@@ -193,9 +164,6 @@ struct DispatchCmd {
 };
 
 struct DispatchIndirectCmd {
-    DispatchIndirectCmd();
-    ~DispatchIndirectCmd();
-
     Ref<BufferBase> indirectBuffer;
     uint64_t indirectOffset;
 };
@@ -216,9 +184,6 @@ struct DrawIndexedCmd {
 };
 
 struct DrawIndirectCmd {
-    DrawIndirectCmd();
-    ~DrawIndirectCmd();
-
     Ref<BufferBase> indirectBuffer;
     uint64_t indirectOffset;
 };
@@ -226,24 +191,15 @@ struct DrawIndirectCmd {
 struct DrawIndexedIndirectCmd : DrawIndirectCmd {};
 
 struct EndComputePassCmd {
-    EndComputePassCmd();
-    ~EndComputePassCmd();
-
     std::vector<TimestampWrite> timestampWrites;
 };
 
 struct EndOcclusionQueryCmd {
-    EndOcclusionQueryCmd();
-    ~EndOcclusionQueryCmd();
-
     Ref<QuerySetBase> querySet;
     uint32_t queryIndex;
 };
 
 struct EndRenderPassCmd {
-    EndRenderPassCmd();
-    ~EndRenderPassCmd();
-
     std::vector<TimestampWrite> timestampWrites;
 };
 
@@ -252,9 +208,6 @@ struct ExecuteBundlesCmd {
 };
 
 struct ClearBufferCmd {
-    ClearBufferCmd();
-    ~ClearBufferCmd();
-
     Ref<BufferBase> buffer;
     uint64_t offset;
     uint64_t size;
@@ -271,9 +224,6 @@ struct PushDebugGroupCmd {
 };
 
 struct ResolveQuerySetCmd {
-    ResolveQuerySetCmd();
-    ~ResolveQuerySetCmd();
-
     Ref<QuerySetBase> querySet;
     uint32_t firstQuery;
     uint32_t queryCount;
@@ -282,16 +232,10 @@ struct ResolveQuerySetCmd {
 };
 
 struct SetComputePipelineCmd {
-    SetComputePipelineCmd();
-    ~SetComputePipelineCmd();
-
     Ref<ComputePipelineBase> pipeline;
 };
 
 struct SetRenderPipelineCmd {
-    SetRenderPipelineCmd();
-    ~SetRenderPipelineCmd();
-
     Ref<RenderPipelineBase> pipeline;
 };
 
@@ -312,18 +256,12 @@ struct SetBlendConstantCmd {
 };
 
 struct SetBindGroupCmd {
-    SetBindGroupCmd();
-    ~SetBindGroupCmd();
-
     BindGroupIndex index;
     Ref<BindGroupBase> group;
     uint32_t dynamicOffsetCount;
 };
 
 struct SetIndexBufferCmd {
-    SetIndexBufferCmd();
-    ~SetIndexBufferCmd();
-
     Ref<BufferBase> buffer;
     wgpu::IndexFormat format;
     uint64_t offset;
@@ -331,9 +269,6 @@ struct SetIndexBufferCmd {
 };
 
 struct SetVertexBufferCmd {
-    SetVertexBufferCmd();
-    ~SetVertexBufferCmd();
-
     VertexBufferSlot slot;
     Ref<BufferBase> buffer;
     uint64_t offset;
@@ -341,18 +276,12 @@ struct SetVertexBufferCmd {
 };
 
 struct WriteBufferCmd {
-    WriteBufferCmd();
-    ~WriteBufferCmd();
-
     Ref<BufferBase> buffer;
     uint64_t offset;
     uint64_t size;
 };
 
 struct WriteTimestampCmd {
-    WriteTimestampCmd();
-    ~WriteTimestampCmd();
-
     Ref<QuerySetBase> querySet;
     uint32_t queryIndex;
 };
