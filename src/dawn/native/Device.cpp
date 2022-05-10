@@ -1238,7 +1238,7 @@ void DeviceBase::SetWGSLExtensionAllowList() {
     //     mWGSLExtensionAllowList.insert("InternalExtensionForTesting");
 }
 
-WGSLExtensionsSet DeviceBase::GetWGSLExtensionAllowList() const {
+WGSLExtensionSet DeviceBase::GetWGSLExtensionAllowList() const {
     return mWGSLExtensionAllowList;
 }
 

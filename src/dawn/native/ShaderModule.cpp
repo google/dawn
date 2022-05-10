@@ -901,25 +901,20 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
 }
 
 MaybeError ValidateWGSLProgramExtension(const DeviceBase* device,
-                                        const tint::Program* program,
+                                        const WGSLExtensionSet* enabledExtensions,
                                         OwnedCompilationMessages* outMessages) {
-    DAWN_ASSERT(program->IsValid());
-    tint::inspector::Inspector inspector(program);
-    auto enableDirectives = inspector.GetEnableDirectives();
-
-    auto extensionAllowList = device->GetWGSLExtensionAllowList();
+    const WGSLExtensionSet& extensionAllowList = device->GetWGSLExtensionAllowList();
 
     bool hasDisallowedExtension = false;
     tint::diag::List messages;
 
-    for (auto enable : enableDirectives) {
-        if (extensionAllowList.count(enable.first)) {
+    for (const std::string& extension : *enabledExtensions) {
+        if (extensionAllowList.count(extension)) {
             continue;
         }
         hasDisallowedExtension = true;
         messages.add_error(tint::diag::System::Program,
-                           "Extension " + enable.first + " is not allowed on the Device.",
-                           enable.second);
+                           "Extension " + extension + " is not allowed on the Device.");
     }
 
     if (hasDisallowedExtension) {
@@ -936,8 +931,8 @@ MaybeError ValidateWGSLProgramExtension(const DeviceBase* device,
 MaybeError ReflectShaderUsingTint(const DeviceBase* device,
                                   const tint::Program* program,
                                   OwnedCompilationMessages* compilationMessages,
-                                  EntryPointMetadataTable& entryPointMetadataTable,
-                                  WGSLExtensionsSet* enabledWGSLExtensions) {
+                                  EntryPointMetadataTable* entryPointMetadataTable,
+                                  WGSLExtensionSet* enabledWGSLExtensions) {
     ASSERT(program->IsValid());
 
     tint::inspector::Inspector inspector(program);
@@ -947,8 +942,7 @@ MaybeError ReflectShaderUsingTint(const DeviceBase* device,
     for (std::string name : usedExtensionNames) {
         enabledWGSLExtensions->insert(name);
     }
-
-    DAWN_TRY(ValidateWGSLProgramExtension(device, program, compilationMessages));
+    DAWN_TRY(ValidateWGSLProgramExtension(device, enabledWGSLExtensions, compilationMessages));
 
     std::vector<tint::inspector::EntryPoint> entryPoints = inspector.GetEntryPoints();
     DAWN_INVALID_IF(inspector.has_error(), "Tint Reflection failure: Inspector: %s\n",
@@ -960,8 +954,8 @@ MaybeError ReflectShaderUsingTint(const DeviceBase* device,
                                 ReflectEntryPointUsingTint(device, &inspector, entryPoint),
                                 "processing entry point \"%s\".", entryPoint.name);
 
-        ASSERT(entryPointMetadataTable.count(entryPoint.name) == 0);
-        entryPointMetadataTable[entryPoint.name] = std::move(metadata);
+        ASSERT(entryPointMetadataTable->count(entryPoint.name) == 0);
+        (*entryPointMetadataTable)[entryPoint.name] = std::move(metadata);
     }
     return {};
 }
@@ -1336,7 +1330,7 @@ MaybeError ShaderModuleBase::InitializeBase(ShaderModuleParseResult* parseResult
     mTintSource = std::move(parseResult->tintSource);
 
     DAWN_TRY(ReflectShaderUsingTint(GetDevice(), mTintProgram.get(), compilationMessages,
-                                    mEntryPoints, &mEnabledWGSLExtensions));
+                                    &mEntryPoints, &mEnabledWGSLExtensions));
     return {};
 }
 

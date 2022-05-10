@@ -55,7 +55,7 @@ struct CallbackTask;
 struct InternalPipelineStore;
 struct ShaderModuleParseResult;
 
-using WGSLExtensionsSet = std::unordered_set<std::string>;
+using WGSLExtensionSet = std::unordered_set<std::string>;
 
 class DeviceBase : public RefCounted {
   public:
@@ -319,7 +319,7 @@ class DeviceBase : public RefCounted {
     std::mutex* GetObjectListMutex(ObjectType type);
 
     std::vector<const char*> GetTogglesUsed() const;
-    WGSLExtensionsSet GetWGSLExtensionAllowList() const;
+    WGSLExtensionSet GetWGSLExtensionAllowList() const;
     bool IsFeatureEnabled(Feature feature) const;
     bool IsToggleEnabled(Toggle toggle) const;
     bool IsValidationEnabled() const;
@@ -549,7 +549,7 @@ class DeviceBase : public RefCounted {
 
     CombinedLimits mLimits;
     FeaturesSet mEnabledFeatures;
-    WGSLExtensionsSet mWGSLExtensionAllowList;
+    WGSLExtensionSet mWGSLExtensionAllowList;
 
     std::unique_ptr<InternalPipelineStore> mInternalPipelineStore;
 

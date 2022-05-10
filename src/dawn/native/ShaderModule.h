@@ -53,7 +53,7 @@ class VertexPulling;
 
 namespace dawn::native {
 
-using WGSLExtensionsSet = std::unordered_set<std::string>;
+using WGSLExtensionSet = std::unordered_set<std::string>;
 struct EntryPointMetadata;
 
 // Base component type of an inter-stage variable
@@ -307,7 +307,7 @@ class ShaderModuleBase : public ApiObjectBase, public CachedObject {
     std::string mWgsl;
 
     EntryPointMetadataTable mEntryPoints;
-    WGSLExtensionsSet mEnabledWGSLExtensions;
+    WGSLExtensionSet mEnabledWGSLExtensions;
     std::unique_ptr<tint::Program> mTintProgram;
     std::unique_ptr<TintSource> mTintSource;  // Keep the tint::Source::File alive
 
