@@ -89,6 +89,12 @@ BuiltinType ParseBuiltinType(const std::string& name) {
     if (name == "dot") {
         return BuiltinType::kDot;
     }
+    if (name == "dot4I8Packed") {
+        return BuiltinType::kDot4I8Packed;
+    }
+    if (name == "dot4U8Packed") {
+        return BuiltinType::kDot4U8Packed;
+    }
     if (name == "dpdx") {
         return BuiltinType::kDpdx;
     }
@@ -391,6 +397,10 @@ const char* str(BuiltinType i) {
             return "distance";
         case BuiltinType::kDot:
             return "dot";
+        case BuiltinType::kDot4I8Packed:
+            return "dot4I8Packed";
+        case BuiltinType::kDot4U8Packed:
+            return "dot4U8Packed";
         case BuiltinType::kDpdx:
             return "dpdx";
         case BuiltinType::kDpdxCoarse:

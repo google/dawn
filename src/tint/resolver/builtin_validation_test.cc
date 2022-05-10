@@ -371,5 +371,71 @@ INSTANTIATE_TEST_SUITE_P(
 
 }  // namespace texture_constexpr_args
 
+// TODO(crbug.com/tint/1497): Update or remove ResolverDP4aExtensionValidationTest when the
+// experimental extension chromium_experimental_dp4a is not needed.
+using ResolverDP4aExtensionValidationTest = ResolverTest;
+
+TEST_F(ResolverDP4aExtensionValidationTest, Dot4I8PackedWithExtension) {
+    // enable chromium_experimental_dp4a;
+    // fn func { return dot4I8Packed(1u, 2u); }
+    auto* ext =
+        create<ast::Enable>(Source{Source::Range{Source::Location{10, 2}, Source::Location{10, 5}}},
+                            "chromium_experimental_dp4a");
+    AST().AddEnable(ext);
+
+    Func("func", {}, ty.i32(),
+         {
+             Return(Call(Source{Source::Location{12, 34}}, "dot4I8Packed",
+                         ast::ExpressionList{Expr(1_u), Expr(2_u)})),
+         });
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
+TEST_F(ResolverDP4aExtensionValidationTest, Dot4I8PackedWithoutExtension) {
+    // fn func { return dot4I8Packed(1u, 2u); }
+    Func("func", {}, ty.i32(),
+         {
+             Return(Call(Source{Source::Location{12, 34}}, "dot4I8Packed",
+                         ast::ExpressionList{Expr(1_u), Expr(2_u)})),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: cannot call built-in function 'dot4I8Packed' without extension chromium_experimental_dp4a)");
+}
+
+TEST_F(ResolverDP4aExtensionValidationTest, Dot4U8PackedWithExtension) {
+    // enable chromium_experimental_dp4a;
+    // fn func { return dot4U8Packed(1u, 2u); }
+    auto* ext =
+        create<ast::Enable>(Source{Source::Range{Source::Location{10, 2}, Source::Location{10, 5}}},
+                            "chromium_experimental_dp4a");
+    AST().AddEnable(ext);
+
+    Func("func", {}, ty.u32(),
+         {
+             Return(Call(Source{Source::Location{12, 34}}, "dot4U8Packed",
+                         ast::ExpressionList{Expr(1_u), Expr(2_u)})),
+         });
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
+TEST_F(ResolverDP4aExtensionValidationTest, Dot4U8PackedWithoutExtension) {
+    // fn func { return dot4U8Packed(1u, 2u); }
+    Func("func", {}, ty.u32(),
+         {
+             Return(Call(Source{Source::Location{12, 34}}, "dot4U8Packed",
+                         ast::ExpressionList{Expr(1_u), Expr(2_u)})),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: cannot call built-in function 'dot4U8Packed' without extension chromium_experimental_dp4a)");
+}
+
 }  // namespace
 }  // namespace tint::resolver

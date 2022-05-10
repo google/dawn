@@ -53,6 +53,8 @@ enum class BuiltinType {
     kDeterminant,
     kDistance,
     kDot,
+    kDot4I8Packed,
+    kDot4U8Packed,
     kDpdx,
     kDpdxCoarse,
     kDpdxFine,

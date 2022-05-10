@@ -134,6 +134,10 @@ class Builtin final : public Castable<Builtin, CallTarget> {
     /// one of its inputs)
     bool HasSideEffects() const;
 
+    /// @returns the required extension of this builtin function. Returns
+    /// ast::Enable::ExtensionKind::kNotAnExtension if no extension is required.
+    ast::Enable::ExtensionKind RequiredExtension() const;
+
   private:
     const BuiltinType type_;
     const PipelineStageSet supported_stages_;

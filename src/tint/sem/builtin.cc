@@ -145,6 +145,16 @@ bool Builtin::HasSideEffects() const {
     return false;
 }
 
+ast::Enable::ExtensionKind Builtin::RequiredExtension() const {
+    switch (type_) {
+        case sem::BuiltinType::kDot4I8Packed:
+        case sem::BuiltinType::kDot4U8Packed:
+            return ast::Enable::ExtensionKind::kChromiumExperimentalDP4a;
+        default:
+            return ast::Enable::ExtensionKind::kNotAnExtension;
+    }
+}
+
 }  // namespace tint::sem
 
 //! @endcond

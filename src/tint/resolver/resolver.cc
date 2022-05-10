@@ -1309,6 +1309,10 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
 
     current_function_->AddDirectlyCalledBuiltin(builtin);
 
+    if (!validator_.RequiredExtensionForBuiltinFunction(call, builder_->AST().Extensions())) {
+        return nullptr;
+    }
+
     if (IsTextureBuiltin(builtin_type)) {
         if (!validator_.TextureBuiltinFunction(call)) {
             return nullptr;

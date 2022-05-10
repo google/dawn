@@ -56,6 +56,8 @@ INSTANTIATE_TEST_SUITE_P(
                     BuiltinData{"determinant", BuiltinType::kDeterminant},
                     BuiltinData{"distance", BuiltinType::kDistance},
                     BuiltinData{"dot", BuiltinType::kDot},
+                    BuiltinData{"dot4I8Packed", BuiltinType::kDot4I8Packed},
+                    BuiltinData{"dot4U8Packed", BuiltinType::kDot4U8Packed},
                     BuiltinData{"dpdx", BuiltinType::kDpdx},
                     BuiltinData{"dpdxCoarse", BuiltinType::kDpdxCoarse},
                     BuiltinData{"dpdxFine", BuiltinType::kDpdxFine},

@@ -1517,6 +1517,28 @@ bool Validator::TextureBuiltinFunction(const sem::Call* call) const {
            check_arg_is_constexpr(sem::ParameterUsage::kComponent, 0, 3);
 }
 
+bool Validator::RequiredExtensionForBuiltinFunction(const sem::Call* call,
+                                                    const ast::ExtensionSet& extensionSet) const {
+    const auto* builtin = call->Target()->As<sem::Builtin>();
+    if (!builtin) {
+        return true;
+    }
+
+    const auto extension = builtin->RequiredExtension();
+    if (extension == ast::Enable::ExtensionKind::kNotAnExtension) {
+        return true;
+    }
+
+    if (extensionSet.find(extension) == extensionSet.cend()) {
+        AddError("cannot call built-in function '" + std::string(builtin->str()) +
+                     "' without extension " + ast::Enable::KindToName(extension),
+                 call->Declaration()->source);
+        return false;
+    }
+
+    return true;
+}
+
 bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_statement) const {
     auto* decl = call->Declaration();
     auto* target = call->Target()->As<sem::Function>();

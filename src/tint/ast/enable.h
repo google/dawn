@@ -32,6 +32,11 @@ class Enable : public Castable<Enable, Node> {
   public:
     ///  The enum class identifing each supported WGSL extension
     enum class ExtensionKind {
+        /// An extension for the experimental feature
+        /// "chromium_experimental_dp4a".
+        /// See crbug.com/tint/1497 for more details
+        kChromiumExperimentalDP4a,
+
         /// An internal reserved extension for test, named
         /// "InternalExtensionForTesting"
         kInternalExtensionForTesting = -2,

@@ -22,6 +22,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Enable);
 namespace tint::ast {
 
 Enable::ExtensionKind Enable::NameToKind(const std::string& name) {
+    if (name == "chromium_experimental_dp4a") {
+        return Enable::ExtensionKind::kChromiumExperimentalDP4a;
+    }
+
     // The reserved internal extension name for testing
     if (name == "InternalExtensionForTesting") {
         return Enable::ExtensionKind::kInternalExtensionForTesting;
@@ -32,6 +36,8 @@ Enable::ExtensionKind Enable::NameToKind(const std::string& name) {
 
 std::string Enable::KindToName(ExtensionKind kind) {
     switch (kind) {
+        case ExtensionKind::kChromiumExperimentalDP4a:
+            return "chromium_experimental_dp4a";
         // The reserved internal extension for testing
         case ExtensionKind::kInternalExtensionForTesting:
             return "InternalExtensionForTesting";

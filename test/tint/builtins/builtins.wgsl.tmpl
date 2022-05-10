@@ -9,10 +9,11 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
-{{- /* For each permutation of each overload of each builtin... */ -}}
+{{- /* For each permutation of each overload of each function... */ -}}
 {{- range .Sem.Builtins -}}
-{{- /* TODO(crbug.com/tint/1483): Remove the bodge below after smoothStep is removed from builtins.def */}}
-{{- if not (eq .Name "smoothStep") }}
+{{- /* TODO(crbug.com/tint/1483): Remove the bodge below after smoothStep is removed from intrinsics.def */}}
+{{- /* TODO(crbug.com/tint/1536): Remove the bodge below after we support [[extension("extension_name")]] in intrinsics.def */}}
+{{- if not (or (eq .Name "smoothStep") (eq .Name "dot4I8Packed") (eq .Name "dot4U8Packed"))}}
 {{-   range .Overloads  -}}
 {{-     range Permute . -}}
 {{- /*    Generate a ./gen/<function>/<permuataion-hash>.wgsl file using
