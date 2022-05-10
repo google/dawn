@@ -35,11 +35,9 @@ def list_testcases(query, js_out_dir=None):
 
     try:
         logging.info('WebGPU CTS: Transpiling tools...')
-        compile_src_for_node(js_out_dir, [
-            '--incremental', '--tsBuildInfoFile',
-            os.path.join(js_out_dir, 'build.tsbuildinfo')
-        ],
-                             clean=False)
+        # TODO(crbug.com/dawn/1395): Bring back usage of an incremental build to
+        # speed up this operation. It was disabled due to flakiness.
+        compile_src_for_node(js_out_dir)
 
         old_sys_path = sys.path
         try:

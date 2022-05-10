@@ -32,7 +32,7 @@ finally:
 
 def compile_src(out_dir):
     # First, clean the output directory so deleted files are pruned from old builds.
-    shutil.rmtree(out_dir)
+    shutil.rmtree(out_dir, ignore_errors=True)
 
     run_tsc_ignore_errors([
         "--project",
@@ -56,7 +56,7 @@ def compile_src_for_node(out_dir, additional_args=None, clean=True):
     additional_args = additional_args or []
     if clean:
         # First, clean the output directory so deleted files are pruned from old builds.
-        shutil.rmtree(out_dir)
+        shutil.rmtree(out_dir, ignore_errors=True)
 
     args = [
         "--project",
