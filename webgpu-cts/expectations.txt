@@ -128,42 +128,45 @@ crbug.com/dawn/0000 [ intel win ] webgpu:api,operation,resource_init,texture_zer
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";* [ Failure ]
 
 ################################################################################
-# webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas
-# Failures on mac
+# copyToTexture failures on Linux
+# Skipped instead of just Crash because of the number of failures
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 [ mac ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Failure ]
-
-################################################################################
-# webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData
-# Failures on all platforms
-# KEEP
-################################################################################
-crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,ImageBitmap:* [ Failure ]
-crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ Skip ] # crashes (skip because there are very many)
-
-################################################################################
-# webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas
-# A big bag of failures / flakes.
-# KEEP
-################################################################################
-crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Failure ]
-
-################################################################################
-# webgpu:web_platform,copyToTexture,canvas:color_space_conversion:
-# Crashes / Flakes
-# KEEP
-################################################################################
+crbug.com/1234041 [ linux ] webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:* [ Skip ]
+crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ Skip ]
 crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Skip ]
-crbug.com/dawn/0000 [ mac ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ RetryOnFailure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ RetryOnFailure ]
+crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Skip ]
+crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ]
+crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Skip ]
+crbug.com/1236130 [ linux ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Skip ]
+
+################################################################################
+# copyToTexture failures. Needs investigation
+# KEEP
+################################################################################
+crbug.com/dawn/0000 [ mac intel ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,* [ Failure ]
+crbug.com/dawn/1319 [ win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:* [ Failure ]
+
+################################################################################
+# General test slowness because of https://github.com/gpuweb/cts/issues/1162
+# KEEP
+################################################################################
+crbug.com/dawn/1398 webgpu:web_platform,copyToTexture,ImageBitmap:* [ Slow ]
+crbug.com/dawn/1398 [ mac ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Slow ]
+crbug.com/dawn/1398 [ win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Slow ]
+crbug.com/dawn/1398 [ mac ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Slow ]
+crbug.com/dawn/1398 [ win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Slow ]
+crbug.com/dawn/1398 [ mac ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Slow ]
+crbug.com/dawn/1398 [ win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Slow ]
+crbug.com/dawn/1398 [ mac ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Slow ]
+crbug.com/dawn/1398 [ win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Slow ]
+crbug.com/dawn/1398 [ mac amd ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,* [ Slow ]
+crbug.com/dawn/1398 [ win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:* [ Slow ]
 
 ################################################################################
 # Flaky tests
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 [ win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ RetryOnFailure ]
-crbug.com/dawn/0000 [ win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ RetryOnFailure ]
 crbug.com/dawn/0000 webgpu:api,operation,adapter,requestDevice_limits:supported_limits:* [ RetryOnFailure ]
 
 ################################################################################
@@ -263,18 +266,12 @@ crbug.com/dawn/0000 webgpu:api,operation,rendering,depth_clip_clamp:depth_test_i
 ################################################################################
 # compilation_info failures
 ################################################################################
-crbug.com/dawn/0000 webgpu:api,operation,shader_module,compilation_info:offset_and_length:valid=false;unicode=true [ Failure ]
+crbug.com/dawn/1357 webgpu:api,operation,shader_module,compilation_info:offset_and_length:valid=false;unicode=true [ Failure ]
 
 ################################################################################
 # createBuffer_invalid_and_oom failures
 ################################################################################
 crbug.com/dawn/0000 webgpu:api,validation,buffer,create:createBuffer_invalid_and_oom: [ Failure ]
-
-################################################################################
-# CopyExternalImageToTexture crashes (skip because there are very many)
-# KEEP
-################################################################################
-crbug.com/1234041 [ linux ] webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:* [ Skip ]
 
 ################################################################################
 # shader execution failures
@@ -312,13 +309,6 @@ crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="2147483647" 
 crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="4294967295" [ Failure ]
 
 ################################################################################
-# webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed failures
-# KEEP
-################################################################################
-crbug.com/dawn/0000 [ mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,* [ Failure ]
-crbug.com/dawn/0000 [ win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,* [ Failure ]
-
-################################################################################
 # crbug.com/dawn/1325 render pass/bundle and render pipeline depth/stencil read only and write states validation
 # KEEP
 ################################################################################
@@ -331,10 +321,7 @@ crbug.com/dawn/1325 webgpu:api,validation,attachment_compatibility:render_pass_o
 crbug.com/dawn/0000 [ mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth32float" [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,render_pass,resolve:* [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,render_pipeline,pipeline_output_targets:color,component_count,blend:format="rg8unorm" [ Failure ]
-crbug.com/1236130 [ linux ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Skip ] # crashes (skip because there are very many)
 crbug.com/dawn/0000 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Failure ]
-crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Skip ] # crashes (skip because there are very many)
-crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ] # crashes (skip because there are very many)
 crbug.com/dawn/0000 [ mac ] worker_webgpu:api,operation,render_pass,storeOp:render_pass_store_op,depth_stencil_attachment_only:depthStencilFormat="stencil8";* [ Failure ]
 
 ################################################################################
