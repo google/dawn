@@ -552,7 +552,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_Negative) {
     // fn main() {}
 
     Func("main", {}, ty.void_(), {},
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Expr(Source{{12, 34}}, i32(-2)))});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Expr(Source{{12, 34}}, -2_i))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: workgroup_size argument must be at least 1");
@@ -587,7 +587,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_Negative) {
     // let x = -2i;
     // @stage(compute) @workgroup_size(x)
     // fn main() {}
-    GlobalConst("x", ty.i32(), Expr(i32(-2)));
+    GlobalConst("x", ty.i32(), Expr(-2_i));
     Func("main", {}, ty.void_(), {},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Expr(Source{{12, 34}}, "x"))});
 

@@ -72,7 +72,7 @@ TEST_F(BuilderTest, Literal_Bool_Dedup) {
 }
 
 TEST_F(BuilderTest, Literal_I32) {
-    auto* i = Expr(i32(-23));
+    auto* i = Expr(-23_i);
     WrapInFunction(i);
     spirv::Builder& b = Build();
 
@@ -86,8 +86,8 @@ TEST_F(BuilderTest, Literal_I32) {
 }
 
 TEST_F(BuilderTest, Literal_I32_Dedup) {
-    auto* i1 = Expr(i32(-23));
-    auto* i2 = Expr(i32(-23));
+    auto* i1 = Expr(-23_i);
+    auto* i2 = Expr(-23_i);
     WrapInFunction(i1, i2);
 
     spirv::Builder& b = Build();

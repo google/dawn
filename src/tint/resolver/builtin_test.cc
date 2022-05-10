@@ -947,7 +947,7 @@ TEST_P(ResolverBuiltinTest_SingleParam_FloatOrInt, Float_Vector) {
 TEST_P(ResolverBuiltinTest_SingleParam_FloatOrInt, Sint_Scalar) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, i32(-1));
+    auto* call = Call(param.name, -1_i);
     WrapInFunction(call);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

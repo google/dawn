@@ -991,7 +991,7 @@ TEST_F(InspectorGetConstantIDsTest, U32) {
 
 TEST_F(InspectorGetConstantIDsTest, I32) {
     AddOverridableConstantWithID("foo", 1, ty.i32(), nullptr);
-    AddOverridableConstantWithID("bar", 20, ty.i32(), Expr(i32(-42)));
+    AddOverridableConstantWithID("bar", 20, ty.i32(), Expr(-42_i));
     AddOverridableConstantWithID("baz", 300, ty.i32(), Expr(42_i));
 
     Inspector& inspector = Build();

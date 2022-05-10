@@ -40,6 +40,10 @@ struct Number {
     /// @returns the value as T
     operator T() const { return value; }
 
+    /// Negation operator
+    /// @returns the negative value of the number
+    Number operator-() const { return Number(-value); }
+
     /// Assignment operator
     /// @param v the new value
     /// @returns this Number so calls can be chained

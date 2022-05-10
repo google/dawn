@@ -232,9 +232,9 @@ TEST_F(ResolverControlBlockValidationTest, SwitchConditionTypeMustMatchSelectorT
     // }
     auto* var = Var("a", ty.u32(), Expr(2_u));
 
-    auto* block = Block(Decl(var),                                       //
-                        Switch("a",                                      //
-                               Case(Source{{12, 34}}, {Expr(i32(-1))}),  //
+    auto* block = Block(Decl(var),                                    //
+                        Switch("a",                                   //
+                               Case(Source{{12, 34}}, {Expr(-1_i)}),  //
                                DefaultCase()));
     WrapInFunction(block);
 
@@ -281,12 +281,12 @@ TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelectorValueSint_Fail) 
 
     auto* block = Block(Decl(var),   //
                         Switch("a",  //
-                               Case(Expr(Source{{12, 34}}, i32(-10))),
+                               Case(Expr(Source{{12, 34}}, -10_i)),
                                Case({
                                    Expr(0_i),
                                    Expr(1_i),
                                    Expr(2_i),
-                                   Expr(Source{{56, 78}}, i32(-10)),
+                                   Expr(Source{{56, 78}}, -10_i),
                                }),
                                DefaultCase()));
     WrapInFunction(block);

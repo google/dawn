@@ -232,7 +232,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Zero) {
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Negative) {
     // var<private> a : array<f32, -10i>;
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, i32(-10))), ast::StorageClass::kPrivate);
+    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, -10_i)), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size must be at least 1");
 }
@@ -258,7 +258,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_SignedConstant_Zero) {
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedConstant_Negative) {
     // let size = -10i;
     // var<private> a : array<f32, size>;
-    GlobalConst("size", nullptr, Expr(i32(-10)));
+    GlobalConst("size", nullptr, Expr(-10_i));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size must be at least 1");

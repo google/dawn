@@ -34,7 +34,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Bool) {
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Int) {
-    WrapInFunction(Expr(i32(-12345)));
+    WrapInFunction(Expr(-12345_i));
 
     GeneratorImpl& gen = Build();
 
@@ -80,7 +80,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Bool) {
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Int) {
-    WrapInFunction(Construct<i32>(i32(-12345)));
+    WrapInFunction(Construct<i32>(-12345_i));
 
     GeneratorImpl& gen = Build();
 
