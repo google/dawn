@@ -351,10 +351,11 @@ class DawnTestBase {
 
     size_t mLastWarningCount = 0;
 
-    // Mock callbacks tracking errors and destruction. Device lost is a nice mock since tests that
-    // do not care about device destruction can ignore the callback entirely.
-    testing::MockCallback<WGPUErrorCallback> mDeviceErrorCallback;
-    testing::MockCallback<WGPUDeviceLostCallback> mDeviceLostCallback;
+    // Mock callbacks tracking errors and destruction. These are strict mocks because any errors or
+    // device loss that aren't expected should result in test failures and not just some warnings
+    // printed to stdout.
+    testing::StrictMock<testing::MockCallback<WGPUErrorCallback>> mDeviceErrorCallback;
+    testing::StrictMock<testing::MockCallback<WGPUDeviceLostCallback>> mDeviceLostCallback;
 
     // Helper methods to implement the EXPECT_ macros
     std::ostringstream& AddBufferExpectation(const char* file,

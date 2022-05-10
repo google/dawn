@@ -955,10 +955,17 @@ std::pair<wgpu::Device, WGPUDevice> DawnTestBase::CreateDeviceImpl(std::string i
 
     auto devices = mWireHelper->RegisterDevice(mBackendAdapter.CreateDevice(&deviceDescriptor));
     wgpu::Device device = devices.first;
+
+    // Set up the mocks for uncaptured errors and device loss. The loss of the device is expected
+    // to happen at the end of the test so at it directly.
     device.SetUncapturedErrorCallback(mDeviceErrorCallback.Callback(),
                                       mDeviceErrorCallback.MakeUserdata(device.Get()));
     device.SetDeviceLostCallback(mDeviceLostCallback.Callback(),
                                  mDeviceLostCallback.MakeUserdata(device.Get()));
+    EXPECT_CALL(mDeviceLostCallback,
+                Call(WGPUDeviceLostReason_Destroyed, testing::_, device.Get()))
+        .Times(testing::AtMost(1));
+
     device.SetLoggingCallback(
         [](WGPULoggingType type, char const* message, void*) {
             switch (type) {
@@ -977,6 +984,7 @@ std::pair<wgpu::Device, WGPUDevice> DawnTestBase::CreateDeviceImpl(std::string i
             }
         },
         nullptr);
+
     return devices;
 }
 
@@ -1050,33 +1058,26 @@ void DawnTestBase::TearDown() {
 }
 
 void DawnTestBase::DestroyDevice(wgpu::Device device) {
-    wgpu::Device resolvedDevice;
-    if (device != nullptr) {
-        resolvedDevice = device;
-    } else {
+    wgpu::Device resolvedDevice = device;
+    if (resolvedDevice == nullptr) {
         resolvedDevice = this->device;
     }
-    EXPECT_CALL(mDeviceLostCallback,
-                Call(WGPUDeviceLostReason_Destroyed, testing::_, resolvedDevice.Get()))
-        .Times(1);
+
+    // No expectation is added because the expectations for this kind of destruction is set up as
+    // soon as the device is created.
     resolvedDevice.Destroy();
-    FlushWire();
-    testing::Mock::VerifyAndClearExpectations(&mDeviceLostCallback);
 }
 
 void DawnTestBase::LoseDeviceForTesting(wgpu::Device device) {
-    wgpu::Device resolvedDevice;
-    if (device != nullptr) {
-        resolvedDevice = device;
-    } else {
+    wgpu::Device resolvedDevice = device;
+    if (resolvedDevice == nullptr) {
         resolvedDevice = this->device;
     }
+
     EXPECT_CALL(mDeviceLostCallback,
                 Call(WGPUDeviceLostReason_Undefined, testing::_, resolvedDevice.Get()))
         .Times(1);
     resolvedDevice.LoseForTesting();
-    FlushWire();
-    testing::Mock::VerifyAndClearExpectations(&mDeviceLostCallback);
 }
 
 std::ostringstream& DawnTestBase::AddBufferExpectation(const char* file,
