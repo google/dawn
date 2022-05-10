@@ -317,7 +317,7 @@ TEST_P(FloatTest, Parse) {
 
     auto t = l.next();
     if (std::string(params.input).back() == 'f') {
-        EXPECT_TRUE(t.Is(Token::Type::kFloatFLiteral));
+        EXPECT_TRUE(t.Is(Token::Type::kFloatLiteral_F));
     } else {
         EXPECT_TRUE(t.Is(Token::Type::kFloatLiteral));
     }
@@ -611,7 +611,7 @@ TEST_P(IntegerTest_HexSigned, ISuffix) {
     Lexer l(&file);
 
     auto t = l.next();
-    EXPECT_TRUE(t.Is(Token::Type::kIntILiteral));
+    EXPECT_TRUE(t.Is(Token::Type::kIntLiteral_I));
     EXPECT_EQ(t.source().range.begin.line, 1u);
     EXPECT_EQ(t.source().range.begin.column, 1u);
     EXPECT_EQ(t.source().range.end.line, 1u);
@@ -727,7 +727,7 @@ TEST_P(IntegerTest_HexUnsigned, Matches) {
     Lexer l(&file);
 
     auto t = l.next();
-    EXPECT_TRUE(t.Is(Token::Type::kIntULiteral));
+    EXPECT_TRUE(t.Is(Token::Type::kIntLiteral_U));
     EXPECT_EQ(t.source().range.begin.line, 1u);
     EXPECT_EQ(t.source().range.begin.column, 1u);
     EXPECT_EQ(t.source().range.end.line, 1u);
@@ -770,7 +770,7 @@ TEST_P(IntegerTest_Unsigned, Matches) {
     Lexer l(&file);
 
     auto t = l.next();
-    EXPECT_TRUE(t.Is(Token::Type::kIntULiteral));
+    EXPECT_TRUE(t.Is(Token::Type::kIntLiteral_U));
     EXPECT_EQ(t.to_i64(), params.result);
     EXPECT_EQ(t.source().range.begin.line, 1u);
     EXPECT_EQ(t.source().range.begin.column, 1u);
@@ -839,8 +839,8 @@ TEST_P(IntegerTest_Invalid, Parses) {
 
     auto t = l.next();
     EXPECT_FALSE(t.Is(Token::Type::kIntLiteral));
-    EXPECT_FALSE(t.Is(Token::Type::kIntULiteral));
-    EXPECT_FALSE(t.Is(Token::Type::kIntILiteral));
+    EXPECT_FALSE(t.Is(Token::Type::kIntLiteral_U));
+    EXPECT_FALSE(t.Is(Token::Type::kIntLiteral_I));
 }
 INSTANTIATE_TEST_SUITE_P(
     LexerTest,

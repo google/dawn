@@ -27,13 +27,13 @@ std::string_view Token::TypeToName(Type type) {
             return "identifier";
         case Token::Type::kFloatLiteral:
             return "abstract float literal";
-        case Token::Type::kFloatFLiteral:
+        case Token::Type::kFloatLiteral_F:
             return "'f'-suffixed float literal";
         case Token::Type::kIntLiteral:
             return "abstract integer literal";
-        case Token::Type::kIntILiteral:
+        case Token::Type::kIntLiteral_I:
             return "'i'-suffixed integer literal";
-        case Token::Type::kIntULiteral:
+        case Token::Type::kIntLiteral_U:
             return "'u'-suffixed integer literal";
         case Token::Type::kUninitialized:
             return "uninitialized";
@@ -307,13 +307,13 @@ std::string Token::to_str() const {
     switch (type_) {
         case Type::kFloatLiteral:
             return std::to_string(std::get<double>(value_));
-        case Type::kFloatFLiteral:
+        case Type::kFloatLiteral_F:
             return std::to_string(std::get<double>(value_)) + "f";
         case Type::kIntLiteral:
             return std::to_string(std::get<int64_t>(value_));
-        case Type::kIntILiteral:
+        case Type::kIntLiteral_I:
             return std::to_string(std::get<int64_t>(value_)) + "i";
-        case Type::kIntULiteral:
+        case Type::kIntLiteral_U:
             return std::to_string(std::get<int64_t>(value_)) + "u";
         case Type::kIdentifier:
         case Type::kError:

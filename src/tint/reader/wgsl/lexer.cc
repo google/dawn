@@ -406,7 +406,7 @@ Token Lexer::try_float() {
             case LimitCheck::kTooLarge:
                 return {Token::Type::kError, source, "value too large for f32"};
             default:
-                return {Token::Type::kFloatFLiteral, source, value};
+                return {Token::Type::kFloatLiteral_F, source, value};
         }
     }
 
@@ -715,7 +715,7 @@ Token Lexer::try_hex_float() {
     float result_f32;
     std::memcpy(&result_f32, &result_u32, sizeof(result_f32));
     double result_f64 = static_cast<double>(result_f32);
-    return {has_f_suffix ? Token::Type::kFloatFLiteral : Token::Type::kFloatLiteral, source,
+    return {has_f_suffix ? Token::Type::kFloatLiteral_F : Token::Type::kFloatLiteral, source,
             result_f64};
 }
 
@@ -731,7 +731,7 @@ Token Lexer::build_token_from_int_if_possible(Source source, size_t start, int32
             default:
                 advance(1);
                 end_source(source);
-                return {Token::Type::kIntULiteral, source, res};
+                return {Token::Type::kIntLiteral_U, source, res};
         }
     }
 
@@ -746,7 +746,7 @@ Token Lexer::build_token_from_int_if_possible(Source source, size_t start, int32
         }
         advance(1);
         end_source(source);
-        return {Token::Type::kIntILiteral, source, res};
+        return {Token::Type::kIntLiteral_I, source, res};
     }
 
     // TODO(crbug.com/tint/1504): Properly support abstract int:

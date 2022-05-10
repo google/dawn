@@ -41,13 +41,13 @@ class Token {
         /// A float literal with no suffix
         kFloatLiteral,
         /// A float literal with an 'f' suffix
-        kFloatFLiteral,
+        kFloatLiteral_F,
         /// An integer literal with no suffix
         kIntLiteral,
         /// An integer literal with an 'i' suffix
-        kIntILiteral,
+        kIntLiteral_I,
         /// An integer literal with a 'u' suffix
-        kIntULiteral,
+        kIntLiteral_U,
 
         /// A '&'
         kAnd,
@@ -342,9 +342,9 @@ class Token {
     bool IsIdentifier() const { return type_ == Type::kIdentifier; }
     /// @returns true if the token is a literal
     bool IsLiteral() const {
-        return type_ == Type::kIntLiteral || type_ == Type::kIntILiteral ||
-               type_ == Type::kIntULiteral || type_ == Type::kFalse || type_ == Type::kTrue ||
-               type_ == Type::kFloatLiteral || type_ == Type::kFloatFLiteral;
+        return type_ == Type::kIntLiteral || type_ == Type::kIntLiteral_I ||
+               type_ == Type::kIntLiteral_U || type_ == Type::kFalse || type_ == Type::kTrue ||
+               type_ == Type::kFloatLiteral || type_ == Type::kFloatLiteral_F;
     }
     /// @returns true if token is a 'matNxM'
     bool IsMatrix() const {

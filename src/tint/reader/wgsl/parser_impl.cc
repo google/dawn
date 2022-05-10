@@ -2781,11 +2781,11 @@ Maybe<const ast::LiteralExpression*> ParserImpl::const_literal() {
         return create<ast::IntLiteralExpression>(t.source(), t.to_i64(),
                                                  ast::IntLiteralExpression::Suffix::kNone);
     }
-    if (match(Token::Type::kIntILiteral)) {
+    if (match(Token::Type::kIntLiteral_I)) {
         return create<ast::IntLiteralExpression>(t.source(), t.to_i64(),
                                                  ast::IntLiteralExpression::Suffix::kI);
     }
-    if (match(Token::Type::kIntULiteral)) {
+    if (match(Token::Type::kIntLiteral_U)) {
         return create<ast::IntLiteralExpression>(t.source(), t.to_i64(),
                                                  ast::IntLiteralExpression::Suffix::kU);
     }
@@ -2793,7 +2793,7 @@ Maybe<const ast::LiteralExpression*> ParserImpl::const_literal() {
         return create<ast::FloatLiteralExpression>(t.source(), t.to_f64(),
                                                    ast::FloatLiteralExpression::Suffix::kNone);
     }
-    if (match(Token::Type::kFloatFLiteral)) {
+    if (match(Token::Type::kFloatLiteral_F)) {
         return create<ast::FloatLiteralExpression>(t.source(), t.to_f64(),
                                                    ast::FloatLiteralExpression::Suffix::kF);
     }
@@ -3131,7 +3131,7 @@ bool ParserImpl::expect(std::string_view use, Token::Type tok) {
 
 Expect<int32_t> ParserImpl::expect_sint(std::string_view use) {
     auto t = peek();
-    if (!t.Is(Token::Type::kIntLiteral) && !t.Is(Token::Type::kIntILiteral)) {
+    if (!t.Is(Token::Type::kIntLiteral) && !t.Is(Token::Type::kIntLiteral_I)) {
         return add_error(t.source(), "expected signed integer literal", use);
     }
 
