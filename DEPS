@@ -96,7 +96,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'third_party/googletest': {
-    'url': '{chromium_git}/external/github.com/google/googletest@6b74da4757a549563d7c37c8fae3e704662a043b',
+    'url': '{chromium_git}/external/github.com/google/googletest@bda85449f48f2d80a494c8c07766b6aba3170f3b',
     'condition': 'dawn_standalone',
   },
   # This is a dependency of //testing

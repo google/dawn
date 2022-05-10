@@ -34,7 +34,7 @@ class D3D11on12ResourceCacheEntry : public RefCounted {
     explicit D3D11on12ResourceCacheEntry(ComPtr<ID3D11On12Device> d3d11on12Device);
     D3D11on12ResourceCacheEntry(ComPtr<IDXGIKeyedMutex> d3d11on12Resource,
                                 ComPtr<ID3D11On12Device> d3d11on12Device);
-    ~D3D11on12ResourceCacheEntry();
+    ~D3D11on12ResourceCacheEntry() override;
 
     MaybeError AcquireKeyedMutex();
     void ReleaseKeyedMutex();

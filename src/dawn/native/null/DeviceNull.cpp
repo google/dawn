@@ -89,7 +89,7 @@ BackendConnection* Connect(InstanceBase* instance) {
 }
 
 struct CopyFromStagingToBufferOperation : PendingOperation {
-    virtual void Execute() {
+    void Execute() override {
         destination->CopyFromStaging(staging, sourceOffset, destinationOffset, size);
     }
 

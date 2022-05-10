@@ -60,7 +60,7 @@ using WGSLExtensionSet = std::unordered_set<std::string>;
 class DeviceBase : public RefCounted {
   public:
     DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor);
-    virtual ~DeviceBase();
+    ~DeviceBase() override;
 
     void HandleError(InternalErrorType type, const char* message);
 

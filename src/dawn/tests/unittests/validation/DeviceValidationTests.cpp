@@ -22,7 +22,7 @@ using ::testing::HasSubstr;
 
 class RequestDeviceValidationTest : public ValidationTest {
   protected:
-    void SetUp() {
+    void SetUp() override {
         DAWN_SKIP_TEST_IF(UsesWire());
         ValidationTest::SetUp();
     }

@@ -25,7 +25,7 @@ namespace dawn::wire::client {
     class ClientBase : public ChunkedCommandHandler, public ObjectIdProvider {
       public:
         ClientBase() = default;
-        virtual ~ClientBase() = default;
+        ~ClientBase() override = default;
 
         {% for type in by_category["object"] %}
             const ObjectAllocator<{{type.name.CamelCase()}}>& {{type.name.CamelCase()}}Allocator() const {

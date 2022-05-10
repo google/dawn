@@ -118,6 +118,8 @@ config("internal_config") {
       "-Wredundant-move",
       "-Wshadow-field",
       "-Wstrict-prototypes",
+      "-Wsuggest-destructor-override",
+      "-Wsuggest-override",
       "-Wtautological-unsigned-zero-compare",
       "-Wunreachable-code-aggressive",
       "-Wunused-but-set-variable",

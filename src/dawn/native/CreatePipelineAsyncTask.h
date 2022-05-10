@@ -34,7 +34,7 @@ struct FlatComputePipelineDescriptor;
 
 struct CreatePipelineAsyncCallbackTaskBase : CallbackTask {
     CreatePipelineAsyncCallbackTaskBase(std::string errorMessage, void* userData);
-    ~CreatePipelineAsyncCallbackTaskBase();
+    ~CreatePipelineAsyncCallbackTaskBase() override;
 
   protected:
     std::string mErrorMessage;

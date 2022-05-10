@@ -48,7 +48,7 @@ class CommandBuffer final : public CommandBufferBase {
                                      const CommandBufferDescriptor* descriptor);
 
     CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
-    ~CommandBuffer();
+    ~CommandBuffer() override;
 
     MaybeError FillCommands(CommandRecordingContext* commandContext);
 

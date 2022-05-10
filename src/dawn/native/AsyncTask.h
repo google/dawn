@@ -48,7 +48,7 @@ class AsyncTaskManager {
     class WaitableTask : public RefCounted {
       public:
         WaitableTask();
-        ~WaitableTask();
+        ~WaitableTask() override;
 
         AsyncTask asyncTask;
         AsyncTaskManager* taskManager;

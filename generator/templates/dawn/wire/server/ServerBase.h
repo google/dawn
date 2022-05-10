@@ -27,7 +27,7 @@ namespace dawn::wire::server {
     class ServerBase : public ChunkedCommandHandler, public ObjectIdResolver {
       public:
         ServerBase() = default;
-        virtual ~ServerBase() = default;
+        ~ServerBase() override = default;
 
       protected:
         void DestroyAllObjects(const DawnProcTable& procs) {
