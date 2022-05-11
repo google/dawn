@@ -295,13 +295,18 @@ void Device::InitializeRenderPipelineAsyncImpl(Ref<RenderPipelineBase> renderPip
 
 ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
     uint64_t frontendCompletedSerial{GetCompletedCommandSerial()};
-    if (frontendCompletedSerial > mCompletedSerial) {
-        // sometimes we increase the serials, in which case the completed serial in
-        // the device base will surpass the completed serial we have in the metal backend, so we
-        // must update ours when we see that the completed serial from device base has
-        // increased.
-        mCompletedSerial = frontendCompletedSerial;
+    // sometimes we increase the serials, in which case the completed serial in
+    // the device base will surpass the completed serial we have in the metal backend, so we
+    // must update ours when we see that the completed serial from device base has
+    // increased.
+    //
+    // This update has to be atomic otherwise there is a race with the `addCompletedHandler`
+    // call below and this call could set the mCompletedSerial backwards.
+    uint64_t current = mCompletedSerial.load();
+    while (frontendCompletedSerial > current &&
+           !mCompletedSerial.compare_exchange_weak(current, frontendCompletedSerial)) {
     }
+
     return ExecutionSerial(mCompletedSerial.load());
 }
 
