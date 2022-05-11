@@ -315,6 +315,11 @@ crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="4294967295" 
 crbug.com/dawn/1325 webgpu:api,validation,attachment_compatibility:render_pass_or_bundle_and_pipeline,depth_stencil_read_only_write_state:* [ Failure ]
 
 ################################################################################
+# createView failures
+################################################################################
+crbug.com/dawn/1380 webgpu:api,validation,createView:array_layers:textureDimension="2d";viewDimension="_undef_" [ Failure ]
+
+################################################################################
 # untriaged failures
 # KEEP
 ################################################################################
@@ -381,7 +386,6 @@ crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:api,o
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x5912 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgba8sint" [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgba8snorm" [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x5912 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgba8snorm" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,createView:array_layers:textureDimension="2d";viewDimension="_undef_" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x5912 win10 ] webgpu:api,validation,image_copy,texture_related:format:method="WriteTexture";depthOrArrayLayers=32;dimension="3d";format="rgba32sint" [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation win10 ] webgpu:api,validation,resource_usages,texture,in_render_common:subresources,depth_stencil_texture_in_bind_groups:view0Levels={"base":1,"count":2};view0Layers={"base":1,"count":1};view1Levels={"base":1,"count":1};view1Layers={"base":0,"count":1};aspect0="stencil-only";aspect1="depth-only";inSamePass=false [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation win10 ] webgpu:api,validation,vertex_state:vertex_attribute_contained_in_stride:format="uint32x2" [ Failure ]
