@@ -51,7 +51,10 @@ group("abseil") {
   if (build_with_chromium) {
     public_deps = [ "$dawn_abseil_dir:absl" ]
   } else {
-    public_deps = [ "${dawn_root}/third_party/gn/abseil-cpp:str_format" ]
+    public_deps = [
+      "${dawn_root}/third_party/gn/abseil-cpp:str_format",
+      "${dawn_root}/third_party/gn/abseil-cpp:strings",
+    ]
   }
 }
 
