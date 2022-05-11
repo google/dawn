@@ -52,6 +52,7 @@
 #include "src/tint/transform/calculate_array_length.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
 #include "src/tint/transform/decompose_memory_access.h"
+#include "src/tint/transform/disable_uniformity_analysis.h"
 #include "src/tint/transform/expand_compound_assignment.h"
 #include "src/tint/transform/fold_trivial_single_use_lets.h"
 #include "src/tint/transform/localize_struct_array_assignment.h"
@@ -138,6 +139,8 @@ SanitizedResult::SanitizedResult(SanitizedResult&&) = default;
 SanitizedResult Sanitize(const Program* in, const Options& options) {
     transform::Manager manager;
     transform::DataMap data;
+
+    manager.Add<transform::DisableUniformityAnalysis>();
 
     {  // Builtin polyfills
         transform::BuiltinPolyfill::Builtins polyfills;
@@ -246,6 +249,10 @@ bool GeneratorImpl::Generate() {
         if (decl->Is<ast::Alias>()) {
             continue;  // Ignore aliases.
         }
+        if (decl->Is<ast::Enable>()) {
+            // Currently we don't have to do anything for using a extension in HLSL.
+            continue;
+        }
 
         // Emit a new line between declarations if the type of declaration has
         // changed, or we're about to emit a function
@@ -284,11 +291,6 @@ bool GeneratorImpl::Generate() {
                     return EmitEntryPointFunction(func);
                 }
                 return EmitFunction(func);
-            },
-            [&](const ast::Enable*) {
-                // Currently we don't have to do anything for using a extension in
-                // HLSL
-                return true;
             },
             [&](Default) {
                 TINT_ICE(Writer, diagnostics_)

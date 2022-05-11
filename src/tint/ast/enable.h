@@ -36,6 +36,8 @@ class Enable : public Castable<Enable, Node> {
         /// "chromium_experimental_dp4a".
         /// See crbug.com/tint/1497 for more details
         kChromiumExperimentalDP4a,
+        /// A Chromium-specific extension for disabling uniformity analysis.
+        kChromiumDisableUniformityAnalysis,
 
         /// An internal reserved extension for test, named
         /// "InternalExtensionForTesting"

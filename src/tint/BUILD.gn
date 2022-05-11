@@ -451,6 +451,8 @@ libtint_source_set("libtint_core_all_src") {
     "transform/decompose_strided_array.h",
     "transform/decompose_strided_matrix.cc",
     "transform/decompose_strided_matrix.h",
+    "transform/disable_uniformity_analysis.cc",
+    "transform/disable_uniformity_analysis.h",
     "transform/expand_compound_assignment.cc",
     "transform/expand_compound_assignment.h",
     "transform/first_index_offset.cc",

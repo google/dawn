@@ -333,6 +333,8 @@ set(TINT_LIB_SRCS
   transform/decompose_strided_array.h
   transform/decompose_strided_matrix.cc
   transform/decompose_strided_matrix.h
+  transform/disable_uniformity_analysis.cc
+  transform/disable_uniformity_analysis.h
   transform/first_index_offset.cc
   transform/first_index_offset.h
   transform/fold_constants.cc
@@ -1044,6 +1046,7 @@ if(TINT_BUILD_TESTS)
       transform/decompose_memory_access_test.cc
       transform/decompose_strided_array_test.cc
       transform/decompose_strided_matrix_test.cc
+      transform/disable_uniformity_analysis_test.cc
       transform/expand_compound_assignment_test.cc
       transform/first_index_offset_test.cc
       transform/fold_constants_test.cc

@@ -21,6 +21,7 @@
 #include "src/tint/transform/add_spirv_block_attribute.h"
 #include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
+#include "src/tint/transform/disable_uniformity_analysis.h"
 #include "src/tint/transform/expand_compound_assignment.h"
 #include "src/tint/transform/fold_constants.h"
 #include "src/tint/transform/for_loop_to_loop.h"
@@ -40,6 +41,8 @@ namespace tint::writer::spirv {
 SanitizedResult Sanitize(const Program* in, const Options& options) {
     transform::Manager manager;
     transform::DataMap data;
+
+    manager.Add<transform::DisableUniformityAnalysis>();
 
     {  // Builtin polyfills
         transform::BuiltinPolyfill::Builtins polyfills;

@@ -52,6 +52,7 @@
 #include "src/tint/transform/canonicalize_entry_point_io.h"
 #include "src/tint/transform/combine_samplers.h"
 #include "src/tint/transform/decompose_memory_access.h"
+#include "src/tint/transform/disable_uniformity_analysis.h"
 #include "src/tint/transform/expand_compound_assignment.h"
 #include "src/tint/transform/fold_trivial_single_use_lets.h"
 #include "src/tint/transform/loop_to_for_loop.h"
@@ -156,6 +157,8 @@ SanitizedResult Sanitize(const Program* in,
                          const std::string& entry_point) {
     transform::Manager manager;
     transform::DataMap data;
+
+    manager.Add<transform::DisableUniformityAnalysis>();
 
     {  // Builtin polyfills
         transform::BuiltinPolyfill::Builtins polyfills;
@@ -2595,10 +2598,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         if (storage && storage->access() != ast::Access::kRead) {
             out << "writeonly ";
         }
-        auto* subtype = sampled   ? sampled->type()
-                        : storage ? storage->type()
-                        : ms      ? ms->type()
-                                  : nullptr;
+        auto* subtype =
+            sampled ? sampled->type() : storage ? storage->type() : ms ? ms->type() : nullptr;
         if (!subtype || subtype->Is<sem::F32>()) {
         } else if (subtype->Is<sem::I32>()) {
             out << "i";

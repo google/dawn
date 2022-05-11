@@ -323,6 +323,7 @@ tint_unittests_source_set("tint_unittests_transform_src") {
     "../../src/tint/transform/decompose_memory_access_test.cc",
     "../../src/tint/transform/decompose_strided_array_test.cc",
     "../../src/tint/transform/decompose_strided_matrix_test.cc",
+    "../../src/tint/transform/disable_uniformity_analysis_test.cc",
     "../../src/tint/transform/expand_compound_assignment_test.cc",
     "../../src/tint/transform/first_index_offset_test.cc",
     "../../src/tint/transform/fold_constants_test.cc",
