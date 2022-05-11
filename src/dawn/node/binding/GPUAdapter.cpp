@@ -204,6 +204,7 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
                 continue;
             case interop::GPUFeatureName::kDepthClipControl:
             case interop::GPUFeatureName::kIndirectFirstInstance:
+            case interop::GPUFeatureName::kShaderF16:
                 // TODO(dawn:1123) Add support for these extensions when possible.
                 continue;
         }
