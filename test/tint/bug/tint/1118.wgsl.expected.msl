@@ -1,3 +1,7 @@
+bug/tint/1118.wgsl:64:31 warning: 'dpdx' must only be called from uniform control flow
+  normalW = normalize(-(cross(dpdx(x_62), dpdy(x_64))));
+                              ^^^^
+
 #include <metal_stdlib>
 
 using namespace metal;

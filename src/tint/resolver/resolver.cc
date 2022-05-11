@@ -50,6 +50,7 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/vector.h"
 #include "src/tint/ast/workgroup_attribute.h"
+#include "src/tint/resolver/uniformity.h"
 #include "src/tint/sem/array.h"
 #include "src/tint/sem/atomic.h"
 #include "src/tint/sem/call.h"
@@ -143,6 +144,10 @@ bool Resolver::ResolveInternal() {
 
     if (!validator_.PipelineStages(entry_points_)) {
         return false;
+    }
+
+    if (!AnalyzeUniformity(builder_, dependencies_)) {
+        // TODO(jrprice): Reject programs that fail uniformity analysis.
     }
 
     bool result = true;

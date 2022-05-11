@@ -1,3 +1,7 @@
+bug/dawn/947.wgsl:59:20 warning: 'textureSample' must only be called from uniform control flow
+    var srcColor = textureSample(myTexture, mySampler, texcoord);
+                   ^^^^^^^^^^^^^
+
 #version 310 es
 
 layout(location = 0) out vec2 texcoords_1;

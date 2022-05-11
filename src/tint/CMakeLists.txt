@@ -256,6 +256,8 @@ set(TINT_LIB_SRCS
   resolver/resolver.h
   resolver/sem_helper.cc
   resolver/sem_helper.h
+  resolver/uniformity.cc
+  resolver/uniformity.h
   resolver/validator.cc
   resolver/validator.h
   scope_stack.h
@@ -832,6 +834,13 @@ if(TINT_BUILD_TESTS)
     writer/generate_external_texture_bindings_test.cc
     writer/text_generator_test.cc
   )
+
+  # Uniformity analysis tests depend on WGSL reader
+  if(${TINT_BUILD_WGSL_READER})
+    list(APPEND TINT_TEST_SRCS
+      resolver/uniformity_test.cc
+    )
+  endif()
 
   # Inspector tests depend on WGSL reader
   if(${TINT_BUILD_WGSL_READER})

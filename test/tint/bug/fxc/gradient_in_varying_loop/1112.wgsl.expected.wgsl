@@ -1,3 +1,7 @@
+bug/fxc/gradient_in_varying_loop/1112.wgsl:23:33 warning: 'textureSample' must only be called from uniform control flow
+        let sampleDepth : f32 = textureSample(depthTexture, Sampler, offset.xy).r;
+                                ^^^^^^^^^^^^^
+
 @group(0) @binding(0) var Sampler : sampler;
 
 @group(0) @binding(1) var randomTexture : texture_2d<f32>;

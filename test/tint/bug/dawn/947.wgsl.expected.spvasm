@@ -1,3 +1,7 @@
+bug/dawn/947.wgsl:59:20 warning: 'textureSample' must only be called from uniform control flow
+    var srcColor = textureSample(myTexture, mySampler, texcoord);
+                   ^^^^^^^^^^^^^
+
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0

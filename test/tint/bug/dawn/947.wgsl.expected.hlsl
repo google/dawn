@@ -1,3 +1,7 @@
+bug/dawn/947.wgsl:59:20 warning: 'textureSample' must only be called from uniform control flow
+    var srcColor = textureSample(myTexture, mySampler, texcoord);
+                   ^^^^^^^^^^^^^
+
 cbuffer cbuffer_uniforms : register(b0, space0) {
   uint4 uniforms[1];
 };

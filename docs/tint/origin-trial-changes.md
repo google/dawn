@@ -1,5 +1,12 @@
 # Tint changes during Origin Trial
 
+## Changes for M103
+
+### New features
+
+* Produce warnings for when calling barriers, textureSample, and derivative
+builtins in non-uniform control flow [tint:880](crbug.com/tint/880)
+
 ## Changes for M102
 
 ### New Features

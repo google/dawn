@@ -71,6 +71,16 @@ class ScopeStack {
         return V{};
     }
 
+    /// Return the top scope of the stack.
+    /// @returns the top scope of the stack
+    const std::unordered_map<K, V>& Top() const { return stack_.back(); }
+
+    /// Clear the scope stack.
+    void Clear() {
+        stack_.clear();
+        stack_.push_back({});
+    }
+
   private:
     std::vector<std::unordered_map<K, V>> stack_;
 };

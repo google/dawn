@@ -67,5 +67,25 @@ TEST_F(ScopeStackTest, Set) {
     EXPECT_EQ(s.Get(b), 25u);
 }
 
+TEST_F(ScopeStackTest, Clear) {
+    ScopeStack<Symbol, uint32_t> s;
+    Symbol a(1, ID());
+    Symbol b(2, ID());
+
+    EXPECT_EQ(s.Set(a, 5u), 0u);
+    EXPECT_EQ(s.Get(a), 5u);
+
+    s.Push();
+
+    EXPECT_EQ(s.Set(b, 10u), 0u);
+    EXPECT_EQ(s.Get(b), 10u);
+
+    s.Push();
+
+    s.Clear();
+    EXPECT_EQ(s.Get(a), 0u);
+    EXPECT_EQ(s.Get(b), 0u);
+}
+
 }  // namespace
 }  // namespace tint

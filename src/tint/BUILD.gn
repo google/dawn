@@ -375,6 +375,8 @@ libtint_source_set("libtint_core_all_src") {
     "resolver/resolver_constants.cc",
     "resolver/sem_helper.cc",
     "resolver/sem_helper.h",
+    "resolver/uniformity.cc",
+    "resolver/uniformity.h",
     "resolver/validator.cc",
     "resolver/validator.h",
     "scope_stack.h",

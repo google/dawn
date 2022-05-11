@@ -1,3 +1,7 @@
+bug/tint/949.wgsl:326:29 warning: 'textureSample' must only be called from uniform control flow
+    let x_397 : vec4<f32> = textureSample(TextureSamplerTexture, TextureSamplerSampler, (x_394 + x_395));
+                            ^^^^^^^^^^^^^
+
 #version 310 es
 precision mediump float;
 

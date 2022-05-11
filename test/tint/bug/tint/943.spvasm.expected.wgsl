@@ -1,3 +1,4 @@
+warning: parameter 'dimInner' of 'mm_matMul_i1_i1_i1_' must be uniform
 struct Uniforms {
   NAN : f32,
   @size(12)

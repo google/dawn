@@ -1,3 +1,7 @@
+bug/fxc/gradient_in_varying_loop/1112.wgsl:23:33 warning: 'textureSample' must only be called from uniform control flow
+        let sampleDepth : f32 = textureSample(depthTexture, Sampler, offset.xy).r;
+                                ^^^^^^^^^^^^^
+
 SamplerState tint_symbol : register(s0, space0);
 Texture2D<float4> randomTexture : register(t1, space0);
 Texture2D<float4> depthTexture : register(t2, space0);

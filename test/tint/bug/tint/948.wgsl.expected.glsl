@@ -1,3 +1,7 @@
+bug/tint/948.wgsl:146:33 warning: 'textureSampleBias' must only be called from uniform control flow
+        let x_217 : vec4<f32> = textureSampleBias(animationMapTexture, animationMapSampler, vec2<f32>(((x_208 + 0.5) / x_211), (0.125 * x_214)), 0.0);
+                                ^^^^^^^^^^^^^^^^^
+
 #version 310 es
 precision mediump float;
 

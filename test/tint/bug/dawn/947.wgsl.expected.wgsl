@@ -1,3 +1,7 @@
+bug/dawn/947.wgsl:59:20 warning: 'textureSample' must only be called from uniform control flow
+    var srcColor = textureSample(myTexture, mySampler, texcoord);
+                   ^^^^^^^^^^^^^
+
 struct Uniforms {
   u_scale : vec2<f32>,
   u_offset : vec2<f32>,
