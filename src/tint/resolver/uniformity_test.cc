@@ -466,6 +466,10 @@ fn bar() {
               R"(test:11:7 warning: parameter 'i' of 'foo' must be uniform
   foo(rw);
       ^^
+
+test:6:5 note: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
 )");
 }
 
@@ -3229,6 +3233,34 @@ fn foo() {
 )");
 }
 
+TEST_F(UniformityAnalysisTest, LoadNonUniformThroughPointerParameter) {
+    auto src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn bar(p : ptr<function, i32>) {
+  if (*p == 0) {
+    workgroupBarrier();
+  }
+}
+
+fn foo() {
+  var v = non_uniform;
+  bar(&v);
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:12:7 warning: parameter 'p' of 'bar' must be uniform
+  bar(&v);
+      ^
+
+test:6:5 note: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+)");
+}
+
 TEST_F(UniformityAnalysisTest, LoadUniformThroughPointer) {
     auto src = R"(
 fn foo() {
@@ -3250,6 +3282,23 @@ fn foo() {
   if (*pv == 0) {
     workgroupBarrier();
   }
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, LoadUniformThroughPointerParameter) {
+    auto src = R"(
+fn bar(p : ptr<function, i32>) {
+  if (*p == 0) {
+    workgroupBarrier();
+  }
+}
+
+fn foo() {
+  var v = 42;
+  bar(&v);
 }
 )";
 
@@ -4882,6 +4931,115 @@ fn foo() {
 )";
 
     RunTest(src, true);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Tests for the quality of the error messages produced by the analysis.
+////////////////////////////////////////////////////////////////////////////////
+
+TEST_F(UniformityAnalysisTest, Error_CallUserThatCallsBuiltinDirectly) {
+    auto src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo() {
+  workgroupBarrier();
+}
+
+fn main() {
+  if (non_uniform == 42) {
+    foo();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:10:5 warning: 'foo' must only be called from uniform control flow
+    foo();
+    ^^^
+
+test:5:3 note: 'foo' requires uniformity because it calls workgroupBarrier
+  workgroupBarrier();
+  ^^^^^^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, Error_CallUserThatCallsBuiltinIndirectly) {
+    auto src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn zoo() {
+  workgroupBarrier();
+}
+
+fn bar() {
+  zoo();
+}
+
+fn foo() {
+  bar();
+}
+
+fn main() {
+  if (non_uniform == 42) {
+    foo();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:18:5 warning: 'foo' must only be called from uniform control flow
+    foo();
+    ^^^
+
+test:5:3 note: 'foo' requires uniformity because it indirectly calls workgroupBarrier
+  workgroupBarrier();
+  ^^^^^^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, Error_ParametersRequireUniformityInChain) {
+    auto src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn zoo(a : i32) {
+  if (a == 42) {
+    workgroupBarrier();
+  }
+}
+
+fn bar(b : i32) {
+  zoo(b);
+}
+
+fn foo(c : i32) {
+  bar(c);
+}
+
+fn main() {
+  foo(non_uniform);
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:19:7 warning: parameter 'c' of 'foo' must be uniform
+  foo(non_uniform);
+      ^^^^^^^^^^^
+
+test:15:7 note: parameter 'b' of 'bar' must be uniform
+  bar(c);
+      ^
+
+test:11:7 note: parameter 'a' of 'zoo' must be uniform
+  zoo(b);
+      ^
+
+test:6:5 note: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+)");
 }
 
 }  // namespace
