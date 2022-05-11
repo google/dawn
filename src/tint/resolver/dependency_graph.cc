@@ -420,7 +420,7 @@ class DependencyScanner {
     DependencyGraph& graph_;
     DependencyEdges& dependency_edges_;
 
-    ScopeStack<const ast::Node*> scope_stack_;
+    ScopeStack<Symbol, const ast::Node*> scope_stack_;
     Global* current_global_ = nullptr;
 };
 

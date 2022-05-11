@@ -24,7 +24,7 @@ namespace tint {
 
 /// Used to store a stack of scope information.
 /// The stack starts with a global scope which can not be popped.
-template <class T>
+template <class K, class V>
 class ScopeStack {
   public:
     /// Constructor
@@ -47,32 +47,32 @@ class ScopeStack {
     }
 
     /// Assigns the value into the top most scope of the stack.
-    /// @param symbol the symbol of the value
+    /// @param key the key of the value
     /// @param val the value
-    /// @returns the old value if there was an existing symbol at the top of the
+    /// @returns the old value if there was an existing key at the top of the
     /// stack, otherwise the zero initializer for type T.
-    T Set(const Symbol& symbol, T val) {
-        std::swap(val, stack_.back()[symbol]);
+    V Set(const K& key, V val) {
+        std::swap(val, stack_.back()[key]);
         return val;
     }
 
     /// Retrieves a value from the stack
-    /// @param symbol the symbol to look for
+    /// @param key the key to look for
     /// @returns the value, or the zero initializer if the value was not found
-    T Get(const Symbol& symbol) const {
+    V Get(const K& key) const {
         for (auto iter = stack_.rbegin(); iter != stack_.rend(); ++iter) {
             auto& map = *iter;
-            auto val = map.find(symbol);
+            auto val = map.find(key);
             if (val != map.end()) {
                 return val->second;
             }
         }
 
-        return T{};
+        return V{};
     }
 
   private:
-    std::vector<std::unordered_map<Symbol, T>> stack_;
+    std::vector<std::unordered_map<K, V>> stack_;
 };
 
 }  // namespace tint

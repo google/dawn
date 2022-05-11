@@ -22,7 +22,7 @@ namespace {
 class ScopeStackTest : public ProgramBuilder, public testing::Test {};
 
 TEST_F(ScopeStackTest, Get) {
-    ScopeStack<uint32_t> s;
+    ScopeStack<Symbol, uint32_t> s;
     Symbol a(1, ID());
     Symbol b(3, ID());
     s.Push();
@@ -44,13 +44,13 @@ TEST_F(ScopeStackTest, Get) {
 }
 
 TEST_F(ScopeStackTest, Get_MissingSymbol) {
-    ScopeStack<uint32_t> s;
+    ScopeStack<Symbol, uint32_t> s;
     Symbol sym(1, ID());
     EXPECT_EQ(s.Get(sym), 0u);
 }
 
 TEST_F(ScopeStackTest, Set) {
-    ScopeStack<uint32_t> s;
+    ScopeStack<Symbol, uint32_t> s;
     Symbol a(1, ID());
     Symbol b(2, ID());
 
