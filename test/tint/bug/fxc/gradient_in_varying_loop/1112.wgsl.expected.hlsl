@@ -2,6 +2,10 @@ bug/fxc/gradient_in_varying_loop/1112.wgsl:23:33 warning: 'textureSample' must o
         let sampleDepth : f32 = textureSample(depthTexture, Sampler, offset.xy).r;
                                 ^^^^^^^^^^^^^
 
+bug/fxc/gradient_in_varying_loop/1112.wgsl:8:29 note: return value of 'textureSample' may be non-uniform
+    let random: vec3<f32> = textureSample(randomTexture, Sampler, vUV).rgb;
+                            ^^^^^^^^^^^^^
+
 SamplerState tint_symbol : register(s0, space0);
 Texture2D<float4> randomTexture : register(t1, space0);
 Texture2D<float4> depthTexture : register(t2, space0);

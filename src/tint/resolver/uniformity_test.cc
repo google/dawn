@@ -394,6 +394,10 @@ fn main() {
               R"(test:17:3 warning: 'workgroupBarrier' must only be called from uniform control flow
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
+
+test:16:3 note: calling 'foo' may cause subsequent control flow to be non-uniform
+  foo();
+  ^^^
 )");
 }
 
@@ -470,6 +474,10 @@ fn bar() {
 test:6:5 note: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:11:7 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  foo(rw);
+      ^^
 )");
 }
 
@@ -515,6 +523,10 @@ fn bar() {
               R"(test:10:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:9:11 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  if (foo(rw) == 7) {
+          ^^
 )");
 }
 
@@ -572,6 +584,10 @@ fn bar() {
               R"(test:17:3 warning: 'workgroupBarrier' must only be called from uniform control flow
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
+
+test:16:7 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  foo(rw);
+      ^^
 )");
 }
 
@@ -607,6 +623,10 @@ fn main(@builtin()" +
             R"(test:5:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:4:16 note: reading from builtin 'b' may result in a non-uniform value
+  if (all(vec3(b) == vec3(0u))) {
+               ^
 )");
     }
 }
@@ -634,6 +654,10 @@ fn main(s : S) {
             R"(test:9:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:8:16 note: reading from 's' may result in a non-uniform value
+  if (all(vec3(s.b) == vec3(0u))) {
+               ^
 )");
     }
 }
@@ -671,6 +695,10 @@ fn main(s : S) {
               R"(test:10:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:9:7 note: reading from 's' may result in a non-uniform value
+  if (s.num_groups.x == 0u) {
+      ^
 )");
 }
 
@@ -694,6 +722,10 @@ fn main(@builtin()" +
                   R"(test:5:5 warning: 'dpdx' must only be called from uniform control flow
     dpdx(0.5);
     ^^^^
+
+test:4:16 note: reading from builtin 'b' may result in a non-uniform value
+  if (u32(vec4(b).x) == 0u) {
+               ^
 )");
     }
 }
@@ -720,6 +752,10 @@ fn main(s : S) {
                   R"(test:9:5 warning: 'dpdx' must only be called from uniform control flow
     dpdx(0.5);
     ^^^^
+
+test:8:16 note: reading from 's' may result in a non-uniform value
+  if (u32(vec4(s.b).x) == 0u) {
+               ^
 )");
     }
 }
@@ -749,6 +785,10 @@ fn main(@location(0) l : f32) {
               R"(test:5:5 warning: 'dpdx' must only be called from uniform control flow
     dpdx(0.5);
     ^^^^
+
+test:4:7 note: reading from user-defined input 'l' may result in a non-uniform value
+  if (l == 0.0) {
+      ^
 )");
 }
 
@@ -771,6 +811,10 @@ fn main(s : S) {
               R"(test:9:5 warning: 'dpdx' must only be called from uniform control flow
     dpdx(0.5);
     ^^^^
+
+test:8:7 note: reading from 's' may result in a non-uniform value
+  if (s.l == 0.0) {
+      ^
 )");
 }
 
@@ -873,12 +917,14 @@ fn foo() {
 
     if (condition == kNonUniform) {
         RunTest(src, false);
-        EXPECT_EQ(
+        EXPECT_THAT(
             error_,
-            R"(test:13:5 warning: 'workgroupBarrier' must only be called from uniform control flow
-    workgroupBarrier();
-    ^^^^^^^^^^^^^^^^
-)");
+            ::testing::StartsWith(
+                R"(test:13:5 warning: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();)"));
+        EXPECT_THAT(error_,
+                    ::testing::HasSubstr("test:14:9 note: reading from read_write storage buffer "
+                                         "'nonuniform_var' may result in a non-uniform value"));
     } else {
         RunTest(src, true);
     }
@@ -910,12 +956,15 @@ fn foo() {
 
     if (condition == kNonUniform) {
         RunTest(src, false);
-        EXPECT_EQ(
+
+        EXPECT_THAT(
             error_,
-            R"(test:14:5 warning: 'workgroupBarrier' must only be called from uniform control flow
-    workgroupBarrier();
-    ^^^^^^^^^^^^^^^^
-)");
+            ::testing::StartsWith(
+                R"(test:14:5 warning: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();)"));
+        EXPECT_THAT(error_,
+                    ::testing::HasSubstr("test:13:9 note: reading from read_write storage buffer "
+                                         "'nonuniform_var' may result in a non-uniform value"));
     } else {
         RunTest(src, true);
     }
@@ -949,12 +998,14 @@ fn foo() {
 
     if (condition == kNonUniform) {
         RunTest(src, false);
-        EXPECT_EQ(
+        EXPECT_THAT(
             error_,
-            R"(test:15:7 warning: 'workgroupBarrier' must only be called from uniform control flow
-      workgroupBarrier();
-      ^^^^^^^^^^^^^^^^
-)");
+            ::testing::StartsWith(
+                R"(test:15:7 warning: 'workgroupBarrier' must only be called from uniform control flow
+      workgroupBarrier();)"));
+        EXPECT_THAT(error_,
+                    ::testing::HasSubstr("test:13:9 note: reading from read_write storage buffer "
+                                         "'nonuniform_var' may result in a non-uniform value"));
     } else {
         RunTest(src, true);
     }
@@ -1004,6 +1055,10 @@ fn foo() {
               R"(test:7:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:10:16 note: reading from read_write storage buffer 'n' may result in a non-uniform value
+      if (i == n) {
+               ^
 )");
 }
 
@@ -1051,6 +1106,10 @@ fn foo() {
               R"(test:8:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:10:16 note: reading from read_write storage buffer 'n' may result in a non-uniform value
+      if (i == n) {
+               ^
 )");
 }
 
@@ -1113,6 +1172,10 @@ fn foo() {
               R"(test:8:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+    v = non_uniform;
+        ^^^^^^^^^^^
 )");
 }
 
@@ -1189,6 +1252,10 @@ fn foo() {
               R"(test:14:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:8:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+      v = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -1219,6 +1286,10 @@ fn foo() {
               R"(test:15:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:8:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+      v = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -1254,6 +1325,10 @@ fn foo() {
               R"(test:20:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:11:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+    v = non_uniform;
+        ^^^^^^^^^^^
 )");
 }
 
@@ -1320,6 +1395,10 @@ fn foo() {
               R"(test:20:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+    v = non_uniform;
+        ^^^^^^^^^^^
 )");
 }
 
@@ -1353,6 +1432,10 @@ fn foo() {
               R"(test:8:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+    v = non_uniform;
+        ^^^^^^^^^^^
 )");
 }
 
@@ -1391,6 +1474,10 @@ fn foo() {
               R"(test:16:9 warning: 'workgroupBarrier' must only be called from uniform control flow
         workgroupBarrier();
         ^^^^^^^^^^^^^^^^
+
+test:7:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+    v = non_uniform;
+        ^^^^^^^^^^^
 )");
 }
 
@@ -1424,6 +1511,10 @@ fn foo() {
               R"(test:8:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+    v = non_uniform;
+        ^^^^^^^^^^^
 )");
 }
 
@@ -1457,6 +1548,10 @@ fn foo() {
               R"(test:8:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:14:13 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+        v = non_uniform;
+            ^^^^^^^^^^^
 )");
 }
 
@@ -1585,6 +1680,10 @@ fn foo() {
               R"(test:15:3 warning: 'workgroupBarrier' must only be called from uniform control flow
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
+
+test:12:5 note: calling 'bar' may cause subsequent control flow to be non-uniform
+    bar();
+    ^^^
 )");
 }
 
@@ -1618,6 +1717,10 @@ fn foo() {
               R"(test:6:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:23 note: reading from read_write storage buffer 'n' may result in a non-uniform value
+  for (var i = 0; i < n; i = i + 1) {
+                      ^
 )");
 }
 
@@ -1645,6 +1748,10 @@ fn foo() {
               R"(test:14:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:13:16 note: calling 'bar' may cause subsequent control flow to be non-uniform
+  for (var i = bar(); i < 10; i = i + 1) {
+               ^^^
 )");
 }
 
@@ -1672,6 +1779,10 @@ fn foo() {
               R"(test:14:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:13:35 note: calling 'bar' may cause subsequent control flow to be non-uniform
+  for (var i = 0; i < 10; i = i + bar()) {
+                                  ^^^
 )");
 }
 
@@ -1697,6 +1808,10 @@ fn foo() {
               R"(test:8:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:6:31 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  for (var i = 0; i < 10; v = non_uniform) {
+                              ^^^^^^^^^^^
 )");
 }
 
@@ -1744,6 +1859,10 @@ fn foo() {
               R"(test:10:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:31 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  for (var i = 0; i < 10; v = non_uniform) {
+                              ^^^^^^^^^^^
 )");
 }
 
@@ -1791,6 +1910,10 @@ fn foo() {
               R"(test:8:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+    v = non_uniform;
+        ^^^^^^^^^^^
 )");
 }
 
@@ -1844,6 +1967,10 @@ fn foo() {
               R"(test:15:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:8:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+      v = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -1881,6 +2008,10 @@ fn foo() {
               R"(test:21:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+    v = non_uniform;
+        ^^^^^^^^^^^
 )");
 }
 
@@ -1915,6 +2046,10 @@ fn foo() {
               R"(test:8:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+    v = non_uniform;
+        ^^^^^^^^^^^
 )");
 }
 
@@ -1948,6 +2083,10 @@ fn foo() {
               R"(test:8:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+    v = non_uniform;
+        ^^^^^^^^^^^
 )");
 }
 
@@ -2033,6 +2172,10 @@ fn foo() {
               R"(test:6:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  if (non_uniform == 42) {
+      ^^^^^^^^^^^
 )");
 }
 
@@ -2053,6 +2196,10 @@ fn foo() {
               R"(test:7:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  if (non_uniform == 42) {
+      ^^^^^^^^^^^
 )");
 }
 
@@ -2074,6 +2221,10 @@ fn main() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:8 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
+  if ((non_uniform_global == 42) && false) {
+       ^^^^^^^^^^^^^^^^^^
 )");
 }
 
@@ -2095,6 +2246,10 @@ fn main() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:17 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
+  if (false && (non_uniform_global == 42)) {
+                ^^^^^^^^^^^^^^^^^^
 )");
 }
 
@@ -2116,6 +2271,10 @@ fn main() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:8 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
+  if ((non_uniform_global == 42) || true) {
+       ^^^^^^^^^^^^^^^^^^
 )");
 }
 
@@ -2137,6 +2296,10 @@ fn main() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:16 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
+  if (true || (non_uniform_global == 42)) {
+               ^^^^^^^^^^^^^^^^^^
 )");
 }
 
@@ -2157,6 +2320,10 @@ fn foo() {
               R"(test:7:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  if (non_uniform == 42) {
+      ^^^^^^^^^^^
 )");
 }
 
@@ -2180,6 +2347,10 @@ fn foo() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:7 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  v = rw;
+      ^^
 )");
 }
 
@@ -2249,6 +2420,10 @@ fn foo() {
               R"(test:15:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:8:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+      v = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -2324,6 +2499,10 @@ fn foo() {
               R"(test:12:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  v = non_uniform;
+      ^^^^^^^^^^^
 )");
 }
 
@@ -2353,6 +2532,10 @@ fn foo() {
               R"(test:13:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  v = non_uniform;
+      ^^^^^^^^^^^
 )");
 }
 
@@ -2502,6 +2685,10 @@ fn foo() {
               R"(test:9:3 warning: 'workgroupBarrier' must only be called from uniform control flow
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
+
+test:5:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  if (non_uniform == 42) {
+      ^^^^^^^^^^^
 )");
 }
 
@@ -2524,6 +2711,10 @@ fn foo() {
               R"(test:9:3 warning: 'workgroupBarrier' must only be called from uniform control flow
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
+
+test:5:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  if (non_uniform == 42) {
+      ^^^^^^^^^^^
 )");
 }
 
@@ -2553,6 +2744,10 @@ fn foo() {
               R"(test:7:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:5:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  switch (non_uniform) {
+          ^^^^^^^^^^^
 )");
 }
 
@@ -2575,6 +2770,10 @@ fn foo() {
               R"(test:7:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:5:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  switch (non_uniform) {
+          ^^^^^^^^^^^
 )");
 }
 
@@ -2602,6 +2801,10 @@ fn foo() {
               R"(test:11:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:8:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+      if (non_uniform == 42) {
+          ^^^^^^^^^^^
 )");
 }
 
@@ -2656,6 +2859,10 @@ fn foo() {
               R"(test:14:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:8:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+      if (non_uniform == 42) {
+          ^^^^^^^^^^^
 )");
 }
 
@@ -2713,6 +2920,10 @@ fn foo() {
               R"(test:14:9 warning: 'workgroupBarrier' must only be called from uniform control flow
         workgroupBarrier();
         ^^^^^^^^^^^^^^^^
+
+test:9:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+      x = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -2744,6 +2955,10 @@ fn foo() {
               R"(test:14:9 warning: 'workgroupBarrier' must only be called from uniform control flow
         workgroupBarrier();
         ^^^^^^^^^^^^^^^^
+
+test:6:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  var x = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -2802,6 +3017,10 @@ fn foo() {
               R"(test:19:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:9:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+      x = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -2860,6 +3079,10 @@ fn foo() {
               R"(test:18:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  var x = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -2921,6 +3144,10 @@ fn foo() {
               R"(test:21:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  var x = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -2955,6 +3182,10 @@ fn foo() {
               R"(test:9:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:15:13 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+        x = non_uniform;
+            ^^^^^^^^^^^
 )");
 }
 
@@ -3085,6 +3316,10 @@ fn foo() {
               R"(test:17:3 warning: 'workgroupBarrier' must only be called from uniform control flow
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
+
+test:13:7 note: calling 'bar' may cause subsequent control flow to be non-uniform
+      bar();
+      ^^^
 )");
 }
 
@@ -3110,6 +3345,10 @@ fn foo() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  *&v = non_uniform;
+        ^^^^^^^^^^^
 )");
 }
 
@@ -3132,6 +3371,10 @@ fn foo() {
               R"(test:9:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  *pv = non_uniform;
+        ^^^^^^^^^^^
 )");
 }
 
@@ -3189,6 +3432,10 @@ fn foo() {
               R"(test:11:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  if (non_uniform == 0) {
+      ^^^^^^^^^^^
 )");
 }
 
@@ -3209,6 +3456,10 @@ fn foo() {
               R"(test:7:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  var v = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -3230,6 +3481,10 @@ fn foo() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  var v = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -3258,6 +3513,10 @@ fn foo() {
 test:6:5 note: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:11:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  var v = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -3324,6 +3583,10 @@ fn foo() {
               R"(test:9:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  v = non_uniform;
+      ^^^^^^^^^^^
 )");
 }
 
@@ -3364,6 +3627,10 @@ fn foo() {
               R"(test:10:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:8:14 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  *&*&*pv2 = non_uniform;
+             ^^^^^^^^^^^
 )");
 }
 
@@ -3386,6 +3653,10 @@ fn foo() {
               R"(test:9:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  var v = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -3410,6 +3681,10 @@ fn foo() {
               R"(test:11:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:9:10 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  *pv2 = non_uniform;
+         ^^^^^^^^^^^
 )");
 }
 
@@ -3453,6 +3728,10 @@ fn foo() {
               R"(test:11:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:8:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  var v = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -3495,6 +3774,10 @@ fn foo() {
               R"(test:12:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:10:7 note: pointer contents may become non-uniform after calling 'bar'
+  bar(&v);
+      ^
 )");
 }
 
@@ -3540,6 +3823,10 @@ fn foo() {
               R"(test:12:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:10:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  bar(&v, non_uniform);
+          ^^^^^^^^^^^
 )");
 }
 
@@ -3566,6 +3853,10 @@ fn foo() {
               R"(test:13:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:10:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  var a = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -3641,6 +3932,10 @@ fn foo() {
               R"(test:21:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:18:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  var a = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -3727,6 +4022,10 @@ fn foo() {
               R"(test:18:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:16:7 note: pointer contents may become non-uniform after calling 'bar'
+  bar(&v);
+      ^
 )");
 }
 
@@ -3756,6 +4055,10 @@ fn foo() {
               R"(test:16:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:14:7 note: pointer contents may become non-uniform after calling 'bar'
+  bar(&v);
+      ^
 )");
 }
 
@@ -3785,6 +4088,10 @@ fn foo() {
               R"(test:16:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:14:7 note: pointer contents may become non-uniform after calling 'bar'
+  bar(&v);
+      ^
 )");
 }
 
@@ -3822,6 +4129,10 @@ fn foo() {
               R"(test:24:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:22:7 note: pointer contents may become non-uniform after calling 'bar'
+  bar(&v);
+      ^
 )");
 }
 
@@ -3853,6 +4164,10 @@ fn foo() {
               R"(test:18:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:16:7 note: pointer contents may become non-uniform after calling 'bar'
+  bar(&v);
+      ^
 )");
 }
 
@@ -3881,6 +4196,10 @@ fn foo(p : ptr<function, i32>) {
               R"(test:7:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:12:12 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+      *p = non_uniform;
+           ^^^^^^^^^^^
 )");
 }
 
@@ -3909,6 +4228,10 @@ fn foo() {
               R"(test:15:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:12:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  var v = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -3936,6 +4259,10 @@ fn foo() {
               R"(test:14:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:10:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  var a = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -3985,6 +4312,10 @@ fn foo() {
               R"(test:14:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:12:11 note: pointer contents may become non-uniform after calling 'bar'
+  bar(&a, &b);
+          ^
 )");
 }
 
@@ -4032,6 +4363,10 @@ fn foo() {
               R"(test:12:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:9:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  var v = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -4062,6 +4397,10 @@ fn foo() {
               R"(test:14:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:12:11 note: pointer contents may become non-uniform after calling 'bar'
+  bar(&a, &b);
+          ^
 )");
 }
 
@@ -4094,6 +4433,10 @@ fn foo() {
               R"(test:16:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:11:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  var a = non_uniform;
+          ^^^^^^^^^^^
 )");
 }
 
@@ -4155,7 +4498,8 @@ TEST_F(UniformityAnalysisTest, MaximumNumberOfPointerParameters) {
     // TODO(jrprice): Expect false when uniformity issues become errors.
     EXPECT_TRUE(RunTest(std::move(b))) << error_;
     EXPECT_EQ(error_,
-              R"(warning: 'workgroupBarrier' must only be called from uniform control flow)");
+              R"(warning: 'workgroupBarrier' must only be called from uniform control flow
+note: reading from module-scope private variable 'non_uniform_global' may result in a non-uniform value)");
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4192,6 +4536,10 @@ fn foo() {
               R"(test:6:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:7 note: reading from read_write storage buffer 'v' may result in a non-uniform value
+  if (v[2] == 0) {
+      ^
 )");
 }
 
@@ -4213,6 +4561,10 @@ fn foo() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:10 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  v[2] = rw;
+         ^^
 )");
 }
 
@@ -4250,6 +4602,10 @@ fn foo() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:10 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  v[1] = rw;
+         ^^
 )");
 }
 
@@ -4275,6 +4631,10 @@ fn foo() {
               R"(test:9:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:10 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  v[1] = rw;
+         ^^
 )");
 }
 
@@ -4300,6 +4660,10 @@ fn foo() {
               R"(test:9:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:10 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  v[1] = rw;
+         ^^
 )");
 }
 
@@ -4321,6 +4685,10 @@ fn foo() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:10 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
+  v[1] = non_uniform_global;
+         ^^^^^^^^^^^^^^^^^^
 )");
 }
 
@@ -4362,6 +4730,10 @@ fn foo() {
               R"(test:10:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:9:7 note: reading from read_write storage buffer 's' may result in a non-uniform value
+  if (s.b == 0) {
+      ^
 )");
 }
 
@@ -4387,6 +4759,10 @@ fn foo() {
               R"(test:12:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:10:9 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  s.b = rw;
+        ^^
 )");
 }
 
@@ -4432,6 +4808,10 @@ fn foo() {
               R"(test:12:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:10:9 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  s.a = rw;
+        ^^
 )");
 }
 
@@ -4461,6 +4841,10 @@ fn foo() {
               R"(test:13:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:10:9 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  s.a = rw;
+        ^^
 )");
 }
 
@@ -4490,6 +4874,10 @@ fn foo() {
               R"(test:13:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:10:9 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  s.a = rw;
+        ^^
 )");
 }
 
@@ -4523,6 +4911,10 @@ fn foo() {
               R"(test:6:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:7 note: reading from read_write storage buffer 'arr' may result in a non-uniform value
+  if (arr[7] == 0) {
+      ^^^
 )");
 }
 
@@ -4544,6 +4936,10 @@ fn foo() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:12 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  arr[2] = rw;
+           ^^
 )");
 }
 
@@ -4581,6 +4977,10 @@ fn foo() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:12 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  arr[1] = rw;
+           ^^
 )");
 }
 
@@ -4603,6 +5003,10 @@ fn foo() {
               R"(test:9:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:9 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  *pa = rw;
+        ^^
 )");
 }
 
@@ -4628,6 +5032,10 @@ fn foo() {
               R"(test:9:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:12 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  arr[1] = rw;
+           ^^
 )");
 }
 
@@ -4653,6 +5061,10 @@ fn foo() {
               R"(test:9:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:12 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  arr[1] = rw;
+           ^^
 )");
 }
 
@@ -4679,6 +5091,10 @@ fn foo() {
               R"(test:10:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:12 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  arr[1] = rw;
+           ^^
 )");
 }
 
@@ -4702,6 +5118,10 @@ fn foo() {
               R"(test:6:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:11 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
+  if (i32(non_uniform_global) == 0) {
+          ^^^^^^^^^^^^^^^^^^
 )");
 }
 
@@ -4721,6 +5141,10 @@ fn foo() {
               R"(test:6:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:11 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
+  if (f32(non_uniform_global) == 0.0) {
+          ^^^^^^^^^^^^^^^^^^
 )");
 }
 
@@ -4740,6 +5164,10 @@ fn foo() {
               R"(test:6:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:20 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
+  if (bitcast<f32>(non_uniform_global) == 0.0) {
+                   ^^^^^^^^^^^^^^^^^^
 )");
 }
 
@@ -4762,6 +5190,10 @@ fn foo() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:8 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  v += rw;
+       ^^
 )");
 }
 
@@ -4784,6 +5216,10 @@ fn foo() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:11 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  var v = rw;
+          ^^
 )");
 }
 
@@ -4810,6 +5246,10 @@ fn foo() {
               R"(test:14:3 warning: 'workgroupBarrier' must only be called from uniform control flow
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
+
+test:13:7 note: calling 'bar' may cause subsequent control flow to be non-uniform
+  _ = bar();
+      ^^^
 )");
 }
 
@@ -4830,6 +5270,10 @@ fn main() {
               R"(test:8:3 warning: 'workgroupBarrier' must only be called from uniform control flow
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
+
+test:7:12 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
+  let b = (non_uniform_global == 42) && false;
+           ^^^^^^^^^^^^^^^^^^
 )");
 }
 
@@ -4895,6 +5339,10 @@ fn foo() {
               R"(test:6:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:18 note: reading from workgroup storage variable 'a' may result in a non-uniform value
+  if (atomicAdd(&a, 1) == 1) {
+                 ^
 )");
 }
 
@@ -4914,6 +5362,10 @@ fn foo() {
               R"(test:6:5 warning: 'storageBarrier' must only be called from uniform control flow
     storageBarrier();
     ^^^^^^^^^^^^^^
+
+test:5:18 note: reading from read_write storage buffer 'a' may result in a non-uniform value
+  if (atomicAdd(&a, 1) == 1) {
+                 ^
 )");
 }
 
@@ -4961,6 +5413,10 @@ fn main() {
 test:5:3 note: 'foo' requires uniformity because it calls workgroupBarrier
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
+
+test:9:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  if (non_uniform == 42) {
+      ^^^^^^^^^^^
 )");
 }
 
@@ -4996,6 +5452,10 @@ fn main() {
 test:5:3 note: 'foo' requires uniformity because it indirectly calls workgroupBarrier
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
+
+test:17:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  if (non_uniform == 42) {
+      ^^^^^^^^^^^
 )");
 }
 
@@ -5039,6 +5499,45 @@ test:11:7 note: parameter 'a' of 'zoo' must be uniform
 test:6:5 note: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:19:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
+  foo(non_uniform);
+      ^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, Error_ReturnValueMayBeNonUniformChain) {
+    auto src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn zoo() -> i32 {
+  return non_uniform;
+}
+
+fn bar() -> i32 {
+  return zoo();
+}
+
+fn foo() -> i32 {
+  return bar();
+}
+
+fn main() {
+  if (foo() == 42) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:18:5 warning: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:17:7 note: return value of 'foo' may be non-uniform
+  if (foo() == 42) {
+      ^^^
 )");
 }
 

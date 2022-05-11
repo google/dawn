@@ -79,11 +79,23 @@ struct Node {
     std::string tag;
 #endif
 
+    /// Type describes the type of the node, which is used to determine additional diagnostic
+    /// information.
+    enum Type {
+        kRegular,
+        kFunctionCallArgument,
+        kFunctionCallPointerArgumentResult,
+        kFunctionCallReturnValue,
+    };
+
+    /// The type of the node.
+    Type type = kRegular;
+
     /// The corresponding AST node, or nullptr.
     const ast::Node* ast = nullptr;
 
-    /// The function call argument index, or UINT32_MAX.
-    uint32_t arg_index = std::numeric_limits<uint32_t>::max();
+    /// The function call argument index, if applicable.
+    uint32_t arg_index;
 
     /// The set of edges from this node to other nodes in the graph.
     utils::UniqueVector<Node*> edges;
@@ -895,6 +907,7 @@ class UniformityGraph {
 
         auto name = builder_->Symbols().NameFor(ident->symbol);
         auto* sem = sem_.Get<sem::VariableUser>(ident)->Variable();
+        auto* node = CreateNode(name + "_ident_expr", ident);
         return Switch(
             sem,
 
@@ -910,38 +923,39 @@ class UniformityGraph {
                                 uniform = false;
                             }
                         }
-                        return std::make_pair(cf,
-                                              uniform ? cf : current_function_->may_be_non_uniform);
+                        node->AddEdge(uniform ? cf : current_function_->may_be_non_uniform);
+                        return std::make_pair(cf, node);
                     } else {
                         if (has_nonuniform_entry_point_attribute(param->Declaration())) {
-                            return std::make_pair(cf, current_function_->may_be_non_uniform);
+                            node->AddEdge(current_function_->may_be_non_uniform);
+                        } else {
+                            node->AddEdge(cf);
                         }
-                        return std::make_pair(cf, cf);
+                        return std::make_pair(cf, node);
                     }
                 } else {
-                    auto* result = CreateNode(name + "_result");
                     auto* x = current_function_->variables.Get(param);
-                    result->AddEdge(cf);
-                    result->AddEdge(x);
-                    return std::make_pair(cf, result);
+                    node->AddEdge(cf);
+                    node->AddEdge(x);
+                    return std::make_pair(cf, node);
                 }
             },
 
             [&](const sem::GlobalVariable* global) {
                 if (global->Declaration()->is_const || global->Access() == ast::Access::kRead) {
-                    return std::make_pair(cf, cf);
+                    node->AddEdge(cf);
                 } else {
-                    return std::make_pair(cf, current_function_->may_be_non_uniform);
+                    node->AddEdge(current_function_->may_be_non_uniform);
                 }
+                return std::make_pair(cf, node);
             },
 
             [&](const sem::LocalVariable* local) {
-                auto* result = CreateNode(name + "_result");
-                result->AddEdge(cf);
+                node->AddEdge(cf);
                 if (auto* x = current_function_->variables.Get(local)) {
-                    result->AddEdge(x);
+                    node->AddEdge(x);
                 }
-                return std::make_pair(cf, result);
+                return std::make_pair(cf, node);
             },
 
             [&](Default) {
@@ -1110,6 +1124,7 @@ class UniformityGraph {
             // Note: This is an additional node that isn't described in the specification, for the
             // purpose of providing diagnostic information.
             Node* arg_node = CreateNode(name + "_arg_" + std::to_string(i), call);
+            arg_node->type = Node::kFunctionCallArgument;
             arg_node->arg_index = static_cast<uint32_t>(i);
             arg_node->AddEdge(arg_i);
 
@@ -1117,7 +1132,8 @@ class UniformityGraph {
             args.push_back(arg_node);
         }
 
-        Node* result = CreateNode("Result_" + name);
+        Node* result = CreateNode(name + "_return_value", call);
+        result->type = Node::kFunctionCallReturnValue;
         Node* cf_after = CreateNode("CF_after_" + name, call);
 
         // Get tags for the callee.
@@ -1200,7 +1216,9 @@ class UniformityGraph {
                 auto* sem_arg = sem_.Get(call->args[i]);
                 if (sem_arg->Type()->Is<sem::Pointer>()) {
                     auto* ptr_result =
-                        CreateNode(name + "_ptrarg_" + std::to_string(i) + "_result");
+                        CreateNode(name + "_ptrarg_" + std::to_string(i) + "_result", call);
+                    ptr_result->type = Node::kFunctionCallPointerArgumentResult;
+                    ptr_result->arg_index = static_cast<uint32_t>(i);
                     if (func_info->parameters[i].pointer_may_become_non_uniform) {
                         ptr_result->AddEdge(current_function_->may_be_non_uniform);
                     } else {
@@ -1259,7 +1277,7 @@ class UniformityGraph {
             // function and look for one whose node has an edge from the RequiredToBeUniform node.
             auto& target_info = functions_.at(user->Declaration());
             for (auto* call_node : target_info.required_to_be_uniform->edges) {
-                if (call_node->arg_index == std::numeric_limits<uint32_t>::max()) {
+                if (call_node->type == Node::kRegular) {
                     auto* child_call = call_node->ast->As<ast::CallExpression>();
                     return FindBuiltinThatRequiresUniformity(child_call);
                 }
@@ -1315,7 +1333,7 @@ class UniformityGraph {
             func_name = builder_->Symbols().NameFor(user->Declaration()->symbol);
         }
 
-        if (cause->arg_index != std::numeric_limits<uint32_t>::max()) {
+        if (cause->type == Node::kFunctionCallArgument) {
             // The requirement was on a function parameter.
             auto param_name = builder_->Symbols().NameFor(
                 target->Parameters()[cause->arg_index]->Declaration()->symbol);
@@ -1353,7 +1371,91 @@ class UniformityGraph {
                                       innermost_call->source);
             }
         }
-        // TODO(jrprice): Show the source of non-uniformity.
+
+        // Show the source of non-uniformity.
+        if (!note) {
+            // Traverse the graph to generate a path from RequiredToBeUniform to MayBeNonUniform.
+            function.ResetVisited();
+            Traverse(function.required_to_be_uniform);
+
+            // Get the source of the non-uniform value.
+            auto* non_uniform_source = function.may_be_non_uniform->visited_from;
+            TINT_ASSERT(Resolver, non_uniform_source);
+
+            // TODO(jrprice): Show where the non-uniform value results in non-uniform control flow.
+
+            Switch(
+                non_uniform_source->ast,
+                [&](const ast::IdentifierExpression* ident) {
+                    std::string var_type = "";
+                    auto* var = sem_.Get<sem::VariableUser>(ident)->Variable();
+                    switch (var->StorageClass()) {
+                        case ast::StorageClass::kStorage:
+                            var_type = "read_write storage buffer ";
+                            break;
+                        case ast::StorageClass::kWorkgroup:
+                            var_type = "workgroup storage variable ";
+                            break;
+                        case ast::StorageClass::kPrivate:
+                            var_type = "module-scope private variable ";
+                            break;
+                        default:
+                            if (ast::HasAttribute<ast::BuiltinAttribute>(
+                                    var->Declaration()->attributes)) {
+                                var_type = "builtin ";
+                            } else if (ast::HasAttribute<ast::LocationAttribute>(
+                                           var->Declaration()->attributes)) {
+                                var_type = "user-defined input ";
+                            } else {
+                                // TODO(jrprice): Provide more info for this case.
+                            }
+                            break;
+                    }
+                    diagnostics_.add_note(diag::System::Resolver,
+                                          "reading from " + var_type + "'" +
+                                              builder_->Symbols().NameFor(ident->symbol) +
+                                              "' may result in a non-uniform value",
+                                          ident->source);
+                },
+                [&](const ast::CallExpression* c) {
+                    auto target_name = builder_->Symbols().NameFor(
+                        c->target.name->As<ast::IdentifierExpression>()->symbol);
+                    switch (non_uniform_source->type) {
+                        case Node::kRegular: {
+                            diagnostics_.add_note(
+                                diag::System::Resolver,
+                                "calling '" + target_name +
+                                    "' may cause subsequent control flow to be non-uniform",
+                                c->source);
+                            // TODO(jrprice): Descend into the function and show the reason why.
+                            break;
+                        }
+                        case Node::kFunctionCallReturnValue: {
+                            diagnostics_.add_note(
+                                diag::System::Resolver,
+                                "return value of '" + target_name + "' may be non-uniform",
+                                c->source);
+                            break;
+                        }
+                        case Node::kFunctionCallPointerArgumentResult: {
+                            diagnostics_.add_note(
+                                diag::System::Resolver,
+                                "pointer contents may become non-uniform after calling '" +
+                                    target_name + "'",
+                                c->args[non_uniform_source->arg_index]->source);
+                            break;
+                        }
+                        default: {
+                            TINT_ICE(Resolver, diagnostics_)
+                                << "unhandled source of non-uniformity";
+                            break;
+                        }
+                    }
+                },
+                [&](Default) {
+                    TINT_ICE(Resolver, diagnostics_) << "unhandled source of non-uniformity";
+                });
+        }
     }
 };
 
