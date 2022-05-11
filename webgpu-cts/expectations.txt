@@ -354,6 +354,12 @@ crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,binary,f32_logica
 crbug.com/1322180 webgpu:api,operation,adapter,requestDevice_limits:worse_than_default:limit="minStorageBufferOffsetAlignment" [ Skip ]
 crbug.com/1322180 webgpu:api,operation,adapter,requestDevice_limits:worse_than_default:limit="minUniformBufferOffsetAlignment" [ Skip ]
 
+################################################################################
+# Failing due to limit value change. Needs CTS update.
+################################################################################
+crbug.com/dawn/1410 webgpu:api,operation,adapter,requestDevice_limits:supported_limits:limit="maxComputeWorkgroupStorageSize" [ Failure ]
+crbug.com/dawn/1410 webgpu:api,operation,adapter,requestDevice_limits:worse_than_default:limit="maxComputeWorkgroupStorageSize" [ Failure ]
+
 # New failures. Please triage:
 crbug.com/dawn/0000 [ intel-0x5912 ubuntu ] webgpu:api,operation,adapter,requestDevice_limits:worse_than_default:limit="maxBindGroups" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x5912 ubuntu ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,array:srcFormat="astc-10x10-unorm";dstFormat="astc-10x10-unorm-srgb";dimension="2d" [ Failure ]

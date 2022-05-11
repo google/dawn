@@ -34,7 +34,7 @@ TEST(Limits, ReifyDefaultLimits_PopulatesDefault) {
     limits.maxStorageBufferBindingSize = wgpu::kLimitU64Undefined;
 
     dawn::native::Limits reified = dawn::native::ReifyDefaultLimits(limits);
-    EXPECT_EQ(reified.maxComputeWorkgroupStorageSize, 16352u);
+    EXPECT_EQ(reified.maxComputeWorkgroupStorageSize, 16384u);
     EXPECT_EQ(reified.maxStorageBufferBindingSize, 134217728ul);
 }
 
@@ -137,7 +137,7 @@ TEST(Limits, ApplyLimitTiers) {
     SetLimitsStorageBufferBindingSizeTier3(&limitsStorageBufferBindingSizeTier3);
 
     auto SetLimitsComputeWorkgroupStorageSizeTier1 = [](dawn::native::Limits* limits) {
-        limits->maxComputeWorkgroupStorageSize = 16352;
+        limits->maxComputeWorkgroupStorageSize = 16384;
     };
     dawn::native::Limits limitsComputeWorkgroupStorageSizeTier1;
     dawn::native::GetDefaultLimits(&limitsComputeWorkgroupStorageSizeTier1);

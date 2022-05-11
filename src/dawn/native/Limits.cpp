@@ -23,7 +23,7 @@
 // TODO(crbug.com/dawn/685):
 // For now, only expose these tiers until metrics can determine better ones.
 #define LIMITS_WORKGROUP_STORAGE_SIZE(X)                                  \
-    X(Maximum, maxComputeWorkgroupStorageSize, 16352, 32768, 49152, 65536)
+    X(Maximum, maxComputeWorkgroupStorageSize, 16384, 32768, 49152, 65536)
 
 #define LIMITS_STORAGE_BUFFER_BINDING_SIZE(X)                                             \
     X(Maximum, maxStorageBufferBindingSize, 134217728, 1073741824, 2147483647, 4294967295)
