@@ -144,6 +144,35 @@ TEST_F(ResolverCompoundStatementTest, Loop) {
     }
 }
 
+TEST_F(ResolverCompoundStatementTest, Loop_EmptyContinuing) {
+    // fn F() {
+    //   loop {
+    //     break;
+    //     continuing {
+    //     }
+    //   }
+    // }
+    auto* brk = Break();
+    auto* loop = Loop(Block(brk), Block());
+    Func("F", {}, ty.void_(), {loop});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    {
+        auto* s = Sem().Get(loop);
+        ASSERT_NE(s, nullptr);
+        EXPECT_TRUE(s->Is<sem::LoopStatement>());
+        EXPECT_EQ(s->Parent(), s->FindFirstParent<sem::FunctionBlockStatement>());
+        EXPECT_EQ(s->Parent(), s->Block());
+    }
+    {
+        auto* s = Sem().Get(loop->continuing);
+        ASSERT_NE(s, nullptr);
+        EXPECT_TRUE(Is<sem::LoopContinuingBlockStatement>(s));
+        EXPECT_TRUE(Is<sem::LoopStatement>(s->Parent()->Parent()));
+    }
+}
+
 TEST_F(ResolverCompoundStatementTest, ForLoop) {
     // fn F() {
     //   for (var i : u32; true; i = i + 1u) {

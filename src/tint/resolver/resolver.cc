@@ -935,17 +935,15 @@ sem::LoopStatement* Resolver::LoopStatement(const ast::LoopStatement* stmt) {
 
             if (stmt->continuing) {
                 Mark(stmt->continuing);
-                if (!stmt->continuing->Empty()) {
-                    auto* continuing = StatementScope(
-                        stmt->continuing,
-                        builder_->create<sem::LoopContinuingBlockStatement>(
-                            stmt->continuing, current_compound_statement_, current_function_),
-                        [&] { return Statements(stmt->continuing->statements); });
-                    if (!continuing) {
-                        return false;
-                    }
-                    behaviors.Add(continuing->Behaviors());
+                auto* continuing = StatementScope(
+                    stmt->continuing,
+                    builder_->create<sem::LoopContinuingBlockStatement>(
+                        stmt->continuing, current_compound_statement_, current_function_),
+                    [&] { return Statements(stmt->continuing->statements); });
+                if (!continuing) {
+                    return false;
                 }
+                behaviors.Add(continuing->Behaviors());
             }
 
             if (behaviors.Contains(sem::Behavior::kBreak)) {  // Does the loop exit?
