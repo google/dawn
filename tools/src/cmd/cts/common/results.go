@@ -355,6 +355,10 @@ func CleanTags(cfg Config, results *result.List) {
 			return result.Crash
 		case s.Contains(result.Abort):
 			return result.Abort
+		case s.Contains(result.Failure):
+			return result.Failure
+		case s.Contains(result.Slow):
+			return result.Slow
 		}
 		return result.Failure
 	})
