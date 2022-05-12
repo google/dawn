@@ -58,6 +58,10 @@ WGPUDevice WireServer::GetDevice(uint32_t id, uint32_t generation) {
     return mImpl->GetDevice(id, generation);
 }
 
+bool WireServer::IsDeviceKnown(WGPUDevice device) const {
+    return mImpl->IsDeviceKnown(device);
+}
+
 namespace server {
 MemoryTransferService::MemoryTransferService() = default;
 

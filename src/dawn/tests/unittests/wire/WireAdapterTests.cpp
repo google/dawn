@@ -177,6 +177,10 @@ TEST_F(WireAdapterTests, RequestDeviceSuccess) {
 
     // Expect the server to receive the message. Then, mock a fake reply.
     WGPUDevice apiDevice = api.GetNewDevice();
+    // The backend device should not be known by the wire server.
+    EXPECT_FALSE(GetWireServer()->IsDeviceKnown(apiDevice));
+
+    wgpu::Device device;
     EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), NotNull(), NotNull()))
         .WillOnce(InvokeWithoutArgs([&]() {
             // Set on device creation to forward callbacks to the client.
@@ -203,15 +207,20 @@ TEST_F(WireAdapterTests, RequestDeviceSuccess) {
                     return fakeFeatures.size();
                 })));
 
+            // The backend device should still not be known by the wire server since the
+            // callback has not been called yet.
+            EXPECT_FALSE(GetWireServer()->IsDeviceKnown(apiDevice));
             api.CallAdapterRequestDeviceCallback(apiAdapter, WGPURequestDeviceStatus_Success,
                                                  apiDevice, nullptr);
+            // After the callback is called, the backend device is now known by the server.
+            EXPECT_TRUE(GetWireServer()->IsDeviceKnown(apiDevice));
         }));
     FlushClient();
 
     // Expect the callback in the client and all the device information to match.
     EXPECT_CALL(cb, Call(WGPURequestDeviceStatus_Success, NotNull(), nullptr, this))
         .WillOnce(WithArg<1>(Invoke([&](WGPUDevice cDevice) {
-            wgpu::Device device = wgpu::Device::Acquire(cDevice);
+            device = wgpu::Device::Acquire(cDevice);
 
             wgpu::SupportedLimits limits;
             EXPECT_TRUE(device.GetLimits(&limits));
@@ -230,10 +239,28 @@ TEST_F(WireAdapterTests, RequestDeviceSuccess) {
         })));
     FlushServer();
 
+    // Test that callbacks can propagate from server to client.
+    MockCallback<WGPUErrorCallback> errorCb;
+    device.SetUncapturedErrorCallback(errorCb.Callback(), errorCb.MakeUserdata(this));
+    api.CallDeviceSetUncapturedErrorCallbackCallback(apiDevice, WGPUErrorType_Validation,
+                                                     "Some error message");
+
+    EXPECT_CALL(errorCb, Call(WGPUErrorType_Validation, StrEq("Some error message"), this))
+        .Times(1);
+    FlushServer();
+
+    device = nullptr;
     // Cleared when the device is destroyed.
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(1);
     EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, nullptr, nullptr)).Times(1);
+    EXPECT_CALL(api, DeviceRelease(apiDevice));
+
+    // Server has not recevied the release yet, so the device should be known.
+    EXPECT_TRUE(GetWireServer()->IsDeviceKnown(apiDevice));
+    FlushClient();
+    // After receiving the release call, the device is no longer known by the server.
+    EXPECT_FALSE(GetWireServer()->IsDeviceKnown(apiDevice));
 }
 
 // Test that features requested that the implementation supports, but not the

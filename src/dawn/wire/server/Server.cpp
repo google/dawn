@@ -155,6 +155,10 @@ WGPUDevice Server::GetDevice(uint32_t id, uint32_t generation) {
     return data->handle;
 }
 
+bool Server::IsDeviceKnown(WGPUDevice device) const {
+    return DeviceObjects().IsKnown(device);
+}
+
 void Server::SetForwardingDeviceCallbacks(ObjectData<WGPUDevice>* deviceObject) {
     // Note: these callbacks are manually inlined here since they do not acquire and
     // free their userdata. Also unlike other callbacks, these are cleared and unset when

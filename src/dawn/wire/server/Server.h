@@ -170,6 +170,7 @@ class Server : public ServerBase {
     bool InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generation);
 
     WGPUDevice GetDevice(uint32_t id, uint32_t generation);
+    bool IsDeviceKnown(WGPUDevice device) const;
 
     template <typename T,
               typename Enable = std::enable_if<std::is_base_of<CallbackUserdata, T>::value>>

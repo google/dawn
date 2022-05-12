@@ -94,11 +94,11 @@ struct ObjectData<WGPUDevice> : public ObjectDataBase<WGPUDevice> {
 
 // Keeps track of the mapping between client IDs and backend objects.
 template <typename T>
-class KnownObjects {
+class KnownObjectsBase {
   public:
     using Data = ObjectData<T>;
 
-    KnownObjects() {
+    KnownObjectsBase() {
         // Reserve ID 0 so that it can be used to represent nullptr for optional object values
         // in the wire format. However don't tag it as allocated so that it is an error to ask
         // KnownObjects for ID 0.
@@ -110,30 +110,35 @@ class KnownObjects {
 
     // Get a backend objects for a given client ID.
     // Returns nullptr if the ID hasn't previously been allocated.
-    const Data* Get(uint32_t id, AllocationState expected = AllocationState::Allocated) const {
+    const Data* Get(uint32_t id) const {
         if (id >= mKnown.size()) {
             return nullptr;
         }
 
         const Data* data = &mKnown[id];
-
-        if (data->state != expected) {
+        if (data->state != AllocationState::Allocated) {
             return nullptr;
         }
-
         return data;
     }
-    Data* Get(uint32_t id, AllocationState expected = AllocationState::Allocated) {
+    Data* Get(uint32_t id) {
         if (id >= mKnown.size()) {
             return nullptr;
         }
 
         Data* data = &mKnown[id];
-
-        if (data->state != expected) {
+        if (data->state != AllocationState::Allocated) {
             return nullptr;
         }
+        return data;
+    }
 
+    Data* FillReservation(uint32_t id, T handle) {
+        ASSERT(id < mKnown.size());
+        Data* data = &mKnown[id];
+        ASSERT(data->state == AllocationState::Reserved);
+        data->handle = handle;
+        data->state = AllocationState::Allocated;
         return data;
     }
 
@@ -181,9 +186,9 @@ class KnownObjects {
         return objects;
     }
 
-    std::vector<T> GetAllHandles() {
+    std::vector<T> GetAllHandles() const {
         std::vector<T> objects;
-        for (Data& data : mKnown) {
+        for (const Data& data : mKnown) {
             if (data.state == AllocationState::Allocated && data.handle != nullptr) {
                 objects.push_back(data.handle);
             }
@@ -192,8 +197,48 @@ class KnownObjects {
         return objects;
     }
 
-  private:
+  protected:
     std::vector<Data> mKnown;
+};
+
+template <typename T>
+class KnownObjects : public KnownObjectsBase<T> {
+  public:
+    KnownObjects() = default;
+};
+
+template <>
+class KnownObjects<WGPUDevice> : public KnownObjectsBase<WGPUDevice> {
+  public:
+    KnownObjects() = default;
+
+    Data* Allocate(uint32_t id, AllocationState state = AllocationState::Allocated) {
+        Data* data = KnownObjectsBase<WGPUDevice>::Allocate(id, state);
+        AddToKnownSet(data);
+        return data;
+    }
+
+    Data* FillReservation(uint32_t id, WGPUDevice handle) {
+        Data* data = KnownObjectsBase<WGPUDevice>::FillReservation(id, handle);
+        AddToKnownSet(data);
+        return data;
+    }
+
+    void Free(uint32_t id) {
+        mKnownSet.erase(mKnown[id].handle);
+        KnownObjectsBase<WGPUDevice>::Free(id);
+    }
+
+    bool IsKnown(WGPUDevice device) const { return mKnownSet.count(device) != 0; }
+
+  private:
+    void AddToKnownSet(Data* data) {
+        if (data != nullptr && data->state == AllocationState::Allocated &&
+            data->handle != nullptr) {
+            mKnownSet.insert(data->handle);
+        }
+    }
+    std::unordered_set<WGPUDevice> mKnownSet;
 };
 
 // ObjectIds are lost in deserialization. Store the ids of deserialized

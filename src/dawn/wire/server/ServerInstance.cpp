@@ -51,11 +51,6 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
                                       WGPURequestAdapterStatus status,
                                       WGPUAdapter adapter,
                                       const char* message) {
-    auto* adapterObject = AdapterObjects().Get(data->adapterObjectId, AllocationState::Reserved);
-    // Should be impossible to fail. ObjectIds can't be freed by a destroy command until
-    // they move from Reserved to Allocated, or if they are destroyed here.
-    ASSERT(adapterObject != nullptr);
-
     ReturnInstanceRequestAdapterCallbackCmd cmd = {};
     cmd.instance = data->instance;
     cmd.requestSerial = data->requestSerial;
@@ -75,8 +70,8 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     std::vector<WGPUFeatureName> features;
 
     // Assign the handle and allocated status if the adapter is created successfully.
-    adapterObject->state = AllocationState::Allocated;
-    adapterObject->handle = adapter;
+    auto* adapterObject = AdapterObjects().FillReservation(data->adapterObjectId, adapter);
+    ASSERT(adapterObject != nullptr);
 
     size_t featuresCount = mProcs.adapterEnumerateFeatures(adapter, nullptr);
     features.resize(featuresCount);

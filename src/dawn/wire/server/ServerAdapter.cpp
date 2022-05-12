@@ -50,11 +50,6 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
                                      WGPURequestDeviceStatus status,
                                      WGPUDevice device,
                                      const char* message) {
-    auto* deviceObject = DeviceObjects().Get(data->deviceObjectId, AllocationState::Reserved);
-    // Should be impossible to fail. ObjectIds can't be freed by a destroy command until
-    // they move from Reserved to Allocated, or if they are destroyed here.
-    ASSERT(deviceObject != nullptr);
-
     ReturnAdapterRequestDeviceCallbackCmd cmd = {};
     cmd.adapter = data->adapter;
     cmd.requestSerial = data->requestSerial;
@@ -101,8 +96,10 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     cmd.limits = &limits;
 
     // Assign the handle and allocated status if the device is created successfully.
-    deviceObject->state = AllocationState::Allocated;
-    deviceObject->handle = device;
+    auto* deviceObject = DeviceObjects().FillReservation(data->deviceObjectId, device);
+    ASSERT(deviceObject != nullptr);
+    deviceObject->info->server = this;
+    deviceObject->info->self = ObjectHandle{data->deviceObjectId, deviceObject->generation};
     SetForwardingDeviceCallbacks(deviceObject);
 
     SerializeCommand(cmd);
