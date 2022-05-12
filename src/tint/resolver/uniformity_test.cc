@@ -278,7 +278,7 @@ class BasicTest : public UniformityAnalysisTestBase,
 TEST_P(BasicTest, ConditionalFunctionCall) {
     auto condition = static_cast<Condition>(std::get<0>(GetParam()));
     auto function = static_cast<Function>(std::get<1>(GetParam()));
-    auto src = R"(
+    std::string src = R"(
 var<private> p : i32;
 var<workgroup> w : i32;
 @group(0) @binding(0) var<uniform> u : i32;
@@ -308,9 +308,9 @@ fn foo() {
   func_non_uniform = rw;
 
   if ()" + ConditionToStr(condition) +
-               R"() {
+                      R"() {
     )" + FunctionToStr(function) +
-               R"(;
+                      R"(;
   }
 }
 )";
@@ -337,7 +337,7 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(UniformityAnalysisTest, SubsequentControlFlowMayBeNonUniform_Pass) {
     // Call a function that causes subsequent control flow to be non-uniform, and then call another
     // function that doesn't require uniformity.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 var<private> p : i32;
@@ -369,7 +369,7 @@ fn main() {
 TEST_F(UniformityAnalysisTest, SubsequentControlFlowMayBeNonUniform_Fail) {
     // Call a function that causes subsequent control flow to be non-uniform, and then call another
     // function that requires uniformity.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 var<private> p : i32;
@@ -404,7 +404,7 @@ test:16:3 note: calling 'foo' may cause subsequent control flow to be non-unifor
 TEST_F(UniformityAnalysisTest, ParameterNoRestriction_Pass) {
     // Pass a non-uniform value as an argument, and then try to use the return value for
     // control-flow guarding a barrier.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 var<private> p : i32;
@@ -431,7 +431,7 @@ fn bar() {
 TEST_F(UniformityAnalysisTest, ParameterRequiredToBeUniform_Pass) {
     // Pass a uniform value as an argument to a function that uses that parameter for control-flow
     // guarding a barrier.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read> ro : i32;
 
 fn foo(i : i32) {
@@ -451,7 +451,7 @@ fn bar() {
 TEST_F(UniformityAnalysisTest, ParameterRequiredToBeUniform_Fail) {
     // Pass a non-uniform value as an argument to a function that uses that parameter for
     // control-flow guarding a barrier.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo(i : i32) {
@@ -484,7 +484,7 @@ test:11:7 note: reading from read_write storage buffer 'rw' may result in a non-
 TEST_F(UniformityAnalysisTest, ParameterRequiredToBeUniformForReturnValue_Pass) {
     // Pass a uniform value as an argument to a function that uses that parameter to produce the
     // return value, and then use the return value for control-flow guarding a barrier.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read> ro : i32;
 
 fn foo(i : i32) -> i32 {
@@ -504,7 +504,7 @@ fn bar() {
 TEST_F(UniformityAnalysisTest, ParameterRequiredToBeUniformForReturnValue_Fail) {
     // Pass a non-uniform value as an argument to a function that uses that parameter to produce the
     // return value, and then use the return value for control-flow guarding a barrier.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo(i : i32) -> i32 {
@@ -533,7 +533,7 @@ test:9:11 note: reading from read_write storage buffer 'rw' may result in a non-
 TEST_F(UniformityAnalysisTest, ParameterRequiredToBeUniformForSubsequentControlFlow_Pass) {
     // Pass a uniform value as an argument to a function that uses that parameter return early, and
     // then invoke a barrier after calling that function.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read> ro : i32;
 
 var<private> p : i32;
@@ -559,7 +559,7 @@ fn bar() {
 TEST_F(UniformityAnalysisTest, ParameterRequiredToBeUniformForSubsequentControlFlow_Fail) {
     // Pass a non-uniform value as an argument to a function that uses that parameter return early,
     // and then invoke a barrier after calling that function.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 var<private> p : i32;
@@ -605,10 +605,10 @@ struct BuiltinEntry {
 class ComputeBuiltin : public UniformityAnalysisTestBase,
                        public ::testing::TestWithParam<BuiltinEntry> {};
 TEST_P(ComputeBuiltin, AsParam) {
-    auto src = R"(
+    std::string src = R"(
 @stage(compute) @workgroup_size(64)
-fn main(@builtin()" +
-               GetParam().name + R"() b : )" + GetParam().type + R"() {
+fn main(@builtin()" + GetParam().name +
+                      R"() b : )" + GetParam().type + R"() {
   if (all(vec3(b) == vec3(0u))) {
     workgroupBarrier();
   }
@@ -632,10 +632,10 @@ test:4:16 note: reading from builtin 'b' may result in a non-uniform value
 }
 
 TEST_P(ComputeBuiltin, InStruct) {
-    auto src = R"(
+    std::string src = R"(
 struct S {
   @builtin()" + GetParam().name +
-               R"() b : )" + GetParam().type + R"(
+                      R"() b : )" + GetParam().type + R"(
 }
 
 @stage(compute) @workgroup_size(64)
@@ -676,7 +676,7 @@ INSTANTIATE_TEST_SUITE_P(UniformityAnalysisTest,
 TEST_F(UniformityAnalysisTest, ComputeBuiltin_MixedAttributesInStruct) {
     // Mix both non-uniform and uniform shader IO attributes in the same structure. Even accessing
     // just uniform member causes non-uniformity in this case.
-    auto src = R"(
+    std::string src = R"(
 struct S {
   @builtin(num_workgroups) num_groups : vec3<u32>,
   @builtin(local_invocation_index) idx : u32,
@@ -705,10 +705,10 @@ test:9:7 note: reading from 's' may result in a non-uniform value
 class FragmentBuiltin : public UniformityAnalysisTestBase,
                         public ::testing::TestWithParam<BuiltinEntry> {};
 TEST_P(FragmentBuiltin, AsParam) {
-    auto src = R"(
+    std::string src = R"(
 @stage(fragment)
-fn main(@builtin()" +
-               GetParam().name + R"() b : )" + GetParam().type + R"() {
+fn main(@builtin()" + GetParam().name +
+                      R"() b : )" + GetParam().type + R"() {
   if (u32(vec4(b).x) == 0u) {
     dpdx(0.5);
   }
@@ -731,10 +731,10 @@ test:4:16 note: reading from builtin 'b' may result in a non-uniform value
 }
 
 TEST_P(FragmentBuiltin, InStruct) {
-    auto src = R"(
+    std::string src = R"(
 struct S {
   @builtin()" + GetParam().name +
-               R"() b : )" + GetParam().type + R"(
+                      R"() b : )" + GetParam().type + R"(
 }
 
 @stage(fragment)
@@ -771,7 +771,7 @@ INSTANTIATE_TEST_SUITE_P(UniformityAnalysisTest,
                          });
 
 TEST_F(UniformityAnalysisTest, FragmentLocation) {
-    auto src = R"(
+    std::string src = R"(
 @stage(fragment)
 fn main(@location(0) l : f32) {
   if (l == 0.0) {
@@ -793,7 +793,7 @@ test:4:7 note: reading from user-defined input 'l' may result in a non-uniform v
 }
 
 TEST_F(UniformityAnalysisTest, FragmentLocation_InStruct) {
-    auto src = R"(
+    std::string src = R"(
 struct S {
   @location(0) l : f32
 }
@@ -896,7 +896,7 @@ TEST_P(LoopTest, CallInBody_InterruptAfter) {
     // flow.
     auto interrupt = static_cast<ControlFlowInterrupt>(std::get<0>(GetParam()));
     auto condition = static_cast<Condition>(std::get<1>(GetParam()));
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read> uniform_var : i32;
 @group(0) @binding(0) var<storage, read_write> nonuniform_var : i32;
 
@@ -910,7 +910,7 @@ fn foo() {
 
     workgroupBarrier();
     )" + MakeInterrupt(interrupt, condition) +
-               R"(;
+                      R"(;
   }
 }
 )";
@@ -935,7 +935,7 @@ TEST_P(LoopTest, CallInBody_InterruptBefore) {
     // flow.
     auto interrupt = static_cast<ControlFlowInterrupt>(std::get<0>(GetParam()));
     auto condition = static_cast<Condition>(std::get<1>(GetParam()));
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read> uniform_var : i32;
 @group(0) @binding(0) var<storage, read_write> nonuniform_var : i32;
 
@@ -948,7 +948,7 @@ fn foo() {
     }
 
     )" + MakeInterrupt(interrupt, condition) +
-               R"(;
+                      R"(;
     workgroupBarrier();
   }
 }
@@ -975,7 +975,7 @@ TEST_P(LoopTest, CallInContinuing_InterruptInBody) {
     // in the continuing statement.
     auto interrupt = static_cast<ControlFlowInterrupt>(std::get<0>(GetParam()));
     auto condition = static_cast<Condition>(std::get<1>(GetParam()));
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read> uniform_var : i32;
 @group(0) @binding(0) var<storage, read_write> nonuniform_var : i32;
 
@@ -988,7 +988,7 @@ fn foo() {
     }
 
     )" + MakeInterrupt(interrupt, condition) +
-               R"(;
+                      R"(;
     continuing {
       workgroupBarrier();
     }
@@ -1012,7 +1012,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, Loop_CallInBody_UniformBreakInContinuing) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read> n : i32;
 
 fn foo() {
@@ -1033,7 +1033,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, Loop_CallInBody_NonUniformBreakInContinuing) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> n : i32;
 
 fn foo() {
@@ -1063,7 +1063,7 @@ test:10:16 note: reading from read_write storage buffer 'n' may result in a non-
 }
 
 TEST_F(UniformityAnalysisTest, Loop_CallInContinuing_UniformBreakInContinuing) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read> n : i32;
 
 fn foo() {
@@ -1084,7 +1084,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, Loop_CallInContinuing_NonUniformBreakInContinuing) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> n : i32;
 
 fn foo() {
@@ -1124,13 +1124,13 @@ INSTANTIATE_TEST_SUITE_P(UniformityAnalysisTest,
 
 TEST_P(LoopDeadCodeTest, AfterInterrupt) {
     // Dead code after a control-flow interrupt in a loop shouldn't cause uniformity errors.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> n : i32;
 
 fn foo() {
   loop {
     )" + ToStr(static_cast<ControlFlowInterrupt>(GetParam())) +
-               R"(;
+                      R"(;
     if (n == 42) {
       workgroupBarrier();
     }
@@ -1151,7 +1151,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, Loop_VarBecomesNonUniformInLoopAfterBarrier) {
     // Use a variable for a conditional barrier in a loop, and then assign a non-uniform value to
     // that variable later in that loop.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1183,7 +1183,7 @@ TEST_F(UniformityAnalysisTest, Loop_VarBecomesNonUniformInLoopAfterBarrier_Break
     // Use a variable for a conditional barrier in a loop, and then assign a non-uniform value to
     // that variable later in that loop. End the loop with a break statement to prevent the
     // non-uniform value from causing an issue.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1205,7 +1205,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, Loop_ConditionalAssignNonUniformWithBreak_BarrierInLoop) {
     // In a conditional block, assign a non-uniform value and then break, then use a variable for a
     // conditional barrier later in the loop.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1228,7 +1228,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, Loop_ConditionalAssignNonUniformWithConditionalBreak_BarrierInLoop) {
     // In a conditional block, assign a non-uniform value and then conditionally break, then use a
     // variable for a conditional barrier later in the loop.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1262,7 +1262,7 @@ test:8:11 note: reading from read_write storage buffer 'non_uniform' may result 
 TEST_F(UniformityAnalysisTest, Loop_ConditionalAssignNonUniformWithBreak_BarrierAfterLoop) {
     // In a conditional block, assign a non-uniform value and then break, then use a variable for a
     // conditional barrier after the loop.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1296,7 +1296,7 @@ test:8:11 note: reading from read_write storage buffer 'non_uniform' may result 
 TEST_F(UniformityAnalysisTest, Loop_VarBecomesUniformBeforeSomeExits_BarrierAfterLoop) {
     // Assign a non-uniform value, have two exit points only one of which assigns a uniform value,
     // then use a variable for a conditional barrier after the loop.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1335,7 +1335,7 @@ test:11:9 note: reading from read_write storage buffer 'non_uniform' may result 
 TEST_F(UniformityAnalysisTest, Loop_VarBecomesUniformBeforeAllExits_BarrierAfterLoop) {
     // Assign a non-uniform value, have two exit points both of which assigns a uniform value,
     // then use a variable for a conditional barrier after the loop.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1366,7 +1366,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, Loop_AssignNonUniformBeforeConditionalBreak_BarrierAfterLoop) {
     // Assign a non-uniform value and then break in a conditional block, then use a variable for a
     // conditional barrier after the loop.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1406,7 +1406,7 @@ TEST_F(UniformityAnalysisTest, Loop_VarBecomesNonUniformBeforeConditionalContinu
     // Use a variable for a conditional barrier in a loop, assign a non-uniform value to
     // that variable later in that loop, then perform a conditional continue before assigning a
     // uniform value to that variable.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1444,7 +1444,7 @@ TEST_F(UniformityAnalysisTest,
     // Use a variable for a conditional barrier in the continuing statement of a loop, assign a
     // non-uniform value to that variable later in that loop, then conditionally assign a uniform
     // value before continuing.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1485,7 +1485,7 @@ TEST_F(UniformityAnalysisTest, Loop_VarBecomesNonUniformBeforeConditionalContinu
     // Use a variable for a conditional barrier in a loop, assign a non-uniform value to
     // that variable later in that loop, then perform a conditional continue before assigning a
     // uniform value to that variable.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1521,7 +1521,7 @@ test:12:9 note: reading from read_write storage buffer 'non_uniform' may result 
 TEST_F(UniformityAnalysisTest, Loop_VarBecomesNonUniformInNestedLoopWithBreak_BarrierInLoop) {
     // Use a variable for a conditional barrier in a loop, then conditionally assign a non-uniform
     // value to that variable followed by a break in a nested loop.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1560,7 +1560,7 @@ TEST_F(UniformityAnalysisTest,
     // Conditionally assign a non-uniform value followed by a break in a nested loop, assign a
     // uniform value in the outer loop, and then use a variable for a conditional barrier after the
     // loop.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1588,7 +1588,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, Loop_NonUniformValueNeverReachesContinuing) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1611,7 +1611,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, Loop_NonUniformBreakInBody_Reconverge) {
     // Loops reconverge at exit, so test that we can call workgroupBarrier() after a loop that
     // contains a non-uniform conditional break.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> n : i32;
 
 fn foo() {
@@ -1632,7 +1632,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, Loop_NonUniformFunctionInBody_Reconverge) {
     // Loops reconverge at exit, so test that we can call workgroupBarrier() after a loop that
     // contains a call to a function that causes non-uniform control flow.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> n : i32;
 
 fn bar() {
@@ -1657,7 +1657,7 @@ fn foo() {
 
 TEST_F(UniformityAnalysisTest, Loop_NonUniformFunctionDiscard_NoReconvergence) {
     // Loops should not reconverge after non-uniform discard statements.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> n : i32;
 
 fn bar() {
@@ -1688,7 +1688,7 @@ test:12:5 note: calling 'bar' may cause subsequent control flow to be non-unifor
 }
 
 TEST_F(UniformityAnalysisTest, ForLoop_CallInside_UniformCondition) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read> n : i32;
 
 fn foo() {
@@ -1702,7 +1702,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, ForLoop_CallInside_NonUniformCondition) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> n : i32;
 
 fn foo() {
@@ -1725,7 +1725,7 @@ test:5:23 note: reading from read_write storage buffer 'n' may result in a non-u
 }
 
 TEST_F(UniformityAnalysisTest, ForLoop_CallInside_InitializerCausesNonUniformFlow) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> n : i32;
 
 fn bar() -> i32 {
@@ -1756,7 +1756,7 @@ test:13:16 note: calling 'bar' may cause subsequent control flow to be non-unifo
 }
 
 TEST_F(UniformityAnalysisTest, ForLoop_CallInside_ContinuingCausesNonUniformFlow) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> n : i32;
 
 fn bar() -> i32 {
@@ -1789,7 +1789,7 @@ test:13:35 note: calling 'bar' may cause subsequent control flow to be non-unifo
 TEST_F(UniformityAnalysisTest, ForLoop_VarBecomesNonUniformInContinuing_BarrierInLoop) {
     // Use a variable for a conditional barrier in a loop, and then assign a non-uniform value to
     // that variable in the continuing statement.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1818,7 +1818,7 @@ test:6:31 note: reading from read_write storage buffer 'non_uniform' may result 
 TEST_F(UniformityAnalysisTest, ForLoop_VarBecomesUniformInContinuing_BarrierInLoop) {
     // Use a variable for a conditional barrier in a loop, and then assign a uniform value to that
     // variable in the continuing statement.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1840,7 +1840,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, ForLoop_VarBecomesNonUniformInContinuing_BarrierAfterLoop) {
     // Use a variable for a conditional barrier after a loop, and assign a non-uniform value to
     // that variable in the continuing statement.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1869,7 +1869,7 @@ test:6:31 note: reading from read_write storage buffer 'non_uniform' may result 
 TEST_F(UniformityAnalysisTest, ForLoop_VarBecomesUniformInContinuing_BarrierAfterLoop) {
     // Use a variable for a conditional barrier after a loop, and assign a uniform value to that
     // variable in the continuing statement.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1889,7 +1889,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, ForLoop_VarBecomesNonUniformInLoopAfterBarrier) {
     // Use a variable for a conditional barrier in a loop, and then assign a non-uniform value to
     // that variable later in that loop.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1920,7 +1920,7 @@ test:12:9 note: reading from read_write storage buffer 'non_uniform' may result 
 TEST_F(UniformityAnalysisTest, ForLoop_ConditionalAssignNonUniformWithBreak_BarrierInLoop) {
     // In a conditional block, assign a non-uniform value and then break, then use a variable for a
     // conditional barrier later in the loop.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1943,7 +1943,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, ForLoop_ConditionalAssignNonUniformWithBreak_BarrierAfterLoop) {
     // In a conditional block, assign a non-uniform value and then break, then use a variable for a
     // conditional barrier after the loop.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -1978,7 +1978,7 @@ TEST_F(UniformityAnalysisTest, ForLoop_VarRemainsNonUniformAtLoopEnd_BarrierAfte
     // Assign a non-uniform value, assign a uniform value before all explicit break points but leave
     // the value non-uniform at loop exit, then use a variable for a conditional barrier after the
     // loop.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2020,7 +2020,7 @@ TEST_F(UniformityAnalysisTest,
     // Use a variable for a conditional barrier in a loop, assign a non-uniform value to
     // that variable later in that loop, then perform a conditional continue before assigning a
     // uniform value to that variable.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2057,7 +2057,7 @@ TEST_F(UniformityAnalysisTest, ForLoop_VarBecomesNonUniformBeforeConditionalCont
     // Use a variable for a conditional barrier in a loop, assign a non-uniform value to
     // that variable later in that loop, then perform a conditional continue before assigning a
     // uniform value to that variable.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2093,7 +2093,7 @@ test:12:9 note: reading from read_write storage buffer 'non_uniform' may result 
 TEST_F(UniformityAnalysisTest, ForLoop_NonUniformCondition_Reconverge) {
     // Loops reconverge at exit, so test that we can call workgroupBarrier() after a loop that has a
     // non-uniform condition.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> n : i32;
 
 fn foo() {
@@ -2113,7 +2113,7 @@ fn foo() {
 ////////////////////////////////////////////////////////////////////////////////
 
 TEST_F(UniformityAnalysisTest, IfElse_UniformCondition_BarrierInTrueBlock) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read> uniform_global : i32;
 
 fn foo() {
@@ -2127,7 +2127,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, IfElse_UniformCondition_BarrierInElseBlock) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read> uniform_global : i32;
 
 fn foo() {
@@ -2142,7 +2142,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, IfElse_UniformCondition_BarrierInElseIfBlock) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read> uniform_global : i32;
 
 fn foo() {
@@ -2157,7 +2157,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, IfElse_NonUniformCondition_BarrierInTrueBlock) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2180,7 +2180,7 @@ test:5:7 note: reading from read_write storage buffer 'non_uniform' may result i
 }
 
 TEST_F(UniformityAnalysisTest, IfElse_NonUniformCondition_BarrierInElseBlock) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2204,7 +2204,7 @@ test:5:7 note: reading from read_write storage buffer 'non_uniform' may result i
 }
 
 TEST_F(UniformityAnalysisTest, IfElse_ShortCircuitingCondition_NonUniformLHS_And) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
 
 var<private> p : i32;
@@ -2229,7 +2229,7 @@ test:7:8 note: reading from read_write storage buffer 'non_uniform_global' may r
 }
 
 TEST_F(UniformityAnalysisTest, IfElse_ShortCircuitingCondition_NonUniformRHS_And) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
 
 var<private> p : i32;
@@ -2254,7 +2254,7 @@ test:7:17 note: reading from read_write storage buffer 'non_uniform_global' may 
 }
 
 TEST_F(UniformityAnalysisTest, IfElse_ShortCircuitingCondition_NonUniformLHS_Or) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
 
 var<private> p : i32;
@@ -2279,7 +2279,7 @@ test:7:8 note: reading from read_write storage buffer 'non_uniform_global' may r
 }
 
 TEST_F(UniformityAnalysisTest, IfElse_ShortCircuitingCondition_NonUniformRHS_Or) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
 
 var<private> p : i32;
@@ -2304,7 +2304,7 @@ test:7:16 note: reading from read_write storage buffer 'non_uniform_global' may 
 }
 
 TEST_F(UniformityAnalysisTest, IfElse_NonUniformCondition_BarrierInElseIfBlock) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2330,7 +2330,7 @@ test:5:7 note: reading from read_write storage buffer 'non_uniform' may result i
 TEST_F(UniformityAnalysisTest, IfElse_VarBecomesNonUniform_BeforeCondition) {
     // Use a function-scope variable for control-flow guarding a barrier, and then assign to that
     // variable before checking the condition.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo() {
@@ -2357,7 +2357,7 @@ test:6:7 note: reading from read_write storage buffer 'rw' may result in a non-u
 TEST_F(UniformityAnalysisTest, IfElse_VarBecomesNonUniform_AfterCondition) {
     // Use a function-scope variable for control-flow guarding a barrier, and then assign to that
     // variable after checking the condition.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo() {
@@ -2375,7 +2375,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, IfElse_VarBecomesNonUniformInIf_BarrierInElse) {
     // Assign a non-uniform value to a variable in an if-block, and then use that variable for a
     // conditional barrier in the else block.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2396,7 +2396,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, IfElse_AssignNonUniformInIf_AssignUniformInElse) {
     // Assign a non-uniform value to a variable in an if-block and a uniform value in the else
     // block, and then use that variable for a conditional barrier after the if-else statement.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2430,7 +2430,7 @@ test:8:11 note: reading from read_write storage buffer 'non_uniform' may result 
 TEST_F(UniformityAnalysisTest, IfElse_AssignNonUniformInIfWithReturn) {
     // Assign a non-uniform value to a variable in an if-block followed by a return, and then use
     // that variable for a conditional barrier after the if-else statement.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2453,7 +2453,7 @@ TEST_F(UniformityAnalysisTest, IfElse_AssignNonUniformBeforeIf_BothBranchesAssig
     // Assign a non-uniform value to a variable before and if-else statement, assign uniform values
     // in both branch of the if-else, and then use that variable for a conditional barrier after
     // the if-else statement.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2478,7 +2478,7 @@ TEST_F(UniformityAnalysisTest, IfElse_AssignNonUniformBeforeIf_OnlyTrueBranchAss
     // Assign a non-uniform value to a variable before and if-else statement, assign a uniform value
     // in the true branch of the if-else, and then use that variable for a conditional barrier after
     // the if-else statement.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2510,7 +2510,7 @@ TEST_F(UniformityAnalysisTest, IfElse_AssignNonUniformBeforeIf_OnlyFalseBranchAs
     // Assign a non-uniform value to a variable before and if-else statement, assign a uniform value
     // in the false branch of the if-else, and then use that variable for a conditional barrier
     // after the if-else statement.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2544,7 +2544,7 @@ TEST_F(UniformityAnalysisTest,
     // Assign a non-uniform value to a variable before and if-else statement, assign a uniform value
     // in the true branch of the if-else, leave the variable untouched in the false branch and just
     // return, and then use that variable for a conditional barrier after the if-else statement.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2570,7 +2570,7 @@ TEST_F(UniformityAnalysisTest,
     // Assign a non-uniform value to a variable before and if-else statement, assign a uniform value
     // in the false branch of the if-else, leave the variable untouched in the true branch and just
     // return, and then use that variable for a conditional barrier after the if-else statement.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2594,7 +2594,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, IfElse_NonUniformCondition_Reconverge) {
     // If statements reconverge at exit, so test that we can call workgroupBarrier() after an if
     // statement with a non-uniform condition.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2611,7 +2611,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, IfElse_ShortCircuitingNonUniformConditionLHS_Reconverge) {
     // If statements reconverge at exit, so test that we can call workgroupBarrier() after an if
     // statement with a non-uniform condition that uses short-circuiting.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2627,7 +2627,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, IfElse_ShortCircuitingNonUniformConditionRHS_Reconverge) {
     // If statements reconverge at exit, so test that we can call workgroupBarrier() after an if
     // statement with a non-uniform condition that uses short-circuiting.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2643,7 +2643,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, IfElse_NonUniformFunctionCall_Reconverge) {
     // If statements reconverge at exit, so test that we can call workgroupBarrier() after an if
     // statement with a non-uniform condition.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar() {
@@ -2668,7 +2668,7 @@ fn foo() {
 
 TEST_F(UniformityAnalysisTest, IfElse_NonUniformReturn_NoReconverge) {
     // If statements should not reconverge after non-uniform returns.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2694,7 +2694,7 @@ test:5:7 note: reading from read_write storage buffer 'non_uniform' may result i
 
 TEST_F(UniformityAnalysisTest, IfElse_NonUniformDiscard_NoReconverge) {
     // If statements should not reconverge after non-uniform discards.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2723,7 +2723,7 @@ test:5:7 note: reading from read_write storage buffer 'non_uniform' may result i
 ////////////////////////////////////////////////////////////////////////////////
 
 TEST_F(UniformityAnalysisTest, Switch_NonUniformCondition_BarrierInCase) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2752,7 +2752,7 @@ test:5:11 note: reading from read_write storage buffer 'non_uniform' may result 
 }
 
 TEST_F(UniformityAnalysisTest, Switch_NonUniformCondition_BarrierInDefault) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -2778,7 +2778,7 @@ test:5:11 note: reading from read_write storage buffer 'non_uniform' may result 
 }
 
 TEST_F(UniformityAnalysisTest, Switch_NonUniformBreak) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 @group(0) @binding(0) var<uniform> condition : i32;
 
@@ -2809,7 +2809,7 @@ test:8:11 note: reading from read_write storage buffer 'non_uniform' may result 
 }
 
 TEST_F(UniformityAnalysisTest, Switch_NonUniformBreakInDifferentCase) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 @group(0) @binding(0) var<uniform> condition : i32;
 
@@ -2833,7 +2833,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, Switch_NonUniformBreakInDifferentCase_Fallthrough) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 @group(0) @binding(0) var<uniform> condition : i32;
 
@@ -2867,7 +2867,7 @@ test:8:11 note: reading from read_write storage buffer 'non_uniform' may result 
 }
 
 TEST_F(UniformityAnalysisTest, Switch_VarBecomesNonUniformInDifferentCase_WithBreak) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 @group(0) @binding(0) var<uniform> condition : i32;
 
@@ -2893,7 +2893,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, Switch_VarBecomesNonUniformInDifferentCase_WithFallthrough) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 @group(0) @binding(0) var<uniform> condition : i32;
 
@@ -2928,7 +2928,7 @@ test:9:11 note: reading from read_write storage buffer 'non_uniform' may result 
 }
 
 TEST_F(UniformityAnalysisTest, Switch_VarBecomesUniformInDifferentCase_WithBreak) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 @group(0) @binding(0) var<uniform> condition : i32;
 
@@ -2963,7 +2963,7 @@ test:6:11 note: reading from read_write storage buffer 'non_uniform' may result 
 }
 
 TEST_F(UniformityAnalysisTest, Switch_VarBecomesUniformInDifferentCase_WithFallthrough) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 @group(0) @binding(0) var<uniform> condition : i32;
 
@@ -2989,7 +2989,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, Switch_VarBecomesNonUniformInCase_BarrierAfter) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 @group(0) @binding(0) var<uniform> condition : i32;
 
@@ -3025,7 +3025,7 @@ test:9:11 note: reading from read_write storage buffer 'non_uniform' may result 
 }
 
 TEST_F(UniformityAnalysisTest, Switch_VarBecomesUniformInAllCases_BarrierAfter) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 @group(0) @binding(0) var<uniform> condition : i32;
 
@@ -3052,7 +3052,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, Switch_VarBecomesUniformInSomeCases_BarrierAfter) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 @group(0) @binding(0) var<uniform> condition : i32;
 
@@ -3087,7 +3087,7 @@ test:6:11 note: reading from read_write storage buffer 'non_uniform' may result 
 }
 
 TEST_F(UniformityAnalysisTest, Switch_VarBecomesUniformInCasesThatDontReturn_BarrierAfter) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 @group(0) @binding(0) var<uniform> condition : i32;
 
@@ -3114,7 +3114,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, Switch_VarBecomesUniformAfterConditionalBreak_BarrierAfter) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 @group(0) @binding(0) var<uniform> condition : i32;
 
@@ -3152,7 +3152,7 @@ test:6:11 note: reading from read_write storage buffer 'non_uniform' may result 
 }
 
 TEST_F(UniformityAnalysisTest, Switch_NestedInLoop_VarBecomesNonUniformWithBreak_BarrierInLoop) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 @group(0) @binding(0) var<uniform> condition : i32;
 
@@ -3190,7 +3190,7 @@ test:15:13 note: reading from read_write storage buffer 'non_uniform' may result
 }
 
 TEST_F(UniformityAnalysisTest, Switch_NestedInLoop_VarBecomesNonUniformWithBreak_BarrierAfterLoop) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 @group(0) @binding(0) var<uniform> condition : i32;
 
@@ -3223,7 +3223,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, Switch_NonUniformCondition_Reconverge) {
     // Switch statements reconverge at exit, so test that we can call workgroupBarrier() after a
     // switch statement that contains a non-uniform conditional break.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -3242,7 +3242,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, Switch_NonUniformBreak_Reconverge) {
     // Switch statements reconverge at exit, so test that we can call workgroupBarrier() after a
     // switch statement that contains a non-uniform conditional break.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -3264,7 +3264,7 @@ fn foo() {
 TEST_F(UniformityAnalysisTest, Switch_NonUniformFunctionCall_Reconverge) {
     // Switch statements reconverge at exit, so test that we can call workgroupBarrier() after a
     // switch statement that contains a call to a function that causes non-uniform control flow.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> n : i32;
 
 fn bar() {
@@ -3291,7 +3291,7 @@ fn foo() {
 
 TEST_F(UniformityAnalysisTest, Switch_NonUniformFunctionDiscard_NoReconvergence) {
     // Switch statements should not reconverge after non-uniform discards.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> n : i32;
 
 fn bar() {
@@ -3328,7 +3328,7 @@ test:13:7 note: calling 'bar' may cause subsequent control flow to be non-unifor
 ////////////////////////////////////////////////////////////////////////////////
 
 TEST_F(UniformityAnalysisTest, AssignNonUniformThroughPointer) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -3353,7 +3353,7 @@ test:6:9 note: reading from read_write storage buffer 'non_uniform' may result i
 }
 
 TEST_F(UniformityAnalysisTest, AssignNonUniformThroughCapturedPointer) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -3379,7 +3379,7 @@ test:7:9 note: reading from read_write storage buffer 'non_uniform' may result i
 }
 
 TEST_F(UniformityAnalysisTest, AssignUniformThroughPointer) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -3395,7 +3395,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, AssignUniformThroughCapturedPointer) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -3412,7 +3412,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, AssignUniformThroughCapturedPointer_InNonUniformControlFlow) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -3440,7 +3440,7 @@ test:7:7 note: reading from read_write storage buffer 'non_uniform' may result i
 }
 
 TEST_F(UniformityAnalysisTest, LoadNonUniformThroughPointer) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -3464,7 +3464,7 @@ test:5:11 note: reading from read_write storage buffer 'non_uniform' may result 
 }
 
 TEST_F(UniformityAnalysisTest, LoadNonUniformThroughCapturedPointer) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -3489,7 +3489,7 @@ test:5:11 note: reading from read_write storage buffer 'non_uniform' may result 
 }
 
 TEST_F(UniformityAnalysisTest, LoadNonUniformThroughPointerParameter) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(p : ptr<function, i32>) {
@@ -3521,7 +3521,7 @@ test:11:11 note: reading from read_write storage buffer 'non_uniform' may result
 }
 
 TEST_F(UniformityAnalysisTest, LoadUniformThroughPointer) {
-    auto src = R"(
+    std::string src = R"(
 fn foo() {
   var v = 42;
   if (*&v == 0) {
@@ -3534,7 +3534,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, LoadUniformThroughCapturedPointer) {
-    auto src = R"(
+    std::string src = R"(
 fn foo() {
   var v = 42;
   let pv = &v;
@@ -3548,7 +3548,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, LoadUniformThroughPointerParameter) {
-    auto src = R"(
+    std::string src = R"(
 fn bar(p : ptr<function, i32>) {
   if (*p == 0) {
     workgroupBarrier();
@@ -3565,7 +3565,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, StoreNonUniformAfterCapturingPointer) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -3591,7 +3591,7 @@ test:7:7 note: reading from read_write storage buffer 'non_uniform' may result i
 }
 
 TEST_F(UniformityAnalysisTest, StoreUniformAfterCapturingPointer) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -3608,7 +3608,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, AssignNonUniformThroughLongChainOfPointers) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -3635,7 +3635,7 @@ test:8:14 note: reading from read_write storage buffer 'non_uniform' may result 
 }
 
 TEST_F(UniformityAnalysisTest, LoadNonUniformThroughLongChainOfPointers) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -3661,7 +3661,7 @@ test:5:11 note: reading from read_write storage buffer 'non_uniform' may result 
 }
 
 TEST_F(UniformityAnalysisTest, AssignUniformThenNonUniformThroughDifferentPointer) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -3689,7 +3689,7 @@ test:9:10 note: reading from read_write storage buffer 'non_uniform' may result 
 }
 
 TEST_F(UniformityAnalysisTest, AssignNonUniformThenUniformThroughDifferentPointer) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -3708,7 +3708,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, UnmodifiedPointerParameterNonUniform) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(p : ptr<function, i32>) {
@@ -3736,7 +3736,7 @@ test:8:11 note: reading from read_write storage buffer 'non_uniform' may result 
 }
 
 TEST_F(UniformityAnalysisTest, UnmodifiedPointerParameterUniform) {
-    auto src = R"(
+    std::string src = R"(
 fn bar(p : ptr<function, i32>) {
 }
 
@@ -3753,7 +3753,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, AssignNonUniformThroughPointerInFunctionCall) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(p : ptr<function, i32>) {
@@ -3782,7 +3782,7 @@ test:10:7 note: pointer contents may become non-uniform after calling 'bar'
 }
 
 TEST_F(UniformityAnalysisTest, AssignUniformThroughPointerInFunctionCall) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(p : ptr<function, i32>) {
@@ -3802,7 +3802,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, AssignNonUniformThroughPointerInFunctionCallViaArg) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(p : ptr<function, i32>, a : i32) {
@@ -3831,7 +3831,7 @@ test:10:11 note: reading from read_write storage buffer 'non_uniform' may result
 }
 
 TEST_F(UniformityAnalysisTest, AssignNonUniformThroughPointerInFunctionCallViaPointerArg) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(p : ptr<function, i32>, a : ptr<function, i32>) {
@@ -3861,7 +3861,7 @@ test:10:11 note: reading from read_write storage buffer 'non_uniform' may result
 }
 
 TEST_F(UniformityAnalysisTest, AssignUniformThroughPointerInFunctionCallViaArg) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(p : ptr<function, i32>, a : i32) {
@@ -3881,7 +3881,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, AssignUniformThroughPointerInFunctionCallViaPointerArg) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(p : ptr<function, i32>, a : ptr<function, i32>) {
@@ -3902,7 +3902,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, AssignNonUniformThroughPointerInFunctionCallChain) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn f3(p : ptr<function, i32>, a : ptr<function, i32>) {
@@ -3940,7 +3940,7 @@ test:18:11 note: reading from read_write storage buffer 'non_uniform' may result
 }
 
 TEST_F(UniformityAnalysisTest, AssignUniformThroughPointerInFunctionCallChain) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn f3(p : ptr<function, i32>, a : ptr<function, i32>) {
@@ -3969,7 +3969,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, MakePointerParamUniformInReturnExpression) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn zoo(p : ptr<function, i32>) -> i32 {
@@ -3995,7 +3995,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, MakePointerParamNonUniformInReturnExpression) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn zoo(p : ptr<function, i32>) -> i32 {
@@ -4030,7 +4030,7 @@ test:16:7 note: pointer contents may become non-uniform after calling 'bar'
 }
 
 TEST_F(UniformityAnalysisTest, PointerParamAssignNonUniformInTrueAndUniformInFalse) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(p : ptr<function, i32>) {
@@ -4063,7 +4063,7 @@ test:14:7 note: pointer contents may become non-uniform after calling 'bar'
 }
 
 TEST_F(UniformityAnalysisTest, ConditionalAssignNonUniformToPointerParamAndReturn) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(p : ptr<function, i32>) {
@@ -4096,7 +4096,7 @@ test:14:7 note: pointer contents may become non-uniform after calling 'bar'
 }
 
 TEST_F(UniformityAnalysisTest, ConditionalAssignNonUniformToPointerParamAndBreakFromSwitch) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 @group(0) @binding(1) var<uniform> condition : i32;
 
@@ -4137,7 +4137,7 @@ test:22:7 note: pointer contents may become non-uniform after calling 'bar'
 }
 
 TEST_F(UniformityAnalysisTest, ConditionalAssignNonUniformToPointerParamAndBreakFromLoop) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(p : ptr<function, i32>) {
@@ -4172,7 +4172,7 @@ test:16:7 note: pointer contents may become non-uniform after calling 'bar'
 }
 
 TEST_F(UniformityAnalysisTest, ConditionalAssignNonUniformToPointerParamAndContinue) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo(p : ptr<function, i32>) {
@@ -4204,7 +4204,7 @@ test:12:12 note: reading from read_write storage buffer 'non_uniform' may result
 }
 
 TEST_F(UniformityAnalysisTest, PointerParamMaybeBecomesUniform) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(p : ptr<function, i32>) {
@@ -4236,7 +4236,7 @@ test:12:11 note: reading from read_write storage buffer 'non_uniform' may result
 }
 
 TEST_F(UniformityAnalysisTest, NonUniformPointerParameterBecomesUniform_AfterUse) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(a : ptr<function, i32>, b : ptr<function, i32>) {
@@ -4267,7 +4267,7 @@ test:10:11 note: reading from read_write storage buffer 'non_uniform' may result
 }
 
 TEST_F(UniformityAnalysisTest, NonUniformPointerParameterBecomesUniform_BeforeUse) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(a : ptr<function, i32>, b : ptr<function, i32>) {
@@ -4289,7 +4289,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, UniformPointerParameterBecomesNonUniform_BeforeUse) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(a : ptr<function, i32>, b : ptr<function, i32>) {
@@ -4320,7 +4320,7 @@ test:12:11 note: pointer contents may become non-uniform after calling 'bar'
 }
 
 TEST_F(UniformityAnalysisTest, UniformPointerParameterBecomesNonUniform_AfterUse) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(a : ptr<function, i32>, b : ptr<function, i32>) {
@@ -4342,7 +4342,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, NonUniformPointerParameterUpdatedInPlace) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(p : ptr<function, i32>) {
@@ -4374,7 +4374,7 @@ TEST_F(UniformityAnalysisTest, MultiplePointerParametersBecomeNonUniform) {
     // The analysis traverses the tree for each pointer parameter, and we need to make sure that we
     // reset the "visited" state of nodes in between these traversals to properly capture each of
     // their uniformity states.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(a : ptr<function, i32>, b : ptr<function, i32>) {
@@ -4408,7 +4408,7 @@ TEST_F(UniformityAnalysisTest, MultiplePointerParametersWithEdgesToEachOther) {
     // The analysis traverses the tree for each pointer parameter, and we need to make sure that we
     // reset the "visited" state of nodes in between these traversals to properly capture each of
     // their uniformity states.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn bar(a : ptr<function, i32>, b : ptr<function, i32>, c : ptr<function, i32>) {
@@ -4507,7 +4507,7 @@ note: reading from module-scope private variable 'non_uniform_global' may result
 ////////////////////////////////////////////////////////////////////////////////
 
 TEST_F(UniformityAnalysisTest, VectorElement_Uniform) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read> v : vec4<i32>;
 
 fn foo() {
@@ -4521,7 +4521,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, VectorElement_NonUniform) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> v : array<i32>;
 
 fn foo() {
@@ -4544,7 +4544,7 @@ test:5:7 note: reading from read_write storage buffer 'v' may result in a non-un
 }
 
 TEST_F(UniformityAnalysisTest, VectorElement_BecomesNonUniform_BeforeCondition) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo() {
@@ -4569,7 +4569,7 @@ test:6:10 note: reading from read_write storage buffer 'rw' may result in a non-
 }
 
 TEST_F(UniformityAnalysisTest, VectorElement_BecomesNonUniform_AfterCondition) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo() {
@@ -4585,7 +4585,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, VectorElement_DifferentElementBecomesNonUniform) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo() {
@@ -4613,7 +4613,7 @@ TEST_F(UniformityAnalysisTest, VectorElement_ElementBecomesUniform) {
     // For aggregate types, we conservatively consider them to be forever non-uniform once they
     // become non-uniform. Test that after assigning a uniform value to an element, that element is
     // still considered to be non-uniform.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo() {
@@ -4642,7 +4642,7 @@ TEST_F(UniformityAnalysisTest, VectorElement_DifferentElementBecomesUniform) {
     // For aggregate types, we conservatively consider them to be forever non-uniform once they
     // become non-uniform. Test that after assigning a uniform value to an element, the whole vector
     // is still considered to be non-uniform.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo() {
@@ -4668,7 +4668,7 @@ test:6:10 note: reading from read_write storage buffer 'rw' may result in a non-
 }
 
 TEST_F(UniformityAnalysisTest, VectorElement_NonUniform_AnyBuiltin) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
 
 fn foo() {
@@ -4693,7 +4693,7 @@ test:6:10 note: reading from read_write storage buffer 'non_uniform_global' may 
 }
 
 TEST_F(UniformityAnalysisTest, StructMember_Uniform) {
-    auto src = R"(
+    std::string src = R"(
 struct S {
   a : i32,
   b : i32,
@@ -4711,7 +4711,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, StructMember_NonUniform) {
-    auto src = R"(
+    std::string src = R"(
 struct S {
   a : i32,
   b : i32,
@@ -4738,7 +4738,7 @@ test:9:7 note: reading from read_write storage buffer 's' may result in a non-un
 }
 
 TEST_F(UniformityAnalysisTest, StructMember_BecomesNonUniform_BeforeCondition) {
-    auto src = R"(
+    std::string src = R"(
 struct S {
   a : i32,
   b : i32,
@@ -4767,7 +4767,7 @@ test:10:9 note: reading from read_write storage buffer 'rw' may result in a non-
 }
 
 TEST_F(UniformityAnalysisTest, StructMember_BecomesNonUniform_AfterCondition) {
-    auto src = R"(
+    std::string src = R"(
 struct S {
   a : i32,
   b : i32,
@@ -4787,7 +4787,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, StructMember_DifferentMemberBecomesNonUniform) {
-    auto src = R"(
+    std::string src = R"(
 struct S {
   a : i32,
   b : i32,
@@ -4819,7 +4819,7 @@ TEST_F(UniformityAnalysisTest, StructMember_MemberBecomesUniform) {
     // For aggregate types, we conservatively consider them to be forever non-uniform once they
     // become non-uniform. Test that after assigning a uniform value to a member, that member is
     // still considered to be non-uniform.
-    auto src = R"(
+    std::string src = R"(
 struct S {
   a : i32,
   b : i32,
@@ -4852,7 +4852,7 @@ TEST_F(UniformityAnalysisTest, StructMember_DifferentMemberBecomesUniform) {
     // For aggregate types, we conservatively consider them to be forever non-uniform once they
     // become non-uniform. Test that after assigning a uniform value to a member, the whole struct
     // is still considered to be non-uniform.
-    auto src = R"(
+    std::string src = R"(
 struct S {
   a : i32,
   b : i32,
@@ -4882,7 +4882,7 @@ test:10:9 note: reading from read_write storage buffer 'rw' may result in a non-
 }
 
 TEST_F(UniformityAnalysisTest, ArrayElement_Uniform) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read> arr : array<i32>;
 
 fn foo() {
@@ -4896,7 +4896,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, ArrayElement_NonUniform) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> arr : array<i32>;
 
 fn foo() {
@@ -4919,7 +4919,7 @@ test:5:7 note: reading from read_write storage buffer 'arr' may result in a non-
 }
 
 TEST_F(UniformityAnalysisTest, ArrayElement_BecomesNonUniform_BeforeCondition) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo() {
@@ -4944,7 +4944,7 @@ test:6:12 note: reading from read_write storage buffer 'rw' may result in a non-
 }
 
 TEST_F(UniformityAnalysisTest, ArrayElement_BecomesNonUniform_AfterCondition) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo() {
@@ -4960,7 +4960,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, ArrayElement_DifferentElementBecomesNonUniform) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo() {
@@ -4985,7 +4985,7 @@ test:6:12 note: reading from read_write storage buffer 'rw' may result in a non-
 }
 
 TEST_F(UniformityAnalysisTest, ArrayElement_DifferentElementBecomesNonUniformThroughPointer) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo() {
@@ -5014,7 +5014,7 @@ TEST_F(UniformityAnalysisTest, ArrayElement_ElementBecomesUniform) {
     // For aggregate types, we conservatively consider them to be forever non-uniform once they
     // become non-uniform. Test that after assigning a uniform value to an element, that element is
     // still considered to be non-uniform.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo() {
@@ -5043,7 +5043,7 @@ TEST_F(UniformityAnalysisTest, ArrayElement_DifferentElementBecomesUniform) {
     // For aggregate types, we conservatively consider them to be forever non-uniform once they
     // become non-uniform. Test that after assigning a uniform value to an element, the whole array
     // is still considered to be non-uniform.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo() {
@@ -5072,7 +5072,7 @@ TEST_F(UniformityAnalysisTest, ArrayElement_ElementBecomesUniformThroughPointer)
     // For aggregate types, we conservatively consider them to be forever non-uniform once they
     // become non-uniform. Test that after assigning a uniform value to an element through a
     // pointer, the whole array is still considered to be non-uniform.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo() {
@@ -5103,7 +5103,7 @@ test:7:12 note: reading from read_write storage buffer 'rw' may result in a non-
 ////////////////////////////////////////////////////////////////////////////////
 
 TEST_F(UniformityAnalysisTest, TypeConstructor) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
 
 fn foo() {
@@ -5126,7 +5126,7 @@ test:5:11 note: reading from read_write storage buffer 'non_uniform_global' may 
 }
 
 TEST_F(UniformityAnalysisTest, Conversion) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
 
 fn foo() {
@@ -5149,7 +5149,7 @@ test:5:11 note: reading from read_write storage buffer 'non_uniform_global' may 
 }
 
 TEST_F(UniformityAnalysisTest, Bitcast) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
 
 fn foo() {
@@ -5173,7 +5173,7 @@ test:5:20 note: reading from read_write storage buffer 'non_uniform_global' may 
 
 TEST_F(UniformityAnalysisTest, CompoundAssignment_NonUniformRHS) {
     // Use compound assignment with a non-uniform RHS on a variable.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo() {
@@ -5199,7 +5199,7 @@ test:6:8 note: reading from read_write storage buffer 'rw' may result in a non-u
 
 TEST_F(UniformityAnalysisTest, CompoundAssignment_UniformRHS_StillNonUniform) {
     // Use compound assignment with a uniform RHS on a variable that is already non-uniform.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 fn foo() {
@@ -5224,7 +5224,7 @@ test:5:11 note: reading from read_write storage buffer 'rw' may result in a non-
 }
 
 TEST_F(UniformityAnalysisTest, PhonyAssignment_LhsCausesNonUniformControlFlow) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> nonuniform_var : i32;
 
 fn bar() -> i32 {
@@ -5254,7 +5254,7 @@ test:13:7 note: calling 'bar' may cause subsequent control flow to be non-unifor
 }
 
 TEST_F(UniformityAnalysisTest, ShortCircuiting_CausesNonUniformControlFlow) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
 
 var<private> p : i32;
@@ -5279,7 +5279,7 @@ test:7:12 note: reading from read_write storage buffer 'non_uniform_global' may 
 
 TEST_F(UniformityAnalysisTest, DeadCode_AfterReturn) {
     // Dead code after a return statement shouldn't cause uniformity errors.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -5295,7 +5295,7 @@ fn foo() {
 
 TEST_F(UniformityAnalysisTest, DeadCode_AfterDiscard) {
     // Dead code after a discard statement shouldn't cause uniformity errors.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -5310,7 +5310,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, ArrayLength) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> arr : array<f32>;
 
 fn foo() {
@@ -5324,7 +5324,7 @@ fn foo() {
 }
 
 TEST_F(UniformityAnalysisTest, WorkgroupAtomics) {
-    auto src = R"(
+    std::string src = R"(
 var<workgroup> a : atomic<i32>;
 
 fn foo() {
@@ -5347,7 +5347,7 @@ test:5:18 note: reading from workgroup storage variable 'a' may result in a non-
 }
 
 TEST_F(UniformityAnalysisTest, StorageAtomics) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> a : atomic<i32>;
 
 fn foo() {
@@ -5370,7 +5370,7 @@ test:5:18 note: reading from read_write storage buffer 'a' may result in a non-u
 }
 
 TEST_F(UniformityAnalysisTest, DisableAnalysisWithExtension) {
-    auto src = R"(
+    std::string src = R"(
 enable chromium_disable_uniformity_analysis;
 
 @group(0) @binding(0) var<storage, read_write> rw : i32;
@@ -5390,7 +5390,7 @@ fn foo() {
 ////////////////////////////////////////////////////////////////////////////////
 
 TEST_F(UniformityAnalysisTest, Error_CallUserThatCallsBuiltinDirectly) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn foo() {
@@ -5421,7 +5421,7 @@ test:9:7 note: reading from read_write storage buffer 'non_uniform' may result i
 }
 
 TEST_F(UniformityAnalysisTest, Error_CallUserThatCallsBuiltinIndirectly) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn zoo() {
@@ -5460,7 +5460,7 @@ test:17:7 note: reading from read_write storage buffer 'non_uniform' may result 
 }
 
 TEST_F(UniformityAnalysisTest, Error_ParametersRequireUniformityInChain) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn zoo(a : i32) {
@@ -5507,7 +5507,7 @@ test:19:7 note: reading from read_write storage buffer 'non_uniform' may result 
 }
 
 TEST_F(UniformityAnalysisTest, Error_ReturnValueMayBeNonUniformChain) {
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform : i32;
 
 fn zoo() -> i32 {
