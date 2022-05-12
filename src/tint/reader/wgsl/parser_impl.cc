@@ -2577,7 +2577,7 @@ Maybe<const ast::Expression*> ParserImpl::exclusive_or_expression() {
 Expect<const ast::Expression*> ParserImpl::expect_inclusive_or_expr(const ast::Expression* lhs) {
     while (continue_parsing()) {
         Source source;
-        if (!match(Token::Type::kOr))
+        if (!match(Token::Type::kOr, &source))
             return lhs;
 
         auto rhs = exclusive_or_expression();
@@ -2644,7 +2644,7 @@ Maybe<const ast::Expression*> ParserImpl::logical_and_expression() {
 Expect<const ast::Expression*> ParserImpl::expect_logical_or_expr(const ast::Expression* lhs) {
     while (continue_parsing()) {
         Source source;
-        if (!match(Token::Type::kOrOr))
+        if (!match(Token::Type::kOrOr, &source))
             return lhs;
 
         auto rhs = logical_and_expression();
