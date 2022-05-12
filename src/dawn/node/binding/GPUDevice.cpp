@@ -166,7 +166,8 @@ interop::Interface<interop::GPUTexture> GPUDevice::createTexture(
         !conv(desc.dimension, descriptor.dimension) ||                                 //
         !conv(desc.mipLevelCount, descriptor.mipLevelCount) ||                         //
         !conv(desc.sampleCount, descriptor.sampleCount) ||                             //
-        !conv(desc.format, descriptor.format)) {
+        !conv(desc.format, descriptor.format) ||                                       //
+        !conv(desc.viewFormats, desc.viewFormatCount, descriptor.viewFormats)) {
         return {};
     }
     return interop::GPUTexture::Create<GPUTexture>(env, device_.CreateTexture(&desc));
