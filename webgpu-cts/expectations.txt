@@ -307,6 +307,16 @@ crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="0x3f" [ Fail
 crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="123" [ Failure ]
 crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="2147483647" [ Failure ]
 crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="4294967295" [ Failure ]
+crbug.com/dawn/1546 [ monterey ] webgpu:shader,execution,expression,call,builtin,ceil:* [ Failure ]
+crbug.com/dawn/1546 [ ubuntu ] webgpu:shader,execution,expression,call,builtin,ceil:* [ Failure ]
+crbug.com/dawn/1546 [ win10 ] webgpu:shader,execution,expression,call,builtin,ceil:* [ Failure ]
+crbug.com/dawn/1546 [ monterey ] webgpu:shader,execution,expression,call,builtin,floor:* [ Failure ]
+crbug.com/dawn/1546 [ ubuntu ] webgpu:shader,execution,expression,call,builtin,floor:* [ Failure ]
+crbug.com/dawn/1546 [ win10 ] webgpu:shader,execution,expression,call,builtin,floor:* [ Failure ]
+crbug.com/dawn/1546 [ monterey ] webgpu:shader,execution,expression,call,builtin,fract:* [ Failure ]
+crbug.com/dawn/1546 [ ubuntu ] webgpu:shader,execution,expression,call,builtin,fract:* [ Failure ]
+crbug.com/dawn/1546 [ win10 ] webgpu:shader,execution,expression,call,builtin,fract:* [ Failure ]
+
 
 ################################################################################
 # crbug.com/dawn/1325 render pass/bundle and render pipeline depth/stencil read only and write states validation
@@ -395,13 +405,4 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x5912 win10 ] webgpu:api
 crbug.com/dawn/0000 [ intel-0x5912 win10 ] webgpu:api,validation,image_copy,texture_related:format:method="WriteTexture";depthOrArrayLayers=32;dimension="3d";format="rgba32sint" [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation win10 ] webgpu:api,validation,resource_usages,texture,in_render_common:subresources,depth_stencil_texture_in_bind_groups:view0Levels={"base":1,"count":2};view0Layers={"base":1,"count":1};view1Levels={"base":1,"count":1};view1Layers={"base":0,"count":1};aspect0="stencil-only";aspect1="depth-only";inSamePass=false [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation win10 ] webgpu:api,validation,vertex_state:vertex_attribute_contained_in_stride:format="uint32x2" [ Failure ]
-crbug.com/dawn/0000 [ monterey ] webgpu:shader,execution,expression,call,builtin,ceil:* [ Failure ]
-crbug.com/dawn/0000 [ ubuntu ] webgpu:shader,execution,expression,call,builtin,ceil:* [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,ceil:* [ Failure ]
-crbug.com/dawn/0000 [ monterey ] webgpu:shader,execution,expression,call,builtin,floor:* [ Failure ]
-crbug.com/dawn/0000 [ ubuntu ] webgpu:shader,execution,expression,call,builtin,floor:* [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,floor:* [ Failure ]
-crbug.com/dawn/0000 [ monterey ] webgpu:shader,execution,expression,call,builtin,fract:* [ Failure ]
-crbug.com/dawn/0000 [ ubuntu ] webgpu:shader,execution,expression,call,builtin,fract:* [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,fract:* [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x3e9b ] webgpu:shader,execution,zero_init:compute,zero_init:storageClass="workgroup";workgroupSize=[1,47,1];batch__=12 [ Failure ]
