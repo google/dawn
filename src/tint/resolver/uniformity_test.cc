@@ -401,6 +401,47 @@ test:16:3 note: calling 'foo' may cause subsequent control flow to be non-unifor
 )");
 }
 
+TEST_F(UniformityAnalysisTest, SubsequentControlFlowMayBeNonUniform_Nested_Fail) {
+    // Indirectly call a function that causes subsequent control flow to be non-uniform, and then
+    // call another function that requires uniformity.
+    // The lack of return statement in `foo()` requires that we implicitly add an edge from
+    // CF_return to that last control flow node of the function.
+    auto src = R"(
+@group(0) @binding(0) var<storage, read_write> rw : i32;
+
+var<private> p : i32;
+
+fn bar() {
+  if (rw == 0) {
+    p = 42;
+    return;
+  }
+  p = 5;
+  return;
+}
+
+fn foo() {
+  bar();
+}
+
+fn main() {
+  foo();
+  workgroupBarrier();
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:21:3 warning: 'workgroupBarrier' must only be called from uniform control flow
+  workgroupBarrier();
+  ^^^^^^^^^^^^^^^^
+
+test:20:3 note: calling 'foo' may cause subsequent control flow to be non-uniform
+  foo();
+  ^^^
+)");
+}
+
 TEST_F(UniformityAnalysisTest, ParameterNoRestriction_Pass) {
     // Pass a non-uniform value as an argument, and then try to use the return value for
     // control-flow guarding a barrier.

@@ -314,7 +314,8 @@ class UniformityGraph {
 
         // Process function body.
         if (func->body) {
-            ProcessStatement(current_function_->cf_start, func->body);
+            auto* cf = ProcessStatement(current_function_->cf_start, func->body);
+            current_function_->cf_return->AddEdge(cf);
         }
 
 #if TINT_DUMP_UNIFORMITY_GRAPH
@@ -556,10 +557,7 @@ class UniformityGraph {
                 return cf;
             },
 
-            [&](const ast::DiscardStatement*) {
-                current_function_->cf_return->AddEdge(cf);
-                return cf;
-            },
+            [&](const ast::DiscardStatement*) { return cf; },
 
             [&](const ast::FallthroughStatement*) { return cf; },
 
