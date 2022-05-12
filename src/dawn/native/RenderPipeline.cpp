@@ -348,10 +348,6 @@ MaybeError ValidateFragmentState(DeviceBase* device,
             DAWN_INVALID_IF(target->blend,
                             "Color target[%u] blend state is set when the format is undefined.",
                             static_cast<uint8_t>(i));
-            DAWN_INVALID_IF(
-                target->writeMask != wgpu::ColorWriteMask::None,
-                "Color target[%u] write mask is set to (%s) when the format is undefined.",
-                static_cast<uint8_t>(i), target->writeMask);
         }
     }
 

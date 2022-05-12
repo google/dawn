@@ -194,8 +194,8 @@ TEST_F(RenderPipelineValidationTest, ColorTargetStateRequired) {
     }
 }
 
-// Tests that target blend and writeMasks must not be set if the format is undefined.
-TEST_F(RenderPipelineValidationTest, UndefinedColorStateFormatWithBlendOrWriteMask) {
+// Tests that target blend must not be set if the format is undefined.
+TEST_F(RenderPipelineValidationTest, UndefinedColorStateFormatWithBlend) {
     {
         // Control case: Valid undefined format target.
         utils::ComboRenderPipelineDescriptor descriptor;
@@ -203,7 +203,6 @@ TEST_F(RenderPipelineValidationTest, UndefinedColorStateFormatWithBlendOrWriteMa
         descriptor.cFragment.module = fsModule;
         descriptor.cFragment.targetCount = 1;
         descriptor.cTargets[0].format = wgpu::TextureFormat::Undefined;
-        descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
 
         device.CreateRenderPipeline(&descriptor);
     }
@@ -221,19 +220,25 @@ TEST_F(RenderPipelineValidationTest, UndefinedColorStateFormatWithBlendOrWriteMa
             device.CreateRenderPipeline(&descriptor),
             testing::HasSubstr("Color target[0] blend state is set when the format is undefined."));
     }
-    {
-        // Error case: undefined format target with write masking not being none.
-        utils::ComboRenderPipelineDescriptor descriptor;
-        descriptor.vertex.module = vsModule;
-        descriptor.cFragment.module = fsModule;
-        descriptor.cFragment.targetCount = 1;
-        descriptor.cTargets[0].format = wgpu::TextureFormat::Undefined;
-        descriptor.cTargets[0].blend = nullptr;
-        descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::All;
+}
 
-        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
-                            testing::HasSubstr("Color target[0] write mask is set to"));
-    }
+// Tests that a color target that's present in the pipeline descriptor but not in the shader must
+// have its writeMask set to 0.
+TEST_F(RenderPipelineValidationTest, WriteMaskMustBeZeroForColorTargetWithNoShaderOutput) {
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.cFragment.targetCount = 2;
+    descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    descriptor.cTargets[1].format = wgpu::TextureFormat::RGBA8Unorm;
+
+    // Control case: Target 1 not output by the shader but has writeMask = 0
+    descriptor.cTargets[1].writeMask = wgpu::ColorWriteMask::None;
+    device.CreateRenderPipeline(&descriptor);
+
+    // Error case: the writeMask is not 0.
+    descriptor.cTargets[1].writeMask = wgpu::ColorWriteMask::Red;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 }
 
 // Tests that the color formats must be renderable.
