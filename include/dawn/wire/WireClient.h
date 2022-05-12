@@ -68,7 +68,7 @@ class DAWN_WIRE_EXPORT WireClient : public CommandHandler {
     explicit WireClient(const WireClientDescriptor& descriptor);
     ~WireClient() override;
 
-    const volatile char* HandleCommands(const volatile char* commands, size_t size) final;
+    const volatile char* HandleCommands(const volatile char* commands, size_t size) override;
 
     ReservedTexture ReserveTexture(WGPUDevice device);
     ReservedSwapChain ReserveSwapChain(WGPUDevice device);

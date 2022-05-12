@@ -39,7 +39,7 @@ class DAWN_WIRE_EXPORT WireServer : public CommandHandler {
     explicit WireServer(const WireServerDescriptor& descriptor);
     ~WireServer() override;
 
-    const volatile char* HandleCommands(const volatile char* commands, size_t size) final;
+    const volatile char* HandleCommands(const volatile char* commands, size_t size) override;
 
     bool InjectTexture(WGPUTexture texture,
                        uint32_t id,
