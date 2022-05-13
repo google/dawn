@@ -144,7 +144,7 @@ class Builtin final : public Castable<Builtin, CallTarget> {
     bool HasSideEffects() const;
 
     /// @returns the required extension of this builtin function. Returns
-    /// ast::Enable::ExtensionKind::kNotAnExtension if no extension is required.
+    /// ast::Enable::ExtensionKind::kNoExtension if no extension is required.
     ast::Enable::ExtensionKind RequiredExtension() const;
 
   private:

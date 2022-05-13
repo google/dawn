@@ -157,7 +157,7 @@ ast::Enable::ExtensionKind Builtin::RequiredExtension() const {
     if (IsDP4a()) {
         return ast::Enable::ExtensionKind::kChromiumExperimentalDP4a;
     }
-    return ast::Enable::ExtensionKind::kNotAnExtension;
+    return ast::Enable::ExtensionKind::kNoExtension;
 }
 
 }  // namespace tint::sem

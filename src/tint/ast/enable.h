@@ -32,6 +32,10 @@ class Enable : public Castable<Enable, Node> {
   public:
     ///  The enum class identifing each supported WGSL extension
     enum class ExtensionKind {
+        /// An internal reserved extension for test, named
+        /// "InternalExtensionForTesting".
+        kInternalExtensionForTesting,
+
         /// An extension for the experimental feature
         /// "chromium_experimental_dp4a".
         /// See crbug.com/tint/1497 for more details
@@ -39,28 +43,26 @@ class Enable : public Castable<Enable, Node> {
         /// A Chromium-specific extension for disabling uniformity analysis.
         kChromiumDisableUniformityAnalysis,
 
-        /// An internal reserved extension for test, named
-        /// "InternalExtensionForTesting"
-        kInternalExtensionForTesting = -2,
-        kNotAnExtension = -1,
+        /// Reserved for representing "No extension required" or "Not a valid extension".
+        kNoExtension,
     };
 
     /// Convert a string of extension name into one of ExtensionKind enum value,
-    /// the result will be ExtensionKind::kNotAnExtension if the name is not a
-    /// known extension name. A extension node of kind kNotAnExtension must not
+    /// the result will be ExtensionKind::kNoExtension if the name is not a
+    /// known extension name. A extension node of kind kNoExtension must not
     /// exist in the AST tree, and using a unknown extension name in WGSL code
     /// should result in a shader-creation error.
     /// @param name string of the extension name
     /// @return the ExtensionKind enum value for the extension of given name, or
-    /// kNotAnExtension if no known extension has the given name
+    /// kNoExtension if no known extension has the given name
     static ExtensionKind NameToKind(const std::string& name);
 
     /// Convert the ExtensionKind enum value to corresponding extension name
-    /// string. If the given enum value is kNotAnExtension or don't have a known
+    /// string. If the given enum value is kNoExtension or don't have a known
     /// name, return an empty string instead.
     /// @param kind the ExtensionKind enum value
     /// @return string of the extension name corresponding to the given kind, or
-    /// an empty string if the given enum value is kNotAnExtension or don't have a
+    /// an empty string if the given enum value is kNoExtension or don't have a
     /// known corresponding name
     static std::string KindToName(ExtensionKind kind);
 

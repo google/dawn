@@ -34,7 +34,7 @@ Enable::ExtensionKind Enable::NameToKind(const std::string& name) {
         return Enable::ExtensionKind::kInternalExtensionForTesting;
     }
 
-    return Enable::ExtensionKind::kNotAnExtension;
+    return Enable::ExtensionKind::kNoExtension;
 }
 
 std::string Enable::KindToName(ExtensionKind kind) {
@@ -47,8 +47,8 @@ std::string Enable::KindToName(ExtensionKind kind) {
         // The reserved internal extension for testing
         case ExtensionKind::kInternalExtensionForTesting:
             return "InternalExtensionForTesting";
-        case ExtensionKind::kNotAnExtension:
-            // Return an empty string for kNotAnExtension
+        case ExtensionKind::kNoExtension:
+            // Return an empty string for kNoExtension
             return {};
             // No default case, as this switch must cover all ExtensionKind values.
     }

@@ -358,7 +358,7 @@ Maybe<bool> ParserImpl::enable_directive() {
             return Failure::kErrored;
         }
 
-        if (ast::Enable::NameToKind(name.value) != ast::Enable::ExtensionKind::kNotAnExtension) {
+        if (ast::Enable::NameToKind(name.value) != ast::Enable::ExtensionKind::kNoExtension) {
             const ast::Enable* extension = create<ast::Enable>(name.source, name.value);
             builder_.AST().AddEnable(extension);
         } else {

@@ -39,20 +39,20 @@ TEST_F(AstExtensionTest, Creation_InvalidName) {
     EXPECT_EQ(ext->source.range.begin.column, 2u);
     EXPECT_EQ(ext->source.range.end.line, 20u);
     EXPECT_EQ(ext->source.range.end.column, 5u);
-    EXPECT_EQ(ext->kind, ast::Enable::ExtensionKind::kNotAnExtension);
+    EXPECT_EQ(ext->kind, ast::Enable::ExtensionKind::kNoExtension);
 }
 
 TEST_F(AstExtensionTest, NameToKind_InvalidName) {
-    EXPECT_EQ(ast::Enable::NameToKind(std::string()), ast::Enable::ExtensionKind::kNotAnExtension);
+    EXPECT_EQ(ast::Enable::NameToKind(std::string()), ast::Enable::ExtensionKind::kNoExtension);
     EXPECT_EQ(ast::Enable::NameToKind("__ImpossibleExtensionName"),
-              ast::Enable::ExtensionKind::kNotAnExtension);
-    EXPECT_EQ(ast::Enable::NameToKind("123"), ast::Enable::ExtensionKind::kNotAnExtension);
+              ast::Enable::ExtensionKind::kNoExtension);
+    EXPECT_EQ(ast::Enable::NameToKind("123"), ast::Enable::ExtensionKind::kNoExtension);
 }
 
 TEST_F(AstExtensionTest, KindToName) {
     EXPECT_EQ(ast::Enable::KindToName(ast::Enable::ExtensionKind::kInternalExtensionForTesting),
               "InternalExtensionForTesting");
-    EXPECT_EQ(ast::Enable::KindToName(ast::Enable::ExtensionKind::kNotAnExtension), std::string());
+    EXPECT_EQ(ast::Enable::KindToName(ast::Enable::ExtensionKind::kNoExtension), std::string());
 }
 
 }  // namespace

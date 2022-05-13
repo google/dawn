@@ -1525,7 +1525,7 @@ bool Validator::RequiredExtensionForBuiltinFunction(const sem::Call* call,
     }
 
     const auto extension = builtin->RequiredExtension();
-    if (extension == ast::Enable::ExtensionKind::kNotAnExtension) {
+    if (extension == ast::Enable::ExtensionKind::kNoExtension) {
         return true;
     }
 
