@@ -176,6 +176,10 @@ void OwnedCompilationMessages::AddFormattedTintMessages(const tint::diag::List& 
                 messageList.add(tint::diag::Diagnostic(diag));
                 break;
             }
+            case (tint::diag::Severity::Note): {
+                messageList.add(tint::diag::Diagnostic(diag));
+                break;
+            }
             default:
                 break;
         }
