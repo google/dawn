@@ -242,7 +242,7 @@ class GeneratorImpl : public TextGenerator {
     /// Handles generating a call to data packing builtin
     /// @param out the output of the expression stream
     /// @param expr the call expression
-    /// @param builtin the semantic information for the texture builtin
+    /// @param builtin the semantic information for the builtin
     /// @returns true if the call expression is emitted
     bool EmitDataPackingCall(std::ostream& out,
                              const ast::CallExpression* expr,
@@ -250,11 +250,19 @@ class GeneratorImpl : public TextGenerator {
     /// Handles generating a call to data unpacking builtin
     /// @param out the output of the expression stream
     /// @param expr the call expression
-    /// @param builtin the semantic information for the texture builtin
+    /// @param builtin the semantic information for the builtin
     /// @returns true if the call expression is emitted
     bool EmitDataUnpackingCall(std::ostream& out,
                                const ast::CallExpression* expr,
                                const sem::Builtin* builtin);
+    /// Handles generating a call to DP4a builtins (dot4I8Packed and dot4U8Packed)
+    /// @param out the output of the expression stream
+    /// @param expr the call expression
+    /// @param builtin the semantic information for the builtin
+    /// @returns true if the call expression is emitted
+    bool EmitDP4aCall(std::ostream& out,
+                      const ast::CallExpression* expr,
+                      const sem::Builtin* builtin);
     /// Handles a case statement
     /// @param s the switch statement
     /// @param case_idx the index of the switch case in the switch statement

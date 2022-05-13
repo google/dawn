@@ -70,6 +70,11 @@ bool IsBarrierBuiltin(BuiltinType i);
 /// @returns true if the given `i` is a atomic builtin
 bool IsAtomicBuiltin(BuiltinType i);
 
+/// Determins if the given `i` is a DP4a builtin
+/// @param i the builtin
+/// @returns true if the given `i` is a DP4a builtin
+bool IsDP4aBuiltin(BuiltinType i);
+
 /// Builtin holds the semantic information for a builtin function.
 class Builtin final : public Castable<Builtin, CallTarget> {
   public:
@@ -129,6 +134,10 @@ class Builtin final : public Castable<Builtin, CallTarget> {
 
     /// @returns true if builtin is a atomic builtin
     bool IsAtomic() const;
+
+    /// @returns true if builtin is a DP4a builtin (defined in the extension
+    /// chromium_experimental_DP4a)
+    bool IsDP4a() const;
 
     /// @returns true if intrinsic may have side-effects (i.e. writes to at least
     /// one of its inputs)

@@ -726,5 +726,61 @@ void main() {
 )");
 }
 
+TEST_F(HlslGeneratorImplTest_Builtin, Dot4I8Packed) {
+    auto* ext =
+        create<ast::Enable>(Source{Source::Range{Source::Location{10, 2}, Source::Location{10, 5}}},
+                            "chromium_experimental_dp4a");
+    AST().AddEnable(ext);
+
+    auto* val1 = Var("val1", ty.u32());
+    auto* val2 = Var("val2", ty.u32());
+    auto* call = Call("dot4I8Packed", val1, val2);
+    WrapInFunction(val1, val2, call);
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(int tint_dot4I8Packed(uint param_0, uint param_1) {
+  return dot4add_i8packed(param_0, param_1, 0);
+}
+
+[numthreads(1, 1, 1)]
+void test_function() {
+  uint val1 = 0u;
+  uint val2 = 0u;
+  const int tint_symbol = tint_dot4I8Packed(val1, val2);
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Builtin, Dot4U8Packed) {
+    auto* ext =
+        create<ast::Enable>(Source{Source::Range{Source::Location{10, 2}, Source::Location{10, 5}}},
+                            "chromium_experimental_dp4a");
+    AST().AddEnable(ext);
+
+    auto* val1 = Var("val1", ty.u32());
+    auto* val2 = Var("val2", ty.u32());
+    auto* call = Call("dot4U8Packed", val1, val2);
+    WrapInFunction(val1, val2, call);
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(uint tint_dot4U8Packed(uint param_0, uint param_1) {
+  return dot4add_u8packed(param_0, param_1, 0);
+}
+
+[numthreads(1, 1, 1)]
+void test_function() {
+  uint val1 = 0u;
+  uint val2 = 0u;
+  const uint tint_symbol = tint_dot4U8Packed(val1, val2);
+  return;
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::writer::hlsl

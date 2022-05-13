@@ -1027,6 +1027,9 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
     if (builtin->IsAtomic()) {
         return EmitWorkgroupAtomicCall(out, expr, builtin);
     }
+    if (builtin->IsDP4a()) {
+        return EmitDP4aCall(out, expr, builtin);
+    }
     auto name = generate_builtin_name(builtin);
     if (name.empty()) {
         return false;
@@ -2028,6 +2031,32 @@ bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& out,
                                            "Internal error: unhandled data packing builtin");
                     return false;
             }
+
+            return true;
+        });
+}
+
+bool GeneratorImpl::EmitDP4aCall(std::ostream& out,
+                                 const ast::CallExpression* expr,
+                                 const sem::Builtin* builtin) {
+    // TODO(crbug.com/tint/1497): support the polyfill version of DP4a functions.
+    return CallBuiltinHelper(
+        out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
+            std::string functionName;
+            switch (builtin->Type()) {
+                case sem::BuiltinType::kDot4I8Packed:
+                    functionName = "dot4add_i8packed";
+                    break;
+                case sem::BuiltinType::kDot4U8Packed:
+                    functionName = "dot4add_u8packed";
+                    break;
+                default:
+                    diagnostics_.add_error(diag::System::Writer,
+                                           "Internal error: unhandled DP4a builtin");
+                    return false;
+            }
+            line(b) << "return " << functionName << "(" << params[0] << ", " << params[1]
+                    << ", 0);";
 
             return true;
         });
