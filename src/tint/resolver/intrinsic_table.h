@@ -26,7 +26,7 @@ namespace tint {
 class ProgramBuilder;
 }  // namespace tint
 
-namespace tint {
+namespace tint::resolver {
 
 /// IntrinsicTable is a lookup table of all the WGSL builtin functions and intrinsic operators
 class IntrinsicTable {
@@ -91,6 +91,6 @@ class IntrinsicTable {
                                   bool is_compound) = 0;
 };
 
-}  // namespace tint
+}  // namespace tint::resolver
 
 #endif  // SRC_TINT_RESOLVER_INTRINSIC_TABLE_H_

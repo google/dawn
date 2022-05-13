@@ -102,6 +102,8 @@ type Overload struct {
 	CanBeUsedInStage sem.StageUses
 	// True if the overload is marked as deprecated
 	IsDeprecated bool
+	// The kind of overload
+	Kind string
 }
 
 // Intrinsic is used to create the C++ IntrinsicInfo structure
@@ -202,6 +204,7 @@ func (b *IntrinsicTableBuilder) buildOverload(o *sem.Overload) (Overload, error)
 		ReturnMatcherIndicesOffset: ob.returnTypeMatcherIndicesOffset,
 		CanBeUsedInStage:           o.CanBeUsedInStage,
 		IsDeprecated:               o.IsDeprecated,
+		Kind:                       string(o.Decl.Kind),
 	}, nil
 }
 

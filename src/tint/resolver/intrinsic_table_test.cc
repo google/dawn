@@ -25,7 +25,7 @@
 #include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/storage_texture.h"
 
-namespace tint {
+namespace tint::resolver {
 namespace {
 
 using ::testing::HasSubstr;
@@ -662,4 +662,4 @@ TEST_F(IntrinsicTableTest, MismatchCompoundOp) {
 }
 
 }  // namespace
-}  // namespace tint
+}  // namespace tint::resolver

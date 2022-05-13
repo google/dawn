@@ -97,11 +97,11 @@ constexpr OverloadInfo kOverloads[] = {
 {{-   if $o.ReturnMatcherIndicesOffset }} &kMatcherIndices[{{$o.ReturnMatcherIndicesOffset}}]
 {{-   else                             }} nullptr
 {{-   end }},
-    /* supported_stages */ PipelineStageSet(
+    /* flags */ OverloadFlags(OverloadFlag::kIs{{Title $o.Kind}}
 {{-   range $i, $u := $o.CanBeUsedInStage.List -}}
-{{-     if $i -}}, {{end}}PipelineStage::k{{Title $u}}
-{{-   end }}),
-    /* is_deprecated */ {{$o.IsDeprecated}},
+        , OverloadFlag::kSupports{{Title $u}}Pipeline
+{{-   end }}
+{{-   if $o.IsDeprecated}}, OverloadFlag::kIsDeprecated{{end }}),
   },
 {{- end }}
 };

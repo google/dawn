@@ -33,7 +33,7 @@
 #include "src/tint/utils/math.h"
 #include "src/tint/utils/scoped_assignment.h"
 
-namespace tint {
+namespace tint::resolver {
 namespace {
 
 // Forward declarations
@@ -289,8 +289,20 @@ using TexelFormat = ast::TexelFormat;
 using Access = ast::Access;
 using StorageClass = ast::StorageClass;
 using ParameterUsage = sem::ParameterUsage;
-using PipelineStageSet = sem::PipelineStageSet;
 using PipelineStage = ast::PipelineStage;
+
+/// Unique flag bits for overloads
+enum class OverloadFlag {
+    kIsBuiltin,                 // The overload is a builtin ('fn')
+    kIsOperator,                // The overload is an operator ('op')
+    kSupportsVertexPipeline,    // The overload can be used in vertex shaders
+    kSupportsFragmentPipeline,  // The overload can be used in fragment shaders
+    kSupportsComputePipeline,   // The overload can be used in compute shaders
+    kIsDeprecated,              // The overload is deprecated
+};
+
+// An enum set of OverloadFlag, used by OperatorInfo
+using OverloadFlags = utils::EnumSet<OverloadFlag>;
 
 bool match_bool(const sem::Type* ty) {
     return ty->IsAnyOf<Any, sem::Bool>();
@@ -756,10 +768,8 @@ struct OverloadInfo {
     /// Matchers::number, used to build the return type. If the function has no
     /// return type then this is null
     MatcherIndex const* const return_matcher_indices;
-    /// The pipeline stages that this overload can be used in
-    PipelineStageSet supported_stages;
-    /// True if the overload is marked as deprecated
-    bool is_deprecated;
+    /// The flags for the overload
+    OverloadFlags flags;
 };
 
 /// IntrinsicInfo describes a builtin function or operator overload
@@ -791,21 +801,18 @@ struct IntrinsicPrototype {
             for (auto& p : i.parameters) {
                 utils::HashCombine(&hash, p.type, p.usage);
             }
-            return utils::Hash(hash, i.index, i.return_type, i.supported_stages, i.is_deprecated);
+            return utils::Hash(hash, i.overload, i.return_type);
         }
     };
 
-    uint32_t index = 0;  // Index of the intrinsic (builtin or operator)
-    std::vector<Parameter> parameters;
+    const OverloadInfo* overload = nullptr;
     sem::Type const* return_type = nullptr;
-    PipelineStageSet supported_stages;
-    bool is_deprecated = false;
+    std::vector<Parameter> parameters;
 };
 
 /// Equality operator for IntrinsicPrototype
 bool operator==(const IntrinsicPrototype& a, const IntrinsicPrototype& b) {
-    if (a.index != b.index || a.supported_stages != b.supported_stages ||
-        a.return_type != b.return_type || a.is_deprecated != b.is_deprecated ||
+    if (a.overload != b.overload || a.return_type != b.return_type ||
         a.parameters.size() != b.parameters.size()) {
         return false;
     }
@@ -845,7 +852,6 @@ class Impl : public IntrinsicTable {
     };
 
     const IntrinsicPrototype Match(const char* intrinsic_name,
-                                   uint32_t intrinsic_index,
                                    const OverloadInfo& overload,
                                    const std::vector<const sem::Type*>& args,
                                    int& match_score);
@@ -905,7 +911,7 @@ const sem::Builtin* Impl::Lookup(sem::BuiltinType builtin_type,
     for (uint32_t o = 0; o < builtin.num_overloads; o++) {
         int match_score = 1000;
         auto& overload = builtin.overloads[o];
-        auto match = Match(intrinsic_name, intrinsic_index, overload, args, match_score);
+        auto match = Match(intrinsic_name, overload, args, match_score);
         if (match.return_type) {
             // De-duplicate builtins that are identical.
             return utils::GetOrCreate(builtins, match, [&] {
@@ -916,9 +922,19 @@ const sem::Builtin* Impl::Lookup(sem::BuiltinType builtin_type,
                         nullptr, static_cast<uint32_t>(params.size()), p.type,
                         ast::StorageClass::kNone, ast::Access::kUndefined, p.usage));
                 }
-                return builder.create<sem::Builtin>(builtin_type, match.return_type,
-                                                    std::move(params), match.supported_stages,
-                                                    match.is_deprecated);
+                sem::PipelineStageSet supported_stages;
+                if (match.overload->flags.Contains(OverloadFlag::kSupportsVertexPipeline)) {
+                    supported_stages.Add(ast::PipelineStage::kVertex);
+                }
+                if (match.overload->flags.Contains(OverloadFlag::kSupportsFragmentPipeline)) {
+                    supported_stages.Add(ast::PipelineStage::kFragment);
+                }
+                if (match.overload->flags.Contains(OverloadFlag::kSupportsComputePipeline)) {
+                    supported_stages.Add(ast::PipelineStage::kCompute);
+                }
+                return builder.create<sem::Builtin>(
+                    builtin_type, match.return_type, std::move(params), supported_stages,
+                    match.overload->flags.Contains(OverloadFlag::kIsDeprecated));
             });
         }
         if (match_score > 0) {
@@ -970,7 +986,7 @@ IntrinsicTable::UnaryOperator Impl::Lookup(ast::UnaryOp op,
     for (uint32_t o = 0; o < builtin.num_overloads; o++) {
         int match_score = 1000;
         auto& overload = builtin.overloads[o];
-        auto match = Match(intrinsic_name, intrinsic_index, overload, {arg}, match_score);
+        auto match = Match(intrinsic_name, overload, {arg}, match_score);
         if (match.return_type) {
             return UnaryOperator{match.return_type, match.parameters[0].type};
         }
@@ -1055,7 +1071,7 @@ IntrinsicTable::BinaryOperator Impl::Lookup(ast::BinaryOp op,
     for (uint32_t o = 0; o < builtin.num_overloads; o++) {
         int match_score = 1000;
         auto& overload = builtin.overloads[o];
-        auto match = Match(intrinsic_name, intrinsic_index, overload, {lhs, rhs}, match_score);
+        auto match = Match(intrinsic_name, overload, {lhs, rhs}, match_score);
         if (match.return_type) {
             return BinaryOperator{match.return_type, match.parameters[0].type,
                                   match.parameters[1].type};
@@ -1088,7 +1104,6 @@ IntrinsicTable::BinaryOperator Impl::Lookup(ast::BinaryOp op,
 }
 
 const IntrinsicPrototype Impl::Match(const char* intrinsic_name,
-                                     uint32_t intrinsic_index,
                                      const OverloadInfo& overload,
                                      const std::vector<const sem::Type*>& args,
                                      int& match_score) {
@@ -1177,11 +1192,9 @@ const IntrinsicPrototype Impl::Match(const char* intrinsic_name,
     }
 
     IntrinsicPrototype builtin;
-    builtin.index = intrinsic_index;
+    builtin.overload = &overload;
     builtin.return_type = return_type;
     builtin.parameters = std::move(parameters);
-    builtin.supported_stages = overload.supported_stages;
-    builtin.is_deprecated = overload.is_deprecated;
     return builtin;
 }
 
@@ -1270,7 +1283,7 @@ std::unique_ptr<IntrinsicTable> IntrinsicTable::Create(ProgramBuilder& builder) 
 
 IntrinsicTable::~IntrinsicTable() = default;
 
-/// TypeInfo for the Any type declared in the anonymous namespace above
-TINT_INSTANTIATE_TYPEINFO(Any);
+}  // namespace tint::resolver
 
-}  // namespace tint
+/// TypeInfo for the Any type declared in the anonymous namespace above
+TINT_INSTANTIATE_TYPEINFO(tint::resolver::Any);
