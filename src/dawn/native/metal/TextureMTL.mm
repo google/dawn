@@ -930,23 +930,18 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
             }
         }
     } else {
-        Extent3D largestMipSize = GetMipLevelVirtualSize(range.baseMipLevel);
-
         // Encode a buffer to texture copy to clear each subresource.
         for (Aspect aspect : IterateEnumMask(range.aspects)) {
             // Compute the buffer size big enough to fill the largest mip.
             const TexelBlockInfo& blockInfo = GetFormat().GetAspectInfo(aspect).block;
 
-            // Metal validation layers: sourceBytesPerRow must be at least 64.
+            // Computations for the bytes per row / image height are done using the physical size
+            // so that enough data is reserved for compressed textures.
+            Extent3D largestMipSize = GetMipLevelPhysicalSize(range.baseMipLevel);
             uint32_t largestMipBytesPerRow =
-                std::max((largestMipSize.width / blockInfo.width) * blockInfo.byteSize, 64u);
-
-            // Metal validation layers: sourceBytesPerImage must be at least 512.
-            uint64_t largestMipBytesPerImage =
-                std::max(static_cast<uint64_t>(largestMipBytesPerRow) *
-                             (largestMipSize.height / blockInfo.height),
-                         512llu);
-
+                (largestMipSize.width / blockInfo.width) * blockInfo.byteSize;
+            uint64_t largestMipBytesPerImage = static_cast<uint64_t>(largestMipBytesPerRow) *
+                                               (largestMipSize.height / blockInfo.height);
             uint64_t bufferSize = largestMipBytesPerImage * largestMipSize.depthOrArrayLayers;
 
             if (bufferSize > std::numeric_limits<NSUInteger>::max()) {
