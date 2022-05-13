@@ -25,7 +25,10 @@
 namespace dawn::native {
 
 EncodingContext::EncodingContext(DeviceBase* device, const ApiObjectBase* initialEncoder)
-    : mDevice(device), mTopLevelEncoder(initialEncoder), mCurrentEncoder(initialEncoder) {}
+    : mDevice(device),
+      mTopLevelEncoder(initialEncoder),
+      mCurrentEncoder(initialEncoder),
+      mDestroyed(device->IsLost()) {}
 
 EncodingContext::~EncodingContext() {
     Destroy();
