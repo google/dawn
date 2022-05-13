@@ -956,28 +956,26 @@ IntrinsicTable::UnaryOperator Impl::Lookup(ast::UnaryOp op,
     auto [intrinsic_index, intrinsic_name] = [&]() -> std::pair<uint32_t, const char*> {
         switch (op) {
             case ast::UnaryOp::kComplement:
-                return {kOperatorComplement, "operator ~ "};
+                return {kUnaryOperatorComplement, "operator ~ "};
             case ast::UnaryOp::kNegation:
-                return {kOperatorMinus, "operator - "};
+                return {kUnaryOperatorMinus, "operator - "};
             case ast::UnaryOp::kNot:
-                return {kOperatorNot, "operator ! "};
+                return {kUnaryOperatorNot, "operator ! "};
             default:
                 return {0, "<unknown>"};
         }
     }();
 
-    auto& builtin = kOperators[intrinsic_index];
+    auto& builtin = kUnaryOperators[intrinsic_index];
     for (uint32_t o = 0; o < builtin.num_overloads; o++) {
         int match_score = 1000;
         auto& overload = builtin.overloads[o];
-        if (overload.num_parameters == 1) {
-            auto match = Match(intrinsic_name, intrinsic_index, overload, {arg}, match_score);
-            if (match.return_type) {
-                return UnaryOperator{match.return_type, match.parameters[0].type};
-            }
-            if (match_score > 0) {
-                candidates.emplace_back(Candidate{&overload, match_score});
-            }
+        auto match = Match(intrinsic_name, intrinsic_index, overload, {arg}, match_score);
+        if (match.return_type) {
+            return UnaryOperator{match.return_type, match.parameters[0].type};
+        }
+        if (match_score > 0) {
+            candidates.emplace_back(Candidate{&overload, match_score});
         }
     }
 
@@ -1013,59 +1011,57 @@ IntrinsicTable::BinaryOperator Impl::Lookup(ast::BinaryOp op,
     auto [intrinsic_index, intrinsic_name] = [&]() -> std::pair<uint32_t, const char*> {
         switch (op) {
             case ast::BinaryOp::kAnd:
-                return {kOperatorAnd, is_compound ? "operator &= " : "operator & "};
+                return {kBinaryOperatorAnd, is_compound ? "operator &= " : "operator & "};
             case ast::BinaryOp::kOr:
-                return {kOperatorOr, is_compound ? "operator |= " : "operator | "};
+                return {kBinaryOperatorOr, is_compound ? "operator |= " : "operator | "};
             case ast::BinaryOp::kXor:
-                return {kOperatorXor, is_compound ? "operator ^= " : "operator ^ "};
+                return {kBinaryOperatorXor, is_compound ? "operator ^= " : "operator ^ "};
             case ast::BinaryOp::kLogicalAnd:
-                return {kOperatorLogicalAnd, "operator && "};
+                return {kBinaryOperatorLogicalAnd, "operator && "};
             case ast::BinaryOp::kLogicalOr:
-                return {kOperatorLogicalOr, "operator || "};
+                return {kBinaryOperatorLogicalOr, "operator || "};
             case ast::BinaryOp::kEqual:
-                return {kOperatorEqual, "operator == "};
+                return {kBinaryOperatorEqual, "operator == "};
             case ast::BinaryOp::kNotEqual:
-                return {kOperatorNotEqual, "operator != "};
+                return {kBinaryOperatorNotEqual, "operator != "};
             case ast::BinaryOp::kLessThan:
-                return {kOperatorLessThan, "operator < "};
+                return {kBinaryOperatorLessThan, "operator < "};
             case ast::BinaryOp::kGreaterThan:
-                return {kOperatorGreaterThan, "operator > "};
+                return {kBinaryOperatorGreaterThan, "operator > "};
             case ast::BinaryOp::kLessThanEqual:
-                return {kOperatorLessThanEqual, "operator <= "};
+                return {kBinaryOperatorLessThanEqual, "operator <= "};
             case ast::BinaryOp::kGreaterThanEqual:
-                return {kOperatorGreaterThanEqual, "operator >= "};
+                return {kBinaryOperatorGreaterThanEqual, "operator >= "};
             case ast::BinaryOp::kShiftLeft:
-                return {kOperatorShiftLeft, is_compound ? "operator <<= " : "operator << "};
+                return {kBinaryOperatorShiftLeft, is_compound ? "operator <<= " : "operator << "};
             case ast::BinaryOp::kShiftRight:
-                return {kOperatorShiftRight, is_compound ? "operator >>= " : "operator >> "};
+                return {kBinaryOperatorShiftRight, is_compound ? "operator >>= " : "operator >> "};
             case ast::BinaryOp::kAdd:
-                return {kOperatorPlus, is_compound ? "operator += " : "operator + "};
+                return {kBinaryOperatorPlus, is_compound ? "operator += " : "operator + "};
             case ast::BinaryOp::kSubtract:
-                return {kOperatorMinus, is_compound ? "operator -= " : "operator - "};
+                return {kBinaryOperatorMinus, is_compound ? "operator -= " : "operator - "};
             case ast::BinaryOp::kMultiply:
-                return {kOperatorStar, is_compound ? "operator *= " : "operator * "};
+                return {kBinaryOperatorStar, is_compound ? "operator *= " : "operator * "};
             case ast::BinaryOp::kDivide:
-                return {kOperatorDivide, is_compound ? "operator /= " : "operator / "};
+                return {kBinaryOperatorDivide, is_compound ? "operator /= " : "operator / "};
             case ast::BinaryOp::kModulo:
-                return {kOperatorModulo, is_compound ? "operator %= " : "operator % "};
+                return {kBinaryOperatorModulo, is_compound ? "operator %= " : "operator % "};
             default:
                 return {0, "<unknown>"};
         }
     }();
 
-    auto& builtin = kOperators[intrinsic_index];
+    auto& builtin = kBinaryOperators[intrinsic_index];
     for (uint32_t o = 0; o < builtin.num_overloads; o++) {
         int match_score = 1000;
         auto& overload = builtin.overloads[o];
-        if (overload.num_parameters == 2) {
-            auto match = Match(intrinsic_name, intrinsic_index, overload, {lhs, rhs}, match_score);
-            if (match.return_type) {
-                return BinaryOperator{match.return_type, match.parameters[0].type,
-                                      match.parameters[1].type};
-            }
-            if (match_score > 0) {
-                candidates.emplace_back(Candidate{&overload, match_score});
-            }
+        auto match = Match(intrinsic_name, intrinsic_index, overload, {lhs, rhs}, match_score);
+        if (match.return_type) {
+            return BinaryOperator{match.return_type, match.parameters[0].type,
+                                  match.parameters[1].type};
+        }
+        if (match_score > 0) {
+            candidates.emplace_back(Candidate{&overload, match_score});
         }
     }
 

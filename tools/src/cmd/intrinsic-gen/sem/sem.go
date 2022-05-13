@@ -22,12 +22,13 @@ import (
 
 // Sem is the root of the semantic tree
 type Sem struct {
-	Enums        []*Enum
-	Types        []*Type
-	TypeMatchers []*TypeMatcher
-	EnumMatchers []*EnumMatcher
-	Builtins     []*Intrinsic
-	Operators    []*Intrinsic
+	Enums           []*Enum
+	Types           []*Type
+	TypeMatchers    []*TypeMatcher
+	EnumMatchers    []*EnumMatcher
+	Builtins        []*Intrinsic
+	UnaryOperators  []*Intrinsic
+	BinaryOperators []*Intrinsic
 	// Maximum number of open-types used across all builtins
 	MaxOpenTypes int
 	// Maximum number of open-numbers used across all builtins
@@ -39,12 +40,13 @@ type Sem struct {
 // New returns a new Sem
 func New() *Sem {
 	return &Sem{
-		Enums:        []*Enum{},
-		Types:        []*Type{},
-		TypeMatchers: []*TypeMatcher{},
-		EnumMatchers: []*EnumMatcher{},
-		Builtins:     []*Intrinsic{},
-		Operators:    []*Intrinsic{},
+		Enums:           []*Enum{},
+		Types:           []*Type{},
+		TypeMatchers:    []*TypeMatcher{},
+		EnumMatchers:    []*EnumMatcher{},
+		Builtins:        []*Intrinsic{},
+		UnaryOperators:  []*Intrinsic{},
+		BinaryOperators: []*Intrinsic{},
 	}
 }
 

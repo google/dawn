@@ -107,7 +107,11 @@ func (m MatcherDecl) Format(w fmt.State, verb rune) {
 type IntrinsicKind string
 
 const (
-	Builtin  IntrinsicKind = "builtin"
+	// Builtin is a builtin function (max, fract, etc).
+	// Declared with 'fn'.
+	Builtin IntrinsicKind = "builtin"
+	// Operator is a unary or binary operator.
+	// Declared with 'op'.
 	Operator IntrinsicKind = "operator"
 )
 

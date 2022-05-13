@@ -37,13 +37,14 @@ type IntrinsicTable struct {
 	NMatchers     []sem.Named
 	NMatcherIndex map[sem.Named]int // [object -> index] in NMatchers
 
-	MatcherIndices []int        // kMatcherIndices table content
-	OpenTypes      []OpenType   // kOpenTypes table content
-	OpenNumbers    []OpenNumber // kOpenNumbers table content
-	Parameters     []Parameter  // kParameters table content
-	Overloads      []Overload   // kOverloads table content
-	Builtins       []Intrinsic  // kBuiltins table content
-	Operators      []Intrinsic  // kOperators table content
+	MatcherIndices  []int        // kMatcherIndices table content
+	OpenTypes       []OpenType   // kOpenTypes table content
+	OpenNumbers     []OpenNumber // kOpenNumbers table content
+	Parameters      []Parameter  // kParameters table content
+	Overloads       []Overload   // kOverloads table content
+	Builtins        []Intrinsic  // kBuiltins table content
+	UnaryOperators  []Intrinsic  // kUnaryOperators table content
+	BinaryOperators []Intrinsic  // kBinaryOperators table content
 }
 
 // OpenType is used to create the C++ OpenTypeInfo structure
@@ -361,9 +362,16 @@ func buildIntrinsicTable(s *sem.Sem) (*IntrinsicTable, error) {
 
 	b.layoutMatchers(s)
 
-	buildIntrinsics := func(in []*sem.Intrinsic) ([]Intrinsic, error) {
-		out := make([]Intrinsic, len(in))
-		for i, f := range in {
+	for _, intrinsics := range []struct {
+		in  []*sem.Intrinsic
+		out *[]Intrinsic
+	}{
+		{s.Builtins, &b.Builtins},
+		{s.UnaryOperators, &b.UnaryOperators},
+		{s.BinaryOperators, &b.BinaryOperators},
+	} {
+		out := make([]Intrinsic, len(intrinsics.in))
+		for i, f := range intrinsics.in {
 			overloads := make([]Overload, len(f.Overloads))
 			overloadDescriptions := make([]string, len(f.Overloads))
 			for i, o := range f.Overloads {
@@ -380,15 +388,7 @@ func buildIntrinsicTable(s *sem.Sem) (*IntrinsicTable, error) {
 				OverloadsOffset:      b.lut.overloads.Add(overloads),
 			}
 		}
-		return out, nil
-	}
-
-	var err error
-	if b.Builtins, err = buildIntrinsics(s.Builtins); err != nil {
-		return nil, err
-	}
-	if b.Operators, err = buildIntrinsics(s.Operators); err != nil {
-		return nil, err
+		*intrinsics.out = out
 	}
 
 	b.lut.matcherIndices.Compact()

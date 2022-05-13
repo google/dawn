@@ -119,8 +119,8 @@ constexpr IntrinsicInfo kBuiltins[] = {
 {{- end }}
 };
 
-constexpr IntrinsicInfo kOperators[] = {
-{{- range $i, $o := .Operators }}
+constexpr IntrinsicInfo kUnaryOperators[] = {
+{{- range $i, $o := .UnaryOperators }}
   {
     /* [{{$i}}] */
 {{-   range $o.OverloadDescriptions }}
@@ -132,8 +132,25 @@ constexpr IntrinsicInfo kOperators[] = {
 {{- end }}
 };
 
-{{- range $i, $o := .Operators }}
-constexpr uint8_t kOperator{{template "OperatorName" $o.Name}} = {{$i}};
+{{- range $i, $o := .UnaryOperators }}
+constexpr uint8_t kUnaryOperator{{template "OperatorName" $o.Name}} = {{$i}};
+{{- end }}
+
+constexpr IntrinsicInfo kBinaryOperators[] = {
+{{- range $i, $o := .BinaryOperators }}
+  {
+    /* [{{$i}}] */
+{{-   range $o.OverloadDescriptions }}
+    /* {{.}} */
+{{-   end }}
+    /* num overloads */ {{$o.NumOverloads}},
+    /* overloads */ &kOverloads[{{$o.OverloadsOffset}}],
+  },
+{{- end }}
+};
+
+{{- range $i, $o := .BinaryOperators }}
+constexpr uint8_t kBinaryOperator{{template "OperatorName" $o.Name}} = {{$i}};
 {{- end }}
 
 // clang-format on
