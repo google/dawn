@@ -194,7 +194,7 @@ bool Validator::IsFixedFootprint(const sem::Type* type) const {
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable-types
 bool Validator::IsHostShareable(const sem::Type* type) const {
-    if (type->IsAnyOf<sem::I32, sem::U32, sem::F32>()) {
+    if (type->IsAnyOf<sem::I32, sem::U32, sem::F32, sem::F16>()) {
         return true;
     }
     return Switch(
@@ -1890,11 +1890,13 @@ bool Validator::ScalarConstructorOrCast(const ast::CallExpression* ctor,
     using Bool = sem::Bool;
     using I32 = sem::I32;
     using U32 = sem::U32;
+    using F16 = sem::F16;
     using F32 = sem::F32;
 
     const bool is_valid =
         (ty->Is<Bool>() && value_ty->is_scalar()) || (ty->Is<I32>() && value_ty->is_scalar()) ||
-        (ty->Is<U32>() && value_ty->is_scalar()) || (ty->Is<F32>() && value_ty->is_scalar());
+        (ty->Is<U32>() && value_ty->is_scalar()) || (ty->Is<F16>() && value_ty->is_scalar()) ||
+        (ty->Is<F32>() && value_ty->is_scalar());
     if (!is_valid) {
         AddError("cannot construct '" + sem_.TypeNameOf(ty) + "' with a value of type '" +
                      sem_.TypeNameOf(value_ty) + "'",

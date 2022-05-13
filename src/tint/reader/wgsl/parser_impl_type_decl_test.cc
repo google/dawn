@@ -55,6 +55,17 @@ TEST_F(ParserImplTest, TypeDecl_Bool) {
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 5u}}));
 }
 
+TEST_F(ParserImplTest, TypeDecl_F16) {
+    auto p = parser("f16");
+
+    auto t = p->type_decl();
+    EXPECT_TRUE(t.matched);
+    EXPECT_FALSE(t.errored);
+    ASSERT_NE(t.value, nullptr) << p->error();
+    ASSERT_TRUE(t.value->Is<ast::F16>());
+    EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 4u}}));
+}
+
 TEST_F(ParserImplTest, TypeDecl_F32) {
     auto p = parser("f32");
 

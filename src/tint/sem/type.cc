@@ -15,6 +15,7 @@
 #include "src/tint/sem/type.h"
 
 #include "src/tint/sem/bool.h"
+#include "src/tint/sem/f16.h"
 #include "src/tint/sem/f32.h"
 #include "src/tint/sem/i32.h"
 #include "src/tint/sem/matrix.h"
@@ -64,15 +65,15 @@ bool Type::IsConstructible() const {
 }
 
 bool Type::is_scalar() const {
-    return IsAnyOf<F32, U32, I32, Bool>();
+    return IsAnyOf<F16, F32, U32, I32, Bool>();
 }
 
 bool Type::is_numeric_scalar() const {
-    return IsAnyOf<F32, U32, I32>();
+    return IsAnyOf<F16, F32, U32, I32>();
 }
 
 bool Type::is_float_scalar() const {
-    return Is<F32>();
+    return IsAnyOf<F16, F32>();
 }
 
 bool Type::is_float_matrix() const {

@@ -2565,6 +2565,9 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         out << "bool";
     } else if (type->Is<sem::F32>()) {
         out << "float";
+    } else if (type->Is<sem::F16>()) {
+        diagnostics_.add_error(diag::System::Writer, "Type f16 is not completely implemented yet.");
+        return false;
     } else if (type->Is<sem::I32>()) {
         out << "int";
     } else if (auto* mat = type->As<sem::Matrix>()) {

@@ -1628,6 +1628,8 @@ uint32_t Builder::GenerateLiteralIfNeeded(const ast::Variable* var,
                     constant.kind = ScalarConstant::Kind::kF32;
                     constant.value.f32 = static_cast<float>(f->value);
                     return;
+                case ast::FloatLiteralExpression::Suffix::kH:
+                    error_ = "Type f16 is not completely implemented yet";
             }
         },
         [&](Default) { error_ = "unknown literal type"; });
@@ -3671,6 +3673,11 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
             [&](const sem::F32*) {
                 push_type(spv::Op::OpTypeFloat, {result, Operand(32u)});
                 return true;
+            },
+            [&](const sem::F16*) {
+                // Should be `push_type(spv::Op::OpTypeFloat, {result, Operand(16u)});`
+                error_ = "Type f16 is not completely implemented yet.";
+                return false;
             },
             [&](const sem::I32*) {
                 push_type(spv::Op::OpTypeInt, {result, Operand(32u), Operand(1u)});

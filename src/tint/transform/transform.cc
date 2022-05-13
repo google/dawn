@@ -87,6 +87,9 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const sem::Type*
     if (ty->Is<sem::U32>()) {
         return ctx.dst->create<ast::U32>();
     }
+    if (ty->Is<sem::F16>()) {
+        return ctx.dst->create<ast::F16>();
+    }
     if (ty->Is<sem::F32>()) {
         return ctx.dst->create<ast::F32>();
     }

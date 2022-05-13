@@ -162,6 +162,8 @@ class Token {
         kElse,
         /// A 'enable'
         kEnable,
+        /// A 'f16'
+        kF16,
         /// A 'f32'
         kF32,
         /// A 'fallthrough'

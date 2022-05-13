@@ -27,6 +27,7 @@
 #include "src/tint/sem/array.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/depth_multisampled_texture.h"
+#include "src/tint/sem/f16.h"
 #include "src/tint/sem/f32.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/i32.h"

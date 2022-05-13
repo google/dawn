@@ -28,6 +28,9 @@ Enable::ExtensionKind Enable::NameToKind(const std::string& name) {
     if (name == "chromium_disable_uniformity_analysis") {
         return Enable::ExtensionKind::kChromiumDisableUniformityAnalysis;
     }
+    if (name == "f16") {
+        return Enable::ExtensionKind::kF16;
+    }
 
     // The reserved internal extension name for testing
     if (name == "InternalExtensionForTesting") {
@@ -43,7 +46,8 @@ std::string Enable::KindToName(ExtensionKind kind) {
             return "chromium_experimental_dp4a";
         case ExtensionKind::kChromiumDisableUniformityAnalysis:
             return "chromium_disable_uniformity_analysis";
-
+        case ExtensionKind::kF16:
+            return "f16";
         // The reserved internal extension for testing
         case ExtensionKind::kInternalExtensionForTesting:
             return "InternalExtensionForTesting";

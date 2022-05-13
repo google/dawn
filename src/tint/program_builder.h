@@ -40,6 +40,7 @@
 #include "src/tint/ast/discard_statement.h"
 #include "src/tint/ast/enable.h"
 #include "src/tint/ast/external_texture.h"
+#include "src/tint/ast/f16.h"
 #include "src/tint/ast/f32.h"
 #include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/ast/float_literal_expression.h"
@@ -82,6 +83,7 @@
 #include "src/tint/sem/bool.h"
 #include "src/tint/sem/depth_texture.h"
 #include "src/tint/sem/external_texture.h"
+#include "src/tint/sem/f16.h"
 #include "src/tint/sem/f32.h"
 #include "src/tint/sem/i32.h"
 #include "src/tint/sem/matrix.h"
@@ -383,6 +385,15 @@ class ProgramBuilder {
         /// @returns a boolean type
         const ast::Bool* bool_(const Source& source) const {
             return builder->create<ast::Bool>(source);
+        }
+
+        /// @returns a f16 type
+        const ast::F16* f16() const { return builder->create<ast::F16>(); }
+
+        /// @param source the Source of the node
+        /// @returns a f16 type
+        const ast::F16* f16(const Source& source) const {
+            return builder->create<ast::F16>(source);
         }
 
         /// @returns a f32 type
@@ -1002,6 +1013,21 @@ class ProgramBuilder {
     const ast::FloatLiteralExpression* Expr(f32 value) {
         return create<ast::FloatLiteralExpression>(static_cast<double>(value.value),
                                                    ast::FloatLiteralExpression::Suffix::kF);
+    }
+
+    /// @param source the source information
+    /// @param value the float value
+    /// @return a 'h'-suffixed FloatLiteralExpression for the f16 value
+    const ast::FloatLiteralExpression* Expr(const Source& source, f16 value) {
+        return create<ast::FloatLiteralExpression>(source, static_cast<double>(value.value),
+                                                   ast::FloatLiteralExpression::Suffix::kH);
+    }
+
+    /// @param value the float value
+    /// @return a 'h'-suffixed FloatLiteralExpression for the f16 value
+    const ast::FloatLiteralExpression* Expr(f16 value) {
+        return create<ast::FloatLiteralExpression>(static_cast<double>(value.value),
+                                                   ast::FloatLiteralExpression::Suffix::kH);
     }
 
     /// @param source the source information
@@ -2673,6 +2699,10 @@ struct ProgramBuilder::TypesBuilder::CToAST<u32> {
 template <>
 struct ProgramBuilder::TypesBuilder::CToAST<f32> {
     static const ast::Type* get(const ProgramBuilder::TypesBuilder* t) { return t->f32(); }
+};
+template <>
+struct ProgramBuilder::TypesBuilder::CToAST<f16> {
+    static const ast::Type* get(const ProgramBuilder::TypesBuilder* t) { return t->f16(); }
 };
 template <>
 struct ProgramBuilder::TypesBuilder::CToAST<bool> {

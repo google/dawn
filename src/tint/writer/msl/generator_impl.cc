@@ -1467,6 +1467,12 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
             out << "false";
             return true;
         },
+        [&](const sem::F16*) {
+            // Placeholder for emitting f16 zero value
+            diagnostics_.add_error(diag::System::Writer,
+                                   "Type f16 is not completely implemented yet");
+            return false;
+        },
         [&](const sem::F32*) {
             out << "0.0f";
             return true;
@@ -2238,6 +2244,11 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         [&](const sem::Bool*) {
             out << "bool";
             return true;
+        },
+        [&](const sem::F16*) {
+            diagnostics_.add_error(diag::System::Writer,
+                                   "Type f16 is not completely implemented yet");
+            return false;
         },
         [&](const sem::F32*) {
             out << "float";

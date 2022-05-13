@@ -172,6 +172,14 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
         [&](const ast::Bool*) { return builder_->create<sem::Bool>(); },
         [&](const ast::I32*) { return builder_->create<sem::I32>(); },
         [&](const ast::U32*) { return builder_->create<sem::U32>(); },
+        [&](const ast::F16* t) -> sem::F16* {
+            // Validate if f16 type is allowed.
+            if (builder_->AST().Extensions().count(ast::Enable::ExtensionKind::kF16) == 0) {
+                AddError("f16 used without 'f16' extension enabled", t->source);
+                return nullptr;
+            }
+            return builder_->create<sem::F16>();
+        },
         [&](const ast::F32*) { return builder_->create<sem::F32>(); },
         [&](const ast::Vector* t) -> sem::Vector* {
             if (!t->type) {

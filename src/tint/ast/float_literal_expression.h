@@ -30,6 +30,8 @@ class FloatLiteralExpression final : public Castable<FloatLiteralExpression, Lit
         kNone,
         /// 'f' suffix (f32)
         kF,
+        /// 'h' suffix (f16)
+        kH,
     };
 
     /// Constructor

@@ -35,6 +35,8 @@ class Constant {
         tint::u32 u32;
         /// The scalar value as a f32
         tint::f32 f32;
+        /// The scalar value as a f16, internally stored as float
+        tint::f16 f16;
         /// The scalar value as a bool
         bool bool_;
 
@@ -49,6 +51,10 @@ class Constant {
         /// Constructs the scalar with the f32 value `v`
         /// @param v the value of the Scalar
         Scalar(tint::f32 v) : f32(v) {}  // NOLINT
+
+        /// Constructs the scalar with the f16 value `v`
+        /// @param v the value of the Scalar
+        Scalar(tint::f16 v) : f16({v}) {}  // NOLINT
 
         /// Constructs the scalar with the bool value `v`
         /// @param v the value of the Scalar
@@ -106,6 +112,7 @@ class Constant {
             ElementType(),  //
             [&](const I32*) { return func(elems_[index].i32); },
             [&](const U32*) { return func(elems_[index].u32); },
+            [&](const F16*) { return func(elems_[index].f16); },
             [&](const F32*) { return func(elems_[index].f32); },
             [&](const Bool*) { return func(elems_[index].bool_); },
             [&](Default) {

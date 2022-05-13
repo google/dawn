@@ -116,6 +116,8 @@ set(TINT_LIB_SRCS
   ast/expression.h
   ast/external_texture.cc
   ast/external_texture.h
+  ast/f16.cc
+  ast/f16.h
   ast/f32.cc
   ast/f32.h
   ast/fallthrough_statement.cc
@@ -403,6 +405,8 @@ set(TINT_LIB_SRCS
   sem/depth_texture.h
   sem/external_texture.cc
   sem/external_texture.h
+  sem/f16.cc
+  sem/f16.h
   sem/f32.cc
   sem/f32.h
   sem/for_loop_statement.cc
@@ -686,6 +690,7 @@ if(TINT_BUILD_TESTS)
     ast/discard_statement_test.cc
     ast/enable_test.cc
     ast/external_texture_test.cc
+    ast/f16_test.cc
     ast/f32_test.cc
     ast/fallthrough_statement_test.cc
     ast/float_literal_expression_test.cc
@@ -790,6 +795,7 @@ if(TINT_BUILD_TESTS)
     sem/depth_multisampled_texture_test.cc
     sem/depth_texture_test.cc
     sem/external_texture_test.cc
+    sem/f16_test.cc
     sem/f32_test.cc
     sem/i32_test.cc
     sem/matrix_test.cc

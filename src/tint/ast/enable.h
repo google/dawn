@@ -35,6 +35,8 @@ class Enable : public Castable<Enable, Node> {
         /// An internal reserved extension for test, named
         /// "InternalExtensionForTesting".
         kInternalExtensionForTesting,
+        /// WGSL Extension "f16"
+        kF16,
 
         /// An extension for the experimental feature
         /// "chromium_experimental_dp4a".

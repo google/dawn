@@ -3513,6 +3513,11 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             out << "float";
             return true;
         },
+        [&](const sem::F16*) {
+            diagnostics_.add_error(diag::System::Writer,
+                                   "Type f16 is not completely implemented yet.");
+            return false;
+        },
         [&](const sem::I32*) {
             out << "int";
             return true;

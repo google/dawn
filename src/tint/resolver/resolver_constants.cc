@@ -70,6 +70,10 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::CallExpression* call,
         if (elem_type->Is<sem::U32>()) {
             return sem::Constant(type, sem::Constant::Scalars(result_size, 0_u));
         }
+        // Add f16 zero scalar here
+        if (elem_type->Is<sem::F16>()) {
+            return sem::Constant(type, sem::Constant::Scalars(result_size, f16{0.f}));
+        }
         if (elem_type->Is<sem::F32>()) {
             return sem::Constant(type, sem::Constant::Scalars(result_size, 0_f));
         }
@@ -118,6 +122,11 @@ sem::Constant Resolver::ConstantCast(const sem::Constant& value,
             [&](const sem::U32*) {
                 return value.WithScalarAt(i, [](auto&& s) {  //
                     return u32(static_cast<uint32_t>(s));
+                });
+            },
+            [&](const sem::F16*) {
+                return value.WithScalarAt(i, [](auto&& s) {  //
+                    return f16{static_cast<float>(s)};
                 });
             },
             [&](const sem::F32*) {
