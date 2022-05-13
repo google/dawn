@@ -14,6 +14,8 @@
 
 #include "src/tint/resolver/intrinsic_table.h"
 
+#include <utility>
+
 #include "gmock/gmock.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/atomic.h"
@@ -659,6 +661,14 @@ TEST_F(IntrinsicTableTest, MismatchCompoundOp) {
   operator *= (vecR<f32>, matCxR<f32>) -> vecC<f32>
   operator *= (matKxR<f32>, matCxK<f32>) -> matCxR<f32>
 )");
+}
+
+TEST_F(IntrinsicTableTest, Err257Arguments) {  // crbug.com/1323605
+    auto* f32 = create<sem::F32>();
+    std::vector<const sem::Type*> arg_tys(257, f32);
+    auto* result = table->Lookup(BuiltinType::kAbs, std::move(arg_tys), Source{});
+    ASSERT_EQ(result, nullptr);
+    ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
 }  // namespace

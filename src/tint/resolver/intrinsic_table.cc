@@ -1113,10 +1113,15 @@ const IntrinsicPrototype Impl::Match(const char* intrinsic_name,
     constexpr int kScorePerMatchedOpenType = 1;
     constexpr int kScorePerMatchedOpenNumber = 1;
 
-    auto num_parameters = overload.num_parameters;
-    auto num_arguments = static_cast<decltype(num_parameters)>(args.size());
+    uint32_t num_parameters = static_cast<uint32_t>(overload.num_parameters);
+    uint32_t num_arguments = static_cast<uint32_t>(args.size());
 
     bool overload_matched = true;
+
+    if (static_cast<uint64_t>(args.size()) >
+        static_cast<uint64_t>(std::numeric_limits<uint32_t>::max())) {
+        overload_matched = false;  // No overload has this number of arguments.
+    }
 
     if (num_parameters != num_arguments) {
         match_score += kScorePerParamArgMismatch * (std::max(num_parameters, num_arguments) -
