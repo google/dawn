@@ -135,42 +135,42 @@ using f16 = Number<detail::NumberKindF16>;
 namespace tint::number_suffixes {
 
 /// Literal suffix for abstract integer literals
-inline AInt operator"" _a(unsigned long long int value) {  // NOLINT
+inline AInt operator""_a(unsigned long long int value) {  // NOLINT
     return AInt(static_cast<int64_t>(value));
 }
 
 /// Literal suffix for abstract float literals
-inline AFloat operator"" _a(long double value) {  // NOLINT
+inline AFloat operator""_a(long double value) {  // NOLINT
     return AFloat(static_cast<double>(value));
 }
 
 /// Literal suffix for i32 literals
-inline i32 operator"" _i(unsigned long long int value) {  // NOLINT
+inline i32 operator""_i(unsigned long long int value) {  // NOLINT
     return i32(static_cast<int32_t>(value));
 }
 
 /// Literal suffix for u32 literals
-inline u32 operator"" _u(unsigned long long int value) {  // NOLINT
+inline u32 operator""_u(unsigned long long int value) {  // NOLINT
     return u32(static_cast<uint32_t>(value));
 }
 
 /// Literal suffix for f32 literals
-inline f32 operator"" _f(long double value) {  // NOLINT
+inline f32 operator""_f(long double value) {  // NOLINT
     return f32(static_cast<double>(value));
 }
 
 /// Literal suffix for f32 literals
-inline f32 operator"" _f(unsigned long long int value) {  // NOLINT
+inline f32 operator""_f(unsigned long long int value) {  // NOLINT
     return f32(static_cast<double>(value));
 }
 
 /// Literal suffix for f16 literals
-inline f16 operator"" _h(long double value) {  // NOLINT
+inline f16 operator""_h(long double value) {  // NOLINT
     return f16(static_cast<double>(value));
 }
 
 /// Literal suffix for f16 literals
-inline f16 operator"" _h(unsigned long long int value) {  // NOLINT
+inline f16 operator""_h(unsigned long long int value) {  // NOLINT
     return f16(static_cast<double>(value));
 }
 
