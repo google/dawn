@@ -741,7 +741,8 @@ TEST_F(HlslGeneratorImplTest_Builtin, Dot4I8Packed) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(int tint_dot4I8Packed(uint param_0, uint param_1) {
-  return dot4add_i8packed(param_0, param_1, 0);
+  int accumulator = 0;
+  return dot4add_i8packed(param_0, param_1, accumulator);
 }
 
 [numthreads(1, 1, 1)]
@@ -769,7 +770,8 @@ TEST_F(HlslGeneratorImplTest_Builtin, Dot4U8Packed) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(uint tint_dot4U8Packed(uint param_0, uint param_1) {
-  return dot4add_u8packed(param_0, param_1, 0);
+  uint accumulator = 0u;
+  return dot4add_u8packed(param_0, param_1, accumulator);
 }
 
 [numthreads(1, 1, 1)]

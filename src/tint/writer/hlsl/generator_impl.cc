@@ -2045,9 +2045,11 @@ bool GeneratorImpl::EmitDP4aCall(std::ostream& out,
             std::string functionName;
             switch (builtin->Type()) {
                 case sem::BuiltinType::kDot4I8Packed:
+                    line(b) << "int accumulator = 0;";
                     functionName = "dot4add_i8packed";
                     break;
                 case sem::BuiltinType::kDot4U8Packed:
+                    line(b) << "uint accumulator = 0u;";
                     functionName = "dot4add_u8packed";
                     break;
                 default:
@@ -2056,7 +2058,7 @@ bool GeneratorImpl::EmitDP4aCall(std::ostream& out,
                     return false;
             }
             line(b) << "return " << functionName << "(" << params[0] << ", " << params[1]
-                    << ", 0);";
+                    << ", accumulator);";
 
             return true;
         });
