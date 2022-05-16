@@ -2,6 +2,10 @@ bug/tint/949.wgsl:326:29 warning: 'textureSample' must only be called from unifo
     let x_397 : vec4<f32> = textureSample(TextureSamplerTexture, TextureSamplerSampler, (x_394 + x_395));
                             ^^^^^^^^^^^^^
 
+bug/tint/949.wgsl:330:5 note: control flow depends on non-uniform value
+    if ((x_400 > x_401)) {
+    ^^
+
 bug/tint/949.wgsl:326:29 note: return value of 'textureSample' may be non-uniform
     let x_397 : vec4<f32> = textureSample(TextureSamplerTexture, TextureSamplerSampler, (x_394 + x_395));
                             ^^^^^^^^^^^^^

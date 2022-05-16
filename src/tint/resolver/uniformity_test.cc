@@ -398,6 +398,14 @@ fn main() {
 test:16:3 note: calling 'foo' may cause subsequent control flow to be non-uniform
   foo();
   ^^^
+
+test:7:3 note: control flow depends on non-uniform value
+  if (rw == 0) {
+  ^^
+
+test:7:7 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  if (rw == 0) {
+      ^^
 )");
 }
 
@@ -406,7 +414,7 @@ TEST_F(UniformityAnalysisTest, SubsequentControlFlowMayBeNonUniform_Nested_Fail)
     // call another function that requires uniformity.
     // The lack of return statement in `foo()` requires that we implicitly add an edge from
     // CF_return to that last control flow node of the function.
-    auto src = R"(
+    std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> rw : i32;
 
 var<private> p : i32;
@@ -439,6 +447,18 @@ fn main() {
 test:20:3 note: calling 'foo' may cause subsequent control flow to be non-uniform
   foo();
   ^^^
+
+test:16:3 note: calling 'bar' may cause subsequent control flow to be non-uniform
+  bar();
+  ^^^
+
+test:7:3 note: control flow depends on non-uniform value
+  if (rw == 0) {
+  ^^
+
+test:7:7 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
+  if (rw == 0) {
+      ^^
 )");
 }
 
@@ -565,6 +585,10 @@ fn bar() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:9:3 note: control flow depends on non-uniform value
+  if (foo(rw) == 7) {
+  ^^
+
 test:9:11 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   if (foo(rw) == 7) {
           ^^
@@ -626,6 +650,18 @@ fn bar() {
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
 
+test:16:7 note: non-uniform function call argument causes subsequent control flow to be non-uniform
+  foo(rw);
+      ^^
+
+test:7:3 note: control flow depends on non-uniform value
+  if (i == 0) {
+  ^^
+
+test:7:7 note: reading from 'i' may result in a non-uniform value
+  if (i == 0) {
+      ^
+
 test:16:7 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   foo(rw);
       ^^
@@ -665,6 +701,10 @@ fn main(@builtin()" + GetParam().name +
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:4:3 note: control flow depends on non-uniform value
+  if (all(vec3(b) == vec3(0u))) {
+  ^^
+
 test:4:16 note: reading from builtin 'b' may result in a non-uniform value
   if (all(vec3(b) == vec3(0u))) {
                ^
@@ -695,6 +735,10 @@ fn main(s : S) {
             R"(test:9:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:8:3 note: control flow depends on non-uniform value
+  if (all(vec3(s.b) == vec3(0u))) {
+  ^^
 
 test:8:16 note: reading from 's' may result in a non-uniform value
   if (all(vec3(s.b) == vec3(0u))) {
@@ -737,6 +781,10 @@ fn main(s : S) {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:9:3 note: control flow depends on non-uniform value
+  if (s.num_groups.x == 0u) {
+  ^^
+
 test:9:7 note: reading from 's' may result in a non-uniform value
   if (s.num_groups.x == 0u) {
       ^
@@ -763,6 +811,10 @@ fn main(@builtin()" + GetParam().name +
                   R"(test:5:5 warning: 'dpdx' must only be called from uniform control flow
     dpdx(0.5);
     ^^^^
+
+test:4:3 note: control flow depends on non-uniform value
+  if (u32(vec4(b).x) == 0u) {
+  ^^
 
 test:4:16 note: reading from builtin 'b' may result in a non-uniform value
   if (u32(vec4(b).x) == 0u) {
@@ -793,6 +845,10 @@ fn main(s : S) {
                   R"(test:9:5 warning: 'dpdx' must only be called from uniform control flow
     dpdx(0.5);
     ^^^^
+
+test:8:3 note: control flow depends on non-uniform value
+  if (u32(vec4(s.b).x) == 0u) {
+  ^^
 
 test:8:16 note: reading from 's' may result in a non-uniform value
   if (u32(vec4(s.b).x) == 0u) {
@@ -827,6 +883,10 @@ fn main(@location(0) l : f32) {
     dpdx(0.5);
     ^^^^
 
+test:4:3 note: control flow depends on non-uniform value
+  if (l == 0.0) {
+  ^^
+
 test:4:7 note: reading from user-defined input 'l' may result in a non-uniform value
   if (l == 0.0) {
       ^
@@ -852,6 +912,10 @@ fn main(s : S) {
               R"(test:9:5 warning: 'dpdx' must only be called from uniform control flow
     dpdx(0.5);
     ^^^^
+
+test:8:3 note: control flow depends on non-uniform value
+  if (s.l == 0.0) {
+  ^^
 
 test:8:7 note: reading from 's' may result in a non-uniform value
   if (s.l == 0.0) {
@@ -1097,6 +1161,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:10:7 note: control flow depends on non-uniform value
+      if (i == n) {
+      ^^
+
 test:10:16 note: reading from read_write storage buffer 'n' may result in a non-uniform value
       if (i == n) {
                ^
@@ -1147,6 +1215,10 @@ fn foo() {
               R"(test:8:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:10:7 note: control flow depends on non-uniform value
+      if (i == n) {
+      ^^
 
 test:10:16 note: reading from read_write storage buffer 'n' may result in a non-uniform value
       if (i == n) {
@@ -1213,6 +1285,10 @@ fn foo() {
               R"(test:8:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:7:5 note: control flow depends on non-uniform value
+    if (v == 0) {
+    ^^
 
 test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
     v = non_uniform;
@@ -1294,6 +1370,10 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
+test:13:5 note: control flow depends on non-uniform value
+    if (v == 0) {
+    ^^
+
 test:8:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
       v = non_uniform;
           ^^^^^^^^^^^
@@ -1327,6 +1407,10 @@ fn foo() {
               R"(test:15:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:14:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
 
 test:8:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
       v = non_uniform;
@@ -1366,6 +1450,10 @@ fn foo() {
               R"(test:20:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:19:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
 
 test:11:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
     v = non_uniform;
@@ -1437,6 +1525,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:19:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
+
 test:7:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
     v = non_uniform;
         ^^^^^^^^^^^
@@ -1473,6 +1565,10 @@ fn foo() {
               R"(test:8:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:7:5 note: control flow depends on non-uniform value
+    if (v == 0) {
+    ^^
 
 test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
     v = non_uniform;
@@ -1516,6 +1612,10 @@ fn foo() {
         workgroupBarrier();
         ^^^^^^^^^^^^^^^^
 
+test:15:7 note: control flow depends on non-uniform value
+      if (v == 0) {
+      ^^
+
 test:7:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
     v = non_uniform;
         ^^^^^^^^^^^
@@ -1553,6 +1653,10 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
+test:7:5 note: control flow depends on non-uniform value
+    if (v == 0) {
+    ^^
+
 test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
     v = non_uniform;
         ^^^^^^^^^^^
@@ -1589,6 +1693,10 @@ fn foo() {
               R"(test:8:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:7:5 note: control flow depends on non-uniform value
+    if (v == 0) {
+    ^^
 
 test:14:13 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
         v = non_uniform;
@@ -1725,6 +1833,14 @@ fn foo() {
 test:12:5 note: calling 'bar' may cause subsequent control flow to be non-uniform
     bar();
     ^^^
+
+test:5:3 note: control flow depends on non-uniform value
+  if (n == 42) {
+  ^^
+
+test:5:7 note: reading from read_write storage buffer 'n' may result in a non-uniform value
+  if (n == 42) {
+      ^
 )");
 }
 
@@ -1758,6 +1874,10 @@ fn foo() {
               R"(test:6:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on non-uniform value
+  for (var i = 0; i < n; i = i + 1) {
+  ^^^
 
 test:5:23 note: reading from read_write storage buffer 'n' may result in a non-uniform value
   for (var i = 0; i < n; i = i + 1) {
@@ -1793,6 +1913,14 @@ fn foo() {
 test:13:16 note: calling 'bar' may cause subsequent control flow to be non-uniform
   for (var i = bar(); i < 10; i = i + 1) {
                ^^^
+
+test:5:3 note: control flow depends on non-uniform value
+  if (n == 42) {
+  ^^
+
+test:5:7 note: reading from read_write storage buffer 'n' may result in a non-uniform value
+  if (n == 42) {
+      ^
 )");
 }
 
@@ -1824,6 +1952,14 @@ fn foo() {
 test:13:35 note: calling 'bar' may cause subsequent control flow to be non-uniform
   for (var i = 0; i < 10; i = i + bar()) {
                                   ^^^
+
+test:5:3 note: control flow depends on non-uniform value
+  if (n == 42) {
+  ^^
+
+test:5:7 note: reading from read_write storage buffer 'n' may result in a non-uniform value
+  if (n == 42) {
+      ^
 )");
 }
 
@@ -1849,6 +1985,10 @@ fn foo() {
               R"(test:8:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:7:5 note: control flow depends on non-uniform value
+    if (v == 0) {
+    ^^
 
 test:6:31 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   for (var i = 0; i < 10; v = non_uniform) {
@@ -1901,6 +2041,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:9:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
+
 test:6:31 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   for (var i = 0; i < 10; v = non_uniform) {
                               ^^^^^^^^^^^
@@ -1951,6 +2095,10 @@ fn foo() {
               R"(test:8:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:7:5 note: control flow depends on non-uniform value
+    if (v == 0) {
+    ^^
 
 test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
     v = non_uniform;
@@ -2009,6 +2157,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:14:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
+
 test:8:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
       v = non_uniform;
           ^^^^^^^^^^^
@@ -2050,6 +2202,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:20:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
+
 test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
     v = non_uniform;
         ^^^^^^^^^^^
@@ -2088,6 +2244,10 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
+test:7:5 note: control flow depends on non-uniform value
+    if (v == 0) {
+    ^^
+
 test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
     v = non_uniform;
         ^^^^^^^^^^^
@@ -2124,6 +2284,10 @@ fn foo() {
               R"(test:8:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:7:5 note: control flow depends on non-uniform value
+    if (v == 0) {
+    ^^
 
 test:12:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
     v = non_uniform;
@@ -2214,6 +2378,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:5:3 note: control flow depends on non-uniform value
+  if (non_uniform == 42) {
+  ^^
+
 test:5:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   if (non_uniform == 42) {
       ^^^^^^^^^^^
@@ -2237,6 +2405,10 @@ fn foo() {
               R"(test:7:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on non-uniform value
+  if (non_uniform == 42) {
+  ^^
 
 test:5:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   if (non_uniform == 42) {
@@ -2263,6 +2435,10 @@ fn main() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:7:34 note: control flow depends on non-uniform value
+  if ((non_uniform_global == 42) && false) {
+                                 ^^
+
 test:7:8 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
   if ((non_uniform_global == 42) && false) {
        ^^^^^^^^^^^^^^^^^^
@@ -2287,6 +2463,10 @@ fn main() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on non-uniform value
+  if (false && (non_uniform_global == 42)) {
+  ^^
 
 test:7:17 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
   if (false && (non_uniform_global == 42)) {
@@ -2313,6 +2493,10 @@ fn main() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:7:34 note: control flow depends on non-uniform value
+  if ((non_uniform_global == 42) || true) {
+                                 ^^
+
 test:7:8 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
   if ((non_uniform_global == 42) || true) {
        ^^^^^^^^^^^^^^^^^^
@@ -2338,6 +2522,10 @@ fn main() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:7:3 note: control flow depends on non-uniform value
+  if (true || (non_uniform_global == 42)) {
+  ^^
+
 test:7:16 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
   if (true || (non_uniform_global == 42)) {
                ^^^^^^^^^^^^^^^^^^
@@ -2361,6 +2549,10 @@ fn foo() {
               R"(test:7:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on non-uniform value
+  if (non_uniform == 42) {
+  ^^
 
 test:5:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   if (non_uniform == 42) {
@@ -2388,6 +2580,10 @@ fn foo() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
 
 test:6:7 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   v = rw;
@@ -2461,6 +2657,10 @@ fn foo() {
               R"(test:15:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:14:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
 
 test:8:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
       v = non_uniform;
@@ -2541,6 +2741,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:11:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
+
 test:6:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   v = non_uniform;
       ^^^^^^^^^^^
@@ -2573,6 +2777,10 @@ fn foo() {
               R"(test:13:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:12:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
 
 test:6:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   v = non_uniform;
@@ -2727,6 +2935,10 @@ fn foo() {
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
 
+test:5:3 note: control flow depends on non-uniform value
+  if (non_uniform == 42) {
+  ^^
+
 test:5:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   if (non_uniform == 42) {
       ^^^^^^^^^^^
@@ -2752,6 +2964,10 @@ fn foo() {
               R"(test:9:3 warning: 'workgroupBarrier' must only be called from uniform control flow
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on non-uniform value
+  if (non_uniform == 42) {
+  ^^
 
 test:5:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   if (non_uniform == 42) {
@@ -2786,6 +3002,10 @@ fn foo() {
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
+test:5:3 note: control flow depends on non-uniform value
+  switch (non_uniform) {
+  ^^^^^^
+
 test:5:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   switch (non_uniform) {
           ^^^^^^^^^^^
@@ -2811,6 +3031,10 @@ fn foo() {
               R"(test:7:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on non-uniform value
+  switch (non_uniform) {
+  ^^^^^^
 
 test:5:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   switch (non_uniform) {
@@ -2842,6 +3066,10 @@ fn foo() {
               R"(test:11:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:8:7 note: control flow depends on non-uniform value
+      if (non_uniform == 42) {
+      ^^
 
 test:8:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
       if (non_uniform == 42) {
@@ -2900,6 +3128,10 @@ fn foo() {
               R"(test:14:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:8:7 note: control flow depends on non-uniform value
+      if (non_uniform == 42) {
+      ^^
 
 test:8:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
       if (non_uniform == 42) {
@@ -2962,6 +3194,10 @@ fn foo() {
         workgroupBarrier();
         ^^^^^^^^^^^^^^^^
 
+test:13:7 note: control flow depends on non-uniform value
+      if (x == 0) {
+      ^^
+
 test:9:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
       x = non_uniform;
           ^^^^^^^^^^^
@@ -2996,6 +3232,10 @@ fn foo() {
               R"(test:14:9 warning: 'workgroupBarrier' must only be called from uniform control flow
         workgroupBarrier();
         ^^^^^^^^^^^^^^^^
+
+test:13:7 note: control flow depends on non-uniform value
+      if (x == 0) {
+      ^^
 
 test:6:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   var x = non_uniform;
@@ -3059,6 +3299,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:18:3 note: control flow depends on non-uniform value
+  if (x == 0) {
+  ^^
+
 test:9:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
       x = non_uniform;
           ^^^^^^^^^^^
@@ -3120,6 +3364,10 @@ fn foo() {
               R"(test:18:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:17:3 note: control flow depends on non-uniform value
+  if (x == 0) {
+  ^^
 
 test:6:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   var x = non_uniform;
@@ -3186,6 +3434,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:20:3 note: control flow depends on non-uniform value
+  if (x == 0) {
+  ^^
+
 test:6:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   var x = non_uniform;
           ^^^^^^^^^^^
@@ -3223,6 +3475,10 @@ fn foo() {
               R"(test:9:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:8:5 note: control flow depends on non-uniform value
+    if (x == 0) {
+    ^^
 
 test:15:13 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
         x = non_uniform;
@@ -3361,6 +3617,14 @@ fn foo() {
 test:13:7 note: calling 'bar' may cause subsequent control flow to be non-uniform
       bar();
       ^^^
+
+test:5:3 note: control flow depends on non-uniform value
+  if (n == 42) {
+  ^^
+
+test:5:7 note: reading from read_write storage buffer 'n' may result in a non-uniform value
+  if (n == 42) {
+      ^
 )");
 }
 
@@ -3387,6 +3651,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:7:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
+
 test:6:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   *&v = non_uniform;
         ^^^^^^^^^^^
@@ -3412,6 +3680,10 @@ fn foo() {
               R"(test:9:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:8:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
 
 test:7:9 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   *pv = non_uniform;
@@ -3474,6 +3746,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:7:3 note: control flow depends on non-uniform value
+  if (non_uniform == 0) {
+  ^^
+
 test:7:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   if (non_uniform == 0) {
       ^^^^^^^^^^^
@@ -3497,6 +3773,10 @@ fn foo() {
               R"(test:7:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:6:3 note: control flow depends on non-uniform value
+  if (*&v == 0) {
+  ^^
 
 test:5:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   var v = non_uniform;
@@ -3522,6 +3802,10 @@ fn foo() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on non-uniform value
+  if (*pv == 0) {
+  ^^
 
 test:5:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   var v = non_uniform;
@@ -3625,6 +3909,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:8:3 note: control flow depends on non-uniform value
+  if (*pv == 0) {
+  ^^
+
 test:7:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   v = non_uniform;
       ^^^^^^^^^^^
@@ -3669,6 +3957,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:9:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
+
 test:8:14 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   *&*&*pv2 = non_uniform;
              ^^^^^^^^^^^
@@ -3694,6 +3986,10 @@ fn foo() {
               R"(test:9:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:8:3 note: control flow depends on non-uniform value
+  if (*&*&*pv2 == 0) {
+  ^^
 
 test:5:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   var v = non_uniform;
@@ -3722,6 +4018,10 @@ fn foo() {
               R"(test:11:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:10:3 note: control flow depends on non-uniform value
+  if (*pv1 == 0) {
+  ^^
 
 test:9:10 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   *pv2 = non_uniform;
@@ -3770,6 +4070,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:10:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
+
 test:8:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   var v = non_uniform;
           ^^^^^^^^^^^
@@ -3815,6 +4119,10 @@ fn foo() {
               R"(test:12:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:11:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
 
 test:10:7 note: pointer contents may become non-uniform after calling 'bar'
   bar(&v);
@@ -3865,6 +4173,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:11:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
+
 test:10:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   bar(&v, non_uniform);
           ^^^^^^^^^^^
@@ -3894,6 +4206,10 @@ fn foo() {
               R"(test:13:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:12:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
 
 test:10:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   var a = non_uniform;
@@ -3973,6 +4289,10 @@ fn foo() {
               R"(test:21:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:20:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
 
 test:18:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   var a = non_uniform;
@@ -4064,6 +4384,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:17:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
+
 test:16:7 note: pointer contents may become non-uniform after calling 'bar'
   bar(&v);
       ^
@@ -4097,6 +4421,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:15:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
+
 test:14:7 note: pointer contents may become non-uniform after calling 'bar'
   bar(&v);
       ^
@@ -4129,6 +4457,10 @@ fn foo() {
               R"(test:16:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:15:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
 
 test:14:7 note: pointer contents may become non-uniform after calling 'bar'
   bar(&v);
@@ -4171,6 +4503,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:23:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
+
 test:22:7 note: pointer contents may become non-uniform after calling 'bar'
   bar(&v);
       ^
@@ -4206,6 +4542,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:17:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
+
 test:16:7 note: pointer contents may become non-uniform after calling 'bar'
   bar(&v);
       ^
@@ -4237,6 +4577,10 @@ fn foo(p : ptr<function, i32>) {
               R"(test:7:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
+
+test:6:5 note: control flow depends on non-uniform value
+    if (*p == 0) {
+    ^^
 
 test:12:12 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
       *p = non_uniform;
@@ -4270,6 +4614,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:14:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
+
 test:12:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   var v = non_uniform;
           ^^^^^^^^^^^
@@ -4300,6 +4648,10 @@ fn foo() {
               R"(test:14:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:13:3 note: control flow depends on non-uniform value
+  if (b == 0) {
+  ^^
 
 test:10:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   var a = non_uniform;
@@ -4354,6 +4706,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:13:3 note: control flow depends on non-uniform value
+  if (b == 0) {
+  ^^
+
 test:12:11 note: pointer contents may become non-uniform after calling 'bar'
   bar(&a, &b);
           ^
@@ -4405,6 +4761,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:11:3 note: control flow depends on non-uniform value
+  if (v == 1) {
+  ^^
+
 test:9:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   var v = non_uniform;
           ^^^^^^^^^^^
@@ -4438,6 +4798,10 @@ fn foo() {
               R"(test:14:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:13:3 note: control flow depends on non-uniform value
+  if (b == 0) {
+  ^^
 
 test:12:11 note: pointer contents may become non-uniform after calling 'bar'
   bar(&a, &b);
@@ -4474,6 +4838,10 @@ fn foo() {
               R"(test:16:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:15:3 note: control flow depends on non-uniform value
+  if (c == 0) {
+  ^^
 
 test:11:11 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   var a = non_uniform;
@@ -4540,6 +4908,7 @@ TEST_F(UniformityAnalysisTest, MaximumNumberOfPointerParameters) {
     EXPECT_TRUE(RunTest(std::move(b))) << error_;
     EXPECT_EQ(error_,
               R"(warning: 'workgroupBarrier' must only be called from uniform control flow
+note: control flow depends on non-uniform value
 note: reading from module-scope private variable 'non_uniform_global' may result in a non-uniform value)");
 }
 
@@ -4578,6 +4947,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:5:3 note: control flow depends on non-uniform value
+  if (v[2] == 0) {
+  ^^
+
 test:5:7 note: reading from read_write storage buffer 'v' may result in a non-uniform value
   if (v[2] == 0) {
       ^
@@ -4602,6 +4975,10 @@ fn foo() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on non-uniform value
+  if (v[2] == 0) {
+  ^^
 
 test:6:10 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   v[2] = rw;
@@ -4644,6 +5021,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:7:3 note: control flow depends on non-uniform value
+  if (v[2] == 0) {
+  ^^
+
 test:6:10 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   v[1] = rw;
          ^^
@@ -4672,6 +5053,10 @@ fn foo() {
               R"(test:9:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:8:3 note: control flow depends on non-uniform value
+  if (v[1] == 0) {
+  ^^
 
 test:6:10 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   v[1] = rw;
@@ -4702,6 +5087,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:8:3 note: control flow depends on non-uniform value
+  if (v[1] == 0) {
+  ^^
+
 test:6:10 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   v[1] = rw;
          ^^
@@ -4726,6 +5115,10 @@ fn foo() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on non-uniform value
+  if (any(v == vec4(42))) {
+  ^^
 
 test:6:10 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
   v[1] = non_uniform_global;
@@ -4772,6 +5165,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:9:3 note: control flow depends on non-uniform value
+  if (s.b == 0) {
+  ^^
+
 test:9:7 note: reading from read_write storage buffer 's' may result in a non-uniform value
   if (s.b == 0) {
       ^
@@ -4800,6 +5197,10 @@ fn foo() {
               R"(test:12:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:11:3 note: control flow depends on non-uniform value
+  if (s.b == 0) {
+  ^^
 
 test:10:9 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   s.b = rw;
@@ -4850,6 +5251,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:11:3 note: control flow depends on non-uniform value
+  if (s.b == 0) {
+  ^^
+
 test:10:9 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   s.a = rw;
         ^^
@@ -4883,6 +5288,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:12:3 note: control flow depends on non-uniform value
+  if (s.a == 0) {
+  ^^
+
 test:10:9 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   s.a = rw;
         ^^
@@ -4915,6 +5324,10 @@ fn foo() {
               R"(test:13:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:12:3 note: control flow depends on non-uniform value
+  if (s.a == 0) {
+  ^^
 
 test:10:9 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   s.a = rw;
@@ -4953,6 +5366,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:5:3 note: control flow depends on non-uniform value
+  if (arr[7] == 0) {
+  ^^
+
 test:5:7 note: reading from read_write storage buffer 'arr' may result in a non-uniform value
   if (arr[7] == 0) {
       ^^^
@@ -4977,6 +5394,10 @@ fn foo() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on non-uniform value
+  if (arr[2] == 0) {
+  ^^
 
 test:6:12 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   arr[2] = rw;
@@ -5019,6 +5440,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:7:3 note: control flow depends on non-uniform value
+  if (arr[2] == 0) {
+  ^^
+
 test:6:12 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   arr[1] = rw;
            ^^
@@ -5044,6 +5469,10 @@ fn foo() {
               R"(test:9:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:8:3 note: control flow depends on non-uniform value
+  if (arr[2] == 0) {
+  ^^
 
 test:7:9 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   *pa = rw;
@@ -5074,6 +5503,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:8:3 note: control flow depends on non-uniform value
+  if (arr[1] == 0) {
+  ^^
+
 test:6:12 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   arr[1] = rw;
            ^^
@@ -5102,6 +5535,10 @@ fn foo() {
               R"(test:9:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:8:3 note: control flow depends on non-uniform value
+  if (arr[1] == 0) {
+  ^^
 
 test:6:12 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   arr[1] = rw;
@@ -5133,6 +5570,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:9:3 note: control flow depends on non-uniform value
+  if (arr[1] == 0) {
+  ^^
+
 test:7:12 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   arr[1] = rw;
            ^^
@@ -5160,6 +5601,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:5:3 note: control flow depends on non-uniform value
+  if (i32(non_uniform_global) == 0) {
+  ^^
+
 test:5:11 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
   if (i32(non_uniform_global) == 0) {
           ^^^^^^^^^^^^^^^^^^
@@ -5183,6 +5628,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:5:3 note: control flow depends on non-uniform value
+  if (f32(non_uniform_global) == 0.0) {
+  ^^
+
 test:5:11 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
   if (f32(non_uniform_global) == 0.0) {
           ^^^^^^^^^^^^^^^^^^
@@ -5205,6 +5654,10 @@ fn foo() {
               R"(test:6:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on non-uniform value
+  if (bitcast<f32>(non_uniform_global) == 0.0) {
+  ^^
 
 test:5:20 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
   if (bitcast<f32>(non_uniform_global) == 0.0) {
@@ -5232,6 +5685,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:7:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
+
 test:6:8 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   v += rw;
        ^^
@@ -5257,6 +5714,10 @@ fn foo() {
               R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on non-uniform value
+  if (v == 0) {
+  ^^
 
 test:5:11 note: reading from read_write storage buffer 'rw' may result in a non-uniform value
   var v = rw;
@@ -5291,6 +5752,14 @@ fn foo() {
 test:13:7 note: calling 'bar' may cause subsequent control flow to be non-uniform
   _ = bar();
       ^^^
+
+test:5:3 note: control flow depends on non-uniform value
+  if (nonuniform_var == 42) {
+  ^^
+
+test:5:7 note: reading from read_write storage buffer 'nonuniform_var' may result in a non-uniform value
+  if (nonuniform_var == 42) {
+      ^^^^^^^^^^^^^^
 )");
 }
 
@@ -5311,6 +5780,10 @@ fn main() {
               R"(test:8:3 warning: 'workgroupBarrier' must only be called from uniform control flow
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
+
+test:7:38 note: control flow depends on non-uniform value
+  let b = (non_uniform_global == 42) && false;
+                                     ^^
 
 test:7:12 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
   let b = (non_uniform_global == 42) && false;
@@ -5381,6 +5854,10 @@ fn foo() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:5:3 note: control flow depends on non-uniform value
+  if (atomicAdd(&a, 1) == 1) {
+  ^^
+
 test:5:18 note: reading from workgroup storage variable 'a' may result in a non-uniform value
   if (atomicAdd(&a, 1) == 1) {
                  ^
@@ -5403,6 +5880,10 @@ fn foo() {
               R"(test:6:5 warning: 'storageBarrier' must only be called from uniform control flow
     storageBarrier();
     ^^^^^^^^^^^^^^
+
+test:5:3 note: control flow depends on non-uniform value
+  if (atomicAdd(&a, 1) == 1) {
+  ^^
 
 test:5:18 note: reading from read_write storage buffer 'a' may result in a non-uniform value
   if (atomicAdd(&a, 1) == 1) {
@@ -5455,6 +5936,10 @@ test:5:3 note: 'foo' requires uniformity because it calls workgroupBarrier
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
 
+test:9:3 note: control flow depends on non-uniform value
+  if (non_uniform == 42) {
+  ^^
+
 test:9:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   if (non_uniform == 42) {
       ^^^^^^^^^^^
@@ -5493,6 +5978,10 @@ fn main() {
 test:5:3 note: 'foo' requires uniformity because it indirectly calls workgroupBarrier
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
+
+test:17:3 note: control flow depends on non-uniform value
+  if (non_uniform == 42) {
+  ^^
 
 test:17:7 note: reading from read_write storage buffer 'non_uniform' may result in a non-uniform value
   if (non_uniform == 42) {
@@ -5576,9 +6065,132 @@ fn main() {
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
+test:17:3 note: control flow depends on non-uniform value
+  if (foo() == 42) {
+  ^^
+
 test:17:7 note: return value of 'foo' may be non-uniform
   if (foo() == 42) {
       ^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, Error_SubsequentControlFlowMayBeNonUniform) {
+    // Make sure we correctly identify the function call as the source of non-uniform control flow
+    // and not the if statement with the uniform condition.
+    std::string src = R"(
+@group(0) @binding(0) var<uniform> uniform_value : i32;
+@group(0) @binding(1) var<storage, read_write> non_uniform_value : i32;
+
+fn foo() -> i32 {
+  if (non_uniform_value == 0) {
+    return 5;
+  }
+  return 6;
+}
+
+fn main() {
+  foo();
+  if (uniform_value == 42) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:15:5 warning: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:13:3 note: calling 'foo' may cause subsequent control flow to be non-uniform
+  foo();
+  ^^^
+
+test:6:3 note: control flow depends on non-uniform value
+  if (non_uniform_value == 0) {
+  ^^
+
+test:6:7 note: reading from read_write storage buffer 'non_uniform_value' may result in a non-uniform value
+  if (non_uniform_value == 0) {
+      ^^^^^^^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, Error_ParameterRequiredToBeUniformForSubsequentControlFlow) {
+    // Make sure we correctly identify the function call as the source of non-uniform control flow
+    // and not the if statement with the uniform condition.
+    std::string src = R"(
+@group(0) @binding(0) var<uniform> uniform_value : i32;
+@group(0) @binding(1) var<storage, read_write> non_uniform_value : i32;
+
+fn foo(x : i32) -> i32 {
+  if (x == 0) {
+    return 5;
+  }
+  return 6;
+}
+
+fn main() {
+  foo(non_uniform_value);
+  if (uniform_value == 42) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:15:5 warning: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:13:7 note: non-uniform function call argument causes subsequent control flow to be non-uniform
+  foo(non_uniform_value);
+      ^^^^^^^^^^^^^^^^^
+
+test:6:3 note: control flow depends on non-uniform value
+  if (x == 0) {
+  ^^
+
+test:6:7 note: reading from 'x' may result in a non-uniform value
+  if (x == 0) {
+      ^
+
+test:13:7 note: reading from read_write storage buffer 'non_uniform_value' may result in a non-uniform value
+  foo(non_uniform_value);
+      ^^^^^^^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, Error_ShortCircuitingExprCausesNonUniformControlFlow) {
+    // Make sure we correctly identify the short-circuit as the source of non-uniform control flow
+    // and not the if statement with the uniform condition.
+    std::string src = R"(
+@group(0) @binding(0) var<uniform> uniform_value : i32;
+@group(0) @binding(1) var<storage, read_write> non_uniform_value : i32;
+
+fn main() {
+  let b = (non_uniform_value == 0) && true;
+  if (uniform_value == 42) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:6:36 note: control flow depends on non-uniform value
+  let b = (non_uniform_value == 0) && true;
+                                   ^^
+
+test:6:12 note: reading from read_write storage buffer 'non_uniform_value' may result in a non-uniform value
+  let b = (non_uniform_value == 0) && true;
+           ^^^^^^^^^^^^^^^^^
 )");
 }
 

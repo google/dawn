@@ -2,6 +2,10 @@ bug/fxc/gradient_in_varying_loop/1112.wgsl:23:33 warning: 'textureSample' must o
         let sampleDepth : f32 = textureSample(depthTexture, Sampler, offset.xy).r;
                                 ^^^^^^^^^^^^^
 
+bug/fxc/gradient_in_varying_loop/1112.wgsl:18:28 note: control flow depends on non-uniform value
+        if (offset.x < 0.0 || offset.y < 0.0 || offset.x > 1.0 || offset.y > 1.0) {
+                           ^^
+
 bug/fxc/gradient_in_varying_loop/1112.wgsl:8:29 note: return value of 'textureSample' may be non-uniform
     let random: vec3<f32> = textureSample(randomTexture, Sampler, vUV).rgb;
                             ^^^^^^^^^^^^^

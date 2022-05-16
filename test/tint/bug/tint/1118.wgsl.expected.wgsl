@@ -2,6 +2,10 @@ bug/tint/1118.wgsl:64:31 warning: 'dpdx' must only be called from uniform contro
   normalW = normalize(-(cross(dpdx(x_62), dpdy(x_64))));
                               ^^^^
 
+bug/tint/1118.wgsl:47:3 note: control flow depends on non-uniform value
+  if ((x_9 > 0.0)) {
+  ^^
+
 bug/tint/1118.wgsl:46:19 note: reading from module-scope private variable 'fClipDistance3' may result in a non-uniform value
   let x_9 : f32 = fClipDistance3;
                   ^^^^^^^^^^^^^^

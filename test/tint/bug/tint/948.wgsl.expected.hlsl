@@ -2,6 +2,10 @@ bug/tint/948.wgsl:146:33 warning: 'textureSampleBias' must only be called from u
         let x_217 : vec4<f32> = textureSampleBias(animationMapTexture, animationMapSampler, vec2<f32>(((x_208 + 0.5) / x_211), (0.125 * x_214)), 0.0);
                                 ^^^^^^^^^^^^^^^^^
 
+bug/tint/948.wgsl:125:5 note: control flow depends on non-uniform value
+    if ((x_174 > 0.0)) {
+    ^^
+
 bug/tint/948.wgsl:146:33 note: return value of 'textureSampleBias' may be non-uniform
         let x_217 : vec4<f32> = textureSampleBias(animationMapTexture, animationMapSampler, vec2<f32>(((x_208 + 0.5) / x_211), (0.125 * x_214)), 0.0);
                                 ^^^^^^^^^^^^^^^^^
