@@ -313,6 +313,13 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
             continue;
         }
 
+        constexpr const char kUseAngleArg[] = "--use-angle=";
+        argLen = sizeof(kUseAngleArg) - 1;
+        if (strncmp(argv[i], kUseAngleArg, argLen) == 0) {
+            mANGLEBackend = argv[i] + argLen;
+            continue;
+        }
+
         constexpr const char kExclusiveDeviceTypePreferenceArg[] =
             "--exclusive-device-type-preference=";
         argLen = sizeof(kExclusiveDeviceTypePreferenceArg) - 1;
@@ -440,7 +447,13 @@ std::unique_ptr<dawn::native::Instance> DawnTestEnvironment::CreateInstanceAndDi
 
     ScopedEnvironmentVar angleDefaultPlatform;
     if (GetEnvironmentVar("ANGLE_DEFAULT_PLATFORM").first.empty()) {
-        angleDefaultPlatform.Set("ANGLE_DEFAULT_PLATFORM", "swiftshader");
+        const char* platform;
+        if (!mANGLEBackend.empty()) {
+            platform = mANGLEBackend.c_str();
+        } else {
+            platform = "swiftshader";
+        }
+        angleDefaultPlatform.Set("ANGLE_DEFAULT_PLATFORM", platform);
     }
 
     if (!glfwInit()) {
