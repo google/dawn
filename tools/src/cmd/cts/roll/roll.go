@@ -97,13 +97,13 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 
 	// Check tools can be found
 	for _, tool := range []struct {
-		name, path string
+		name, path, hint string
 	}{
 		{name: "git", path: c.flags.gitPath},
-		{name: "tsc", path: c.flags.tscPath},
+		{name: "tsc", path: c.flags.tscPath, hint: "Try using '-tsc third_party/webgpu-cts/node_modules/.bin/tsc' after an 'npm ci'."},
 	} {
 		if _, err := os.Stat(tool.path); err != nil {
-			return fmt.Errorf("failed to find path to %v: %v", tool.name, err)
+			return fmt.Errorf("failed to find path to %v: %v. %v", tool.name, err, tool.hint)
 		}
 	}
 
