@@ -172,6 +172,7 @@ function(common_compile_options TARGET)
     target_compile_options(${TARGET} PRIVATE
       -fno-exceptions
       -fno-rtti
+      -fvisibility-inlines-hidden
     )
 
     if (${DAWN_ENABLE_MSAN})
