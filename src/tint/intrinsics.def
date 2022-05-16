@@ -605,6 +605,15 @@ ctor bool(bool) -> bool
 ctor vec2<T: scalar>(vec2<T>) -> vec2<T>
 ctor vec3<T: scalar>(vec3<T>) -> vec3<T>
 ctor vec4<T: scalar>(vec4<T>) -> vec4<T>
+ctor mat2x2<f32>(mat2x2<f32>) -> mat2x2<f32>
+ctor mat2x3<f32>(mat2x3<f32>) -> mat2x3<f32>
+ctor mat2x4<f32>(mat2x4<f32>) -> mat2x4<f32>
+ctor mat3x2<f32>(mat3x2<f32>) -> mat3x2<f32>
+ctor mat3x3<f32>(mat3x3<f32>) -> mat3x3<f32>
+ctor mat3x4<f32>(mat3x4<f32>) -> mat3x4<f32>
+ctor mat4x2<f32>(mat4x2<f32>) -> mat4x2<f32>
+ctor mat4x3<f32>(mat4x3<f32>) -> mat4x3<f32>
+ctor mat4x4<f32>(mat4x4<f32>) -> mat4x4<f32>
 
 // Vector constructors
 ctor vec2<T: scalar>(T) -> vec2<T>
@@ -623,50 +632,59 @@ ctor vec4<T: scalar>(xyz: vec3<T>, w: T) -> vec4<T>
 ctor vec4<T: scalar>(x: T, zyw: vec3<T>) -> vec4<T>
 
 // Matrix constructors
-ctor mat2x2(f32, f32,
-            f32, f32) -> mat2x2<f32>
-ctor mat2x2(vec2<f32>, vec2<f32>) -> mat2x2<f32>
+ctor mat2x2<T: f32>(T) -> mat2x2<T>
+ctor mat2x2<T: f32>(T, T,
+                    T, T) -> mat2x2<T>
+ctor mat2x2<T: f32>(vec2<T>, vec2<T>) -> mat2x2<T>
 
-ctor mat2x3(f32, f32, f32,
-            f32, f32, f32) -> mat2x3<f32>
-ctor mat2x3(vec3<f32>, vec3<f32>) -> mat2x3<f32>
+ctor mat2x3<T: f32>(T) -> mat2x3<T>
+ctor mat2x3<T: f32>(T, T, T,
+                    T, T, T) -> mat2x3<T>
+ctor mat2x3<T: f32>(vec3<T>, vec3<T>) -> mat2x3<T>
 
-ctor mat2x4(f32, f32, f32, f32,
-            f32, f32, f32, f32) -> mat2x4<f32>
-ctor mat2x4(vec4<f32>, vec4<f32>) -> mat2x4<f32>
+ctor mat2x4<T: f32>(T) -> mat2x4<T>
+ctor mat2x4<T: f32>(T, T, T, T,
+                    T, T, T, T) -> mat2x4<T>
+ctor mat2x4<T: f32>(vec4<T>, vec4<T>) -> mat2x4<T>
 
-ctor mat3x2(f32, f32,
-            f32, f32,
-            f32, f32) -> mat3x2<f32>
-ctor mat3x2(vec2<f32>, vec2<f32>, vec2<f32>) -> mat3x2<f32>
+ctor mat3x2<T: f32>(T) -> mat3x2<T>
+ctor mat3x2<T: f32>(T, T,
+                    T, T,
+                    T, T) -> mat3x2<T>
+ctor mat3x2<T: f32>(vec2<T>, vec2<T>, vec2<T>) -> mat3x2<T>
 
-ctor mat3x3(f32, f32, f32,
-            f32, f32, f32,
-            f32, f32, f32) -> mat3x3<f32>
-ctor mat3x3(vec3<f32>, vec3<f32>, vec3<f32>) -> mat3x3<f32>
+ctor mat3x3<T: f32>(T) -> mat3x3<T>
+ctor mat3x3<T: f32>(T, T, T,
+                    T, T, T,
+                    T, T, T) -> mat3x3<T>
+ctor mat3x3<T: f32>(vec3<T>, vec3<T>, vec3<T>) -> mat3x3<T>
 
-ctor mat3x4(f32, f32, f32, f32,
-            f32, f32, f32, f32,
-            f32, f32, f32, f32) -> mat3x4<f32>
-ctor mat3x4(vec4<f32>, vec4<f32>, vec4<f32>) -> mat3x4<f32>
+ctor mat3x4<T: f32>(T) -> mat3x4<T>
+ctor mat3x4<T: f32>(T, T, T, T,
+                    T, T, T, T,
+                    T, T, T, T) -> mat3x4<T>
+ctor mat3x4<T: f32>(vec4<T>, vec4<T>, vec4<T>) -> mat3x4<T>
 
-ctor mat4x2(f32, f32,
-            f32, f32,
-            f32, f32,
-            f32, f32) -> mat4x2<f32>
-ctor mat4x2(vec2<f32>, vec2<f32>, vec2<f32>, vec2<f32>) -> mat4x2<f32>
+ctor mat4x2<T: f32>(T) -> mat4x2<T>
+ctor mat4x2<T: f32>(T, T,
+                    T, T,
+                    T, T,
+                    T, T) -> mat4x2<T>
+ctor mat4x2<T: f32>(vec2<T>, vec2<T>, vec2<T>, vec2<T>) -> mat4x2<T>
 
-ctor mat4x3(f32, f32, f32,
-            f32, f32, f32,
-            f32, f32, f32,
-            f32, f32, f32) -> mat4x3<f32>
-ctor mat4x3(vec3<f32>, vec3<f32>, vec3<f32>, vec3<f32>) -> mat4x3<f32>
+ctor mat4x3<T: f32>(T) -> mat4x3<T>
+ctor mat4x3<T: f32>(T, T, T,
+                    T, T, T,
+                    T, T, T,
+                    T, T, T) -> mat4x3<T>
+ctor mat4x3<T: f32>(vec3<T>, vec3<T>, vec3<T>, vec3<T>) -> mat4x3<T>
 
-ctor mat4x4(f32, f32, f32, f32,
-            f32, f32, f32, f32,
-            f32, f32, f32, f32,
-            f32, f32, f32, f32) -> mat4x4<f32>
-ctor mat4x4(vec4<f32>, vec4<f32>, vec4<f32>, vec4<f32>) -> mat4x4<f32>
+ctor mat4x4<T: f32>(T) -> mat4x4<T>
+ctor mat4x4<T: f32>(T, T, T, T,
+                    T, T, T, T,
+                    T, T, T, T,
+                    T, T, T, T) -> mat4x4<T>
+ctor mat4x4<T: f32>(vec4<T>, vec4<T>, vec4<T>, vec4<T>) -> mat4x4<T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Type conversions                                                           //

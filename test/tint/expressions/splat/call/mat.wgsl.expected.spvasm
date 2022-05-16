@@ -1,0 +1,194 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 123
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %get_f32 "get_f32"
+               OpName %build_mat2x2 "build_mat2x2"
+               OpName %value "value"
+               OpName %build_mat2x3 "build_mat2x3"
+               OpName %value_0 "value"
+               OpName %build_mat2x4 "build_mat2x4"
+               OpName %value_1 "value"
+               OpName %build_mat3x2 "build_mat3x2"
+               OpName %value_2 "value"
+               OpName %build_mat3x3 "build_mat3x3"
+               OpName %value_3 "value"
+               OpName %build_mat3x4 "build_mat3x4"
+               OpName %value_4 "value"
+               OpName %build_mat4x2 "build_mat4x2"
+               OpName %value_5 "value"
+               OpName %build_mat4x3 "build_mat4x3"
+               OpName %value_6 "value"
+               OpName %build_mat4x4 "build_mat4x4"
+               OpName %value_7 "value"
+               OpName %f "f"
+               OpName %m2x2 "m2x2"
+               OpName %m2x3 "m2x3"
+               OpName %m2x4 "m2x4"
+               OpName %m3x2 "m3x2"
+               OpName %m3x3 "m3x3"
+               OpName %m3x4 "m3x4"
+               OpName %m4x2 "m4x2"
+               OpName %m4x3 "m4x3"
+               OpName %m4x4 "m4x4"
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+          %5 = OpTypeFunction %float
+    %float_1 = OpConstant %float 1
+    %v2float = OpTypeVector %float 2
+%mat2v2float = OpTypeMatrix %v2float 2
+         %10 = OpTypeFunction %mat2v2float %float
+    %v3float = OpTypeVector %float 3
+%mat2v3float = OpTypeMatrix %v3float 2
+         %18 = OpTypeFunction %mat2v3float %float
+    %v4float = OpTypeVector %float 4
+%mat2v4float = OpTypeMatrix %v4float 2
+         %26 = OpTypeFunction %mat2v4float %float
+%mat3v2float = OpTypeMatrix %v2float 3
+         %34 = OpTypeFunction %mat3v2float %float
+%mat3v3float = OpTypeMatrix %v3float 3
+         %41 = OpTypeFunction %mat3v3float %float
+%mat3v4float = OpTypeMatrix %v4float 3
+         %48 = OpTypeFunction %mat3v4float %float
+%mat4v2float = OpTypeMatrix %v2float 4
+         %55 = OpTypeFunction %mat4v2float %float
+%mat4v3float = OpTypeMatrix %v3float 4
+         %62 = OpTypeFunction %mat4v3float %float
+%mat4v4float = OpTypeMatrix %v4float 4
+         %69 = OpTypeFunction %mat4v4float %float
+%_ptr_Function_mat2v2float = OpTypePointer Function %mat2v2float
+         %82 = OpConstantNull %mat2v2float
+%_ptr_Function_mat2v3float = OpTypePointer Function %mat2v3float
+         %87 = OpConstantNull %mat2v3float
+%_ptr_Function_mat2v4float = OpTypePointer Function %mat2v4float
+         %92 = OpConstantNull %mat2v4float
+%_ptr_Function_mat3v2float = OpTypePointer Function %mat3v2float
+         %97 = OpConstantNull %mat3v2float
+%_ptr_Function_mat3v3float = OpTypePointer Function %mat3v3float
+        %102 = OpConstantNull %mat3v3float
+%_ptr_Function_mat3v4float = OpTypePointer Function %mat3v4float
+        %107 = OpConstantNull %mat3v4float
+%_ptr_Function_mat4v2float = OpTypePointer Function %mat4v2float
+        %112 = OpConstantNull %mat4v2float
+%_ptr_Function_mat4v3float = OpTypePointer Function %mat4v3float
+        %117 = OpConstantNull %mat4v3float
+%_ptr_Function_mat4v4float = OpTypePointer Function %mat4v4float
+        %122 = OpConstantNull %mat4v4float
+%unused_entry_point = OpFunction %void None %1
+          %4 = OpLabel
+               OpReturn
+               OpFunctionEnd
+    %get_f32 = OpFunction %float None %5
+          %8 = OpLabel
+               OpReturnValue %float_1
+               OpFunctionEnd
+%build_mat2x2 = OpFunction %mat2v2float None %10
+      %value = OpFunctionParameter %float
+         %15 = OpLabel
+         %16 = OpCompositeConstruct %v2float %value %value
+         %17 = OpCompositeConstruct %mat2v2float %16 %16
+               OpReturnValue %17
+               OpFunctionEnd
+%build_mat2x3 = OpFunction %mat2v3float None %18
+    %value_0 = OpFunctionParameter %float
+         %23 = OpLabel
+         %24 = OpCompositeConstruct %v3float %value_0 %value_0 %value_0
+         %25 = OpCompositeConstruct %mat2v3float %24 %24
+               OpReturnValue %25
+               OpFunctionEnd
+%build_mat2x4 = OpFunction %mat2v4float None %26
+    %value_1 = OpFunctionParameter %float
+         %31 = OpLabel
+         %32 = OpCompositeConstruct %v4float %value_1 %value_1 %value_1 %value_1
+         %33 = OpCompositeConstruct %mat2v4float %32 %32
+               OpReturnValue %33
+               OpFunctionEnd
+%build_mat3x2 = OpFunction %mat3v2float None %34
+    %value_2 = OpFunctionParameter %float
+         %38 = OpLabel
+         %39 = OpCompositeConstruct %v2float %value_2 %value_2
+         %40 = OpCompositeConstruct %mat3v2float %39 %39 %39
+               OpReturnValue %40
+               OpFunctionEnd
+%build_mat3x3 = OpFunction %mat3v3float None %41
+    %value_3 = OpFunctionParameter %float
+         %45 = OpLabel
+         %46 = OpCompositeConstruct %v3float %value_3 %value_3 %value_3
+         %47 = OpCompositeConstruct %mat3v3float %46 %46 %46
+               OpReturnValue %47
+               OpFunctionEnd
+%build_mat3x4 = OpFunction %mat3v4float None %48
+    %value_4 = OpFunctionParameter %float
+         %52 = OpLabel
+         %53 = OpCompositeConstruct %v4float %value_4 %value_4 %value_4 %value_4
+         %54 = OpCompositeConstruct %mat3v4float %53 %53 %53
+               OpReturnValue %54
+               OpFunctionEnd
+%build_mat4x2 = OpFunction %mat4v2float None %55
+    %value_5 = OpFunctionParameter %float
+         %59 = OpLabel
+         %60 = OpCompositeConstruct %v2float %value_5 %value_5
+         %61 = OpCompositeConstruct %mat4v2float %60 %60 %60 %60
+               OpReturnValue %61
+               OpFunctionEnd
+%build_mat4x3 = OpFunction %mat4v3float None %62
+    %value_6 = OpFunctionParameter %float
+         %66 = OpLabel
+         %67 = OpCompositeConstruct %v3float %value_6 %value_6 %value_6
+         %68 = OpCompositeConstruct %mat4v3float %67 %67 %67 %67
+               OpReturnValue %68
+               OpFunctionEnd
+%build_mat4x4 = OpFunction %mat4v4float None %69
+    %value_7 = OpFunctionParameter %float
+         %73 = OpLabel
+         %74 = OpCompositeConstruct %v4float %value_7 %value_7 %value_7 %value_7
+         %75 = OpCompositeConstruct %mat4v4float %74 %74 %74 %74
+               OpReturnValue %75
+               OpFunctionEnd
+          %f = OpFunction %void None %1
+         %77 = OpLabel
+       %m2x2 = OpVariable %_ptr_Function_mat2v2float Function %82
+       %m2x3 = OpVariable %_ptr_Function_mat2v3float Function %87
+       %m2x4 = OpVariable %_ptr_Function_mat2v4float Function %92
+       %m3x2 = OpVariable %_ptr_Function_mat3v2float Function %97
+       %m3x3 = OpVariable %_ptr_Function_mat3v3float Function %102
+       %m3x4 = OpVariable %_ptr_Function_mat3v4float Function %107
+       %m4x2 = OpVariable %_ptr_Function_mat4v2float Function %112
+       %m4x3 = OpVariable %_ptr_Function_mat4v3float Function %117
+       %m4x4 = OpVariable %_ptr_Function_mat4v4float Function %122
+         %78 = OpFunctionCall %float %get_f32
+         %79 = OpFunctionCall %mat2v2float %build_mat2x2 %78
+               OpStore %m2x2 %79
+         %83 = OpFunctionCall %float %get_f32
+         %84 = OpFunctionCall %mat2v3float %build_mat2x3 %83
+               OpStore %m2x3 %84
+         %88 = OpFunctionCall %float %get_f32
+         %89 = OpFunctionCall %mat2v4float %build_mat2x4 %88
+               OpStore %m2x4 %89
+         %93 = OpFunctionCall %float %get_f32
+         %94 = OpFunctionCall %mat3v2float %build_mat3x2 %93
+               OpStore %m3x2 %94
+         %98 = OpFunctionCall %float %get_f32
+         %99 = OpFunctionCall %mat3v3float %build_mat3x3 %98
+               OpStore %m3x3 %99
+        %103 = OpFunctionCall %float %get_f32
+        %104 = OpFunctionCall %mat3v4float %build_mat3x4 %103
+               OpStore %m3x4 %104
+        %108 = OpFunctionCall %float %get_f32
+        %109 = OpFunctionCall %mat4v2float %build_mat4x2 %108
+               OpStore %m4x2 %109
+        %113 = OpFunctionCall %float %get_f32
+        %114 = OpFunctionCall %mat4v3float %build_mat4x3 %113
+               OpStore %m4x3 %114
+        %118 = OpFunctionCall %float %get_f32
+        %119 = OpFunctionCall %mat4v4float %build_mat4x4 %118
+               OpStore %m4x4 %119
+               OpReturn
+               OpFunctionEnd

@@ -6,6 +6,7 @@
 
 * Produce warnings for when calling barriers, textureSample, and derivative
 builtins in non-uniform control flow [tint:880](crbug.com/tint/880)
+* Matrix identity constructors and constructors for a single scalar value are now supported [tint:1545](crbug.com/tint/1545)
 
 ## Changes for M102
 

@@ -235,21 +235,28 @@ constexpr Params ParamsFor(Kind kind) {
 }
 
 static constexpr Params valid_cases[] = {
-    // Direct init (non-conversions)
-    ParamsFor<bool, bool>(Kind::Construct),              //
-    ParamsFor<i32, i32>(Kind::Construct),                //
-    ParamsFor<u32, u32>(Kind::Construct),                //
-    ParamsFor<f32, f32>(Kind::Construct),                //
-    ParamsFor<vec3<bool>, vec3<bool>>(Kind::Construct),  //
-    ParamsFor<vec3<i32>, vec3<i32>>(Kind::Construct),    //
-    ParamsFor<vec3<u32>, vec3<u32>>(Kind::Construct),    //
-    ParamsFor<vec3<f32>, vec3<f32>>(Kind::Construct),    //
+    // Identity
+    ParamsFor<bool, bool>(Kind::Construct),                //
+    ParamsFor<i32, i32>(Kind::Construct),                  //
+    ParamsFor<u32, u32>(Kind::Construct),                  //
+    ParamsFor<f32, f32>(Kind::Construct),                  //
+    ParamsFor<vec3<bool>, vec3<bool>>(Kind::Construct),    //
+    ParamsFor<vec3<i32>, vec3<i32>>(Kind::Construct),      //
+    ParamsFor<vec3<u32>, vec3<u32>>(Kind::Construct),      //
+    ParamsFor<vec3<f32>, vec3<f32>>(Kind::Construct),      //
+    ParamsFor<mat3x3<f32>, mat3x3<f32>>(Kind::Construct),  //
+    ParamsFor<mat2x3<f32>, mat2x3<f32>>(Kind::Construct),  //
+    ParamsFor<mat3x2<f32>, mat3x2<f32>>(Kind::Construct),  //
 
     // Splat
     ParamsFor<vec3<bool>, bool>(Kind::Construct),  //
     ParamsFor<vec3<i32>, i32>(Kind::Construct),    //
     ParamsFor<vec3<u32>, u32>(Kind::Construct),    //
     ParamsFor<vec3<f32>, f32>(Kind::Construct),    //
+
+    ParamsFor<mat3x3<f32>, f32>(Kind::Construct),  //
+    ParamsFor<mat2x3<f32>, f32>(Kind::Construct),  //
+    ParamsFor<mat3x2<f32>, f32>(Kind::Construct),  //
 
     // Conversion
     ParamsFor<bool, u32>(Kind::Conversion),  //
@@ -2016,9 +2023,8 @@ TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooFewArguments) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
-                          args_tys.str() + ")\n\n3 candidate constructors:"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_TooFewArguments) {
@@ -2041,9 +2047,8 @@ TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_TooFewArguments) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
-                          args_tys.str() + ")\n\n3 candidate constructors:"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooManyArguments) {
@@ -2067,9 +2072,8 @@ TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooManyArguments) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
-                          args_tys.str() + ")\n\n3 candidate constructors:"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_TooManyArguments) {
@@ -2092,9 +2096,8 @@ TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_TooManyArguments) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
-                          args_tys.str() + ")\n\n3 candidate constructors:"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_InvalidArgumentType) {
@@ -2118,9 +2121,8 @@ TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_InvalidArgumentType) 
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
-                          args_tys.str() + ")\n\n3 candidate constructors:"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_InvalidArgumentType) {
@@ -2143,9 +2145,8 @@ TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_InvalidArgumentType)
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
-                          args_tys.str() + ")\n\n3 candidate constructors:"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooFewRowsInVectorArgument) {
@@ -2178,9 +2179,8 @@ TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooFewRowsInVectorArg
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
-                          args_tys.str() + ")\n\n3 candidate constructors:"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooManyRowsInVectorArgument) {
@@ -2212,9 +2212,8 @@ TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooManyRowsInVectorAr
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
-                          args_tys.str() + ")\n\n3 candidate constructors:"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ZeroValue_Success) {
@@ -2285,9 +2284,8 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Error) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
-                          args_tys.str() + ")\n\n3 candidate constructors:"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Success) {
@@ -2357,9 +2355,8 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentElementTypeAlias_Error) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
-                          args_tys.str() + ")\n\n3 candidate constructors:"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for " +
+                                        MatrixStr(param) + "(" + args_tys.str() + ")"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentElementTypeAlias_Success) {

@@ -1,0 +1,6 @@
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+  return;
+}
+
+static const float4x2 m = float4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
