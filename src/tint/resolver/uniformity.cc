@@ -566,14 +566,14 @@ class UniformityGraph {
 
             [&](const ast::ForLoopStatement* f) {
                 auto* sem_loop = sem_.Get(f);
-                auto cfx = CreateNode("loop_start");
+                auto* cfx = CreateNode("loop_start");
 
                 // Insert the initializer before the loop.
-                auto cf_init = cf;
+                auto* cf_init = cf;
                 if (f->initializer) {
                     cf_init = ProcessStatement(cf, f->initializer);
                 }
-                auto cf_start = cf_init;
+                auto* cf_start = cf_init;
 
                 auto& info = current_function_->loop_switch_infos[sem_loop];
                 info.type = "forloop";
@@ -604,11 +604,11 @@ class UniformityGraph {
                         exit_node->AddEdge(current_function_->variables.Get(var));
                     }
                 }
-                auto cf1 = ProcessStatement(cf_start, f->body);
+                auto* cf1 = ProcessStatement(cf_start, f->body);
 
                 // Insert the continuing statement at the end of the loop body.
                 if (f->continuing) {
-                    auto cf2 = ProcessStatement(cf1, f->continuing);
+                    auto* cf2 = ProcessStatement(cf1, f->continuing);
                     cfx->AddEdge(cf2);
                 } else {
                     cfx->AddEdge(cf1);
@@ -660,7 +660,7 @@ class UniformityGraph {
                         current_function_->variables.Push();
 
                         // Process the statement.
-                        auto cf_out = ProcessStatement(cf_in, s);
+                        auto* cf_out = ProcessStatement(cf_in, s);
 
                         assigned_vars = current_function_->variables.Top();
 
@@ -669,7 +669,7 @@ class UniformityGraph {
                         return cf_out;
                     };
 
-                auto cf1 = process_in_scope(v, i->body, true_vars);
+                auto* cf1 = process_in_scope(v, i->body, true_vars);
 
                 bool true_has_next = sem_.Get(i->body)->Behaviors().Contains(sem::Behavior::kNext);
                 bool false_has_next = true;
@@ -683,7 +683,7 @@ class UniformityGraph {
                 }
 
                 // Update values for any variables assigned in the if or else blocks.
-                for (auto var : current_function_->local_var_decls) {
+                for (auto* var : current_function_->local_var_decls) {
                     // Skip variables not assigned in either block.
                     if (true_vars.count(var) == 0 && false_vars.count(var) == 0) {
                         continue;
@@ -738,7 +738,7 @@ class UniformityGraph {
 
             [&](const ast::LoopStatement* l) {
                 auto* sem_loop = sem_.Get(l);
-                auto cfx = CreateNode("loop_start");
+                auto* cfx = CreateNode("loop_start");
 
                 auto& info = current_function_->loop_switch_infos[sem_loop];
                 info.type = "loop";
@@ -752,9 +752,9 @@ class UniformityGraph {
                     current_function_->variables.Set(v, in_node);
                 }
 
-                auto cf1 = ProcessStatement(cfx, l->body);
+                auto* cf1 = ProcessStatement(cfx, l->body);
                 if (l->continuing) {
-                    auto cf2 = ProcessStatement(cf1, l->continuing);
+                    auto* cf2 = ProcessStatement(cf1, l->continuing);
                     cfx->AddEdge(cf2);
                 } else {
                     cfx->AddEdge(cf1);
@@ -823,7 +823,7 @@ class UniformityGraph {
                 auto& info = current_function_->loop_switch_infos[sem_switch];
                 info.type = "switch";
 
-                auto cf_n = v;
+                auto* cf_n = v;
                 bool previous_case_has_fallthrough = false;
                 for (auto* c : s->body) {
                     auto* sem_case = sem_.Get(c);
