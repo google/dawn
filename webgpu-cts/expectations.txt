@@ -268,7 +268,7 @@ crbug.com/dawn/0000 webgpu:api,validation,buffer,create:createBuffer_invalid_and
 # shader execution failures
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,atan2:* [ Failure ]
+crbug.com/tint/1524 [ win ] webgpu:shader,execution,expression,call,builtin,atan2:* [ Skip ]
 crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,call,builtin,countTrailingZeros:* [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,call,builtin,extractBits:* [ Failure ]
 crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,call,builtin,firstTrailingBit:* [ Failure ]
