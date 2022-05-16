@@ -26,6 +26,9 @@ vars = {
 
   # GN variable required by //testing that will be output in the gclient_args.gni
   'generate_location_tags': False,
+
+  # Fetch clang-tidy into the same bin/ directory as our clang binary.
+  'checkout_clang_tidy': False,
 }
 
 deps = {
@@ -241,6 +244,15 @@ hooks = [
     'pattern': '.',
     'action': ['python3', 'tools/clang/scripts/update.py'],
     'condition': 'dawn_standalone',
+  },
+  {
+    # This is also supposed to support the same set of platforms as 'clang'
+    # above. LLVM ToT support isn't provided at the moment.
+    'name': 'clang_tidy',
+    'pattern': '.',
+    'condition': 'checkout_clang_tidy',
+    'action': ['python3', 'tools/clang/scripts/update.py',
+               '--package=clang-tidy'],
   },
   {
     # Pull rc binaries using checked-in hashes.
