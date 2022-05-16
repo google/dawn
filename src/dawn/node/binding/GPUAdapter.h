@@ -42,6 +42,7 @@ class GPUAdapter final : public interop::GPUAdapter {
   private:
     dawn::native::Adapter adapter_;
     const Flags& flags_;
+    std::string name_;
 };
 
 }  // namespace wgpu::binding

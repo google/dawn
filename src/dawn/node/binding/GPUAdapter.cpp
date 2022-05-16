@@ -145,10 +145,15 @@ class Features : public interop::GPUSupportedFeatures {
 // wgpu::bindings::GPUAdapter
 // TODO(crbug.com/dawn/1133): This is a stub implementation. Properly implement.
 ////////////////////////////////////////////////////////////////////////////////
-GPUAdapter::GPUAdapter(dawn::native::Adapter a, const Flags& flags) : adapter_(a), flags_(flags) {}
+GPUAdapter::GPUAdapter(dawn::native::Adapter a, const Flags& flags) : adapter_(a), flags_(flags) {
+    wgpu::AdapterProperties props;
+    adapter_.GetProperties(&props);
+    name_ = props.name;
+}
 
+// TODO(dawn:1133): Avoid the extra copy by making the generator make a virtual method with const std::string&
 std::string GPUAdapter::getName(Napi::Env) {
-    return "dawn-adapter";
+    return name_;
 }
 
 interop::Interface<interop::GPUSupportedFeatures> GPUAdapter::getFeatures(Napi::Env env) {
