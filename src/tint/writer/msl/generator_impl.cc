@@ -513,6 +513,22 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
         return true;
     }
 
+    // Handle '&' and '|' of booleans.
+    if ((expr->IsAnd() || expr->IsOr()) && lhs_type->Is<sem::Bool>()) {
+        out << "bool";
+        ScopedParen sp(out);
+        if (!EmitExpression(out, expr->lhs)) {
+            return false;
+        }
+        if (!emit_op()) {
+            return false;
+        }
+        if (!EmitExpression(out, expr->rhs)) {
+            return false;
+        }
+        return true;
+    }
+
     // Emit as usual
     ScopedParen sp(out);
     if (!EmitExpression(out, expr->lhs)) {

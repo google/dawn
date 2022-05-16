@@ -171,5 +171,31 @@ TEST_F(MslBinaryTest, ModVec3F32) {
     EXPECT_EQ(out.str(), "fmod(left, right)");
 }
 
+TEST_F(MslBinaryTest, BoolAnd) {
+    auto* left = Var("left", nullptr, Expr(true));
+    auto* right = Var("right", nullptr, Expr(false));
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kAnd, Expr(left), Expr(right));
+    WrapInFunction(left, right, expr);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "bool(left & right)");
+}
+
+TEST_F(MslBinaryTest, BoolOr) {
+    auto* left = Var("left", nullptr, Expr(true));
+    auto* right = Var("right", nullptr, Expr(false));
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kOr, Expr(left), Expr(right));
+    WrapInFunction(left, right, expr);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "bool(left | right)");
+}
+
 }  // namespace
 }  // namespace tint::writer::msl

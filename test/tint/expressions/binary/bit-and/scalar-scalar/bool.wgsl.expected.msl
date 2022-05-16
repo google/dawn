@@ -1,0 +1,10 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void f() {
+  bool const a = true;
+  bool const b = false;
+  bool const r = bool(a & b);
+  return;
+}
+

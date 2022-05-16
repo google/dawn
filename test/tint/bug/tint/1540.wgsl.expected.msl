@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  bool e;
+};
+
+kernel void tint_symbol() {
+  bool b = false;
+  S v = {.e=bool(true & b)};
+  return;
+}
+
