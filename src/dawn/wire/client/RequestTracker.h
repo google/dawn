@@ -72,7 +72,7 @@ class RequestTracker : NonCopyable {
     }
 
   private:
-    uint64_t mSerial;
+    uint64_t mSerial = 0;
     std::map<uint64_t, Request> mRequests;
 };
 
