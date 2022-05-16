@@ -26,7 +26,7 @@ if (NOT DAWN_JINJA2_DIR)
         message(FATAL_ERROR "Dawn: Missing dependencies for code generation, please ensure you have python-jinja2 installed.")
     endif()
 else()
-    message(STATUS "Dawn: Using jinja2 at ${DAWN_JINJA2_DIR}")
+    message(STATUS "Dawn: using jinja2 at ${DAWN_JINJA2_DIR}")
 endif()
 
 # Function to invoke a generator_lib.py generator.
