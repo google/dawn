@@ -58,6 +58,12 @@ func TestLexTokens(t *testing.T) {
 		{"type", tok.Token{Kind: tok.Type, Runes: []rune("type"), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 5, 4),
 		}}},
+		{"ctor", tok.Token{Kind: tok.Constructor, Runes: []rune("ctor"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 5, 4),
+		}}},
+		{"conv", tok.Token{Kind: tok.Converter, Runes: []rune("conv"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 5, 4),
+		}}},
 		{"enum", tok.Token{Kind: tok.Enum, Runes: []rune("enum"), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 5, 4),
 		}}},

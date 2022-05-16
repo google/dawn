@@ -142,6 +142,40 @@ type T<x>
 fn f(T< T<f32> >)`,
 			success,
 		}, {
+			`
+type f32
+op -(f32)`,
+			success,
+		}, {
+			`
+type f32
+type T<x>
+op +(T<f32>, T<f32>)`,
+			success,
+		}, {
+			`
+type f32
+ctor f32(f32)`,
+			success,
+		}, {
+			`
+type f32
+type T<x>
+ctor f32(T<f32>)`,
+			success,
+		}, {
+			`
+type f32
+type i32
+conv f32(i32)`,
+			success,
+		}, {
+			`
+type f32
+type T<x>
+conv f32(T<f32>)`,
+			success,
+		}, {
 			`enum E {A A}`,
 			`
 file.txt:1:6 'A' already declared
@@ -360,6 +394,125 @@ type P<N: num>
 enum E { a b }
 match m: a | b
 op << <M: m>(P<M>)`,
+			`file.txt:4:16 cannot use template enum 'E' as template number`,
+		}, {
+			`
+type i
+enum e { a }
+ctor F(i) -> e`,
+			`file.txt:3:14 cannot use 'e' as return type. Must be a type or template type`,
+		}, {
+			`
+type T<x>
+ctor F(T<u>)`,
+			`file.txt:2:10 cannot resolve 'u'`,
+		}, {
+			`
+type x
+ctor F<T>(T<x>)`,
+			`file.txt:2:11 'T' template parameters do not accept template arguments`,
+		}, {
+			`
+type A<N: num>
+type B
+ctor F(A<B>)`,
+			`file.txt:3:10 cannot use type 'B' as template number`,
+		}, {
+			`
+type A<N>
+enum E { b }
+ctor F(A<b>)`,
+			`file.txt:3:10 cannot use enum entry 'E.b' as template type`,
+		}, {
+			`
+type T
+type P<N: num>
+match m: T
+ctor F(P<m>)`,
+			`file.txt:4:10 cannot use type matcher 'm' as template number`,
+		}, {
+			`
+type P<N: num>
+enum E { b }
+ctor F(P<E>)`,
+			`file.txt:3:10 cannot use enum 'E' as template number`,
+		}, {
+			`
+type P<N: num>
+enum E { a b }
+match m: a | b
+ctor F(P<m>)`,
+			`file.txt:4:10 cannot use enum matcher 'm' as template number`,
+		}, {
+			`
+type P<N: num>
+enum E { a b }
+match m: a | b
+ctor F<M: m>(P<M>)`,
+			`file.txt:4:16 cannot use template enum 'E' as template number`,
+		}, {
+			`
+conv F()`,
+			`file.txt:1:6 conversions must have a single parameter`,
+		}, {
+			`
+type i
+conv F(i, i, i)`,
+			`file.txt:2:6 conversions must have a single parameter`,
+		}, {
+			`
+type i
+enum e { a }
+conv F(i) -> e`,
+			`file.txt:3:14 cannot use 'e' as return type. Must be a type or template type`,
+		}, {
+			`
+type T<x>
+conv F(T<u>)`,
+			`file.txt:2:10 cannot resolve 'u'`,
+		}, {
+			`
+type x
+conv F<T>(T<x>)`,
+			`file.txt:2:11 'T' template parameters do not accept template arguments`,
+		}, {
+			`
+type A<N: num>
+type B
+conv F(A<B>)`,
+			`file.txt:3:10 cannot use type 'B' as template number`,
+		}, {
+			`
+type A<N>
+enum E { b }
+conv F(A<b>)`,
+			`file.txt:3:10 cannot use enum entry 'E.b' as template type`,
+		}, {
+			`
+type T
+type P<N: num>
+match m: T
+conv F(P<m>)`,
+			`file.txt:4:10 cannot use type matcher 'm' as template number`,
+		}, {
+			`
+type P<N: num>
+enum E { b }
+conv F(P<E>)`,
+			`file.txt:3:10 cannot use enum 'E' as template number`,
+		}, {
+			`
+type P<N: num>
+enum E { a b }
+match m: a | b
+conv F(P<m>)`,
+			`file.txt:4:10 cannot use enum matcher 'm' as template number`,
+		}, {
+			`
+type P<N: num>
+enum E { a b }
+match m: a | b
+conv F<M: m>(P<M>)`,
 			`file.txt:4:16 cannot use template enum 'E' as template number`,
 		}, {
 			`

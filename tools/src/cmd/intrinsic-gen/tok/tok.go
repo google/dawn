@@ -30,6 +30,8 @@ const (
 	Match        Kind = "match"
 	Function     Kind = "fn"
 	Operator     Kind = "op"
+	Constructor  Kind = "ctor"
+	Converter    Kind = "conv"
 	Type         Kind = "type"
 	Enum         Kind = "enum"
 	And          Kind = "&"

@@ -370,6 +370,254 @@ func TestParser(t *testing.T) {
 					},
 					Parameters: ast.Parameters{},
 				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"ctor F()",
+			ast.AST{
+				Constructors: []ast.IntrinsicDecl{{
+					Kind:       ast.Constructor,
+					Name:       "F",
+					Parameters: ast.Parameters{},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"[[deco]] ctor F()",
+			ast.AST{
+				Constructors: []ast.IntrinsicDecl{{
+					Kind: ast.Constructor,
+					Name: "F",
+					Decorations: ast.Decorations{
+						{Name: "deco", Values: []string{}},
+					},
+					Parameters: ast.Parameters{},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"ctor F(a)",
+			ast.AST{
+				Constructors: []ast.IntrinsicDecl{{
+					Kind: ast.Constructor,
+					Name: "F",
+					Parameters: ast.Parameters{
+						{Type: ast.TemplatedName{Name: "a"}},
+					},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"ctor F(a: T)",
+			ast.AST{
+				Constructors: []ast.IntrinsicDecl{{
+					Kind: ast.Constructor,
+					Name: "F",
+					Parameters: ast.Parameters{
+						{Name: "a", Type: ast.TemplatedName{Name: "T"}},
+					},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"ctor F(a, b)",
+			ast.AST{
+				Constructors: []ast.IntrinsicDecl{{
+					Kind: ast.Constructor,
+					Name: "F",
+					Parameters: ast.Parameters{
+						{Type: ast.TemplatedName{Name: "a"}},
+						{Type: ast.TemplatedName{Name: "b"}},
+					},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"ctor F<A : B<C> >()",
+			ast.AST{
+				Constructors: []ast.IntrinsicDecl{{
+					Kind: ast.Constructor,
+					Name: "F",
+					TemplateParams: ast.TemplateParams{
+						{
+							Name: "A", Type: ast.TemplatedName{
+								Name: "B",
+								TemplateArgs: ast.TemplatedNames{
+									{Name: "C"},
+								},
+							},
+						},
+					},
+					Parameters: ast.Parameters{},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"ctor F<T>(a: X, b: Y<T>)",
+			ast.AST{
+				Constructors: []ast.IntrinsicDecl{{
+					Kind: ast.Constructor,
+					Name: "F",
+					TemplateParams: ast.TemplateParams{
+						{Name: "T"},
+					},
+					Parameters: ast.Parameters{
+						{Name: "a", Type: ast.TemplatedName{Name: "X"}},
+						{Name: "b", Type: ast.TemplatedName{
+							Name:         "Y",
+							TemplateArgs: []ast.TemplatedName{{Name: "T"}},
+						}},
+					},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"ctor F() -> X",
+			ast.AST{
+				Constructors: []ast.IntrinsicDecl{{
+					Kind:       ast.Constructor,
+					Name:       "F",
+					ReturnType: &ast.TemplatedName{Name: "X"},
+					Parameters: ast.Parameters{},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"ctor F() -> X<T>",
+			ast.AST{
+				Constructors: []ast.IntrinsicDecl{{
+					Kind: ast.Constructor,
+					Name: "F",
+					ReturnType: &ast.TemplatedName{
+						Name:         "X",
+						TemplateArgs: []ast.TemplatedName{{Name: "T"}},
+					},
+					Parameters: ast.Parameters{},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"conv F()",
+			ast.AST{
+				Converters: []ast.IntrinsicDecl{{
+					Kind:       ast.Converter,
+					Name:       "F",
+					Parameters: ast.Parameters{},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"[[deco]] conv F()",
+			ast.AST{
+				Converters: []ast.IntrinsicDecl{{
+					Kind: ast.Converter,
+					Name: "F",
+					Decorations: ast.Decorations{
+						{Name: "deco", Values: []string{}},
+					},
+					Parameters: ast.Parameters{},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"conv F(a)",
+			ast.AST{
+				Converters: []ast.IntrinsicDecl{{
+					Kind: ast.Converter,
+					Name: "F",
+					Parameters: ast.Parameters{
+						{Type: ast.TemplatedName{Name: "a"}},
+					},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"conv F(a: T)",
+			ast.AST{
+				Converters: []ast.IntrinsicDecl{{
+					Kind: ast.Converter,
+					Name: "F",
+					Parameters: ast.Parameters{
+						{Name: "a", Type: ast.TemplatedName{Name: "T"}},
+					},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"conv F(a, b)",
+			ast.AST{
+				Converters: []ast.IntrinsicDecl{{
+					Kind: ast.Converter,
+					Name: "F",
+					Parameters: ast.Parameters{
+						{Type: ast.TemplatedName{Name: "a"}},
+						{Type: ast.TemplatedName{Name: "b"}},
+					},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"conv F<A : B<C> >()",
+			ast.AST{
+				Converters: []ast.IntrinsicDecl{{
+					Kind: ast.Converter,
+					Name: "F",
+					TemplateParams: ast.TemplateParams{
+						{
+							Name: "A", Type: ast.TemplatedName{
+								Name: "B",
+								TemplateArgs: ast.TemplatedNames{
+									{Name: "C"},
+								},
+							},
+						},
+					},
+					Parameters: ast.Parameters{},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"conv F<T>(a: X, b: Y<T>)",
+			ast.AST{
+				Converters: []ast.IntrinsicDecl{{
+					Kind: ast.Converter,
+					Name: "F",
+					TemplateParams: ast.TemplateParams{
+						{Name: "T"},
+					},
+					Parameters: ast.Parameters{
+						{Name: "a", Type: ast.TemplatedName{Name: "X"}},
+						{Name: "b", Type: ast.TemplatedName{
+							Name:         "Y",
+							TemplateArgs: []ast.TemplatedName{{Name: "T"}},
+						}},
+					},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"conv F() -> X",
+			ast.AST{
+				Converters: []ast.IntrinsicDecl{{
+					Kind:       ast.Converter,
+					Name:       "F",
+					ReturnType: &ast.TemplatedName{Name: "X"},
+					Parameters: ast.Parameters{},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"conv F() -> X<T>",
+			ast.AST{
+				Converters: []ast.IntrinsicDecl{{
+					Kind: ast.Converter,
+					Name: "F",
+					ReturnType: &ast.TemplatedName{
+						Name:         "X",
+						TemplateArgs: []ast.TemplatedName{{Name: "T"}},
+					},
+					Parameters: ast.Parameters{},
+				}},
 			}},
 	} {
 		got, err := parser.Parse(test.src, "file.txt")

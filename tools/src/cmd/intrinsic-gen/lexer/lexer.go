@@ -97,6 +97,8 @@ func (l *lexer) lex() error {
 			case l.match("op", tok.Operator):
 			case l.match("enum", tok.Enum):
 			case l.match("type", tok.Type):
+			case l.match("ctor", tok.Constructor):
+			case l.match("conv", tok.Converter):
 			case l.match("match", tok.Match):
 			case unicode.IsLetter(l.peek(0)) || l.peek(0) == '_':
 				l.tok(l.count(alphaNumericOrUnderscore), tok.Identifier)

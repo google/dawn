@@ -27,23 +27,25 @@ type resolver struct {
 	a *ast.AST
 	s *sem.Sem
 
-	globals           scope
-	builtins          map[string]*sem.Intrinsic
-	unaryOperators    map[string]*sem.Intrinsic
-	binaryOperators   map[string]*sem.Intrinsic
-	enumEntryMatchers map[*sem.EnumEntry]*sem.EnumMatcher
+	globals                   scope
+	builtins                  map[string]*sem.Intrinsic
+	unaryOperators            map[string]*sem.Intrinsic
+	binaryOperators           map[string]*sem.Intrinsic
+	constructorsAndConverters map[string]*sem.Intrinsic
+	enumEntryMatchers         map[*sem.EnumEntry]*sem.EnumMatcher
 }
 
 // Resolve processes the AST
 func Resolve(a *ast.AST) (*sem.Sem, error) {
 	r := resolver{
-		a:                 a,
-		s:                 sem.New(),
-		globals:           newScope(nil),
-		builtins:          map[string]*sem.Intrinsic{},
-		unaryOperators:    map[string]*sem.Intrinsic{},
-		binaryOperators:   map[string]*sem.Intrinsic{},
-		enumEntryMatchers: map[*sem.EnumEntry]*sem.EnumMatcher{},
+		a:                         a,
+		s:                         sem.New(),
+		globals:                   newScope(nil),
+		builtins:                  map[string]*sem.Intrinsic{},
+		unaryOperators:            map[string]*sem.Intrinsic{},
+		binaryOperators:           map[string]*sem.Intrinsic{},
+		constructorsAndConverters: map[string]*sem.Intrinsic{},
+		enumEntryMatchers:         map[*sem.EnumEntry]*sem.EnumMatcher{},
 	}
 	// Declare and resolve all the enumerators
 	for _, e := range a.Enums {
@@ -82,6 +84,21 @@ func Resolve(a *ast.AST) (*sem.Sem, error) {
 			}
 		default:
 			return nil, fmt.Errorf("%v operators must have either 1 or 2 parameters", o.Source)
+		}
+	}
+
+	// Declare and resolve type constructors and converters
+	for _, c := range a.Constructors {
+		if err := r.intrinsic(c, r.constructorsAndConverters, &r.s.ConstructorsAndConverters); err != nil {
+			return nil, err
+		}
+	}
+	for _, c := range a.Converters {
+		if len(c.Parameters) != 1 {
+			return nil, fmt.Errorf("%v conversions must have a single parameter", c.Source)
+		}
+		if err := r.intrinsic(c, r.constructorsAndConverters, &r.s.ConstructorsAndConverters); err != nil {
+			return nil, err
 		}
 	}
 
@@ -440,6 +457,8 @@ func (r *resolver) templateParam(a ast.TemplateParam) (sem.TemplateParam, error)
 			return &sem.TemplateEnumParam{Name: a.Name, Enum: r.Enum, Matcher: r}, nil
 		case *sem.TypeMatcher:
 			return &sem.TemplateTypeParam{Name: a.Name, Type: r}, nil
+		case *sem.Type:
+			return &sem.TemplateTypeParam{Name: a.Name, Type: r}, nil
 		default:
 			return nil, fmt.Errorf("%v invalid template parameter type '%v'", a.Source, a.Type.Name)
 		}
@@ -525,6 +544,7 @@ func (r *resolver) calculateUniqueParameterNames() []string {
 		r.s.Builtins,
 		r.s.UnaryOperators,
 		r.s.BinaryOperators,
+		r.s.ConstructorsAndConverters,
 	} {
 		for _, i := range intrinsics {
 			for _, o := range i.Overloads {

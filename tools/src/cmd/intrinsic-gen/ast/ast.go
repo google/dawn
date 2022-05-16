@@ -25,11 +25,13 @@ import (
 
 // AST is the parsed syntax tree of the intrinsic definition file
 type AST struct {
-	Enums     []EnumDecl
-	Types     []TypeDecl
-	Matchers  []MatcherDecl
-	Builtins  []IntrinsicDecl
-	Operators []IntrinsicDecl
+	Enums        []EnumDecl
+	Types        []TypeDecl
+	Matchers     []MatcherDecl
+	Builtins     []IntrinsicDecl
+	Constructors []IntrinsicDecl
+	Converters   []IntrinsicDecl
+	Operators    []IntrinsicDecl
 }
 
 func (a AST) String() string {
@@ -48,6 +50,14 @@ func (a AST) String() string {
 	}
 	for _, b := range a.Builtins {
 		fmt.Fprintf(&sb, "%v", b)
+		fmt.Fprintln(&sb)
+	}
+	for _, o := range a.Constructors {
+		fmt.Fprintf(&sb, "%v", o)
+		fmt.Fprintln(&sb)
+	}
+	for _, o := range a.Converters {
+		fmt.Fprintf(&sb, "%v", o)
 		fmt.Fprintln(&sb)
 	}
 	for _, o := range a.Operators {
@@ -103,7 +113,7 @@ func (m MatcherDecl) Format(w fmt.State, verb rune) {
 	m.Options.Format(w, verb)
 }
 
-// IntrinsicKind is either a Builtin or Operator
+// IntrinsicKind is either a Builtin, Operator, Constructor or Converter
 type IntrinsicKind string
 
 const (
@@ -113,6 +123,12 @@ const (
 	// Operator is a unary or binary operator.
 	// Declared with 'op'.
 	Operator IntrinsicKind = "operator"
+	// Constructor is a type constructor function.
+	// Declared with 'ctor'.
+	Constructor IntrinsicKind = "constructor"
+	// Converter is a type conversion function.
+	// Declared with 'conv'.
+	Converter IntrinsicKind = "converter"
 )
 
 // IntrinsicDecl describes a builtin or operator declaration
@@ -133,6 +149,10 @@ func (i IntrinsicDecl) Format(w fmt.State, verb rune) {
 		fmt.Fprintf(w, "fn ")
 	case Operator:
 		fmt.Fprintf(w, "op ")
+	case Constructor:
+		fmt.Fprintf(w, "ctor ")
+	case Converter:
+		fmt.Fprintf(w, "conv ")
 	}
 	fmt.Fprintf(w, "%v", i.Name)
 	i.TemplateParams.Format(w, verb)

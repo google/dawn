@@ -71,6 +71,12 @@ func (p *parser) parse() (*ast.AST, error) {
 		case tok.Operator:
 			out.Operators = append(out.Operators, p.operatorDecl(decorations))
 			decorations = nil
+		case tok.Constructor:
+			out.Constructors = append(out.Constructors, p.constructorDecl(decorations))
+			decorations = nil
+		case tok.Converter:
+			out.Converters = append(out.Converters, p.converterDecl(decorations))
+			decorations = nil
 		default:
 			p.err = fmt.Errorf("%v unexpected token '%v'", t.Source, t.Kind)
 		}
@@ -195,6 +201,47 @@ func (p *parser) operatorDecl(decos ast.Decorations) ast.IntrinsicDecl {
 	}
 	return f
 }
+
+func (p *parser) constructorDecl(decos ast.Decorations) ast.IntrinsicDecl {
+	p.expect(tok.Constructor, "constructor declaration")
+	name := p.next()
+	f := ast.IntrinsicDecl{
+		Source:      name.Source,
+		Kind:        ast.Constructor,
+		Decorations: decos,
+		Name:        string(name.Runes),
+	}
+	if p.peekIs(0, tok.Lt) {
+		f.TemplateParams = p.templateParams()
+	}
+	f.Parameters = p.parameters()
+	if p.match(tok.Arrow) != nil {
+		ret := p.templatedName()
+		f.ReturnType = &ret
+	}
+	return f
+}
+
+func (p *parser) converterDecl(decos ast.Decorations) ast.IntrinsicDecl {
+	p.expect(tok.Converter, "converter declaration")
+	name := p.next()
+	f := ast.IntrinsicDecl{
+		Source:      name.Source,
+		Kind:        ast.Converter,
+		Decorations: decos,
+		Name:        string(name.Runes),
+	}
+	if p.peekIs(0, tok.Lt) {
+		f.TemplateParams = p.templateParams()
+	}
+	f.Parameters = p.parameters()
+	if p.match(tok.Arrow) != nil {
+		ret := p.templatedName()
+		f.ReturnType = &ret
+	}
+	return f
+}
+
 func (p *parser) parameters() ast.Parameters {
 	l := ast.Parameters{}
 	p.expect(tok.Lparen, "function parameter list")
