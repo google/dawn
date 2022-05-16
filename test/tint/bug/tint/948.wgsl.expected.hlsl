@@ -2,13 +2,13 @@ bug/tint/948.wgsl:146:33 warning: 'textureSampleBias' must only be called from u
         let x_217 : vec4<f32> = textureSampleBias(animationMapTexture, animationMapSampler, vec2<f32>(((x_208 + 0.5) / x_211), (0.125 * x_214)), 0.0);
                                 ^^^^^^^^^^^^^^^^^
 
-bug/tint/948.wgsl:125:5 note: control flow depends on non-uniform value
-    if ((x_174 > 0.0)) {
-    ^^
+bug/tint/948.wgsl:138:9 note: control flow depends on non-uniform value
+        if ((x_197 > x_198)) {
+        ^^
 
-bug/tint/948.wgsl:146:33 note: return value of 'textureSampleBias' may be non-uniform
-        let x_217 : vec4<f32> = textureSampleBias(animationMapTexture, animationMapSampler, vec2<f32>(((x_208 + 0.5) / x_211), (0.125 * x_214)), 0.0);
-                                ^^^^^^^^^^^^^^^^^
+bug/tint/948.wgsl:137:27 note: reading from module-scope private variable 'mt' may result in a non-uniform value
+        let x_198 : f32 = mt;
+                          ^^
 
 cbuffer cbuffer_x_20 : register(b9, space2) {
   uint4 x_20[8];

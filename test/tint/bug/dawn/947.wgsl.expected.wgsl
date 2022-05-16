@@ -6,9 +6,9 @@ bug/dawn/947.wgsl:55:5 note: control flow depends on non-uniform value
     if (!all(clampedTexcoord == texcoord)) {
     ^^
 
-bug/dawn/947.wgsl:54:15 note: reading from user-defined input 'texcoord' may result in a non-uniform value
-        clamp(texcoord, vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0));
-              ^^^^^^^^
+bug/dawn/947.wgsl:55:33 note: reading from user-defined input 'texcoord' may result in a non-uniform value
+    if (!all(clampedTexcoord == texcoord)) {
+                                ^^^^^^^^
 
 struct Uniforms {
   u_scale : vec2<f32>,

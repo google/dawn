@@ -1269,18 +1269,25 @@ class UniformityGraph {
         return {cf_after, result};
     }
 
-    /// Recursively traverse a graph starting at `node`, inserting all nodes that are reached into
-    /// `reachable`.
-    /// @param node the starting node
+    /// Traverse a graph starting at `source`, inserting all visited nodes into `reachable` and
+    /// recording which node they were reached from.
+    /// @param source the starting node
     /// @param reachable the set of reachable nodes to populate, if required
-    void Traverse(Node* node, utils::UniqueVector<Node*>* reachable = nullptr) {
-        if (reachable) {
-            reachable->add(node);
-        }
-        for (auto* to : node->edges) {
-            if (to->visited_from == nullptr) {
-                to->visited_from = node;
-                Traverse(to, reachable);
+    void Traverse(Node* source, utils::UniqueVector<Node*>* reachable = nullptr) {
+        std::vector<Node*> to_visit{source};
+
+        while (!to_visit.empty()) {
+            auto* node = to_visit.back();
+            to_visit.pop_back();
+
+            if (reachable) {
+                reachable->add(node);
+            }
+            for (auto* to : node->edges) {
+                if (to->visited_from == nullptr) {
+                    to->visited_from = node;
+                    to_visit.push_back(to);
+                }
             }
         }
     }

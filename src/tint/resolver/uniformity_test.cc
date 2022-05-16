@@ -5907,6 +5907,41 @@ fn foo() {
     RunTest(src, true);
 }
 
+TEST_F(UniformityAnalysisTest, StressGraphTraversalDepth) {
+    // Create a function with a very long sequence of variable declarations and assignments to
+    // test traversals of very deep graphs. This requires a non-recursive traversal algorithm.
+    ProgramBuilder b;
+    auto& ty = b.ty;
+
+    // var<private> v0 : i32 = 0i;
+    // fn foo() {
+    //   let v1 = v0;
+    //   let v2 = v1;
+    //   ...
+    //   let v{N} = v{N-1};
+    //   if (v{N} == 0) {
+    //     workgroupBarrier();
+    //   }
+    // }
+    b.Global("v0", ty.i32(), ast::StorageClass::kPrivate, b.Expr(0_i));
+    ast::StatementList foo_body;
+    std::string v_last = "v0";
+    for (int i = 1; i < 100000; i++) {
+        auto v = "v" + std::to_string(i);
+        foo_body.push_back(b.Decl(b.Var(v, nullptr, b.Expr(v_last))));
+        v_last = v;
+    }
+    foo_body.push_back(b.If(b.Equal(v_last, 0_i), b.Block(b.CallStmt(b.Call("workgroupBarrier")))));
+    b.Func("foo", {}, ty.void_(), foo_body);
+
+    // TODO(jrprice): Expect false when uniformity issues become errors.
+    EXPECT_TRUE(RunTest(std::move(b))) << error_;
+    EXPECT_EQ(error_,
+              R"(warning: 'workgroupBarrier' must only be called from uniform control flow
+note: control flow depends on non-uniform value
+note: reading from module-scope private variable 'v0' may result in a non-uniform value)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Tests for the quality of the error messages produced by the analysis.
 ////////////////////////////////////////////////////////////////////////////////
