@@ -63,7 +63,7 @@
 # tags: [ webgpu-adapter-default webgpu-adapter-swiftshader ]
 # END TAG HEADER
 
-# Last rolled: 2022-05-12 10:15:46AM
+# Last rolled: 2022-05-13 02:28:31PM
 
 ################################################################################
 # webgpu:shader,execution,zero_init:compute,zero_init failures on intel-0x5912
@@ -307,7 +307,6 @@ crbug.com/dawn/1546 [ win10 ] webgpu:shader,execution,expression,call,builtin,fl
 crbug.com/dawn/1546 [ monterey ] webgpu:shader,execution,expression,call,builtin,fract:* [ Failure ]
 crbug.com/dawn/1546 [ ubuntu ] webgpu:shader,execution,expression,call,builtin,fract:* [ Failure ]
 crbug.com/dawn/1546 [ win10 ] webgpu:shader,execution,expression,call,builtin,fract:* [ Failure ]
-
 
 ################################################################################
 # crbug.com/dawn/1325 render pass/bundle and render pipeline depth/stencil read only and write states validation
