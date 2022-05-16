@@ -56,6 +56,24 @@ const char* str(ParameterUsage usage) {
             return "texture";
         case ParameterUsage::kValue:
             return "value";
+        case ParameterUsage::kW:
+            return "w";
+        case ParameterUsage::kX:
+            return "x";
+        case ParameterUsage::kXy:
+            return "xy";
+        case ParameterUsage::kXyz:
+            return "xyz";
+        case ParameterUsage::kY:
+            return "y";
+        case ParameterUsage::kYz:
+            return "yz";
+        case ParameterUsage::kZ:
+            return "z";
+        case ParameterUsage::kZw:
+            return "zw";
+        case ParameterUsage::kZyw:
+            return "zyw";
     }
     return "<unknown>";
 }

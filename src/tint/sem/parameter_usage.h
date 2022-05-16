@@ -44,6 +44,15 @@ enum class ParameterUsage {
     kSampler,
     kTexture,
     kValue,
+    kW,
+    kX,
+    kXy,
+    kXyz,
+    kY,
+    kYz,
+    kZ,
+    kZw,
+    kZyw,
 };
 
 /// @returns a string representation of the given parameter usage.

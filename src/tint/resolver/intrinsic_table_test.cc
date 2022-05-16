@@ -26,6 +26,8 @@
 #include "src/tint/sem/reference.h"
 #include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/storage_texture.h"
+#include "src/tint/sem/type_constructor.h"
+#include "src/tint/sem/type_conversion.h"
 
 namespace tint::resolver {
 namespace {
@@ -660,6 +662,118 @@ TEST_F(IntrinsicTableTest, MismatchCompoundOp) {
   operator *= (matCxR<f32>, vecC<f32>) -> vecR<f32>
   operator *= (vecR<f32>, matCxR<f32>) -> vecC<f32>
   operator *= (matKxR<f32>, matCxK<f32>) -> matCxR<f32>
+)");
+}
+
+TEST_F(IntrinsicTableTest, MatchTypeConstructorImplicit) {
+    auto* i32 = create<sem::I32>();
+    auto* vec3_i32 = create<sem::Vector>(i32, 3u);
+    auto* result =
+        table->Lookup(CtorConvIntrinsic::kVec3, nullptr, {i32, i32, i32}, Source{{12, 34}});
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->ReturnType(), vec3_i32);
+    EXPECT_TRUE(result->Is<sem::TypeConstructor>());
+    ASSERT_EQ(result->Parameters().size(), 3u);
+    EXPECT_EQ(result->Parameters()[0]->Type(), i32);
+    EXPECT_EQ(result->Parameters()[1]->Type(), i32);
+    EXPECT_EQ(result->Parameters()[2]->Type(), i32);
+}
+
+TEST_F(IntrinsicTableTest, MatchTypeConstructorExplicit) {
+    auto* i32 = create<sem::I32>();
+    auto* vec3_i32 = create<sem::Vector>(i32, 3u);
+    auto* result = table->Lookup(CtorConvIntrinsic::kVec3, i32, {i32, i32, i32}, Source{{12, 34}});
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->ReturnType(), vec3_i32);
+    EXPECT_TRUE(result->Is<sem::TypeConstructor>());
+    ASSERT_EQ(result->Parameters().size(), 3u);
+    EXPECT_EQ(result->Parameters()[0]->Type(), i32);
+    EXPECT_EQ(result->Parameters()[1]->Type(), i32);
+    EXPECT_EQ(result->Parameters()[2]->Type(), i32);
+}
+
+TEST_F(IntrinsicTableTest, MismatchTypeConstructorImplicit) {
+    auto* i32 = create<sem::I32>();
+    auto* f32 = create<sem::F32>();
+    auto* result =
+        table->Lookup(CtorConvIntrinsic::kVec3, nullptr, {i32, f32, i32}, Source{{12, 34}});
+    ASSERT_EQ(result, nullptr);
+    EXPECT_EQ(Diagnostics().str(), R"(12:34 error: no matching constructor for vec3(i32, f32, i32)
+
+6 candidate constructors:
+  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(T) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(vec3<T>) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3() -> vec3<T>  where: T is f32, i32, u32 or bool
+
+4 candidate conversions:
+  vec3(vec3<U>) -> vec3<f32>  where: T is f32, U is i32, u32 or bool
+  vec3(vec3<U>) -> vec3<i32>  where: T is i32, U is f32, u32 or bool
+  vec3(vec3<U>) -> vec3<u32>  where: T is u32, U is f32, i32 or bool
+  vec3(vec3<U>) -> vec3<bool>  where: T is bool, U is f32, i32 or u32
+)");
+}
+
+TEST_F(IntrinsicTableTest, MismatchTypeConstructorExplicit) {
+    auto* i32 = create<sem::I32>();
+    auto* f32 = create<sem::F32>();
+    auto* result = table->Lookup(CtorConvIntrinsic::kVec3, i32, {i32, f32, i32}, Source{{12, 34}});
+    ASSERT_EQ(result, nullptr);
+    EXPECT_EQ(Diagnostics().str(),
+              R"(12:34 error: no matching constructor for vec3<i32>(i32, f32, i32)
+
+6 candidate constructors:
+  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(T) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(vec3<T>) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3() -> vec3<T>  where: T is f32, i32, u32 or bool
+
+4 candidate conversions:
+  vec3(vec3<U>) -> vec3<f32>  where: T is f32, U is i32, u32 or bool
+  vec3(vec3<U>) -> vec3<i32>  where: T is i32, U is f32, u32 or bool
+  vec3(vec3<U>) -> vec3<u32>  where: T is u32, U is f32, i32 or bool
+  vec3(vec3<U>) -> vec3<bool>  where: T is bool, U is f32, i32 or u32
+)");
+}
+
+TEST_F(IntrinsicTableTest, MatchTypeConversion) {
+    auto* i32 = create<sem::I32>();
+    auto* vec3_i32 = create<sem::Vector>(i32, 3u);
+    auto* f32 = create<sem::F32>();
+    auto* vec3_f32 = create<sem::Vector>(f32, 3u);
+    auto* result = table->Lookup(CtorConvIntrinsic::kVec3, i32, {vec3_f32}, Source{{12, 34}});
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->ReturnType(), vec3_i32);
+    EXPECT_TRUE(result->Is<sem::TypeConversion>());
+    ASSERT_EQ(result->Parameters().size(), 1u);
+    EXPECT_EQ(result->Parameters()[0]->Type(), vec3_f32);
+}
+
+TEST_F(IntrinsicTableTest, MismatchTypeConversion) {
+    auto* arr = create<sem::Array>(create<sem::U32>(), 0u, 4u, 4u, 4u, 4u);
+    auto* f32 = create<sem::F32>();
+    auto* result = table->Lookup(CtorConvIntrinsic::kVec3, f32, {arr}, Source{{12, 34}});
+    ASSERT_EQ(result, nullptr);
+    EXPECT_EQ(Diagnostics().str(),
+              R"(12:34 error: no matching constructor for vec3<f32>(array<u32>)
+
+6 candidate constructors:
+  vec3(vec3<T>) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(T) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3() -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is f32, i32, u32 or bool
+
+4 candidate conversions:
+  vec3(vec3<U>) -> vec3<f32>  where: T is f32, U is i32, u32 or bool
+  vec3(vec3<U>) -> vec3<i32>  where: T is i32, U is f32, u32 or bool
+  vec3(vec3<U>) -> vec3<u32>  where: T is u32, U is f32, i32 or bool
+  vec3(vec3<U>) -> vec3<bool>  where: T is bool, U is f32, i32 or u32
 )");
 }
 

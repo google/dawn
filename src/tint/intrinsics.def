@@ -72,6 +72,15 @@ type u32
 type vec2<T>
 type vec3<T>
 type vec4<T>
+type mat2x2<T>
+type mat2x3<T>
+type mat2x4<T>
+type mat3x2<T>
+type mat3x3<T>
+type mat3x4<T>
+type mat4x2<T>
+type mat4x3<T>
+type mat4x4<T>
 [[display("vec{N}<{T}>")]]     type vec<N: num, T>
 [[display("mat{N}x{M}<{T}>")]] type mat<N: num, M: num, T>
 type ptr<S: storage_class, T, A: access>
@@ -112,6 +121,10 @@ match fiu32: f32 | i32 | u32
 match fi32: f32 | i32
 match iu32: i32 | u32
 match scalar: f32 | i32 | u32 | bool
+match scalar_no_f32: i32 | u32 | bool
+match scalar_no_i32: f32 | u32 | bool
+match scalar_no_u32: f32 | i32 | bool
+match scalar_no_bool: f32 | i32 | u32
 
 ////////////////////////////////////////////////////////////////////////////////
 // Enum matchers                                                              //
@@ -561,6 +574,122 @@ fn textureLoad(texture: texture_external, coords: vec2<i32>) -> vec4<f32>
 [[stage("fragment", "compute")]] fn atomicXor<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
 [[stage("fragment", "compute")]] fn atomicExchange<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
 [[stage("fragment", "compute")]] fn atomicCompareExchangeWeak<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T, T) -> vec2<T>
+
+////////////////////////////////////////////////////////////////////////////////
+// Type constructors                                                          //
+////////////////////////////////////////////////////////////////////////////////
+
+// Zero value constructors
+ctor i32() -> i32
+ctor u32() -> u32
+ctor f32() -> f32
+ctor bool() -> bool
+ctor vec2<T: scalar>() -> vec2<T>
+ctor vec3<T: scalar>() -> vec3<T>
+ctor vec4<T: scalar>() -> vec4<T>
+ctor mat2x2() -> mat2x2<f32>
+ctor mat2x3() -> mat2x3<f32>
+ctor mat2x4() -> mat2x4<f32>
+ctor mat3x2() -> mat3x2<f32>
+ctor mat3x3() -> mat3x3<f32>
+ctor mat3x4() -> mat3x4<f32>
+ctor mat4x2() -> mat4x2<f32>
+ctor mat4x3() -> mat4x3<f32>
+ctor mat4x4() -> mat4x4<f32>
+
+// Identity constructors
+ctor i32(i32) -> i32
+ctor u32(u32) -> u32
+ctor f32(f32) -> f32
+ctor bool(bool) -> bool
+ctor vec2<T: scalar>(vec2<T>) -> vec2<T>
+ctor vec3<T: scalar>(vec3<T>) -> vec3<T>
+ctor vec4<T: scalar>(vec4<T>) -> vec4<T>
+
+// Vector constructors
+ctor vec2<T: scalar>(T) -> vec2<T>
+ctor vec2<T: scalar>(x: T, y: T) -> vec2<T>
+ctor vec3<T: scalar>(T) -> vec3<T>
+ctor vec3<T: scalar>(x: T, y: T, z: T) -> vec3<T>
+ctor vec3<T: scalar>(xy: vec2<T>, z: T) -> vec3<T>
+ctor vec3<T: scalar>(x: T, yz: vec2<T>) -> vec3<T>
+ctor vec4<T: scalar>(T) -> vec4<T>
+ctor vec4<T: scalar>(x: T, y: T, z: T, w: T) -> vec4<T>
+ctor vec4<T: scalar>(xy: vec2<T>, z: T, w: T) -> vec4<T>
+ctor vec4<T: scalar>(x: T, yz: vec2<T>, w: T) -> vec4<T>
+ctor vec4<T: scalar>(x: T, y: T, zw: vec2<T>) -> vec4<T>
+ctor vec4<T: scalar>(xy: vec2<T>, zw: vec2<T>) -> vec4<T>
+ctor vec4<T: scalar>(xyz: vec3<T>, w: T) -> vec4<T>
+ctor vec4<T: scalar>(x: T, zyw: vec3<T>) -> vec4<T>
+
+// Matrix constructors
+ctor mat2x2(f32, f32,
+            f32, f32) -> mat2x2<f32>
+ctor mat2x2(vec2<f32>, vec2<f32>) -> mat2x2<f32>
+
+ctor mat2x3(f32, f32, f32,
+            f32, f32, f32) -> mat2x3<f32>
+ctor mat2x3(vec3<f32>, vec3<f32>) -> mat2x3<f32>
+
+ctor mat2x4(f32, f32, f32, f32,
+            f32, f32, f32, f32) -> mat2x4<f32>
+ctor mat2x4(vec4<f32>, vec4<f32>) -> mat2x4<f32>
+
+ctor mat3x2(f32, f32,
+            f32, f32,
+            f32, f32) -> mat3x2<f32>
+ctor mat3x2(vec2<f32>, vec2<f32>, vec2<f32>) -> mat3x2<f32>
+
+ctor mat3x3(f32, f32, f32,
+            f32, f32, f32,
+            f32, f32, f32) -> mat3x3<f32>
+ctor mat3x3(vec3<f32>, vec3<f32>, vec3<f32>) -> mat3x3<f32>
+
+ctor mat3x4(f32, f32, f32, f32,
+            f32, f32, f32, f32,
+            f32, f32, f32, f32) -> mat3x4<f32>
+ctor mat3x4(vec4<f32>, vec4<f32>, vec4<f32>) -> mat3x4<f32>
+
+ctor mat4x2(f32, f32,
+            f32, f32,
+            f32, f32,
+            f32, f32) -> mat4x2<f32>
+ctor mat4x2(vec2<f32>, vec2<f32>, vec2<f32>, vec2<f32>) -> mat4x2<f32>
+
+ctor mat4x3(f32, f32, f32,
+            f32, f32, f32,
+            f32, f32, f32,
+            f32, f32, f32) -> mat4x3<f32>
+ctor mat4x3(vec3<f32>, vec3<f32>, vec3<f32>, vec3<f32>) -> mat4x3<f32>
+
+ctor mat4x4(f32, f32, f32, f32,
+            f32, f32, f32, f32,
+            f32, f32, f32, f32,
+            f32, f32, f32, f32) -> mat4x4<f32>
+ctor mat4x4(vec4<f32>, vec4<f32>, vec4<f32>, vec4<f32>) -> mat4x4<f32>
+
+////////////////////////////////////////////////////////////////////////////////
+// Type conversions                                                           //
+////////////////////////////////////////////////////////////////////////////////
+conv f32<T: scalar_no_f32>(T) -> f32
+conv i32<T: scalar_no_i32>(T) -> i32
+conv u32<T: scalar_no_u32>(T) -> u32
+conv bool<T: scalar_no_bool>(T) -> bool
+
+conv vec2<T: f32, U: scalar_no_f32>(vec2<U>) -> vec2<f32>
+conv vec2<T: i32, U: scalar_no_i32>(vec2<U>) -> vec2<i32>
+conv vec2<T: u32, U: scalar_no_u32>(vec2<U>) -> vec2<u32>
+conv vec2<T: bool, U: scalar_no_bool>(vec2<U>) -> vec2<bool>
+
+conv vec3<T: f32, U: scalar_no_f32>(vec3<U>) -> vec3<f32>
+conv vec3<T: i32, U: scalar_no_i32>(vec3<U>) -> vec3<i32>
+conv vec3<T: u32, U: scalar_no_u32>(vec3<U>) -> vec3<u32>
+conv vec3<T: bool, U: scalar_no_bool>(vec3<U>) -> vec3<bool>
+
+conv vec4<T: f32, U: scalar_no_f32>(vec4<U>) -> vec4<f32>
+conv vec4<T: i32, U: scalar_no_i32>(vec4<U>) -> vec4<i32>
+conv vec4<T: u32, U: scalar_no_u32>(vec4<U>) -> vec4<u32>
+conv vec4<T: bool, U: scalar_no_bool>(vec4<U>) -> vec4<bool>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Operators                                                                  //

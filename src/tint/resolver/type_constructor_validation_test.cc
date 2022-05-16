@@ -57,7 +57,7 @@ constexpr Params ParamsFor() {
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, InferTypeTest_Simple) {
-    // var a = 1;
+    // var a = 1i;
     // var b = a;
     auto* a = Var("a", nullptr, ast::StorageClass::kNone, Expr(1_i));
     auto* b = Var("b", nullptr, ast::StorageClass::kNone, Expr("a"));
@@ -147,15 +147,16 @@ TEST_P(InferTypeTest_FromArithmeticExpression, All) {
                              << "expected: " << FriendlyName(expected) << "\n";
 }
 static constexpr Params from_arithmetic_expression_cases[] = {
-    ParamsFor<i32>(),       ParamsFor<u32>(),         ParamsFor<f32>(),
-    ParamsFor<vec3<f32>>(), ParamsFor<mat3x3<f32>>(),
-
-    // TODO(amaiorano): Uncomment once https://crbug.com/tint/680 is fixed
-    // ParamsFor<alias<ty_i32>>(),
-    // ParamsFor<alias<ty_u32>>(),
-    // ParamsFor<alias<ty_f32>>(),
-    // ParamsFor<alias<ty_vec3<f32>>>(),
-    // ParamsFor<alias<ty_mat3x3<f32>>>(),
+    ParamsFor<i32>(),
+    ParamsFor<u32>(),
+    ParamsFor<f32>(),
+    ParamsFor<vec3<f32>>(),
+    ParamsFor<mat3x3<f32>>(),
+    ParamsFor<alias<i32>>(),
+    ParamsFor<alias<u32>>(),
+    ParamsFor<alias<f32>>(),
+    ParamsFor<alias<vec3<f32>>>(),
+    ParamsFor<alias<mat3x3<f32>>>(),
 };
 INSTANTIATE_TEST_SUITE_P(ResolverTypeConstructorValidationTest,
                          InferTypeTest_FromArithmeticExpression,
@@ -408,7 +409,7 @@ TEST_F(ResolverTypeConstructorValidationTest, ConversionConstructorInvalid_TooMa
     WrapInFunction(a);
 
     ASSERT_FALSE(r()->Resolve());
-    ASSERT_EQ(r()->error(), "12:34 error: expected zero or one value in constructor, got 2");
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for f32(f32, f32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, ConversionConstructorInvalid_InvalidInitializer) {
@@ -417,9 +418,8 @@ TEST_F(ResolverTypeConstructorValidationTest, ConversionConstructorInvalid_Inval
     WrapInFunction(a);
 
     ASSERT_FALSE(r()->Resolve());
-    ASSERT_EQ(r()->error(),
-              "12:34 error: cannot construct 'f32' with a value of type "
-              "'array<f32, 4>'");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for f32(array<f32, 4>)"));
 }
 
 }  // namespace ConversionConstructTest
@@ -727,101 +727,90 @@ namespace VectorConstructor {
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec2F32_Error_ScalarArgumentTypeMismatch) {
-    auto* tc = vec2<f32>(Expr(Source{{12, 34}}, 1_i), 1_f);
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec2<f32>(), 1_i, 2_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in vector constructor does not match vector "
-              "type: expected 'f32', found 'i32'");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec2<f32>(i32, f32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec2U32_Error_ScalarArgumentTypeMismatch) {
-    auto* tc = vec2<u32>(1_u, Expr(Source{{12, 34}}, 1_i));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec2<u32>(), 1_u, 2_i));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in vector constructor does not match vector "
-              "type: expected 'u32', found 'i32'");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec2<u32>(u32, i32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec2I32_Error_ScalarArgumentTypeMismatch) {
-    auto* tc = vec2<i32>(Expr(Source{{12, 34}}, 1_u), 1_i);
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec2<i32>(), 1_u, 2_i));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in vector constructor does not match vector "
-              "type: expected 'i32', found 'u32'");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec2<i32>(u32, i32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec2Bool_Error_ScalarArgumentTypeMismatch) {
-    auto* tc = vec2<bool>(true, Expr(Source{{12, 34}}, 1_i));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec2<bool>(), true, 1_i));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in vector constructor does not match vector "
-              "type: expected 'bool', found 'i32'");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec2<bool>(bool, i32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec2_Error_Vec3ArgumentCardinalityTooLarge) {
-    auto* tc = vec2<f32>(Construct(Source{{12, 34}}, ty.vec3<f32>()));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec2<f32>(), vec3<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec2<f32>' with 3 component(s)");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec2<f32>(vec3<f32>)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec2_Error_Vec4ArgumentCardinalityTooLarge) {
-    auto* tc = vec2<f32>(Construct(Source{{12, 34}}, ty.vec4<f32>()));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec2<f32>(), vec4<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec2<f32>' with 4 component(s)");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec2<f32>(vec4<f32>)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec2_Error_TooManyArgumentsScalar) {
-    auto* tc = vec2<f32>(Expr(Source{{12, 34}}, 1_f), Expr(Source{{12, 40}}, 1_f),
-                         Expr(Source{{12, 46}}, 1_f));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec2<f32>(), 1_f, 2_f, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec2<f32>' with 3 component(s)");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec2<f32>(f32, f32, f32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec2_Error_TooManyArgumentsVector) {
-    auto* tc = vec2<f32>(Construct(Source{{12, 34}}, ty.vec2<f32>()),
-                         Construct(Source{{12, 40}}, ty.vec2<f32>()));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec2<f32>(), vec2<f32>(), vec2<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec2<f32>' with 4 component(s)");
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr("12:34 error: no matching constructor for vec2<f32>(vec2<f32>, vec2<f32>)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec2_Error_TooManyArgumentsVectorAndScalar) {
-    auto* tc = vec2<f32>(Construct(Source{{12, 34}}, ty.vec2<f32>()), Expr(Source{{12, 40}}, 1_f));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec2<f32>(), vec2<f32>(), 1_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec2<f32>' with 3 component(s)");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec2<f32>(vec2<f32>, f32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec2_Error_InvalidArgumentType) {
-    auto* tc = vec2<f32>(Construct(Source{{12, 34}}, ty.mat2x2<f32>()));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec2<f32>(), mat2x2<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: expected vector or scalar type in vector "
-              "constructor; found: mat2x2<f32>");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec2<f32>(mat2x2<f32>)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec2_Success_ZeroValue) {
@@ -969,117 +958,107 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec2_Success_Vec2
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec3F32_Error_ScalarArgumentTypeMismatch) {
-    auto* tc = vec3<f32>(1_f, 1_f, Expr(Source{{12, 34}}, 1_i));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec3<f32>(), 1_f, 2_f, 3_i));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in vector constructor does not match vector "
-              "type: expected 'f32', found 'i32'");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec3<f32>(f32, f32, i32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec3U32_Error_ScalarArgumentTypeMismatch) {
-    auto* tc = vec3<u32>(1_u, Expr(Source{{12, 34}}, 1_i), 1_u);
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec3<u32>(), 1_u, 2_i, 3_u));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in vector constructor does not match vector "
-              "type: expected 'u32', found 'i32'");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec3<u32>(u32, i32, u32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec3I32_Error_ScalarArgumentTypeMismatch) {
-    auto* tc = vec3<i32>(1_i, Expr(Source{{12, 34}}, 1_u), 1_i);
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec3<i32>(), 1_i, 2_u, 3_i));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in vector constructor does not match vector "
-              "type: expected 'i32', found 'u32'");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec3<i32>(i32, u32, i32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec3Bool_Error_ScalarArgumentTypeMismatch) {
-    auto* tc = vec3<bool>(true, Expr(Source{{12, 34}}, 1_i), false);
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec3<bool>(), false, 1_i, true));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in vector constructor does not match vector "
-              "type: expected 'bool', found 'i32'");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec3<bool>(bool, i32, bool)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec3_Error_Vec4ArgumentCardinalityTooLarge) {
-    auto* tc = vec3<f32>(Construct(Source{{12, 34}}, ty.vec4<f32>()));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec3<f32>(), vec4<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec3<f32>' with 4 component(s)");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec3<f32>(vec4<f32>)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec3_Error_TooFewArgumentsScalar) {
-    auto* tc = vec3<f32>(Expr(Source{{12, 34}}, 1_f), Expr(Source{{12, 40}}, 1_f));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec3<f32>(), 1_f, 2_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec3<f32>' with 2 component(s)");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec3<f32>(f32, f32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec3_Error_TooManyArgumentsScalar) {
-    auto* tc = vec3<f32>(Expr(Source{{12, 34}}, 1_f), Expr(Source{{12, 40}}, 1_f),
-                         Expr(Source{{12, 46}}, 1_f), Expr(Source{{12, 52}}, 1_f));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec3<f32>(), 1_f, 2_f, 3_f, 4_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec3<f32>' with 4 component(s)");
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr("12:34 error: no matching constructor for vec3<f32>(f32, f32, f32, f32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec3_Error_TooFewArgumentsVec2) {
-    auto* tc = vec3<f32>(Construct(Source{{12, 34}}, ty.vec2<f32>()));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec3<f32>(), vec2<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec3<f32>' with 2 component(s)");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec3<f32>(vec2<f32>)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec3_Error_TooManyArgumentsVec2) {
-    auto* tc = vec3<f32>(Construct(Source{{12, 34}}, ty.vec2<f32>()),
-                         Construct(Source{{12, 40}}, ty.vec2<f32>()));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec3<f32>(), vec2<f32>(), vec2<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec3<f32>' with 4 component(s)");
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr("12:34 error: no matching constructor for vec3<f32>(vec2<f32>, vec2<f32>)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec3_Error_TooManyArgumentsVec2AndScalar) {
-    auto* tc = vec3<f32>(Construct(Source{{12, 34}}, ty.vec2<f32>()), Expr(Source{{12, 40}}, 1_f),
-                         Expr(Source{{12, 46}}, 1_f));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec3<f32>(), vec2<f32>(), 1_f, 1_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec3<f32>' with 4 component(s)");
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr("12:34 error: no matching constructor for vec3<f32>(vec2<f32>, f32, f32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec3_Error_TooManyArgumentsVec3) {
-    auto* tc = vec3<f32>(Construct(Source{{12, 34}}, ty.vec3<f32>()), Expr(Source{{12, 40}}, 1_f));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec3<f32>(), vec3<f32>(), 1_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec3<f32>' with 4 component(s)");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec3<f32>(vec3<f32>, f32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec3_Error_InvalidArgumentType) {
-    auto* tc = vec3<f32>(Construct(Source{{12, 34}}, ty.mat2x2<f32>()));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec3<f32>(), mat2x2<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: expected vector or scalar type in vector "
-              "constructor; found: mat2x2<f32>");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec3<f32>(mat2x2<f32>)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec3_Success_ZeroValue) {
@@ -1273,163 +1252,156 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec3_Success_Vec3
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4F32_Error_ScalarArgumentTypeMismatch) {
-    auto* tc = vec4<f32>(1_f, 1_f, Expr(Source{{12, 34}}, 1_i), 1_f);
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec4<f32>(), 1_f, 1_f, 1_i, 1_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in vector constructor does not match vector "
-              "type: expected 'f32', found 'i32'");
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr("12:34 error: no matching constructor for vec4<f32>(f32, f32, i32, f32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4U32_Error_ScalarArgumentTypeMismatch) {
-    auto* tc = vec4<u32>(1_u, 1_u, Expr(Source{{12, 34}}, 1_i), 1_u);
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec4<u32>(), 1_u, 1_u, 1_i, 1_u));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in vector constructor does not match vector "
-              "type: expected 'u32', found 'i32'");
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr("12:34 error: no matching constructor for vec4<u32>(u32, u32, i32, u32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4I32_Error_ScalarArgumentTypeMismatch) {
-    auto* tc = vec4<i32>(1_i, 1_i, Expr(Source{{12, 34}}, 1_u), 1_i);
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec4<i32>(), 1_i, 1_i, 1_u, 1_i));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in vector constructor does not match vector "
-              "type: expected 'i32', found 'u32'");
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr("12:34 error: no matching constructor for vec4<i32>(i32, i32, u32, i32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4Bool_Error_ScalarArgumentTypeMismatch) {
-    auto* tc = vec4<bool>(true, false, Expr(Source{{12, 34}}, 1_i), true);
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec4<bool>(), true, false, 1_i, true));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in vector constructor does not match vector "
-              "type: expected 'bool', found 'i32'");
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr("12:34 error: no matching constructor for vec4<bool>(bool, bool, i32, bool)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec4_Error_TooFewArgumentsScalar) {
-    auto* tc = vec4<f32>(Expr(Source{{12, 34}}, 1_f), Expr(Source{{12, 40}}, 1_f),
-                         Expr(Source{{12, 46}}, 1_f));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec4<f32>(), 1_f, 2_f, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec4<f32>' with 3 component(s)");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec4<f32>(f32, f32, f32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec4_Error_TooManyArgumentsScalar) {
-    auto* tc = vec4<f32>(Expr(Source{{12, 34}}, 1_f), Expr(Source{{12, 40}}, 1_f),
-                         Expr(Source{{12, 46}}, 1_f), Expr(Source{{12, 52}}, 1_f),
-                         Expr(Source{{12, 58}}, 1_f));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec4<f32>(), 1_f, 2_f, 3_f, 4_f, 5_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec4<f32>' with 5 component(s)");
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr("12:34 error: no matching constructor for vec4<f32>(f32, f32, f32, f32, f32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4_Error_TooFewArgumentsVec2AndScalar) {
-    auto* tc = vec4<f32>(Construct(Source{{12, 34}}, ty.vec2<f32>()), Expr(Source{{12, 40}}, 1_f));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec4<f32>(), vec2<f32>(), 1_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec4<f32>' with 3 component(s)");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec2<f32>, f32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4_Error_TooManyArgumentsVec2AndScalars) {
-    auto* tc = vec4<f32>(Construct(Source{{12, 34}}, ty.vec2<f32>()), Expr(Source{{12, 40}}, 1_f),
-                         Expr(Source{{12, 46}}, 1_f), Expr(Source{{12, 52}}, 1_f));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec4<f32>(), vec2<f32>(), 1_f, 2_f, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec4<f32>' with 5 component(s)");
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec2<f32>, f32, f32, f32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4_Error_TooManyArgumentsVec2Vec2Scalar) {
-    auto* tc = vec4<f32>(Construct(Source{{12, 34}}, ty.vec2<f32>()),
-                         Construct(Source{{12, 40}}, ty.vec2<f32>()), Expr(Source{{12, 46}}, 1_f));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec4<f32>(), vec2<f32>(), vec2<f32>(), 1_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec4<f32>' with 5 component(s)");
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec2<f32>, vec2<f32>, f32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4_Error_TooManyArgumentsVec2Vec2Vec2) {
-    auto* tc = vec4<f32>(Construct(Source{{12, 34}}, ty.vec2<f32>()),
-                         Construct(Source{{12, 40}}, ty.vec2<f32>()),
-                         Construct(Source{{12, 40}}, ty.vec2<f32>()));
-    WrapInFunction(tc);
+    WrapInFunction(
+        Construct(Source{{12, 34}}, ty.vec4<f32>(), vec2<f32>(), vec2<f32>(), vec2<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec4<f32>' with 6 component(s)");
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr(
+            "12:34 error: no matching constructor for vec4<f32>(vec2<f32>, vec2<f32>, vec2<f32>)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec4_Error_TooFewArgumentsVec3) {
-    auto* tc = vec4<f32>(Construct(Source{{12, 34}}, ty.vec3<f32>()));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec4<f32>(), vec3<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec4<f32>' with 3 component(s)");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec3<f32>)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4_Error_TooManyArgumentsVec3AndScalars) {
-    auto* tc = vec4<f32>(Construct(Source{{12, 34}}, ty.vec3<f32>()), Expr(Source{{12, 40}}, 1_f),
-                         Expr(Source{{12, 46}}, 1_f));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec4<f32>(), vec3<f32>(), 1_f, 2_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec4<f32>' with 5 component(s)");
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec3<f32>, f32, f32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4_Error_TooManyArgumentsVec3AndVec2) {
-    auto* tc = vec4<f32>(Construct(Source{{12, 34}}, ty.vec3<f32>()),
-                         Construct(Source{{12, 40}}, ty.vec2<f32>()));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec4<f32>(), vec3<f32>(), vec2<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec4<f32>' with 5 component(s)");
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec3<f32>, vec2<f32>)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4_Error_TooManyArgumentsVec2AndVec3) {
-    auto* tc = vec4<f32>(Construct(Source{{12, 34}}, ty.vec2<f32>()),
-                         Construct(Source{{12, 40}}, ty.vec3<f32>()));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec4<f32>(), vec2<f32>(), vec3<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec4<f32>' with 5 component(s)");
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec2<f32>, vec3<f32>)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_Vec4_Error_TooManyArgumentsVec3AndVec3) {
-    auto* tc = vec4<f32>(Construct(Source{{12, 34}}, ty.vec3<f32>()),
-                         Construct(Source{{12, 40}}, ty.vec3<f32>()));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec4<f32>(), vec3<f32>(), vec3<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec4<f32>' with 6 component(s)");
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr("12:34 error: no matching constructor for vec4<f32>(vec3<f32>, vec3<f32>)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec4_Error_InvalidArgumentType) {
-    auto* tc = vec4<f32>(Construct(Source{{12, 34}}, ty.mat2x2<f32>()));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec4<f32>(), mat2x2<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: expected vector or scalar type in vector "
-              "constructor; found: mat2x2<f32>");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec4<f32>(mat2x2<f32>)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec4_Success_ZeroValue) {
@@ -1590,13 +1562,13 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec4_Success_Vec4
 
 TEST_F(ResolverTypeConstructorValidationTest,
        Expr_Constructor_NestedVectorConstructors_InnerError) {
-    auto* tc = vec4<f32>(
-        vec4<f32>(1_f, 1_f, vec3<f32>(Expr(Source{{12, 34}}, 1_f), Expr(Source{{12, 34}}, 1_f))),
-        1_f);
-    WrapInFunction(tc);
+    WrapInFunction(vec4<f32>(vec4<f32>(1_f, 1_f,  //
+                                       Construct(Source{{12, 34}}, ty.vec3<f32>(), 1_f, 1_f)),
+                             1_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: attempted to construct 'vec3<f32>' with 2 component(s)");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec3<f32>(f32, f32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_NestedVectorConstructors_Success) {
@@ -1615,13 +1587,11 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vector_Alias_Argu
     auto* alias = Alias("UnsignedInt", ty.u32());
     Global("uint_var", ty.Of(alias), ast::StorageClass::kPrivate);
 
-    auto* tc = vec2<f32>(Expr(Source{{12, 34}}, "uint_var"));
+    auto* tc = Construct(Source{{12, 34}}, ty.vec2<f32>(), "uint_var");
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in vector constructor does not match vector "
-              "type: expected 'f32', found 'u32'");
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for vec2<f32>(u32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vector_Alias_Argument_Success) {
@@ -1640,13 +1610,11 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vector_ElementTyp
 
     // vec2<Float32>(1.0f, 1u)
     auto* vec_type = ty.vec(ty.Of(f32_alias), 2);
-    auto* tc = Construct(Source{{12, 34}}, vec_type, 1_f, Expr(Source{{12, 40}}, 1_u));
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, vec_type, 1_f, 1_u));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:40 error: type in vector constructor does not match vector "
-              "type: expected 'f32', found 'u32'");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec2<f32>(f32, u32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vector_ElementTypeAlias_Success) {
@@ -1666,13 +1634,11 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
     // vec3<u32>(vec<Float32>(), 1.0f)
     auto* vec_type = ty.vec(ty.Of(f32_alias), 2);
-    auto* tc = vec3<u32>(Construct(Source{{12, 34}}, vec_type), 1_f);
-    WrapInFunction(tc);
+    WrapInFunction(Construct(Source{{12, 34}}, ty.vec3<u32>(), Construct(vec_type), 1_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in vector constructor does not match vector "
-              "type: expected 'u32', found 'f32'");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for vec3<u32>(vec2<f32>, f32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -1946,10 +1912,10 @@ TEST_F(ResolverTypeConstructorValidationTest, InferVec4ElementTypeFromVec2AndVec
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, CannotInferVectorElementTypeWithoutArgs) {
-    WrapInFunction(Construct(create<ast::Vector>(Source{{12, 34}}, nullptr, 3)));
+    WrapInFunction(Construct(Source{{12, 34}}, create<ast::Vector>(nullptr, 3)));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for vec3()"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec2ElementTypeFromScalarsMismatch) {
@@ -1958,11 +1924,7 @@ TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec2ElementTypeFromScal
                              Expr(Source{{1, 3}}, 2_u)));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(
-        r()->error(),
-        R"(1:1 error: cannot infer vector element type, as constructor arguments have different types
-1:2 note: argument 0 has type i32
-1:3 note: argument 1 has type u32)");
+    EXPECT_THAT(r()->error(), HasSubstr("1:1 error: no matching constructor for vec2(i32, u32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec3ElementTypeFromScalarsMismatch) {
@@ -1972,12 +1934,8 @@ TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec3ElementTypeFromScal
                              Expr(Source{{1, 4}}, 3_i)));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(
-        r()->error(),
-        R"(1:1 error: cannot infer vector element type, as constructor arguments have different types
-1:2 note: argument 0 has type i32
-1:3 note: argument 1 has type u32
-1:4 note: argument 2 has type i32)");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("1:1 error: no matching constructor for vec3(i32, u32, i32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec3ElementTypeFromScalarAndVec2Mismatch) {
@@ -1986,11 +1944,8 @@ TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec3ElementTypeFromScal
                              Construct(Source{{1, 3}}, ty.vec2<f32>(), 2_f, 3_f)));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(
-        r()->error(),
-        R"(1:1 error: cannot infer vector element type, as constructor arguments have different types
-1:2 note: argument 0 has type i32
-1:3 note: argument 1 has type vec2<f32>)");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("1:1 error: no matching constructor for vec3(i32, vec2<f32>)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec4ElementTypeFromScalarsMismatch) {
@@ -2001,13 +1956,8 @@ TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec4ElementTypeFromScal
                              Expr(Source{{1, 5}}, 4_i)));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(
-        r()->error(),
-        R"(1:1 error: cannot infer vector element type, as constructor arguments have different types
-1:2 note: argument 0 has type i32
-1:3 note: argument 1 has type i32
-1:4 note: argument 2 has type f32
-1:5 note: argument 3 has type i32)");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("1:1 error: no matching constructor for vec4(i32, i32, f32, i32)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec4ElementTypeFromScalarAndVec3Mismatch) {
@@ -2016,11 +1966,8 @@ TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec4ElementTypeFromScal
                              Construct(Source{{1, 3}}, ty.vec3<u32>(), 2_u, 3_u, 4_u)));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(
-        r()->error(),
-        R"(1:1 error: cannot infer vector element type, as constructor arguments have different types
-1:2 note: argument 0 has type i32
-1:3 note: argument 1 has type vec3<u32>)");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("1:1 error: no matching constructor for vec4(i32, vec3<u32>)"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec4ElementTypeFromVec2AndVec2Mismatch) {
@@ -2029,11 +1976,8 @@ TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec4ElementTypeFromVec2
                              Construct(Source{{1, 3}}, ty.vec2<u32>(), 3_u, 4_u)));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(
-        r()->error(),
-        R"(1:1 error: cannot infer vector element type, as constructor arguments have different types
-1:2 note: argument 0 has type vec2<i32>
-1:3 note: argument 1 has type vec2<u32>)");
+    EXPECT_THAT(r()->error(),
+                HasSubstr("1:1 error: no matching constructor for vec4(vec2<i32>, vec2<u32>)"));
 }
 
 }  // namespace VectorConstructor
@@ -2058,22 +2002,23 @@ TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooFewArguments) {
 
     std::stringstream args_tys;
     ast::ExpressionList args;
-    for (uint32_t i = 1; i <= param.columns - 1; i++) {
+    for (uint32_t i = 0; i < param.columns - 1; i++) {
         auto* vec_type = ty.vec<f32>(param.rows);
-        args.push_back(Construct(Source{{12, i}}, vec_type));
-        if (i > 1) {
+        args.push_back(Construct(vec_type));
+        if (i > 0) {
             args_tys << ", ";
         }
         args_tys << "vec" << param.rows << "<f32>";
     }
 
     auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
-    auto* tc = Construct(Source{}, matrix_type, std::move(args));
+    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " + MatrixStr(param) +
-                                        "(" + args_tys.str() + ")\n\n3 candidates available:"));
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
+                          args_tys.str() + ")\n\n3 candidate constructors:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_TooFewArguments) {
@@ -2083,21 +2028,22 @@ TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_TooFewArguments) {
 
     std::stringstream args_tys;
     ast::ExpressionList args;
-    for (uint32_t i = 1; i <= param.columns * param.rows - 1; i++) {
-        args.push_back(Construct(Source{{12, i}}, ty.f32()));
-        if (i > 1) {
+    for (uint32_t i = 0; i < param.columns * param.rows - 1; i++) {
+        args.push_back(Construct(ty.f32()));
+        if (i > 0) {
             args_tys << ", ";
         }
         args_tys << "f32";
     }
 
     auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
-    auto* tc = Construct(Source{}, matrix_type, std::move(args));
+    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " + MatrixStr(param) +
-                                        "(" + args_tys.str() + ")\n\n3 candidates available:"));
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
+                          args_tys.str() + ")\n\n3 candidate constructors:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooManyArguments) {
@@ -2107,22 +2053,23 @@ TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooManyArguments) {
 
     std::stringstream args_tys;
     ast::ExpressionList args;
-    for (uint32_t i = 1; i <= param.columns + 1; i++) {
+    for (uint32_t i = 0; i < param.columns + 1; i++) {
         auto* vec_type = ty.vec<f32>(param.rows);
-        args.push_back(Construct(Source{{12, i}}, vec_type));
-        if (i > 1) {
+        args.push_back(Construct(vec_type));
+        if (i > 0) {
             args_tys << ", ";
         }
         args_tys << "vec" << param.rows << "<f32>";
     }
 
     auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
-    auto* tc = Construct(Source{}, matrix_type, std::move(args));
+    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " + MatrixStr(param) +
-                                        "(" + args_tys.str() + ")\n\n3 candidates available:"));
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
+                          args_tys.str() + ")\n\n3 candidate constructors:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_TooManyArguments) {
@@ -2132,21 +2079,22 @@ TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_TooManyArguments) {
 
     std::stringstream args_tys;
     ast::ExpressionList args;
-    for (uint32_t i = 1; i <= param.columns * param.rows + 1; i++) {
-        args.push_back(Construct(Source{{12, i}}, ty.f32()));
-        if (i > 1) {
+    for (uint32_t i = 0; i < param.columns * param.rows + 1; i++) {
+        args.push_back(Construct(ty.f32()));
+        if (i > 0) {
             args_tys << ", ";
         }
         args_tys << "f32";
     }
 
     auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
-    auto* tc = Construct(Source{}, matrix_type, std::move(args));
+    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " + MatrixStr(param) +
-                                        "(" + args_tys.str() + ")\n\n3 candidates available:"));
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
+                          args_tys.str() + ")\n\n3 candidate constructors:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_InvalidArgumentType) {
@@ -2156,22 +2104,23 @@ TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_InvalidArgumentType) 
 
     std::stringstream args_tys;
     ast::ExpressionList args;
-    for (uint32_t i = 1; i <= param.columns; i++) {
+    for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = ty.vec<u32>(param.rows);
-        args.push_back(Construct(Source{{12, i}}, vec_type));
-        if (i > 1) {
+        args.push_back(Construct(vec_type));
+        if (i > 0) {
             args_tys << ", ";
         }
         args_tys << "vec" << param.rows << "<u32>";
     }
 
     auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
-    auto* tc = Construct(Source{}, matrix_type, std::move(args));
+    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " + MatrixStr(param) +
-                                        "(" + args_tys.str() + ")\n\n3 candidates available:"));
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
+                          args_tys.str() + ")\n\n3 candidate constructors:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_InvalidArgumentType) {
@@ -2181,21 +2130,22 @@ TEST_P(MatrixConstructorTest, Expr_ElementConstructor_Error_InvalidArgumentType)
 
     std::stringstream args_tys;
     ast::ExpressionList args;
-    for (uint32_t i = 1; i <= param.columns; i++) {
-        args.push_back(Expr(Source{{12, i}}, 1_u));
-        if (i > 1) {
+    for (uint32_t i = 0; i < param.columns; i++) {
+        args.push_back(Expr(1_u));
+        if (i > 0) {
             args_tys << ", ";
         }
         args_tys << "u32";
     }
 
     auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
-    auto* tc = Construct(Source{}, matrix_type, std::move(args));
+    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " + MatrixStr(param) +
-                                        "(" + args_tys.str() + ")\n\n3 candidates available:"));
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
+                          args_tys.str() + ")\n\n3 candidate constructors:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooFewRowsInVectorArgument) {
@@ -2210,10 +2160,10 @@ TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooFewRowsInVectorArg
 
     std::stringstream args_tys;
     ast::ExpressionList args;
-    for (uint32_t i = 1; i <= param.columns - 1; i++) {
+    for (uint32_t i = 0; i < param.columns; i++) {
         auto* valid_vec_type = ty.vec<f32>(param.rows);
-        args.push_back(Construct(Source{{12, i}}, valid_vec_type));
-        if (i > 1) {
+        args.push_back(Construct(valid_vec_type));
+        if (i > 0) {
             args_tys << ", ";
         }
         args_tys << "vec" << param.rows << "<f32>";
@@ -2224,12 +2174,13 @@ TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooFewRowsInVectorArg
     args_tys << ", vec" << (param.rows - 1) << "<f32>";
 
     auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
-    auto* tc = Construct(Source{}, matrix_type, std::move(args));
+    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " + MatrixStr(param) +
-                                        "(" + args_tys.str() + ")\n\n3 candidates available:"));
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
+                          args_tys.str() + ")\n\n3 candidate constructors:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooManyRowsInVectorArgument) {
@@ -2244,26 +2195,26 @@ TEST_P(MatrixConstructorTest, Expr_ColumnConstructor_Error_TooManyRowsInVectorAr
 
     std::stringstream args_tys;
     ast::ExpressionList args;
-    for (uint32_t i = 1; i <= param.columns - 1; i++) {
+    for (uint32_t i = 0; i < param.columns; i++) {
         auto* valid_vec_type = ty.vec<f32>(param.rows);
-        args.push_back(Construct(Source{{12, i}}, valid_vec_type));
-        if (i > 1) {
+        args.push_back(Construct(valid_vec_type));
+        if (i > 0) {
             args_tys << ", ";
         }
         args_tys << "vec" << param.rows << "<f32>";
     }
-    const size_t kInvalidLoc = 2 * (param.columns - 1);
     auto* invalid_vec_type = ty.vec<f32>(param.rows + 1);
-    args.push_back(Construct(Source{{12, kInvalidLoc}}, invalid_vec_type));
+    args.push_back(Construct(invalid_vec_type));
     args_tys << ", vec" << (param.rows + 1) << "<f32>";
 
     auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
-    auto* tc = Construct(Source{}, matrix_type, std::move(args));
+    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " + MatrixStr(param) +
-                                        "(" + args_tys.str() + ")\n\n3 candidates available:"));
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
+                          args_tys.str() + ")\n\n3 candidate constructors:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ZeroValue_Success) {
@@ -2283,13 +2234,13 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_WithColumns_Success) {
     const auto param = GetParam();
 
     ast::ExpressionList args;
-    for (uint32_t i = 1; i <= param.columns; i++) {
+    for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = ty.vec<f32>(param.rows);
-        args.push_back(Construct(Source{{12, i}}, vec_type));
+        args.push_back(Construct(vec_type));
     }
 
     auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
-    auto* tc = Construct(Source{}, matrix_type, std::move(args));
+    auto* tc = Construct(matrix_type, std::move(args));
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2301,12 +2252,12 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_WithElements_Success) {
     const auto param = GetParam();
 
     ast::ExpressionList args;
-    for (uint32_t i = 1; i <= param.columns * param.rows; i++) {
-        args.push_back(Construct(Source{{12, i}}, ty.f32()));
+    for (uint32_t i = 0; i < param.columns * param.rows; i++) {
+        args.push_back(Construct(ty.f32()));
     }
 
     auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
-    auto* tc = Construct(Source{}, matrix_type, std::move(args));
+    auto* tc = Construct(matrix_type, std::move(args));
     WrapInFunction(tc);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2320,22 +2271,23 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Error) {
 
     std::stringstream args_tys;
     ast::ExpressionList args;
-    for (uint32_t i = 1; i <= param.columns; i++) {
+    for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = ty.vec(ty.u32(), param.rows);
-        args.push_back(Construct(Source{{12, i}}, vec_type));
-        if (i > 1) {
+        args.push_back(Construct(vec_type));
+        if (i > 0) {
             args_tys << ", ";
         }
         args_tys << "vec" << param.rows << "<u32>";
     }
 
     auto* matrix_type = ty.mat(ty.Of(f32_alias), param.columns, param.rows);
-    auto* tc = Construct(Source{}, matrix_type, std::move(args));
+    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " + MatrixStr(param) +
-                                        "(" + args_tys.str() + ")\n\n3 candidates available:"));
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
+                          args_tys.str() + ")\n\n3 candidate constructors:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Success) {
@@ -2345,9 +2297,9 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Success) {
     auto* f32_alias = Alias("Float32", ty.f32());
 
     ast::ExpressionList args;
-    for (uint32_t i = 1; i <= param.columns; i++) {
+    for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = ty.vec<f32>(param.rows);
-        args.push_back(Construct(Source{{12, i}}, vec_type));
+        args.push_back(Construct(vec_type));
     }
 
     auto* matrix_type = ty.mat(ty.Of(f32_alias), param.columns, param.rows);
@@ -2359,18 +2311,13 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Success) {
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_MatrixConstructor_ArgumentTypeAlias_Error) {
     auto* alias = Alias("VectorUnsigned2", ty.vec2<u32>());
-    auto* tc = mat2x2<f32>(Construct(Source{{12, 34}}, ty.Of(alias)), vec2<f32>());
+    auto* tc = Construct(Source{{12, 34}}, ty.mat2x2<f32>(), Construct(ty.Of(alias)), vec2<f32>());
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: no matching constructor mat2x2<f32>(vec2<u32>, vec2<f32>)
-
-3 candidates available:
-  mat2x2<f32>()
-  mat2x2<f32>(f32,...,f32) // 4 arguments
-  mat2x2<f32>(vec2<f32>, vec2<f32>)
-)");
+    EXPECT_THAT(
+        r()->error(),
+        HasSubstr("12:34 error: no matching constructor for mat2x2<f32>(vec2<u32>, vec2<f32>)"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentTypeAlias_Success) {
@@ -2380,8 +2327,8 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentTypeAlias_Success) {
     auto* vec_alias = Alias("VectorFloat2", vec_type);
 
     ast::ExpressionList args;
-    for (uint32_t i = 1; i <= param.columns; i++) {
-        args.push_back(Construct(Source{{12, i}}, ty.Of(vec_alias)));
+    for (uint32_t i = 0; i < param.columns; i++) {
+        args.push_back(Construct(ty.Of(vec_alias)));
     }
 
     auto* tc = Construct(Source{}, matrix_type, std::move(args));
@@ -2397,21 +2344,22 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentElementTypeAlias_Error) {
 
     std::stringstream args_tys;
     ast::ExpressionList args;
-    for (uint32_t i = 1; i <= param.columns; i++) {
+    for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = ty.vec(ty.Of(f32_alias), param.rows);
-        args.push_back(Construct(Source{{12, i}}, vec_type));
-        if (i > 1) {
+        args.push_back(Construct(vec_type));
+        if (i > 0) {
             args_tys << ", ";
         }
         args_tys << "vec" << param.rows << "<u32>";
     }
 
-    auto* tc = Construct(Source{}, matrix_type, std::move(args));
+    auto* tc = Construct(Source{{12, 34}}, matrix_type, std::move(args));
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), HasSubstr("12:1 error: no matching constructor " + MatrixStr(param) +
-                                        "(" + args_tys.str() + ")\n\n3 candidates available:"));
+    EXPECT_THAT(r()->error(),
+                HasSubstr("12:34 error: no matching constructor for " + MatrixStr(param) + "(" +
+                          args_tys.str() + ")\n\n3 candidate constructors:"));
 }
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentElementTypeAlias_Success) {
@@ -2419,9 +2367,9 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentElementTypeAlias_Success)
     auto* f32_alias = Alias("Float32", ty.f32());
 
     ast::ExpressionList args;
-    for (uint32_t i = 1; i <= param.columns; i++) {
+    for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = ty.vec(ty.Of(f32_alias), param.rows);
-        args.push_back(Construct(Source{{12, i}}, vec_type));
+        args.push_back(Construct(vec_type));
     }
 
     auto* matrix_type = ty.mat<f32>(param.columns, param.rows);
@@ -2435,7 +2383,7 @@ TEST_P(MatrixConstructorTest, InferElementTypeFromVectors) {
     const auto param = GetParam();
 
     ast::ExpressionList args;
-    for (uint32_t i = 1; i <= param.columns; i++) {
+    for (uint32_t i = 0; i < param.columns; i++) {
         args.push_back(Construct(ty.vec<f32>(param.rows)));
     }
 
@@ -2464,20 +2412,21 @@ TEST_P(MatrixConstructorTest, CannotInferElementTypeFromVectors_Mismatch) {
     const auto param = GetParam();
 
     std::stringstream err;
-    err << "12:34 error: cannot infer matrix element type, as constructor "
-           "arguments have different types";
+    err << "12:34 error: no matching constructor for mat" << param.columns << "x" << param.rows
+        << "(";
 
     ast::ExpressionList args;
     for (uint32_t i = 0; i < param.columns; i++) {
-        err << "\n";
-        auto src = Source{{1, 10 + i}};
+        if (i > 0) {
+            err << ", ";
+        }
         if (i == 1) {
             // Odd one out
-            args.push_back(Construct(src, ty.vec<i32>(param.rows)));
-            err << src << " note: argument " << i << " has type vec" << param.rows << "<i32>";
+            args.push_back(Construct(ty.vec<i32>(param.rows)));
+            err << "vec" << param.rows << "<i32>";
         } else {
-            args.push_back(Construct(src, ty.vec<f32>(param.rows)));
-            err << src << " note: argument " << i << " has type vec" << param.rows << "<f32>";
+            args.push_back(Construct(ty.vec<f32>(param.rows)));
+            err << "vec" << param.rows << "<f32>";
         }
     }
 
@@ -2485,33 +2434,37 @@ TEST_P(MatrixConstructorTest, CannotInferElementTypeFromVectors_Mismatch) {
     WrapInFunction(Construct(Source{{12, 34}}, matrix_type, std::move(args)));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), err.str());
+    EXPECT_THAT(r()->error(), HasSubstr(err.str()));
 }
 
 TEST_P(MatrixConstructorTest, CannotInferElementTypeFromScalars_Mismatch) {
     const auto param = GetParam();
 
     std::stringstream err;
-    err << "12:34 error: cannot infer matrix element type, as constructor "
-           "arguments have different types";
+    err << "12:34 error: no matching constructor for mat" << param.columns << "x" << param.rows
+        << "(";
+
     ast::ExpressionList args;
     for (uint32_t i = 0; i < param.rows * param.columns; i++) {
-        err << "\n";
-        auto src = Source{{1, 10 + i}};
+        if (i > 0) {
+            err << ", ";
+        }
         if (i == 3) {
-            args.push_back(Expr(src, static_cast<i32>(i)));  // The odd one out
-            err << src << " note: argument " << i << " has type i32";
+            args.push_back(Expr(static_cast<i32>(i)));  // The odd one out
+            err << "i32";
         } else {
-            args.push_back(Expr(src, static_cast<f32>(i)));
-            err << src << " note: argument " << i << " has type f32";
+            args.push_back(Expr(static_cast<f32>(i)));
+            err << "f32";
         }
     }
+
+    err << ")";
 
     auto* matrix_type = create<ast::Matrix>(nullptr, param.rows, param.columns);
     WrapInFunction(Construct(Source{{12, 34}}, matrix_type, std::move(args)));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_THAT(r()->error(), err.str());
+    EXPECT_THAT(r()->error(), HasSubstr(err.str()));
 }
 
 INSTANTIATE_TEST_SUITE_P(ResolverTypeConstructorValidationTest,
@@ -2729,7 +2682,7 @@ TEST_F(ResolverTypeConstructorValidationTest, TypeConversionAsStatement) {
     WrapInFunction(CallStmt(Construct(Source{{12, 34}}, ty.f32(), 1_i)));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: type cast evaluated but not used");
+    EXPECT_EQ(r()->error(), "12:34 error: type conversion evaluated but not used");
 }
 
 }  // namespace

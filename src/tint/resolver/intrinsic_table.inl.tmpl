@@ -153,6 +153,19 @@ constexpr IntrinsicInfo kBinaryOperators[] = {
 constexpr uint8_t kBinaryOperator{{template "OperatorName" $o.Name}} = {{$i}};
 {{- end }}
 
+constexpr IntrinsicInfo kConstructorsAndConverters[] = {
+{{- range $i, $o := .ConstructorsAndConverters }}
+  {
+    /* [{{$i}}] */
+{{-   range $o.OverloadDescriptions }}
+    /* {{.}} */
+{{-   end }}
+    /* num overloads */ {{$o.NumOverloads}},
+    /* overloads */ &kOverloads[{{$o.OverloadsOffset}}],
+  },
+{{- end }}
+};
+
 // clang-format on
 {{ end -}}
 

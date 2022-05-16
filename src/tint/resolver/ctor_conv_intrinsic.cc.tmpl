@@ -1,0 +1,28 @@
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with tools/builtin-gen to generate ctor_conv_intrinsic.cc
+
+See:
+* tools/cmd/intrinsic-gen/gen for structures used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+#include "src/tint/resolver/ctor_conv_intrinsic.h"
+
+namespace tint::resolver {
+
+const char* str(CtorConvIntrinsic i) {
+    switch (i) {
+        case CtorConvIntrinsic::kNone:
+            return "<none>";
+{{- range .Sem.ConstructorsAndConverters  }}
+        case CtorConvIntrinsic::k{{Title .Name}}:
+            return "{{.Name}}";
+{{- end  }}
+    }
+    return "<unknown>";
+}
+
+}  // namespace tint::resolver
+

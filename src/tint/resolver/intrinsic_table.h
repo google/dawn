@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include "src/tint/resolver/ctor_conv_intrinsic.h"
 #include "src/tint/sem/builtin.h"
 
 // Forward declarations
@@ -89,6 +90,18 @@ class IntrinsicTable {
                                   const sem::Type* rhs,
                                   const Source& source,
                                   bool is_compound) = 0;
+
+    /// Lookup looks for the type constructor or conversion overload for the given
+    /// CtorConvIntrinsic.
+    /// @param type the type being constructed or converted
+    /// @param template_arg the optional template argument
+    /// @param args the argument types passed to the constructor / conversion call
+    /// @param source the source of the call
+    /// @return a sem::TypeConstructor, sem::TypeConversion or nullptr if nothing matched
+    virtual const sem::CallTarget* Lookup(CtorConvIntrinsic type,
+                                          const sem::Type* template_arg,
+                                          const std::vector<const sem::Type*>& args,
+                                          const Source& source) = 0;
 };
 
 }  // namespace tint::resolver

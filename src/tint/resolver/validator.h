@@ -183,6 +183,12 @@ class Validator {
     /// @returns true on success, false otherwise
     bool ContinueStatement(const sem::Statement* stmt, sem::Statement* current_statement) const;
 
+    /// Validates a call
+    /// @param call the call
+    /// @param current_statement the current statement being resolved
+    /// @returns true on success, false otherwise
+    bool Call(const sem::Call* call, sem::Statement* current_statement) const;
+
     /// Validates a discard statement
     /// @param stmt the statement to validate
     /// @param current_statement the current statement being resolved
@@ -308,12 +314,12 @@ class Validator {
     /// @returns true on success, false otherwise.
     bool Structure(const sem::Struct* str, ast::PipelineStage stage) const;
 
-    /// Validates a structure constructor or cast
+    /// Validates a structure constructor
     /// @param ctor the call expression to validate
     /// @param struct_type the type of the structure
     /// @returns true on success, false otherwise
-    bool StructureConstructorOrCast(const ast::CallExpression* ctor,
-                                    const sem::Struct* struct_type) const;
+    bool StructureConstructor(const ast::CallExpression* ctor,
+                              const sem::Struct* struct_type) const;
 
     /// Validates a switch statement
     /// @param s the switch to validate
@@ -342,31 +348,11 @@ class Validator {
     /// @returns true on success, false otherwise
     bool Vector(const sem::Vector* ty, const Source& source) const;
 
-    /// Validates a vector constructor or cast
-    /// @param ctor the call expression to validate
-    /// @param vec_type the vector type
-    /// @returns true on success, false otherwise
-    bool VectorConstructorOrCast(const ast::CallExpression* ctor,
-                                 const sem::Vector* vec_type) const;
-
-    /// Validates a matrix constructor or cast
-    /// @param ctor the call expression to validate
-    /// @param matrix_type the type of the matrix
-    /// @returns true on success, false otherwise
-    bool MatrixConstructorOrCast(const ast::CallExpression* ctor,
-                                 const sem::Matrix* matrix_type) const;
-
-    /// Validates a scalar constructor or cast
-    /// @param ctor the call expression to validate
-    /// @param type the type of the scalar
-    /// @returns true on success, false otherwise.
-    bool ScalarConstructorOrCast(const ast::CallExpression* ctor, const sem::Type* type) const;
-
-    /// Validates an array constructor or cast
+    /// Validates an array constructor
     /// @param ctor the call expresion to validate
     /// @param arr_type the type of the array
     /// @returns true on success, false otherwise
-    bool ArrayConstructorOrCast(const ast::CallExpression* ctor, const sem::Array* arr_type) const;
+    bool ArrayConstructor(const ast::CallExpression* ctor, const sem::Array* arr_type) const;
 
     /// Validates a texture builtin function
     /// @param call the builtin call to validate
