@@ -660,13 +660,8 @@ bool GeneratorImpl::EmitExpressionOrOneIfZero(std::ostream& out, const ast::Expr
                 if (i != 0) {
                     out << ", ";
                 }
-                if (!val.WithScalarAt(i, [&](auto&& s) -> bool {
-                        // Use std::equal_to to work around -Wfloat-equal warnings
-                        using T = std::remove_reference_t<decltype(s)>;
-                        auto equal_to = std::equal_to<T>{};
-                        bool is_zero = equal_to(s, T(0));
-                        return EmitValue(out, elem_ty, is_zero ? 1 : static_cast<int>(s));
-                    })) {
+                auto s = val.Element<AInt>(i).value;
+                if (!EmitValue(out, elem_ty, (s == 0) ? 1 : static_cast<int>(s))) {
                     return false;
                 }
             }
@@ -1191,7 +1186,7 @@ bool GeneratorImpl::EmitUniformBufferAccess(
 
     if (auto val = offset_arg->ConstantValue()) {
         TINT_ASSERT(Writer, val.Type()->Is<sem::U32>());
-        scalar_offset_value = val.Elements()[0].u32;
+        scalar_offset_value = static_cast<uint32_t>(val.Element<AInt>(0).value);
         scalar_offset_value /= 4;  // bytes -> scalar index
         scalar_offset_constant = true;
     }
@@ -2371,7 +2366,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
         case sem::BuiltinType::kTextureGather:
             out << ".Gather";
             if (builtin->Parameters()[0]->Usage() == sem::ParameterUsage::kComponent) {
-                switch (call->Arguments()[0]->ConstantValue().Elements()[0].i32) {
+                switch (call->Arguments()[0]->ConstantValue().Element<AInt>(0).value) {
                     case 0:
                         out << "Red";
                         break;

@@ -1136,8 +1136,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
                     break;  // Other texture dimensions don't have an offset
             }
         }
-        auto c = component->ConstantValue().Elements()[0].i32;
-        switch (c) {
+        auto c = component->ConstantValue().Element<AInt>(0);
+        switch (c.value) {
             case 0:
                 out << "component::x";
                 break;

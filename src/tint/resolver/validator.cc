@@ -1515,7 +1515,7 @@ bool Validator::TextureBuiltinFunction(const sem::Call* call) const {
             if (is_const_expr) {
                 auto vector = builtin->Parameters()[index]->Type()->Is<sem::Vector>();
                 for (size_t i = 0; i < values.Elements().size(); i++) {
-                    auto value = values.Elements()[i].i32;
+                    auto value = values.Element<AInt>(i).value;
                     if (value < min || value > max) {
                         if (vector) {
                             AddError("each component of the " + name +

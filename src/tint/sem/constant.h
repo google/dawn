@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_SEM_CONSTANT_H_
 #define SRC_TINT_SEM_CONSTANT_H_
 
+#include <variant>
 #include <vector>
 
 #include "src/tint/program_builder.h"
@@ -26,40 +27,8 @@ namespace tint::sem {
 /// list of scalar values. Value may be of a scalar or vector type.
 class Constant {
   public:
-    /// Scalar holds a single constant scalar value, as a union of an i32, u32,
-    /// f32 or boolean.
-    union Scalar {
-        /// The scalar value as a i32
-        tint::i32 i32;
-        /// The scalar value as a u32
-        tint::u32 u32;
-        /// The scalar value as a f32
-        tint::f32 f32;
-        /// The scalar value as a f16, internally stored as float
-        tint::f16 f16;
-        /// The scalar value as a bool
-        bool bool_;
-
-        /// Constructs the scalar with the i32 value `v`
-        /// @param v the value of the Scalar
-        Scalar(tint::i32 v) : i32(v) {}  // NOLINT
-
-        /// Constructs the scalar with the u32 value `v`
-        /// @param v the value of the Scalar
-        Scalar(tint::u32 v) : u32(v) {}  // NOLINT
-
-        /// Constructs the scalar with the f32 value `v`
-        /// @param v the value of the Scalar
-        Scalar(tint::f32 v) : f32(v) {}  // NOLINT
-
-        /// Constructs the scalar with the f16 value `v`
-        /// @param v the value of the Scalar
-        Scalar(tint::f16 v) : f16({v}) {}  // NOLINT
-
-        /// Constructs the scalar with the bool value `v`
-        /// @param v the value of the Scalar
-        Scalar(bool v) : bool_(v) {}  // NOLINT
-    };
+    /// Scalar holds a single constant scalar value - one of: AInt, AFloat or bool.
+    using Scalar = std::variant<AInt, AFloat, bool>;
 
     /// Scalars is a list of scalar values
     using Scalars = std::vector<Scalar>;
@@ -101,33 +70,18 @@ class Constant {
     /// @returns true if any scalar element is zero
     bool AnyZero() const;
 
-    /// Calls `func(s)` with s being the current scalar value at `index`.
-    /// `func` is typically a lambda of the form '[](auto&& s)'.
     /// @param index the index of the scalar value
-    /// @param func a function with signature `T(S)`
-    /// @return the value returned by func.
-    template <typename Func>
-    auto WithScalarAt(size_t index, Func&& func) const {
-        return Switch(
-            ElementType(),  //
-            [&](const I32*) { return func(elems_[index].i32); },
-            [&](const U32*) { return func(elems_[index].u32); },
-            [&](const F16*) { return func(elems_[index].f16); },
-            [&](const F32*) { return func(elems_[index].f32); },
-            [&](const Bool*) { return func(elems_[index].bool_); },
-            [&](Default) {
-                diag::List diags;
-                TINT_UNREACHABLE(Semantic, diags)
-                    << "invalid scalar type " << type_->TypeInfo().name;
-                return func(u32(0u));
-            });
+    /// @return the value of the scalar at `index`, which must be of type `T`.
+    template <typename T>
+    T Element(size_t index) const {
+        return std::get<T>(elems_[index]);
     }
 
     /// @param index the index of the scalar value
     /// @return the value of the scalar `static_cast` to type T.
     template <typename T>
     T ElementAs(size_t index) const {
-        return WithScalarAt(index, [](auto val) { return static_cast<T>(val); });
+        return std::visit([](auto val) { return static_cast<T>(val); }, elems_[index]);
     }
 
   private:

@@ -60,16 +60,12 @@ Constant::~Constant() = default;
 Constant& Constant::operator=(const Constant& rhs) = default;
 
 bool Constant::AnyZero() const {
-    for (size_t i = 0; i < Elements().size(); ++i) {
-        if (WithScalarAt(i, [&](auto&& s) {
-                // Use std::equal_to to work around -Wfloat-equal warnings
-                using T = std::remove_reference_t<decltype(s)>;
-                auto equal_to = std::equal_to<T>{};
-                if (equal_to(s, T(0))) {
-                    return true;
-                }
-                return false;
-            })) {
+    for (auto scalar : elems_) {
+        auto is_zero = [&](auto&& s) {
+            using T = std::remove_reference_t<decltype(s)>;
+            return s == T(0);
+        };
+        if (std::visit(is_zero, scalar)) {
             return true;
         }
     }

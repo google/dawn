@@ -56,6 +56,21 @@ void FoldConstants::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
             return nullptr;
         }
 
+        auto build_scalar = [&](sem::Constant::Scalar s) {
+            return Switch(
+                value.ElementType(),  //
+                [&](const sem::I32*) { return ctx.dst->Expr(i32(std::get<AInt>(s).value)); },
+                [&](const sem::U32*) { return ctx.dst->Expr(u32(std::get<AInt>(s).value)); },
+                [&](const sem::F32*) { return ctx.dst->Expr(f32(std::get<AFloat>(s).value)); },
+                [&](const sem::Bool*) { return ctx.dst->Expr(std::get<bool>(s)); },
+                [&](Default) {
+                    TINT_ICE(Transform, ctx.dst->Diagnostics())
+                        << "unhandled Constant::Scalar type: "
+                        << value.ElementType()->FriendlyName(ctx.src->Symbols());
+                    return nullptr;
+                });
+        };
+
         if (auto* vec = ty->As<sem::Vector>()) {
             uint32_t vec_size = static_cast<uint32_t>(vec->Width());
 
@@ -73,7 +88,7 @@ void FoldConstants::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
 
             ast::ExpressionList ctors;
             for (uint32_t i = 0; i < ctor_size; ++i) {
-                value.WithScalarAt(i, [&](auto&& s) { ctors.emplace_back(ctx.dst->Expr(s)); });
+                ctors.emplace_back(build_scalar(value.Elements()[i]));
             }
 
             auto* el_ty = CreateASTTypeFor(ctx, vec->type());
@@ -81,8 +96,7 @@ void FoldConstants::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
         }
 
         if (ty->is_scalar()) {
-            return value.WithScalarAt(
-                0, [&](auto&& s) -> const ast::LiteralExpression* { return ctx.dst->Expr(s); });
+            return build_scalar(value.Elements()[0]);
         }
 
         return nullptr;

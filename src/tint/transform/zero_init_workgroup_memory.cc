@@ -359,13 +359,8 @@ struct ZeroInitWorkgroupMemory::State {
             }
             auto* sem = ctx.src->Sem().Get(expr);
             if (auto c = sem->ConstantValue()) {
-                if (c.ElementType()->Is<sem::I32>()) {
-                    workgroup_size_const *= static_cast<uint32_t>(c.Elements()[0].i32);
-                    continue;
-                } else if (c.ElementType()->Is<sem::U32>()) {
-                    workgroup_size_const *= c.Elements()[0].u32;
-                    continue;
-                }
+                workgroup_size_const *= c.Element<AInt>(0).value;
+                continue;
             }
             // Constant value could not be found. Build expression instead.
             workgroup_size_expr = [this, expr, size = workgroup_size_expr] {

@@ -793,13 +793,12 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
             continue;
         }
         // validator_.Validate and set the default value for this dimension.
-        if (is_i32 ? value.Elements()[0].i32 < 1 : value.Elements()[0].u32 < 1) {
+        if (value.Element<AInt>(0).value < 1) {
             AddError("workgroup_size argument must be at least 1", values[i]->source);
             return false;
         }
 
-        ws[i].value =
-            is_i32 ? static_cast<uint32_t>(value.Elements()[0].i32) : value.Elements()[0].u32;
+        ws[i].value = static_cast<uint32_t>(value.Element<AInt>(0).value);
     }
 
     current_function_->SetWorkgroupSize(std::move(ws));
@@ -1855,13 +1854,12 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
             return nullptr;
         }
 
-        if (ty->is_signed_integer_scalar() ? count_val.Elements()[0].i32 < 1
-                                           : count_val.Elements()[0].u32 < 1u) {
+        if (count_val.Element<AInt>(0).value < 1) {
             AddError("array size must be at least 1", size_source);
             return nullptr;
         }
 
-        count = count_val.Elements()[0].u32;
+        count = static_cast<uint32_t>(count_val.Element<AInt>(0).value);
     }
 
     auto size = std::max<uint64_t>(count, 1) * stride;

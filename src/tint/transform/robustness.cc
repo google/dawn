@@ -123,10 +123,10 @@ struct Robustness::State {
         if (auto idx_constant = idx_sem->ConstantValue()) {
             // Constant value index
             if (idx_constant.Type()->Is<sem::I32>()) {
-                idx.i32 = idx_constant.Elements()[0].i32;
+                idx.i32 = static_cast<int32_t>(idx_constant.Element<AInt>(0).value);
                 idx.is_signed = true;
             } else if (idx_constant.Type()->Is<sem::U32>()) {
-                idx.u32 = idx_constant.Elements()[0].u32;
+                idx.u32 = static_cast<uint32_t>(idx_constant.Element<AInt>(0).value);
                 idx.is_signed = false;
             } else {
                 TINT_ICE(Transform, b.Diagnostics()) << "unsupported constant value for accessor "
