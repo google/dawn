@@ -328,22 +328,22 @@ func (r *resolver) intrinsic(
 	intrinsic.Overloads = append(intrinsic.Overloads, overload)
 
 	// Sort the template parameters by resolved type. Append these to
-	// sem.Overload.OpenTypes or sem.Overload.OpenNumbers based on their kind.
+	// sem.Overload.TemplateTypes or sem.Overload.TemplateNumbers based on their kind.
 	for _, param := range templateParams {
 		switch param := param.(type) {
 		case *sem.TemplateTypeParam:
-			overload.OpenTypes = append(overload.OpenTypes, param)
+			overload.TemplateTypes = append(overload.TemplateTypes, param)
 		case *sem.TemplateEnumParam, *sem.TemplateNumberParam:
-			overload.OpenNumbers = append(overload.OpenNumbers, param)
+			overload.TemplateNumbers = append(overload.TemplateNumbers, param)
 		}
 	}
 
-	// Update high-water marks of open types / numbers
-	if r.s.MaxOpenTypes < len(overload.OpenTypes) {
-		r.s.MaxOpenTypes = len(overload.OpenTypes)
+	// Update high-water marks of template types and numbers
+	if r.s.MaxTemplateTypes < len(overload.TemplateTypes) {
+		r.s.MaxTemplateTypes = len(overload.TemplateTypes)
 	}
-	if r.s.MaxOpenNumbers < len(overload.OpenNumbers) {
-		r.s.MaxOpenNumbers = len(overload.OpenNumbers)
+	if r.s.MaxTemplateNumbers < len(overload.TemplateNumbers) {
+		r.s.MaxTemplateNumbers = len(overload.TemplateNumbers)
 	}
 
 	// Resolve the parameters

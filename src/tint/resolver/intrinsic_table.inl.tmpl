@@ -51,8 +51,8 @@ constexpr ParameterInfo kParameters[] = {
 {{- end }}
 };
 
-constexpr OpenTypeInfo kOpenTypes[] = {
-{{- range $i, $o := .OpenTypes }}
+constexpr TemplateTypeInfo kTemplateTypes[] = {
+{{- range $i, $o := .TemplateTypes }}
   {
     /* [{{$i}}] */
     /* name */ "{{$o.Name}}",
@@ -64,8 +64,8 @@ constexpr OpenTypeInfo kOpenTypes[] = {
 {{- end }}
 };
 
-constexpr OpenNumberInfo kOpenNumbers[] = {
-{{- range $i, $o := .OpenNumbers }}
+constexpr TemplateNumberInfo kTemplateNumbers[] = {
+{{- range $i, $o := .TemplateNumbers }}
   {
     /* [{{$i}}] */
     /* name */ "{{$o.Name}}",
@@ -82,14 +82,14 @@ constexpr OverloadInfo kOverloads[] = {
   {
     /* [{{$i}}] */
     /* num parameters */ {{$o.NumParameters}},
-    /* num open types */ {{$o.NumOpenTypes}},
-    /* num open numbers */ {{$o.NumOpenNumbers}},
-    /* open types */
-{{-   if $o.OpenTypesOffset }} &kOpenTypes[{{$o.OpenTypesOffset}}],
+    /* num template types */ {{$o.NumTemplateTypes}},
+    /* num template numbers */ {{$o.NumTemplateNumbers}},
+    /* template types */
+{{-   if $o.TemplateTypesOffset }} &kTemplateTypes[{{$o.TemplateTypesOffset}}],
 {{-   else                  }} nullptr,
 {{-   end }}
-    /* open numbers */
-{{-   if $o.OpenNumbersOffset }} &kOpenNumbers[{{$o.OpenNumbersOffset}}]
+    /* template numbers */
+{{-   if $o.TemplateNumbersOffset }} &kTemplateNumbers[{{$o.TemplateNumbersOffset}}]
 {{-   else                    }} nullptr
 {{-   end }},
     /* parameters */ &kParameters[{{$o.ParametersOffset}}],
@@ -180,7 +180,7 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
 class {{$class}} : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may close open types and numbers in state.
+  /// Match may define template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -236,7 +236,7 @@ class {{$class}} : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
   /// expected, canonicalized type on success.
-  /// Match may close open types and numbers in state.
+  /// Match may define template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -280,7 +280,7 @@ std::string {{$class}}::String(MatchState&) const {
 class {{$class}} : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
-  /// Match may close open types and numbers in state.
+  /// Match may define template types and numbers in state.
   /// @param state the MatchState
   /// @param number the enum value as a Number
   /// @return true if the enum value matches the set
@@ -332,15 +332,15 @@ class Matchers {
  private:
 {{- $t_names := Map -}}
 {{- $n_names := Map -}}
-{{- range Iterate .Sem.MaxOpenTypes -}}
-{{-   $name := printf "open_type_%v" . -}}
+{{- range Iterate .Sem.MaxTemplateTypes -}}
+{{-   $name := printf "template_type_%v" . -}}
 {{-   $t_names.Put . $name }}
-  OpenTypeMatcher {{$name}}_{ {{- . -}} };
+  TemplateTypeMatcher {{$name}}_{ {{- . -}} };
 {{- end }}
-{{- range Iterate .Sem.MaxOpenNumbers -}}
-{{-   $name := printf "open_number_%v" . -}}
+{{- range Iterate .Sem.MaxTemplateNumbers -}}
+{{-   $name := printf "template_number_%v" . -}}
 {{-   $n_names.Put . $name }}
-  OpenNumberMatcher {{$name}}_{ {{- . -}} };
+  TemplateNumberMatcher {{$name}}_{ {{- . -}} };
 {{- end }}
 {{- range .Sem.Types -}}
 {{-   $name := PascalCase .Name -}}
@@ -364,7 +364,7 @@ class Matchers {
   /// Destructor
   ~Matchers();
 
-  /// The open-types, types, and type matchers
+  /// The template types, types, and type matchers
   TypeMatcher const* const type[{{len .TMatchers}}] = {
 {{- range $i, $m := .TMatchers }}
     /* [{{$i}}] */
@@ -374,7 +374,7 @@ class Matchers {
 {{- end }}
   };
 
-  /// The open-numbers, and number matchers
+  /// The template numbers, and number matchers
   NumberMatcher const* const number[{{len .NMatchers}}] = {
 {{- range $i, $m := .NMatchers }}
     /* [{{$i}}] */

@@ -27,39 +27,39 @@ type IntrinsicTable struct {
 	// The semantic info
 	Sem *sem.Sem
 
-	// TMatchers are all the sem.OpenType, sem.Type and sem.TypeMatchers.
+	// TMatchers are all the sem.TemplateType, sem.Type and sem.TypeMatchers.
 	// These are all implemented by classes deriving from tint::TypeMatcher
 	TMatchers     []sem.Named
 	TMatcherIndex map[sem.Named]int // [object -> index] in TMatcher
 
-	// NMatchers are all the sem.OpenNumber and sem.EnumMatchers.
+	// NMatchers are all the sem.TemplateNumber and sem.EnumMatchers.
 	// These are all implemented by classes deriving from tint::NumberMatcher
 	NMatchers     []sem.Named
 	NMatcherIndex map[sem.Named]int // [object -> index] in NMatchers
 
-	MatcherIndices            []int        // kMatcherIndices table content
-	OpenTypes                 []OpenType   // kOpenTypes table content
-	OpenNumbers               []OpenNumber // kOpenNumbers table content
-	Parameters                []Parameter  // kParameters table content
-	Overloads                 []Overload   // kOverloads table content
-	Builtins                  []Intrinsic  // kBuiltins table content
-	UnaryOperators            []Intrinsic  // kUnaryOperators table content
-	BinaryOperators           []Intrinsic  // kBinaryOperators table content
-	ConstructorsAndConverters []Intrinsic  // kConstructorsAndConverters table content
+	MatcherIndices            []int            // kMatcherIndices table content
+	TemplateTypes             []TemplateType   // kTemplateTypes table content
+	TemplateNumbers           []TemplateNumber // kTemplateNumbers table content
+	Parameters                []Parameter      // kParameters table content
+	Overloads                 []Overload       // kOverloads table content
+	Builtins                  []Intrinsic      // kBuiltins table content
+	UnaryOperators            []Intrinsic      // kUnaryOperators table content
+	BinaryOperators           []Intrinsic      // kBinaryOperators table content
+	ConstructorsAndConverters []Intrinsic      // kConstructorsAndConverters table content
 }
 
-// OpenType is used to create the C++ OpenTypeInfo structure
-type OpenType struct {
-	// Name of the open type (e.g. 'T')
+// TemplateType is used to create the C++ TemplateTypeInfo structure
+type TemplateType struct {
+	// Name of the template type (e.g. 'T')
 	Name string
 	// Optional type matcher constraint.
 	// Either an index in Matchers::type, or -1
 	MatcherIndex int
 }
 
-// OpenNumber is used to create the C++ OpenNumberInfo structure
-type OpenNumber struct {
-	// Name of the open number (e.g. 'N')
+// TemplateNumber is used to create the C++ TemplateNumberInfo structure
+type TemplateNumber struct {
+	// Name of the template number (e.g. 'N')
 	Name string
 	// Optional type matcher constraint.
 	// Either an index in Matchers::type, or -1
@@ -83,14 +83,14 @@ type Parameter struct {
 type Overload struct {
 	// Total number of parameters for the overload
 	NumParameters int
-	// Total number of open types for the overload
-	NumOpenTypes int
-	// Total number of open numbers for the overload
-	NumOpenNumbers int
-	// Index to the first open type in IntrinsicTable.OpenTypes
-	OpenTypesOffset *int
-	// Index to the first open number in IntrinsicTable.OpenNumbers
-	OpenNumbersOffset *int
+	// Total number of template types for the overload
+	NumTemplateTypes int
+	// Total number of template numbers for the overload
+	NumTemplateNumbers int
+	// Index to the first template type in IntrinsicTable.TemplateTypes
+	TemplateTypesOffset *int
+	// Index to the first template number in IntrinsicTable.TemplateNumbers
+	TemplateNumbersOffset *int
 	// Index to the first parameter in IntrinsicTable.Parameters
 	ParametersOffset *int
 	// Index into IntrinsicTable.MatcherIndices, beginning the list of matchers
@@ -123,25 +123,25 @@ type IntrinsicTableBuilder struct {
 	// Lookup tables.
 	// These are packed (compressed) once all the entries have been added.
 	lut struct {
-		matcherIndices lut.LUT
-		openTypes      lut.LUT
-		openNumbers    lut.LUT
-		parameters     lut.LUT
-		overloads      lut.LUT
+		matcherIndices  lut.LUT
+		templateTypes   lut.LUT
+		templateNumbers lut.LUT
+		parameters      lut.LUT
+		overloads       lut.LUT
 	}
 }
 
 // Helper for building a single overload
 type overloadBuilder struct {
 	*IntrinsicTableBuilder
-	// Maps TemplateParam to index in openTypes
-	openTypeIndex map[sem.TemplateParam]int
-	// Maps TemplateParam to index in openNumbers
-	openNumberIndex map[sem.TemplateParam]int
-	// Open types used by the overload
-	openTypes []OpenType
-	// Open numbers used by the overload
-	openNumbers []OpenNumber
+	// Maps TemplateParam to index in templateTypes
+	templateTypeIndex map[sem.TemplateParam]int
+	// Maps TemplateParam to index in templateNumbers
+	templateNumberIndex map[sem.TemplateParam]int
+	// Template types used by the overload
+	templateTypes []TemplateType
+	// Template numbers used by the overload
+	templateNumbers []TemplateNumber
 	// All parameters declared by the overload
 	parameters []Parameter
 	// Index into IntrinsicTable.MatcherIndices, beginning the list of matchers
@@ -155,8 +155,8 @@ type overloadBuilder struct {
 // layoutMatchers assigns each of the TMatchers and NMatchers a unique index
 // in the C++ Matchers::type and Matchers::number arrays, respectively.
 func (b *IntrinsicTableBuilder) layoutMatchers(s *sem.Sem) {
-	// First MaxOpenTypes of TMatchers are open types
-	b.TMatchers = make([]sem.Named, s.MaxOpenTypes)
+	// First MaxTemplateTypes of TMatchers are template types
+	b.TMatchers = make([]sem.Named, s.MaxTemplateTypes)
 	for _, m := range s.Types {
 		b.TMatcherIndex[m] = len(b.TMatchers)
 		b.TMatchers = append(b.TMatchers, m)
@@ -166,8 +166,8 @@ func (b *IntrinsicTableBuilder) layoutMatchers(s *sem.Sem) {
 		b.TMatchers = append(b.TMatchers, m)
 	}
 
-	// First MaxOpenNumbers of NMatchers are open numbers
-	b.NMatchers = make([]sem.Named, s.MaxOpenNumbers)
+	// First MaxTemplateNumbers of NMatchers are template numbers
+	b.NMatchers = make([]sem.Named, s.MaxTemplateNumbers)
 	for _, m := range s.EnumMatchers {
 		b.NMatcherIndex[m] = len(b.NMatchers)
 		b.NMatchers = append(b.NMatchers, m)
@@ -178,14 +178,14 @@ func (b *IntrinsicTableBuilder) layoutMatchers(s *sem.Sem) {
 func (b *IntrinsicTableBuilder) buildOverload(o *sem.Overload) (Overload, error) {
 	ob := overloadBuilder{
 		IntrinsicTableBuilder: b,
-		openTypeIndex:         map[sem.TemplateParam]int{},
-		openNumberIndex:       map[sem.TemplateParam]int{},
+		templateTypeIndex:     map[sem.TemplateParam]int{},
+		templateNumberIndex:   map[sem.TemplateParam]int{},
 	}
 
-	if err := ob.buildOpenTypes(o); err != nil {
+	if err := ob.buildTemplateTypes(o); err != nil {
 		return Overload{}, err
 	}
-	if err := ob.buildOpenNumbers(o); err != nil {
+	if err := ob.buildTemplateNumbers(o); err != nil {
 		return Overload{}, err
 	}
 	if err := ob.buildParameters(o); err != nil {
@@ -197,10 +197,10 @@ func (b *IntrinsicTableBuilder) buildOverload(o *sem.Overload) (Overload, error)
 
 	return Overload{
 		NumParameters:              len(ob.parameters),
-		NumOpenTypes:               len(ob.openTypes),
-		NumOpenNumbers:             len(ob.openNumbers),
-		OpenTypesOffset:            b.lut.openTypes.Add(ob.openTypes),
-		OpenNumbersOffset:          b.lut.openNumbers.Add(ob.openNumbers),
+		NumTemplateTypes:           len(ob.templateTypes),
+		NumTemplateNumbers:         len(ob.templateNumbers),
+		TemplateTypesOffset:        b.lut.templateTypes.Add(ob.templateTypes),
+		TemplateNumbersOffset:      b.lut.templateNumbers.Add(ob.templateNumbers),
 		ParametersOffset:           b.lut.parameters.Add(ob.parameters),
 		ReturnMatcherIndicesOffset: ob.returnTypeMatcherIndicesOffset,
 		CanBeUsedInStage:           o.CanBeUsedInStage,
@@ -209,12 +209,12 @@ func (b *IntrinsicTableBuilder) buildOverload(o *sem.Overload) (Overload, error)
 	}, nil
 }
 
-// buildOpenTypes constructs the OpenTypes used by the overload, populating
-// b.openTypes
-func (b *overloadBuilder) buildOpenTypes(o *sem.Overload) error {
-	b.openTypes = make([]OpenType, len(o.OpenTypes))
-	for i, t := range o.OpenTypes {
-		b.openTypeIndex[t] = i
+// buildTemplateTypes constructs the TemplateTypes used by the overload, populating
+// b.templateTypes
+func (b *overloadBuilder) buildTemplateTypes(o *sem.Overload) error {
+	b.templateTypes = make([]TemplateType, len(o.TemplateTypes))
+	for i, t := range o.TemplateTypes {
+		b.templateTypeIndex[t] = i
 		matcherIndex := -1
 		if t.Type != nil {
 			var err error
@@ -223,7 +223,7 @@ func (b *overloadBuilder) buildOpenTypes(o *sem.Overload) error {
 				return err
 			}
 		}
-		b.openTypes[i] = OpenType{
+		b.templateTypes[i] = TemplateType{
 			Name:         t.Name,
 			MatcherIndex: matcherIndex,
 		}
@@ -231,12 +231,12 @@ func (b *overloadBuilder) buildOpenTypes(o *sem.Overload) error {
 	return nil
 }
 
-// buildOpenNumbers constructs the OpenNumbers used by the overload, populating
-// b.openNumbers
-func (b *overloadBuilder) buildOpenNumbers(o *sem.Overload) error {
-	b.openNumbers = make([]OpenNumber, len(o.OpenNumbers))
-	for i, t := range o.OpenNumbers {
-		b.openNumberIndex[t] = i
+// buildTemplateNumbers constructs the TemplateNumbers used by the overload, populating
+// b.templateNumbers
+func (b *overloadBuilder) buildTemplateNumbers(o *sem.Overload) error {
+	b.templateNumbers = make([]TemplateNumber, len(o.TemplateNumbers))
+	for i, t := range o.TemplateNumbers {
+		b.templateNumberIndex[t] = i
 		matcherIndex := -1
 		if e, ok := t.(*sem.TemplateEnumParam); ok && e.Matcher != nil {
 			var err error
@@ -245,7 +245,7 @@ func (b *overloadBuilder) buildOpenNumbers(o *sem.Overload) error {
 				return err
 			}
 		}
-		b.openNumbers[i] = OpenNumber{
+		b.templateNumbers[i] = TemplateNumber{
 			Name:         t.GetName(),
 			MatcherIndex: matcherIndex,
 		}
@@ -295,25 +295,25 @@ func (b *overloadBuilder) matcherIndex(n sem.Named) (int, error) {
 		}
 		return 0, fmt.Errorf("matcherIndex missing entry for %v %T", n.GetName(), n)
 	case *sem.TemplateTypeParam:
-		if i, ok := b.openTypeIndex[n]; ok {
+		if i, ok := b.templateTypeIndex[n]; ok {
 			return i, nil
 		}
-		return 0, fmt.Errorf("openTypeIndex missing entry for %v %T", n.Name, n)
+		return 0, fmt.Errorf("templateTypeIndex missing entry for %v %T", n.Name, n)
 	case *sem.EnumMatcher:
 		if i, ok := b.NMatcherIndex[n]; ok {
 			return i, nil
 		}
 		return 0, fmt.Errorf("matcherIndex missing entry for %v %T", n.GetName(), n)
 	case *sem.TemplateEnumParam:
-		if i, ok := b.openNumberIndex[n]; ok {
+		if i, ok := b.templateNumberIndex[n]; ok {
 			return i, nil
 		}
-		return 0, fmt.Errorf("openNumberIndex missing entry for %v %T", n, n)
+		return 0, fmt.Errorf("templateNumberIndex missing entry for %v %T", n, n)
 	case *sem.TemplateNumberParam:
-		if i, ok := b.openNumberIndex[n]; ok {
+		if i, ok := b.templateNumberIndex[n]; ok {
 			return i, nil
 		}
-		return 0, fmt.Errorf("openNumberIndex missing entry for %v %T", n, n)
+		return 0, fmt.Errorf("templateNumberIndex missing entry for %v %T", n, n)
 	default:
 		return 0, fmt.Errorf("overload.matcherIndex() does not handle %v %T", n, n)
 	}
@@ -359,8 +359,8 @@ func buildIntrinsicTable(s *sem.Sem) (*IntrinsicTable, error) {
 		},
 	}
 	b.lut.matcherIndices = lut.New(list.Wrap(&b.MatcherIndices))
-	b.lut.openTypes = lut.New(list.Wrap(&b.OpenTypes))
-	b.lut.openNumbers = lut.New(list.Wrap(&b.OpenNumbers))
+	b.lut.templateTypes = lut.New(list.Wrap(&b.TemplateTypes))
+	b.lut.templateNumbers = lut.New(list.Wrap(&b.TemplateNumbers))
 	b.lut.parameters = lut.New(list.Wrap(&b.Parameters))
 	b.lut.overloads = lut.New(list.Wrap(&b.Overloads))
 
@@ -397,8 +397,8 @@ func buildIntrinsicTable(s *sem.Sem) (*IntrinsicTable, error) {
 	}
 
 	b.lut.matcherIndices.Compact()
-	b.lut.openTypes.Compact()
-	b.lut.openNumbers.Compact()
+	b.lut.templateTypes.Compact()
+	b.lut.templateNumbers.Compact()
 	b.lut.parameters.Compact()
 	b.lut.overloads.Compact()
 

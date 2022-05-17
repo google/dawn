@@ -30,10 +30,10 @@ type Sem struct {
 	UnaryOperators            []*Intrinsic
 	BinaryOperators           []*Intrinsic
 	ConstructorsAndConverters []*Intrinsic
-	// Maximum number of open-types used across all builtins
-	MaxOpenTypes int
-	// Maximum number of open-numbers used across all builtins
-	MaxOpenNumbers int
+	// Maximum number of template types used across all builtins
+	MaxTemplateTypes int
+	// Maximum number of template numbers used across all builtins
+	MaxTemplateNumbers int
 	// The alphabetically sorted list of unique parameter names
 	UniqueParameterNames []string
 }
@@ -137,8 +137,8 @@ type Overload struct {
 	Decl             ast.IntrinsicDecl
 	Intrinsic        *Intrinsic
 	TemplateParams   []TemplateParam
-	OpenTypes        []*TemplateTypeParam
-	OpenNumbers      []TemplateParam
+	TemplateTypes    []*TemplateTypeParam
+	TemplateNumbers  []TemplateParam
 	ReturnType       *FullyQualifiedName
 	Parameters       []Parameter
 	CanBeUsedInStage StageUses

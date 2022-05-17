@@ -154,7 +154,7 @@ match workgroup_or_storage: workgroup | storage
 // functions supported by the WGSL language. This builtin definition          //
 // language supports simple static-type function declarations, as well as     //
 // single overload declarations that can match a number of different          //
-// argument types via the use of 'open-types' and 'open-numbers'.             //
+// argument types via the use of template types and template numbers          //
 //                                                                            //
 // * Basic example:                                                           //
 //                                                                            //
@@ -163,10 +163,9 @@ match workgroup_or_storage: workgroup | storage
 //   Declares an overload of the function 'isInf' that accepts a single       //
 //   parameter of type 'f32' and returns a 'bool'.                            //
 //                                                                            //
-// An 'open-type' can be thought as a template type that is determined by the //
-// arguments to the builtin.                                                  //
+// A template type is a type determined by the arguments to the builtin.      //
 //                                                                            //
-// * Open-type example without constraint:                                    //
+// * Template type example without constraint:                                //
 //                                                                            //
 //    fn arrayLength<T>(array<T>) -> u32                                      //
 //                                                                            //
@@ -175,7 +174,7 @@ match workgroup_or_storage: workgroup | storage
 //    element type. This overload will always return a value of the same type //
 //    as its single argument.                                                 //
 //                                                                            //
-// * Open-type example with constraint:                                       //
+// * Template type example with constraint:                                   //
 //                                                                            //
 //    fn abs<T: fiu32>(T) -> T                                                //
 //                                                                            //
@@ -183,10 +182,10 @@ match workgroup_or_storage: workgroup | storage
 //    argument of type 'f32', 'i32' or 'u32', which returns a value of the    //
 //    same argument type.                                                     //
 //                                                                            //
-// Similarly an 'open-number' can be thought as a template number or          //
-// enumerator that is determined by the arguments to the builtin.             //
+// Similarly a template number is a number or enumerator that is determined   //
+// by the arguments to the builtin.                                           //
 //                                                                            //
-// * Open-number example:                                                     //
+// * Template number example:                                                 //
 //                                                                            //
 //    fn dpdx<N: num>(vec<N, f32>) -> vec<N, f32>                             //
 //                                                                            //
@@ -198,51 +197,50 @@ match workgroup_or_storage: workgroup | storage
 // Matching algorithm:                                                        //
 // -------------------                                                        //
 //                                                                            //
-// Prior to matching an overload, all open-types are undefined.               //
+// Prior to matching an overload, all template types are undefined.           //
 //                                                                            //
-// Open-types become closed-types (pinned to a fixed type) on the first       //
-// attempt to match an argument to that open-type.                            //
-// Once open-types are closed, they remain that type for the rest of the      //
-// overload evaluation.                                                       //
+// Template types become defined on the first attempt to match an argument to //
+// that template type. Once template types are defined, they remain that type //
+// for the rest of the overload evaluation.                                   //
 //                                                                            //
 // To better understand, let's consider the following hypothetical overload   //
 // declaration:                                                               //
 //                                                                            //
 //    fn foo<T: scalar>(T, T);                                                //
 //                                                                            //
-//    T           - is the open-type                                          //
+//    T           - is the template type name                                 //
 //    scalar      - is a matcher for the types 'f32', 'i32', 'u32' or 'bool'  //
 //                  (declared above)                                          //
-//    <T: scalar> - declares the open-type T, with the constraint that T must //
-//                  match one of 'f32', 'i32', 'u32' or 'bool'.               //
+//    <T: scalar> - declares the template type T, with the constraint that T  //
+//                  must match one of 'f32', 'i32', 'u32' or 'bool'.          //
 //                                                                            //
 // The process for resolving this overload is as follows:                     //
 //                                                                            //
 //   (1) The overload resolver begins by attempting to match the argument     //
 //       types from left to right.                                            //
-//       The first parameter type is compared against the argument type.      //
-//       As the open-type T has not been closed yet, T is closed as the type  //
-//       of the first argument.                                               //
+//       The first parameter type is compared against the argument type T.    //
+//       As the template type T has not been defined yet, T is defined as the //
+//       type of the first argument.                                          //
 //       There's no verification that the T type is a scalar at this stage.   //
 //   (2) The second parameter is then compared against the second argument.   //
-//       As the open-type T is now closed, the argument type is compared      //
-//       against the value of the closed-type of T. If the types match, then  //
+//       As the template type T is now defined  the argument type is compared //
+//       against the value of the defined type of T. If the types match, then //
 //       the overload is still a candidate for matching, otherwise the        //
 //       overload is no longer considered.                                    //
-//   (3) If all the parameters matched, constraints on the open-types need    //
-//       to be checked next. If the closed-type does not match the 'match'    //
-//       constraint, then the overload is no longer considered.               //
+//   (3) If all the parameters matched, constraints on the template types     //
+//       need to be checked next. If the defined type does not match the      //
+//       'match' constraint, then the overload is no longer considered.       //
 //                                                                            //
-// The algorithm for matching open-numbers is almost identical to open-types, //
-// except of course, they match against integer numbers or enumerators        //
-// instead of types.                                                          //
+// The algorithm for matching template numbers is almost identical to         //
+// matching template types, except of course, they match against integer      //
+// numbers or enumerators instead of types.                                   //
 //                                                                            //
 //                                                                            //
 // * More examples:                                                           //
 //                                                                            //
 //   fn F()                                                                   //
 //     - Function called F.                                                   //
-//       No open types or numbers, no parameters, no return value             //
+//       No template types or numbers, no parameters, no return value         //
 //                                                                            //
 //   fn F() -> RETURN_TYPE                                                    //
 //     - Function with RETURN_TYPE as the return type value                   //
@@ -256,21 +254,21 @@ match workgroup_or_storage: workgroup | storage
 //       some builtin functions                                               //
 //                                                                            //
 //   fn F<T>(T)                                                               //
-//     - Single parameter of unconstrained open-type T (any type)             //
+//     - Single parameter of unconstrained template type T (any type)         //
 //                                                                            //
 //   fn F<T: scalar>(T)                                                       //
-//     - Single parameter of constrained open-type T (must be a scalar)       //
+//     - Single parameter of constrained template type T (must be a scalar)   //
 //                                                                            //
 //   fn F<T: fiu32>(T) -> T                                                   //
-//     - Single parameter of constrained open-type T (must be a one of fiu32) //
-//       Return type matches parameter type                                   //
+//     - Single parameter of constrained template type T (must be a one of    //
+//       fiu32) Return type matches parameter type                            //
 //                                                                            //
 //   fn F<T, N: num>(vec<N, T>)                                               //
-//     - Single parameter of vector type with open-number size N and element  //
-//       open-type T                                                          //
+//     - Single parameter of vector type with template number size N and      //
+//       element template type T                                              //
 //                                                                            //
 //   fn F<A: access>(texture_storage_1d<f32_texel_format, A>)                 //
-//     - Single parameter of texture_storage_1d type with open-number         //
+//     - Single parameter of texture_storage_1d type with template number     //
 //       access-control C, and of a texel format that is listed in            //
 //       f32_texel_format                                                     //
 //                                                                            //

@@ -32,7 +32,7 @@ type Permuter struct {
 
 // buildPermuter returns a new initialized Permuter
 func buildPermuter(s *sem.Sem) (*Permuter, error) {
-	// allTypes are the list of FQNs that are used for open, unconstrained types
+	// allTypes are the list of FQNs that are used for unconstrained types
 	allTypes := []sem.FullyQualifiedName{}
 	for _, ty := range s.Types {
 		if len(ty.TemplateParams) > 0 {
@@ -58,10 +58,10 @@ type Permutation struct {
 // Permute generates a set of permutations for the given intrinsic overload
 func (p *Permuter) Permute(overload *sem.Overload) ([]Permutation, error) {
 	state := permutationState{
-		Permuter:      p,
-		closedTypes:   map[sem.TemplateParam]sem.FullyQualifiedName{},
-		closedNumbers: map[sem.TemplateParam]interface{}{},
-		parameters:    map[int]sem.FullyQualifiedName{},
+		Permuter:        p,
+		templateTypes:   map[sem.TemplateParam]sem.FullyQualifiedName{},
+		templateNumbers: map[sem.TemplateParam]interface{}{},
+		parameters:      map[int]sem.FullyQualifiedName{},
 	}
 
 	out := []Permutation{}
@@ -144,15 +144,15 @@ func (p *Permuter) Permute(overload *sem.Overload) ([]Permutation, error) {
 				var err error
 				types, err = state.permutateFQN(sem.FullyQualifiedName{Target: t.Type})
 				if err != nil {
-					return nil, fmt.Errorf("while permutating open types: %w", err)
+					return nil, fmt.Errorf("while permutating template types: %w", err)
 				}
 			}
 			if len(types) == 0 {
-				return nil, fmt.Errorf("open type %v has no permutations", t.Name)
+				return nil, fmt.Errorf("template type %v has no permutations", t.Name)
 			}
 			permutate = func() error {
 				for _, ty := range types {
-					state.closedTypes[t] = ty
+					state.templateTypes[t] = ty
 					if err := next(); err != nil {
 						return err
 					}
@@ -168,14 +168,14 @@ func (p *Permuter) Permute(overload *sem.Overload) ([]Permutation, error) {
 				permutations, err = state.permutateFQN(sem.FullyQualifiedName{Target: t.Enum})
 			}
 			if err != nil {
-				return nil, fmt.Errorf("while permutating open numbers: %w", err)
+				return nil, fmt.Errorf("while permutating template numbers: %w", err)
 			}
 			if len(permutations) == 0 {
-				return nil, fmt.Errorf("open type %v has no permutations", t.Name)
+				return nil, fmt.Errorf("template type %v has no permutations", t.Name)
 			}
 			permutate = func() error {
 				for _, n := range permutations {
-					state.closedNumbers[t] = n
+					state.templateNumbers[t] = n
 					if err := next(); err != nil {
 						return err
 					}
@@ -187,7 +187,7 @@ func (p *Permuter) Permute(overload *sem.Overload) ([]Permutation, error) {
 			permutations := []int{2, 3, 4}
 			permutate = func() error {
 				for _, n := range permutations {
-					state.closedNumbers[t] = n
+					state.templateNumbers[t] = n
 					if err := next(); err != nil {
 						return err
 					}
@@ -206,19 +206,19 @@ func (p *Permuter) Permute(overload *sem.Overload) ([]Permutation, error) {
 
 type permutationState struct {
 	*Permuter
-	closedTypes   map[sem.TemplateParam]sem.FullyQualifiedName
-	closedNumbers map[sem.TemplateParam]interface{}
-	parameters    map[int]sem.FullyQualifiedName
+	templateTypes   map[sem.TemplateParam]sem.FullyQualifiedName
+	templateNumbers map[sem.TemplateParam]interface{}
+	parameters      map[int]sem.FullyQualifiedName
 }
 
 func (s permutationState) String() string {
 	sb := &strings.Builder{}
-	sb.WriteString("Closed types:\n")
-	for ct, ty := range s.closedTypes {
+	sb.WriteString("Template types:\n")
+	for ct, ty := range s.templateTypes {
 		fmt.Fprintf(sb, "  %v: %v\n", ct.GetName(), ty)
 	}
-	sb.WriteString("Closed numbers:\n")
-	for cn, v := range s.closedNumbers {
+	sb.WriteString("Template numbers:\n")
+	for cn, v := range s.templateNumbers {
 		fmt.Fprintf(sb, "  %v: %v\n", cn.GetName(), v)
 	}
 	return sb.String()
@@ -240,13 +240,13 @@ func (s *permutationState) permutateFQN(in sem.FullyQualifiedName) ([]sem.FullyQ
 			return nil
 		}
 	case sem.TemplateParam:
-		if ty, ok := s.closedTypes[target]; ok {
+		if ty, ok := s.templateTypes[target]; ok {
 			permutate = func() error {
 				out = append(out, ty)
 				return nil
 			}
 		} else {
-			return nil, fmt.Errorf("'%v' was not found in closedTypes", target.GetName())
+			return nil, fmt.Errorf("'%v' was not found in templateTypes", target.GetName())
 		}
 	case *sem.TypeMatcher:
 		permutate = func() error {
@@ -284,12 +284,12 @@ func (s *permutationState) permutateFQN(in sem.FullyQualifiedName) ([]sem.FullyQ
 		case sem.FullyQualifiedName:
 			switch target := arg.Target.(type) {
 			case sem.TemplateParam:
-				if ty, ok := s.closedTypes[target]; ok {
+				if ty, ok := s.templateTypes[target]; ok {
 					args[i] = ty
-				} else if num, ok := s.closedNumbers[target]; ok {
+				} else if num, ok := s.templateNumbers[target]; ok {
 					args[i] = num
 				} else {
-					return nil, fmt.Errorf("'%v' was not found in closedTypes or closedNumbers", target.GetName())
+					return nil, fmt.Errorf("'%v' was not found in templateTypes or templateNumbers", target.GetName())
 				}
 			default:
 				perms, err := s.permutateFQN(arg)
