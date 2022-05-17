@@ -73,6 +73,23 @@ TEST_F(TraverseExpressionsTest, DescendBinaryExpression) {
     }
 }
 
+TEST_F(TraverseExpressionsTest, Depth) {
+    std::vector<const ast::Expression*> e = {Expr(1_i), Expr(1_i), Expr(1_i), Expr(1_i)};
+    std::vector<const ast::Expression*> i = {Add(e[0], e[1]), Sub(e[2], e[3])};
+    auto* root = Mul(i[0], i[1]);
+
+    size_t j = 0;
+    size_t depths[] = {0, 1, 2, 2, 1, 2, 2};
+    {
+        TraverseExpressions<TraverseOrder::LeftToRight>(  //
+            root, Diagnostics(), [&](const ast::Expression* expr, size_t depth) {
+                (void)expr;
+                EXPECT_THAT(depth, depths[j++]);
+                return ast::TraverseAction::Descend;
+            });
+    }
+}
+
 TEST_F(TraverseExpressionsTest, DescendBitcastExpression) {
     auto* e = Expr(1_i);
     auto* b0 = Bitcast<i32>(e);

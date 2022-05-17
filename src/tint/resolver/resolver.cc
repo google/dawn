@@ -1025,11 +1025,19 @@ sem::ForLoopStatement* Resolver::ForLoopStatement(const ast::ForLoopStatement* s
 
 sem::Expression* Resolver::Expression(const ast::Expression* root) {
     std::vector<const ast::Expression*> sorted;
-    bool mark_failed = false;
+    constexpr size_t kMaxExpressionDepth = 512U;
+    bool failed = false;
     if (!ast::TraverseExpressions<ast::TraverseOrder::RightToLeft>(
-            root, diagnostics_, [&](const ast::Expression* expr) {
+            root, diagnostics_, [&](const ast::Expression* expr, size_t depth) {
+                if (depth > kMaxExpressionDepth) {
+                    AddError(
+                        "reached max expression depth of " + std::to_string(kMaxExpressionDepth),
+                        expr->source);
+                    failed = true;
+                    return ast::TraverseAction::Stop;
+                }
                 if (!Mark(expr)) {
-                    mark_failed = true;
+                    failed = true;
                     return ast::TraverseAction::Stop;
                 }
                 sorted.emplace_back(expr);
@@ -1038,7 +1046,7 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
         return nullptr;
     }
 
-    if (mark_failed) {
+    if (failed) {
         return nullptr;
     }
 
