@@ -250,7 +250,7 @@ hooks = [
     # above. LLVM ToT support isn't provided at the moment.
     'name': 'clang_tidy',
     'pattern': '.',
-    'condition': 'checkout_clang_tidy',
+    'condition': 'dawn_standalone and checkout_clang_tidy',
     'action': ['python3', 'tools/clang/scripts/update.py',
                '--package=clang-tidy'],
   },
