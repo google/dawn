@@ -121,6 +121,7 @@ coverage.summary
 default.profraw
 lcov.info
 /cmake-build-*/
+/build-*/
 /testing
 
 ### Clang-Tidy files
