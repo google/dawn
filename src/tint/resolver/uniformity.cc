@@ -1150,6 +1150,11 @@ class UniformityGraph {
             args.push_back(arg_node);
         }
 
+        // Note: This is an additional node that isn't described in the specification, for the
+        // purpose of providing diagnostic information.
+        Node* call_node = CreateNode(name + "_call", call);
+        call_node->AddEdge(cf_last_arg);
+
         Node* result = CreateNode(name + "_return_value", call);
         result->type = Node::kFunctionCallReturnValue;
         Node* cf_after = CreateNode("CF_after_" + name, call);
@@ -1199,12 +1204,9 @@ class UniformityGraph {
             });
 
         if (callsite_tag == CallSiteRequiredToBeUniform) {
-            // Note: This deviates from the rules in the specification, which would add the edge
-            // directly to the incoming CF node. Going through CF_after instead makes it easier to
-            // produce diagnostics that can identify the function being called.
-            current_function_->required_to_be_uniform->AddEdge(cf_after);
+            current_function_->required_to_be_uniform->AddEdge(call_node);
         }
-        cf_after->AddEdge(cf_last_arg);
+        cf_after->AddEdge(call_node);
 
         if (function_tag == SubsequentControlFlowMayBeNonUniform) {
             cf_after->AddEdge(current_function_->may_be_non_uniform);

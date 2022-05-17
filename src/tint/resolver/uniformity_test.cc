@@ -5584,6 +5584,29 @@ test:7:12 note: reading from read_write storage buffer 'rw' may result in a non-
 /// Miscellaneous statement and expression tests.
 ////////////////////////////////////////////////////////////////////////////////
 
+TEST_F(UniformityAnalysisTest, FunctionRequiresUniformFlowAndCausesNonUniformFlow) {
+    // Test that a function that requires uniform flow and then causes non-uniform flow can be
+    // called without error.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
+
+fn foo() {
+  _ = dpdx(0.5);
+
+  if (non_uniform_global == 0) {
+    discard;
+  }
+}
+
+@stage(fragment)
+fn main() {
+  foo();
+}
+)";
+
+    RunTest(src, true);
+}
+
 TEST_F(UniformityAnalysisTest, TypeConstructor) {
     std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
