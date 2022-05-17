@@ -72,8 +72,8 @@ struct AspectInfo {
     TexelBlockInfo block;
     // TODO(crbug.com/dawn/367): Replace TextureComponentType with TextureSampleType, or make it
     // an internal Dawn enum.
-    wgpu::TextureComponentType baseType;
-    SampleTypeBit supportedSampleTypes;
+    wgpu::TextureComponentType baseType{};
+    SampleTypeBit supportedSampleTypes{};
     wgpu::TextureFormat format = wgpu::TextureFormat::Undefined;
 };
 
@@ -88,19 +88,19 @@ using FormatTable = ityp::array<FormatIndex, Format, kKnownFormatCount>;
 
 // A wgpu::TextureFormat along with all the information about it necessary for validation.
 struct Format {
-    wgpu::TextureFormat format;
+    wgpu::TextureFormat format = wgpu::TextureFormat::Undefined;
 
     // TODO(crbug.com/dawn/1332): These members could be stored in a Format capability matrix.
-    bool isRenderable;
-    bool isCompressed;
+    bool isRenderable = false;
+    bool isCompressed = false;
     // A format can be known but not supported because it is part of a disabled extension.
-    bool isSupported;
-    bool supportsStorageUsage;
-    bool supportsMultisample;
-    bool supportsResolveTarget;
-    Aspect aspects;
+    bool isSupported = false;
+    bool supportsStorageUsage = false;
+    bool supportsMultisample = false;
+    bool supportsResolveTarget = false;
+    Aspect aspects{};
     // Only used for renderable color formats, number of color channels.
-    uint8_t componentCount;
+    uint8_t componentCount = 0;
 
     bool IsColor() const;
     bool HasDepth() const;
@@ -121,7 +121,7 @@ struct Format {
     // baseFormat represents the memory layout of the format.
     // If two formats has the same baseFormat, they could copy to and be viewed as the other
     // format. Currently two formats have the same baseFormat if they differ only in sRGB-ness.
-    wgpu::TextureFormat baseFormat;
+    wgpu::TextureFormat baseFormat = wgpu::TextureFormat::Undefined;
 
     // Returns true if the formats are copy compatible.
     // Currently means they differ only in sRGB-ness.
@@ -136,7 +136,7 @@ struct Format {
     // only the first aspect info or aspectInfo[0] is valid. For depth-stencil, the first aspect
     // info is depth and the second aspect info is stencil. For multi-planar formats,
     // aspectInfo[i] is the ith plane.
-    std::array<AspectInfo, kMaxPlanesPerFormat> aspectInfo;
+    std::array<AspectInfo, kMaxPlanesPerFormat> aspectInfo{};
 
     friend FormatTable BuildFormatTable(const DeviceBase* device);
 };

@@ -548,7 +548,7 @@ TextureBase::TextureBase(DeviceBase* device,
 
 TextureBase::~TextureBase() = default;
 
-static Format kUnusedFormat;
+static constexpr Format kUnusedFormat;
 
 TextureBase::TextureBase(DeviceBase* device, TextureState state)
     : ApiObjectBase(device, kLabelNotImplemented), mFormat(kUnusedFormat), mState(state) {
