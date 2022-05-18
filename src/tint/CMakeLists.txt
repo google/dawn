@@ -810,6 +810,7 @@ if(TINT_BUILD_TESTS)
     sem/sem_struct_test.cc
     sem/storage_texture_test.cc
     sem/texture_test.cc
+    sem/type_test.cc
     sem/type_manager_test.cc
     sem/u32_test.cc
     sem/vector_test.cc

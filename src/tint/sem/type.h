@@ -114,6 +114,19 @@ class Type : public Castable<Type, Node> {
     /// @returns true if this type is a handle type
     bool is_handle() const;
 
+    /// kNoConversion is returned from ConversionRank() when the implicit conversion is not
+    /// permitted.
+    static constexpr uint32_t kNoConversion = 0xffffffffu;
+
+    /// ConversionRank returns the implicit conversion rank when attempting to convert `from` to
+    /// `to`. Lower ranks are preferred over higher ranks.
+    /// @param from the source type
+    /// @param to the destination type
+    /// @returns the rank value for converting from type `from` to type `to`, or #kNoConversion if
+    /// the implicit conversion is not allowed.
+    /// @see https://www.w3.org/TR/WGSL/#conversion-rank
+    static uint32_t ConversionRank(const Type* from, const Type* to);
+
   protected:
     Type();
 };
