@@ -180,7 +180,7 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
 class {{$class}} : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -236,7 +236,7 @@ class {{$class}} : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
   /// expected, canonicalized type on success.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -280,7 +280,7 @@ std::string {{$class}}::String(MatchState&) const {
 class {{$class}} : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define template numbers in state.
   /// @param state the MatchState
   /// @param number the enum value as a Number
   /// @return true if the enum value matches the set

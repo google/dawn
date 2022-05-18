@@ -22,6 +22,8 @@
 #include "gtest/gtest.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/resolver/resolver.h"
+#include "src/tint/sem/abstract_float.h"
+#include "src/tint/sem/abstract_int.h"
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
@@ -174,6 +176,15 @@ using sem_type_func_ptr = const sem::Type* (*)(ProgramBuilder& b);
 template <typename T>
 struct DataType {};
 
+/// Helper that represents no-type. Returns nullptr for all static methods.
+template <>
+struct DataType<void> {
+    /// @return nullptr
+    static inline const ast::Type* AST(ProgramBuilder&) { return nullptr; }
+    /// @return nullptr
+    static inline const sem::Type* Sem(ProgramBuilder&) { return nullptr; }
+};
+
 /// Helper for building bool types and expressions
 template <>
 struct DataType<bool> {
@@ -251,6 +262,40 @@ struct DataType<f32> {
     /// @return a new AST f32 literal value expression
     static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
         return b.Expr(static_cast<f32>(elem_value));
+    }
+};
+
+/// Helper for building abstract float types and expressions
+template <>
+struct DataType<AFloat> {
+    /// false as AFloat is not a composite type
+    static constexpr bool is_composite = false;
+
+    /// @param b the ProgramBuilder
+    /// @return the semantic abstract-float type
+    static inline const sem::Type* Sem(ProgramBuilder& b) { return b.create<sem::AbstractFloat>(); }
+    /// @param b the ProgramBuilder
+    /// @param elem_value the abstract-float value
+    /// @return a new AST abstract-float literal value expression
+    static inline const ast::Expression* Expr(ProgramBuilder& b, AFloat elem_value) {
+        return b.Expr(elem_value);
+    }
+};
+
+/// Helper for building abstract integer types and expressions
+template <>
+struct DataType<AInt> {
+    /// false as AFloat is not a composite type
+    static constexpr bool is_composite = false;
+
+    /// @param b the ProgramBuilder
+    /// @return the semantic abstract-int type
+    static inline const sem::Type* Sem(ProgramBuilder& b) { return b.create<sem::AbstractInt>(); }
+    /// @param b the ProgramBuilder
+    /// @param elem_value the abstract-int value
+    /// @return a new AST abstract-int literal value expression
+    static inline const ast::Expression* Expr(ProgramBuilder& b, AInt elem_value) {
+        return b.Expr(elem_value);
     }
 };
 

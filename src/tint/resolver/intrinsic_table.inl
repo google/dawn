@@ -29,7 +29,7 @@
 class Bool : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -56,7 +56,7 @@ std::string Bool::String(MatchState&) const {
 class I32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -83,7 +83,7 @@ std::string I32::String(MatchState&) const {
 class U32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -110,7 +110,7 @@ std::string U32::String(MatchState&) const {
 class F32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -137,7 +137,7 @@ std::string F32::String(MatchState&) const {
 class Vec2 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -170,7 +170,7 @@ std::string Vec2::String(MatchState& state) const {
 class Vec3 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -203,7 +203,7 @@ std::string Vec3::String(MatchState& state) const {
 class Vec4 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -236,7 +236,7 @@ std::string Vec4::String(MatchState& state) const {
 class Mat2X2 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -269,7 +269,7 @@ std::string Mat2X2::String(MatchState& state) const {
 class Mat2X3 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -302,7 +302,7 @@ std::string Mat2X3::String(MatchState& state) const {
 class Mat2X4 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -335,7 +335,7 @@ std::string Mat2X4::String(MatchState& state) const {
 class Mat3X2 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -368,7 +368,7 @@ std::string Mat3X2::String(MatchState& state) const {
 class Mat3X3 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -401,7 +401,7 @@ std::string Mat3X3::String(MatchState& state) const {
 class Mat3X4 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -434,7 +434,7 @@ std::string Mat3X4::String(MatchState& state) const {
 class Mat4X2 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -467,7 +467,7 @@ std::string Mat4X2::String(MatchState& state) const {
 class Mat4X3 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -500,7 +500,7 @@ std::string Mat4X3::String(MatchState& state) const {
 class Mat4X4 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -533,7 +533,7 @@ std::string Mat4X4::String(MatchState& state) const {
 class Vec : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -574,7 +574,7 @@ std::string Vec::String(MatchState& state) const {
 class Mat : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -621,7 +621,7 @@ std::string Mat::String(MatchState& state) const {
 class Ptr : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -666,7 +666,7 @@ std::string Ptr::String(MatchState& state) const {
 class Atomic : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -699,7 +699,7 @@ std::string Atomic::String(MatchState& state) const {
 class Array : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -732,7 +732,7 @@ std::string Array::String(MatchState& state) const {
 class Sampler : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -759,7 +759,7 @@ std::string Sampler::String(MatchState&) const {
 class SamplerComparison : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -786,7 +786,7 @@ std::string SamplerComparison::String(MatchState&) const {
 class Texture1D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -819,7 +819,7 @@ std::string Texture1D::String(MatchState& state) const {
 class Texture2D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -852,7 +852,7 @@ std::string Texture2D::String(MatchState& state) const {
 class Texture2DArray : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -885,7 +885,7 @@ std::string Texture2DArray::String(MatchState& state) const {
 class Texture3D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -918,7 +918,7 @@ std::string Texture3D::String(MatchState& state) const {
 class TextureCube : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -951,7 +951,7 @@ std::string TextureCube::String(MatchState& state) const {
 class TextureCubeArray : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -984,7 +984,7 @@ std::string TextureCubeArray::String(MatchState& state) const {
 class TextureMultisampled2D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1017,7 +1017,7 @@ std::string TextureMultisampled2D::String(MatchState& state) const {
 class TextureDepth2D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1044,7 +1044,7 @@ std::string TextureDepth2D::String(MatchState&) const {
 class TextureDepth2DArray : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1071,7 +1071,7 @@ std::string TextureDepth2DArray::String(MatchState&) const {
 class TextureDepthCube : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1098,7 +1098,7 @@ std::string TextureDepthCube::String(MatchState&) const {
 class TextureDepthCubeArray : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1125,7 +1125,7 @@ std::string TextureDepthCubeArray::String(MatchState&) const {
 class TextureDepthMultisampled2D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1152,7 +1152,7 @@ std::string TextureDepthMultisampled2D::String(MatchState&) const {
 class TextureStorage1D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1191,7 +1191,7 @@ std::string TextureStorage1D::String(MatchState& state) const {
 class TextureStorage2D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1230,7 +1230,7 @@ std::string TextureStorage2D::String(MatchState& state) const {
 class TextureStorage2DArray : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1269,7 +1269,7 @@ std::string TextureStorage2DArray::String(MatchState& state) const {
 class TextureStorage3D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1308,7 +1308,7 @@ std::string TextureStorage3D::String(MatchState& state) const {
 class TextureExternal : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1335,7 +1335,7 @@ std::string TextureExternal::String(MatchState&) const {
 class ModfResult : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1362,7 +1362,7 @@ std::string ModfResult::String(MatchState&) const {
 class ModfResultVec : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1397,7 +1397,7 @@ std::string ModfResultVec::String(MatchState& state) const {
 class FrexpResult : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1424,7 +1424,7 @@ std::string FrexpResult::String(MatchState&) const {
 class FrexpResultVec : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1460,7 +1460,7 @@ class Fiu32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
   /// expected, canonicalized type on success.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1494,7 +1494,7 @@ class Fi32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
   /// expected, canonicalized type on success.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1525,7 +1525,7 @@ class Iu32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
   /// expected, canonicalized type on success.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1556,7 +1556,7 @@ class Scalar : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
   /// expected, canonicalized type on success.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1593,7 +1593,7 @@ class ScalarNoF32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
   /// expected, canonicalized type on success.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1627,7 +1627,7 @@ class ScalarNoI32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
   /// expected, canonicalized type on success.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1661,7 +1661,7 @@ class ScalarNoU32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
   /// expected, canonicalized type on success.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1695,7 +1695,7 @@ class ScalarNoBool : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
   /// expected, canonicalized type on success.
-  /// Match may define template types and numbers in state.
+  /// Match may define and refine the template types and numbers in state.
   /// @param state the MatchState
   /// @param type the type to match
   /// @returns the canonicalized type on match, otherwise nullptr
@@ -1728,7 +1728,7 @@ std::string ScalarNoBool::String(MatchState&) const {
 class F32TexelFormat : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define template numbers in state.
   /// @param state the MatchState
   /// @param number the enum value as a Number
   /// @return true if the enum value matches the set
@@ -1761,7 +1761,7 @@ std::string F32TexelFormat::String(MatchState&) const {
 class I32TexelFormat : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define template numbers in state.
   /// @param state the MatchState
   /// @param number the enum value as a Number
   /// @return true if the enum value matches the set
@@ -1793,7 +1793,7 @@ std::string I32TexelFormat::String(MatchState&) const {
 class U32TexelFormat : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define template numbers in state.
   /// @param state the MatchState
   /// @param number the enum value as a Number
   /// @return true if the enum value matches the set
@@ -1825,7 +1825,7 @@ std::string U32TexelFormat::String(MatchState&) const {
 class WriteOnly : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define template numbers in state.
   /// @param state the MatchState
   /// @param number the enum value as a Number
   /// @return true if the enum value matches the set
@@ -1851,7 +1851,7 @@ std::string WriteOnly::String(MatchState&) const {
 class FunctionPrivateWorkgroup : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define template numbers in state.
   /// @param state the MatchState
   /// @param number the enum value as a Number
   /// @return true if the enum value matches the set
@@ -1881,7 +1881,7 @@ std::string FunctionPrivateWorkgroup::String(MatchState&) const {
 class WorkgroupOrStorage : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define template numbers in state.
   /// @param state the MatchState
   /// @param number the enum value as a Number
   /// @return true if the enum value matches the set
@@ -1909,7 +1909,7 @@ std::string WorkgroupOrStorage::String(MatchState&) const {
 class Storage : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define template numbers in state.
   /// @param state the MatchState
   /// @param number the enum value as a Number
   /// @return true if the enum value matches the set
@@ -1934,7 +1934,7 @@ std::string Storage::String(MatchState&) const {
 class Write : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define template numbers in state.
   /// @param state the MatchState
   /// @param number the enum value as a Number
   /// @return true if the enum value matches the set
@@ -1959,7 +1959,7 @@ std::string Write::String(MatchState&) const {
 class ReadWrite : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
-  /// Match may define template types and numbers in state.
+  /// Match may define template numbers in state.
   /// @param state the MatchState
   /// @param number the enum value as a Number
   /// @return true if the enum value matches the set

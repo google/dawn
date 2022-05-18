@@ -199,14 +199,30 @@ match workgroup_or_storage: workgroup | storage
 //    the same argument type.                                                 //
 //                                                                            //
 //                                                                            //
-// Matching algorithm:                                                        //
-// -------------------                                                        //
+// Matching algorithm for a single overload:                                  //
+// -----------------------------------------                                  //
+//                                                                            //
+// The goal of matching is to compare a function call's arguments in the      //
+// program source against a possibly-templated overload declaration, and      //
+// determine if the call satisfies the form and type constraints of the       //
+// overload. Currently it is impossible for a call to match more than one     //
+// overload definition. In the event that more than one overload matches, an  //
+// ICE will be raised. Note that Tint may need to support multiple-overload   //
+// resolution in the future, depending on future overload definitions.        //
 //                                                                            //
 // Prior to matching an overload, all template types are undefined.           //
 //                                                                            //
-// Template types become defined on the first attempt to match an argument to //
-// that template type. Once template types are defined, they remain that type //
-// for the rest of the overload evaluation.                                   //
+// Template types are first defined with the type of the leftmost argument    //
+// that matches against that template type name. Subsequent arguments that    //
+// attempt to match against the template type name will either reject the     //
+// overload or refine the template, in one of 3 ways:                         //
+// (a) Fail to match, causing the overload to be immediately rejected.        //
+// (b) Match the existing template type, either exactly or via implicit       //
+//     conversion, and overload resolution continues.                         //
+// (c) Match via implicit conversion of the currently defined template type   //
+//     to the argument type. In this situation, the template type is refined  //
+//     with the more constrained argument type, and overload resolution       //
+//     continues.                                                             //
 //                                                                            //
 // To better understand, let's consider the following hypothetical overload   //
 // declaration:                                                               //
@@ -228,17 +244,24 @@ match workgroup_or_storage: workgroup | storage
 //       type of the first argument.                                          //
 //       There's no verification that the T type is a scalar at this stage.   //
 //   (2) The second parameter is then compared against the second argument.   //
-//       As the template type T is now defined  the argument type is compared //
-//       against the value of the defined type of T. If the types match, then //
-//       the overload is still a candidate for matching, otherwise the        //
-//       overload is no longer considered.                                    //
+//       As the template type T is now defined the argument type is compared  //
+//       against the value of the defined type of T. Depending on the         //
+//       comparison of the argument type to the template type, either the     //
+//       actions of (a), (b) or (c) from above will occur.                    //
 //   (3) If all the parameters matched, constraints on the template types     //
 //       need to be checked next. If the defined type does not match the      //
 //       'match' constraint, then the overload is no longer considered.       //
 //                                                                            //
-// The algorithm for matching template numbers is almost identical to         //
-// matching template types, except of course, they match against integer      //
-// numbers or enumerators instead of types.                                   //
+// This algorithm is less general than the overload resolution described in   //
+// the WGSL spec.  But it makes the same decisions because the overloads      //
+// defined by WGSL are monotonic in the sense that once a template parameter  //
+// has been refined, there is never a need to backtrack and un-refine it to   //
+// match a later argument.                                                    //
+//                                                                            //
+// The algorithm for matching template numbers is similar to matching         //
+// template types, except numbers need to exactly match across all uses -     //
+// there is no implicit conversion. Template numbers may match integer        //
+// numbers or enumerators.                                                    //
 //                                                                            //
 //                                                                            //
 // * More examples:                                                           //
