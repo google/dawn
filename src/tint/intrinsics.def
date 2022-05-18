@@ -62,13 +62,18 @@ enum texel_format {
 
 ////////////////////////////////////////////////////////////////////////////////
 // WGSL primitive types                                                       //
+// Types may be decorated with [[precedence(N)]] to prioritize which type     //
+// will be picked when multiple types of a matcher match.                     //
+// This is used to ensure that abstract numerical types materialize to the    //
+// concrete type with the lowest conversion rank.                             //
+// Types with higher the precedence values will be matched first.             //
 ////////////////////////////////////////////////////////////////////////////////
 
 // https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
 type bool
-type f32
-type i32
-type u32
+[[precedence(2)]] type i32
+[[precedence(1)]] type u32
+[[precedence(0)]] type f32
 type vec2<T>
 type vec3<T>
 type vec4<T>

@@ -142,7 +142,7 @@ func (p *parser) decorations() ast.Decorations {
 		values := []string{}
 		if p.match(tok.Lparen) != nil {
 			for p.err == nil {
-				values = append(values, p.string())
+				values = append(values, string(p.next().Runes))
 				if p.match(tok.Comma) == nil {
 					break
 				}

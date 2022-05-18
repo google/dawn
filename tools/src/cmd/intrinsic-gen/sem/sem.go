@@ -16,6 +16,7 @@ package sem
 
 import (
 	"fmt"
+	"sort"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/ast"
 )
@@ -89,6 +90,7 @@ type Type struct {
 	Decl           ast.TypeDecl
 	Name           string
 	DisplayName    string
+	Precedence     int
 }
 
 // TypeMatcher declares a type matcher
@@ -97,6 +99,13 @@ type TypeMatcher struct {
 	Decl           ast.MatcherDecl
 	Name           string
 	Types          []*Type
+}
+
+func (t TypeMatcher) PrecedenceSortedTypes() []*Type {
+	out := make([]*Type, len(t.Types))
+	copy(out, t.Types)
+	sort.Slice(out, func(i, j int) bool { return out[i].Precedence > out[j].Precedence })
+	return out
 }
 
 // EnumMatcher declares a enum matcher

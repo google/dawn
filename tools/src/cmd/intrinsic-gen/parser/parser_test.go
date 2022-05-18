@@ -102,6 +102,16 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
+			`[[deco(1, "x")]] type T`, ast.AST{
+				Types: []ast.TypeDecl{{
+					Decorations: ast.Decorations{
+						{Name: "deco", Values: []string{"1", "x"}},
+					},
+					Name: "T",
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
 			"match M : A",
 			ast.AST{
 				Matchers: []ast.MatcherDecl{{

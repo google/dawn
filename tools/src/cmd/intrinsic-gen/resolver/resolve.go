@@ -17,6 +17,7 @@ package resolver
 import (
 	"fmt"
 	"sort"
+	"strconv"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/ast"
 	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/sem"
@@ -179,6 +180,17 @@ func (r *resolver) ty(a ast.TypeDecl) error {
 		}
 		t.DisplayName = d.Values[0]
 	}
+	if d := a.Decorations.Take("precedence"); d != nil {
+		if len(d.Values) != 1 {
+			return fmt.Errorf("%v expected a single integer value for 'precedence' decoration", d.Source)
+		}
+		n, err := strconv.Atoi(d.Values[0])
+		if err != nil {
+			return fmt.Errorf("%v %v", d.Source, err)
+		}
+		t.Precedence = n
+	}
+
 	if len(a.Decorations) != 0 {
 		return fmt.Errorf("%v unknown decoration", a.Decorations[0].Source)
 	}
