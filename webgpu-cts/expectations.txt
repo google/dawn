@@ -100,12 +100,8 @@ crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:unin
 crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth32float-stencil8" [ Failure ]
 crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
 crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth16unorm" [ Failure ]
-crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth32float-stencil8" [ Failure ]
 crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
 crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth16unorm" [ Failure ]
-crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="depth24plus-stencil8" [ Failure ]
-crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="depth24unorm-stencil8" [ Failure ]
-crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="depth32float-stencil8" [ Failure ]
 crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="stencil8" [ Failure ]
 
 ################################################################################
@@ -116,12 +112,7 @@ crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:unin
 crbug.com/dawn/0000 [ intel win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth16unorm" [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth32float-stencil8" [ Failure ]
 crbug.com/dawn/0000 [ intel win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
-crbug.com/dawn/0000 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth24plus-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth24unorm-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth32float-stencil8" [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";* [ Failure ]
 
 ################################################################################
@@ -201,7 +192,6 @@ crbug.com/dawn/0000 [ win ] webgpu:api,operation,command_buffer,copyTextureToTex
 crbug.com/dawn/0000 [ mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth32float-stencil8" [ Failure ]
 crbug.com/dawn/0000 [ mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="stencil8" [ Failure ]
 crbug.com/dawn/0000 [ mac ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="stencil8";* [ Failure ]
-crbug.com/dawn/0000 [ mac ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="depth32float-stencil8";copyMethod="CopyT2B";aspect="depth-only" [ Failure ]
 crbug.com/dawn/0000 [ mac ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="stencil8";* [ Failure ]
 crbug.com/dawn/0000 [ mac ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,depth_stencil_attachment_only:depthStencilFormat="stencil8";* [ Failure ]
 
@@ -302,12 +292,6 @@ crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="0x3f" [ Fail
 crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="123" [ Failure ]
 crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="2147483647" [ Failure ]
 crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="4294967295" [ Failure ]
-
-################################################################################
-# crbug.com/dawn/1325 render pass/bundle and render pipeline depth/stencil read only and write states validation
-# KEEP
-################################################################################
-crbug.com/dawn/1325 webgpu:api,validation,attachment_compatibility:render_pass_or_bundle_and_pipeline,depth_stencil_read_only_write_state:* [ Failure ]
 
 ################################################################################
 # createView failures
