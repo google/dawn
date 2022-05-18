@@ -265,10 +265,14 @@ crbug.com/dawn/1357 webgpu:api,operation,shader_module,compilation_info:offset_a
 crbug.com/dawn/0000 webgpu:api,validation,buffer,create:createBuffer_invalid_and_oom: [ Failure ]
 
 ################################################################################
-# shader execution failures
-# KEEP
+# atan2 shader execution failures
+# Very slow, many failing. Skip for now.
 ################################################################################
 crbug.com/tint/1524 [ win ] webgpu:shader,execution,expression,call,builtin,atan2:* [ Skip ]
+
+################################################################################
+# shader execution failures
+################################################################################
 crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,call,builtin,countTrailingZeros:* [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,call,builtin,extractBits:* [ Failure ]
 crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,call,builtin,firstTrailingBit:* [ Failure ]
@@ -298,15 +302,6 @@ crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="0x3f" [ Fail
 crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="123" [ Failure ]
 crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="2147483647" [ Failure ]
 crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="4294967295" [ Failure ]
-crbug.com/dawn/1546 [ monterey ] webgpu:shader,execution,expression,call,builtin,ceil:* [ Failure ]
-crbug.com/dawn/1546 [ ubuntu ] webgpu:shader,execution,expression,call,builtin,ceil:* [ Failure ]
-crbug.com/dawn/1546 [ win10 ] webgpu:shader,execution,expression,call,builtin,ceil:* [ Failure ]
-crbug.com/dawn/1546 [ monterey ] webgpu:shader,execution,expression,call,builtin,floor:* [ Failure ]
-crbug.com/dawn/1546 [ ubuntu ] webgpu:shader,execution,expression,call,builtin,floor:* [ Failure ]
-crbug.com/dawn/1546 [ win10 ] webgpu:shader,execution,expression,call,builtin,floor:* [ Failure ]
-crbug.com/dawn/1546 [ monterey ] webgpu:shader,execution,expression,call,builtin,fract:* [ Failure ]
-crbug.com/dawn/1546 [ ubuntu ] webgpu:shader,execution,expression,call,builtin,fract:* [ Failure ]
-crbug.com/dawn/1546 [ win10 ] webgpu:shader,execution,expression,call,builtin,fract:* [ Failure ]
 
 ################################################################################
 # crbug.com/dawn/1325 render pass/bundle and render pipeline depth/stencil read only and write states validation
