@@ -101,15 +101,16 @@ bool Resolver::Resolve() {
         return false;
     }
 
-    // Create the semantic module
-    builder_->Sem().SetModule(builder_->create<sem::Module>(dependencies_.ordered_globals));
-
     bool result = ResolveInternal();
 
     if (!result && !diagnostics_.contains_errors()) {
         TINT_ICE(Resolver, diagnostics_) << "resolving failed, but no error was raised";
         return false;
     }
+
+    // Create the semantic module
+    builder_->Sem().SetModule(builder_->create<sem::Module>(
+        std::move(dependencies_.ordered_globals), std::move(enabled_extensions_)));
 
     return result;
 }
@@ -120,19 +121,16 @@ bool Resolver::ResolveInternal() {
     // Process all module-scope declarations in dependency order.
     for (auto* decl : dependencies_.ordered_globals) {
         Mark(decl);
-        // Enable directives don't have sem node.
-        if (decl->Is<ast::Enable>()) {
-            continue;
-        }
-        if (!Switch(
+        if (!Switch<bool>(
                 decl,  //
+                [&](const ast::Enable* e) { return Enable(e); },
                 [&](const ast::TypeDecl* td) { return TypeDecl(td); },
                 [&](const ast::Function* func) { return Function(func); },
                 [&](const ast::Variable* var) { return GlobalVariable(var); },
                 [&](Default) {
                     TINT_UNREACHABLE(Resolver, diagnostics_)
                         << "unhandled global declaration: " << decl->TypeInfo().name;
-                    return nullptr;
+                    return false;
                 })) {
             return false;
         }
@@ -146,8 +144,10 @@ bool Resolver::ResolveInternal() {
         return false;
     }
 
-    if (!AnalyzeUniformity(builder_, dependencies_)) {
-        // TODO(jrprice): Reject programs that fail uniformity analysis.
+    if (!enabled_extensions_.contains(ast::Extension::kChromiumDisableUniformityAnalysis)) {
+        if (!AnalyzeUniformity(builder_, dependencies_)) {
+            // TODO(jrprice): Reject programs that fail uniformity analysis.
+        }
     }
 
     bool result = true;
@@ -174,7 +174,7 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
         [&](const ast::U32*) { return builder_->create<sem::U32>(); },
         [&](const ast::F16* t) -> sem::F16* {
             // Validate if f16 type is allowed.
-            if (builder_->AST().Extensions().count(ast::Enable::ExtensionKind::kF16) == 0) {
+            if (!enabled_extensions_.contains(ast::Extension::kF16)) {
                 AddError("f16 used without 'f16' extension enabled", t->source);
                 return nullptr;
             }
@@ -1358,7 +1358,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
 
     current_function_->AddDirectlyCalledBuiltin(builtin);
 
-    if (!validator_.RequiredExtensionForBuiltinFunction(call, builder_->AST().Extensions())) {
+    if (!validator_.RequiredExtensionForBuiltinFunction(call, enabled_extensions_)) {
         return nullptr;
     }
 
@@ -1748,6 +1748,11 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
                                                   expr->HasSideEffects(), source_var);
     sem->Behaviors() = expr->Behaviors();
     return sem;
+}
+
+bool Resolver::Enable(const ast::Enable* enable) {
+    enabled_extensions_.add(enable->extension);
+    return true;
 }
 
 sem::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {

@@ -727,10 +727,7 @@ void main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Builtin, Dot4I8Packed) {
-    auto* ext =
-        create<ast::Enable>(Source{Source::Range{Source::Location{10, 2}, Source::Location{10, 5}}},
-                            "chromium_experimental_dp4a");
-    AST().AddEnable(ext);
+    Enable(ast::Extension::kChromiumExperimentalDP4a);
 
     auto* val1 = Var("val1", ty.u32());
     auto* val2 = Var("val2", ty.u32());
@@ -756,10 +753,7 @@ void test_function() {
 }
 
 TEST_F(HlslGeneratorImplTest_Builtin, Dot4U8Packed) {
-    auto* ext =
-        create<ast::Enable>(Source{Source::Range{Source::Location{10, 2}, Source::Location{10, 5}}},
-                            "chromium_experimental_dp4a");
-    AST().AddEnable(ext);
+    Enable(ast::Extension::kChromiumExperimentalDP4a);
 
     auto* val1 = Var("val1", ty.u32());
     auto* val2 = Var("val2", ty.u32());

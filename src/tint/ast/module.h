@@ -78,7 +78,7 @@ class Module final : public Castable<Module, Node> {
     VariableList& GlobalVariables() { return global_variables_; }
 
     /// @returns the extension set for the module
-    const ExtensionSet& Extensions() const { return extensions_; }
+    const EnableList& Enables() const { return enables_; }
 
     /// Adds a type declaration to the Builder.
     /// @param decl the type declaration to add
@@ -120,7 +120,7 @@ class Module final : public Castable<Module, Node> {
     std::vector<const TypeDecl*> type_decls_;
     FunctionList functions_;
     VariableList global_variables_;
-    ExtensionSet extensions_;
+    EnableList enables_;
 };
 
 }  // namespace tint::ast

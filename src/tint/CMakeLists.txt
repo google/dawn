@@ -114,6 +114,8 @@ set(TINT_LIB_SRCS
   ast/enable.h
   ast/expression.cc
   ast/expression.h
+  ast/extension.cc
+  ast/extension.h
   ast/external_texture.cc
   ast/external_texture.h
   ast/f16.cc
@@ -691,6 +693,7 @@ if(TINT_BUILD_TESTS)
     ast/depth_texture_test.cc
     ast/discard_statement_test.cc
     ast/enable_test.cc
+    ast/extension_test.cc
     ast/external_texture_test.cc
     ast/f16_test.cc
     ast/f32_test.cc

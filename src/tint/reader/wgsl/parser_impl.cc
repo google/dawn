@@ -366,13 +366,11 @@ Maybe<bool> ParserImpl::enable_directive() {
             return Failure::kErrored;
         }
 
-        if (ast::Enable::NameToKind(name.value) != ast::Enable::ExtensionKind::kNoExtension) {
-            const ast::Enable* extension = create<ast::Enable>(name.source, name.value);
-            builder_.AST().AddEnable(extension);
-        } else {
-            // Error if an unknown extension is used
+        auto extension = ast::ParseExtension(name.value);
+        if (extension == ast::Extension::kNone) {
             return add_error(name.source, "unsupported extension: '" + name.value + "'");
         }
+        builder_.AST().AddEnable(create<ast::Enable>(name.source, extension));
 
         return true;
     });

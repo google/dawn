@@ -1548,11 +1548,6 @@ class UniformityGraph {
 }  // namespace
 
 bool AnalyzeUniformity(ProgramBuilder* builder, const DependencyGraph& dependency_graph) {
-    if (builder->AST().Extensions().count(
-            ast::Enable::ExtensionKind::kChromiumDisableUniformityAnalysis)) {
-        return true;
-    }
-
     UniformityGraph graph(builder);
     return graph.Build(dependency_graph);
 }

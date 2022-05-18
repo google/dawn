@@ -16,63 +16,26 @@
 #define SRC_TINT_AST_ENABLE_H_
 
 #include <string>
-#include <unordered_set>
 #include <utility>
+#include <vector>
 
-#include "src/tint/ast/access.h"
-#include "src/tint/ast/expression.h"
+#include "src/tint/ast/extension.h"
+#include "src/tint/ast/node.h"
 
 namespace tint::ast {
 
-/// An instance of this class represents one extension mentioned in a
-/// "enable" derictive. Example:
-///       // Enable an extension named "f16"
-///       enable f16;
-class Enable : public Castable<Enable, Node> {
+/// An "enable" directive. Example:
+/// ```
+///   // Enable an extension named "f16"
+///   enable f16;
+/// ```
+class Enable final : public Castable<Enable, Node> {
   public:
-    ///  The enum class identifing each supported WGSL extension
-    enum class ExtensionKind {
-        /// An internal reserved extension for test, named
-        /// "InternalExtensionForTesting".
-        kInternalExtensionForTesting,
-        /// WGSL Extension "f16"
-        kF16,
-
-        /// An extension for the experimental feature
-        /// "chromium_experimental_dp4a".
-        /// See crbug.com/tint/1497 for more details
-        kChromiumExperimentalDP4a,
-        /// A Chromium-specific extension for disabling uniformity analysis.
-        kChromiumDisableUniformityAnalysis,
-
-        /// Reserved for representing "No extension required" or "Not a valid extension".
-        kNoExtension,
-    };
-
-    /// Convert a string of extension name into one of ExtensionKind enum value,
-    /// the result will be ExtensionKind::kNoExtension if the name is not a
-    /// known extension name. A extension node of kind kNoExtension must not
-    /// exist in the AST tree, and using a unknown extension name in WGSL code
-    /// should result in a shader-creation error.
-    /// @param name string of the extension name
-    /// @return the ExtensionKind enum value for the extension of given name, or
-    /// kNoExtension if no known extension has the given name
-    static ExtensionKind NameToKind(const std::string& name);
-
-    /// Convert the ExtensionKind enum value to corresponding extension name
-    /// string. If the given enum value is kNoExtension or don't have a known
-    /// name, return an empty string instead.
-    /// @param kind the ExtensionKind enum value
-    /// @return string of the extension name corresponding to the given kind, or
-    /// an empty string if the given enum value is kNoExtension or don't have a
-    /// known corresponding name
-    static std::string KindToName(ExtensionKind kind);
-
     /// Create a extension
     /// @param pid the identifier of the program that owns this node
     /// @param src the source of this node
-    /// @param name the name of extension
-    Enable(ProgramID pid, const Source& src, const std::string& name);
+    /// @param ext the extension
+    Enable(ProgramID pid, const Source& src, Extension ext);
     /// Move constructor
     Enable(Enable&&);
 
@@ -85,14 +48,11 @@ class Enable : public Castable<Enable, Node> {
     const Enable* Clone(CloneContext* ctx) const override;
 
     /// The extension name
-    const std::string name;
-
-    /// The extension kind
-    const ExtensionKind kind;
+    const Extension extension;
 };
 
-///  A set of extension kinds
-using ExtensionSet = std::unordered_set<Enable::ExtensionKind>;
+/// A list of enables
+using EnableList = std::vector<const Enable*>;
 
 }  // namespace tint::ast
 

@@ -228,6 +228,10 @@ class Resolver {
     /// @param ty the ast::Type
     sem::Type* Type(const ast::Type* ty);
 
+    /// @param enable the enable declaration
+    /// @returns the resolved extension
+    bool Enable(const ast::Enable* enable);
+
     /// @param named_type the named type to resolve
     /// @returns the resolved semantic type
     sem::Type* TypeDecl(const ast::TypeDecl* named_type);
@@ -351,6 +355,7 @@ class Resolver {
     DependencyGraph dependencies_;
     SemHelper sem_;
     Validator validator_;
+    ast::Extensions enabled_extensions_;
     std::vector<sem::Function*> entry_points_;
     std::unordered_map<const sem::Type*, const Source&> atomic_composite_info_;
     std::unordered_set<const ast::Node*> marked_;

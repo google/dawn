@@ -665,8 +665,8 @@ TEST_F(ResolverTypeValidationTest, BuiltinAsType) {
 TEST_F(ResolverTypeValidationTest, F16TypeUsedWithExtension) {
     // enable f16;
     // var<private> v : f16;
-    auto* ext = create<ast::Enable>("f16");
-    AST().AddEnable(ext);
+    Enable(ast::Extension::kF16);
+
     Global("v", ty.f16(), ast::StorageClass::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

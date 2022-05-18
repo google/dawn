@@ -226,6 +226,8 @@ libtint_source_set("libtint_core_all_src") {
     "ast/enable.h",
     "ast/expression.cc",
     "ast/expression.h",
+    "ast/extension.cc",
+    "ast/extension.h",
     "ast/external_texture.cc",
     "ast/external_texture.h",
     "ast/f16.cc",

@@ -23,41 +23,36 @@ using EnableDirectiveTest = ParserImplTest;
 
 // Test a valid enable directive.
 TEST_F(EnableDirectiveTest, Valid) {
-    auto p = parser("enable InternalExtensionForTesting;");
+    auto p = parser("enable f16;");
     p->enable_directive();
     EXPECT_FALSE(p->has_error()) << p->error();
     auto program = p->program();
     auto& ast = program.AST();
-    EXPECT_EQ(ast.Extensions(),
-              ast::ExtensionSet{ast::Enable::ExtensionKind::kInternalExtensionForTesting});
-    EXPECT_EQ(ast.GlobalDeclarations().size(), 1u);
-    auto* node = ast.GlobalDeclarations()[0]->As<ast::Enable>();
-    EXPECT_TRUE(node != nullptr);
-    EXPECT_EQ(node->name, "InternalExtensionForTesting");
-    EXPECT_EQ(node->kind, ast::Enable::ExtensionKind::kInternalExtensionForTesting);
+    ASSERT_EQ(ast.Enables().size(), 1u);
+    auto* enable = ast.Enables()[0];
+    EXPECT_EQ(enable->extension, ast::Extension::kF16);
+    ASSERT_EQ(ast.GlobalDeclarations().size(), 1u);
+    EXPECT_EQ(ast.GlobalDeclarations()[0], enable);
 }
 
 // Test multiple enable directives for a same extension.
 TEST_F(EnableDirectiveTest, EnableMultipleTime) {
     auto p = parser(R"(
-enable InternalExtensionForTesting;
-enable InternalExtensionForTesting;
+enable f16;
+enable f16;
 )");
     p->translation_unit();
     EXPECT_FALSE(p->has_error()) << p->error();
     auto program = p->program();
     auto& ast = program.AST();
-    EXPECT_EQ(ast.Extensions(),
-              ast::ExtensionSet{ast::Enable::ExtensionKind::kInternalExtensionForTesting});
-    EXPECT_EQ(ast.GlobalDeclarations().size(), 2u);
-    auto* node1 = ast.GlobalDeclarations()[0]->As<ast::Enable>();
-    EXPECT_TRUE(node1 != nullptr);
-    EXPECT_EQ(node1->name, "InternalExtensionForTesting");
-    EXPECT_EQ(node1->kind, ast::Enable::ExtensionKind::kInternalExtensionForTesting);
-    auto* node2 = ast.GlobalDeclarations()[1]->As<ast::Enable>();
-    EXPECT_TRUE(node2 != nullptr);
-    EXPECT_EQ(node2->name, "InternalExtensionForTesting");
-    EXPECT_EQ(node2->kind, ast::Enable::ExtensionKind::kInternalExtensionForTesting);
+    ASSERT_EQ(ast.Enables().size(), 2u);
+    auto* enable_a = ast.Enables()[0];
+    auto* enable_b = ast.Enables()[1];
+    EXPECT_EQ(enable_a->extension, ast::Extension::kF16);
+    EXPECT_EQ(enable_b->extension, ast::Extension::kF16);
+    ASSERT_EQ(ast.GlobalDeclarations().size(), 2u);
+    EXPECT_EQ(ast.GlobalDeclarations()[0], enable_a);
+    EXPECT_EQ(ast.GlobalDeclarations()[1], enable_b);
 }
 
 // Test an unknown extension identifier.
@@ -69,42 +64,42 @@ TEST_F(EnableDirectiveTest, InvalidIdentifier) {
     EXPECT_EQ(p->error(), "1:8: unsupported extension: 'NotAValidExtensionName'");
     auto program = p->program();
     auto& ast = program.AST();
-    EXPECT_EQ(ast.Extensions().size(), 0u);
+    EXPECT_EQ(ast.Enables().size(), 0u);
     EXPECT_EQ(ast.GlobalDeclarations().size(), 0u);
 }
 
-// Test an enable directive missing ending semiclon.
-TEST_F(EnableDirectiveTest, MissingEndingSemiclon) {
-    auto p = parser("enable InternalExtensionForTesting");
+// Test an enable directive missing ending semicolon.
+TEST_F(EnableDirectiveTest, MissingEndingSemicolon) {
+    auto p = parser("enable f16");
     p->translation_unit();
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:35: expected ';' for enable directive");
+    EXPECT_EQ(p->error(), "1:11: expected ';' for enable directive");
     auto program = p->program();
     auto& ast = program.AST();
-    EXPECT_EQ(ast.Extensions().size(), 0u);
+    EXPECT_EQ(ast.Enables().size(), 0u);
     EXPECT_EQ(ast.GlobalDeclarations().size(), 0u);
 }
 
 // Test using invalid tokens in an enable directive.
 TEST_F(EnableDirectiveTest, InvalidTokens) {
     {
-        auto p = parser("enable InternalExtensionForTesting<;");
+        auto p = parser("enable f16<;");
         p->translation_unit();
         EXPECT_TRUE(p->has_error());
-        EXPECT_EQ(p->error(), "1:35: expected ';' for enable directive");
+        EXPECT_EQ(p->error(), "1:11: expected ';' for enable directive");
         auto program = p->program();
         auto& ast = program.AST();
-        EXPECT_EQ(ast.Extensions().size(), 0u);
+        EXPECT_EQ(ast.Enables().size(), 0u);
         EXPECT_EQ(ast.GlobalDeclarations().size(), 0u);
     }
     {
-        auto p = parser("enable <InternalExtensionForTesting;");
+        auto p = parser("enable <f16;");
         p->translation_unit();
         EXPECT_TRUE(p->has_error());
         EXPECT_EQ(p->error(), "1:8: invalid extension name");
         auto program = p->program();
         auto& ast = program.AST();
-        EXPECT_EQ(ast.Extensions().size(), 0u);
+        EXPECT_EQ(ast.Enables().size(), 0u);
         EXPECT_EQ(ast.GlobalDeclarations().size(), 0u);
     }
     {
@@ -114,7 +109,7 @@ TEST_F(EnableDirectiveTest, InvalidTokens) {
         EXPECT_EQ(p->error(), "1:8: invalid extension name");
         auto program = p->program();
         auto& ast = program.AST();
-        EXPECT_EQ(ast.Extensions().size(), 0u);
+        EXPECT_EQ(ast.Enables().size(), 0u);
         EXPECT_EQ(ast.GlobalDeclarations().size(), 0u);
     }
     {
@@ -124,7 +119,7 @@ TEST_F(EnableDirectiveTest, InvalidTokens) {
         EXPECT_EQ(p->error(), "1:8: invalid extension name");
         auto program = p->program();
         auto& ast = program.AST();
-        EXPECT_EQ(ast.Extensions().size(), 0u);
+        EXPECT_EQ(ast.Enables().size(), 0u);
         EXPECT_EQ(ast.GlobalDeclarations().size(), 0u);
     }
 }
@@ -133,35 +128,39 @@ TEST_F(EnableDirectiveTest, InvalidTokens) {
 TEST_F(EnableDirectiveTest, FollowingOtherGlobalDecl) {
     auto p = parser(R"(
 var<private> t: f32 = 0f;
-enable InternalExtensionForTesting;
+enable f16;
 )");
     p->translation_unit();
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), "3:1: enable directives must come before all global declarations");
     auto program = p->program();
     auto& ast = program.AST();
-    // Accept the enable directive although it cause an error
-    EXPECT_EQ(ast.Extensions(),
-              ast::ExtensionSet{ast::Enable::ExtensionKind::kInternalExtensionForTesting});
-    EXPECT_EQ(ast.GlobalDeclarations().size(), 2u);
+    // Accept the enable directive although it caused an error
+    ASSERT_EQ(ast.Enables().size(), 1u);
+    auto* enable = ast.Enables()[0];
+    EXPECT_EQ(enable->extension, ast::Extension::kF16);
+    ASSERT_EQ(ast.GlobalDeclarations().size(), 2u);
+    EXPECT_EQ(ast.GlobalDeclarations()[1], enable);
 }
 
-// Test an enable directive go after an empty semiclon.
-TEST_F(EnableDirectiveTest, FollowingEmptySemiclon) {
+// Test an enable directive go after an empty semicolon.
+TEST_F(EnableDirectiveTest, FollowingEmptySemicolon) {
     auto p = parser(R"(
 ;
-enable InternalExtensionForTesting;
+enable f16;
 )");
     p->translation_unit();
-    // An empty semiclon is treated as a global declaration
+    // An empty semicolon is treated as a global declaration
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), "3:1: enable directives must come before all global declarations");
     auto program = p->program();
     auto& ast = program.AST();
     // Accept the enable directive although it cause an error
-    EXPECT_EQ(ast.Extensions(),
-              ast::ExtensionSet{ast::Enable::ExtensionKind::kInternalExtensionForTesting});
-    EXPECT_EQ(ast.GlobalDeclarations().size(), 1u);
+    ASSERT_EQ(ast.Enables().size(), 1u);
+    auto* enable = ast.Enables()[0];
+    EXPECT_EQ(enable->extension, ast::Extension::kF16);
+    ASSERT_EQ(ast.GlobalDeclarations().size(), 1u);
+    EXPECT_EQ(ast.GlobalDeclarations()[0], enable);
 }
 
 }  // namespace

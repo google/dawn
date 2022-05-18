@@ -19,6 +19,7 @@
 
 #include "src/tint/ast/bool_literal_expression.h"
 #include "src/tint/ast/call_expression.h"
+#include "src/tint/ast/extension.h"
 #include "src/tint/ast/float_literal_expression.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/interpolate_attribute.h"
@@ -32,6 +33,7 @@
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/i32.h"
 #include "src/tint/sem/matrix.h"
+#include "src/tint/sem/module.h"
 #include "src/tint/sem/multisampled_texture.h"
 #include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/statement.h"
@@ -544,16 +546,13 @@ uint32_t Inspector::GetWorkgroupStorageSize(const std::string& entry_point) {
 }
 
 std::vector<std::string> Inspector::GetUsedExtensionNames() {
-    std::vector<std::string> result;
-
-    ast::ExtensionSet set = program_->AST().Extensions();
-    result.reserve(set.size());
-    for (auto kind : set) {
-        std::string name = ast::Enable::KindToName(kind);
-        result.push_back(name);
+    auto& extensions = program_->Sem().Module()->Extensions();
+    std::vector<std::string> out;
+    out.reserve(extensions.size());
+    for (auto ext : extensions) {
+        out.push_back(ast::str(ext));
     }
-
-    return result;
+    return out;
 }
 
 std::vector<std::pair<std::string, Source>> Inspector::GetEnableDirectives() {
@@ -563,7 +562,7 @@ std::vector<std::pair<std::string, Source>> Inspector::GetEnableDirectives() {
     auto global_decls = program_->AST().GlobalDeclarations();
     for (auto* node : global_decls) {
         if (auto* ext = node->As<ast::Enable>()) {
-            result.push_back({ext->name, ext->source});
+            result.push_back({ast::str(ext->extension), ext->source});
         }
     }
 

@@ -153,11 +153,11 @@ bool Builtin::HasSideEffects() const {
     return false;
 }
 
-ast::Enable::ExtensionKind Builtin::RequiredExtension() const {
+ast::Extension Builtin::RequiredExtension() const {
     if (IsDP4a()) {
-        return ast::Enable::ExtensionKind::kChromiumExperimentalDP4a;
+        return ast::Extension::kChromiumExperimentalDP4a;
     }
-    return ast::Enable::ExtensionKind::kNoExtension;
+    return ast::Extension::kNone;
 }
 
 }  // namespace tint::sem

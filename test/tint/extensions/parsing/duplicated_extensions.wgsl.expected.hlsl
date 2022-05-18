@@ -1,14 +1,9 @@
-void bar() {
-}
-
 struct tint_symbol {
   float4 value : SV_Target0;
 };
 
 float4 main_inner() {
-  float2 a = float2(0.0f, 0.0f);
-  bar();
-  return float4(0.400000006f, 0.400000006f, 0.800000012f, 1.0f);
+  return float4(0.100000001f, 0.200000003f, 0.300000012f, 0.400000006f);
 }
 
 tint_symbol main() {

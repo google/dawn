@@ -361,10 +361,10 @@ class Validator {
 
     /// Validates an optional builtin function and its required extension.
     /// @param call the builtin call to validate
-    /// @param extensionSet all the extensions declared in current module
+    /// @param enabled_extensions all the extensions declared in current module
     /// @returns true on success, false otherwise
     bool RequiredExtensionForBuiltinFunction(const sem::Call* call,
-                                             const ast::ExtensionSet& extensionSet) const;
+                                             const ast::Extensions& enabled_extensions) const;
 
     /// Validates there are no duplicate attributes
     /// @param attributes the list of attributes to validate

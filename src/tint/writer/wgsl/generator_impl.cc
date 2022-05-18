@@ -62,12 +62,12 @@ GeneratorImpl::~GeneratorImpl() = default;
 
 bool GeneratorImpl::Generate() {
     // Generate enable directives before any other global declarations.
-    for (auto ext : program_->AST().Extensions()) {
-        if (!EmitEnableDirective(ext)) {
+    for (auto enable : program_->AST().Enables()) {
+        if (!EmitEnable(enable)) {
             return false;
         }
     }
-    if (!program_->AST().Extensions().empty()) {
+    if (!program_->AST().Enables().empty()) {
         line();
     }
     // Generate global declarations in the order they appear in the module.
@@ -94,13 +94,9 @@ bool GeneratorImpl::Generate() {
     return true;
 }
 
-bool GeneratorImpl::EmitEnableDirective(const ast::Enable::ExtensionKind ext) {
+bool GeneratorImpl::EmitEnable(const ast::Enable* enable) {
     auto out = line();
-    auto extension = ast::Enable::KindToName(ext);
-    if (extension == "") {
-        return false;
-    }
-    out << "enable " << extension << ";";
+    out << "enable " << enable->extension << ";";
     return true;
 }
 

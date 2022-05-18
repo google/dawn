@@ -39,6 +39,7 @@
 #include "src/tint/ast/disable_validation_attribute.h"
 #include "src/tint/ast/discard_statement.h"
 #include "src/tint/ast/enable.h"
+#include "src/tint/ast/extension.h"
 #include "src/tint/ast/external_texture.h"
 #include "src/tint/ast/f16.h"
 #include "src/tint/ast/f32.h"
@@ -1305,6 +1306,15 @@ class ProgramBuilder {
     template <typename EXPR, typename... ARGS>
     const ast::CallExpression* array(const ast::Type* subtype, EXPR&& n, ARGS&&... args) {
         return Construct(ty.array(subtype, std::forward<EXPR>(n)), std::forward<ARGS>(args)...);
+    }
+
+    /// Adds the extension to the list of enable directives at the top of the module.
+    /// @param ext the extension to enable
+    /// @return an `ast::Enable` enabling the given extension.
+    const ast::Enable* Enable(ast::Extension ext) {
+        auto* enable = create<ast::Enable>(ext);
+        AST().AddEnable(enable);
+        return enable;
     }
 
     /// @param name the variable name

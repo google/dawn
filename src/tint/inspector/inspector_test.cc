@@ -2849,7 +2849,7 @@ fn main() {
 // Test calling GetUsedExtensionNames on a shader with valid extension.
 TEST_F(InspectorGetUsedExtensionNamesTest, Simple) {
     std::string shader = R"(
-enable InternalExtensionForTesting;
+enable f16;
 
 @stage(fragment)
 fn main() {
@@ -2859,15 +2859,15 @@ fn main() {
 
     auto result = inspector.GetUsedExtensionNames();
     EXPECT_EQ(result.size(), 1u);
-    EXPECT_EQ(result[0], "InternalExtensionForTesting");
+    EXPECT_EQ(result[0], "f16");
 }
 
 // Test calling GetUsedExtensionNames on a shader with a extension enabled for
 // multiple times.
 TEST_F(InspectorGetUsedExtensionNamesTest, Duplicated) {
     std::string shader = R"(
-enable InternalExtensionForTesting;
-enable InternalExtensionForTesting;
+enable f16;
+enable f16;
 
 @stage(fragment)
 fn main() {
@@ -2877,7 +2877,7 @@ fn main() {
 
     auto result = inspector.GetUsedExtensionNames();
     EXPECT_EQ(result.size(), 1u);
-    EXPECT_EQ(result[0], "InternalExtensionForTesting");
+    EXPECT_EQ(result[0], "f16");
 }
 
 // Test calling GetEnableDirectives on a empty shader.
@@ -2906,7 +2906,7 @@ fn main() {
 // Test calling GetEnableDirectives on a shader with valid extension.
 TEST_F(InspectorGetEnableDirectivesTest, Simple) {
     std::string shader = R"(
-enable InternalExtensionForTesting;
+enable f16;
 
 @stage(fragment)
 fn main() {
@@ -2916,17 +2916,17 @@ fn main() {
 
     auto result = inspector.GetEnableDirectives();
     EXPECT_EQ(result.size(), 1u);
-    EXPECT_EQ(result[0].first, "InternalExtensionForTesting");
-    EXPECT_EQ(result[0].second.range, (Source::Range{{2, 8}, {2, 35}}));
+    EXPECT_EQ(result[0].first, "f16");
+    EXPECT_EQ(result[0].second.range, (Source::Range{{2, 8}, {2, 11}}));
 }
 
 // Test calling GetEnableDirectives on a shader with a extension enabled for
 // multiple times.
 TEST_F(InspectorGetEnableDirectivesTest, Duplicated) {
     std::string shader = R"(
-enable InternalExtensionForTesting;
+enable f16;
 
-enable InternalExtensionForTesting;
+enable f16;
 @stage(fragment)
 fn main() {
 })";
@@ -2935,10 +2935,10 @@ fn main() {
 
     auto result = inspector.GetEnableDirectives();
     EXPECT_EQ(result.size(), 2u);
-    EXPECT_EQ(result[0].first, "InternalExtensionForTesting");
-    EXPECT_EQ(result[0].second.range, (Source::Range{{2, 8}, {2, 35}}));
-    EXPECT_EQ(result[1].first, "InternalExtensionForTesting");
-    EXPECT_EQ(result[1].second.range, (Source::Range{{4, 8}, {4, 35}}));
+    EXPECT_EQ(result[0].first, "f16");
+    EXPECT_EQ(result[0].second.range, (Source::Range{{2, 8}, {2, 11}}));
+    EXPECT_EQ(result[1].first, "f16");
+    EXPECT_EQ(result[1].second.range, (Source::Range{{4, 8}, {4, 11}}));
 }
 
 // Crash was occuring in ::GenerateSamplerTargets, when

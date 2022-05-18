@@ -256,7 +256,7 @@ bool Builder::Build() {
     push_memory_model(spv::Op::OpMemoryModel,
                       {U32Operand(SpvAddressingModelLogical), U32Operand(SpvMemoryModelGLSL450)});
 
-    for (auto ext : builder_.AST().Extensions()) {
+    for (auto ext : builder_.Sem().Module()->Extensions()) {
         GenerateExtension(ext);
     }
 
@@ -366,7 +366,7 @@ void Builder::push_capability(uint32_t cap) {
     }
 }
 
-bool Builder::GenerateExtension(ast::Enable::ExtensionKind) {
+bool Builder::GenerateExtension(ast::Extension) {
     /*
     For each supported extension, push corresponding capability into the builder.
     For example:

@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "src/tint/program_builder.h"
+#include "src/tint/sem/module.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::DisableUniformityAnalysis);
 
@@ -27,13 +28,12 @@ DisableUniformityAnalysis::DisableUniformityAnalysis() = default;
 DisableUniformityAnalysis::~DisableUniformityAnalysis() = default;
 
 bool DisableUniformityAnalysis::ShouldRun(const Program* program, const DataMap&) const {
-    return !program->AST().Extensions().count(
-        ast::Enable::ExtensionKind::kChromiumDisableUniformityAnalysis);
+    return !program->Sem().Module()->Extensions().contains(
+        ast::Extension::kChromiumDisableUniformityAnalysis);
 }
 
 void DisableUniformityAnalysis::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    ctx.dst->AST().AddEnable(ctx.dst->create<ast::Enable>(
-        ast::Enable::KindToName(ast::Enable::ExtensionKind::kChromiumDisableUniformityAnalysis)));
+    ctx.dst->Enable(ast::Extension::kChromiumDisableUniformityAnalysis);
     ctx.Clone();
 }
 

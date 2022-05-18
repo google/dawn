@@ -164,6 +164,7 @@ tint_unittests_source_set("tint_unittests_ast_src") {
     "../../src/tint/ast/depth_texture_test.cc",
     "../../src/tint/ast/discard_statement_test.cc",
     "../../src/tint/ast/enable_test.cc",
+    "../../src/tint/ast/extension_test.cc",
     "../../src/tint/ast/external_texture_test.cc",
     "../../src/tint/ast/f16_test.cc",
     "../../src/tint/ast/f32_test.cc",

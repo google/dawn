@@ -1,4 +1,5 @@
-// Copyright 2022 The Tint Authors.
+
+// Copyright 2021 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,22 +13,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/enable.h"
+#include "src/tint/ast/extension.h"
 
-#include "src/tint/ast/test_helper.h"
+#include "gtest/gtest.h"
 
 namespace tint::ast {
 namespace {
 
-using EnableTest = TestHelper;
+TEST(ExtensionTest, NameToKind_InvalidName) {
+    EXPECT_EQ(ParseExtension("f16"), Extension::kF16);
+    EXPECT_EQ(ParseExtension(""), Extension::kNone);
+    EXPECT_EQ(ParseExtension("__ImpossibleExtensionName"), Extension::kNone);
+    EXPECT_EQ(ParseExtension("123"), Extension::kNone);
+}
 
-TEST_F(EnableTest, Creation) {
-    auto* ext = create<ast::Enable>(Source{{{20, 2}, {20, 5}}}, Extension::kF16);
-    EXPECT_EQ(ext->source.range.begin.line, 20u);
-    EXPECT_EQ(ext->source.range.begin.column, 2u);
-    EXPECT_EQ(ext->source.range.end.line, 20u);
-    EXPECT_EQ(ext->source.range.end.column, 5u);
-    EXPECT_EQ(ext->extension, Extension::kF16);
+TEST(ExtensionTest, KindToName) {
+    EXPECT_EQ(std::string(str(Extension::kF16)), "f16");
+    EXPECT_EQ(std::string(str(Extension::kNone)), "<none>");
 }
 
 }  // namespace
