@@ -157,11 +157,13 @@ source_set("sources") {
 
   configs += [
     ":internal",
-
-    # Enable -Wglobal-constructors here only, instead of in internal_config,
-    # because gtest and some other targets don't build with it.
-    "//build/config/compiler:wglobal_constructors",
   ]
+
+  # Enable -Wglobal-constructors here only, instead of in internal_config,
+  # because gtest and some other targets don't build with it.
+  if (is_clang) {
+    cflags = [ "-Wglobal-constructors" ]
+  }
 
   # Dependencies that are needed to compile dawn native entry points in
   # FooBackend.cpp need to be public deps so they are propagated to the
