@@ -94,7 +94,7 @@ bool TraverseExpressions(const ast::Expression* root, diag::List& diags, CALLBAC
     };
 
     while (!to_visit.empty()) {
-        auto& p = to_visit.back();
+        auto p = to_visit.back();
         to_visit.pop_back();
         const ast::Expression* expr = p.expr;
 
