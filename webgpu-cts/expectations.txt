@@ -152,10 +152,10 @@ crbug.com/dawn/1398 [ mac ] webgpu:web_platform,copyToTexture,canvas:copy_conten
 crbug.com/dawn/1398 [ win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Slow ]
 
 ################################################################################
-# Flaky tests
+# Flaky tests - temporarily marked as failing to avoid expectations conflicts in a roll.
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 webgpu:api,operation,adapter,requestDevice_limits:supported_limits:* [ RetryOnFailure ]
+crbug.com/dawn/0000 webgpu:api,operation,adapter,requestDevice_limits:supported_limits:* [ Failure ]
 
 ################################################################################
 # webgpu:shader,execution,robust_access
