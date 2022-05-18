@@ -652,6 +652,13 @@ bool Validator::Variable(const sem::Variable* var) const {
         return false;
     }
 
+    if (auto* r = storage_ty->As<sem::SampledTexture>()) {
+        if (!r->type()->UnwrapRef()->is_numeric_scalar()) {
+            AddError("texture_2d<type>: type must be f32, i32 or u32", decl->source);
+            return false;
+        }
+    }
+
     if (auto* r = storage_ty->As<sem::MultisampledTexture>()) {
         if (r->dim() != ast::TextureDimension::k2d) {
             AddError("only 2d multisampled textures are supported", decl->source);

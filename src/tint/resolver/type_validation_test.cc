@@ -737,19 +737,29 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest, CanonicalTest, testing::Val
 
 }  // namespace GetCanonicalTests
 
-namespace MultisampledTextureTests {
+namespace SampledTextureTests {
 struct DimensionParams {
     ast::TextureDimension dim;
     bool is_valid;
 };
 
-static constexpr DimensionParams dimension_cases[] = {
-    DimensionParams{ast::TextureDimension::k1d, false},
-    DimensionParams{ast::TextureDimension::k2d, true},
-    DimensionParams{ast::TextureDimension::k2dArray, false},
-    DimensionParams{ast::TextureDimension::k3d, false},
-    DimensionParams{ast::TextureDimension::kCube, false},
-    DimensionParams{ast::TextureDimension::kCubeArray, false}};
+using SampledTextureDimensionTest = ResolverTestWithParam<DimensionParams>;
+TEST_P(SampledTextureDimensionTest, All) {
+    auto& params = GetParam();
+    Global(Source{{12, 34}}, "a", ty.sampled_texture(params.dim, ty.i32()),
+           ast::StorageClass::kNone, nullptr, ast::AttributeList{GroupAndBinding(0, 0)});
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
+                         SampledTextureDimensionTest,
+                         testing::Values(  //
+                             DimensionParams{ast::TextureDimension::k1d, true},
+                             DimensionParams{ast::TextureDimension::k2d, true},
+                             DimensionParams{ast::TextureDimension::k2dArray, true},
+                             DimensionParams{ast::TextureDimension::k3d, true},
+                             DimensionParams{ast::TextureDimension::kCube, true},
+                             DimensionParams{ast::TextureDimension::kCubeArray, true}));
 
 using MultisampledTextureDimensionTest = ResolverTestWithParam<DimensionParams>;
 TEST_P(MultisampledTextureDimensionTest, All) {
@@ -766,7 +776,13 @@ TEST_P(MultisampledTextureDimensionTest, All) {
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                          MultisampledTextureDimensionTest,
-                         testing::ValuesIn(dimension_cases));
+                         testing::Values(  //
+                             DimensionParams{ast::TextureDimension::k1d, false},
+                             DimensionParams{ast::TextureDimension::k2d, true},
+                             DimensionParams{ast::TextureDimension::k2dArray, false},
+                             DimensionParams{ast::TextureDimension::k3d, false},
+                             DimensionParams{ast::TextureDimension::kCube, false},
+                             DimensionParams{ast::TextureDimension::kCubeArray, false}));
 
 struct TypeParams {
     builder::ast_type_func_ptr type_func;
@@ -796,6 +812,26 @@ static constexpr TypeParams type_cases[] = {
     TypeParamsFor<alias<mat3x3<f32>>>(false),
 };
 
+using SampledTextureTypeTest = ResolverTestWithParam<TypeParams>;
+TEST_P(SampledTextureTypeTest, All) {
+    auto& params = GetParam();
+    Global(Source{{12, 34}}, "a",
+           ty.sampled_texture(ast::TextureDimension::k2d, params.type_func(*this)),
+           ast::StorageClass::kNone, nullptr, ast::AttributeList{GroupAndBinding(0, 0)});
+
+    if (params.is_valid) {
+        EXPECT_TRUE(r()->Resolve()) << r()->error();
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        EXPECT_EQ(r()->error(),
+                  "12:34 error: texture_2d<type>: type must be f32, "
+                  "i32 or u32");
+    }
+}
+INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
+                         SampledTextureTypeTest,
+                         testing::ValuesIn(type_cases));
+
 using MultisampledTextureTypeTest = ResolverTestWithParam<TypeParams>;
 TEST_P(MultisampledTextureTypeTest, All) {
     auto& params = GetParam();
@@ -816,7 +852,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                          MultisampledTextureTypeTest,
                          testing::ValuesIn(type_cases));
 
-}  // namespace MultisampledTextureTests
+}  // namespace SampledTextureTests
 
 namespace StorageTextureTests {
 struct DimensionParams {
