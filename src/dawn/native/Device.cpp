@@ -171,6 +171,7 @@ ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetRenderPipelineDescrip
 
 DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor)
     : mInstance(adapter->GetInstance()), mAdapter(adapter), mNextPipelineCompatibilityToken(1) {
+    mInstance->IncrementDeviceCountForTesting();
     ASSERT(descriptor != nullptr);
 
     AdapterProperties adapterProperties;
@@ -220,6 +221,10 @@ DeviceBase::~DeviceBase() {
     // We need to explicitly release the Queue before we complete the destructor so that the
     // Queue does not get destroyed after the Device.
     mQueue = nullptr;
+    // mInstance is not set for mock test devices.
+    if (mInstance != nullptr) {
+        mInstance->DecrementDeviceCountForTesting();
+    }
 }
 
 MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {

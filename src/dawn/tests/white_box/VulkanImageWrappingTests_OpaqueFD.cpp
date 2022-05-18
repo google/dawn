@@ -141,7 +141,8 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
         descriptorOpaqueFD.memoryTypeIndex = textureOpaqueFD->memoryTypeIndex;
         descriptorOpaqueFD.waitFDs = std::move(waitFDs);
 
-        return dawn::native::vulkan::WrapVulkanImage(device.Get(), &descriptorOpaqueFD);
+        return wgpu::Texture::Acquire(
+            dawn::native::vulkan::WrapVulkanImage(device.Get(), &descriptorOpaqueFD));
     }
 
     bool ExportImage(const wgpu::Texture& texture,

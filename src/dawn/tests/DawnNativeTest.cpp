@@ -62,7 +62,7 @@ void DawnNativeTest::SetUp() {
 
     ASSERT(foundNullAdapter);
 
-    device = wgpu::Device(CreateTestDevice());
+    device = wgpu::Device::Acquire(CreateTestDevice());
     device.SetUncapturedErrorCallback(DawnNativeTest::OnDeviceError, nullptr);
 }
 

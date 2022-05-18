@@ -118,6 +118,9 @@ ValidationTest::~ValidationTest() {
     // will call a nullptr
     device = wgpu::Device();
     mWireHelper.reset();
+
+    // Check that all devices were destructed.
+    EXPECT_EQ(instance->GetDeviceCountForTesting(), 0u);
 }
 
 void ValidationTest::TearDown() {

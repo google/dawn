@@ -84,5 +84,6 @@ TEST_F(FeatureTests, GetEnabledFeatures) {
         wgpu::FeatureName enabledFeature;
         deviceBase->APIEnumerateFeatures(&enabledFeature);
         EXPECT_EQ(enabledFeature, featureName);
+        deviceBase->APIRelease();
     }
 }

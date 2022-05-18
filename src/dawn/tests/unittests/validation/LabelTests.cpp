@@ -325,7 +325,7 @@ TEST_F(LabelTest, Queue) {
     // The label should be empty if one was not set.
     {
         wgpu::DeviceDescriptor descriptor;
-        wgpu::Device labelDevice = adapter.CreateDevice(&descriptor);
+        wgpu::Device labelDevice = wgpu::Device::Acquire(adapter.CreateDevice(&descriptor));
         std::string readbackLabel =
             dawn::native::GetObjectLabelForTesting(labelDevice.GetQueue().Get());
         ASSERT_TRUE(readbackLabel.empty());
@@ -334,7 +334,7 @@ TEST_F(LabelTest, Queue) {
     // Test setting a label through API
     {
         wgpu::DeviceDescriptor descriptor;
-        wgpu::Device labelDevice = adapter.CreateDevice(&descriptor);
+        wgpu::Device labelDevice = wgpu::Device::Acquire(adapter.CreateDevice(&descriptor));
         labelDevice.GetQueue().SetLabel(label.c_str());
         std::string readbackLabel =
             dawn::native::GetObjectLabelForTesting(labelDevice.GetQueue().Get());
@@ -345,7 +345,7 @@ TEST_F(LabelTest, Queue) {
     {
         wgpu::DeviceDescriptor descriptor;
         descriptor.defaultQueue.label = label.c_str();
-        wgpu::Device labelDevice = adapter.CreateDevice(&descriptor);
+        wgpu::Device labelDevice = wgpu::Device::Acquire(adapter.CreateDevice(&descriptor));
         std::string readbackLabel =
             dawn::native::GetObjectLabelForTesting(labelDevice.GetQueue().Get());
         ASSERT_EQ(label, readbackLabel);

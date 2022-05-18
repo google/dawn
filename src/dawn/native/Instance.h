@@ -84,6 +84,10 @@ class InstanceBase final : public RefCounted {
     dawn::platform::Platform* GetPlatform();
     BlobCache* GetBlobCache();
 
+    uint64_t GetDeviceCountForTesting() const;
+    void IncrementDeviceCountForTesting();
+    void DecrementDeviceCountForTesting();
+
     const std::vector<std::string>& GetRuntimeSearchPaths() const;
 
     // Get backend-independent libraries that need to be loaded dynamically.
@@ -130,6 +134,8 @@ class InstanceBase final : public RefCounted {
 #if defined(DAWN_USE_X11)
     std::unique_ptr<XlibXcbFunctions> mXlibXcbFunctions;
 #endif  // defined(DAWN_USE_X11)
+
+    std::atomic_uint64_t mDeviceCountForTesting{0};
 };
 
 }  // namespace dawn::native

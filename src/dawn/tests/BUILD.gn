@@ -491,12 +491,6 @@ source_set("end2end_tests_sources") {
     "end2end/ViewportTests.cpp",
   ]
 
-  # Validation tests that need OS windows live in end2end tests.
-  sources += [
-    "unittests/validation/ValidationTest.cpp",
-    "unittests/validation/ValidationTest.h",
-  ]
-
   libs = []
 
   if (dawn_enable_d3d12) {

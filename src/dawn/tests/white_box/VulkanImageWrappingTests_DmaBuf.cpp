@@ -118,7 +118,8 @@ class VulkanImageWrappingTestBackendDmaBuf : public VulkanImageWrappingTestBacke
         descriptorDmaBuf.stride = textureDmaBuf->stride;
         descriptorDmaBuf.drmModifier = textureDmaBuf->drmModifier;
 
-        return dawn::native::vulkan::WrapVulkanImage(device.Get(), &descriptorDmaBuf);
+        return wgpu::Texture::Acquire(
+            dawn::native::vulkan::WrapVulkanImage(device.Get(), &descriptorDmaBuf));
     }
 
     bool ExportImage(const wgpu::Texture& texture,

@@ -170,6 +170,8 @@ class DAWN_NATIVE_EXPORT Instance {
     // TODO(dawn:1374) Deprecate this once it is passed via the descriptor.
     void SetPlatform(dawn::platform::Platform* platform);
 
+    uint64_t GetDeviceCountForTesting() const;
+
     // Returns the underlying WGPUInstance object.
     WGPUInstance Get() const;
 

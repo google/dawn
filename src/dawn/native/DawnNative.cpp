@@ -244,6 +244,10 @@ void Instance::SetPlatform(dawn::platform::Platform* platform) {
     mImpl->SetPlatform(platform);
 }
 
+uint64_t Instance::GetDeviceCountForTesting() const {
+    return mImpl->GetDeviceCountForTesting();
+}
+
 WGPUInstance Instance::Get() const {
     return ToAPI(mImpl);
 }

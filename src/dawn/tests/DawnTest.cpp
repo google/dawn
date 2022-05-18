@@ -723,6 +723,9 @@ DawnTestBase::~DawnTestBase() {
         mBackendAdapter.ResetInternalDeviceForTesting();
     }
     mWireHelper.reset();
+
+    // Check that all devices were destructed.
+    EXPECT_EQ(gTestEnv->GetInstance()->GetDeviceCountForTesting(), 0u);
 }
 
 bool DawnTestBase::IsD3D12() const {

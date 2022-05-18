@@ -23,8 +23,8 @@ using ::testing::HasSubstr;
 class RequestDeviceValidationTest : public ValidationTest {
   protected:
     void SetUp() override {
-        DAWN_SKIP_TEST_IF(UsesWire());
         ValidationTest::SetUp();
+        DAWN_SKIP_TEST_IF(UsesWire());
     }
 
     static void ExpectRequestDeviceSuccess(WGPURequestDeviceStatus status,

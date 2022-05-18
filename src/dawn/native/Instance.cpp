@@ -437,6 +437,18 @@ BlobCache* InstanceBase::GetBlobCache() {
     return mBlobCache.get();
 }
 
+uint64_t InstanceBase::GetDeviceCountForTesting() const {
+    return mDeviceCountForTesting.load();
+}
+
+void InstanceBase::IncrementDeviceCountForTesting() {
+    mDeviceCountForTesting++;
+}
+
+void InstanceBase::DecrementDeviceCountForTesting() {
+    mDeviceCountForTesting--;
+}
+
 const std::vector<std::string>& InstanceBase::GetRuntimeSearchPaths() const {
     return mRuntimeSearchPaths;
 }
