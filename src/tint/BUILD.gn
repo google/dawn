@@ -616,6 +616,8 @@ libtint_source_set("libtint_sem_src") {
     "sem/info.h",
     "sem/loop_statement.cc",
     "sem/loop_statement.h",
+    "sem/materialize.cc",
+    "sem/materialize.h",
     "sem/matrix.cc",
     "sem/matrix.h",
     "sem/member_accessor_expression.cc",

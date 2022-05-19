@@ -16,6 +16,8 @@
 
 #include <utility>
 
+#include "src/tint/sem/materialize.h"
+
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Expression);
 
 namespace tint::sem {
@@ -36,5 +38,12 @@ Expression::Expression(const ast::Expression* declaration,
 }
 
 Expression::~Expression() = default;
+
+const Expression* Expression::UnwrapMaterialize() const {
+    if (auto* m = As<Materialize>()) {
+        return m->Expr();
+    }
+    return this;
+}
 
 }  // namespace tint::sem

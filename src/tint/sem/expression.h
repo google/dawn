@@ -76,6 +76,9 @@ class Expression : public Castable<Expression, Node> {
     /// @return true of this expression may have side effects
     bool HasSideEffects() const { return has_side_effects_; }
 
+    /// @return the inner expression node if this is a Materialize, otherwise this.
+    const Expression* UnwrapMaterialize() const;
+
   protected:
     /// The AST expression node for this semantic expression
     const ast::Expression* const declaration_;

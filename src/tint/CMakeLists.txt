@@ -421,6 +421,8 @@ set(TINT_LIB_SRCS
   sem/if_statement.h
   sem/loop_statement.cc
   sem/loop_statement.h
+  sem/materialize.cc
+  sem/materialize.h
   sem/matrix.cc
   sem/matrix.h
   sem/multisampled_texture.cc
@@ -799,6 +801,7 @@ if(TINT_BUILD_TESTS)
     sem/builtin_test.cc
     sem/depth_multisampled_texture_test.cc
     sem/depth_texture_test.cc
+    sem/expression_test.cc
     sem/external_texture_test.cc
     sem/f16_test.cc
     sem/f32_test.cc
