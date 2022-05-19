@@ -173,10 +173,6 @@ deps = {
     'url': '{github_git}/gpuweb/gpuweb.git@16df823c91c9045b7cdf9bd0f2c0ef6d43ac95e7',
     'condition': 'dawn_node',
   },
-  'third_party/gpuweb-cts': {
-    'url': '{chromium_git}/external/github.com/gpuweb/cts@e518bfe8a42b5a3070cde35d03dc7317187801c1',
-    'condition': 'dawn_standalone',
-  },
 
   'tools/golang': {
     'condition': 'dawn_node',
