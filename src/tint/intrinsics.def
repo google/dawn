@@ -71,6 +71,8 @@ enum texel_format {
 
 // https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
 type bool
+[[precedence(4), display("abstract-float")]] type af
+[[precedence(3), display("abstract-int")]]   type ai
 [[precedence(2)]] type i32
 [[precedence(1)]] type u32
 [[precedence(0)]] type f32
@@ -126,6 +128,7 @@ match fiu32: f32 | i32 | u32
 match fi32: f32 | i32
 match iu32: i32 | u32
 match scalar: f32 | i32 | u32 | bool
+match abstract_or_scalar: ai | af | f32 | i32 | u32 | bool
 match scalar_no_f32: i32 | u32 | bool
 match scalar_no_i32: f32 | u32 | bool
 match scalar_no_u32: f32 | i32 | bool
