@@ -304,6 +304,12 @@ class DrawVertexAndIndexBufferOOBValidationTests : public ValidationTest {
         // Non-zero offset and size
         {(2 * kFloat32x4Stride), 5 * (2 * kFloat32x4Stride), (2 * kFloat32x4Stride),
          3 * (2 * kFloat32x4Stride), 3},
+        // For (strideCount - 1) * arrayStride + lastStride <= bound buffer size < strideCount *
+        // arrayStride
+        {(kFloat32x4Stride + 4), 2 * (kFloat32x4Stride + 4) + kFloat32x4Stride, 0, wgpu::kWholeSize,
+         3},
+        {(kFloat32x4Stride + 4), 2 * (kFloat32x4Stride + 4) + kFloat32x4Stride - 1, 0,
+         wgpu::kWholeSize, 2},
     };
     // Parameters list for instance-step-mode buffer.
     const std::vector<VertexBufferParams> kInstanceParamsList = {
@@ -325,6 +331,12 @@ class DrawVertexAndIndexBufferOOBValidationTests : public ValidationTest {
         // Non-zero offset and size
         {(3 * kFloat32x2Stride), 7 * (3 * kFloat32x2Stride), (3 * kFloat32x2Stride),
          5 * (3 * kFloat32x2Stride), 5},
+        // For (strideCount - 1) * arrayStride + lastStride <= bound buffer size < strideCount *
+        // arrayStride
+        {(kFloat32x2Stride + 4), 2 * (kFloat32x2Stride + 4) + kFloat32x2Stride, 0, wgpu::kWholeSize,
+         3},
+        {(kFloat32x2Stride + 4), 2 * (kFloat32x2Stride + 4) + kFloat32x2Stride - 1, 0,
+         wgpu::kWholeSize, 2},
     };
 
   private:
@@ -341,7 +353,9 @@ TEST_F(DrawVertexAndIndexBufferOOBValidationTests, DrawBasic) {
     {
         // Implicit size
         VertexBufferList vertexBufferList = {{0, vertexBuffer, 0, wgpu::kWholeSize}};
-        TestRenderPassDraw(pipeline, vertexBufferList, 3, 1, 0, 0, true);
+        TestRenderPassDraw(pipeline, vertexBufferList, /* vertexCount */ 3,
+                           /* instanceCount */ 1, /* firstVertex */ 0,
+                           /* firstInstance */ 0, /* isSuccess */ true);
     }
 
     {
@@ -362,9 +376,12 @@ TEST_F(DrawVertexAndIndexBufferOOBValidationTests, DrawVertexBufferOutOfBoundWit
         VertexBufferList vertexBufferList = {
             {0, vertexBuffer, params.bufferOffsetForEncoder, params.bufferSizeForEncoder}};
 
+        DAWN_ASSERT(params.maxValidAccessNumber > 0);
         uint32_t n = params.maxValidAccessNumber;
         // It is ok to draw n vertices with vertex buffer
-        TestRenderPassDraw(pipeline, vertexBufferList, n, 1, 0, 0, true);
+        TestRenderPassDraw(pipeline, vertexBufferList, /* vertexCount */ n,
+                           /* instanceCount */ 1, /* firstVertex */ 0,
+                           /* firstInstance */ 0, /* isSuccess */ true);
         // It is ok to draw n-1 vertices with offset 1
         TestRenderPassDraw(pipeline, vertexBufferList, n - 1, 1, 1, 0, true);
         // Drawing more vertices will cause OOB, even if not enough for another primitive
@@ -396,10 +413,14 @@ TEST_F(DrawVertexAndIndexBufferOOBValidationTests, DrawVertexBufferOutOfBoundWit
                  instanceParams.bufferSizeForEncoder},
             };
 
+            DAWN_ASSERT(vertexParams.maxValidAccessNumber > 0);
+            DAWN_ASSERT(instanceParams.maxValidAccessNumber > 0);
             uint32_t vert = vertexParams.maxValidAccessNumber;
             uint32_t inst = instanceParams.maxValidAccessNumber;
             // It is ok to draw vert vertices
-            TestRenderPassDraw(pipeline, vertexBufferList, vert, 1, 0, 0, true);
+            TestRenderPassDraw(pipeline, vertexBufferList, /* vertexCount */ vert,
+                               /* instanceCount */ 1, /* firstVertex */ 0,
+                               /* firstInstance */ 0, /* isSuccess */ true);
             TestRenderPassDraw(pipeline, vertexBufferList, vert - 1, 1, 1, 0, true);
             // It is ok to draw vert vertices and inst instences
             TestRenderPassDraw(pipeline, vertexBufferList, vert, inst, 0, 0, true);
@@ -432,7 +453,9 @@ TEST_F(DrawVertexAndIndexBufferOOBValidationTests, DrawIndexedBasic) {
 
     IndexBufferDesc indexBufferDesc = {indexBuffer, wgpu::IndexFormat::Uint32};
 
-    TestRenderPassDrawIndexed(pipeline, indexBufferDesc, vertexBufferList, 12, 1, 0, 0, 0, true);
+    TestRenderPassDrawIndexed(pipeline, indexBufferDesc, vertexBufferList, /* indexCount */ 12,
+                              /* instanceCount */ 1, /* firstIndex */ 0, /* baseVertex */ 0,
+                              /* firstInstance */ 0, /* isSuccess */ true);
 }
 
 // Verify index buffer OOB for DrawIndexed are caught in command encoder
@@ -454,10 +477,13 @@ TEST_F(DrawVertexAndIndexBufferOOBValidationTests, DrawIndexedIndexBufferOOB) {
                                            params.indexBufferOffsetForEncoder,
                                            params.indexBufferSizeForEncoder};
 
+        DAWN_ASSERT(params.maxValidIndexNumber > 0);
         uint32_t n = params.maxValidIndexNumber;
 
         // Control case
-        TestRenderPassDrawIndexed(pipeline, indexBufferDesc, vertexBufferList, n, 5, 0, 0, 0, true);
+        TestRenderPassDrawIndexed(pipeline, indexBufferDesc, vertexBufferList, /* indexCount */ n,
+                                  /* instanceCount */ 5, /* firstIndex */ 0, /* baseVertex */ 0,
+                                  /* firstInstance */ 0, /* isSuccess */ true);
         TestRenderPassDrawIndexed(pipeline, indexBufferDesc, vertexBufferList, n - 1, 5, 1, 0, 0,
                                   true);
         // Index buffer OOB, indexCount too large
@@ -487,8 +513,8 @@ TEST_F(DrawVertexAndIndexBufferOOBValidationTests, DrawIndexedVertexBufferOOB) {
             wgpu::RenderPipeline pipeline = CreateBasicRenderPipelineWithInstance(
                 vertexParams.bufferStride, instanceParams.bufferStride);
 
-            auto indexFormat = wgpu::IndexFormat::Uint32;
-            auto indexStride = sizeof(uint32_t);
+            constexpr wgpu::IndexFormat indexFormat = wgpu::IndexFormat::Uint32;
+            constexpr uint64_t indexStride = sizeof(uint32_t);
 
             // Build index buffer for 12 indexes
             wgpu::Buffer indexBuffer = CreateBuffer(12 * indexStride, wgpu::BufferUsage::Index);
@@ -505,10 +531,13 @@ TEST_F(DrawVertexAndIndexBufferOOBValidationTests, DrawIndexedVertexBufferOOB) {
 
             IndexBufferDesc indexBufferDesc = {indexBuffer, indexFormat};
 
+            DAWN_ASSERT(instanceParams.maxValidAccessNumber > 0);
             uint32_t inst = instanceParams.maxValidAccessNumber;
             // Control case
-            TestRenderPassDrawIndexed(pipeline, indexBufferDesc, vertexBufferList, 12, inst, 0, 0,
-                                      0, true);
+            TestRenderPassDrawIndexed(
+                pipeline, indexBufferDesc, vertexBufferList, /* indexCount */ 12,
+                /* instanceCount */ inst, /* firstIndex */ 0, /* baseVertex */ 0,
+                /* firstInstance */ 0, /* isSuccess */ true);
             // Vertex buffer (stepMode = instance) OOB, instanceCount too large
             TestRenderPassDrawIndexed(pipeline, indexBufferDesc, vertexBufferList, 12, inst + 1, 0,
                                       0, 0, false);
@@ -527,8 +556,10 @@ TEST_F(DrawVertexAndIndexBufferOOBValidationTests, DrawIndexedVertexBufferOOB) {
     }
 }
 
-// Verify instance mode vertex buffer OOB for DrawIndexed are caught in command encoder
-TEST_F(DrawVertexAndIndexBufferOOBValidationTests, ZeroArrayStrideVertexBufferOOB) {
+// Verify zero array stride vertex buffer OOB for Draw and DrawIndexed are caught in command encoder
+// This test only test cases that strideCount > 0. Cases of strideCount == 0 are tested in
+// ZeroStrideCountVertexBufferNeverOOB.
+TEST_F(DrawVertexAndIndexBufferOOBValidationTests, ZeroArrayStrideVertexBuffer) {
     // In this test, we use VertexBufferParams.maxValidAccessNumber > 0 to indicate that such
     // buffer parameter meet the requirement of pipeline, and maxValidAccessNumber == 0 to
     // indicate that such buffer parameter will cause OOB.
@@ -569,8 +600,8 @@ TEST_F(DrawVertexAndIndexBufferOOBValidationTests, ZeroArrayStrideVertexBufferOO
 
     for (VertexBufferParams vertexParams : kVertexParamsListForZeroStride) {
         for (VertexBufferParams instanceParams : kInstanceParamsListForZeroStride) {
-            auto indexFormat = wgpu::IndexFormat::Uint32;
-            auto indexStride = sizeof(uint32_t);
+            constexpr wgpu::IndexFormat indexFormat = wgpu::IndexFormat::Uint32;
+            constexpr uint64_t indexStride = sizeof(uint32_t);
 
             // Build index buffer for 12 indexes
             wgpu::Buffer indexBuffer = CreateBuffer(12 * indexStride, wgpu::BufferUsage::Index);
@@ -587,14 +618,137 @@ TEST_F(DrawVertexAndIndexBufferOOBValidationTests, ZeroArrayStrideVertexBufferOO
 
             IndexBufferDesc indexBufferDesc = {indexBuffer, indexFormat};
 
-            const bool isSuccess = (vertexParams.maxValidAccessNumber > 0) &&
-                                   (instanceParams.maxValidAccessNumber > 0);
+            const bool vertexModeBufferOOB = vertexParams.maxValidAccessNumber == 0;
+            const bool instanceModeBufferOOB = instanceParams.maxValidAccessNumber == 0;
+
+            // Draw validate both vertex and instance step mode buffer OOB.
             // vertexCount and instanceCount doesn't matter, as array stride is zero and all
-            // vertex/instance access the same space of buffer
-            TestRenderPassDraw(pipeline, vertexBufferList, 100, 100, 0, 0, isSuccess);
-            // indexCount doesn't matter as long as no index buffer OOB happened
-            TestRenderPassDrawIndexed(pipeline, indexBufferDesc, vertexBufferList, 12, 100, 0, 0, 0,
-                                      isSuccess);
+            // vertex/instance access the same space of buffer, as long as both (vertexCount +
+            // firstVertex) and (instanceCount + firstInstance) are larger than zero.
+            TestRenderPassDraw(pipeline, vertexBufferList, /* vertexCount */ 100,
+                               /* instanceCount */ 100, /* firstVertex */ 0,
+                               /* firstInstance */ 0,
+                               /* isSuccess */ !vertexModeBufferOOB && !instanceModeBufferOOB);
+            TestRenderPassDraw(pipeline, vertexBufferList, 100, 100, 100, 100,
+                               !vertexModeBufferOOB && !instanceModeBufferOOB);
+            TestRenderPassDraw(pipeline, vertexBufferList, 0, 0, 100, 100,
+                               !vertexModeBufferOOB && !instanceModeBufferOOB);
+
+            // DrawIndexed only validate instance step mode buffer OOB.
+            // indexCount doesn't matter as long as no index buffer OOB happened, and instanceCount
+            // doesn't matter as long as (instanceCount + firstInstance) are larger than zero.
+            TestRenderPassDrawIndexed(
+                pipeline, indexBufferDesc, vertexBufferList, /* indexCount */ 12,
+                /* instanceCount */ 100, /* firstIndex */ 0, /* baseVertex */ 0,
+                /* firstInstance */ 0, /* isSuccess */ !instanceModeBufferOOB);
+            TestRenderPassDrawIndexed(pipeline, indexBufferDesc, vertexBufferList, 12, 0, 0, 0, 100,
+                                      !instanceModeBufferOOB);
+        }
+    }
+}
+
+// Verify all vertex buffer never OOB for Draw and DrawIndexed with zero stride count
+TEST_F(DrawVertexAndIndexBufferOOBValidationTests, ZeroStrideCountVertexBufferNeverOOB) {
+    // In this test we use a render pipeline with non-zero array stride and a render pipeline with
+    // zero array stride, both use a vertex step mode vertex buffer with lastStride = 16 and a
+    // instance step mode vertex buffer with lastStride = 8. Binding a buffer with size less than
+    // lastStride to corresponding buffer slot will result in a OOB validation error is strideCount
+    // is larger than 0, but shall not result in validation error if strideCount == 0.
+
+    // Create the render pipeline with non-zero array stride (larger than lastStride)
+    std::vector<PipelineVertexBufferDesc> bufferDescListNonZeroArrayStride = {
+        {20u, wgpu::VertexStepMode::Vertex, {{0, wgpu::VertexFormat::Float32x4}}},
+        {12u, wgpu::VertexStepMode::Instance, {{3, wgpu::VertexFormat::Float32x2}}},
+    };
+    wgpu::RenderPipeline pipelineWithNonZeroArrayStride =
+        CreateRenderPipelineWithBufferDesc(bufferDescListNonZeroArrayStride);
+
+    // Create the render pipeline with zero array stride
+    std::vector<PipelineVertexBufferDesc> bufferDescListZeroArrayStride = {
+        {0u, wgpu::VertexStepMode::Vertex, {{0, wgpu::VertexFormat::Float32x4}}},
+        {0u, wgpu::VertexStepMode::Instance, {{3, wgpu::VertexFormat::Float32x2}}},
+    };
+    wgpu::RenderPipeline pipelineWithZeroArrayStride =
+        CreateRenderPipelineWithBufferDesc(bufferDescListZeroArrayStride);
+
+    const std::vector<VertexBufferParams> kVertexParamsListForZeroStride = {
+        // Size enough for 1 vertex
+        {kFloat32x4Stride, 16, 0, wgpu::kWholeSize, 1},
+        // No enough size for 1 vertex
+        {kFloat32x4Stride, 19, 4, wgpu::kWholeSize, 0},
+        {kFloat32x4Stride, 16, 16, wgpu::kWholeSize, 0},
+    };
+
+    const std::vector<VertexBufferParams> kInstanceParamsListForZeroStride = {
+        // Size enough for 1 instance
+        {kFloat32x2Stride, 8, 0, wgpu::kWholeSize, 1},
+        // No enough size for 1 instance
+        {kFloat32x2Stride, 11, 4, wgpu::kWholeSize, 0},
+        {kFloat32x2Stride, 8, 8, wgpu::kWholeSize, 0},
+    };
+
+    for (VertexBufferParams vertexParams : kVertexParamsListForZeroStride) {
+        for (VertexBufferParams instanceParams : kInstanceParamsListForZeroStride) {
+            for (wgpu::RenderPipeline pipeline :
+                 {pipelineWithNonZeroArrayStride, pipelineWithZeroArrayStride}) {
+                constexpr wgpu::IndexFormat indexFormat = wgpu::IndexFormat::Uint32;
+                constexpr uint64_t indexStride = sizeof(uint32_t);
+
+                // Build index buffer for 1 index
+                wgpu::Buffer indexBuffer = CreateBuffer(indexStride, wgpu::BufferUsage::Index);
+                // Build vertex buffer for vertices
+                wgpu::Buffer vertexBuffer = CreateBuffer(vertexParams.bufferSize);
+                // Build vertex buffer for instances
+                wgpu::Buffer instanceBuffer = CreateBuffer(instanceParams.bufferSize);
+
+                VertexBufferList vertexBufferList = {
+                    {0, vertexBuffer, vertexParams.bufferOffsetForEncoder,
+                     vertexParams.bufferSizeForEncoder},
+                    {1, instanceBuffer, instanceParams.bufferOffsetForEncoder,
+                     instanceParams.bufferSizeForEncoder}};
+
+                IndexBufferDesc indexBufferDesc = {indexBuffer, indexFormat};
+
+                const bool vertexModeBufferOOB = vertexParams.maxValidAccessNumber == 0;
+                const bool instanceModeBufferOOB = instanceParams.maxValidAccessNumber == 0;
+
+                // Draw validate both vertex and instance step mode buffer OOB.
+                // Control case, non-zero stride for both step mode buffer
+                TestRenderPassDraw(pipeline, vertexBufferList, /* vertexCount */ 1,
+                                   /* instanceCount */ 1, /* firstVertex */ 0,
+                                   /* firstInstance */ 0,
+                                   /* isSuccess */ !vertexModeBufferOOB && !instanceModeBufferOOB);
+                TestRenderPassDraw(pipeline, vertexBufferList, 1, 0, 0, 1,
+                                   !vertexModeBufferOOB && !instanceModeBufferOOB);
+                TestRenderPassDraw(pipeline, vertexBufferList, 0, 1, 1, 0,
+                                   !vertexModeBufferOOB && !instanceModeBufferOOB);
+                TestRenderPassDraw(pipeline, vertexBufferList, 0, 0, 1, 1,
+                                   !vertexModeBufferOOB && !instanceModeBufferOOB);
+                // Vertex step mode buffer will never OOB if (vertexCount + firstVertex) is zero,
+                // and only instance step mode buffer OOB will fail validation
+                TestRenderPassDraw(pipeline, vertexBufferList, 0, 1, 0, 0, !instanceModeBufferOOB);
+                TestRenderPassDraw(pipeline, vertexBufferList, 0, 0, 0, 1, !instanceModeBufferOOB);
+                // Instance step mode buffer will never OOB if (instanceCount + firstInstance) is
+                // zero, and only vertex step mode buffer OOB will fail validation
+                TestRenderPassDraw(pipeline, vertexBufferList, 1, 0, 0, 0, !vertexModeBufferOOB);
+                TestRenderPassDraw(pipeline, vertexBufferList, 0, 0, 1, 0, !vertexModeBufferOOB);
+                // If both (vertexCount + firstVertex) and (instanceCount + firstInstance) are zero,
+                // all vertex buffer will never OOB
+                TestRenderPassDraw(pipeline, vertexBufferList, 0, 0, 0, 0, true);
+
+                // DrawIndexed only validate instance step mode buffer OOB.
+                // Control case, non-zero stride for instance step mode buffer
+                TestRenderPassDrawIndexed(
+                    pipeline, indexBufferDesc, vertexBufferList, /* indexCount */ 1,
+                    /* instanceCount */ 1, /* firstIndex */ 0, /* baseVertex */ 0,
+                    /* firstInstance */ 0, /* isSuccess */ !instanceModeBufferOOB);
+                TestRenderPassDrawIndexed(pipeline, indexBufferDesc, vertexBufferList, 1, 0, 0, 0,
+                                          1, !instanceModeBufferOOB);
+                // Instance step mode buffer will never OOB if (instanceCount + firstInstance) is
+                // zero, validation shall always succeed
+                TestRenderPassDrawIndexed(pipeline, indexBufferDesc, vertexBufferList, 1, 0, 0, 0,
+                                          0, true);
+            }
         }
     }
 }

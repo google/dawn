@@ -129,10 +129,7 @@ void RenderEncoderBase::APIDrawIndexed(uint32_t indexCount,
 
                 DAWN_TRY(mCommandBufferState.ValidateIndexBufferInRange(indexCount, firstIndex));
 
-                // Although we don't know actual vertex access range in CPU, we still call the
-                // ValidateBufferInRangeForVertexBuffer in order to deal with those vertex step
-                // mode vertex buffer with an array stride of zero.
-                DAWN_TRY(mCommandBufferState.ValidateBufferInRangeForVertexBuffer(0, 0));
+                // DrawIndexed only validate instance step mode vertex buffer
                 DAWN_TRY(mCommandBufferState.ValidateBufferInRangeForInstanceBuffer(instanceCount,
                                                                                     firstInstance));
             }
