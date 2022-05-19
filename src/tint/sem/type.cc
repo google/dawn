@@ -232,4 +232,26 @@ const Type* Type::ElementOf(const Type* ty, uint32_t* count /* = nullptr */) {
         });
 }
 
+const sem::Type* Type::Common(Type const* const* types, size_t count) {
+    if (count == 0) {
+        return nullptr;
+    }
+    const auto* common = types[0];
+    for (size_t i = 1; i < count; i++) {
+        auto* ty = types[i];
+        if (ty == common) {
+            continue;  // ty == common
+        }
+        if (sem::Type::ConversionRank(ty, common) != sem::Type::kNoConversion) {
+            continue;  // ty can be converted to common.
+        }
+        if (sem::Type::ConversionRank(common, ty) != sem::Type::kNoConversion) {
+            common = ty;  // common can be converted to ty.
+            continue;
+        }
+        return nullptr;  // Conversion is not valid.
+    }
+    return common;
+}
+
 }  // namespace tint::sem

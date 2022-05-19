@@ -124,16 +124,11 @@ class TemplateState {
         if (existing == ty) {
             return ty;
         }
-        if (sem::Type::ConversionRank(ty, existing) != sem::Type::kNoConversion) {
-            // ty can be converted to the existing type. Keep the existing type.
-            return existing;
+        ty = sem::Type::Common({existing, ty});
+        if (ty) {
+            res.first->second = ty;
         }
-        if (sem::Type::ConversionRank(existing, ty) != sem::Type::kNoConversion) {
-            // template type can be converted to ty. Constrain the existing type.
-            types_[idx] = ty;
-            return ty;
-        }
-        return nullptr;
+        return ty;
     }
 
     /// If the number with index `idx` is undefined, then it is defined with the number `number` and

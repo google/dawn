@@ -135,6 +135,21 @@ class Type : public Castable<Type, Node> {
     /// or array, otherwise nullptr.
     static const Type* ElementOf(const Type* ty, uint32_t* count = nullptr);
 
+    /// @param types a pointer to a list of `const Type*`.
+    /// @param count the number of types in `types`.
+    /// @returns the lowest-ranking type that all types in `types` can be implicitly converted to,
+    /// or nullptr if there is no consistent common type across all types in `types`.
+    /// @see https://www.w3.org/TR/WGSL/#conversion-rank
+    static const sem::Type* Common(Type const* const* types, size_t count);
+
+    /// @param types an initializer_list of `const Type*`.
+    /// @returns the lowest-ranking type that all types in `types` can be implicitly converted to,
+    /// or nullptr if there is no consistent common type across all types in `types`.
+    /// @see https://www.w3.org/TR/WGSL/#conversion-rank
+    static const sem::Type* Common(std::initializer_list<const Type*> types) {
+        return Common(types.begin(), types.size());
+    }
+
   protected:
     Type();
 };

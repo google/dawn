@@ -44,4 +44,16 @@ using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
 }  // namespace tint::sem
 
+/// Helper macro for testing that a semantic type was as expected
+#define EXPECT_TYPE(GOT, EXPECT)                                         \
+    do {                                                                 \
+        const sem::Type* got = GOT;                                      \
+        const sem::Type* expect = EXPECT;                                \
+        if (got != expect) {                                             \
+            ADD_FAILURE() << #GOT " != " #EXPECT "\n"                    \
+                          << "  " #GOT ": " << FriendlyName(got) << "\n" \
+                          << "  " #EXPECT ": " << FriendlyName(expect);  \
+        }                                                                \
+    } while (false)
+
 #endif  // SRC_TINT_SEM_TEST_HELPER_H_
