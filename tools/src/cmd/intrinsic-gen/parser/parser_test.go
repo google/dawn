@@ -92,6 +92,18 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
+			"[[deco_a, deco_b]] type T",
+			ast.AST{
+				Types: []ast.TypeDecl{{
+					Decorations: ast.Decorations{
+						{Name: "deco_a", Values: []string{}},
+						{Name: "deco_b", Values: []string{}},
+					},
+					Name: "T",
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
 			`[[deco("a", "b")]] type T`, ast.AST{
 				Types: []ast.TypeDecl{{
 					Decorations: ast.Decorations{

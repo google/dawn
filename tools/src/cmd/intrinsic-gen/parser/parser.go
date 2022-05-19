@@ -154,7 +154,7 @@ func (p *parser) decorations() ast.Decorations {
 			Name:   string(name.Runes),
 			Values: values,
 		})
-		if !p.peekIs(0, tok.Comma) {
+		if p.match(tok.Comma) == nil {
 			break
 		}
 	}
