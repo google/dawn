@@ -232,8 +232,9 @@ bool Lexer::is_hex(char ch) const {
 }
 
 bool Lexer::matches(size_t pos, std::string_view sub_string) {
-    if (pos >= length())
+    if (pos >= length()) {
         return false;
+    }
     return substr(pos, sub_string.size()) == sub_string;
 }
 
@@ -265,8 +266,9 @@ Token Lexer::skip_blankspace_and_comments() {
 
         // If the cursor didn't advance we didn't remove any blankspace
         // so we're done.
-        if (loc == location_)
+        if (loc == location_) {
             break;
+        }
     }
     if (is_eof()) {
         return {Token::Type::kEOF, begin_source()};
@@ -1043,110 +1045,159 @@ Token Lexer::try_punctuation() {
 }
 
 Token Lexer::check_keyword(const Source& source, std::string_view str) {
-    if (str == "array")
+    if (str == "array") {
         return {Token::Type::kArray, source, "array"};
-    if (str == "atomic")
+    }
+    if (str == "atomic") {
         return {Token::Type::kAtomic, source, "atomic"};
-    if (str == "bitcast")
+    }
+    if (str == "bitcast") {
         return {Token::Type::kBitcast, source, "bitcast"};
-    if (str == "bool")
+    }
+    if (str == "bool") {
         return {Token::Type::kBool, source, "bool"};
-    if (str == "break")
+    }
+    if (str == "break") {
         return {Token::Type::kBreak, source, "break"};
-    if (str == "case")
+    }
+    if (str == "case") {
         return {Token::Type::kCase, source, "case"};
-    if (str == "continue")
+    }
+    if (str == "continue") {
         return {Token::Type::kContinue, source, "continue"};
-    if (str == "continuing")
+    }
+    if (str == "continuing") {
         return {Token::Type::kContinuing, source, "continuing"};
-    if (str == "discard")
+    }
+    if (str == "discard") {
         return {Token::Type::kDiscard, source, "discard"};
-    if (str == "default")
+    }
+    if (str == "default") {
         return {Token::Type::kDefault, source, "default"};
-    if (str == "else")
+    }
+    if (str == "else") {
         return {Token::Type::kElse, source, "else"};
-    if (str == "enable")
+    }
+    if (str == "enable") {
         return {Token::Type::kEnable, source, "enable"};
-    if (str == "f16")
+    }
+    if (str == "f16") {
         return {Token::Type::kF16, source, "f16"};
-    if (str == "f32")
+    }
+    if (str == "f32") {
         return {Token::Type::kF32, source, "f32"};
-    if (str == "fallthrough")
+    }
+    if (str == "fallthrough") {
         return {Token::Type::kFallthrough, source, "fallthrough"};
-    if (str == "false")
+    }
+    if (str == "false") {
         return {Token::Type::kFalse, source, "false"};
-    if (str == "fn")
+    }
+    if (str == "fn") {
         return {Token::Type::kFn, source, "fn"};
-    if (str == "for")
+    }
+    if (str == "for") {
         return {Token::Type::kFor, source, "for"};
-    if (str == "function")
+    }
+    if (str == "function") {
         return {Token::Type::kFunction, source, "function"};
-    if (str == "i32")
+    }
+    if (str == "i32") {
         return {Token::Type::kI32, source, "i32"};
-    if (str == "if")
+    }
+    if (str == "if") {
         return {Token::Type::kIf, source, "if"};
-    if (str == "import")
+    }
+    if (str == "import") {
         return {Token::Type::kImport, source, "import"};
-    if (str == "let")
+    }
+    if (str == "let") {
         return {Token::Type::kLet, source, "let"};
-    if (str == "loop")
+    }
+    if (str == "loop") {
         return {Token::Type::kLoop, source, "loop"};
-    if (str == "mat2x2")
+    }
+    if (str == "mat2x2") {
         return {Token::Type::kMat2x2, source, "mat2x2"};
-    if (str == "mat2x3")
+    }
+    if (str == "mat2x3") {
         return {Token::Type::kMat2x3, source, "mat2x3"};
-    if (str == "mat2x4")
+    }
+    if (str == "mat2x4") {
         return {Token::Type::kMat2x4, source, "mat2x4"};
-    if (str == "mat3x2")
+    }
+    if (str == "mat3x2") {
         return {Token::Type::kMat3x2, source, "mat3x2"};
-    if (str == "mat3x3")
+    }
+    if (str == "mat3x3") {
         return {Token::Type::kMat3x3, source, "mat3x3"};
-    if (str == "mat3x4")
+    }
+    if (str == "mat3x4") {
         return {Token::Type::kMat3x4, source, "mat3x4"};
-    if (str == "mat4x2")
+    }
+    if (str == "mat4x2") {
         return {Token::Type::kMat4x2, source, "mat4x2"};
-    if (str == "mat4x3")
+    }
+    if (str == "mat4x3") {
         return {Token::Type::kMat4x3, source, "mat4x3"};
-    if (str == "mat4x4")
+    }
+    if (str == "mat4x4") {
         return {Token::Type::kMat4x4, source, "mat4x4"};
-    if (str == "override")
+    }
+    if (str == "override") {
         return {Token::Type::kOverride, source, "override"};
-    if (str == "private")
+    }
+    if (str == "private") {
         return {Token::Type::kPrivate, source, "private"};
-    if (str == "ptr")
+    }
+    if (str == "ptr") {
         return {Token::Type::kPtr, source, "ptr"};
-    if (str == "return")
+    }
+    if (str == "return") {
         return {Token::Type::kReturn, source, "return"};
-    if (str == "sampler")
+    }
+    if (str == "sampler") {
         return {Token::Type::kSampler, source, "sampler"};
-    if (str == "sampler_comparison")
+    }
+    if (str == "sampler_comparison") {
         return {Token::Type::kComparisonSampler, source, "sampler_comparison"};
-    if (str == "storage_buffer" || str == "storage")
+    }
+    if (str == "storage_buffer" || str == "storage") {
         return {Token::Type::kStorage, source, "storage"};
-    if (str == "struct")
+    }
+    if (str == "struct") {
         return {Token::Type::kStruct, source, "struct"};
-    if (str == "switch")
+    }
+    if (str == "switch") {
         return {Token::Type::kSwitch, source, "switch"};
-    if (str == "texture_1d")
+    }
+    if (str == "texture_1d") {
         return {Token::Type::kTextureSampled1d, source, "texture_1d"};
-    if (str == "texture_2d")
+    }
+    if (str == "texture_2d") {
         return {Token::Type::kTextureSampled2d, source, "texture_2d"};
-    if (str == "texture_2d_array")
+    }
+    if (str == "texture_2d_array") {
         return {Token::Type::kTextureSampled2dArray, source, "texture_2d_array"};
-    if (str == "texture_3d")
+    }
+    if (str == "texture_3d") {
         return {Token::Type::kTextureSampled3d, source, "texture_3d"};
-    if (str == "texture_cube")
+    }
+    if (str == "texture_cube") {
         return {Token::Type::kTextureSampledCube, source, "texture_cube"};
+    }
     if (str == "texture_cube_array") {
         return {Token::Type::kTextureSampledCubeArray, source, "texture_cube_array"};
     }
-    if (str == "texture_depth_2d")
+    if (str == "texture_depth_2d") {
         return {Token::Type::kTextureDepth2d, source, "texture_depth_2d"};
+    }
     if (str == "texture_depth_2d_array") {
         return {Token::Type::kTextureDepth2dArray, source, "texture_depth_2d_array"};
     }
-    if (str == "texture_depth_cube")
+    if (str == "texture_depth_cube") {
         return {Token::Type::kTextureDepthCube, source, "texture_depth_cube"};
+    }
     if (str == "texture_depth_cube_array") {
         return {Token::Type::kTextureDepthCubeArray, source, "texture_depth_cube_array"};
     }
@@ -1171,24 +1222,33 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     if (str == "texture_storage_3d") {
         return {Token::Type::kTextureStorage3d, source, "texture_storage_3d"};
     }
-    if (str == "true")
+    if (str == "true") {
         return {Token::Type::kTrue, source, "true"};
-    if (str == "type")
+    }
+    if (str == "type") {
         return {Token::Type::kType, source, "type"};
-    if (str == "u32")
+    }
+    if (str == "u32") {
         return {Token::Type::kU32, source, "u32"};
-    if (str == "uniform")
+    }
+    if (str == "uniform") {
         return {Token::Type::kUniform, source, "uniform"};
-    if (str == "var")
+    }
+    if (str == "var") {
         return {Token::Type::kVar, source, "var"};
-    if (str == "vec2")
+    }
+    if (str == "vec2") {
         return {Token::Type::kVec2, source, "vec2"};
-    if (str == "vec3")
+    }
+    if (str == "vec3") {
         return {Token::Type::kVec3, source, "vec3"};
-    if (str == "vec4")
+    }
+    if (str == "vec4") {
         return {Token::Type::kVec4, source, "vec4"};
-    if (str == "workgroup")
+    }
+    if (str == "workgroup") {
         return {Token::Type::kWorkgroup, source, "workgroup"};
+    }
     return {};
 }
 

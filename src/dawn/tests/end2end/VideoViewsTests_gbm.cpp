@@ -84,8 +84,9 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
         for (uint32_t i = kRenderNodeStart; i < kRenderNodeEnd; i++) {
             std::string renderNode = kRenderNodeTemplate + std::to_string(i);
             renderNodeFd = open(renderNode.c_str(), O_RDWR);
-            if (renderNodeFd >= 0)
+            if (renderNodeFd >= 0) {
                 break;
+            }
         }
         ASSERT(renderNodeFd > 0);
 

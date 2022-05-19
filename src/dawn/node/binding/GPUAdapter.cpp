@@ -25,8 +25,9 @@
 namespace {
 // TODO(amaiorano): Move to utility header
 std::vector<std::string> Split(const std::string& s, char delim) {
-    if (s.empty())
+    if (s.empty()) {
         return {};
+    }
 
     std::vector<std::string> result;
     const size_t lastIndex = s.length() - 1;
@@ -36,13 +37,15 @@ std::vector<std::string> Split(const std::string& s, char delim) {
     while (i <= lastIndex) {
         if (s[i] == delim) {
             auto token = s.substr(startIndex, i - startIndex);
-            if (!token.empty())  // Discard empty tokens
+            if (!token.empty()) {  // Discard empty tokens
                 result.push_back(token);
+            }
             startIndex = i + 1;
         } else if (i == lastIndex) {
             auto token = s.substr(startIndex, i - startIndex + 1);
-            if (!token.empty())  // Discard empty tokens
+            if (!token.empty()) {  // Discard empty tokens
                 result.push_back(token);
+            }
         }
         ++i;
     }
@@ -151,7 +154,8 @@ GPUAdapter::GPUAdapter(dawn::native::Adapter a, const Flags& flags) : adapter_(a
     name_ = props.name;
 }
 
-// TODO(dawn:1133): Avoid the extra copy by making the generator make a virtual method with const std::string&
+// TODO(dawn:1133): Avoid the extra copy by making the generator make a virtual method with const
+// std::string&
 std::string GPUAdapter::getName(Napi::Env) {
     return name_;
 }

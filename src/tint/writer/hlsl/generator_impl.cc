@@ -2324,8 +2324,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
             break;
     }
 
-    if (!EmitExpression(out, texture))
+    if (!EmitExpression(out, texture)) {
         return false;
+    }
 
     // If pack_level_in_coords is true, then the mip level will be appended as the
     // last value of the coordinates argument. If the WGSL builtin overload does
@@ -2397,8 +2398,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     }
 
     if (auto* sampler = arg(Usage::kSampler)) {
-        if (!EmitExpression(out, sampler))
+        if (!EmitExpression(out, sampler)) {
             return false;
+        }
         out << ", ";
     }
 

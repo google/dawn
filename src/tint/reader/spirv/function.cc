@@ -602,10 +602,12 @@ class StructuredTraverser {
     // header, we will visit its merge block, then its continue target (if any).
     // Also records the post order ordering.
     void VisitBackward(uint32_t id) {
-        if (id == 0)
+        if (id == 0) {
             return;
-        if (visited_.count(id))
+        }
+        if (visited_.count(id)) {
             return;
+        }
         visited_.insert(id);
 
         const spvtools::opt::BasicBlock* bb = id_to_block_[id];  // non-null for valid modules
@@ -1600,8 +1602,9 @@ bool FunctionEmitter::RegisterMerges() {
         bool is_single_block_loop = false;
         block_info->basic_block->ForEachSuccessorLabel(
             [&is_single_block_loop, block_id](const uint32_t succ) {
-                if (block_id == succ)
+                if (block_id == succ) {
                     is_single_block_loop = true;
+                }
             });
         const auto ct = block_info->continue_for_header;
         block_info->is_continue_entire_loop = ct == block_id;

@@ -125,30 +125,36 @@ Format parse_format(const std::string& fmt) {
     (void)fmt;
 
 #if TINT_BUILD_SPV_WRITER
-    if (fmt == "spirv")
+    if (fmt == "spirv") {
         return Format::kSpirv;
-    if (fmt == "spvasm")
+    }
+    if (fmt == "spvasm") {
         return Format::kSpvAsm;
+    }
 #endif  // TINT_BUILD_SPV_WRITER
 
 #if TINT_BUILD_WGSL_WRITER
-    if (fmt == "wgsl")
+    if (fmt == "wgsl") {
         return Format::kWgsl;
+    }
 #endif  // TINT_BUILD_WGSL_WRITER
 
 #if TINT_BUILD_MSL_WRITER
-    if (fmt == "msl")
+    if (fmt == "msl") {
         return Format::kMsl;
+    }
 #endif  // TINT_BUILD_MSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER
-    if (fmt == "hlsl")
+    if (fmt == "hlsl") {
         return Format::kHlsl;
+    }
 #endif  // TINT_BUILD_HLSL_WRITER
 
 #if TINT_BUILD_GLSL_WRITER
-    if (fmt == "glsl")
+    if (fmt == "glsl") {
         return Format::kGlsl;
+    }
 #endif  // TINT_BUILD_GLSL_WRITER
 
     return Format::kNone;

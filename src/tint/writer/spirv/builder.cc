@@ -55,8 +55,9 @@ const char kGLSLstd450[] = "GLSL.std.450";
 
 uint32_t size_of(const InstructionList& instructions) {
     uint32_t size = 0;
-    for (const auto& inst : instructions)
+    for (const auto& inst : instructions) {
         size += inst.word_length();
+    }
 
     return size;
 }

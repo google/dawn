@@ -154,8 +154,9 @@ class VulkanImageWrappingTestBackendDmaBuf : public VulkanImageWrappingTestBacke
         for (uint32_t i = kRenderNodeStart; i < kRenderNodeEnd; i++) {
             std::string renderNode = kRenderNodeTemplate + std::to_string(i);
             renderNodeFd = open(renderNode.c_str(), O_RDWR);
-            if (renderNodeFd >= 0)
+            if (renderNodeFd >= 0) {
                 break;
+            }
         }
         EXPECT_GE(renderNodeFd, 0) << "Failed to get file descriptor for render node";
 
@@ -167,8 +168,9 @@ class VulkanImageWrappingTestBackendDmaBuf : public VulkanImageWrappingTestBacke
   private:
     gbm_bo* CreateGbmBo(uint32_t width, uint32_t height, bool linear) {
         uint32_t flags = GBM_BO_USE_RENDERING;
-        if (linear)
+        if (linear) {
             flags |= GBM_BO_USE_LINEAR;
+        }
         gbm_bo* gbmBo = gbm_bo_create(mGbmDevice, width, height, GBM_FORMAT_XBGR8888, flags);
         EXPECT_NE(gbmBo, nullptr) << "Failed to create GBM buffer object";
         return gbmBo;

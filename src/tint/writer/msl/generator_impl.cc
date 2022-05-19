@@ -1043,8 +1043,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
                 }
             }
 
-            if (!EmitExpression(out, e->Declaration()))
+            if (!EmitExpression(out, e->Declaration())) {
                 return false;
+            }
 
             if (casted) {
                 out << ")";

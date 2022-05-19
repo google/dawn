@@ -978,8 +978,7 @@ std::pair<wgpu::Device, WGPUDevice> DawnTestBase::CreateDeviceImpl(std::string i
                                       mDeviceErrorCallback.MakeUserdata(device.Get()));
     device.SetDeviceLostCallback(mDeviceLostCallback.Callback(),
                                  mDeviceLostCallback.MakeUserdata(device.Get()));
-    EXPECT_CALL(mDeviceLostCallback,
-                Call(WGPUDeviceLostReason_Destroyed, testing::_, device.Get()))
+    EXPECT_CALL(mDeviceLostCallback, Call(WGPUDeviceLostReason_Destroyed, testing::_, device.Get()))
         .Times(testing::AtMost(1));
 
     device.SetLoggingCallback(

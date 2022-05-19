@@ -34,8 +34,9 @@ Symbol SymbolTable::Register(const std::string& name) {
     TINT_ASSERT(Symbol, !name.empty());
 
     auto it = name_to_symbol_.find(name);
-    if (it != name_to_symbol_.end())
+    if (it != name_to_symbol_.end()) {
         return it->second;
+    }
 
 #if TINT_SYMBOL_STORE_DEBUG_NAME
     Symbol sym(next_symbol_, program_id_, name);

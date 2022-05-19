@@ -103,10 +103,11 @@ class StackAllocator : public std::allocator<T> {
     // Free: when trying to free the stack buffer, just mark it as free. For
     // non-stack-buffer pointers, just fall though to the standard allocator.
     void deallocate(pointer p, size_type n) {
-        if (source_ && p == source_->stack_buffer())
+        if (source_ && p == source_->stack_buffer()) {
             source_->used_stack_buffer_ = false;
-        else
+        } else {
             std::allocator<T>::deallocate(p, n);
+        }
     }
 
   private:

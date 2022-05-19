@@ -921,8 +921,9 @@ class TraceEndOnScopeClose {
     // Note: members of m_data intentionally left uninitialized. See initialize.
     TraceEndOnScopeClose() : m_pdata(0) {}
     ~TraceEndOnScopeClose() {
-        if (m_pdata)
+        if (m_pdata) {
             addEventIfEnabled();
+        }
     }
 
     void initialize(dawn::platform::Platform* platform,

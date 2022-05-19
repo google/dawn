@@ -67,4 +67,3 @@ const char* str(CtorConvIntrinsic i) {
 }
 
 }  // namespace tint::resolver
-

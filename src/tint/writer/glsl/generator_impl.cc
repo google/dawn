@@ -1464,8 +1464,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
 
     out << "(";
 
-    if (!EmitExpression(out, texture))
+    if (!EmitExpression(out, texture)) {
         return false;
+    }
 
     out << ", ";
 
@@ -2601,8 +2602,10 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         if (storage && storage->access() != ast::Access::kRead) {
             out << "writeonly ";
         }
-        auto* subtype =
-            sampled ? sampled->type() : storage ? storage->type() : ms ? ms->type() : nullptr;
+        auto* subtype = sampled   ? sampled->type()
+                        : storage ? storage->type()
+                        : ms      ? ms->type()
+                                  : nullptr;
         if (!subtype || subtype->Is<sem::F32>()) {
         } else if (subtype->Is<sem::I32>()) {
             out << "i";
