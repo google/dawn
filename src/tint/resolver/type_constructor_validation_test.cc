@@ -318,7 +318,7 @@ TEST_P(ConversionConstructorValidTest, All) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     switch (params.kind) {
         case Kind::Construct: {
@@ -440,7 +440,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Array_ZeroValue_P
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     EXPECT_TRUE(call->Type()->Is<sem::Array>());
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
@@ -456,7 +456,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Array_type_match)
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     EXPECT_TRUE(call->Type()->Is<sem::Array>());
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
@@ -629,7 +629,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Construct_i32_Success) {
     ASSERT_NE(TypeOf(expr), nullptr);
     ASSERT_TRUE(TypeOf(expr)->Is<sem::I32>());
 
-    auto* call = Sem().Get(expr);
+    auto* call = Sem().Get<sem::Call>(expr);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
     ASSERT_NE(ctor, nullptr);
@@ -647,7 +647,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Construct_u32_Success) {
     ASSERT_NE(TypeOf(expr), nullptr);
     ASSERT_TRUE(TypeOf(expr)->Is<sem::U32>());
 
-    auto* call = Sem().Get(expr);
+    auto* call = Sem().Get<sem::Call>(expr);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
     ASSERT_NE(ctor, nullptr);
@@ -665,7 +665,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Construct_f32_Success) {
     ASSERT_NE(TypeOf(expr), nullptr);
     ASSERT_TRUE(TypeOf(expr)->Is<sem::F32>());
 
-    auto* call = Sem().Get(expr);
+    auto* call = Sem().Get<sem::Call>(expr);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
     ASSERT_NE(ctor, nullptr);
@@ -683,7 +683,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Convert_f32_to_i32_Success) {
     ASSERT_NE(TypeOf(expr), nullptr);
     ASSERT_TRUE(TypeOf(expr)->Is<sem::I32>());
 
-    auto* call = Sem().Get(expr);
+    auto* call = Sem().Get<sem::Call>(expr);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConversion>();
     ASSERT_NE(ctor, nullptr);
@@ -701,7 +701,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Convert_i32_to_u32_Success) {
     ASSERT_NE(TypeOf(expr), nullptr);
     ASSERT_TRUE(TypeOf(expr)->Is<sem::U32>());
 
-    auto* call = Sem().Get(expr);
+    auto* call = Sem().Get<sem::Call>(expr);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConversion>();
     ASSERT_NE(ctor, nullptr);
@@ -719,7 +719,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Convert_u32_to_f32_Success) {
     ASSERT_NE(TypeOf(expr), nullptr);
     ASSERT_TRUE(TypeOf(expr)->Is<sem::F32>());
 
-    auto* call = Sem().Get(expr);
+    auto* call = Sem().Get<sem::Call>(expr);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConversion>();
     ASSERT_NE(ctor, nullptr);
@@ -831,7 +831,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec2_Success_Zero
     EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 2u);
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
     ASSERT_NE(ctor, nullptr);
@@ -850,7 +850,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec2F32_Success_S
     EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 2u);
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
     ASSERT_NE(ctor, nullptr);
@@ -871,7 +871,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec2U32_Success_S
     EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::U32>());
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 2u);
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
     ASSERT_NE(ctor, nullptr);
@@ -892,7 +892,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec2I32_Success_S
     EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::I32>());
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 2u);
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
     ASSERT_NE(ctor, nullptr);
@@ -913,7 +913,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec2Bool_Success_
     EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::Bool>());
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 2u);
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
     ASSERT_NE(ctor, nullptr);
@@ -934,7 +934,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec2_Success_Iden
     EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 2u);
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
     ASSERT_NE(ctor, nullptr);
@@ -954,7 +954,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec2_Success_Vec2
     EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 2u);
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConversion>();
     ASSERT_NE(ctor, nullptr);
@@ -1079,7 +1079,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec3_Success_Zero
     EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
     ASSERT_NE(ctor, nullptr);
@@ -1098,7 +1098,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec3F32_Success_S
     EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
     ASSERT_NE(ctor, nullptr);
@@ -1120,7 +1120,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec3U32_Success_S
     EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::U32>());
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
     ASSERT_NE(ctor, nullptr);
@@ -1142,7 +1142,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec3I32_Success_S
     EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::I32>());
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
     ASSERT_NE(ctor, nullptr);
@@ -1164,7 +1164,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec3Bool_Success_
     EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::Bool>());
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
     ASSERT_NE(ctor, nullptr);
@@ -1186,7 +1186,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec3_Success_Vec2
     EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
     ASSERT_NE(ctor, nullptr);
@@ -1207,7 +1207,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec3_Success_Scal
     EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
     ASSERT_NE(ctor, nullptr);
@@ -1228,7 +1228,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec3_Success_Iden
     EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConstructor>();
     ASSERT_NE(ctor, nullptr);
@@ -1248,7 +1248,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vec3_Success_Vec3
     EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 
-    auto* call = Sem().Get(tc);
+    auto* call = Sem().Get<sem::Call>(tc);
     ASSERT_NE(call, nullptr);
     auto* ctor = call->Target()->As<sem::TypeConversion>();
     ASSERT_NE(ctor, nullptr);

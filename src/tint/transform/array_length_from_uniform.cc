@@ -52,7 +52,7 @@ static void IterateArrayLengthOnStorageVar(CloneContext& ctx, F&& functor) {
             continue;
         }
 
-        auto* call = sem.Get(call_expr);
+        auto* call = sem.Get(call_expr)->UnwrapMaterialize()->As<sem::Call>();
         auto* builtin = call->Target()->As<sem::Builtin>();
         if (!builtin || builtin->Type() != sem::BuiltinType::kArrayLength) {
             continue;

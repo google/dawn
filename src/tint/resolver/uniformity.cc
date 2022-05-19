@@ -1162,7 +1162,7 @@ class UniformityGraph {
         // Get tags for the callee.
         CallSiteTag callsite_tag = CallSiteNoRestriction;
         FunctionTag function_tag = NoRestriction;
-        auto* sem = sem_.Get(call);
+        auto* sem = SemCall(call);
         const FunctionInfo* func_info = nullptr;
         Switch(
             sem->Target(),
@@ -1313,7 +1313,7 @@ class UniformityGraph {
     /// Recursively descend through the function called by `call` and the functions that it calls in
     /// order to find a call to a builtin function that requires uniformity.
     const ast::CallExpression* FindBuiltinThatRequiresUniformity(const ast::CallExpression* call) {
-        auto* target = sem_.Get(call)->Target();
+        auto* target = SemCall(call)->Target();
         if (target->Is<sem::Builtin>()) {
             // This is a call to a builtin, so we must be done.
             return call;
@@ -1362,7 +1362,7 @@ class UniformityGraph {
                                           call->args[idx]->source);
 
                     // Recurse into the target function.
-                    if (auto* user = sem_.Get(call)->Target()->As<sem::Function>()) {
+                    if (auto* user = SemCall(call)->Target()->As<sem::Function>()) {
                         auto& callee = functions_.at(user->Declaration());
                         ShowCauseOfNonUniformity(callee, callee.cf_return,
                                                  callee.parameters[idx].init_value);
@@ -1427,7 +1427,7 @@ class UniformityGraph {
                             c->source);
 
                         // Recurse into the target function.
-                        if (auto* user = sem_.Get(c)->Target()->As<sem::Function>()) {
+                        if (auto* user = SemCall(c)->Target()->As<sem::Function>()) {
                             auto& callee = functions_.at(user->Declaration());
                             ShowCauseOfNonUniformity(callee, callee.cf_return,
                                                      callee.may_be_non_uniform);
@@ -1489,7 +1489,7 @@ class UniformityGraph {
         // The node will always have a corresponding call expression.
         auto* call = cause->ast->As<ast::CallExpression>();
         TINT_ASSERT(Resolver, call);
-        auto* target = sem_.Get(call)->Target();
+        auto* target = SemCall(call)->Target();
 
         std::string func_name;
         if (auto* builtin = target->As<sem::Builtin>()) {
@@ -1521,14 +1521,17 @@ class UniformityGraph {
             // causes the uniformity requirement.
             auto* innermost_call = FindBuiltinThatRequiresUniformity(call);
             if (innermost_call != call) {
+                auto* sem_call = SemCall(call);
+                auto* sem_innermost_call = SemCall(innermost_call);
+
                 // Determine whether the builtin is being called directly or indirectly.
                 bool indirect = false;
-                if (sem_.Get(call)->Target()->As<sem::Function>() !=
-                    sem_.Get(innermost_call)->Stmt()->Function()) {
+                if (sem_call->Target()->As<sem::Function>() !=
+                    sem_innermost_call->Stmt()->Function()) {
                     indirect = true;
                 }
 
-                auto* builtin = sem_.Get(innermost_call)->Target()->As<sem::Builtin>();
+                auto* builtin = sem_innermost_call->Target()->As<sem::Builtin>();
                 diagnostics_.add_note(diag::System::Resolver,
                                       "'" + func_name + "' requires uniformity because it " +
                                           (indirect ? "indirectly " : "") + "calls " +
@@ -1542,6 +1545,11 @@ class UniformityGraph {
             ShowCauseOfNonUniformity(function, function.required_to_be_uniform,
                                      function.may_be_non_uniform);
         }
+    }
+
+    // Helper for obtaining the sem::Call node for the ast::CallExpression
+    const sem::Call* SemCall(const ast::CallExpression* expr) const {
+        return sem_.Get(expr)->UnwrapMaterialize()->As<sem::Call>();
     }
 };
 

@@ -49,7 +49,7 @@ void VectorizeScalarMatrixConstructors::Run(CloneContext& ctx, const DataMap&, D
     std::unordered_map<const sem::Matrix*, Symbol> scalar_ctors;
 
     ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::CallExpression* {
-        auto* call = ctx.src->Sem().Get(expr);
+        auto* call = ctx.src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
         auto* ty_ctor = call->Target()->As<sem::TypeConstructor>();
         if (!ty_ctor) {
             return nullptr;

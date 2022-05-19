@@ -123,7 +123,7 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) cons
     // Find all the arrayLength() calls...
     for (auto* node : ctx.src->ASTNodes().Objects()) {
         if (auto* call_expr = node->As<ast::CallExpression>()) {
-            auto* call = sem.Get(call_expr);
+            auto* call = sem.Get(call_expr)->UnwrapMaterialize()->As<sem::Call>();
             if (auto* builtin = call->Target()->As<sem::Builtin>()) {
                 if (builtin->Type() == sem::BuiltinType::kArrayLength) {
                     // We're dealing with an arrayLength() call

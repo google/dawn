@@ -30,6 +30,7 @@
 #include "src/tint/sem/depth_multisampled_texture.h"
 #include "src/tint/sem/depth_texture.h"
 #include "src/tint/sem/function.h"
+#include "src/tint/sem/materialize.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
 #include "src/tint/sem/multisampled_texture.h"
@@ -1273,7 +1274,13 @@ bool Builder::IsConstructorConst(const ast::Expression* expr) {
             return ast::TraverseAction::Descend;
         }
         if (auto* ce = e->As<ast::CallExpression>()) {
-            auto* call = builder_.Sem().Get(ce);
+            auto* sem = builder_.Sem().Get(ce);
+            if (sem->Is<sem::Materialize>()) {
+                // Materialize can only occur on compile time expressions, so this sub-tree must be
+                // constant.
+                return ast::TraverseAction::Skip;
+            }
+            auto* call = sem->As<sem::Call>();
             if (call->Target()->Is<sem::TypeConstructor>()) {
                 return ast::TraverseAction::Descend;
             }
@@ -2154,7 +2161,12 @@ bool Builder::GenerateBlockStatementWithoutScoping(const ast::BlockStatement* st
 }
 
 uint32_t Builder::GenerateCallExpression(const ast::CallExpression* expr) {
-    auto* call = builder_.Sem().Get(expr);
+    auto* sem = builder_.Sem().Get(expr);
+    if (auto* m = sem->As<sem::Materialize>()) {
+        // TODO(crbug.com/tint/1504): Just emit the constant value.
+        sem = m->Expr();
+    }
+    auto* call = sem->As<sem::Call>();
     auto* target = call->Target();
     return Switch(
         target, [&](const sem::Function* func) { return GenerateFunctionCall(call, func); },

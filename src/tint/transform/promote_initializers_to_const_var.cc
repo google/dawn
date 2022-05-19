@@ -33,7 +33,7 @@ void PromoteInitializersToConstVar::Run(CloneContext& ctx, const DataMap&, DataM
     // Hoists array and structure initializers to a constant variable, declared
     // just before the statement of usage.
     auto type_ctor_to_let = [&](const ast::CallExpression* expr) {
-        auto* ctor = ctx.src->Sem().Get(expr);
+        auto* ctor = ctx.src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
         if (!ctor->Target()->Is<sem::TypeConstructor>()) {
             return true;
         }

@@ -206,7 +206,7 @@ struct Robustness::State {
     /// @return the clamped replacement call expression, or nullptr if `expr`
     /// should be cloned without changes.
     const ast::CallExpression* Transform(const ast::CallExpression* expr) {
-        auto* call = ctx.src->Sem().Get(expr);
+        auto* call = ctx.src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
         auto* call_target = call->Target();
         auto* builtin = call_target->As<sem::Builtin>();
         if (!builtin || !TextureBuiltinNeedsClamping(builtin->Type())) {

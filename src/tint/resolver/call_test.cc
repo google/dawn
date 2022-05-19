@@ -94,7 +94,7 @@ TEST_F(ResolverCallTest, Valid) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* call = Sem().Get(call_expr);
+    auto* call = Sem().Get<sem::Call>(call_expr);
     EXPECT_NE(call, nullptr);
     EXPECT_EQ(call->Target(), Sem().Get(func));
 }
@@ -106,7 +106,7 @@ TEST_F(ResolverCallTest, OutOfOrder) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* call = Sem().Get(call_expr);
+    auto* call = Sem().Get<sem::Call>(call_expr);
     EXPECT_NE(call, nullptr);
     EXPECT_EQ(call->Target(), Sem().Get(b));
 }

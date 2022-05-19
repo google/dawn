@@ -86,12 +86,19 @@ void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
             if (stmt->lhs->Is<ast::PhonyExpression>()) {
                 std::vector<const ast::Expression*> side_effects;
                 if (!ast::TraverseExpressions(
-                        stmt->rhs, ctx.dst->Diagnostics(), [&](const ast::CallExpression* call) {
+                        stmt->rhs, ctx.dst->Diagnostics(), [&](const ast::CallExpression* expr) {
                             // ast::CallExpression may map to a function or builtin call
                             // (both may have side-effects), or a type constructor or
                             // type conversion (both do not have side effects).
-                            if (sem.Get(call)->Target()->IsAnyOf<sem::Function, sem::Builtin>()) {
-                                side_effects.push_back(call);
+                            auto* call = sem.Get<sem::Call>(expr);
+                            if (!call) {
+                                // Semantic node must be a Materialize, in which case the expression
+                                // was creation-time (compile time), so could not have side effects.
+                                // Just skip.
+                                return ast::TraverseAction::Skip;
+                            }
+                            if (call->Target()->IsAnyOf<sem::Function, sem::Builtin>()) {
+                                side_effects.push_back(expr);
                                 return ast::TraverseAction::Skip;
                             }
                             return ast::TraverseAction::Descend;

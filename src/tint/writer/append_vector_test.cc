@@ -46,7 +46,7 @@ TEST_F(AppendVectorTest, Vec2i32_i32) {
     EXPECT_EQ(vec_123->args[1], scalar_2);
     EXPECT_EQ(vec_123->args[2], scalar_3);
 
-    auto* call = Sem().Get(vec_123);
+    auto* call = Sem().Get<sem::Call>(vec_123);
     ASSERT_NE(call, nullptr);
     ASSERT_EQ(call->Arguments().size(), 3u);
     EXPECT_EQ(call->Arguments()[0], Sem().Get(scalar_1));
@@ -90,7 +90,7 @@ TEST_F(AppendVectorTest, Vec2i32_u32) {
     ASSERT_EQ(u32_to_i32->args.size(), 1u);
     EXPECT_EQ(u32_to_i32->args[0], scalar_3);
 
-    auto* call = Sem().Get(vec_123);
+    auto* call = Sem().Get<sem::Call>(vec_123);
     ASSERT_NE(call, nullptr);
     ASSERT_EQ(call->Arguments().size(), 3u);
     EXPECT_EQ(call->Arguments()[0], Sem().Get(scalar_1));
@@ -142,7 +142,7 @@ TEST_F(AppendVectorTest, Vec2i32FromVec2u32_u32) {
     ASSERT_EQ(u32_to_i32->args.size(), 1u);
     EXPECT_EQ(u32_to_i32->args[0], scalar_3);
 
-    auto* call = Sem().Get(vec_123);
+    auto* call = Sem().Get<sem::Call>(vec_123);
     ASSERT_NE(call, nullptr);
     ASSERT_EQ(call->Arguments().size(), 2u);
     EXPECT_EQ(call->Arguments()[0], Sem().Get(vec_12));
@@ -184,7 +184,7 @@ TEST_F(AppendVectorTest, Vec2i32_f32) {
     ASSERT_EQ(f32_to_i32->args.size(), 1u);
     EXPECT_EQ(f32_to_i32->args[0], scalar_3);
 
-    auto* call = Sem().Get(vec_123);
+    auto* call = Sem().Get<sem::Call>(vec_123);
     ASSERT_NE(call, nullptr);
     ASSERT_EQ(call->Arguments().size(), 3u);
     EXPECT_EQ(call->Arguments()[0], Sem().Get(scalar_1));
@@ -226,7 +226,7 @@ TEST_F(AppendVectorTest, Vec3i32_i32) {
     EXPECT_EQ(vec_1234->args[2], scalar_3);
     EXPECT_EQ(vec_1234->args[3], scalar_4);
 
-    auto* call = Sem().Get(vec_1234);
+    auto* call = Sem().Get<sem::Call>(vec_1234);
     ASSERT_NE(call, nullptr);
     ASSERT_EQ(call->Arguments().size(), 4u);
     EXPECT_EQ(call->Arguments()[0], Sem().Get(scalar_1));
@@ -266,7 +266,7 @@ TEST_F(AppendVectorTest, Vec2i32Var_i32) {
     EXPECT_EQ(vec_123->args[0], vec_12);
     EXPECT_EQ(vec_123->args[1], scalar_3);
 
-    auto* call = Sem().Get(vec_123);
+    auto* call = Sem().Get<sem::Call>(vec_123);
     ASSERT_NE(call, nullptr);
     ASSERT_EQ(call->Arguments().size(), 2u);
     EXPECT_EQ(call->Arguments()[0], Sem().Get(vec_12));
@@ -305,7 +305,7 @@ TEST_F(AppendVectorTest, Vec2i32_i32Var) {
     EXPECT_EQ(vec_123->args[1], scalar_2);
     EXPECT_EQ(vec_123->args[2], scalar_3);
 
-    auto* call = Sem().Get(vec_123);
+    auto* call = Sem().Get<sem::Call>(vec_123);
     ASSERT_NE(call, nullptr);
     ASSERT_EQ(call->Arguments().size(), 3u);
     EXPECT_EQ(call->Arguments()[0], Sem().Get(scalar_1));
@@ -344,7 +344,7 @@ TEST_F(AppendVectorTest, Vec2i32Var_i32Var) {
     EXPECT_EQ(vec_123->args[0], vec_12);
     EXPECT_EQ(vec_123->args[1], scalar_3);
 
-    auto* call = Sem().Get(vec_123);
+    auto* call = Sem().Get<sem::Call>(vec_123);
     ASSERT_NE(call, nullptr);
     ASSERT_EQ(call->Arguments().size(), 2u);
     EXPECT_EQ(call->Arguments()[0], Sem().Get(vec_12));
@@ -385,7 +385,7 @@ TEST_F(AppendVectorTest, Vec2i32Var_f32Var) {
     ASSERT_EQ(f32_to_i32->args.size(), 1u);
     EXPECT_EQ(f32_to_i32->args[0], scalar_3);
 
-    auto* call = Sem().Get(vec_123);
+    auto* call = Sem().Get<sem::Call>(vec_123);
     ASSERT_NE(call, nullptr);
     ASSERT_EQ(call->Arguments().size(), 2u);
     EXPECT_EQ(call->Arguments()[0], Sem().Get(vec_12));
@@ -422,7 +422,7 @@ TEST_F(AppendVectorTest, Vec2boolVar_boolVar) {
     EXPECT_EQ(vec_123->args[0], vec_12);
     EXPECT_EQ(vec_123->args[1], scalar_3);
 
-    auto* call = Sem().Get(vec_123);
+    auto* call = Sem().Get<sem::Call>(vec_123);
     ASSERT_NE(call, nullptr);
     ASSERT_EQ(call->Arguments().size(), 2u);
     EXPECT_EQ(call->Arguments()[0], Sem().Get(vec_12));
@@ -461,7 +461,7 @@ TEST_F(AppendVectorTest, ZeroVec3i32_i32) {
     }
     EXPECT_EQ(vec_0004->args[3], scalar);
 
-    auto* call = Sem().Get(vec_0004);
+    auto* call = Sem().Get<sem::Call>(vec_0004);
     ASSERT_NE(call, nullptr);
     ASSERT_EQ(call->Arguments().size(), 4u);
     EXPECT_EQ(call->Arguments()[0], Sem().Get(vec_0004->args[0]));

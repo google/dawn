@@ -83,7 +83,7 @@ void WrapArraysInStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) const
 
     // Fix up array constructors so `A(1,2)` becomes `tint_array_wrapper(A(1,2))`
     ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::Expression* {
-        if (auto* call = sem.Get(expr)) {
+        if (auto* call = sem.Get(expr)->UnwrapMaterialize()->As<sem::Call>()) {
             if (auto* ctor = call->Target()->As<sem::TypeConstructor>()) {
                 if (auto* array = ctor->ReturnType()->As<sem::Array>()) {
                     if (auto w = wrapper(array)) {

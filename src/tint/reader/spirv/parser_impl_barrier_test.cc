@@ -69,7 +69,7 @@ TEST_F(SpvParserTest, WorkgroupBarrier) {
     auto* call = helper->body->statements[0]->As<ast::CallStatement>();
     ASSERT_NE(call, nullptr);
     EXPECT_EQ(call->expr->args.size(), 0u);
-    auto* sem_call = program.Sem().Get(call->expr);
+    auto* sem_call = program.Sem().Get<sem::Call>(call->expr);
     ASSERT_NE(sem_call, nullptr);
     auto* builtin = sem_call->Target()->As<sem::Builtin>();
     ASSERT_NE(builtin, nullptr);
@@ -102,7 +102,7 @@ TEST_F(SpvParserTest, StorageBarrier) {
     auto* call = helper->body->statements[0]->As<ast::CallStatement>();
     ASSERT_NE(call, nullptr);
     EXPECT_EQ(call->expr->args.size(), 0u);
-    auto* sem_call = program.Sem().Get(call->expr);
+    auto* sem_call = program.Sem().Get<sem::Call>(call->expr);
     ASSERT_NE(sem_call, nullptr);
     auto* builtin = sem_call->Target()->As<sem::Builtin>();
     ASSERT_NE(builtin, nullptr);

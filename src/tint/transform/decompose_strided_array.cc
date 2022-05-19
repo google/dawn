@@ -115,7 +115,7 @@ void DecomposeStridedArray::Run(CloneContext& ctx, const DataMap&, DataMap&) con
     //   `array<strided_arr, 3>(strided_arr(1), strided_arr(2), strided_arr(3))`
     ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::Expression* {
         if (!expr->args.empty()) {
-            if (auto* call = sem.Get(expr)) {
+            if (auto* call = sem.Get(expr)->UnwrapMaterialize()->As<sem::Call>()) {
                 if (auto* ctor = call->Target()->As<sem::TypeConstructor>()) {
                     if (auto* arr = ctor->ReturnType()->As<sem::Array>()) {
                         // Begin by cloning the array constructor type or name

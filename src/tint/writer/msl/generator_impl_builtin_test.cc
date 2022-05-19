@@ -189,7 +189,7 @@ TEST_P(MslBuiltinTest, Emit) {
 
     GeneratorImpl& gen = Build();
 
-    auto* sem = program->Sem().Get(call);
+    auto* sem = program->Sem().Get<sem::Call>(call);
     ASSERT_NE(sem, nullptr);
     auto* target = sem->Target();
     ASSERT_NE(target, nullptr);

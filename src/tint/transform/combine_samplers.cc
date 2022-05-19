@@ -220,7 +220,7 @@ struct CombineSamplers::State {
         // sampler parameters to use the current function's combined samplers or
         // the combined global samplers, as appropriate.
         ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::Expression* {
-            if (auto* call = sem.Get(expr)) {
+            if (auto* call = sem.Get(expr)->UnwrapMaterialize()->As<sem::Call>()) {
                 ast::ExpressionList args;
                 // Replace all texture builtin calls.
                 if (auto* builtin = call->Target()->As<sem::Builtin>()) {

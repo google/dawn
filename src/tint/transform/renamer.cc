@@ -1278,7 +1278,7 @@ Output Renamer::Run(const Program* in, const DataMap& inputs) const {
                 }
             }
         } else if (auto* call = node->As<ast::CallExpression>()) {
-            auto* sem = in->Sem().Get(call);
+            auto* sem = in->Sem().Get(call)->UnwrapMaterialize()->As<sem::Call>();
             if (!sem) {
                 TINT_ICE(Transform, out.Diagnostics()) << "CallExpression has no semantic info";
                 continue;

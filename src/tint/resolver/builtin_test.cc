@@ -1924,7 +1924,7 @@ TEST_P(ResolverBuiltinTest_Texture, Call) {
         }
     }
 
-    auto* call_sem = Sem().Get(call);
+    auto* call_sem = Sem().Get<sem::Call>(call);
     ASSERT_NE(call_sem, nullptr);
     auto* target = call_sem->Target();
     ASSERT_NE(target, nullptr);

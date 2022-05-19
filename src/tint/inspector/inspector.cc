@@ -777,7 +777,7 @@ void Inspector::GenerateSamplerTargets() {
             continue;
         }
 
-        auto* call = sem.Get(c);
+        auto* call = sem.Get(c)->UnwrapMaterialize()->As<sem::Call>();
         if (!call) {
             continue;
         }

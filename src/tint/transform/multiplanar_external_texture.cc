@@ -184,7 +184,8 @@ struct MultiplanarExternalTexture::State {
         // Transform the original textureLoad and textureSampleLevel calls into
         // textureLoadExternal and textureSampleExternal calls.
         ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::CallExpression* {
-            auto* builtin = sem.Get(expr)->Target()->As<sem::Builtin>();
+            auto* call = sem.Get(expr)->UnwrapMaterialize()->As<sem::Call>();
+            auto* builtin = call->Target()->As<sem::Builtin>();
 
             if (builtin && !builtin->Parameters().empty() &&
                 builtin->Parameters()[0]->Type()->Is<sem::ExternalTexture>() &&
@@ -209,7 +210,7 @@ struct MultiplanarExternalTexture::State {
                     }
                 }
 
-            } else if (sem.Get(expr)->Target()->Is<sem::Function>()) {
+            } else if (call->Target()->Is<sem::Function>()) {
                 // The call expression may be to a user-defined function that
                 // contains a texture_external parameter. These need to be expanded
                 // out to multiple plane textures and the texture parameters
