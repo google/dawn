@@ -1122,7 +1122,8 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                     RecordBufferTextureCopyWithBufferHandle(
                         BufferTextureCopyDirection::B2T, commandList,
                         ToBackend(uploadHandle.stagingBuffer)->GetResource(),
-                        uploadHandle.startOffset, bytesPerRow, GetHeight(), textureCopy, copySize);
+                        uploadHandle.startOffset, bytesPerRow, largestMipSize.height, textureCopy,
+                        copySize);
                 }
             }
         }
