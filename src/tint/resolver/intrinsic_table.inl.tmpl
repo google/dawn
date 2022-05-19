@@ -188,7 +188,7 @@ class {{$class}} : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* {{$class}}::Match(MatchState& state, const sem::Type* ty) const {
@@ -207,7 +207,7 @@ const sem::Type* {{$class}}::Match(MatchState& state, const sem::Type* ty) const
   return build_{{TrimLeft .Name "_"}}(state{{range .TemplateParams}}, {{.GetName}}{{end}});
 }
 
-std::string {{$class}}::String(MatchState&{{if .TemplateParams}} state{{end}}) const {
+std::string {{$class}}::String(MatchState*{{if .TemplateParams}} state{{end}}) const {
 {{- range .TemplateParams }}
 {{-   template "DeclareLocalTemplateParamName" . }}
 {{- end  }}
@@ -244,7 +244,7 @@ class {{$class}} : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* {{$class}}::Match(MatchState& state, const sem::Type* ty) const {
@@ -256,15 +256,18 @@ const sem::Type* {{$class}}::Match(MatchState& state, const sem::Type* ty) const
   return nullptr;
 }
 
-std::string {{$class}}::String(MatchState&) const {
-  return "
+std::string {{$class}}::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss
 {{- range .Types -}}
-{{-   if      IsFirstIn . $.Types }}{{.Name}}
-{{-   else if IsLastIn  . $.Types }} or {{.Name}}
-{{-   else                        }}, {{.Name}}
+{{-   if      IsFirstIn . $.Types }} << {{PascalCase .Name}}().String(nullptr)
+{{-   else if IsLastIn  . $.Types }} << " or " << {{PascalCase .Name}}().String(nullptr)
+{{-   else                        }} << ", " << {{PascalCase .Name}}().String(nullptr)
 {{-   end -}}
-{{- end -}}
-  ";
+{{- end -}};
+  return ss.str();
 }
 {{  end -}}
 
@@ -287,7 +290,7 @@ class {{$class}} : public NumberMatcher {
   Number Match(MatchState& state, Number number) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 {{ if eq 1 (len .Options) -}}
@@ -312,7 +315,7 @@ Number {{$class}}::Match(MatchState&, Number number) const {
 }
 {{- end }}
 
-std::string {{$class}}::String(MatchState&) const {
+std::string {{$class}}::String(MatchState*) const {
   return "
 {{- range .Options -}}
 {{-   if      IsFirstIn . $.Options }}{{.Name}}
@@ -405,11 +408,11 @@ Matchers::~Matchers() = default;
 {{-                   define "DeclareLocalTemplateParamName"                 -}}
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-   if      IsTemplateTypeParam . }}
-  const std::string {{.Name}} = state.TypeName();
+  const std::string {{.Name}} = state->TypeName();
 {{-   else if IsTemplateNumberParam . }}
-  const std::string {{.Name}} = state.NumName();
+  const std::string {{.Name}} = state->NumName();
 {{-   else if IsTemplateEnumParam . }}
-  const std::string {{.Name}} = state.NumName();
+  const std::string {{.Name}} = state->NumName();
 {{-   end -}}
 {{- end -}}
 

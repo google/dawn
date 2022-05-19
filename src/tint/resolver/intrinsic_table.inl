@@ -37,7 +37,7 @@ class Bool : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Bool::Match(MatchState& state, const sem::Type* ty) const {
@@ -47,7 +47,7 @@ const sem::Type* Bool::Match(MatchState& state, const sem::Type* ty) const {
   return build_bool(state);
 }
 
-std::string Bool::String(MatchState&) const {
+std::string Bool::String(MatchState*) const {
   return "bool";
 }
 
@@ -64,7 +64,7 @@ class I32 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* I32::Match(MatchState& state, const sem::Type* ty) const {
@@ -74,7 +74,7 @@ const sem::Type* I32::Match(MatchState& state, const sem::Type* ty) const {
   return build_i32(state);
 }
 
-std::string I32::String(MatchState&) const {
+std::string I32::String(MatchState*) const {
   return "i32";
 }
 
@@ -91,7 +91,7 @@ class U32 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* U32::Match(MatchState& state, const sem::Type* ty) const {
@@ -101,7 +101,7 @@ const sem::Type* U32::Match(MatchState& state, const sem::Type* ty) const {
   return build_u32(state);
 }
 
-std::string U32::String(MatchState&) const {
+std::string U32::String(MatchState*) const {
   return "u32";
 }
 
@@ -118,7 +118,7 @@ class F32 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* F32::Match(MatchState& state, const sem::Type* ty) const {
@@ -128,7 +128,7 @@ const sem::Type* F32::Match(MatchState& state, const sem::Type* ty) const {
   return build_f32(state);
 }
 
-std::string F32::String(MatchState&) const {
+std::string F32::String(MatchState*) const {
   return "f32";
 }
 
@@ -145,7 +145,7 @@ class Vec2 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Vec2::Match(MatchState& state, const sem::Type* ty) const {
@@ -160,8 +160,8 @@ const sem::Type* Vec2::Match(MatchState& state, const sem::Type* ty) const {
   return build_vec2(state, T);
 }
 
-std::string Vec2::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Vec2::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "vec2<" + T + ">";
 }
 
@@ -178,7 +178,7 @@ class Vec3 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Vec3::Match(MatchState& state, const sem::Type* ty) const {
@@ -193,8 +193,8 @@ const sem::Type* Vec3::Match(MatchState& state, const sem::Type* ty) const {
   return build_vec3(state, T);
 }
 
-std::string Vec3::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Vec3::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "vec3<" + T + ">";
 }
 
@@ -211,7 +211,7 @@ class Vec4 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Vec4::Match(MatchState& state, const sem::Type* ty) const {
@@ -226,8 +226,8 @@ const sem::Type* Vec4::Match(MatchState& state, const sem::Type* ty) const {
   return build_vec4(state, T);
 }
 
-std::string Vec4::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Vec4::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "vec4<" + T + ">";
 }
 
@@ -244,7 +244,7 @@ class Mat2X2 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Mat2X2::Match(MatchState& state, const sem::Type* ty) const {
@@ -259,8 +259,8 @@ const sem::Type* Mat2X2::Match(MatchState& state, const sem::Type* ty) const {
   return build_mat2x2(state, T);
 }
 
-std::string Mat2X2::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Mat2X2::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "mat2x2<" + T + ">";
 }
 
@@ -277,7 +277,7 @@ class Mat2X3 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Mat2X3::Match(MatchState& state, const sem::Type* ty) const {
@@ -292,8 +292,8 @@ const sem::Type* Mat2X3::Match(MatchState& state, const sem::Type* ty) const {
   return build_mat2x3(state, T);
 }
 
-std::string Mat2X3::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Mat2X3::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "mat2x3<" + T + ">";
 }
 
@@ -310,7 +310,7 @@ class Mat2X4 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Mat2X4::Match(MatchState& state, const sem::Type* ty) const {
@@ -325,8 +325,8 @@ const sem::Type* Mat2X4::Match(MatchState& state, const sem::Type* ty) const {
   return build_mat2x4(state, T);
 }
 
-std::string Mat2X4::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Mat2X4::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "mat2x4<" + T + ">";
 }
 
@@ -343,7 +343,7 @@ class Mat3X2 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Mat3X2::Match(MatchState& state, const sem::Type* ty) const {
@@ -358,8 +358,8 @@ const sem::Type* Mat3X2::Match(MatchState& state, const sem::Type* ty) const {
   return build_mat3x2(state, T);
 }
 
-std::string Mat3X2::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Mat3X2::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "mat3x2<" + T + ">";
 }
 
@@ -376,7 +376,7 @@ class Mat3X3 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Mat3X3::Match(MatchState& state, const sem::Type* ty) const {
@@ -391,8 +391,8 @@ const sem::Type* Mat3X3::Match(MatchState& state, const sem::Type* ty) const {
   return build_mat3x3(state, T);
 }
 
-std::string Mat3X3::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Mat3X3::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "mat3x3<" + T + ">";
 }
 
@@ -409,7 +409,7 @@ class Mat3X4 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Mat3X4::Match(MatchState& state, const sem::Type* ty) const {
@@ -424,8 +424,8 @@ const sem::Type* Mat3X4::Match(MatchState& state, const sem::Type* ty) const {
   return build_mat3x4(state, T);
 }
 
-std::string Mat3X4::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Mat3X4::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "mat3x4<" + T + ">";
 }
 
@@ -442,7 +442,7 @@ class Mat4X2 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Mat4X2::Match(MatchState& state, const sem::Type* ty) const {
@@ -457,8 +457,8 @@ const sem::Type* Mat4X2::Match(MatchState& state, const sem::Type* ty) const {
   return build_mat4x2(state, T);
 }
 
-std::string Mat4X2::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Mat4X2::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "mat4x2<" + T + ">";
 }
 
@@ -475,7 +475,7 @@ class Mat4X3 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Mat4X3::Match(MatchState& state, const sem::Type* ty) const {
@@ -490,8 +490,8 @@ const sem::Type* Mat4X3::Match(MatchState& state, const sem::Type* ty) const {
   return build_mat4x3(state, T);
 }
 
-std::string Mat4X3::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Mat4X3::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "mat4x3<" + T + ">";
 }
 
@@ -508,7 +508,7 @@ class Mat4X4 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Mat4X4::Match(MatchState& state, const sem::Type* ty) const {
@@ -523,8 +523,8 @@ const sem::Type* Mat4X4::Match(MatchState& state, const sem::Type* ty) const {
   return build_mat4x4(state, T);
 }
 
-std::string Mat4X4::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Mat4X4::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "mat4x4<" + T + ">";
 }
 
@@ -541,7 +541,7 @@ class Vec : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Vec::Match(MatchState& state, const sem::Type* ty) const {
@@ -561,9 +561,9 @@ const sem::Type* Vec::Match(MatchState& state, const sem::Type* ty) const {
   return build_vec(state, N, T);
 }
 
-std::string Vec::String(MatchState& state) const {
-  const std::string N = state.NumName();
-  const std::string T = state.TypeName();
+std::string Vec::String(MatchState* state) const {
+  const std::string N = state->NumName();
+  const std::string T = state->TypeName();
   std::stringstream ss;
   ss << "vec" << N << "<" << T << ">";
   return ss.str();
@@ -582,7 +582,7 @@ class Mat : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Mat::Match(MatchState& state, const sem::Type* ty) const {
@@ -607,10 +607,10 @@ const sem::Type* Mat::Match(MatchState& state, const sem::Type* ty) const {
   return build_mat(state, N, M, T);
 }
 
-std::string Mat::String(MatchState& state) const {
-  const std::string N = state.NumName();
-  const std::string M = state.NumName();
-  const std::string T = state.TypeName();
+std::string Mat::String(MatchState* state) const {
+  const std::string N = state->NumName();
+  const std::string M = state->NumName();
+  const std::string T = state->TypeName();
   std::stringstream ss;
   ss << "mat" << N << "x" << M << "<" << T << ">";
   return ss.str();
@@ -629,7 +629,7 @@ class Ptr : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Ptr::Match(MatchState& state, const sem::Type* ty) const {
@@ -654,10 +654,10 @@ const sem::Type* Ptr::Match(MatchState& state, const sem::Type* ty) const {
   return build_ptr(state, S, T, A);
 }
 
-std::string Ptr::String(MatchState& state) const {
-  const std::string S = state.NumName();
-  const std::string T = state.TypeName();
-  const std::string A = state.NumName();
+std::string Ptr::String(MatchState* state) const {
+  const std::string S = state->NumName();
+  const std::string T = state->TypeName();
+  const std::string A = state->NumName();
   return "ptr<" + S + ", " + T + ", " + A + ">";
 }
 
@@ -674,7 +674,7 @@ class Atomic : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Atomic::Match(MatchState& state, const sem::Type* ty) const {
@@ -689,8 +689,8 @@ const sem::Type* Atomic::Match(MatchState& state, const sem::Type* ty) const {
   return build_atomic(state, T);
 }
 
-std::string Atomic::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Atomic::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "atomic<" + T + ">";
 }
 
@@ -707,7 +707,7 @@ class Array : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Array::Match(MatchState& state, const sem::Type* ty) const {
@@ -722,8 +722,8 @@ const sem::Type* Array::Match(MatchState& state, const sem::Type* ty) const {
   return build_array(state, T);
 }
 
-std::string Array::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Array::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "array<" + T + ">";
 }
 
@@ -740,7 +740,7 @@ class Sampler : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Sampler::Match(MatchState& state, const sem::Type* ty) const {
@@ -750,7 +750,7 @@ const sem::Type* Sampler::Match(MatchState& state, const sem::Type* ty) const {
   return build_sampler(state);
 }
 
-std::string Sampler::String(MatchState&) const {
+std::string Sampler::String(MatchState*) const {
   return "sampler";
 }
 
@@ -767,7 +767,7 @@ class SamplerComparison : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* SamplerComparison::Match(MatchState& state, const sem::Type* ty) const {
@@ -777,7 +777,7 @@ const sem::Type* SamplerComparison::Match(MatchState& state, const sem::Type* ty
   return build_sampler_comparison(state);
 }
 
-std::string SamplerComparison::String(MatchState&) const {
+std::string SamplerComparison::String(MatchState*) const {
   return "sampler_comparison";
 }
 
@@ -794,7 +794,7 @@ class Texture1D : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Texture1D::Match(MatchState& state, const sem::Type* ty) const {
@@ -809,8 +809,8 @@ const sem::Type* Texture1D::Match(MatchState& state, const sem::Type* ty) const 
   return build_texture_1d(state, T);
 }
 
-std::string Texture1D::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Texture1D::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "texture_1d<" + T + ">";
 }
 
@@ -827,7 +827,7 @@ class Texture2D : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Texture2D::Match(MatchState& state, const sem::Type* ty) const {
@@ -842,8 +842,8 @@ const sem::Type* Texture2D::Match(MatchState& state, const sem::Type* ty) const 
   return build_texture_2d(state, T);
 }
 
-std::string Texture2D::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Texture2D::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "texture_2d<" + T + ">";
 }
 
@@ -860,7 +860,7 @@ class Texture2DArray : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Texture2DArray::Match(MatchState& state, const sem::Type* ty) const {
@@ -875,8 +875,8 @@ const sem::Type* Texture2DArray::Match(MatchState& state, const sem::Type* ty) c
   return build_texture_2d_array(state, T);
 }
 
-std::string Texture2DArray::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Texture2DArray::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "texture_2d_array<" + T + ">";
 }
 
@@ -893,7 +893,7 @@ class Texture3D : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Texture3D::Match(MatchState& state, const sem::Type* ty) const {
@@ -908,8 +908,8 @@ const sem::Type* Texture3D::Match(MatchState& state, const sem::Type* ty) const 
   return build_texture_3d(state, T);
 }
 
-std::string Texture3D::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string Texture3D::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "texture_3d<" + T + ">";
 }
 
@@ -926,7 +926,7 @@ class TextureCube : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* TextureCube::Match(MatchState& state, const sem::Type* ty) const {
@@ -941,8 +941,8 @@ const sem::Type* TextureCube::Match(MatchState& state, const sem::Type* ty) cons
   return build_texture_cube(state, T);
 }
 
-std::string TextureCube::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string TextureCube::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "texture_cube<" + T + ">";
 }
 
@@ -959,7 +959,7 @@ class TextureCubeArray : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* TextureCubeArray::Match(MatchState& state, const sem::Type* ty) const {
@@ -974,8 +974,8 @@ const sem::Type* TextureCubeArray::Match(MatchState& state, const sem::Type* ty)
   return build_texture_cube_array(state, T);
 }
 
-std::string TextureCubeArray::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string TextureCubeArray::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "texture_cube_array<" + T + ">";
 }
 
@@ -992,7 +992,7 @@ class TextureMultisampled2D : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* TextureMultisampled2D::Match(MatchState& state, const sem::Type* ty) const {
@@ -1007,8 +1007,8 @@ const sem::Type* TextureMultisampled2D::Match(MatchState& state, const sem::Type
   return build_texture_multisampled_2d(state, T);
 }
 
-std::string TextureMultisampled2D::String(MatchState& state) const {
-  const std::string T = state.TypeName();
+std::string TextureMultisampled2D::String(MatchState* state) const {
+  const std::string T = state->TypeName();
   return "texture_multisampled_2d<" + T + ">";
 }
 
@@ -1025,7 +1025,7 @@ class TextureDepth2D : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* TextureDepth2D::Match(MatchState& state, const sem::Type* ty) const {
@@ -1035,7 +1035,7 @@ const sem::Type* TextureDepth2D::Match(MatchState& state, const sem::Type* ty) c
   return build_texture_depth_2d(state);
 }
 
-std::string TextureDepth2D::String(MatchState&) const {
+std::string TextureDepth2D::String(MatchState*) const {
   return "texture_depth_2d";
 }
 
@@ -1052,7 +1052,7 @@ class TextureDepth2DArray : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* TextureDepth2DArray::Match(MatchState& state, const sem::Type* ty) const {
@@ -1062,7 +1062,7 @@ const sem::Type* TextureDepth2DArray::Match(MatchState& state, const sem::Type* 
   return build_texture_depth_2d_array(state);
 }
 
-std::string TextureDepth2DArray::String(MatchState&) const {
+std::string TextureDepth2DArray::String(MatchState*) const {
   return "texture_depth_2d_array";
 }
 
@@ -1079,7 +1079,7 @@ class TextureDepthCube : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* TextureDepthCube::Match(MatchState& state, const sem::Type* ty) const {
@@ -1089,7 +1089,7 @@ const sem::Type* TextureDepthCube::Match(MatchState& state, const sem::Type* ty)
   return build_texture_depth_cube(state);
 }
 
-std::string TextureDepthCube::String(MatchState&) const {
+std::string TextureDepthCube::String(MatchState*) const {
   return "texture_depth_cube";
 }
 
@@ -1106,7 +1106,7 @@ class TextureDepthCubeArray : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* TextureDepthCubeArray::Match(MatchState& state, const sem::Type* ty) const {
@@ -1116,7 +1116,7 @@ const sem::Type* TextureDepthCubeArray::Match(MatchState& state, const sem::Type
   return build_texture_depth_cube_array(state);
 }
 
-std::string TextureDepthCubeArray::String(MatchState&) const {
+std::string TextureDepthCubeArray::String(MatchState*) const {
   return "texture_depth_cube_array";
 }
 
@@ -1133,7 +1133,7 @@ class TextureDepthMultisampled2D : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* TextureDepthMultisampled2D::Match(MatchState& state, const sem::Type* ty) const {
@@ -1143,7 +1143,7 @@ const sem::Type* TextureDepthMultisampled2D::Match(MatchState& state, const sem:
   return build_texture_depth_multisampled_2d(state);
 }
 
-std::string TextureDepthMultisampled2D::String(MatchState&) const {
+std::string TextureDepthMultisampled2D::String(MatchState*) const {
   return "texture_depth_multisampled_2d";
 }
 
@@ -1160,7 +1160,7 @@ class TextureStorage1D : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* TextureStorage1D::Match(MatchState& state, const sem::Type* ty) const {
@@ -1180,9 +1180,9 @@ const sem::Type* TextureStorage1D::Match(MatchState& state, const sem::Type* ty)
   return build_texture_storage_1d(state, F, A);
 }
 
-std::string TextureStorage1D::String(MatchState& state) const {
-  const std::string F = state.NumName();
-  const std::string A = state.NumName();
+std::string TextureStorage1D::String(MatchState* state) const {
+  const std::string F = state->NumName();
+  const std::string A = state->NumName();
   return "texture_storage_1d<" + F + ", " + A + ">";
 }
 
@@ -1199,7 +1199,7 @@ class TextureStorage2D : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* TextureStorage2D::Match(MatchState& state, const sem::Type* ty) const {
@@ -1219,9 +1219,9 @@ const sem::Type* TextureStorage2D::Match(MatchState& state, const sem::Type* ty)
   return build_texture_storage_2d(state, F, A);
 }
 
-std::string TextureStorage2D::String(MatchState& state) const {
-  const std::string F = state.NumName();
-  const std::string A = state.NumName();
+std::string TextureStorage2D::String(MatchState* state) const {
+  const std::string F = state->NumName();
+  const std::string A = state->NumName();
   return "texture_storage_2d<" + F + ", " + A + ">";
 }
 
@@ -1238,7 +1238,7 @@ class TextureStorage2DArray : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* TextureStorage2DArray::Match(MatchState& state, const sem::Type* ty) const {
@@ -1258,9 +1258,9 @@ const sem::Type* TextureStorage2DArray::Match(MatchState& state, const sem::Type
   return build_texture_storage_2d_array(state, F, A);
 }
 
-std::string TextureStorage2DArray::String(MatchState& state) const {
-  const std::string F = state.NumName();
-  const std::string A = state.NumName();
+std::string TextureStorage2DArray::String(MatchState* state) const {
+  const std::string F = state->NumName();
+  const std::string A = state->NumName();
   return "texture_storage_2d_array<" + F + ", " + A + ">";
 }
 
@@ -1277,7 +1277,7 @@ class TextureStorage3D : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* TextureStorage3D::Match(MatchState& state, const sem::Type* ty) const {
@@ -1297,9 +1297,9 @@ const sem::Type* TextureStorage3D::Match(MatchState& state, const sem::Type* ty)
   return build_texture_storage_3d(state, F, A);
 }
 
-std::string TextureStorage3D::String(MatchState& state) const {
-  const std::string F = state.NumName();
-  const std::string A = state.NumName();
+std::string TextureStorage3D::String(MatchState* state) const {
+  const std::string F = state->NumName();
+  const std::string A = state->NumName();
   return "texture_storage_3d<" + F + ", " + A + ">";
 }
 
@@ -1316,7 +1316,7 @@ class TextureExternal : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* TextureExternal::Match(MatchState& state, const sem::Type* ty) const {
@@ -1326,7 +1326,7 @@ const sem::Type* TextureExternal::Match(MatchState& state, const sem::Type* ty) 
   return build_texture_external(state);
 }
 
-std::string TextureExternal::String(MatchState&) const {
+std::string TextureExternal::String(MatchState*) const {
   return "texture_external";
 }
 
@@ -1343,7 +1343,7 @@ class ModfResult : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* ModfResult::Match(MatchState& state, const sem::Type* ty) const {
@@ -1353,7 +1353,7 @@ const sem::Type* ModfResult::Match(MatchState& state, const sem::Type* ty) const
   return build_modf_result(state);
 }
 
-std::string ModfResult::String(MatchState&) const {
+std::string ModfResult::String(MatchState*) const {
   return "__modf_result";
 }
 
@@ -1370,7 +1370,7 @@ class ModfResultVec : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* ModfResultVec::Match(MatchState& state, const sem::Type* ty) const {
@@ -1385,8 +1385,8 @@ const sem::Type* ModfResultVec::Match(MatchState& state, const sem::Type* ty) co
   return build_modf_result_vec(state, N);
 }
 
-std::string ModfResultVec::String(MatchState& state) const {
-  const std::string N = state.NumName();
+std::string ModfResultVec::String(MatchState* state) const {
+  const std::string N = state->NumName();
   std::stringstream ss;
   ss << "__modf_result_vec" << N;
   return ss.str();
@@ -1405,7 +1405,7 @@ class FrexpResult : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* FrexpResult::Match(MatchState& state, const sem::Type* ty) const {
@@ -1415,7 +1415,7 @@ const sem::Type* FrexpResult::Match(MatchState& state, const sem::Type* ty) cons
   return build_frexp_result(state);
 }
 
-std::string FrexpResult::String(MatchState&) const {
+std::string FrexpResult::String(MatchState*) const {
   return "__frexp_result";
 }
 
@@ -1432,7 +1432,7 @@ class FrexpResultVec : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* FrexpResultVec::Match(MatchState& state, const sem::Type* ty) const {
@@ -1447,8 +1447,8 @@ const sem::Type* FrexpResultVec::Match(MatchState& state, const sem::Type* ty) c
   return build_frexp_result_vec(state, N);
 }
 
-std::string FrexpResultVec::String(MatchState& state) const {
-  const std::string N = state.NumName();
+std::string FrexpResultVec::String(MatchState* state) const {
+  const std::string N = state->NumName();
   std::stringstream ss;
   ss << "__frexp_result_vec" << N;
   return ss.str();
@@ -1468,7 +1468,7 @@ class Fiu32 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Fiu32::Match(MatchState& state, const sem::Type* ty) const {
@@ -1484,8 +1484,12 @@ const sem::Type* Fiu32::Match(MatchState& state, const sem::Type* ty) const {
   return nullptr;
 }
 
-std::string Fiu32::String(MatchState&) const {
-  return "f32, i32 or u32";
+std::string Fiu32::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << F32().String(nullptr) << ", " << I32().String(nullptr) << " or " << U32().String(nullptr);
+  return ss.str();
 }
 
 /// TypeMatcher for 'match fi32'
@@ -1502,7 +1506,7 @@ class Fi32 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Fi32::Match(MatchState& state, const sem::Type* ty) const {
@@ -1515,8 +1519,12 @@ const sem::Type* Fi32::Match(MatchState& state, const sem::Type* ty) const {
   return nullptr;
 }
 
-std::string Fi32::String(MatchState&) const {
-  return "f32 or i32";
+std::string Fi32::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << F32().String(nullptr) << " or " << I32().String(nullptr);
+  return ss.str();
 }
 
 /// TypeMatcher for 'match iu32'
@@ -1533,7 +1541,7 @@ class Iu32 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Iu32::Match(MatchState& state, const sem::Type* ty) const {
@@ -1546,8 +1554,12 @@ const sem::Type* Iu32::Match(MatchState& state, const sem::Type* ty) const {
   return nullptr;
 }
 
-std::string Iu32::String(MatchState&) const {
-  return "i32 or u32";
+std::string Iu32::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << I32().String(nullptr) << " or " << U32().String(nullptr);
+  return ss.str();
 }
 
 /// TypeMatcher for 'match scalar'
@@ -1564,7 +1576,7 @@ class Scalar : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* Scalar::Match(MatchState& state, const sem::Type* ty) const {
@@ -1583,8 +1595,12 @@ const sem::Type* Scalar::Match(MatchState& state, const sem::Type* ty) const {
   return nullptr;
 }
 
-std::string Scalar::String(MatchState&) const {
-  return "f32, i32, u32 or bool";
+std::string Scalar::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << F32().String(nullptr) << ", " << I32().String(nullptr) << ", " << U32().String(nullptr) << " or " << Bool().String(nullptr);
+  return ss.str();
 }
 
 /// TypeMatcher for 'match scalar_no_f32'
@@ -1601,7 +1617,7 @@ class ScalarNoF32 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* ScalarNoF32::Match(MatchState& state, const sem::Type* ty) const {
@@ -1617,8 +1633,12 @@ const sem::Type* ScalarNoF32::Match(MatchState& state, const sem::Type* ty) cons
   return nullptr;
 }
 
-std::string ScalarNoF32::String(MatchState&) const {
-  return "i32, u32 or bool";
+std::string ScalarNoF32::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << I32().String(nullptr) << ", " << U32().String(nullptr) << " or " << Bool().String(nullptr);
+  return ss.str();
 }
 
 /// TypeMatcher for 'match scalar_no_i32'
@@ -1635,7 +1655,7 @@ class ScalarNoI32 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* ScalarNoI32::Match(MatchState& state, const sem::Type* ty) const {
@@ -1651,8 +1671,12 @@ const sem::Type* ScalarNoI32::Match(MatchState& state, const sem::Type* ty) cons
   return nullptr;
 }
 
-std::string ScalarNoI32::String(MatchState&) const {
-  return "f32, u32 or bool";
+std::string ScalarNoI32::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << F32().String(nullptr) << ", " << U32().String(nullptr) << " or " << Bool().String(nullptr);
+  return ss.str();
 }
 
 /// TypeMatcher for 'match scalar_no_u32'
@@ -1669,7 +1693,7 @@ class ScalarNoU32 : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* ScalarNoU32::Match(MatchState& state, const sem::Type* ty) const {
@@ -1685,8 +1709,12 @@ const sem::Type* ScalarNoU32::Match(MatchState& state, const sem::Type* ty) cons
   return nullptr;
 }
 
-std::string ScalarNoU32::String(MatchState&) const {
-  return "f32, i32 or bool";
+std::string ScalarNoU32::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << F32().String(nullptr) << ", " << I32().String(nullptr) << " or " << Bool().String(nullptr);
+  return ss.str();
 }
 
 /// TypeMatcher for 'match scalar_no_bool'
@@ -1703,7 +1731,7 @@ class ScalarNoBool : public TypeMatcher {
                          const sem::Type* type) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 const sem::Type* ScalarNoBool::Match(MatchState& state, const sem::Type* ty) const {
@@ -1719,8 +1747,12 @@ const sem::Type* ScalarNoBool::Match(MatchState& state, const sem::Type* ty) con
   return nullptr;
 }
 
-std::string ScalarNoBool::String(MatchState&) const {
-  return "f32, i32 or u32";
+std::string ScalarNoBool::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << F32().String(nullptr) << ", " << I32().String(nullptr) << " or " << U32().String(nullptr);
+  return ss.str();
 }
 
 /// EnumMatcher for 'match f32_texel_format'
@@ -1735,7 +1767,7 @@ class F32TexelFormat : public NumberMatcher {
   Number Match(MatchState& state, Number number) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 Number F32TexelFormat::Match(MatchState&, Number number) const {
@@ -1752,7 +1784,7 @@ Number F32TexelFormat::Match(MatchState&, Number number) const {
   }
 }
 
-std::string F32TexelFormat::String(MatchState&) const {
+std::string F32TexelFormat::String(MatchState*) const {
   return "rgba8unorm, rgba8snorm, rgba16float, r32float, rg32float or rgba32float";
 }
 
@@ -1768,7 +1800,7 @@ class I32TexelFormat : public NumberMatcher {
   Number Match(MatchState& state, Number number) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 Number I32TexelFormat::Match(MatchState&, Number number) const {
@@ -1784,7 +1816,7 @@ Number I32TexelFormat::Match(MatchState&, Number number) const {
   }
 }
 
-std::string I32TexelFormat::String(MatchState&) const {
+std::string I32TexelFormat::String(MatchState*) const {
   return "rgba8sint, rgba16sint, r32sint, rg32sint or rgba32sint";
 }
 
@@ -1800,7 +1832,7 @@ class U32TexelFormat : public NumberMatcher {
   Number Match(MatchState& state, Number number) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 Number U32TexelFormat::Match(MatchState&, Number number) const {
@@ -1816,7 +1848,7 @@ Number U32TexelFormat::Match(MatchState&, Number number) const {
   }
 }
 
-std::string U32TexelFormat::String(MatchState&) const {
+std::string U32TexelFormat::String(MatchState*) const {
   return "rgba8uint, rgba16uint, r32uint, rg32uint or rgba32uint";
 }
 
@@ -1832,7 +1864,7 @@ class WriteOnly : public NumberMatcher {
   Number Match(MatchState& state, Number number) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 Number WriteOnly::Match(MatchState&, Number number) const {
@@ -1842,7 +1874,7 @@ Number WriteOnly::Match(MatchState&, Number number) const {
   return Number::invalid;
 }
 
-std::string WriteOnly::String(MatchState&) const {
+std::string WriteOnly::String(MatchState*) const {
   return "write";
 }
 
@@ -1858,7 +1890,7 @@ class FunctionPrivateWorkgroup : public NumberMatcher {
   Number Match(MatchState& state, Number number) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 Number FunctionPrivateWorkgroup::Match(MatchState&, Number number) const {
@@ -1872,7 +1904,7 @@ Number FunctionPrivateWorkgroup::Match(MatchState&, Number number) const {
   }
 }
 
-std::string FunctionPrivateWorkgroup::String(MatchState&) const {
+std::string FunctionPrivateWorkgroup::String(MatchState*) const {
   return "function, private or workgroup";
 }
 
@@ -1888,7 +1920,7 @@ class WorkgroupOrStorage : public NumberMatcher {
   Number Match(MatchState& state, Number number) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 Number WorkgroupOrStorage::Match(MatchState&, Number number) const {
@@ -1901,7 +1933,7 @@ Number WorkgroupOrStorage::Match(MatchState&, Number number) const {
   }
 }
 
-std::string WorkgroupOrStorage::String(MatchState&) const {
+std::string WorkgroupOrStorage::String(MatchState*) const {
   return "workgroup or storage";
 }
 
@@ -1916,7 +1948,7 @@ class Storage : public NumberMatcher {
   Number Match(MatchState& state, Number number) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 Number Storage::Match(MatchState&, Number number) const {
@@ -1926,7 +1958,7 @@ Number Storage::Match(MatchState&, Number number) const {
   return Number::invalid;
 }
 
-std::string Storage::String(MatchState&) const {
+std::string Storage::String(MatchState*) const {
   return "storage";
 }
 
@@ -1941,7 +1973,7 @@ class Write : public NumberMatcher {
   Number Match(MatchState& state, Number number) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 Number Write::Match(MatchState&, Number number) const {
@@ -1951,7 +1983,7 @@ Number Write::Match(MatchState&, Number number) const {
   return Number::invalid;
 }
 
-std::string Write::String(MatchState&) const {
+std::string Write::String(MatchState*) const {
   return "write";
 }
 
@@ -1966,7 +1998,7 @@ class ReadWrite : public NumberMatcher {
   Number Match(MatchState& state, Number number) const override;
   /// @param state the MatchState
   /// @return a string representation of the matcher.
-  std::string String(MatchState& state) const override;
+  std::string String(MatchState* state) const override;
 };
 
 Number ReadWrite::Match(MatchState&, Number number) const {
@@ -1976,7 +2008,7 @@ Number ReadWrite::Match(MatchState&, Number number) const {
   return Number::invalid;
 }
 
-std::string ReadWrite::String(MatchState&) const {
+std::string ReadWrite::String(MatchState*) const {
   return "read_write";
 }
 

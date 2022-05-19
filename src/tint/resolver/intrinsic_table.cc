@@ -231,7 +231,7 @@ class TypeMatcher {
 
     /// @return a string representation of the matcher. Used for printing error
     /// messages when no overload is found.
-    virtual std::string String(MatchState& state) const = 0;
+    virtual std::string String(MatchState* state) const = 0;
 };
 
 /// A NumberMatcher is the interface used to match a number or enumerator used
@@ -249,7 +249,7 @@ class NumberMatcher {
 
     /// @return a string representation of the matcher. Used for printing error
     /// messages when no overload is found.
-    virtual std::string String(MatchState& state) const = 0;
+    virtual std::string String(MatchState* state) const = 0;
 };
 
 /// TemplateTypeMatcher is a Matcher for a template type.
@@ -270,7 +270,7 @@ class TemplateTypeMatcher : public TypeMatcher {
         return nullptr;
     }
 
-    std::string String(MatchState& state) const override;
+    std::string String(MatchState* state) const override;
 
   private:
     size_t index_;
@@ -290,7 +290,7 @@ class TemplateNumberMatcher : public NumberMatcher {
         return state.templates.Num(index_, number) ? number : Number::invalid;
     }
 
-    std::string String(MatchState& state) const override;
+    std::string String(MatchState* state) const override;
 
   private:
     size_t index_;
@@ -1008,12 +1008,12 @@ std::string CallSignature(ProgramBuilder& builder,
     return ss.str();
 }
 
-std::string TemplateTypeMatcher::String(MatchState& state) const {
-    return state.overload->template_types[index_].name;
+std::string TemplateTypeMatcher::String(MatchState* state) const {
+    return state->overload->template_types[index_].name;
 }
 
-std::string TemplateNumberMatcher::String(MatchState& state) const {
-    return state.overload->template_numbers[index_].name;
+std::string TemplateNumberMatcher::String(MatchState* state) const {
+    return state->overload->template_numbers[index_].name;
 }
 
 Impl::Impl(ProgramBuilder& b) : builder(b) {}
@@ -1477,13 +1477,13 @@ Number MatchState::Num(Number number) {
 std::string MatchState::TypeName() {
     MatcherIndex matcher_index = *matcher_indices_++;
     auto* matcher = matchers.type[matcher_index];
-    return matcher->String(*this);
+    return matcher->String(this);
 }
 
 std::string MatchState::NumName() {
     MatcherIndex matcher_index = *matcher_indices_++;
     auto* matcher = matchers.number[matcher_index];
-    return matcher->String(*this);
+    return matcher->String(this);
 }
 
 void Impl::ErrMultipleOverloadsMatched(size_t num_matched,
