@@ -15,6 +15,7 @@
 #include "src/tint/utils/hash.h"
 
 #include <string>
+#include <tuple>
 #include <unordered_map>
 
 #include "gtest/gtest.h"
@@ -39,6 +40,13 @@ TEST(HashTests, Vector) {
     EXPECT_EQ(Hash(std::vector<int>({1, 2, 3})), Hash(std::vector<int>({1, 2, 3})));
     EXPECT_NE(Hash(std::vector<int>({1, 2, 3})), Hash(std::vector<int>({1, 2, 4})));
     EXPECT_NE(Hash(std::vector<int>({1, 2, 3})), Hash(std::vector<int>({1, 2, 3, 4})));
+}
+
+TEST(HashTests, Tuple) {
+    EXPECT_EQ(Hash(std::make_tuple(1)), Hash(std::make_tuple(1)));
+    EXPECT_EQ(Hash(std::make_tuple(1, 2, 3)), Hash(std::make_tuple(1, 2, 3)));
+    EXPECT_NE(Hash(std::make_tuple(1, 2, 3)), Hash(std::make_tuple(1, 2, 4)));
+    EXPECT_NE(Hash(std::make_tuple(1, 2, 3)), Hash(std::make_tuple(1, 2, 3, 4)));
 }
 
 TEST(HashTests, UnorderedKeyWrapper) {
