@@ -34,7 +34,7 @@ bool AbstractInt::Equals(const sem::Type& other) const {
 }
 
 std::string AbstractInt::FriendlyName(const SymbolTable&) const {
-    return "AbstractInt";
+    return "abstract-int";
 }
 
 }  // namespace tint::sem

@@ -86,7 +86,7 @@ TEST_F(ResolverVarLetTest, VarDeclWithConstructor) {
     // struct S { i : i32; }
     // alias A = S;
     // fn F(){
-    //   var i : i32 = 1;
+    //   var i : i32 = 1i;
     //   var u : u32 = 1u;
     //   var f : f32 = 1.f;
     //   var b : bool = true;

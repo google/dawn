@@ -34,7 +34,7 @@ bool AbstractFloat::Equals(const sem::Type& other) const {
 }
 
 std::string AbstractFloat::FriendlyName(const SymbolTable&) const {
-    return "AbstractFloat";
+    return "abstract-float";
 }
 
 }  // namespace tint::sem
