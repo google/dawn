@@ -229,6 +229,11 @@ TEST_F(LabelTest, ExternalTexture) {
 
     wgpu::ExternalTextureDescriptor descriptor;
     descriptor.plane0 = texture.CreateView();
+    std::array<float, 12> mPlaceholderConstantArray;
+    descriptor.yuvToRgbConversionMatrix = mPlaceholderConstantArray.data();
+    descriptor.gamutConversionMatrix = mPlaceholderConstantArray.data();
+    descriptor.srcTransferFunctionParameters = mPlaceholderConstantArray.data();
+    descriptor.dstTransferFunctionParameters = mPlaceholderConstantArray.data();
 
     // The label should be empty if one was not set.
     {

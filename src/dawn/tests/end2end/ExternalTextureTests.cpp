@@ -37,10 +37,28 @@ wgpu::Texture Create2DTexture(wgpu::Device device,
 
 class ExternalTextureTests : public DawnTest {
   protected:
+    wgpu::ExternalTextureDescriptor CreateDefaultExternalTextureDescriptor() {
+        wgpu::ExternalTextureDescriptor desc;
+        desc.yuvToRgbConversionMatrix = kYuvToRGBMatrixBT709.data();
+        desc.gamutConversionMatrix = kGamutConversionMatrixBT709ToSrgb.data();
+        desc.srcTransferFunctionParameters = kGammaDecodeBT709.data();
+        desc.dstTransferFunctionParameters = kGammaEncodeSrgb.data();
+
+        return desc;
+    }
+
     static constexpr uint32_t kWidth = 4;
     static constexpr uint32_t kHeight = 4;
     static constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
     static constexpr wgpu::TextureUsage kSampledUsage = wgpu::TextureUsage::TextureBinding;
+    std::array<float, 12> kYuvToRGBMatrixBT709 = {1.164384f, 0.0f,       1.792741f,  -0.972945f,
+                                                  1.164384f, -0.213249f, -0.532909f, 0.301483f,
+                                                  1.164384f, 2.112402f,  0.0f,       -1.133402f};
+    std::array<float, 9> kGamutConversionMatrixBT709ToSrgb = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+                                                              0.0f, 0.0f, 0.0f, 1.0f};
+    std::array<float, 7> kGammaDecodeBT709 = {2.2, 1.0 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081,
+                                              0.0, 0.0};
+    std::array<float, 7> kGammaEncodeSrgb = {1 / 2.4, 1.137119, 0.0, 12.92, 0.0031308, -0.055, 0.0};
 };
 }  // anonymous namespace
 
@@ -51,7 +69,7 @@ TEST_P(ExternalTextureTests, CreateExternalTextureSuccess) {
     wgpu::TextureView view = texture.CreateView();
 
     // Create an ExternalTextureDescriptor from the texture view
-    wgpu::ExternalTextureDescriptor externalDesc;
+    wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
     externalDesc.plane0 = view;
 
     // Import the external texture
@@ -114,7 +132,7 @@ TEST_P(ExternalTextureTests, SampleExternalTexture) {
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
     // Create an ExternalTextureDescriptor from the texture view
-    wgpu::ExternalTextureDescriptor externalDesc;
+    wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
     externalDesc.plane0 = externalView;
 
     // Import the external texture
@@ -225,7 +243,7 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTexture) {
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
         // Create an ExternalTextureDescriptor from the texture views
-        wgpu::ExternalTextureDescriptor externalDesc;
+        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
         externalDesc.plane0 = externalViewPlane0;
         externalDesc.plane1 = externalViewPlane1;
 

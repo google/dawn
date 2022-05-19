@@ -60,7 +60,8 @@ class BindGroupValidationTest : public ValidationTest {
                 CreateTexture(wgpu::TextureUsage::TextureBinding, kDefaultTextureFormat, 1);
             mSampledTextureView = mSampledTexture.CreateView();
 
-            wgpu::ExternalTextureDescriptor externalTextureDesc;
+            wgpu::ExternalTextureDescriptor externalTextureDesc =
+                CreateDefaultExternalTextureDescriptor();
             externalTextureDesc.plane0 = mSampledTextureView;
             mExternalTexture = device.CreateExternalTexture(&externalTextureDesc);
             mExternalTextureBindingEntry.externalTexture = mExternalTexture;
@@ -68,6 +69,15 @@ class BindGroupValidationTest : public ValidationTest {
     }
 
   protected:
+    wgpu::ExternalTextureDescriptor CreateDefaultExternalTextureDescriptor() {
+        wgpu::ExternalTextureDescriptor desc;
+        desc.yuvToRgbConversionMatrix = mPlaceholderConstantArray.data();
+        desc.gamutConversionMatrix = mPlaceholderConstantArray.data();
+        desc.srcTransferFunctionParameters = mPlaceholderConstantArray.data();
+        desc.dstTransferFunctionParameters = mPlaceholderConstantArray.data();
+        return desc;
+    }
+
     wgpu::Buffer mUBO;
     wgpu::Buffer mSSBO;
     wgpu::Sampler mSampler;
@@ -79,6 +89,7 @@ class BindGroupValidationTest : public ValidationTest {
 
   private:
     wgpu::ExternalTexture mExternalTexture;
+    std::array<float, 12> mPlaceholderConstantArray;
 };
 
 // Test the validation of BindGroupDescriptor::nextInChain
@@ -311,7 +322,7 @@ TEST_F(BindGroupValidationTest, ExternalTextureBindingType) {
     // Create an external texture
     wgpu::Texture texture =
         CreateTexture(wgpu::TextureUsage::TextureBinding, kDefaultTextureFormat, 1);
-    wgpu::ExternalTextureDescriptor externalDesc;
+    wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
     externalDesc.plane0 = texture.CreateView();
     wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
 
@@ -360,7 +371,8 @@ TEST_F(BindGroupValidationTest, ExternalTextureBindingType) {
     {
         wgpu::Texture errorTexture = CreateTexture(wgpu::TextureUsage::TextureBinding,
                                                    wgpu::TextureFormat::RGBA8UnormSrgb, 1);
-        wgpu::ExternalTextureDescriptor errorExternalDesciptor;
+        wgpu::ExternalTextureDescriptor errorExternalDesciptor =
+            CreateDefaultExternalTextureDescriptor();
         errorExternalDesciptor.plane0 = errorTexture.CreateView();
 
         wgpu::ExternalTexture errorExternalTexture;
