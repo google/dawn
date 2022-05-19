@@ -91,5 +91,93 @@ TEST_F(TypeTest, ConversionRank) {
     EXPECT_EQ(Type::ConversionRank(f16, ai), Type::kNoConversion);
 }
 
+/// Helper macro for testing that a semantic type was as expected
+#define EXPECT_TYPE(GOT, EXPECT)                              \
+    if ((GOT) != (EXPECT)) {                                  \
+        FAIL() << #GOT " != " #EXPECT "\n"                    \
+               << "  " #GOT ": " << FriendlyName(GOT) << "\n" \
+               << "  " #EXPECT ": " << FriendlyName(EXPECT);  \
+    }                                                         \
+    do {                                                      \
+    } while (false)
+
+TEST_F(TypeTest, ElementOf) {
+    auto* f32 = create<F32>();
+    auto* f16 = create<F16>();
+    auto* i32 = create<I32>();
+    auto* u32 = create<U32>();
+    auto* vec2_f32 = create<Vector>(f32, 2u);
+    auto* vec3_f16 = create<Vector>(f16, 3u);
+    auto* vec4_f32 = create<Vector>(f32, 4u);
+    auto* vec3_u32 = create<Vector>(u32, 3u);
+    auto* vec3_i32 = create<Vector>(i32, 3u);
+    auto* mat2x4_f32 = create<Matrix>(vec4_f32, 2u);
+    auto* mat4x2_f32 = create<Matrix>(vec2_f32, 4u);
+    auto* mat4x3_f16 = create<Matrix>(vec3_f16, 4u);
+    auto* arr_i32 = create<Array>(
+        /* element */ i32,
+        /* count */ 5u,
+        /* align */ 4u,
+        /* size */ 5u * 4u,
+        /* stride */ 5u * 4u,
+        /* implicit_stride */ 5u * 4u);
+
+    // No count
+    EXPECT_TYPE(Type::ElementOf(f32), f32);
+    EXPECT_TYPE(Type::ElementOf(f16), f16);
+    EXPECT_TYPE(Type::ElementOf(i32), i32);
+    EXPECT_TYPE(Type::ElementOf(u32), u32);
+    EXPECT_TYPE(Type::ElementOf(vec2_f32), f32);
+    EXPECT_TYPE(Type::ElementOf(vec3_f16), f16);
+    EXPECT_TYPE(Type::ElementOf(vec4_f32), f32);
+    EXPECT_TYPE(Type::ElementOf(vec3_u32), u32);
+    EXPECT_TYPE(Type::ElementOf(vec3_i32), i32);
+    EXPECT_TYPE(Type::ElementOf(mat2x4_f32), f32);
+    EXPECT_TYPE(Type::ElementOf(mat4x2_f32), f32);
+    EXPECT_TYPE(Type::ElementOf(mat4x3_f16), f16);
+    EXPECT_TYPE(Type::ElementOf(arr_i32), i32);
+
+    // With count
+    uint32_t count = 0;
+    EXPECT_TYPE(Type::ElementOf(f32, &count), f32);
+    EXPECT_EQ(count, 1u);
+    count = 0;
+    EXPECT_TYPE(Type::ElementOf(f16, &count), f16);
+    EXPECT_EQ(count, 1u);
+    count = 0;
+    EXPECT_TYPE(Type::ElementOf(i32, &count), i32);
+    EXPECT_EQ(count, 1u);
+    count = 0;
+    EXPECT_TYPE(Type::ElementOf(u32, &count), u32);
+    EXPECT_EQ(count, 1u);
+    count = 0;
+    EXPECT_TYPE(Type::ElementOf(vec2_f32, &count), f32);
+    EXPECT_EQ(count, 2u);
+    count = 0;
+    EXPECT_TYPE(Type::ElementOf(vec3_f16, &count), f16);
+    EXPECT_EQ(count, 3u);
+    count = 0;
+    EXPECT_TYPE(Type::ElementOf(vec4_f32, &count), f32);
+    EXPECT_EQ(count, 4u);
+    count = 0;
+    EXPECT_TYPE(Type::ElementOf(vec3_u32, &count), u32);
+    EXPECT_EQ(count, 3u);
+    count = 0;
+    EXPECT_TYPE(Type::ElementOf(vec3_i32, &count), i32);
+    EXPECT_EQ(count, 3u);
+    count = 0;
+    EXPECT_TYPE(Type::ElementOf(mat2x4_f32, &count), f32);
+    EXPECT_EQ(count, 8u);
+    count = 0;
+    EXPECT_TYPE(Type::ElementOf(mat4x2_f32, &count), f32);
+    EXPECT_EQ(count, 8u);
+    count = 0;
+    EXPECT_TYPE(Type::ElementOf(mat4x3_f16, &count), f16);
+    EXPECT_EQ(count, 12u);
+    count = 0;
+    EXPECT_TYPE(Type::ElementOf(arr_i32, &count), i32);
+    EXPECT_EQ(count, 5u);
+}
+
 }  // namespace
 }  // namespace tint::sem

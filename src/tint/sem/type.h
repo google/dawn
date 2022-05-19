@@ -71,6 +71,8 @@ class Type : public Castable<Type, Node> {
 
     /// @returns true if this type is a scalar
     bool is_scalar() const;
+    /// @returns true if this type is a scalar or an abstract numeric
+    bool is_abstract_or_scalar() const;
     /// @returns true if this type is a numeric scalar
     bool is_numeric_scalar() const;
     /// @returns true if this type is a float scalar
@@ -126,6 +128,12 @@ class Type : public Castable<Type, Node> {
     /// the implicit conversion is not allowed.
     /// @see https://www.w3.org/TR/WGSL/#conversion-rank
     static uint32_t ConversionRank(const Type* from, const Type* to);
+
+    /// @param ty the type to obtain the element type from
+    /// @param count if not null, then this is assigned the number of elements in the type
+    /// @returns `ty` if `ty` is an abstract or scalar, the element type if ty is a vector, matrix
+    /// or array, otherwise nullptr.
+    static const Type* ElementOf(const Type* ty, uint32_t* count = nullptr);
 
   protected:
     Type();

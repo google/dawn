@@ -2636,6 +2636,25 @@ class ProgramBuilder {
     /// the type declaration has no resolved type.
     const sem::Type* TypeOf(const ast::TypeDecl* type_decl) const;
 
+    /// @param type a type
+    /// @returns the name for `type` that closely resembles how it would be
+    /// declared in WGSL.
+    std::string FriendlyName(const ast::Type* type) {
+        return type ? type->FriendlyName(Symbols()) : "<null>";
+    }
+
+    /// @param type a type
+    /// @returns the name for `type` that closely resembles how it would be
+    /// declared in WGSL.
+    std::string FriendlyName(const sem::Type* type) {
+        return type ? type->FriendlyName(Symbols()) : "<null>";
+    }
+
+    /// Overload of FriendlyName, which removes an ambiguity when passing nullptr.
+    /// Simplifies test code.
+    /// @returns "<null>"
+    std::string FriendlyName(std::nullptr_t) { return "<null>"; }
+
     /// Wraps the ast::Expression in a statement. This is used by tests that
     /// construct a partial AST and require the Resolver to reach these
     /// nodes.

@@ -16,6 +16,7 @@
 
 #include "src/tint/sem/abstract_float.h"
 #include "src/tint/sem/abstract_int.h"
+#include "src/tint/sem/array.h"
 #include "src/tint/sem/bool.h"
 #include "src/tint/sem/f16.h"
 #include "src/tint/sem/f32.h"
@@ -68,6 +69,10 @@ bool Type::IsConstructible() const {
 
 bool Type::is_scalar() const {
     return IsAnyOf<F16, F32, U32, I32, Bool>();
+}
+
+bool Type::is_abstract_or_scalar() const {
+    return IsAnyOf<F16, F32, U32, I32, Bool, AbstractNumeric>();
 }
 
 bool Type::is_numeric_scalar() const {
@@ -196,6 +201,35 @@ uint32_t Type::ConversionRank(const Type* from, const Type* to) {
             return kNoConversion;
         },
         [&](Default) { return kNoConversion; });
+}
+
+const Type* Type::ElementOf(const Type* ty, uint32_t* count /* = nullptr */) {
+    if (ty->is_abstract_or_scalar()) {
+        if (count) {
+            *count = 1;
+        }
+        return ty;
+    }
+    return Switch(
+        ty,  //
+        [&](const Vector* v) {
+            if (count) {
+                *count = v->Width();
+            }
+            return v->type();
+        },
+        [&](const Matrix* m) {
+            if (count) {
+                *count = m->columns() * m->rows();
+            }
+            return m->type();
+        },
+        [&](const Array* a) {
+            if (count) {
+                *count = a->Count();
+            }
+            return a->ElemType();
+        });
 }
 
 }  // namespace tint::sem
