@@ -332,7 +332,9 @@ class Resolver {
     //////////////////////////////////////////////////////////////////////////////
     /// Cast `Value` to `target_type`
     /// @return the casted value
-    sem::Constant ConstantCast(const sem::Constant& value, const sem::Type* target_elem_type);
+    sem::Constant ConstantCast(const sem::Constant& value,
+                               const sem::Type* target_type,
+                               const sem::Type* target_element_type = nullptr);
 
     sem::Constant EvaluateConstantValue(const ast::Expression* expr, const sem::Type* type);
     sem::Constant EvaluateConstantValue(const ast::LiteralExpression* literal,

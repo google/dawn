@@ -81,7 +81,14 @@ class Constant {
     /// @return the value of the scalar `static_cast` to type T.
     template <typename T>
     T ElementAs(size_t index) const {
-        return std::visit([](auto val) { return static_cast<T>(val); }, elems_[index]);
+        return Cast<T>(elems_[index]);
+    }
+
+    /// @param s the input scalar
+    /// @returns the scalar `s` cast to the type `T`.
+    template <typename T>
+    static T Cast(Scalar s) {
+        return std::visit([](auto v) { return static_cast<T>(v); }, s);
     }
 
   private:
