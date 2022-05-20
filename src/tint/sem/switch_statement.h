@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_SEM_SWITCH_STATEMENT_H_
 #define SRC_TINT_SEM_SWITCH_STATEMENT_H_
 
+#include <vector>
+
 #include "src/tint/sem/block_statement.h"
 
 // Forward declarations
@@ -22,6 +24,10 @@ namespace tint::ast {
 class CaseStatement;
 class SwitchStatement;
 }  // namespace tint::ast
+namespace tint::sem {
+class CaseStatement;
+class Expression;
+}  // namespace tint::sem
 
 namespace tint::sem {
 
@@ -41,6 +47,15 @@ class SwitchStatement final : public Castable<SwitchStatement, CompoundStatement
 
     /// @return the AST node for this statement
     const ast::SwitchStatement* Declaration() const;
+
+    /// @returns the case statements for this switch
+    std::vector<const CaseStatement*>& Cases() { return cases_; }
+
+    /// @returns the case statements for this switch
+    const std::vector<const CaseStatement*>& Cases() const { return cases_; }
+
+  private:
+    std::vector<const CaseStatement*> cases_;
 };
 
 /// Holds semantic information about a switch case statement
@@ -66,8 +81,15 @@ class CaseStatement final : public Castable<CaseStatement, CompoundStatement> {
     /// @returns the case body block statement
     const BlockStatement* Body() const { return body_; }
 
+    /// @returns the selectors for the case
+    std::vector<const Expression*>& Selectors() { return selectors_; }
+
+    /// @returns the selectors for the case
+    const std::vector<const Expression*>& Selectors() const { return selectors_; }
+
   private:
     const BlockStatement* body_ = nullptr;
+    std::vector<const Expression*> selectors_;
 };
 
 }  // namespace tint::sem

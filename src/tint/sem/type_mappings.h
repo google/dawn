@@ -30,6 +30,7 @@ class Node;
 class Statement;
 class Struct;
 class StructMember;
+class SwitchStatement;
 class Type;
 class TypeDecl;
 class Variable;
@@ -46,6 +47,7 @@ class Node;
 class Statement;
 class Struct;
 class StructMember;
+class SwitchStatement;
 class Type;
 class Variable;
 }  // namespace tint::sem
@@ -68,6 +70,7 @@ struct TypeMappings {
     Statement* operator()(ast::Statement*);
     Struct* operator()(ast::Struct*);
     StructMember* operator()(ast::StructMember*);
+    SwitchStatement* operator()(ast::SwitchStatement*);
     Type* operator()(ast::Type*);
     Type* operator()(ast::TypeDecl*);
     Variable* operator()(ast::Variable*);

@@ -19,6 +19,7 @@
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/for_loop_statement.h"
 #include "src/tint/sem/if_statement.h"
+#include "src/tint/sem/switch_statement.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

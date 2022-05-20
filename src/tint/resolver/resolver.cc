@@ -870,10 +870,13 @@ sem::CaseStatement* Resolver::CaseStatement(const ast::CaseStatement* stmt) {
     auto* sem =
         builder_->create<sem::CaseStatement>(stmt, current_compound_statement_, current_function_);
     return StatementScope(stmt, sem, [&] {
+        sem->Selectors().reserve(stmt->selectors.size());
         for (auto* sel : stmt->selectors) {
-            if (!Expression(sel)) {
+            auto* expr = Expression(sel);
+            if (!expr) {
                 return false;
             }
+            sem->Selectors().emplace_back(expr);
         }
         Mark(stmt->body);
         auto* body = BlockStatement(stmt->body);
@@ -2140,6 +2143,7 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
                 return false;
             }
             behaviors.Add(c->Behaviors());
+            sem->Cases().emplace_back(c);
         }
 
         if (behaviors.Contains(sem::Behavior::kBreak)) {
