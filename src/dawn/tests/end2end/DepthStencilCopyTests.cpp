@@ -437,9 +437,9 @@ TEST_P(DepthCopyTests, FromDepthAspect) {
     DAWN_TEST_UNSUPPORTED_IF(GetParam().mTextureFormat == wgpu::TextureFormat::Depth16Unorm &&
                              (IsOpenGL() || IsOpenGLES()));
 
-    // TODO(crbug.com/dawn/1291): These tests are failing on NVidia GLES
+    // TODO(crbug.com/dawn/1291): These tests are failing on GLES (both native and ANGLE)
     // when using Tint/GLSL.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES() && IsNvidia());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
@@ -480,9 +480,9 @@ TEST_P(DepthCopyTests, FromNonZeroMipDepthAspect) {
     DAWN_TEST_UNSUPPORTED_IF(GetParam().mTextureFormat == wgpu::TextureFormat::Depth16Unorm &&
                              (IsOpenGL() || IsOpenGLES()));
 
-    // TODO(crbug.com/dawn/1291): These tests are failing on NVidia GLES
+    // TODO(crbug.com/dawn/1291): These tests are failing on GLES (both native and ANGLE)
     // when using Tint/GLSL.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES() && IsNvidia());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     wgpu::Texture depthTexture = CreateDepthTexture(
         9, 9, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc, 2);

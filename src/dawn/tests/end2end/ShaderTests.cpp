@@ -364,6 +364,10 @@ struct S1 { data : array<vec4<u32>, 20> }
 
 // Test that WGSL built-in variable @sample_index can be used in fragment shaders.
 TEST_P(ShaderTests, SampleIndex) {
+    // TODO(crbug.com/dawn/673): Work around or enforce via validation that sample variables are not
+    // supported on some platforms.
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_sample_variables"));
+
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
 @stage(vertex)
 fn main(@location(0) pos : vec4<f32>) -> @builtin(position) vec4<f32> {

@@ -2290,6 +2290,9 @@ TEST_P(CopyTests_T2T, Texture3DSameTextureDifferentMipLevels) {
 
 // Test that copying whole 3D texture to a 2D array in one texture-to-texture-copy works.
 TEST_P(CopyTests_T2T, Texture3DTo2DArrayFull) {
+    // TODO(crbug.com/dawn/1425): Remove this suppression.
+    DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows() && IsIntel());
+
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kDepth = 6u;
@@ -2306,6 +2309,9 @@ TEST_P(CopyTests_T2T, Texture3DTo2DArrayFull) {
 TEST_P(CopyTests_T2T, Texture3DAnd2DArraySubRegion) {
     // TODO(crbug.com/dawn/1216): Remove this suppression.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
+
+    // TODO(crbug.com/dawn/1426): Remove this suppression.
+    DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows() && IsIntel());
 
     constexpr uint32_t kWidth = 8;
     constexpr uint32_t kHeight = 4;

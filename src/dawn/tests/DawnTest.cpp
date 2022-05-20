@@ -451,7 +451,11 @@ std::unique_ptr<dawn::native::Instance> DawnTestEnvironment::CreateInstanceAndDi
         if (!mANGLEBackend.empty()) {
             platform = mANGLEBackend.c_str();
         } else {
+#if defined(DAWN_PLATFORM_WINDOWS)
+            platform = "d3d11";
+#else
             platform = "swiftshader";
+#endif
         }
         angleDefaultPlatform.Set("ANGLE_DEFAULT_PLATFORM", platform);
     }
