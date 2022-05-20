@@ -85,6 +85,8 @@ class PipelineLayout final : public PipelineLayoutBase {
     ~PipelineLayout() override = default;
     using PipelineLayoutBase::PipelineLayoutBase;
     MaybeError Initialize();
+    void DestroyImpl() override;
+
     ityp::array<BindGroupIndex, uint32_t, kMaxBindGroups> mCbvUavSrvRootParameterInfo;
     ityp::array<BindGroupIndex, uint32_t, kMaxBindGroups> mSamplerRootParameterInfo;
     ityp::array<BindGroupIndex,

@@ -275,6 +275,27 @@ MaybeError PipelineLayout::Initialize() {
     return {};
 }
 
+void PipelineLayout::DestroyImpl() {
+    PipelineLayoutBase::DestroyImpl();
+
+    Device* device = ToBackend(GetDevice());
+    device->ReferenceUntilUnused(mRootSignature);
+
+    // The ID3D12CommandSignature object should not be referenced by GPU operations in-flight on
+    // Command Queue when it is being deleted. According to D3D12 debug layer, "it is not safe to
+    // final-release objects that may have GPU operations pending. This can result in application
+    // instability (921)".
+    if (mDispatchIndirectCommandSignatureWithNumWorkgroups.Get()) {
+        device->ReferenceUntilUnused(mDispatchIndirectCommandSignatureWithNumWorkgroups);
+    }
+    if (mDrawIndirectCommandSignatureWithInstanceVertexOffsets.Get()) {
+        device->ReferenceUntilUnused(mDrawIndirectCommandSignatureWithInstanceVertexOffsets);
+    }
+    if (mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets.Get()) {
+        device->ReferenceUntilUnused(mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets);
+    }
+}
+
 uint32_t PipelineLayout::GetCbvUavSrvRootParameterIndex(BindGroupIndex group) const {
     ASSERT(group < kMaxBindGroupsTyped);
     return mCbvUavSrvRootParameterInfo[group];
