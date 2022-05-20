@@ -203,6 +203,8 @@ struct DataType<bool> {
     static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
         return b.Expr(elem_value == 0);
     }
+    /// @returns the WGSL name for the type
+    static inline std::string Name() { return "bool"; }
 };
 
 /// Helper for building i32 types and expressions
@@ -223,6 +225,8 @@ struct DataType<i32> {
     static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
         return b.Expr(static_cast<i32>(elem_value));
     }
+    /// @returns the WGSL name for the type
+    static inline std::string Name() { return "i32"; }
 };
 
 /// Helper for building u32 types and expressions
@@ -243,6 +247,8 @@ struct DataType<u32> {
     static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
         return b.Expr(static_cast<u32>(elem_value));
     }
+    /// @returns the WGSL name for the type
+    static inline std::string Name() { return "u32"; }
 };
 
 /// Helper for building f32 types and expressions
@@ -263,6 +269,30 @@ struct DataType<f32> {
     static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
         return b.Expr(static_cast<f32>(elem_value));
     }
+    /// @returns the WGSL name for the type
+    static inline std::string Name() { return "f32"; }
+};
+
+/// Helper for building f16 types and expressions
+template <>
+struct DataType<f16> {
+    /// false as f16 is not a composite type
+    static constexpr bool is_composite = false;
+
+    /// @param b the ProgramBuilder
+    /// @return a new AST f16 type
+    static inline const ast::Type* AST(ProgramBuilder& b) { return b.ty.f16(); }
+    /// @param b the ProgramBuilder
+    /// @return the semantic f16 type
+    static inline const sem::Type* Sem(ProgramBuilder& b) { return b.create<sem::F16>(); }
+    /// @param b the ProgramBuilder
+    /// @param elem_value the value f16 will be initialized with
+    /// @return a new AST f16 literal value expression
+    static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+        return b.Expr(static_cast<f16>(elem_value));
+    }
+    /// @returns the WGSL name for the type
+    static inline std::string Name() { return "f16"; }
 };
 
 /// Helper for building abstract float types and expressions
@@ -271,15 +301,19 @@ struct DataType<AFloat> {
     /// false as AFloat is not a composite type
     static constexpr bool is_composite = false;
 
+    /// @returns nullptr, as abstract floats are un-typeable
+    static inline const ast::Type* AST(ProgramBuilder&) { return nullptr; }
     /// @param b the ProgramBuilder
     /// @return the semantic abstract-float type
     static inline const sem::Type* Sem(ProgramBuilder& b) { return b.create<sem::AbstractFloat>(); }
     /// @param b the ProgramBuilder
-    /// @param elem_value the abstract-float value
+    /// @param elem_value the value the abstract-float literal will be constructed with
     /// @return a new AST abstract-float literal value expression
-    static inline const ast::Expression* Expr(ProgramBuilder& b, AFloat elem_value) {
-        return b.Expr(elem_value);
+    static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+        return b.Expr(AFloat(elem_value));
     }
+    /// @returns the WGSL name for the type
+    static inline std::string Name() { return "abstract-float"; }
 };
 
 /// Helper for building abstract integer types and expressions
@@ -288,15 +322,19 @@ struct DataType<AInt> {
     /// false as AFloat is not a composite type
     static constexpr bool is_composite = false;
 
+    /// @returns nullptr, as abstract integers are un-typeable
+    static inline const ast::Type* AST(ProgramBuilder&) { return nullptr; }
     /// @param b the ProgramBuilder
     /// @return the semantic abstract-int type
     static inline const sem::Type* Sem(ProgramBuilder& b) { return b.create<sem::AbstractInt>(); }
     /// @param b the ProgramBuilder
-    /// @param elem_value the abstract-int value
+    /// @param elem_value the value the abstract-int literal will be constructed with
     /// @return a new AST abstract-int literal value expression
-    static inline const ast::Expression* Expr(ProgramBuilder& b, AInt elem_value) {
-        return b.Expr(elem_value);
+    static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+        return b.Expr(AInt(elem_value));
     }
+    /// @returns the WGSL name for the type
+    static inline std::string Name() { return "abstract-int"; }
 };
 
 /// Helper for building vector types and expressions
@@ -332,6 +370,10 @@ struct DataType<vec<N, T>> {
             args.emplace_back(DataType<T>::Expr(b, elem_value));
         }
         return args;
+    }
+    /// @returns the WGSL name for the type
+    static inline std::string Name() {
+        return "vec" + std::to_string(N) + "<" + DataType<T>::Name() + ">";
     }
 };
 
@@ -369,6 +411,11 @@ struct DataType<mat<N, M, T>> {
             args.emplace_back(DataType<vec<M, T>>::Expr(b, elem_value));
         }
         return args;
+    }
+    /// @returns the WGSL name for the type
+    static inline std::string Name() {
+        return "mat" + std::to_string(N) + "x" + std::to_string(M) + "<" + DataType<T>::Name() +
+               ">";
     }
 };
 
@@ -411,6 +458,8 @@ struct DataType<alias<T, ID>> {
         // Construct
         return b.Construct(AST(b), DataType<T>::ExprArgs(b, elem_value));
     }
+    /// @returns the WGSL name for the type
+    static inline std::string Name() { return "alias_" + std::to_string(ID); }
 };
 
 /// Helper for building pointer types and expressions
@@ -439,6 +488,8 @@ struct DataType<ptr<T>> {
         b.Global(sym, DataType<T>::AST(b), ast::StorageClass::kPrivate);
         return b.AddressOf(sym);
     }
+    /// @returns the WGSL name for the type
+    static inline std::string Name() { return "ptr<" + DataType<T>::Name() + ">"; }
 };
 
 /// Helper for building array types and expressions
@@ -481,6 +532,10 @@ struct DataType<array<N, T>> {
             args.emplace_back(DataType<T>::Expr(b, elem_value));
         }
         return args;
+    }
+    /// @returns the WGSL name for the type
+    static inline std::string Name() {
+        return "array<" + DataType<T>::Name() + ", " + std::to_string(N) + ">";
     }
 };
 
