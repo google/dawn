@@ -30,6 +30,10 @@ Result::Result(const Result&) = default;
 
 Result Generate(const Program* program, const Options& options, const std::string& entry_point) {
     Result result;
+    if (!program->IsValid()) {
+        result.error = "input program is not valid";
+        return result;
+    }
 
     // Sanitize the program.
     auto sanitized_result = Sanitize(program, options, entry_point);

@@ -20,6 +20,15 @@ namespace {
 
 using BuilderTest = TestHelper;
 
+TEST_F(BuilderTest, InvalidProgram) {
+    Diagnostics().add_error(diag::System::Writer, "make the program invalid");
+    ASSERT_FALSE(IsValid());
+    auto program = std::make_unique<Program>(std::move(*this));
+    ASSERT_FALSE(program->IsValid());
+    auto result = Generate(program.get(), Options{});
+    EXPECT_EQ(result.error, "input program is not valid");
+}
+
 TEST_F(BuilderTest, TracksIdBounds) {
     spirv::Builder& b = Build();
 
