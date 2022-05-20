@@ -709,10 +709,10 @@ TEST_F(IntrinsicTableTest, MismatchTypeConstructorImplicit) {
     EXPECT_EQ(Diagnostics().str(), R"(12:34 error: no matching constructor for vec3(i32, f32, i32)
 
 6 candidate constructors:
-  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is f32, i32, u32 or bool
-  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is f32, i32, u32 or bool
-  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is f32, i32, u32 or bool
-  vec3(T) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
+  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
+  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
+  vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
   vec3(vec3<T>) -> vec3<T>  where: T is f32, i32, u32 or bool
   vec3() -> vec3<T>  where: T is f32, i32, u32 or bool
 
@@ -733,10 +733,10 @@ TEST_F(IntrinsicTableTest, MismatchTypeConstructorExplicit) {
               R"(12:34 error: no matching constructor for vec3<i32>(i32, f32, i32)
 
 6 candidate constructors:
-  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is f32, i32, u32 or bool
-  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is f32, i32, u32 or bool
-  vec3(T) -> vec3<T>  where: T is f32, i32, u32 or bool
-  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
+  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
+  vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
+  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
   vec3(vec3<T>) -> vec3<T>  where: T is f32, i32, u32 or bool
   vec3() -> vec3<T>  where: T is f32, i32, u32 or bool
 
@@ -771,11 +771,11 @@ TEST_F(IntrinsicTableTest, MismatchTypeConversion) {
 
 6 candidate constructors:
   vec3(vec3<T>) -> vec3<T>  where: T is f32, i32, u32 or bool
-  vec3(T) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
   vec3() -> vec3<T>  where: T is f32, i32, u32 or bool
-  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is f32, i32, u32 or bool
-  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is f32, i32, u32 or bool
-  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
+  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
+  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
 
 4 candidate conversions:
   vec3(vec3<U>) -> vec3<f32>  where: T is f32, U is i32, u32 or bool
@@ -822,8 +822,7 @@ struct Case {
     builder::sem_type_func_ptr arg_rhs;
 };
 
-struct IntrinsicTableAbstractBinaryTest : public testing::TestWithParam<Case>,
-                                          public ProgramBuilder {
+struct IntrinsicTableAbstractBinaryTest : public ResolverTestWithParam<Case> {
     std::unique_ptr<IntrinsicTable> table = IntrinsicTable::Create(*this);
 };
 
@@ -1004,8 +1003,7 @@ struct Case {
     builder::sem_type_func_ptr arg_c;
 };
 
-struct IntrinsicTableAbstractTernaryTest : public testing::TestWithParam<Case>,
-                                           public ProgramBuilder {
+struct IntrinsicTableAbstractTernaryTest : public ResolverTestWithParam<Case> {
     std::unique_ptr<IntrinsicTable> table = IntrinsicTable::Create(*this);
 };
 
