@@ -141,6 +141,8 @@ target_sources(dawn_native PRIVATE
     "QuerySet.h"
     "Queue.cpp"
     "Queue.h"
+    "RefCountedWithExternalCount.cpp"
+    "RefCountedWithExternalCount.h"
     "RenderBundle.cpp"
     "RenderBundle.h"
     "RenderBundleEncoder.cpp"

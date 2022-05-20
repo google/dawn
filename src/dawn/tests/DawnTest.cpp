@@ -1066,7 +1066,7 @@ void DawnTestBase::TearDown() {
         mReadbackSlots[i].buffer.Unmap();
     }
 
-    if (!UsesWire()) {
+    if (!UsesWire() && device) {
         EXPECT_EQ(mLastWarningCount,
                   dawn::native::GetDeprecationWarningCountForTesting(device.Get()));
     }
@@ -1454,7 +1454,9 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
 }
 
 void DawnTestBase::WaitABit() {
-    device.Tick();
+    if (device) {
+        device.Tick();
+    }
     FlushWire();
 
     utils::USleep(100);

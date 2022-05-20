@@ -704,6 +704,8 @@ void Device::AppendDebugLayerMessages(ErrorData* error) {
 void Device::DestroyImpl() {
     ASSERT(GetState() == State::Disconnected);
 
+    mZeroBuffer = nullptr;
+
     // Immediately forget about all pending commands for the case where device is lost on its
     // own and WaitForIdleForDestruction isn't called.
     mPendingCommands.Release();

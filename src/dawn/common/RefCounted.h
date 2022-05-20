@@ -20,6 +20,24 @@
 
 #include "dawn/common/RefBase.h"
 
+class RefCount {
+  public:
+    // Create a refcount with a payload. The refcount starts initially at one.
+    explicit RefCount(uint64_t payload = 0);
+
+    uint64_t GetValueForTesting() const;
+    uint64_t GetPayload() const;
+
+    // Add a reference.
+    void Increment();
+
+    // Remove a reference. Returns true if this was the last reference.
+    bool Decrement();
+
+  private:
+    std::atomic<uint64_t> mRefCount;
+};
+
 class RefCounted {
   public:
     explicit RefCounted(uint64_t payload = 0);
@@ -30,16 +48,17 @@ class RefCounted {
     void Reference();
     void Release();
 
-    void APIReference();
-    void APIRelease();
+    void APIReference() { Reference(); }
+    void APIRelease() { Release(); }
 
   protected:
-    virtual ~RefCounted() = default;
+    virtual ~RefCounted();
+
     // A Derived class may override this if they require a custom deleter.
     virtual void DeleteThis();
 
   private:
-    std::atomic<uint64_t> mRefCount;
+    RefCount mRefCount;
 };
 
 template <typename T>

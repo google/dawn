@@ -155,9 +155,7 @@ source_set("sources") {
   libs = []
   data_deps = []
 
-  configs += [
-    ":internal",
-  ]
+  configs += [ ":internal" ]
 
   # Enable -Wglobal-constructors here only, instead of in internal_config,
   # because gtest and some other targets don't build with it.
@@ -286,6 +284,8 @@ source_set("sources") {
     "QuerySet.h",
     "Queue.cpp",
     "Queue.h",
+    "RefCountedWithExternalCount.cpp",
+    "RefCountedWithExternalCount.h",
     "RenderBundle.cpp",
     "RenderBundle.h",
     "RenderBundleEncoder.cpp",

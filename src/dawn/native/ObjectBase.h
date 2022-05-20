@@ -37,8 +37,8 @@ class ObjectBase : public RefCounted {
     bool IsError() const;
 
   private:
-    // Pointer to owning device.
-    DeviceBase* mDevice;
+    // Ref to owning device.
+    Ref<DeviceBase> mDevice;
 };
 
 class ApiObjectBase : public ObjectBase, public LinkNode<ApiObjectBase> {

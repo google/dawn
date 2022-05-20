@@ -22,15 +22,15 @@ static constexpr size_t kPayloadBits = 1;
 static constexpr uint64_t kPayloadMask = (uint64_t(1) << kPayloadBits) - 1;
 static constexpr uint64_t kRefCountIncrement = (uint64_t(1) << kPayloadBits);
 
-RefCounted::RefCounted(uint64_t payload) : mRefCount(kRefCountIncrement + payload) {
+RefCount::RefCount(uint64_t payload) : mRefCount(kRefCountIncrement + payload) {
     ASSERT((payload & kPayloadMask) == payload);
 }
 
-uint64_t RefCounted::GetRefCountForTesting() const {
+uint64_t RefCount::GetValueForTesting() const {
     return mRefCount >> kPayloadBits;
 }
 
-uint64_t RefCounted::GetRefCountPayload() const {
+uint64_t RefCount::GetPayload() const {
     // We only care about the payload bits of the refcount. These never change after
     // initialization so we can use the relaxed memory order. The order doesn't guarantee
     // anything except the atomicity of the load, which is enough since any past values of the
@@ -38,7 +38,7 @@ uint64_t RefCounted::GetRefCountPayload() const {
     return kPayloadMask & mRefCount.load(std::memory_order_relaxed);
 }
 
-void RefCounted::Reference() {
+void RefCount::Increment() {
     ASSERT((mRefCount & ~kPayloadMask) != 0);
 
     // The relaxed ordering guarantees only the atomicity of the update, which is enough here
@@ -49,7 +49,7 @@ void RefCounted::Reference() {
     mRefCount.fetch_add(kRefCountIncrement, std::memory_order_relaxed);
 }
 
-void RefCounted::Release() {
+bool RefCount::Decrement() {
     ASSERT((mRefCount & ~kPayloadMask) != 0);
 
     // The release fence here is to make sure all accesses to the object on a thread A
@@ -69,16 +69,30 @@ void RefCounted::Release() {
         // memory barrier, when an acquire load on mRefCount (using the `ldar` instruction)
         // should be enough and could end up being faster.
         std::atomic_thread_fence(std::memory_order_acquire);
+        return true;
+    }
+    return false;
+}
+
+RefCounted::RefCounted(uint64_t payload) : mRefCount(payload) {}
+RefCounted::~RefCounted() = default;
+
+uint64_t RefCounted::GetRefCountForTesting() const {
+    return mRefCount.GetValueForTesting();
+}
+
+uint64_t RefCounted::GetRefCountPayload() const {
+    return mRefCount.GetPayload();
+}
+
+void RefCounted::Reference() {
+    mRefCount.Increment();
+}
+
+void RefCounted::Release() {
+    if (mRefCount.Decrement()) {
         DeleteThis();
     }
-}
-
-void RefCounted::APIReference() {
-    Reference();
-}
-
-void RefCounted::APIRelease() {
-    Release();
 }
 
 void RefCounted::DeleteThis() {

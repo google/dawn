@@ -27,7 +27,7 @@ ObjectBase::ObjectBase(DeviceBase* device) : RefCounted(kNotErrorPayload), mDevi
 ObjectBase::ObjectBase(DeviceBase* device, ErrorTag) : RefCounted(kErrorPayload), mDevice(device) {}
 
 DeviceBase* ObjectBase::GetDevice() const {
-    return mDevice;
+    return mDevice.Get();
 }
 
 bool ObjectBase::IsError() const {

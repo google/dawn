@@ -32,6 +32,7 @@
 #include "dawn/native/Limits.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/ObjectType_autogen.h"
+#include "dawn/native/RefCountedWithExternalCount.h"
 #include "dawn/native/StagingBuffer.h"
 #include "dawn/native/Toggles.h"
 
@@ -57,7 +58,7 @@ struct ShaderModuleParseResult;
 
 using WGSLExtensionSet = std::unordered_set<std::string>;
 
-class DeviceBase : public RefCounted {
+class DeviceBase : public RefCountedWithExternalCount {
   public:
     DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor);
     ~DeviceBase() override;
@@ -404,6 +405,8 @@ class DeviceBase : public RefCounted {
     void IncrementLastSubmittedCommandSerial();
 
   private:
+    void WillDropLastExternalRef() override;
+
     virtual ResultOrError<Ref<BindGroupBase>> CreateBindGroupImpl(
         const BindGroupDescriptor* descriptor) = 0;
     virtual ResultOrError<Ref<BindGroupLayoutBase>> CreateBindGroupLayoutImpl(

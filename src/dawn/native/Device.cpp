@@ -288,6 +288,39 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
     return {};
 }
 
+void DeviceBase::WillDropLastExternalRef() {
+    // DeviceBase uses RefCountedWithExternalCount to break refcycles.
+    //
+    // DeviceBase holds multiple Refs to various API objects (pipelines, buffers, etc.) which are
+    // used to implement various device-level facilities. These objects are cached on the device,
+    // so we want to keep them around instead of making transient allocations. However, many of
+    // the objects also hold a Ref<Device> back to their parent device.
+    //
+    // In order to break this cycle and prevent leaks, when the application drops the last external
+    // ref and WillDropLastExternalRef is called, the device clears out any member refs to API
+    // objects that hold back-refs to the device - thus breaking any reference cycles.
+    //
+    // Currently, this is done by calling Destroy on the device to cease all in-flight work and
+    // drop references to internal objects. We may want to lift this in the future, but it would
+    // make things more complex because there might be pending tasks which hold a ref back to the
+    // device - either directly or indirectly. We would need to ensure those tasks don't create new
+    // reference cycles, and we would need to continuously try draining the pending tasks to clear
+    // out all remaining refs.
+    Destroy();
+
+    // Reset callbacks since after this, since after dropping the last external reference, the
+    // application may have freed any device-scope memory needed to run the callback.
+    mUncapturedErrorCallback = [](WGPUErrorType, char const* message, void*) {
+        dawn::WarningLog() << "Uncaptured error after last external device reference dropped.\n"
+                           << message;
+    };
+
+    mDeviceLostCallback = [](WGPUDeviceLostReason, char const* message, void*) {
+        dawn::WarningLog() << "Device lost after last external device reference dropped.\n"
+                           << message;
+    };
+}
+
 void DeviceBase::DestroyObjects() {
     // List of object types in reverse "dependency" order so we can iterate and delete the
     // objects safely. We define dependent here such that if B has a ref to A, then B depends on
@@ -344,6 +377,15 @@ void DeviceBase::Destroy() {
     if (mState == State::Destroyed) {
         return;
     }
+
+    // This function may be called re-entrantly inside APITick(). Tick triggers callbacks
+    // inside which the application may destroy the device. Thus, we should be careful not
+    // to delete objects that are needed inside Tick after callbacks have been called.
+    //  - mCallbackTaskManager is not deleted since we flush the callback queue at the end
+    // of Tick(). Note: that flush should always be emtpy since all callbacks are drained
+    // inside Destroy() so there should be no outstanding tasks holding objects alive.
+    //  - Similiarly, mAsyncTaskManager is not deleted since we use it to return a status
+    // from Tick() whether or not there is any more pending work.
 
     // Skip handling device facilities if they haven't even been created (or failed doing so)
     if (mState != State::BeingCreated) {
@@ -413,11 +455,10 @@ void DeviceBase::Destroy() {
     mState = State::Disconnected;
 
     mDynamicUploader = nullptr;
-    mCallbackTaskManager = nullptr;
-    mAsyncTaskManager = nullptr;
     mEmptyBindGroupLayout = nullptr;
     mInternalPipelineStore = nullptr;
     mExternalTexturePlaceholderView = nullptr;
+    mQueue = nullptr;
 
     AssumeCommandsComplete();
 
@@ -1162,6 +1203,9 @@ BufferBase* DeviceBase::APICreateErrorBuffer() {
 
 // Returns true if future ticking is needed.
 bool DeviceBase::APITick() {
+    // Tick may trigger callbacks which drop a ref to the device itself. Hold a Ref to ourselves
+    // to avoid deleting |this| in the middle of this function call.
+    Ref<DeviceBase> self(this);
     if (IsLost() || ConsumedError(Tick())) {
         return false;
     }
@@ -1334,6 +1378,7 @@ void DeviceBase::APIInjectError(wgpu::ErrorType type, const char* message) {
 }
 
 QueueBase* DeviceBase::GetQueue() const {
+    ASSERT(mQueue != nullptr);
     return mQueue.Get();
 }
 
