@@ -999,23 +999,25 @@ bool GeneratorImpl::EmitFunctionCall(std::ostream& out,
 bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
                                     const sem::Call* call,
                                     const sem::Builtin* builtin) {
+    const auto type = builtin->Type();
+
     auto* expr = call->Declaration();
     if (builtin->IsTexture()) {
         return EmitTextureCall(out, call, builtin);
     }
-    if (builtin->Type() == sem::BuiltinType::kSelect) {
+    if (type == sem::BuiltinType::kSelect) {
         return EmitSelectCall(out, expr);
     }
-    if (builtin->Type() == sem::BuiltinType::kModf) {
+    if (type == sem::BuiltinType::kModf) {
         return EmitModfCall(out, expr, builtin);
     }
-    if (builtin->Type() == sem::BuiltinType::kFrexp) {
+    if (type == sem::BuiltinType::kFrexp) {
         return EmitFrexpCall(out, expr, builtin);
     }
-    if (builtin->Type() == sem::BuiltinType::kDegrees) {
+    if (type == sem::BuiltinType::kDegrees) {
         return EmitDegreesCall(out, expr, builtin);
     }
-    if (builtin->Type() == sem::BuiltinType::kRadians) {
+    if (type == sem::BuiltinType::kRadians) {
         return EmitRadiansCall(out, expr, builtin);
     }
     if (builtin->IsDataPacking()) {
@@ -1033,9 +1035,25 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
     if (builtin->IsDP4a()) {
         return EmitDP4aCall(out, expr, builtin);
     }
+
     auto name = generate_builtin_name(builtin);
     if (name.empty()) {
         return false;
+    }
+
+    // Handle single argument builtins that only accept and return uint (not int overload). We need
+    // to explicitly cast the return value (we also cast the arg for good measure). See
+    // crbug.com/tint/1550
+    if (type == sem::BuiltinType::kCountOneBits || type == sem::BuiltinType::kReverseBits) {
+        auto* arg = call->Arguments()[0];
+        if (arg->Type()->UnwrapRef()->is_signed_scalar_or_vector()) {
+            out << "asint(" << name << "(asuint(";
+            if (!EmitExpression(out, arg->Declaration())) {
+                return false;
+            }
+            out << ")))";
+            return true;
+        }
     }
 
     out << name << "(";
@@ -1053,6 +1071,7 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
     }
 
     out << ")";
+
     return true;
 }
 
@@ -2546,7 +2565,7 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
         case sem::BuiltinType::kTranspose:
         case sem::BuiltinType::kTrunc:
             return builtin->str();
-        case sem::BuiltinType::kCountOneBits:
+        case sem::BuiltinType::kCountOneBits:  // uint
             return "countbits";
         case sem::BuiltinType::kDpdx:
             return "ddx";
@@ -2574,7 +2593,7 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
             return "rsqrt";
         case sem::BuiltinType::kMix:
             return "lerp";
-        case sem::BuiltinType::kReverseBits:
+        case sem::BuiltinType::kReverseBits:  // uint
             return "reversebits";
         case sem::BuiltinType::kSmoothstep:
         case sem::BuiltinType::kSmoothStep:

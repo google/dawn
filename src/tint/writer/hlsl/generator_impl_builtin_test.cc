@@ -778,5 +778,39 @@ void test_function() {
 )");
 }
 
+TEST_F(HlslGeneratorImplTest_Builtin, CountOneBits) {
+    auto* val = Var("val1", ty.i32());
+    auto* call = Call("countOneBits", val);
+    WrapInFunction(val, call);
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"([numthreads(1, 1, 1)]
+void test_function() {
+  int val1 = 0;
+  const int tint_symbol = asint(countbits(asuint(val1)));
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Builtin, ReverseBits) {
+    auto* val = Var("val1", ty.i32());
+    auto* call = Call("reverseBits", val);
+    WrapInFunction(val, call);
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"([numthreads(1, 1, 1)]
+void test_function() {
+  int val1 = 0;
+  const int tint_symbol = asint(reversebits(asuint(val1)));
+  return;
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::writer::hlsl
