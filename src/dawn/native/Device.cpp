@@ -1555,6 +1555,7 @@ ResultOrError<Ref<PipelineLayoutBase>> DeviceBase::CreatePipelineLayout(
 
 ResultOrError<Ref<ExternalTextureBase>> DeviceBase::CreateExternalTextureImpl(
     const ExternalTextureDescriptor* descriptor) {
+    DAWN_TRY(ValidateIsAlive());
     if (IsValidationEnabled()) {
         DAWN_TRY_CONTEXT(ValidateExternalTextureDescriptor(this, descriptor), "validating %s",
                          descriptor);
