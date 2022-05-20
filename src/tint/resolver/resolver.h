@@ -75,7 +75,10 @@ class Resolver {
   public:
     /// Constructor
     /// @param builder the program builder
-    explicit Resolver(ProgramBuilder* builder);
+    /// @param enable_abstract_numerics if true, then treat unsuffixed integers as abstract integers
+    /// and unsuffixed floats as abstract floats. This is a temporary flag while abstract numerics
+    /// are being developed. Once complete, this will be permanently enabled.
+    explicit Resolver(ProgramBuilder* builder, bool enable_abstract_numerics = false);
 
     /// Destructor
     ~Resolver();
@@ -365,6 +368,8 @@ class Resolver {
     sem::Statement* current_statement_ = nullptr;
     sem::CompoundStatement* current_compound_statement_ = nullptr;
     sem::BlockStatement* current_block_ = nullptr;
+
+    bool enable_abstract_numerics_ = false;
 };
 
 }  // namespace tint::resolver

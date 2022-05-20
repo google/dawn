@@ -14,6 +14,8 @@
 
 #include "src/tint/resolver/resolver.h"
 
+#include "src/tint/sem/abstract_float.h"
+#include "src/tint/sem/abstract_int.h"
 #include "src/tint/sem/constant.h"
 #include "src/tint/sem/type_constructor.h"
 #include "src/tint/utils/map.h"
@@ -64,6 +66,12 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::CallExpression* call,
         using Scalars = sem::Constant::Scalars;
         auto constant = Switch(
             elem_type,
+            [&](const sem::AbstractInt*) {
+                return sem::Constant(type, Scalars(result_size, AInt(0)));
+            },
+            [&](const sem::AbstractFloat*) {
+                return sem::Constant(type, Scalars(result_size, AFloat(0)));
+            },
             [&](const sem::I32*) { return sem::Constant(type, Scalars(result_size, AInt(0))); },
             [&](const sem::U32*) { return sem::Constant(type, Scalars(result_size, AInt(0))); },
             [&](const sem::F32*) { return sem::Constant(type, Scalars(result_size, AFloat(0))); },
@@ -107,6 +115,8 @@ sem::Constant Resolver::ConstantCast(const sem::Constant& value,
         // TODO(crbug.com/tint/1504): Check that value fits in new type
         elems.emplace_back(Switch<sem::Constant::Scalar>(
             target_elem_type,  //
+            [&](const sem::AbstractInt*) { return value.ElementAs<AInt>(i); },
+            [&](const sem::AbstractFloat*) { return value.ElementAs<AFloat>(i); },
             [&](const sem::I32*) { return value.ElementAs<AInt>(i); },
             [&](const sem::U32*) { return value.ElementAs<AInt>(i); },
             [&](const sem::F32*) { return value.ElementAs<AFloat>(i); },

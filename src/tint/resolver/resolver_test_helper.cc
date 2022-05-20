@@ -18,7 +18,8 @@
 
 namespace tint::resolver {
 
-TestHelper::TestHelper() : resolver_(std::make_unique<Resolver>(this)) {}
+TestHelper::TestHelper()
+    : resolver_(std::make_unique<Resolver>(this, /* enable_abstract_numerics */ true)) {}
 
 TestHelper::~TestHelper() = default;
 
