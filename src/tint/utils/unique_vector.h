@@ -75,6 +75,9 @@ struct UniqueVector {
     /// @returns the number of items in the vector
     size_t size() const { return vector.size(); }
 
+    /// @returns the pointer to the first element in the vector, or nullptr if the vector is empty.
+    const T* data() const { return vector.empty() ? nullptr : vector.data(); }
+
     /// @returns an iterator to the beginning of the vector
     ConstIterator begin() const { return vector.begin(); }
 

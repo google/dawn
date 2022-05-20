@@ -139,5 +139,14 @@ TEST(UniqueVectorTest, PopBack) {
     EXPECT_EQ(unique_vec.empty(), true);
 }
 
+TEST(UniqueVectorTest, Data) {
+    UniqueVector<int> unique_vec;
+    EXPECT_EQ(unique_vec.data(), nullptr);
+
+    unique_vec.add(42);
+    EXPECT_EQ(unique_vec.data(), &unique_vec[0]);
+    EXPECT_EQ(*unique_vec.data(), 42);
+}
+
 }  // namespace
 }  // namespace tint::utils
