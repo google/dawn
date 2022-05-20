@@ -68,6 +68,8 @@ void RecordBufferTextureCopy(BufferTextureCopyDirection direction,
 
 void SetDebugName(Device* device, ID3D12Object* object, const char* prefix, std::string label = "");
 
+uint64_t MakeDXCVersion(uint64_t majorVersion, uint64_t minorVersion);
+
 }  // namespace dawn::native::d3d12
 
 #endif  // SRC_DAWN_NATIVE_D3D12_UTILSD3D12_H_

@@ -21,6 +21,7 @@
 #include "dawn/native/d3d12/AdapterD3D12.h"
 #include "dawn/native/d3d12/D3D12Error.h"
 #include "dawn/native/d3d12/PlatformFunctions.h"
+#include "dawn/native/d3d12/UtilsD3D12.h"
 
 namespace dawn::native::d3d12 {
 
@@ -139,6 +140,21 @@ ComPtr<IDxcCompiler> Backend::GetDxcCompiler() const {
 ComPtr<IDxcValidator> Backend::GetDxcValidator() const {
     ASSERT(mDxcValidator != nullptr);
     return mDxcValidator;
+}
+
+ResultOrError<uint64_t> Backend::GetDXCompilerVersion() {
+    DAWN_TRY(EnsureDxcValidator());
+
+    ComPtr<IDxcVersionInfo> versionInfo;
+    DAWN_TRY(CheckHRESULT(mDxcValidator.As(&versionInfo),
+                          "D3D12 QueryInterface IDxcValidator to IDxcVersionInfo"));
+
+    uint32_t compilerMajor, compilerMinor;
+    DAWN_TRY(CheckHRESULT(versionInfo->GetVersion(&compilerMajor, &compilerMinor),
+                          "IDxcVersionInfo::GetVersion"));
+
+    // Pack both into a single version number.
+    return MakeDXCVersion(compilerMajor, compilerMinor);
 }
 
 const PlatformFunctions* Backend::GetFunctions() const {

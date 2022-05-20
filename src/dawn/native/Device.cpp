@@ -182,6 +182,8 @@ DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor)
     if (togglesDesc != nullptr) {
         ApplyToggleOverrides(togglesDesc);
     }
+
+    SetDefaultToggles();
     ApplyFeatures(descriptor);
 
     DawnCacheDeviceDescriptor defaultCacheDesc = {};
@@ -198,7 +200,6 @@ DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor)
     }
 
     mFormatTable = BuildFormatTable(this);
-    SetDefaultToggles();
 
     SetWGSLExtensionAllowList();
 
@@ -1234,13 +1235,25 @@ void DeviceBase::ApplyFeatures(const DeviceDescriptor* deviceDescriptor) {
 }
 
 bool DeviceBase::IsFeatureEnabled(Feature feature) const {
-    return mEnabledFeatures.IsEnabled(feature);
+    if (mEnabledFeatures.IsEnabled(feature)) {
+        // Currently we can only use DXC to compile HLSL shaders using float16, and
+        // ChromiumExperimentalDp4a is an experimental feature which can only be enabled with toggle
+        // "use_dxc".
+        if (feature == Feature::ChromiumExperimentalDp4a || feature == Feature::ShaderFloat16) {
+            return IsToggleEnabled(Toggle::UseDXC);
+        }
+        return true;
+    }
+    return false;
 }
 
 void DeviceBase::SetWGSLExtensionAllowList() {
     // Set the WGSL extensions allow list based on device's enabled features and other
     // propority. For example:
     //     mWGSLExtensionAllowList.insert("InternalExtensionForTesting");
+    if (IsFeatureEnabled(Feature::ChromiumExperimentalDp4a)) {
+        mWGSLExtensionAllowList.insert("chromium_experimental_dp4a");
+    }
 }
 
 WGSLExtensionSet DeviceBase::GetWGSLExtensionAllowList() const {

@@ -75,10 +75,9 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const Adapter& adapter) {
         }
     }
 
-    D3D12_FEATURE_DATA_SHADER_MODEL knownShaderModels[] = {{D3D_SHADER_MODEL_6_2},
-                                                           {D3D_SHADER_MODEL_6_1},
-                                                           {D3D_SHADER_MODEL_6_0},
-                                                           {D3D_SHADER_MODEL_5_1}};
+    D3D12_FEATURE_DATA_SHADER_MODEL knownShaderModels[] = {
+        {D3D_SHADER_MODEL_6_4}, {D3D_SHADER_MODEL_6_3}, {D3D_SHADER_MODEL_6_2},
+        {D3D_SHADER_MODEL_6_1}, {D3D_SHADER_MODEL_6_0}, {D3D_SHADER_MODEL_5_1}};
     uint32_t driverShaderModel = 0;
     for (D3D12_FEATURE_DATA_SHADER_MODEL shaderModel : knownShaderModels) {
         if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
@@ -117,6 +116,8 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const Adapter& adapter) {
         info.supportsShaderFloat16 =
             driverShaderModel >= D3D_SHADER_MODEL_6_2 && featureData4.Native16BitShaderOpsSupported;
     }
+
+    info.supportsDP4a = driverShaderModel >= D3D_SHADER_MODEL_6_4;
 
     return std::move(info);
 }

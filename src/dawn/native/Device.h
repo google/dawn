@@ -265,7 +265,11 @@ class DeviceBase : public RefCounted {
     QueueBase* APIGetQueue();
 
     bool APIGetLimits(SupportedLimits* limits) const;
+    // Note that we should not use this function to query the features which can only be enabled
+    // behind toggles (use IsFeatureEnabled() instead).
     bool APIHasFeature(wgpu::FeatureName feature) const;
+    // Note that we should not use this function to query the features which can only be enabled
+    // behind toggles (use IsFeatureEnabled() instead).
     size_t APIEnumerateFeatures(wgpu::FeatureName* features) const;
     void APIInjectError(wgpu::ErrorType type, const char* message);
     bool APITick();

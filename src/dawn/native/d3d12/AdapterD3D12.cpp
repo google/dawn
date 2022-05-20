@@ -23,6 +23,7 @@
 #include "dawn/native/d3d12/D3D12Error.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/native/d3d12/PlatformFunctions.h"
+#include "dawn/native/d3d12/UtilsD3D12.h"
 
 namespace dawn::native::d3d12 {
 
@@ -136,6 +137,17 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
     mSupportedFeatures.EnableFeature(Feature::MultiPlanarFormats);
     mSupportedFeatures.EnableFeature(Feature::Depth24UnormStencil8);
     mSupportedFeatures.EnableFeature(Feature::Depth32FloatStencil8);
+
+    if (GetBackend()->GetFunctions()->IsDXCAvailable()) {
+        uint64_t dxcVersion = 0;
+        DAWN_TRY_ASSIGN(dxcVersion, GetBackend()->GetDXCompilerVersion());
+        constexpr uint64_t kLeastMajorVersionForDP4a = 1;
+        constexpr uint64_t kLeastMinorVersionForDP4a = 4;
+        if (mDeviceInfo.supportsDP4a &&
+            dxcVersion >= MakeDXCVersion(kLeastMajorVersionForDP4a, kLeastMinorVersionForDP4a)) {
+            mSupportedFeatures.EnableFeature(Feature::ChromiumExperimentalDp4a);
+        }
+    }
 
     return {};
 }

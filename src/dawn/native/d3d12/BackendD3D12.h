@@ -40,6 +40,7 @@ class Backend : public BackendConnection {
     ComPtr<IDxcLibrary> GetDxcLibrary() const;
     ComPtr<IDxcCompiler> GetDxcCompiler() const;
     ComPtr<IDxcValidator> GetDxcValidator() const;
+    ResultOrError<uint64_t> GetDXCompilerVersion();
 
     const PlatformFunctions* GetFunctions() const;
 

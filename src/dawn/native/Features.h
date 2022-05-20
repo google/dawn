@@ -36,6 +36,7 @@ enum class Feature {
     DepthClamping,
     Depth24UnormStencil8,
     Depth32FloatStencil8,
+    ChromiumExperimentalDp4a,
 
     // Dawn-specific
     DawnInternalUsages,

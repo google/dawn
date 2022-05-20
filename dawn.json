@@ -1201,6 +1201,7 @@
             {"name": "depth clamping", "type": "bool", "default": "false"},
             {"name": "depth24 unorm stencil8", "type": "bool", "default": "false"},
             {"name": "depth32 float stencil8", "type": "bool", "default": "false"},
+            {"name": "chromium experimental dp4a", "type": "bool", "default": "false"},
             {"name": "invalid feature", "type": "bool", "default": "false"},
             {"name": "dawn internal usages", "type": "bool", "default": "false"},
             {"name": "dawn native", "type": "bool", "default": "false"},
@@ -1361,7 +1362,8 @@
             {"value": 1001, "name": "dawn shader float 16", "tags": ["dawn"]},
             {"value": 1002, "name": "dawn internal usages", "tags": ["dawn"]},
             {"value": 1003, "name": "dawn multi planar formats", "tags": ["dawn"]},
-            {"value": 1004, "name": "dawn native", "tags": ["dawn", "native"]}
+            {"value": 1004, "name": "dawn native", "tags": ["dawn", "native"]},
+            {"value": 1005, "name": "chromium experimental dp4a", "tags": ["dawn"]}
         ]
     },
     "filter mode": {

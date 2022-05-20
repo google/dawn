@@ -31,6 +31,8 @@
 #include "dawn/native/CacheKey.h"
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/TintUtils.h"
+#include "dawn/native/d3d12/AdapterD3D12.h"
+#include "dawn/native/d3d12/BackendD3D12.h"
 #include "dawn/native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn/native/d3d12/D3D12Error.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
@@ -45,19 +47,6 @@
 namespace dawn::native::d3d12 {
 
 namespace {
-ResultOrError<uint64_t> GetDXCompilerVersion(ComPtr<IDxcValidator> dxcValidator) {
-    ComPtr<IDxcVersionInfo> versionInfo;
-    DAWN_TRY(CheckHRESULT(dxcValidator.As(&versionInfo),
-                          "D3D12 QueryInterface IDxcValidator to IDxcVersionInfo"));
-
-    uint32_t compilerMajor, compilerMinor;
-    DAWN_TRY(CheckHRESULT(versionInfo->GetVersion(&compilerMajor, &compilerMinor),
-                          "IDxcVersionInfo::GetVersion"));
-
-    // Pack both into a single version number.
-    return (uint64_t(compilerMajor) << uint64_t(32)) + compilerMinor;
-}
-
 uint64_t GetD3DCompilerVersion() {
     return D3D_COMPILER_VERSION;
 }
@@ -222,7 +211,8 @@ struct ShaderCompilationRequest {
         uint64_t dxcVersion = 0;
         if (device->IsToggleEnabled(Toggle::UseDXC)) {
             compiler = Compiler::DXC;
-            DAWN_TRY_ASSIGN(dxcVersion, GetDXCompilerVersion(device->GetDxcValidator()));
+            DAWN_TRY_ASSIGN(dxcVersion,
+                            ToBackend(device->GetAdapter())->GetBackend()->GetDXCompilerVersion());
         } else {
             compiler = Compiler::FXC;
         }

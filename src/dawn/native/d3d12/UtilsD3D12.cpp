@@ -386,4 +386,8 @@ void SetDebugName(Device* device, ID3D12Object* object, const char* prefix, std:
     object->SetPrivateData(WKPDID_D3DDebugObjectName, objectName.length(), objectName.c_str());
 }
 
+uint64_t MakeDXCVersion(uint64_t majorVersion, uint64_t minorVersion) {
+    return (majorVersion << 32) + minorVersion;
+}
+
 }  // namespace dawn::native::d3d12
