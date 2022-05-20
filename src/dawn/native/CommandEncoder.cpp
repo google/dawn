@@ -277,7 +277,16 @@ MaybeError ValidateRenderPassDepthStencilAttachment(
     DAWN_TRY(ValidateCanUseAs(attachment->GetTexture(), wgpu::TextureUsage::RenderAttachment,
                               usageValidationMode));
 
-    const Format& format = attachment->GetFormat();
+    // DS attachments must encompass all aspects of the texture, so we first check that this is
+    // true, which means that in the rest of the function we can assume that the view's format is
+    // the same as the texture's format.
+    const Format& format = attachment->GetTexture()->GetFormat();
+    DAWN_INVALID_IF(
+        attachment->GetAspects() != format.aspects,
+        "The depth stencil attachment %s must encompass all aspects of it's texture's format (%s).",
+        attachment, format.format);
+    ASSERT(attachment->GetFormat().format == format.format);
+
     DAWN_INVALID_IF(!format.HasDepthOrStencil(),
                     "The depth stencil attachment %s format (%s) is not a depth stencil format.",
                     attachment, format.format);
@@ -285,9 +294,6 @@ MaybeError ValidateRenderPassDepthStencilAttachment(
     DAWN_INVALID_IF(!format.isRenderable,
                     "The depth stencil attachment %s format (%s) is not renderable.", attachment,
                     format.format);
-
-    DAWN_INVALID_IF(attachment->GetAspects() != format.aspects,
-                    "The depth stencil attachment %s must encompass all aspects.", attachment);
 
     DAWN_INVALID_IF(
         attachment->GetAspects() == (Aspect::Depth | Aspect::Stencil) &&
