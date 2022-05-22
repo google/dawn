@@ -565,7 +565,14 @@ endfunction()
 ################################################################################
 
 add_subdirectory(third_party)
+
+# TODO(crbug.com/tint/455): Tint does not currently build with CMake when
+# BUILD_SHARED_LIBS=1, so always build it as static for now.
+set(BUILD_SHARED_LIBS_SAVED ${BUILD_SHARED_LIBS})
+set(BUILD_SHARED_LIBS 0)
 add_subdirectory(src/tint)
+set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVED})
+
 add_subdirectory(generator)
 add_subdirectory(src/dawn)
 
