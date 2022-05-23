@@ -280,6 +280,8 @@ TEST_P(FirstIndexOffsetTests, IndexedBothOffset) {
 
 // Test that vertex_index starts at 7 when drawn using DrawIndirect()
 TEST_P(FirstIndexOffsetTests, NonIndexedIndirectVertexOffset) {
+    // TODO(crbug.com/dawn/1429): Fails with the full validation turned on.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsFullBackendValidationEnabled());
     TestVertexIndex(DrawMode::NonIndexedIndirect, 7);
 }
 
@@ -296,6 +298,8 @@ TEST_P(FirstIndexOffsetTests, NonIndexedIndirectBothOffset) {
 
 // Test that vertex_index starts at 7 when drawn using DrawIndexedIndirect()
 TEST_P(FirstIndexOffsetTests, IndexedIndirectVertex) {
+    // TODO(crbug.com/dawn/1429): Fails with the full validation turned on.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsFullBackendValidationEnabled());
     TestVertexIndex(DrawMode::IndexedIndirect, 7);
 }
 

@@ -309,6 +309,7 @@ class DawnTestBase {
 
     bool UsesWire() const;
     bool IsBackendValidationEnabled() const;
+    bool IsFullBackendValidationEnabled() const;
     bool RunSuppressedTests() const;
 
     bool IsDXC() const;

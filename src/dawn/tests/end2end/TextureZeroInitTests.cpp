@@ -469,6 +469,9 @@ TEST_P(TextureZeroInitTest, CopyTextureToTextureHalf) {
 // This tests the texture with depth attachment and load op load will init depth stencil texture to
 // 0s.
 TEST_P(TextureZeroInitTest, RenderingLoadingDepth) {
+    // TODO(crbug.com/dawn/1423): Investigate why this test fails on Windows Vulkan drivers
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan());
+
     wgpu::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
                                 wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
@@ -511,6 +514,9 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepth) {
 // This tests the texture with stencil attachment and load op load will init depth stencil texture
 // to 0s.
 TEST_P(TextureZeroInitTest, RenderingLoadingStencil) {
+    // TODO(crbug.com/dawn/1423): Investigate why this test fails on Windows Vulkan drivers
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan());
+
     wgpu::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
                                 wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
@@ -553,6 +559,9 @@ TEST_P(TextureZeroInitTest, RenderingLoadingStencil) {
 // This tests the texture with depth stencil attachment and load op load will init depth stencil
 // texture to 0s.
 TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
+    // TODO(crbug.com/dawn/1423): Investigate why this test fails on Windows Vulkan drivers
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan());
+
     wgpu::TextureDescriptor srcDescriptor =
         CreateTextureDescriptor(1, 1,
                                 wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |

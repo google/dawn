@@ -219,7 +219,7 @@ TEST_P(ComputeDispatchTests, IndirectBasic) {
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
 #endif
     // TODO(crbug.com/dawn/1262): Fails with the full validation turned on.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsFullBackendValidationEnabled());
 
     IndirectTest({2, 3, 4}, 0);
 }
@@ -251,7 +251,7 @@ TEST_P(ComputeDispatchTests, IndirectOffset) {
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
 #endif
     // TODO(crbug.com/dawn/1262): Fails with the full validation turned on.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsFullBackendValidationEnabled());
 
     IndirectTest({0, 0, 0, 2, 3, 4}, 3 * sizeof(uint32_t));
 }
@@ -268,7 +268,7 @@ TEST_P(ComputeDispatchTests, MaxWorkgroups) {
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
 #endif
     // TODO(crbug.com/dawn/1262): Fails with the full validation turned on.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsFullBackendValidationEnabled());
 
     // TODO(crbug.com/dawn/1165): Fails with WARP
     DAWN_SUPPRESS_TEST_IF(IsWARP());
