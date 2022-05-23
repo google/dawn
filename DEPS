@@ -121,7 +121,6 @@ deps = {
   # GLFW for tests and samples
   'third_party/glfw': {
     'url': '{chromium_git}/external/github.com/glfw/glfw@94773111300fee0453844a4c9407af7e880b4df8',
-    'condition': 'dawn_standalone',
   },
 
   'third_party/vulkan_memory_allocator': {
