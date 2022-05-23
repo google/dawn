@@ -100,6 +100,7 @@ typedef struct {{c_prefix}}ChainedStructOut {
         {% endif %}
         {% for member in type.members %}
             {{as_annotated_cType(member)}};
+            {%- if member.optional %} // nullable{% endif %}{{""}}
         {% endfor %}
     } {{as_cType(type.name)}};
 
@@ -143,6 +144,7 @@ extern "C" {
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}
                 , {{as_annotated_cType(arg)}}
+                {%- if arg.optional %} /* nullable */{% endif %}
             {%- endfor -%}
         );
     {% endfor %}
@@ -167,6 +169,7 @@ extern "C" {
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}
                 , {{as_annotated_cType(arg)}}
+                {%- if arg.optional %} /* nullable */{% endif %}
             {%- endfor -%}
         );
     {% endfor %}

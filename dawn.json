@@ -1065,9 +1065,19 @@
             },
             {
                 "name": "create swap chain",
+                "tags": ["dawn"],
                 "returns": "swap chain",
                 "args": [
                     {"name": "surface", "type": "surface", "optional": true},
+                    {"name": "descriptor", "type": "swap chain descriptor", "annotation": "const*"}
+                ]
+            },
+            {
+                "name": "create swap chain",
+                "tags": ["upstream", "emscripten"],
+                "returns": "swap chain",
+                "args": [
+                    {"name": "surface", "type": "surface"},
                     {"name": "descriptor", "type": "swap chain descriptor", "annotation": "const*"}
                 ]
             },
