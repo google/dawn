@@ -351,7 +351,6 @@ TEST(CommandAllocator, EmptyIterator) {
         bool hasNext = iterator2.NextCommandId(&type);
         ASSERT_FALSE(hasNext);
 
-        iterator1.MakeEmptyAsDataWasDestroyed();
         iterator2.MakeEmptyAsDataWasDestroyed();
     }
     {
@@ -362,7 +361,6 @@ TEST(CommandAllocator, EmptyIterator) {
         bool hasNext = iterator2.NextCommandId(&type);
         ASSERT_FALSE(hasNext);
 
-        iterator1.MakeEmptyAsDataWasDestroyed();
         iterator2.MakeEmptyAsDataWasDestroyed();
     }
 }
