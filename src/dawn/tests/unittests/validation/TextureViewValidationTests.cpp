@@ -487,10 +487,15 @@ TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaults2DArray) {
     {
         wgpu::TextureViewDescriptor descriptor;
 
-        // Setting array layers to non-0 means the dimensionality will
-        // default to 2D so by itself it causes an error.
+        // Setting array layers to > 1 with an explicit dimensionality of 2D will
+        // causes an error.
         descriptor.arrayLayerCount = kDefaultArrayLayers;
+        descriptor.dimension = wgpu::TextureViewDimension::e2D;
         ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
+        // Setting view dimension to Undefined will result in a dimension of 2DArray because the
+        // underlying texture has > 1 array layers.
+        descriptor.dimension = wgpu::TextureViewDimension::Undefined;
+        texture.CreateView(&descriptor);
         descriptor.dimension = wgpu::TextureViewDimension::e2DArray;
         texture.CreateView(&descriptor);
 

@@ -537,6 +537,7 @@ MaybeError DoCopyTextureForBrowser(DeviceBase* device,
 
     // Prepare binding 2 resource: sampled texture
     TextureViewDescriptor srcTextureViewDesc = {};
+    srcTextureViewDesc.dimension = wgpu::TextureViewDimension::e2D;
     srcTextureViewDesc.baseMipLevel = source->mipLevel;
     srcTextureViewDesc.mipLevelCount = 1;
     srcTextureViewDesc.arrayLayerCount = 1;
@@ -556,6 +557,7 @@ MaybeError DoCopyTextureForBrowser(DeviceBase* device,
 
     // Prepare dst texture view as color Attachment.
     TextureViewDescriptor dstTextureViewDesc;
+    dstTextureViewDesc.dimension = wgpu::TextureViewDimension::e2D;
     dstTextureViewDesc.baseMipLevel = destination->mipLevel;
     dstTextureViewDesc.mipLevelCount = 1;
     dstTextureViewDesc.baseArrayLayer = destination->origin.z;
