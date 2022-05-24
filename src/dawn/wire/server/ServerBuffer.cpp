@@ -116,12 +116,8 @@ bool Server::DoDeviceCreateBuffer(ObjectId deviceId,
     }
     resultData->generation = bufferResult.generation;
     resultData->handle = mProcs.deviceCreateBuffer(device->handle, descriptor);
-    resultData->deviceInfo = device->info.get();
     resultData->usage = descriptor->usage;
     resultData->mappedAtCreation = descriptor->mappedAtCreation;
-    if (!TrackDeviceChild(resultData->deviceInfo, ObjectType::Buffer, bufferResult.id)) {
-        return false;
-    }
 
     // isReadMode and isWriteMode could be true at the same time if usage contains
     // WGPUMapMode_Read and buffer is mappedAtCreation

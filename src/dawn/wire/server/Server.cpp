@@ -62,11 +62,6 @@ bool Server::InjectTexture(WGPUTexture texture,
     data->handle = texture;
     data->generation = generation;
     data->state = AllocationState::Allocated;
-    data->deviceInfo = device->info.get();
-
-    if (!TrackDeviceChild(data->deviceInfo, ObjectType::Texture, id)) {
-        return false;
-    }
 
     // The texture is externally owned so it shouldn't be destroyed when we receive a destroy
     // message from the client. Add a reference to counterbalance the eventual release.
@@ -94,11 +89,6 @@ bool Server::InjectSwapChain(WGPUSwapChain swapchain,
     data->handle = swapchain;
     data->generation = generation;
     data->state = AllocationState::Allocated;
-    data->deviceInfo = device->info.get();
-
-    if (!TrackDeviceChild(data->deviceInfo, ObjectType::SwapChain, id)) {
-        return false;
-    }
 
     // The texture is externally owned so it shouldn't be destroyed when we receive a destroy
     // message from the client. Add a reference to counterbalance the eventual release.
@@ -164,6 +154,9 @@ void Server::SetForwardingDeviceCallbacks(ObjectData<WGPUDevice>* deviceObject) 
     // free their userdata. Also unlike other callbacks, these are cleared and unset when
     // the server is destroyed, so we don't need to check if the server is still alive
     // inside them.
+    // Also, the device is special-cased in Server::DoDestroyObject to call
+    // ClearDeviceCallbacks. This ensures that callbacks will not fire after |deviceObject|
+    // is freed.
     mProcs.deviceSetUncapturedErrorCallback(
         deviceObject->handle,
         [](WGPUErrorType type, const char* message, void* userdata) {
@@ -195,26 +188,6 @@ void Server::ClearDeviceCallbacks(WGPUDevice device) {
     mProcs.deviceSetUncapturedErrorCallback(device, nullptr, nullptr);
     mProcs.deviceSetLoggingCallback(device, nullptr, nullptr);
     mProcs.deviceSetDeviceLostCallback(device, nullptr, nullptr);
-}
-
-bool TrackDeviceChild(DeviceInfo* info, ObjectType type, ObjectId id) {
-    auto [_, inserted] = info->childObjectTypesAndIds.insert(PackObjectTypeAndId(type, id));
-    if (!inserted) {
-        // An object of this type and id already exists.
-        return false;
-    }
-    return true;
-}
-
-bool UntrackDeviceChild(DeviceInfo* info, ObjectType type, ObjectId id) {
-    auto& children = info->childObjectTypesAndIds;
-    auto it = children.find(PackObjectTypeAndId(type, id));
-    if (it == children.end()) {
-        // An object of this type and id was already deleted.
-        return false;
-    }
-    children.erase(it);
-    return true;
 }
 
 }  // namespace dawn::wire::server

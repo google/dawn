@@ -234,9 +234,6 @@ class Server : public ServerBase {
     std::shared_ptr<bool> mIsAlive;
 };
 
-bool TrackDeviceChild(DeviceInfo* device, ObjectType type, ObjectId id);
-bool UntrackDeviceChild(DeviceInfo* device, ObjectType type, ObjectId id);
-
 std::unique_ptr<MemoryTransferService> CreateInlineMemoryTransferService();
 
 }  // namespace dawn::wire::server

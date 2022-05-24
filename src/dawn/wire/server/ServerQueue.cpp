@@ -59,12 +59,7 @@ bool Server::DoQueueWriteBuffer(ObjectId queueId,
     }
 
     if (size > std::numeric_limits<size_t>::max()) {
-        auto* device = DeviceObjects().Get(queue->deviceInfo->self.id);
-        if (device == nullptr) {
-            return false;
-        }
-        return DoDeviceInjectError(reinterpret_cast<WGPUDevice>(device), WGPUErrorType_OutOfMemory,
-                                   "Data size too large for write texture.");
+        return false;
     }
 
     mProcs.queueWriteBuffer(queue->handle, buffer->handle, bufferOffset, data,
@@ -86,12 +81,7 @@ bool Server::DoQueueWriteTexture(ObjectId queueId,
     }
 
     if (dataSize > std::numeric_limits<size_t>::max()) {
-        auto* device = DeviceObjects().Get(queue->deviceInfo->self.id);
-        if (device == nullptr) {
-            return false;
-        }
-        return DoDeviceInjectError(reinterpret_cast<WGPUDevice>(device), WGPUErrorType_OutOfMemory,
-                                   "Data size too large for write texture.");
+        return false;
     }
 
     mProcs.queueWriteTexture(queue->handle, destination, data, static_cast<size_t>(dataSize),

@@ -27,12 +27,6 @@
 
 namespace dawn::wire::server {
 
-struct DeviceInfo {
-    std::unordered_set<uint64_t> childObjectTypesAndIds;
-    Server* server;
-    ObjectHandle self;
-};
-
 // Whether this object has been allocated, or reserved for async object creation.
 // Used by the KnownObjects queries
 enum class AllocationState : uint32_t {
@@ -48,9 +42,6 @@ struct ObjectDataBase {
     uint32_t generation = 0;
 
     AllocationState state;
-
-    // This points to an allocation that is owned by the device.
-    DeviceInfo* deviceInfo = nullptr;
 };
 
 // Stores what the backend knows about the type.
@@ -70,27 +61,20 @@ struct ObjectData<WGPUBuffer> : public ObjectDataBase<WGPUBuffer> {
     bool mappedAtCreation = false;
 };
 
-// Pack the ObjectType and ObjectId as a single value for storage in
-// an std::unordered_set. This lets us avoid providing our own hash and
-// equality comparison operators.
-inline uint64_t PackObjectTypeAndId(ObjectType type, ObjectId id) {
-    static_assert(sizeof(ObjectType) * 8 <= 32);
-    static_assert(sizeof(ObjectId) * 8 <= 32);
-    return (static_cast<uint64_t>(type) << 32) + id;
-}
-
-inline std::pair<ObjectType, ObjectId> UnpackObjectTypeAndId(uint64_t payload) {
-    ObjectType type = static_cast<ObjectType>(payload >> 32);
-    ObjectId id = payload & 0xFFFFFFFF;
-    return std::make_pair(type, id);
-}
+struct DeviceInfo {
+    Server* server;
+    ObjectHandle self;
+};
 
 template <>
 struct ObjectData<WGPUDevice> : public ObjectDataBase<WGPUDevice> {
     // Store |info| as a separate allocation so that its address does not move.
-    // The pointer to |info| is stored in device child objects.
+    // The pointer to |info| is used as the userdata to device callback.
     std::unique_ptr<DeviceInfo> info = std::make_unique<DeviceInfo>();
 };
+
+template <>
+struct ObjectData<WGPUQueue> : public ObjectDataBase<WGPUQueue> {};
 
 // Keeps track of the mapping between client IDs and backend objects.
 template <typename T>

@@ -363,20 +363,10 @@ TEST_F(WireCreatePipelineAsyncTest, DeviceDeletedBeforeCallback) {
 
     wgpuDeviceRelease(device);
 
-    // Expect release on all objects created by the client.
-    Sequence s1, s2;
-    EXPECT_CALL(api, QueueRelease(apiQueue)).Times(1).InSequence(s1);
-    EXPECT_CALL(api, ShaderModuleRelease(apiModule)).Times(1).InSequence(s2);
-    EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr))
-        .Times(1)
-        .InSequence(s1, s2);
-    EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr))
-        .Times(1)
-        .InSequence(s1, s2);
-    EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, nullptr, nullptr))
-        .Times(1)
-        .InSequence(s1, s2);
-    EXPECT_CALL(api, DeviceRelease(apiDevice)).Times(1).InSequence(s1, s2);
+    EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr)).Times(1);
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(1);
+    EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, nullptr, nullptr)).Times(1);
+    EXPECT_CALL(api, DeviceRelease(apiDevice)).Times(1);
 
     FlushClient();
     DefaultApiDeviceWasReleased();

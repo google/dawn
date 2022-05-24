@@ -26,12 +26,6 @@ void HandleCreatePipelineAsyncCallback(KnownObjects<Pipeline>* knownObjects,
     if (status == WGPUCreatePipelineAsyncStatus_Success) {
         auto* pipelineObject = knownObjects->FillReservation(data->pipelineObjectID, pipeline);
         ASSERT(pipelineObject != nullptr);
-
-        // This should be impossible to fail. It would require a command to be sent that
-        // creates a duplicate ObjectId, which would fail validation.
-        bool success =
-            TrackDeviceChild(pipelineObject->deviceInfo, objectType, data->pipelineObjectID);
-        ASSERT(success);
     } else {
         // Otherwise, free the ObjectId which will make it unusable.
         knownObjects->Free(data->pipelineObjectID);
@@ -111,7 +105,6 @@ bool Server::DoDeviceCreateComputePipelineAsync(ObjectId deviceId,
     }
 
     resultData->generation = pipelineObjectHandle.generation;
-    resultData->deviceInfo = device->info.get();
 
     auto userdata = MakeUserdata<CreatePipelineAsyncUserData>();
     userdata->device = ObjectHandle{deviceId, device->generation};
@@ -156,7 +149,6 @@ bool Server::DoDeviceCreateRenderPipelineAsync(ObjectId deviceId,
     }
 
     resultData->generation = pipelineObjectHandle.generation;
-    resultData->deviceInfo = device->info.get();
 
     auto userdata = MakeUserdata<CreatePipelineAsyncUserData>();
     userdata->device = ObjectHandle{deviceId, device->generation};

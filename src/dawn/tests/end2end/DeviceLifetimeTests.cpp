@@ -17,14 +17,7 @@
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/WGPUHelpers.h"
 
-class DeviceLifetimeTests : public DawnTest {
-    void SetUp() override {
-        DawnTest::SetUp();
-        // The wire currently has a different device / device-child lifetime mechanism
-        // which will be removed soon and these tests enabled.
-        DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    }
-};
+class DeviceLifetimeTests : public DawnTest {};
 
 // Test that the device can be dropped before its queue.
 TEST_P(DeviceLifetimeTests, DroppedBeforeQueue) {
@@ -86,9 +79,16 @@ TEST_P(DeviceLifetimeTests, DroppedInsideQueueOnSubmittedWorkDone) {
 // Test that the device can be dropped while a popErrorScope callback is in flight.
 TEST_P(DeviceLifetimeTests, DroppedWhilePopErrorScope) {
     device.PushErrorScope(wgpu::ErrorFilter::Validation);
+    bool wire = UsesWire();
     device.PopErrorScope(
-        [](WGPUErrorType type, const char*, void*) { EXPECT_EQ(type, WGPUErrorType_NoError); },
-        nullptr);
+        [](WGPUErrorType type, const char*, void* userdata) {
+            const bool wire = *static_cast<bool*>(userdata);
+            // On the wire, all callbacks get rejected immediately with once the device is deleted.
+            // In native, popErrorScope is called synchronously.
+            // TODO(crbug.com/dawn/1122): These callbacks should be made consistent.
+            EXPECT_EQ(type, wire ? WGPUErrorType_Unknown : WGPUErrorType_NoError);
+        },
+        &wire);
     device = nullptr;
 }
 
@@ -215,11 +215,12 @@ TEST_P(DeviceLifetimeTests, DroppedInsideBufferMapCallback) {
     struct Userdata {
         wgpu::Device device;
         wgpu::Buffer buffer;
+        bool wire;
         bool done;
     };
 
     // Ask for a mapAsync callback and drop the device inside the callback.
-    Userdata data = Userdata{std::move(device), buffer, false};
+    Userdata data = Userdata{std::move(device), buffer, UsesWire(), false};
     buffer.MapAsync(
         wgpu::MapMode::Read, 0, wgpu::kWholeMapSize,
         [](WGPUBufferMapAsyncStatus status, void* userdata) {
@@ -229,7 +230,11 @@ TEST_P(DeviceLifetimeTests, DroppedInsideBufferMapCallback) {
             data->done = true;
 
             // Mapped data should be null since the buffer is implicitly destroyed.
-            EXPECT_EQ(data->buffer.GetConstMappedRange(), nullptr);
+            // TODO(crbug.com/dawn/1424): On the wire client, we don't track device child objects so
+            // the mapped data is still available when the device is destroyed.
+            if (!data->wire) {
+                EXPECT_EQ(data->buffer.GetConstMappedRange(), nullptr);
+            }
         },
         &data);
 
@@ -243,7 +248,11 @@ TEST_P(DeviceLifetimeTests, DroppedInsideBufferMapCallback) {
     }
 
     // Mapped data should be null since the buffer is implicitly destroyed.
-    EXPECT_EQ(buffer.GetConstMappedRange(), nullptr);
+    // TODO(crbug.com/dawn/1424): On the wire client, we don't track device child objects so the
+    // mapped data is still available when the device is destroyed.
+    if (!UsesWire()) {
+        EXPECT_EQ(buffer.GetConstMappedRange(), nullptr);
+    }
 }
 
 // Test that the device can be dropped while a write buffer operation is enqueued.
@@ -341,16 +350,20 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncAlreadyCached) {
     // Create a pipeline ahead of time so it's in the cache.
     wgpu::ComputePipeline p = device.CreateComputePipeline(&desc);
 
+    bool wire = UsesWire();
     device.CreateComputePipelineAsync(
         &desc,
-        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline cPipeline, const char* message,
+        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline cPipeline, const char*,
            void* userdata) {
+            const bool wire = *static_cast<bool*>(userdata);
             wgpu::ComputePipeline::Acquire(cPipeline);
-            // Success because it hits the frontend cache immediately.
-            EXPECT_EQ(status, WGPUCreatePipelineAsyncStatus_Success);
+            // On the wire, all callbacks get rejected immediately with once the device is deleted.
+            // In native, expect success since the compilation hits the frontend cache immediately.
+            // TODO(crbug.com/dawn/1122): These callbacks should be made consistent.
+            EXPECT_EQ(status, wire ? WGPUCreatePipelineAsyncStatus_DeviceDestroyed
+                                   : WGPUCreatePipelineAsyncStatus_Success);
         },
-        nullptr);
-
+        &wire);
     device = nullptr;
 }
 
