@@ -190,6 +190,20 @@ TEST_P(DestroyTest, DestroyDeviceLingeringBGL) {
     DestroyDevice();
 }
 
+// Regression test for crbug.com/1327865 where the device set the queue to null
+// inside Destroy() such that it could no longer return it to a call to GetQueue().
+TEST_P(DestroyTest, GetQueueAfterDeviceDestroy) {
+    DestroyDevice();
+
+    wgpu::Queue queue = device.GetQueue();
+    ASSERT_DEVICE_ERROR(queue.OnSubmittedWorkDone(
+        0u,
+        [](WGPUQueueWorkDoneStatus status, void* userdata) {
+            EXPECT_EQ(status, WGPUQueueWorkDoneStatus_DeviceLost);
+        },
+        nullptr));
+}
+
 DAWN_INSTANTIATE_TEST(DestroyTest,
                       D3D12Backend(),
                       MetalBackend(),

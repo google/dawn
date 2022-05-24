@@ -308,6 +308,10 @@ void DeviceBase::WillDropLastExternalRef() {
     // out all remaining refs.
     Destroy();
 
+    // Drop te device's reference to the queue. Because the application dropped the last external
+    // references, they can no longer get the queue from APIGetQueue().
+    mQueue = nullptr;
+
     // Reset callbacks since after this, since after dropping the last external reference, the
     // application may have freed any device-scope memory needed to run the callback.
     mUncapturedErrorCallback = [](WGPUErrorType, char const* message, void*) {
@@ -454,11 +458,12 @@ void DeviceBase::Destroy() {
     // implementations of DestroyImpl checks that we are disconnected before doing work.
     mState = State::Disconnected;
 
+    // Note: mQueue is not released here since the application may still get it after calling
+    // Destroy() via APIGetQueue.
     mDynamicUploader = nullptr;
     mEmptyBindGroupLayout = nullptr;
     mInternalPipelineStore = nullptr;
     mExternalTexturePlaceholderView = nullptr;
-    mQueue = nullptr;
 
     AssumeCommandsComplete();
 
