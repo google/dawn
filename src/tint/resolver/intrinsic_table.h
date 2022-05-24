@@ -43,17 +43,17 @@ class IntrinsicTable {
     struct UnaryOperator {
         /// The result type of the unary operator
         const sem::Type* result;
-        /// The type of the arg of the unary operator
-        const sem::Type* arg;
+        /// The type of the parameter of the unary operator
+        const sem::Type* parameter;
     };
 
     /// BinaryOperator describes a resolved binary operator
     struct BinaryOperator {
         /// The result type of the binary operator
         const sem::Type* result;
-        /// The type of LHS of the binary operator
+        /// The type of LHS parameter of the binary operator
         const sem::Type* lhs;
-        /// The type of RHS of the binary operator
+        /// The type of RHS parameter of the binary operator
         const sem::Type* rhs;
     };
 

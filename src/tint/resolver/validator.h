@@ -54,6 +54,7 @@ class CaseStatement;
 class ForLoopStatement;
 class IfStatement;
 class LoopStatement;
+class Materialize;
 class Statement;
 class SwitchStatement;
 class TypeConstructor;
@@ -274,6 +275,11 @@ class Validator {
     /// @param stmt the loop statement
     /// @returns true on success, false otherwise.
     bool LoopStatement(const sem::LoopStatement* stmt) const;
+
+    /// Validates a materialize of an abstract numeric value
+    /// @param m the materialize to validate
+    /// @returns true on success, false otherwise
+    bool Materialize(const sem::Materialize* m) const;
 
     /// Validates a matrix
     /// @param ty the matrix to validate

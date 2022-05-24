@@ -410,6 +410,7 @@ libtint_source_set("libtint_core_all_src") {
     "sem/if_statement.h",
     "sem/info.h",
     "sem/loop_statement.h",
+    "sem/materialize.h",
     "sem/matrix.h",
     "sem/module.h",
     "sem/multisampled_texture.h",

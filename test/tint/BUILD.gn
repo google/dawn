@@ -257,6 +257,7 @@ tint_unittests_source_set("tint_unittests_resolver_src") {
     "../../src/tint/resolver/intrinsic_table_test.cc",
     "../../src/tint/resolver/is_host_shareable_test.cc",
     "../../src/tint/resolver/is_storeable_test.cc",
+    "../../src/tint/resolver/materialize_test.cc",
     "../../src/tint/resolver/pipeline_overridable_constant_test.cc",
     "../../src/tint/resolver/ptr_ref_test.cc",
     "../../src/tint/resolver/ptr_ref_validation_test.cc",

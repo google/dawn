@@ -57,6 +57,7 @@
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/if_statement.h"
 #include "src/tint/sem/loop_statement.h"
+#include "src/tint/sem/materialize.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/multisampled_texture.h"
 #include "src/tint/sem/pointer.h"
@@ -271,6 +272,19 @@ bool Validator::StorageTexture(const ast::StorageTexture* t) const {
             "image format must be one of the texel formats specified for storage "
             "textues in https://gpuweb.github.io/gpuweb/wgsl/#texel-formats",
             t->source);
+        return false;
+    }
+    return true;
+}
+
+bool Validator::Materialize(const sem::Materialize* m) const {
+    auto* from = m->Expr()->Type();
+    auto* to = m->Type();
+
+    if (sem::Type::ConversionRank(from, to) == sem::Type::kNoConversion) {
+        AddError("cannot convert value of type '" + sem_.TypeNameOf(from) + "' to type '" +
+                     sem_.TypeNameOf(to) + "'",
+                 m->Expr()->Declaration()->source);
         return false;
     }
     return true;

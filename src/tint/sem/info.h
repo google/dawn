@@ -70,8 +70,7 @@ class Info {
         return As<RESULT>(it->second);
     }
 
-    /// Add registers the semantic node `sem_node` for the AST or type node
-    /// `node`.
+    /// Add registers the semantic node `sem_node` for the AST or type node `node`.
     /// @param node the AST or type node
     /// @param sem_node the semantic node
     template <typename AST_OR_TYPE>
@@ -79,6 +78,14 @@ class Info {
         // Check there's no semantic info already existing for the node
         TINT_ASSERT(Semantic, Get(node) == nullptr);
         map_.emplace(node, sem_node);
+    }
+
+    /// Replace replaces any existing semantic node `sem_node` for the AST or type node `node`.
+    /// @param node the AST or type node
+    /// @param sem_node the new semantic node
+    template <typename AST_OR_TYPE>
+    void Replace(const AST_OR_TYPE* node, const SemanticNodeTypeFor<AST_OR_TYPE>* sem_node) {
+        map_[node] = sem_node;
     }
 
     /// Wrap returns a new Info created with the contents of `inner`.

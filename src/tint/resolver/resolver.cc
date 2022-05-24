@@ -62,6 +62,7 @@
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/if_statement.h"
 #include "src/tint/sem/loop_statement.h"
+#include "src/tint/sem/materialize.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
 #include "src/tint/sem/multisampled_texture.h"
@@ -318,7 +319,11 @@ sem::Variable* Resolver::Variable(const ast::Variable* var,
 
     // Does the variable have a constructor?
     if (var->constructor) {
-        rhs = Expression(var->constructor);
+        auto* ctor = Expression(var->constructor);
+        if (!ctor) {
+            return nullptr;
+        }
+        rhs = Materialize(ctor, storage_ty);
         if (!rhs) {
             return nullptr;
         }
@@ -1100,6 +1105,83 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
     return nullptr;
 }
 
+const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
+                                             const sem::Type* target_type /* = nullptr */) {
+    // Helper for actually creating the the materialize node, performing the constant cast, updating
+    // the ast -> sem binding, and performing validation.
+    auto materialize = [&](const sem::Type* target_ty) -> sem::Materialize* {
+        auto expr_val = EvaluateConstantValue(expr->Declaration(), expr->Type());
+        if (!expr_val.IsValid()) {
+            TINT_ICE(Resolver, builder_->Diagnostics())
+                << expr->Declaration()->source
+                << " EvaluateConstantValue() returned invalid value for materialized "
+                   "value of type: "
+                << (expr->Type() ? expr->Type()->FriendlyName(builder_->Symbols()) : "<null>");
+            return nullptr;
+        }
+        auto materialized_val = ConstantCast(expr_val, target_ty);
+        auto* m = builder_->create<sem::Materialize>(expr, current_statement_, materialized_val);
+        m->Behaviors() = expr->Behaviors();
+        builder_->Sem().Replace(expr->Declaration(), m);
+        return validator_.Materialize(m) ? m : nullptr;
+    };
+
+    // Helpers for constructing semantic types
+    auto i32 = [&] { return builder_->create<sem::I32>(); };
+    auto f32 = [&] { return builder_->create<sem::F32>(); };
+    auto i32v = [&](uint32_t width) { return builder_->create<sem::Vector>(i32(), width); };
+    auto f32v = [&](uint32_t width) { return builder_->create<sem::Vector>(f32(), width); };
+    auto f32m = [&](uint32_t columns, uint32_t rows) {
+        return builder_->create<sem::Matrix>(f32v(columns), rows);
+    };
+
+    // Type dispatch based on the expression type
+    return Switch<sem::Expression*>(
+        expr->Type(),  //
+        [&](const sem::AbstractInt*) { return materialize(target_type ? target_type : i32()); },
+        [&](const sem::AbstractFloat*) { return materialize(target_type ? target_type : f32()); },
+        [&](const sem::Vector* v) {
+            return Switch(
+                v->type(),  //
+                [&](const sem::AbstractInt*) {
+                    return materialize(target_type ? target_type : i32v(v->Width()));
+                },
+                [&](const sem::AbstractFloat*) {
+                    return materialize(target_type ? target_type : f32v(v->Width()));
+                },
+                [&](Default) { return expr; });
+        },
+        [&](const sem::Matrix* m) {
+            return Switch(
+                m->type(),  //
+                [&](const sem::AbstractFloat*) {
+                    return materialize(target_type ? target_type : f32m(m->columns(), m->rows()));
+                },
+                [&](Default) { return expr; });
+        },
+        [&](Default) { return expr; });
+}
+
+bool Resolver::MaterializeArguments(std::vector<const sem::Expression*>& args,
+                                    const sem::CallTarget* target) {
+    for (size_t i = 0, n = std::min(args.size(), target->Parameters().size()); i < n; i++) {
+        const auto* param_ty = target->Parameters()[i]->Type();
+        if (ShouldMaterializeArgument(param_ty)) {
+            auto* materialized = Materialize(args[i], param_ty);
+            if (!materialized) {
+                return false;
+            }
+            args[i] = materialized;
+        }
+    }
+    return true;
+}
+
+bool Resolver::ShouldMaterializeArgument(const sem::Type* parameter_ty) const {
+    const auto* param_el_ty = sem::Type::ElementOf(parameter_ty);
+    return param_el_ty && !param_el_ty->Is<sem::AbstractNumeric>();
+}
+
 sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* expr) {
     auto* idx = sem_.Get(expr->index);
     auto* obj = sem_.Get(expr->object);
@@ -1192,6 +1274,9 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         if (!call_target) {
             return nullptr;
         }
+        if (!MaterializeArguments(args, call_target)) {
+            return nullptr;
+        }
         auto value = EvaluateConstantValue(expr, call_target->ReturnType());
         return builder_->create<sem::Call>(expr, call_target, std::move(args), current_statement_,
                                            value, has_side_effects);
@@ -1227,6 +1312,9 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                         }
                         return builder_->create<sem::TypeConstructor>(arr, std::move(params));
                     });
+                if (!MaterializeArguments(args, call_target)) {
+                    return nullptr;
+                }
                 auto value = EvaluateConstantValue(expr, call_target->ReturnType());
                 return builder_->create<sem::Call>(expr, call_target, std::move(args),
                                                    current_statement_, value, has_side_effects);
@@ -1246,6 +1334,9 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                         }
                         return builder_->create<sem::TypeConstructor>(str, std::move(params));
                     });
+                if (!MaterializeArguments(args, call_target)) {
+                    return nullptr;
+                }
                 auto value = EvaluateConstantValue(expr, call_target->ReturnType());
                 return builder_->create<sem::Call>(expr, call_target, std::move(args),
                                                    current_statement_, value, has_side_effects);
@@ -1368,6 +1459,10 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         }
     }
 
+    if (!MaterializeArguments(args, builtin)) {
+        return nullptr;
+    }
+
     if (builtin->IsDeprecated()) {
         AddWarning("use of deprecated builtin", expr->source);
     }
@@ -1424,6 +1519,10 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
                                   sem::Behaviors arg_behaviors) {
     auto sym = expr->target.name->symbol;
     auto name = builder_->Symbols().NameFor(sym);
+
+    if (!MaterializeArguments(args, target)) {
+        return nullptr;
+    }
 
     // TODO(crbug.com/tint/1420): For now, assume all function calls have side
     // effects.
@@ -1715,6 +1814,18 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
     if (!op.result) {
         return nullptr;
     }
+    if (ShouldMaterializeArgument(op.lhs)) {
+        lhs = Materialize(lhs, op.lhs);
+        if (!lhs) {
+            return nullptr;
+        }
+    }
+    if (ShouldMaterializeArgument(op.rhs)) {
+        rhs = Materialize(rhs, op.rhs);
+        if (!rhs) {
+            return nullptr;
+        }
+    }
 
     auto val = EvaluateConstantValue(expr, op.result);
     bool has_side_effects = lhs->HasSideEffects() || rhs->HasSideEffects();
@@ -1775,10 +1886,17 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
             break;
 
         default: {
-            ty = intrinsic_table_->Lookup(unary->op, expr_ty, unary->source).result;
-            if (!ty) {
+            auto op = intrinsic_table_->Lookup(unary->op, expr_ty, unary->source);
+            if (!op.result) {
                 return nullptr;
             }
+            if (ShouldMaterializeArgument(op.parameter)) {
+                expr = Materialize(expr, op.parameter);
+                if (!expr) {
+                    return nullptr;
+                }
+            }
+            ty = op.result;
             break;
         }
     }
@@ -2118,7 +2236,11 @@ sem::Statement* Resolver::ReturnStatement(const ast::ReturnStatement* stmt) {
 
         const sem::Type* value_ty = nullptr;
         if (auto* value = stmt->value) {
-            auto* expr = Expression(value);
+            const auto* expr = Expression(value);
+            if (!expr) {
+                return false;
+            }
+            expr = Materialize(expr, current_function_->ReturnType());
             if (!expr) {
                 return false;
             }
@@ -2141,20 +2263,52 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
     return StatementScope(stmt, sem, [&] {
         auto& behaviors = sem->Behaviors();
 
-        auto* cond = Expression(stmt->condition);
+        const auto* cond = Expression(stmt->condition);
         if (!cond) {
             return false;
         }
         behaviors = cond->Behaviors() - sem::Behavior::kNext;
 
+        auto* cond_ty = cond->Type()->UnwrapRef();
+
+        utils::UniqueVector<const sem::Type*> types;
+        types.add(cond_ty);
+
+        std::vector<sem::CaseStatement*> cases;
+        cases.reserve(stmt->body.size());
         for (auto* case_stmt : stmt->body) {
             Mark(case_stmt);
             auto* c = CaseStatement(case_stmt);
             if (!c) {
                 return false;
             }
+            for (auto* expr : c->Selectors()) {
+                types.add(expr->Type()->UnwrapRef());
+            }
+            cases.emplace_back(c);
             behaviors.Add(c->Behaviors());
             sem->Cases().emplace_back(c);
+        }
+
+        // Determine the common type across all selectors and the switch expression
+        // This must materialize to an integer scalar (non-abstract).
+        auto* common_ty = sem::Type::Common(types.data(), types.size());
+        if (!common_ty || !common_ty->is_integer_scalar()) {
+            // No common type found or the common type was abstract.
+            // Pick i32 and let validation deal with any mismatches.
+            common_ty = builder_->create<sem::I32>();
+        }
+        cond = Materialize(cond, common_ty);
+        if (!cond) {
+            return false;
+        }
+        for (auto* c : cases) {
+            for (auto*& sel : c->Selectors()) {  // Note: pointer reference
+                sel = Materialize(sel, common_ty);
+                if (!sel) {
+                    return false;
+                }
+            }
         }
 
         if (behaviors.Contains(sem::Behavior::kBreak)) {
