@@ -360,7 +360,5 @@ TEST_F(WireAdapterTests, RequestDeviceWireDisconnectedBeforeCallback) {
     GetWireClient()->Disconnect();
 }
 
-// TODO(https://crbug.com/dawn/1381) Remove when namespaces are not indented.
-// NOLINTNEXTLINE(readability/namespace)
 }  // namespace
 }  // namespace dawn::wire

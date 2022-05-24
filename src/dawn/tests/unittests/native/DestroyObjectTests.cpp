@@ -812,7 +812,5 @@ TEST_F(DestroyObjectRegressionTests, LastRefInCommandComputePipeline) {
     device.Destroy();
 }
 
-// TODO(https://crbug.com/dawn/1381) Remove when namespaces are not indented.
-// NOLINTNEXTLINE(readability/namespace)
 }  // namespace
 }  // namespace dawn::native
