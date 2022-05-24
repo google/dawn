@@ -46,7 +46,8 @@ class VideoViewsTestBackend {
     };
     virtual std::unique_ptr<PlatformTexture> CreateVideoTextureForTest(wgpu::TextureFormat format,
                                                                        wgpu::TextureUsage usage,
-                                                                       bool isCheckerboard) = 0;
+                                                                       bool isCheckerboard,
+                                                                       bool initialized) = 0;
     virtual void DestroyVideoTextureForTest(std::unique_ptr<PlatformTexture>&& platformTexture) = 0;
 };
 

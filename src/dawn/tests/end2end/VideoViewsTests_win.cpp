@@ -90,7 +90,8 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
     std::unique_ptr<VideoViewsTestBackend::PlatformTexture> CreateVideoTextureForTest(
         wgpu::TextureFormat format,
         wgpu::TextureUsage usage,
-        bool isCheckerboard) override {
+        bool isCheckerboard,
+        bool initialized) override {
         wgpu::TextureDescriptor textureDesc;
         textureDesc.format = format;
         textureDesc.dimension = wgpu::TextureDimension::e2D;
@@ -121,7 +122,8 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         subres.SysMemPitch = VideoViewsTests::kYUVImageDataWidthInTexels;
 
         ComPtr<ID3D11Texture2D> d3d11Texture;
-        HRESULT hr = mD3d11Device->CreateTexture2D(&d3dDescriptor, &subres, &d3d11Texture);
+        HRESULT hr = mD3d11Device->CreateTexture2D(
+            &d3dDescriptor, (initialized ? &subres : nullptr), &d3d11Texture);
         ASSERT(hr == S_OK);
 
         ComPtr<IDXGIResource1> dxgiResource;

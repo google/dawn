@@ -125,9 +125,17 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
     std::unique_ptr<VideoViewsTestBackend::PlatformTexture> CreateVideoTextureForTest(
         wgpu::TextureFormat format,
         wgpu::TextureUsage usage,
-        bool isCheckerboard) override {
-        uint32_t flags = GBM_BO_USE_SCANOUT | GBM_BO_USE_TEXTURING | GBM_BO_USE_HW_VIDEO_DECODER |
-                         GBM_BO_USE_SW_WRITE_RARELY;
+        bool isCheckerboard,
+        bool initialized) override {
+        // The flags Chromium is using for the VAAPI decoder.
+        uint32_t flags = GBM_BO_USE_SCANOUT | GBM_BO_USE_TEXTURING | GBM_BO_USE_HW_VIDEO_DECODER;
+        if (initialized) {
+            // The flag specifically used for tests, which need to initialize the GBM buffer with
+            // the expected raw video data via CPU, and then sample and draw the buffer via GPU.
+            // With the flag added, the buffer's drm modifier will be DRM_FORMAT_MOD_LINEAR instead
+            // of I915_FORMAT_MOD_Y_TILED.
+            flags |= GBM_BO_USE_SW_WRITE_RARELY;
+        }
         gbm_bo* gbmBo = gbm_bo_create(mGbmDevice, VideoViewsTests::kYUVImageDataWidthInTexels,
                                       VideoViewsTests::kYUVImageDataHeightInTexels,
                                       GetGbmBoFormat(format), flags);
@@ -135,17 +143,19 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
             return nullptr;
         }
 
-        void* mapHandle = nullptr;
-        uint32_t strideBytes = 0;
-        void* addr = gbm_bo_map(gbmBo, 0, 0, VideoViewsTests::kYUVImageDataWidthInTexels,
-                                VideoViewsTests::kYUVImageDataHeightInTexels, GBM_BO_TRANSFER_WRITE,
-                                &strideBytes, &mapHandle);
-        EXPECT_NE(addr, nullptr);
-        std::vector<uint8_t> initialData =
-            VideoViewsTests::GetTestTextureData(format, isCheckerboard);
-        std::memcpy(addr, initialData.data(), initialData.size());
+        if (initialized) {
+            void* mapHandle = nullptr;
+            uint32_t strideBytes = 0;
+            void* addr = gbm_bo_map(gbmBo, 0, 0, VideoViewsTests::kYUVImageDataWidthInTexels,
+                                    VideoViewsTests::kYUVImageDataHeightInTexels,
+                                    GBM_BO_TRANSFER_WRITE, &strideBytes, &mapHandle);
+            EXPECT_NE(addr, nullptr);
+            std::vector<uint8_t> initialData =
+                VideoViewsTests::GetTestTextureData(format, isCheckerboard);
+            std::memcpy(addr, initialData.data(), initialData.size());
 
-        gbm_bo_unmap(gbmBo, mapHandle);
+            gbm_bo_unmap(gbmBo, mapHandle);
+        }
 
         wgpu::TextureDescriptor textureDesc;
         textureDesc.format = format;
@@ -168,9 +178,12 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
         descriptor.drmModifier = gbm_bo_get_modifier(gbmBo);
         descriptor.waitFDs = {};
 
-        return std::make_unique<PlatformTextureGbm>(
-            wgpu::Texture::Acquire(dawn::native::vulkan::WrapVulkanImage(mWGPUDevice, &descriptor)),
-            gbmBo);
+        WGPUTexture texture = dawn::native::vulkan::WrapVulkanImage(mWGPUDevice, &descriptor);
+        if (texture != nullptr) {
+            return std::make_unique<PlatformTextureGbm>(wgpu::Texture::Acquire(texture), gbmBo);
+        } else {
+            return nullptr;
+        }
     }
 
     void DestroyVideoTextureForTest(

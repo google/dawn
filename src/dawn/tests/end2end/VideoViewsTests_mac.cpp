@@ -86,7 +86,8 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
     std::unique_ptr<VideoViewsTestBackend::PlatformTexture> CreateVideoTextureForTest(
         wgpu::TextureFormat format,
         wgpu::TextureUsage usage,
-        bool isCheckerboard) override {
+        bool isCheckerboard,
+        bool initialized) override {
         CFMutableDictionaryRef dict(CFDictionaryCreateMutable(kCFAllocatorDefault, 0,
                                                               &kCFTypeDictionaryKeyCallBacks,
                                                               &kCFTypeDictionaryValueCallBacks));
@@ -134,15 +135,17 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
         IOSurfaceRef surface = IOSurfaceCreate(dict);
         CFRelease(dict);
 
-        IOSurfaceLock(surface, 0, nullptr);
-        for (size_t plane = 0; plane < num_planes; ++plane) {
-            std::vector<uint8_t> data = VideoViewsTests::GetTestTextureDataWithPlaneIndex(
-                plane, IOSurfaceGetBytesPerRowOfPlane(surface, plane),
-                IOSurfaceGetHeightOfPlane(surface, plane), isCheckerboard);
-            void* pointer = IOSurfaceGetBaseAddressOfPlane(surface, plane);
-            memcpy(pointer, data.data(), data.size());
+        if (initialized) {
+            IOSurfaceLock(surface, 0, nullptr);
+            for (size_t plane = 0; plane < num_planes; ++plane) {
+                std::vector<uint8_t> data = VideoViewsTests::GetTestTextureDataWithPlaneIndex(
+                    plane, IOSurfaceGetBytesPerRowOfPlane(surface, plane),
+                    IOSurfaceGetHeightOfPlane(surface, plane), isCheckerboard);
+                void* pointer = IOSurfaceGetBaseAddressOfPlane(surface, plane);
+                memcpy(pointer, data.data(), data.size());
+            }
+            IOSurfaceUnlock(surface, 0, nullptr);
         }
-        IOSurfaceUnlock(surface, 0, nullptr);
 
         wgpu::TextureDescriptor textureDesc;
         textureDesc.format = format;
