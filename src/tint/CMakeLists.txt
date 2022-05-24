@@ -62,18 +62,17 @@ set(TINT_LIB_SRCS
   ../../include/tint/tint.h
   ast/access.cc
   ast/access.h
-  ast/attribute.cc
-  ast/attribute.h
   ast/alias.cc
   ast/alias.h
-  ast/index_accessor_expression.cc
-  ast/index_accessor_expression.h
   ast/array.cc
   ast/array.h
   ast/assignment_statement.cc
   ast/assignment_statement.h
+  ast/ast_type.cc  # TODO(bclayton) - rename to type.cc
   ast/atomic.cc
   ast/atomic.h
+  ast/attribute.cc
+  ast/attribute.h
   ast/binary_expression.cc
   ast/binary_expression.h
   ast/binding_attribute.cc
@@ -104,10 +103,10 @@ set(TINT_LIB_SRCS
   ast/continue_statement.h
   ast/depth_multisampled_texture.cc
   ast/depth_multisampled_texture.h
-  ast/disable_validation_attribute.cc
-  ast/disable_validation_attribute.h
   ast/depth_texture.cc
   ast/depth_texture.h
+  ast/disable_validation_attribute.cc
+  ast/disable_validation_attribute.h
   ast/discard_statement.cc
   ast/discard_statement.h
   ast/enable.cc
@@ -142,6 +141,8 @@ set(TINT_LIB_SRCS
   ast/if_statement.h
   ast/increment_decrement_statement.cc
   ast/increment_decrement_statement.h
+  ast/index_accessor_expression.cc
+  ast/index_accessor_expression.h
   ast/int_literal_expression.cc
   ast/int_literal_expression.h
   ast/internal_attribute.cc
@@ -203,14 +204,11 @@ set(TINT_LIB_SRCS
   ast/texture.cc
   ast/texture.h
   ast/traverse_expressions.h
-  ast/type_name.cc
-  ast/type_name.h
-  ast/ast_type.cc  # TODO(bclayton) - rename to type.cc
-  ast/type.h
   ast/type_decl.cc
   ast/type_decl.h
   ast/type_name.cc
   ast/type_name.h
+  ast/type.h
   ast/u32.cc
   ast/u32.h
   ast/unary_op_expression.cc
@@ -233,7 +231,6 @@ set(TINT_LIB_SRCS
   clone_context.h
   demangler.cc
   demangler.h
-  number.h
   inspector/entry_point.cc
   inspector/entry_point.h
   inspector/inspector.cc
@@ -242,6 +239,7 @@ set(TINT_LIB_SRCS
   inspector/resource_binding.h
   inspector/scalar.cc
   inspector/scalar.h
+  number.h
   program_builder.cc
   program_builder.h
   program_id.cc
@@ -257,8 +255,8 @@ set(TINT_LIB_SRCS
   resolver/intrinsic_table.cc
   resolver/intrinsic_table.h
   resolver/intrinsic_table.inl
-  resolver/resolver.cc
   resolver/resolver_constants.cc
+  resolver/resolver.cc
   resolver/resolver.h
   resolver/sem_helper.cc
   resolver/sem_helper.h
@@ -282,6 +280,8 @@ set(TINT_LIB_SRCS
   sem/binding_point.h
   sem/block_statement.cc
   sem/block_statement.h
+  sem/bool.cc
+  sem/bool.h
   sem/builtin_type.cc
   sem/builtin_type.h
   sem/builtin.cc
@@ -294,24 +294,74 @@ set(TINT_LIB_SRCS
   sem/constant.h
   sem/depth_multisampled_texture.cc
   sem/depth_multisampled_texture.h
+  sem/depth_texture.cc
+  sem/depth_texture.h
   sem/expression.cc
   sem/expression.h
+  sem/external_texture.cc
+  sem/external_texture.h
+  sem/f16.cc
+  sem/f16.h
+  sem/f32.cc
+  sem/f32.h
+  sem/for_loop_statement.cc
+  sem/for_loop_statement.h
   sem/function.cc
+  sem/i32.cc
+  sem/i32.h
+  sem/if_statement.cc
+  sem/if_statement.h
   sem/info.cc
   sem/info.h
+  sem/loop_statement.cc
+  sem/loop_statement.h
+  sem/materialize.cc
+  sem/materialize.h
+  sem/matrix.cc
+  sem/matrix.h
   sem/member_accessor_expression.cc
+  sem/module.cc
+  sem/module.h
+  sem/multisampled_texture.cc
+  sem/multisampled_texture.h
+  sem/node.cc
+  sem/node.h
   sem/parameter_usage.cc
   sem/parameter_usage.h
   sem/pipeline_stage_set.h
-  sem/node.cc
-  sem/node.h
-  sem/module.cc
-  sem/module.h
+  sem/pointer.cc
+  sem/pointer.h
+  sem/reference.cc
+  sem/reference.h
+  sem/sampled_texture.cc
+  sem/sampled_texture.h
   sem/sampler_texture_pair.h
+  sem/sampler.cc
+  sem/sampler.h
   sem/statement.cc
+  sem/storage_texture.cc
+  sem/storage_texture.h
   sem/struct.cc
+  sem/switch_statement.cc
+  sem/switch_statement.h
+  sem/texture.cc
+  sem/texture.h
+  sem/type_constructor.cc
+  sem/type_constructor.h
+  sem/type_conversion.cc
+  sem/type_conversion.h
+  sem/type_manager.cc
+  sem/type_manager.h
   sem/type_mappings.h
+  sem/type.cc
+  sem/type.h
+  sem/u32.cc
+  sem/u32.h
   sem/variable.cc
+  sem/vector.cc
+  sem/vector.h
+  sem/void.cc
+  sem/void.h
   symbol_table.cc
   symbol_table.h
   symbol.cc
@@ -331,10 +381,10 @@ set(TINT_LIB_SRCS
   transform/builtin_polyfill.h
   transform/calculate_array_length.cc
   transform/calculate_array_length.h
-  transform/combine_samplers.cc
-  transform/combine_samplers.h
   transform/canonicalize_entry_point_io.cc
   transform/canonicalize_entry_point_io.h
+  transform/combine_samplers.cc
+  transform/combine_samplers.h
   transform/decompose_memory_access.cc
   transform/decompose_memory_access.h
   transform/decompose_strided_array.cc
@@ -343,18 +393,18 @@ set(TINT_LIB_SRCS
   transform/decompose_strided_matrix.h
   transform/disable_uniformity_analysis.cc
   transform/disable_uniformity_analysis.h
+  transform/expand_compound_assignment.cc
+  transform/expand_compound_assignment.h
   transform/first_index_offset.cc
   transform/first_index_offset.h
   transform/fold_constants.cc
   transform/fold_constants.h
   transform/fold_trivial_single_use_lets.cc
   transform/fold_trivial_single_use_lets.h
-  transform/localize_struct_array_assignment.cc
-  transform/localize_struct_array_assignment.h
   transform/for_loop_to_loop.cc
   transform/for_loop_to_loop.h
-  transform/expand_compound_assignment.cc
-  transform/expand_compound_assignment.h
+  transform/localize_struct_array_assignment.cc
+  transform/localize_struct_array_assignment.h
   transform/loop_to_for_loop.cc
   transform/loop_to_for_loop.h
   transform/manager.cc
@@ -369,10 +419,10 @@ set(TINT_LIB_SRCS
   transform/promote_initializers_to_const_var.h
   transform/promote_side_effects_to_decl.cc
   transform/promote_side_effects_to_decl.h
-  transform/remove_phonies.cc
-  transform/remove_phonies.h
   transform/remove_continue_in_switch.cc
   transform/remove_continue_in_switch.h
+  transform/remove_phonies.cc
+  transform/remove_phonies.h
   transform/remove_unreachable_statements.cc
   transform/remove_unreachable_statements.h
   transform/renamer.cc
@@ -389,72 +439,20 @@ set(TINT_LIB_SRCS
   transform/unshadow.h
   transform/unwind_discard_functions.cc
   transform/unwind_discard_functions.h
-  transform/vectorize_scalar_matrix_constructors.cc
-  transform/vectorize_scalar_matrix_constructors.h
+  transform/utils/get_insertion_point.cc
+  transform/utils/get_insertion_point.h
+  transform/utils/hoist_to_decl_before.cc
+  transform/utils/hoist_to_decl_before.h
   transform/var_for_dynamic_index.cc
   transform/var_for_dynamic_index.h
+  transform/vectorize_scalar_matrix_constructors.cc
+  transform/vectorize_scalar_matrix_constructors.h
   transform/vertex_pulling.cc
   transform/vertex_pulling.h
   transform/wrap_arrays_in_structs.cc
   transform/wrap_arrays_in_structs.h
   transform/zero_init_workgroup_memory.cc
   transform/zero_init_workgroup_memory.h
-  transform/utils/get_insertion_point.cc
-  transform/utils/get_insertion_point.h
-  transform/utils/hoist_to_decl_before.cc
-  transform/utils/hoist_to_decl_before.h
-  sem/bool.cc
-  sem/bool.h
-  sem/depth_texture.cc
-  sem/depth_texture.h
-  sem/external_texture.cc
-  sem/external_texture.h
-  sem/f16.cc
-  sem/f16.h
-  sem/f32.cc
-  sem/f32.h
-  sem/for_loop_statement.cc
-  sem/for_loop_statement.h
-  sem/i32.cc
-  sem/i32.h
-  sem/if_statement.cc
-  sem/if_statement.h
-  sem/loop_statement.cc
-  sem/loop_statement.h
-  sem/materialize.cc
-  sem/materialize.h
-  sem/matrix.cc
-  sem/matrix.h
-  sem/multisampled_texture.cc
-  sem/multisampled_texture.h
-  sem/pointer.cc
-  sem/pointer.h
-  sem/reference.cc
-  sem/reference.h
-  sem/sampled_texture.cc
-  sem/sampled_texture.h
-  sem/sampler.cc
-  sem/sampler.h
-  sem/storage_texture.cc
-  sem/storage_texture.h
-  sem/switch_statement.cc
-  sem/switch_statement.h
-  sem/texture.cc
-  sem/texture.h
-  sem/type_constructor.cc
-  sem/type_constructor.h
-  sem/type_conversion.cc
-  sem/type_conversion.h
-  sem/type.cc
-  sem/type.h
-  sem/type_manager.cc
-  sem/type_manager.h
-  sem/u32.cc
-  sem/u32.h
-  sem/vector.cc
-  sem/vector.h
-  sem/void.cc
-  sem/void.h
   utils/bitcast.h
   utils/block_allocator.h
   utils/crc32.h
