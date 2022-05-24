@@ -57,9 +57,6 @@ MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
 
     wgpu::TextureFormat plane0Format = descriptor->plane0->GetFormat().format;
 
-    DAWN_INVALID_IF(!descriptor->yuvToRgbConversionMatrix,
-                    "The YUV-to-RGB conversion matrix must be non-null.");
-
     DAWN_INVALID_IF(!descriptor->gamutConversionMatrix,
                     "The gamut conversion matrix must be non-null.");
 
@@ -69,10 +66,14 @@ MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
     DAWN_INVALID_IF(!descriptor->dstTransferFunctionParameters,
                     "The destination transfer function parameters must be non-null.");
 
+    DAWN_INVALID_IF(descriptor->colorSpace != wgpu::PredefinedColorSpace::Srgb,
+                    "The specified color space (%s) is not %s.", descriptor->colorSpace,
+                    wgpu::PredefinedColorSpace::Srgb);
+
     if (descriptor->plane1) {
-        DAWN_INVALID_IF(descriptor->colorSpace != wgpu::PredefinedColorSpace::Srgb,
-                        "The specified color space (%s) is not %s.", descriptor->colorSpace,
-                        wgpu::PredefinedColorSpace::Srgb);
+        DAWN_INVALID_IF(
+            !descriptor->yuvToRgbConversionMatrix,
+            "When more than one plane is set, the YUV-to-RGB conversion matrix must be non-null.");
 
         DAWN_TRY(device->ValidateObject(descriptor->plane1));
         wgpu::TextureFormat plane1Format = descriptor->plane1->GetFormat().format;
@@ -157,8 +158,12 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
 
     // YUV-to-RGB conversion is performed by multiplying the source YUV values with a 4x3 matrix
     // passed from Chromium. The matrix was originally sourced from /skia/src/core/SkYUVMath.cpp.
-    const float* yMat = descriptor->yuvToRgbConversionMatrix;
-    std::copy(yMat, yMat + 12, params.yuvToRgbConversionMatrix.begin());
+    // This matrix is only used in multiplanar scenarios.
+    if (params.numPlanes == 2) {
+        ASSERT(descriptor->yuvToRgbConversionMatrix);
+        const float* yMat = descriptor->yuvToRgbConversionMatrix;
+        std::copy(yMat, yMat + 12, params.yuvToRgbConversionMatrix.begin());
+    }
 
     // Gamut correction is performed by multiplying a 3x3 matrix passed from Chromium. The
     // matrix was computed by multiplying the appropriate source and destination gamut

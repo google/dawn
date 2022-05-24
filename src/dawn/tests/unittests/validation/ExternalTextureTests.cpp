@@ -157,13 +157,29 @@ TEST_F(ExternalTextureTest, CreateExternalTextureValidation) {
 
 TEST_F(ExternalTextureTest, CreateExternalTextureConstantValueValidation) {
     DAWN_SKIP_TEST_IF(UsesWire());
-    // Creating an external texture without a YUV-to-RGB matrix should fail.
+    // Creating a single plane external texture without a YUV-to-RGB matrix should pass.
     {
         wgpu::TextureDescriptor textureDescriptor = CreateTextureDescriptor();
         wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
 
         wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
         externalDesc.plane0 = texture.CreateView();
+        externalDesc.yuvToRgbConversionMatrix = nullptr;
+        device.CreateExternalTexture(&externalDesc);
+    }
+
+    // Creating a multiplanar external texture without a YUV-to-RGB matrix should fail.
+    {
+        wgpu::TextureDescriptor plane0TextureDescriptor =
+            CreateTextureDescriptor(kBiplanarPlane0Format);
+        wgpu::TextureDescriptor plane1TextureDescriptor =
+            CreateTextureDescriptor(kBiplanarPlane1Format);
+        wgpu::Texture texture0 = device.CreateTexture(&plane0TextureDescriptor);
+        wgpu::Texture texture1 = device.CreateTexture(&plane1TextureDescriptor);
+
+        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
+        externalDesc.plane0 = texture0.CreateView();
+        externalDesc.plane1 = texture1.CreateView();
         externalDesc.yuvToRgbConversionMatrix = nullptr;
         ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
     }
