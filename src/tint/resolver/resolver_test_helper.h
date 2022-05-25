@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_RESOLVER_RESOLVER_TEST_HELPER_H_
 #define SRC_TINT_RESOLVER_RESOLVER_TEST_HELPER_H_
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -170,7 +171,7 @@ template <typename TO>
 struct ptr {};
 
 using ast_type_func_ptr = const ast::Type* (*)(ProgramBuilder& b);
-using ast_expr_func_ptr = const ast::Expression* (*)(ProgramBuilder& b, int elem_value);
+using ast_expr_func_ptr = const ast::Expression* (*)(ProgramBuilder& b, double elem_value);
 using sem_type_func_ptr = const sem::Type* (*)(ProgramBuilder& b);
 
 template <typename T>
@@ -200,8 +201,8 @@ struct DataType<bool> {
     /// @param b the ProgramBuilder
     /// @param elem_value the b
     /// @return a new AST expression of the bool type
-    static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
-        return b.Expr(elem_value == 0);
+    static inline const ast::Expression* Expr(ProgramBuilder& b, double elem_value) {
+        return b.Expr(std::equal_to<double>()(elem_value, 0));
     }
     /// @returns the WGSL name for the type
     static inline std::string Name() { return "bool"; }
@@ -222,7 +223,7 @@ struct DataType<i32> {
     /// @param b the ProgramBuilder
     /// @param elem_value the value i32 will be initialized with
     /// @return a new AST i32 literal value expression
-    static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+    static inline const ast::Expression* Expr(ProgramBuilder& b, double elem_value) {
         return b.Expr(static_cast<i32>(elem_value));
     }
     /// @returns the WGSL name for the type
@@ -244,7 +245,7 @@ struct DataType<u32> {
     /// @param b the ProgramBuilder
     /// @param elem_value the value u32 will be initialized with
     /// @return a new AST u32 literal value expression
-    static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+    static inline const ast::Expression* Expr(ProgramBuilder& b, double elem_value) {
         return b.Expr(static_cast<u32>(elem_value));
     }
     /// @returns the WGSL name for the type
@@ -266,7 +267,7 @@ struct DataType<f32> {
     /// @param b the ProgramBuilder
     /// @param elem_value the value f32 will be initialized with
     /// @return a new AST f32 literal value expression
-    static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+    static inline const ast::Expression* Expr(ProgramBuilder& b, double elem_value) {
         return b.Expr(static_cast<f32>(elem_value));
     }
     /// @returns the WGSL name for the type
@@ -288,7 +289,7 @@ struct DataType<f16> {
     /// @param b the ProgramBuilder
     /// @param elem_value the value f16 will be initialized with
     /// @return a new AST f16 literal value expression
-    static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+    static inline const ast::Expression* Expr(ProgramBuilder& b, double elem_value) {
         return b.Expr(static_cast<f16>(elem_value));
     }
     /// @returns the WGSL name for the type
@@ -309,7 +310,7 @@ struct DataType<AFloat> {
     /// @param b the ProgramBuilder
     /// @param elem_value the value the abstract-float literal will be constructed with
     /// @return a new AST abstract-float literal value expression
-    static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+    static inline const ast::Expression* Expr(ProgramBuilder& b, double elem_value) {
         return b.Expr(AFloat(elem_value));
     }
     /// @returns the WGSL name for the type
@@ -330,7 +331,7 @@ struct DataType<AInt> {
     /// @param b the ProgramBuilder
     /// @param elem_value the value the abstract-int literal will be constructed with
     /// @return a new AST abstract-int literal value expression
-    static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+    static inline const ast::Expression* Expr(ProgramBuilder& b, double elem_value) {
         return b.Expr(AInt(elem_value));
     }
     /// @returns the WGSL name for the type
@@ -357,14 +358,14 @@ struct DataType<vec<N, T>> {
     /// @param elem_value the value each element in the vector will be initialized
     /// with
     /// @return a new AST vector value expression
-    static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+    static inline const ast::Expression* Expr(ProgramBuilder& b, double elem_value) {
         return b.Construct(AST(b), ExprArgs(b, elem_value));
     }
 
     /// @param b the ProgramBuilder
     /// @param elem_value the value each element will be initialized with
     /// @return the list of expressions that are used to construct the vector
-    static inline ast::ExpressionList ExprArgs(ProgramBuilder& b, int elem_value) {
+    static inline ast::ExpressionList ExprArgs(ProgramBuilder& b, double elem_value) {
         ast::ExpressionList args;
         for (uint32_t i = 0; i < N; i++) {
             args.emplace_back(DataType<T>::Expr(b, elem_value));
@@ -398,14 +399,14 @@ struct DataType<mat<N, M, T>> {
     /// @param elem_value the value each element in the matrix will be initialized
     /// with
     /// @return a new AST matrix value expression
-    static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+    static inline const ast::Expression* Expr(ProgramBuilder& b, double elem_value) {
         return b.Construct(AST(b), ExprArgs(b, elem_value));
     }
 
     /// @param b the ProgramBuilder
     /// @param elem_value the value each element will be initialized with
     /// @return the list of expressions that are used to construct the matrix
-    static inline ast::ExpressionList ExprArgs(ProgramBuilder& b, int elem_value) {
+    static inline ast::ExpressionList ExprArgs(ProgramBuilder& b, double elem_value) {
         ast::ExpressionList args;
         for (uint32_t i = 0; i < N; i++) {
             args.emplace_back(DataType<vec<M, T>>::Expr(b, elem_value));
@@ -444,7 +445,7 @@ struct DataType<alias<T, ID>> {
     /// @return a new AST expression of the alias type
     template <bool IS_COMPOSITE = is_composite>
     static inline traits::EnableIf<!IS_COMPOSITE, const ast::Expression*> Expr(ProgramBuilder& b,
-                                                                               int elem_value) {
+                                                                               double elem_value) {
         // Cast
         return b.Construct(AST(b), DataType<T>::Expr(b, elem_value));
     }
@@ -454,7 +455,7 @@ struct DataType<alias<T, ID>> {
     /// @return a new AST expression of the alias type
     template <bool IS_COMPOSITE = is_composite>
     static inline traits::EnableIf<IS_COMPOSITE, const ast::Expression*> Expr(ProgramBuilder& b,
-                                                                              int elem_value) {
+                                                                              double elem_value) {
         // Construct
         return b.Construct(AST(b), DataType<T>::ExprArgs(b, elem_value));
     }
@@ -483,7 +484,7 @@ struct DataType<ptr<T>> {
 
     /// @param b the ProgramBuilder
     /// @return a new AST expression of the alias type
-    static inline const ast::Expression* Expr(ProgramBuilder& b, int /*unused*/) {
+    static inline const ast::Expression* Expr(ProgramBuilder& b, double /*unused*/) {
         auto sym = b.Symbols().New("global_for_ptr");
         b.Global(sym, DataType<T>::AST(b), ast::StorageClass::kPrivate);
         return b.AddressOf(sym);
@@ -519,14 +520,14 @@ struct DataType<array<N, T>> {
     /// @param elem_value the value each element in the array will be initialized
     /// with
     /// @return a new AST array value expression
-    static inline const ast::Expression* Expr(ProgramBuilder& b, int elem_value) {
+    static inline const ast::Expression* Expr(ProgramBuilder& b, double elem_value) {
         return b.Construct(AST(b), ExprArgs(b, elem_value));
     }
 
     /// @param b the ProgramBuilder
     /// @param elem_value the value each element will be initialized with
     /// @return the list of expressions that are used to construct the array
-    static inline ast::ExpressionList ExprArgs(ProgramBuilder& b, int elem_value) {
+    static inline ast::ExpressionList ExprArgs(ProgramBuilder& b, double elem_value) {
         ast::ExpressionList args;
         for (uint32_t i = 0; i < N; i++) {
             args.emplace_back(DataType<T>::Expr(b, elem_value));
