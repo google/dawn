@@ -387,17 +387,17 @@ Token Lexer::try_float() {
 }
 
 Token Lexer::try_hex_float() {
-    constexpr uint32_t kTotalBits = 32;
-    constexpr uint32_t kTotalMsb = kTotalBits - 1;
+    constexpr uint32_t kExponentBits = 8;
     constexpr uint32_t kMantissaBits = 23;
+    constexpr uint32_t kTotalBits = 1 + kExponentBits + kMantissaBits;
+    constexpr uint32_t kTotalMsb = kTotalBits - 1;
     constexpr uint32_t kMantissaMsb = kMantissaBits - 1;
     constexpr uint32_t kMantissaShiftRight = kTotalBits - kMantissaBits;
     constexpr int32_t kExponentBias = 127;
-    constexpr int32_t kExponentMax = 255;
-    constexpr uint32_t kExponentBits = 8;
     constexpr uint32_t kExponentMask = (1 << kExponentBits) - 1;
+    constexpr int32_t kExponentMax = kExponentMask;  // Including NaN / inf
     constexpr uint32_t kExponentLeftShift = kMantissaBits;
-    constexpr uint32_t kSignBit = 31;
+    constexpr uint32_t kSignBit = kTotalBits - 1;
 
     auto start = pos();
     auto end = pos();
