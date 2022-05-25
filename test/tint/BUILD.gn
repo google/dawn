@@ -375,6 +375,7 @@ tint_unittests_source_set("tint_unittests_utils_src") {
     "../../src/tint/utils/io/tmpfile_test.cc",
     "../../src/tint/utils/map_test.cc",
     "../../src/tint/utils/math_test.cc",
+    "../../src/tint/utils/result_test.cc",
     "../../src/tint/utils/reverse_test.cc",
     "../../src/tint/utils/scoped_assignment_test.cc",
     "../../src/tint/utils/string_test.cc",

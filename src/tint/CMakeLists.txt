@@ -836,6 +836,7 @@ if(TINT_BUILD_TESTS)
     utils/io/tmpfile_test.cc
     utils/map_test.cc
     utils/math_test.cc
+    utils/result_test.cc
     utils/reverse_test.cc
     utils/scoped_assignment_test.cc
     utils/string_test.cc
