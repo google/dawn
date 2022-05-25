@@ -24,6 +24,7 @@
 #include <utility>
 
 #include "src/tint/debug.h"
+#include "src/tint/number.h"
 #include "src/tint/text/unicode.h"
 
 namespace tint::reader::wgsl {
@@ -78,42 +79,6 @@ uint32_t hex_value(char c) {
         return 0xA + static_cast<uint32_t>(c - 'A');
     }
     return 0;
-}
-
-/// LimitCheck is the enumerator result of check_limits().
-enum class LimitCheck {
-    /// The value was within the limits of the data type.
-    kWithinLimits,
-    /// The value was too small to fit within the data type.
-    kTooSmall,
-    /// The value was too large to fit within the data type.
-    kTooLarge,
-};
-
-/// Checks whether the value fits within the integer type `T`
-template <typename T>
-LimitCheck check_limits(int64_t value) {
-    static_assert(std::is_integral_v<T>, "T must be an integer");
-    if (value < static_cast<int64_t>(std::numeric_limits<T>::lowest())) {
-        return LimitCheck::kTooSmall;
-    }
-    if (value > static_cast<int64_t>(std::numeric_limits<T>::max())) {
-        return LimitCheck::kTooLarge;
-    }
-    return LimitCheck::kWithinLimits;
-}
-
-/// Checks whether the value fits within the floating point type `T`
-template <typename T>
-LimitCheck check_limits(double value) {
-    static_assert(std::is_floating_point_v<T>, "T must be a floating point");
-    if (value < static_cast<double>(std::numeric_limits<T>::lowest())) {
-        return LimitCheck::kTooSmall;
-    }
-    if (value > static_cast<double>(std::numeric_limits<T>::max())) {
-        return LimitCheck::kTooLarge;
-    }
-    return LimitCheck::kWithinLimits;
 }
 
 }  // namespace
@@ -394,38 +359,30 @@ Token Lexer::try_float() {
     end_source(source);
 
     double value = strtod(&at(start), nullptr);
-    const double magnitude = std::abs(value);
 
     if (has_f_suffix) {
-        // This errors out if a non-zero magnitude is too small to represent in a
-        // float. It can't be represented faithfully in an f32.
-        if (0.0 < magnitude && magnitude < static_cast<double>(std::numeric_limits<float>::min())) {
-            return {Token::Type::kError, source, "magnitude too small to be represented as f32"};
-        }
-        switch (check_limits<float>(value)) {
-            case LimitCheck::kTooSmall:
-                return {Token::Type::kError, source, "value too small for f32"};
-            case LimitCheck::kTooLarge:
-                return {Token::Type::kError, source, "value too large for f32"};
-            default:
-                return {Token::Type::kFloatLiteral_F, source, value};
+        if (auto f = CheckedConvert<f32>(AFloat(value))) {
+            return {Token::Type::kFloatLiteral_F, source, value};
+        } else {
+            if (f.Failure() == ConversionFailure::kTooSmall) {
+                return {Token::Type::kError, source,
+                        "value magnitude too small to be represented as 'f32'"};
+            }
+            return {Token::Type::kError, source, "value cannot be represented as 'f32'"};
         }
     }
 
     // TODO(crbug.com/tint/1504): Properly support abstract float:
     // Change `AbstractFloatType` to `double`, update errors to say 'abstract int'.
-    using AbstractFloatType = float;
-    if (0.0 < magnitude &&
-        magnitude < static_cast<double>(std::numeric_limits<AbstractFloatType>::min())) {
-        return {Token::Type::kError, source, "magnitude too small to be represented as f32"};
-    }
-    switch (check_limits<AbstractFloatType>(value)) {
-        case LimitCheck::kTooSmall:
-            return {Token::Type::kError, source, "value too small for f32"};
-        case LimitCheck::kTooLarge:
-            return {Token::Type::kError, source, "value too large for f32"};
-        default:
-            return {Token::Type::kFloatLiteral, source, value};
+    using AbstractFloatType = f32;
+    if (auto f = CheckedConvert<AbstractFloatType>(AFloat(value))) {
+        return {Token::Type::kFloatLiteral, source, value};
+    } else {
+        if (f.Failure() == ConversionFailure::kTooSmall) {
+            return {Token::Type::kError, source,
+                    "value magnitude too small to be represented as 'f32'"};
+        }
+        return {Token::Type::kError, source, "value cannot be represented as 'f32'"};
     }
 }
 
@@ -725,44 +682,31 @@ Token Lexer::build_token_from_int_if_possible(Source source, size_t start, int32
     int64_t res = strtoll(&at(start), nullptr, base);
 
     if (matches(pos(), "u")) {
-        switch (check_limits<uint32_t>(res)) {
-            case LimitCheck::kTooSmall:
-                return {Token::Type::kError, source, "unsigned literal cannot be negative"};
-            case LimitCheck::kTooLarge:
-                return {Token::Type::kError, source, "value too large for u32"};
-            default:
-                advance(1);
-                end_source(source);
-                return {Token::Type::kIntLiteral_U, source, res};
+        if (CheckedConvert<u32>(AInt(res))) {
+            advance(1);
+            end_source(source);
+            return {Token::Type::kIntLiteral_U, source, res};
         }
+        return {Token::Type::kError, source, "value cannot be represented as 'u32'"};
     }
 
     if (matches(pos(), "i")) {
-        switch (check_limits<int32_t>(res)) {
-            case LimitCheck::kTooSmall:
-                return {Token::Type::kError, source, "value too small for i32"};
-            case LimitCheck::kTooLarge:
-                return {Token::Type::kError, source, "value too large for i32"};
-            default:
-                break;
+        if (CheckedConvert<i32>(AInt(res))) {
+            advance(1);
+            end_source(source);
+            return {Token::Type::kIntLiteral_I, source, res};
         }
-        advance(1);
-        end_source(source);
-        return {Token::Type::kIntLiteral_I, source, res};
+        return {Token::Type::kError, source, "value cannot be represented as 'i32'"};
     }
 
     // TODO(crbug.com/tint/1504): Properly support abstract int:
     // Change `AbstractIntType` to `int64_t`, update errors to say 'abstract int'.
-    using AbstractIntType = int32_t;
-    switch (check_limits<AbstractIntType>(res)) {
-        case LimitCheck::kTooSmall:
-            return {Token::Type::kError, source, "value too small for i32"};
-        case LimitCheck::kTooLarge:
-            return {Token::Type::kError, source, "value too large for i32"};
-        default:
-            end_source(source);
-            return {Token::Type::kIntLiteral, source, res};
+    using AbstractIntType = i32;
+    if (CheckedConvert<AbstractIntType>(AInt(res))) {
+        end_source(source);
+        return {Token::Type::kIntLiteral, source, res};
     }
+    return {Token::Type::kError, source, "value cannot be represented as 'i32'"};
 }
 
 Token Lexer::try_hex_integer() {

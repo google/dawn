@@ -133,7 +133,7 @@ TEST_F(ParserImplTest, ConstLiteral_Uint_Negative) {
     auto c = p->const_literal();
     EXPECT_FALSE(c.matched);
     EXPECT_TRUE(c.errored);
-    EXPECT_EQ(p->error(), "1:1: unsigned literal cannot be negative");
+    EXPECT_EQ(p->error(), "1:1: value cannot be represented as 'u32'");
     ASSERT_EQ(c.value, nullptr);
 }
 
@@ -179,7 +179,7 @@ TEST_F(ParserImplTest, ConstLiteral_InvalidFloat_TooSmallMagnitude) {
     auto c = p->const_literal();
     EXPECT_FALSE(c.matched);
     EXPECT_TRUE(c.errored);
-    EXPECT_EQ(p->error(), "1:1: magnitude too small to be represented as f32");
+    EXPECT_EQ(p->error(), "1:1: value magnitude too small to be represented as 'f32'");
     ASSERT_EQ(c.value, nullptr);
 }
 
@@ -188,7 +188,7 @@ TEST_F(ParserImplTest, ConstLiteral_InvalidFloat_TooLargeNegative) {
     auto c = p->const_literal();
     EXPECT_FALSE(c.matched);
     EXPECT_TRUE(c.errored);
-    EXPECT_EQ(p->error(), "1:1: value too small for f32");
+    EXPECT_EQ(p->error(), "1:1: value cannot be represented as 'f32'");
     ASSERT_EQ(c.value, nullptr);
 }
 
@@ -197,7 +197,7 @@ TEST_F(ParserImplTest, ConstLiteral_InvalidFloat_TooLargePositive) {
     auto c = p->const_literal();
     EXPECT_FALSE(c.matched);
     EXPECT_TRUE(c.errored);
-    EXPECT_EQ(p->error(), "1:1: value too large for f32");
+    EXPECT_EQ(p->error(), "1:1: value cannot be represented as 'f32'");
     ASSERT_EQ(c.value, nullptr);
 }
 

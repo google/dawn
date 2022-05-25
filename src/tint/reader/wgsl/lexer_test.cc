@@ -680,7 +680,7 @@ TEST_F(LexerTest, IntegerTest_HexSignedTooLarge) {
 
     auto t = l.next();
     ASSERT_TRUE(t.Is(Token::Type::kError));
-    EXPECT_EQ(t.to_str(), "value too large for i32");
+    EXPECT_EQ(t.to_str(), "value cannot be represented as 'i32'");
 }
 
 TEST_F(LexerTest, IntegerTest_HexSignedTooSmall) {
@@ -689,7 +689,7 @@ TEST_F(LexerTest, IntegerTest_HexSignedTooSmall) {
 
     auto t = l.next();
     ASSERT_TRUE(t.Is(Token::Type::kError));
-    EXPECT_EQ(t.to_str(), "value too small for i32");
+    EXPECT_EQ(t.to_str(), "value cannot be represented as 'i32'");
 }
 
 TEST_F(LexerTest, IntegerTest_HexSignedTooManyDigits) {
