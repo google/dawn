@@ -313,11 +313,6 @@ crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="2147483647" 
 crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="4294967295" [ Failure ]
 
 ################################################################################
-# createView failures
-################################################################################
-crbug.com/dawn/1380 webgpu:api,validation,createView:array_layers:textureDimension="2d";viewDimension="_undef_" [ Failure ]
-
-################################################################################
 # untriaged failures
 # KEEP
 ################################################################################
