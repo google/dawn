@@ -529,6 +529,8 @@ libtint_source_set("libtint_core_all_src") {
     "transform/zero_init_workgroup_memory.h",
     "utils/bitcast.h",
     "utils/block_allocator.h",
+    "utils/compiler_macros.h",
+    "utils/concat.h",
     "utils/crc32.h",
     "utils/debugger.cc",
     "utils/debugger.h",

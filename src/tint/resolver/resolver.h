@@ -354,11 +354,10 @@ class Resolver {
     //////////////////////////////////////////////////////////////////////////////
     /// Constant value evaluation methods
     //////////////////////////////////////////////////////////////////////////////
-    /// Cast `Value` to `target_type`
-    /// @return the casted value
-    sem::Constant ConstantCast(const sem::Constant& value,
-                               const sem::Type* target_type,
-                               const sem::Type* target_element_type = nullptr);
+
+    /// Convert the `value` to `target_type`
+    /// @return the converted value
+    sem::Constant ConvertValue(const sem::Constant& value, const sem::Type* target_type);
 
     sem::Constant EvaluateConstantValue(const ast::Expression* expr, const sem::Type* type);
     sem::Constant EvaluateConstantValue(const ast::LiteralExpression* literal,

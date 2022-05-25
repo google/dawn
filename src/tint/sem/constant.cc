@@ -23,29 +23,19 @@
 namespace tint::sem {
 
 namespace {
-
-const Type* CheckElemType(const Type* ty, size_t num_scalars) {
-    diag::List diag;
-    if (ty->is_abstract_or_scalar() || ty->IsAnyOf<Vector, Matrix>()) {
-        uint32_t count = 0;
-        auto* el_ty = Type::ElementOf(ty, &count);
-        if (num_scalars != count) {
-            TINT_ICE(Semantic, diag) << "sem::Constant() type <-> scalar mismatch. type: '"
-                                     << ty->TypeInfo().name << "' scalar: " << num_scalars;
-        }
-        TINT_ASSERT(Semantic, el_ty->is_abstract_or_scalar());
-        return el_ty;
-    }
-    TINT_UNREACHABLE(Semantic, diag) << "Unsupported sem::Constant type: " << ty->TypeInfo().name;
-    return nullptr;
+size_t CountElements(const Constant::Elements& elements) {
+    return std::visit([](auto&& vec) { return vec.size(); }, elements);
 }
-
 }  // namespace
 
 Constant::Constant() {}
 
-Constant::Constant(const sem::Type* ty, Scalars els)
-    : type_(ty), elem_type_(CheckElemType(ty, els.size())), elems_(std::move(els)) {}
+Constant::Constant(const sem::Type* ty, Elements els)
+    : type_(ty), elem_type_(CheckElemType(ty, CountElements(els))), elems_(std::move(els)) {}
+
+Constant::Constant(const sem::Type* ty, AInts vec) : Constant(ty, Elements{std::move(vec)}) {}
+
+Constant::Constant(const sem::Type* ty, AFloats vec) : Constant(ty, Elements{std::move(vec)}) {}
 
 Constant::Constant(const Constant&) = default;
 
@@ -54,16 +44,31 @@ Constant::~Constant() = default;
 Constant& Constant::operator=(const Constant& rhs) = default;
 
 bool Constant::AnyZero() const {
-    for (auto scalar : elems_) {
-        auto is_zero = [&](auto&& s) {
-            using T = std::remove_reference_t<decltype(s)>;
-            return s == T(0);
-        };
-        if (std::visit(is_zero, scalar)) {
-            return true;
+    return WithElements([&](auto&& vec) {
+        for (auto scalar : vec) {
+            using T = std::remove_reference_t<decltype(scalar)>;
+            if (scalar == T(0)) {
+                return true;
+            }
         }
+        return false;
+    });
+}
+
+const Type* Constant::CheckElemType(const sem::Type* ty, size_t num_elements) {
+    diag::List diag;
+    if (ty->is_abstract_or_scalar() || ty->IsAnyOf<Vector, Matrix>()) {
+        uint32_t count = 0;
+        auto* el_ty = Type::ElementOf(ty, &count);
+        if (num_elements != count) {
+            TINT_ICE(Semantic, diag) << "sem::Constant() type <-> element mismatch. type: '"
+                                     << ty->TypeInfo().name << "' element: " << num_elements;
+        }
+        TINT_ASSERT(Semantic, el_ty->is_abstract_or_scalar());
+        return el_ty;
     }
-    return false;
+    TINT_UNREACHABLE(Semantic, diag) << "Unsupported sem::Constant type: " << ty->TypeInfo().name;
+    return nullptr;
 }
 
 }  // namespace tint::sem

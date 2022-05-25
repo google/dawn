@@ -639,7 +639,6 @@ bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
 
 bool GeneratorImpl::EmitExpressionOrOneIfZero(std::ostream& out, const ast::Expression* expr) {
     // For constants, replace literal 0 with 1.
-    sem::Constant::Scalars elems;
     if (const auto& val = builder_.Sem().Get(expr)->ConstantValue()) {
         if (!val.AnyZero()) {
             return EmitExpression(out, expr);
@@ -657,7 +656,7 @@ bool GeneratorImpl::EmitExpressionOrOneIfZero(std::ostream& out, const ast::Expr
             }
 
             out << "(";
-            for (size_t i = 0; i < val.Elements().size(); ++i) {
+            for (size_t i = 0; i < val.ElementCount(); ++i) {
                 if (i != 0) {
                     out << ", ";
                 }

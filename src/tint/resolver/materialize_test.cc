@@ -252,11 +252,13 @@ TEST_P(MaterializeAbstractNumeric, Test) {
         uint32_t num_elems = 0;
         const sem::Type* target_sem_el_ty = sem::Type::ElementOf(target_sem_ty, &num_elems);
         EXPECT_TYPE(expr->ConstantValue().ElementType(), target_sem_el_ty);
-        std::visit(
-            [&](auto&& v) {
-                EXPECT_EQ(expr->ConstantValue().Elements(), sem::Constant::Scalars(num_elems, {v}));
-            },
-            data.materialized_value);
+        expr->ConstantValue().WithElements([&](auto&& vec) {
+            using VEC_TY = std::decay_t<decltype(vec)>;
+            using EL_TY = typename VEC_TY::value_type;
+            ASSERT_TRUE(std::holds_alternative<EL_TY>(data.materialized_value));
+            VEC_TY expected(num_elems, std::get<EL_TY>(data.materialized_value));
+            EXPECT_EQ(vec, expected);
+        });
     };
 
     switch (expectation) {

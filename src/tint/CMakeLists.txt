@@ -456,6 +456,8 @@ set(TINT_LIB_SRCS
   transform/zero_init_workgroup_memory.h
   utils/bitcast.h
   utils/block_allocator.h
+  utils/compiler_macros.h
+  utils/concat.h
   utils/crc32.h
   utils/enum_set.h
   utils/hash.h
@@ -801,6 +803,7 @@ if(TINT_BUILD_TESTS)
     sem/atomic.cc
     sem/bool_test.cc
     sem/builtin_test.cc
+    sem/constant_test.cc
     sem/depth_multisampled_texture_test.cc
     sem/depth_texture_test.cc
     sem/expression_test.cc

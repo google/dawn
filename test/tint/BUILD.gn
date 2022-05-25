@@ -289,6 +289,7 @@ tint_unittests_source_set("tint_unittests_sem_src") {
     "../../src/tint/sem/atomic_test.cc",
     "../../src/tint/sem/bool_test.cc",
     "../../src/tint/sem/builtin_test.cc",
+    "../../src/tint/sem/constant_test.cc",
     "../../src/tint/sem/depth_multisampled_texture_test.cc",
     "../../src/tint/sem/depth_texture_test.cc",
     "../../src/tint/sem/expression_test.cc",

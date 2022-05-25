@@ -23,6 +23,7 @@
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/type_constructor.h"
 #include "src/tint/sem/type_conversion.h"
+#include "src/tint/utils/transform.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::FoldConstants);
 
@@ -50,24 +51,40 @@ void FoldConstants::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
             return nullptr;
         }
 
-        // If original ctor expression had no init values, don't replace the
-        // expression
+        // If original ctor expression had no init values, don't replace the expression
         if (call->Arguments().empty()) {
             return nullptr;
         }
 
-        auto build_scalar = [&](sem::Constant::Scalar s) {
+        auto build_elements = [&](size_t limit) {
             return Switch(
                 value.ElementType(),  //
-                [&](const sem::I32*) { return ctx.dst->Expr(i32(std::get<AInt>(s).value)); },
-                [&](const sem::U32*) { return ctx.dst->Expr(u32(std::get<AInt>(s).value)); },
-                [&](const sem::F32*) { return ctx.dst->Expr(f32(std::get<AFloat>(s).value)); },
-                [&](const sem::Bool*) { return ctx.dst->Expr(std::get<bool>(s)); },
+                [&](const sem::Bool*) {
+                    return utils::TransformN(value.IElements(), limit, [&](AInt i) {
+                        return static_cast<const ast::Expression*>(
+                            ctx.dst->Expr(static_cast<bool>(i.value)));
+                    });
+                },
+                [&](const sem::I32*) {
+                    return utils::TransformN(value.IElements(), limit, [&](AInt i) {
+                        return static_cast<const ast::Expression*>(ctx.dst->Expr(i32(i.value)));
+                    });
+                },
+                [&](const sem::U32*) {
+                    return utils::TransformN(value.IElements(), limit, [&](AInt i) {
+                        return static_cast<const ast::Expression*>(ctx.dst->Expr(u32(i.value)));
+                    });
+                },
+                [&](const sem::F32*) {
+                    return utils::TransformN(value.FElements(), limit, [&](AFloat f) {
+                        return static_cast<const ast::Expression*>(ctx.dst->Expr(f32(f.value)));
+                    });
+                },
                 [&](Default) {
                     TINT_ICE(Transform, ctx.dst->Diagnostics())
                         << "unhandled Constant::Scalar type: "
                         << value.ElementType()->FriendlyName(ctx.src->Symbols());
-                    return nullptr;
+                    return ast::ExpressionList{};
                 });
         };
 
@@ -78,17 +95,17 @@ void FoldConstants::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
             // constructor args that the original node had, but after folding
             // constants, cases like the following are problematic:
             //
-            // vec3<f32> = vec3<f32>(vec2<f32>, 1.0) // vec_size=3, ctor_size=2
+            // vec3<f32> = vec3<f32>(vec2<f32>(), 1.0) // vec_size=3, ctor_size=2
             //
             // In this case, creating a vec3 with 2 args is invalid, so we should
             // create it with 3. So what we do is construct with vec_size args,
             // except if the original vector was single-value initialized, in
             // which case, we only construct with one arg again.
-            uint32_t ctor_size = (call->Arguments().size() == 1) ? 1 : vec_size;
-
             ast::ExpressionList ctors;
-            for (uint32_t i = 0; i < ctor_size; ++i) {
-                ctors.emplace_back(build_scalar(value.Elements()[i]));
+            if (call->Arguments().size() == 1) {
+                ctors = build_elements(1);
+            } else {
+                ctors = build_elements(value.ElementCount());
             }
 
             auto* el_ty = CreateASTTypeFor(ctx, vec->type());
@@ -96,7 +113,7 @@ void FoldConstants::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
         }
 
         if (ty->is_scalar()) {
-            return build_scalar(value.Elements()[0]);
+            return build_elements(1)[0];
         }
 
         return nullptr;

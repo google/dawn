@@ -924,7 +924,7 @@ bool Builder::GenerateIndexAccessor(const ast::IndexAccessorExpression* expr, Ac
                                     Operand(result_type_id),
                                     extract,
                                     Operand(info->source_id),
-                                    Operand(idx_constval.ElementAs<uint32_t>(0)),
+                                    Operand(idx_constval.Element<uint32_t>(0)),
                                 })) {
             return false;
         }

@@ -806,7 +806,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
             return false;
         }
 
-        ws[i].value = static_cast<uint32_t>(value.Element<AInt>(0).value);
+        ws[i].value = value.Element<uint32_t>(0);
     }
 
     current_function_->SetWorkgroupSize(std::move(ws));
@@ -1119,7 +1119,7 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
                 << (expr->Type() ? expr->Type()->FriendlyName(builder_->Symbols()) : "<null>");
             return nullptr;
         }
-        auto materialized_val = ConstantCast(expr_val, target_ty);
+        auto materialized_val = ConvertValue(expr_val, target_ty);
         auto* m = builder_->create<sem::Materialize>(expr, current_statement_, materialized_val);
         m->Behaviors() = expr->Behaviors();
         builder_->Sem().Replace(expr->Declaration(), m);
@@ -2022,7 +2022,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
             return nullptr;
         }
 
-        count = static_cast<uint32_t>(count_val.Element<AInt>(0).value);
+        count = count_val.Element<uint32_t>(0);
     }
 
     auto size = std::max<uint64_t>(count, 1) * stride;
