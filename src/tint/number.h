@@ -17,18 +17,72 @@
 
 #include <stdint.h>
 #include <functional>
+#include <limits>
+#include <ostream>
+
+#include "src/tint/utils/result.h"
+
+// Forward declaration
+namespace tint {
+/// Number wraps a integer or floating point number, enforcing explicit casting.
+template <typename T>
+struct Number;
+}  // namespace tint
 
 namespace tint::detail {
 /// An empty structure used as a unique template type for Number when
 /// specializing for the f16 type.
 struct NumberKindF16 {};
+
+/// Helper for obtaining the underlying type for a Number.
+template <typename T>
+struct NumberUnwrapper {
+    /// When T is not a Number, then type defined to be T.
+    using type = T;
+};
+
+/// NumberUnwrapper specialization for Number<T>.
+template <typename T>
+struct NumberUnwrapper<Number<T>> {
+    /// The Number's underlying type.
+    using type = typename Number<T>::type;
+};
+
 }  // namespace tint::detail
 
 namespace tint {
 
+/// Evaluates to true iff T is a floating-point type or is NumberKindF16.
+template <typename T>
+constexpr bool IsFloatingPoint =
+    std::is_floating_point_v<T> || std::is_same_v<T, detail::NumberKindF16>;
+
+/// Evaluates to true iff T is an integer type.
+template <typename T>
+constexpr bool IsInteger = std::is_integral_v<T>;
+
+/// Evaluates to true iff T is an integer type, floating-point type or is NumberKindF16.
+template <typename T>
+constexpr bool IsNumeric = IsInteger<T> || IsFloatingPoint<T>;
+
 /// Number wraps a integer or floating point number, enforcing explicit casting.
 template <typename T>
 struct Number {
+    static_assert(IsNumeric<T>, "Number<T> constructed with non-numeric type");
+
+    /// type is the underlying type of the Number
+    using type = T;
+
+    /// Highest finite representable value of this type.
+    static constexpr type kHighest = std::numeric_limits<type>::max();
+
+    /// Lowest finite representable value of this type.
+    static constexpr type kLowest = std::numeric_limits<type>::lowest();
+
+    /// Smallest positive normal value of this type.
+    static constexpr type kSmallest =
+        std::is_integral_v<type> ? 0 : std::numeric_limits<type>::min();
+
     /// Constructor. The value is zero-initialized.
     Number() = default;
 
@@ -59,41 +113,139 @@ struct Number {
     }
 
     /// The number value
-    T value = {};
+    type value = {};
 };
 
+/// Resolves to the underlying type for a Number.
+template <typename T>
+using UnwrapNumber = typename detail::NumberUnwrapper<T>::type;
+
+/// Writes the number to the ostream.
+/// @param out the std::ostream to write to
+/// @param num the Number
+/// @return the std::ostream so calls can be chained
+template <typename T>
+inline std::ostream& operator<<(std::ostream& out, Number<T> num) {
+    return out << num.value;
+}
+
+/// Equality operator.
+/// @param a the LHS number
+/// @param b the RHS number
+/// @returns true if the numbers `a` and `b` are exactly equal.
 template <typename A, typename B>
 bool operator==(Number<A> a, Number<B> b) {
     using T = decltype(a.value + b.value);
-    return std::equal_to<T>()(a.value, b.value);
+    return std::equal_to<T>()(static_cast<T>(a.value), static_cast<T>(b.value));
 }
 
+/// Inequality operator.
+/// @param a the LHS number
+/// @param b the RHS number
+/// @returns true if the numbers `a` and `b` are exactly unequal.
 template <typename A, typename B>
-bool operator==(Number<A> a, B b) {
+bool operator!=(Number<A> a, Number<B> b) {
+    return !(a == b);
+}
+
+/// Equality operator.
+/// @param a the LHS number
+/// @param b the RHS number
+/// @returns true if the numbers `a` and `b` are exactly equal.
+template <typename A, typename B>
+std::enable_if_t<IsNumeric<B>, bool> operator==(Number<A> a, B b) {
     return a == Number<B>(b);
 }
 
+/// Inequality operator.
+/// @param a the LHS number
+/// @param b the RHS number
+/// @returns true if the numbers `a` and `b` are exactly unequal.
 template <typename A, typename B>
-bool operator==(A a, Number<B> b) {
+std::enable_if_t<IsNumeric<B>, bool> operator!=(Number<A> a, B b) {
+    return !(a == b);
+}
+
+/// Equality operator.
+/// @param a the LHS number
+/// @param b the RHS number
+/// @returns true if the numbers `a` and `b` are exactly equal.
+template <typename A, typename B>
+std::enable_if_t<IsNumeric<A>, bool> operator==(A a, Number<B> b) {
     return Number<A>(a) == b;
+}
+
+/// Inequality operator.
+/// @param a the LHS number
+/// @param b the RHS number
+/// @returns true if the numbers `a` and `b` are exactly unequal.
+template <typename A, typename B>
+std::enable_if_t<IsNumeric<A>, bool> operator!=(A a, Number<B> b) {
+    return !(a == b);
+}
+
+/// Enumerator of failure reasons when converting from one number to another.
+enum class ConversionFailure {
+    kExceedsPositiveLimit,  // The value was too big (+'ve) to fit in the target type
+    kExceedsNegativeLimit,  // The value was too big (-'ve) to fit in the target type
+    kTooSmall,              // The value was too small to fit in the target type
+};
+
+/// Writes the conversion failure message to the ostream.
+/// @param out the std::ostream to write to
+/// @param failure the ConversionFailure
+/// @return the std::ostream so calls can be chained
+std::ostream& operator<<(std::ostream& out, ConversionFailure failure);
+
+/// Converts a number from one type to another, checking that the value fits in the target type.
+/// @returns the resulting value of the conversion, or a failure reason.
+template <typename TO, typename FROM>
+utils::Result<TO, ConversionFailure> CheckedConvert(Number<FROM> num) {
+    using T = decltype(UnwrapNumber<TO>() + num.value);
+    const auto value = static_cast<T>(num.value);
+    if (value > static_cast<T>(TO::kHighest)) {
+        return ConversionFailure::kExceedsPositiveLimit;
+    }
+    if (value < static_cast<T>(TO::kLowest)) {
+        return ConversionFailure::kExceedsNegativeLimit;
+    }
+    if constexpr (IsFloatingPoint<UnwrapNumber<TO>>) {
+        if ((value < T(0) && value > static_cast<T>(-TO::kSmallest)) ||
+            (value > T(0) && value < static_cast<T>(TO::kSmallest))) {
+            return ConversionFailure::kTooSmall;
+        }
+    }
+    return TO(value);  // Success
 }
 
 /// The partial specification of Number for f16 type, storing the f16 value as float,
 /// and enforcing proper explicit casting.
 template <>
 struct Number<detail::NumberKindF16> {
+    /// C++ does not have a native float16 type, so we use a 32-bit float instead.
+    using type = float;
+
+    /// Highest finite representable value of this type.
+    static constexpr type kHighest = 65504.0f;  // 2¹⁵ × (1 + 1023/1024)
+
+    /// Lowest finite representable value of this type.
+    static constexpr type kLowest = -65504.0f;
+
+    /// Smallest positive normal value of this type.
+    static constexpr type kSmallest = 0.00006103515625f;  // 2⁻¹⁴
+
     /// Constructor. The value is zero-initialized.
     Number() = default;
 
     /// Constructor.
     /// @param v the value to initialize this Number to
     template <typename U>
-    explicit Number(U v) : value(static_cast<float>(v)) {}
+    explicit Number(U v) : value(Quantize(static_cast<type>(v))) {}
 
     /// Constructor.
     /// @param v the value to initialize this Number to
     template <typename U>
-    explicit Number(Number<U> v) : value(static_cast<float>(v.value)) {}
+    explicit Number(Number<U> v) : value(Quantize(static_cast<type>(v.value))) {}
 
     /// Conversion operator
     /// @returns the value as the internal representation type of F16
@@ -106,13 +258,20 @@ struct Number<detail::NumberKindF16> {
     /// Assignment operator with parameter as native floating point type
     /// @param v the new value
     /// @returns this Number so calls can be chained
-    Number& operator=(float v) {
-        value = v;
+    Number& operator=(type v) {
+        value = Quantize(v);
         return *this;
     }
 
+    /// @param value the input float32 value
+    /// @returns the float32 value quantized to the smaller float16 value, through truncation of the
+    /// mantissa bits (no rounding). If the float32 value is too large (positive or negative) to be
+    /// represented by a float16 value, then the returned value will be positive or negative
+    /// infinity.
+    static type Quantize(type value);
+
     /// The number value, stored as float
-    float value = {};
+    type value = {};
 };
 
 /// `AInt` is a type alias to `Number<int64_t>`.

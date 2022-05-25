@@ -727,6 +727,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../../src/tint/clone_context_test.cc",
     "../../src/tint/debug_test.cc",
     "../../src/tint/demangler_test.cc",
+    "../../src/tint/number_test.cc",
     "../../src/tint/program_builder_test.cc",
     "../../src/tint/program_test.cc",
     "../../src/tint/scope_stack_test.cc",
