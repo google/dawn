@@ -23,6 +23,7 @@ default_args = {
   angle_enable_abseil = false
   angle_standalone = false
   angle_build_all = false
+  angle_build_tests = false
   angle_has_rapidjson = false
   angle_use_wayland = false
   angle_vulkan_headers_dir = "//third_party/vulkan-deps/vulkan-headers/src"
