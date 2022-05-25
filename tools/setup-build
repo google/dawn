@@ -46,7 +46,7 @@ case $BUILD_SYSTEM in
         generate "gn gen out/active --args=is_debug=true"
       ;;
       "release")
-        generate "gn gen out/active"
+        generate "gn gen out/active --args=is_debug=false"
       ;;
       *)
         echo "invalid build type '${BUILD_TYPE}'"
