@@ -598,7 +598,7 @@ source_set("white_box_tests_sources") {
 
   if (dawn_enable_opengles && defined(dawn_angle_dir)) {
     sources += [ "white_box/EGLImageWrappingTests.cpp" ]
-    deps += [ "${dawn_angle_dir}:libEGL" ]
+    include_dirs = [ "${dawn_angle_dir}/include" ]
   }
 
   libs = []
