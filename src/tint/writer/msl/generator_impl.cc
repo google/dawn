@@ -1544,12 +1544,13 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
             return true;
         },
         [&](const ast::FloatLiteralExpression* l) {
-            if (std::isinf(l->value)) {
-                out << (l->value >= 0 ? "INFINITY" : "-INFINITY");
-            } else if (std::isnan(l->value)) {
+            auto f32 = static_cast<float>(l->value);
+            if (std::isinf(f32)) {
+                out << (f32 >= 0 ? "INFINITY" : "-INFINITY");
+            } else if (std::isnan(f32)) {
                 out << "NAN";
             } else {
-                out << FloatToString(static_cast<float>(l->value)) << "f";
+                out << FloatToString(f32) << "f";
             }
             return true;
         },

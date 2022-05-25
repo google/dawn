@@ -3139,13 +3139,14 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
             out << (l->value ? "true" : "false");
             return true;
         },
-        [&](const ast::FloatLiteralExpression* fl) {
-            if (std::isinf(fl->value)) {
-                out << (fl->value >= 0 ? "asfloat(0x7f800000u)" : "asfloat(0xff800000u)");
-            } else if (std::isnan(fl->value)) {
+        [&](const ast::FloatLiteralExpression* l) {
+            auto f32 = static_cast<float>(l->value);
+            if (std::isinf(f32)) {
+                out << (f32 >= 0 ? "asfloat(0x7f800000u)" : "asfloat(0xff800000u)");
+            } else if (std::isnan(f32)) {
                 out << "asfloat(0x7fc00000u)";
             } else {
-                out << FloatToString(static_cast<float>(fl->value)) << "f";
+                out << FloatToString(f32) << "f";
             }
             return true;
         },

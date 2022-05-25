@@ -2183,13 +2183,14 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
             return true;
         },
         [&](const ast::FloatLiteralExpression* l) {
-            if (std::isinf(l->value)) {
+            auto f32 = static_cast<float>(l->value);
+            if (std::isinf(f32)) {
                 out << (l->value >= 0 ? "uintBitsToFloat(0x7f800000u)"
                                       : "uintBitsToFloat(0xff800000u)");
             } else if (std::isnan(l->value)) {
                 out << "uintBitsToFloat(0x7fc00000u)";
             } else {
-                out << FloatToString(static_cast<float>(l->value)) << "f";
+                out << FloatToString(f32) << "f";
             }
             return true;
         },
