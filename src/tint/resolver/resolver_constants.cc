@@ -14,7 +14,9 @@
 
 #include "src/tint/resolver/resolver.h"
 
-#include <optional>
+#include <cmath>
+// TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
+#include <optional>  // NOLINT(build/include_order))
 
 #include "src/tint/sem/abstract_float.h"
 #include "src/tint/sem/abstract_int.h"
@@ -30,46 +32,53 @@ namespace tint::resolver {
 
 namespace {
 
-/// Converts all the element values of `in` to the type `T`.
+/// Converts and returns all the element values of `in` to the type `T`, using the converter
+/// function `CONVERTER`.
 /// @param elements_in the vector of elements to be converted
+/// @param converter a function-like with the signature `void(TO&, FROM)`
 /// @returns the elements converted to type T.
-template <typename T, typename ELEMENTS_IN>
-sem::Constant::Elements Convert(const ELEMENTS_IN& elements_in) {
+template <typename T, typename ELEMENTS_IN, typename CONVERTER>
+sem::Constant::Elements Transform(const ELEMENTS_IN& elements_in, CONVERTER&& converter) {
     TINT_BEGIN_DISABLE_WARNING_UNREACHABLE_CODE();
 
-    using E = UnwrapNumber<T>;
     return utils::Transform(elements_in, [&](auto value_in) {
-        if constexpr (std::is_same_v<E, bool>) {
+        if constexpr (std::is_same_v<UnwrapNumber<T>, bool>) {
             return AInt(value_in != 0);
-        }
-
-        E converted = static_cast<E>(value_in);
-        if constexpr (IsFloatingPoint<E>) {
-            return AFloat(converted);
         } else {
-            return AInt(converted);
+            T converted{};
+            converter(converted, value_in);
+            if constexpr (IsFloatingPoint<UnwrapNumber<T>>) {
+                return AFloat(converted);
+            } else {
+                return AInt(converted);
+            }
         }
     });
 
     TINT_END_DISABLE_WARNING_UNREACHABLE_CODE();
 }
 
-/// Converts and returns all the element values of `in` to the semantic type `el_ty`.
+/// Converts and returns all the element values of `in` to the semantic type `el_ty`, using the
+/// converter function `CONVERTER`.
 /// @param in the constant to convert
 /// @param el_ty the target element type
-/// @returns the elements converted to `type`
-sem::Constant::Elements Convert(const sem::Constant::Elements& in, const sem::Type* el_ty) {
+/// @param converter a function-like with the signature `void(TO&, FROM)`
+/// @returns the elements converted to `el_ty`
+template <typename CONVERTER>
+sem::Constant::Elements Transform(const sem::Constant::Elements& in,
+                                  const sem::Type* el_ty,
+                                  CONVERTER&& converter) {
     return std::visit(
         [&](auto&& v) {
             return Switch(
                 el_ty,  //
-                [&](const sem::AbstractInt*) { return Convert<AInt>(v); },
-                [&](const sem::AbstractFloat*) { return Convert<AFloat>(v); },
-                [&](const sem::I32*) { return Convert<i32>(v); },
-                [&](const sem::U32*) { return Convert<u32>(v); },
-                [&](const sem::F32*) { return Convert<f32>(v); },
-                [&](const sem::F16*) { return Convert<f16>(v); },
-                [&](const sem::Bool*) { return Convert<bool>(v); },
+                [&](const sem::AbstractInt*) { return Transform<AInt>(v, converter); },
+                [&](const sem::AbstractFloat*) { return Transform<AFloat>(v, converter); },
+                [&](const sem::I32*) { return Transform<i32>(v, converter); },
+                [&](const sem::U32*) { return Transform<u32>(v, converter); },
+                [&](const sem::F32*) { return Transform<f32>(v, converter); },
+                [&](const sem::F16*) { return Transform<f16>(v, converter); },
+                [&](const sem::Bool*) { return Transform<bool>(v, converter); },
                 [&](Default) -> sem::Constant::Elements {
                     diag::List diags;
                     TINT_UNREACHABLE(Semantic, diags)
@@ -80,44 +89,91 @@ sem::Constant::Elements Convert(const sem::Constant::Elements& in, const sem::Ty
         in);
 }
 
+/// Converts and returns all the elements in `in` to the type `el_ty`, by performing a `static_cast`
+/// on each element value. No checks will be performed that the value fits in the target type.
+/// @param in the input elements
+/// @param el_ty the target element type
+/// @returns the elements converted to `el_ty`
+sem::Constant::Elements ConvertElements(const sem::Constant::Elements& in, const sem::Type* el_ty) {
+    return Transform(in, el_ty, [](auto& el_out, auto el_in) {
+        el_out = std::decay_t<decltype(el_out)>(el_in);
+    });
+}
+
+/// Converts and returns all the elements in `in` to the type `el_ty`, by performing a
+/// `CheckedConvert` on each element value. A single error diagnostic will be raised if an element
+/// value cannot be represented by the target type.
+/// @param in the input elements
+/// @param el_ty the target element type
+/// @returns the elements converted to `el_ty`, or a Failure if some elements could not be
+/// represented by the target type.
+utils::Result<sem::Constant::Elements> MaterializeElements(const sem::Constant::Elements& in,
+                                                           const sem::Type* el_ty,
+                                                           ProgramBuilder& builder,
+                                                           Source source) {
+    std::optional<std::string> failure;
+
+    auto out = Transform(in, el_ty, [&](auto& el_out, auto el_in) {
+        using OUT = std::decay_t<decltype(el_out)>;
+        if (auto conv = CheckedConvert<OUT>(el_in)) {
+            el_out = conv.Get();
+        } else if (conv.Failure() == ConversionFailure::kTooSmall) {
+            el_out = OUT(el_in < 0 ? -0.0 : 0.0);
+        } else if (!failure.has_value()) {
+            std::stringstream ss;
+            ss << "value " << el_in << " cannot be represented as ";
+            ss << "'" << builder.FriendlyName(el_ty) << "'";
+            failure = ss.str();
+        }
+    });
+
+    if (failure.has_value()) {
+        builder.Diagnostics().add_error(diag::System::Resolver, std::move(failure.value()), source);
+        return utils::Failure;
+    }
+
+    return out;
+}
+
 }  // namespace
 
-sem::Constant Resolver::EvaluateConstantValue(const ast::Expression* expr, const sem::Type* type) {
+utils::Result<sem::Constant> Resolver::EvaluateConstantValue(const ast::Expression* expr,
+                                                             const sem::Type* type) {
     if (auto* e = expr->As<ast::LiteralExpression>()) {
         return EvaluateConstantValue(e, type);
     }
     if (auto* e = expr->As<ast::CallExpression>()) {
         return EvaluateConstantValue(e, type);
     }
-    return {};
+    return sem::Constant{};
 }
 
-sem::Constant Resolver::EvaluateConstantValue(const ast::LiteralExpression* literal,
-                                              const sem::Type* type) {
+utils::Result<sem::Constant> Resolver::EvaluateConstantValue(const ast::LiteralExpression* literal,
+                                                             const sem::Type* type) {
     return Switch(
         literal,
+        [&](const ast::BoolLiteralExpression* lit) {
+            return sem::Constant{type, {AInt(lit->value ? 1 : 0)}};
+        },
         [&](const ast::IntLiteralExpression* lit) {
             return sem::Constant{type, {AInt(lit->value)}};
         },
         [&](const ast::FloatLiteralExpression* lit) {
             return sem::Constant{type, {AFloat(lit->value)}};
-        },
-        [&](const ast::BoolLiteralExpression* lit) {
-            return sem::Constant{type, {AInt(lit->value ? 1 : 0)}};
         });
 }
 
-sem::Constant Resolver::EvaluateConstantValue(const ast::CallExpression* call,
-                                              const sem::Type* ty) {
+utils::Result<sem::Constant> Resolver::EvaluateConstantValue(const ast::CallExpression* call,
+                                                             const sem::Type* ty) {
     uint32_t result_size = 0;
     auto* el_ty = sem::Type::ElementOf(ty, &result_size);
     if (!el_ty) {
-        return {};
+        return sem::Constant{};
     }
 
     // ElementOf() will also return the element type of array, which we do not support.
     if (ty->Is<sem::Array>()) {
-        return {};
+        return sem::Constant{};
     }
 
     // For zero value init, return 0s
@@ -142,15 +198,15 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::CallExpression* call,
     for (auto* expr : call->args) {
         auto* arg = builder_->Sem().Get(expr);
         if (!arg) {
-            return {};
+            return sem::Constant{};
         }
         auto value = arg->ConstantValue();
         if (!value) {
-            return {};
+            return sem::Constant{};
         }
 
         // Convert the elements to the desired type.
-        auto converted = Convert(value.GetElements(), el_ty);
+        auto converted = ConvertElements(value.GetElements(), el_ty);
 
         if (elements.has_value()) {
             // Append the converted vector to elements
@@ -180,20 +236,25 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::CallExpression* call,
     return sem::Constant(ty, std::move(elements.value()));
 }
 
-sem::Constant Resolver::ConvertValue(const sem::Constant& value, const sem::Type* ty) {
+utils::Result<sem::Constant> Resolver::ConvertValue(const sem::Constant& value,
+                                                    const sem::Type* ty,
+                                                    const Source& source) {
     if (value.Type() == ty) {
         return value;
     }
 
     auto* el_ty = sem::Type::ElementOf(ty);
     if (el_ty == nullptr) {
-        return {};
+        return sem::Constant{};
     }
     if (value.ElementType() == el_ty) {
         return sem::Constant(ty, value.GetElements());
     }
 
-    return sem::Constant(ty, Convert(value.GetElements(), el_ty));
+    if (auto res = MaterializeElements(value.GetElements(), el_ty, *builder_, source)) {
+        return sem::Constant(ty, std::move(res.Get()));
+    }
+    return utils::Failure;
 }
 
 }  // namespace tint::resolver

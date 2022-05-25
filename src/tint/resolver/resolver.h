@@ -34,6 +34,7 @@
 #include "src/tint/sem/constant.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/struct.h"
+#include "src/tint/utils/result.h"
 #include "src/tint/utils/unique_vector.h"
 
 // Forward declarations
@@ -354,15 +355,19 @@ class Resolver {
     //////////////////////////////////////////////////////////////////////////////
     /// Constant value evaluation methods
     //////////////////////////////////////////////////////////////////////////////
+    /// The result type of a ConstantEvaluation method. Holds the constant value and a boolean,
+    /// which is true on success, false on an error.
+    using ConstantResult = utils::Result<sem::Constant>;
 
     /// Convert the `value` to `target_type`
     /// @return the converted value
-    sem::Constant ConvertValue(const sem::Constant& value, const sem::Type* target_type);
-
-    sem::Constant EvaluateConstantValue(const ast::Expression* expr, const sem::Type* type);
-    sem::Constant EvaluateConstantValue(const ast::LiteralExpression* literal,
-                                        const sem::Type* type);
-    sem::Constant EvaluateConstantValue(const ast::CallExpression* call, const sem::Type* type);
+    ConstantResult ConvertValue(const sem::Constant& value,
+                                const sem::Type* target_type,
+                                const Source& source);
+    ConstantResult EvaluateConstantValue(const ast::Expression* expr, const sem::Type* type);
+    ConstantResult EvaluateConstantValue(const ast::LiteralExpression* literal,
+                                         const sem::Type* type);
+    ConstantResult EvaluateConstantValue(const ast::CallExpression* call, const sem::Type* type);
 
     /// @returns true if the symbol is the name of a builtin function.
     bool IsBuiltin(Symbol) const;

@@ -1110,19 +1110,27 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
     // Helper for actually creating the the materialize node, performing the constant cast, updating
     // the ast -> sem binding, and performing validation.
     auto materialize = [&](const sem::Type* target_ty) -> sem::Materialize* {
-        auto expr_val = EvaluateConstantValue(expr->Declaration(), expr->Type());
-        if (!expr_val.IsValid()) {
+        auto* decl = expr->Declaration();
+        auto expr_val = EvaluateConstantValue(decl, expr->Type());
+        if (!expr_val) {
+            return nullptr;
+        }
+        if (!expr_val->IsValid()) {
             TINT_ICE(Resolver, builder_->Diagnostics())
-                << expr->Declaration()->source
+                << decl->source
                 << " EvaluateConstantValue() returned invalid value for materialized "
                    "value of type: "
                 << (expr->Type() ? expr->Type()->FriendlyName(builder_->Symbols()) : "<null>");
             return nullptr;
         }
-        auto materialized_val = ConvertValue(expr_val, target_ty);
-        auto* m = builder_->create<sem::Materialize>(expr, current_statement_, materialized_val);
+        auto materialized_val = ConvertValue(expr_val.Get(), target_ty, decl->source);
+        if (!materialized_val) {
+            return nullptr;
+        }
+        auto* m =
+            builder_->create<sem::Materialize>(expr, current_statement_, materialized_val.Get());
         m->Behaviors() = expr->Behaviors();
-        builder_->Sem().Replace(expr->Declaration(), m);
+        builder_->Sem().Replace(decl, m);
         return validator_.Materialize(m) ? m : nullptr;
     };
 
@@ -1215,8 +1223,11 @@ sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* exp
     }
 
     auto val = EvaluateConstantValue(expr, ty);
+    if (!val) {
+        return nullptr;
+    }
     bool has_side_effects = idx->HasSideEffects() || obj->HasSideEffects();
-    auto* sem = builder_->create<sem::Expression>(expr, ty, current_statement_, val,
+    auto* sem = builder_->create<sem::Expression>(expr, ty, current_statement_, val.Get(),
                                                   has_side_effects, obj->SourceVariable());
     sem->Behaviors() = idx->Behaviors() + obj->Behaviors();
     return sem;
@@ -1230,7 +1241,10 @@ sem::Expression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
     }
 
     auto val = EvaluateConstantValue(expr, ty);
-    auto* sem = builder_->create<sem::Expression>(expr, ty, current_statement_, val,
+    if (!val) {
+        return nullptr;
+    }
+    auto* sem = builder_->create<sem::Expression>(expr, ty, current_statement_, val.Get(),
                                                   inner->HasSideEffects());
 
     sem->Behaviors() = inner->Behaviors();
@@ -1277,9 +1291,12 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         if (!MaterializeArguments(args, call_target)) {
             return nullptr;
         }
-        auto value = EvaluateConstantValue(expr, call_target->ReturnType());
+        auto val = EvaluateConstantValue(expr, call_target->ReturnType());
+        if (!val) {
+            return nullptr;
+        }
         return builder_->create<sem::Call>(expr, call_target, std::move(args), current_statement_,
-                                           value, has_side_effects);
+                                           val.Get(), has_side_effects);
     };
 
     // ct_ctor_or_conv is a helper for building either a sem::TypeConstructor or sem::TypeConversion
@@ -1315,9 +1332,12 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 if (!MaterializeArguments(args, call_target)) {
                     return nullptr;
                 }
-                auto value = EvaluateConstantValue(expr, call_target->ReturnType());
+                auto val = EvaluateConstantValue(expr, call_target->ReturnType());
+                if (!val) {
+                    return nullptr;
+                }
                 return builder_->create<sem::Call>(expr, call_target, std::move(args),
-                                                   current_statement_, value, has_side_effects);
+                                                   current_statement_, val.Get(), has_side_effects);
             },
             [&](const sem::Struct* str) -> sem::Call* {
                 auto* call_target = utils::GetOrCreate(
@@ -1337,9 +1357,12 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 if (!MaterializeArguments(args, call_target)) {
                     return nullptr;
                 }
-                auto value = EvaluateConstantValue(expr, call_target->ReturnType());
+                auto val = EvaluateConstantValue(expr, call_target->ReturnType());
+                if (!val) {
+                    return nullptr;
+                }
                 return builder_->create<sem::Call>(expr, call_target, std::move(args),
-                                                   current_statement_, value, has_side_effects);
+                                                   current_statement_, val.Get(), has_side_effects);
             },
             [&](Default) {
                 AddError("type is not constructible", expr->source);
@@ -1616,7 +1639,10 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
     }
 
     auto val = EvaluateConstantValue(literal, ty);
-    return builder_->create<sem::Expression>(literal, ty, current_statement_, val,
+    if (!val) {
+        return nullptr;
+    }
+    return builder_->create<sem::Expression>(literal, ty, current_statement_, val.Get(),
                                              /* has_side_effects */ false);
 }
 
@@ -1828,8 +1854,11 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
     }
 
     auto val = EvaluateConstantValue(expr, op.result);
+    if (!val) {
+        return nullptr;
+    }
     bool has_side_effects = lhs->HasSideEffects() || rhs->HasSideEffects();
-    auto* sem = builder_->create<sem::Expression>(expr, op.result, current_statement_, val,
+    auto* sem = builder_->create<sem::Expression>(expr, op.result, current_statement_, val.Get(),
                                                   has_side_effects);
     sem->Behaviors() = lhs->Behaviors() + rhs->Behaviors();
 
@@ -1902,7 +1931,10 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
     }
 
     auto val = EvaluateConstantValue(unary, ty);
-    auto* sem = builder_->create<sem::Expression>(unary, ty, current_statement_, val,
+    if (!val) {
+        return nullptr;
+    }
+    auto* sem = builder_->create<sem::Expression>(unary, ty, current_statement_, val.Get(),
                                                   expr->HasSideEffects(), source_var);
     sem->Behaviors() = expr->Behaviors();
     return sem;

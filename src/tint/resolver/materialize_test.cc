@@ -134,35 +134,65 @@ static std::ostream& operator<<(std::ostream& o, Method m) {
 
 struct Data {
     std::string target_type_name;
+    std::string target_element_type_name;
     builder::ast_type_func_ptr target_ast_ty;
     builder::sem_type_func_ptr target_sem_ty;
     builder::ast_expr_func_ptr target_expr;
-    std::string literal_type_name;
-    builder::ast_expr_func_ptr literal_value;
+    std::string source_type_name;
+    builder::ast_expr_func_ptr source_builder;
     std::variant<AInt, AFloat> materialized_value;
+    double literal_value;
 };
 
-template <typename TARGET_TYPE, typename LITERAL_TYPE, typename MATERIALIZED_TYPE = AInt>
-Data Types(MATERIALIZED_TYPE materialized_value = 0_a) {
+template <typename TARGET_TYPE, typename SOURCE_TYPE, typename MATERIALIZED_TYPE>
+Data Types(MATERIALIZED_TYPE materialized_value, double literal_value) {
+    using TargetDataType = builder::DataType<TARGET_TYPE>;
+    using SourceDataType = builder::DataType<SOURCE_TYPE>;
+    using TargetElementDataType = builder::DataType<typename TargetDataType::ElementType>;
     return {
-        builder::DataType<TARGET_TYPE>::Name(),   //
-        builder::DataType<TARGET_TYPE>::AST,      //
-        builder::DataType<TARGET_TYPE>::Sem,      //
-        builder::DataType<TARGET_TYPE>::Expr,     //
-        builder::DataType<LITERAL_TYPE>::Name(),  //
-        builder::DataType<LITERAL_TYPE>::Expr,    //
+        TargetDataType::Name(),         // target_type_name
+        TargetElementDataType::Name(),  // target_element_type_name
+        TargetDataType::AST,            // target_ast_ty
+        TargetDataType::Sem,            // target_sem_ty
+        TargetDataType::Expr,           // target_expr
+        SourceDataType::Name(),         // literal_type_name
+        SourceDataType::Expr,           // literal_builder
         materialized_value,
+        literal_value,
+    };
+}
+
+template <typename TARGET_TYPE, typename SOURCE_TYPE>
+Data Types() {
+    using TargetDataType = builder::DataType<TARGET_TYPE>;
+    using SourceDataType = builder::DataType<SOURCE_TYPE>;
+    using TargetElementDataType = builder::DataType<typename TargetDataType::ElementType>;
+    return {
+        TargetDataType::Name(),         // target_type_name
+        TargetElementDataType::Name(),  // target_element_type_name
+        TargetDataType::AST,            // target_ast_ty
+        TargetDataType::Sem,            // target_sem_ty
+        TargetDataType::Expr,           // target_expr
+        SourceDataType::Name(),         // literal_type_name
+        SourceDataType::Expr,           // literal_builder
+        0_a,
+        0.0,
     };
 }
 
 static std::ostream& operator<<(std::ostream& o, const Data& c) {
-    return o << "[" << c.target_type_name << " <- " << c.literal_type_name << "]";
+    auto print_value = [&](auto&& v) { o << v; };
+    o << "[" << c.target_type_name << " <- " << c.source_type_name << "] [";
+    std::visit(print_value, c.materialized_value);
+    o << " <- " << c.literal_value << "]";
+    return o;
 }
 
 enum class Expectation {
     kMaterialize,
     kNoMaterialize,
     kInvalidCast,
+    kValueCannotBeRepresented,
 };
 
 static std::ostream& operator<<(std::ostream& o, Expectation m) {
@@ -173,6 +203,8 @@ static std::ostream& operator<<(std::ostream& o, Expectation m) {
             return o << "no-materialize";
         case Expectation::kInvalidCast:
             return o << "invalid-cast";
+        case Expectation::kValueCannotBeRepresented:
+            return o << "value too low or high";
     }
     return o << "<unknown>";
 }
@@ -191,7 +223,7 @@ TEST_P(MaterializeAbstractNumeric, Test) {
 
     auto target_ty = [&] { return data.target_ast_ty(*this); };
     auto target_expr = [&] { return data.target_expr(*this, 42); };
-    auto* literal = data.literal_value(*this, 1);
+    auto* literal = data.source_builder(*this, data.literal_value);
     switch (method) {
         case Method::kVar:
             WrapInFunction(Decl(Var("a", target_ty(), literal)));
@@ -283,109 +315,190 @@ TEST_P(MaterializeAbstractNumeric, Test) {
             switch (method) {
                 case Method::kBuiltinArg:
                     expect = "error: no matching call to min(" + data.target_type_name + ", " +
-                             data.literal_type_name + ")";
+                             data.source_type_name + ")";
                     break;
                 case Method::kBinaryOp:
                     expect = "error: no matching overload for operator + (" +
-                             data.target_type_name + ", " + data.literal_type_name + ")";
+                             data.target_type_name + ", " + data.source_type_name + ")";
                     break;
                 default:
-                    expect = "error: cannot convert value of type '" + data.literal_type_name +
+                    expect = "error: cannot convert value of type '" + data.source_type_name +
                              "' to type '" + data.target_type_name + "'";
                     break;
             }
             EXPECT_THAT(r()->error(), testing::StartsWith(expect));
             break;
         }
+        case Expectation::kValueCannotBeRepresented:
+            ASSERT_FALSE(r()->Resolve());
+            EXPECT_THAT(r()->error(), testing::HasSubstr("cannot be represented as '" +
+                                                         data.target_element_type_name + "'"));
+            break;
     }
 }
 
-// TODO(crbug.com/tint/1504): Test for abstract-numeric values not fitting in materialized types.
+/// Methods that support scalar materialization
+constexpr Method kScalarMethods[] = {Method::kLet,         //
+                                     Method::kVar,         //
+                                     Method::kFnArg,       //
+                                     Method::kBuiltinArg,  //
+                                     Method::kReturn,      //
+                                     Method::kArray,       //
+                                     Method::kStruct,      //
+                                     Method::kBinaryOp};
 
-INSTANTIATE_TEST_SUITE_P(MaterializeScalar,
-                         MaterializeAbstractNumeric,                                        //
-                         testing::Combine(testing::Values(Expectation::kMaterialize),       //
-                                          testing::Values(Method::kLet,                     //
-                                                          Method::kVar,                     //
-                                                          Method::kFnArg,                   //
-                                                          Method::kBuiltinArg,              //
-                                                          Method::kReturn,                  //
-                                                          Method::kArray,                   //
-                                                          Method::kStruct,                  //
-                                                          Method::kBinaryOp),               //
-                                          testing::Values(Types<i32, AInt>(1_a),            //
-                                                          Types<u32, AInt>(1_a),            //
-                                                          Types<f32, AFloat>(1.0_a)         //
-                                                          /* Types<f16, AFloat>(1.0_a), */  //
-                                                          /* Types<f16, AFloat>(1.0_a), */)));
+/// Methods that support vector materialization
+constexpr Method kVectorMethods[] = {Method::kLet,         //
+                                     Method::kVar,         //
+                                     Method::kFnArg,       //
+                                     Method::kBuiltinArg,  //
+                                     Method::kReturn,      //
+                                     Method::kArray,       //
+                                     Method::kStruct,      //
+                                     Method::kBinaryOp};
 
-INSTANTIATE_TEST_SUITE_P(MaterializeVector,
-                         MaterializeAbstractNumeric,                                          //
-                         testing::Combine(testing::Values(Expectation::kMaterialize),         //
-                                          testing::Values(Method::kLet,                       //
-                                                          Method::kVar,                       //
-                                                          Method::kFnArg,                     //
-                                                          Method::kBuiltinArg,                //
-                                                          Method::kReturn,                    //
-                                                          Method::kArray,                     //
-                                                          Method::kStruct,                    //
-                                                          Method::kBinaryOp),                 //
-                                          testing::Values(Types<i32V, AIntV>(1_a),            //
-                                                          Types<u32V, AIntV>(1_a),            //
-                                                          Types<f32V, AFloatV>(1.0_a)         //
-                                                          /* Types<f16V, AFloatV>(1.0_a), */  //
-                                                          /* Types<f16V, AFloatV>(1.0_a), */)));
+/// Methods that support matrix materialization
+constexpr Method kMatrixMethods[] = {Method::kLet,     //
+                                     Method::kVar,     //
+                                     Method::kFnArg,   //
+                                     Method::kReturn,  //
+                                     Method::kArray,   //
+                                     Method::kStruct,  //
+                                     Method::kBinaryOp};
 
-INSTANTIATE_TEST_SUITE_P(MaterializeMatrix,
-                         MaterializeAbstractNumeric,                                          //
-                         testing::Combine(testing::Values(Expectation::kMaterialize),         //
-                                          testing::Values(Method::kLet,                       //
-                                                          Method::kVar,                       //
-                                                          Method::kFnArg,                     //
-                                                          Method::kReturn,                    //
-                                                          Method::kArray,                     //
-                                                          Method::kStruct,                    //
-                                                          Method::kBinaryOp),                 //
-                                          testing::Values(Types<f32M, AFloatM>(1.0_a)         //
-                                                          /* Types<f16V, AFloatM>(1.0_a), */  //
-                                                          )));
+/// Methods that support materialization for switch cases
+constexpr Method kSwitchMethods[] = {Method::kSwitchCond,                  //
+                                     Method::kSwitchCase,                  //
+                                     Method::kSwitchCondWithAbstractCase,  //
+                                     Method::kSwitchCaseWithAbstractCase};
 
-INSTANTIATE_TEST_SUITE_P(MaterializeSwitch,
-                         MaterializeAbstractNumeric,                                             //
-                         testing::Combine(testing::Values(Expectation::kMaterialize),            //
-                                          testing::Values(Method::kSwitchCond,                   //
-                                                          Method::kSwitchCase,                   //
-                                                          Method::kSwitchCondWithAbstractCase,   //
-                                                          Method::kSwitchCaseWithAbstractCase),  //
-                                          testing::Values(Types<i32, AInt>(1_a),                 //
-                                                          Types<u32, AInt>(1_a))));
+constexpr double kMaxF32 = static_cast<double>(f32::kHighest);
+constexpr double kPiF64 = 3.141592653589793;
+constexpr double kPiF32 = 3.1415927410125732;  // kPiF64 quantized to f32
+
+// (2^-127)×(1+(0xfffffffffffff÷0x10000000000000))
+constexpr double kTooSmallF32 = 1.1754943508222874e-38;
+
+INSTANTIATE_TEST_SUITE_P(
+    MaterializeScalar,
+    MaterializeAbstractNumeric,                                                       //
+    testing::Combine(testing::Values(Expectation::kMaterialize),                      //
+                     testing::ValuesIn(kScalarMethods),                               //
+                     testing::Values(Types<i32, AInt>(0_a, 0.0),                      //
+                                     Types<i32, AInt>(2147483647_a, 2147483647.0),    //
+                                     Types<i32, AInt>(-2147483648_a, -2147483648.0),  //
+                                     Types<u32, AInt>(0_a, 0.0),                      //
+                                     Types<u32, AInt>(4294967295_a, 4294967295.0),    //
+                                     Types<f32, AFloat>(0.0_a, 0.0),                  //
+                                     Types<f32, AFloat>(AFloat(kMaxF32), kMaxF32),    //
+                                     Types<f32, AFloat>(AFloat(-kMaxF32), -kMaxF32),  //
+                                     Types<f32, AFloat>(AFloat(kPiF32), kPiF64),      //
+                                     Types<f32, AFloat>(0.0_a, kTooSmallF32),         //
+                                     Types<f32, AFloat>(-0.0_a, -kTooSmallF32)        //
+                                     /* Types<f16, AFloat>(1.0_a), */                 //
+                                     /* Types<f16, AFloat>(1.0_a), */)));
+
+INSTANTIATE_TEST_SUITE_P(
+    MaterializeVector,
+    MaterializeAbstractNumeric,                                                         //
+    testing::Combine(testing::Values(Expectation::kMaterialize),                        //
+                     testing::ValuesIn(kVectorMethods),                                 //
+                     testing::Values(Types<i32V, AIntV>(0_a, 0.0),                      //
+                                     Types<i32V, AIntV>(2147483647_a, 2147483647.0),    //
+                                     Types<i32V, AIntV>(-2147483648_a, -2147483648.0),  //
+                                     Types<u32V, AIntV>(0_a, 0.0),                      //
+                                     Types<u32V, AIntV>(4294967295_a, 4294967295.0),    //
+                                     Types<f32V, AFloatV>(0.0_a, 0.0),                  //
+                                     Types<f32V, AFloatV>(AFloat(kMaxF32), kMaxF32),    //
+                                     Types<f32V, AFloatV>(AFloat(-kMaxF32), -kMaxF32),  //
+                                     Types<f32V, AFloatV>(AFloat(kPiF32), kPiF64),      //
+                                     Types<f32V, AFloatV>(0.0_a, kTooSmallF32),         //
+                                     Types<f32V, AFloatV>(-0.0_a, -kTooSmallF32)        //
+                                     /* Types<f16V, AFloatV>(1.0_a), */                 //
+                                     /* Types<f16V, AFloatV>(1.0_a), */)));
+
+INSTANTIATE_TEST_SUITE_P(
+    MaterializeMatrix,
+    MaterializeAbstractNumeric,                                                         //
+    testing::Combine(testing::Values(Expectation::kMaterialize),                        //
+                     testing::ValuesIn(kMatrixMethods),                                 //
+                     testing::Values(Types<f32M, AFloatM>(0.0_a, 0.0),                  //
+                                     Types<f32M, AFloatM>(AFloat(kMaxF32), kMaxF32),    //
+                                     Types<f32M, AFloatM>(AFloat(-kMaxF32), -kMaxF32),  //
+                                     Types<f32M, AFloatM>(AFloat(kPiF32), kPiF64),      //
+                                     Types<f32M, AFloatM>(0.0_a, kTooSmallF32),         //
+                                     Types<f32M, AFloatM>(-0.0_a, -kTooSmallF32)        //
+                                     /* Types<f16V, AFloatM>(1.0_a), */                 //
+                                     )));
+
+INSTANTIATE_TEST_SUITE_P(
+    MaterializeSwitch,
+    MaterializeAbstractNumeric,                                                       //
+    testing::Combine(testing::Values(Expectation::kMaterialize),                      //
+                     testing::ValuesIn(kSwitchMethods),                               //
+                     testing::Values(Types<i32, AInt>(0_a, 0.0),                      //
+                                     Types<i32, AInt>(2147483647_a, 2147483647.0),    //
+                                     Types<i32, AInt>(-2147483648_a, -2147483648.0),  //
+                                     Types<u32, AInt>(0_a, 0.0),                      //
+                                     Types<u32, AInt>(4294967295_a, 4294967295.0))));
 
 // TODO(crbug.com/tint/1504): Enable once we have abstract overloads of builtins / binary ops.
 INSTANTIATE_TEST_SUITE_P(DISABLED_NoMaterialize,
-                         MaterializeAbstractNumeric,                                       //
-                         testing::Combine(testing::Values(Expectation::kNoMaterialize),    //
-                                          testing::Values(Method::kBuiltinArg,             //
-                                                          Method::kBinaryOp),              //
-                                          testing::Values(Types<AInt, AInt>(1_a),          //
-                                                          Types<AFloat, AFloat>(1.0_a),    //
-                                                          Types<AIntV, AIntV>(1_a),        //
-                                                          Types<AFloatV, AFloatV>(1.0_a),  //
-                                                          Types<AFloatM, AFloatM>(1.0_a))));
+                         MaterializeAbstractNumeric,                                     //
+                         testing::Combine(testing::Values(Expectation::kNoMaterialize),  //
+                                          testing::Values(Method::kBuiltinArg,           //
+                                                          Method::kBinaryOp),            //
+                                          testing::Values(Types<AInt, AInt>(),           //
+                                                          Types<AFloat, AFloat>(),       //
+                                                          Types<AIntV, AIntV>(),         //
+                                                          Types<AFloatV, AFloatV>(),     //
+                                                          Types<AFloatM, AFloatM>())));
 INSTANTIATE_TEST_SUITE_P(InvalidCast,
                          MaterializeAbstractNumeric,                                   //
                          testing::Combine(testing::Values(Expectation::kInvalidCast),  //
-                                          testing::Values(Method::kLet,                //
-                                                          Method::kVar,                //
-                                                          Method::kFnArg,              //
-                                                          Method::kBuiltinArg,         //
-                                                          Method::kReturn,             //
-                                                          Method::kArray,              //
-                                                          Method::kStruct,             //
-                                                          Method::kBinaryOp),          //
+                                          testing::ValuesIn(kScalarMethods),           //
                                           testing::Values(Types<i32, AFloat>(),        //
                                                           Types<u32, AFloat>(),        //
                                                           Types<i32V, AFloatV>(),      //
                                                           Types<u32V, AFloatV>())));
+
+INSTANTIATE_TEST_SUITE_P(
+    ScalarValueCannotBeRepresented,
+    MaterializeAbstractNumeric,                                                //
+    testing::Combine(testing::Values(Expectation::kValueCannotBeRepresented),  //
+                     testing::ValuesIn(kScalarMethods),                        //
+                     testing::Values(Types<i32, AInt>(0_a, 2147483648.0),      //
+                                     Types<i32, AInt>(0_a, -2147483649.0),     //
+                                     Types<u32, AInt>(0_a, 4294967296),        //
+                                     Types<u32, AInt>(0_a, -1.0),              //
+                                     Types<f32, AFloat>(0.0_a, 3.5e+38),       //
+                                     Types<f32, AFloat>(0.0_a, -3.5e+38)       //
+                                     /* Types<f16, AFloat>(), */               //
+                                     /* Types<f16, AFloat>(), */)));
+
+INSTANTIATE_TEST_SUITE_P(
+    VectorValueCannotBeRepresented,
+    MaterializeAbstractNumeric,                                                //
+    testing::Combine(testing::Values(Expectation::kValueCannotBeRepresented),  //
+                     testing::ValuesIn(kVectorMethods),                        //
+                     testing::Values(Types<i32V, AIntV>(0_a, 2147483648.0),    //
+                                     Types<i32V, AIntV>(0_a, -2147483649.0),   //
+                                     Types<u32V, AIntV>(0_a, 4294967296),      //
+                                     Types<u32V, AIntV>(0_a, -1.0),            //
+                                     Types<f32V, AFloatV>(0.0_a, 3.5e+38),     //
+                                     Types<f32V, AFloatV>(0.0_a, -3.5e+38)     //
+                                     /* Types<f16V, AFloatV>(), */             //
+                                     /* Types<f16V, AFloatV>(), */)));
+
+INSTANTIATE_TEST_SUITE_P(
+    MatrixValueCannotBeRepresented,
+    MaterializeAbstractNumeric,                                                //
+    testing::Combine(testing::Values(Expectation::kValueCannotBeRepresented),  //
+                     testing::ValuesIn(kMatrixMethods),                        //
+                     testing::Values(Types<f32M, AFloatM>(0.0_a, 3.5e+38),     //
+                                     Types<f32M, AFloatM>(0.0_a, -3.5e+38)     //
+                                     /* Types<f16M, AFloatM>(), */             //
+                                     /* Types<f16M, AFloatM>(), */)));
 
 }  // namespace MaterializeTests
 
