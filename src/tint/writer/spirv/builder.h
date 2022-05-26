@@ -113,11 +113,8 @@ class Builder {
     /// @returns the capabilities
     const InstructionList& capabilities() const { return capabilities_; }
     /// Adds an instruction to the extensions
-    /// @param op the op to set
-    /// @param operands the operands for the instruction
-    void push_extension(spv::Op op, const OperandList& operands) {
-        extensions_.push_back(Instruction{op, operands});
-    }
+    /// @param extension the name of the extension
+    void push_extension(const char* extension);
     /// @returns the extensions
     const InstructionList& extensions() const { return extensions_; }
     /// Adds an instruction to the ext import

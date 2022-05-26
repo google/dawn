@@ -49,5 +49,13 @@ TEST_F(BuilderTest, Capabilities_Dedup) {
     EXPECT_EQ(DumpInstructions(b.capabilities()), "OpCapability Shader\n");
 }
 
+TEST_F(BuilderTest, DeclareExtension) {
+    spirv::Builder& b = Build();
+
+    b.push_extension("SPV_KHR_integer_dot_product");
+
+    EXPECT_EQ(DumpInstructions(b.extensions()), "OpExtension \"SPV_KHR_integer_dot_product\"\n");
+}
+
 }  // namespace
 }  // namespace tint::writer::spirv

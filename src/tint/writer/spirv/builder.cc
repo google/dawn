@@ -368,7 +368,11 @@ void Builder::push_capability(uint32_t cap) {
     }
 }
 
-bool Builder::GenerateExtension(ast::Extension) {
+void Builder::push_extension(const char* extension) {
+    extensions_.push_back(Instruction{spv::Op::OpExtension, {Operand(extension)}});
+}
+
+bool Builder::GenerateExtension(ast::Extension extension) {
     /*
     For each supported extension, push corresponding capability into the builder.
     For example:
@@ -379,6 +383,15 @@ bool Builder::GenerateExtension(ast::Extension) {
         push_capability(SpvCapabilityStorageInputOutput16);
       }
     */
+    switch (extension) {
+        case ast::Extension::kChromiumExperimentalDP4a:
+            push_extension("SPV_KHR_integer_dot_product");
+            push_capability(SpvCapabilityDotProductKHR);
+            push_capability(SpvCapabilityDotProductInput4x8BitPackedKHR);
+            break;
+        default:
+            return false;
+    }
 
     return true;
 }
@@ -2494,6 +2507,30 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
                 glsl_std450(GLSLstd450SAbs);
             }
             break;
+        case BuiltinType::kDot4I8Packed: {
+            auto first_param_id = get_arg_as_value_id(0);
+            auto second_param_id = get_arg_as_value_id(1);
+            if (!push_function_inst(spv::Op::OpSDotKHR,
+                                    {Operand(result_type_id), result, Operand(first_param_id),
+                                     Operand(second_param_id),
+                                     Operand(static_cast<uint32_t>(
+                                         spv::PackedVectorFormat::PackedVectorFormat4x8BitKHR))})) {
+                return 0;
+            }
+            return result_id;
+        }
+        case BuiltinType::kDot4U8Packed: {
+            auto first_param_id = get_arg_as_value_id(0);
+            auto second_param_id = get_arg_as_value_id(1);
+            if (!push_function_inst(spv::Op::OpUDotKHR,
+                                    {Operand(result_type_id), result, Operand(first_param_id),
+                                     Operand(second_param_id),
+                                     Operand(static_cast<uint32_t>(
+                                         spv::PackedVectorFormat::PackedVectorFormat4x8BitKHR))})) {
+                return 0;
+            }
+            return result_id;
+        }
         default: {
             auto inst_id = builtin_to_glsl_method(builtin);
             if (inst_id == 0) {

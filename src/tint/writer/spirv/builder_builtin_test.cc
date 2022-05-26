@@ -2601,5 +2601,80 @@ OpFunctionEnd
 )");
 }
 
+TEST_F(BuiltinBuilderTest, Call_Dot4I8Packed) {
+    auto* ext =
+        create<ast::Enable>(Source{Source::Range{Source::Location{10, 2}, Source::Location{10, 5}}},
+                            ast::Extension::kChromiumExperimentalDP4a);
+    AST().AddEnable(ext);
+
+    auto* val1 = Var("val1", ty.u32());
+    auto* val2 = Var("val2", ty.u32());
+    auto* call = Call("dot4I8Packed", val1, val2);
+    auto* func = WrapInFunction(val1, val2, call);
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+OpExecutionMode %3 LocalSize 1 1 1
+OpName %3 "test_function"
+OpName %5 "val1"
+OpName %9 "val2"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeInt 32 0
+%6 = OpTypePointer Function %7
+%8 = OpConstantNull %7
+%11 = OpTypeInt 32 1
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpVariable %6 Function %8
+%9 = OpVariable %6 Function %8
+%12 = OpLoad %7 %5
+%13 = OpLoad %7 %9
+%10 = OpSDot %11 %12 %13 PackedVectorFormat4x8Bit
+OpReturn
+OpFunctionEnd
+)");
+}
+
+TEST_F(BuiltinBuilderTest, Call_Dot4U8Packed) {
+    auto* ext =
+        create<ast::Enable>(Source{Source::Range{Source::Location{10, 2}, Source::Location{10, 5}}},
+                            ast::Extension::kChromiumExperimentalDP4a);
+    AST().AddEnable(ext);
+
+    auto* val1 = Var("val1", ty.u32());
+    auto* val2 = Var("val2", ty.u32());
+    auto* call = Call("dot4U8Packed", val1, val2);
+    auto* func = WrapInFunction(val1, val2, call);
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+OpExecutionMode %3 LocalSize 1 1 1
+OpName %3 "test_function"
+OpName %5 "val1"
+OpName %9 "val2"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeInt 32 0
+%6 = OpTypePointer Function %7
+%8 = OpConstantNull %7
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%5 = OpVariable %6 Function %8
+%9 = OpVariable %6 Function %8
+%11 = OpLoad %7 %5
+%12 = OpLoad %7 %9
+%10 = OpUDot %7 %11 %12 PackedVectorFormat4x8Bit
+OpReturn
+OpFunctionEnd
+)");
+}
+
 }  // namespace
 }  // namespace tint::writer::spirv
