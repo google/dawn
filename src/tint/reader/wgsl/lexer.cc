@@ -358,31 +358,22 @@ Token Lexer::try_float() {
     advance(end - start);
     end_source(source);
 
-    double value = strtod(&at(start), nullptr);
+    double value = std::strtod(&at(start), nullptr);
 
     if (has_f_suffix) {
         if (auto f = CheckedConvert<f32>(AFloat(value))) {
-            return {Token::Type::kFloatLiteral_F, source, value};
+            return {Token::Type::kFloatLiteral_F, source, static_cast<double>(f.Get())};
+        } else if (f.Failure() == ConversionFailure::kTooSmall) {
+            return {Token::Type::kFloatLiteral_F, source, 0.0};
         } else {
-            if (f.Failure() == ConversionFailure::kTooSmall) {
-                return {Token::Type::kError, source,
-                        "value magnitude too small to be represented as 'f32'"};
-            }
             return {Token::Type::kError, source, "value cannot be represented as 'f32'"};
         }
     }
 
-    // TODO(crbug.com/tint/1504): Properly support abstract float:
-    // Change `AbstractFloatType` to `double`, update errors to say 'abstract int'.
-    using AbstractFloatType = f32;
-    if (auto f = CheckedConvert<AbstractFloatType>(AFloat(value))) {
-        return {Token::Type::kFloatLiteral, source, value};
+    if (value == HUGE_VAL || -value == HUGE_VAL) {
+        return {Token::Type::kError, source, "value cannot be represented as 'abstract-float'"};
     } else {
-        if (f.Failure() == ConversionFailure::kTooSmall) {
-            return {Token::Type::kError, source,
-                    "value magnitude too small to be represented as 'f32'"};
-        }
-        return {Token::Type::kError, source, "value cannot be represented as 'f32'"};
+        return {Token::Type::kFloatLiteral, source, value};
     }
 }
 

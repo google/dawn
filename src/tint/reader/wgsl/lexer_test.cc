@@ -362,12 +362,12 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                              FloatData{"-5.", -5.},
                              FloatData{"-.7", -.7},
                              // Non-zero with decimal and 'f' suffix
-                             FloatData{"5.7f", 5.7},
-                             FloatData{"5.f", 5.},
-                             FloatData{".7f", .7},
-                             FloatData{"-5.7f", -5.7},
-                             FloatData{"-5.f", -5.},
-                             FloatData{"-.7f", -.7},
+                             FloatData{"5.7f", static_cast<double>(5.7f)},
+                             FloatData{"5.f", static_cast<double>(5.f)},
+                             FloatData{".7f", static_cast<double>(.7f)},
+                             FloatData{"-5.7f", static_cast<double>(-5.7f)},
+                             FloatData{"-5.f", static_cast<double>(-5.f)},
+                             FloatData{"-.7f", static_cast<double>(-.7f)},
 
                              // No decimal, with exponent
                              FloatData{"1e5", 1e5},
@@ -375,10 +375,10 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                              FloatData{"1e-5", 1e-5},
                              FloatData{"1E-5", 1e-5},
                              // No decimal, with exponent and 'f' suffix
-                             FloatData{"1e5f", 1e5},
-                             FloatData{"1E5f", 1e5},
-                             FloatData{"1e-5f", 1e-5},
-                             FloatData{"1E-5f", 1e-5},
+                             FloatData{"1e5f", static_cast<double>(1e5f)},
+                             FloatData{"1E5f", static_cast<double>(1e5f)},
+                             FloatData{"1e-5f", static_cast<double>(1e-5f)},
+                             FloatData{"1E-5f", static_cast<double>(1e-5f)},
                              // With decimal and exponents
                              FloatData{"0.2e+12", 0.2e12},
                              FloatData{"1.2e-5", 1.2e-5},
@@ -386,11 +386,15 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                              FloatData{"2.5e+0", 2.5},
                              FloatData{"2.5e-0", 2.5},
                              // With decimal and exponents and 'f' suffix
-                             FloatData{"0.2e+12f", 0.2e12},
-                             FloatData{"1.2e-5f", 1.2e-5},
-                             FloatData{"2.57e23f", 2.57e23},
-                             FloatData{"2.5e+0f", 2.5},
-                             FloatData{"2.5e-0f", 2.5}));
+                             FloatData{"0.2e+12f", static_cast<double>(0.2e12f)},
+                             FloatData{"1.2e-5f", static_cast<double>(1.2e-5f)},
+                             FloatData{"2.57e23f", static_cast<double>(2.57e23f)},
+                             FloatData{"2.5e+0f", static_cast<double>(2.5f)},
+                             FloatData{"2.5e-0f", static_cast<double>(2.5f)},
+                             // Quantization
+                             FloatData{"3.141592653589793", 3.141592653589793},   // no quantization
+                             FloatData{"3.141592653589793f", 3.1415927410125732}  // f32 quantized
+                             ));
 
 using FloatTest_Invalid = testing::TestWithParam<const char*>;
 TEST_P(FloatTest_Invalid, Handles) {
@@ -415,11 +419,11 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          ".e+",
                                          ".e-",
                                          // Overflow
-                                         "2.5e+256",
-                                         "-2.5e+127",
+                                         "2.5e+256f",
+                                         "-2.5e+127f",
                                          // Magnitude smaller than smallest positive f32.
-                                         "2.5e-300",
-                                         "-2.5e-300",
+                                         "2.5e-300f",
+                                         "-2.5e-300f",
                                          // Decimal exponent must immediately
                                          // follow the 'e'.
                                          "2.5e 12",

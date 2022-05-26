@@ -117,67 +117,12 @@ TEST_F(ParserImplTest, ConstLiteral_Uint_Negative) {
     ASSERT_EQ(c.value, nullptr);
 }
 
-TEST_F(ParserImplTest, ConstLiteral_Float) {
-    auto p = parser("234.e12");
-    auto c = p->const_literal();
-    EXPECT_TRUE(c.matched);
-    EXPECT_FALSE(c.errored);
-    EXPECT_FALSE(p->has_error()) << p->error();
-    ASSERT_NE(c.value, nullptr);
-    ASSERT_TRUE(c->Is<ast::FloatLiteralExpression>());
-    EXPECT_DOUBLE_EQ(c->As<ast::FloatLiteralExpression>()->value, 234e12);
-    EXPECT_EQ(c->As<ast::FloatLiteralExpression>()->suffix,
-              ast::FloatLiteralExpression::Suffix::kNone);
-    EXPECT_EQ(c->source.range, (Source::Range{{1u, 1u}, {1u, 8u}}));
-}
-
-TEST_F(ParserImplTest, ConstLiteral_FloatF) {
-    auto p = parser("234.e12f");
-    auto c = p->const_literal();
-    EXPECT_TRUE(c.matched);
-    EXPECT_FALSE(c.errored);
-    EXPECT_FALSE(p->has_error()) << p->error();
-    ASSERT_NE(c.value, nullptr);
-    ASSERT_TRUE(c->Is<ast::FloatLiteralExpression>());
-    EXPECT_DOUBLE_EQ(c->As<ast::FloatLiteralExpression>()->value, 234e12);
-    EXPECT_EQ(c->As<ast::FloatLiteralExpression>()->suffix,
-              ast::FloatLiteralExpression::Suffix::kF);
-    EXPECT_EQ(c->source.range, (Source::Range{{1u, 1u}, {1u, 9u}}));
-}
-
 TEST_F(ParserImplTest, ConstLiteral_InvalidFloat_IncompleteExponent) {
     auto p = parser("1.0e+");
     auto c = p->const_literal();
     EXPECT_FALSE(c.matched);
     EXPECT_TRUE(c.errored);
     EXPECT_EQ(p->error(), "1:1: incomplete exponent for floating point literal: 1.0e+");
-    ASSERT_EQ(c.value, nullptr);
-}
-
-TEST_F(ParserImplTest, ConstLiteral_InvalidFloat_TooSmallMagnitude) {
-    auto p = parser("1e-256");
-    auto c = p->const_literal();
-    EXPECT_FALSE(c.matched);
-    EXPECT_TRUE(c.errored);
-    EXPECT_EQ(p->error(), "1:1: value magnitude too small to be represented as 'f32'");
-    ASSERT_EQ(c.value, nullptr);
-}
-
-TEST_F(ParserImplTest, ConstLiteral_InvalidFloat_TooLargeNegative) {
-    auto p = parser("-1.2e+256");
-    auto c = p->const_literal();
-    EXPECT_FALSE(c.matched);
-    EXPECT_TRUE(c.errored);
-    EXPECT_EQ(p->error(), "1:1: value cannot be represented as 'f32'");
-    ASSERT_EQ(c.value, nullptr);
-}
-
-TEST_F(ParserImplTest, ConstLiteral_InvalidFloat_TooLargePositive) {
-    auto p = parser("1.2e+256");
-    auto c = p->const_literal();
-    EXPECT_FALSE(c.matched);
-    EXPECT_TRUE(c.errored);
-    EXPECT_EQ(p->error(), "1:1: value cannot be represented as 'f32'");
     ASSERT_EQ(c.value, nullptr);
 }
 
@@ -217,26 +162,54 @@ TEST_P(ParserImplFloatLiteralTest, Parse) {
         EXPECT_EQ(c->As<ast::FloatLiteralExpression>()->suffix,
                   ast::FloatLiteralExpression::Suffix::kNone);
     }
+    EXPECT_EQ(c->source.range, (Source::Range{{1u, 1u}, {1u, 1u + params.input.size()}}));
 }
 using FloatLiteralTestCaseList = std::vector<FloatLiteralTestCase>;
 
-FloatLiteralTestCaseList DecimalFloatCases() {
-    return FloatLiteralTestCaseList{
-        {"0.0", 0.0},                        // Zero
-        {"1.0", 1.0},                        // One
-        {"-1.0", -1.0},                      // MinusOne
-        {"1000000000.0", 1e9},               // Billion
-        {"-0.0", std::copysign(0.0, -5.0)},  // NegativeZero
-        {"0.0", MakeDouble(0, 0, 0)},        // Zero
-        {"-0.0", MakeDouble(1, 0, 0)},       // NegativeZero
-        {"1.0", MakeDouble(0, 1023, 0)},     // One
-        {"-1.0", MakeDouble(1, 1023, 0)},    // NegativeOne
-    };
-}
-
 INSTANTIATE_TEST_SUITE_P(ParserImplFloatLiteralTest_Float,
                          ParserImplFloatLiteralTest,
-                         testing::ValuesIn(DecimalFloatCases()));
+                         testing::ValuesIn(FloatLiteralTestCaseList{
+                             {"0.0", 0.0},                        // Zero
+                             {"1.0", 1.0},                        // One
+                             {"-1.0", -1.0},                      // MinusOne
+                             {"1000000000.0", 1e9},               // Billion
+                             {"-0.0", std::copysign(0.0, -5.0)},  // NegativeZero
+                             {"0.0", MakeDouble(0, 0, 0)},        // Zero
+                             {"-0.0", MakeDouble(1, 0, 0)},       // NegativeZero
+                             {"1.0", MakeDouble(0, 1023, 0)},     // One
+                             {"-1.0", MakeDouble(1, 1023, 0)},    // NegativeOne
+
+                             {"234.e12", 234.e12},
+                             {"234.e12f", static_cast<double>(234.e12f)},
+
+                             // Tiny cases
+                             {"1e-5000", 0.0},
+                             {"-1e-5000", 0.0},
+                             {"1e-5000f", 0.0},
+                             {"-1e-5000f", 0.0},
+                             {"1e-50f", 0.0},
+                             {"-1e-50f", 0.0},
+
+                             // Nearly overflow
+                             {"1.e308", 1.e308},
+                             {"-1.e308", -1.e308},
+                             {"1.8e307", 1.8e307},
+                             {"-1.8e307", -1.8e307},
+                             {"1.798e307", 1.798e307},
+                             {"-1.798e307", -1.798e307},
+                             {"1.7977e307", 1.7977e307},
+                             {"-1.7977e307", -1.7977e307},
+
+                             // Nearly overflow
+                             {"1e38f", static_cast<double>(1e38f)},
+                             {"-1e38f", static_cast<double>(-1e38f)},
+                             {"4.0e37f", static_cast<double>(4.0e37f)},
+                             {"-4.0e37f", static_cast<double>(-4.0e37f)},
+                             {"3.5e37f", static_cast<double>(3.5e37f)},
+                             {"-3.5e37f", static_cast<double>(-3.5e37f)},
+                             {"3.403e37f", static_cast<double>(3.403e37f)},
+                             {"-3.403e37f", static_cast<double>(-3.403e37f)},
+                         }));
 
 const double NegInf = MakeDouble(1, 0x7FF, 0);
 const double PosInf = MakeDouble(0, 0x7FF, 0);
@@ -535,7 +508,7 @@ INSTANTIATE_TEST_SUITE_P(
                      })));
 
 INSTANTIATE_TEST_SUITE_P(
-    NaNAFloat,
+    HexNaNAFloat,
     ParserImplInvalidLiteralTest,
     testing::Combine(testing::Values("1:1: value cannot be represented as 'abstract-float'"),
                      testing::ValuesIn(std::vector<const char*>{
@@ -552,7 +525,7 @@ INSTANTIATE_TEST_SUITE_P(
                      })));
 
 INSTANTIATE_TEST_SUITE_P(
-    NaNF32,
+    HexNaNF32,
     ParserImplInvalidLiteralTest,
     testing::Combine(testing::Values("1:1: value cannot be represented as 'f32'"),
                      testing::ValuesIn(std::vector<const char*>{
@@ -569,7 +542,7 @@ INSTANTIATE_TEST_SUITE_P(
                      })));
 
 INSTANTIATE_TEST_SUITE_P(
-    OverflowAFloat,
+    HexOverflowAFloat,
     ParserImplInvalidLiteralTest,
     testing::Combine(testing::Values("1:1: value cannot be represented as 'abstract-float'"),
                      testing::ValuesIn(std::vector<const char*>{
@@ -588,7 +561,7 @@ INSTANTIATE_TEST_SUITE_P(
                      })));
 
 INSTANTIATE_TEST_SUITE_P(
-    OverflowF32,
+    HexOverflowF32,
     ParserImplInvalidLiteralTest,
     testing::Combine(testing::Values("1:1: value cannot be represented as 'f32'"),
                      testing::ValuesIn(std::vector<const char*>{
@@ -602,6 +575,40 @@ INSTANTIATE_TEST_SUITE_P(
                          "-0x32p+127f",
                          "0x32p+500f",
                          "-0x32p+500f",
+                     })));
+
+INSTANTIATE_TEST_SUITE_P(
+    DecOverflowAFloat,
+    ParserImplInvalidLiteralTest,
+    testing::Combine(testing::Values("1:1: value cannot be represented as 'abstract-float'"),
+                     testing::ValuesIn(std::vector<const char*>{
+                         "1.e309",
+                         "-1.e309",
+                         "1.8e308",
+                         "-1.8e308",
+                         "1.798e308",
+                         "-1.798e308",
+                         "1.7977e308",
+                         "-1.7977e308",
+                         "1.2e+5000",
+                         "-1.2e+5000",
+                     })));
+
+INSTANTIATE_TEST_SUITE_P(
+    DecOverflowF32,
+    ParserImplInvalidLiteralTest,
+    testing::Combine(testing::Values("1:1: value cannot be represented as 'f32'"),
+                     testing::ValuesIn(std::vector<const char*>{
+                         "1e39f",
+                         "-1e39f",
+                         "4.0e38f",
+                         "-4.0e38f",
+                         "3.5e38f",
+                         "-3.5e38f",
+                         "3.403e38f",
+                         "-3.403e38f",
+                         "1.2e+256f",
+                         "-1.2e+256f",
                      })));
 
 TEST_F(ParserImplTest, ConstLiteral_FloatHighest) {
