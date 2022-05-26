@@ -14,32 +14,12 @@
 
 #include "src/tint/reader/wgsl/parser_impl_test_helper.h"
 
-#include <cmath>
 #include <cstring>
 
 #include "gmock/gmock.h"
 
 namespace tint::reader::wgsl {
 namespace {
-
-// Makes an IEEE 754 binary32 floating point number with
-// - 0 sign if sign is 0, 1 otherwise
-// - 'exponent_bits' is placed in the exponent space.
-//   So, the exponent bias must already be included.
-float MakeFloat(uint32_t sign, uint32_t biased_exponent, uint32_t mantissa) {
-    const uint32_t sign_bit = sign ? 0x80000000u : 0u;
-    // The binary32 exponent is 8 bits, just below the sign.
-    const uint32_t exponent_bits = (biased_exponent & 0xffu) << 23;
-    // The mantissa is the bottom 23 bits.
-    const uint32_t mantissa_bits = (mantissa & 0x7fffffu);
-
-    uint32_t bits = sign_bit | exponent_bits | mantissa_bits;
-    float result = 0.0f;
-    static_assert(sizeof(result) == sizeof(bits),
-                  "expected float and uint32_t to be the same size");
-    std::memcpy(&result, &bits, sizeof(bits));
-    return result;
-}
 
 // Makes an IEEE 754 binary64 floating point number with
 // - 0 sign if sign is 0, 1 otherwise
@@ -263,106 +243,106 @@ const double PosInf = MakeDouble(0, 0x7FF, 0);
 FloatLiteralTestCaseList HexFloatCases() {
     return FloatLiteralTestCaseList{
         // Regular numbers
-        {"0x0p+0", 0.0},
-        {"0x1p+0", 1.0},
-        {"0x1p+1", 2.0},
-        {"0x1.8p+1", 3.0},
-        {"0x1.99999ap-4", 0.10000000149011612},
-        {"0x1p-1", 0.5},
-        {"0x1p-2", 0.25},
-        {"0x1.8p-1", 0.75},
-        {"-0x0p+0", -0.0},
-        {"-0x1p+0", -1.0},
-        {"-0x1p-1", -0.5},
-        {"-0x1p-2", -0.25},
-        {"-0x1.8p-1", -0.75},
+        {"0x0p+0", 0x0p+0},
+        {"0x1p+0", 0x1p+0},
+        {"0x1p+1", 0x1p+1},
+        {"0x1.8p+1", 0x1.8p+1},
+        {"0x1.99999ap-4", 0x1.99999ap-4},
+        {"0x1p-1", 0x1p-1},
+        {"0x1p-2", 0x1p-2},
+        {"0x1.8p-1", 0x1.8p-1},
+        {"-0x0p+0", -0x0p+0},
+        {"-0x1p+0", -0x1p+0},
+        {"-0x1p-1", -0x1p-1},
+        {"-0x1p-2", -0x1p-2},
+        {"-0x1.8p-1", -0x1.8p-1},
 
         // Large numbers
-        {"0x1p+9", 512.0},
-        {"0x1p+10", 1024.0},
-        {"0x1.02p+10", 1024.0 + 8.0},
-        {"-0x1p+9", -512.0},
-        {"-0x1p+10", -1024.0},
-        {"-0x1.02p+10", -1024.0 - 8.0},
+        {"0x1p+9", 0x1p+9},
+        {"0x1p+10", 0x1p+10},
+        {"0x1.02p+10", 0x1.02p+10},
+        {"-0x1p+9", -0x1p+9},
+        {"-0x1p+10", -0x1p+10},
+        {"-0x1.02p+10", -0x1.02p+10},
 
         // Small numbers
-        {"0x1p-9", 1.0 / 512.0},
-        {"0x1p-10", 1.0 / 1024.0},
-        {"0x1.02p-3", 1.0 / 1024.0 + 1.0 / 8.0},
-        {"-0x1p-9", 1.0 / -512.0},
-        {"-0x1p-10", 1.0 / -1024.0},
-        {"-0x1.02p-3", 1.0 / -1024.0 - 1.0 / 8.0},
+        {"0x1p-9", 0x1p-9},
+        {"0x1p-10", 0x1p-10},
+        {"0x1.02p-3", 0x1.02p-3},
+        {"-0x1p-9", -0x1p-9},
+        {"-0x1p-10", -0x1p-10},
+        {"-0x1.02p-3", -0x1.02p-3},
 
         // Near lowest non-denorm
-        {"0x1p-1020", std::ldexp(1.0 * 8.0, -1023)},
-        {"0x1p-1021", std::ldexp(1.0 * 4.0, -1023)},
-        {"-0x1p-1020", -std::ldexp(1.0 * 8.0, -1023)},
-        {"-0x1p-1021", -std::ldexp(1.0 * 4.0, -1023)},
+        {"0x1p-1020", 0x1p-1020},
+        {"0x1p-1021", 0x1p-1021},
+        {"-0x1p-1020", -0x1p-1020},
+        {"-0x1p-1021", -0x1p-1021},
 
-        {"0x1p-124f", std::ldexp(1.0 * 8.0, -127)},
-        {"0x1p-125f", std::ldexp(1.0 * 4.0, -127)},
-        {"-0x1p-124f", -std::ldexp(1.0 * 8.0, -127)},
-        {"-0x1p-125f", -std::ldexp(1.0 * 4.0, -127)},
+        {"0x1p-124f", 0x1p-124},
+        {"0x1p-125f", 0x1p-125},
+        {"-0x1p-124f", -0x1p-124},
+        {"-0x1p-125f", -0x1p-125},
 
         // Lowest non-denorm
-        {"0x1p-1022", std::ldexp(1.0 * 2.0, -1023)},
-        {"-0x1p-1022", -std::ldexp(1.0 * 2.0, -1023)},
+        {"0x1p-1022", 0x1p-1022},
+        {"-0x1p-1022", -0x1p-1022},
 
-        {"0x1p-126f", std::ldexp(1.0 * 2.0, -127)},
-        {"-0x1p-126f", -std::ldexp(1.0 * 2.0, -127)},
+        {"0x1p-126f", 0x1p-126},
+        {"-0x1p-126f", -0x1p-126},
 
         // Denormalized values
-        {"0x1p-1023", std::ldexp(1.0, -1023)},
-        {"0x1p-1024", std::ldexp(1.0 / 2.0, -1023)},
-        {"0x1p-1025", std::ldexp(1.0 / 4.0, -1023)},
-        {"0x1p-1026", std::ldexp(1.0 / 8.0, -1023)},
-        {"-0x1p-1023", -std::ldexp(1.0, -1023)},
-        {"-0x1p-1024", -std::ldexp(1.0 / 2.0, -1023)},
-        {"-0x1p-1025", -std::ldexp(1.0 / 4.0, -1023)},
-        {"-0x1p-1026", -std::ldexp(1.0 / 8.0, -1023)},
-        {"0x1.8p-1023", std::ldexp(1.0, -1023) + (std::ldexp(1.0, -1023) / 2.0)},
-        {"0x1.8p-1024", std::ldexp(1.0, -1023) / 2.0 + (std::ldexp(1.0, -1023) / 4.0)},
+        {"0x1p-1023", 0x1p-1023},
+        {"0x1p-1024", 0x1p-1024},
+        {"0x1p-1025", 0x1p-1025},
+        {"0x1p-1026", 0x1p-1026},
+        {"-0x1p-1023", -0x1p-1023},
+        {"-0x1p-1024", -0x1p-1024},
+        {"-0x1p-1025", -0x1p-1025},
+        {"-0x1p-1026", -0x1p-1026},
+        {"0x1.8p-1023", 0x1.8p-1023},
+        {"0x1.8p-1024", 0x1.8p-1024},
 
-        {"0x1p-127f", std::ldexp(1.0, -127)},
-        {"0x1p-128f", std::ldexp(1.0 / 2.0, -127)},
-        {"0x1p-129f", std::ldexp(1.0 / 4.0, -127)},
-        {"0x1p-130f", std::ldexp(1.0 / 8.0, -127)},
-        {"-0x1p-127f", -std::ldexp(1.0, -127)},
-        {"-0x1p-128f", -std::ldexp(1.0 / 2.0, -127)},
-        {"-0x1p-129f", -std::ldexp(1.0 / 4.0, -127)},
-        {"-0x1p-130f", -std::ldexp(1.0 / 8.0, -127)},
-        {"0x1.8p-127f", std::ldexp(1.0, -127) + (std::ldexp(1.0, -127) / 2.0)},
-        {"0x1.8p-128f", std::ldexp(1.0, -127) / 2.0 + (std::ldexp(1.0, -127) / 4.0)},
+        {"0x1p-127f", 0x1p-127},
+        {"0x1p-128f", 0x1p-128},
+        {"0x1p-129f", 0x1p-129},
+        {"0x1p-130f", 0x1p-130},
+        {"-0x1p-127f", -0x1p-127},
+        {"-0x1p-128f", -0x1p-128},
+        {"-0x1p-129f", -0x1p-129},
+        {"-0x1p-130f", -0x1p-130},
+        {"0x1.8p-127f", 0x1.8p-127},
+        {"0x1.8p-128f", 0x1.8p-128},
 
         // F64 extremities
-        {"0x1p-1074", MakeDouble(0, 0, 1)},                             // +SmallestDenormal
-        {"0x1p-1073", MakeDouble(0, 0, 2)},                             // +BiggerDenormal
-        {"0x1.ffffffffffffp-1027", MakeDouble(0, 0, 0xffffffffffff)},   // +LargestDenormal
-        {"-0x1p-1074", MakeDouble(1, 0, 1)},                            // -SmallestDenormal
-        {"-0x1p-1073", MakeDouble(1, 0, 2)},                            // -BiggerDenormal
-        {"-0x1.ffffffffffffp-1027", MakeDouble(1, 0, 0xffffffffffff)},  // -LargestDenormal
+        {"0x1p-1074", 0x1p-1074},                              // +SmallestDenormal
+        {"0x1p-1073", 0x1p-1073},                              // +BiggerDenormal
+        {"0x1.ffffffffffffp-1027", 0x1.ffffffffffffp-1027},    // +LargestDenormal
+        {"-0x1p-1074", -0x1p-1074},                            // -SmallestDenormal
+        {"-0x1p-1073", -0x1p-1073},                            // -BiggerDenormal
+        {"-0x1.ffffffffffffp-1027", -0x1.ffffffffffffp-1027},  // -LargestDenormal
 
-        {"0x0.cafebeeff000dp-1022", MakeDouble(0, 0, 0xcafebeeff000d)},   // +Subnormal
-        {"-0x0.cafebeeff000dp-1022", MakeDouble(1, 0, 0xcafebeeff000d)},  // -Subnormal
-        {"0x1.2bfaf8p-1052", MakeDouble(0, 0, 0x4afebe)},                 // +Subnormal
-        {"-0x1.2bfaf8p-1052", MakeDouble(1, 0, 0x4afebe)},                // +Subnormal
-        {"0x1.55554p-1055", MakeDouble(0, 0, 0xaaaaa)},                   // +Subnormal
-        {"-0x1.55554p-1055", MakeDouble(1, 0, 0xaaaaa)},                  // -Subnormal
+        {"0x0.cafebeeff000dp-1022", 0x0.cafebeeff000dp-1022},    // +Subnormal
+        {"-0x0.cafebeeff000dp-1022", -0x0.cafebeeff000dp-1022},  // -Subnormal
+        {"0x1.2bfaf8p-1052", 0x1.2bfaf8p-1052},                  // +Subnormal
+        {"-0x1.2bfaf8p-1052", -0x1.2bfaf8p-1052},                // +Subnormal
+        {"0x1.55554p-1055", 0x1.55554p-1055},                    // +Subnormal
+        {"-0x1.55554p-1055", -0x1.55554p-1055},                  // -Subnormal
 
         // F32 extremities
-        {"0x1p-149", static_cast<double>(MakeFloat(0, 0, 1))},                 // +SmallestDenormal
-        {"0x1p-148", static_cast<double>(MakeFloat(0, 0, 2))},                 // +BiggerDenormal
-        {"0x1.fffffcp-127", static_cast<double>(MakeFloat(0, 0, 0x7fffff))},   // +LargestDenormal
-        {"-0x1p-149", static_cast<double>(MakeFloat(1, 0, 1))},                // -SmallestDenormal
-        {"-0x1p-148", static_cast<double>(MakeFloat(1, 0, 2))},                // -BiggerDenormal
-        {"-0x1.fffffcp-127", static_cast<double>(MakeFloat(1, 0, 0x7fffff))},  // -LargestDenormal
+        {"0x1p-149", 0x1p-149},                  // +SmallestDenormal
+        {"0x1p-148", 0x1p-148},                  // +BiggerDenormal
+        {"0x1.fffffcp-127", 0x1.fffffcp-127},    // +LargestDenormal
+        {"-0x1p-149", -0x1p-149},                // -SmallestDenormal
+        {"-0x1p-148", -0x1p-148},                // -BiggerDenormal
+        {"-0x1.fffffcp-127", -0x1.fffffcp-127},  // -LargestDenormal
 
-        {"0x0.cafebp-129", static_cast<double>(MakeFloat(0, 0, 0xcafeb))},     // +Subnormal
-        {"-0x0.cafebp-129", static_cast<double>(MakeFloat(1, 0, 0xcafeb))},    // -Subnormal
-        {"0x1.2bfaf8p-127", static_cast<double>(MakeFloat(0, 0, 0x4afebe))},   // +Subnormal
-        {"-0x1.2bfaf8p-127", static_cast<double>(MakeFloat(1, 0, 0x4afebe))},  // -Subnormal
-        {"0x1.55554p-130", static_cast<double>(MakeFloat(0, 0, 0xaaaaa))},     // +Subnormal
-        {"-0x1.55554p-130", static_cast<double>(MakeFloat(1, 0, 0xaaaaa))},    // -Subnormal
+        {"0x0.cafebp-129", 0x0.cafebp-129},      // +Subnormal
+        {"-0x0.cafebp-129", -0x0.cafebp-129},    // -Subnormal
+        {"0x1.2bfaf8p-127", 0x1.2bfaf8p-127},    // +Subnormal
+        {"-0x1.2bfaf8p-127", -0x1.2bfaf8p-127},  // -Subnormal
+        {"0x1.55554p-130", 0x1.55554p-130},      // +Subnormal
+        {"-0x1.55554p-130", -0x1.55554p-130},    // -Subnormal
 
         // Underflow -> Zero
         {"0x1p-1074", 0.0},  // Exponent underflows
