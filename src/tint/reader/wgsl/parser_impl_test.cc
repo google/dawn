@@ -82,7 +82,7 @@ foobar
 TEST_F(ParserImplTest, HandlesBadToken_InMiddle) {
     auto p = parser(R"(
 fn main() {
-  let f = 0x1p500000000000; // Exponent too big for hex float
+  let f = 0x1p10000000000000000000; // Exponent too big for hex float
   return;
 })");
 
@@ -96,7 +96,7 @@ TEST_F(ParserImplTest, HandlesBadToken_AtModuleScope) {
 fn main() {
   return;
 }
-0x1p5000000000000
+0x1p10000000000000000000
 )");
 
     ASSERT_FALSE(p->Parse());

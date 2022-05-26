@@ -224,8 +224,12 @@ TEST_P(ParserImplFloatLiteralTest, Parse) {
     EXPECT_FALSE(c.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(c.value, nullptr);
-    ASSERT_TRUE(c->Is<ast::FloatLiteralExpression>());
-    EXPECT_DOUBLE_EQ(c->As<ast::FloatLiteralExpression>()->value, params.expected);
+    auto* literal = c->As<ast::FloatLiteralExpression>();
+    ASSERT_NE(literal, nullptr);
+    EXPECT_DOUBLE_EQ(literal->value, params.expected)
+        << "\n"
+        << "got:      " << std::hexfloat << literal->value << "\n"
+        << "expected: " << std::hexfloat << params.expected;
     if (params.input.back() == 'f') {
         EXPECT_EQ(c->As<ast::FloatLiteralExpression>()->suffix,
                   ast::FloatLiteralExpression::Suffix::kF);
@@ -290,27 +294,60 @@ FloatLiteralTestCaseList HexFloatCases() {
         {"-0x1.02p-3", 1.0 / -1024.0 - 1.0 / 8.0},
 
         // Near lowest non-denorm
-        {"0x1p-124", std::ldexp(1.0 * 8.0, -127)},
-        {"0x1p-125", std::ldexp(1.0 * 4.0, -127)},
-        {"-0x1p-124", -std::ldexp(1.0 * 8.0, -127)},
-        {"-0x1p-125", -std::ldexp(1.0 * 4.0, -127)},
+        {"0x1p-1020", std::ldexp(1.0 * 8.0, -1023)},
+        {"0x1p-1021", std::ldexp(1.0 * 4.0, -1023)},
+        {"-0x1p-1020", -std::ldexp(1.0 * 8.0, -1023)},
+        {"-0x1p-1021", -std::ldexp(1.0 * 4.0, -1023)},
+
+        {"0x1p-124f", std::ldexp(1.0 * 8.0, -127)},
+        {"0x1p-125f", std::ldexp(1.0 * 4.0, -127)},
+        {"-0x1p-124f", -std::ldexp(1.0 * 8.0, -127)},
+        {"-0x1p-125f", -std::ldexp(1.0 * 4.0, -127)},
 
         // Lowest non-denorm
-        {"0x1p-126", std::ldexp(1.0 * 2.0, -127)},
-        {"-0x1p-126", -std::ldexp(1.0 * 2.0, -127)},
+        {"0x1p-1022", std::ldexp(1.0 * 2.0, -1023)},
+        {"-0x1p-1022", -std::ldexp(1.0 * 2.0, -1023)},
+
+        {"0x1p-126f", std::ldexp(1.0 * 2.0, -127)},
+        {"-0x1p-126f", -std::ldexp(1.0 * 2.0, -127)},
 
         // Denormalized values
-        {"0x1p-127", std::ldexp(1.0, -127)},
-        {"0x1p-128", std::ldexp(1.0 / 2.0, -127)},
-        {"0x1p-129", std::ldexp(1.0 / 4.0, -127)},
-        {"0x1p-130", std::ldexp(1.0 / 8.0, -127)},
-        {"-0x1p-127", -std::ldexp(1.0, -127)},
-        {"-0x1p-128", -std::ldexp(1.0 / 2.0, -127)},
-        {"-0x1p-129", -std::ldexp(1.0 / 4.0, -127)},
-        {"-0x1p-130", -std::ldexp(1.0 / 8.0, -127)},
+        {"0x1p-1023", std::ldexp(1.0, -1023)},
+        {"0x1p-1024", std::ldexp(1.0 / 2.0, -1023)},
+        {"0x1p-1025", std::ldexp(1.0 / 4.0, -1023)},
+        {"0x1p-1026", std::ldexp(1.0 / 8.0, -1023)},
+        {"-0x1p-1023", -std::ldexp(1.0, -1023)},
+        {"-0x1p-1024", -std::ldexp(1.0 / 2.0, -1023)},
+        {"-0x1p-1025", -std::ldexp(1.0 / 4.0, -1023)},
+        {"-0x1p-1026", -std::ldexp(1.0 / 8.0, -1023)},
+        {"0x1.8p-1023", std::ldexp(1.0, -1023) + (std::ldexp(1.0, -1023) / 2.0)},
+        {"0x1.8p-1024", std::ldexp(1.0, -1023) / 2.0 + (std::ldexp(1.0, -1023) / 4.0)},
 
-        {"0x1.8p-127", std::ldexp(1.0, -127) + (std::ldexp(1.0, -127) / 2.0)},
-        {"0x1.8p-128", std::ldexp(1.0, -127) / 2.0 + (std::ldexp(1.0, -127) / 4.0)},
+        {"0x1p-127f", std::ldexp(1.0, -127)},
+        {"0x1p-128f", std::ldexp(1.0 / 2.0, -127)},
+        {"0x1p-129f", std::ldexp(1.0 / 4.0, -127)},
+        {"0x1p-130f", std::ldexp(1.0 / 8.0, -127)},
+        {"-0x1p-127f", -std::ldexp(1.0, -127)},
+        {"-0x1p-128f", -std::ldexp(1.0 / 2.0, -127)},
+        {"-0x1p-129f", -std::ldexp(1.0 / 4.0, -127)},
+        {"-0x1p-130f", -std::ldexp(1.0 / 8.0, -127)},
+        {"0x1.8p-127f", std::ldexp(1.0, -127) + (std::ldexp(1.0, -127) / 2.0)},
+        {"0x1.8p-128f", std::ldexp(1.0, -127) / 2.0 + (std::ldexp(1.0, -127) / 4.0)},
+
+        // F64 extremities
+        {"0x1p-1074", MakeDouble(0, 0, 1)},                             // +SmallestDenormal
+        {"0x1p-1073", MakeDouble(0, 0, 2)},                             // +BiggerDenormal
+        {"0x1.ffffffffffffp-1027", MakeDouble(0, 0, 0xffffffffffff)},   // +LargestDenormal
+        {"-0x1p-1074", MakeDouble(1, 0, 1)},                            // -SmallestDenormal
+        {"-0x1p-1073", MakeDouble(1, 0, 2)},                            // -BiggerDenormal
+        {"-0x1.ffffffffffffp-1027", MakeDouble(1, 0, 0xffffffffffff)},  // -LargestDenormal
+
+        {"0x0.cafebeeff000dp-1022", MakeDouble(0, 0, 0xcafebeeff000d)},   // +Subnormal
+        {"-0x0.cafebeeff000dp-1022", MakeDouble(1, 0, 0xcafebeeff000d)},  // -Subnormal
+        {"0x1.2bfaf8p-1052", MakeDouble(0, 0, 0x4afebe)},                 // +Subnormal
+        {"-0x1.2bfaf8p-1052", MakeDouble(1, 0, 0x4afebe)},                // +Subnormal
+        {"0x1.55554p-1055", MakeDouble(0, 0, 0xaaaaa)},                   // +Subnormal
+        {"-0x1.55554p-1055", MakeDouble(1, 0, 0xaaaaa)},                  // -Subnormal
 
         // F32 extremities
         {"0x1p-149", static_cast<double>(MakeFloat(0, 0, 1))},                 // +SmallestDenormal
@@ -320,46 +357,32 @@ FloatLiteralTestCaseList HexFloatCases() {
         {"-0x1p-148", static_cast<double>(MakeFloat(1, 0, 2))},                // -BiggerDenormal
         {"-0x1.fffffcp-127", static_cast<double>(MakeFloat(1, 0, 0x7fffff))},  // -LargestDenormal
 
-        {"0x1.2bfaf8p-127", static_cast<double>(MakeFloat(0, 0, 0xcafebe))},   // +Subnormal
-        {"-0x1.2bfaf8p-127", static_cast<double>(MakeFloat(1, 0, 0xcafebe))},  // -Subnormal
+        {"0x0.cafebp-129", static_cast<double>(MakeFloat(0, 0, 0xcafeb))},     // +Subnormal
+        {"-0x0.cafebp-129", static_cast<double>(MakeFloat(1, 0, 0xcafeb))},    // -Subnormal
+        {"0x1.2bfaf8p-127", static_cast<double>(MakeFloat(0, 0, 0x4afebe))},   // +Subnormal
+        {"-0x1.2bfaf8p-127", static_cast<double>(MakeFloat(1, 0, 0x4afebe))},  // -Subnormal
         {"0x1.55554p-130", static_cast<double>(MakeFloat(0, 0, 0xaaaaa))},     // +Subnormal
         {"-0x1.55554p-130", static_cast<double>(MakeFloat(1, 0, 0xaaaaa))},    // -Subnormal
 
-        // Nan -> Infinity
-        {"0x1.8p+128", PosInf},
-        {"0x1.0002p+128", PosInf},
-        {"0x1.0018p+128", PosInf},
-        {"0x1.01ep+128", PosInf},
-        {"0x1.fffffep+128", PosInf},
-        {"-0x1.8p+128", NegInf},
-        {"-0x1.0002p+128", NegInf},
-        {"-0x1.0018p+128", NegInf},
-        {"-0x1.01ep+128", NegInf},
-        {"-0x1.fffffep+128", NegInf},
-
-        // Infinity
-        {"0x1p+128", PosInf},
-        {"-0x1p+128", NegInf},
-        {"0x32p+127", PosInf},
-        {"0x32p+500", PosInf},
-        {"-0x32p+127", NegInf},
-        {"-0x32p+500", NegInf},
-
-        // Overflow -> Infinity
-        {"0x1p+129", PosInf},
-        {"0x1.1p+128", PosInf},
-        {"-0x1p+129", NegInf},
-        {"-0x1.1p+128", NegInf},
-        {"0x1.0p2147483520", PosInf},  // INT_MAX - 127 (largest valid exponent)
-
         // Underflow -> Zero
-        {"0x1p-500", 0.0},  // Exponent underflows
-        {"-0x1p-500", -0.0},
-        {"0x0.00000000001p-126", 0.0},  // Fraction causes underflow
-        {"-0x0.0000000001p-127", -0.0},
-        {"0x0.01p-142", 0.0},
-        {"-0x0.01p-142", -0.0},    // Fraction causes additional underflow
-        {"0x1.0p-2147483520", 0},  // -(INT_MAX - 127) (smallest valid exponent)
+        {"0x1p-1074", 0.0},  // Exponent underflows
+        {"-0x1p-1074", 0.0},
+        {"0x1p-5000", 0.0},
+        {"-0x1p-5000", 0.0},
+        {"0x0.00000000000000000000001p-1022", 0.0},  // Fraction causes underflow
+        {"-0x0.0000000000000000000001p-1023", -0.0},
+        {"0x0.01p-1073", -0.0},
+        {"-0x0.01p-1073", -0.0},  // Fraction causes additional underflow
+
+        {"0x1p-150f", 0.0},  // Exponent underflows
+        {"-0x1p-150f", 0.0},
+        {"0x1p-500f", 0.0},
+        {"-0x1p-500f", -0.0},
+        {"0x0.00000000001p-126f", 0.0},  // Fraction causes underflow
+        {"-0x0.0000000001p-127f", -0.0},
+        {"0x0.01p-142f", 0.0},
+        {"-0x0.01p-142f", -0.0},            // Fraction causes additional underflow
+        {"0x1.0p-9223372036854774784", 0},  // -(INT64_MAX - 1023) (smallest valid exponent)
 
         // Zero with non-zero exponent -> Zero
         {"0x0p+0", 0.0},
@@ -369,22 +392,22 @@ FloatLiteralTestCaseList HexFloatCases() {
         {"0x0p-9999999999", 0.0},
         // Same, but with very large positive exponents that would cause overflow
         // if the mantissa were non-zero.
-        {"0x0p+4000000000", 0.0},    // 4 billion:
-        {"0x0p+40000000000", 0.0},   // 40 billion
-        {"-0x0p+40000000000", 0.0},  // As above 2, but negative mantissa
-        {"-0x0p+400000000000", 0.0},
-        {"0x0.00p+4000000000", 0.0},  // As above 4, but with fractional part
-        {"0x0.00p+40000000000", 0.0},
-        {"-0x0.00p+40000000000", 0.0},
-        {"-0x0.00p+400000000000", 0.0},
-        {"0x0p-4000000000", 0.0},  // As above 8, but with negative exponents
-        {"0x0p-40000000000", 0.0},
-        {"-0x0p-40000000000", 0.0},
-        {"-0x0p-400000000000", 0.0},
-        {"0x0.00p-4000000000", 0.0},
-        {"0x0.00p-40000000000", 0.0},
-        {"-0x0.00p-40000000000", 0.0},
-        {"-0x0.00p-400000000000", 0.0},
+        {"0x0p+10000000000000000000", 0.0},    // 10 quintillion   (10,000,000,000,000,000,000)
+        {"0x0p+100000000000000000000", 0.0},   // 100 quintillion (100,000,000,000,000,000,000)
+        {"-0x0p+100000000000000000000", 0.0},  // As above 2, but negative mantissa
+        {"-0x0p+1000000000000000000000", 0.0},
+        {"0x0.00p+10000000000000000000", 0.0},  // As above 4, but with fractional part
+        {"0x0.00p+100000000000000000000", 0.0},
+        {"-0x0.00p+100000000000000000000", 0.0},
+        {"-0x0.00p+1000000000000000000000", 0.0},
+        {"0x0p-10000000000000000000", 0.0},  // As above 8, but with negative exponents
+        {"0x0p-100000000000000000000", 0.0},
+        {"-0x0p-100000000000000000000", 0.0},
+        {"-0x0p-1000000000000000000000", 0.0},
+        {"0x0.00p-10000000000000000000", 0.0},
+        {"0x0.00p-100000000000000000000", 0.0},
+        {"-0x0.00p-100000000000000000000", 0.0},
+        {"-0x0.00p-1000000000000000000000", 0.0},
 
         // Test parsing
         {"0x0p0", 0.0},
@@ -462,65 +485,144 @@ INSTANTIATE_TEST_SUITE_P(ParserImplFloatLiteralTest_HexFloat_UpperCase0X,
                          ParserImplFloatLiteralTest,
                          testing::ValuesIn(UpperCase0X(HexFloatCases())));
 
-struct InvalidLiteralTestCase {
-    const char* input;
-    const char* error_msg;
-};
+// <error, source>
+using InvalidLiteralTestCase = std::tuple<const char*, const char*>;
+
 class ParserImplInvalidLiteralTest : public ParserImplTestWithParam<InvalidLiteralTestCase> {};
 TEST_P(ParserImplInvalidLiteralTest, Parse) {
-    auto params = GetParam();
-    SCOPED_TRACE(params.input);
-    auto p = parser(params.input);
+    auto* error = std::get<0>(GetParam());
+    auto* source = std::get<1>(GetParam());
+    auto p = parser(source);
     auto c = p->const_literal();
     EXPECT_FALSE(c.matched);
     EXPECT_TRUE(c.errored);
-    EXPECT_EQ(p->error(), params.error_msg);
+    EXPECT_EQ(p->error(), std::string(error));
     ASSERT_EQ(c.value, nullptr);
 }
 
-InvalidLiteralTestCase invalid_hexfloat_mantissa_too_large_cases[] = {
-    {"0x1.ffffffff8p0", "1:1: mantissa is too large for hex float"},
-    {"0x1f.fffffff8p0", "1:1: mantissa is too large for hex float"},
-    {"0x1ff.ffffff8p0", "1:1: mantissa is too large for hex float"},
-    {"0x1fff.fffff8p0", "1:1: mantissa is too large for hex float"},
-    {"0x1ffff.ffff8p0", "1:1: mantissa is too large for hex float"},
-    {"0x1fffff.fff8p0", "1:1: mantissa is too large for hex float"},
-    {"0x1ffffff.ff8p0", "1:1: mantissa is too large for hex float"},
-    {"0x1fffffff.f8p0", "1:1: mantissa is too large for hex float"},
-    {"0x1ffffffff.8p0", "1:1: mantissa is too large for hex float"},
-    {"0x1ffffffff8.p0", "1:1: mantissa is too large for hex float"},
-};
-INSTANTIATE_TEST_SUITE_P(ParserImplInvalidLiteralTest_HexFloatMantissaTooLarge,
-                         ParserImplInvalidLiteralTest,
-                         testing::ValuesIn(invalid_hexfloat_mantissa_too_large_cases));
+INSTANTIATE_TEST_SUITE_P(
+    HexFloatMantissaTooLarge,
+    ParserImplInvalidLiteralTest,
+    testing::Combine(testing::Values("1:1: mantissa is too large for hex float"),
+                     testing::ValuesIn(std::vector<const char*>{
+                         "0x1.ffffffffffffffff8p0",
+                         "0x1f.fffffffffffffff8p0",
+                         "0x1ff.ffffffffffffff8p0",
+                         "0x1fff.fffffffffffff8p0",
+                         "0x1ffff.ffffffffffff8p0",
+                         "0x1fffff.fffffffffff8p0",
+                         "0x1ffffff.ffffffffff8p0",
+                         "0x1fffffff.fffffffff8p0",
+                         "0x1ffffffff.ffffffff8p0",
+                         "0x1fffffffff.fffffff8p0",
+                         "0x1ffffffffff.ffffff8p0",
+                         "0x1fffffffffff.fffff8p0",
+                         "0x1ffffffffffff.ffff8p0",
+                         "0x1fffffffffffff.fff8p0",
+                         "0x1ffffffffffffff.ff8p0",
+                         "0x1ffffffffffffffff.8p0",
+                         "0x1ffffffffffffffff8.p0",
+                     })));
 
-InvalidLiteralTestCase invalid_hexfloat_exponent_too_large_cases[] = {
-    {"0x1p+2147483521", "1:1: exponent is too large for hex float"},
-    {"0x1p-2147483521", "1:1: exponent is too large for hex float"},
-    {"0x1p+4294967296", "1:1: exponent is too large for hex float"},
-    {"0x1p-4294967296", "1:1: exponent is too large for hex float"},
-};
-INSTANTIATE_TEST_SUITE_P(ParserImplInvalidLiteralTest_HexFloatExponentTooLarge,
-                         ParserImplInvalidLiteralTest,
-                         testing::ValuesIn(invalid_hexfloat_exponent_too_large_cases));
+INSTANTIATE_TEST_SUITE_P(
+    HexFloatExponentTooLarge,
+    ParserImplInvalidLiteralTest,
+    testing::Combine(testing::Values("1:1: exponent is too large for hex float"),
+                     testing::ValuesIn(std::vector<const char*>{
+                         "0x1p+9223372036854774785",
+                         "0x1p-9223372036854774785",
+                         "0x1p+18446744073709551616",
+                         "0x1p-18446744073709551616",
+                     })));
 
-InvalidLiteralTestCase invalid_hexfloat_exponent_missing_cases[] = {
-    // Lower case p
-    {"0x0p", "1:1: expected an exponent value for hex float"},
-    {"0x0p+", "1:1: expected an exponent value for hex float"},
-    {"0x0p-", "1:1: expected an exponent value for hex float"},
-    {"0x1.0p", "1:1: expected an exponent value for hex float"},
-    {"0x0.1p", "1:1: expected an exponent value for hex float"},
-    // Upper case p
-    {"0x0P", "1:1: expected an exponent value for hex float"},
-    {"0x0P+", "1:1: expected an exponent value for hex float"},
-    {"0x0P-", "1:1: expected an exponent value for hex float"},
-    {"0x1.0P", "1:1: expected an exponent value for hex float"},
-    {"0x0.1P", "1:1: expected an exponent value for hex float"},
-};
-INSTANTIATE_TEST_SUITE_P(ParserImplInvalidLiteralTest_HexFloatExponentMissing,
-                         ParserImplInvalidLiteralTest,
-                         testing::ValuesIn(invalid_hexfloat_exponent_missing_cases));
+INSTANTIATE_TEST_SUITE_P(
+    HexFloatMissingExponent,
+    ParserImplInvalidLiteralTest,
+    testing::Combine(testing::Values("1:1: expected an exponent value for hex float"),
+                     testing::ValuesIn(std::vector<const char*>{
+                         // Lower case p
+                         "0x0p",
+                         "0x0p+",
+                         "0x0p-",
+                         "0x1.0p",
+                         "0x0.1p",
+                         // Upper case p
+                         "0x0P",
+                         "0x0P+",
+                         "0x0P-",
+                         "0x1.0P",
+                         "0x0.1P",
+                     })));
+
+INSTANTIATE_TEST_SUITE_P(
+    NaNAFloat,
+    ParserImplInvalidLiteralTest,
+    testing::Combine(testing::Values("1:1: value cannot be represented as 'abstract-float'"),
+                     testing::ValuesIn(std::vector<const char*>{
+                         "0x1.8p+1024",
+                         "0x1.0002p+1024",
+                         "0x1.0018p+1024",
+                         "0x1.01ep+1024",
+                         "0x1.fffffep+1024",
+                         "-0x1.8p+1024",
+                         "-0x1.0002p+1024",
+                         "-0x1.0018p+1024",
+                         "-0x1.01ep+1024",
+                         "-0x1.fffffep+1024",
+                     })));
+
+INSTANTIATE_TEST_SUITE_P(
+    NaNF32,
+    ParserImplInvalidLiteralTest,
+    testing::Combine(testing::Values("1:1: value cannot be represented as 'f32'"),
+                     testing::ValuesIn(std::vector<const char*>{
+                         "0x1.8p+128f",
+                         "0x1.0002p+128f",
+                         "0x1.0018p+128f",
+                         "0x1.01ep+128f",
+                         "0x1.fffffep+128f",
+                         "-0x1.8p+128f",
+                         "-0x1.0002p+128f",
+                         "-0x1.0018p+128f",
+                         "-0x1.01ep+128f",
+                         "-0x1.fffffep+128f",
+                     })));
+
+INSTANTIATE_TEST_SUITE_P(
+    OverflowAFloat,
+    ParserImplInvalidLiteralTest,
+    testing::Combine(testing::Values("1:1: value cannot be represented as 'abstract-float'"),
+                     testing::ValuesIn(std::vector<const char*>{
+                         "0x1p+1024",
+                         "-0x1p+1024",
+                         "0x1.1p+1024",
+                         "-0x1.1p+1024",
+                         "0x1p+1025",
+                         "-0x1p+1025",
+                         "0x32p+1023",
+                         "-0x32p+1023",
+                         "0x32p+5000",
+                         "-0x32p+5000",
+                         "0x1.0p9223372036854774784",
+                         "-0x1.0p9223372036854774784",
+                     })));
+
+INSTANTIATE_TEST_SUITE_P(
+    OverflowF32,
+    ParserImplInvalidLiteralTest,
+    testing::Combine(testing::Values("1:1: value cannot be represented as 'f32'"),
+                     testing::ValuesIn(std::vector<const char*>{
+                         "0x1p+128f",
+                         "-0x1p+128f",
+                         "0x1.1p+128f",
+                         "-0x1.1p+128f",
+                         "0x1p+129f",
+                         "-0x1p+129f",
+                         "0x32p+127f",
+                         "-0x32p+127f",
+                         "0x32p+500f",
+                         "-0x32p+500f",
+                     })));
 
 TEST_F(ParserImplTest, ConstLiteral_FloatHighest) {
     const auto highest = std::numeric_limits<float>::max();
