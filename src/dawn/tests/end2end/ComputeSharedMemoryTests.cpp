@@ -104,9 +104,6 @@ TEST_P(ComputeSharedMemoryTests, Basic) {
 // for matrices in threadgroup memory. Basic test that reading and
 // writing a matrix in workgroup memory works.
 TEST_P(ComputeSharedMemoryTests, AssortedTypes) {
-    // TODO(anglebug.com/7226): fix failure in ANGLE/D3D11
-    DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
-
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
         struct StructValues {
