@@ -109,6 +109,8 @@ TEST_F(WireInstanceTests, RequestAdapterSuccess) {
 
     wgpu::AdapterProperties fakeProperties = {};
     fakeProperties.vendorID = 0x134;
+    fakeProperties.vendorName = "fake-vendor";
+    fakeProperties.architecture = "fake-architecture";
     fakeProperties.deviceID = 0x918;
     fakeProperties.name = "fake adapter";
     fakeProperties.driverDescription = "hello world";
@@ -161,6 +163,8 @@ TEST_F(WireInstanceTests, RequestAdapterSuccess) {
             wgpu::AdapterProperties properties;
             adapter.GetProperties(&properties);
             EXPECT_EQ(properties.vendorID, fakeProperties.vendorID);
+            EXPECT_STREQ(properties.vendorName, fakeProperties.vendorName);
+            EXPECT_STREQ(properties.architecture, fakeProperties.architecture);
             EXPECT_EQ(properties.deviceID, fakeProperties.deviceID);
             EXPECT_STREQ(properties.name, fakeProperties.name);
             EXPECT_STREQ(properties.driverDescription, fakeProperties.driverDescription);
@@ -206,6 +210,8 @@ TEST_F(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
             EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterProperties* properties) {
                     *properties = {};
+                    properties->vendorName = "";
+                    properties->architecture = "";
                     properties->name = "";
                     properties->driverDescription = "";
                 })));

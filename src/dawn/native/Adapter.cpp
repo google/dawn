@@ -18,6 +18,7 @@
 #include <memory>
 
 #include "dawn/common/Constants.h"
+#include "dawn/common/GPUInfo.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/ValidationUtils_autogen.h"
@@ -42,6 +43,9 @@ MaybeError AdapterBase::Initialize() {
         "gathering supported limits for \"%s\" - \"%s\" (vendorId=%#06x deviceId=%#06x "
         "backend=%s type=%s)",
         mName, mDriverDescription, mVendorId, mDeviceId, mBackend, mAdapterType);
+
+    mVendorName = gpu_info::GetVendorName(mVendorId);
+    mArchitectureName = gpu_info::GetArchitectureName(mVendorId, mDeviceId);
 
     // Enforce internal Dawn constants.
     mLimits.v1.maxVertexBufferArrayStride =
@@ -79,6 +83,8 @@ bool AdapterBase::APIGetLimits(SupportedLimits* limits) const {
 
 void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
     properties->vendorID = mVendorId;
+    properties->vendorName = mVendorName.c_str();
+    properties->architecture = mArchitectureName.c_str();
     properties->deviceID = mDeviceId;
     properties->name = mName.c_str();
     properties->driverDescription = mDriverDescription.c_str();

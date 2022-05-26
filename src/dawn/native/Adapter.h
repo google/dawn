@@ -67,6 +67,8 @@ class AdapterBase : public RefCounted {
 
   protected:
     uint32_t mVendorId = 0xFFFFFFFF;
+    std::string mVendorName;
+    std::string mArchitectureName;
     uint32_t mDeviceId = 0xFFFFFFFF;
     std::string mName;
     wgpu::AdapterType mAdapterType = wgpu::AdapterType::Unknown;

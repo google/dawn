@@ -15,36 +15,11 @@
 #ifndef SRC_DAWN_COMMON_GPUINFO_H_
 #define SRC_DAWN_COMMON_GPUINFO_H_
 
-#include <array>
-#include <cstdint>
+#include "dawn/common/GPUInfo_autogen.h"
 
-using PCIVendorID = uint32_t;
-using PCIDeviceID = uint32_t;
+#include <array>
 
 namespace gpu_info {
-
-static constexpr PCIVendorID kVendorID_AMD = 0x1002;
-static constexpr PCIVendorID kVendorID_ARM = 0x13B5;
-static constexpr PCIVendorID kVendorID_ImgTec = 0x1010;
-static constexpr PCIVendorID kVendorID_Intel = 0x8086;
-static constexpr PCIVendorID kVendorID_Mesa = 0x10005;
-static constexpr PCIVendorID kVendorID_Nvidia = 0x10DE;
-static constexpr PCIVendorID kVendorID_Qualcomm = 0x5143;
-static constexpr PCIVendorID kVendorID_Google = 0x1AE0;
-static constexpr PCIVendorID kVendorID_Microsoft = 0x1414;
-
-static constexpr PCIDeviceID kDeviceID_Swiftshader = 0xC0DE;
-static constexpr PCIDeviceID kDeviceID_WARP = 0x8c;
-
-bool IsAMD(PCIVendorID vendorId);
-bool IsARM(PCIVendorID vendorId);
-bool IsImgTec(PCIVendorID vendorId);
-bool IsIntel(PCIVendorID vendorId);
-bool IsMesa(PCIVendorID vendorId);
-bool IsNvidia(PCIVendorID vendorId);
-bool IsQualcomm(PCIVendorID vendorId);
-bool IsSwiftshader(PCIVendorID vendorId, PCIDeviceID deviceId);
-bool IsWARP(PCIVendorID vendorId, PCIDeviceID deviceId);
 
 using D3DDriverVersion = std::array<uint16_t, 4>;
 
@@ -59,8 +34,6 @@ int CompareD3DDriverVersion(PCIVendorID vendorId,
 
 // Intel architectures
 bool IsSkylake(PCIDeviceID deviceId);
-bool IsKabylake(PCIDeviceID deviceId);
-bool IsCoffeelake(PCIDeviceID deviceId);
 
 }  // namespace gpu_info
 #endif  // SRC_DAWN_COMMON_GPUINFO_H_

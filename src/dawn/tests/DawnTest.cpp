@@ -780,8 +780,8 @@ bool DawnTestBase::IsQualcomm() const {
 }
 
 bool DawnTestBase::IsSwiftshader() const {
-    return gpu_info::IsSwiftshader(mParam.adapterProperties.vendorID,
-                                   mParam.adapterProperties.deviceID);
+    return gpu_info::IsGoogleSwiftshader(mParam.adapterProperties.vendorID,
+                                         mParam.adapterProperties.deviceID);
 }
 
 bool DawnTestBase::IsANGLE() const {
@@ -789,7 +789,8 @@ bool DawnTestBase::IsANGLE() const {
 }
 
 bool DawnTestBase::IsWARP() const {
-    return gpu_info::IsWARP(mParam.adapterProperties.vendorID, mParam.adapterProperties.deviceID);
+    return gpu_info::IsMicrosoftWARP(mParam.adapterProperties.vendorID,
+                                     mParam.adapterProperties.deviceID);
 }
 
 bool DawnTestBase::IsWindows() const {

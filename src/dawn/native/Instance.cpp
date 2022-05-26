@@ -211,7 +211,7 @@ ResultOrError<Ref<AdapterBase>> InstanceBase::RequestAdapterInternal(
         mAdapters[i]->APIGetProperties(&properties);
 
         if (options->forceFallbackAdapter) {
-            if (!gpu_info::IsSwiftshader(properties.vendorID, properties.deviceID)) {
+            if (!gpu_info::IsGoogleSwiftshader(properties.vendorID, properties.deviceID)) {
                 continue;
             }
             return mAdapters[i];

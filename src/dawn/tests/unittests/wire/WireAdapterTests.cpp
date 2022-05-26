@@ -62,6 +62,8 @@ class WireAdapterTests : public WireTest {
                 EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
                     .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterProperties* properties) {
                         *properties = {};
+                        properties->vendorName = "";
+                        properties->architecture = "";
                         properties->name = "";
                         properties->driverDescription = "";
                     })));

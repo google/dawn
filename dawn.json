@@ -128,6 +128,8 @@
         "extensible": "out",
         "members": [
             {"name": "vendor ID", "type": "uint32_t"},
+            {"name": "vendor name", "type": "char", "annotation": "const*", "length": "strlen"},
+            {"name": "architecture", "type": "char", "annotation": "const*", "length": "strlen"},
             {"name": "device ID", "type": "uint32_t"},
             {"name": "name", "type": "char", "annotation": "const*", "length": "strlen"},
             {"name": "driver description", "type": "char", "annotation": "const*", "length": "strlen"},

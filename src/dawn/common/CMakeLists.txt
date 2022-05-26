@@ -20,10 +20,19 @@ DawnGenerator(
     RESULT_VARIABLE "DAWN_VERSION_AUTOGEN_SOURCES"
 )
 
+DawnGenerator(
+    SCRIPT "${Dawn_SOURCE_DIR}/generator/dawn_gpu_info_generator.py"
+    PRINT_NAME "Dawn GPU info utilities"
+    ARGS "--gpu-info-json"
+         "${Dawn_SOURCE_DIR}/gpu_info.json"
+    RESULT_VARIABLE "DAWN_GPU_INFO_AUTOGEN_SOURCES"
+)
+
 add_library(dawn_common STATIC ${DAWN_PLACEHOLDER_FILE})
 common_compile_options(dawn_common)
 target_sources(dawn_common PRIVATE
     ${DAWN_VERSION_AUTOGEN_SOURCES}
+    ${DAWN_GPU_INFO_AUTOGEN_SOURCES}
     "Alloc.h"
     "Assert.cpp"
     "Assert.h"
