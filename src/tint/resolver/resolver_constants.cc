@@ -89,14 +89,34 @@ sem::Constant::Elements Transform(const sem::Constant::Elements& in,
         in);
 }
 
-/// Converts and returns all the elements in `in` to the type `el_ty`, by performing a `static_cast`
-/// on each element value. No checks will be performed that the value fits in the target type.
+/// Converts and returns all the elements in `in` to the type `el_ty`.
+/// If the value does not fit in the target type, and:
+///  * the target type is an integer type, then the resulting value will be clamped to the integer's
+///    highest or lowest value.
+///  * the target type is an float type, then the resulting value will be either positive or
+///    negative infinity, based on the sign of the input value.
 /// @param in the input elements
 /// @param el_ty the target element type
 /// @returns the elements converted to `el_ty`
 sem::Constant::Elements ConvertElements(const sem::Constant::Elements& in, const sem::Type* el_ty) {
     return Transform(in, el_ty, [](auto& el_out, auto el_in) {
-        el_out = std::decay_t<decltype(el_out)>(el_in);
+        using OUT = std::decay_t<decltype(el_out)>;
+        if (auto conv = CheckedConvert<OUT>(el_in)) {
+            el_out = conv.Get();
+        } else {
+            constexpr auto kInf = std::numeric_limits<double>::infinity();
+            switch (conv.Failure()) {
+                case ConversionFailure::kExceedsNegativeLimit:
+                    el_out = IsFloatingPoint<UnwrapNumber<OUT>> ? OUT(-kInf) : OUT::kLowest;
+                    break;
+                case ConversionFailure::kExceedsPositiveLimit:
+                    el_out = IsFloatingPoint<UnwrapNumber<OUT>> ? OUT(kInf) : OUT::kHighest;
+                    break;
+                case ConversionFailure::kTooSmall:
+                    el_out = OUT(el_in < 0 ? -0.0 : 0.0);
+                    break;
+            }
+        }
     });
 }
 
