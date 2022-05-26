@@ -105,9 +105,6 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfBasic) {
 
 // Test that a slightly-less-trivial compute-shader memcpy implementation works.
 TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
-    // TODO(anglebug.com/7271): fix failure in ANGLE/D3D11
-    DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
-
     BasicTest(R"(
         struct S {
             a : vec2<u32>,
