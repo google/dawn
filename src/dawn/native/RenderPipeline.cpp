@@ -498,7 +498,8 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
     mVertexBufferCount = descriptor->vertex.bufferCount;
     const VertexBufferLayout* buffers = descriptor->vertex.buffers;
     for (uint8_t slot = 0; slot < mVertexBufferCount; ++slot) {
-        if (buffers[slot].attributeCount == 0) {
+        // Skip unused slots
+        if (buffers[slot].stepMode == wgpu::VertexStepMode::VertexBufferNotUsed) {
             continue;
         }
 

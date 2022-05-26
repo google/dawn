@@ -1479,8 +1479,9 @@
     "vertex step mode": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "vertex"},
-            {"value": 1, "name": "instance"}
+            {"value": 0, "name": "vertex buffer not used"},
+            {"value": 1, "name": "vertex"},
+            {"value": 2, "name": "instance"}
         ]
     },
     "load op": {

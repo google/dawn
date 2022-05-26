@@ -276,6 +276,8 @@ void RenderPipeline::CreateVAOForVertexState() {
                 case wgpu::VertexStepMode::Instance:
                     gl.VertexAttribDivisor(glAttrib, 1);
                     break;
+                case wgpu::VertexStepMode::VertexBufferNotUsed:
+                    UNREACHABLE();
             }
         }
     }

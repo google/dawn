@@ -112,8 +112,9 @@ tint::transform::VertexStepMode ToTintVertexStepMode(wgpu::VertexStepMode mode) 
             return tint::transform::VertexStepMode::kVertex;
         case wgpu::VertexStepMode::Instance:
             return tint::transform::VertexStepMode::kInstance;
+        case wgpu::VertexStepMode::VertexBufferNotUsed:
+            UNREACHABLE();
     }
-    UNREACHABLE();
 }
 
 ResultOrError<SingleShaderStage> TintPipelineStageToShaderStage(tint::ast::PipelineStage stage) {

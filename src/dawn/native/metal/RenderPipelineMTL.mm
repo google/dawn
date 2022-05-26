@@ -98,6 +98,8 @@ MTLVertexStepFunction VertexStepModeFunction(wgpu::VertexStepMode mode) {
             return MTLVertexStepFunctionPerVertex;
         case wgpu::VertexStepMode::Instance:
             return MTLVertexStepFunctionPerInstance;
+        case wgpu::VertexStepMode::VertexBufferNotUsed:
+            UNREACHABLE();
     }
 }
 

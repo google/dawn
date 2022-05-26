@@ -440,6 +440,50 @@ TEST_F(DrawVertexAndIndexBufferOOBValidationTests, DrawVertexBufferOutOfBoundWit
     }
 }
 
+// Verify zero-attribute vertex buffer OOB for non-instanced Draw are caught in command encoder
+TEST_F(DrawVertexAndIndexBufferOOBValidationTests, ZeroAttribute) {
+    // Create a render pipeline with zero-attribute vertex buffer description
+    wgpu::RenderPipeline pipeline =
+        CreateRenderPipelineWithBufferDesc({{kFloat32x4Stride, wgpu::VertexStepMode::Vertex, {}}});
+
+    wgpu::Buffer vertexBuffer = CreateBuffer(3 * kFloat32x4Stride);
+
+    {
+        // Valid
+        VertexBufferList vertexBufferList = {{0, vertexBuffer, 0, wgpu::kWholeSize}};
+        TestRenderPassDraw(pipeline, vertexBufferList, 3, 1, 0, 0, true);
+    }
+
+    {
+        // OOB
+        VertexBufferList vertexBufferList = {{0, vertexBuffer, 0, 0}};
+        TestRenderPassDraw(pipeline, vertexBufferList, 3, 1, 0, 0, false);
+    }
+}
+
+// Verify vertex buffers don't need to be set to unused (hole) slots for Draw
+TEST_F(DrawVertexAndIndexBufferOOBValidationTests, UnusedSlots) {
+    // Set vertex buffer only to the second slot
+    wgpu::Buffer vertexBuffer = CreateBuffer(3 * kFloat32x4Stride);
+    VertexBufferList vertexBufferList = {{1, vertexBuffer, 0, wgpu::kWholeSize}};
+
+    {
+        // The first slot it unused so valid even if vertex buffer is not set to it.
+        wgpu::RenderPipeline pipeline = CreateRenderPipelineWithBufferDesc(
+            {{0, wgpu::VertexStepMode::VertexBufferNotUsed, {}},
+             {kFloat32x4Stride, wgpu::VertexStepMode::Vertex, {}}});
+        TestRenderPassDraw(pipeline, vertexBufferList, 3, 1, 0, 0, true);
+    }
+
+    {
+        // The first slot it used so invalid if vertex buffer is not set to it.
+        wgpu::RenderPipeline pipeline = CreateRenderPipelineWithBufferDesc(
+            {{0, wgpu::VertexStepMode::Vertex, {}},
+             {kFloat32x4Stride, wgpu::VertexStepMode::Vertex, {}}});
+        TestRenderPassDraw(pipeline, vertexBufferList, 3, 1, 0, 0, false);
+    }
+}
+
 // Control case for DrawIndexed
 TEST_F(DrawVertexAndIndexBufferOOBValidationTests, DrawIndexedBasic) {
     wgpu::RenderPipeline pipeline = CreateBasicRenderPipeline();
@@ -553,6 +597,75 @@ TEST_F(DrawVertexAndIndexBufferOOBValidationTests, DrawIndexedVertexBufferOOB) {
                                           0, 1, false);
             }
         }
+    }
+}
+
+// Verify zero-attribute instance step mode vertex buffer OOB for instanced DrawIndex
+// are caught in command encoder
+TEST_F(DrawVertexAndIndexBufferOOBValidationTests, DrawIndexedZeroAttribute) {
+    // Create a render pipeline with a vertex step mode and a zero-attribute
+    // instance step mode vertex buffer description
+    wgpu::RenderPipeline pipeline = CreateRenderPipelineWithBufferDesc(
+        {{kFloat32x4Stride, wgpu::VertexStepMode::Vertex, {{0, wgpu::VertexFormat::Float32x4}}},
+         {kFloat32x2Stride, wgpu::VertexStepMode::Instance, {}}});
+
+    // Build index buffer for 12 indexes
+    wgpu::Buffer indexBuffer = CreateBuffer(12 * sizeof(uint32_t), wgpu::BufferUsage::Index);
+    IndexBufferDesc indexBufferDesc = {indexBuffer, wgpu::IndexFormat::Uint32};
+
+    // Build vertex buffer for 3 vertices
+    wgpu::Buffer vertexBuffer = CreateBuffer(3 * kFloat32x4Stride);
+
+    // Build vertex buffer for 3 instances
+    wgpu::Buffer instanceBuffer = CreateBuffer(3 * kFloat32x2Stride);
+
+    {
+        // Valid
+        VertexBufferList vertexBufferList = {{0, vertexBuffer, 0, wgpu::kWholeSize},
+                                             {1, vertexBuffer, 0, wgpu::kWholeSize}};
+        TestRenderPassDrawIndexed(pipeline, indexBufferDesc, vertexBufferList, 12, 3, 0, 0, 0,
+                                  true);
+    }
+
+    {
+        // OOB
+        VertexBufferList vertexBufferList = {{0, vertexBuffer, 0, wgpu::kWholeSize},
+                                             {1, vertexBuffer, 0, 0}};
+        TestRenderPassDrawIndexed(pipeline, indexBufferDesc, vertexBufferList, 12, 3, 0, 0, 0,
+                                  false);
+    }
+}
+
+// Verify vertex buffers don't need to be set to unused (hole) slots for DrawIndexed
+TEST_F(DrawVertexAndIndexBufferOOBValidationTests, DrawIndexedUnusedSlots) {
+    // Build index buffer
+    wgpu::Buffer indexBuffer = CreateBuffer(12 * sizeof(uint32_t), wgpu::BufferUsage::Index);
+    IndexBufferDesc indexBufferDesc = {indexBuffer, wgpu::IndexFormat::Uint32};
+
+    // Set vertex buffers only to the second and third slots
+    wgpu::Buffer vertexBuffer = CreateBuffer(3 * kFloat32x4Stride);
+    wgpu::Buffer instanceBuffer = CreateBuffer(3 * kFloat32x2Stride);
+    VertexBufferList vertexBufferList = {{1, vertexBuffer, 0, wgpu::kWholeSize},
+                                         {2, instanceBuffer, 0, wgpu::kWholeSize}};
+
+    {
+        // The first slot it unused so valid even if vertex buffer is not set to it.
+        wgpu::RenderPipeline pipeline = CreateRenderPipelineWithBufferDesc(
+            {{0, wgpu::VertexStepMode::VertexBufferNotUsed, {}},
+             {kFloat32x4Stride, wgpu::VertexStepMode::Vertex, {}},
+             {kFloat32x2Stride, wgpu::VertexStepMode::Instance, {}}});
+        TestRenderPassDrawIndexed(pipeline, indexBufferDesc, vertexBufferList, 12, 3, 0, 0, 0,
+                                  true);
+    }
+
+    {
+        // The first slot it used so invalid if vertex buffer is not set to it.
+        wgpu::RenderPipeline pipeline = CreateRenderPipelineWithBufferDesc(
+            {{0, wgpu::VertexStepMode::Vertex, {}},
+             {kFloat32x4Stride, wgpu::VertexStepMode::Vertex, {}},
+             {kFloat32x2Stride, wgpu::VertexStepMode::Instance, {}}});
+        TestRenderPassDrawIndexed(pipeline, indexBufferDesc, vertexBufferList, 12, 3, 0, 0, 0,
+                                  false);
     }
 }
 
