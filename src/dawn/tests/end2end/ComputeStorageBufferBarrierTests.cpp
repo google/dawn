@@ -340,9 +340,6 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
 //  2 - Write ones into it with a compute shader.
 //  3 - Use the indirect buffer in a Dispatch while also reading its data.
 TEST_P(ComputeStorageBufferBarrierTests, IndirectBufferCorrectBarrier) {
-    // TODO(anglebug.com/7226): fix failure in ANGLE/D3D11
-    DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
-
     wgpu::ComputePipelineDescriptor step2PipelineDesc;
     step2PipelineDesc.compute.entryPoint = "main";
     step2PipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
