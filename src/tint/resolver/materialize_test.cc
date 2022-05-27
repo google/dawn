@@ -41,53 +41,53 @@ namespace MaterializeTests {
 
 // How should the materialization occur?
 enum class Method {
-    // var a : T = literal;
+    // var a : target_type = abstract_expr;
     kVar,
 
-    // let a : T = literal;
+    // let a : target_type = abstract_expr;
     kLet,
 
-    // fn F(v : T) {}
+    // fn F(v : target_type) {}
     // fn x() {
-    //   F(literal);
+    //   F(abstract_expr);
     // }
     kFnArg,
 
-    // min(target_expr, literal);
+    // min(target_expr, abstract_expr);
     kBuiltinArg,
 
-    // fn F() : T {
-    //   return literal;
+    // fn F() : target_type {
+    //   return abstract_expr;
     // }
     kReturn,
 
-    // array<T, 1>(literal);
+    // array<target_type, 1>(abstract_expr);
     kArray,
 
     // struct S {
-    //   v : T
+    //   v : target_type
     // };
     // fn x() {
-    //   _ = S(literal)
+    //   _ = S(abstract_expr)
     // }
     kStruct,
 
-    // target_expr + literal
+    // target_expr + abstract_expr
     kBinaryOp,
 
-    // switch (literal) {
+    // switch (abstract_expr) {
     //   case target_expr: {}
     //   default: {}
     // }
     kSwitchCond,
 
     // switch (target_expr) {
-    //   case literal: {}
+    //   case abstract_expr: {}
     //   default: {}
     // }
     kSwitchCase,
 
-    // switch (literal) {
+    // switch (abstract_expr) {
     //   case 123: {}
     //   case target_expr: {}
     //   default: {}
@@ -96,7 +96,7 @@ enum class Method {
 
     // switch (target_expr) {
     //   case 123: {}
-    //   case literal: {}
+    //   case abstract_expr: {}
     //   default: {}
     // }
     kSwitchCaseWithAbstractCase,
@@ -138,16 +138,16 @@ struct Data {
     builder::ast_type_func_ptr target_ast_ty;
     builder::sem_type_func_ptr target_sem_ty;
     builder::ast_expr_func_ptr target_expr;
-    std::string source_type_name;
-    builder::ast_expr_func_ptr source_builder;
+    std::string abstract_type_name;
+    builder::ast_expr_func_ptr abstract_expr;
     std::variant<AInt, AFloat> materialized_value;
     double literal_value;
 };
 
-template <typename TARGET_TYPE, typename SOURCE_TYPE, typename MATERIALIZED_TYPE>
+template <typename TARGET_TYPE, typename ABSTRACT_TYPE, typename MATERIALIZED_TYPE>
 Data Types(MATERIALIZED_TYPE materialized_value, double literal_value) {
     using TargetDataType = builder::DataType<TARGET_TYPE>;
-    using SourceDataType = builder::DataType<SOURCE_TYPE>;
+    using AbstractDataType = builder::DataType<ABSTRACT_TYPE>;
     using TargetElementDataType = builder::DataType<typename TargetDataType::ElementType>;
     return {
         TargetDataType::Name(),         // target_type_name
@@ -155,17 +155,17 @@ Data Types(MATERIALIZED_TYPE materialized_value, double literal_value) {
         TargetDataType::AST,            // target_ast_ty
         TargetDataType::Sem,            // target_sem_ty
         TargetDataType::Expr,           // target_expr
-        SourceDataType::Name(),         // literal_type_name
-        SourceDataType::Expr,           // literal_builder
+        AbstractDataType::Name(),       // abstract_type_name
+        AbstractDataType::Expr,         // abstract_expr
         materialized_value,
         literal_value,
     };
 }
 
-template <typename TARGET_TYPE, typename SOURCE_TYPE>
+template <typename TARGET_TYPE, typename ABSTRACT_TYPE>
 Data Types() {
     using TargetDataType = builder::DataType<TARGET_TYPE>;
-    using SourceDataType = builder::DataType<SOURCE_TYPE>;
+    using AbstractDataType = builder::DataType<ABSTRACT_TYPE>;
     using TargetElementDataType = builder::DataType<typename TargetDataType::ElementType>;
     return {
         TargetDataType::Name(),         // target_type_name
@@ -173,8 +173,8 @@ Data Types() {
         TargetDataType::AST,            // target_ast_ty
         TargetDataType::Sem,            // target_sem_ty
         TargetDataType::Expr,           // target_expr
-        SourceDataType::Name(),         // literal_type_name
-        SourceDataType::Expr,           // literal_builder
+        AbstractDataType::Name(),       // abstract_type_name
+        AbstractDataType::Expr,         // abstract_expr
         0_a,
         0.0,
     };
@@ -182,7 +182,7 @@ Data Types() {
 
 static std::ostream& operator<<(std::ostream& o, const Data& c) {
     auto print_value = [&](auto&& v) { o << v; };
-    o << "[" << c.target_type_name << " <- " << c.source_type_name << "] [";
+    o << "[" << c.target_type_name << " <- " << c.abstract_type_name << "] [";
     std::visit(print_value, c.materialized_value);
     o << " <- " << c.literal_value << "]";
     return o;
@@ -223,54 +223,54 @@ TEST_P(MaterializeAbstractNumeric, Test) {
 
     auto target_ty = [&] { return data.target_ast_ty(*this); };
     auto target_expr = [&] { return data.target_expr(*this, 42); };
-    auto* literal = data.source_builder(*this, data.literal_value);
+    auto* abstract_expr = data.abstract_expr(*this, data.literal_value);
     switch (method) {
         case Method::kVar:
-            WrapInFunction(Decl(Var("a", target_ty(), literal)));
+            WrapInFunction(Decl(Var("a", target_ty(), abstract_expr)));
             break;
         case Method::kLet:
-            WrapInFunction(Decl(Let("a", target_ty(), literal)));
+            WrapInFunction(Decl(Let("a", target_ty(), abstract_expr)));
             break;
         case Method::kFnArg:
             Func("F", {Param("P", target_ty())}, ty.void_(), {});
-            WrapInFunction(CallStmt(Call("F", literal)));
+            WrapInFunction(CallStmt(Call("F", abstract_expr)));
             break;
         case Method::kBuiltinArg:
-            WrapInFunction(CallStmt(Call("min", target_expr(), literal)));
+            WrapInFunction(CallStmt(Call("min", target_expr(), abstract_expr)));
             break;
         case Method::kReturn:
-            Func("F", {}, target_ty(), {Return(literal)});
+            Func("F", {}, target_ty(), {Return(abstract_expr)});
             break;
         case Method::kArray:
-            WrapInFunction(Construct(ty.array(target_ty(), 1_i), literal));
+            WrapInFunction(Construct(ty.array(target_ty(), 1_i), abstract_expr));
             break;
         case Method::kStruct:
             Structure("S", {Member("v", target_ty())});
-            WrapInFunction(Construct(ty.type_name("S"), literal));
+            WrapInFunction(Construct(ty.type_name("S"), abstract_expr));
             break;
         case Method::kBinaryOp:
-            WrapInFunction(Add(target_expr(), literal));
+            WrapInFunction(Add(target_expr(), abstract_expr));
             break;
         case Method::kSwitchCond:
-            WrapInFunction(Switch(literal,                                               //
+            WrapInFunction(Switch(abstract_expr,                                         //
                                   Case(target_expr()->As<ast::IntLiteralExpression>()),  //
                                   DefaultCase()));
             break;
         case Method::kSwitchCase:
-            WrapInFunction(Switch(target_expr(),                                   //
-                                  Case(literal->As<ast::IntLiteralExpression>()),  //
+            WrapInFunction(Switch(target_expr(),                                         //
+                                  Case(abstract_expr->As<ast::IntLiteralExpression>()),  //
                                   DefaultCase()));
             break;
         case Method::kSwitchCondWithAbstractCase:
-            WrapInFunction(Switch(literal,                                               //
+            WrapInFunction(Switch(abstract_expr,                                         //
                                   Case(Expr(123_a)),                                     //
                                   Case(target_expr()->As<ast::IntLiteralExpression>()),  //
                                   DefaultCase()));
             break;
         case Method::kSwitchCaseWithAbstractCase:
-            WrapInFunction(Switch(target_expr(),                                   //
-                                  Case(Expr(123_a)),                               //
-                                  Case(literal->As<ast::IntLiteralExpression>()),  //
+            WrapInFunction(Switch(target_expr(),                                         //
+                                  Case(Expr(123_a)),                                     //
+                                  Case(abstract_expr->As<ast::IntLiteralExpression>()),  //
                                   DefaultCase()));
             break;
     }
@@ -296,14 +296,14 @@ TEST_P(MaterializeAbstractNumeric, Test) {
     switch (expectation) {
         case Expectation::kMaterialize: {
             ASSERT_TRUE(r()->Resolve()) << r()->error();
-            auto* materialize = Sem().Get<sem::Materialize>(literal);
+            auto* materialize = Sem().Get<sem::Materialize>(abstract_expr);
             ASSERT_NE(materialize, nullptr);
             check_types_and_values(materialize);
             break;
         }
         case Expectation::kNoMaterialize: {
             ASSERT_TRUE(r()->Resolve()) << r()->error();
-            auto* sem = Sem().Get(literal);
+            auto* sem = Sem().Get(abstract_expr);
             ASSERT_NE(sem, nullptr);
             EXPECT_FALSE(sem->Is<sem::Materialize>());
             check_types_and_values(sem);
@@ -315,14 +315,14 @@ TEST_P(MaterializeAbstractNumeric, Test) {
             switch (method) {
                 case Method::kBuiltinArg:
                     expect = "error: no matching call to min(" + data.target_type_name + ", " +
-                             data.source_type_name + ")";
+                             data.abstract_type_name + ")";
                     break;
                 case Method::kBinaryOp:
                     expect = "error: no matching overload for operator + (" +
-                             data.target_type_name + ", " + data.source_type_name + ")";
+                             data.target_type_name + ", " + data.abstract_type_name + ")";
                     break;
                 default:
-                    expect = "error: cannot convert value of type '" + data.source_type_name +
+                    expect = "error: cannot convert value of type '" + data.abstract_type_name +
                              "' to type '" + data.target_type_name + "'";
                     break;
             }
