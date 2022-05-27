@@ -22,7 +22,7 @@ namespace gpu_info {
 namespace {
 // Intel
 // Referenced from the following Mesa source code:
-// https://github.com/mesa3d/mesa/blob/master/include/pci_ids/i965_pci_ids.h
+// https://github.com/mesa3d/mesa/blob/main/include/pci_ids/iris_pci_ids.h
 // gen9
 const std::array<uint32_t, 25> Skylake = {{0x1902, 0x1906, 0x190A, 0x190B, 0x190E, 0x1912, 0x1913,
                                            0x1915, 0x1916, 0x1917, 0x191A, 0x191B, 0x191D, 0x191E,
