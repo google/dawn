@@ -15,18 +15,64 @@
 #include "dawn/native/vulkan/VulkanFunctions.h"
 
 #include <string>
+#include <utility>
 
 #include "dawn/common/DynamicLib.h"
 #include "dawn/native/vulkan/VulkanInfo.h"
 
 namespace dawn::native::vulkan {
 
-#define GET_GLOBAL_PROC(name)                                                              \
-    do {                                                                                   \
-        name = reinterpret_cast<decltype(name)>(GetInstanceProcAddr(nullptr, "vk" #name)); \
-        if (name == nullptr) {                                                             \
-            return DAWN_INTERNAL_ERROR(std::string("Couldn't get proc vk") + #name);       \
-        }                                                                                  \
+namespace {
+
+#if DAWN_NO_SANITIZE_VK_FN
+
+template <typename F>
+struct AsVkNoSanitizeFn;
+
+// SwiftShader does not export function pointer type information.
+// So, when fuzzing with UBSAN, fuzzers break whenever calling
+// a vk* function since it thinks the type of the function pointer
+// does not match. Context: crbug.com/1296934.
+
+// Workaround this problem by proxying through a std::function
+// in UBSAN builds. The std::function delegates to a Call method
+// which does the same cast of the function pointer type, however
+// the Call method is tagged with
+// `__attribute__((no_sanitize("function")))` to silence the error.
+template <typename R, typename... Args>
+struct AsVkNoSanitizeFn<R(VKAPI_PTR*)(Args...)> {
+    auto operator()(void(VKAPI_PTR* addr)()) {
+        return [addr](Args&&... args) -> R { return Call(addr, std::forward<Args>(args)...); };
+    }
+
+  private:
+    __attribute__((no_sanitize("function"))) static R Call(void(VKAPI_PTR* addr)(),
+                                                           Args&&... args) {
+        return reinterpret_cast<R(VKAPI_PTR*)(Args...)>(addr)(std::forward<Args>(args)...);
+    }
+};
+template <typename F>
+auto AsVkFn(void(VKAPI_PTR* addr)()) {
+    return AsVkNoSanitizeFn<F>{}(addr);
+}
+
+#else
+
+template <typename F>
+F AsVkFn(void(VKAPI_PTR* addr)()) {
+    return reinterpret_cast<F>(addr);
+}
+
+#endif
+
+}  // anonymous namespace
+
+#define GET_GLOBAL_PROC(name)                                                        \
+    do {                                                                             \
+        name = AsVkFn<PFN_vk##name>(GetInstanceProcAddr(nullptr, "vk" #name));       \
+        if (name == nullptr) {                                                       \
+            return DAWN_INTERNAL_ERROR(std::string("Couldn't get proc vk") + #name); \
+        }                                                                            \
     } while (0)
 
 MaybeError VulkanFunctions::LoadGlobalProcs(const DynamicLib& vulkanLib) {
@@ -39,18 +85,18 @@ MaybeError VulkanFunctions::LoadGlobalProcs(const DynamicLib& vulkanLib) {
     GET_GLOBAL_PROC(EnumerateInstanceLayerProperties);
 
     // Is not available in Vulkan 1.0, so allow nullptr
-    EnumerateInstanceVersion = reinterpret_cast<decltype(EnumerateInstanceVersion)>(
+    EnumerateInstanceVersion = AsVkFn<PFN_vkEnumerateInstanceVersion>(
         GetInstanceProcAddr(nullptr, "vkEnumerateInstanceVersion"));
 
     return {};
 }
 
-#define GET_INSTANCE_PROC_BASE(name, procName)                                                  \
-    do {                                                                                        \
-        name = reinterpret_cast<decltype(name)>(GetInstanceProcAddr(instance, "vk" #procName)); \
-        if (name == nullptr) {                                                                  \
-            return DAWN_INTERNAL_ERROR(std::string("Couldn't get proc vk") + #procName);        \
-        }                                                                                       \
+#define GET_INSTANCE_PROC_BASE(name, procName)                                           \
+    do {                                                                                 \
+        name = AsVkFn<PFN_vk##name>(GetInstanceProcAddr(instance, "vk" #procName));      \
+        if (name == nullptr) {                                                           \
+            return DAWN_INTERNAL_ERROR(std::string("Couldn't get proc vk") + #procName); \
+        }                                                                                \
     } while (0)
 
 #define GET_INSTANCE_PROC(name) GET_INSTANCE_PROC_BASE(name, name)
@@ -168,12 +214,12 @@ MaybeError VulkanFunctions::LoadInstanceProcs(VkInstance instance,
     return {};
 }
 
-#define GET_DEVICE_PROC(name)                                                           \
-    do {                                                                                \
-        name = reinterpret_cast<decltype(name)>(GetDeviceProcAddr(device, "vk" #name)); \
-        if (name == nullptr) {                                                          \
-            return DAWN_INTERNAL_ERROR(std::string("Couldn't get proc vk") + #name);    \
-        }                                                                               \
+#define GET_DEVICE_PROC(name)                                                        \
+    do {                                                                             \
+        name = AsVkFn<PFN_vk##name>(GetDeviceProcAddr(device, "vk" #name));          \
+        if (name == nullptr) {                                                       \
+            return DAWN_INTERNAL_ERROR(std::string("Couldn't get proc vk") + #name); \
+        }                                                                            \
     } while (0)
 
 MaybeError VulkanFunctions::LoadDeviceProcs(VkDevice device, const VulkanDeviceInfo& deviceInfo) {

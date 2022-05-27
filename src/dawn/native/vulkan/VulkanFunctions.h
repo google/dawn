@@ -26,6 +26,30 @@ namespace dawn::native::vulkan {
 struct VulkanGlobalInfo;
 struct VulkanDeviceInfo;
 
+#if defined(UNDEFINED_SANITIZER) && defined(DAWN_COMPILER_CLANG)
+#define DAWN_NO_SANITIZE_VK_FN 1
+#else
+#define DAWN_NO_SANITIZE_VK_FN 0
+#endif
+
+template <typename F>
+struct VkFnImpl;
+
+// Override the type of Vulkan functions to be a bound std::function if
+// DAWN_NO_SANITIZE_VK_FN is set. See comment at AsVkNoSanitizeFn in VulkanFunctions.cpp
+// for more information.
+template <typename R, typename... Args>
+struct VkFnImpl<R(VKAPI_PTR*)(Args...)> {
+#if DAWN_NO_SANITIZE_VK_FN
+    using type = std::function<R(Args...)>;
+#else
+    using type = R(VKAPI_PTR*)(Args...);
+#endif
+};
+
+template <typename F>
+using VkFn = typename VkFnImpl<F>::type;
+
 // Stores the Vulkan entry points. Also loads them from the dynamic library
 // and the vkGet*ProcAddress entry points.
 struct VulkanFunctions {
@@ -38,261 +62,268 @@ struct VulkanFunctions {
     // Initial proc from which we can get all the others
     PFN_vkGetInstanceProcAddr GetInstanceProcAddr = nullptr;
 
-    PFN_vkCreateInstance CreateInstance = nullptr;
-    PFN_vkEnumerateInstanceExtensionProperties EnumerateInstanceExtensionProperties = nullptr;
-    PFN_vkEnumerateInstanceLayerProperties EnumerateInstanceLayerProperties = nullptr;
+    VkFn<PFN_vkCreateInstance> CreateInstance = nullptr;
+    VkFn<PFN_vkEnumerateInstanceExtensionProperties> EnumerateInstanceExtensionProperties = nullptr;
+    VkFn<PFN_vkEnumerateInstanceLayerProperties> EnumerateInstanceLayerProperties = nullptr;
     // DestroyInstance isn't technically a global proc but we want to be able to use it
     // before querying the instance procs in case we need to error out during initialization.
-    PFN_vkDestroyInstance DestroyInstance = nullptr;
+    VkFn<PFN_vkDestroyInstance> DestroyInstance = nullptr;
 
     // Core Vulkan 1.1
-    PFN_vkEnumerateInstanceVersion EnumerateInstanceVersion = nullptr;
+    VkFn<PFN_vkEnumerateInstanceVersion> EnumerateInstanceVersion = nullptr;
 
     // ---------- Instance procs
 
     // Core Vulkan 1.0
-    PFN_vkCreateDevice CreateDevice = nullptr;
-    PFN_vkEnumerateDeviceExtensionProperties EnumerateDeviceExtensionProperties = nullptr;
-    PFN_vkEnumerateDeviceLayerProperties EnumerateDeviceLayerProperties = nullptr;
-    PFN_vkEnumeratePhysicalDevices EnumeratePhysicalDevices = nullptr;
-    PFN_vkGetDeviceProcAddr GetDeviceProcAddr = nullptr;
-    PFN_vkGetPhysicalDeviceFeatures GetPhysicalDeviceFeatures = nullptr;
-    PFN_vkGetPhysicalDeviceFormatProperties GetPhysicalDeviceFormatProperties = nullptr;
-    PFN_vkGetPhysicalDeviceImageFormatProperties GetPhysicalDeviceImageFormatProperties = nullptr;
-    PFN_vkGetPhysicalDeviceMemoryProperties GetPhysicalDeviceMemoryProperties = nullptr;
-    PFN_vkGetPhysicalDeviceProperties GetPhysicalDeviceProperties = nullptr;
-    PFN_vkGetPhysicalDeviceQueueFamilyProperties GetPhysicalDeviceQueueFamilyProperties = nullptr;
-    PFN_vkGetPhysicalDeviceSparseImageFormatProperties
+    VkFn<PFN_vkCreateDevice> CreateDevice = nullptr;
+    VkFn<PFN_vkEnumerateDeviceExtensionProperties> EnumerateDeviceExtensionProperties = nullptr;
+    VkFn<PFN_vkEnumerateDeviceLayerProperties> EnumerateDeviceLayerProperties = nullptr;
+    VkFn<PFN_vkEnumeratePhysicalDevices> EnumeratePhysicalDevices = nullptr;
+    VkFn<PFN_vkGetDeviceProcAddr> GetDeviceProcAddr = nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceFeatures> GetPhysicalDeviceFeatures = nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceFormatProperties> GetPhysicalDeviceFormatProperties = nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceImageFormatProperties> GetPhysicalDeviceImageFormatProperties =
+        nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceMemoryProperties> GetPhysicalDeviceMemoryProperties = nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceProperties> GetPhysicalDeviceProperties = nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceQueueFamilyProperties> GetPhysicalDeviceQueueFamilyProperties =
+        nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceSparseImageFormatProperties>
         GetPhysicalDeviceSparseImageFormatProperties = nullptr;
     // Not technically an instance proc but we want to be able to use it as soon as the
     // device is created.
-    PFN_vkDestroyDevice DestroyDevice = nullptr;
+    VkFn<PFN_vkDestroyDevice> DestroyDevice = nullptr;
 
     // VK_EXT_debug_utils
-    PFN_vkCmdBeginDebugUtilsLabelEXT CmdBeginDebugUtilsLabelEXT = nullptr;
-    PFN_vkCmdEndDebugUtilsLabelEXT CmdEndDebugUtilsLabelEXT = nullptr;
-    PFN_vkCmdInsertDebugUtilsLabelEXT CmdInsertDebugUtilsLabelEXT = nullptr;
-    PFN_vkCreateDebugUtilsMessengerEXT CreateDebugUtilsMessengerEXT = nullptr;
-    PFN_vkDestroyDebugUtilsMessengerEXT DestroyDebugUtilsMessengerEXT = nullptr;
-    PFN_vkQueueBeginDebugUtilsLabelEXT QueueBeginDebugUtilsLabelEXT = nullptr;
-    PFN_vkQueueEndDebugUtilsLabelEXT QueueEndDebugUtilsLabelEXT = nullptr;
-    PFN_vkQueueInsertDebugUtilsLabelEXT QueueInsertDebugUtilsLabelEXT = nullptr;
-    PFN_vkSetDebugUtilsObjectNameEXT SetDebugUtilsObjectNameEXT = nullptr;
-    PFN_vkSetDebugUtilsObjectTagEXT SetDebugUtilsObjectTagEXT = nullptr;
-    PFN_vkSubmitDebugUtilsMessageEXT SubmitDebugUtilsMessageEXT = nullptr;
+    VkFn<PFN_vkCmdBeginDebugUtilsLabelEXT> CmdBeginDebugUtilsLabelEXT = nullptr;
+    VkFn<PFN_vkCmdEndDebugUtilsLabelEXT> CmdEndDebugUtilsLabelEXT = nullptr;
+    VkFn<PFN_vkCmdInsertDebugUtilsLabelEXT> CmdInsertDebugUtilsLabelEXT = nullptr;
+    VkFn<PFN_vkCreateDebugUtilsMessengerEXT> CreateDebugUtilsMessengerEXT = nullptr;
+    VkFn<PFN_vkDestroyDebugUtilsMessengerEXT> DestroyDebugUtilsMessengerEXT = nullptr;
+    VkFn<PFN_vkQueueBeginDebugUtilsLabelEXT> QueueBeginDebugUtilsLabelEXT = nullptr;
+    VkFn<PFN_vkQueueEndDebugUtilsLabelEXT> QueueEndDebugUtilsLabelEXT = nullptr;
+    VkFn<PFN_vkQueueInsertDebugUtilsLabelEXT> QueueInsertDebugUtilsLabelEXT = nullptr;
+    VkFn<PFN_vkSetDebugUtilsObjectNameEXT> SetDebugUtilsObjectNameEXT = nullptr;
+    VkFn<PFN_vkSetDebugUtilsObjectTagEXT> SetDebugUtilsObjectTagEXT = nullptr;
+    VkFn<PFN_vkSubmitDebugUtilsMessageEXT> SubmitDebugUtilsMessageEXT = nullptr;
 
     // VK_KHR_surface
-    PFN_vkDestroySurfaceKHR DestroySurfaceKHR = nullptr;
-    PFN_vkGetPhysicalDeviceSurfaceSupportKHR GetPhysicalDeviceSurfaceSupportKHR = nullptr;
-    PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR GetPhysicalDeviceSurfaceCapabilitiesKHR = nullptr;
-    PFN_vkGetPhysicalDeviceSurfaceFormatsKHR GetPhysicalDeviceSurfaceFormatsKHR = nullptr;
-    PFN_vkGetPhysicalDeviceSurfacePresentModesKHR GetPhysicalDeviceSurfacePresentModesKHR = nullptr;
+    VkFn<PFN_vkDestroySurfaceKHR> DestroySurfaceKHR = nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceSurfaceSupportKHR> GetPhysicalDeviceSurfaceSupportKHR = nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR> GetPhysicalDeviceSurfaceCapabilitiesKHR =
+        nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceSurfaceFormatsKHR> GetPhysicalDeviceSurfaceFormatsKHR = nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceSurfacePresentModesKHR> GetPhysicalDeviceSurfacePresentModesKHR =
+        nullptr;
 
     // Core Vulkan 1.1 promoted extensions, set if either the core version or the extension is
     // present.
 
     // VK_KHR_external_memory_capabilities
-    PFN_vkGetPhysicalDeviceExternalBufferProperties GetPhysicalDeviceExternalBufferProperties =
-        nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceExternalBufferProperties>
+        GetPhysicalDeviceExternalBufferProperties = nullptr;
 
     // VK_KHR_external_semaphore_capabilities
-    PFN_vkGetPhysicalDeviceExternalSemaphoreProperties
+    VkFn<PFN_vkGetPhysicalDeviceExternalSemaphoreProperties>
         GetPhysicalDeviceExternalSemaphoreProperties = nullptr;
 
     // VK_KHR_get_physical_device_properties2
-    PFN_vkGetPhysicalDeviceFeatures2 GetPhysicalDeviceFeatures2 = nullptr;
-    PFN_vkGetPhysicalDeviceProperties2 GetPhysicalDeviceProperties2 = nullptr;
-    PFN_vkGetPhysicalDeviceFormatProperties2 GetPhysicalDeviceFormatProperties2 = nullptr;
-    PFN_vkGetPhysicalDeviceImageFormatProperties2 GetPhysicalDeviceImageFormatProperties2 = nullptr;
-    PFN_vkGetPhysicalDeviceQueueFamilyProperties2 GetPhysicalDeviceQueueFamilyProperties2 = nullptr;
-    PFN_vkGetPhysicalDeviceMemoryProperties2 GetPhysicalDeviceMemoryProperties2 = nullptr;
-    PFN_vkGetPhysicalDeviceSparseImageFormatProperties2
+    VkFn<PFN_vkGetPhysicalDeviceFeatures2> GetPhysicalDeviceFeatures2 = nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceProperties2> GetPhysicalDeviceProperties2 = nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceFormatProperties2> GetPhysicalDeviceFormatProperties2 = nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceImageFormatProperties2> GetPhysicalDeviceImageFormatProperties2 =
+        nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceQueueFamilyProperties2> GetPhysicalDeviceQueueFamilyProperties2 =
+        nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceMemoryProperties2> GetPhysicalDeviceMemoryProperties2 = nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceSparseImageFormatProperties2>
         GetPhysicalDeviceSparseImageFormatProperties2 = nullptr;
 
 #if defined(VK_USE_PLATFORM_FUCHSIA)
     // FUCHSIA_image_pipe_surface
-    PFN_vkCreateImagePipeSurfaceFUCHSIA CreateImagePipeSurfaceFUCHSIA = nullptr;
+    VkFn<PFN_vkCreateImagePipeSurfaceFUCHSIA> CreateImagePipeSurfaceFUCHSIA = nullptr;
 #endif  // defined(VK_USE_PLATFORM_FUCHSIA)
 
 #if defined(DAWN_ENABLE_BACKEND_METAL)
     // EXT_metal_surface
-    PFN_vkCreateMetalSurfaceEXT CreateMetalSurfaceEXT = nullptr;
+    VkFn<PFN_vkCreateMetalSurfaceEXT> CreateMetalSurfaceEXT = nullptr;
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
 #if defined(DAWN_PLATFORM_WINDOWS)
     // KHR_win32_surface
-    PFN_vkCreateWin32SurfaceKHR CreateWin32SurfaceKHR = nullptr;
-    PFN_vkGetPhysicalDeviceWin32PresentationSupportKHR
+    VkFn<PFN_vkCreateWin32SurfaceKHR> CreateWin32SurfaceKHR = nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceWin32PresentationSupportKHR>
         GetPhysicalDeviceWin32PresentationSupportKHR = nullptr;
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
 
 #if defined(DAWN_PLATFORM_ANDROID)
-    PFN_vkCreateAndroidSurfaceKHR CreateAndroidSurfaceKHR = nullptr;
+    VkFn<PFN_vkCreateAndroidSurfaceKHR> CreateAndroidSurfaceKHR = nullptr;
 #endif  // defined(DAWN_PLATFORM_ANDROID)
 
 #if defined(DAWN_USE_X11)
     // KHR_xlib_surface
-    PFN_vkCreateXlibSurfaceKHR CreateXlibSurfaceKHR = nullptr;
-    PFN_vkGetPhysicalDeviceXlibPresentationSupportKHR GetPhysicalDeviceXlibPresentationSupportKHR =
-        nullptr;
+    VkFn<PFN_vkCreateXlibSurfaceKHR> CreateXlibSurfaceKHR = nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceXlibPresentationSupportKHR>
+        GetPhysicalDeviceXlibPresentationSupportKHR = nullptr;
 
     // KHR_xcb_surface
-    PFN_vkCreateXcbSurfaceKHR CreateXcbSurfaceKHR = nullptr;
-    PFN_vkGetPhysicalDeviceXcbPresentationSupportKHR GetPhysicalDeviceXcbPresentationSupportKHR =
-        nullptr;
+    VkFn<PFN_vkCreateXcbSurfaceKHR> CreateXcbSurfaceKHR = nullptr;
+    VkFn<PFN_vkGetPhysicalDeviceXcbPresentationSupportKHR>
+        GetPhysicalDeviceXcbPresentationSupportKHR = nullptr;
 #endif  // defined(DAWN_USE_X11)
 
     // ---------- Device procs
 
     // Core Vulkan 1.0
-    PFN_vkAllocateCommandBuffers AllocateCommandBuffers = nullptr;
-    PFN_vkAllocateDescriptorSets AllocateDescriptorSets = nullptr;
-    PFN_vkAllocateMemory AllocateMemory = nullptr;
-    PFN_vkBeginCommandBuffer BeginCommandBuffer = nullptr;
-    PFN_vkBindBufferMemory BindBufferMemory = nullptr;
-    PFN_vkBindImageMemory BindImageMemory = nullptr;
-    PFN_vkCmdBeginQuery CmdBeginQuery = nullptr;
-    PFN_vkCmdBeginRenderPass CmdBeginRenderPass = nullptr;
-    PFN_vkCmdBindDescriptorSets CmdBindDescriptorSets = nullptr;
-    PFN_vkCmdBindIndexBuffer CmdBindIndexBuffer = nullptr;
-    PFN_vkCmdBindPipeline CmdBindPipeline = nullptr;
-    PFN_vkCmdBindVertexBuffers CmdBindVertexBuffers = nullptr;
-    PFN_vkCmdBlitImage CmdBlitImage = nullptr;
-    PFN_vkCmdClearAttachments CmdClearAttachments = nullptr;
-    PFN_vkCmdClearColorImage CmdClearColorImage = nullptr;
-    PFN_vkCmdClearDepthStencilImage CmdClearDepthStencilImage = nullptr;
-    PFN_vkCmdCopyBuffer CmdCopyBuffer = nullptr;
-    PFN_vkCmdCopyBufferToImage CmdCopyBufferToImage = nullptr;
-    PFN_vkCmdCopyImage CmdCopyImage = nullptr;
-    PFN_vkCmdCopyImageToBuffer CmdCopyImageToBuffer = nullptr;
-    PFN_vkCmdCopyQueryPoolResults CmdCopyQueryPoolResults = nullptr;
-    PFN_vkCmdDispatch CmdDispatch = nullptr;
-    PFN_vkCmdDispatchIndirect CmdDispatchIndirect = nullptr;
-    PFN_vkCmdDraw CmdDraw = nullptr;
-    PFN_vkCmdDrawIndexed CmdDrawIndexed = nullptr;
-    PFN_vkCmdDrawIndexedIndirect CmdDrawIndexedIndirect = nullptr;
-    PFN_vkCmdDrawIndirect CmdDrawIndirect = nullptr;
-    PFN_vkCmdEndQuery CmdEndQuery = nullptr;
-    PFN_vkCmdEndRenderPass CmdEndRenderPass = nullptr;
-    PFN_vkCmdExecuteCommands CmdExecuteCommands = nullptr;
-    PFN_vkCmdFillBuffer CmdFillBuffer = nullptr;
-    PFN_vkCmdNextSubpass CmdNextSubpass = nullptr;
-    PFN_vkCmdPipelineBarrier CmdPipelineBarrier = nullptr;
-    PFN_vkCmdPushConstants CmdPushConstants = nullptr;
-    PFN_vkCmdResetEvent CmdResetEvent = nullptr;
-    PFN_vkCmdResetQueryPool CmdResetQueryPool = nullptr;
-    PFN_vkCmdResolveImage CmdResolveImage = nullptr;
-    PFN_vkCmdSetBlendConstants CmdSetBlendConstants = nullptr;
-    PFN_vkCmdSetDepthBias CmdSetDepthBias = nullptr;
-    PFN_vkCmdSetDepthBounds CmdSetDepthBounds = nullptr;
-    PFN_vkCmdSetEvent CmdSetEvent = nullptr;
-    PFN_vkCmdSetLineWidth CmdSetLineWidth = nullptr;
-    PFN_vkCmdSetScissor CmdSetScissor = nullptr;
-    PFN_vkCmdSetStencilCompareMask CmdSetStencilCompareMask = nullptr;
-    PFN_vkCmdSetStencilReference CmdSetStencilReference = nullptr;
-    PFN_vkCmdSetStencilWriteMask CmdSetStencilWriteMask = nullptr;
-    PFN_vkCmdSetViewport CmdSetViewport = nullptr;
-    PFN_vkCmdUpdateBuffer CmdUpdateBuffer = nullptr;
-    PFN_vkCmdWaitEvents CmdWaitEvents = nullptr;
-    PFN_vkCmdWriteTimestamp CmdWriteTimestamp = nullptr;
-    PFN_vkCreateBuffer CreateBuffer = nullptr;
-    PFN_vkCreateBufferView CreateBufferView = nullptr;
-    PFN_vkCreateCommandPool CreateCommandPool = nullptr;
-    PFN_vkCreateComputePipelines CreateComputePipelines = nullptr;
-    PFN_vkCreateDescriptorPool CreateDescriptorPool = nullptr;
-    PFN_vkCreateDescriptorSetLayout CreateDescriptorSetLayout = nullptr;
-    PFN_vkCreateEvent CreateEvent = nullptr;
-    PFN_vkCreateFence CreateFence = nullptr;
-    PFN_vkCreateFramebuffer CreateFramebuffer = nullptr;
-    PFN_vkCreateGraphicsPipelines CreateGraphicsPipelines = nullptr;
-    PFN_vkCreateImage CreateImage = nullptr;
-    PFN_vkCreateImageView CreateImageView = nullptr;
-    PFN_vkCreatePipelineCache CreatePipelineCache = nullptr;
-    PFN_vkCreatePipelineLayout CreatePipelineLayout = nullptr;
-    PFN_vkCreateQueryPool CreateQueryPool = nullptr;
-    PFN_vkCreateRenderPass CreateRenderPass = nullptr;
-    PFN_vkCreateSampler CreateSampler = nullptr;
-    PFN_vkCreateSemaphore CreateSemaphore = nullptr;
-    PFN_vkCreateShaderModule CreateShaderModule = nullptr;
-    PFN_vkDestroyBuffer DestroyBuffer = nullptr;
-    PFN_vkDestroyBufferView DestroyBufferView = nullptr;
-    PFN_vkDestroyCommandPool DestroyCommandPool = nullptr;
-    PFN_vkDestroyDescriptorPool DestroyDescriptorPool = nullptr;
-    PFN_vkDestroyDescriptorSetLayout DestroyDescriptorSetLayout = nullptr;
-    PFN_vkDestroyEvent DestroyEvent = nullptr;
-    PFN_vkDestroyFence DestroyFence = nullptr;
-    PFN_vkDestroyFramebuffer DestroyFramebuffer = nullptr;
-    PFN_vkDestroyImage DestroyImage = nullptr;
-    PFN_vkDestroyImageView DestroyImageView = nullptr;
-    PFN_vkDestroyPipeline DestroyPipeline = nullptr;
-    PFN_vkDestroyPipelineCache DestroyPipelineCache = nullptr;
-    PFN_vkDestroyPipelineLayout DestroyPipelineLayout = nullptr;
-    PFN_vkDestroyQueryPool DestroyQueryPool = nullptr;
-    PFN_vkDestroyRenderPass DestroyRenderPass = nullptr;
-    PFN_vkDestroySampler DestroySampler = nullptr;
-    PFN_vkDestroySemaphore DestroySemaphore = nullptr;
-    PFN_vkDestroyShaderModule DestroyShaderModule = nullptr;
-    PFN_vkDeviceWaitIdle DeviceWaitIdle = nullptr;
-    PFN_vkEndCommandBuffer EndCommandBuffer = nullptr;
-    PFN_vkFlushMappedMemoryRanges FlushMappedMemoryRanges = nullptr;
-    PFN_vkFreeCommandBuffers FreeCommandBuffers = nullptr;
-    PFN_vkFreeDescriptorSets FreeDescriptorSets = nullptr;
-    PFN_vkFreeMemory FreeMemory = nullptr;
-    PFN_vkGetBufferMemoryRequirements GetBufferMemoryRequirements = nullptr;
-    PFN_vkGetDeviceMemoryCommitment GetDeviceMemoryCommitment = nullptr;
-    PFN_vkGetDeviceQueue GetDeviceQueue = nullptr;
-    PFN_vkGetEventStatus GetEventStatus = nullptr;
-    PFN_vkGetFenceStatus GetFenceStatus = nullptr;
-    PFN_vkGetImageMemoryRequirements GetImageMemoryRequirements = nullptr;
-    PFN_vkGetImageSparseMemoryRequirements GetImageSparseMemoryRequirements = nullptr;
-    PFN_vkGetImageSubresourceLayout GetImageSubresourceLayout = nullptr;
-    PFN_vkGetPipelineCacheData GetPipelineCacheData = nullptr;
-    PFN_vkGetQueryPoolResults GetQueryPoolResults = nullptr;
-    PFN_vkGetRenderAreaGranularity GetRenderAreaGranularity = nullptr;
-    PFN_vkInvalidateMappedMemoryRanges InvalidateMappedMemoryRanges = nullptr;
-    PFN_vkMapMemory MapMemory = nullptr;
-    PFN_vkMergePipelineCaches MergePipelineCaches = nullptr;
-    PFN_vkQueueBindSparse QueueBindSparse = nullptr;
-    PFN_vkQueueSubmit QueueSubmit = nullptr;
-    PFN_vkQueueWaitIdle QueueWaitIdle = nullptr;
-    PFN_vkResetCommandBuffer ResetCommandBuffer = nullptr;
-    PFN_vkResetCommandPool ResetCommandPool = nullptr;
-    PFN_vkResetDescriptorPool ResetDescriptorPool = nullptr;
-    PFN_vkResetEvent ResetEvent = nullptr;
-    PFN_vkResetFences ResetFences = nullptr;
-    PFN_vkSetEvent SetEvent = nullptr;
-    PFN_vkUnmapMemory UnmapMemory = nullptr;
-    PFN_vkUpdateDescriptorSets UpdateDescriptorSets = nullptr;
-    PFN_vkWaitForFences WaitForFences = nullptr;
+    VkFn<PFN_vkAllocateCommandBuffers> AllocateCommandBuffers = nullptr;
+    VkFn<PFN_vkAllocateDescriptorSets> AllocateDescriptorSets = nullptr;
+    VkFn<PFN_vkAllocateMemory> AllocateMemory = nullptr;
+    VkFn<PFN_vkBeginCommandBuffer> BeginCommandBuffer = nullptr;
+    VkFn<PFN_vkBindBufferMemory> BindBufferMemory = nullptr;
+    VkFn<PFN_vkBindImageMemory> BindImageMemory = nullptr;
+    VkFn<PFN_vkCmdBeginQuery> CmdBeginQuery = nullptr;
+    VkFn<PFN_vkCmdBeginRenderPass> CmdBeginRenderPass = nullptr;
+    VkFn<PFN_vkCmdBindDescriptorSets> CmdBindDescriptorSets = nullptr;
+    VkFn<PFN_vkCmdBindIndexBuffer> CmdBindIndexBuffer = nullptr;
+    VkFn<PFN_vkCmdBindPipeline> CmdBindPipeline = nullptr;
+    VkFn<PFN_vkCmdBindVertexBuffers> CmdBindVertexBuffers = nullptr;
+    VkFn<PFN_vkCmdBlitImage> CmdBlitImage = nullptr;
+    VkFn<PFN_vkCmdClearAttachments> CmdClearAttachments = nullptr;
+    VkFn<PFN_vkCmdClearColorImage> CmdClearColorImage = nullptr;
+    VkFn<PFN_vkCmdClearDepthStencilImage> CmdClearDepthStencilImage = nullptr;
+    VkFn<PFN_vkCmdCopyBuffer> CmdCopyBuffer = nullptr;
+    VkFn<PFN_vkCmdCopyBufferToImage> CmdCopyBufferToImage = nullptr;
+    VkFn<PFN_vkCmdCopyImage> CmdCopyImage = nullptr;
+    VkFn<PFN_vkCmdCopyImageToBuffer> CmdCopyImageToBuffer = nullptr;
+    VkFn<PFN_vkCmdCopyQueryPoolResults> CmdCopyQueryPoolResults = nullptr;
+    VkFn<PFN_vkCmdDispatch> CmdDispatch = nullptr;
+    VkFn<PFN_vkCmdDispatchIndirect> CmdDispatchIndirect = nullptr;
+    VkFn<PFN_vkCmdDraw> CmdDraw = nullptr;
+    VkFn<PFN_vkCmdDrawIndexed> CmdDrawIndexed = nullptr;
+    VkFn<PFN_vkCmdDrawIndexedIndirect> CmdDrawIndexedIndirect = nullptr;
+    VkFn<PFN_vkCmdDrawIndirect> CmdDrawIndirect = nullptr;
+    VkFn<PFN_vkCmdEndQuery> CmdEndQuery = nullptr;
+    VkFn<PFN_vkCmdEndRenderPass> CmdEndRenderPass = nullptr;
+    VkFn<PFN_vkCmdExecuteCommands> CmdExecuteCommands = nullptr;
+    VkFn<PFN_vkCmdFillBuffer> CmdFillBuffer = nullptr;
+    VkFn<PFN_vkCmdNextSubpass> CmdNextSubpass = nullptr;
+    VkFn<PFN_vkCmdPipelineBarrier> CmdPipelineBarrier = nullptr;
+    VkFn<PFN_vkCmdPushConstants> CmdPushConstants = nullptr;
+    VkFn<PFN_vkCmdResetEvent> CmdResetEvent = nullptr;
+    VkFn<PFN_vkCmdResetQueryPool> CmdResetQueryPool = nullptr;
+    VkFn<PFN_vkCmdResolveImage> CmdResolveImage = nullptr;
+    VkFn<PFN_vkCmdSetBlendConstants> CmdSetBlendConstants = nullptr;
+    VkFn<PFN_vkCmdSetDepthBias> CmdSetDepthBias = nullptr;
+    VkFn<PFN_vkCmdSetDepthBounds> CmdSetDepthBounds = nullptr;
+    VkFn<PFN_vkCmdSetEvent> CmdSetEvent = nullptr;
+    VkFn<PFN_vkCmdSetLineWidth> CmdSetLineWidth = nullptr;
+    VkFn<PFN_vkCmdSetScissor> CmdSetScissor = nullptr;
+    VkFn<PFN_vkCmdSetStencilCompareMask> CmdSetStencilCompareMask = nullptr;
+    VkFn<PFN_vkCmdSetStencilReference> CmdSetStencilReference = nullptr;
+    VkFn<PFN_vkCmdSetStencilWriteMask> CmdSetStencilWriteMask = nullptr;
+    VkFn<PFN_vkCmdSetViewport> CmdSetViewport = nullptr;
+    VkFn<PFN_vkCmdUpdateBuffer> CmdUpdateBuffer = nullptr;
+    VkFn<PFN_vkCmdWaitEvents> CmdWaitEvents = nullptr;
+    VkFn<PFN_vkCmdWriteTimestamp> CmdWriteTimestamp = nullptr;
+    VkFn<PFN_vkCreateBuffer> CreateBuffer = nullptr;
+    VkFn<PFN_vkCreateBufferView> CreateBufferView = nullptr;
+    VkFn<PFN_vkCreateCommandPool> CreateCommandPool = nullptr;
+    VkFn<PFN_vkCreateComputePipelines> CreateComputePipelines = nullptr;
+    VkFn<PFN_vkCreateDescriptorPool> CreateDescriptorPool = nullptr;
+    VkFn<PFN_vkCreateDescriptorSetLayout> CreateDescriptorSetLayout = nullptr;
+    VkFn<PFN_vkCreateEvent> CreateEvent = nullptr;
+    VkFn<PFN_vkCreateFence> CreateFence = nullptr;
+    VkFn<PFN_vkCreateFramebuffer> CreateFramebuffer = nullptr;
+    VkFn<PFN_vkCreateGraphicsPipelines> CreateGraphicsPipelines = nullptr;
+    VkFn<PFN_vkCreateImage> CreateImage = nullptr;
+    VkFn<PFN_vkCreateImageView> CreateImageView = nullptr;
+    VkFn<PFN_vkCreatePipelineCache> CreatePipelineCache = nullptr;
+    VkFn<PFN_vkCreatePipelineLayout> CreatePipelineLayout = nullptr;
+    VkFn<PFN_vkCreateQueryPool> CreateQueryPool = nullptr;
+    VkFn<PFN_vkCreateRenderPass> CreateRenderPass = nullptr;
+    VkFn<PFN_vkCreateSampler> CreateSampler = nullptr;
+    VkFn<PFN_vkCreateSemaphore> CreateSemaphore = nullptr;
+    VkFn<PFN_vkCreateShaderModule> CreateShaderModule = nullptr;
+    VkFn<PFN_vkDestroyBuffer> DestroyBuffer = nullptr;
+    VkFn<PFN_vkDestroyBufferView> DestroyBufferView = nullptr;
+    VkFn<PFN_vkDestroyCommandPool> DestroyCommandPool = nullptr;
+    VkFn<PFN_vkDestroyDescriptorPool> DestroyDescriptorPool = nullptr;
+    VkFn<PFN_vkDestroyDescriptorSetLayout> DestroyDescriptorSetLayout = nullptr;
+    VkFn<PFN_vkDestroyEvent> DestroyEvent = nullptr;
+    VkFn<PFN_vkDestroyFence> DestroyFence = nullptr;
+    VkFn<PFN_vkDestroyFramebuffer> DestroyFramebuffer = nullptr;
+    VkFn<PFN_vkDestroyImage> DestroyImage = nullptr;
+    VkFn<PFN_vkDestroyImageView> DestroyImageView = nullptr;
+    VkFn<PFN_vkDestroyPipeline> DestroyPipeline = nullptr;
+    VkFn<PFN_vkDestroyPipelineCache> DestroyPipelineCache = nullptr;
+    VkFn<PFN_vkDestroyPipelineLayout> DestroyPipelineLayout = nullptr;
+    VkFn<PFN_vkDestroyQueryPool> DestroyQueryPool = nullptr;
+    VkFn<PFN_vkDestroyRenderPass> DestroyRenderPass = nullptr;
+    VkFn<PFN_vkDestroySampler> DestroySampler = nullptr;
+    VkFn<PFN_vkDestroySemaphore> DestroySemaphore = nullptr;
+    VkFn<PFN_vkDestroyShaderModule> DestroyShaderModule = nullptr;
+    VkFn<PFN_vkDeviceWaitIdle> DeviceWaitIdle = nullptr;
+    VkFn<PFN_vkEndCommandBuffer> EndCommandBuffer = nullptr;
+    VkFn<PFN_vkFlushMappedMemoryRanges> FlushMappedMemoryRanges = nullptr;
+    VkFn<PFN_vkFreeCommandBuffers> FreeCommandBuffers = nullptr;
+    VkFn<PFN_vkFreeDescriptorSets> FreeDescriptorSets = nullptr;
+    VkFn<PFN_vkFreeMemory> FreeMemory = nullptr;
+    VkFn<PFN_vkGetBufferMemoryRequirements> GetBufferMemoryRequirements = nullptr;
+    VkFn<PFN_vkGetDeviceMemoryCommitment> GetDeviceMemoryCommitment = nullptr;
+    VkFn<PFN_vkGetDeviceQueue> GetDeviceQueue = nullptr;
+    VkFn<PFN_vkGetEventStatus> GetEventStatus = nullptr;
+    VkFn<PFN_vkGetFenceStatus> GetFenceStatus = nullptr;
+    VkFn<PFN_vkGetImageMemoryRequirements> GetImageMemoryRequirements = nullptr;
+    VkFn<PFN_vkGetImageSparseMemoryRequirements> GetImageSparseMemoryRequirements = nullptr;
+    VkFn<PFN_vkGetImageSubresourceLayout> GetImageSubresourceLayout = nullptr;
+    VkFn<PFN_vkGetPipelineCacheData> GetPipelineCacheData = nullptr;
+    VkFn<PFN_vkGetQueryPoolResults> GetQueryPoolResults = nullptr;
+    VkFn<PFN_vkGetRenderAreaGranularity> GetRenderAreaGranularity = nullptr;
+    VkFn<PFN_vkInvalidateMappedMemoryRanges> InvalidateMappedMemoryRanges = nullptr;
+    VkFn<PFN_vkMapMemory> MapMemory = nullptr;
+    VkFn<PFN_vkMergePipelineCaches> MergePipelineCaches = nullptr;
+    VkFn<PFN_vkQueueBindSparse> QueueBindSparse = nullptr;
+    VkFn<PFN_vkQueueSubmit> QueueSubmit = nullptr;
+    VkFn<PFN_vkQueueWaitIdle> QueueWaitIdle = nullptr;
+    VkFn<PFN_vkResetCommandBuffer> ResetCommandBuffer = nullptr;
+    VkFn<PFN_vkResetCommandPool> ResetCommandPool = nullptr;
+    VkFn<PFN_vkResetDescriptorPool> ResetDescriptorPool = nullptr;
+    VkFn<PFN_vkResetEvent> ResetEvent = nullptr;
+    VkFn<PFN_vkResetFences> ResetFences = nullptr;
+    VkFn<PFN_vkSetEvent> SetEvent = nullptr;
+    VkFn<PFN_vkUnmapMemory> UnmapMemory = nullptr;
+    VkFn<PFN_vkUpdateDescriptorSets> UpdateDescriptorSets = nullptr;
+    VkFn<PFN_vkWaitForFences> WaitForFences = nullptr;
 
     // VK_KHR_external_memory_fd
-    PFN_vkGetMemoryFdKHR GetMemoryFdKHR = nullptr;
-    PFN_vkGetMemoryFdPropertiesKHR GetMemoryFdPropertiesKHR = nullptr;
+    VkFn<PFN_vkGetMemoryFdKHR> GetMemoryFdKHR = nullptr;
+    VkFn<PFN_vkGetMemoryFdPropertiesKHR> GetMemoryFdPropertiesKHR = nullptr;
 
     // VK_KHR_external_semaphore_fd
-    PFN_vkImportSemaphoreFdKHR ImportSemaphoreFdKHR = nullptr;
-    PFN_vkGetSemaphoreFdKHR GetSemaphoreFdKHR = nullptr;
+    VkFn<PFN_vkImportSemaphoreFdKHR> ImportSemaphoreFdKHR = nullptr;
+    VkFn<PFN_vkGetSemaphoreFdKHR> GetSemaphoreFdKHR = nullptr;
 
     // VK_KHR_get_memory_requirements2
-    PFN_vkGetBufferMemoryRequirements2KHR GetBufferMemoryRequirements2 = nullptr;
-    PFN_vkGetImageMemoryRequirements2KHR GetImageMemoryRequirements2 = nullptr;
-    PFN_vkGetImageSparseMemoryRequirements2KHR GetImageSparseMemoryRequirements2 = nullptr;
+    VkFn<PFN_vkGetBufferMemoryRequirements2KHR> GetBufferMemoryRequirements2 = nullptr;
+    VkFn<PFN_vkGetImageMemoryRequirements2KHR> GetImageMemoryRequirements2 = nullptr;
+    VkFn<PFN_vkGetImageSparseMemoryRequirements2KHR> GetImageSparseMemoryRequirements2 = nullptr;
 
     // VK_KHR_swapchain
-    PFN_vkCreateSwapchainKHR CreateSwapchainKHR = nullptr;
-    PFN_vkDestroySwapchainKHR DestroySwapchainKHR = nullptr;
-    PFN_vkGetSwapchainImagesKHR GetSwapchainImagesKHR = nullptr;
-    PFN_vkAcquireNextImageKHR AcquireNextImageKHR = nullptr;
-    PFN_vkQueuePresentKHR QueuePresentKHR = nullptr;
+    VkFn<PFN_vkCreateSwapchainKHR> CreateSwapchainKHR = nullptr;
+    VkFn<PFN_vkDestroySwapchainKHR> DestroySwapchainKHR = nullptr;
+    VkFn<PFN_vkGetSwapchainImagesKHR> GetSwapchainImagesKHR = nullptr;
+    VkFn<PFN_vkAcquireNextImageKHR> AcquireNextImageKHR = nullptr;
+    VkFn<PFN_vkQueuePresentKHR> QueuePresentKHR = nullptr;
 
 #if VK_USE_PLATFORM_FUCHSIA
     // VK_FUCHSIA_external_memory
-    PFN_vkGetMemoryZirconHandleFUCHSIA GetMemoryZirconHandleFUCHSIA = nullptr;
-    PFN_vkGetMemoryZirconHandlePropertiesFUCHSIA GetMemoryZirconHandlePropertiesFUCHSIA = nullptr;
+    VkFn<PFN_vkGetMemoryZirconHandleFUCHSIA> GetMemoryZirconHandleFUCHSIA = nullptr;
+    VkFn<PFN_vkGetMemoryZirconHandlePropertiesFUCHSIA> GetMemoryZirconHandlePropertiesFUCHSIA =
+        nullptr;
 
     // VK_FUCHSIA_external_semaphore
-    PFN_vkImportSemaphoreZirconHandleFUCHSIA ImportSemaphoreZirconHandleFUCHSIA = nullptr;
-    PFN_vkGetSemaphoreZirconHandleFUCHSIA GetSemaphoreZirconHandleFUCHSIA = nullptr;
+    VkFn<PFN_vkImportSemaphoreZirconHandleFUCHSIA> ImportSemaphoreZirconHandleFUCHSIA = nullptr;
+    VkFn<PFN_vkGetSemaphoreZirconHandleFUCHSIA> GetSemaphoreZirconHandleFUCHSIA = nullptr;
 #endif
 };
 
