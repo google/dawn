@@ -317,6 +317,14 @@ FloatLiteralTestCaseList HexFloatCases() {
         {"0x1.55554p-130", 0x1.55554p-130},      // +Subnormal
         {"-0x1.55554p-130", -0x1.55554p-130},    // -Subnormal
 
+        // F32 exactly representable
+        {"0x1.000002p+0f", 0x1.000002p+0},
+        {"0x8.0000fp+0f", 0x8.0000fp+0},
+        {"0x8.fffffp+0f", 0x8.fffffp+0},
+        {"0x8.00003p+0f", 0x8.00003p+0},
+        {"0x2.123p+0f", 0x2.123p+0},
+        {"0x2.cafefp+0f", 0x2.cafefp+0},
+
         // Underflow -> Zero
         {"0x1p-1074", 0.0},  // Exponent underflows
         {"-0x1p-1074", 0.0},
@@ -327,14 +335,6 @@ FloatLiteralTestCaseList HexFloatCases() {
         {"0x0.01p-1073", -0.0},
         {"-0x0.01p-1073", -0.0},  // Fraction causes additional underflow
 
-        {"0x1p-150f", 0.0},  // Exponent underflows
-        {"-0x1p-150f", 0.0},
-        {"0x1p-500f", 0.0},
-        {"-0x1p-500f", -0.0},
-        {"0x0.00000000001p-126f", 0.0},  // Fraction causes underflow
-        {"-0x0.0000000001p-127f", -0.0},
-        {"0x0.01p-142f", 0.0},
-        {"-0x0.01p-142f", -0.0},            // Fraction causes additional underflow
         {"0x1.0p-9223372036854774784", 0},  // -(INT64_MAX - 1023) (smallest valid exponent)
 
         // Zero with non-zero exponent -> Zero
@@ -575,6 +575,17 @@ INSTANTIATE_TEST_SUITE_P(
                          "-0x32p+127f",
                          "0x32p+500f",
                          "-0x32p+500f",
+                     })));
+
+INSTANTIATE_TEST_SUITE_P(
+    HexNotExactlyRepresentableF32,
+    ParserImplInvalidLiteralTest,
+    testing::Combine(testing::Values("1:1: value cannot be exactly represented as 'f32'"),
+                     testing::ValuesIn(std::vector<const char*>{
+                         "0x1.000001p+0f",    // Quantizes to 0x1.0p+0
+                         "0x8.0000f8p+0f",    // Quantizes to 0x8.0000fp+0
+                         "0x8.000038p+0f",    // Quantizes to 0x8.00003p+0
+                         "0x2.cafef00dp+0f",  // Quantizes to 0x2.cafefp+0
                      })));
 
 INSTANTIATE_TEST_SUITE_P(

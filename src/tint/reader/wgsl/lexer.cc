@@ -17,6 +17,7 @@
 #include <cctype>
 #include <cmath>
 #include <cstring>
+#include <functional>
 #include <limits>
 #include <optional>  // NOLINT(build/include_order)
 #include <tuple>
@@ -658,17 +659,19 @@ Token Lexer::try_hex_float() {
     result_u64 |= mantissa;
     result_u64 |= (static_cast<uint64_t>(signed_exponent) & kExponentMask) << kExponentLeftShift;
 
-    // Reinterpret as float and return
+    // Reinterpret as f16 and return
     double result_f64;
     std::memcpy(&result_f64, &result_u64, 8);
 
     if (has_f_suffix) {
-        // Quantize to f32
-        // TODO(crbug.com/tint/1564): If the hex-float value is not exactly representable then we
-        // should be erroring here.
-        result_f64 = static_cast<double>(static_cast<float>(result_f64));
-        if (std::isinf(result_f64)) {
+        // Check value fits in f32
+        if (result_f64 < static_cast<double>(f32::kLowest) ||
+            result_f64 > static_cast<double>(f32::kHighest)) {
             return {Token::Type::kError, source, "value cannot be represented as 'f32'"};
+        }
+        // Check the value can be exactly represented (low 29 mantissa bits must be 0)
+        if (result_u64 & 0x1fffffff) {
+            return {Token::Type::kError, source, "value cannot be exactly represented as 'f32'"};
         }
     }
 
