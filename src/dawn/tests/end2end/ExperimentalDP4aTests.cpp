@@ -68,7 +68,7 @@ TEST_P(ExperimentalDP4aTests, BasicDP4aFeaturesTest) {
         }
 )";
     if (!GetParam().mRequestDP4aExtension || !IsDP4aSupportedOnAdapter() ||
-        !HasToggleEnabled("use_dxc")) {
+        (IsD3D12() && !HasToggleEnabled("use_dxc"))) {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, computeShader));
         return;
     }
@@ -102,5 +102,5 @@ TEST_P(ExperimentalDP4aTests, BasicDP4aFeaturesTest) {
 }
 
 DAWN_INSTANTIATE_TEST_P(ExperimentalDP4aTests,
-                        {D3D12Backend(), D3D12Backend({"use_dxc"})},
+                        {D3D12Backend(), D3D12Backend({"use_dxc"}), VulkanBackend()},
                         {true, false});

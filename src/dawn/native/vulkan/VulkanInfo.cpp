@@ -248,6 +248,12 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const Adapter& adapter) {
                             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES);
     }
 
+    if (info.extensions[DeviceExt::ShaderIntegerDotProduct]) {
+        propertiesChain.Add(
+            &info.shaderIntegerDotProductProperties,
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INTEGER_DOT_PRODUCT_PROPERTIES_KHR);
+    }
+
     // If we have DeviceExt::GetPhysicalDeviceProperties2, use features2 and properties2 so
     // that features no covered by VkPhysicalDevice{Features,Properties} can be queried.
     //

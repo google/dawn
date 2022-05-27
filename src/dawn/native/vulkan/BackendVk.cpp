@@ -14,6 +14,7 @@
 
 #include "dawn/native/vulkan/BackendVk.h"
 
+#include <algorithm>
 #include <string>
 #include <utility>
 
@@ -328,17 +329,7 @@ ResultOrError<VulkanGlobalKnobs> VulkanInstance::CreateVkInstance(const Instance
     appInfo.applicationVersion = 0;
     appInfo.pEngineName = nullptr;
     appInfo.engineVersion = 0;
-    // Vulkan 1.0 implementations were required to return VK_ERROR_INCOMPATIBLE_DRIVER if
-    // apiVersion was larger than 1.0. Meanwhile, as long as the instance supports at least
-    // Vulkan 1.1, an application can use different versions of Vulkan with an instance than
-    // it does with a device or physical device. So we should set apiVersion to Vulkan 1.0
-    // if the instance only supports Vulkan 1.0. Otherwise we set apiVersion to Vulkan 1.2,
-    // treat 1.2 as the highest API version dawn targets.
-    if (mGlobalInfo.apiVersion == VK_MAKE_VERSION(1, 0, 0)) {
-        appInfo.apiVersion = VK_MAKE_VERSION(1, 0, 0);
-    } else {
-        appInfo.apiVersion = VK_MAKE_VERSION(1, 2, 0);
-    }
+    appInfo.apiVersion = std::min(mGlobalInfo.apiVersion, VK_MAKE_VERSION(1, 3, 0));
 
     VkInstanceCreateInfo createInfo;
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;

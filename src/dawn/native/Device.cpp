@@ -201,8 +201,6 @@ DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor)
 
     mFormatTable = BuildFormatTable(this);
 
-    SetWGSLExtensionAllowList();
-
     if (descriptor->label != nullptr && strlen(descriptor->label) != 0) {
         mLabel = descriptor->label;
     }
@@ -229,6 +227,8 @@ DeviceBase::~DeviceBase() {
 }
 
 MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
+    SetWGSLExtensionAllowList();
+
     mQueue = std::move(defaultQueue);
 
 #if defined(DAWN_ENABLE_ASSERTS)
@@ -1284,16 +1284,7 @@ void DeviceBase::ApplyFeatures(const DeviceDescriptor* deviceDescriptor) {
 }
 
 bool DeviceBase::IsFeatureEnabled(Feature feature) const {
-    if (mEnabledFeatures.IsEnabled(feature)) {
-        // Currently we can only use DXC to compile HLSL shaders using float16, and
-        // ChromiumExperimentalDp4a is an experimental feature which can only be enabled with toggle
-        // "use_dxc".
-        if (feature == Feature::ChromiumExperimentalDp4a || feature == Feature::ShaderFloat16) {
-            return IsToggleEnabled(Toggle::UseDXC);
-        }
-        return true;
-    }
-    return false;
+    return mEnabledFeatures.IsEnabled(feature);
 }
 
 void DeviceBase::SetWGSLExtensionAllowList() {

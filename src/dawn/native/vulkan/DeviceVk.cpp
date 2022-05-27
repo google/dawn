@@ -373,6 +373,16 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice physicalD
         featuresChain.Add(&usedKnobs.zeroInitializeWorkgroupMemoryFeatures);
     }
 
+    if (mDeviceInfo.HasExt(DeviceExt::ShaderIntegerDotProduct)) {
+        ASSERT(usedKnobs.HasExt(DeviceExt::ShaderIntegerDotProduct));
+
+        usedKnobs.shaderIntegerDotProductFeatures.sType =
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INTEGER_DOT_PRODUCT_FEATURES;
+
+        usedKnobs.shaderIntegerDotProductFeatures.shaderIntegerDotProduct = VK_TRUE;
+        featuresChain.Add(&usedKnobs.shaderIntegerDotProductFeatures);
+    }
+
     if (mDeviceInfo.features.samplerAnisotropy == VK_TRUE) {
         usedKnobs.features.samplerAnisotropy = VK_TRUE;
     }

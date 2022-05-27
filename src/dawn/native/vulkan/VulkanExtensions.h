@@ -92,6 +92,7 @@ enum class DeviceExt {
     ShaderFloat16Int8,
 
     // Promoted to 1.3
+    ShaderIntegerDotProduct,
     ZeroInitializeWorkgroupMemory,
 
     // External* extensions

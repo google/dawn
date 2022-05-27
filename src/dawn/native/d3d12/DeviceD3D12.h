@@ -151,6 +151,8 @@ class Device final : public DeviceBase {
     bool ShouldDuplicateParametersForDrawIndirect(
         const RenderPipelineBase* renderPipelineBase) const override;
 
+    bool IsFeatureEnabled(Feature feature) const override;
+
     // Dawn APIs
     void SetLabelImpl() override;
 
