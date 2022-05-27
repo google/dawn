@@ -1553,6 +1553,14 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
     auto* call = builder_->create<sem::Call>(expr, target, std::move(args), current_statement_,
                                              sem::Constant{}, has_side_effects);
 
+    target->AddCallSite(call);
+
+    call->Behaviors() = arg_behaviors + target->Behaviors();
+
+    if (!validator_.FunctionCall(call, current_statement_)) {
+        return nullptr;
+    }
+
     if (current_function_) {
         // Note: Requires called functions to be resolved first.
         // This is currently guaranteed as functions must be declared before
@@ -1568,15 +1576,8 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
             current_function_->AddTransitivelyReferencedGlobal(var);
         }
 
+        // Note: Validation *must* be performed before calling this method.
         CollectTextureSamplerPairs(target, call->Arguments());
-    }
-
-    target->AddCallSite(call);
-
-    call->Behaviors() = arg_behaviors + target->Behaviors();
-
-    if (!validator_.FunctionCall(call, current_statement_)) {
-        return nullptr;
     }
 
     return call;
