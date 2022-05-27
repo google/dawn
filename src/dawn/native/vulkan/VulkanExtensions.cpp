@@ -22,9 +22,9 @@
 
 namespace dawn::native::vulkan {
 
-static constexpr uint32_t VulkanVersion_1_1 = VK_MAKE_VERSION(1, 1, 0);
-static constexpr uint32_t VulkanVersion_1_2 = VK_MAKE_VERSION(1, 2, 0);
-static constexpr uint32_t VulkanVersion_1_3 = VK_MAKE_VERSION(1, 3, 0);
+static constexpr uint32_t VulkanVersion_1_1 = VK_API_VERSION_1_1;
+static constexpr uint32_t VulkanVersion_1_2 = VK_API_VERSION_1_2;
+static constexpr uint32_t VulkanVersion_1_3 = VK_API_VERSION_1_3;
 static constexpr uint32_t NeverPromoted = std::numeric_limits<uint32_t>::max();
 
 // A static array for InstanceExtInfo that can be indexed with InstanceExts.

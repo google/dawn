@@ -138,19 +138,19 @@ MaybeError VulkanFunctions::LoadInstanceProcs(VkInstance instance,
 
     // Vulkan 1.1 is not required to report promoted extensions from 1.0 and is not required to
     // support the vendor entrypoint in GetProcAddress.
-    if (globalInfo.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+    if (globalInfo.apiVersion >= VK_API_VERSION_1_1) {
         GET_INSTANCE_PROC(GetPhysicalDeviceExternalBufferProperties);
     } else if (globalInfo.HasExt(InstanceExt::ExternalMemoryCapabilities)) {
         GET_INSTANCE_PROC_VENDOR(GetPhysicalDeviceExternalBufferProperties, KHR);
     }
 
-    if (globalInfo.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+    if (globalInfo.apiVersion >= VK_API_VERSION_1_1) {
         GET_INSTANCE_PROC(GetPhysicalDeviceExternalSemaphoreProperties);
     } else if (globalInfo.HasExt(InstanceExt::ExternalSemaphoreCapabilities)) {
         GET_INSTANCE_PROC_VENDOR(GetPhysicalDeviceExternalSemaphoreProperties, KHR);
     }
 
-    if (globalInfo.apiVersion >= VK_MAKE_VERSION(1, 1, 0)) {
+    if (globalInfo.apiVersion >= VK_API_VERSION_1_1) {
         GET_INSTANCE_PROC(GetPhysicalDeviceFeatures2);
         GET_INSTANCE_PROC(GetPhysicalDeviceProperties2);
         GET_INSTANCE_PROC(GetPhysicalDeviceFormatProperties2);

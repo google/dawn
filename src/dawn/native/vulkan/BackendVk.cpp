@@ -329,7 +329,7 @@ ResultOrError<VulkanGlobalKnobs> VulkanInstance::CreateVkInstance(const Instance
     appInfo.applicationVersion = 0;
     appInfo.pEngineName = nullptr;
     appInfo.engineVersion = 0;
-    appInfo.apiVersion = std::min(mGlobalInfo.apiVersion, VK_MAKE_VERSION(1, 3, 0));
+    appInfo.apiVersion = std::min(mGlobalInfo.apiVersion, VK_API_VERSION_1_3);
 
     VkInstanceCreateInfo createInfo;
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;

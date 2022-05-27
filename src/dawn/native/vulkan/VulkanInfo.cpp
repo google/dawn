@@ -68,7 +68,7 @@ ResultOrError<VulkanGlobalInfo> GatherGlobalInfo(const VulkanFunctions& vkFuncti
     VulkanGlobalInfo info = {};
     // Gather info on available API version
     {
-        info.apiVersion = VK_MAKE_VERSION(1, 0, 0);
+        info.apiVersion = VK_API_VERSION_1_0;
         if (vkFunctions.EnumerateInstanceVersion != nullptr) {
             DAWN_TRY(CheckVkSuccess(vkFunctions.EnumerateInstanceVersion(&info.apiVersion),
                                     "vkEnumerateInstanceVersion"));
