@@ -553,9 +553,6 @@ TEST_P(BindGroupTests, MultipleEntryPointsWithMultipleNonZeroGroups) {
 // This test reproduces an out-of-bound bug on D3D12 backends when calling draw command twice with
 // one pipeline that has 4 bind group sets in one render pass.
 TEST_P(BindGroupTests, DrawTwiceInSamePipelineWithFourBindGroupSets) {
-    // TODO(anglebug.com/7304): fix failure in ANGLE/D3D11
-    DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
-
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
@@ -1236,9 +1233,6 @@ TEST_P(BindGroupTests, DynamicBindingNoneVisibility) {
 
 // Test that bind group bindings may have unbounded and arbitrary binding numbers
 TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
-    // TODO(anglebug.com/7305): fix failure in ANGLE/D3D11
-    DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
-
     // TODO(crbug.com/dawn/736): Test output is wrong with D3D12 + WARP.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
 
