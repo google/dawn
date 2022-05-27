@@ -14,6 +14,8 @@
 
 #include "dawn/common/GPUInfo.h"
 
+#include <algorithm>
+
 #include "dawn/common/Assert.h"
 
 namespace gpu_info {
