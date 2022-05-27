@@ -12,27 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/utils/concat.h"
+
 #ifndef SRC_TINT_UTILS_COMPILER_MACROS_H_
 #define SRC_TINT_UTILS_COMPILER_MACROS_H_
 
-#define TINT_REQUIRE_SEMICOLON \
-    do {                       \
-    } while (false)
+#define TINT_REQUIRE_SEMICOLON static_assert(true)
 
 #if defined(_MSC_VER)
+#define TINT_WARNING_UNREACHABLE_CODE 4702
+#define TINT_WARNING_CONSTANT_OVERFLOW 4756
+
 // clang-format off
-#define TINT_BEGIN_DISABLE_WARNING_UNREACHABLE_CODE() \
-    __pragma(warning(push))                           \
-    __pragma(warning(disable:4702))                   \
+#define TINT_BEGIN_DISABLE_WARNING(name)                        \
+    __pragma(warning(push))                                     \
+    __pragma(warning(disable:TINT_CONCAT(TINT_WARNING_, name))) \
     TINT_REQUIRE_SEMICOLON
-#define TINT_END_DISABLE_WARNING_UNREACHABLE_CODE()   \
-    __pragma(warning(pop))                            \
+#define TINT_END_DISABLE_WARNING(name)                          \
+    __pragma(warning(pop))                                      \
     TINT_REQUIRE_SEMICOLON
 // clang-format on
 #else
 // clang-format off
-#define TINT_BEGIN_DISABLE_WARNING_UNREACHABLE_CODE() TINT_REQUIRE_SEMICOLON
-#define TINT_END_DISABLE_WARNING_UNREACHABLE_CODE() TINT_REQUIRE_SEMICOLON
+#define TINT_BEGIN_DISABLE_WARNING(name) TINT_REQUIRE_SEMICOLON
+#define TINT_END_DISABLE_WARNING(name) TINT_REQUIRE_SEMICOLON
 // clang-format on
 #endif  // defined(_MSC_VER)
 

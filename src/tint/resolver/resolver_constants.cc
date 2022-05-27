@@ -39,7 +39,7 @@ namespace {
 /// @returns the elements converted to type T.
 template <typename T, typename ELEMENTS_IN, typename CONVERTER>
 sem::Constant::Elements Transform(const ELEMENTS_IN& elements_in, CONVERTER&& converter) {
-    TINT_BEGIN_DISABLE_WARNING_UNREACHABLE_CODE();
+    TINT_BEGIN_DISABLE_WARNING(UNREACHABLE_CODE);
 
     return utils::Transform(elements_in, [&](auto value_in) {
         if constexpr (std::is_same_v<UnwrapNumber<T>, bool>) {
@@ -55,7 +55,7 @@ sem::Constant::Elements Transform(const ELEMENTS_IN& elements_in, CONVERTER&& co
         }
     });
 
-    TINT_END_DISABLE_WARNING_UNREACHABLE_CODE();
+    TINT_END_DISABLE_WARNING(UNREACHABLE_CODE);
 }
 
 /// Converts and returns all the element values of `in` to the semantic type `el_ty`, using the
@@ -112,9 +112,6 @@ sem::Constant::Elements ConvertElements(const sem::Constant::Elements& in, const
                 case ConversionFailure::kExceedsPositiveLimit:
                     el_out = IsFloatingPoint<UnwrapNumber<OUT>> ? OUT(kInf) : OUT::kHighest;
                     break;
-                case ConversionFailure::kTooSmall:
-                    el_out = OUT(el_in < 0 ? -0.0 : 0.0);
-                    break;
             }
         }
     });
@@ -137,8 +134,6 @@ utils::Result<sem::Constant::Elements> MaterializeElements(const sem::Constant::
         using OUT = std::decay_t<decltype(el_out)>;
         if (auto conv = CheckedConvert<OUT>(el_in)) {
             el_out = conv.Get();
-        } else if (conv.Failure() == ConversionFailure::kTooSmall) {
-            el_out = OUT(el_in < 0 ? -0.0 : 0.0);
         } else if (!failure.has_value()) {
             std::stringstream ss;
             ss << "value " << el_in << " cannot be represented as ";

@@ -376,59 +376,60 @@ constexpr double kMaxF32 = static_cast<double>(f32::kHighest);
 constexpr double kPiF64 = 3.141592653589793;
 constexpr double kPiF32 = 3.1415927410125732;  // kPiF64 quantized to f32
 
-// (2^-127)×(1+(0xfffffffffffff÷0x10000000000000))
-constexpr double kTooSmallF32 = 1.1754943508222874e-38;
+constexpr double kSubnormalF32 = 0x1.0p-128;
 
 INSTANTIATE_TEST_SUITE_P(
     MaterializeScalar,
-    MaterializeAbstractNumeric,                                                       //
-    testing::Combine(testing::Values(Expectation::kMaterialize),                      //
-                     testing::ValuesIn(kScalarMethods),                               //
-                     testing::Values(Types<i32, AInt>(0_a, 0.0),                      //
-                                     Types<i32, AInt>(2147483647_a, 2147483647.0),    //
-                                     Types<i32, AInt>(-2147483648_a, -2147483648.0),  //
-                                     Types<u32, AInt>(0_a, 0.0),                      //
-                                     Types<u32, AInt>(4294967295_a, 4294967295.0),    //
-                                     Types<f32, AFloat>(0.0_a, 0.0),                  //
-                                     Types<f32, AFloat>(AFloat(kMaxF32), kMaxF32),    //
-                                     Types<f32, AFloat>(AFloat(-kMaxF32), -kMaxF32),  //
-                                     Types<f32, AFloat>(AFloat(kPiF32), kPiF64),      //
-                                     Types<f32, AFloat>(0.0_a, kTooSmallF32),         //
-                                     Types<f32, AFloat>(-0.0_a, -kTooSmallF32)        //
-                                     /* Types<f16, AFloat>(1.0_a), */                 //
+    MaterializeAbstractNumeric,                                                                  //
+    testing::Combine(testing::Values(Expectation::kMaterialize),                                 //
+                     testing::ValuesIn(kScalarMethods),                                          //
+                     testing::Values(Types<i32, AInt>(0_a, 0.0),                                 //
+                                     Types<i32, AInt>(2147483647_a, 2147483647.0),               //
+                                     Types<i32, AInt>(-2147483648_a, -2147483648.0),             //
+                                     Types<u32, AInt>(0_a, 0.0),                                 //
+                                     Types<u32, AInt>(4294967295_a, 4294967295.0),               //
+                                     Types<f32, AFloat>(0.0_a, 0.0),                             //
+                                     Types<f32, AFloat>(AFloat(kMaxF32), kMaxF32),               //
+                                     Types<f32, AFloat>(AFloat(-kMaxF32), -kMaxF32),             //
+                                     Types<f32, AFloat>(AFloat(kPiF32), kPiF64),                 //
+                                     Types<f32, AFloat>(AFloat(kSubnormalF32), kSubnormalF32),   //
+                                     Types<f32, AFloat>(AFloat(-kSubnormalF32), -kSubnormalF32)  //
+                                     /* Types<f16, AFloat>(1.0_a), */                            //
                                      /* Types<f16, AFloat>(1.0_a), */)));
 
 INSTANTIATE_TEST_SUITE_P(
     MaterializeVector,
-    MaterializeAbstractNumeric,                                                         //
-    testing::Combine(testing::Values(Expectation::kMaterialize),                        //
-                     testing::ValuesIn(kVectorMethods),                                 //
-                     testing::Values(Types<i32V, AIntV>(0_a, 0.0),                      //
-                                     Types<i32V, AIntV>(2147483647_a, 2147483647.0),    //
-                                     Types<i32V, AIntV>(-2147483648_a, -2147483648.0),  //
-                                     Types<u32V, AIntV>(0_a, 0.0),                      //
-                                     Types<u32V, AIntV>(4294967295_a, 4294967295.0),    //
-                                     Types<f32V, AFloatV>(0.0_a, 0.0),                  //
-                                     Types<f32V, AFloatV>(AFloat(kMaxF32), kMaxF32),    //
-                                     Types<f32V, AFloatV>(AFloat(-kMaxF32), -kMaxF32),  //
-                                     Types<f32V, AFloatV>(AFloat(kPiF32), kPiF64),      //
-                                     Types<f32V, AFloatV>(0.0_a, kTooSmallF32),         //
-                                     Types<f32V, AFloatV>(-0.0_a, -kTooSmallF32)        //
-                                     /* Types<f16V, AFloatV>(1.0_a), */                 //
+    MaterializeAbstractNumeric,                                                                   //
+    testing::Combine(testing::Values(Expectation::kMaterialize),                                  //
+                     testing::ValuesIn(kVectorMethods),                                           //
+                     testing::Values(Types<i32V, AIntV>(0_a, 0.0),                                //
+                                     Types<i32V, AIntV>(2147483647_a, 2147483647.0),              //
+                                     Types<i32V, AIntV>(-2147483648_a, -2147483648.0),            //
+                                     Types<u32V, AIntV>(0_a, 0.0),                                //
+                                     Types<u32V, AIntV>(4294967295_a, 4294967295.0),              //
+                                     Types<f32V, AFloatV>(0.0_a, 0.0),                            //
+                                     Types<f32V, AFloatV>(AFloat(kMaxF32), kMaxF32),              //
+                                     Types<f32V, AFloatV>(AFloat(-kMaxF32), -kMaxF32),            //
+                                     Types<f32V, AFloatV>(AFloat(kPiF32), kPiF64),                //
+                                     Types<f32V, AFloatV>(AFloat(kSubnormalF32), kSubnormalF32),  //
+                                     Types<f32V, AFloatV>(AFloat(-kSubnormalF32),
+                                                          -kSubnormalF32)  //
+                                     /* Types<f16V, AFloatV>(1.0_a), */    //
                                      /* Types<f16V, AFloatV>(1.0_a), */)));
 
 INSTANTIATE_TEST_SUITE_P(
     MaterializeMatrix,
-    MaterializeAbstractNumeric,                                                         //
-    testing::Combine(testing::Values(Expectation::kMaterialize),                        //
-                     testing::ValuesIn(kMatrixMethods),                                 //
-                     testing::Values(Types<f32M, AFloatM>(0.0_a, 0.0),                  //
-                                     Types<f32M, AFloatM>(AFloat(kMaxF32), kMaxF32),    //
-                                     Types<f32M, AFloatM>(AFloat(-kMaxF32), -kMaxF32),  //
-                                     Types<f32M, AFloatM>(AFloat(kPiF32), kPiF64),      //
-                                     Types<f32M, AFloatM>(0.0_a, kTooSmallF32),         //
-                                     Types<f32M, AFloatM>(-0.0_a, -kTooSmallF32)        //
-                                     /* Types<f16V, AFloatM>(1.0_a), */                 //
+    MaterializeAbstractNumeric,                                                                   //
+    testing::Combine(testing::Values(Expectation::kMaterialize),                                  //
+                     testing::ValuesIn(kMatrixMethods),                                           //
+                     testing::Values(Types<f32M, AFloatM>(0.0_a, 0.0),                            //
+                                     Types<f32M, AFloatM>(AFloat(kMaxF32), kMaxF32),              //
+                                     Types<f32M, AFloatM>(AFloat(-kMaxF32), -kMaxF32),            //
+                                     Types<f32M, AFloatM>(AFloat(kPiF32), kPiF64),                //
+                                     Types<f32M, AFloatM>(AFloat(kSubnormalF32), kSubnormalF32),  //
+                                     Types<f32M, AFloatM>(AFloat(-kSubnormalF32),
+                                                          -kSubnormalF32)  //
+                                     /* Types<f16V, AFloatM>(1.0_a), */    //
                                      )));
 
 INSTANTIATE_TEST_SUITE_P(

@@ -15,6 +15,7 @@
 #include <cmath>
 
 #include "src/tint/program_builder.h"
+#include "src/tint/utils/compiler_macros.h"
 
 #include "gtest/gtest.h"
 
@@ -28,42 +29,39 @@ constexpr int64_t kHighestU32 = static_cast<int64_t>(std::numeric_limits<uint32_
 constexpr int64_t kLowestI32 = static_cast<int64_t>(std::numeric_limits<int32_t>::min());
 constexpr int64_t kLowestU32 = static_cast<int64_t>(std::numeric_limits<uint32_t>::min());
 
-// Highest float32 value. Calculated as:
-// (2^127)×(1+(0x7fffff÷0x800000))
-constexpr double kHighestF32 = 340282346638528859811704183484516925440.0;
+// Highest float32 value.
+constexpr double kHighestF32 = 0x1.fffffep+127;
 
-// Next ULP up from kHighestF32 for a float64. Calculated as:
-// (2^127)×(1+(0xfffffe0000001÷0x10000000000000))
-constexpr double kHighestF32NextULP = 340282346638528897590636046441678635008.0;
+// Next ULP up from kHighestF32 for a float64.
+constexpr double kHighestF32NextULP = 0x1.fffffe0000001p+127;
 
-// Smallest positive normal float32 value. Calculated as:
-// 2^-126
-constexpr double kSmallestF32 = 1.1754943508222875e-38;
+// Smallest positive normal float32 value.
+constexpr double kSmallestF32 = 0x1p-126;
 
-// Next ULP down from kSmallestF32 for a float64. Calculated as:
-// (2^-127)×(1+(0xfffffffffffff÷0x10000000000000))
-constexpr double kSmallestF32PrevULP = 1.1754943508222874e-38;
+// Highest subnormal value for a float32.
+constexpr double kHighestF32Subnormal = 0x0.fffffep-126;
 
-// Highest float16 value. Calculated as:
-// (2^15)×(1+(0x3ff÷0x400))
-constexpr double kHighestF16 = 65504.0;
+// Highest float16 value.
+constexpr double kHighestF16 = 0x1.ffcp+15;
 
-// Next ULP up from kHighestF16 for a float64. Calculated as:
-// (2^15)×(1+(0xffc0000000001÷0x10000000000000))
-constexpr double kHighestF16NextULP = 65504.00000000001;
+// Next ULP up from kHighestF16 for a float64.
+constexpr double kHighestF16NextULP = 0x1.ffc0000000001p+15;
 
-// Smallest positive normal float16 value. Calculated as:
-// 2^-14
-constexpr double kSmallestF16 = 0.00006103515625;
+// Smallest positive normal float16 value.
+constexpr double kSmallestF16 = 0x1p-14;
 
-// Next ULP down from kSmallestF16 for a float64. Calculated as:
-// (2^-15)×(1+(0xfffffffffffff÷0x10000000000000))
-constexpr double kSmallestF16PrevULP = 0.00006103515624999999;
+// Highest subnormal value for a float32.
+constexpr double kHighestF16Subnormal = 0x0.ffcp-14;
 
 constexpr double kLowestF32 = -kHighestF32;
 constexpr double kLowestF32NextULP = -kHighestF32NextULP;
 constexpr double kLowestF16 = -kHighestF16;
 constexpr double kLowestF16NextULP = -kHighestF16NextULP;
+
+// MSVC (only in release builds) can grumble about some of the inlined numerical overflow /
+// underflow that's done in this file. We like to think we know what we're doing, so silence the
+// warning.
+TINT_BEGIN_DISABLE_WARNING(CONSTANT_OVERFLOW);
 
 TEST(NumberTest, CheckedConvertIdentity) {
     EXPECT_EQ(CheckedConvert<AInt>(0_a), 0_a);
@@ -120,9 +118,11 @@ TEST(NumberTest, CheckedConvertExceedsNegativeLimit) {
               ConversionFailure::kExceedsNegativeLimit);
 }
 
-TEST(NumberTest, CheckedConvertTooSmall) {
-    EXPECT_EQ(CheckedConvert<f32>(AFloat(kSmallestF32PrevULP)), ConversionFailure::kTooSmall);
-    EXPECT_EQ(CheckedConvert<f16>(AFloat(kSmallestF16PrevULP)), ConversionFailure::kTooSmall);
+TEST(NumberTest, CheckedConvertSubnormals) {
+    EXPECT_EQ(CheckedConvert<f32>(AFloat(kHighestF32Subnormal)), f32(kHighestF32Subnormal));
+    EXPECT_EQ(CheckedConvert<f16>(AFloat(kHighestF16Subnormal)), f16(kHighestF16Subnormal));
+    EXPECT_EQ(CheckedConvert<f32>(AFloat(-kHighestF32Subnormal)), f32(-kHighestF32Subnormal));
+    EXPECT_EQ(CheckedConvert<f16>(AFloat(-kHighestF16Subnormal)), f16(-kHighestF16Subnormal));
 }
 
 TEST(NumberTest, QuantizeF16) {
@@ -140,6 +140,8 @@ TEST(NumberTest, QuantizeF16) {
     EXPECT_EQ(f16(-inf), -inf);
     EXPECT_TRUE(std::isnan(f16(nan)));
 }
+
+TINT_END_DISABLE_WARNING(CONSTANT_OVERFLOW);
 
 }  // namespace
 }  // namespace tint

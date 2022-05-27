@@ -26,8 +26,6 @@ std::ostream& operator<<(std::ostream& out, ConversionFailure failure) {
             return out << "value exceeds positive limit for type";
         case ConversionFailure::kExceedsNegativeLimit:
             return out << "value exceeds negative limit for type";
-        case ConversionFailure::kTooSmall:
-            return out << "value is too small for type";
     }
     return out << "<unknown>";
 }

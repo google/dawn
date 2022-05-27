@@ -364,8 +364,6 @@ Token Lexer::try_float() {
     if (has_f_suffix) {
         if (auto f = CheckedConvert<f32>(AFloat(value))) {
             return {Token::Type::kFloatLiteral_F, source, static_cast<double>(f.Get())};
-        } else if (f.Failure() == ConversionFailure::kTooSmall) {
-            return {Token::Type::kFloatLiteral_F, source, 0.0};
         } else {
             return {Token::Type::kError, source, "value cannot be represented as 'f32'"};
         }
