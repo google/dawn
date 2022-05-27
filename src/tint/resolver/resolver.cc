@@ -319,11 +319,7 @@ sem::Variable* Resolver::Variable(const ast::Variable* var,
 
     // Does the variable have a constructor?
     if (var->constructor) {
-        auto* ctor = Expression(var->constructor);
-        if (!ctor) {
-            return nullptr;
-        }
-        rhs = Materialize(ctor, storage_ty);
+        rhs = Materialize(Expression(var->constructor), storage_ty);
         if (!rhs) {
             return nullptr;
         }
@@ -1107,6 +1103,10 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
 
 const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
                                              const sem::Type* target_type /* = nullptr */) {
+    if (!expr) {
+        return nullptr;  // Allow for Materialize(Expression(blah))
+    }
+
     // Helper for actually creating the the materialize node, performing the constant cast, updating
     // the ast -> sem binding, and performing validation.
     auto materialize = [&](const sem::Type* target_ty) -> sem::Materialize* {
@@ -1118,13 +1118,18 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
         if (!expr_val->IsValid()) {
             TINT_ICE(Resolver, builder_->Diagnostics())
                 << decl->source
-                << " EvaluateConstantValue() returned invalid value for materialized "
-                   "value of type: "
-                << (expr->Type() ? expr->Type()->FriendlyName(builder_->Symbols()) : "<null>");
+                << "EvaluateConstantValue() returned invalid value for materialized value of type: "
+                << builder_->FriendlyName(expr->Type());
             return nullptr;
         }
         auto materialized_val = ConvertValue(expr_val.Get(), target_ty, decl->source);
         if (!materialized_val) {
+            return nullptr;
+        }
+        if (!materialized_val->IsValid()) {
+            TINT_ICE(Resolver, builder_->Diagnostics())
+                << decl->source << "ConvertValue(" << builder_->FriendlyName(expr_val->Type())
+                << " -> " << builder_->FriendlyName(target_ty) << ") returned invalid value";
             return nullptr;
         }
         auto* m =
@@ -2269,11 +2274,7 @@ sem::Statement* Resolver::ReturnStatement(const ast::ReturnStatement* stmt) {
 
         const sem::Type* value_ty = nullptr;
         if (auto* value = stmt->value) {
-            const auto* expr = Expression(value);
-            if (!expr) {
-                return false;
-            }
-            expr = Materialize(expr, current_function_->ReturnType());
+            const auto* expr = Materialize(Expression(value), current_function_->ReturnType());
             if (!expr) {
                 return false;
             }

@@ -211,6 +211,7 @@ class Resolver {
     ///       if `expr` has a element type of abstract-float.
     /// * The sem::Materialize constant value will be the value of `expr` value-converted to the
     ///   materialized type.
+    /// If `expr` is nullptr, then Materialize() will also return nullptr.
     const sem::Expression* Materialize(const sem::Expression* expr,
                                        const sem::Type* target_type = nullptr);
 
