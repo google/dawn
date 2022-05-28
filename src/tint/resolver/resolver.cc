@@ -1239,7 +1239,10 @@ sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* exp
 }
 
 sem::Expression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
-    auto* inner = sem_.Get(expr->expr);
+    auto* inner = Materialize(sem_.Get(expr->expr));
+    if (!inner) {
+        return nullptr;
+    }
     auto* ty = Type(expr->type);
     if (!ty) {
         return nullptr;

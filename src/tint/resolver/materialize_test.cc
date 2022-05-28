@@ -544,6 +544,12 @@ enum class Method {
     // min(abstract_expr, abstract_expr);
     kBuiltinArg,
 
+    // bitcast<f32>(abstract_expr);
+    kBitcastF32Arg,
+
+    // bitcast<vec3<f32>>(abstract_expr);
+    kBitcastVec3F32Arg,
+
     // array<i32, abstract_expr>();
     kArrayLength,
 
@@ -562,6 +568,10 @@ static std::ostream& operator<<(std::ostream& o, Method m) {
             return o << "let";
         case Method::kBuiltinArg:
             return o << "builtin-arg";
+        case Method::kBitcastF32Arg:
+            return o << "bitcast-f32-arg";
+        case Method::kBitcastVec3F32Arg:
+            return o << "bitcast-vec3-f32-arg";
         case Method::kArrayLength:
             return o << "array-length";
         case Method::kSwitch:
@@ -632,6 +642,12 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
         case Method::kBuiltinArg:
             WrapInFunction(CallStmt(Call("min", abstract_expr(), abstract_expr())));
             break;
+        case Method::kBitcastF32Arg:
+            WrapInFunction(Bitcast<f32>(abstract_expr()));
+            break;
+        case Method::kBitcastVec3F32Arg:
+            WrapInFunction(Bitcast(ty.vec3<f32>(), abstract_expr()));
+            break;
         case Method::kArrayLength:
             WrapInFunction(Construct(ty.array(ty.i32(), abstract_expr())));
             break;
@@ -701,6 +717,7 @@ constexpr Method kScalarMethods[] = {
     Method::kLet,
     Method::kVar,
     Method::kBuiltinArg,
+    Method::kBitcastF32Arg,
 };
 
 /// Methods that support vector materialization
@@ -708,6 +725,7 @@ constexpr Method kVectorMethods[] = {
     Method::kLet,
     Method::kVar,
     Method::kBuiltinArg,
+    Method::kBitcastVec3F32Arg,
 };
 
 /// Methods that support matrix materialization
