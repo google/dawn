@@ -1145,7 +1145,7 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
     auto i32v = [&](uint32_t width) { return builder_->create<sem::Vector>(i32(), width); };
     auto f32v = [&](uint32_t width) { return builder_->create<sem::Vector>(f32(), width); };
     auto f32m = [&](uint32_t columns, uint32_t rows) {
-        return builder_->create<sem::Matrix>(f32v(columns), rows);
+        return builder_->create<sem::Matrix>(f32v(rows), columns);
     };
 
     // Type dispatch based on the expression type
