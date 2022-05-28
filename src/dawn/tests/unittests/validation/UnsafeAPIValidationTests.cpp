@@ -26,14 +26,14 @@ using testing::HasSubstr;
 
 class UnsafeAPIValidationTest : public ValidationTest {
   protected:
-    WGPUDevice CreateTestDevice() override {
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
         wgpu::DeviceDescriptor descriptor;
         wgpu::DawnTogglesDeviceDescriptor togglesDesc;
         descriptor.nextInChain = &togglesDesc;
         const char* toggle = "disallow_unsafe_apis";
         togglesDesc.forceEnabledToggles = &toggle;
         togglesDesc.forceEnabledTogglesCount = 1;
-        return adapter.CreateDevice(&descriptor);
+        return dawnAdapter.CreateDevice(&descriptor);
     }
 };
 
@@ -79,7 +79,7 @@ TEST_F(UnsafeAPIValidationTest, PipelineOverridableConstants) {
 
 class UnsafeQueryAPIValidationTest : public ValidationTest {
   protected:
-    WGPUDevice CreateTestDevice() override {
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
         wgpu::DeviceDescriptor descriptor;
         wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::PipelineStatisticsQuery,
                                                  wgpu::FeatureName::TimestampQuery};
@@ -92,7 +92,7 @@ class UnsafeQueryAPIValidationTest : public ValidationTest {
         togglesDesc.forceEnabledToggles = &toggle;
         togglesDesc.forceEnabledTogglesCount = 1;
 
-        return adapter.CreateDevice(&descriptor);
+        return dawnAdapter.CreateDevice(&descriptor);
     }
 };
 

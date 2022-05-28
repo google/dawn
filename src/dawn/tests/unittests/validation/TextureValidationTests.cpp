@@ -698,12 +698,12 @@ TEST_F(TextureValidationTest, UseASTCFormatWithoutEnablingFeature) {
 
 class D24S8TextureFormatsValidationTests : public TextureValidationTest {
   protected:
-    WGPUDevice CreateTestDevice() override {
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
         wgpu::DeviceDescriptor descriptor;
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth24UnormStencil8};
         descriptor.requiredFeatures = requiredFeatures;
         descriptor.requiredFeaturesCount = 1;
-        return adapter.CreateDevice(&descriptor);
+        return dawnAdapter.CreateDevice(&descriptor);
     }
 };
 
@@ -720,12 +720,12 @@ TEST_F(D24S8TextureFormatsValidationTests, DepthStencilFormatsFor3D) {
 
 class D32S8TextureFormatsValidationTests : public TextureValidationTest {
   protected:
-    WGPUDevice CreateTestDevice() override {
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
         wgpu::DeviceDescriptor descriptor;
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth32FloatStencil8};
         descriptor.requiredFeatures = requiredFeatures;
         descriptor.requiredFeaturesCount = 1;
-        return adapter.CreateDevice(&descriptor);
+        return dawnAdapter.CreateDevice(&descriptor);
     }
 };
 
@@ -742,7 +742,7 @@ TEST_F(D32S8TextureFormatsValidationTests, DepthStencilFormatsFor3D) {
 
 class CompressedTextureFormatsValidationTests : public TextureValidationTest {
   protected:
-    WGPUDevice CreateTestDevice() override {
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
         wgpu::DeviceDescriptor descriptor;
         wgpu::FeatureName requiredFeatures[3] = {wgpu::FeatureName::TextureCompressionBC,
                                                  wgpu::FeatureName::TextureCompressionETC2,
@@ -758,7 +758,7 @@ class CompressedTextureFormatsValidationTests : public TextureValidationTest {
 
         descriptor.nextInChain = &togglesDesc;
 
-        return adapter.CreateDevice(&descriptor);
+        return dawnAdapter.CreateDevice(&descriptor);
     }
 
     wgpu::TextureDescriptor CreateDefaultTextureDescriptor() {

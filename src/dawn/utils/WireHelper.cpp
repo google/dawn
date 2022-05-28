@@ -78,11 +78,11 @@ class WireServerTraceLayer : public dawn::wire::CommandHandler {
 
 class WireHelperDirect : public WireHelper {
   public:
-    WireHelperDirect() { dawnProcSetProcs(&dawn::native::GetProcs()); }
+    explicit WireHelperDirect(const DawnProcTable& procs) { dawnProcSetProcs(&procs); }
 
-    std::pair<wgpu::Device, WGPUDevice> RegisterDevice(WGPUDevice backendDevice) override {
-        ASSERT(backendDevice != nullptr);
-        return std::make_pair(wgpu::Device::Acquire(backendDevice), backendDevice);
+    wgpu::Instance RegisterInstance(WGPUInstance backendInstance) override {
+        ASSERT(backendInstance != nullptr);
+        return wgpu::Instance(backendInstance);
     }
 
     void BeginWireTrace(const char* name) override {}
@@ -94,12 +94,12 @@ class WireHelperDirect : public WireHelper {
 
 class WireHelperProxy : public WireHelper {
   public:
-    explicit WireHelperProxy(const char* wireTraceDir) {
+    explicit WireHelperProxy(const char* wireTraceDir, const DawnProcTable& procs) {
         mC2sBuf = std::make_unique<utils::TerribleCommandBuffer>();
         mS2cBuf = std::make_unique<utils::TerribleCommandBuffer>();
 
         dawn::wire::WireServerDescriptor serverDesc = {};
-        serverDesc.procs = &dawn::native::GetProcs();
+        serverDesc.procs = &procs;
         serverDesc.serializer = mS2cBuf.get();
 
         mWireServer.reset(new dawn::wire::WireServer(serverDesc));
@@ -118,14 +118,13 @@ class WireHelperProxy : public WireHelper {
         dawnProcSetProcs(&dawn::wire::client::GetProcs());
     }
 
-    std::pair<wgpu::Device, WGPUDevice> RegisterDevice(WGPUDevice backendDevice) override {
-        ASSERT(backendDevice != nullptr);
+    wgpu::Instance RegisterInstance(WGPUInstance backendInstance) override {
+        ASSERT(backendInstance != nullptr);
 
-        auto reservation = mWireClient->ReserveDevice();
-        mWireServer->InjectDevice(backendDevice, reservation.id, reservation.generation);
-        dawn::native::GetProcs().deviceRelease(backendDevice);
+        auto reservation = mWireClient->ReserveInstance();
+        mWireServer->InjectInstance(backendInstance, reservation.id, reservation.generation);
 
-        return std::make_pair(wgpu::Device::Acquire(reservation.device), backendDevice);
+        return wgpu::Instance::Acquire(reservation.instance);
     }
 
     void BeginWireTrace(const char* name) override {
@@ -148,11 +147,13 @@ class WireHelperProxy : public WireHelper {
 
 }  // anonymous namespace
 
-std::unique_ptr<WireHelper> CreateWireHelper(bool useWire, const char* wireTraceDir) {
+std::unique_ptr<WireHelper> CreateWireHelper(const DawnProcTable& procs,
+                                             bool useWire,
+                                             const char* wireTraceDir) {
     if (useWire) {
-        return std::unique_ptr<WireHelper>(new WireHelperProxy(wireTraceDir));
+        return std::unique_ptr<WireHelper>(new WireHelperProxy(wireTraceDir, procs));
     } else {
-        return std::unique_ptr<WireHelper>(new WireHelperDirect());
+        return std::unique_ptr<WireHelper>(new WireHelperDirect(procs));
     }
 }
 

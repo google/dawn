@@ -111,7 +111,7 @@ TEST_F(OcclusionQueryValidationTest, InvalidOcclusionQuerySet) {
 
     // Fail to begin render pass if the occlusionQuerySet is created from other device
     {
-        wgpu::Device otherDevice = RegisterDevice(adapter.CreateDevice());
+        wgpu::Device otherDevice = RequestDeviceSync(wgpu::DeviceDescriptor{});
         wgpu::QuerySet occlusionQuerySetOnOther =
             CreateQuerySet(otherDevice, wgpu::QueryType::Occlusion, 2);
         renderPass.occlusionQuerySet = occlusionQuerySetOnOther;
@@ -225,7 +225,7 @@ TEST_F(OcclusionQueryValidationTest, InvalidBeginAndEnd) {
 
 class TimestampQueryValidationTest : public QuerySetValidationTest {
   protected:
-    WGPUDevice CreateTestDevice() override {
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
         wgpu::DeviceDescriptor descriptor;
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::TimestampQuery};
         descriptor.requiredFeatures = requiredFeatures;
@@ -237,7 +237,7 @@ class TimestampQueryValidationTest : public QuerySetValidationTest {
         togglesDesc.forceDisabledToggles = forceDisabledToggles;
         togglesDesc.forceDisabledTogglesCount = 1;
 
-        return adapter.CreateDevice(&descriptor);
+        return dawnAdapter.CreateDevice(&descriptor);
     }
 
     void EncodeRenderPassWithTimestampWrites(
@@ -324,7 +324,7 @@ TEST_F(TimestampQueryValidationTest, TimestampWritesOnComputePass) {
 
     // Fail to write timestamps to a query set created from another device
     {
-        wgpu::Device otherDevice = RegisterDevice(adapter.CreateDevice());
+        wgpu::Device otherDevice = RequestDeviceSync(wgpu::DeviceDescriptor{});
         wgpu::QuerySet querySetFromOtherDevice =
             CreateQuerySet(otherDevice, wgpu::QueryType::Timestamp, 2);
 
@@ -408,7 +408,7 @@ TEST_F(TimestampQueryValidationTest, TimestampWritesOnRenderPass) {
 
     // Fail to write timestamps to a query set created from another device
     {
-        wgpu::Device otherDevice = RegisterDevice(adapter.CreateDevice());
+        wgpu::Device otherDevice = RequestDeviceSync(wgpu::DeviceDescriptor{});
         wgpu::QuerySet querySetFromOtherDevice =
             CreateQuerySet(otherDevice, wgpu::QueryType::Timestamp, 2);
 
@@ -640,7 +640,7 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnRenderPassEncoder) {
 
 class PipelineStatisticsQueryValidationTest : public QuerySetValidationTest {
   protected:
-    WGPUDevice CreateTestDevice() override {
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
         wgpu::DeviceDescriptor descriptor;
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::PipelineStatisticsQuery};
         descriptor.requiredFeatures = requiredFeatures;
@@ -654,7 +654,7 @@ class PipelineStatisticsQueryValidationTest : public QuerySetValidationTest {
         togglesDesc.forceDisabledToggles = forceDisabledToggles;
         togglesDesc.forceDisabledTogglesCount = 1;
 
-        return adapter.CreateDevice(&descriptor);
+        return dawnAdapter.CreateDevice(&descriptor);
     }
 };
 
@@ -793,7 +793,7 @@ TEST_F(ResolveQuerySetValidationTest, ResolveToInvalidBufferAndOffset) {
 
     // Fail to resolve query set to a buffer created from another device
     {
-        wgpu::Device otherDevice = RegisterDevice(adapter.CreateDevice());
+        wgpu::Device otherDevice = RequestDeviceSync(wgpu::DeviceDescriptor{});
         wgpu::Buffer bufferOnOther =
             CreateBuffer(otherDevice, kBufferSize, wgpu::BufferUsage::QueryResolve);
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();

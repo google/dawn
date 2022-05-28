@@ -26,22 +26,10 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     return DawnWireServerFuzzer::Run(
         data, size,
-        [](dawn::native::Instance* instance) {
-            std::vector<dawn::native::Adapter> adapters = instance->GetAdapters();
-
-            wgpu::Device nullDevice;
-            for (dawn::native::Adapter adapter : adapters) {
-                wgpu::AdapterProperties properties;
-                adapter.GetProperties(&properties);
-
-                if (properties.backendType == wgpu::BackendType::Null) {
-                    nullDevice = wgpu::Device::Acquire(adapter.CreateDevice());
-                    break;
-                }
-            }
-
-            ASSERT(nullDevice.Get() != nullptr);
-            return nullDevice;
+        [](const dawn::native::Adapter& adapter) {
+            wgpu::AdapterProperties properties;
+            adapter.GetProperties(&properties);
+            return properties.backendType == wgpu::BackendType::Null;
         },
         false /* supportsErrorInjection */);
 }

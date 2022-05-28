@@ -16,6 +16,7 @@
 #define SRC_DAWN_TESTS_DAWNTEST_H_
 
 #include <memory>
+#include <queue>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -536,18 +537,21 @@ class DawnTestBase {
 
     const wgpu::AdapterProperties& GetAdapterProperties() const;
 
-    // TODO(crbug.com/dawn/689): Use limits returned from the wire
-    // This is implemented here because tests need to always query
-    // the |backendDevice| since limits are not implemented in the wire.
     wgpu::SupportedLimits GetSupportedLimits();
 
   private:
     utils::ScopedAutoreleasePool mObjCAutoreleasePool;
     AdapterTestParam mParam;
     std::unique_ptr<utils::WireHelper> mWireHelper;
+    wgpu::Instance mInstance;
+    wgpu::Adapter mAdapter;
+
+    // Isolation keys are not exposed to the wire client. Device creation in the tests from
+    // the client first push the key into this queue, which is then consumed by the server.
+    std::queue<std::string> mNextIsolationKeyQueue;
 
     // Internal device creation function for default device creation with some optional overrides.
-    std::pair<wgpu::Device, WGPUDevice> CreateDeviceImpl(std::string isolationKey = "");
+    WGPUDevice CreateDeviceImpl(std::string isolationKey);
 
     std::ostringstream& AddTextureExpectationImpl(const char* file,
                                                   int line,
@@ -608,6 +612,7 @@ class DawnTestBase {
     void ResolveExpectations();
 
     dawn::native::Adapter mBackendAdapter;
+    WGPUDevice mLastCreatedBackendDevice;
 
     std::unique_ptr<dawn::platform::Platform> mTestPlatform;
 };
