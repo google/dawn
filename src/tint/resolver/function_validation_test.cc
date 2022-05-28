@@ -429,9 +429,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_ConstU32) {
     // fn main() {}
     auto* x = GlobalConst("x", ty.u32(), Expr(4_u));
     auto* y = GlobalConst("y", ty.u32(), Expr(8_u));
-    auto* func = Func(
-        "main", {}, ty.void_(), {},
-        {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Expr("x"), Expr("y"), Expr(16_u))});
+    auto* func = Func("main", {}, ty.void_(), {},
+                      {Stage(ast::PipelineStage::kCompute), WorkgroupSize("x", "y", 16_u)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -447,43 +446,68 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_ConstU32) {
     EXPECT_TRUE(sem_func->DirectlyReferencedGlobals().contains(sem_y));
 }
 
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_I32) {
+    // @stage(compute) @workgroup_size(1i, 2i, 3i)
+    // fn main() {}
+
+    Func("main", {}, ty.void_(), {},
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Source{{12, 34}}, 1_i, 2_i, 3_i)});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+}
+
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_U32) {
     // @stage(compute) @workgroup_size(1u, 2u, 3u)
     // fn main() {}
 
     Func("main", {}, ty.void_(), {},
-         {Stage(ast::PipelineStage::kCompute),
-          WorkgroupSize(Source{{12, 34}}, Expr(1_u), Expr(2_u), Expr(3_u))});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Source{{12, 34}}, 1_u, 2_u, 3_u)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverFunctionValidationTest, WorkgroupSize_MismatchTypeU32) {
-    // @stage(compute) @workgroup_size(1u, 2u, 3_i)
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_I32_AInt) {
+    // @stage(compute) @workgroup_size(1, 2i, 3)
     // fn main() {}
 
     Func("main", {}, ty.void_(), {},
-         {Stage(ast::PipelineStage::kCompute),
-          WorkgroupSize(Expr(1_u), Expr(2_u), Expr(Source{{12, 34}}, 3_i))});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Source{{12, 34}}, 1_a, 2_i, 3_a)});
 
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size arguments must be of the same type, "
-              "either i32 or u32");
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverFunctionValidationTest, WorkgroupSize_MismatchTypeI32) {
-    // @stage(compute) @workgroup_size(1_i, 2u, 3_i)
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_U32_AInt) {
+    // @stage(compute) @workgroup_size(1u, 2, 3u)
     // fn main() {}
 
     Func("main", {}, ty.void_(), {},
-         {Stage(ast::PipelineStage::kCompute),
-          WorkgroupSize(Expr(1_i), Expr(Source{{12, 34}}, 2_u), Expr(3_i))});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Source{{12, 34}}, 1_u, 2_a, 3_u)});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_MismatchType_U32) {
+    // @stage(compute) @workgroup_size(1u, 2, 3_i)
+    // fn main() {}
+
+    Func("main", {}, ty.void_(), {},
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Source{{12, 34}}, 1_u, 2_a, 3_i)});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size arguments must be of the same type, "
-              "either i32 or u32");
+              "12:34 error: workgroup_size arguments must be of the same type, either i32 or u32");
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_MismatchType_I32) {
+    // @stage(compute) @workgroup_size(1_i, 2u, 3)
+    // fn main() {}
+
+    Func("main", {}, ty.void_(), {},
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Source{{12, 34}}, 1_i, 2_u, 3_a)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: workgroup_size arguments must be of the same type, either i32 or u32");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_TypeMismatch) {
@@ -492,13 +516,11 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_TypeMismatch) {
     // fn main() {}
     GlobalConst("x", ty.u32(), Expr(64_u));
     Func("main", {}, ty.void_(), {},
-         {Stage(ast::PipelineStage::kCompute),
-          WorkgroupSize(Expr(1_i), Expr(Source{{12, 34}}, "x"))});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Source{{12, 34}}, 1_i, "x")});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size arguments must be of the same type, "
-              "either i32 or u32");
+              "12:34 error: workgroup_size arguments must be of the same type, either i32 or u32");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_TypeMismatch2) {
@@ -509,13 +531,11 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_TypeMismatch2) {
     GlobalConst("x", ty.u32(), Expr(64_u));
     GlobalConst("y", ty.i32(), Expr(32_i));
     Func("main", {}, ty.void_(), {},
-         {Stage(ast::PipelineStage::kCompute),
-          WorkgroupSize(Expr("x"), Expr(Source{{12, 34}}, "y"))});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Source{{12, 34}}, "x", "y")});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size arguments must be of the same type, "
-              "either i32 or u32");
+              "12:34 error: workgroup_size arguments must be of the same type, either i32 or u32");
 }
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Mismatch_ConstU32) {
     // let x = 4u;
@@ -525,13 +545,11 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Mismatch_ConstU32) {
     GlobalConst("x", ty.u32(), Expr(4_u));
     GlobalConst("y", ty.u32(), Expr(8_u));
     Func("main", {}, ty.void_(), {},
-         {Stage(ast::PipelineStage::kCompute),
-          WorkgroupSize(Expr("x"), Expr("y"), Expr(Source{{12, 34}}, 16_i))});
+         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Source{{12, 34}}, "x", "y", 16_i)});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size arguments must be of the same type, "
-              "either i32 or u32");
+              "12:34 error: workgroup_size arguments must be of the same type, either i32 or u32");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_BadType) {

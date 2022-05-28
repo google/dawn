@@ -2546,10 +2546,20 @@ class ProgramBuilder {
     }
 
     /// Creates an ast::WorkgroupAttribute
+    /// @param source the source information
     /// @param x the x dimension expression
     /// @param y the y dimension expression
     /// @returns the workgroup attribute pointer
     template <typename EXPR_X, typename EXPR_Y>
+    const ast::WorkgroupAttribute* WorkgroupSize(const Source& source, EXPR_X&& x, EXPR_Y&& y) {
+        return WorkgroupSize(source, std::forward<EXPR_X>(x), std::forward<EXPR_Y>(y), nullptr);
+    }
+
+    /// Creates an ast::WorkgroupAttribute
+    /// @param x the x dimension expression
+    /// @param y the y dimension expression
+    /// @returns the workgroup attribute pointer
+    template <typename EXPR_X, typename EXPR_Y, typename = DisableIfSource<EXPR_X>>
     const ast::WorkgroupAttribute* WorkgroupSize(EXPR_X&& x, EXPR_Y&& y) {
         return WorkgroupSize(std::forward<EXPR_X>(x), std::forward<EXPR_Y>(y), nullptr);
     }
@@ -2575,7 +2585,7 @@ class ProgramBuilder {
     /// @param y the y dimension expression
     /// @param z the z dimension expression
     /// @returns the workgroup attribute pointer
-    template <typename EXPR_X, typename EXPR_Y, typename EXPR_Z>
+    template <typename EXPR_X, typename EXPR_Y, typename EXPR_Z, typename = DisableIfSource<EXPR_X>>
     const ast::WorkgroupAttribute* WorkgroupSize(EXPR_X&& x, EXPR_Y&& y, EXPR_Z&& z) {
         return create<ast::WorkgroupAttribute>(source_, Expr(std::forward<EXPR_X>(x)),
                                                Expr(std::forward<EXPR_Y>(y)),

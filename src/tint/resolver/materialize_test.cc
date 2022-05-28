@@ -134,6 +134,11 @@ enum class Method {
     //   default: {}
     // }
     kSwitchCaseWithAbstractCase,
+
+    // @workgroup_size(target_expr, abstract_expr, 123)
+    // @stage(compute)
+    // fn f() {}
+    kWorkgroupSize
 };
 
 static std::ostream& operator<<(std::ostream& o, Method m) {
@@ -162,6 +167,8 @@ static std::ostream& operator<<(std::ostream& o, Method m) {
             return o << "switch-cond-with-abstract";
         case Method::kSwitchCaseWithAbstractCase:
             return o << "switch-case-with-abstract";
+        case Method::kWorkgroupSize:
+            return o << "workgroup-size";
     }
     return o << "<unknown>";
 }
@@ -285,6 +292,11 @@ TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
                                   Case(Expr(123_a)),                                     //
                                   Case(abstract_expr->As<ast::IntLiteralExpression>()),  //
                                   DefaultCase()));
+            break;
+        case Method::kWorkgroupSize:
+            Func("f", {}, ty.void_(), {},
+                 {WorkgroupSize(target_expr(), abstract_expr, Expr(123_a)),
+                  Stage(ast::PipelineStage::kCompute)});
             break;
     }
 
@@ -461,6 +473,19 @@ INSTANTIATE_TEST_SUITE_P(MaterializeSwitch,
                                               Types<u32, AInt>(AInt(kLowestU32), kLowestU32),    //
                                           })));
 
+INSTANTIATE_TEST_SUITE_P(MaterializeWorkgroupSize,
+                         MaterializeAbstractNumericToConcreteType,
+                         testing::Combine(testing::Values(Expectation::kMaterialize),
+                                          testing::Values(Method::kWorkgroupSize),
+                                          testing::ValuesIn(std::vector<Data>{
+                                              Types<i32, AInt>(1_a, 1.0),          //
+                                              Types<i32, AInt>(10_a, 10.0),        //
+                                              Types<i32, AInt>(65535_a, 65535.0),  //
+                                              Types<u32, AInt>(1_a, 1.0),          //
+                                              Types<u32, AInt>(10_a, 10.0),        //
+                                              Types<u32, AInt>(65535_a, 65535.0),  //
+                                          })));
+
 // TODO(crbug.com/tint/1504): Enable once we have abstract overloads of builtins / binary ops.
 INSTANTIATE_TEST_SUITE_P(DISABLED_NoMaterialize,
                          MaterializeAbstractNumericToConcreteType,
@@ -558,6 +583,11 @@ enum class Method {
     //   default: {}
     // }
     kSwitch,
+
+    // @workgroup_size(abstract_expr)
+    // @stage(compute)
+    // fn f() {}
+    kWorkgroupSize
 };
 
 static std::ostream& operator<<(std::ostream& o, Method m) {
@@ -576,6 +606,8 @@ static std::ostream& operator<<(std::ostream& o, Method m) {
             return o << "array-length";
         case Method::kSwitch:
             return o << "switch";
+        case Method::kWorkgroupSize:
+            return o << "workgroup-size";
     }
     return o << "<unknown>";
 }
@@ -656,6 +688,10 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
                                   Case(abstract_expr()->As<ast::IntLiteralExpression>()),
                                   DefaultCase()));
             break;
+        case Method::kWorkgroupSize:
+            Func("f", {}, ty.void_(), {},
+                 {WorkgroupSize(abstract_expr()), Stage(ast::PipelineStage::kCompute)});
+            break;
     }
 
     auto check_types_and_values = [&](const sem::Expression* expr) {
@@ -734,11 +770,6 @@ constexpr Method kMatrixMethods[] = {
     Method::kVar,
 };
 
-/// Methods that support materialization for switch cases
-constexpr Method kSwitchMethods[] = {
-    Method::kSwitch,
-};
-
 INSTANTIATE_TEST_SUITE_P(
     MaterializeScalar,
     MaterializeAbstractNumericToDefaultType,
@@ -798,11 +829,21 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(MaterializeSwitch,
                          MaterializeAbstractNumericToDefaultType,
                          testing::Combine(testing::Values(Expectation::kMaterialize),
-                                          testing::ValuesIn(kSwitchMethods),
+                                          testing::Values(Method::kSwitch),
                                           testing::ValuesIn(std::vector<Data>{
                                               Types<i32, AInt>(0_a, 0.0),                        //
                                               Types<i32, AInt>(AInt(kHighestI32), kHighestI32),  //
                                               Types<i32, AInt>(AInt(kLowestI32), kLowestI32),    //
+                                          })));
+
+INSTANTIATE_TEST_SUITE_P(MaterializeWorkgroupSize,
+                         MaterializeAbstractNumericToDefaultType,
+                         testing::Combine(testing::Values(Expectation::kMaterialize),
+                                          testing::Values(Method::kWorkgroupSize),
+                                          testing::ValuesIn(std::vector<Data>{
+                                              Types<i32, AInt>(1_a, 1.0),          //
+                                              Types<i32, AInt>(10_a, 10.0),        //
+                                              Types<i32, AInt>(65535_a, 65535.0),  //
                                           })));
 
 INSTANTIATE_TEST_SUITE_P(ScalarValueCannotBeRepresented,
@@ -840,7 +881,16 @@ INSTANTIATE_TEST_SUITE_P(MatrixValueCannotBeRepresented,
 INSTANTIATE_TEST_SUITE_P(SwitchValueCannotBeRepresented,
                          MaterializeAbstractNumericToDefaultType,
                          testing::Combine(testing::Values(Expectation::kValueCannotBeRepresented),
-                                          testing::ValuesIn(kSwitchMethods),
+                                          testing::Values(Method::kSwitch),
+                                          testing::ValuesIn(std::vector<Data>{
+                                              Types<i32, AInt>(0_a, kHighestI32 + 1),  //
+                                              Types<i32, AInt>(0_a, kLowestI32 - 1),   //
+                                          })));
+
+INSTANTIATE_TEST_SUITE_P(WorkgroupSizeValueCannotBeRepresented,
+                         MaterializeAbstractNumericToDefaultType,
+                         testing::Combine(testing::Values(Expectation::kValueCannotBeRepresented),
+                                          testing::Values(Method::kWorkgroupSize),
                                           testing::ValuesIn(std::vector<Data>{
                                               Types<i32, AInt>(0_a, kHighestI32 + 1),  //
                                               Types<i32, AInt>(0_a, kLowestI32 - 1),   //

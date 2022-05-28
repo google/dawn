@@ -721,52 +721,61 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
     }
 
     auto values = attr->Values();
-    auto any_i32 = false;
-    auto any_u32 = false;
+    std::array<const sem::Expression*, 3> args = {};
+    std::array<const sem::Type*, 3> arg_tys = {};
+    size_t arg_count = 0;
+
+    constexpr const char* kErrBadType =
+        "workgroup_size argument must be either literal or module-scope constant of type i32 "
+        "or u32";
+
     for (int i = 0; i < 3; i++) {
-        // Each argument to this attribute can either be a literal, an
-        // identifier for a module-scope constants, or nullptr if not specified.
-
-        auto* expr = values[i];
+        // Each argument to this attribute can either be a literal, an identifier for a module-scope
+        // constants, or nullptr if not specified.
+        auto* value = values[i];
+        if (!value) {
+            break;
+        }
+        const auto* expr = Expression(value);
         if (!expr) {
-            // Not specified, just use the default.
-            continue;
+            return false;
         }
-
-        auto* expr_sem = Expression(expr);
-        if (!expr_sem) {
+        auto* ty = expr->Type();
+        if (!ty->IsAnyOf<sem::I32, sem::U32, sem::AbstractInt>()) {
+            AddError(kErrBadType, value->source);
             return false;
         }
 
-        constexpr const char* kErrBadType =
-            "workgroup_size argument must be either literal or module-scope "
-            "constant of type i32 or u32";
-        constexpr const char* kErrInconsistentType =
-            "workgroup_size arguments must be of the same type, either i32 "
-            "or u32";
+        args[i] = expr;
+        arg_tys[i] = ty;
+        arg_count++;
+    }
 
-        auto* ty = sem_.TypeOf(expr);
-        bool is_i32 = ty->UnwrapRef()->Is<sem::I32>();
-        bool is_u32 = ty->UnwrapRef()->Is<sem::U32>();
-        if (!is_i32 && !is_u32) {
-            AddError(kErrBadType, expr->source);
-            return false;
-        }
+    auto* common_ty = sem::Type::Common(arg_tys.data(), arg_count);
+    if (!common_ty) {
+        AddError("workgroup_size arguments must be of the same type, either i32 or u32",
+                 attr->source);
+        return false;
+    }
 
-        any_i32 = any_i32 || is_i32;
-        any_u32 = any_u32 || is_u32;
-        if (any_i32 && any_u32) {
-            AddError(kErrInconsistentType, expr->source);
+    // If all arguments are abstract-integers, then materialize to i32.
+    if (common_ty->Is<sem::AbstractInt>()) {
+        common_ty = builder_->create<sem::I32>();
+    }
+
+    for (size_t i = 0; i < arg_count; i++) {
+        auto* materialized = Materialize(args[i], common_ty);
+        if (!materialized) {
             return false;
         }
 
         sem::Constant value;
 
-        if (auto* user = sem_.Get(expr)->As<sem::VariableUser>()) {
+        if (auto* user = args[i]->As<sem::VariableUser>()) {
             // We have an variable of a module-scope constant.
             auto* decl = user->Variable()->Declaration();
             if (!decl->is_const) {
-                AddError(kErrBadType, expr->source);
+                AddError(kErrBadType, values[i]->source);
                 return false;
             }
             // Capture the constant if it is pipeline-overridable.
@@ -781,8 +790,8 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
                 ws[i].value = 0;
                 continue;
             }
-        } else if (expr->Is<ast::LiteralExpression>()) {
-            value = sem_.Get(expr)->ConstantValue();
+        } else if (values[i]->Is<ast::LiteralExpression>()) {
+            value = materialized->ConstantValue();
         } else {
             AddError(
                 "workgroup_size argument must be either a literal or a "
