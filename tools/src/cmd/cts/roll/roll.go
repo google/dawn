@@ -467,11 +467,20 @@ func (r *roller) rollCommitMessage(
 func (r *roller) postComments(ps gerrit.Patchset, diags []expectations.Diagnostic, results result.List) error {
 	fc := make([]gerrit.FileComment, len(diags))
 	for i, d := range diags {
+		var prefix string
+		switch d.Severity {
+		case expectations.Error:
+			prefix = "🟥"
+		case expectations.Warning:
+			prefix = "🟨"
+		case expectations.Note:
+			prefix = "🟦"
+		}
 		fc[i] = gerrit.FileComment{
 			Path:    common.RelativeExpectationsPath,
 			Side:    gerrit.Left,
 			Line:    d.Line,
-			Message: fmt.Sprintf("%v: %v", d.Severity, d.Message),
+			Message: fmt.Sprintf("%v %v: %v", prefix, d.Severity, d.Message),
 		}
 	}
 
