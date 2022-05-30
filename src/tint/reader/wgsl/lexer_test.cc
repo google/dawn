@@ -15,6 +15,8 @@
 #include "src/tint/reader/wgsl/lexer.h"
 
 #include <limits>
+#include <tuple>
+#include <vector>
 
 #include "gtest/gtest.h"
 
@@ -586,270 +588,218 @@ TEST_F(LexerTest, IdentifierTest_DoesNotStartWithNumber) {
     EXPECT_FALSE(t.IsIdentifier());
 }
 
-struct HexSignedIntData {
+////////////////////////////////////////////////////////////////////////////////
+// ParseIntegerTest
+////////////////////////////////////////////////////////////////////////////////
+struct ParseIntegerCase {
     const char* input;
-    int32_t result;
+    int64_t result;
 };
-inline std::ostream& operator<<(std::ostream& out, HexSignedIntData data) {
+
+inline std::ostream& operator<<(std::ostream& out, ParseIntegerCase data) {
     out << std::string(data.input);
     return out;
 }
 
-using IntegerTest_HexSigned = testing::TestWithParam<HexSignedIntData>;
-TEST_P(IntegerTest_HexSigned, NoSuffix) {
-    auto params = GetParam();
+using ParseIntegerTest = testing::TestWithParam<std::tuple<char, ParseIntegerCase>>;
+TEST_P(ParseIntegerTest, Parse) {
+    auto suffix = std::get<0>(GetParam());
+    auto params = std::get<1>(GetParam());
     Source::File file("", params.input);
-    Lexer l(&file);
 
-    auto t = l.next();
-    EXPECT_TRUE(t.Is(Token::Type::kIntLiteral));
-    EXPECT_EQ(t.source().range.begin.line, 1u);
-    EXPECT_EQ(t.source().range.begin.column, 1u);
-    EXPECT_EQ(t.source().range.end.line, 1u);
-    EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
-    EXPECT_EQ(t.to_i64(), params.result);
-}
-TEST_P(IntegerTest_HexSigned, ISuffix) {
-    auto params = GetParam();
-    Source::File file("", std::string(params.input) + "i");
-    Lexer l(&file);
-
-    auto t = l.next();
-    EXPECT_TRUE(t.Is(Token::Type::kIntLiteral_I));
-    EXPECT_EQ(t.source().range.begin.line, 1u);
-    EXPECT_EQ(t.source().range.begin.column, 1u);
-    EXPECT_EQ(t.source().range.end.line, 1u);
-    EXPECT_EQ(t.source().range.end.column, 2u + strlen(params.input));
-    EXPECT_EQ(t.to_i64(), params.result);
-}
-INSTANTIATE_TEST_SUITE_P(
-    LexerTest,
-    IntegerTest_HexSigned,
-    testing::Values(HexSignedIntData{"0x0", 0},
-                    HexSignedIntData{"0X0", 0},
-                    HexSignedIntData{"0x42", 66},
-                    HexSignedIntData{"0X42", 66},
-                    HexSignedIntData{"-0x42", -66},
-                    HexSignedIntData{"-0X42", -66},
-                    HexSignedIntData{"0xeF1Abc9", 250719177},
-                    HexSignedIntData{"0XeF1Abc9", 250719177},
-                    HexSignedIntData{"-0x80000000", std::numeric_limits<int32_t>::min()},
-                    HexSignedIntData{"-0X80000000", std::numeric_limits<int32_t>::min()},
-                    HexSignedIntData{"0x7FFFFFFF", std::numeric_limits<int32_t>::max()},
-                    HexSignedIntData{"0X7FFFFFFF", std::numeric_limits<int32_t>::max()}));
-
-TEST_F(LexerTest, HexPrefixOnly_IsError) {
-    // Could be the start of a hex integer or hex float, but is neither.
-    Source::File file("", "0x");
-    Lexer l(&file);
-
-    auto t = l.next();
-    ASSERT_TRUE(t.Is(Token::Type::kError));
-    EXPECT_EQ(t.to_str(), "integer or float hex literal has no significant digits");
-}
-
-TEST_F(LexerTest, HexPrefixUpperCaseOnly_IsError) {
-    // Could be the start of a hex integer or hex float, but is neither.
-    Source::File file("", "0X");
-    Lexer l(&file);
-
-    auto t = l.next();
-    ASSERT_TRUE(t.Is(Token::Type::kError));
-    EXPECT_EQ(t.to_str(), "integer or float hex literal has no significant digits");
-}
-
-TEST_F(LexerTest, NegativeHexPrefixOnly_IsError) {
-    // Could be the start of a hex integer or hex float, but is neither.
-    Source::File file("", "-0x");
-    Lexer l(&file);
-
-    auto t = l.next();
-    ASSERT_TRUE(t.Is(Token::Type::kError));
-    EXPECT_EQ(t.to_str(), "integer or float hex literal has no significant digits");
-}
-
-TEST_F(LexerTest, NegativeHexPrefixUpperCaseOnly_IsError) {
-    // Could be the start of a hex integer or hex float, but is neither.
-    Source::File file("", "-0X");
-    Lexer l(&file);
-
-    auto t = l.next();
-    ASSERT_TRUE(t.Is(Token::Type::kError));
-    EXPECT_EQ(t.to_str(), "integer or float hex literal has no significant digits");
-}
-
-TEST_F(LexerTest, IntegerTest_HexSignedTooLarge) {
-    Source::File file("", "0x80000000");
-    Lexer l(&file);
-
-    auto t = l.next();
-    ASSERT_TRUE(t.Is(Token::Type::kError));
-    EXPECT_EQ(t.to_str(), "value cannot be represented as 'i32'");
-}
-
-TEST_F(LexerTest, IntegerTest_HexSignedTooSmall) {
-    Source::File file("", "-0x8000000F");
-    Lexer l(&file);
-
-    auto t = l.next();
-    ASSERT_TRUE(t.Is(Token::Type::kError));
-    EXPECT_EQ(t.to_str(), "value cannot be represented as 'i32'");
-}
-
-TEST_F(LexerTest, IntegerTest_HexSignedTooManyDigits) {
-    {
-        Source::File file("", "-0x100000000000000000000000");
-        Lexer l(&file);
-
-        auto t = l.next();
-        ASSERT_TRUE(t.Is(Token::Type::kError));
-        EXPECT_EQ(t.to_str(), "integer literal (-0x10000000...) has too many digits");
+    auto t = Lexer(&file).next();
+    switch (suffix) {
+        case 'i':
+            EXPECT_TRUE(t.Is(Token::Type::kIntLiteral_I));
+            break;
+        case 'u':
+            EXPECT_TRUE(t.Is(Token::Type::kIntLiteral_U));
+            break;
+        case 0:
+            EXPECT_TRUE(t.Is(Token::Type::kIntLiteral));
+            break;
     }
-    {
-        Source::File file("", "0x100000000000000");
-        Lexer l(&file);
-
-        auto t = l.next();
-        ASSERT_TRUE(t.Is(Token::Type::kError));
-        EXPECT_EQ(t.to_str(), "integer literal (0x10000000...) has too many digits");
-    }
-}
-
-struct HexUnsignedIntData {
-    const char* input;
-    uint32_t result;
-};
-inline std::ostream& operator<<(std::ostream& out, HexUnsignedIntData data) {
-    out << std::string(data.input);
-    return out;
-}
-using IntegerTest_HexUnsigned = testing::TestWithParam<HexUnsignedIntData>;
-// TODO(crbug.com/tint/1504): Split into NoSuffix and USuffix
-TEST_P(IntegerTest_HexUnsigned, Matches) {
-    auto params = GetParam();
-    Source::File file("", params.input);
-    Lexer l(&file);
-
-    auto t = l.next();
-    EXPECT_TRUE(t.Is(Token::Type::kIntLiteral_U));
     EXPECT_EQ(t.source().range.begin.line, 1u);
     EXPECT_EQ(t.source().range.begin.column, 1u);
     EXPECT_EQ(t.source().range.end.line, 1u);
     EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
+    ASSERT_FALSE(t.IsError()) << t.to_str();
     EXPECT_EQ(t.to_i64(), params.result);
-
-    t = l.next();
-    EXPECT_TRUE(t.IsEof());
-}
-INSTANTIATE_TEST_SUITE_P(
-    LexerTest,
-    IntegerTest_HexUnsigned,
-    testing::Values(HexUnsignedIntData{"0x0u", 0},
-                    HexUnsignedIntData{"0x42u", 66},
-                    HexUnsignedIntData{"0xeF1Abc9u", 250719177},
-                    HexUnsignedIntData{"0x0u", std::numeric_limits<uint32_t>::min()},
-                    HexUnsignedIntData{"0xFFFFFFFFu", std::numeric_limits<uint32_t>::max()}));
-
-TEST_F(LexerTest, IntegerTest_HexUnsignedTooManyDigits) {
-    Source::File file("", "0x1000000000000000000000u");
-    Lexer l(&file);
-
-    auto t = l.next();
-    ASSERT_TRUE(t.Is(Token::Type::kError));
-    EXPECT_EQ(t.to_str(), "integer literal (0x10000000...) has too many digits");
 }
 
-struct UnsignedIntData {
-    const char* input;
-    uint32_t result;
-};
-inline std::ostream& operator<<(std::ostream& out, UnsignedIntData data) {
-    out << std::string(data.input);
-    return out;
+INSTANTIATE_TEST_SUITE_P(Dec_AInt,
+                         ParseIntegerTest,
+                         testing::Combine(testing::Values('\0'),  // No suffix
+                                          testing::ValuesIn(std::vector<ParseIntegerCase>{
+                                              {"0", 0},
+                                              {"-2", -2},
+                                              {"2", 2},
+                                              {"123", 123},
+                                              {"2147483647", 2147483647},
+                                              {"-2147483648", -2147483648LL},
+                                              {"-9223372036854775808", -9223372036854775807LL - 1},
+                                          })));
+
+INSTANTIATE_TEST_SUITE_P(Dec_u32,
+                         ParseIntegerTest,
+                         testing::Combine(testing::Values('u'),  // Suffix
+                                          testing::ValuesIn(std::vector<ParseIntegerCase>{
+                                              {"0u", 0},
+                                              {"123u", 123},
+                                              {"4294967295u", 4294967295ll},
+                                          })));
+
+INSTANTIATE_TEST_SUITE_P(Dec_i32,
+                         ParseIntegerTest,
+                         testing::Combine(testing::Values('i'),  // Suffix
+                                          testing::ValuesIn(std::vector<ParseIntegerCase>{
+                                              {"0i", 0u},
+                                              {"-0i", 0u},
+                                              {"123i", 123},
+                                              {"-123i", -123},
+                                              {"2147483647i", 2147483647},
+                                              {"-2147483647i", -2147483647ll},
+                                          })));
+
+INSTANTIATE_TEST_SUITE_P(Hex_AInt,
+                         ParseIntegerTest,
+                         testing::Combine(testing::Values('\0'),  // No suffix
+                                          testing::ValuesIn(std::vector<ParseIntegerCase>{
+                                              {"0x0", 0},
+                                              {"0X0", 0},
+                                              {"0x42", 66},
+                                              {"0X42", 66},
+                                              {"-0x42", -66},
+                                              {"-0X42", -66},
+                                              {"0xeF1Abc9", 0xeF1Abc9},
+                                              {"0XeF1Abc9", 0xeF1Abc9},
+                                              {"-0xeF1Abc9", -0xeF1Abc9},
+                                              {"-0XeF1Abc9", -0xeF1Abc9},
+                                              {"0x80000000", 0x80000000},
+                                              {"0X80000000", 0X80000000},
+                                              {"-0x80000000", -0x80000000ll},
+                                              {"-0X80000000", -0X80000000ll},
+                                              {"0x7FFFFFFF", 0x7fffffff},
+                                              {"0X7FFFFFFF", 0x7fffffff},
+                                              {"0x7fffffff", 0x7fffffff},
+                                              {"0x7fffffff", 0x7fffffff},
+                                              {"0x7FfFfFfF", 0x7fffffff},
+                                              {"0X7FfFfFfF", 0x7fffffff},
+                                              {"0x7fffffffffffffff", 0x7fffffffffffffffll},
+                                              {"-0x7fffffffffffffff", -0x7fffffffffffffffll},
+                                          })));
+
+INSTANTIATE_TEST_SUITE_P(Hex_u32,
+                         ParseIntegerTest,
+                         testing::Combine(testing::Values('u'),  // Suffix
+                                          testing::ValuesIn(std::vector<ParseIntegerCase>{
+                                              {"0x0u", 0},
+                                              {"0x42u", 66},
+                                              {"0xeF1Abc9u", 250719177},
+                                              {"0xFFFFFFFFu", 0xffffffff},
+                                              {"0XFFFFFFFFu", 0xffffffff},
+                                              {"0xffffffffu", 0xffffffff},
+                                              {"0Xffffffffu", 0xffffffff},
+                                              {"0xfFfFfFfFu", 0xffffffff},
+                                              {"0XfFfFfFfFu", 0xffffffff},
+                                          })));
+
+INSTANTIATE_TEST_SUITE_P(Hex_i32,
+                         ParseIntegerTest,
+                         testing::Combine(testing::Values('i'),  // Suffix
+                                          testing::ValuesIn(std::vector<ParseIntegerCase>{
+                                              {"0x0i", 0},
+                                              {"0x42i", 66},
+                                              {"-0x0i", 0},
+                                              {"-0x42i", -66},
+                                              {"0xeF1Abc9i", 250719177},
+                                              {"-0xeF1Abc9i", -250719177},
+                                              {"0x7FFFFFFFi", 0x7fffffff},
+                                              {"-0x7FFFFFFFi", -0x7fffffff},
+                                              {"0X7FFFFFFFi", 0x7fffffff},
+                                              {"-0X7FFFFFFFi", -0x7fffffff},
+                                              {"0x7fffffffi", 0x7fffffff},
+                                              {"-0x7fffffffi", -0x7fffffff},
+                                              {"0X7fffffffi", 0x7fffffff},
+                                              {"-0X7fffffffi", -0x7fffffff},
+                                              {"0x7FfFfFfFi", 0x7fffffff},
+                                              {"-0x7FfFfFfFi", -0x7fffffff},
+                                              {"0X7FfFfFfFi", 0x7fffffff},
+                                              {"-0X7FfFfFfFi", -0x7fffffff},
+                                          })));
+////////////////////////////////////////////////////////////////////////////////
+// ParseIntegerTest_CannotBeRepresented
+////////////////////////////////////////////////////////////////////////////////
+using ParseIntegerTest_CannotBeRepresented =
+    testing::TestWithParam<std::tuple<const char*, const char*>>;
+TEST_P(ParseIntegerTest_CannotBeRepresented, Parse) {
+    auto type = std::get<0>(GetParam());
+    auto source = std::get<1>(GetParam());
+    Source::File file("", source);
+    auto t = Lexer(&file).next();
+    EXPECT_TRUE(t.Is(Token::Type::kError));
+    auto expect = "value cannot be represented as '" + std::string(type) + "'";
+    EXPECT_EQ(t.to_str(), expect);
 }
-using IntegerTest_Unsigned = testing::TestWithParam<UnsignedIntData>;
-TEST_P(IntegerTest_Unsigned, Matches) {
-    auto params = GetParam();
-    Source::File file("", params.input);
-    Lexer l(&file);
+INSTANTIATE_TEST_SUITE_P(AbstractInt,
+                         ParseIntegerTest_CannotBeRepresented,
+                         testing::Combine(testing::Values("abstract-int"),
+                                          testing::Values("9223372036854775808",
+                                                          "0xFFFFFFFFFFFFFFFF",
+                                                          "0xffffffffffffffff",
+                                                          "0x8000000000000000")));
 
-    auto t = l.next();
-    EXPECT_TRUE(t.Is(Token::Type::kIntLiteral_U));
-    EXPECT_EQ(t.to_i64(), params.result);
-    EXPECT_EQ(t.source().range.begin.line, 1u);
-    EXPECT_EQ(t.source().range.begin.column, 1u);
-    EXPECT_EQ(t.source().range.end.line, 1u);
-    EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
-}
-INSTANTIATE_TEST_SUITE_P(LexerTest,
-                         IntegerTest_Unsigned,
-                         testing::Values(UnsignedIntData{"0u", 0u},
-                                         UnsignedIntData{"123u", 123u},
-                                         UnsignedIntData{"4294967295u", 4294967295u}));
+INSTANTIATE_TEST_SUITE_P(i32,
+                         ParseIntegerTest_CannotBeRepresented,
+                         testing::Combine(testing::Values("i32"),  // type
+                                          testing::Values("2147483648i")));
 
-TEST_F(LexerTest, IntegerTest_UnsignedTooManyDigits) {
-    Source::File file("", "10000000000000000000000u");
-    Lexer l(&file);
+INSTANTIATE_TEST_SUITE_P(u32,
+                         ParseIntegerTest_CannotBeRepresented,
+                         testing::Combine(testing::Values("u32"),         // type
+                                          testing::Values("4294967296u",  //
+                                                          "-1u")));
 
-    auto t = l.next();
-    ASSERT_TRUE(t.Is(Token::Type::kError));
-    EXPECT_EQ(t.to_str(), "integer literal (1000000000...) has too many digits");
-}
-
-struct SignedIntData {
-    const char* input;
-    int32_t result;
-};
-inline std::ostream& operator<<(std::ostream& out, SignedIntData data) {
-    out << std::string(data.input);
-    return out;
-}
-using IntegerTest_Signed = testing::TestWithParam<SignedIntData>;
-TEST_P(IntegerTest_Signed, Matches) {
-    auto params = GetParam();
-    Source::File file("", params.input);
-    Lexer l(&file);
-
-    auto t = l.next();
-    EXPECT_TRUE(t.Is(Token::Type::kIntLiteral));
-    EXPECT_EQ(t.to_i64(), params.result);
-    EXPECT_EQ(t.source().range.begin.line, 1u);
-    EXPECT_EQ(t.source().range.begin.column, 1u);
-    EXPECT_EQ(t.source().range.end.line, 1u);
-    EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
-}
-INSTANTIATE_TEST_SUITE_P(LexerTest,
-                         IntegerTest_Signed,
-                         testing::Values(SignedIntData{"0", 0},
-                                         SignedIntData{"-2", -2},
-                                         SignedIntData{"2", 2},
-                                         SignedIntData{"123", 123},
-                                         SignedIntData{"2147483647", 2147483647},
-                                         SignedIntData{"-2147483648", -2147483648LL}));
-
-TEST_F(LexerTest, IntegerTest_SignedTooManyDigits) {
-    Source::File file("", "-10000000000000000");
-    Lexer l(&file);
-
-    auto t = l.next();
-    ASSERT_TRUE(t.Is(Token::Type::kError));
-    EXPECT_EQ(t.to_str(), "integer literal (-1000000000...) has too many digits");
-}
-
-using IntegerTest_Invalid = testing::TestWithParam<const char*>;
-TEST_P(IntegerTest_Invalid, Parses) {
+////////////////////////////////////////////////////////////////////////////////
+// ParseIntegerTest_LeadingZeros
+////////////////////////////////////////////////////////////////////////////////
+using ParseIntegerTest_LeadingZeros = testing::TestWithParam<const char*>;
+TEST_P(ParseIntegerTest_LeadingZeros, Parse) {
     Source::File file("", GetParam());
-    Lexer l(&file);
-
-    auto t = l.next();
-    EXPECT_FALSE(t.Is(Token::Type::kIntLiteral));
-    EXPECT_FALSE(t.Is(Token::Type::kIntLiteral_U));
-    EXPECT_FALSE(t.Is(Token::Type::kIntLiteral_I));
+    auto t = Lexer(&file).next();
+    EXPECT_TRUE(t.Is(Token::Type::kError));
+    EXPECT_EQ(t.to_str(), "integer literal cannot have leading 0s");
 }
-INSTANTIATE_TEST_SUITE_P(
-    LexerTest,
-    IntegerTest_Invalid,
-    testing::Values("2147483648", "4294967296u", "01234", "0000", "-00", "00u"));
+
+INSTANTIATE_TEST_SUITE_P(LeadingZero,
+                         ParseIntegerTest_LeadingZeros,
+                         testing::Values("01234", "0000", "-00", "00u"));
+
+////////////////////////////////////////////////////////////////////////////////
+// ParseIntegerTest_NoSignificantDigits
+////////////////////////////////////////////////////////////////////////////////
+using ParseIntegerTest_NoSignificantDigits = testing::TestWithParam<const char*>;
+TEST_P(ParseIntegerTest_NoSignificantDigits, Parse) {
+    Source::File file("", GetParam());
+    auto t = Lexer(&file).next();
+    EXPECT_TRUE(t.Is(Token::Type::kError));
+    EXPECT_EQ(t.to_str(), "integer or float hex literal has no significant digits");
+}
+
+INSTANTIATE_TEST_SUITE_P(LeadingZero,
+                         ParseIntegerTest_NoSignificantDigits,
+                         testing::Values("0x",
+                                         "0X",
+                                         "-0x",
+                                         "-0X",
+                                         "0xu",
+                                         "0Xu",
+                                         "-0xu",
+                                         "-0Xu",
+                                         "0xi",
+                                         "0Xi",
+                                         "-0xi",
+                                         "-0Xi"));
 
 struct TokenData {
     const char* input;

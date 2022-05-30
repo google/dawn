@@ -313,6 +313,13 @@ crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="2147483647" 
 crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="4294967295" [ Failure ]
 
 ################################################################################
+# Literal unification failures (implementation WIP)
+################################################################################
+crbug.com/tint/1504 webgpu:shader,validation,parse,literal:abstract_int:val="4294967295" [ Failure ]
+crbug.com/tint/1504 webgpu:shader,validation,parse,literal:i32:val="-2147483649" [ Failure ]
+crbug.com/tint/1504 webgpu:shader,validation,parse,literal:i32:val="2147483648" [ Failure ]
+
+################################################################################
 # untriaged failures
 # KEEP
 ################################################################################

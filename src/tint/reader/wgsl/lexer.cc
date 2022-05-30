@@ -678,10 +678,19 @@ Token Lexer::try_hex_float() {
 }
 
 Token Lexer::build_token_from_int_if_possible(Source source, size_t start, int32_t base) {
-    int64_t res = strtoll(&at(start), nullptr, base);
+    const char* start_ptr = &at(start);
+    char* end_ptr = nullptr;
+
+    errno = 0;
+    int64_t res = strtoll(start_ptr, &end_ptr, base);
+    const bool overflow = errno == ERANGE;
+
+    if (end_ptr) {
+        advance(end_ptr - start_ptr);
+    }
 
     if (matches(pos(), "u")) {
-        if (CheckedConvert<u32>(AInt(res))) {
+        if (!overflow && CheckedConvert<u32>(AInt(res))) {
             advance(1);
             end_source(source);
             return {Token::Type::kIntLiteral_U, source, res};
@@ -690,7 +699,7 @@ Token Lexer::build_token_from_int_if_possible(Source source, size_t start, int32
     }
 
     if (matches(pos(), "i")) {
-        if (CheckedConvert<i32>(AInt(res))) {
+        if (!overflow && CheckedConvert<i32>(AInt(res))) {
             advance(1);
             end_source(source);
             return {Token::Type::kIntLiteral_I, source, res};
@@ -698,93 +707,58 @@ Token Lexer::build_token_from_int_if_possible(Source source, size_t start, int32
         return {Token::Type::kError, source, "value cannot be represented as 'i32'"};
     }
 
-    // TODO(crbug.com/tint/1504): Properly support abstract int:
-    // Change `AbstractIntType` to `int64_t`, update errors to say 'abstract int'.
-    using AbstractIntType = i32;
-    if (CheckedConvert<AbstractIntType>(AInt(res))) {
-        end_source(source);
-        return {Token::Type::kIntLiteral, source, res};
+    end_source(source);
+    if (overflow) {
+        return {Token::Type::kError, source, "value cannot be represented as 'abstract-int'"};
     }
-    return {Token::Type::kError, source, "value cannot be represented as 'i32'"};
+    return {Token::Type::kIntLiteral, source, res};
 }
 
 Token Lexer::try_hex_integer() {
-    constexpr size_t kMaxDigits = 8;  // Valid for both 32-bit integer types
     auto start = pos();
-    auto end = pos();
+    auto curr = start;
 
     auto source = begin_source();
 
-    if (matches(end, "-")) {
-        end++;
+    if (matches(curr, "-")) {
+        curr++;
     }
 
-    if (matches(end, "0x") || matches(end, "0X")) {
-        end += 2;
+    if (matches(curr, "0x") || matches(curr, "0X")) {
+        curr += 2;
     } else {
         return {};
     }
 
-    auto first = end;
-    while (!is_eol() && is_hex(at(end))) {
-        end++;
-
-        auto digits = end - first;
-        if (digits > kMaxDigits) {
-            return {Token::Type::kError, source,
-                    "integer literal (" + std::string{substr(start, end - 1 - start)} +
-                        "...) has too many digits"};
-        }
-    }
-    if (first == end) {
+    if (!is_hex(at(curr))) {
         return {Token::Type::kError, source,
                 "integer or float hex literal has no significant digits"};
     }
-
-    advance(end - start);
 
     return build_token_from_int_if_possible(source, start, 16);
 }
 
 Token Lexer::try_integer() {
-    constexpr size_t kMaxDigits = 10;  // Valid for both 32-bit integer types
     auto start = pos();
-    auto end = start;
+    auto curr = start;
 
     auto source = begin_source();
 
-    if (matches(end, "-")) {
-        end++;
+    if (matches(curr, "-")) {
+        curr++;
     }
 
-    if (end >= length() || !is_digit(at(end))) {
+    if (curr >= length() || !is_digit(at(curr))) {
         return {};
     }
 
-    auto first = end;
     // If the first digit is a zero this must only be zero as leading zeros
     // are not allowed.
-    auto next = first + 1;
-    if (next < length()) {
-        if (at(first) == '0' && is_digit(at(next))) {
-            return {Token::Type::kError, source,
-                    "integer literal (" + std::string{substr(start, end - 1 - start)} +
-                        "...) has leading 0s"};
+    if (auto next = curr + 1; next < length()) {
+        if (at(curr) == '0' && is_digit(at(next))) {
+            return {Token::Type::kError, source, "integer literal cannot have leading 0s"};
         }
     }
-
-    while (end < length() && is_digit(at(end))) {
-        auto digits = end - first;
-        if (digits > kMaxDigits) {
-            return {Token::Type::kError, source,
-                    "integer literal (" + std::string{substr(start, end - 1 - start)} +
-                        "...) has too many digits"};
-        }
-
-        end++;
-    }
-
-    advance(end - start);
 
     return build_token_from_int_if_possible(source, start, 10);
 }
