@@ -7,7 +7,6 @@ Checks: "-*,\
           -bugprone-branch-clone,\
           -bugprone-copy-constructor-init,\
           -bugprone-easily-swappable-parameters,\
-          -bugprone-forward-declaration-namespace,\
           -bugprone-forwarding-reference-overload,\
           -bugprone-implicit-widening-of-multiplication-result,\
           -bugprone-lambda-function-name,\

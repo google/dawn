@@ -23,7 +23,6 @@
 // Forward declarations
 namespace tint::ast {
 class Node;
-class Module;
 }  // namespace tint::ast
 
 namespace tint::sem {

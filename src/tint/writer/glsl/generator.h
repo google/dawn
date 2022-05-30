@@ -32,9 +32,6 @@
 namespace tint {
 class Program;
 }  // namespace tint
-namespace tint::writer::glsl {
-class GeneratorImpl;
-}  // namespace tint::writer::glsl
 
 namespace tint::writer::glsl {
 

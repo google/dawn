@@ -20,6 +20,11 @@
 #include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/texture.h"
 
+// Forward declarations
+namespace tint::sem {
+class Type;
+}  // namespace tint::sem
+
 namespace tint::inspector {
 
 /// Container for information about how a resource is bound

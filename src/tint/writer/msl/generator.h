@@ -28,9 +28,6 @@
 namespace tint {
 class Program;
 }  // namespace tint
-namespace tint::writer::msl {
-class GeneratorImpl;
-}  // namespace tint::writer::msl
 
 namespace tint::writer::msl {
 

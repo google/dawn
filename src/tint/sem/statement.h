@@ -20,7 +20,6 @@
 
 // Forward declarations
 namespace tint::ast {
-class Function;
 class Statement;
 }  // namespace tint::ast
 namespace tint::sem {

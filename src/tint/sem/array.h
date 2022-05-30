@@ -21,11 +21,6 @@
 #include "src/tint/sem/node.h"
 #include "src/tint/sem/type.h"
 
-// Forward declarations
-namespace tint::ast {
-class Array;
-}  // namespace tint::ast
-
 namespace tint::sem {
 
 /// Array holds the semantic information for Array nodes.

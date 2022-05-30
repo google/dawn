@@ -20,8 +20,6 @@
 
 namespace dawn::native::opengl {
 
-class Device;
-
 struct GLFormat {
     GLenum internalFormat = 0;
     GLenum format = 0;

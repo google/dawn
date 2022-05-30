@@ -24,7 +24,6 @@
 namespace tint::ast {
 class BlockStatement;
 class ContinueStatement;
-class Function;
 class Variable;
 }  // namespace tint::ast
 
