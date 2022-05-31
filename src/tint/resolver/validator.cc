@@ -48,6 +48,7 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/vector.h"
 #include "src/tint/ast/workgroup_attribute.h"
+#include "src/tint/sem/abstract_numeric.h"
 #include "src/tint/sem/array.h"
 #include "src/tint/sem/atomic.h"
 #include "src/tint/sem/call.h"
@@ -2141,7 +2142,8 @@ bool Validator::Assignment(const ast::Statement* a, const sem::Type* rhs_ty) con
     if (lhs->Is<ast::PhonyExpression>()) {
         // https://www.w3.org/TR/WGSL/#phony-assignment-section
         auto* ty = rhs_ty->UnwrapRef();
-        if (!ty->IsConstructible() && !ty->IsAnyOf<sem::Pointer, sem::Texture, sem::Sampler>()) {
+        if (!ty->IsConstructible() &&
+            !ty->IsAnyOf<sem::Pointer, sem::Texture, sem::Sampler, sem::AbstractNumeric>()) {
             AddError("cannot assign '" + sem_.TypeNameOf(rhs_ty) +
                          "' to '_'. '_' can only be assigned a constructible, pointer, "
                          "texture or sampler type",

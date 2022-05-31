@@ -2409,14 +2409,23 @@ sem::Statement* Resolver::AssignmentStatement(const ast::AssignmentStatement* st
             return false;
         }
 
-        auto* rhs = Expression(stmt->rhs);
+        const bool is_phony_assignment = stmt->lhs->Is<ast::PhonyExpression>();
+
+        const auto* rhs = Expression(stmt->rhs);
         if (!rhs) {
             return false;
         }
 
+        if (!is_phony_assignment) {
+            rhs = Materialize(rhs, lhs->Type()->UnwrapRef());
+            if (!rhs) {
+                return false;
+            }
+        }
+
         auto& behaviors = sem->Behaviors();
         behaviors = rhs->Behaviors();
-        if (!stmt->lhs->Is<ast::PhonyExpression>()) {
+        if (!is_phony_assignment) {
             behaviors.Add(lhs->Behaviors());
         }
 

@@ -147,29 +147,33 @@ TEST_F(ResolverAssignmentValidationTest, AssignToScalar_Fail) {
     // var my_var : i32 = 2i;
     // 1 = my_var;
 
-    auto* var = Var("my_var", ty.i32(), ast::StorageClass::kNone, Expr(2_i));
-    WrapInFunction(var, Assign(Expr(Source{{12, 34}}, 1_i), "my_var"));
+    WrapInFunction(Var("my_var", ty.i32(), ast::StorageClass::kNone, Expr(2_i)),  //
+                   Assign(Expr(Source{{12, 34}}, 1_i), "my_var"));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: cannot assign to value of type 'i32'");
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignCompatibleTypes_Pass) {
-    // var a : i32 = 2i;
-    // a = 2i
-    auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2_i));
-    WrapInFunction(var, Assign(Source{{12, 34}}, "a", 2_i));
+    // var a : i32 = 1i;
+    // a = 2i;
+    // a = 3;
+    WrapInFunction(Var("a", ty.i32(), ast::StorageClass::kNone, Expr(1_i)),  //
+                   Assign("a", 2_i),                                         //
+                   Assign("a", 3_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignCompatibleTypesThroughAlias_Pass) {
-    // alias myint = i32;
-    // var a : myint = 2i;
-    // a = 2
-    auto* myint = Alias("myint", ty.i32());
-    auto* var = Var("a", ty.Of(myint), ast::StorageClass::kNone, Expr(2_i));
-    WrapInFunction(var, Assign(Source{{12, 34}}, "a", 2_i));
+    // alias myint = u32;
+    // var a : myint = 1u;
+    // a = 2u;
+    // a = 3;
+    auto* myint = Alias("myint", ty.u32());
+    WrapInFunction(Var("a", ty.Of(myint), ast::StorageClass::kNone, Expr(1_u)),  //
+                   Assign("a", 2_u),                                             //
+                   Assign("a", 3_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -178,9 +182,9 @@ TEST_F(ResolverAssignmentValidationTest, AssignCompatibleTypesInferRHSLoad_Pass)
     // var a : i32 = 2i;
     // var b : i32 = 3i;
     // a = b;
-    auto* var_a = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2_i));
-    auto* var_b = Var("b", ty.i32(), ast::StorageClass::kNone, Expr(3_i));
-    WrapInFunction(var_a, var_b, Assign(Source{{12, 34}}, "a", "b"));
+    WrapInFunction(Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2_i)),  //
+                   Var("b", ty.i32(), ast::StorageClass::kNone, Expr(3_i)),  //
+                   Assign("a", "b"));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -190,14 +194,26 @@ TEST_F(ResolverAssignmentValidationTest, AssignThroughPointer_Pass) {
     // let b : ptr<function,i32> = &a;
     // *b = 2i;
     const auto func = ast::StorageClass::kFunction;
-    auto* var_a = Var("a", ty.i32(), func, Expr(2_i));
-    auto* var_b = Let("b", ty.pointer<i32>(func), AddressOf(Expr("a")));
-    WrapInFunction(var_a, var_b, Assign(Source{{12, 34}}, Deref("b"), 2_i));
+    WrapInFunction(Var("a", ty.i32(), func, Expr(2_i)),                    //
+                   Let("b", ty.pointer<i32>(func), AddressOf(Expr("a"))),  //
+                   Assign(Deref("b"), 2_i));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverAssignmentValidationTest, AssignToConstant_Fail) {
+TEST_F(ResolverAssignmentValidationTest, AssignMaterializedThroughPointer_Pass) {
+    // var a : i32;
+    // let b : ptr<function,i32> = &a;
+    // *b = 2;
+    const auto func = ast::StorageClass::kFunction;
+    auto* var_a = Var("a", ty.i32(), func, Expr(2_i));
+    auto* var_b = Let("b", ty.pointer<i32>(func), AddressOf(Expr("a")));
+    WrapInFunction(var_a, var_b, Assign(Deref("b"), 2_a));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverAssignmentValidationTest, AssignToLet_Fail) {
     // {
     //  let a : i32 = 2i;
     //  a = 2i
@@ -328,8 +344,12 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_Pass) {
     // fn f() {
     //   _ = 1i;
     //   _ = 2u;
-    //   _ = 3.0;
-    //   _ = vec2<bool>();
+    //   _ = 3.0f;
+    //   _ = 4;
+    //   _ = 5.0;
+    //   _ = vec2(6);
+    //   _ = vec3(7.0);
+    //   _ = vec4<bool>();
     //   _ = tex;
     //   _ = smp;
     //   _ = &s;
@@ -354,7 +374,11 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_Pass) {
     WrapInFunction(Assign(Phony(), 1_i),                                    //
                    Assign(Phony(), 2_u),                                    //
                    Assign(Phony(), 3_f),                                    //
-                   Assign(Phony(), vec2<bool>()),                           //
+                   Assign(Phony(), 4_a),                                    //
+                   Assign(Phony(), 5.0_a),                                  //
+                   Assign(Phony(), vec(nullptr, 2u, 6_a)),                  //
+                   Assign(Phony(), vec(nullptr, 3u, 7.0_a)),                //
+                   Assign(Phony(), vec4<bool>()),                           //
                    Assign(Phony(), "tex"),                                  //
                    Assign(Phony(), "smp"),                                  //
                    Assign(Phony(), AddressOf("s")),                         //
