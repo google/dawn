@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "DawnWireServerFuzzer.h"
+#include "dawn/common/GPUInfo.h"
 #include "dawn/native/DawnNative.h"
 #include "testing/libfuzzer/libfuzzer_exports.h"
 
@@ -29,8 +30,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
             wgpu::AdapterProperties properties;
             adapter.GetProperties(&properties);
 
-            return properties.backendType == wgpu::BackendType::Vulkan &&
-                   properties.adapterType == wgpu::AdapterType::CPU;
+            return gpu_info::IsGoogleSwiftshader(properties.vendorID, properties.deviceID);
         },
         true /* supportsErrorInjection */);
 }
