@@ -208,13 +208,12 @@ match workgroup_or_storage: workgroup | storage
 // Matching algorithm for a single overload:                                  //
 // -----------------------------------------                                  //
 //                                                                            //
-// The goal of matching is to compare a function call's arguments in the      //
-// program source against a possibly-templated overload declaration, and      //
-// determine if the call satisfies the form and type constraints of the       //
-// overload. Currently it is impossible for a call to match more than one     //
-// overload definition. In the event that more than one overload matches, an  //
-// ICE will be raised. Note that Tint may need to support multiple-overload   //
-// resolution in the future, depending on future overload definitions.        //
+// The goal of matching is to compare a function call's arguments and any     //
+// explicitly provided template types in the program source against an        //
+// overload declaration in this file, and determine if the call satisfies     //
+// the form and type constraints of the overload. If the call matches an      //
+// overload, then the overload is added to the list of 'overload candidates'  //
+// used for overload resolution (described below).                            //
 //                                                                            //
 // Prior to matching an overload, all template types are undefined.           //
 //                                                                            //
@@ -258,11 +257,11 @@ match workgroup_or_storage: workgroup | storage
 //       need to be checked next. If the defined type does not match the      //
 //       'match' constraint, then the overload is no longer considered.       //
 //                                                                            //
-// This algorithm is less general than the overload resolution described in   //
-// the WGSL spec.  But it makes the same decisions because the overloads      //
-// defined by WGSL are monotonic in the sense that once a template parameter  //
-// has been refined, there is never a need to backtrack and un-refine it to   //
-// match a later argument.                                                    //
+// This algorithm for matching a single overload is less general than the     //
+// algorithm described in the WGSL spec.  But it makes the same decisions     //
+// because the overloads defined by WGSL are monotonic in the sense that once //
+// a template parameter has been refined, there is never a need to backtrack  //
+// and un-refine it to match a later argument.                                //
 //                                                                            //
 // The algorithm for matching template numbers is similar to matching         //
 // template types, except numbers need to exactly match across all uses -     //
@@ -270,7 +269,24 @@ match workgroup_or_storage: workgroup | storage
 // numbers or enumerators.                                                    //
 //                                                                            //
 //                                                                            //
-// * More examples:                                                           //
+// Overload resolution for candidate overloads                                //
+// -------------------------------------------                                //
+//                                                                            //
+// If multiple candidate overloads match a given set of arguments, then a     //
+// final overload resolution pass needs to be performed. The arguments and    //
+// overload parameter types for each candidate overload are compared,         //
+// following the algorithm described at:                                      //
+//   https://www.w3.org/TR/WGSL/#overload-resolution-section                  //
+//                                                                            //
+// If the candidate list contains a single entry, then that single candidate  //
+// is picked, and no overload resolution needs to be performed.               //
+//                                                                            //
+// If the candidate list is empty, then the call fails to resolve and an      //
+// error diagnostic is raised.                                                //
+//                                                                            //
+//                                                                            //
+// More examples                                                              //
+// -------------                                                              //
 //                                                                            //
 //   fn F()                                                                   //
 //     - Function called F.                                                   //

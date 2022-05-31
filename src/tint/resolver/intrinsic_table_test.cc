@@ -793,6 +793,20 @@ TEST_F(IntrinsicTableTest, Err257Arguments) {  // crbug.com/1323605
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
+TEST_F(IntrinsicTableTest, OverloadResolution) {
+    // i32(abstract-int) produces candidates for both:
+    //    ctor i32(i32) -> i32
+    //    conv i32<T: scalar_no_i32>(T) -> i32
+    // The first should win overload resolution.
+    auto* ai = create<sem::AbstractInt>();
+    auto* i32 = create<sem::I32>();
+    auto result = table->Lookup(CtorConvIntrinsic::kI32, nullptr, {ai}, Source{});
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->ReturnType(), i32);
+    EXPECT_EQ(result->Parameters().size(), 1u);
+    EXPECT_EQ(result->Parameters()[0]->Type(), i32);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // AbstractBinaryTests
 ////////////////////////////////////////////////////////////////////////////////
