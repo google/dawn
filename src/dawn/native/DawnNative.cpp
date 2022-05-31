@@ -300,6 +300,10 @@ ExternalImageType ExternalImageExportInfo::GetType() const {
     return mType;
 }
 
+bool CheckIsErrorForTesting(void* objectHandle) {
+    return reinterpret_cast<ErrorMonad*>(objectHandle)->IsError();
+}
+
 const char* GetObjectLabelForTesting(void* objectHandle) {
     ApiObjectBase* object = reinterpret_cast<ApiObjectBase*>(objectHandle);
     return object->GetLabel().c_str();

@@ -109,6 +109,15 @@ TEST_P(SwapChainValidationTests, CreationSuccess) {
     swapchain.Present();
 }
 
+// Test that creating a swapchain with an invalid surface is an error.
+TEST_P(SwapChainValidationTests, InvalidSurface) {
+    wgpu::SurfaceDescriptor surface_desc = {};
+    wgpu::Surface surface = GetInstance().CreateSurface(&surface_desc);
+
+    ASSERT_DEVICE_ERROR_MSG(device.CreateSwapChain(surface, &goodDescriptor),
+                            testing::HasSubstr("[Surface] is invalid"));
+}
+
 // Checks that the creation size must be a valid 2D texture size.
 TEST_P(SwapChainValidationTests, InvalidCreationSize) {
     wgpu::Limits supportedLimits = GetSupportedLimits().limits;

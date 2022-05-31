@@ -22,16 +22,19 @@ namespace dawn::native {
 static constexpr uint64_t kErrorPayload = 0;
 static constexpr uint64_t kNotErrorPayload = 1;
 
-ObjectBase::ObjectBase(DeviceBase* device) : RefCounted(kNotErrorPayload), mDevice(device) {}
+ErrorMonad::ErrorMonad() : RefCounted(kNotErrorPayload) {}
+ErrorMonad::ErrorMonad(ErrorTag) : RefCounted(kErrorPayload) {}
 
-ObjectBase::ObjectBase(DeviceBase* device, ErrorTag) : RefCounted(kErrorPayload), mDevice(device) {}
+bool ErrorMonad::IsError() const {
+    return GetRefCountPayload() == kErrorPayload;
+}
+
+ObjectBase::ObjectBase(DeviceBase* device) : ErrorMonad(), mDevice(device) {}
+
+ObjectBase::ObjectBase(DeviceBase* device, ErrorTag) : ErrorMonad(kError), mDevice(device) {}
 
 DeviceBase* ObjectBase::GetDevice() const {
     return mDevice.Get();
-}
-
-bool ObjectBase::IsError() const {
-    return GetRefCountPayload() == kErrorPayload;
 }
 
 ApiObjectBase::ApiObjectBase(DeviceBase* device, const char* label) : ObjectBase(device) {

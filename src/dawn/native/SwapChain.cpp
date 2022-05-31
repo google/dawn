@@ -66,6 +66,7 @@ MaybeError ValidateSwapChainDescriptor(const DeviceBase* device,
     } else {
         DAWN_INVALID_IF(surface == nullptr,
                         "At least one of surface or implementation must be set");
+        DAWN_INVALID_IF(surface->IsError(), "[Surface] is invalid.");
 
         DAWN_TRY(ValidatePresentMode(descriptor->presentMode));
 

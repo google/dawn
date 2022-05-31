@@ -63,7 +63,8 @@ class WindowSurfaceInstanceTests : public testing::Test {
     }
 
     void AssertSurfaceCreation(const wgpu::SurfaceDescriptor* descriptor, bool succeeds) {
-        ASSERT_EQ(mInstance.CreateSurface(descriptor).Get() != nullptr, succeeds);
+        wgpu::Surface surface = mInstance.CreateSurface(descriptor);
+        ASSERT_EQ(dawn::native::CheckIsErrorForTesting(surface.Get()), !succeeds);
     }
 
     GLFWwindow* CreateWindow() {

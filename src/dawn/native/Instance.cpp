@@ -466,7 +466,7 @@ const XlibXcbFunctions* InstanceBase::GetOrCreateXlibXcbFunctions() {
 
 Surface* InstanceBase::APICreateSurface(const SurfaceDescriptor* descriptor) {
     if (ConsumedError(ValidateSurfaceDescriptor(this, descriptor))) {
-        return nullptr;
+        return Surface::MakeError(this);
     }
 
     return new Surface(this, descriptor);

@@ -15,9 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_SURFACE_H_
 #define SRC_DAWN_NATIVE_SURFACE_H_
 
-#include "dawn/common/RefCounted.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
+#include "dawn/native/ObjectBase.h"
 
 #include "dawn/native/dawn_platform.h"
 
@@ -42,8 +42,10 @@ MaybeError ValidateSurfaceDescriptor(const InstanceBase* instance,
 // ObjectiveC).
 // The surface is also used to store the current swapchain so that we can detach it when it is
 // replaced.
-class Surface final : public RefCounted {
+class Surface final : public ErrorMonad {
   public:
+    static Surface* MakeError(InstanceBase* instance);
+
     Surface(InstanceBase* instance, const SurfaceDescriptor* descriptor);
 
     void SetAttachedSwapChain(NewSwapChainBase* swapChain);
@@ -59,7 +61,7 @@ class Surface final : public RefCounted {
         XlibWindow,
     };
     Type GetType() const;
-    InstanceBase* GetInstance();
+    InstanceBase* GetInstance() const;
 
     // Valid to call if the type is MetalLayer
     void* GetMetalLayer() const;
@@ -82,6 +84,7 @@ class Surface final : public RefCounted {
     uint32_t GetXWindow() const;
 
   private:
+    Surface(InstanceBase* instance, ErrorMonad::ErrorTag tag);
     ~Surface() override;
 
     Ref<InstanceBase> mInstance;
