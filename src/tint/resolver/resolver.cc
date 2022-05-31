@@ -1205,7 +1205,10 @@ bool Resolver::ShouldMaterializeArgument(const sem::Type* parameter_ty) const {
 }
 
 sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* expr) {
-    auto* idx = sem_.Get(expr->index);
+    auto* idx = Materialize(sem_.Get(expr->index));
+    if (!idx) {
+        return nullptr;
+    }
     auto* obj = sem_.Get(expr->object);
     auto* obj_raw_ty = obj->Type();
     auto* obj_ty = obj_raw_ty->UnwrapRef();

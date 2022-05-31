@@ -566,16 +566,16 @@ enum class Method {
     // let a = abstract_expr;
     kLet,
 
-    // min(abstract_expr, abstract_expr);
+    // min(abstract_expr, abstract_expr)
     kBuiltinArg,
 
-    // bitcast<f32>(abstract_expr);
+    // bitcast<f32>(abstract_expr)
     kBitcastF32Arg,
 
-    // bitcast<vec3<f32>>(abstract_expr);
+    // bitcast<vec3<f32>>(abstract_expr)
     kBitcastVec3F32Arg,
 
-    // array<i32, abstract_expr>();
+    // array<i32, abstract_expr>()
     kArrayLength,
 
     // switch (abstract_expr) {
@@ -587,7 +587,10 @@ enum class Method {
     // @workgroup_size(abstract_expr)
     // @stage(compute)
     // fn f() {}
-    kWorkgroupSize
+    kWorkgroupSize,
+
+    // arr[abstract_expr]
+    kIndex,
 };
 
 static std::ostream& operator<<(std::ostream& o, Method m) {
@@ -608,6 +611,8 @@ static std::ostream& operator<<(std::ostream& o, Method m) {
             return o << "switch";
         case Method::kWorkgroupSize:
             return o << "workgroup-size";
+        case Method::kIndex:
+            return o << "index";
     }
     return o << "<unknown>";
 }
@@ -692,6 +697,10 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
             Func("f", {}, ty.void_(), {},
                  {WorkgroupSize(abstract_expr()), Stage(ast::PipelineStage::kCompute)});
             break;
+        case Method::kIndex:
+            Global("arr", ty.array<i32, 4>(), ast::StorageClass::kPrivate);
+            WrapInFunction(IndexAccessor("arr", abstract_expr()));
+            break;
     }
 
     auto check_types_and_values = [&](const sem::Expression* expr) {
@@ -754,6 +763,14 @@ constexpr Method kScalarMethods[] = {
     Method::kVar,
     Method::kBuiltinArg,
     Method::kBitcastF32Arg,
+};
+
+/// Methods that support abstract-integer materialization
+/// Note: Doesn't contain kWorkgroupSize as @workgroup_size has tighter constraints on the range of
+///       allowed integer values.
+constexpr Method kAIntMethods[] = {
+    Method::kSwitch,
+    Method::kIndex,
 };
 
 /// Methods that support vector materialization
@@ -826,12 +843,13 @@ INSTANTIATE_TEST_SUITE_P(
                          Types<f32M, AFloatM>(AFloat(-kSubnormalF32), -kSubnormalF32),  //
                      })));
 
-INSTANTIATE_TEST_SUITE_P(MaterializeSwitch,
+INSTANTIATE_TEST_SUITE_P(MaterializeAInt,
                          MaterializeAbstractNumericToDefaultType,
                          testing::Combine(testing::Values(Expectation::kMaterialize),
-                                          testing::Values(Method::kSwitch),
+                                          testing::ValuesIn(kAIntMethods),
                                           testing::ValuesIn(std::vector<Data>{
                                               Types<i32, AInt>(0_a, 0.0),                        //
+                                              Types<i32, AInt>(10_a, 10.0),                      //
                                               Types<i32, AInt>(AInt(kHighestI32), kHighestI32),  //
                                               Types<i32, AInt>(AInt(kLowestI32), kLowestI32),    //
                                           })));
@@ -878,10 +896,10 @@ INSTANTIATE_TEST_SUITE_P(MatrixValueCannotBeRepresented,
                                               Types<f32M, AFloatM>(0.0_a, -kTooBigF32),  //
                                           })));
 
-INSTANTIATE_TEST_SUITE_P(SwitchValueCannotBeRepresented,
+INSTANTIATE_TEST_SUITE_P(AIntValueCannotBeRepresented,
                          MaterializeAbstractNumericToDefaultType,
                          testing::Combine(testing::Values(Expectation::kValueCannotBeRepresented),
-                                          testing::Values(Method::kSwitch),
+                                          testing::ValuesIn(kAIntMethods),
                                           testing::ValuesIn(std::vector<Data>{
                                               Types<i32, AInt>(0_a, kHighestI32 + 1),  //
                                               Types<i32, AInt>(0_a, kLowestI32 - 1),   //

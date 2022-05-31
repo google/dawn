@@ -156,19 +156,36 @@ TEST_F(ResolverIndexAccessorTest, Vector) {
     EXPECT_TRUE(ref->StoreType()->Is<sem::F32>());
 }
 
-TEST_F(ResolverIndexAccessorTest, Array) {
-    auto* idx = Expr(2_i);
+TEST_F(ResolverIndexAccessorTest, Array_Literal_i32) {
     Global("my_var", ty.array<f32, 3>(), ast::StorageClass::kPrivate);
-
-    auto* acc = IndexAccessor("my_var", idx);
+    auto* acc = IndexAccessor("my_var", 2_i);
     WrapInFunction(acc);
-
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-
     ASSERT_NE(TypeOf(acc), nullptr);
-    ASSERT_TRUE(TypeOf(acc)->Is<sem::Reference>());
-
     auto* ref = TypeOf(acc)->As<sem::Reference>();
+    ASSERT_NE(ref, nullptr);
+    EXPECT_TRUE(ref->StoreType()->Is<sem::F32>());
+}
+
+TEST_F(ResolverIndexAccessorTest, Array_Literal_u32) {
+    Global("my_var", ty.array<f32, 3>(), ast::StorageClass::kPrivate);
+    auto* acc = IndexAccessor("my_var", 2_u);
+    WrapInFunction(acc);
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_NE(TypeOf(acc), nullptr);
+    auto* ref = TypeOf(acc)->As<sem::Reference>();
+    ASSERT_NE(ref, nullptr);
+    EXPECT_TRUE(ref->StoreType()->Is<sem::F32>());
+}
+
+TEST_F(ResolverIndexAccessorTest, Array_Literal_AInt) {
+    Global("my_var", ty.array<f32, 3>(), ast::StorageClass::kPrivate);
+    auto* acc = IndexAccessor("my_var", 2_a);
+    WrapInFunction(acc);
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_NE(TypeOf(acc), nullptr);
+    auto* ref = TypeOf(acc)->As<sem::Reference>();
+    ASSERT_NE(ref, nullptr);
     EXPECT_TRUE(ref->StoreType()->Is<sem::F32>());
 }
 
@@ -249,7 +266,7 @@ TEST_F(ResolverIndexAccessorTest, Array_Literal_I32) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverIndexAccessorTest, EXpr_Deref_FuncGoodParent) {
+TEST_F(ResolverIndexAccessorTest, Expr_Deref_FuncGoodParent) {
     // fn func(p: ptr<function, vec4<f32>>) -> f32 {
     //     let idx: u32 = u32();
     //     let x: f32 = (*p)[idx];
@@ -265,7 +282,7 @@ TEST_F(ResolverIndexAccessorTest, EXpr_Deref_FuncGoodParent) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverIndexAccessorTest, EXpr_Deref_FuncBadParent) {
+TEST_F(ResolverIndexAccessorTest, Expr_Deref_FuncBadParent) {
     // fn func(p: ptr<function, vec4<f32>>) -> f32 {
     //     let idx: u32 = u32();
     //     let x: f32 = *p[idx];
