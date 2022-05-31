@@ -2030,7 +2030,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
     // sem::Array uses a size of 0 for a runtime-sized array.
     uint32_t count = 0;
     if (auto* count_expr = arr->count) {
-        auto* count_sem = Expression(count_expr);
+        const auto* count_sem = Materialize(Expression(count_expr));
         if (!count_sem) {
             return nullptr;
         }

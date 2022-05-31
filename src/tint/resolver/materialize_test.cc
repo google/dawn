@@ -766,8 +766,8 @@ constexpr Method kScalarMethods[] = {
 };
 
 /// Methods that support abstract-integer materialization
-/// Note: Doesn't contain kWorkgroupSize as @workgroup_size has tighter constraints on the range of
-///       allowed integer values.
+/// Note: Doesn't contain kWorkgroupSize or kArrayLength as they have tighter constraints on the
+///       range of allowed integer values.
 constexpr Method kAIntMethods[] = {
     Method::kSwitch,
     Method::kIndex,
@@ -854,6 +854,18 @@ INSTANTIATE_TEST_SUITE_P(MaterializeAInt,
                                               Types<i32, AInt>(AInt(kLowestI32), kLowestI32),    //
                                           })));
 
+INSTANTIATE_TEST_SUITE_P(
+    MaterializeArrayLength,
+    MaterializeAbstractNumericToDefaultType,
+    testing::Combine(testing::Values(Expectation::kMaterialize),
+                     testing::Values(Method::kArrayLength),
+                     testing::ValuesIn(std::vector<Data>{
+                         Types<i32, AInt>(1_a, 1.0),        //
+                         Types<i32, AInt>(10_a, 10.0),      //
+                         Types<i32, AInt>(1000_a, 1000.0),  //
+                         // Note: kHighestI32 cannot be used due to max-byte-size validation
+                     })));
+
 INSTANTIATE_TEST_SUITE_P(MaterializeWorkgroupSize,
                          MaterializeAbstractNumericToDefaultType,
                          testing::Combine(testing::Values(Expectation::kMaterialize),
@@ -912,6 +924,14 @@ INSTANTIATE_TEST_SUITE_P(WorkgroupSizeValueCannotBeRepresented,
                                           testing::ValuesIn(std::vector<Data>{
                                               Types<i32, AInt>(0_a, kHighestI32 + 1),  //
                                               Types<i32, AInt>(0_a, kLowestI32 - 1),   //
+                                          })));
+
+INSTANTIATE_TEST_SUITE_P(ArrayLengthValueCannotBeRepresented,
+                         MaterializeAbstractNumericToDefaultType,
+                         testing::Combine(testing::Values(Expectation::kValueCannotBeRepresented),
+                                          testing::Values(Method::kArrayLength),
+                                          testing::ValuesIn(std::vector<Data>{
+                                              Types<i32, AInt>(0_a, kHighestI32 + 1),  //
                                           })));
 
 }  // namespace materialize_abstract_numeric_to_default_type
