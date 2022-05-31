@@ -321,7 +321,6 @@ dawn_test("dawn_unittests") {
     "unittests/wire/WireShaderModuleTests.cpp",
     "unittests/wire/WireTest.cpp",
     "unittests/wire/WireTest.h",
-    "unittests/wire/WireWGPUDevicePropertiesTests.cpp",
   ]
 
   if (is_win) {

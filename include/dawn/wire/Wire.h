@@ -50,26 +50,6 @@ class DAWN_WIRE_EXPORT CommandHandler {
     virtual const volatile char* HandleCommands(const volatile char* commands, size_t size) = 0;
 };
 
-DAWN_WIRE_EXPORT size_t
-SerializedWGPUDevicePropertiesSize(const WGPUDeviceProperties* deviceProperties);
-
-DAWN_WIRE_EXPORT void SerializeWGPUDeviceProperties(const WGPUDeviceProperties* deviceProperties,
-                                                    char* serializeBuffer);
-
-DAWN_WIRE_EXPORT bool DeserializeWGPUDeviceProperties(WGPUDeviceProperties* deviceProperties,
-                                                      const volatile char* deserializeBuffer,
-                                                      size_t deserializeBufferSize);
-
-DAWN_WIRE_EXPORT size_t
-SerializedWGPUSupportedLimitsSize(const WGPUSupportedLimits* supportedLimits);
-
-DAWN_WIRE_EXPORT void SerializeWGPUSupportedLimits(const WGPUSupportedLimits* supportedLimits,
-                                                   char* serializeBuffer);
-
-DAWN_WIRE_EXPORT bool DeserializeWGPUSupportedLimits(WGPUSupportedLimits* supportedLimits,
-                                                     const volatile char* deserializeBuffer,
-                                                     size_t deserializeBufferSize);
-
 }  // namespace dawn::wire
 
 // TODO(dawn:824): Remove once the deprecation period is passed.
