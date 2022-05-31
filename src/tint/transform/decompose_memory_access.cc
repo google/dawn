@@ -644,14 +644,34 @@ struct DecomposeMemoryAccess::State {
                     << el_ty->TypeInfo().name;
             }
 
-            auto* ret_ty = CreateASTTypeFor(ctx, intrinsic->ReturnType());
-            auto* func =
-                b.create<ast::Function>(b.Sym(), params, ret_ty, nullptr,
-                                        ast::AttributeList{
-                                            atomic,
-                                            b.Disable(ast::DisabledValidation::kFunctionHasNoBody),
-                                        },
-                                        ast::AttributeList{});
+            const ast::Type* ret_ty = nullptr;
+
+            // For intrinsics that return a struct, there is no AST node for it, so create one now.
+            if (intrinsic->Type() == sem::BuiltinType::kAtomicCompareExchangeWeak) {
+                auto* str = intrinsic->ReturnType()->As<sem::Struct>();
+                TINT_ASSERT(Transform, str && str->Declaration() == nullptr);
+
+                ast::StructMemberList ast_members;
+                ast_members.reserve(str->Members().size());
+                for (auto& m : str->Members()) {
+                    ast_members.push_back(
+                        b.Member(ctx.Clone(m->Name()), CreateASTTypeFor(ctx, m->Type())));
+                }
+
+                auto name = b.Symbols().New("atomic_compare_exchange_weak_ret_type");
+                auto* new_str = b.Structure(name, std::move(ast_members));
+                ret_ty = b.ty.Of(new_str);
+            } else {
+                ret_ty = CreateASTTypeFor(ctx, intrinsic->ReturnType());
+            }
+
+            auto* func = b.create<ast::Function>(
+                b.Symbols().New(std::string{"tint_"} + intrinsic->str()), params, ret_ty, nullptr,
+                ast::AttributeList{
+                    atomic,
+                    b.Disable(ast::DisabledValidation::kFunctionHasNoBody),
+                },
+                ast::AttributeList{});
 
             b.AST().AddFunction(func);
             return func->symbol;
@@ -751,6 +771,10 @@ const DecomposeMemoryAccess::Intrinsic* DecomposeMemoryAccess::Intrinsic::Clone(
     CloneContext* ctx) const {
     return ctx->dst->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(ctx->dst->ID(), op,
                                                                          storage_class, type);
+}
+
+bool DecomposeMemoryAccess::Intrinsic::IsAtomic() const {
+    return op != Op::kLoad && op != Op::kStore;
 }
 
 DecomposeMemoryAccess::DecomposeMemoryAccess() = default;

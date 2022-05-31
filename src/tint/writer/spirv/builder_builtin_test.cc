@@ -2018,15 +2018,15 @@ OpReturn
 
 TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
     // struct S {
-    //   u : atomic<u32>;
-    //   i : atomic<i32>;
+    //   u : atomic<u32>,
+    //   i : atomic<i32>,
     // }
     //
     // @binding(1) @group(2) var<storage, read_write> b : S;
     //
     // fn a_func() {
-    //   let u : vec2<u32> = atomicCompareExchangeWeak(&b.u, 10u);
-    //   let i : vec2<i32> = atomicCompareExchangeWeak(&b.i, 10);
+    //   let u = atomicCompareExchangeWeak(&b.u, 10u, 20u);
+    //   let i = atomicCompareExchangeWeak(&b.i, 10, 10);
     // }
     auto* s = Structure("S", {
                                  Member("u", ty.atomic<u32>()),
@@ -2040,10 +2040,10 @@ TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
 
     Func("a_func", {}, ty.void_(),
          ast::StatementList{
-             Decl(Let("u", ty.vec2<u32>(),
+             Decl(Let("u", nullptr,
                       Call("atomicCompareExchangeWeak", AddressOf(MemberAccessor("b", "u")), 10_u,
                            20_u))),
-             Decl(Let("i", ty.vec2<i32>(),
+             Decl(Let("i", nullptr,
                       Call("atomicCompareExchangeWeak", AddressOf(MemberAccessor("b", "i")), 10_i,
                            20_i))),
          },
@@ -2062,33 +2062,29 @@ TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
 %1 = OpVariable %2 StorageBuffer
 %7 = OpTypeVoid
 %6 = OpTypeFunction %7
-%11 = OpTypeVector %4 2
-%12 = OpConstant %4 1
-%13 = OpConstant %4 0
-%15 = OpTypePointer StorageBuffer %4
-%17 = OpConstant %4 20
-%18 = OpConstant %4 10
-%19 = OpTypeBool
-%24 = OpTypeVector %5 2
-%26 = OpTypePointer StorageBuffer %5
-%28 = OpConstant %5 20
-%29 = OpConstant %5 10
-%32 = OpConstant %5 0
-%33 = OpConstant %5 1
+%12 = OpTypeBool
+%11 = OpTypeStruct %4 %12
+%13 = OpConstant %4 1
+%14 = OpConstant %4 0
+%16 = OpTypePointer StorageBuffer %4
+%18 = OpConstant %4 20
+%19 = OpConstant %4 10
+%23 = OpTypeStruct %5 %12
+%25 = OpTypePointer StorageBuffer %5
+%27 = OpConstant %5 20
+%28 = OpConstant %5 10
 )";
     auto got_types = DumpInstructions(b.types());
     EXPECT_EQ(expected_types, got_types);
 
-    auto* expected_instructions = R"(%16 = OpAccessChain %15 %1 %13
-%20 = OpAtomicCompareExchange %4 %16 %12 %13 %13 %17 %18
-%21 = OpIEqual %19 %20 %17
-%22 = OpSelect %4 %21 %12 %13
-%10 = OpCompositeConstruct %11 %20 %22
-%27 = OpAccessChain %26 %1 %12
-%30 = OpAtomicCompareExchange %5 %27 %12 %13 %13 %28 %29
-%31 = OpIEqual %19 %30 %28
-%34 = OpSelect %5 %31 %33 %32
-%23 = OpCompositeConstruct %24 %30 %34
+    auto* expected_instructions = R"(%17 = OpAccessChain %16 %1 %14
+%20 = OpAtomicCompareExchange %4 %17 %13 %14 %14 %18 %19
+%21 = OpIEqual %12 %20 %18
+%10 = OpCompositeConstruct %11 %20 %21
+%26 = OpAccessChain %25 %1 %13
+%29 = OpAtomicCompareExchange %5 %26 %13 %14 %14 %27 %28
+%30 = OpIEqual %12 %29 %27
+%22 = OpCompositeConstruct %23 %29 %30
 OpReturn
 )";
     auto got_instructions = DumpInstructions(b.functions()[0].instructions());

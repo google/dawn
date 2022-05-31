@@ -187,6 +187,12 @@ class GeneratorImpl : public TextGenerator {
     bool EmitStorageAtomicCall(std::ostream& out,
                                const ast::CallExpression* expr,
                                const transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
+    /// Handles generating the helper function for the atomic intrinsic function
+    /// @param func the function
+    /// @param intrinsic the atomic intrinsic
+    /// @returns true if the function is emitted
+    bool EmitStorageAtomicIntrinsic(const ast::Function* func,
+                                    const transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
     /// Handles generating an atomic intrinsic call for a workgroup variable
     /// @param out the output of the expression stream
     /// @param expr the call expression
@@ -511,7 +517,6 @@ class GeneratorImpl : public TextGenerator {
 
     TextBuffer helpers_;  // Helper functions emitted at the top of the output
     std::function<bool()> emit_continuing_;
-    std::unordered_map<DMAIntrinsic, std::string, DMAIntrinsic::Hasher> dma_intrinsics_;
     std::unordered_map<const sem::Matrix*, std::string> matrix_scalar_ctors_;
     std::unordered_map<const sem::Builtin*, std::string> builtins_;
     std::unordered_map<const sem::Struct*, std::string> structure_builders_;

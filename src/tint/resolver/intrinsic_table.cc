@@ -722,6 +722,14 @@ bool match_frexp_result_vec(const sem::Type* ty, Number& N) {
     return true;
 }
 
+bool match_atomic_compare_exchange_result(const sem::Type* ty, const sem::Type*& T) {
+    if (ty->Is<Any>()) {
+        T = ty;
+        return true;
+    }
+    return false;
+}
+
 struct NameAndType {
     std::string name;
     sem::Type* type;
@@ -777,6 +785,13 @@ const sem::Struct* build_frexp_result_vec(MatchState& state, Number& n) {
     auto* vec_i32 = state.builder.create<sem::Vector>(state.builder.create<sem::I32>(), n.Value());
     return build_struct(state, "__frexp_result_vec" + std::to_string(n.Value()),
                         {{"sig", vec_f32}, {"exp", vec_i32}});
+}
+
+const sem::Struct* build_atomic_compare_exchange_result(MatchState& state, const sem::Type* ty) {
+    return build_struct(
+        state, "__atomic_compare_exchange_result" + ty->FriendlyName(state.builder.Symbols()),
+        {{"old_value", const_cast<sem::Type*>(ty)},
+         {"exchanged", state.builder.create<sem::Bool>()}});
 }
 
 /// ParameterInfo describes a parameter

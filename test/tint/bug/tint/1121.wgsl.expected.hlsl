@@ -1,9 +1,3 @@
-uint atomicAdd_1(RWByteAddressBuffer buffer, uint offset, uint value) {
-  uint original_value = 0;
-  buffer.InterlockedAdd(offset, value, original_value);
-  return original_value;
-}
-
 RWByteAddressBuffer lightsBuffer : register(u0, space0);
 
 RWByteAddressBuffer tileLightId : register(u0, space1);
@@ -27,6 +21,13 @@ float4x4 tint_symbol_6(uint4 buffer[11], uint offset) {
   const uint scalar_offset_3 = ((offset + 48u)) / 4;
   return float4x4(asfloat(buffer[scalar_offset / 4]), asfloat(buffer[scalar_offset_1 / 4]), asfloat(buffer[scalar_offset_2 / 4]), asfloat(buffer[scalar_offset_3 / 4]));
 }
+
+uint tint_atomicAdd(RWByteAddressBuffer buffer, uint offset, uint value) {
+  uint original_value = 0;
+  buffer.InterlockedAdd(offset, value, original_value);
+  return original_value;
+}
+
 
 void main_inner(uint3 GlobalInvocationID) {
   uint index = GlobalInvocationID.x;
@@ -96,7 +97,7 @@ void main_inner(uint3 GlobalInvocationID) {
             if ((tint_tmp)) {
               continue;
             }
-            uint offset = atomicAdd_1(tileLightId, (260u * tileId), 1u);
+            uint offset = tint_atomicAdd(tileLightId, (260u * tileId), 1u);
             if ((offset >= config[1].x)) {
               continue;
             }

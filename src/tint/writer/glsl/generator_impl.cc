@@ -911,39 +911,56 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
             return true;
         }
         case sem::BuiltinType::kAtomicCompareExchangeWeak: {
-            return CallBuiltinHelper(
-                out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
-                    {
-                        auto pre = line(b);
-                        if (!EmitTypeAndName(pre, builtin->ReturnType(), ast::StorageClass::kNone,
-                                             ast::Access::kUndefined, "result")) {
-                            return false;
-                        }
-                        pre << ";";
+            // Emit the builtin return type unique to this overload. This does not
+            // exist in the AST, so it will not be generated in Generate().
+            if (!EmitStructType(&helpers_, builtin->ReturnType()->As<sem::Struct>())) {
+                return false;
+            }
+
+            auto* dest = expr->args[0];
+            auto* compare_value = expr->args[1];
+            auto* value = expr->args[2];
+
+            std::string result = UniqueIdentifier("atomic_compare_result");
+
+            {
+                auto pre = line();
+                if (!EmitTypeAndName(pre, builtin->ReturnType(), ast::StorageClass::kNone,
+                                     ast::Access::kUndefined, result)) {
+                    return false;
+                }
+                pre << ";";
+            }
+            {
+                auto pre = line();
+                pre << result << ".old_value = atomicCompSwap";
+                {
+                    ScopedParen sp(pre);
+                    if (!EmitExpression(pre, dest)) {
+                        return false;
                     }
-                    {
-                        auto pre = line(b);
-                        pre << "result.x = atomicCompSwap";
-                        {
-                            ScopedParen sp(pre);
-                            pre << params[0];
-                            pre << ", " << params[1];
-                            pre << ", " << params[2];
-                        }
-                        pre << ";";
+                    pre << ", ";
+                    if (!EmitExpression(pre, compare_value)) {
+                        return false;
                     }
-                    {
-                        auto pre = line(b);
-                        pre << "result.y = result.x == " << params[2] << " ? ";
-                        if (TypeOf(expr->args[2])->Is<sem::U32>()) {
-                            pre << "1u : 0u;";
-                        } else {
-                            pre << "1 : 0;";
-                        }
+                    pre << ", ";
+                    if (!EmitExpression(pre, value)) {
+                        return false;
                     }
-                    line(b) << "return result;";
-                    return true;
-                });
+                }
+                pre << ";";
+            }
+            {
+                auto pre = line();
+                pre << result << ".exchanged = " << result << ".old_value == ";
+                if (!EmitExpression(pre, compare_value)) {
+                    return false;
+                }
+                pre << ";";
+            }
+
+            out << result;
+            return true;
         }
 
         case sem::BuiltinType::kAtomicAdd:

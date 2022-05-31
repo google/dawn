@@ -3201,42 +3201,12 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                 return false;
             }
 
-            // zero := T(0)
-            // one := T(1)
-            uint32_t zero = 0;
-            uint32_t one = 0;
-            if (value_sem_type->Is<sem::I32>()) {
-                zero = GenerateConstantIfNeeded(ScalarConstant::I32(0u));
-                one = GenerateConstantIfNeeded(ScalarConstant::I32(1u));
-            } else if (value_sem_type->Is<sem::U32>()) {
-                zero = GenerateConstantIfNeeded(ScalarConstant::U32(0u));
-                one = GenerateConstantIfNeeded(ScalarConstant::U32(1u));
-            } else {
-                TINT_UNREACHABLE(Writer, builder_.Diagnostics())
-                    << "unsupported atomic type " << value_sem_type->TypeInfo().name;
-            }
-            if (zero == 0 || one == 0) {
-                return false;
-            }
-
-            // xchg_success := values_equal ? one : zero
-            auto xchg_success = result_op();
-            if (!push_function_inst(spv::Op::OpSelect, {
-                                                           Operand(value_type),
-                                                           xchg_success,
-                                                           values_equal,
-                                                           Operand(one),
-                                                           Operand(zero),
-                                                       })) {
-                return false;
-            }
-
-            // result := vec2<T>(original_value, xchg_success)
+            // result := __atomic_compare_exchange_result<T>(original_value, values_equal)
             return push_function_inst(spv::Op::OpCompositeConstruct, {
                                                                          result_type,
                                                                          result_id,
                                                                          original_value,
-                                                                         xchg_success,
+                                                                         values_equal,
                                                                      });
         }
         default:

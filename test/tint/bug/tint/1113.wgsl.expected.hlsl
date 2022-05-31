@@ -2,35 +2,6 @@ uint value_or_one_if_zero_uint(uint value) {
   return value == 0u ? 1u : value;
 }
 
-uint atomicLoad_1(RWByteAddressBuffer buffer, uint offset) {
-  uint value = 0;
-  buffer.InterlockedOr(offset, 0, value);
-  return value;
-}
-
-int atomicLoad_2(RWByteAddressBuffer buffer, uint offset) {
-  int value = 0;
-  buffer.InterlockedOr(offset, 0, value);
-  return value;
-}
-
-uint atomicAdd_1(RWByteAddressBuffer buffer, uint offset, uint value) {
-  uint original_value = 0;
-  buffer.InterlockedAdd(offset, value, original_value);
-  return original_value;
-}
-
-void atomicStore_1(RWByteAddressBuffer buffer, uint offset, int value) {
-  int ignored;
-  buffer.InterlockedExchange(offset, value, ignored);
-}
-
-int atomicAdd_2(RWByteAddressBuffer buffer, uint offset, int value) {
-  int original_value = 0;
-  buffer.InterlockedAdd(offset, value, original_value);
-  return original_value;
-}
-
 cbuffer cbuffer_uniforms : register(b0, space0) {
   uint4 uniforms[3];
 };
@@ -69,18 +40,39 @@ float3 loadPosition(uint vertexIndex) {
   return position;
 }
 
+uint tint_atomicLoad(RWByteAddressBuffer buffer, uint offset) {
+  uint value = 0;
+  buffer.InterlockedOr(offset, 0, value);
+  return value;
+}
+
+
+int tint_atomicLoad_1(RWByteAddressBuffer buffer, uint offset) {
+  int value = 0;
+  buffer.InterlockedOr(offset, 0, value);
+  return value;
+}
+
+
 void doIgnore() {
   uint g42 = uniforms[0].x;
   uint kj6 = dbg.Load(20u);
-  uint b53 = atomicLoad_1(counters, (4u * uint(0)));
+  uint b53 = tint_atomicLoad(counters, (4u * uint(0)));
   uint rwg = indices.Load((4u * uint(0)));
   float rb5 = asfloat(positions.Load((4u * uint(0))));
-  int g55 = atomicLoad_2(LUT, (4u * uint(0)));
+  int g55 = tint_atomicLoad_1(LUT, (4u * uint(0)));
 }
 
 struct tint_symbol_1 {
   uint3 GlobalInvocationID : SV_DispatchThreadID;
 };
+
+uint tint_atomicAdd(RWByteAddressBuffer buffer, uint offset, uint value) {
+  uint original_value = 0;
+  buffer.InterlockedAdd(offset, value, original_value);
+  return original_value;
+}
+
 
 void main_count_inner(uint3 GlobalInvocationID) {
   uint triangleIndex = GlobalInvocationID.x;
@@ -97,7 +89,7 @@ void main_count_inner(uint3 GlobalInvocationID) {
   float3 center = (((p0 + p1) + p2) / 3.0f);
   float3 voxelPos = toVoxelPos(center);
   uint voxelIndex = toIndex1D(uniforms[0].y, voxelPos);
-  uint acefg = atomicAdd_1(counters, (4u * voxelIndex), 1u);
+  uint acefg = tint_atomicAdd(counters, (4u * voxelIndex), 1u);
   if ((triangleIndex == 0u)) {
     dbg.Store(16u, asuint(uniforms[0].y));
     dbg.Store(32u, asuint(center.x));
@@ -116,6 +108,19 @@ struct tint_symbol_3 {
   uint3 GlobalInvocationID : SV_DispatchThreadID;
 };
 
+uint tint_atomicAdd_1(RWByteAddressBuffer buffer, uint offset, uint value) {
+  uint original_value = 0;
+  buffer.InterlockedAdd(offset, value, original_value);
+  return original_value;
+}
+
+
+void tint_atomicStore(RWByteAddressBuffer buffer, uint offset, int value) {
+  int ignored;
+  buffer.InterlockedExchange(offset, value, ignored);
+}
+
+
 void main_create_lut_inner(uint3 GlobalInvocationID) {
   uint voxelIndex = GlobalInvocationID.x;
   doIgnore();
@@ -123,13 +128,13 @@ void main_create_lut_inner(uint3 GlobalInvocationID) {
   if ((voxelIndex >= maxVoxels)) {
     return;
   }
-  uint numTriangles = atomicLoad_1(counters, (4u * voxelIndex));
+  uint numTriangles = tint_atomicLoad(counters, (4u * voxelIndex));
   int offset = -1;
   if ((numTriangles > 0u)) {
-    const uint tint_symbol_6 = atomicAdd_1(dbg, 0u, numTriangles);
+    const uint tint_symbol_6 = tint_atomicAdd_1(dbg, 0u, numTriangles);
     offset = int(tint_symbol_6);
   }
-  atomicStore_1(LUT, (4u * voxelIndex), offset);
+  tint_atomicStore(LUT, (4u * voxelIndex), offset);
 }
 
 [numthreads(128, 1, 1)]
@@ -141,6 +146,13 @@ void main_create_lut(tint_symbol_3 tint_symbol_2) {
 struct tint_symbol_5 {
   uint3 GlobalInvocationID : SV_DispatchThreadID;
 };
+
+int tint_atomicAdd_2(RWByteAddressBuffer buffer, uint offset, int value) {
+  int original_value = 0;
+  buffer.InterlockedAdd(offset, value, original_value);
+  return original_value;
+}
+
 
 void main_sort_triangles_inner(uint3 GlobalInvocationID) {
   uint triangleIndex = GlobalInvocationID.x;
@@ -157,7 +169,7 @@ void main_sort_triangles_inner(uint3 GlobalInvocationID) {
   float3 center = (((p0 + p1) + p2) / 3.0f);
   float3 voxelPos = toVoxelPos(center);
   uint voxelIndex = toIndex1D(uniforms[0].y, voxelPos);
-  int triangleOffset = atomicAdd_2(LUT, (4u * voxelIndex), 1);
+  int triangleOffset = tint_atomicAdd_2(LUT, (4u * voxelIndex), 1);
 }
 
 [numthreads(128, 1, 1)]

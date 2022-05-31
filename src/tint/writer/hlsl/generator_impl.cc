@@ -968,7 +968,10 @@ bool GeneratorImpl::EmitFunctionCall(std::ostream& out,
             case ast::StorageClass::kUniform:
                 return EmitUniformBufferAccess(out, expr, intrinsic);
             case ast::StorageClass::kStorage:
-                return EmitStorageBufferAccess(out, expr, intrinsic);
+                if (!intrinsic->IsAtomic()) {
+                    return EmitStorageBufferAccess(out, expr, intrinsic);
+                }
+                break;
             default:
                 TINT_UNREACHABLE(Writer, diagnostics_)
                     << "unsupported DecomposeMemoryAccess::Intrinsic storage class:"
@@ -1445,19 +1448,10 @@ bool GeneratorImpl::EmitStorageBufferAccess(
                 << static_cast<int>(intrinsic->type);
             return false;
         }
-
-        case Op::kAtomicLoad:
-        case Op::kAtomicStore:
-        case Op::kAtomicAdd:
-        case Op::kAtomicSub:
-        case Op::kAtomicMax:
-        case Op::kAtomicMin:
-        case Op::kAtomicAnd:
-        case Op::kAtomicOr:
-        case Op::kAtomicXor:
-        case Op::kAtomicExchange:
-        case Op::kAtomicCompareExchangeWeak:
-            return EmitStorageAtomicCall(out, expr, intrinsic);
+        default:
+            // Break out to error case below/
+            // Note that atomic intrinsics are generated as functions.
+            break;
     }
 
     TINT_UNREACHABLE(Writer, diagnostics_)
@@ -1465,32 +1459,127 @@ bool GeneratorImpl::EmitStorageBufferAccess(
     return false;
 }
 
-bool GeneratorImpl::EmitStorageAtomicCall(
-    std::ostream& out,
-    const ast::CallExpression* expr,
+bool GeneratorImpl::EmitStorageAtomicIntrinsic(
+    const ast::Function* func,
     const transform::DecomposeMemoryAccess::Intrinsic* intrinsic) {
     using Op = transform::DecomposeMemoryAccess::Intrinsic::Op;
 
-    auto* result_ty = TypeOf(expr);
+    const sem::Function* sem_func = builder_.Sem().Get(func);
+    auto* result_ty = sem_func->ReturnType();
+    const auto& params = sem_func->Parameters();
+    const auto name = builder_.Symbols().NameFor(func->symbol);
+    auto& buf = *current_buffer_;
 
-    auto& buf = helpers_;
+    auto rmw = [&](const char* hlsl) -> bool {
+        {
+            auto fn = line(&buf);
+            if (!EmitTypeAndName(fn, result_ty, ast::StorageClass::kNone, ast::Access::kUndefined,
+                                 name)) {
+                return false;
+            }
+            fn << "(RWByteAddressBuffer buffer, uint offset, ";
+            if (!EmitTypeAndName(fn, result_ty, ast::StorageClass::kNone, ast::Access::kUndefined,
+                                 "value")) {
+                return false;
+            }
+            fn << ") {";
+        }
 
-    // generate_helper() generates a helper function that translates the
-    // DecomposeMemoryAccess::Intrinsic call into the corresponding HLSL
-    // atomic intrinsic function.
-    auto generate_helper = [&]() -> std::string {
-        auto rmw = [&](const char* wgsl, const char* hlsl) -> std::string {
-            auto name = UniqueIdentifier(wgsl);
+        buf.IncrementIndent();
+        TINT_DEFER({
+            buf.DecrementIndent();
+            line(&buf) << "}";
+            line(&buf);
+        });
+
+        {
+            auto l = line(&buf);
+            if (!EmitTypeAndName(l, result_ty, ast::StorageClass::kNone, ast::Access::kUndefined,
+                                 "original_value")) {
+                return false;
+            }
+            l << " = 0;";
+        }
+        {
+            auto l = line(&buf);
+            l << "buffer." << hlsl << "(offset, ";
+            if (intrinsic->op == Op::kAtomicSub) {
+                l << "-";
+            }
+            l << "value, original_value);";
+        }
+        line(&buf) << "return original_value;";
+        return true;
+    };
+
+    switch (intrinsic->op) {
+        case Op::kAtomicAdd:
+            return rmw("InterlockedAdd");
+
+        case Op::kAtomicSub:
+            // Use add with the operand negated.
+            return rmw("InterlockedAdd");
+
+        case Op::kAtomicMax:
+            return rmw("InterlockedMax");
+
+        case Op::kAtomicMin:
+            return rmw("InterlockedMin");
+
+        case Op::kAtomicAnd:
+            return rmw("InterlockedAnd");
+
+        case Op::kAtomicOr:
+            return rmw("InterlockedOr");
+
+        case Op::kAtomicXor:
+            return rmw("InterlockedXor");
+
+        case Op::kAtomicExchange:
+            return rmw("InterlockedExchange");
+
+        case Op::kAtomicLoad: {
+            // HLSL does not have an InterlockedLoad, so we emulate it with
+            // InterlockedOr using 0 as the OR value
             {
                 auto fn = line(&buf);
                 if (!EmitTypeAndName(fn, result_ty, ast::StorageClass::kNone,
                                      ast::Access::kUndefined, name)) {
-                    return "";
+                    return false;
                 }
-                fn << "(RWByteAddressBuffer buffer, uint offset, ";
-                if (!EmitTypeAndName(fn, result_ty, ast::StorageClass::kNone,
+                fn << "(RWByteAddressBuffer buffer, uint offset) {";
+            }
+
+            buf.IncrementIndent();
+            TINT_DEFER({
+                buf.DecrementIndent();
+                line(&buf) << "}";
+                line(&buf);
+            });
+
+            {
+                auto l = line(&buf);
+                if (!EmitTypeAndName(l, result_ty, ast::StorageClass::kNone,
                                      ast::Access::kUndefined, "value")) {
-                    return "";
+                    return false;
+                }
+                l << " = 0;";
+            }
+
+            line(&buf) << "buffer.InterlockedOr(offset, 0, value);";
+            line(&buf) << "return value;";
+            return true;
+        }
+        case Op::kAtomicStore: {
+            // HLSL does not have an InterlockedStore, so we emulate it with
+            // InterlockedExchange and discard the returned value
+            auto* value_ty = params[2]->Type()->UnwrapRef();
+            {
+                auto fn = line(&buf);
+                fn << "void " << name << "(RWByteAddressBuffer buffer, uint offset, ";
+                if (!EmitTypeAndName(fn, value_ty, ast::StorageClass::kNone,
+                                     ast::Access::kUndefined, "value")) {
+                    return false;
                 }
                 fn << ") {";
             }
@@ -1504,191 +1593,73 @@ bool GeneratorImpl::EmitStorageAtomicCall(
 
             {
                 auto l = line(&buf);
-                if (!EmitTypeAndName(l, result_ty, ast::StorageClass::kNone,
-                                     ast::Access::kUndefined, "original_value")) {
-                    return "";
+                if (!EmitTypeAndName(l, value_ty, ast::StorageClass::kNone, ast::Access::kUndefined,
+                                     "ignored")) {
+                    return false;
                 }
-                l << " = 0;";
+                l << ";";
             }
+            line(&buf) << "buffer.InterlockedExchange(offset, value, ignored);";
+            return true;
+        }
+        case Op::kAtomicCompareExchangeWeak: {
+            // NOTE: We don't need to emit the return type struct here as DecomposeMemoryAccess
+            // already added it to the AST, and it should have already been emitted by now.
+            auto* value_ty = params[2]->Type()->UnwrapRef();
             {
+                auto fn = line(&buf);
+                if (!EmitTypeAndName(fn, result_ty, ast::StorageClass::kNone,
+                                     ast::Access::kUndefined, name)) {
+                    return false;
+                }
+                fn << "(RWByteAddressBuffer buffer, uint offset, ";
+                if (!EmitTypeAndName(fn, value_ty, ast::StorageClass::kNone,
+                                     ast::Access::kUndefined, "compare")) {
+                    return false;
+                }
+                fn << ", ";
+                if (!EmitTypeAndName(fn, value_ty, ast::StorageClass::kNone,
+                                     ast::Access::kUndefined, "value")) {
+                    return false;
+                }
+                fn << ") {";
+            }
+
+            buf.IncrementIndent();
+            TINT_DEFER({
+                buf.DecrementIndent();
+                line(&buf) << "}";
+                line(&buf);
+            });
+
+            {  // T result = {0};
                 auto l = line(&buf);
-                l << "buffer." << hlsl << "(offset, ";
-                if (intrinsic->op == Op::kAtomicSub) {
-                    l << "-";
+                if (!EmitTypeAndName(l, result_ty, ast::StorageClass::kNone,
+                                     ast::Access::kUndefined, "result")) {
+                    return false;
                 }
-                l << "value, original_value);";
+                l << "=";
+                if (!EmitZeroValue(l, result_ty)) {
+                    return false;
+                }
+                l << ";";
             }
-            line(&buf) << "return original_value;";
-            return name;
-        };
 
-        switch (intrinsic->op) {
-            case Op::kAtomicAdd:
-                return rmw("atomicAdd", "InterlockedAdd");
+            line(&buf) << "buffer.InterlockedCompareExchange(offset, compare, value, "
+                          "result.old_value);";
+            line(&buf) << "result.exchanged = result.old_value == compare;";
+            line(&buf) << "return result;";
 
-            case Op::kAtomicSub:
-                // Use add with the operand negated.
-                return rmw("atomicSub", "InterlockedAdd");
-
-            case Op::kAtomicMax:
-                return rmw("atomicMax", "InterlockedMax");
-
-            case Op::kAtomicMin:
-                return rmw("atomicMin", "InterlockedMin");
-
-            case Op::kAtomicAnd:
-                return rmw("atomicAnd", "InterlockedAnd");
-
-            case Op::kAtomicOr:
-                return rmw("atomicOr", "InterlockedOr");
-
-            case Op::kAtomicXor:
-                return rmw("atomicXor", "InterlockedXor");
-
-            case Op::kAtomicExchange:
-                return rmw("atomicExchange", "InterlockedExchange");
-
-            case Op::kAtomicLoad: {
-                // HLSL does not have an InterlockedLoad, so we emulate it with
-                // InterlockedOr using 0 as the OR value
-                auto name = UniqueIdentifier("atomicLoad");
-                {
-                    auto fn = line(&buf);
-                    if (!EmitTypeAndName(fn, result_ty, ast::StorageClass::kNone,
-                                         ast::Access::kUndefined, name)) {
-                        return "";
-                    }
-                    fn << "(RWByteAddressBuffer buffer, uint offset) {";
-                }
-
-                buf.IncrementIndent();
-                TINT_DEFER({
-                    buf.DecrementIndent();
-                    line(&buf) << "}";
-                    line(&buf);
-                });
-
-                {
-                    auto l = line(&buf);
-                    if (!EmitTypeAndName(l, result_ty, ast::StorageClass::kNone,
-                                         ast::Access::kUndefined, "value")) {
-                        return "";
-                    }
-                    l << " = 0;";
-                }
-
-                line(&buf) << "buffer.InterlockedOr(offset, 0, value);";
-                line(&buf) << "return value;";
-                return name;
-            }
-            case Op::kAtomicStore: {
-                // HLSL does not have an InterlockedStore, so we emulate it with
-                // InterlockedExchange and discard the returned value
-                auto* value_ty = TypeOf(expr->args[2])->UnwrapRef();
-                auto name = UniqueIdentifier("atomicStore");
-                {
-                    auto fn = line(&buf);
-                    fn << "void " << name << "(RWByteAddressBuffer buffer, uint offset, ";
-                    if (!EmitTypeAndName(fn, value_ty, ast::StorageClass::kNone,
-                                         ast::Access::kUndefined, "value")) {
-                        return "";
-                    }
-                    fn << ") {";
-                }
-
-                buf.IncrementIndent();
-                TINT_DEFER({
-                    buf.DecrementIndent();
-                    line(&buf) << "}";
-                    line(&buf);
-                });
-
-                {
-                    auto l = line(&buf);
-                    if (!EmitTypeAndName(l, value_ty, ast::StorageClass::kNone,
-                                         ast::Access::kUndefined, "ignored")) {
-                        return "";
-                    }
-                    l << ";";
-                }
-                line(&buf) << "buffer.InterlockedExchange(offset, value, ignored);";
-                return name;
-            }
-            case Op::kAtomicCompareExchangeWeak: {
-                auto* value_ty = TypeOf(expr->args[2])->UnwrapRef();
-
-                auto name = UniqueIdentifier("atomicCompareExchangeWeak");
-                {
-                    auto fn = line(&buf);
-                    if (!EmitTypeAndName(fn, result_ty, ast::StorageClass::kNone,
-                                         ast::Access::kUndefined, name)) {
-                        return "";
-                    }
-                    fn << "(RWByteAddressBuffer buffer, uint offset, ";
-                    if (!EmitTypeAndName(fn, value_ty, ast::StorageClass::kNone,
-                                         ast::Access::kUndefined, "compare")) {
-                        return "";
-                    }
-                    fn << ", ";
-                    if (!EmitTypeAndName(fn, value_ty, ast::StorageClass::kNone,
-                                         ast::Access::kUndefined, "value")) {
-                        return "";
-                    }
-                    fn << ") {";
-                }
-
-                buf.IncrementIndent();
-                TINT_DEFER({
-                    buf.DecrementIndent();
-                    line(&buf) << "}";
-                    line(&buf);
-                });
-
-                {  // T result = {0, 0};
-                    auto l = line(&buf);
-                    if (!EmitTypeAndName(l, result_ty, ast::StorageClass::kNone,
-                                         ast::Access::kUndefined, "result")) {
-                        return "";
-                    }
-                    l << " = {0, 0};";
-                }
-                line(&buf) << "buffer.InterlockedCompareExchange(offset, compare, "
-                              "value, result.x);";
-                line(&buf) << "result.y = result.x == compare;";
-                line(&buf) << "return result;";
-                return name;
-            }
-            default:
-                break;
+            return true;
         }
-        TINT_UNREACHABLE(Writer, diagnostics_)
-            << "unsupported atomic DecomposeMemoryAccess::Intrinsic::Op: "
-            << static_cast<int>(intrinsic->op);
-        return "";
-    };
-
-    auto func = utils::GetOrCreate(dma_intrinsics_, DMAIntrinsic{intrinsic->op, intrinsic->type},
-                                   generate_helper);
-    if (func.empty()) {
-        return false;
+        default:
+            break;
     }
 
-    out << func;
-    {
-        ScopedParen sp(out);
-        bool first = true;
-        for (auto* arg : expr->args) {
-            if (!first) {
-                out << ", ";
-            }
-            first = false;
-            if (!EmitExpression(out, arg)) {
-                return false;
-            }
-        }
-    }
-
-    return true;
+    TINT_UNREACHABLE(Writer, diagnostics_)
+        << "unsupported atomic DecomposeMemoryAccess::Intrinsic::Op: "
+        << static_cast<int>(intrinsic->op);
+    return false;
 }
 
 bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
@@ -1788,6 +1759,12 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
             return true;
         }
         case sem::BuiltinType::kAtomicCompareExchangeWeak: {
+            // Emit the builtin return type unique to this overload. This does not
+            // exist in the AST, so it will not be generated in Generate().
+            if (!EmitStructType(&helpers_, builtin->ReturnType()->As<sem::Struct>())) {
+                return false;
+            }
+
             auto* dest = expr->args[0];
             auto* compare_value = expr->args[1];
             auto* value = expr->args[2];
@@ -1807,7 +1784,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
                 pre << ";";
             }
 
-            {  // InterlockedCompareExchange(dst, compare, value, result.x);
+            {  // InterlockedCompareExchange(dst, compare, value, result.old_value);
                 auto pre = line();
                 pre << "InterlockedCompareExchange";
                 {
@@ -1819,14 +1796,13 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
                     if (!EmitExpression(pre, value)) {
                         return false;
                     }
-                    pre << ", " << result << ".x";
+                    pre << ", " << result << ".old_value";
                 }
                 pre << ";";
             }
 
-            {  // result.y = result.x == compare;
-                line() << result << ".y = " << result << ".x == " << compare << ";";
-            }
+            // result.exchanged = result.old_value == compare;
+            line() << result << ".exchanged = " << result << ".old_value == " << compare << ";";
 
             out << result;
             return true;
@@ -2739,6 +2715,17 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
 
 bool GeneratorImpl::EmitFunction(const ast::Function* func) {
     auto* sem = builder_.Sem().Get(func);
+
+    // Emit storage atomic helpers
+    if (auto* intrinsic =
+            ast::GetAttribute<transform::DecomposeMemoryAccess::Intrinsic>(func->attributes)) {
+        if (intrinsic->storage_class == ast::StorageClass::kStorage && intrinsic->IsAtomic()) {
+            if (!EmitStorageAtomicIntrinsic(func, intrinsic)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     if (ast::HasAttribute<ast::InternalAttribute>(func->attributes)) {
         // An internal function. Do not emit.
@@ -3755,13 +3742,9 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
         ScopedIndent si(b);
         for (auto* mem : str->Members()) {
             auto mem_name = builder_.Symbols().NameFor(mem->Name());
-
             auto* ty = mem->Type();
-
             auto out = line(b);
-
             std::string pre, post;
-
             if (auto* decl = mem->Declaration()) {
                 for (auto* attr : decl->attributes) {
                     if (auto* location = attr->As<ast::LocationAttribute>()) {
@@ -3826,7 +3809,6 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
     }
 
     line(b) << "};";
-
     return true;
 }
 

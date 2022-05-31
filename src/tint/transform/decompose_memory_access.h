@@ -89,6 +89,9 @@ class DecomposeMemoryAccess final : public Castable<DecomposeMemoryAccess, Trans
         /// @return the newly cloned object
         const Intrinsic* Clone(CloneContext* ctx) const override;
 
+        /// @return true if op is atomic
+        bool IsAtomic() const;
+
         /// The op of the intrinsic
         const Op op;
 

@@ -2467,95 +2467,105 @@ struct SB {
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
 @internal(intrinsic_atomic_store_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32)
+fn tint_atomicStore(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32)
 
 @internal(intrinsic_atomic_load_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> i32
+fn tint_atomicLoad(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> i32
 
 @internal(intrinsic_atomic_add_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_2(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_atomicAdd(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
 
 @internal(intrinsic_atomic_sub_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_3(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_atomicSub(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
 
 @internal(intrinsic_atomic_max_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_4(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_atomicMax(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
 
 @internal(intrinsic_atomic_min_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_5(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_atomicMin(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
 
 @internal(intrinsic_atomic_and_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_6(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_atomicAnd(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
 
 @internal(intrinsic_atomic_or_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_7(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_atomicOr(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
 
 @internal(intrinsic_atomic_xor_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_8(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_atomicXor(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
 
 @internal(intrinsic_atomic_exchange_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_9(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_atomicExchange(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+
+struct atomic_compare_exchange_weak_ret_type {
+  old_value : i32,
+  exchanged : bool,
+}
 
 @internal(intrinsic_atomic_compare_exchange_weak_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_10(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32, param_2 : i32) -> vec2<i32>
+fn tint_atomicCompareExchangeWeak(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32, param_2 : i32) -> atomic_compare_exchange_weak_ret_type
 
 @internal(intrinsic_atomic_store_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_11(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32)
+fn tint_atomicStore_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32)
 
 @internal(intrinsic_atomic_load_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_12(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> u32
+fn tint_atomicLoad_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> u32
 
 @internal(intrinsic_atomic_add_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_13(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_atomicAdd_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
 
 @internal(intrinsic_atomic_sub_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_14(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_atomicSub_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
 
 @internal(intrinsic_atomic_max_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_15(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_atomicMax_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
 
 @internal(intrinsic_atomic_min_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_16(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_atomicMin_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
 
 @internal(intrinsic_atomic_and_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_17(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_atomicAnd_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
 
 @internal(intrinsic_atomic_or_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_18(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_atomicOr_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
 
 @internal(intrinsic_atomic_xor_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_19(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_atomicXor_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
 
 @internal(intrinsic_atomic_exchange_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_20(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_atomicExchange_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+
+struct atomic_compare_exchange_weak_ret_type_1 {
+  old_value : u32,
+  exchanged : bool,
+}
 
 @internal(intrinsic_atomic_compare_exchange_weak_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_21(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32, param_2 : u32) -> vec2<u32>
+fn tint_atomicCompareExchangeWeak_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32, param_2 : u32) -> atomic_compare_exchange_weak_ret_type_1
 
 @stage(compute) @workgroup_size(1)
 fn main() {
-  tint_symbol(sb, 16u, 123);
-  tint_symbol_1(sb, 16u);
-  tint_symbol_2(sb, 16u, 123);
-  tint_symbol_3(sb, 16u, 123);
-  tint_symbol_4(sb, 16u, 123);
-  tint_symbol_5(sb, 16u, 123);
-  tint_symbol_6(sb, 16u, 123);
-  tint_symbol_7(sb, 16u, 123);
-  tint_symbol_8(sb, 16u, 123);
-  tint_symbol_9(sb, 16u, 123);
-  tint_symbol_10(sb, 16u, 123, 345);
-  tint_symbol_11(sb, 20u, 123u);
-  tint_symbol_12(sb, 20u);
-  tint_symbol_13(sb, 20u, 123u);
-  tint_symbol_14(sb, 20u, 123u);
-  tint_symbol_15(sb, 20u, 123u);
-  tint_symbol_16(sb, 20u, 123u);
-  tint_symbol_17(sb, 20u, 123u);
-  tint_symbol_18(sb, 20u, 123u);
-  tint_symbol_19(sb, 20u, 123u);
-  tint_symbol_20(sb, 20u, 123u);
-  tint_symbol_21(sb, 20u, 123u, 345u);
+  tint_atomicStore(sb, 16u, 123);
+  tint_atomicLoad(sb, 16u);
+  tint_atomicAdd(sb, 16u, 123);
+  tint_atomicSub(sb, 16u, 123);
+  tint_atomicMax(sb, 16u, 123);
+  tint_atomicMin(sb, 16u, 123);
+  tint_atomicAnd(sb, 16u, 123);
+  tint_atomicOr(sb, 16u, 123);
+  tint_atomicXor(sb, 16u, 123);
+  tint_atomicExchange(sb, 16u, 123);
+  tint_atomicCompareExchangeWeak(sb, 16u, 123, 345);
+  tint_atomicStore_1(sb, 20u, 123u);
+  tint_atomicLoad_1(sb, 20u);
+  tint_atomicAdd_1(sb, 20u, 123u);
+  tint_atomicSub_1(sb, 20u, 123u);
+  tint_atomicMax_1(sb, 20u, 123u);
+  tint_atomicMin_1(sb, 20u, 123u);
+  tint_atomicAnd_1(sb, 20u, 123u);
+  tint_atomicOr_1(sb, 20u, 123u);
+  tint_atomicXor_1(sb, 20u, 123u);
+  tint_atomicExchange_1(sb, 20u, 123u);
+  tint_atomicCompareExchangeWeak_1(sb, 20u, 123u, 345u);
 }
 )";
 
@@ -2604,95 +2614,105 @@ struct SB {
 
     auto* expect = R"(
 @internal(intrinsic_atomic_store_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32)
+fn tint_atomicStore(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32)
 
 @internal(intrinsic_atomic_load_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> i32
+fn tint_atomicLoad(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> i32
 
 @internal(intrinsic_atomic_add_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_2(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_atomicAdd(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
 
 @internal(intrinsic_atomic_sub_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_3(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_atomicSub(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
 
 @internal(intrinsic_atomic_max_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_4(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_atomicMax(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
 
 @internal(intrinsic_atomic_min_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_5(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_atomicMin(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
 
 @internal(intrinsic_atomic_and_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_6(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_atomicAnd(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
 
 @internal(intrinsic_atomic_or_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_7(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_atomicOr(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
 
 @internal(intrinsic_atomic_xor_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_8(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_atomicXor(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
 
 @internal(intrinsic_atomic_exchange_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_9(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+fn tint_atomicExchange(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32) -> i32
+
+struct atomic_compare_exchange_weak_ret_type {
+  old_value : i32,
+  exchanged : bool,
+}
 
 @internal(intrinsic_atomic_compare_exchange_weak_storage_i32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_10(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32, param_2 : i32) -> vec2<i32>
+fn tint_atomicCompareExchangeWeak(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : i32, param_2 : i32) -> atomic_compare_exchange_weak_ret_type
 
 @internal(intrinsic_atomic_store_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_11(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32)
+fn tint_atomicStore_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32)
 
 @internal(intrinsic_atomic_load_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_12(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> u32
+fn tint_atomicLoad_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> u32
 
 @internal(intrinsic_atomic_add_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_13(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_atomicAdd_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
 
 @internal(intrinsic_atomic_sub_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_14(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_atomicSub_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
 
 @internal(intrinsic_atomic_max_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_15(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_atomicMax_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
 
 @internal(intrinsic_atomic_min_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_16(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_atomicMin_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
 
 @internal(intrinsic_atomic_and_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_17(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_atomicAnd_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
 
 @internal(intrinsic_atomic_or_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_18(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_atomicOr_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
 
 @internal(intrinsic_atomic_xor_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_19(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_atomicXor_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
 
 @internal(intrinsic_atomic_exchange_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_20(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+fn tint_atomicExchange_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32) -> u32
+
+struct atomic_compare_exchange_weak_ret_type_1 {
+  old_value : u32,
+  exchanged : bool,
+}
 
 @internal(intrinsic_atomic_compare_exchange_weak_storage_u32) @internal(disable_validation__function_has_no_body)
-fn tint_symbol_21(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32, param_2 : u32) -> vec2<u32>
+fn tint_atomicCompareExchangeWeak_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32, param_2 : u32) -> atomic_compare_exchange_weak_ret_type_1
 
 @stage(compute) @workgroup_size(1)
 fn main() {
-  tint_symbol(sb, 16u, 123);
-  tint_symbol_1(sb, 16u);
-  tint_symbol_2(sb, 16u, 123);
-  tint_symbol_3(sb, 16u, 123);
-  tint_symbol_4(sb, 16u, 123);
-  tint_symbol_5(sb, 16u, 123);
-  tint_symbol_6(sb, 16u, 123);
-  tint_symbol_7(sb, 16u, 123);
-  tint_symbol_8(sb, 16u, 123);
-  tint_symbol_9(sb, 16u, 123);
-  tint_symbol_10(sb, 16u, 123, 345);
-  tint_symbol_11(sb, 20u, 123u);
-  tint_symbol_12(sb, 20u);
-  tint_symbol_13(sb, 20u, 123u);
-  tint_symbol_14(sb, 20u, 123u);
-  tint_symbol_15(sb, 20u, 123u);
-  tint_symbol_16(sb, 20u, 123u);
-  tint_symbol_17(sb, 20u, 123u);
-  tint_symbol_18(sb, 20u, 123u);
-  tint_symbol_19(sb, 20u, 123u);
-  tint_symbol_20(sb, 20u, 123u);
-  tint_symbol_21(sb, 20u, 123u, 345u);
+  tint_atomicStore(sb, 16u, 123);
+  tint_atomicLoad(sb, 16u);
+  tint_atomicAdd(sb, 16u, 123);
+  tint_atomicSub(sb, 16u, 123);
+  tint_atomicMax(sb, 16u, 123);
+  tint_atomicMin(sb, 16u, 123);
+  tint_atomicAnd(sb, 16u, 123);
+  tint_atomicOr(sb, 16u, 123);
+  tint_atomicXor(sb, 16u, 123);
+  tint_atomicExchange(sb, 16u, 123);
+  tint_atomicCompareExchangeWeak(sb, 16u, 123, 345);
+  tint_atomicStore_1(sb, 20u, 123u);
+  tint_atomicLoad_1(sb, 20u);
+  tint_atomicAdd_1(sb, 20u, 123u);
+  tint_atomicSub_1(sb, 20u, 123u);
+  tint_atomicMax_1(sb, 20u, 123u);
+  tint_atomicMin_1(sb, 20u, 123u);
+  tint_atomicAnd_1(sb, 20u, 123u);
+  tint_atomicOr_1(sb, 20u, 123u);
+  tint_atomicXor_1(sb, 20u, 123u);
+  tint_atomicExchange_1(sb, 20u, 123u);
+  tint_atomicCompareExchangeWeak_1(sb, 20u, 123u, 345u);
 }
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;

@@ -174,14 +174,6 @@ class GeneratorImpl : public TextGenerator {
     /// @param builtin the semantic information for the barrier builtin
     /// @returns true if the call expression is emitted
     bool EmitBarrierCall(std::ostream& out, const sem::Builtin* builtin);
-    /// Handles generating an atomic intrinsic call for a storage buffer variable
-    /// @param out the output of the expression stream
-    /// @param expr the call expression
-    /// @param intrinsic the atomic intrinsic
-    /// @returns true if the call expression is emitted
-    bool EmitStorageAtomicCall(std::ostream& out,
-                               const ast::CallExpression* expr,
-                               const transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
     /// Handles generating an atomic builtin call for a workgroup variable
     /// @param out the output of the expression stream
     /// @param expr the call expression

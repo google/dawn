@@ -806,6 +806,12 @@ bool GeneratorImpl::EmitAtomicCall(std::ostream& out,
             return call("atomic_exchange_explicit", true);
 
         case sem::BuiltinType::kAtomicCompareExchangeWeak: {
+            // Emit the builtin return type unique to this overload. This does not
+            // exist in the AST, so it will not be generated in Generate().
+            if (!EmitStructType(&helpers_, builtin->ReturnType()->As<sem::Struct>())) {
+                return false;
+            }
+
             auto* ptr_ty = TypeOf(expr->args[0])->UnwrapRef()->As<sem::Pointer>();
             auto sc = ptr_ty->StorageClass();
 
@@ -816,7 +822,8 @@ bool GeneratorImpl::EmitAtomicCall(std::ostream& out,
                 line(&buf) << "template <typename A, typename T>";
                 {
                     auto f = line(&buf);
-                    f << "vec<T, 2> " << name << "(";
+                    auto str_name = StructName(builtin->ReturnType()->As<sem::Struct>());
+                    f << str_name << " " << name << "(";
                     if (!EmitStorageClass(f, sc)) {
                         return "";
                     }
@@ -830,12 +837,12 @@ bool GeneratorImpl::EmitAtomicCall(std::ostream& out,
                     line(&buf);
                 });
 
-                line(&buf) << "T prev_value = compare;";
-                line(&buf) << "bool matched = "
+                line(&buf) << "T old_value = compare;";
+                line(&buf) << "bool exchanged = "
                               "atomic_compare_exchange_weak_explicit(atomic, "
-                              "&prev_value, value, memory_order_relaxed, "
+                              "&old_value, value, memory_order_relaxed, "
                               "memory_order_relaxed);";
-                line(&buf) << "return {prev_value, matched};";
+                line(&buf) << "return {old_value, exchanged};";
                 return name;
             });
 

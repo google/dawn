@@ -118,6 +118,8 @@ type __modf_result
 type __frexp_result
 [[display("__frexp_result_vec{N}")]] type __frexp_result_vec<N: num>
 
+type __atomic_compare_exchange_result<T>
+
 ////////////////////////////////////////////////////////////////////////////////
 // Type matchers                                                              //
 //                                                                            //
@@ -603,7 +605,7 @@ fn textureLoad(texture: texture_external, coords: vec2<i32>) -> vec4<f32>
 [[stage("fragment", "compute")]] fn atomicOr<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
 [[stage("fragment", "compute")]] fn atomicXor<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
 [[stage("fragment", "compute")]] fn atomicExchange<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
-[[stage("fragment", "compute")]] fn atomicCompareExchangeWeak<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T, T) -> vec2<T>
+[[stage("fragment", "compute")]] fn atomicCompareExchangeWeak<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T, T) -> __atomic_compare_exchange_result<T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Type constructors                                                          //

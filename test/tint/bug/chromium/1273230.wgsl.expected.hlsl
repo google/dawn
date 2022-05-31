@@ -2,24 +2,6 @@ uint value_or_one_if_zero_uint(uint value) {
   return value == 0u ? 1u : value;
 }
 
-uint atomicLoad_1(RWByteAddressBuffer buffer, uint offset) {
-  uint value = 0;
-  buffer.InterlockedOr(offset, 0, value);
-  return value;
-}
-
-int atomicLoad_2(RWByteAddressBuffer buffer, uint offset) {
-  int value = 0;
-  buffer.InterlockedOr(offset, 0, value);
-  return value;
-}
-
-int atomicAdd_1(RWByteAddressBuffer buffer, uint offset, int value) {
-  int original_value = 0;
-  buffer.InterlockedAdd(offset, value, original_value);
-  return original_value;
-}
-
 void marg8uintin() {
 }
 
@@ -61,18 +43,39 @@ float3 loadPosition(uint vertexIndex) {
   return position;
 }
 
+uint tint_atomicLoad(RWByteAddressBuffer buffer, uint offset) {
+  uint value = 0;
+  buffer.InterlockedOr(offset, 0, value);
+  return value;
+}
+
+
+int tint_atomicLoad_1(RWByteAddressBuffer buffer, uint offset) {
+  int value = 0;
+  buffer.InterlockedOr(offset, 0, value);
+  return value;
+}
+
+
 void doIgnore() {
   uint g43 = uniforms[0].x;
   uint kj6 = dbg.Load(20u);
-  uint b53 = atomicLoad_1(counters, (4u * uint(0)));
+  uint b53 = tint_atomicLoad(counters, (4u * uint(0)));
   uint rwg = indices.Load((4u * uint(0)));
   float rb5 = asfloat(positions.Load((4u * uint(0))));
-  int g55 = atomicLoad_2(LUT, (4u * uint(0)));
+  int g55 = tint_atomicLoad_1(LUT, (4u * uint(0)));
 }
 
 struct tint_symbol_1 {
   uint3 GlobalInvocationID : SV_DispatchThreadID;
 };
+
+int tint_atomicAdd(RWByteAddressBuffer buffer, uint offset, int value) {
+  int original_value = 0;
+  buffer.InterlockedAdd(offset, value, original_value);
+  return original_value;
+}
+
 
 void main_count_inner(uint3 GlobalInvocationID) {
   uint triangleIndex = GlobalInvocationID.x;
@@ -89,7 +92,7 @@ void main_count_inner(uint3 GlobalInvocationID) {
   float3 center = (((p0 + p2) + p1) / 3.0f);
   float3 voxelPos = toVoxelPos(p1);
   uint lIndex = toIndex1D(uniforms[0].y, p0);
-  int triangleOffset = atomicAdd_1(LUT, (4u * i1), 1);
+  int triangleOffset = tint_atomicAdd(LUT, (4u * i1), 1);
 }
 
 [numthreads(128, 1, 1)]
