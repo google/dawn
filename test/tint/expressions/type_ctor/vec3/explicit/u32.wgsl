@@ -1,1 +1,1 @@
-let v = vec3(0u, 1u, 2u);
+let v = vec3<u32>(0u, 1u, 2u);

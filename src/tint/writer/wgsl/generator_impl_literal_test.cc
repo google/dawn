@@ -64,36 +64,37 @@ TEST_P(WgslGenerator_FloatLiteralTest, Emit) {
 
 INSTANTIATE_TEST_SUITE_P(Zero,
                          WgslGenerator_FloatLiteralTest,
-                         ::testing::ValuesIn(std::vector<FloatData>{{0_f, "0.0"},
-                                                                    {MakeFloat(0, 0, 0), "0.0"},
-                                                                    {MakeFloat(1, 0, 0), "-0.0"}}));
+                         ::testing::ValuesIn(std::vector<FloatData>{
+                             {0_f, "0.0f"},
+                             {MakeFloat(0, 0, 0), "0.0f"},
+                             {MakeFloat(1, 0, 0), "-0.0f"}}));
 
 INSTANTIATE_TEST_SUITE_P(Normal,
                          WgslGenerator_FloatLiteralTest,
-                         ::testing::ValuesIn(std::vector<FloatData>{{1_f, "1.0"},
-                                                                    {-1_f, "-1.0"},
-                                                                    {101.375_f, "101.375"}}));
+                         ::testing::ValuesIn(std::vector<FloatData>{{1_f, "1.0f"},
+                                                                    {-1_f, "-1.0f"},
+                                                                    {101.375_f, "101.375f"}}));
 
 INSTANTIATE_TEST_SUITE_P(Subnormal,
                          WgslGenerator_FloatLiteralTest,
                          ::testing::ValuesIn(std::vector<FloatData>{
-                             {MakeFloat(0, 0, 1), "0x1p-149"},  // Smallest
-                             {MakeFloat(1, 0, 1), "-0x1p-149"},
-                             {MakeFloat(0, 0, 2), "0x1p-148"},
-                             {MakeFloat(1, 0, 2), "-0x1p-148"},
-                             {MakeFloat(0, 0, 0x7fffff), "0x1.fffffcp-127"},   // Largest
-                             {MakeFloat(1, 0, 0x7fffff), "-0x1.fffffcp-127"},  // Largest
-                             {MakeFloat(0, 0, 0xcafebe), "0x1.2bfaf8p-127"},   // Scattered bits
-                             {MakeFloat(1, 0, 0xcafebe), "-0x1.2bfaf8p-127"},  // Scattered bits
-                             {MakeFloat(0, 0, 0xaaaaa), "0x1.55554p-130"},     // Scattered bits
-                             {MakeFloat(1, 0, 0xaaaaa), "-0x1.55554p-130"},    // Scattered bits
+                             {MakeFloat(0, 0, 1), "0x1p-149f"},  // Smallest
+                             {MakeFloat(1, 0, 1), "-0x1p-149f"},
+                             {MakeFloat(0, 0, 2), "0x1p-148f"},
+                             {MakeFloat(1, 0, 2), "-0x1p-148f"},
+                             {MakeFloat(0, 0, 0x7fffff), "0x1.fffffcp-127f"},   // Largest
+                             {MakeFloat(1, 0, 0x7fffff), "-0x1.fffffcp-127f"},  // Largest
+                             {MakeFloat(0, 0, 0xcafebe), "0x1.2bfaf8p-127f"},   // Scattered bits
+                             {MakeFloat(1, 0, 0xcafebe), "-0x1.2bfaf8p-127f"},  // Scattered bits
+                             {MakeFloat(0, 0, 0xaaaaa), "0x1.55554p-130f"},     // Scattered bits
+                             {MakeFloat(1, 0, 0xaaaaa), "-0x1.55554p-130f"},    // Scattered bits
                          }));
 
 INSTANTIATE_TEST_SUITE_P(Infinity,
                          WgslGenerator_FloatLiteralTest,
                          ::testing::ValuesIn(std::vector<FloatData>{
-                             {MakeFloat(0, 255, 0), "0x1p+128"},
-                             {MakeFloat(1, 255, 0), "-0x1p+128"}}));
+                             {MakeFloat(0, 255, 0), "0x1p+128f"},
+                             {MakeFloat(1, 255, 0), "-0x1p+128f"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     // TODO(dneto): It's unclear how Infinity and NaN should be handled.
@@ -108,20 +109,20 @@ INSTANTIATE_TEST_SUITE_P(
     WgslGenerator_FloatLiteralTest,
     ::testing::ValuesIn(std::vector<FloatData>{
         // LSB only.  Smallest mantissa.
-        {MakeFloat(0, 255, 1), "0x1.000002p+128"},  // Smallest mantissa
-        {MakeFloat(1, 255, 1), "-0x1.000002p+128"},
+        {MakeFloat(0, 255, 1), "0x1.000002p+128f"},  // Smallest mantissa
+        {MakeFloat(1, 255, 1), "-0x1.000002p+128f"},
         // MSB only.
-        {MakeFloat(0, 255, 0x400000), "0x1.8p+128"},
-        {MakeFloat(1, 255, 0x400000), "-0x1.8p+128"},
+        {MakeFloat(0, 255, 0x400000), "0x1.8p+128f"},
+        {MakeFloat(1, 255, 0x400000), "-0x1.8p+128f"},
         // All 1s in the mantissa.
-        {MakeFloat(0, 255, 0x7fffff), "0x1.fffffep+128"},
-        {MakeFloat(1, 255, 0x7fffff), "-0x1.fffffep+128"},
+        {MakeFloat(0, 255, 0x7fffff), "0x1.fffffep+128f"},
+        {MakeFloat(1, 255, 0x7fffff), "-0x1.fffffep+128f"},
         // Scattered bits, with 0 in top mantissa bit.
-        {MakeFloat(0, 255, 0x20101f), "0x1.40203ep+128"},
-        {MakeFloat(1, 255, 0x20101f), "-0x1.40203ep+128"},
+        {MakeFloat(0, 255, 0x20101f), "0x1.40203ep+128f"},
+        {MakeFloat(1, 255, 0x20101f), "-0x1.40203ep+128f"},
         // Scattered bits, with 1 in top mantissa bit.
-        {MakeFloat(0, 255, 0x40101f), "0x1.80203ep+128"},
-        {MakeFloat(1, 255, 0x40101f), "-0x1.80203ep+128"}}));
+        {MakeFloat(0, 255, 0x40101f), "0x1.80203ep+128f"},
+        {MakeFloat(1, 255, 0x40101f), "-0x1.80203ep+128f"}}));
 
 }  // namespace
 }  // namespace tint::writer::wgsl

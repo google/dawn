@@ -3173,7 +3173,7 @@ fn vert_main_inner() -> vec4<f32> {
 fn vert_main() {
   let inner_result = vert_main_inner();
   value = inner_result;
-  vertex_point_size = 1.0;
+  vertex_point_size = 1.0f;
 }
 )";
 
@@ -3210,7 +3210,7 @@ fn vert_main() -> tint_symbol {
   let inner_result = vert_main_inner();
   var wrapper_result : tint_symbol;
   wrapper_result.value = inner_result;
-  wrapper_result.vertex_point_size = 1.0;
+  wrapper_result.vertex_point_size = 1.0f;
   return wrapper_result;
 }
 )";
@@ -3252,7 +3252,7 @@ fn vert_main_inner() -> VertOut {
 fn vert_main() {
   let inner_result = vert_main_inner();
   pos_1 = inner_result.pos;
-  vertex_point_size = 1.0;
+  vertex_point_size = 1.0f;
 }
 )";
 
@@ -3289,7 +3289,7 @@ fn vert_main_inner() -> VertOut {
 fn vert_main() {
   let inner_result = vert_main_inner();
   pos_1 = inner_result.pos;
-  vertex_point_size = 1.0;
+  vertex_point_size = 1.0f;
 }
 
 struct VertOut {
@@ -3338,7 +3338,7 @@ fn vert_main() -> tint_symbol {
   let inner_result = vert_main_inner();
   var wrapper_result : tint_symbol;
   wrapper_result.pos = inner_result.pos;
-  wrapper_result.vertex_point_size = 1.0;
+  wrapper_result.vertex_point_size = 1.0f;
   return wrapper_result;
 }
 )";
@@ -3380,7 +3380,7 @@ fn vert_main() -> tint_symbol {
   let inner_result = vert_main_inner();
   var wrapper_result : tint_symbol;
   wrapper_result.pos = inner_result.pos;
-  wrapper_result.vertex_point_size = 1.0;
+  wrapper_result.vertex_point_size = 1.0f;
   return wrapper_result;
 }
 
@@ -3463,7 +3463,7 @@ fn vert_main() {
   let inner_result = vert_main_inner(VertIn1(collide_2), VertIn2(collide_3));
   vertex_point_size_3 = inner_result.vertex_point_size;
   vertex_point_size_1_1 = inner_result.vertex_point_size_1;
-  vertex_point_size_4 = 1.0;
+  vertex_point_size_4 = 1.0f;
 }
 )";
 
@@ -3522,7 +3522,7 @@ fn vert_main() {
   let inner_result = vert_main_inner(VertIn1(collide_2), VertIn2(collide_3));
   vertex_point_size_3 = inner_result.vertex_point_size;
   vertex_point_size_1_1 = inner_result.vertex_point_size_1;
-  vertex_point_size_4 = 1.0;
+  vertex_point_size_4 = 1.0f;
 }
 
 struct VertIn1 {
@@ -3616,7 +3616,7 @@ fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   var wrapper_result : tint_symbol_2;
   wrapper_result.vertex_point_size = inner_result.vertex_point_size;
   wrapper_result.vertex_point_size_1 = inner_result.vertex_point_size_1;
-  wrapper_result.vertex_point_size_2 = 1.0;
+  wrapper_result.vertex_point_size_2 = 1.0f;
   return wrapper_result;
 }
 )";
@@ -3679,7 +3679,7 @@ fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   var wrapper_result : tint_symbol_2;
   wrapper_result.vertex_point_size = inner_result.vertex_point_size;
   wrapper_result.vertex_point_size_1 = inner_result.vertex_point_size_1;
-  wrapper_result.vertex_point_size_2 = 1.0;
+  wrapper_result.vertex_point_size_2 = 1.0f;
   return wrapper_result;
 }
 
@@ -3768,7 +3768,7 @@ fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   var wrapper_result : tint_symbol_2;
   wrapper_result.vertex_point_size = inner_result.vertex_point_size;
   wrapper_result.vertex_point_size_1 = inner_result.vertex_point_size_1;
-  wrapper_result.vertex_point_size_2 = 1.0;
+  wrapper_result.vertex_point_size_2 = 1.0f;
   return wrapper_result;
 }
 )";
@@ -3831,7 +3831,7 @@ fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   var wrapper_result : tint_symbol_2;
   wrapper_result.vertex_point_size = inner_result.vertex_point_size;
   wrapper_result.vertex_point_size_1 = inner_result.vertex_point_size_1;
-  wrapper_result.vertex_point_size_2 = 1.0;
+  wrapper_result.vertex_point_size_2 = 1.0f;
   return wrapper_result;
 }
 
@@ -3953,7 +3953,7 @@ fn main() {
   let inner_result = vertex_main(bitcast<u32>(gl_VertexID), bitcast<u32>(gl_InstanceID));
   gl_Position = inner_result;
   gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0 * gl_Position.z) - gl_Position.w);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
 }
 )";
 

@@ -139,7 +139,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_ReturnValue) {
     ASSERT_TRUE(gen.EmitFunction(func));
     EXPECT_EQ(gen.result(), R"(  @stage(fragment)
   fn frag_main() -> @location(1) f32 {
-    return 1.0;
+    return 1.0f;
   }
 )");
 }

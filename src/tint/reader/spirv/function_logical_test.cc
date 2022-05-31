@@ -112,10 +112,10 @@ std::string AstFor(std::string assembly) {
         return "bitcast<vec2<u32>>(vec2<i32>(40i, 30i))";
     }
     if (assembly == "v2float_50_60") {
-        return "vec2<f32>(50.0, 60.0)";
+        return "vec2<f32>(50.0f, 60.0f)";
     }
     if (assembly == "v2float_60_50") {
-        return "vec2<f32>(60.0, 50.0)";
+        return "vec2<f32>(60.0f, 50.0f)";
     }
     return "bad case";
 }
@@ -219,7 +219,7 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FOrdEqual,
                          SpvBinaryLogicalTest,
                          ::testing::Values(BinaryData{"bool", "float_50", "OpFOrdEqual", "float_60",
-                                                      "bool", "50.0", "==", "60.0"},
+                                                      "bool", "50.0f", "==", "60.0f"},
                                            BinaryData{"v2bool", "v2float_50_60", "OpFOrdEqual",
                                                       "v2float_60_50", "vec2<bool>",
                                                       AstFor("v2float_50_60"),
@@ -249,7 +249,7 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FOrdNotEqual,
                          SpvBinaryLogicalTest,
                          ::testing::Values(BinaryData{"bool", "float_50", "OpFOrdNotEqual",
-                                                      "float_60", "bool", "50.0", "!=", "60.0"},
+                                                      "float_60", "bool", "50.0f", "!=", "60.0f"},
                                            BinaryData{"v2bool", "v2float_50_60", "OpFOrdNotEqual",
                                                       "v2float_60_50", "vec2<bool>",
                                                       AstFor("v2float_50_60"),
@@ -258,7 +258,7 @@ INSTANTIATE_TEST_SUITE_P(SpvParserTest_FOrdNotEqual,
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FOrdLessThan,
                          SpvBinaryLogicalTest,
                          ::testing::Values(BinaryData{"bool", "float_50", "OpFOrdLessThan",
-                                                      "float_60", "bool", "50.0", "<", "60.0"},
+                                                      "float_60", "bool", "50.0f", "<", "60.0f"},
                                            BinaryData{"v2bool", "v2float_50_60", "OpFOrdLessThan",
                                                       "v2float_60_50", "vec2<bool>",
                                                       AstFor("v2float_50_60"), "<",
@@ -267,7 +267,7 @@ INSTANTIATE_TEST_SUITE_P(SpvParserTest_FOrdLessThan,
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FOrdLessThanEqual,
                          SpvBinaryLogicalTest,
                          ::testing::Values(BinaryData{"bool", "float_50", "OpFOrdLessThanEqual",
-                                                      "float_60", "bool", "50.0", "<=", "60.0"},
+                                                      "float_60", "bool", "50.0f", "<=", "60.0f"},
                                            BinaryData{"v2bool", "v2float_50_60",
                                                       "OpFOrdLessThanEqual", "v2float_60_50",
                                                       "vec2<bool>", AstFor("v2float_50_60"),
@@ -276,7 +276,7 @@ INSTANTIATE_TEST_SUITE_P(SpvParserTest_FOrdLessThanEqual,
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FOrdGreaterThan,
                          SpvBinaryLogicalTest,
                          ::testing::Values(BinaryData{"bool", "float_50", "OpFOrdGreaterThan",
-                                                      "float_60", "bool", "50.0", ">", "60.0"},
+                                                      "float_60", "bool", "50.0f", ">", "60.0f"},
                                            BinaryData{"v2bool", "v2float_50_60",
                                                       "OpFOrdGreaterThan", "v2float_60_50",
                                                       "vec2<bool>", AstFor("v2float_50_60"), ">",
@@ -285,7 +285,7 @@ INSTANTIATE_TEST_SUITE_P(SpvParserTest_FOrdGreaterThan,
 INSTANTIATE_TEST_SUITE_P(SpvParserTest_FOrdGreaterThanEqual,
                          SpvBinaryLogicalTest,
                          ::testing::Values(BinaryData{"bool", "float_50", "OpFOrdGreaterThanEqual",
-                                                      "float_60", "bool", "50.0", ">=", "60.0"},
+                                                      "float_60", "bool", "50.0f", ">=", "60.0f"},
                                            BinaryData{"v2bool", "v2float_50_60",
                                                       "OpFOrdGreaterThanEqual", "v2float_60_50",
                                                       "vec2<bool>", AstFor("v2float_50_60"),
@@ -515,7 +515,7 @@ TEST_F(SpvFUnordTest, FUnordEqual_Scalar) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : bool = !((50.0 != 60.0));"));
+                HasSubstr("let x_1 : bool = !((50.0f != 60.0f));"));
 }
 
 TEST_F(SpvFUnordTest, FUnordEqual_Vector) {
@@ -533,7 +533,7 @@ TEST_F(SpvFUnordTest, FUnordEqual_Vector) {
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
                 HasSubstr("let x_1 : vec2<bool> = "
-                          "!((vec2<f32>(50.0, 60.0) != vec2<f32>(60.0, 50.0)));"));
+                          "!((vec2<f32>(50.0f, 60.0f) != vec2<f32>(60.0f, 50.0f)));"));
 }
 
 TEST_F(SpvFUnordTest, FUnordNotEqual_Scalar) {
@@ -550,7 +550,7 @@ TEST_F(SpvFUnordTest, FUnordNotEqual_Scalar) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : bool = !((50.0 == 60.0));"));
+                HasSubstr("let x_1 : bool = !((50.0f == 60.0f));"));
 }
 
 TEST_F(SpvFUnordTest, FUnordNotEqual_Vector) {
@@ -568,7 +568,7 @@ TEST_F(SpvFUnordTest, FUnordNotEqual_Vector) {
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
                 HasSubstr("let x_1 : vec2<bool> = "
-                          "!((vec2<f32>(50.0, 60.0) == vec2<f32>(60.0, 50.0)));"));
+                          "!((vec2<f32>(50.0f, 60.0f) == vec2<f32>(60.0f, 50.0f)));"));
 }
 
 TEST_F(SpvFUnordTest, FUnordLessThan_Scalar) {
@@ -585,7 +585,7 @@ TEST_F(SpvFUnordTest, FUnordLessThan_Scalar) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : bool = !((50.0 >= 60.0));"));
+                HasSubstr("let x_1 : bool = !((50.0f >= 60.0f));"));
 }
 
 TEST_F(SpvFUnordTest, FUnordLessThan_Vector) {
@@ -603,7 +603,7 @@ TEST_F(SpvFUnordTest, FUnordLessThan_Vector) {
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
                 HasSubstr("let x_1 : vec2<bool> = "
-                          "!((vec2<f32>(50.0, 60.0) >= vec2<f32>(60.0, 50.0)));"));
+                          "!((vec2<f32>(50.0f, 60.0f) >= vec2<f32>(60.0f, 50.0f)));"));
 }
 
 TEST_F(SpvFUnordTest, FUnordLessThanEqual_Scalar) {
@@ -620,7 +620,7 @@ TEST_F(SpvFUnordTest, FUnordLessThanEqual_Scalar) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : bool = !((50.0 > 60.0));"));
+                HasSubstr("let x_1 : bool = !((50.0f > 60.0f));"));
 }
 
 TEST_F(SpvFUnordTest, FUnordLessThanEqual_Vector) {
@@ -638,7 +638,7 @@ TEST_F(SpvFUnordTest, FUnordLessThanEqual_Vector) {
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
                 HasSubstr("let x_1 : vec2<bool> = "
-                          "!((vec2<f32>(50.0, 60.0) > vec2<f32>(60.0, 50.0)));"));
+                          "!((vec2<f32>(50.0f, 60.0f) > vec2<f32>(60.0f, 50.0f)));"));
 }
 
 TEST_F(SpvFUnordTest, FUnordGreaterThan_Scalar) {
@@ -655,7 +655,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThan_Scalar) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : bool = !((50.0 <= 60.0));"));
+                HasSubstr("let x_1 : bool = !((50.0f <= 60.0f));"));
 }
 
 TEST_F(SpvFUnordTest, FUnordGreaterThan_Vector) {
@@ -673,7 +673,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThan_Vector) {
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
                 HasSubstr("let x_1 : vec2<bool> = "
-                          "!((vec2<f32>(50.0, 60.0) <= vec2<f32>(60.0, 50.0)));"));
+                          "!((vec2<f32>(50.0f, 60.0f) <= vec2<f32>(60.0f, 50.0f)));"));
 }
 
 TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Scalar) {
@@ -690,7 +690,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Scalar) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : bool = !((50.0 < 60.0));"));
+                HasSubstr("let x_1 : bool = !((50.0f < 60.0f));"));
 }
 
 TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Vector) {
@@ -708,7 +708,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Vector) {
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
                 HasSubstr("let x_1 : vec2<bool> = !(("
-                          "vec2<f32>(50.0, 60.0) < vec2<f32>(60.0, 50.0)"
+                          "vec2<f32>(50.0f, 60.0f) < vec2<f32>(60.0f, 50.0f)"
                           "));"));
 }
 
@@ -762,7 +762,7 @@ TEST_F(SpvLogicalTest, Select_BoolCond_FloatScalarParams) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : f32 = select(60.0, 50.0, true);"));
+                HasSubstr("let x_1 : f32 = select(60.0f, 50.0f, true);"));
 }
 
 TEST_F(SpvLogicalTest, Select_BoolCond_VectorParams) {
@@ -859,7 +859,8 @@ TEST_F(SpvLogicalTest, IsNan_Scalar) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 : bool = isNan(50.0);"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : bool = isNan(50.0f);"));
 }
 
 TEST_F(SpvLogicalTest, IsNan_Vector) {
@@ -876,7 +877,7 @@ TEST_F(SpvLogicalTest, IsNan_Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<bool> = isNan(vec2<f32>(50.0, 60.0));"));
+                HasSubstr("let x_1 : vec2<bool> = isNan(vec2<f32>(50.0f, 60.0f));"));
 }
 
 TEST_F(SpvLogicalTest, IsInf_Scalar) {
@@ -892,7 +893,8 @@ TEST_F(SpvLogicalTest, IsInf_Scalar) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 : bool = isInf(50.0);"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body),
+                HasSubstr("let x_1 : bool = isInf(50.0f);"));
 }
 
 TEST_F(SpvLogicalTest, IsInf_Vector) {
@@ -909,7 +911,7 @@ TEST_F(SpvLogicalTest, IsInf_Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<bool> = isInf(vec2<f32>(50.0, 60.0));"));
+                HasSubstr("let x_1 : vec2<bool> = isInf(vec2<f32>(50.0f, 60.0f));"));
 }
 
 // TODO(dneto): Kernel-guarded instructions.

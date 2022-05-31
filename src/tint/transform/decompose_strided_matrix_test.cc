@@ -376,7 +376,7 @@ fn mat2x2_stride_32_to_arr(m : mat2x2<f32>) -> @stride(32) array<vec2<f32>, 2u> 
 
 @stage(compute) @workgroup_size(1i)
 fn f() {
-  s.m = mat2x2_stride_32_to_arr(mat2x2<f32>(vec2<f32>(1.0, 2.0), vec2<f32>(3.0, 4.0)));
+  s.m = mat2x2_stride_32_to_arr(mat2x2<f32>(vec2<f32>(1.0f, 2.0f), vec2<f32>(3.0f, 4.0f)));
 }
 )";
 
@@ -429,7 +429,7 @@ struct S {
 
 @stage(compute) @workgroup_size(1i)
 fn f() {
-  s.m[1i] = vec2<f32>(1.0, 2.0);
+  s.m[1i] = vec2<f32>(1.0f, 2.0f);
 }
 )";
 
@@ -505,8 +505,8 @@ fn f() {
   let x = arr_to_mat2x2_stride_32(s.m);
   let y = s.m[1i];
   let z = x[1i];
-  s.m = mat2x2_stride_32_to_arr(mat2x2<f32>(vec2<f32>(1.0, 2.0), vec2<f32>(3.0, 4.0)));
-  s.m[1i] = vec2<f32>(5.0, 6.0);
+  s.m = mat2x2_stride_32_to_arr(mat2x2<f32>(vec2<f32>(1.0f, 2.0f), vec2<f32>(3.0f, 4.0f)));
+  s.m[1i] = vec2<f32>(5.0f, 6.0f);
 }
 )";
 
@@ -613,7 +613,7 @@ var<private> s : S;
 
 @stage(compute) @workgroup_size(1i)
 fn f() {
-  s.m = mat2x2<f32>(vec2<f32>(1.0, 2.0), vec2<f32>(3.0, 4.0));
+  s.m = mat2x2<f32>(vec2<f32>(1.0f, 2.0f), vec2<f32>(3.0f, 4.0f));
 }
 )";
 

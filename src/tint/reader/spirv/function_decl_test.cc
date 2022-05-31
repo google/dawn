@@ -93,7 +93,7 @@ TEST_F(SpvParserTest, Emit_NonVoidResultType) {
 
     auto got = test::ToString(p->program());
     std::string expect = R"(fn x_200() -> f32 {
-  return 0.0;
+  return 0.0f;
 }
 )";
     EXPECT_THAT(got, HasSubstr(expect));

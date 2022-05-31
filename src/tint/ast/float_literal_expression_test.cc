@@ -33,5 +33,24 @@ TEST_F(FloatLiteralExpressionTest, SuffixF) {
     EXPECT_EQ(i->suffix, FloatLiteralExpression::Suffix::kF);
 }
 
+TEST_F(FloatLiteralExpressionTest, SuffixH) {
+    auto* i = create<FloatLiteralExpression>(42.0, FloatLiteralExpression::Suffix::kH);
+    ASSERT_TRUE(i->Is<FloatLiteralExpression>());
+    EXPECT_EQ(i->value, 42);
+    EXPECT_EQ(i->suffix, FloatLiteralExpression::Suffix::kH);
+}
+
+TEST_F(FloatLiteralExpressionTest, SuffixStringStream) {
+    auto to_str = [](FloatLiteralExpression::Suffix suffix) {
+        std::stringstream ss;
+        ss << suffix;
+        return ss.str();
+    };
+
+    EXPECT_EQ("", to_str(FloatLiteralExpression::Suffix::kNone));
+    EXPECT_EQ("f", to_str(FloatLiteralExpression::Suffix::kF));
+    EXPECT_EQ("h", to_str(FloatLiteralExpression::Suffix::kH));
+}
+
 }  // namespace
 }  // namespace tint::ast

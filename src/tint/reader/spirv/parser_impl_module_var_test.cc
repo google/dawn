@@ -408,7 +408,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_StorePositionMember_OneAcces
     EXPECT_TRUE(p->BuildAndParseInternalModule());
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
-    EXPECT_THAT(module_str, HasSubstr("gl_Position.y = 0.0;")) << module_str;
+    EXPECT_THAT(module_str, HasSubstr("gl_Position.y = 0.0f;")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_StorePositionMember_TwoAccessChain) {
@@ -430,7 +430,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_StorePositionMember_TwoAcces
     EXPECT_TRUE(p->BuildAndParseInternalModule());
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
-    EXPECT_THAT(module_str, HasSubstr("gl_Position.y = 0.0;")) << module_str;
+    EXPECT_THAT(module_str, HasSubstr("gl_Position.y = 0.0f;")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Write1_IsErased) {
@@ -510,7 +510,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_ReadReplaced) {
 var<private> gl_Position : vec4<f32>;
 
 fn main_1() {
-  x_900 = 1.0;
+  x_900 = 1.0f;
   return;
 }
 
@@ -681,7 +681,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPointSize_Loose_ReadReplaced_Vertex) 
 var<private> x_900 : f32;
 
 fn main_1() {
-  x_900 = 1.0;
+  x_900 = 1.0f;
   return;
 }
 
@@ -889,7 +889,7 @@ var<private> x_3 : i32 = -1i;
 
 var<private> x_4 : u32 = 1u;
 
-var<private> x_5 : f32 = 1.5;
+var<private> x_5 : f32 = 1.5f;
 )"));
 }
 
@@ -914,7 +914,7 @@ var<private> x_2 : i32 = 0i;
 
 var<private> x_3 : u32 = 0u;
 
-var<private> x_4 : f32 = 0.0;
+var<private> x_4 : f32 = 0.0f;
 )"));
 }
 
@@ -939,7 +939,7 @@ var<private> x_2 : i32 = 0i;
 
 var<private> x_3 : u32 = 0u;
 
-var<private> x_4 : f32 = 0.0;
+var<private> x_4 : f32 = 0.0f;
 )"));
 
     // This example module emits ok, but is not valid SPIR-V in the first place.
@@ -956,7 +956,7 @@ TEST_F(SpvModuleScopeVarParserTest, VectorInitializer) {
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
-    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : vec2<f32> = vec2<f32>(1.5, 2.0);"));
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : vec2<f32> = vec2<f32>(1.5f, 2.0f);"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, VectorBoolNullInitializer) {
@@ -1083,9 +1083,9 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixInitializer) {
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
     EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : mat3x2<f32> = mat3x2<f32>("
-                                      "vec2<f32>(1.5, 2.0), "
-                                      "vec2<f32>(2.0, 3.0), "
-                                      "vec2<f32>(3.0, 4.0));"));
+                                      "vec2<f32>(1.5f, 2.0f), "
+                                      "vec2<f32>(2.0f, 3.0f), "
+                                      "vec2<f32>(3.0f, 4.0f));"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, MatrixNullInitializer) {
@@ -1168,7 +1168,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructInitializer) {
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
     EXPECT_THAT(module_str,
-                HasSubstr("var<private> x_200 : S = S(1u, 1.5, array<u32, 2u>(1u, 2u));"))
+                HasSubstr("var<private> x_200 : S = S(1u, 1.5f, array<u32, 2u>(1u, 2u));"))
         << module_str;
 }
 
@@ -1181,7 +1181,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructNullInitializer) {
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
-    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : S = S(0u, 0.0, array<u32, 2u>());"))
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : S = S(0u, 0.0f, array<u32, 2u>());"))
         << module_str;
 }
 
@@ -1195,7 +1195,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructUndefInitializer) {
     EXPECT_TRUE(p->error().empty());
 
     const auto module_str = test::ToString(p->program());
-    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : S = S(0u, 0.0, array<u32, 2u>());"))
+    EXPECT_THAT(module_str, HasSubstr("var<private> x_200 : S = S(0u, 0.0f, array<u32, 2u>());"))
         << module_str;
 
     // This example module emits ok, but is not valid SPIR-V in the first place.
@@ -1565,7 +1565,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_F32) {
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
-    EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : f32 = 2.5;")) << module_str;
+    EXPECT_THAT(module_str, HasSubstr("@id(12) override myconst : f32 = 2.5f;")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_F32_WithoutSpecId) {
@@ -1580,7 +1580,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_F32_WithoutS
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
     EXPECT_TRUE(p->error().empty());
     const auto module_str = test::ToString(p->program());
-    EXPECT_THAT(module_str, HasSubstr("override myconst : f32 = 2.5;")) << module_str;
+    EXPECT_THAT(module_str, HasSubstr("override myconst : f32 = 2.5f;")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_UsedInFunction) {
@@ -3854,7 +3854,7 @@ TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_BuiltinVar_FragDepth_Out_
     ASSERT_TRUE(p->Parse()) << p->error() << assembly;
     EXPECT_TRUE(p->error().empty());
     const auto got = test::ToString(p->program());
-    const std::string expected = R"(var<private> x_1 : f32 = 0.0;
+    const std::string expected = R"(var<private> x_1 : f32 = 0.0f;
 
 fn main_1() {
   return;
@@ -3957,7 +3957,7 @@ TEST_F(SpvModuleScopeVarParserTest, BuiltinPosition_BuiltIn_Position_Initializer
 
     const auto got = test::ToString(p->program());
     const std::string expected =
-        R"(var<private> gl_Position : vec4<f32> = vec4<f32>(1.0, 2.0, 3.0, 4.0);
+        R"(var<private> gl_Position : vec4<f32> = vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f);
 
 fn main_1() {
   return;

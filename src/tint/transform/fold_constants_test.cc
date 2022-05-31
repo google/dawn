@@ -41,7 +41,7 @@ var<private> a : i32 = 123i;
 
 var<private> b : u32 = 123u;
 
-var<private> c : f32 = 123.0;
+var<private> c : f32 = 123.0f;
 
 var<private> d : bool = true;
 
@@ -70,7 +70,7 @@ var<private> a : i32 = 123i;
 
 var<private> b : u32 = 123u;
 
-var<private> c : f32 = 123.0;
+var<private> c : f32 = 123.0f;
 
 var<private> d : bool = true;
 
@@ -99,7 +99,7 @@ var<private> a : i32 = 123i;
 
 var<private> b : u32 = 123u;
 
-var<private> c : f32 = 123.0;
+var<private> c : f32 = 123.0f;
 
 var<private> d : bool = true;
 
@@ -128,7 +128,7 @@ var<private> a : vec3<i32> = vec3<i32>(123i);
 
 var<private> b : vec3<u32> = vec3<u32>(123u);
 
-var<private> c : vec3<f32> = vec3<f32>(123.0);
+var<private> c : vec3<f32> = vec3<f32>(123.0f);
 
 var<private> d : vec3<bool> = vec3<bool>(true);
 
@@ -157,7 +157,7 @@ var<private> a : vec3<i32> = vec3<i32>(123i);
 
 var<private> b : vec3<u32> = vec3<u32>(123u);
 
-var<private> c : vec3<f32> = vec3<f32>(123.0);
+var<private> c : vec3<f32> = vec3<f32>(123.0f);
 
 var<private> d : vec3<bool> = vec3<bool>(true);
 
@@ -186,7 +186,7 @@ var<private> a : vec3<i32> = vec3<i32>(123i);
 
 var<private> b : vec3<u32> = vec3<u32>(123u);
 
-var<private> c : vec3<f32> = vec3<f32>(123.0);
+var<private> c : vec3<f32> = vec3<f32>(123.0f);
 
 var<private> d : vec3<bool> = vec3<bool>(true);
 
@@ -245,7 +245,7 @@ fn f() {
 fn f() {
   var a : i32 = 123i;
   var b : u32 = 123u;
-  var c : f32 = 123.0;
+  var c : f32 = 123.0f;
   var d : bool = true;
 }
 )";
@@ -269,7 +269,7 @@ fn f() {
 fn f() {
   var a : i32 = 123i;
   var b : u32 = 123u;
-  var c : f32 = 123.0;
+  var c : f32 = 123.0f;
   var d : bool = true;
 }
 )";
@@ -293,7 +293,7 @@ fn f() {
 fn f() {
   var a : i32 = 123i;
   var b : u32 = 123u;
-  var c : f32 = 123.0;
+  var c : f32 = 123.0f;
   var d : bool = true;
 }
 )";
@@ -308,7 +308,7 @@ TEST_F(FoldConstantsTest, Function_Vector_NoConversion) {
 fn f() {
   var a : vec3<i32> = vec3<i32>(123i);
   var b : vec3<u32> = vec3<u32>(123u);
-  var c : vec3<f32> = vec3<f32>(123.0);
+  var c : vec3<f32> = vec3<f32>(123.0f);
   var d : vec3<bool> = vec3<bool>(true);
 }
 )";
@@ -317,7 +317,7 @@ fn f() {
 fn f() {
   var a : vec3<i32> = vec3<i32>(123i);
   var b : vec3<u32> = vec3<u32>(123u);
-  var c : vec3<f32> = vec3<f32>(123.0);
+  var c : vec3<f32> = vec3<f32>(123.0f);
   var d : vec3<bool> = vec3<bool>(true);
 }
 )";
@@ -341,7 +341,7 @@ fn f() {
 fn f() {
   var a : vec3<i32> = vec3<i32>(123i);
   var b : vec3<u32> = vec3<u32>(123u);
-  var c : vec3<f32> = vec3<f32>(123.0);
+  var c : vec3<f32> = vec3<f32>(123.0f);
   var d : vec3<bool> = vec3<bool>(true);
 }
 )";
@@ -365,7 +365,7 @@ fn f() {
 fn f() {
   var a : vec3<i32> = vec3<i32>(123i);
   var b : vec3<u32> = vec3<u32>(123u);
-  var c : vec3<f32> = vec3<f32>(123.0);
+  var c : vec3<f32> = vec3<f32>(123.0f);
   var d : vec3<bool> = vec3<bool>(true);
 }
 )";
@@ -412,7 +412,7 @@ fn f() {
     auto* expect = R"(
 fn f() {
   var a : f32 = f32();
-  var b : vec2<f32> = vec2<f32>(1.0, a);
+  var b : vec2<f32> = vec2<f32>(1.0f, a);
 }
 )";
 

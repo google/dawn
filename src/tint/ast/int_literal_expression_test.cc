@@ -40,5 +40,17 @@ TEST_F(IntLiteralExpressionTest, SuffixU) {
     EXPECT_EQ(i->suffix, IntLiteralExpression::Suffix::kU);
 }
 
+TEST_F(IntLiteralExpressionTest, SuffixStringStream) {
+    auto to_str = [](IntLiteralExpression::Suffix suffix) {
+        std::stringstream ss;
+        ss << suffix;
+        return ss.str();
+    };
+
+    EXPECT_EQ("", to_str(IntLiteralExpression::Suffix::kNone));
+    EXPECT_EQ("i", to_str(IntLiteralExpression::Suffix::kI));
+    EXPECT_EQ("u", to_str(IntLiteralExpression::Suffix::kU));
+}
+
 }  // namespace
 }  // namespace tint::ast

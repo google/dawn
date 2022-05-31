@@ -402,7 +402,16 @@ TEST_F(SpvParserTest, EmitFunctions_NonVoidResultType) {
     Program program = p->program();
     const auto program_ast = test::ToString(program);
     EXPECT_THAT(program_ast, HasSubstr(R"(fn ret_float() -> f32 {
-  return 0.0;
+  return 0.0f;
+}
+
+fn x_100_1() {
+  return;
+}
+
+@stage(fragment)
+fn x_100() {
+  x_100_1();
 }
 )")) << program_ast;
 }

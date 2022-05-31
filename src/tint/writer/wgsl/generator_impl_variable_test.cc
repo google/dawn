@@ -107,7 +107,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
 
     std::stringstream out;
     ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
-    EXPECT_EQ(out.str(), R"(var<private> a : f32 = 1.0;)");
+    EXPECT_EQ(out.str(), R"(var<private> a : f32 = 1.0f;)");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
@@ -118,7 +118,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
 
     std::stringstream out;
     ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
-    EXPECT_EQ(out.str(), R"(let a : f32 = 1.0;)");
+    EXPECT_EQ(out.str(), R"(let a : f32 = 1.0f;)");
 }
 
 }  // namespace

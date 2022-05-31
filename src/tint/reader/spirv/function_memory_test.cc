@@ -133,8 +133,9 @@ TEST_F(SpvParserMemoryTest, EmitStatement_StoreFloatConst) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody());
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(x_1 = 42.0;
-x_1 = 0.0;
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(x_1 = 42.0f;
+x_1 = 0.0f;
+return;
 )"));
 }
 
@@ -497,7 +498,7 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Matrix) {
     EXPECT_TRUE(fe.EmitBody());
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("myvar[2u] = vec4<f32>(42.0, 42.0, 42.0, 42.0);"));
+                HasSubstr("myvar[2u] = vec4<f32>(42.0f, 42.0f, 42.0f, 42.0f);"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Array) {
@@ -529,7 +530,7 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Array) {
     EXPECT_TRUE(fe.EmitBody());
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("myvar[2u] = vec4<f32>(42.0, 42.0, 42.0, 42.0);"));
+                HasSubstr("myvar[2u] = vec4<f32>(42.0f, 42.0f, 42.0f, 42.0f);"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Struct) {
@@ -559,7 +560,7 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Struct) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody());
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("myvar.age = 42.0;"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("myvar.age = 42.0f;"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Struct_DifferOnlyMemberName) {
@@ -601,8 +602,9 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Struct_DifferOnlyMemberNam
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody());
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(myvar.age = 42.0;
-myvar2.ancientness = 420.0;
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(myvar.age = 42.0f;
+myvar2.ancientness = 420.0f;
+return;
 )"));
 }
 
@@ -706,7 +708,7 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Struct_RuntimeArray) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody());
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("myvar.age[2u] = 42.0;"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("myvar.age[2u] = 42.0f;"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Compound_Matrix_Vector) {
@@ -737,7 +739,7 @@ TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_Compound_Matrix_Vector) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody());
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("myvar[2u].w = 42.0;"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("myvar[2u].w = 42.0f;"));
 }
 
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_InvalidPointeeType) {

@@ -26,7 +26,7 @@ fn f_1() {
   let x_28 : Arr = s.a[3i].el[2i];
   let x_32 : f32 = s.a[3i].el[2i][1i].el;
   s.a = array<strided_arr_1, 4u>();
-  s.a[3i].el[2i][1i].el = 5.0;
+  s.a[3i].el[2i][1i].el = 5.0f;
   return;
 }
 

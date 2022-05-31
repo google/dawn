@@ -32,7 +32,7 @@ fn main_1() {
   var q : vec4<f32>;
   var p : vec3<f32>;
   let x_13 : vec3<f32> = position;
-  q = vec4<f32>(x_13.x, x_13.y, x_13.z, 1.0);
+  q = vec4<f32>(x_13.x, x_13.y, x_13.z, 1.0f);
   let x_21 : vec4<f32> = q;
   p = vec3<f32>(x_21.x, x_21.y, x_21.z);
   let x_27 : f32 = p.x;
@@ -42,14 +42,14 @@ fn main_1() {
   p.x = (x_27 + sin(((x_41 * x_45) + x_49)));
   let x_55 : f32 = p.y;
   let x_57 : f32 = x_14.time;
-  p.y = (x_55 + sin((x_57 + 4.0)));
+  p.y = (x_55 + sin((x_57 + 4.0f)));
   let x_69 : mat4x4<f32> = x_14.worldViewProjection;
   let x_70 : vec3<f32> = p;
-  gl_Position = (x_69 * vec4<f32>(x_70.x, x_70.y, x_70.z, 1.0));
+  gl_Position = (x_69 * vec4<f32>(x_70.x, x_70.y, x_70.z, 1.0f));
   let x_83 : vec2<f32> = uv;
   vUV = x_83;
   let x_87 : f32 = gl_Position.y;
-  gl_Position.y = (x_87 * -1.0);
+  gl_Position.y = (x_87 * -1.0f);
   return;
 }
 

@@ -58,7 +58,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Float) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("1073741824.0"));
+    EXPECT_THAT(gen.result(), HasSubstr("1073741824.0f"));
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Float) {
@@ -67,7 +67,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Float) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("f32(-0.000012)"));
+    EXPECT_THAT(gen.result(), HasSubstr("f32(-0.000012f)"));
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Bool) {
@@ -103,7 +103,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Vec) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("vec3<f32>(1.0, 2.0, 3.0)"));
+    EXPECT_THAT(gen.result(), HasSubstr("vec3<f32>(1.0f, 2.0f, 3.0f)"));
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Mat) {
@@ -112,8 +112,8 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Mat) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("mat2x3<f32>(vec3<f32>(1.0, 2.0, 3.0), "
-                                        "vec3<f32>(3.0, 4.0, 5.0))"));
+    EXPECT_THAT(gen.result(), HasSubstr("mat2x3<f32>(vec3<f32>(1.0f, 2.0f, 3.0f), "
+                                        "vec3<f32>(3.0f, 4.0f, 5.0f))"));
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Array) {
@@ -123,8 +123,9 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Array) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("array<vec3<f32>, 3u>(vec3<f32>(1.0, 2.0, 3.0), "
-                                        "vec3<f32>(4.0, 5.0, 6.0), vec3<f32>(7.0, 8.0, 9.0))"));
+    EXPECT_THAT(gen.result(),
+                HasSubstr("array<vec3<f32>, 3u>(vec3<f32>(1.0f, 2.0f, 3.0f), "
+                          "vec3<f32>(4.0f, 5.0f, 6.0f), vec3<f32>(7.0f, 8.0f, 9.0f))"));
 }
 
 }  // namespace

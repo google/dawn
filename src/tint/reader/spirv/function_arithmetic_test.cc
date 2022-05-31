@@ -93,10 +93,10 @@ std::string AstFor(std::string assembly) {
         return "bitcast<vec2<u32>>(vec2<i32>(40i, 30i))";
     }
     if (assembly == "v2float_50_60") {
-        return "vec2<f32>(50.0, 60.0)";
+        return "vec2<f32>(50.0f, 60.0f)";
     }
     if (assembly == "v2float_60_50") {
-        return "vec2<f32>(60.0, 50.0)";
+        return "vec2<f32>(60.0f, 50.0f)";
     }
     return "bad case";
 }
@@ -253,7 +253,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Scalar) {
     auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
-    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 : f32 = -(50.0);"));
+    EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr("let x_1 : f32 = -(50.0f);"));
 }
 
 TEST_F(SpvUnaryArithTest, FNegate_Vector) {
@@ -270,7 +270,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Vector) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : vec2<f32> = -(vec2<f32>(50.0, 60.0));"));
+                HasSubstr("let x_1 : vec2<f32> = -(vec2<f32>(50.0f, 60.0f));"));
 }
 
 struct BinaryData {
@@ -394,8 +394,8 @@ INSTANTIATE_TEST_SUITE_P(SpvParserTest_FAdd,
                          SpvBinaryArithTest,
                          ::testing::Values(
                              // Scalar float
-                             BinaryData{"float", "float_50", "OpFAdd", "float_60", "f32", "50.0",
-                                        "+", "60.0"},  // Vector float
+                             BinaryData{"float", "float_50", "OpFAdd", "float_60", "f32", "50.0f",
+                                        "+", "60.0f"},  // Vector float
                              BinaryData{"v2float", "v2float_50_60", "OpFAdd", "v2float_60_50",
                                         "vec2<f32>", AstFor("v2float_50_60"), "+",
                                         AstFor("v2float_60_50")}));
@@ -441,8 +441,8 @@ INSTANTIATE_TEST_SUITE_P(SpvParserTest_FSub,
                          SpvBinaryArithTest,
                          ::testing::Values(
                              // Scalar float
-                             BinaryData{"float", "float_50", "OpFSub", "float_60", "f32", "50.0",
-                                        "-", "60.0"},  // Vector float
+                             BinaryData{"float", "float_50", "OpFSub", "float_60", "f32", "50.0f",
+                                        "-", "60.0f"},  // Vector float
                              BinaryData{"v2float", "v2float_50_60", "OpFSub", "v2float_60_50",
                                         "vec2<f32>", AstFor("v2float_50_60"), "-",
                                         AstFor("v2float_60_50")}));
@@ -488,8 +488,8 @@ INSTANTIATE_TEST_SUITE_P(SpvParserTest_FMul,
                          SpvBinaryArithTest,
                          ::testing::Values(
                              // Scalar float
-                             BinaryData{"float", "float_50", "OpFMul", "float_60", "f32", "50.0",
-                                        "*", "60.0"},  // Vector float
+                             BinaryData{"float", "float_50", "OpFMul", "float_60", "f32", "50.0f",
+                                        "*", "60.0f"},  // Vector float
                              BinaryData{"v2float", "v2float_50_60", "OpFMul", "v2float_60_50",
                                         "vec2<f32>", AstFor("v2float_50_60"), "*",
                                         AstFor("v2float_60_50")}));
@@ -576,8 +576,8 @@ INSTANTIATE_TEST_SUITE_P(SpvParserTest_FDiv,
                          SpvBinaryArithTest,
                          ::testing::Values(
                              // Scalar float
-                             BinaryData{"float", "float_50", "OpFDiv", "float_60", "f32", "50.0",
-                                        "/", "60.0"},  // Vector float
+                             BinaryData{"float", "float_50", "OpFDiv", "float_60", "f32", "50.0f",
+                                        "/", "60.0f"},  // Vector float
                              BinaryData{"v2float", "v2float_50_60", "OpFDiv", "v2float_60_50",
                                         "vec2<f32>", AstFor("v2float_50_60"), "/",
                                         AstFor("v2float_60_50")}));
@@ -667,8 +667,8 @@ INSTANTIATE_TEST_SUITE_P(SpvParserTest_FRem,
                          SpvBinaryArithTest,
                          ::testing::Values(
                              // Scalar float
-                             BinaryData{"float", "float_50", "OpFRem", "float_60", "f32", "50.0",
-                                        "%", "60.0"},  // Vector float
+                             BinaryData{"float", "float_50", "OpFRem", "float_60", "f32", "50.0f",
+                                        "%", "60.0f"},  // Vector float
                              BinaryData{"v2float", "v2float_50_60", "OpFRem", "v2float_60_50",
                                         "vec2<f32>", AstFor("v2float_50_60"), "%",
                                         AstFor("v2float_60_50")}));
@@ -687,7 +687,7 @@ TEST_F(SpvBinaryArithTestBasic, FMod_Scalar) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : f32 = (50.0 - (60.0 * floor((50.0 / 60.0))));"));
+                HasSubstr("let x_1 : f32 = (50.0f - (60.0f * floor((50.0f / 60.0f))));"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, FMod_Vector) {
@@ -706,7 +706,7 @@ TEST_F(SpvBinaryArithTestBasic, FMod_Vector) {
     EXPECT_THAT(
         test::ToString(p->program(), ast_body),
         HasSubstr(
-            R"(let x_1 : vec2<f32> = (vec2<f32>(50.0, 60.0) - (vec2<f32>(60.0, 50.0) * floor((vec2<f32>(50.0, 60.0) / vec2<f32>(60.0, 50.0)))));)"));
+            R"(let x_1 : vec2<f32> = (vec2<f32>(50.0f, 60.0f) - (vec2<f32>(60.0f, 50.0f) * floor((vec2<f32>(50.0f, 60.0f) / vec2<f32>(60.0f, 50.0f)))));)"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, VectorTimesScalar) {

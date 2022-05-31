@@ -1,7 +1,7 @@
 var<private> gl_Position : vec4<f32>;
 
 fn main_1() {
-  gl_Position = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+  gl_Position = vec4<f32>(0.0f, 0.0f, 0.0f, 0.0f);
   return;
 }
 

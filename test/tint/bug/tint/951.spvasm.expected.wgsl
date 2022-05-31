@@ -34,8 +34,8 @@ fn getAAtOutCoords_() -> f32 {
 
 fn unaryOperation_f1_(a : ptr<function, f32>) -> f32 {
   let x_47 : f32 = *(a);
-  if ((x_47 < 0.0)) {
-    return 0x1p+128;
+  if ((x_47 < 0.0f)) {
+    return 0x1p+128f;
   }
   let x_55 : f32 = *(a);
   return log(x_55);

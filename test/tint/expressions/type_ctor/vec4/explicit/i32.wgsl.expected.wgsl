@@ -1,1 +1,1 @@
-let v = vec4(0, 1, 2, 3);
+let v = vec4(0i, 1i, 2i, 3i);

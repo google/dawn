@@ -673,7 +673,7 @@ TEST_F(SpvParserTest, Normalize_Scalar) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 : f32 = 1.0;")) << body;
+    EXPECT_THAT(body, HasSubstr("let x_1 : f32 = 1.0f;")) << body;
 }
 
 TEST_F(SpvParserTest, Normalize_Vector2) {
@@ -981,7 +981,7 @@ TEST_F(SpvParserTest, GlslStd450_Refract_Scalar) {
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
     const auto* expected =
-        R"(let x_1 : f32 = refract(vec2<f32>(f1, 0.0), vec2<f32>(f2, 0.0), f3).x;)";
+        R"(let x_1 : f32 = refract(vec2<f32>(f1, 0.0f), vec2<f32>(f2, 0.0f), f3).x;)";
 
     EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
@@ -1019,7 +1019,7 @@ TEST_F(SpvParserTest, GlslStd450_FaceForward_Scalar) {
     // The %99 sum only has one use.  Ensure it is evaluated only once by
     // making a let-declaration for it, since it is the normal operand to
     // the builtin function, and code generation uses it twice.
-    const auto* expected = R"(let x_1 : f32 = select(-(x_99), x_99, ((f2 * f3) < 0.0));)";
+    const auto* expected = R"(let x_1 : f32 = select(-(x_99), x_99, ((f2 * f3) < 0.0f));)";
 
     EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
@@ -1059,7 +1059,7 @@ TEST_F(SpvParserTest, GlslStd450_Reflect_Scalar) {
     // The %99 sum only has one use.  Ensure it is evaluated only once by
     // making a let-declaration for it, since it is the normal operand to
     // the builtin function, and code generation uses it twice.
-    const auto* expected = R"(let x_1 : f32 = (x_98 - (2.0 * (x_99 * (x_99 * x_98))));)";
+    const auto* expected = R"(let x_1 : f32 = (x_98 - (2.0f * (x_99 * (x_99 * x_98))));)";
 
     EXPECT_THAT(body, HasSubstr(expected)) << body;
 }

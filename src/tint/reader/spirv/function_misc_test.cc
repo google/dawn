@@ -75,7 +75,8 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_BeforeFunction_Scalar) {
     EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(let x_11 : bool = false;
 let x_12 : u32 = 0u;
 let x_13 : i32 = 0i;
-let x_14 : f32 = 0.0;
+let x_14 : f32 = 0.0f;
+return;
 )"));
 }
 
@@ -133,7 +134,8 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Scalar) {
     EXPECT_THAT(test::ToString(p->program(), ast_body), HasSubstr(R"(let x_11 : bool = false;
 let x_12 : u32 = 0u;
 let x_13 : i32 = 0i;
-let x_14 : f32 = 0.0;
+let x_14 : f32 = 0.0f;
+return;
 )"));
 }
 
@@ -224,7 +226,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_11 : S = S(false, 0u, 0i, 0.0);"));
+                HasSubstr("let x_11 : S = S(false, 0u, 0i, 0.0f);"));
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpNop) {
@@ -330,7 +332,7 @@ TEST_F(SpvParserTest, ValueFromBlockNotInBlockOrder) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto got = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(got, HasSubstr("let x_81 : f32 = (0.0 * 42.0);"));
+    EXPECT_THAT(got, HasSubstr("let x_81 : f32 = (0.0f * 42.0f);"));
 }
 
 // TODO(dneto): OpSizeof : requires Kernel (OpenCL)

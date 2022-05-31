@@ -83,7 +83,7 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Scalar) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr("let x_1 : u32 = bitcast<u32>(50.0);"));
+                HasSubstr("let x_1 : u32 = bitcast<u32>(50.0f);"));
 }
 
 TEST_F(SpvUnaryConversionTest, Bitcast_Vector) {

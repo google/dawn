@@ -872,7 +872,7 @@ fn main() -> vec4<f32> {
 @group(0) @binding(0) @internal(disable_validation__binding_point_collision) var placeholder_comparison_sampler : sampler_comparison;
 
 fn f(t_s : texture_depth_2d, coords : vec2<f32>) -> f32 {
-  return textureSampleCompare(t_s, placeholder_comparison_sampler, coords, 5.0);
+  return textureSampleCompare(t_s, placeholder_comparison_sampler, coords, 5.0f);
 }
 
 @group(0) @binding(0) @internal(disable_validation__binding_point_collision) var tex_samp : texture_depth_2d;
@@ -912,7 +912,7 @@ fn main() -> vec4<f32> {
 @group(0) @binding(0) @internal(disable_validation__binding_point_collision) var placeholder_comparison_sampler : sampler_comparison;
 
 fn f(t_s : texture_depth_2d, coords : vec2<f32>) -> f32 {
-  return textureSampleCompare(t_s, placeholder_comparison_sampler, coords, 5.0);
+  return textureSampleCompare(t_s, placeholder_comparison_sampler, coords, 5.0f);
 }
 )";
 

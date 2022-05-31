@@ -374,8 +374,8 @@ struct S {
 @stage(compute) @workgroup_size(1i)
 fn f() {
   s.a = array<strided_arr, 4u>();
-  s.a = array<strided_arr, 4u>(strided_arr(1.0), strided_arr(2.0), strided_arr(3.0), strided_arr(4.0));
-  s.a[1i].el = 5.0;
+  s.a = array<strided_arr, 4u>(strided_arr(1.0f), strided_arr(2.0f), strided_arr(3.0f), strided_arr(4.0f));
+  s.a[1i].el = 5.0f;
 }
 )";
 
@@ -423,8 +423,8 @@ struct S {
 @stage(compute) @workgroup_size(1i)
 fn f() {
   s.a = array<f32, 4u>();
-  s.a = array<f32, 4u>(1.0, 2.0, 3.0, 4.0);
-  s.a[1i] = 5.0;
+  s.a = array<f32, 4u>(1.0f, 2.0f, 3.0f, 4.0f);
+  s.a[1i] = 5.0f;
 }
 )";
 
@@ -483,8 +483,8 @@ struct S {
 fn f() {
   let c = s.a;
   let d = s.a[1i].el;
-  s.a = array<strided_arr, 4u>(strided_arr(1.0), strided_arr(2.0), strided_arr(3.0), strided_arr(4.0));
-  s.a[1i].el = 5.0;
+  s.a = array<strided_arr, 4u>(strided_arr(1.0f), strided_arr(2.0f), strided_arr(3.0f), strided_arr(4.0f));
+  s.a[1i].el = 5.0f;
 }
 )";
 
@@ -546,8 +546,8 @@ fn f() {
   let a : ARR = s.a;
   let b : f32 = s.a[1i].el;
   s.a = ARR();
-  s.a = ARR(strided_arr(1.0), strided_arr(2.0), strided_arr(3.0), strided_arr(4.0));
-  s.a[1i].el = 5.0;
+  s.a = ARR(strided_arr(1.0f), strided_arr(2.0f), strided_arr(3.0f), strided_arr(4.0f));
+  s.a[1i].el = 5.0f;
 }
 )";
 
@@ -648,7 +648,7 @@ fn f() {
   let c : ARR_A = s.a[3i].el[2i];
   let d : f32 = s.a[3i].el[2i][1i].el;
   s.a = ARR_B();
-  s.a[3i].el[2i][1i].el = 5.0;
+  s.a[3i].el[2i][1i].el = 5.0f;
 }
 )";
 
