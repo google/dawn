@@ -34,7 +34,7 @@ fn main_1() {
   let x_13 : i32 = x_5.x_GLF_uniform_int_values[0].el;
   x_GLF_color = vec4<f32>(f32(x_10), f32(x_11), f32(x_12), f32(x_13));
   let x_45 : f32 = x_8.x_GLF_uniform_float_values[1].el;
-  a = (x_45 - (0x1.8p+128 * floor((x_45 / 0x1.8p+128))));
+  a = (x_45 - (1.0 * floor((x_45 / 1.0))));
   let x_47 : f32 = a;
   let x_49 : f32 = x_8.x_GLF_uniform_float_values[0].el;
   if ((x_47 != x_49)) {

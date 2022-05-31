@@ -31,7 +31,7 @@ fn main_1() {
   m24 = mat2x2<f32>(vec2<f32>(x_40, x_42), vec2<f32>((x_44 * 1.0), x_47));
   let x_51 : mat2x2<f32> = m24;
   a = x_51[0u].x;
-  v2 = vec2<f32>(-0x1.8p+128, 1.0);
+  v2 = vec2<f32>(1.0, 1.0);
   let x_53 : vec2<f32> = v2;
   let x_54 : f32 = a;
   let x_55 : vec2<f32> = vec2<f32>(x_54, 1.0);
