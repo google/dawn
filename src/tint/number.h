@@ -19,7 +19,10 @@
 #include <functional>
 #include <limits>
 #include <ostream>
+// TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
+#include <optional>  // NOLINT(build/include_order))
 
+#include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/result.h"
 
 // Forward declaration
@@ -184,33 +187,6 @@ std::enable_if_t<IsNumeric<A>, bool> operator!=(A a, Number<B> b) {
     return !(a == b);
 }
 
-/// Enumerator of failure reasons when converting from one number to another.
-enum class ConversionFailure {
-    kExceedsPositiveLimit,  // The value was too big (+'ve) to fit in the target type
-    kExceedsNegativeLimit,  // The value was too big (-'ve) to fit in the target type
-};
-
-/// Writes the conversion failure message to the ostream.
-/// @param out the std::ostream to write to
-/// @param failure the ConversionFailure
-/// @return the std::ostream so calls can be chained
-std::ostream& operator<<(std::ostream& out, ConversionFailure failure);
-
-/// Converts a number from one type to another, checking that the value fits in the target type.
-/// @returns the resulting value of the conversion, or a failure reason.
-template <typename TO, typename FROM>
-utils::Result<TO, ConversionFailure> CheckedConvert(Number<FROM> num) {
-    using T = decltype(UnwrapNumber<TO>() + num.value);
-    const auto value = static_cast<T>(num.value);
-    if (value > static_cast<T>(TO::kHighest)) {
-        return ConversionFailure::kExceedsPositiveLimit;
-    }
-    if (value < static_cast<T>(TO::kLowest)) {
-        return ConversionFailure::kExceedsNegativeLimit;
-    }
-    return TO(value);  // Success
-}
-
 /// The partial specification of Number for f16 type, storing the f16 value as float,
 /// and enforcing proper explicit casting.
 template <>
@@ -281,6 +257,114 @@ using f32 = Number<float>;
 /// `f16` is a type alias to `Number<detail::NumberKindF16>`, which should be IEEE 754 binary16.
 /// However since C++ don't have native binary16 type, the value is stored as float.
 using f16 = Number<detail::NumberKindF16>;
+
+/// Enumerator of failure reasons when converting from one number to another.
+enum class ConversionFailure {
+    kExceedsPositiveLimit,  // The value was too big (+'ve) to fit in the target type
+    kExceedsNegativeLimit,  // The value was too big (-'ve) to fit in the target type
+};
+
+/// Writes the conversion failure message to the ostream.
+/// @param out the std::ostream to write to
+/// @param failure the ConversionFailure
+/// @return the std::ostream so calls can be chained
+std::ostream& operator<<(std::ostream& out, ConversionFailure failure);
+
+/// Converts a number from one type to another, checking that the value fits in the target type.
+/// @returns the resulting value of the conversion, or a failure reason.
+template <typename TO, typename FROM>
+utils::Result<TO, ConversionFailure> CheckedConvert(Number<FROM> num) {
+    using T = decltype(UnwrapNumber<TO>() + num.value);
+    const auto value = static_cast<T>(num.value);
+    if (value > static_cast<T>(TO::kHighest)) {
+        return ConversionFailure::kExceedsPositiveLimit;
+    }
+    if (value < static_cast<T>(TO::kLowest)) {
+        return ConversionFailure::kExceedsNegativeLimit;
+    }
+    return TO(value);  // Success
+}
+
+/// Define 'TINT_HAS_OVERFLOW_BUILTINS' if the compiler provide overflow checking builtins.
+/// If the compiler does not support these builtins, then these are emulated with algorithms
+/// described in:
+/// https://wiki.sei.cmu.edu/confluence/display/c/INT32-C.+Ensure+that+operations+on+signed+integers+do+not+result+in+overflow
+#if defined(__GNUC__) && __GNUC__ >= 5
+#define TINT_HAS_OVERFLOW_BUILTINS
+#elif defined(__clang__)
+#if __has_builtin(__builtin_add_overflow) && __has_builtin(__builtin_mul_overflow)
+#define TINT_HAS_OVERFLOW_BUILTINS
+#endif
+#endif
+
+/// @returns a + b, or an empty optional if the resulting value overflowed the AInt
+inline std::optional<AInt> CheckedAdd(AInt a, AInt b) {
+    int64_t result;
+#ifdef TINT_HAS_OVERFLOW_BUILTINS
+    if (__builtin_add_overflow(a.value, b.value, &result)) {
+        return {};
+    }
+#else   // TINT_HAS_OVERFLOW_BUILTINS
+    if (a.value >= 0) {
+        if (AInt::kHighest - a.value < b.value) {
+            return {};
+        }
+    } else {
+        if (b.value < AInt::kLowest - a.value) {
+            return {};
+        }
+    }
+    result = a.value + b.value;
+#endif  // TINT_HAS_OVERFLOW_BUILTINS
+    return AInt(result);
+}
+
+/// @returns a * b, or an empty optional if the resulting value overflowed the AInt
+inline std::optional<AInt> CheckedMul(AInt a, AInt b) {
+    int64_t result;
+#ifdef TINT_HAS_OVERFLOW_BUILTINS
+    if (__builtin_mul_overflow(a.value, b.value, &result)) {
+        return {};
+    }
+#else   // TINT_HAS_OVERFLOW_BUILTINS
+    if (a > 0) {
+        if (b > 0) {
+            if (a > (AInt::kHighest / b)) {
+                return {};
+            }
+        } else {
+            if (b < (AInt::kLowest / a)) {
+                return {};
+            }
+        }
+    } else {
+        if (b > 0) {
+            if (a < (AInt::kLowest / b)) {
+                return {};
+            }
+        } else {
+            if ((a != 0) && (b < (AInt::kHighest / a))) {
+                return {};
+            }
+        }
+    }
+    result = a.value * b.value;
+#endif  // TINT_HAS_OVERFLOW_BUILTINS
+    return AInt(result);
+}
+
+/// @returns a * b + c, or an empty optional if the value overflowed the AInt
+inline std::optional<AInt> CheckedMadd(AInt a, AInt b, AInt c) {
+    // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
+    TINT_BEGIN_DISABLE_WARNING(MAYBE_UNINITIALIZED);
+
+    if (auto mul = CheckedMul(a, b)) {
+        return CheckedAdd(mul.value(), c);
+    }
+    return {};
+
+    TINT_END_DISABLE_WARNING(MAYBE_UNINITIALIZED);
+}
 
 }  // namespace tint
 

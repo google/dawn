@@ -20,23 +20,63 @@
 #define TINT_REQUIRE_SEMICOLON static_assert(true)
 
 #if defined(_MSC_VER)
-#define TINT_WARNING_UNREACHABLE_CODE 4702
-#define TINT_WARNING_CONSTANT_OVERFLOW 4756
+////////////////////////////////////////////////////////////////////////////////
+// MSVC
+////////////////////////////////////////////////////////////////////////////////
+#define TINT_DISABLE_WARNING_CONSTANT_OVERFLOW __pragma(warning(disable : 4756))
+#define TINT_DISABLE_WARNING_MAYBE_UNINITIALIZED /* currently no-op */
+#define TINT_DISABLE_WARNING_UNREACHABLE_CODE __pragma(warning(disable : 4702))
 
 // clang-format off
-#define TINT_BEGIN_DISABLE_WARNING(name)                        \
-    __pragma(warning(push))                                     \
-    __pragma(warning(disable:TINT_CONCAT(TINT_WARNING_, name))) \
+#define TINT_BEGIN_DISABLE_WARNING(name)     \
+    __pragma(warning(push))                  \
+    TINT_CONCAT(TINT_DISABLE_WARNING_, name) \
     TINT_REQUIRE_SEMICOLON
-#define TINT_END_DISABLE_WARNING(name)                          \
-    __pragma(warning(pop))                                      \
+#define TINT_END_DISABLE_WARNING(name)       \
+    __pragma(warning(pop))                   \
+    TINT_REQUIRE_SEMICOLON
+// clang-format on
+#elif defined(__clang__)
+////////////////////////////////////////////////////////////////////////////////
+// Clang
+////////////////////////////////////////////////////////////////////////////////
+#define TINT_DISABLE_WARNING_CONSTANT_OVERFLOW   /* currently no-op */
+#define TINT_DISABLE_WARNING_MAYBE_UNINITIALIZED /* currently no-op */
+#define TINT_DISABLE_WARNING_UNREACHABLE_CODE    /* currently no-op */
+
+// clang-format off
+#define TINT_BEGIN_DISABLE_WARNING(name)     \
+    _Pragma("clang diagnostic push")         \
+    TINT_CONCAT(TINT_DISABLE_WARNING_, name) \
+    TINT_REQUIRE_SEMICOLON
+#define TINT_END_DISABLE_WARNING(name)       \
+    _Pragma("clang diagnostic pop")          \
+    TINT_REQUIRE_SEMICOLON
+// clang-format on
+#elif defined(__GNUC__)
+////////////////////////////////////////////////////////////////////////////////
+// GCC
+////////////////////////////////////////////////////////////////////////////////
+#define TINT_DISABLE_WARNING_CONSTANT_OVERFLOW /* currently no-op */
+#define TINT_DISABLE_WARNING_MAYBE_UNINITIALIZED \
+    _Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
+#define TINT_DISABLE_WARNING_UNREACHABLE_CODE /* currently no-op */
+
+// clang-format off
+#define TINT_BEGIN_DISABLE_WARNING(name)     \
+    _Pragma("GCC diagnostic push")           \
+    TINT_CONCAT(TINT_DISABLE_WARNING_, name) \
+    TINT_REQUIRE_SEMICOLON
+#define TINT_END_DISABLE_WARNING(name)       \
+    _Pragma("GCC diagnostic pop")            \
     TINT_REQUIRE_SEMICOLON
 // clang-format on
 #else
-// clang-format off
+////////////////////////////////////////////////////////////////////////////////
+// Other
+////////////////////////////////////////////////////////////////////////////////
 #define TINT_BEGIN_DISABLE_WARNING(name) TINT_REQUIRE_SEMICOLON
 #define TINT_END_DISABLE_WARNING(name) TINT_REQUIRE_SEMICOLON
-// clang-format on
-#endif  // defined(_MSC_VER)
+#endif
 
 #endif  // SRC_TINT_UTILS_COMPILER_MACROS_H_
