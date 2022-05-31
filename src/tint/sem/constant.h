@@ -132,6 +132,17 @@ class Constant {
     /// @returns true if any element is zero
     bool AnyZero() const;
 
+    /// @returns true if all elements are zero
+    bool AllZero() const;
+
+    /// @returns true if all elements are the same value
+    bool AllEqual() const { return AllEqual(0, ElementCount()); }
+
+    /// @param start the first element index
+    /// @param end one past the last element index
+    /// @returns true if all elements between `[start, end)` are the same value
+    bool AllEqual(size_t start, size_t end) const;
+
     /// @param index the index of the element
     /// @return the element at `index`, which must be of type `T`.
     template <typename T>

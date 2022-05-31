@@ -45,13 +45,39 @@ Constant& Constant::operator=(const Constant& rhs) = default;
 
 bool Constant::AnyZero() const {
     return WithElements([&](auto&& vec) {
-        for (auto scalar : vec) {
-            using T = std::remove_reference_t<decltype(scalar)>;
-            if (scalar == T(0)) {
+        using T = typename std::decay_t<decltype(vec)>::value_type;
+        for (auto el : vec) {
+            if (el == T(0)) {
                 return true;
             }
         }
         return false;
+    });
+}
+
+bool Constant::AllZero() const {
+    return WithElements([&](auto&& vec) {
+        using T = typename std::decay_t<decltype(vec)>::value_type;
+        for (auto el : vec) {
+            if (el != T(0)) {
+                return false;
+            }
+        }
+        return true;
+    });
+}
+
+bool Constant::AllEqual(size_t start, size_t end) const {
+    return WithElements([&](auto&& vec) {
+        if (!vec.empty()) {
+            auto value = vec[start];
+            for (size_t i = start + 1; i < end; i++) {
+                if (vec[i] != value) {
+                    return false;
+                }
+            }
+        }
+        return true;
     });
 }
 
