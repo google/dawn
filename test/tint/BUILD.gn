@@ -334,7 +334,6 @@ tint_unittests_source_set("tint_unittests_transform_src") {
     "../../src/tint/transform/disable_uniformity_analysis_test.cc",
     "../../src/tint/transform/expand_compound_assignment_test.cc",
     "../../src/tint/transform/first_index_offset_test.cc",
-    "../../src/tint/transform/fold_constants_test.cc",
     "../../src/tint/transform/fold_trivial_single_use_lets_test.cc",
     "../../src/tint/transform/for_loop_to_loop_test.cc",
     "../../src/tint/transform/localize_struct_array_assignment_test.cc",

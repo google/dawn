@@ -398,8 +398,6 @@ set(TINT_LIB_SRCS
   transform/expand_compound_assignment.h
   transform/first_index_offset.cc
   transform/first_index_offset.h
-  transform/fold_constants.cc
-  transform/fold_constants.h
   transform/fold_trivial_single_use_lets.cc
   transform/fold_trivial_single_use_lets.h
   transform/for_loop_to_loop.cc
@@ -1079,7 +1077,6 @@ if(TINT_BUILD_TESTS)
       transform/disable_uniformity_analysis_test.cc
       transform/expand_compound_assignment_test.cc
       transform/first_index_offset_test.cc
-      transform/fold_constants_test.cc
       transform/fold_trivial_single_use_lets_test.cc
       transform/for_loop_to_loop_test.cc
       transform/expand_compound_assignment.cc
