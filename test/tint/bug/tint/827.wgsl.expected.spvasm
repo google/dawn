@@ -44,7 +44,7 @@
     %v4float = OpTypeVector %float 4
         %int = OpTypeInt 32 1
       %v2int = OpTypeVector %int 2
-      %int_0 = OpConstant %int 0
+         %37 = OpConstantNull %int
          %38 = OpTypeFunction %void
  %main_inner = OpFunction %void None %14
 %GlobalInvocationId = OpFunctionParameter %v3uint
@@ -60,7 +60,7 @@
          %35 = OpCompositeExtract %uint %GlobalInvocationId 1
          %34 = OpBitcast %int %35
          %36 = OpCompositeConstruct %v2int %32 %34
-         %27 = OpImageFetch %v4float %29 %36 Lod %int_0
+         %27 = OpImageFetch %v4float %29 %36 Lod %37
          %26 = OpCompositeExtract %float %27 0
                OpStore %25 %26
                OpReturn

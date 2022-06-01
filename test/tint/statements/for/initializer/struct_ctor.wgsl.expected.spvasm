@@ -22,7 +22,7 @@
 %_ptr_Function_int = OpTypePointer Function %int
          %14 = OpConstantNull %int
        %bool = OpTypeBool
-      %false = OpConstantFalse %bool
+         %21 = OpConstantNull %bool
 %unused_entry_point = OpFunction %void None %1
           %4 = OpLabel
                OpReturn
@@ -37,7 +37,7 @@
                OpLoopMerge %16 %17 None
                OpBranch %18
          %18 = OpLabel
-         %19 = OpLogicalNot %bool %false
+         %19 = OpLogicalNot %bool %21
                OpSelectionMerge %22 None
                OpBranchConditional %19 %23 %22
          %23 = OpLabel

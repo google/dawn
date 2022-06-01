@@ -11,9 +11,9 @@
                OpName %unused_entry_point "unused_entry_point"
                OpName %main "main"
         %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
+          %2 = OpConstantNull %int
 %_ptr_Private_int = OpTypePointer Private %int
-          %i = OpVariable %_ptr_Private_int Private %int_0
+          %i = OpVariable %_ptr_Private_int Private %2
        %void = OpTypeVoid
           %5 = OpTypeFunction %void
       %int_1 = OpConstant %int 1

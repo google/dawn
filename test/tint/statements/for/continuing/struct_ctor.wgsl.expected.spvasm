@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 27
+; Bound: 26
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -16,40 +16,39 @@
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
         %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
+          %8 = OpConstantNull %int
 %_ptr_Function_int = OpTypePointer Function %int
-         %11 = OpConstantNull %int
        %bool = OpTypeBool
-      %false = OpConstantFalse %bool
+         %17 = OpConstantNull %bool
           %S = OpTypeStruct %int
       %int_1 = OpConstant %int 1
-         %24 = OpConstantComposite %S %int_1
+         %23 = OpConstantComposite %S %int_1
 %unused_entry_point = OpFunction %void None %1
           %4 = OpLabel
                OpReturn
                OpFunctionEnd
           %f = OpFunction %void None %1
           %6 = OpLabel
-          %i = OpVariable %_ptr_Function_int Function %11
-               OpStore %i %int_0
-               OpBranch %12
-         %12 = OpLabel
-               OpLoopMerge %13 %14 None
-               OpBranch %15
-         %15 = OpLabel
-         %16 = OpLogicalNot %bool %false
-               OpSelectionMerge %19 None
-               OpBranchConditional %16 %20 %19
-         %20 = OpLabel
-               OpBranch %13
-         %19 = OpLabel
+          %i = OpVariable %_ptr_Function_int Function %8
+               OpStore %i %8
+               OpBranch %11
+         %11 = OpLabel
+               OpLoopMerge %12 %13 None
                OpBranch %14
          %14 = OpLabel
-         %21 = OpLoad %int %i
-         %25 = OpCompositeExtract %int %24 0
-         %26 = OpIAdd %int %21 %25
-               OpStore %i %26
+         %15 = OpLogicalNot %bool %17
+               OpSelectionMerge %18 None
+               OpBranchConditional %15 %19 %18
+         %19 = OpLabel
                OpBranch %12
+         %18 = OpLabel
+               OpBranch %13
          %13 = OpLabel
+         %20 = OpLoad %int %i
+         %24 = OpCompositeExtract %int %23 0
+         %25 = OpIAdd %int %20 %24
+               OpStore %i %25
+               OpBranch %11
+         %12 = OpLabel
                OpReturn
                OpFunctionEnd

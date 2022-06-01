@@ -70,8 +70,8 @@
          %39 = OpConstantComposite %v2float %float_n1 %float_n1
          %40 = OpConstantComposite %_arr_v2float_uint_3 %37 %38 %39
 %_ptr_Function_v2float = OpTypePointer Function %v2float
+         %44 = OpConstantNull %uint
      %uint_1 = OpConstant %uint 1
-    %float_0 = OpConstant %float 0
        %void = OpTypeVoid
          %57 = OpTypeFunction %void
  %main_inner = OpFunction %v4float None %20
@@ -85,17 +85,17 @@
                OpStore %indexable %40
          %42 = OpAccessChain %_ptr_Function_v2float %indexable %gl_VertexIndex
          %43 = OpLoad %v2float %42
-         %44 = OpCompositeExtract %v2float %32 0
-         %45 = OpCompositeExtract %v2float %34 0
-         %46 = OpFAdd %v2float %44 %45
-         %48 = OpCompositeExtract %v2float %32 1
-         %49 = OpCompositeExtract %v2float %34 1
-         %50 = OpFAdd %v2float %48 %49
-         %51 = OpCompositeConstruct %mat2v2float %46 %50
-         %52 = OpMatrixTimesVector %v2float %51 %43
-         %53 = OpCompositeExtract %float %52 0
-         %54 = OpCompositeExtract %float %52 1
-         %56 = OpCompositeConstruct %v4float %53 %54 %float_0 %float_1
+         %45 = OpCompositeExtract %v2float %32 0
+         %46 = OpCompositeExtract %v2float %34 0
+         %47 = OpFAdd %v2float %45 %46
+         %49 = OpCompositeExtract %v2float %32 1
+         %50 = OpCompositeExtract %v2float %34 1
+         %51 = OpFAdd %v2float %49 %50
+         %52 = OpCompositeConstruct %mat2v2float %47 %51
+         %53 = OpMatrixTimesVector %v2float %52 %43
+         %54 = OpCompositeExtract %float %53 0
+         %55 = OpCompositeExtract %float %53 1
+         %56 = OpCompositeConstruct %v4float %54 %55 %11 %float_1
                OpReturnValue %56
                OpFunctionEnd
        %main = OpFunction %void None %57

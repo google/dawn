@@ -41,7 +41,7 @@
          %15 = OpTypeFunction %void %v4float %bool %uint %uint
          %26 = OpTypeFunction %void
         %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
+         %34 = OpConstantNull %int
  %main_inner = OpFunction %void None %15
    %position = OpFunctionParameter %v4float
 %front_facing = OpFunctionParameter %bool
@@ -61,7 +61,7 @@
          %30 = OpLoad %v4float %position_1
          %31 = OpLoad %bool %front_facing_1
          %32 = OpLoad %uint %sample_index_1
-         %35 = OpAccessChain %_ptr_Input_uint %sample_mask_1 %int_0
+         %35 = OpAccessChain %_ptr_Input_uint %sample_mask_1 %34
          %36 = OpLoad %uint %35
          %29 = OpFunctionCall %void %main_inner %30 %31 %32 %36
                OpReturn

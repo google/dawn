@@ -31,8 +31,8 @@
          %15 = OpConstantNull %v4uint
         %int = OpTypeInt 32 1
       %v2int = OpTypeVector %int 2
-      %int_0 = OpConstant %int 0
-         %21 = OpConstantComposite %v2int %int_0 %int_0
+         %20 = OpConstantNull %v2int
+         %21 = OpConstantNull %int
      %uint_0 = OpConstant %uint 0
 %_ptr_Function_uint = OpTypePointer Function %uint
       %int_1 = OpConstant %int 1
@@ -40,7 +40,7 @@
          %11 = OpLabel
    %srcValue = OpVariable %_ptr_Function_v4uint Function %15
          %17 = OpLoad %3 %Src
-         %16 = OpImageFetch %v4uint %17 %21 Lod %int_0
+         %16 = OpImageFetch %v4uint %17 %20 Lod %21
                OpStore %srcValue %16
          %24 = OpAccessChain %_ptr_Function_uint %srcValue %uint_0
          %25 = OpLoad %uint %24
@@ -50,7 +50,7 @@
                OpStore %26 %29
          %30 = OpLoad %v4uint %srcValue
          %32 = OpLoad %7 %Dst
-               OpImageWrite %32 %21 %30
+               OpImageWrite %32 %20 %30
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %8

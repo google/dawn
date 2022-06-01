@@ -23,13 +23,13 @@
           %A = OpVariable %_ptr_Private__arr_S_uint_4 Private %8
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
-      %int_0 = OpConstant %int 0
+         %13 = OpConstantNull %int
 %_ptr_Private_S = OpTypePointer Private %S
       %int_1 = OpConstant %int 1
          %17 = OpConstantComposite %S %int_1
           %f = OpFunction %void None %9
          %12 = OpLabel
-         %15 = OpAccessChain %_ptr_Private_S %A %int_0
+         %15 = OpAccessChain %_ptr_Private_S %A %13
                OpStore %15 %17
                OpReturn
                OpFunctionEnd

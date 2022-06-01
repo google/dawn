@@ -12,9 +12,9 @@
           %1 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1
-     %uint_0 = OpConstant %uint 0
+          %7 = OpConstantNull %uint
           %f = OpFunction %void None %1
           %4 = OpLabel
-          %8 = OpUMod %uint %uint_1 %uint_0
+          %8 = OpUMod %uint %uint_1 %7
                OpReturn
                OpFunctionEnd

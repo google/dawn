@@ -23,7 +23,6 @@
 #include "src/tint/transform/canonicalize_entry_point_io.h"
 #include "src/tint/transform/disable_uniformity_analysis.h"
 #include "src/tint/transform/expand_compound_assignment.h"
-#include "src/tint/transform/fold_constants.h"
 #include "src/tint/transform/for_loop_to_loop.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/transform/promote_side_effects_to_decl.h"
@@ -73,7 +72,6 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     manager.Add<transform::PromoteSideEffectsToDecl>();
     manager.Add<transform::UnwindDiscardFunctions>();
     manager.Add<transform::SimplifyPointers>();  // Required for arrayLength()
-    manager.Add<transform::FoldConstants>();
     manager.Add<transform::VectorizeScalarMatrixConstructors>();
     manager.Add<transform::ForLoopToLoop>();  // Must come after
                                               // ZeroInitWorkgroupMemory

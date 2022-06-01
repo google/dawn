@@ -100,7 +100,7 @@ TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
 )");
 }
 
-TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
+TEST_F(BuilderTest, GlobalVar_Complex_ConstructorNestedVector) {
     auto* init = vec3<f32>(vec2<f32>(1_f, 2_f), 3_f);
 
     auto* v = GlobalConst("var", ty.vec3<f32>(), init);
@@ -112,17 +112,10 @@ TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
-%3 = OpTypeVector %2 2
-%4 = OpConstant %2 1
-%5 = OpConstant %2 2
-%6 = OpConstantComposite %3 %4 %5
-%8 = OpTypeInt 32 0
-%9 = OpConstant %8 0
-%7 = OpSpecConstantOp %2 CompositeExtract %6 9
-%11 = OpConstant %8 1
-%10 = OpSpecConstantOp %2 CompositeExtract %6 11
-%12 = OpConstant %2 3
-%13 = OpSpecConstantComposite %1 %7 %10 %12
+%3 = OpConstant %2 1
+%4 = OpConstant %2 2
+%5 = OpConstant %2 3
+%6 = OpConstantComposite %1 %3 %4 %5
 )");
 }
 

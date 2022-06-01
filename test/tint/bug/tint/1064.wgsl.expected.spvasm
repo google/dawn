@@ -11,7 +11,7 @@
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
        %bool = OpTypeBool
-      %false = OpConstantFalse %bool
+         %10 = OpConstantNull %bool
        %true = OpConstantTrue %bool
        %main = OpFunction %void None %1
           %4 = OpLabel
@@ -21,7 +21,7 @@
                OpBranch %8
           %8 = OpLabel
                OpSelectionMerge %11 None
-               OpBranchConditional %false %12 %13
+               OpBranchConditional %10 %12 %13
          %12 = OpLabel
                OpBranch %11
          %13 = OpLabel

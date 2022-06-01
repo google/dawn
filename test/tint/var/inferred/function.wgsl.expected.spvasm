@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 92
+; Bound: 90
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -83,8 +83,6 @@
 %_ptr_Function_MyStruct = OpTypePointer Function %MyStruct
 %_ptr_Function__arr_float_uint_10 = OpTypePointer Function %_arr_float_uint_10
          %84 = OpTypeFunction %v4float
-    %float_0 = OpConstant %float 0
-         %88 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_0
     %ret_i32 = OpFunction %int None %6
           %9 = OpLabel
                OpReturnValue %int_1
@@ -151,11 +149,11 @@
                OpFunctionEnd
  %main_inner = OpFunction %v4float None %84
          %86 = OpLabel
-               OpReturnValue %88
+               OpReturnValue %5
                OpFunctionEnd
        %main = OpFunction %void None %31
-         %90 = OpLabel
-         %91 = OpFunctionCall %v4float %main_inner
-               OpStore %value %91
+         %88 = OpLabel
+         %89 = OpFunctionCall %v4float %main_inner
+               OpStore %value %89
                OpReturn
                OpFunctionEnd

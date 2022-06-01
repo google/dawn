@@ -223,7 +223,7 @@ TEST_F(BuilderTest, If_WithMultiple) {
 %6 = OpConstantTrue %5
 %10 = OpConstant %3 2
 %14 = OpConstant %3 3
-%15 = OpConstantFalse %5
+%15 = OpConstantNull %5
 %19 = OpConstant %3 4
 %20 = OpConstant %3 5
 )");
@@ -472,7 +472,7 @@ TEST_F(BuilderTest, If_WithReturnValue) {
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
 %1 = OpTypeFunction %2
 %5 = OpConstantTrue %2
-%8 = OpConstantFalse %2
+%8 = OpConstantNull %2
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
               R"(OpSelectionMerge %6 None
@@ -542,7 +542,7 @@ TEST_F(BuilderTest, If_WithNestedBlockReturnValue) {
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
 %1 = OpTypeFunction %2
 %5 = OpConstantTrue %2
-%8 = OpConstantFalse %2
+%8 = OpConstantNull %2
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
               R"(OpSelectionMerge %6 None
@@ -600,7 +600,7 @@ TEST_F(BuilderTest, If_ElseIf_WithReturn) {
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %5 = OpTypeBool
-%6 = OpConstantFalse %5
+%6 = OpConstantNull %5
 %10 = OpConstantTrue %5
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
@@ -638,7 +638,7 @@ TEST_F(BuilderTest, Loop_If_ElseIf_WithBreak) {
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %9 = OpTypeBool
-%10 = OpConstantFalse %9
+%10 = OpConstantNull %9
 %14 = OpConstantTrue %9
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),

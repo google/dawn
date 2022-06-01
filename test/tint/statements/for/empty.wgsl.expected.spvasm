@@ -12,7 +12,7 @@
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
        %bool = OpTypeBool
-      %false = OpConstantFalse %bool
+         %13 = OpConstantNull %bool
 %unused_entry_point = OpFunction %void None %1
           %4 = OpLabel
                OpReturn
@@ -24,7 +24,7 @@
                OpLoopMerge %8 %9 None
                OpBranch %10
          %10 = OpLabel
-         %11 = OpLogicalNot %bool %false
+         %11 = OpLogicalNot %bool %13
                OpSelectionMerge %14 None
                OpBranchConditional %11 %15 %14
          %15 = OpLabel

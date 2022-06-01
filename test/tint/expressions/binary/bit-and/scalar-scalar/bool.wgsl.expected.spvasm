@@ -12,9 +12,9 @@
           %1 = OpTypeFunction %void
        %bool = OpTypeBool
        %true = OpConstantTrue %bool
-      %false = OpConstantFalse %bool
+          %7 = OpConstantNull %bool
           %f = OpFunction %void None %1
           %4 = OpLabel
-          %8 = OpLogicalAnd %bool %true %false
+          %8 = OpLogicalAnd %bool %true %7
                OpReturn
                OpFunctionEnd

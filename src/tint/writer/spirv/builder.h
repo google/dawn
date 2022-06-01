@@ -43,6 +43,7 @@
 // Forward declarations
 namespace tint::sem {
 class Call;
+class Constant;
 class Reference;
 class TypeConstructor;
 class TypeConversion;
@@ -549,6 +550,11 @@ class Builder {
     /// @returns the resolved type of the ast::Expression `expr`
     /// @param expr the expression
     const sem::Type* TypeOf(const ast::Expression* expr) const { return builder_.TypeOf(expr); }
+
+    /// Generates a constant value if needed
+    /// @param constant the constant to generate.
+    /// @returns the ID on success or 0 on failure
+    uint32_t GenerateConstantIfNeeded(const sem::Constant& constant);
 
     /// Generates a scalar constant if needed
     /// @param constant the constant to generate.

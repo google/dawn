@@ -98,7 +98,7 @@ TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
 )");
 }
 
-TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
+TEST_F(BuilderTest, Assign_Var_Complex_ConstructorNestedVector) {
     auto* init = vec3<f32>(vec2<f32>(1_f, 2_f), 3_f);
 
     auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
@@ -121,17 +121,13 @@ TEST_F(BuilderTest, Assign_Var_Complex_ConstructorWithExtract) {
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3
 %1 = OpVariable %2 Private %5
-%6 = OpTypeVector %4 2
-%7 = OpConstant %4 1
-%8 = OpConstant %4 2
-%9 = OpConstantComposite %6 %7 %8
-%12 = OpConstant %4 3
+%6 = OpConstant %4 1
+%7 = OpConstant %4 2
+%8 = OpConstant %4 3
+%9 = OpConstantComposite %3 %6 %7 %8
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%10 = OpCompositeExtract %4 %9 0
-%11 = OpCompositeExtract %4 %9 1
-%13 = OpCompositeConstruct %3 %10 %11 %12
-OpStore %1 %13
+              R"(OpStore %1 %9
 )");
 }
 

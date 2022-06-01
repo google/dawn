@@ -48,7 +48,7 @@
          %15 = OpTypeFunction %void %FragmentInputs
          %28 = OpTypeFunction %void
         %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
+         %36 = OpConstantNull %int
  %main_inner = OpFunction %void None %15
      %inputs = OpFunctionParameter %FragmentInputs
          %20 = OpLabel
@@ -69,7 +69,7 @@
          %32 = OpLoad %v4float %position_1
          %33 = OpLoad %bool %front_facing_1
          %34 = OpLoad %uint %sample_index_1
-         %37 = OpAccessChain %_ptr_Input_uint %sample_mask_1 %int_0
+         %37 = OpAccessChain %_ptr_Input_uint %sample_mask_1 %36
          %38 = OpLoad %uint %37
          %39 = OpCompositeConstruct %FragmentInputs %32 %33 %34 %38
          %31 = OpFunctionCall %void %main_inner %39

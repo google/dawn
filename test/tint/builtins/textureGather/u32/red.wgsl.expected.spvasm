@@ -30,7 +30,7 @@
     %v2float = OpTypeVector %float 2
          %20 = OpConstantNull %v2float
         %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
+         %22 = OpConstantNull %int
 %_ptr_Function_v4uint = OpTypePointer Function %v4uint
          %25 = OpConstantNull %v4uint
        %main = OpFunction %void None %8
@@ -39,7 +39,7 @@
          %14 = OpLoad %7 %s
          %15 = OpLoad %3 %t
          %17 = OpSampledImage %16 %15 %14
-         %12 = OpImageGather %v4uint %17 %20 %int_0
+         %12 = OpImageGather %v4uint %17 %20 %22
                OpStore %res %12
                OpReturn
                OpFunctionEnd

@@ -9,7 +9,7 @@ bug/tint/1369.wgsl:9:9 warning: code is unreachable
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 23
+; Bound: 22
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -21,35 +21,34 @@ bug/tint/1369.wgsl:9:9 warning: code is unreachable
                OpName %f "f"
                OpName %v "v"
        %bool = OpTypeBool
-      %false = OpConstantFalse %bool
+          %2 = OpConstantNull %bool
 %_ptr_Private_bool = OpTypePointer Private %bool
-%tint_discard = OpVariable %_ptr_Private_bool Private %false
+%tint_discard = OpVariable %_ptr_Private_bool Private %2
           %5 = OpTypeFunction %bool
        %true = OpConstantTrue %bool
-          %9 = OpConstantNull %bool
        %void = OpTypeVoid
-         %10 = OpTypeFunction %void
+          %9 = OpTypeFunction %void
 %_ptr_Function_bool = OpTypePointer Function %bool
 %call_discard = OpFunction %bool None %5
           %7 = OpLabel
                OpStore %tint_discard %true
-               OpReturnValue %9
+               OpReturnValue %2
                OpFunctionEnd
-%tint_discard_func = OpFunction %void None %10
-         %13 = OpLabel
+%tint_discard_func = OpFunction %void None %9
+         %12 = OpLabel
                OpKill
                OpFunctionEnd
-          %f = OpFunction %void None %10
-         %15 = OpLabel
-          %v = OpVariable %_ptr_Function_bool Function %9
-         %16 = OpFunctionCall %bool %call_discard
-               OpStore %v %16
-         %19 = OpLoad %bool %tint_discard
-               OpSelectionMerge %20 None
-               OpBranchConditional %19 %21 %20
-         %21 = OpLabel
-         %22 = OpFunctionCall %void %tint_discard_func
-               OpReturn
+          %f = OpFunction %void None %9
+         %14 = OpLabel
+          %v = OpVariable %_ptr_Function_bool Function %2
+         %15 = OpFunctionCall %bool %call_discard
+               OpStore %v %15
+         %18 = OpLoad %bool %tint_discard
+               OpSelectionMerge %19 None
+               OpBranchConditional %18 %20 %19
          %20 = OpLabel
+         %21 = OpFunctionCall %void %tint_discard_func
+               OpReturn
+         %19 = OpLabel
                OpReturn
                OpFunctionEnd

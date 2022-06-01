@@ -49,7 +49,7 @@
       %int_2 = OpConstant %int 2
       %int_3 = OpConstant %int 3
       %int_4 = OpConstant %int 4
-      %int_0 = OpConstant %int 0
+         %44 = OpConstantNull %int
      %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
     %uint_10 = OpConstant %uint 10
@@ -91,7 +91,7 @@
          %42 = OpLoad %uint %v
          %43 = OpISub %uint %42 %uint_1
                OpStore %v %43
-               OpReturnValue %int_0
+               OpReturnValue %44
                OpFunctionEnd
        %idx6 = OpFunction %int None %18
          %46 = OpLabel

@@ -589,7 +589,7 @@ OpCapability ImageQuery
 %16 = OpConstant %4 2
 %17 = OpConstantComposite %14 %15 %16
 %18 = OpTypeInt 32 1
-%19 = OpConstant %18 0
+%19 = OpConstantNull %18
 )",
                     R"(
 %10 = OpLoad %7 %5
@@ -615,7 +615,7 @@ OpCapability ImageQuery
 %16 = OpConstant %4 2
 %17 = OpConstantComposite %14 %15 %16
 %18 = OpTypeInt 32 1
-%19 = OpConstant %18 0
+%19 = OpConstantNull %18
 %20 = OpTypeVector %18 2
 %21 = OpConstant %18 3
 %22 = OpConstant %18 4
@@ -645,7 +645,7 @@ OpCapability ImageQuery
 %16 = OpConstant %4 2
 %18 = OpTypeInt 32 1
 %19 = OpConstant %18 3
-%21 = OpConstant %18 0
+%21 = OpConstantNull %18
 )",
                     R"(
 %10 = OpLoad %7 %5
@@ -673,7 +673,7 @@ OpCapability ImageQuery
 %16 = OpConstant %4 2
 %18 = OpTypeInt 32 1
 %19 = OpConstant %18 3
-%21 = OpConstant %18 0
+%21 = OpConstantNull %18
 %22 = OpTypeVector %18 2
 %23 = OpConstant %18 4
 %24 = OpConstant %18 5
@@ -706,7 +706,7 @@ OpCapability ImageQuery
 %17 = OpConstant %4 3
 %18 = OpConstantComposite %14 %15 %16 %17
 %19 = OpTypeInt 32 1
-%20 = OpConstant %19 0
+%20 = OpConstantNull %19
 )",
                     R"(
 %10 = OpLoad %7 %5
@@ -732,7 +732,7 @@ OpCapability ImageQuery
 %16 = OpConstant %4 3
 %18 = OpTypeInt 32 1
 %19 = OpConstant %18 4
-%21 = OpConstant %18 0
+%21 = OpConstantNull %18
 )",
                     R"(
 %10 = OpLoad %7 %5

@@ -34,14 +34,14 @@
      %uint_0 = OpConstant %uint 0
 %_ptr_Uniform_uint = OpTypePointer Uniform %uint
         %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
+         %20 = OpConstantNull %int
 %_ptr_Private_float = OpTypePointer Private %float
     %float_1 = OpConstant %float 1
        %main = OpFunction %void None %11
          %14 = OpLabel
          %17 = OpAccessChain %_ptr_Uniform_uint %uniforms %uint_0
          %18 = OpLoad %uint %17
-         %22 = OpAccessChain %_ptr_Private_float %m1 %18 %int_0
+         %22 = OpAccessChain %_ptr_Private_float %m1 %18 %20
                OpStore %22 %float_1
                OpReturn
                OpFunctionEnd

@@ -12,9 +12,9 @@
           %1 = OpTypeFunction %void
       %float = OpTypeFloat 32
     %float_1 = OpConstant %float 1
-    %float_0 = OpConstant %float 0
+          %7 = OpConstantNull %float
           %f = OpFunction %void None %1
           %4 = OpLabel
-          %8 = OpFDiv %float %float_1 %float_0
+          %8 = OpFDiv %float %float_1 %7
                OpReturn
                OpFunctionEnd

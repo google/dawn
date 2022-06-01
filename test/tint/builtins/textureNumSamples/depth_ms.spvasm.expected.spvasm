@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 57
+; Bound: 56
 ; Schema: 0
                OpCapability Shader
                OpCapability ImageQuery
@@ -49,66 +49,65 @@
        %void = OpTypeVoid
          %14 = OpTypeFunction %void
         %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
+         %19 = OpConstantNull %int
 %_ptr_Function_int = OpTypePointer Function %int
-         %22 = OpConstantNull %int
-         %25 = OpTypeFunction %void %v4float
+         %24 = OpTypeFunction %void %v4float
 %vertex_main_out = OpTypeStruct %v4float
-         %33 = OpTypeFunction %vertex_main_out
+         %32 = OpTypeFunction %vertex_main_out
     %float_1 = OpConstant %float 1
 %textureNumSamples_a3c8a0 = OpFunction %void None %14
          %17 = OpLabel
-        %res = OpVariable %_ptr_Function_int Function %22
-               OpStore %res %int_0
-         %24 = OpLoad %11 %arg_0
-         %23 = OpImageQuerySamples %int %24
-               OpStore %res %23
+        %res = OpVariable %_ptr_Function_int Function %19
+               OpStore %res %19
+         %23 = OpLoad %11 %arg_0
+         %22 = OpImageQuerySamples %int %23
+               OpStore %res %22
                OpReturn
                OpFunctionEnd
-%tint_symbol_2 = OpFunction %void None %25
+%tint_symbol_2 = OpFunction %void None %24
 %tint_symbol = OpFunctionParameter %v4float
-         %28 = OpLabel
+         %27 = OpLabel
                OpStore %tint_symbol_1 %tint_symbol
                OpReturn
                OpFunctionEnd
 %vertex_main_1 = OpFunction %void None %14
-         %30 = OpLabel
-         %31 = OpFunctionCall %void %textureNumSamples_a3c8a0
-         %32 = OpFunctionCall %void %tint_symbol_2 %5
+         %29 = OpLabel
+         %30 = OpFunctionCall %void %textureNumSamples_a3c8a0
+         %31 = OpFunctionCall %void %tint_symbol_2 %5
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %vertex_main_out None %33
-         %36 = OpLabel
-         %37 = OpFunctionCall %void %vertex_main_1
-         %38 = OpLoad %v4float %tint_symbol_1
-         %39 = OpCompositeConstruct %vertex_main_out %38
-               OpReturnValue %39
+%vertex_main_inner = OpFunction %vertex_main_out None %32
+         %35 = OpLabel
+         %36 = OpFunctionCall %void %vertex_main_1
+         %37 = OpLoad %v4float %tint_symbol_1
+         %38 = OpCompositeConstruct %vertex_main_out %37
+               OpReturnValue %38
                OpFunctionEnd
 %vertex_main = OpFunction %void None %14
-         %41 = OpLabel
-         %42 = OpFunctionCall %vertex_main_out %vertex_main_inner
-         %43 = OpCompositeExtract %v4float %42 0
-               OpStore %tint_symbol_1_1_1 %43
+         %40 = OpLabel
+         %41 = OpFunctionCall %vertex_main_out %vertex_main_inner
+         %42 = OpCompositeExtract %v4float %41 0
+               OpStore %tint_symbol_1_1_1 %42
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main_1 = OpFunction %void None %14
-         %46 = OpLabel
-         %47 = OpFunctionCall %void %textureNumSamples_a3c8a0
+         %45 = OpLabel
+         %46 = OpFunctionCall %void %textureNumSamples_a3c8a0
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %14
-         %49 = OpLabel
-         %50 = OpFunctionCall %void %fragment_main_1
+         %48 = OpLabel
+         %49 = OpFunctionCall %void %fragment_main_1
                OpReturn
                OpFunctionEnd
 %compute_main_1 = OpFunction %void None %14
-         %52 = OpLabel
-         %53 = OpFunctionCall %void %textureNumSamples_a3c8a0
+         %51 = OpLabel
+         %52 = OpFunctionCall %void %textureNumSamples_a3c8a0
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %14
-         %55 = OpLabel
-         %56 = OpFunctionCall %void %compute_main_1
+         %54 = OpLabel
+         %55 = OpFunctionCall %void %compute_main_1
                OpReturn
                OpFunctionEnd

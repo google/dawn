@@ -79,7 +79,7 @@ TEST_F(BuilderTest, UnaryOp_Not) {
     b.push_function(Function{});
     EXPECT_EQ(b.GenerateUnaryOpExpression(expr), 1u) << b.error();
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
-%3 = OpConstantFalse %2
+%3 = OpConstantNull %2
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
               R"(%1 = OpLogicalNot %2 %3

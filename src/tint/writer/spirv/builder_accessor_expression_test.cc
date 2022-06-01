@@ -326,7 +326,7 @@ TEST_F(BuilderTest, MemberAccessor_NonPointer) {
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeStruct %2 %2
-%3 = OpConstant %2 0
+%3 = OpConstantNull %2
 %4 = OpConstantComposite %1 %3 %3
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
@@ -367,7 +367,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_NonPointer) {
     EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypeStruct %3 %3
 %1 = OpTypeStruct %2
-%4 = OpConstant %3 0
+%4 = OpConstantNull %3
 %5 = OpConstantComposite %2 %4 %4
 %6 = OpConstantComposite %1 %5
 )");
@@ -729,7 +729,7 @@ TEST_F(BuilderTest, IndexAccessor_Mixed_ArrayAndMember) {
 %2 = OpTypePointer Function %3
 %13 = OpConstantNull %3
 %14 = OpTypeInt 32 1
-%15 = OpConstant %14 0
+%15 = OpConstantNull %14
 %16 = OpConstant %10 0
 %17 = OpConstant %14 2
 %18 = OpTypePointer Function %8
@@ -916,7 +916,7 @@ TEST_F(BuilderTest, IndexAccessor_Array_Literal) {
 %7 = OpTypeInt 32 0
 %8 = OpConstant %7 3
 %5 = OpTypeArray %6 %8
-%9 = OpConstant %6 0
+%9 = OpConstantNull %6
 %10 = OpConstant %6 0.5
 %11 = OpConstant %6 1
 %12 = OpConstantComposite %5 %9 %10 %11
@@ -954,7 +954,7 @@ TEST_F(BuilderTest, IndexAccessor_Array_Dynamic) {
 %7 = OpTypeInt 32 0
 %8 = OpConstant %7 3
 %5 = OpTypeArray %6 %8
-%9 = OpConstant %6 0
+%9 = OpConstantNull %6
 %10 = OpConstant %6 0.5
 %11 = OpConstant %6 1
 %12 = OpConstantComposite %5 %9 %10 %11

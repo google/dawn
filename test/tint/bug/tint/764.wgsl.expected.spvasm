@@ -18,7 +18,7 @@
          %11 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
          %12 = OpConstantComposite %mat4v4float %11 %11 %11 %11
         %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
+         %14 = OpConstantNull %int
 %unused_entry_point = OpFunction %void None %1
           %4 = OpLabel
                OpReturn

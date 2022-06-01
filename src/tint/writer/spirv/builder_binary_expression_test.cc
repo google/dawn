@@ -264,7 +264,7 @@ TEST_P(BinaryOperatorBoolTest, Scalar) {
     EXPECT_EQ(b.GenerateBinaryExpression(expr), 4u) << b.error();
     EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
 %2 = OpConstantTrue %1
-%3 = OpConstantFalse %1
+%3 = OpConstantNull %1
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
               "%4 = " + param.name + " %1 %2 %3\n");
@@ -724,7 +724,7 @@ TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
 %3 = OpConstantTrue %2
 %5 = OpTypePointer Private %2
 %4 = OpVariable %5 Private %3
-%6 = OpConstantFalse %2
+%6 = OpConstantNull %2
 %7 = OpVariable %5 Private %6
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
@@ -761,7 +761,7 @@ TEST_F(BuilderTest, Binary_logicalOr_Nested_LogicalAnd) {
     EXPECT_EQ(b.GenerateBinaryExpression(expr), 10u) << b.error();
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
 %3 = OpConstantTrue %2
-%8 = OpConstantFalse %2
+%8 = OpConstantNull %2
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
               R"(%1 = OpLabel
@@ -801,7 +801,7 @@ TEST_F(BuilderTest, Binary_logicalAnd_Nested_LogicalOr) {
     EXPECT_EQ(b.GenerateBinaryExpression(expr), 10u) << b.error();
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
 %3 = OpConstantTrue %2
-%8 = OpConstantFalse %2
+%8 = OpConstantNull %2
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
               R"(%1 = OpLabel
@@ -877,7 +877,7 @@ TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
 %3 = OpConstantTrue %2
 %5 = OpTypePointer Private %2
 %4 = OpVariable %5 Private %3
-%6 = OpConstantFalse %2
+%6 = OpConstantNull %2
 %7 = OpVariable %5 Private %6
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),

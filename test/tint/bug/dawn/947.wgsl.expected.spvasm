@@ -13,7 +13,7 @@ bug/dawn/947.wgsl:55:33 note: reading from user-defined input 'texcoord' may res
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 140
+; Bound: 139
 ; Schema: 0
                OpCapability Shader
         %118 = OpExtInstImport "GLSL.std.450"
@@ -128,9 +128,8 @@ bug/dawn/947.wgsl:55:33 note: reading from user-defined input 'texcoord' may res
        %void = OpTypeVoid
         %103 = OpTypeFunction %void
         %113 = OpTypeFunction %v4float %v2float
-        %119 = OpConstantComposite %v2float %float_0 %float_0
      %v2bool = OpTypeVector %bool 2
-        %132 = OpTypeSampledImage %27
+        %131 = OpTypeSampledImage %27
 %vs_main_inner = OpFunction %VertexOutputs None %28
 %VertexIndex = OpFunctionParameter %uint
          %32 = OpLabel
@@ -145,11 +144,11 @@ bug/dawn/947.wgsl:55:33 note: reading from user-defined input 'texcoord' may res
          %59 = OpFSub %v2float %56 %58
          %60 = OpCompositeExtract %float %59 0
          %61 = OpCompositeExtract %float %59 1
-         %62 = OpCompositeConstruct %v4float %60 %61 %float_0 %float_1
+         %62 = OpCompositeConstruct %v4float %60 %61 %15 %float_1
                OpStore %52 %62
          %65 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_1
          %66 = OpLoad %float %65
-         %67 = OpFOrdLessThan %bool %66 %float_0
+         %67 = OpFOrdLessThan %bool %66 %15
                OpStore %flipY %67
          %72 = OpLoad %bool %flipY
                OpSelectionMerge %73 None
@@ -206,30 +205,30 @@ bug/dawn/947.wgsl:55:33 note: reading from user-defined input 'texcoord' may res
         %116 = OpLabel
 %clampedTexcoord = OpVariable %_ptr_Function_v2float Function %8
    %srcColor = OpVariable %_ptr_Function_v4float Function %12
-        %117 = OpExtInst %v2float %118 NClamp %texcoord_0 %119 %58
+        %117 = OpExtInst %v2float %118 NClamp %texcoord_0 %8 %58
                OpStore %clampedTexcoord %117
-        %123 = OpLoad %v2float %clampedTexcoord
-        %124 = OpFOrdEqual %v2bool %123 %texcoord_0
-        %122 = OpAll %bool %124
-        %121 = OpLogicalNot %bool %122
-               OpSelectionMerge %126 None
-               OpBranchConditional %121 %127 %126
-        %127 = OpLabel
-        %128 = OpFunctionCall %void %tint_discard_func
-               OpReturnValue %12
+        %122 = OpLoad %v2float %clampedTexcoord
+        %123 = OpFOrdEqual %v2bool %122 %texcoord_0
+        %121 = OpAll %bool %123
+        %120 = OpLogicalNot %bool %121
+               OpSelectionMerge %125 None
+               OpBranchConditional %120 %126 %125
         %126 = OpLabel
-        %130 = OpLoad %24 %mySampler
-        %131 = OpLoad %27 %myTexture
-        %133 = OpSampledImage %132 %131 %130
-        %129 = OpImageSampleImplicitLod %v4float %133 %texcoord_0
-               OpStore %srcColor %129
-        %135 = OpLoad %v4float %srcColor
-               OpReturnValue %135
+        %127 = OpFunctionCall %void %tint_discard_func
+               OpReturnValue %12
+        %125 = OpLabel
+        %129 = OpLoad %24 %mySampler
+        %130 = OpLoad %27 %myTexture
+        %132 = OpSampledImage %131 %130 %129
+        %128 = OpImageSampleImplicitLod %v4float %132 %texcoord_0
+               OpStore %srcColor %128
+        %134 = OpLoad %v4float %srcColor
+               OpReturnValue %134
                OpFunctionEnd
     %fs_main = OpFunction %void None %103
-        %137 = OpLabel
-        %139 = OpLoad %v2float %texcoord_1
-        %138 = OpFunctionCall %v4float %fs_main_inner %139
-               OpStore %value %138
+        %136 = OpLabel
+        %138 = OpLoad %v2float %texcoord_1
+        %137 = OpFunctionCall %v4float %fs_main_inner %138
+               OpStore %value %137
                OpReturn
                OpFunctionEnd

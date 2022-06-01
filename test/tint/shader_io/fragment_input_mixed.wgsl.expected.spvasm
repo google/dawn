@@ -71,7 +71,7 @@
 %FragmentInputs1 = OpTypeStruct %v4float %uint
          %22 = OpTypeFunction %void %FragmentInputs0 %bool %uint %uint %FragmentInputs1 %float
          %41 = OpTypeFunction %void
-      %int_0 = OpConstant %int 0
+         %52 = OpConstantNull %int
  %main_inner = OpFunction %void None %22
     %inputs0 = OpFunctionParameter %FragmentInputs0
 %front_facing = OpFunctionParameter %bool
@@ -101,7 +101,7 @@
          %49 = OpLoad %uint %loc1_1
          %50 = OpLoad %uint %sample_index_1
          %51 = OpLoad %v4float %loc3_1
-         %53 = OpAccessChain %_ptr_Input_uint %sample_mask_1 %int_0
+         %53 = OpAccessChain %_ptr_Input_uint %sample_mask_1 %52
          %54 = OpLoad %uint %53
          %55 = OpCompositeConstruct %FragmentInputs1 %51 %54
          %56 = OpLoad %float %loc2_1

@@ -16,13 +16,13 @@
     %float_2 = OpConstant %float 2
     %float_3 = OpConstant %float 3
          %10 = OpConstantComposite %v3float %float_1 %float_2 %float_3
-    %float_0 = OpConstant %float 0
+         %11 = OpConstantNull %float
 %_ptr_Function_v3float = OpTypePointer Function %v3float
          %15 = OpConstantNull %v3float
           %f = OpFunction %void None %1
           %4 = OpLabel
          %13 = OpVariable %_ptr_Function_v3float Function %15
-         %16 = OpCompositeConstruct %v3float %float_0 %float_0 %float_0
+         %16 = OpCompositeConstruct %v3float %11 %11 %11
          %12 = OpFDiv %v3float %10 %16
                OpReturn
                OpFunctionEnd

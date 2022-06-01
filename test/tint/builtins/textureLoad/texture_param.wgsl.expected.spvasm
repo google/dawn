@@ -45,7 +45,7 @@
        %void = OpTypeVoid
          %22 = OpTypeFunction %void
          %28 = OpConstantNull %v2int
-      %int_0 = OpConstant %int 0
+         %29 = OpConstantNull %int
 %_ptr_Function_v4int = OpTypePointer Function %v4int
          %32 = OpConstantNull %v4int
          %33 = OpTypeFunction %v4float
@@ -62,7 +62,7 @@
          %25 = OpLabel
         %res = OpVariable %_ptr_Function_v4int Function %32
          %27 = OpLoad %11 %arg_0
-         %26 = OpFunctionCall %v4int %textureLoad2d %27 %28 %int_0
+         %26 = OpFunctionCall %v4int %textureLoad2d %27 %28 %29
                OpStore %res %26
                OpReturn
                OpFunctionEnd

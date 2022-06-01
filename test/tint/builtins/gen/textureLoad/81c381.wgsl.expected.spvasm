@@ -39,7 +39,7 @@
          %12 = OpTypeFunction %void
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
-      %int_0 = OpConstant %int 0
+         %20 = OpConstantNull %int
 %_ptr_Function_v4float = OpTypePointer Function %v4float
          %23 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
@@ -47,7 +47,7 @@
          %15 = OpLabel
         %res = OpVariable %_ptr_Function_v4float Function %5
          %17 = OpLoad %11 %arg_0
-         %16 = OpImageFetch %v4float %17 %int_1 Lod %int_0
+         %16 = OpImageFetch %v4float %17 %int_1 Lod %20
                OpStore %res %16
                OpReturn
                OpFunctionEnd

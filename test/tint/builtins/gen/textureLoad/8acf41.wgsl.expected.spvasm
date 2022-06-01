@@ -102,7 +102,7 @@
       %v2int = OpTypeVector %int 2
          %61 = OpTypeFunction %v4float %11 %11 %v2int %ExternalTextureParams
      %uint_1 = OpConstant %uint 1
-      %int_0 = OpConstant %int 0
+         %78 = OpConstantNull %int
     %v2float = OpTypeVector %float 2
     %float_1 = OpConstant %float 1
        %void = OpTypeVoid
@@ -158,14 +158,14 @@
                OpSelectionMerge %74 None
                OpBranchConditional %73 %75 %76
          %75 = OpLabel
-         %77 = OpImageFetch %v4float %plane0 %coord Lod %int_0
+         %77 = OpImageFetch %v4float %plane0 %coord Lod %78
          %79 = OpVectorShuffle %v3float %77 %77 0 1 2
                OpStore %color %79
                OpBranch %74
          %76 = OpLabel
-         %80 = OpImageFetch %v4float %plane0 %coord Lod %int_0
+         %80 = OpImageFetch %v4float %plane0 %coord Lod %78
          %81 = OpCompositeExtract %float %80 0
-         %82 = OpImageFetch %v4float %plane1 %coord Lod %int_0
+         %82 = OpImageFetch %v4float %plane1 %coord Lod %78
          %84 = OpVectorShuffle %v2float %82 %82 0 1
          %85 = OpCompositeExtract %float %84 0
          %86 = OpCompositeExtract %float %84 1

@@ -71,7 +71,7 @@
          %62 = OpConstantComposite %_arr_int_uint_2 %int_3 %int_4
          %63 = OpConstantComposite %T %62
          %64 = OpConstantComposite %_arr_T_uint_2 %61 %63
-      %int_0 = OpConstant %int 0
+         %65 = OpConstantNull %int
        %main = OpFunction %void None %1
           %4 = OpLabel
          %14 = OpIAdd %int %int_42 %int_1

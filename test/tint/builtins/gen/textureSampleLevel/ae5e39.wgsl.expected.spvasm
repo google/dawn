@@ -47,7 +47,7 @@
     %float_0 = OpConstant %float 0
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
-      %int_0 = OpConstant %int 0
+         %31 = OpConstantNull %int
 %_ptr_Function_float = OpTypePointer Function %float
          %34 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
@@ -59,7 +59,7 @@
          %24 = OpSampledImage %23 %22 %21
          %26 = OpConvertSToF %float %int_1
          %29 = OpCompositeConstruct %v4float %float_0 %float_0 %float_0 %26
-         %30 = OpConvertSToF %float %int_0
+         %30 = OpConvertSToF %float %31
          %20 = OpImageSampleExplicitLod %v4float %24 %29 Lod %30
          %19 = OpCompositeExtract %float %20 0
                OpStore %res %19

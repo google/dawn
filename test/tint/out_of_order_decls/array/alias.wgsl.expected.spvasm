@@ -19,12 +19,12 @@
           %A = OpVariable %_ptr_Private__arr_int_uint_4 Private %7
        %void = OpTypeVoid
           %8 = OpTypeFunction %void
-      %int_0 = OpConstant %int 0
+         %12 = OpConstantNull %int
 %_ptr_Private_int = OpTypePointer Private %int
       %int_1 = OpConstant %int 1
           %f = OpFunction %void None %8
          %11 = OpLabel
-         %14 = OpAccessChain %_ptr_Private_int %A %int_0
+         %14 = OpAccessChain %_ptr_Private_int %A %12
                OpStore %14 %int_1
                OpReturn
                OpFunctionEnd

@@ -16,13 +16,13 @@
       %int_2 = OpConstant %int 2
       %int_3 = OpConstant %int 3
          %10 = OpConstantComposite %v3int %int_1 %int_2 %int_3
-      %int_0 = OpConstant %int 0
+         %11 = OpConstantNull %int
 %_ptr_Function_v3int = OpTypePointer Function %v3int
          %15 = OpConstantNull %v3int
           %f = OpFunction %void None %1
           %4 = OpLabel
          %13 = OpVariable %_ptr_Function_v3int Function %15
-         %16 = OpCompositeConstruct %v3int %int_0 %int_0 %int_0
+         %16 = OpCompositeConstruct %v3int %11 %11 %11
          %12 = OpSMod %v3int %10 %16
                OpReturn
                OpFunctionEnd

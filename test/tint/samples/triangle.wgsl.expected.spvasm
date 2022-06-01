@@ -64,7 +64,7 @@
          %32 = OpLoad %v2float %31
          %33 = OpCompositeExtract %float %32 0
          %34 = OpCompositeExtract %float %32 1
-         %36 = OpCompositeConstruct %v4float %33 %34 %float_0 %float_1
+         %36 = OpCompositeConstruct %v4float %33 %34 %11 %float_1
                OpReturnValue %36
                OpFunctionEnd
    %vtx_main = OpFunction %void None %37

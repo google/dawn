@@ -44,12 +44,12 @@
      %mask_2 = OpVariable %_ptr_Output__arr_uint_uint_1 Output %15
      %FragIn = OpTypeStruct %float %uint
          %16 = OpTypeFunction %FragIn %FragIn %float
-     %uint_0 = OpConstant %uint 0
+         %23 = OpConstantNull %uint
        %bool = OpTypeBool
        %void = OpTypeVoid
          %29 = OpTypeFunction %void
         %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
+         %36 = OpConstantNull %int
 %_ptr_Input_uint = OpTypePointer Input %uint
 %_ptr_Output_uint = OpTypePointer Output %uint
  %main_inner = OpFunction %FragIn None %16
@@ -57,7 +57,7 @@
           %b = OpFunctionParameter %float
          %21 = OpLabel
          %22 = OpCompositeExtract %uint %in 1
-         %24 = OpIEqual %bool %22 %uint_0
+         %24 = OpIEqual %bool %22 %23
                OpSelectionMerge %26 None
                OpBranchConditional %24 %27 %26
          %27 = OpLabel
@@ -69,14 +69,14 @@
        %main = OpFunction %void None %29
          %32 = OpLabel
          %34 = OpLoad %float %a_1
-         %38 = OpAccessChain %_ptr_Input_uint %mask_1 %int_0
+         %38 = OpAccessChain %_ptr_Input_uint %mask_1 %36
          %39 = OpLoad %uint %38
          %40 = OpCompositeConstruct %FragIn %34 %39
          %41 = OpLoad %float %b_1
          %33 = OpFunctionCall %FragIn %main_inner %40 %41
          %42 = OpCompositeExtract %float %33 0
                OpStore %a_2 %42
-         %44 = OpAccessChain %_ptr_Output_uint %mask_2 %int_0
+         %44 = OpAccessChain %_ptr_Output_uint %mask_2 %36
          %45 = OpCompositeExtract %uint %33 1
                OpStore %44 %45
                OpReturn

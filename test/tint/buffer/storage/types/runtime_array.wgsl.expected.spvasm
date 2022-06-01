@@ -35,12 +35,12 @@
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
         %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
+         %15 = OpConstantNull %int
 %_ptr_StorageBuffer_S = OpTypePointer StorageBuffer %S
        %main = OpFunction %void None %8
          %11 = OpLabel
-         %17 = OpAccessChain %_ptr_StorageBuffer_S %out %uint_0 %int_0
-         %18 = OpAccessChain %_ptr_StorageBuffer_S %in %uint_0 %int_0
+         %17 = OpAccessChain %_ptr_StorageBuffer_S %out %uint_0 %15
+         %18 = OpAccessChain %_ptr_StorageBuffer_S %in %uint_0 %15
          %19 = OpLoad %S %18
                OpStore %17 %19
                OpReturn

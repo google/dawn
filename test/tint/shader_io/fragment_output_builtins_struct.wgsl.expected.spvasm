@@ -37,7 +37,7 @@
        %void = OpTypeVoid
          %17 = OpTypeFunction %void
         %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
+         %24 = OpConstantNull %int
 %_ptr_Output_uint = OpTypePointer Output %uint
  %main_inner = OpFunction %FragmentOutputs None %11
          %14 = OpLabel
@@ -48,7 +48,7 @@
          %21 = OpFunctionCall %FragmentOutputs %main_inner
          %22 = OpCompositeExtract %float %21 0
                OpStore %frag_depth_1 %22
-         %26 = OpAccessChain %_ptr_Output_uint %sample_mask_1 %int_0
+         %26 = OpAccessChain %_ptr_Output_uint %sample_mask_1 %24
          %27 = OpCompositeExtract %uint %21 1
                OpStore %26 %27
                OpReturn

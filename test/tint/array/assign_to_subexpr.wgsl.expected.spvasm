@@ -34,7 +34,7 @@
          %22 = OpConstantNull %_arr__arr_int_uint_4_uint_2
      %uint_0 = OpConstant %uint 0
       %int_1 = OpConstant %int 1
-      %int_0 = OpConstant %int 0
+         %28 = OpConstantNull %int
 %unused_entry_point = OpFunction %void None %1
           %4 = OpLabel
                OpReturn
@@ -51,7 +51,7 @@
                OpStore %dst %11
          %27 = OpAccessChain %_ptr_Function__arr_int_uint_4 %dst_struct %uint_0
                OpStore %27 %11
-         %29 = OpAccessChain %_ptr_Function__arr_int_uint_4 %dst_array %int_0
+         %29 = OpAccessChain %_ptr_Function__arr_int_uint_4 %dst_array %28
                OpStore %29 %11
                OpReturn
                OpFunctionEnd

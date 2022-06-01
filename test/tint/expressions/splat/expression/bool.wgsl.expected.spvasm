@@ -17,7 +17,7 @@
        %bool = OpTypeBool
      %v2bool = OpTypeVector %bool 2
        %true = OpConstantTrue %bool
-      %false = OpConstantFalse %bool
+         %12 = OpConstantNull %bool
 %_ptr_Function_v2bool = OpTypePointer Function %v2bool
          %17 = OpConstantNull %v2bool
      %v3bool = OpTypeVector %bool 3
@@ -40,7 +40,7 @@
          %11 = OpLabel
                OpBranch %10
          %10 = OpLabel
-         %13 = OpPhi %bool %true %6 %false %11
+         %13 = OpPhi %bool %true %6 %12 %11
          %14 = OpCompositeConstruct %v2bool %13 %13
                OpStore %v2 %14
                OpSelectionMerge %19 None
@@ -48,7 +48,7 @@
          %20 = OpLabel
                OpBranch %19
          %19 = OpLabel
-         %21 = OpPhi %bool %true %10 %false %20
+         %21 = OpPhi %bool %true %10 %12 %20
          %22 = OpCompositeConstruct %v3bool %21 %21 %21
                OpStore %v3 %22
                OpSelectionMerge %27 None
@@ -56,7 +56,7 @@
          %28 = OpLabel
                OpBranch %27
          %27 = OpLabel
-         %29 = OpPhi %bool %true %19 %false %28
+         %29 = OpPhi %bool %true %19 %12 %28
          %30 = OpCompositeConstruct %v4bool %29 %29 %29 %29
                OpStore %v4 %30
                OpReturn

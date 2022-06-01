@@ -106,7 +106,7 @@
 %_ptr_Function_float = OpTypePointer Function %float
      %uint_3 = OpConstant %uint 3
         %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
+         %63 = OpConstantNull %int
 %_ptr_Uniform_float = OpTypePointer Uniform %float
      %uint_1 = OpConstant %uint 1
 %_ptr_Private_float = OpTypePointer Private %float
@@ -133,7 +133,7 @@
                OpStore %p %56
          %59 = OpAccessChain %_ptr_Function_float %p %uint_0
          %60 = OpLoad %float %59
-         %65 = OpAccessChain %_ptr_Uniform_float %x_14 %uint_3 %int_0 %uint_0
+         %65 = OpAccessChain %_ptr_Uniform_float %x_14 %uint_3 %63 %uint_0
          %66 = OpLoad %float %65
          %69 = OpAccessChain %_ptr_Private_float %position %uint_1
          %70 = OpLoad %float %69
