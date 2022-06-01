@@ -518,7 +518,9 @@ TEST_F(BuiltinBuilderTest, Call_GLSLMethod_WithLoad) {
     ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%10 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect =
+        R"(%10 = OpExtInstImport "GLSL.std.450"
 OpName %1 "ident"
 OpName %7 "a_func"
 %3 = OpTypeFloat 32
@@ -533,7 +535,8 @@ OpName %7 "a_func"
 %9 = OpExtInst %3 %10 RoundEven %11
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 using Builtin_Builtin_SingleParam_Float_Test = BuiltinBuilderTestWithParam<BuiltinData>;
@@ -549,7 +552,8 @@ TEST_P(Builtin_Builtin_SingleParam_Float_Test, Call_Scalar) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -557,11 +561,13 @@ OpName %3 "a_func"
 %8 = OpConstant %6 1
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %7 )" + param.op +
-                                  R"( %8
+%5 = OpExtInst %6 %7 )" +
+                  param.op +
+                  R"( %8
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_P(Builtin_Builtin_SingleParam_Float_Test, Call_Vector) {
@@ -576,7 +582,8 @@ TEST_P(Builtin_Builtin_SingleParam_Float_Test, Call_Vector) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -586,11 +593,13 @@ OpName %3 "a_func"
 %10 = OpConstantComposite %6 %9 %9
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %8 )" + param.op +
-                                  R"( %10
+%5 = OpExtInst %6 %8 )" +
+                  param.op +
+                  R"( %10
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          Builtin_Builtin_SingleParam_Float_Test,
@@ -630,7 +639,8 @@ TEST_F(BuiltinBuilderTest, Call_Length_Scalar) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -641,7 +651,8 @@ OpName %3 "a_func"
 %5 = OpExtInst %6 %7 Length %8
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(BuiltinBuilderTest, Call_Length_Vector) {
@@ -655,7 +666,8 @@ TEST_F(BuiltinBuilderTest, Call_Length_Vector) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -668,7 +680,8 @@ OpName %3 "a_func"
 %5 = OpExtInst %6 %7 Length %10
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(BuiltinBuilderTest, Call_Normalize) {
@@ -682,7 +695,8 @@ TEST_F(BuiltinBuilderTest, Call_Normalize) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -695,15 +709,18 @@ OpName %3 "a_func"
 %5 = OpExtInst %6 %8 Normalize %10
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 using Builtin_Builtin_DualParam_Float_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_DualParam_Float_Test, Call_Scalar) {
     auto param = GetParam();
-    auto* expr = Call(param.name, 1_f, 1_f);
+    auto* scalar = Var("scalar", nullptr, Expr(1_f));
+    auto* expr = Call(param.name, scalar, scalar);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
+                          Decl(scalar),
                           Assign(Phony(), expr),
                       });
 
@@ -711,26 +728,38 @@ TEST_P(Builtin_Builtin_DualParam_Float_Test, Call_Scalar) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
+OpName %7 "scalar"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
-%6 = OpTypeFloat 32
-%8 = OpConstant %6 1
+%5 = OpTypeFloat 32
+%6 = OpConstant %5 1
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %7 )" + param.op +
-                                  R"( %8 %8
+%7 = OpVariable %8 Function %9
+OpStore %7 %6
+%12 = OpLoad %5 %7
+%13 = OpLoad %5 %7
+%10 = OpExtInst %5 %11 )" +
+                  param.op +
+                  R"( %12 %13
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_P(Builtin_Builtin_DualParam_Float_Test, Call_Vector) {
     auto param = GetParam();
-    auto* expr = Call(param.name, vec2<f32>(1_f, 1_f), vec2<f32>(1_f, 1_f));
+    auto* vec = Var("vec", nullptr, vec2<f32>(1_f, 1_f));
+    auto* expr = Call(param.name, vec, vec);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
+                          Decl(vec),
                           Assign(Phony(), expr),
                       });
 
@@ -738,21 +767,31 @@ TEST_P(Builtin_Builtin_DualParam_Float_Test, Call_Vector) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
+OpName %9 "vec"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
-%7 = OpTypeFloat 32
-%6 = OpTypeVector %7 2
-%9 = OpConstant %7 1
-%10 = OpConstantComposite %6 %9 %9
+%6 = OpTypeFloat 32
+%5 = OpTypeVector %6 2
+%7 = OpConstant %6 1
+%8 = OpConstantComposite %5 %7 %7
+%10 = OpTypePointer Function %5
+%11 = OpConstantNull %5
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %8 )" + param.op +
-                                  R"( %10 %10
+%9 = OpVariable %10 Function %11
+OpStore %9 %8
+%14 = OpLoad %5 %9
+%15 = OpLoad %5 %9
+%12 = OpExtInst %5 %13 )" +
+                  param.op +
+                  R"( %14 %15
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          Builtin_Builtin_DualParam_Float_Test,
@@ -773,7 +812,8 @@ TEST_F(BuiltinBuilderTest, Call_Reflect_Vector) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -786,7 +826,8 @@ OpName %3 "a_func"
 %5 = OpExtInst %6 %8 Reflect %10 %10
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(BuiltinBuilderTest, Call_Distance_Scalar) {
@@ -800,7 +841,8 @@ TEST_F(BuiltinBuilderTest, Call_Distance_Scalar) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -811,7 +853,8 @@ OpName %3 "a_func"
 %5 = OpExtInst %6 %7 Distance %8 %8
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(BuiltinBuilderTest, Call_Distance_Vector) {
@@ -825,7 +868,8 @@ TEST_F(BuiltinBuilderTest, Call_Distance_Vector) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -838,7 +882,8 @@ OpName %3 "a_func"
 %5 = OpExtInst %6 %7 Distance %10 %10
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(BuiltinBuilderTest, Call_Cross) {
@@ -852,7 +897,8 @@ TEST_F(BuiltinBuilderTest, Call_Cross) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -865,7 +911,8 @@ OpName %3 "a_func"
 %5 = OpExtInst %6 %8 Cross %10 %10
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 using Builtin_Builtin_ThreeParam_Float_Test = BuiltinBuilderTestWithParam<BuiltinData>;
@@ -881,7 +928,8 @@ TEST_P(Builtin_Builtin_ThreeParam_Float_Test, Call_Scalar) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -889,11 +937,13 @@ OpName %3 "a_func"
 %8 = OpConstant %6 1
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %7 )" + param.op +
-                                  R"( %8 %8 %8
+%5 = OpExtInst %6 %7 )" +
+                  param.op +
+                  R"( %8 %8 %8
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_P(Builtin_Builtin_ThreeParam_Float_Test, Call_Vector) {
@@ -908,7 +958,8 @@ TEST_P(Builtin_Builtin_ThreeParam_Float_Test, Call_Vector) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -918,11 +969,13 @@ OpName %3 "a_func"
 %10 = OpConstantComposite %6 %9 %9
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %8 )" + param.op +
-                                  R"( %10 %10 %10
+%5 = OpExtInst %6 %8 )" +
+                  param.op +
+                  R"( %10 %10 %10
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          Builtin_Builtin_ThreeParam_Float_Test,
@@ -943,7 +996,8 @@ TEST_F(BuiltinBuilderTest, Call_FaceForward_Vector) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -956,7 +1010,8 @@ OpName %3 "a_func"
 %5 = OpExtInst %6 %8 FaceForward %10 %10 %10
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 using Builtin_Builtin_SingleParam_Sint_Test = BuiltinBuilderTestWithParam<BuiltinData>;
@@ -972,7 +1027,8 @@ TEST_P(Builtin_Builtin_SingleParam_Sint_Test, Call_Scalar) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -980,11 +1036,13 @@ OpName %3 "a_func"
 %8 = OpConstant %6 1
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %7 )" + param.op +
-                                  R"( %8
+%5 = OpExtInst %6 %7 )" +
+                  param.op +
+                  R"( %8
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_P(Builtin_Builtin_SingleParam_Sint_Test, Call_Vector) {
@@ -999,7 +1057,8 @@ TEST_P(Builtin_Builtin_SingleParam_Sint_Test, Call_Vector) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1009,11 +1068,13 @@ OpName %3 "a_func"
 %10 = OpConstantComposite %6 %9 %9
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %8 )" + param.op +
-                                  R"( %10
+%5 = OpExtInst %6 %8 )" +
+                  param.op +
+                  R"( %10
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          Builtin_Builtin_SingleParam_Sint_Test,
@@ -1022,7 +1083,7 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
 // Calling abs() on an unsigned integer scalar / vector is a no-op.
 using Builtin_Builtin_Abs_Uint_Test = BuiltinBuilderTest;
 TEST_F(Builtin_Builtin_Abs_Uint_Test, Call_Scalar) {
-    auto* expr = Call("abs", 1_u);
+    auto* expr = Call("abs", Expr(1_u));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
                           Assign(Phony(), expr),
@@ -1032,7 +1093,8 @@ TEST_F(Builtin_Builtin_Abs_Uint_Test, Call_Scalar) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
+    auto got = DumpBuilder(b);
+    auto expect = R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %6 = OpTypeInt 32 0
@@ -1041,7 +1103,8 @@ TEST_F(Builtin_Builtin_Abs_Uint_Test, Call_Scalar) {
 %4 = OpLabel
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(Builtin_Builtin_Abs_Uint_Test, Call_Vector) {
@@ -1055,7 +1118,8 @@ TEST_F(Builtin_Builtin_Abs_Uint_Test, Call_Vector) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
+    auto got = DumpBuilder(b);
+    auto expect = R"(OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %7 = OpTypeInt 32 0
@@ -1066,15 +1130,18 @@ TEST_F(Builtin_Builtin_Abs_Uint_Test, Call_Vector) {
 %4 = OpLabel
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 using Builtin_Builtin_DualParam_SInt_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_DualParam_SInt_Test, Call_Scalar) {
     auto param = GetParam();
-    auto* expr = Call(param.name, 1_i, 1_i);
+    auto* scalar = Var("scalar", nullptr, Expr(1_i));
+    auto* expr = Call(param.name, scalar, scalar);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
+                          Decl(scalar),
                           Assign(Phony(), expr),
                       });
 
@@ -1082,26 +1149,38 @@ TEST_P(Builtin_Builtin_DualParam_SInt_Test, Call_Scalar) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
+OpName %7 "scalar"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
-%6 = OpTypeInt 32 1
-%8 = OpConstant %6 1
+%5 = OpTypeInt 32 1
+%6 = OpConstant %5 1
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %7 )" + param.op +
-                                  R"( %8 %8
+%7 = OpVariable %8 Function %9
+OpStore %7 %6
+%12 = OpLoad %5 %7
+%13 = OpLoad %5 %7
+%10 = OpExtInst %5 %11 )" +
+                  param.op +
+                  R"( %12 %13
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_P(Builtin_Builtin_DualParam_SInt_Test, Call_Vector) {
     auto param = GetParam();
-    auto* expr = Call(param.name, vec2<i32>(1_i, 1_i), vec2<i32>(1_i, 1_i));
+    auto* vec = Var("vec", nullptr, vec2<i32>(1_i, 1_i));
+    auto* expr = Call(param.name, vec, vec);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
+                          Decl(vec),
                           Assign(Phony(), expr),
                       });
 
@@ -1109,21 +1188,31 @@ TEST_P(Builtin_Builtin_DualParam_SInt_Test, Call_Vector) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
+OpName %9 "vec"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
-%7 = OpTypeInt 32 1
-%6 = OpTypeVector %7 2
-%9 = OpConstant %7 1
-%10 = OpConstantComposite %6 %9 %9
+%6 = OpTypeInt 32 1
+%5 = OpTypeVector %6 2
+%7 = OpConstant %6 1
+%8 = OpConstantComposite %5 %7 %7
+%10 = OpTypePointer Function %5
+%11 = OpConstantNull %5
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %8 )" + param.op +
-                                  R"( %10 %10
+%9 = OpVariable %10 Function %11
+OpStore %9 %8
+%14 = OpLoad %5 %9
+%15 = OpLoad %5 %9
+%12 = OpExtInst %5 %13 )" +
+                  param.op +
+                  R"( %14 %15
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          Builtin_Builtin_DualParam_SInt_Test,
@@ -1132,9 +1221,11 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
 using Builtin_Builtin_DualParam_UInt_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_DualParam_UInt_Test, Call_Scalar) {
     auto param = GetParam();
-    auto* expr = Call(param.name, 1_u, 1_u);
+    auto* scalar = Var("scalar", nullptr, Expr(1_u));
+    auto* expr = Call(param.name, scalar, scalar);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
+                          Decl(scalar),
                           Assign(Phony(), expr),
                       });
 
@@ -1142,26 +1233,38 @@ TEST_P(Builtin_Builtin_DualParam_UInt_Test, Call_Scalar) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
+OpName %7 "scalar"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
-%6 = OpTypeInt 32 0
-%8 = OpConstant %6 1
+%5 = OpTypeInt 32 0
+%6 = OpConstant %5 1
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %7 )" + param.op +
-                                  R"( %8 %8
+%7 = OpVariable %8 Function %9
+OpStore %7 %6
+%12 = OpLoad %5 %7
+%13 = OpLoad %5 %7
+%10 = OpExtInst %5 %11 )" +
+                  param.op +
+                  R"( %12 %13
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_P(Builtin_Builtin_DualParam_UInt_Test, Call_Vector) {
     auto param = GetParam();
-    auto* expr = Call(param.name, vec2<u32>(1_u, 1_u), vec2<u32>(1_u, 1_u));
+    auto* vec = Var("vec", nullptr, vec2<u32>(1_u, 1_u));
+    auto* expr = Call(param.name, vec, vec);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
+                          Decl(vec),
                           Assign(Phony(), expr),
                       });
 
@@ -1169,21 +1272,31 @@ TEST_P(Builtin_Builtin_DualParam_UInt_Test, Call_Vector) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
+OpName %9 "vec"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
-%7 = OpTypeInt 32 0
-%6 = OpTypeVector %7 2
-%9 = OpConstant %7 1
-%10 = OpConstantComposite %6 %9 %9
+%6 = OpTypeInt 32 0
+%5 = OpTypeVector %6 2
+%7 = OpConstant %6 1
+%8 = OpConstantComposite %5 %7 %7
+%10 = OpTypePointer Function %5
+%11 = OpConstantNull %5
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %8 )" + param.op +
-                                  R"( %10 %10
+%9 = OpVariable %10 Function %11
+OpStore %9 %8
+%14 = OpLoad %5 %9
+%15 = OpLoad %5 %9
+%12 = OpExtInst %5 %13 )" +
+                  param.op +
+                  R"( %14 %15
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          Builtin_Builtin_DualParam_UInt_Test,
@@ -1202,7 +1315,8 @@ TEST_P(Builtin_Builtin_ThreeParam_Sint_Test, Call_Scalar) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1210,11 +1324,13 @@ OpName %3 "a_func"
 %8 = OpConstant %6 1
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %7 )" + param.op +
-                                  R"( %8 %8 %8
+%5 = OpExtInst %6 %7 )" +
+                  param.op +
+                  R"( %8 %8 %8
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_P(Builtin_Builtin_ThreeParam_Sint_Test, Call_Vector) {
@@ -1229,7 +1345,8 @@ TEST_P(Builtin_Builtin_ThreeParam_Sint_Test, Call_Vector) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1239,11 +1356,13 @@ OpName %3 "a_func"
 %10 = OpConstantComposite %6 %9 %9
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %8 )" + param.op +
-                                  R"( %10 %10 %10
+%5 = OpExtInst %6 %8 )" +
+                  param.op +
+                  R"( %10 %10 %10
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          Builtin_Builtin_ThreeParam_Sint_Test,
@@ -1262,7 +1381,8 @@ TEST_P(Builtin_Builtin_ThreeParam_Uint_Test, Call_Scalar) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1270,11 +1390,13 @@ OpName %3 "a_func"
 %8 = OpConstant %6 1
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %7 )" + param.op +
-                                  R"( %8 %8 %8
+%5 = OpExtInst %6 %7 )" +
+                  param.op +
+                  R"( %8 %8 %8
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_P(Builtin_Builtin_ThreeParam_Uint_Test, Call_Vector) {
@@ -1289,7 +1411,8 @@ TEST_P(Builtin_Builtin_ThreeParam_Uint_Test, Call_Vector) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -1299,11 +1422,13 @@ OpName %3 "a_func"
 %10 = OpConstantComposite %6 %9 %9
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %8 )" + param.op +
-                                  R"( %10 %10 %10
+%5 = OpExtInst %6 %8 )" +
+                  param.op +
+                  R"( %10 %10 %10
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          Builtin_Builtin_ThreeParam_Uint_Test,
@@ -1400,7 +1525,8 @@ TEST_F(BuiltinBuilderTest, Call_Determinant) {
     ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(%12 = OpExtInstImport "GLSL.std.450"
+    auto got = DumpBuilder(b);
+    auto expect = R"(%12 = OpExtInstImport "GLSL.std.450"
 OpName %1 "var"
 OpName %9 "a_func"
 %5 = OpTypeFloat 32
@@ -1417,7 +1543,8 @@ OpName %9 "a_func"
 %11 = OpExtInst %5 %12 Determinant %13
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(BuiltinBuilderTest, Call_Transpose) {
@@ -1433,7 +1560,8 @@ TEST_F(BuiltinBuilderTest, Call_Transpose) {
     ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "var"
+    auto got = DumpBuilder(b);
+    auto expect = R"(OpName %1 "var"
 OpName %9 "a_func"
 %5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
@@ -1451,7 +1579,8 @@ OpName %9 "a_func"
 %11 = OpTranspose %12 %14
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(BuiltinBuilderTest, Call_ArrayLength) {
@@ -2107,7 +2236,8 @@ TEST_P(Builtin_Builtin_DataPacking_Test, Binary) {
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
     if (pack4) {
-        EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+        auto got = DumpBuilder(b);
+        auto expect = R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -2118,13 +2248,16 @@ OpName %3 "a_func"
 %11 = OpConstantComposite %8 %10 %10 %10 %10
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %7 )" + param.op +
-                                      R"( %11
+%5 = OpExtInst %6 %7 )" +
+                      param.op +
+                      R"( %11
 OpReturn
 OpFunctionEnd
-)");
+)";
+        EXPECT_EQ(got, expect);
     } else {
-        EXPECT_EQ(DumpBuilder(b), R"(%7 = OpExtInstImport "GLSL.std.450"
+        auto got = DumpBuilder(b);
+        auto expect = R"(%7 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -2135,11 +2268,13 @@ OpName %3 "a_func"
 %11 = OpConstantComposite %8 %10 %10
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %7 )" + param.op +
-                                      R"( %11
+%5 = OpExtInst %6 %7 )" +
+                      param.op +
+                      R"( %11
 OpReturn
 OpFunctionEnd
-)");
+)";
+        EXPECT_EQ(got, expect);
     }
 }
 
@@ -2163,7 +2298,8 @@ TEST_P(Builtin_Builtin_DataUnpacking_Test, Binary) {
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
     if (pack4) {
-        EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+        auto got = DumpBuilder(b);
+        auto expect = R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -2173,13 +2309,16 @@ OpName %3 "a_func"
 %10 = OpConstant %9 1
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %8 )" + param.op +
-                                      R"( %10
+%5 = OpExtInst %6 %8 )" +
+                      param.op +
+                      R"( %10
 OpReturn
 OpFunctionEnd
-)");
+)";
+        EXPECT_EQ(got, expect);
     } else {
-        EXPECT_EQ(DumpBuilder(b), R"(%8 = OpExtInstImport "GLSL.std.450"
+        auto got = DumpBuilder(b);
+        auto expect = R"(%8 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
@@ -2189,11 +2328,13 @@ OpName %3 "a_func"
 %10 = OpConstant %9 1
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %8 )" + param.op +
-                                      R"( %10
+%5 = OpExtInst %6 %8 )" +
+                      param.op +
+                      R"( %10
 OpReturn
 OpFunctionEnd
-)");
+)";
+        EXPECT_EQ(got, expect);
     }
 }
 
@@ -2284,7 +2425,8 @@ TEST_F(BuiltinBuilderTest, Call_ExtractBits_i32) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    auto got = DumpBuilder(b);
+    auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "v"
@@ -2309,7 +2451,8 @@ OpName %13 "count"
 %14 = OpBitFieldSExtract %7 %15 %16 %17
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(BuiltinBuilderTest, Call_ExtractBits_u32) {
@@ -2323,7 +2466,8 @@ TEST_F(BuiltinBuilderTest, Call_ExtractBits_u32) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    auto got = DumpBuilder(b);
+    auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "v"
@@ -2345,7 +2489,8 @@ OpName %10 "count"
 %11 = OpBitFieldUExtract %7 %12 %13 %14
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(BuiltinBuilderTest, Call_ExtractBits_vec3_i32) {
@@ -2359,7 +2504,8 @@ TEST_F(BuiltinBuilderTest, Call_ExtractBits_vec3_i32) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    auto got = DumpBuilder(b);
+    auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "v"
@@ -2385,7 +2531,8 @@ OpName %14 "count"
 %15 = OpBitFieldSExtract %7 %16 %17 %18
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(BuiltinBuilderTest, Call_ExtractBits_vec3_u32) {
@@ -2399,7 +2546,8 @@ TEST_F(BuiltinBuilderTest, Call_ExtractBits_vec3_u32) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    auto got = DumpBuilder(b);
+    auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "v"
@@ -2424,7 +2572,8 @@ OpName %13 "count"
 %14 = OpBitFieldUExtract %7 %15 %16 %17
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(BuiltinBuilderTest, Call_InsertBits_i32) {
@@ -2439,7 +2588,8 @@ TEST_F(BuiltinBuilderTest, Call_InsertBits_i32) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    auto got = DumpBuilder(b);
+    auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "v"
@@ -2467,7 +2617,8 @@ OpName %14 "count"
 %15 = OpBitFieldInsert %7 %16 %17 %18 %19
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(BuiltinBuilderTest, Call_InsertBits_u32) {
@@ -2482,7 +2633,8 @@ TEST_F(BuiltinBuilderTest, Call_InsertBits_u32) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    auto got = DumpBuilder(b);
+    auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "v"
@@ -2507,7 +2659,8 @@ OpName %11 "count"
 %12 = OpBitFieldInsert %7 %13 %14 %15 %16
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(BuiltinBuilderTest, Call_InsertBits_vec3_i32) {
@@ -2522,7 +2675,8 @@ TEST_F(BuiltinBuilderTest, Call_InsertBits_vec3_i32) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    auto got = DumpBuilder(b);
+    auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "v"
@@ -2551,7 +2705,8 @@ OpName %15 "count"
 %16 = OpBitFieldInsert %7 %17 %18 %19 %20
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(BuiltinBuilderTest, Call_InsertBits_vec3_u32) {
@@ -2566,7 +2721,8 @@ TEST_F(BuiltinBuilderTest, Call_InsertBits_vec3_u32) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    auto got = DumpBuilder(b);
+    auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "v"
@@ -2594,7 +2750,8 @@ OpName %14 "count"
 %15 = OpBitFieldInsert %7 %16 %17 %18 %19
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(BuiltinBuilderTest, Call_Dot4I8Packed) {
@@ -2612,7 +2769,8 @@ TEST_F(BuiltinBuilderTest, Call_Dot4I8Packed) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    auto got = DumpBuilder(b);
+    auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "val1"
@@ -2632,7 +2790,8 @@ OpName %9 "val2"
 %10 = OpSDot %11 %12 %13 PackedVectorFormat4x8Bit
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 TEST_F(BuiltinBuilderTest, Call_Dot4U8Packed) {
@@ -2650,7 +2809,8 @@ TEST_F(BuiltinBuilderTest, Call_Dot4U8Packed) {
 
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-    EXPECT_EQ(DumpBuilder(b), R"(OpEntryPoint GLCompute %3 "test_function"
+    auto got = DumpBuilder(b);
+    auto expect = R"(OpEntryPoint GLCompute %3 "test_function"
 OpExecutionMode %3 LocalSize 1 1 1
 OpName %3 "test_function"
 OpName %5 "val1"
@@ -2669,7 +2829,8 @@ OpName %9 "val2"
 %10 = OpUDot %7 %11 %12 PackedVectorFormat4x8Bit
 OpReturn
 OpFunctionEnd
-)");
+)";
+    EXPECT_EQ(got, expect);
 }
 
 }  // namespace
