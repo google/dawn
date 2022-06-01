@@ -324,26 +324,16 @@ func MostRecentResultsForChange(
 	return nil, gerrit.Patchset{}, fmt.Errorf("no builds found for change %v", change)
 }
 
-// CleanTags modifies each result so that tags which are found in
-// cfg.TagAliases are expanded to include all the tag aliases.
-// Tags in cfg.Tag.Remove are also removed.
-// Finally, duplicate results are removed by erring towards Failure.
+// CleanTags modifies each result so that tags in cfg.Tag.Remove are removed and
+// duplicate results are removed by erring towards Failure.
 // See: crbug.com/dawn/1387, crbug.com/dawn/1401
 func CleanTags(cfg Config, results *result.List) {
+	// Remove any tags found in cfg.Tag.Remove
 	remove := result.NewTags(cfg.Tag.Remove...)
-	aliases := make([]result.Tags, len(cfg.Tag.Aliases))
-	for i, l := range cfg.Tag.Aliases {
-		aliases[i] = result.NewTags(l...)
-	}
-	// Expand the result tags for the aliased tag sets
 	for _, r := range *results {
-		for _, set := range aliases {
-			if r.Tags.ContainsAny(set) {
-				r.Tags.AddAll(set)
-			}
-		}
 		r.Tags.RemoveAll(remove)
 	}
+	// Clean up duplicate results
 	*results = results.ReplaceDuplicates(func(s result.Statuses) result.Status {
 		// If all results have the same status, then use that.
 		if len(s) == 1 {

@@ -55,10 +55,6 @@ type Config struct {
 	Builders map[string]buildbucket.Builder
 	// Tags holds configuration data for cleaning result tags before processing
 	Tag struct {
-		// TagAliases is a list of tags which are treated as equivalent.
-		// For example, some GPUs are similar enough to be considered equivalent.
-		// See crbug.com/dawn/1387 for more information.
-		Aliases [][]string
 		// Remove holds tags that should be removed before processing.
 		// See crbug.com/dawn/1401 for more information.
 		Remove []string
