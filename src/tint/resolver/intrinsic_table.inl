@@ -7681,6 +7681,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[899],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [1] */
@@ -7692,6 +7693,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[611],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [2] */
@@ -7703,6 +7705,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[898],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [3] */
@@ -7714,6 +7717,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[615],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [4] */
@@ -7725,6 +7729,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[897],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [5] */
@@ -7736,6 +7741,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[619],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [6] */
@@ -7747,6 +7753,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[896],
     /* return matcher indices */ &kMatcherIndices[123],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [7] */
@@ -7758,6 +7765,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[623],
     /* return matcher indices */ &kMatcherIndices[123],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [8] */
@@ -7769,6 +7777,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[895],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [9] */
@@ -7780,6 +7789,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[627],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [10] */
@@ -7791,6 +7801,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[894],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [11] */
@@ -7802,6 +7813,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[631],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [12] */
@@ -7813,6 +7825,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[893],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [13] */
@@ -7824,6 +7837,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[892],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [14] */
@@ -7835,6 +7849,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[637],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [15] */
@@ -7846,6 +7861,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[891],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [16] */
@@ -7857,6 +7873,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[641],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [17] */
@@ -7868,6 +7885,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[890],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [18] */
@@ -7879,6 +7897,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[645],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [19] */
@@ -7890,6 +7909,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[889],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [20] */
@@ -7901,6 +7921,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[649],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [21] */
@@ -7912,6 +7933,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[888],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [22] */
@@ -7923,6 +7945,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[887],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [23] */
@@ -7934,6 +7957,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[886],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [24] */
@@ -7945,6 +7969,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[840],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [25] */
@@ -7956,6 +7981,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[884],
     /* return matcher indices */ &kMatcherIndices[123],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [26] */
@@ -7967,6 +7993,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[883],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [27] */
@@ -7978,6 +8005,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[585],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [28] */
@@ -7989,6 +8017,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[582],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [29] */
@@ -8000,6 +8029,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[367],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [30] */
@@ -8011,6 +8041,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[363],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [31] */
@@ -8022,6 +8053,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[215],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [32] */
@@ -8033,6 +8065,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[570],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [33] */
@@ -8044,6 +8077,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[355],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [34] */
@@ -8055,6 +8089,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[564],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [35] */
@@ -8066,6 +8101,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[351],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [36] */
@@ -8077,6 +8113,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[546],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [37] */
@@ -8088,6 +8125,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[347],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [38] */
@@ -8099,6 +8137,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[343],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [39] */
@@ -8110,6 +8149,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[200],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [40] */
@@ -8121,6 +8161,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[534],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [41] */
@@ -8132,6 +8173,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[335],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [42] */
@@ -8143,6 +8185,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[319],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [43] */
@@ -8154,6 +8197,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[195],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [44] */
@@ -8165,6 +8209,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[190],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [45] */
@@ -8176,6 +8221,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[126],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [46] */
@@ -8187,6 +8233,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[327],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [47] */
@@ -8198,6 +8245,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[175],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [48] */
@@ -8209,6 +8257,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[339],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [49] */
@@ -8220,6 +8269,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[165],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [50] */
@@ -8231,6 +8281,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[371],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [51] */
@@ -8242,6 +8293,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[155],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [52] */
@@ -8253,6 +8305,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[150],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [53] */
@@ -8264,6 +8317,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[72],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [54] */
@@ -8275,6 +8329,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[379],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [55] */
@@ -8286,6 +8341,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[170],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [56] */
@@ -8297,6 +8353,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[456],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [57] */
@@ -8308,6 +8365,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [58] */
@@ -8319,6 +8377,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[950],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [59] */
@@ -8330,6 +8389,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[951],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [60] */
@@ -8341,6 +8401,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[419],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [61] */
@@ -8352,6 +8413,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[513],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [62] */
@@ -8363,6 +8425,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[510],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [63] */
@@ -8374,6 +8437,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[501],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [64] */
@@ -8385,6 +8449,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[769],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [65] */
@@ -8396,6 +8461,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[775],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [66] */
@@ -8407,6 +8473,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[777],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [67] */
@@ -8418,6 +8485,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[959],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsConverter, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [68] */
@@ -8429,6 +8497,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[960],
     /* return matcher indices */ &kMatcherIndices[57],
     /* flags */ OverloadFlags(OverloadFlag::kIsConverter, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [69] */
@@ -8440,6 +8509,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[961],
     /* return matcher indices */ &kMatcherIndices[61],
     /* flags */ OverloadFlags(OverloadFlag::kIsConverter, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [70] */
@@ -8451,6 +8521,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[962],
     /* return matcher indices */ &kMatcherIndices[65],
     /* flags */ OverloadFlags(OverloadFlag::kIsConverter, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [71] */
@@ -8462,6 +8533,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[359],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [72] */
@@ -8473,6 +8545,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[255],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [73] */
@@ -8484,6 +8557,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[235],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [74] */
@@ -8495,6 +8569,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[96],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [75] */
@@ -8506,6 +8581,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[423],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [76] */
@@ -8517,6 +8593,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[230],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [77] */
@@ -8528,6 +8605,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[447],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [78] */
@@ -8539,6 +8617,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[415],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [79] */
@@ -8550,6 +8629,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[411],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [80] */
@@ -8561,6 +8641,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[225],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [81] */
@@ -8572,6 +8653,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[594],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [82] */
@@ -8583,6 +8665,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[395],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [83] */
@@ -8594,6 +8677,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[477],
     /* return matcher indices */ nullptr,
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [84] */
@@ -8605,6 +8689,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[480],
     /* return matcher indices */ nullptr,
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [85] */
@@ -8616,6 +8701,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[383],
     /* return matcher indices */ nullptr,
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [86] */
@@ -8627,6 +8713,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[483],
     /* return matcher indices */ nullptr,
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [87] */
@@ -8638,6 +8725,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[486],
     /* return matcher indices */ nullptr,
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [88] */
@@ -8649,6 +8737,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[489],
     /* return matcher indices */ nullptr,
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [89] */
@@ -8660,6 +8749,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[387],
     /* return matcher indices */ nullptr,
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [90] */
@@ -8671,6 +8761,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[492],
     /* return matcher indices */ nullptr,
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [91] */
@@ -8682,6 +8773,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[516],
     /* return matcher indices */ nullptr,
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [92] */
@@ -8693,6 +8785,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[519],
     /* return matcher indices */ nullptr,
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [93] */
@@ -8704,6 +8797,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[399],
     /* return matcher indices */ nullptr,
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [94] */
@@ -8715,6 +8809,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[537],
     /* return matcher indices */ nullptr,
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [95] */
@@ -8726,6 +8821,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ &kMatcherIndices[115],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [96] */
@@ -8737,6 +8833,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[940],
     /* return matcher indices */ &kMatcherIndices[115],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [97] */
@@ -8748,6 +8845,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[941],
     /* return matcher indices */ &kMatcherIndices[115],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [98] */
@@ -8759,6 +8857,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[531],
     /* return matcher indices */ &kMatcherIndices[115],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [99] */
@@ -8770,6 +8869,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[763],
     /* return matcher indices */ &kMatcherIndices[115],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [100] */
@@ -8781,6 +8881,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[765],
     /* return matcher indices */ &kMatcherIndices[115],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [101] */
@@ -8792,6 +8893,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[945],
     /* return matcher indices */ &kMatcherIndices[121],
     /* flags */ OverloadFlags(OverloadFlag::kIsConverter, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [102] */
@@ -8803,6 +8905,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[946],
     /* return matcher indices */ &kMatcherIndices[123],
     /* flags */ OverloadFlags(OverloadFlag::kIsConverter, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [103] */
@@ -8814,6 +8917,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[947],
     /* return matcher indices */ &kMatcherIndices[125],
     /* flags */ OverloadFlags(OverloadFlag::kIsConverter, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [104] */
@@ -8825,6 +8929,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[948],
     /* return matcher indices */ &kMatcherIndices[127],
     /* flags */ OverloadFlags(OverloadFlag::kIsConverter, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [105] */
@@ -8836,6 +8941,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[856],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [106] */
@@ -8847,6 +8953,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[855],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [107] */
@@ -8858,6 +8965,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[854],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [108] */
@@ -8869,6 +8977,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[853],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [109] */
@@ -8880,6 +8989,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[852],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [110] */
@@ -8891,6 +9001,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[851],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [111] */
@@ -8902,6 +9013,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[850],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [112] */
@@ -8913,6 +9025,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[849],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [113] */
@@ -8924,6 +9037,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[848],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [114] */
@@ -8935,6 +9049,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[846],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [115] */
@@ -8946,6 +9061,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[540],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [116] */
@@ -8957,6 +9073,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[543],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [117] */
@@ -8968,6 +9085,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[323],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [118] */
@@ -8979,6 +9097,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[573],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [119] */
@@ -8990,6 +9109,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[576],
     /* return matcher indices */ &kMatcherIndices[49],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [120] */
@@ -9001,6 +9121,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[579],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [121] */
@@ -9012,6 +9133,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[407],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [122] */
@@ -9023,6 +9145,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[588],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [123] */
@@ -9034,6 +9157,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[727],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [124] */
@@ -9045,6 +9169,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[685],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [125] */
@@ -9056,6 +9181,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[681],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [126] */
@@ -9067,6 +9193,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[679],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [127] */
@@ -9078,6 +9205,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[673],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [128] */
@@ -9089,6 +9217,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[671],
     /* return matcher indices */ &kMatcherIndices[11],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [129] */
@@ -9100,6 +9229,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[669],
     /* return matcher indices */ &kMatcherIndices[11],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [130] */
@@ -9111,6 +9241,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[667],
     /* return matcher indices */ &kMatcherIndices[76],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [131] */
@@ -9122,6 +9253,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[665],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [132] */
@@ -9133,6 +9265,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[663],
     /* return matcher indices */ &kMatcherIndices[27],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [133] */
@@ -9144,6 +9277,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[331],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [134] */
@@ -9155,6 +9289,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[180],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [135] */
@@ -9166,6 +9301,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[290],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [136] */
@@ -9177,6 +9313,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[132],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [137] */
@@ -9188,6 +9325,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[315],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [138] */
@@ -9199,6 +9337,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[250],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [139] */
@@ -9210,6 +9349,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[307],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [140] */
@@ -9221,6 +9361,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[270],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [141] */
@@ -9232,6 +9373,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[240],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [142] */
@@ -9243,6 +9385,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[84],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [143] */
@@ -9254,6 +9397,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[102],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [144] */
@@ -9265,6 +9409,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[65],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [145] */
@@ -9276,6 +9421,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[220],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [146] */
@@ -9287,6 +9433,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[114],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [147] */
@@ -9298,6 +9445,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[210],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [148] */
@@ -9309,6 +9457,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[120],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [149] */
@@ -9320,6 +9469,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ &kMatcherIndices[105],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [150] */
@@ -9331,6 +9481,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[932],
     /* return matcher indices */ &kMatcherIndices[105],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [151] */
@@ -9342,6 +9493,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[933],
     /* return matcher indices */ &kMatcherIndices[105],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [152] */
@@ -9353,6 +9505,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[759],
     /* return matcher indices */ &kMatcherIndices[105],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [153] */
@@ -9364,6 +9517,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[935],
     /* return matcher indices */ &kMatcherIndices[103],
     /* flags */ OverloadFlags(OverloadFlag::kIsConverter, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [154] */
@@ -9375,6 +9529,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[936],
     /* return matcher indices */ &kMatcherIndices[109],
     /* flags */ OverloadFlags(OverloadFlag::kIsConverter, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [155] */
@@ -9386,6 +9541,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[937],
     /* return matcher indices */ &kMatcherIndices[111],
     /* flags */ OverloadFlags(OverloadFlag::kIsConverter, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [156] */
@@ -9397,6 +9553,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[938],
     /* return matcher indices */ &kMatcherIndices[113],
     /* flags */ OverloadFlags(OverloadFlag::kIsConverter, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [157] */
@@ -9408,6 +9565,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[391],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [158] */
@@ -9419,6 +9577,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[205],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [159] */
@@ -9430,6 +9589,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[185],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [160] */
@@ -9441,6 +9601,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[138],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [161] */
@@ -9452,6 +9613,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[375],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [162] */
@@ -9463,6 +9625,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[160],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [163] */
@@ -9474,6 +9637,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[303],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [164] */
@@ -9485,6 +9649,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[265],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [165] */
@@ -9496,6 +9661,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[260],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [166] */
@@ -9507,6 +9673,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[144],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [167] */
@@ -9518,6 +9685,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[311],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [168] */
@@ -9529,6 +9697,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[245],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [169] */
@@ -9540,6 +9709,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[299],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [170] */
@@ -9551,6 +9721,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[280],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [171] */
@@ -9562,6 +9733,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[285],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [172] */
@@ -9573,6 +9745,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[108],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [173] */
@@ -9584,6 +9757,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[295],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [174] */
@@ -9595,6 +9769,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[275],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [175] */
@@ -9606,6 +9781,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ &kMatcherIndices[149],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [176] */
@@ -9617,6 +9793,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[969],
     /* return matcher indices */ &kMatcherIndices[149],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [177] */
@@ -9628,6 +9805,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[970],
     /* return matcher indices */ &kMatcherIndices[151],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [178] */
@@ -9639,6 +9817,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[90],
     /* return matcher indices */ &kMatcherIndices[151],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [179] */
@@ -9650,6 +9829,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[781],
     /* return matcher indices */ &kMatcherIndices[151],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [180] */
@@ -9661,6 +9841,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ &kMatcherIndices[165],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [181] */
@@ -9672,6 +9853,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[988],
     /* return matcher indices */ &kMatcherIndices[165],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [182] */
@@ -9683,6 +9865,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[983],
     /* return matcher indices */ &kMatcherIndices[167],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [183] */
@@ -9694,6 +9877,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[16],
     /* return matcher indices */ &kMatcherIndices[167],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [184] */
@@ -9705,6 +9889,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[468],
     /* return matcher indices */ &kMatcherIndices[167],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [185] */
@@ -9716,6 +9901,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ &kMatcherIndices[169],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [186] */
@@ -9727,6 +9913,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[968],
     /* return matcher indices */ &kMatcherIndices[169],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [187] */
@@ -9738,6 +9925,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[957],
     /* return matcher indices */ &kMatcherIndices[171],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [188] */
@@ -9749,6 +9937,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[57],
     /* return matcher indices */ &kMatcherIndices[171],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [189] */
@@ -9760,6 +9949,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[431],
     /* return matcher indices */ &kMatcherIndices[171],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [190] */
@@ -9771,6 +9961,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ &kMatcherIndices[4],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [191] */
@@ -9782,6 +9973,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[964],
     /* return matcher indices */ &kMatcherIndices[4],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [192] */
@@ -9793,6 +9985,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[965],
     /* return matcher indices */ &kMatcherIndices[147],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [193] */
@@ -9804,6 +9997,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[427],
     /* return matcher indices */ &kMatcherIndices[147],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [194] */
@@ -9815,6 +10009,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[779],
     /* return matcher indices */ &kMatcherIndices[147],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [195] */
@@ -9826,6 +10021,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ &kMatcherIndices[157],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [196] */
@@ -9837,6 +10033,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[979],
     /* return matcher indices */ &kMatcherIndices[157],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [197] */
@@ -9848,6 +10045,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[980],
     /* return matcher indices */ &kMatcherIndices[159],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [198] */
@@ -9859,6 +10057,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[78],
     /* return matcher indices */ &kMatcherIndices[159],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [199] */
@@ -9870,6 +10069,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[474],
     /* return matcher indices */ &kMatcherIndices[159],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [200] */
@@ -9881,6 +10081,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ &kMatcherIndices[153],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [201] */
@@ -9892,6 +10093,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[974],
     /* return matcher indices */ &kMatcherIndices[153],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [202] */
@@ -9903,6 +10105,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[975],
     /* return matcher indices */ &kMatcherIndices[155],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [203] */
@@ -9914,6 +10117,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[49],
     /* return matcher indices */ &kMatcherIndices[155],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [204] */
@@ -9925,6 +10129,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[783],
     /* return matcher indices */ &kMatcherIndices[155],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [205] */
@@ -9936,6 +10141,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[867],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [206] */
@@ -9947,6 +10153,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[866],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [207] */
@@ -9958,6 +10165,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[865],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [208] */
@@ -9969,6 +10177,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[864],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [209] */
@@ -9980,6 +10189,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[857],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [210] */
@@ -9991,6 +10201,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ &kMatcherIndices[175],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [211] */
@@ -10002,6 +10213,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[931],
     /* return matcher indices */ &kMatcherIndices[175],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [212] */
@@ -10013,6 +10225,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[928],
     /* return matcher indices */ &kMatcherIndices[177],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [213] */
@@ -10024,6 +10237,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[28],
     /* return matcher indices */ &kMatcherIndices[177],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [214] */
@@ -10035,6 +10249,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[435],
     /* return matcher indices */ &kMatcherIndices[177],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [215] */
@@ -10046,6 +10261,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[695],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [216] */
@@ -10057,6 +10273,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[693],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [217] */
@@ -10068,6 +10285,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[691],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [218] */
@@ -10079,6 +10297,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[689],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [219] */
@@ -10090,6 +10309,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[687],
     /* return matcher indices */ &kMatcherIndices[11],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [220] */
@@ -10101,6 +10321,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[705],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [221] */
@@ -10112,6 +10333,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[703],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [222] */
@@ -10123,6 +10345,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[701],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [223] */
@@ -10134,6 +10357,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[699],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [224] */
@@ -10145,6 +10369,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[697],
     /* return matcher indices */ &kMatcherIndices[11],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [225] */
@@ -10156,6 +10381,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ &kMatcherIndices[185],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [226] */
@@ -10167,6 +10393,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[919],
     /* return matcher indices */ &kMatcherIndices[185],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [227] */
@@ -10178,6 +10405,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[912],
     /* return matcher indices */ &kMatcherIndices[137],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [228] */
@@ -10189,6 +10417,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[0],
     /* return matcher indices */ &kMatcherIndices[137],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [229] */
@@ -10200,6 +10429,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[443],
     /* return matcher indices */ &kMatcherIndices[137],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [230] */
@@ -10211,6 +10441,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ &kMatcherIndices[161],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [231] */
@@ -10222,6 +10453,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[984],
     /* return matcher indices */ &kMatcherIndices[161],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [232] */
@@ -10233,6 +10465,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[985],
     /* return matcher indices */ &kMatcherIndices[163],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [233] */
@@ -10244,6 +10477,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[40],
     /* return matcher indices */ &kMatcherIndices[163],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [234] */
@@ -10255,6 +10489,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[471],
     /* return matcher indices */ &kMatcherIndices[163],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [235] */
@@ -10266,6 +10501,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[633],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [236] */
@@ -10277,6 +10513,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[629],
     /* return matcher indices */ &kMatcherIndices[40],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [237] */
@@ -10288,6 +10525,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[625],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [238] */
@@ -10299,6 +10537,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[621],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [239] */
@@ -10310,6 +10549,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[653],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [240] */
@@ -10321,6 +10561,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[651],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [241] */
@@ -10332,6 +10573,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[647],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [242] */
@@ -10343,6 +10585,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[643],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [243] */
@@ -10354,6 +10597,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[661],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [244] */
@@ -10365,6 +10609,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[659],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [245] */
@@ -10376,6 +10621,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[657],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [246] */
@@ -10387,6 +10633,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[655],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [247] */
@@ -10398,6 +10645,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[617],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [248] */
@@ -10409,6 +10657,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[613],
     /* return matcher indices */ &kMatcherIndices[40],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [249] */
@@ -10420,6 +10669,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[609],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [250] */
@@ -10431,6 +10681,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[607],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [251] */
@@ -10442,6 +10693,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [252] */
@@ -10453,6 +10705,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[920],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [253] */
@@ -10464,6 +10717,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[921],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsConverter, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [254] */
@@ -10475,6 +10729,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [255] */
@@ -10486,6 +10741,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[929],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [256] */
@@ -10497,6 +10753,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[930],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsConverter, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [257] */
@@ -10508,6 +10765,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[522],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [258] */
@@ -10519,6 +10777,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[525],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [259] */
@@ -10530,6 +10789,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[528],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [260] */
@@ -10541,6 +10801,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ &kMatcherIndices[62],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [261] */
@@ -10552,6 +10813,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[923],
     /* return matcher indices */ &kMatcherIndices[62],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [262] */
@@ -10563,6 +10825,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[924],
     /* return matcher indices */ &kMatcherIndices[62],
     /* flags */ OverloadFlags(OverloadFlag::kIsConverter, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [263] */
@@ -10574,6 +10837,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [264] */
@@ -10585,6 +10849,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[926],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsConstructor, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [265] */
@@ -10596,6 +10861,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[927],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsConverter, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [266] */
@@ -10607,6 +10873,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[459],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [267] */
@@ -10618,6 +10885,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[462],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [268] */
@@ -10629,6 +10897,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[465],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [269] */
@@ -10640,6 +10909,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[858],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [270] */
@@ -10651,6 +10921,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[859],
     /* return matcher indices */ &kMatcherIndices[40],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [271] */
@@ -10662,6 +10933,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[871],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [272] */
@@ -10673,6 +10945,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[872],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [273] */
@@ -10684,6 +10957,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[869],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [274] */
@@ -10695,6 +10969,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[870],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [275] */
@@ -10706,6 +10981,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[439],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [276] */
@@ -10717,6 +10993,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[403],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [277] */
@@ -10728,6 +11005,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[875],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [278] */
@@ -10739,6 +11017,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[876],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [279] */
@@ -10750,6 +11029,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[677],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [280] */
@@ -10761,6 +11041,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[801],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [281] */
@@ -10772,6 +11053,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[878],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [282] */
@@ -10783,6 +11065,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[879],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [283] */
@@ -10794,6 +11077,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[880],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [284] */
@@ -10805,6 +11089,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[881],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [285] */
@@ -10816,6 +11101,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[882],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [286] */
@@ -10827,6 +11113,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[885],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [287] */
@@ -10838,6 +11125,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[737],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [288] */
@@ -10849,6 +11137,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[789],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [289] */
@@ -10860,6 +11149,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[787],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [290] */
@@ -10871,6 +11161,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[785],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [291] */
@@ -10882,6 +11173,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[843],
     /* return matcher indices */ &kMatcherIndices[202],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [292] */
@@ -10893,6 +11185,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[868],
     /* return matcher indices */ &kMatcherIndices[135],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [293] */
@@ -10904,6 +11197,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[973],
     /* return matcher indices */ &kMatcherIndices[201],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [294] */
@@ -10915,6 +11209,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[905],
     /* return matcher indices */ &kMatcherIndices[117],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [295] */
@@ -10926,6 +11221,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[841],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [296] */
@@ -10937,6 +11233,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[842],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [297] */
@@ -10948,6 +11245,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[561],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [298] */
@@ -10959,6 +11257,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[567],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [299] */
@@ -10970,6 +11269,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[873],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [300] */
@@ -10981,6 +11281,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[874],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [301] */
@@ -10992,6 +11293,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[838],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [302] */
@@ -11003,6 +11305,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[839],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [303] */
@@ -11014,6 +11317,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[836],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [304] */
@@ -11025,6 +11329,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[837],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [305] */
@@ -11036,6 +11341,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[834],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [306] */
@@ -11047,6 +11353,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[835],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [307] */
@@ -11058,6 +11365,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[773],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [308] */
@@ -11069,6 +11377,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[771],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [309] */
@@ -11080,6 +11389,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[956],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [310] */
@@ -11091,6 +11401,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[955],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [311] */
@@ -11102,6 +11413,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[495],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [312] */
@@ -11113,6 +11425,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[498],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [313] */
@@ -11124,6 +11437,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[831],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [314] */
@@ -11135,6 +11449,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[833],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [315] */
@@ -11146,6 +11461,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[954],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [316] */
@@ -11157,6 +11473,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[953],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [317] */
@@ -11168,6 +11485,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[944],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [318] */
@@ -11179,6 +11497,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[943],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [319] */
@@ -11190,6 +11509,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[829],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [320] */
@@ -11201,6 +11521,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[830],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [321] */
@@ -11212,6 +11533,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[942],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [322] */
@@ -11223,6 +11545,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[934],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [323] */
@@ -11234,6 +11557,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[918],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [324] */
@@ -11245,6 +11569,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[917],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [325] */
@@ -11256,6 +11581,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[916],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [326] */
@@ -11267,6 +11593,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[915],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [327] */
@@ -11278,6 +11605,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[549],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [328] */
@@ -11289,6 +11617,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[552],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [329] */
@@ -11300,6 +11629,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[555],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kIsDeprecated),
+    /* const eval */ nullptr,
   },
   {
     /* [330] */
@@ -11311,6 +11641,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[558],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kIsDeprecated),
+    /* const eval */ nullptr,
   },
   {
     /* [331] */
@@ -11322,6 +11653,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[914],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [332] */
@@ -11333,6 +11665,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[913],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [333] */
@@ -11344,6 +11677,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[745],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [334] */
@@ -11355,6 +11689,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[743],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [335] */
@@ -11366,6 +11701,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[826],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [336] */
@@ -11377,6 +11713,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[827],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [337] */
@@ -11388,6 +11725,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[911],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [338] */
@@ -11399,6 +11737,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[877],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [339] */
@@ -11410,6 +11749,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[910],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [340] */
@@ -11421,6 +11761,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[909],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [341] */
@@ -11432,6 +11773,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[755],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [342] */
@@ -11443,6 +11785,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[757],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [343] */
@@ -11454,6 +11797,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[907],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [344] */
@@ -11465,6 +11809,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[906],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [345] */
@@ -11476,6 +11821,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[751],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [346] */
@@ -11487,6 +11833,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[753],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [347] */
@@ -11498,6 +11845,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[824],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [348] */
@@ -11509,6 +11857,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[825],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [349] */
@@ -11520,6 +11869,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[739],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [350] */
@@ -11531,6 +11881,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[741],
     /* return matcher indices */ &kMatcherIndices[40],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [351] */
@@ -11542,6 +11893,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[733],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [352] */
@@ -11553,6 +11905,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[735],
     /* return matcher indices */ &kMatcherIndices[40],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [353] */
@@ -11564,6 +11917,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[707],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [354] */
@@ -11575,6 +11929,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[729],
     /* return matcher indices */ &kMatcherIndices[40],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [355] */
@@ -11586,6 +11941,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[675],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [356] */
@@ -11597,6 +11953,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[683],
     /* return matcher indices */ &kMatcherIndices[40],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [357] */
@@ -11608,6 +11965,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[812],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [358] */
@@ -11619,6 +11977,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[823],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [359] */
@@ -11630,6 +11989,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[807],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [360] */
@@ -11641,6 +12001,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[808],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [361] */
@@ -11652,6 +12013,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[805],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [362] */
@@ -11663,6 +12025,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[806],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [363] */
@@ -11674,6 +12037,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[803],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [364] */
@@ -11685,6 +12049,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[804],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [365] */
@@ -11696,6 +12061,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[793],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [366] */
@@ -11707,6 +12073,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[795],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [367] */
@@ -11718,6 +12085,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[845],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [368] */
@@ -11729,6 +12097,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[844],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [369] */
@@ -11740,6 +12109,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[811],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [370] */
@@ -11751,6 +12121,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[810],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [371] */
@@ -11762,6 +12133,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[814],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [372] */
@@ -11773,6 +12145,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[813],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [373] */
@@ -11784,6 +12157,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[601],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [374] */
@@ -11795,6 +12169,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[599],
     /* return matcher indices */ &kMatcherIndices[40],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [375] */
@@ -11806,6 +12181,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[816],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [376] */
@@ -11817,6 +12193,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[815],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [377] */
@@ -11828,6 +12205,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[818],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [378] */
@@ -11839,6 +12217,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[817],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [379] */
@@ -11850,6 +12229,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[820],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [380] */
@@ -11861,6 +12241,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[819],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [381] */
@@ -11872,6 +12253,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[822],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [382] */
@@ -11883,6 +12265,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[821],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [383] */
@@ -11894,6 +12277,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[453],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [384] */
@@ -11905,6 +12289,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[450],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [385] */
@@ -11916,6 +12301,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[832],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [386] */
@@ -11927,6 +12313,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[828],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [387] */
@@ -11938,6 +12325,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[731],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [388] */
@@ -11949,6 +12337,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[761],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [389] */
@@ -11960,6 +12349,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[639],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [390] */
@@ -11971,6 +12361,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[635],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [391] */
@@ -11982,6 +12373,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[966],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [392] */
@@ -11993,6 +12385,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[952],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [393] */
@@ -12004,6 +12397,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[976],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [394] */
@@ -12015,6 +12409,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[971],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [395] */
@@ -12026,6 +12421,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[978],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [396] */
@@ -12037,6 +12433,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[986],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [397] */
@@ -12048,6 +12445,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[939],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [398] */
@@ -12059,6 +12457,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[949],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [399] */
@@ -12070,6 +12469,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[922],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [400] */
@@ -12081,6 +12481,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[925],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [401] */
@@ -12092,6 +12493,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[862],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [402] */
@@ -12103,6 +12505,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[863],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [403] */
@@ -12114,6 +12517,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[860],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [404] */
@@ -12125,6 +12529,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[861],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [405] */
@@ -12136,6 +12541,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[963],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [406] */
@@ -12147,6 +12553,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[900],
     /* return matcher indices */ &kMatcherIndices[37],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [407] */
@@ -12158,6 +12565,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[747],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [408] */
@@ -12169,6 +12577,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[749],
     /* return matcher indices */ &kMatcherIndices[40],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [409] */
@@ -12180,6 +12589,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[904],
     /* return matcher indices */ &kMatcherIndices[103],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [410] */
@@ -12191,6 +12601,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[711],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [411] */
@@ -12202,6 +12613,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[713],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [412] */
@@ -12213,6 +12625,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[715],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [413] */
@@ -12224,6 +12637,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[717],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [414] */
@@ -12235,6 +12649,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[719],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [415] */
@@ -12246,6 +12661,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[721],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [416] */
@@ -12257,6 +12673,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[723],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [417] */
@@ -12268,6 +12685,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[725],
     /* return matcher indices */ nullptr,
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [418] */
@@ -12279,6 +12697,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[847],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [419] */
@@ -12290,6 +12709,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[605],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [420] */
@@ -12301,6 +12721,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[603],
     /* return matcher indices */ &kMatcherIndices[21],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [421] */
@@ -12312,6 +12733,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[967],
     /* return matcher indices */ &kMatcherIndices[62],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [422] */
@@ -12323,6 +12745,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ nullptr,
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [423] */
@@ -12334,6 +12757,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[901],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [424] */
@@ -12345,6 +12769,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[902],
     /* return matcher indices */ &kMatcherIndices[45],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [425] */
@@ -12356,6 +12781,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[903],
     /* return matcher indices */ &kMatcherIndices[103],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [426] */
@@ -12367,6 +12793,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[709],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [427] */
@@ -12378,6 +12805,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[987],
     /* return matcher indices */ &kMatcherIndices[103],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [428] */
@@ -12389,6 +12817,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[908],
     /* return matcher indices */ &kMatcherIndices[23],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [429] */
@@ -12400,6 +12829,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[990],
     /* return matcher indices */ nullptr,
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [430] */
@@ -12411,6 +12841,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[507],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [431] */
@@ -12422,6 +12853,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[767],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [432] */
@@ -12433,6 +12865,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[989],
     /* return matcher indices */ &kMatcherIndices[62],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [433] */
@@ -12444,6 +12877,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[958],
     /* return matcher indices */ &kMatcherIndices[62],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [434] */
@@ -12455,6 +12889,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[972],
     /* return matcher indices */ &kMatcherIndices[62],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [435] */
@@ -12466,6 +12901,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[977],
     /* return matcher indices */ &kMatcherIndices[62],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [436] */
@@ -12477,6 +12913,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[982],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [437] */
@@ -12488,6 +12925,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[504],
     /* return matcher indices */ &kMatcherIndices[31],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [438] */
@@ -12499,6 +12937,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[597],
     /* return matcher indices */ &kMatcherIndices[62],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [439] */
@@ -12510,6 +12949,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[799],
     /* return matcher indices */ &kMatcherIndices[44],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [440] */
@@ -12521,6 +12961,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[797],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [441] */
@@ -12532,6 +12973,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[809],
     /* return matcher indices */ &kMatcherIndices[5],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [442] */
@@ -12543,6 +12985,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[791],
     /* return matcher indices */ &kMatcherIndices[121],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [443] */
@@ -12554,6 +12997,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[981],
     /* return matcher indices */ &kMatcherIndices[62],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
   {
     /* [444] */
@@ -12565,6 +13009,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[591],
     /* return matcher indices */ &kMatcherIndices[173],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* const eval */ nullptr,
   },
 };
 

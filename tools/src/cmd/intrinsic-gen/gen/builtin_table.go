@@ -105,6 +105,8 @@ type Overload struct {
 	IsDeprecated bool
 	// The kind of overload
 	Kind string
+	// The function name used to evaluate the overload at shader-creation time
+	ConstEvalFunction string
 }
 
 // Intrinsic is used to create the C++ IntrinsicInfo structure
@@ -206,6 +208,7 @@ func (b *IntrinsicTableBuilder) buildOverload(o *sem.Overload) (Overload, error)
 		CanBeUsedInStage:           o.CanBeUsedInStage,
 		IsDeprecated:               o.IsDeprecated,
 		Kind:                       string(o.Decl.Kind),
+		ConstEvalFunction:          o.ConstEvalFunction,
 	}, nil
 }
 

@@ -143,15 +143,16 @@ type Intrinsic struct {
 
 // Overload describes a single overload of a builtin or operator
 type Overload struct {
-	Decl             ast.IntrinsicDecl
-	Intrinsic        *Intrinsic
-	TemplateParams   []TemplateParam
-	TemplateTypes    []*TemplateTypeParam
-	TemplateNumbers  []TemplateParam
-	ReturnType       *FullyQualifiedName
-	Parameters       []Parameter
-	CanBeUsedInStage StageUses
-	IsDeprecated     bool // True if this overload is deprecated
+	Decl              ast.IntrinsicDecl
+	Intrinsic         *Intrinsic
+	TemplateParams    []TemplateParam
+	TemplateTypes     []*TemplateTypeParam
+	TemplateNumbers   []TemplateParam
+	ReturnType        *FullyQualifiedName
+	Parameters        []Parameter
+	CanBeUsedInStage  StageUses
+	IsDeprecated      bool   // True if this overload is deprecated
+	ConstEvalFunction string // Name of the function used to evaluate the intrinsic at shader creation time
 }
 
 // StageUses describes the stages an overload can be used in

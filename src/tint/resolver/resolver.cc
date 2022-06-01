@@ -1492,30 +1492,48 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
                                  sem::BuiltinType builtin_type,
                                  std::vector<const sem::Expression*> args) {
-    const sem::Builtin* builtin = nullptr;
+    IntrinsicTable::Builtin builtin;
     {
         auto arg_tys = utils::Transform(args, [](auto* arg) { return arg->Type(); });
         builtin = intrinsic_table_->Lookup(builtin_type, arg_tys, expr->source);
-        if (!builtin) {
+        if (!builtin.sem) {
             return nullptr;
         }
     }
 
-    if (!MaterializeArguments(args, builtin)) {
+    if (!MaterializeArguments(args, builtin.sem)) {
         return nullptr;
     }
 
-    if (builtin->IsDeprecated()) {
+    if (builtin.sem->IsDeprecated()) {
         AddWarning("use of deprecated builtin", expr->source);
     }
 
-    bool has_side_effects =
-        builtin->HasSideEffects() ||
-        std::any_of(args.begin(), args.end(), [](auto* e) { return e->HasSideEffects(); });
-    auto* call = builder_->create<sem::Call>(expr, builtin, std::move(args), current_statement_,
-                                             sem::Constant{}, has_side_effects);
+    // If the builtin is @const, and all arguments have constant values, evaluate the builtin now.
+    sem::Constant constant;
+    if (builtin.const_eval_fn) {
+        std::vector<sem::Constant> values(args.size());
+        bool is_const = true;  // all arguments have constant values
+        for (size_t i = 0; i < values.size(); i++) {
+            if (auto v = args[i]->ConstantValue()) {
+                values[i] = std::move(v);
+            } else {
+                is_const = false;
+                break;
+            }
+        }
+        if (is_const) {
+            constant = builtin.const_eval_fn(*builder_, values.data(), args.size());
+        }
+    }
 
-    current_function_->AddDirectlyCalledBuiltin(builtin);
+    bool has_side_effects =
+        builtin.sem->HasSideEffects() ||
+        std::any_of(args.begin(), args.end(), [](auto* e) { return e->HasSideEffects(); });
+    auto* call = builder_->create<sem::Call>(expr, builtin.sem, std::move(args), current_statement_,
+                                             constant, has_side_effects);
+
+    current_function_->AddDirectlyCalledBuiltin(builtin.sem);
 
     if (!validator_.RequiredExtensionForBuiltinFunction(call, enabled_extensions_)) {
         return nullptr;
@@ -1525,7 +1543,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         if (!validator_.TextureBuiltinFunction(call)) {
             return nullptr;
         }
-        CollectTextureSamplerPairs(builtin, call->Arguments());
+        CollectTextureSamplerPairs(builtin.sem, call->Arguments());
     }
 
     if (!validator_.BuiltinCall(call)) {

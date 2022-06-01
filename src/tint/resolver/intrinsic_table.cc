@@ -844,6 +844,8 @@ struct OverloadInfo {
     MatcherIndex const* const return_matcher_indices;
     /// The flags for the overload
     OverloadFlags flags;
+    /// The function used to evaluate the overload at shader-creation time.
+    const_eval::Function* const const_eval_fn;
 };
 
 /// IntrinsicInfo describes a builtin function or operator overload
@@ -905,9 +907,9 @@ class Impl : public IntrinsicTable {
   public:
     explicit Impl(ProgramBuilder& builder);
 
-    const sem::Builtin* Lookup(sem::BuiltinType builtin_type,
-                               const std::vector<const sem::Type*>& args,
-                               const Source& source) override;
+    Builtin Lookup(sem::BuiltinType builtin_type,
+                   const std::vector<const sem::Type*>& args,
+                   const Source& source) override;
 
     UnaryOperator Lookup(ast::UnaryOp op, const sem::Type* arg, const Source& source) override;
 
@@ -1064,9 +1066,9 @@ std::string TemplateNumberMatcher::String(MatchState* state) const {
 
 Impl::Impl(ProgramBuilder& b) : builder(b) {}
 
-const sem::Builtin* Impl::Lookup(sem::BuiltinType builtin_type,
-                                 const std::vector<const sem::Type*>& args,
-                                 const Source& source) {
+Impl::Builtin Impl::Lookup(sem::BuiltinType builtin_type,
+                           const std::vector<const sem::Type*>& args,
+                           const Source& source) {
     const char* intrinsic_name = sem::str(builtin_type);
 
     // Generates an error when no overloads match the provided arguments
@@ -1090,7 +1092,7 @@ const sem::Builtin* Impl::Lookup(sem::BuiltinType builtin_type,
     }
 
     // De-duplicate builtins that are identical.
-    return utils::GetOrCreate(builtins, match, [&] {
+    auto* sem = utils::GetOrCreate(builtins, match, [&] {
         std::vector<sem::Parameter*> params;
         params.reserve(match.parameters.size());
         for (auto& p : match.parameters) {
@@ -1112,6 +1114,7 @@ const sem::Builtin* Impl::Lookup(sem::BuiltinType builtin_type,
             builtin_type, match.return_type, std::move(params), supported_stages,
             match.overload->flags.Contains(OverloadFlag::kIsDeprecated));
     });
+    return Builtin{sem, match.overload->const_eval_fn};
 }
 
 IntrinsicTable::UnaryOperator Impl::Lookup(ast::UnaryOp op,

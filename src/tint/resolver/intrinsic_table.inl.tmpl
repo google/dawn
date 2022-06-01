@@ -86,11 +86,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* num template numbers */ {{$o.NumTemplateNumbers}},
     /* template types */
 {{-   if $o.TemplateTypesOffset }} &kTemplateTypes[{{$o.TemplateTypesOffset}}],
-{{-   else                  }} nullptr,
+{{-   else                      }} nullptr,
 {{-   end }}
     /* template numbers */
 {{-   if $o.TemplateNumbersOffset }} &kTemplateNumbers[{{$o.TemplateNumbersOffset}}]
-{{-   else                    }} nullptr
+{{-   else                        }} nullptr
 {{-   end }},
     /* parameters */ &kParameters[{{$o.ParametersOffset}}],
     /* return matcher indices */
@@ -102,6 +102,10 @@ constexpr OverloadInfo kOverloads[] = {
         , OverloadFlag::kSupports{{Title $u}}Pipeline
 {{-   end }}
 {{-   if $o.IsDeprecated}}, OverloadFlag::kIsDeprecated{{end }}),
+    /* const eval */
+{{-   if $o.ConstEvalFunction }} const_eval::{{$o.ConstEvalFunction}},
+{{-   else                    }} nullptr,
+{{-   end }}
   },
 {{- end }}
 };

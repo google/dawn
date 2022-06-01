@@ -370,6 +370,8 @@ libtint_source_set("libtint_core_all_src") {
     "program_id.h",
     "reader/reader.cc",
     "reader/reader.h",
+    "resolver/const_eval.cc",
+    "resolver/const_eval.h",
     "resolver/ctor_conv_intrinsic.cc",
     "resolver/ctor_conv_intrinsic.h",
     "resolver/dependency_graph.cc",

@@ -326,6 +326,16 @@ func (r *resolver) intrinsic(
 			Compute:  true,
 		}
 	}
+	if constEvalFn := a.Attributes.Take("const"); constEvalFn != nil {
+		switch len(constEvalFn.Values) {
+		case 0:
+			overload.ConstEvalFunction = overload.Decl.Name
+		case 1:
+			overload.ConstEvalFunction = constEvalFn.Values[0]
+		default:
+			return fmt.Errorf("%v too many values for @const attribute", constEvalFn.Source)
+		}
+	}
 	if deprecated := a.Attributes.Take("deprecated"); deprecated != nil {
 		overload.IsDeprecated = true
 		if len(deprecated.Values) != 0 {
