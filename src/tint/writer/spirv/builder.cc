@@ -3161,7 +3161,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                 return false;
             }
 
-            auto* value_sem_type = TypeOf(call->Arguments()[2]->Declaration());
+            auto* value_sem_type = call->Target()->Signature().parameters[2]->Type();
 
             auto value_type = GenerateTypeIfNeeded(value_sem_type);
             if (value_type == 0) {
