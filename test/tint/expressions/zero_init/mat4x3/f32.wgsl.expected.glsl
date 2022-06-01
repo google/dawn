@@ -5,6 +5,6 @@ void unused_entry_point() {
   return;
 }
 void f() {
-  mat4x3 v = mat4x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+  mat4x3 v = mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f));
 }
 

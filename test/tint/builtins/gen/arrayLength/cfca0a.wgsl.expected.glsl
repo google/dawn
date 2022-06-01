@@ -9,7 +9,7 @@ void arrayLength_cfca0a() {
 
 vec4 vertex_main() {
   arrayLength_cfca0a();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

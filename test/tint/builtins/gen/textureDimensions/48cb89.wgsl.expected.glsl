@@ -7,7 +7,7 @@ void textureDimensions_48cb89() {
 
 vec4 vertex_main() {
   textureDimensions_48cb89();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

@@ -12,7 +12,7 @@ void insertBits_e3e3a2() {
 
 vec4 vertex_main() {
   insertBits_e3e3a2();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

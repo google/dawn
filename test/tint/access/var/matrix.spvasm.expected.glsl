@@ -1,7 +1,7 @@
 #version 310 es
 
 void main_1() {
-  mat3 m = mat3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+  mat3 m = mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f));
   vec3 x_15 = m[1];
   float x_16 = x_15.y;
   return;

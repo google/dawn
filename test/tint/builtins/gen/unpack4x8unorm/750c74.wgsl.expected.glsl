@@ -6,7 +6,7 @@ void unpack4x8unorm_750c74() {
 
 vec4 vertex_main() {
   unpack4x8unorm_750c74();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

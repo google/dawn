@@ -2,12 +2,12 @@
 
 layout(rgba8i) uniform highp writeonly iimage3D arg_0;
 void textureStore_b706b1() {
-  imageStore(arg_0, ivec3(0, 0, 0), ivec4(0, 0, 0, 0));
+  imageStore(arg_0, ivec3(0), ivec4(0));
 }
 
 vec4 vertex_main() {
   textureStore_b706b1();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -23,7 +23,7 @@ precision mediump float;
 
 layout(rgba8i) uniform highp writeonly iimage3D arg_0;
 void textureStore_b706b1() {
-  imageStore(arg_0, ivec3(0, 0, 0), ivec4(0, 0, 0, 0));
+  imageStore(arg_0, ivec3(0), ivec4(0));
 }
 
 void fragment_main() {
@@ -38,7 +38,7 @@ void main() {
 
 layout(rgba8i) uniform highp writeonly iimage3D arg_0;
 void textureStore_b706b1() {
-  imageStore(arg_0, ivec3(0, 0, 0), ivec4(0, 0, 0, 0));
+  imageStore(arg_0, ivec3(0), ivec4(0));
 }
 
 void compute_main() {

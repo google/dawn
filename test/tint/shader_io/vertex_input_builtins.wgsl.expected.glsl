@@ -2,7 +2,7 @@
 
 vec4 tint_symbol(uint vertex_index, uint instance_index) {
   uint foo = (vertex_index + instance_index);
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

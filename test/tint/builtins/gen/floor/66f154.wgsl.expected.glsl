@@ -6,7 +6,7 @@ void floor_66f154() {
 
 vec4 vertex_main() {
   floor_66f154();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

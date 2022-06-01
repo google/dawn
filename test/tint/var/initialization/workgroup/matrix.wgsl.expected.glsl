@@ -3,7 +3,7 @@
 shared mat2x3 v;
 void tint_symbol(uint local_invocation_index) {
   {
-    v = mat2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+    v = mat2x3(vec3(0.0f), vec3(0.0f));
   }
   barrier();
 }

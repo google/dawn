@@ -16,12 +16,12 @@ ivec3 tint_count_trailing_zeros(ivec3 v) {
 }
 
 void countTrailingZeros_acfacb() {
-  ivec3 res = tint_count_trailing_zeros(ivec3(0, 0, 0));
+  ivec3 res = tint_count_trailing_zeros(ivec3(0));
 }
 
 vec4 vertex_main() {
   countTrailingZeros_acfacb();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -51,7 +51,7 @@ ivec3 tint_count_trailing_zeros(ivec3 v) {
 }
 
 void countTrailingZeros_acfacb() {
-  ivec3 res = tint_count_trailing_zeros(ivec3(0, 0, 0));
+  ivec3 res = tint_count_trailing_zeros(ivec3(0));
 }
 
 void fragment_main() {
@@ -80,7 +80,7 @@ ivec3 tint_count_trailing_zeros(ivec3 v) {
 }
 
 void countTrailingZeros_acfacb() {
-  ivec3 res = tint_count_trailing_zeros(ivec3(0, 0, 0));
+  ivec3 res = tint_count_trailing_zeros(ivec3(0));
 }
 
 void compute_main() {

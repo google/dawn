@@ -1,12 +1,12 @@
 #version 310 es
 
 void min_c70bb7() {
-  uvec3 res = min(uvec3(0u, 0u, 0u), uvec3(0u, 0u, 0u));
+  uvec3 res = min(uvec3(0u), uvec3(0u));
 }
 
 vec4 vertex_main() {
   min_c70bb7();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void min_c70bb7() {
-  uvec3 res = min(uvec3(0u, 0u, 0u), uvec3(0u, 0u, 0u));
+  uvec3 res = min(uvec3(0u), uvec3(0u));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void min_c70bb7() {
-  uvec3 res = min(uvec3(0u, 0u, 0u), uvec3(0u, 0u, 0u));
+  uvec3 res = min(uvec3(0u), uvec3(0u));
 }
 
 void compute_main() {

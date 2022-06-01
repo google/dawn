@@ -1,7 +1,7 @@
 #version 310 es
 
 vec4 tint_symbol() {
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

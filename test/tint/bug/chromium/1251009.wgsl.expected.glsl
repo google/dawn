@@ -16,7 +16,7 @@ struct VertexInputs1 {
 
 vec4 tint_symbol(VertexInputs0 inputs0, uint loc1, uint instance_index, VertexInputs1 inputs1) {
   uint foo = (inputs0.vertex_index + instance_index);
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

@@ -6,7 +6,7 @@ void fract_fa5c71() {
 
 vec4 vertex_main() {
   fract_fa5c71();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

@@ -1,12 +1,12 @@
 #version 310 es
 
 void transpose_4ce359() {
-  mat4x2 res = transpose(mat2x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  mat4x2 res = transpose(mat2x4(vec4(0.0f), vec4(0.0f)));
 }
 
 vec4 vertex_main() {
   transpose_4ce359();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void transpose_4ce359() {
-  mat4x2 res = transpose(mat2x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  mat4x2 res = transpose(mat2x4(vec4(0.0f), vec4(0.0f)));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void transpose_4ce359() {
-  mat4x2 res = transpose(mat2x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  mat4x2 res = transpose(mat2x4(vec4(0.0f), vec4(0.0f)));
 }
 
 void compute_main() {

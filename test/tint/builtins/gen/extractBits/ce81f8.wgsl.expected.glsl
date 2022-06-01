@@ -12,7 +12,7 @@ void extractBits_ce81f8() {
 
 vec4 vertex_main() {
   extractBits_ce81f8();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

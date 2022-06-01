@@ -6,7 +6,7 @@ void sqrt_20c74e() {
 
 vec4 vertex_main() {
   sqrt_20c74e();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

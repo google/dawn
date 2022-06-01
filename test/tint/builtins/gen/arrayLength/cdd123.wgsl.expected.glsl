@@ -9,7 +9,7 @@ void arrayLength_cdd123() {
 
 vec4 vertex_main() {
   arrayLength_cdd123();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

@@ -1,12 +1,12 @@
 #version 310 es
 
 void reverseBits_a6ccd4() {
-  uvec3 res = bitfieldReverse(uvec3(0u, 0u, 0u));
+  uvec3 res = bitfieldReverse(uvec3(0u));
 }
 
 vec4 vertex_main() {
   reverseBits_a6ccd4();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void reverseBits_a6ccd4() {
-  uvec3 res = bitfieldReverse(uvec3(0u, 0u, 0u));
+  uvec3 res = bitfieldReverse(uvec3(0u));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void reverseBits_a6ccd4() {
-  uvec3 res = bitfieldReverse(uvec3(0u, 0u, 0u));
+  uvec3 res = bitfieldReverse(uvec3(0u));
 }
 
 void compute_main() {

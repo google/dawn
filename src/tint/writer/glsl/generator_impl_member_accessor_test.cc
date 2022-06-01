@@ -291,7 +291,7 @@ layout(binding = 0, std430) buffer Data_1 {
   mat2x3 b;
 } data;
 void tint_symbol() {
-  data.b = mat2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+  data.b = mat2x3(vec3(0.0f), vec3(0.0f));
 }
 
 void main() {

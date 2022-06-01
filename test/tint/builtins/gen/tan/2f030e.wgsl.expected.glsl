@@ -6,7 +6,7 @@ void tan_2f030e() {
 
 vec4 vertex_main() {
   tan_2f030e();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

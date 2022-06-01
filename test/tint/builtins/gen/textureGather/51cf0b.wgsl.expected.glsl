@@ -8,7 +8,7 @@ void textureGather_51cf0b() {
 
 vec4 vertex_main() {
   textureGather_51cf0b();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

@@ -1,12 +1,12 @@
 #version 310 es
 
 void max_320815() {
-  uvec2 res = max(uvec2(0u, 0u), uvec2(0u, 0u));
+  uvec2 res = max(uvec2(0u), uvec2(0u));
 }
 
 vec4 vertex_main() {
   max_320815();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void max_320815() {
-  uvec2 res = max(uvec2(0u, 0u), uvec2(0u, 0u));
+  uvec2 res = max(uvec2(0u), uvec2(0u));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void max_320815() {
-  uvec2 res = max(uvec2(0u, 0u), uvec2(0u, 0u));
+  uvec2 res = max(uvec2(0u), uvec2(0u));
 }
 
 void compute_main() {

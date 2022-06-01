@@ -6,7 +6,7 @@ void ceil_678655() {
 
 vec4 vertex_main() {
   ceil_678655();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

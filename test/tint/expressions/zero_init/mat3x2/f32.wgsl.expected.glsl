@@ -5,6 +5,6 @@ void unused_entry_point() {
   return;
 }
 void f() {
-  mat3x2 v = mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+  mat3x2 v = mat3x2(vec2(0.0f), vec2(0.0f), vec2(0.0f));
 }
 

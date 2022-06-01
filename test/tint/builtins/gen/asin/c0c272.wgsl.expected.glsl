@@ -6,7 +6,7 @@ void asin_c0c272() {
 
 vec4 vertex_main() {
   asin_c0c272();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

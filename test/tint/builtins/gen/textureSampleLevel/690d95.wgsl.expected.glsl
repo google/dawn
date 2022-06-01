@@ -3,12 +3,12 @@
 uniform highp sampler2D arg_0_arg_1;
 
 void textureSampleLevel_690d95() {
-  vec4 res = textureLodOffset(arg_0_arg_1, vec2(0.0f, 0.0f), 1.0f, ivec2(0, 0));
+  vec4 res = textureLodOffset(arg_0_arg_1, vec2(0.0f), 1.0f, ivec2(0));
 }
 
 vec4 vertex_main() {
   textureSampleLevel_690d95();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -25,7 +25,7 @@ precision mediump float;
 uniform highp sampler2D arg_0_arg_1;
 
 void textureSampleLevel_690d95() {
-  vec4 res = textureLodOffset(arg_0_arg_1, vec2(0.0f, 0.0f), 1.0f, ivec2(0, 0));
+  vec4 res = textureLodOffset(arg_0_arg_1, vec2(0.0f), 1.0f, ivec2(0));
 }
 
 void fragment_main() {
@@ -41,7 +41,7 @@ void main() {
 uniform highp sampler2D arg_0_arg_1;
 
 void textureSampleLevel_690d95() {
-  vec4 res = textureLodOffset(arg_0_arg_1, vec2(0.0f, 0.0f), 1.0f, ivec2(0, 0));
+  vec4 res = textureLodOffset(arg_0_arg_1, vec2(0.0f), 1.0f, ivec2(0));
 }
 
 void compute_main() {

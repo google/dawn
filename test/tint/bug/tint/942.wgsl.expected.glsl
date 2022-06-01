@@ -28,7 +28,7 @@ void tint_symbol(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocati
     for(uint idx = local_invocation_index; (idx < 1024u); idx = (idx + 64u)) {
       uint i_1 = (idx / 256u);
       uint i_2 = (idx % 256u);
-      tile[i_1][i_2] = vec3(0.0f, 0.0f, 0.0f);
+      tile[i_1][i_2] = vec3(0.0f);
     }
   }
   barrier();
@@ -43,7 +43,7 @@ void tint_symbol(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocati
           if ((flip.value != 0u)) {
             loadIndex = loadIndex.yx;
           }
-          tile[r][((4u * LocalInvocationID.x) + c)] = textureLod(inputTex_samp, ((vec2(loadIndex) + vec2(0.25f, 0.25f)) / vec2(dims)), 0.0f).rgb;
+          tile[r][((4u * LocalInvocationID.x) + c)] = textureLod(inputTex_samp, ((vec2(loadIndex) + vec2(0.25f)) / vec2(dims)), 0.0f).rgb;
         }
       }
     }
@@ -67,7 +67,7 @@ void tint_symbol(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocati
             tint_tmp = all(lessThan(writeIndex, dims));
           }
           if ((tint_tmp)) {
-            vec3 acc = vec3(0.0f, 0.0f, 0.0f);
+            vec3 acc = vec3(0.0f);
             {
               for(uint f = 0u; (f < params.filterDim); f = (f + 1u)) {
                 uint i = ((center + f) - filterOffset);

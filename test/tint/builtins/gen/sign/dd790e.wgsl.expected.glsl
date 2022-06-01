@@ -6,7 +6,7 @@ void sign_dd790e() {
 
 vec4 vertex_main() {
   sign_dd790e();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

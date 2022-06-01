@@ -60,7 +60,7 @@ struct Particles {
 };
 
 vec4 frag_main() {
-  return vec4(1.0f, 1.0f, 1.0f, 1.0f);
+  return vec4(1.0f);
 }
 
 void main() {
@@ -112,9 +112,9 @@ void comp_main(uvec3 tint_symbol) {
   }
   vec2 vPos = particlesA.particles[index].pos;
   vec2 vVel = particlesA.particles[index].vel;
-  vec2 cMass = vec2(0.0f, 0.0f);
-  vec2 cVel = vec2(0.0f, 0.0f);
-  vec2 colVel = vec2(0.0f, 0.0f);
+  vec2 cMass = vec2(0.0f);
+  vec2 cVel = vec2(0.0f);
+  vec2 colVel = vec2(0.0f);
   int cMassCount = 0;
   int cVelCount = 0;
   vec2 pos = vec2(0.0f, 0.0f);

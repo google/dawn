@@ -2,7 +2,7 @@
 precision mediump float;
 
 void dpdyFine_1fb7ab() {
-  vec3 res = dFdy(vec3(0.0f, 0.0f, 0.0f));
+  vec3 res = dFdy(vec3(0.0f));
 }
 
 void fragment_main() {

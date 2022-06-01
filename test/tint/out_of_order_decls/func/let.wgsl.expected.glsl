@@ -3,7 +3,7 @@ precision mediump float;
 
 const int a = 1;
 void f() {
-  int b = a;
+  int b = 1;
 }
 
 void main() {

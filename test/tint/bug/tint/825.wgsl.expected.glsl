@@ -8,6 +8,6 @@ void f() {
   int i = 0;
   int j = 0;
   mat2 m = mat2(vec2(1.0f, 2.0f), vec2(3.0f, 4.0f));
-  float f_1 = m[i][j];
+  float f_1 = mat2(vec2(1.0f, 2.0f), vec2(3.0f, 4.0f))[i][j];
 }
 

@@ -7,7 +7,7 @@ void textureDimensions_bb3dde() {
 
 vec4 vertex_main() {
   textureDimensions_bb3dde();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

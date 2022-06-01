@@ -1,12 +1,12 @@
 #version 310 es
 
 void log2_aea659() {
-  vec2 res = log2(vec2(0.0f, 0.0f));
+  vec2 res = log2(vec2(0.0f));
 }
 
 vec4 vertex_main() {
   log2_aea659();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void log2_aea659() {
-  vec2 res = log2(vec2(0.0f, 0.0f));
+  vec2 res = log2(vec2(0.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void log2_aea659() {
-  vec2 res = log2(vec2(0.0f, 0.0f));
+  vec2 res = log2(vec2(0.0f));
 }
 
 void compute_main() {

@@ -11,7 +11,7 @@ void radians_6b0ff2() {
 
 vec4 vertex_main() {
   radians_6b0ff2();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

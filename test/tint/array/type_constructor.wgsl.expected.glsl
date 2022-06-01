@@ -4,7 +4,7 @@ void tint_symbol() {
   int x = 42;
   int empty[4] = int[4](0, 0, 0, 0);
   int nonempty[4] = int[4](1, 2, 3, 4);
-  int nonempty_with_expr[4] = int[4](1, x, (x + 1), nonempty[3]);
+  int nonempty_with_expr[4] = int[4](1, 42, (42 + 1), nonempty[3]);
   int nested_empty[2][3][4] = int[2][3][4](int[3][4](int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0)), int[3][4](int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0)));
   int tint_symbol_1[4] = int[4](1, 2, 3, 4);
   int tint_symbol_2[4] = int[4](5, 6, 7, 8);
@@ -15,7 +15,7 @@ void tint_symbol() {
   int tint_symbol_7[4] = int[4](21, 22, 23, 24);
   int tint_symbol_8[3][4] = int[3][4](tint_symbol_5, tint_symbol_6, tint_symbol_7);
   int nested_nonempty[2][3][4] = int[2][3][4](tint_symbol_4, tint_symbol_8);
-  int tint_symbol_9[4] = int[4](1, 2, x, (x + 1));
+  int tint_symbol_9[4] = int[4](1, 2, 42, (42 + 1));
   int tint_symbol_10[4] = int[4](5, 6, nonempty[2], (nonempty[3] + 1));
   int tint_symbol_11[3][4] = int[3][4](tint_symbol_9, tint_symbol_10, nonempty);
   int nested_nonempty_with_expr[2][3][4] = int[2][3][4](tint_symbol_11, nested_nonempty[1]);
@@ -23,7 +23,7 @@ void tint_symbol() {
   int subexpr_empty = tint_symbol_12[1];
   int tint_symbol_13[4] = int[4](1, 2, 3, 4);
   int subexpr_nonempty = tint_symbol_13[2];
-  int tint_symbol_14[4] = int[4](1, x, (x + 1), nonempty[3]);
+  int tint_symbol_14[4] = int[4](1, 42, (42 + 1), nonempty[3]);
   int subexpr_nonempty_with_expr = tint_symbol_14[2];
   int tint_symbol_15[2][4] = int[2][4](int[4](0, 0, 0, 0), int[4](0, 0, 0, 0));
   int subexpr_nested_empty[4] = tint_symbol_15[1];
@@ -31,7 +31,7 @@ void tint_symbol() {
   int tint_symbol_17[4] = int[4](5, 6, 7, 8);
   int tint_symbol_18[2][4] = int[2][4](tint_symbol_16, tint_symbol_17);
   int subexpr_nested_nonempty[4] = tint_symbol_18[1];
-  int tint_symbol_19[4] = int[4](1, x, (x + 1), nonempty[3]);
+  int tint_symbol_19[4] = int[4](1, 42, (42 + 1), nonempty[3]);
   int tint_symbol_20[2][4] = int[2][4](tint_symbol_19, nested_nonempty[1][2]);
   int subexpr_nested_nonempty_with_expr[4] = tint_symbol_20[1];
 }

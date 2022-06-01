@@ -1,12 +1,12 @@
 #version 310 es
 
 void pack4x8snorm_4d22e7() {
-  uint res = packSnorm4x8(vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  uint res = packSnorm4x8(vec4(0.0f));
 }
 
 vec4 vertex_main() {
   pack4x8snorm_4d22e7();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void pack4x8snorm_4d22e7() {
-  uint res = packSnorm4x8(vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  uint res = packSnorm4x8(vec4(0.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void pack4x8snorm_4d22e7() {
-  uint res = packSnorm4x8(vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  uint res = packSnorm4x8(vec4(0.0f));
 }
 
 void compute_main() {

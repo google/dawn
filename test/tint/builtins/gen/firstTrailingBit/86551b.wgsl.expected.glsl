@@ -16,12 +16,12 @@ ivec4 tint_first_trailing_bit(ivec4 v) {
 }
 
 void firstTrailingBit_86551b() {
-  ivec4 res = tint_first_trailing_bit(ivec4(0, 0, 0, 0));
+  ivec4 res = tint_first_trailing_bit(ivec4(0));
 }
 
 vec4 vertex_main() {
   firstTrailingBit_86551b();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -51,7 +51,7 @@ ivec4 tint_first_trailing_bit(ivec4 v) {
 }
 
 void firstTrailingBit_86551b() {
-  ivec4 res = tint_first_trailing_bit(ivec4(0, 0, 0, 0));
+  ivec4 res = tint_first_trailing_bit(ivec4(0));
 }
 
 void fragment_main() {
@@ -80,7 +80,7 @@ ivec4 tint_first_trailing_bit(ivec4 v) {
 }
 
 void firstTrailingBit_86551b() {
-  ivec4 res = tint_first_trailing_bit(ivec4(0, 0, 0, 0));
+  ivec4 res = tint_first_trailing_bit(ivec4(0));
 }
 
 void compute_main() {

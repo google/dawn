@@ -6,7 +6,7 @@ void exp_771fd2() {
 
 vec4 vertex_main() {
   exp_771fd2();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

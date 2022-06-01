@@ -21,7 +21,7 @@ void firstTrailingBit_47d475() {
 
 vec4 vertex_main() {
   firstTrailingBit_47d475();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

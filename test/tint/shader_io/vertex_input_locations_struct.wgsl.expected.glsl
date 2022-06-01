@@ -16,7 +16,7 @@ vec4 tint_symbol(VertexInputs inputs) {
   uint u = inputs.loc1;
   float f = inputs.loc2;
   vec4 v = inputs.loc3;
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

@@ -9,7 +9,7 @@ void arrayLength_eb510f() {
 
 vec4 vertex_main() {
   arrayLength_eb510f();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

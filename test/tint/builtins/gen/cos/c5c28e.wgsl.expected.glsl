@@ -6,7 +6,7 @@ void cos_c5c28e() {
 
 vec4 vertex_main() {
   cos_c5c28e();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

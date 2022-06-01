@@ -334,7 +334,7 @@ modf_result_vec3 tint_modf(vec3 param_0) {
 
 
 void test_function() {
-  tint_modf(vec3(0.0f, 0.0f, 0.0f));
+  tint_modf(vec3(0.0f));
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -394,7 +394,7 @@ frexp_result_vec3 tint_frexp(vec3 param_0) {
 
 
 void test_function() {
-  tint_frexp(vec3(0.0f, 0.0f, 0.0f));
+  tint_frexp(vec3(0.0f));
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

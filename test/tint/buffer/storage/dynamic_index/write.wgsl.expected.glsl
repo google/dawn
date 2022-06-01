@@ -16,14 +16,14 @@ layout(binding = 0, std430) buffer S_1 {
   Inner arr[];
 } s;
 void tint_symbol(uint idx) {
-  s.arr[idx].a = ivec3(0, 0, 0);
+  s.arr[idx].a = ivec3(0);
   s.arr[idx].b = 0;
-  s.arr[idx].c = uvec3(0u, 0u, 0u);
+  s.arr[idx].c = uvec3(0u);
   s.arr[idx].d = 0u;
-  s.arr[idx].e = vec3(0.0f, 0.0f, 0.0f);
+  s.arr[idx].e = vec3(0.0f);
   s.arr[idx].f = 0.0f;
-  s.arr[idx].g = mat2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-  s.arr[idx].h = mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+  s.arr[idx].g = mat2x3(vec3(0.0f), vec3(0.0f));
+  s.arr[idx].h = mat3x2(vec2(0.0f), vec2(0.0f), vec2(0.0f));
   ivec4 tint_symbol_1[4] = ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
   s.arr[idx].i = tint_symbol_1;
 }

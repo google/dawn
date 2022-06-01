@@ -5,12 +5,12 @@ builtins/gen/smoothstep/658be3.wgsl:28:24 warning: use of deprecated builtin
 #version 310 es
 
 void smoothStep_658be3() {
-  vec3 res = smoothstep(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
+  vec3 res = smoothstep(vec3(0.0f), vec3(0.0f), vec3(0.0f));
 }
 
 vec4 vertex_main() {
   smoothStep_658be3();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -25,7 +25,7 @@ void main() {
 precision mediump float;
 
 void smoothStep_658be3() {
-  vec3 res = smoothstep(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
+  vec3 res = smoothstep(vec3(0.0f), vec3(0.0f), vec3(0.0f));
 }
 
 void fragment_main() {
@@ -39,7 +39,7 @@ void main() {
 #version 310 es
 
 void smoothStep_658be3() {
-  vec3 res = smoothstep(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f));
+  vec3 res = smoothstep(vec3(0.0f), vec3(0.0f), vec3(0.0f));
 }
 
 void compute_main() {

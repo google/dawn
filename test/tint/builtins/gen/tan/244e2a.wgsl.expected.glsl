@@ -1,12 +1,12 @@
 #version 310 es
 
 void tan_244e2a() {
-  vec4 res = tan(vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  vec4 res = tan(vec4(0.0f));
 }
 
 vec4 vertex_main() {
   tan_244e2a();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void tan_244e2a() {
-  vec4 res = tan(vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  vec4 res = tan(vec4(0.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void tan_244e2a() {
-  vec4 res = tan(vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  vec4 res = tan(vec4(0.0f));
 }
 
 void compute_main() {

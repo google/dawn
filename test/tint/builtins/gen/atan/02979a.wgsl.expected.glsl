@@ -6,7 +6,7 @@ void atan_02979a() {
 
 vec4 vertex_main() {
   atan_02979a();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

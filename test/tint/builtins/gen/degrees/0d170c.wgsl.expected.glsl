@@ -6,12 +6,12 @@ vec4 tint_degrees(vec4 param_0) {
 
 
 void degrees_0d170c() {
-  vec4 res = tint_degrees(vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  vec4 res = tint_degrees(vec4(0.0f));
 }
 
 vec4 vertex_main() {
   degrees_0d170c();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -31,7 +31,7 @@ vec4 tint_degrees(vec4 param_0) {
 
 
 void degrees_0d170c() {
-  vec4 res = tint_degrees(vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  vec4 res = tint_degrees(vec4(0.0f));
 }
 
 void fragment_main() {
@@ -50,7 +50,7 @@ vec4 tint_degrees(vec4 param_0) {
 
 
 void degrees_0d170c() {
-  vec4 res = tint_degrees(vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  vec4 res = tint_degrees(vec4(0.0f));
 }
 
 void compute_main() {

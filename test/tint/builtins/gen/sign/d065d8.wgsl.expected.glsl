@@ -1,12 +1,12 @@
 #version 310 es
 
 void sign_d065d8() {
-  vec2 res = sign(vec2(0.0f, 0.0f));
+  vec2 res = sign(vec2(0.0f));
 }
 
 vec4 vertex_main() {
   sign_d065d8();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void sign_d065d8() {
-  vec2 res = sign(vec2(0.0f, 0.0f));
+  vec2 res = sign(vec2(0.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void sign_d065d8() {
-  vec2 res = sign(vec2(0.0f, 0.0f));
+  vec2 res = sign(vec2(0.0f));
 }
 
 void compute_main() {

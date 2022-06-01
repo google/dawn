@@ -7,8 +7,8 @@ ivec3 tint_insert_bits(ivec3 v, ivec3 n, uint offset, uint count) {
 }
 
 void f_1() {
-  ivec3 v = ivec3(0, 0, 0);
-  ivec3 n = ivec3(0, 0, 0);
+  ivec3 v = ivec3(0);
+  ivec3 n = ivec3(0);
   uint offset_1 = 0u;
   uint count = 0u;
   ivec3 x_16 = tint_insert_bits(v, n, offset_1, count);

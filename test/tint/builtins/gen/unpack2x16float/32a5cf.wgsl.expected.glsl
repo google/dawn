@@ -6,7 +6,7 @@ void unpack2x16float_32a5cf() {
 
 vec4 vertex_main() {
   unpack2x16float_32a5cf();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

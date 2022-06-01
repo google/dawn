@@ -13,7 +13,7 @@ layout(binding = 0, std430) buffer a_block_1 {
 } a;
 void tint_symbol() {
   int tint_symbol_2 = 1;
-  a.inner[tint_symbol_2] = (a.inner[tint_symbol_2] + 1u);
+  a.inner[1] = (a.inner[1] + 1u);
   a.inner.z = (a.inner.z + 1u);
 }
 

@@ -67,7 +67,7 @@ mat4 getFrameData_f1_(inout float frameID) {
   vec4 x_40 = texture(frameMapTexture_frameMapSampler, vec2(fX, 0.0f), 0.0f);
   vec4 x_47 = texture(frameMapTexture_frameMapSampler, vec2(fX, 0.25f), 0.0f);
   vec4 x_54 = texture(frameMapTexture_frameMapSampler, vec2(fX, 0.5f), 0.0f);
-  return mat4(vec4(x_40.x, x_40.y, x_40.z, x_40.w), vec4(x_47.x, x_47.y, x_47.z, x_47.w), vec4(x_54.x, x_54.y, x_54.z, x_54.w), vec4(vec4(0.0f, 0.0f, 0.0f, 0.0f).x, vec4(0.0f, 0.0f, 0.0f, 0.0f).y, vec4(0.0f, 0.0f, 0.0f, 0.0f).z, vec4(0.0f, 0.0f, 0.0f, 0.0f).w));
+  return mat4(vec4(x_40.x, x_40.y, x_40.z, x_40.w), vec4(x_47.x, x_47.y, x_47.z, x_47.w), vec4(x_54.x, x_54.y, x_54.z, x_54.w), vec4(vec4(0.0f).x, vec4(0.0f).y, vec4(0.0f).z, vec4(0.0f).w));
 }
 
 uniform highp sampler2D tileMapsTexture1_tileMapsSampler;
@@ -93,17 +93,17 @@ void main_1() {
   vec4 nc = vec4(0.0f, 0.0f, 0.0f, 0.0f);
   float alpha = 0.0f;
   vec3 mixed = vec3(0.0f, 0.0f, 0.0f);
-  color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  color = vec4(0.0f);
   tileUV = fract(tUV);
   float x_91 = tileUV.y;
   tileUV.y = (1.0f - x_91);
   tileID = floor(tUV);
   vec2 x_101 = x_20.spriteMapSize;
-  sheetUnits = (vec2(1.0f, 1.0f) / x_101);
+  sheetUnits = (vec2(1.0f) / x_101);
   float x_106 = x_20.spriteCount;
   spriteUnits = (1.0f / x_106);
   vec2 x_111 = x_20.stageSize;
-  stageUnits = (vec2(1.0f, 1.0f) / x_111);
+  stageUnits = (vec2(1.0f) / x_111);
   i = 0;
   {
     for(; (i < 2); i = (i + 1)) {
@@ -111,14 +111,14 @@ void main_1() {
         case 1: {
           vec2 x_150 = tileID;
           vec2 x_154 = x_20.stageSize;
-          vec4 x_156 = texture(tileMapsTexture1_tileMapsSampler, ((x_150 + vec2(0.5f, 0.5f)) / x_154), 0.0f);
+          vec4 x_156 = texture(tileMapsTexture1_tileMapsSampler, ((x_150 + vec2(0.5f)) / x_154), 0.0f);
           frameID_1 = x_156.x;
           break;
         }
         case 0: {
           vec2 x_136 = tileID;
           vec2 x_140 = x_20.stageSize;
-          vec4 x_142 = texture(tileMapsTexture0_tileMapsSampler, ((x_136 + vec2(0.5f, 0.5f)) / x_140), 0.0f);
+          vec4 x_142 = texture(tileMapsTexture0_tileMapsSampler, ((x_136 + vec2(0.5f)) / x_140), 0.0f);
           frameID_1 = x_142.x;
           break;
         }

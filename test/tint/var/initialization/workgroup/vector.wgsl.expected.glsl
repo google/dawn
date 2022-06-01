@@ -3,7 +3,7 @@
 shared ivec3 v;
 void tint_symbol(uint local_invocation_index) {
   {
-    v = ivec3(0, 0, 0);
+    v = ivec3(0);
   }
   barrier();
 }

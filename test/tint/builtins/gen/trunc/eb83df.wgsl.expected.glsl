@@ -6,7 +6,7 @@ void trunc_eb83df() {
 
 vec4 vertex_main() {
   trunc_eb83df();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

@@ -6,7 +6,7 @@ void select_c31f9e() {
 
 vec4 vertex_main() {
   select_c31f9e();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

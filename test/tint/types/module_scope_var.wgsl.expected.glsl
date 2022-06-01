@@ -19,10 +19,10 @@ void tint_symbol() {
   i32_var = 0;
   u32_var = 0u;
   f32_var = 0.0f;
-  v2i32_var = ivec2(0, 0);
-  v3u32_var = uvec3(0u, 0u, 0u);
-  v4f32_var = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-  m2x3_var = mat2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+  v2i32_var = ivec2(0);
+  v3u32_var = uvec3(0u);
+  v4f32_var = vec4(0.0f);
+  m2x3_var = mat2x3(vec3(0.0f), vec3(0.0f));
   float tint_symbol_1[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
   arr_var = tint_symbol_1;
   S tint_symbol_2 = S(0.0f);

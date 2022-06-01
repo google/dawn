@@ -21,7 +21,7 @@ void firstLeadingBit_f0779d() {
 
 vec4 vertex_main() {
   firstLeadingBit_f0779d();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

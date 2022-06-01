@@ -5,12 +5,12 @@ uint tint_int_dot(uvec3 a, uvec3 b) {
 }
 
 void dot_7548a0() {
-  uint res = tint_int_dot(uvec3(0u, 0u, 0u), uvec3(0u, 0u, 0u));
+  uint res = tint_int_dot(uvec3(0u), uvec3(0u));
 }
 
 vec4 vertex_main() {
   dot_7548a0();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -29,7 +29,7 @@ uint tint_int_dot(uvec3 a, uvec3 b) {
 }
 
 void dot_7548a0() {
-  uint res = tint_int_dot(uvec3(0u, 0u, 0u), uvec3(0u, 0u, 0u));
+  uint res = tint_int_dot(uvec3(0u), uvec3(0u));
 }
 
 void fragment_main() {
@@ -47,7 +47,7 @@ uint tint_int_dot(uvec3 a, uvec3 b) {
 }
 
 void dot_7548a0() {
-  uint res = tint_int_dot(uvec3(0u, 0u, 0u), uvec3(0u, 0u, 0u));
+  uint res = tint_int_dot(uvec3(0u), uvec3(0u));
 }
 
 void compute_main() {

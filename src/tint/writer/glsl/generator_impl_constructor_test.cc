@@ -67,7 +67,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Float) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("float(-0.000012f)"));
+    EXPECT_THAT(gen.result(), HasSubstr("-0.000012f"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Bool) {
@@ -76,7 +76,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Bool) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("bool(true)"));
+    EXPECT_THAT(gen.result(), HasSubstr("true"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Int) {
@@ -85,7 +85,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Int) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("int(-12345)"));
+    EXPECT_THAT(gen.result(), HasSubstr("-12345"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Uint) {
@@ -94,7 +94,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Uint) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("uint(12345u)"));
+    EXPECT_THAT(gen.result(), HasSubstr("12345u"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec) {
@@ -112,7 +112,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_Empty) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("vec3(0.0f, 0.0f, 0.0f)"));
+    EXPECT_THAT(gen.result(), HasSubstr("vec3(0.0f)"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_SingleScalar_Float) {
@@ -168,7 +168,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat_Empty) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
 
-    EXPECT_THAT(gen.result(), HasSubstr("mat2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)"));
+    EXPECT_THAT(gen.result(), HasSubstr("mat2x3(vec3(0.0f), vec3(0.0f)"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array) {

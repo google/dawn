@@ -6,7 +6,7 @@ void smoothstep_6c4975() {
 
 vec4 vertex_main() {
   smoothstep_6c4975();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

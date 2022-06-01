@@ -1,12 +1,12 @@
 #version 310 es
 
 void clamp_bd43ce() {
-  uvec4 res = clamp(uvec4(0u, 0u, 0u, 0u), uvec4(0u, 0u, 0u, 0u), uvec4(0u, 0u, 0u, 0u));
+  uvec4 res = clamp(uvec4(0u), uvec4(0u), uvec4(0u));
 }
 
 vec4 vertex_main() {
   clamp_bd43ce();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void clamp_bd43ce() {
-  uvec4 res = clamp(uvec4(0u, 0u, 0u, 0u), uvec4(0u, 0u, 0u, 0u), uvec4(0u, 0u, 0u, 0u));
+  uvec4 res = clamp(uvec4(0u), uvec4(0u), uvec4(0u));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void clamp_bd43ce() {
-  uvec4 res = clamp(uvec4(0u, 0u, 0u, 0u), uvec4(0u, 0u, 0u, 0u), uvec4(0u, 0u, 0u, 0u));
+  uvec4 res = clamp(uvec4(0u), uvec4(0u), uvec4(0u));
 }
 
 void compute_main() {

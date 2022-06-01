@@ -9,7 +9,7 @@ shared vec4 b;
 shared mat2 c;
 void foo() {
   a = (a / 2);
-  b = (b * mat4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  b = (b * mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)));
   c = (c * 2.0f);
 }
 

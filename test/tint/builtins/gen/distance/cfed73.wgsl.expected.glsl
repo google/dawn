@@ -6,7 +6,7 @@ void distance_cfed73() {
 
 vec4 vertex_main() {
   distance_cfed73();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

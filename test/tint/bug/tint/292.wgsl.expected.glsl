@@ -3,7 +3,7 @@
 vec4 tint_symbol() {
   vec3 light = vec3(1.200000048f, 1.0f, 2.0f);
   vec3 negative_light = -(light);
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

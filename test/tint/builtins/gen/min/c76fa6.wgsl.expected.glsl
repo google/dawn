@@ -1,12 +1,12 @@
 #version 310 es
 
 void min_c76fa6() {
-  vec4 res = min(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  vec4 res = min(vec4(0.0f), vec4(0.0f));
 }
 
 vec4 vertex_main() {
   min_c76fa6();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void min_c76fa6() {
-  vec4 res = min(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  vec4 res = min(vec4(0.0f), vec4(0.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void min_c76fa6() {
-  vec4 res = min(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  vec4 res = min(vec4(0.0f), vec4(0.0f));
 }
 
 void compute_main() {

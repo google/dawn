@@ -6,7 +6,7 @@ void min_af326d() {
 
 vec4 vertex_main() {
   min_af326d();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

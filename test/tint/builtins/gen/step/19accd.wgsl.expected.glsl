@@ -1,12 +1,12 @@
 #version 310 es
 
 void step_19accd() {
-  vec2 res = step(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));
+  vec2 res = step(vec2(0.0f), vec2(0.0f));
 }
 
 vec4 vertex_main() {
   step_19accd();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void step_19accd() {
-  vec2 res = step(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));
+  vec2 res = step(vec2(0.0f), vec2(0.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void step_19accd() {
-  vec2 res = step(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));
+  vec2 res = step(vec2(0.0f), vec2(0.0f));
 }
 
 void compute_main() {

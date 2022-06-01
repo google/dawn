@@ -1,12 +1,12 @@
 #version 310 es
 
 void ldexp_cc9cde() {
-  vec4 res = ldexp(vec4(0.0f, 0.0f, 0.0f, 0.0f), ivec4(0, 0, 0, 0));
+  vec4 res = ldexp(vec4(0.0f), ivec4(0));
 }
 
 vec4 vertex_main() {
   ldexp_cc9cde();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void ldexp_cc9cde() {
-  vec4 res = ldexp(vec4(0.0f, 0.0f, 0.0f, 0.0f), ivec4(0, 0, 0, 0));
+  vec4 res = ldexp(vec4(0.0f), ivec4(0));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void ldexp_cc9cde() {
-  vec4 res = ldexp(vec4(0.0f, 0.0f, 0.0f, 0.0f), ivec4(0, 0, 0, 0));
+  vec4 res = ldexp(vec4(0.0f), ivec4(0));
 }
 
 void compute_main() {

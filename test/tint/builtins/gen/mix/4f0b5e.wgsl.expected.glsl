@@ -6,7 +6,7 @@ void mix_4f0b5e() {
 
 vec4 vertex_main() {
   mix_4f0b5e();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

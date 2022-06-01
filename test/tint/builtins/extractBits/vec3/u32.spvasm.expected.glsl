@@ -7,7 +7,7 @@ uvec3 tint_extract_bits(uvec3 v, uint offset, uint count) {
 }
 
 void f_1() {
-  uvec3 v = uvec3(0u, 0u, 0u);
+  uvec3 v = uvec3(0u);
   uint offset_1 = 0u;
   uint count = 0u;
   uvec3 x_14 = tint_extract_bits(v, offset_1, count);

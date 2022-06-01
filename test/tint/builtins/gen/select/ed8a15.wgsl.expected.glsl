@@ -6,7 +6,7 @@ void select_ed8a15() {
 
 vec4 vertex_main() {
   select_ed8a15();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

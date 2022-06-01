@@ -6,7 +6,7 @@ void max_ce7c30() {
 
 vec4 vertex_main() {
   max_ce7c30();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

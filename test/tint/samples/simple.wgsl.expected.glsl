@@ -6,7 +6,7 @@ void bar() {
 }
 
 vec4 tint_symbol() {
-  vec2 a = vec2(0.0f, 0.0f);
+  vec2 a = vec2(0.0f);
   bar();
   return vec4(0.400000006f, 0.400000006f, 0.800000012f, 1.0f);
 }

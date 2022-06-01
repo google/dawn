@@ -13,12 +13,12 @@ modf_result_vec4 tint_modf(vec4 param_0) {
 
 
 void modf_ec2dbc() {
-  modf_result_vec4 res = tint_modf(vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  modf_result_vec4 res = tint_modf(vec4(0.0f));
 }
 
 vec4 vertex_main() {
   modf_ec2dbc();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -45,7 +45,7 @@ modf_result_vec4 tint_modf(vec4 param_0) {
 
 
 void modf_ec2dbc() {
-  modf_result_vec4 res = tint_modf(vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  modf_result_vec4 res = tint_modf(vec4(0.0f));
 }
 
 void fragment_main() {
@@ -71,7 +71,7 @@ modf_result_vec4 tint_modf(vec4 param_0) {
 
 
 void modf_ec2dbc() {
-  modf_result_vec4 res = tint_modf(vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  modf_result_vec4 res = tint_modf(vec4(0.0f));
 }
 
 void compute_main() {

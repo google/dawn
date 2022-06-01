@@ -21,7 +21,7 @@ void countTrailingZeros_21e394() {
 
 vec4 vertex_main() {
   countTrailingZeros_21e394();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

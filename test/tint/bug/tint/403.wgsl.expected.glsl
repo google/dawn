@@ -21,7 +21,7 @@ vec4 tint_symbol(uint tint_symbol_1) {
   mat2 x_23 = x_20.transform1;
   mat2 x_28 = x_26.transform2;
   uint x_46 = tint_symbol_1;
-  vec2 tint_symbol_2[3] = vec2[3](vec2(-1.0f, 1.0f), vec2(1.0f, 1.0f), vec2(-1.0f, -1.0f));
+  vec2 tint_symbol_2[3] = vec2[3](vec2(-1.0f, 1.0f), vec2(1.0f), vec2(-1.0f));
   indexable = tint_symbol_2;
   vec2 x_51 = indexable[x_46];
   vec2 x_52 = (mat2((x_23[0u] + x_28[0u]), (x_23[1u] + x_28[1u])) * x_51);

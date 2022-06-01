@@ -1,12 +1,12 @@
 #version 310 es
 
 void determinant_2b62ba() {
-  float res = determinant(mat3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  float res = determinant(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)));
 }
 
 vec4 vertex_main() {
   determinant_2b62ba();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void determinant_2b62ba() {
-  float res = determinant(mat3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  float res = determinant(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void determinant_2b62ba() {
-  float res = determinant(mat3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  float res = determinant(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)));
 }
 
 void compute_main() {

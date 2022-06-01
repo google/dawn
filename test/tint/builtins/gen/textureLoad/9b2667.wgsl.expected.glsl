@@ -7,7 +7,7 @@ void textureLoad_9b2667() {
 
 vec4 vertex_main() {
   textureLoad_9b2667();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

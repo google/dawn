@@ -8,7 +8,7 @@ void textureSampleCompareLevel_2ad2b1() {
 
 vec4 vertex_main() {
   textureSampleCompareLevel_2ad2b1();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

@@ -7,7 +7,7 @@ void textureNumLayers_ff5e89() {
 
 vec4 vertex_main() {
   textureNumLayers_ff5e89();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

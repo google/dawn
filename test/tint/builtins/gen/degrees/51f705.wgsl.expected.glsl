@@ -11,7 +11,7 @@ void degrees_51f705() {
 
 vec4 vertex_main() {
   degrees_51f705();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

@@ -36,20 +36,20 @@ bool test_int_S1_c0_b() {
   ok = true;
   x_41_phi = false;
   if (true) {
-    x_40 = all(equal((ivec4(0, 0, 0, 0) / ivec4(x_27, x_27, x_27, x_27)), ivec4(0, 0, 0, 0)));
+    x_40 = all(equal((ivec4(0) / ivec4(x_27, x_27, x_27, x_27)), ivec4(0)));
     x_41_phi = x_40;
   }
   bool x_41 = x_41_phi;
   ok = x_41;
   ivec4 x_44 = ivec4(x_27, x_27, x_27, x_27);
   val = x_44;
-  ivec4 x_47 = (x_44 + ivec4(1, 1, 1, 1));
+  ivec4 x_47 = (x_44 + ivec4(1));
   val = x_47;
-  ivec4 x_48 = (x_47 - ivec4(1, 1, 1, 1));
+  ivec4 x_48 = (x_47 - ivec4(1));
   val = x_48;
-  ivec4 x_49 = (x_48 + ivec4(1, 1, 1, 1));
+  ivec4 x_49 = (x_48 + ivec4(1));
   val = x_49;
-  ivec4 x_50 = (x_49 - ivec4(1, 1, 1, 1));
+  ivec4 x_50 = (x_49 - ivec4(1));
   val = x_50;
   x_55_phi = false;
   if (x_41) {
@@ -58,13 +58,13 @@ bool test_int_S1_c0_b() {
   }
   bool x_55 = x_55_phi;
   ok = x_55;
-  ivec4 x_58 = (x_50 * ivec4(2, 2, 2, 2));
+  ivec4 x_58 = (x_50 * ivec4(2));
   val = x_58;
-  ivec4 x_59 = (x_58 / ivec4(2, 2, 2, 2));
+  ivec4 x_59 = (x_58 / ivec4(2));
   val = x_59;
-  ivec4 x_60 = (x_59 * ivec4(2, 2, 2, 2));
+  ivec4 x_60 = (x_59 * ivec4(2));
   val = x_60;
-  ivec4 x_61 = (x_60 / ivec4(2, 2, 2, 2));
+  ivec4 x_61 = (x_60 / ivec4(2));
   val = x_61;
   x_66_phi = false;
   if (x_55) {
@@ -97,20 +97,20 @@ void main_1() {
   x_9_ok = true;
   x_87_phi = false;
   if (true) {
-    x_86 = all(equal((vec4(0.0f, 0.0f, 0.0f, 0.0f) / vec4(x_77, x_77, x_77, x_77)), vec4(0.0f, 0.0f, 0.0f, 0.0f)));
+    x_86 = all(equal((vec4(0.0f) / vec4(x_77, x_77, x_77, x_77)), vec4(0.0f)));
     x_87_phi = x_86;
   }
   bool x_87 = x_87_phi;
   x_9_ok = x_87;
   vec4 x_89 = vec4(x_77, x_77, x_77, x_77);
   x_10_val = x_89;
-  vec4 x_92 = (x_89 + vec4(1.0f, 1.0f, 1.0f, 1.0f));
+  vec4 x_92 = (x_89 + vec4(1.0f));
   x_10_val = x_92;
-  vec4 x_93 = (x_92 - vec4(1.0f, 1.0f, 1.0f, 1.0f));
+  vec4 x_93 = (x_92 - vec4(1.0f));
   x_10_val = x_93;
-  vec4 x_94 = (x_93 + vec4(1.0f, 1.0f, 1.0f, 1.0f));
+  vec4 x_94 = (x_93 + vec4(1.0f));
   x_10_val = x_94;
-  vec4 x_95 = (x_94 - vec4(1.0f, 1.0f, 1.0f, 1.0f));
+  vec4 x_95 = (x_94 - vec4(1.0f));
   x_10_val = x_95;
   x_100_phi = false;
   if (x_87) {
@@ -119,13 +119,13 @@ void main_1() {
   }
   bool x_100 = x_100_phi;
   x_9_ok = x_100;
-  vec4 x_103 = (x_95 * vec4(2.0f, 2.0f, 2.0f, 2.0f));
+  vec4 x_103 = (x_95 * vec4(2.0f));
   x_10_val = x_103;
-  vec4 x_104 = (x_103 / vec4(2.0f, 2.0f, 2.0f, 2.0f));
+  vec4 x_104 = (x_103 / vec4(2.0f));
   x_10_val = x_104;
-  vec4 x_105 = (x_104 * vec4(2.0f, 2.0f, 2.0f, 2.0f));
+  vec4 x_105 = (x_104 * vec4(2.0f));
   x_10_val = x_105;
-  vec4 x_106 = (x_105 / vec4(2.0f, 2.0f, 2.0f, 2.0f));
+  vec4 x_106 = (x_105 / vec4(2.0f));
   x_10_val = x_106;
   x_111_phi = false;
   if (x_100) {

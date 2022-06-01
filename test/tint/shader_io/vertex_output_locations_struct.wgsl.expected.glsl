@@ -13,7 +13,7 @@ struct VertexOutputs {
 };
 
 VertexOutputs tint_symbol() {
-  VertexOutputs tint_symbol_1 = VertexOutputs(1, 1u, 1.0f, vec4(1.0f, 2.0f, 3.0f, 4.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  VertexOutputs tint_symbol_1 = VertexOutputs(1, 1u, 1.0f, vec4(1.0f, 2.0f, 3.0f, 4.0f), vec4(0.0f));
   return tint_symbol_1;
 }
 

@@ -3,12 +3,12 @@
 uniform highp sampler2D arg_1_arg_2;
 
 void textureGather_15d79c() {
-  vec4 res = textureGatherOffset(arg_1_arg_2, vec2(0.0f, 0.0f), ivec2(0, 0), 1);
+  vec4 res = textureGatherOffset(arg_1_arg_2, vec2(0.0f), ivec2(0), 1);
 }
 
 vec4 vertex_main() {
   textureGather_15d79c();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -25,7 +25,7 @@ precision mediump float;
 uniform highp sampler2D arg_1_arg_2;
 
 void textureGather_15d79c() {
-  vec4 res = textureGatherOffset(arg_1_arg_2, vec2(0.0f, 0.0f), ivec2(0, 0), 1);
+  vec4 res = textureGatherOffset(arg_1_arg_2, vec2(0.0f), ivec2(0), 1);
 }
 
 void fragment_main() {
@@ -41,7 +41,7 @@ void main() {
 uniform highp sampler2D arg_1_arg_2;
 
 void textureGather_15d79c() {
-  vec4 res = textureGatherOffset(arg_1_arg_2, vec2(0.0f, 0.0f), ivec2(0, 0), 1);
+  vec4 res = textureGatherOffset(arg_1_arg_2, vec2(0.0f), ivec2(0), 1);
 }
 
 void compute_main() {

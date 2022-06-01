@@ -20,7 +20,7 @@ vec4 tint_symbol(VertexInputs0 inputs0, uint loc1, uint instance_index, VertexIn
   uint u = loc1;
   float f = inputs1.loc2;
   vec4 v = inputs1.loc3;
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

@@ -1,12 +1,12 @@
 #version 310 es
 
 void max_85e6bc() {
-  ivec4 res = max(ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
+  ivec4 res = max(ivec4(0), ivec4(0));
 }
 
 vec4 vertex_main() {
   max_85e6bc();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void max_85e6bc() {
-  ivec4 res = max(ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
+  ivec4 res = max(ivec4(0), ivec4(0));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void max_85e6bc() {
-  ivec4 res = max(ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
+  ivec4 res = max(ivec4(0), ivec4(0));
 }
 
 void compute_main() {

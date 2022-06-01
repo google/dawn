@@ -7,7 +7,7 @@ void textureDimensions_f60bdb() {
 
 vec4 vertex_main() {
   textureDimensions_f60bdb();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

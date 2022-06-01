@@ -9,7 +9,7 @@ vec4 tint_symbol(int loc0, uint loc1, float loc2, vec4 loc3) {
   uint u = loc1;
   float f = loc2;
   vec4 v = loc3;
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

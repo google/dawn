@@ -6,7 +6,7 @@ void abs_4ad288() {
 
 vec4 vertex_main() {
   abs_4ad288();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

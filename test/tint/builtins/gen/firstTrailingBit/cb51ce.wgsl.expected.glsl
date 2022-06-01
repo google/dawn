@@ -16,12 +16,12 @@ uvec3 tint_first_trailing_bit(uvec3 v) {
 }
 
 void firstTrailingBit_cb51ce() {
-  uvec3 res = tint_first_trailing_bit(uvec3(0u, 0u, 0u));
+  uvec3 res = tint_first_trailing_bit(uvec3(0u));
 }
 
 vec4 vertex_main() {
   firstTrailingBit_cb51ce();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -51,7 +51,7 @@ uvec3 tint_first_trailing_bit(uvec3 v) {
 }
 
 void firstTrailingBit_cb51ce() {
-  uvec3 res = tint_first_trailing_bit(uvec3(0u, 0u, 0u));
+  uvec3 res = tint_first_trailing_bit(uvec3(0u));
 }
 
 void fragment_main() {
@@ -80,7 +80,7 @@ uvec3 tint_first_trailing_bit(uvec3 v) {
 }
 
 void firstTrailingBit_cb51ce() {
-  uvec3 res = tint_first_trailing_bit(uvec3(0u, 0u, 0u));
+  uvec3 res = tint_first_trailing_bit(uvec3(0u));
 }
 
 void compute_main() {

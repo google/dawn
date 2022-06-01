@@ -6,7 +6,7 @@ void log_7114a6() {
 
 vec4 vertex_main() {
   log_7114a6();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

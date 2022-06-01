@@ -5,6 +5,6 @@ void unused_entry_point() {
   return;
 }
 void f() {
-  vec3 v = vec3(0.0f, 0.0f, 0.0f);
+  vec3 v = vec3(0.0f);
 }
 

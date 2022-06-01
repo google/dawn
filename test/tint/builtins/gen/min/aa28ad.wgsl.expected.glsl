@@ -1,12 +1,12 @@
 #version 310 es
 
 void min_aa28ad() {
-  vec2 res = min(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));
+  vec2 res = min(vec2(0.0f), vec2(0.0f));
 }
 
 vec4 vertex_main() {
   min_aa28ad();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void min_aa28ad() {
-  vec2 res = min(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));
+  vec2 res = min(vec2(0.0f), vec2(0.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void min_aa28ad() {
-  vec2 res = min(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f));
+  vec2 res = min(vec2(0.0f), vec2(0.0f));
 }
 
 void compute_main() {

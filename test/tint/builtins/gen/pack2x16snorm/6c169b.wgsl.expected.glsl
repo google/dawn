@@ -1,12 +1,12 @@
 #version 310 es
 
 void pack2x16snorm_6c169b() {
-  uint res = packSnorm2x16(vec2(0.0f, 0.0f));
+  uint res = packSnorm2x16(vec2(0.0f));
 }
 
 vec4 vertex_main() {
   pack2x16snorm_6c169b();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void pack2x16snorm_6c169b() {
-  uint res = packSnorm2x16(vec2(0.0f, 0.0f));
+  uint res = packSnorm2x16(vec2(0.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void pack2x16snorm_6c169b() {
-  uint res = packSnorm2x16(vec2(0.0f, 0.0f));
+  uint res = packSnorm2x16(vec2(0.0f));
 }
 
 void compute_main() {

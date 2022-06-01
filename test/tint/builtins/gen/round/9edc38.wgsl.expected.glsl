@@ -6,7 +6,7 @@ void round_9edc38() {
 
 vec4 vertex_main() {
   round_9edc38();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

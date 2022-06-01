@@ -6,7 +6,7 @@ void max_0c0aae() {
 
 vec4 vertex_main() {
   max_0c0aae();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

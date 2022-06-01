@@ -18,7 +18,7 @@ void modf_180fed() {
 
 vec4 vertex_main() {
   modf_180fed();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

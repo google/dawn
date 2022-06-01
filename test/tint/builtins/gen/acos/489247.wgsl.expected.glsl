@@ -6,7 +6,7 @@ void acos_489247() {
 
 vec4 vertex_main() {
   acos_489247();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

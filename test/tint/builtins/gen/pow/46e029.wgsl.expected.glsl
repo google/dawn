@@ -6,7 +6,7 @@ void pow_46e029() {
 
 vec4 vertex_main() {
   pow_46e029();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

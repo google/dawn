@@ -18,13 +18,13 @@ float tint_degrees_3(float param_0) {
 
 
 void tint_symbol() {
-  tint_degrees(vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  tint_degrees(vec4(0.0f));
   tint_degrees(vec4(1.0f));
   tint_degrees(vec4(1.0f, 2.0f, 3.0f, 4.0f));
-  tint_degrees_1(vec3(0.0f, 0.0f, 0.0f));
+  tint_degrees_1(vec3(0.0f));
   tint_degrees_1(vec3(1.0f));
   tint_degrees_1(vec3(1.0f, 2.0f, 3.0f));
-  tint_degrees_2(vec2(0.0f, 0.0f));
+  tint_degrees_2(vec2(0.0f));
   tint_degrees_2(vec2(1.0f));
   tint_degrees_2(vec2(1.0f, 2.0f));
   tint_degrees_3(1.0f);

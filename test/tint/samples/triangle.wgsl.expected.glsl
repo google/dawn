@@ -1,6 +1,6 @@
 #version 310 es
 
-const vec2 pos[3] = vec2[3](vec2(0.0f, 0.5f), vec2(-0.5f, -0.5f), vec2(0.5f, -0.5f));
+const vec2 pos[3] = vec2[3](vec2(0.0f, 0.5f), vec2(-0.5f), vec2(0.5f, -0.5f));
 vec4 vtx_main(uint VertexIndex) {
   return vec4(pos[VertexIndex], 0.0f, 1.0f);
 }

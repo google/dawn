@@ -6,7 +6,7 @@ void countOneBits_fd88b2() {
 
 vec4 vertex_main() {
   countOneBits_fd88b2();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

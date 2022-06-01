@@ -222,7 +222,7 @@ struct Interface {
 };
 
 Interface vert_main() {
-  Interface tint_symbol = Interface(vec4(0.0f, 0.0f, 0.0f, 0.0f), 0.5f, 0.25f);
+  Interface tint_symbol = Interface(vec4(0.0f), 0.5f, 0.25f);
   return tint_symbol;
 }
 
@@ -789,9 +789,9 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_Compute_WithWor
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
-const int width = int(2);
-const int height = int(3);
-const int depth = int(4);
+const int width = 2;
+const int height = 3;
+const int depth = 4;
 layout(local_size_x = 2, local_size_y = 3, local_size_z = 4) in;
 void main() {
   return;
@@ -816,15 +816,15 @@ TEST_F(GlslGeneratorImplTest_Function,
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
 #ifndef WGSL_SPEC_CONSTANT_7
-#define WGSL_SPEC_CONSTANT_7 int(2)
+#define WGSL_SPEC_CONSTANT_7 2
 #endif
 const int width = WGSL_SPEC_CONSTANT_7;
 #ifndef WGSL_SPEC_CONSTANT_8
-#define WGSL_SPEC_CONSTANT_8 int(3)
+#define WGSL_SPEC_CONSTANT_8 3
 #endif
 const int height = WGSL_SPEC_CONSTANT_8;
 #ifndef WGSL_SPEC_CONSTANT_9
-#define WGSL_SPEC_CONSTANT_9 int(4)
+#define WGSL_SPEC_CONSTANT_9 4
 #endif
 const int depth = WGSL_SPEC_CONSTANT_9;
 layout(local_size_x = WGSL_SPEC_CONSTANT_7, local_size_y = WGSL_SPEC_CONSTANT_8, local_size_z = WGSL_SPEC_CONSTANT_9) in;

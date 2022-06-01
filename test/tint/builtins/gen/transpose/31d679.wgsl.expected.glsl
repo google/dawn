@@ -1,12 +1,12 @@
 #version 310 es
 
 void transpose_31d679() {
-  mat2 res = transpose(mat2(0.0f, 0.0f, 0.0f, 0.0f));
+  mat2 res = transpose(mat2(vec2(0.0f), vec2(0.0f)));
 }
 
 vec4 vertex_main() {
   transpose_31d679();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void transpose_31d679() {
-  mat2 res = transpose(mat2(0.0f, 0.0f, 0.0f, 0.0f));
+  mat2 res = transpose(mat2(vec2(0.0f), vec2(0.0f)));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void transpose_31d679() {
-  mat2 res = transpose(mat2(0.0f, 0.0f, 0.0f, 0.0f));
+  mat2 res = transpose(mat2(vec2(0.0f), vec2(0.0f)));
 }
 
 void compute_main() {

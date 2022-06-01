@@ -6,7 +6,7 @@ void step_0b073b() {
 
 vec4 vertex_main() {
   step_0b073b();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

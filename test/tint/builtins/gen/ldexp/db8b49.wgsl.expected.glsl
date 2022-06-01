@@ -6,7 +6,7 @@ void ldexp_db8b49() {
 
 vec4 vertex_main() {
   ldexp_db8b49();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

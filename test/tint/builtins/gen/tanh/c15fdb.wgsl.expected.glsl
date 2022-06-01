@@ -6,7 +6,7 @@ void tanh_c15fdb() {
 
 vec4 vertex_main() {
   tanh_c15fdb();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

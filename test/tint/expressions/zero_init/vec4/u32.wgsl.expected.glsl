@@ -5,6 +5,6 @@ void unused_entry_point() {
   return;
 }
 void f() {
-  uvec4 v = uvec4(0u, 0u, 0u, 0u);
+  uvec4 v = uvec4(0u);
 }
 

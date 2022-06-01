@@ -12,6 +12,6 @@ layout(binding = 0, std430) buffer S_1 {
   mat4 a;
 } v;
 void foo() {
-  v.a = (v.a + mat4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  v.a = (v.a + mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)));
 }
 

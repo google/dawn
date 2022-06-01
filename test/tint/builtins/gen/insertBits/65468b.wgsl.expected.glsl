@@ -12,7 +12,7 @@ void insertBits_65468b() {
 
 vec4 vertex_main() {
   insertBits_65468b();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

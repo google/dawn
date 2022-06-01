@@ -134,9 +134,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Multiply_VectorScalar) {
 
     std::stringstream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(),
-              "(vec3(1.0f, 1.0f, 1.0f) * "
-              "1.0f)");
+    EXPECT_EQ(out.str(), "(vec3(1.0f) * 1.0f)");
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
@@ -151,9 +149,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
 
     std::stringstream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(),
-              "(1.0f * vec3(1.0f, 1.0f, "
-              "1.0f))");
+    EXPECT_EQ(out.str(), "(1.0f * vec3(1.0f))");
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
@@ -198,7 +194,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
 
     std::stringstream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(), "(mat * vec3(1.0f, 1.0f, 1.0f))");
+    EXPECT_EQ(out.str(), "(mat * vec3(1.0f))");
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
@@ -213,7 +209,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
 
     std::stringstream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(), "(vec3(1.0f, 1.0f, 1.0f) * mat)");
+    EXPECT_EQ(out.str(), "(vec3(1.0f) * mat)");
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, Multiply_MatrixMatrix) {

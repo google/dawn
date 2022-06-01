@@ -9,7 +9,7 @@ struct Interface {
 };
 
 Interface vert_main() {
-  Interface tint_symbol = Interface(0.400000006f, 0.600000024f, vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  Interface tint_symbol = Interface(0.400000006f, 0.600000024f, vec4(0.0f));
   return tint_symbol;
 }
 

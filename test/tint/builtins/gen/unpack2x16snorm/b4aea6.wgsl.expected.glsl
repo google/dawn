@@ -6,7 +6,7 @@ void unpack2x16snorm_b4aea6() {
 
 vec4 vertex_main() {
   unpack2x16snorm_b4aea6();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

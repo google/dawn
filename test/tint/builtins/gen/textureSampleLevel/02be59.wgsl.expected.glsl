@@ -8,7 +8,7 @@ void textureSampleLevel_02be59() {
 
 vec4 vertex_main() {
   textureSampleLevel_02be59();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

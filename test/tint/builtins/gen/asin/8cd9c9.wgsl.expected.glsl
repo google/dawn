@@ -1,12 +1,12 @@
 #version 310 es
 
 void asin_8cd9c9() {
-  vec3 res = asin(vec3(0.0f, 0.0f, 0.0f));
+  vec3 res = asin(vec3(0.0f));
 }
 
 vec4 vertex_main() {
   asin_8cd9c9();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void asin_8cd9c9() {
-  vec3 res = asin(vec3(0.0f, 0.0f, 0.0f));
+  vec3 res = asin(vec3(0.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void asin_8cd9c9() {
-  vec3 res = asin(vec3(0.0f, 0.0f, 0.0f));
+  vec3 res = asin(vec3(0.0f));
 }
 
 void compute_main() {

@@ -6,7 +6,7 @@ void cosh_da92dd() {
 
 vec4 vertex_main() {
   cosh_da92dd();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

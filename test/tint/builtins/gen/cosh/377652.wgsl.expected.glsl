@@ -1,12 +1,12 @@
 #version 310 es
 
 void cosh_377652() {
-  vec3 res = cosh(vec3(0.0f, 0.0f, 0.0f));
+  vec3 res = cosh(vec3(0.0f));
 }
 
 vec4 vertex_main() {
   cosh_377652();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void cosh_377652() {
-  vec3 res = cosh(vec3(0.0f, 0.0f, 0.0f));
+  vec3 res = cosh(vec3(0.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void cosh_377652() {
-  vec3 res = cosh(vec3(0.0f, 0.0f, 0.0f));
+  vec3 res = cosh(vec3(0.0f));
 }
 
 void compute_main() {

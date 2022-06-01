@@ -6,7 +6,7 @@ void sinh_7bb598() {
 
 vec4 vertex_main() {
   sinh_7bb598();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

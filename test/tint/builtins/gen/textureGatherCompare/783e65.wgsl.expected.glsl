@@ -8,7 +8,7 @@ void textureGatherCompare_783e65() {
 
 vec4 vertex_main() {
   textureGatherCompare_783e65();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

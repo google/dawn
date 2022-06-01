@@ -6,7 +6,7 @@ void reverseBits_7c4269() {
 
 vec4 vertex_main() {
   reverseBits_7c4269();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

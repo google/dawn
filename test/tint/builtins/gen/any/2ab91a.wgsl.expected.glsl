@@ -6,7 +6,7 @@ void any_2ab91a() {
 
 vec4 vertex_main() {
   any_2ab91a();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {

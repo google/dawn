@@ -98,7 +98,7 @@ TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Initialize
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-    EXPECT_EQ(gen.result(), R"(vec3 a = vec3(0.0f, 0.0f, 0.0f);
+    EXPECT_EQ(gen.result(), R"(vec3 a = vec3(0.0f);
 )");
 }
 
@@ -112,7 +112,7 @@ TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Initialize
 
     ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
     EXPECT_EQ(gen.result(),
-              R"(mat2x3 a = mat2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+              R"(mat2x3 a = mat2x3(vec3(0.0f), vec3(0.0f));
 )");
 }
 

@@ -1,7 +1,7 @@
 #version 310 es
 
 void main_1() {
-  vec3 v = vec3(0.0f, 0.0f, 0.0f);
+  vec3 v = vec3(0.0f);
   float x_14 = v.y;
   vec3 x_16 = v;
   vec2 x_17 = vec2(x_16.x, x_16.z);

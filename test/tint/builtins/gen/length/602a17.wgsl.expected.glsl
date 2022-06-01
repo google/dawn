@@ -6,7 +6,7 @@ void length_602a17() {
 
 vec4 vertex_main() {
   length_602a17();
-  return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+  return vec4(0.0f);
 }
 
 void main() {
