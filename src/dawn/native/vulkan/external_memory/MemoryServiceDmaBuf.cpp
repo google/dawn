@@ -311,37 +311,37 @@ ResultOrError<VkImage> Service::CreateImage(const ExternalImageDescriptor* descr
     createInfoChain.Add(&externalMemoryImageCreateInfo,
                         VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO);
 
+    VkSubresourceLayout planeLayouts[ExternalImageDescriptorDmaBuf::kMaxPlanes];
+    for (uint32_t plane = 0u; plane < planeCount; ++plane) {
+        planeLayouts[plane].offset = dmaBufDescriptor->planeLayouts[plane].offset;
+        planeLayouts[plane].size = 0;  // VK_EXT_image_drm_format_modifier mandates size = 0.
+        planeLayouts[plane].rowPitch = dmaBufDescriptor->planeLayouts[plane].stride;
+        planeLayouts[plane].arrayPitch = 0;  // Not an array texture
+        planeLayouts[plane].depthPitch = 0;  // Not a depth texture
+    }
+
     // For single plane formats.
-    VkSubresourceLayout planeLayout = {};
-    planeLayout.offset = 0;
-    planeLayout.size = 0;  // VK_EXT_image_drm_format_modifier mandates size = 0.
-    planeLayout.rowPitch = dmaBufDescriptor->stride;
-    planeLayout.arrayPitch = 0;  // Not an array texture
-    planeLayout.depthPitch = 0;  // Not a depth texture
+    // To be Removed after chromium's switch to planeLayouts.
+    if (dmaBufDescriptor->stride != 0) {
+        planeLayouts[0].offset = 0;
+        planeLayouts[0].size = 0;  // VK_EXT_image_drm_format_modifier mandates size = 0.
+        planeLayouts[0].rowPitch = dmaBufDescriptor->stride;
+        planeLayouts[0].arrayPitch = 0;  // Not an array texture
+        planeLayouts[0].depthPitch = 0;  // Not a depth texture
+    }
 
     VkImageDrmFormatModifierExplicitCreateInfoEXT explicitCreateInfo = {};
     explicitCreateInfo.drmFormatModifier = dmaBufDescriptor->drmModifier;
-    explicitCreateInfo.drmFormatModifierPlaneCount = 1;
-    explicitCreateInfo.pPlaneLayouts = &planeLayout;
-
-    // For multi-planar formats, we can't explicitly specify VkSubresourceLayout for each plane
-    // due to the lack of knowledge about the required 'offset'. Alternatively
-    // VkImageDrmFormatModifierListCreateInfoEXT can be used to create image with the DRM format
-    // modifier.
-    VkImageDrmFormatModifierListCreateInfoEXT listCreateInfo = {};
-    listCreateInfo.drmFormatModifierCount = 1;
-    listCreateInfo.pDrmFormatModifiers = &dmaBufDescriptor->drmModifier;
+    explicitCreateInfo.drmFormatModifierPlaneCount = planeCount;
+    explicitCreateInfo.pPlaneLayouts = &planeLayouts[0];
 
     if (planeCount > 1) {
         // For multi-planar formats, VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT specifies that a
         // VkImageView can be plane's format which might differ from the image's format.
         createInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
-        createInfoChain.Add(&listCreateInfo,
-                            VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_LIST_CREATE_INFO_EXT);
-    } else {
-        createInfoChain.Add(&explicitCreateInfo,
-                            VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_EXPLICIT_CREATE_INFO_EXT);
     }
+    createInfoChain.Add(&explicitCreateInfo,
+                        VK_STRUCTURE_TYPE_IMAGE_DRM_FORMAT_MODIFIER_EXPLICIT_CREATE_INFO_EXT);
 
     // Create a new VkImage with tiling equal to the DRM format modifier.
     VkImage image;
