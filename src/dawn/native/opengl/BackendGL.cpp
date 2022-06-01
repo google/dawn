@@ -247,6 +247,15 @@ class Adapter : public AdapterBase {
             mSupportedFeatures.EnableFeature(Feature::Depth24UnormStencil8);
         }
 
+        // Non-zero baseInstance requires at least desktop OpenGL 4.2, and it is not supported in
+        // OpenGL ES OpenGL:
+        // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDrawElementsIndirect.xhtml
+        // OpenGL ES:
+        // https://www.khronos.org/registry/OpenGL-Refpages/es3/html/glDrawElementsIndirect.xhtml
+        if (mFunctions.IsAtLeastGL(4, 2)) {
+            mSupportedFeatures.EnableFeature(Feature::IndirectFirstInstance);
+        }
+
         return {};
     }
 

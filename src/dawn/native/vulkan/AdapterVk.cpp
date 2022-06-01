@@ -163,6 +163,10 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
         mSupportedFeatures.EnableFeature(Feature::Depth32FloatStencil8);
     }
 
+    if (mDeviceInfo.features.drawIndirectFirstInstance == VK_TRUE) {
+        mSupportedFeatures.EnableFeature(Feature::IndirectFirstInstance);
+    }
+
     if (mDeviceInfo.HasExt(DeviceExt::ShaderIntegerDotProduct) &&
         mDeviceInfo.shaderIntegerDotProductProperties
                 .integerDotProduct4x8BitPackedSignedAccelerated == VK_TRUE &&

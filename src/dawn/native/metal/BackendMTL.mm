@@ -386,6 +386,8 @@ class Adapter : public AdapterBase {
         }
 #endif
 
+        mSupportedFeatures.EnableFeature(Feature::IndirectFirstInstance);
+
         return {};
     }
 

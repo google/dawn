@@ -78,6 +78,10 @@ static constexpr FeatureEnumAndInfoList kFeatureNameAndInfoList = {{
      {"chromium-experimental-dp4a", "Support experimental DP4a instructions in WGSL",
       "https://bugs.chromium.org/p/tint/issues/detail?id=1497"},
      &WGPUDeviceProperties::chromiumExperimentalDp4a},
+    {Feature::IndirectFirstInstance,
+     {"indirect-first-instance", "Support non-zero first instance values on indirect draw calls",
+      "https://bugs.chromium.org/p/dawn/issues/detail?id=1197"},
+     &WGPUDeviceProperties::indirectFirstInstance},
     {Feature::DawnInternalUsages,
      {"dawn-internal-usages",
       "Add internal usages to resources to affect how the texture is allocated, but not "
@@ -117,6 +121,8 @@ Feature FromAPIFeature(wgpu::FeatureName feature) {
             return Feature::Depth24UnormStencil8;
         case wgpu::FeatureName::Depth32FloatStencil8:
             return Feature::Depth32FloatStencil8;
+        case wgpu::FeatureName::IndirectFirstInstance:
+            return Feature::IndirectFirstInstance;
         case wgpu::FeatureName::DawnShaderFloat16:
             return Feature::ShaderFloat16;
         case wgpu::FeatureName::DawnInternalUsages:
@@ -127,9 +133,6 @@ Feature FromAPIFeature(wgpu::FeatureName feature) {
             return Feature::DawnNative;
         case wgpu::FeatureName::ChromiumExperimentalDp4a:
             return Feature::ChromiumExperimentalDp4a;
-
-        case wgpu::FeatureName::IndirectFirstInstance:
-            return Feature::InvalidEnum;
     }
     return Feature::InvalidEnum;
 }
@@ -152,6 +155,8 @@ wgpu::FeatureName ToAPIFeature(Feature feature) {
             return wgpu::FeatureName::Depth24UnormStencil8;
         case Feature::Depth32FloatStencil8:
             return wgpu::FeatureName::Depth32FloatStencil8;
+        case Feature::IndirectFirstInstance:
+            return wgpu::FeatureName::IndirectFirstInstance;
         case Feature::ShaderFloat16:
             return wgpu::FeatureName::DawnShaderFloat16;
         case Feature::DawnInternalUsages:

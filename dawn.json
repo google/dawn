@@ -1214,6 +1214,7 @@
             {"name": "depth24 unorm stencil8", "type": "bool", "default": "false"},
             {"name": "depth32 float stencil8", "type": "bool", "default": "false"},
             {"name": "chromium experimental dp4a", "type": "bool", "default": "false"},
+            {"name": "indirect first instance", "type": "bool", "default": "false"},
             {"name": "invalid feature", "type": "bool", "default": "false"},
             {"name": "dawn internal usages", "type": "bool", "default": "false"},
             {"name": "dawn native", "type": "bool", "default": "false"},

@@ -63,6 +63,13 @@ class FirstIndexOffsetTests : public DawnTest {
         DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
     }
 
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        if (!SupportsFeatures({wgpu::FeatureName::IndirectFirstInstance})) {
+            return {};
+        }
+        return {wgpu::FeatureName::IndirectFirstInstance};
+    }
+
   private:
     void TestImpl(DrawMode mode,
                   CheckIndex checkIndex,

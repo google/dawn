@@ -43,6 +43,7 @@ constexpr uint64_t kWorkgroupSize = 64;
 constexpr uint32_t kDuplicateBaseVertexInstance = 1;
 constexpr uint32_t kIndexedDraw = 2;
 constexpr uint32_t kValidationEnabled = 4;
+constexpr uint32_t kIndirectFirstInstanceEnabled = 8;
 
 // Equivalent to the BatchInfo struct defined in the shader below.
 struct BatchInfo {
@@ -64,6 +65,7 @@ static const char sRenderValidationShaderSource[] = R"(
             let kDuplicateBaseVertexInstance = 1u;
             let kIndexedDraw = 2u;
             let kValidationEnabled = 4u;
+            let kIndirectFirstInstanceEnabled = 8u;
 
             struct BatchInfo {
                 numIndexBufferElementsLow: u32,
@@ -140,11 +142,13 @@ static const char sRenderValidationShaderSource[] = R"(
                 }
 
                 let inputIndex = batch.indirectOffsets[id.x];
-                // firstInstance is always the last parameter
-                let firstInstance = inputParams.data[inputIndex + numIndirectParamsPerDrawCallInput() - 1u];
-                if (firstInstance != 0u) {
-                    fail(id.x);
-                    return;
+                if(!bool(batch.flags & kIndirectFirstInstanceEnabled)) {
+                    // firstInstance is always the last parameter
+                    let firstInstance = inputParams.data[inputIndex + numIndirectParamsPerDrawCallInput() - 1u];
+                    if (firstInstance != 0u) {
+                        fail(id.x);
+                        return;
+                    }
                 }
 
                 if (!bool(batch.flags & kIndexedDraw)) {
@@ -333,6 +337,9 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
             }
             if (device->IsValidationEnabled()) {
                 newPass.flags |= kValidationEnabled;
+            }
+            if (device->IsFeatureEnabled(Feature::IndirectFirstInstance)) {
+                newPass.flags |= kIndirectFirstInstanceEnabled;
             }
             passes.push_back(std::move(newPass));
         }
