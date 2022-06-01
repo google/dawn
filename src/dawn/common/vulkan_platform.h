@@ -153,6 +153,12 @@ HandleType* AsVkArray(detail::VkHandle<Tag, HandleType>* handle) {
 #include "dawn/common/xlib_with_undefs.h"
 #endif  // defined(DAWN_USE_X11)
 
+#if defined(DAWN_USE_WAYLAND)
+#ifndef VK_USE_PLATFORM_WAYLAND_KHR
+#define VK_USE_PLATFORM_WAYLAND_KHR
+#endif
+#endif  // defined(DAWN_USE_WAYLAND)
+
 #if defined(DAWN_ENABLE_BACKEND_METAL)
 #ifndef VK_USE_PLATFORM_METAL_EXT
 #define VK_USE_PLATFORM_METAL_EXT

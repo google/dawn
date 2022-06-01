@@ -149,6 +149,13 @@ struct VulkanFunctions {
     VkFn<PFN_vkCreateMetalSurfaceEXT> CreateMetalSurfaceEXT = nullptr;
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
+#if defined(DAWN_USE_WAYLAND)
+    // KHR_wayland_surface
+    PFN_vkCreateWaylandSurfaceKHR CreateWaylandSurfaceKHR = nullptr;
+    PFN_vkGetPhysicalDeviceWaylandPresentationSupportKHR
+        GetPhysicalDeviceWaylandPresentationSupportKHR = nullptr;
+#endif  // defined(DAWN_USE_WAYLAND)
+
 #if defined(DAWN_PLATFORM_WINDOWS)
     // KHR_win32_surface
     VkFn<PFN_vkCreateWin32SurfaceKHR> CreateWin32SurfaceKHR = nullptr;

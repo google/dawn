@@ -19,10 +19,12 @@ if (build_with_chromium) {
   import("//build/config/sanitizers/sanitizers.gni")
 
   dawn_use_x11 = ozone_platform_x11
+  dawn_use_wayland = false
 } else {
   declare_args() {
     # Whether Dawn should enable X11 support.
     dawn_use_x11 = is_linux && !is_chromeos
+    dawn_use_wayland = false
   }
 }
 

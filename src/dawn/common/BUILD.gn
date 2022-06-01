@@ -80,6 +80,9 @@ config("internal_config") {
     defines += [ "DAWN_ENABLE_BACKEND_VULKAN" ]
   }
 
+  if (dawn_use_wayland) {
+    defines += [ "DAWN_USE_WAYLAND" ]
+  }
   if (dawn_use_x11) {
     defines += [ "DAWN_USE_X11" ]
   }
