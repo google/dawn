@@ -3,4 +3,4 @@ void unused_entry_point() {
   return;
 }
 
-static const float3x3 m = float3x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+static const float3x3 m = float3x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx);

@@ -16,6 +16,6 @@ S tint_symbol_4(ByteAddressBuffer buffer, uint offset) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  tint_symbol_2(tint_symbol_1, (4u * uint(0)), tint_symbol_4(tint_symbol, (4u * uint(0))));
+  tint_symbol_2(tint_symbol_1, (4u * 0u), tint_symbol_4(tint_symbol, (4u * 0u)));
   return;
 }

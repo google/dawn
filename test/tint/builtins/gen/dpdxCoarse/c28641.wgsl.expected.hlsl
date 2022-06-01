@@ -1,5 +1,5 @@
 void dpdxCoarse_c28641() {
-  float4 res = ddx_coarse(float4(0.0f, 0.0f, 0.0f, 0.0f));
+  float4 res = ddx_coarse((0.0f).xxxx);
 }
 
 void fragment_main() {

@@ -6,7 +6,7 @@ struct tint_symbol_1 {
 
 void main_inner(uint local_invocation_index) {
   {
-    v = float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+    v = float2x3((0.0f).xxx, (0.0f).xxx);
   }
   GroupMemoryBarrierWithGroupSync();
 }

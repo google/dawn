@@ -10,7 +10,7 @@ frexp_result_vec4 tint_frexp(float4 param_0) {
 }
 
 void frexp_3c4f48() {
-  frexp_result_vec4 res = tint_frexp(float4(0.0f, 0.0f, 0.0f, 0.0f));
+  frexp_result_vec4 res = tint_frexp((0.0f).xxxx);
 }
 
 struct tint_symbol {
@@ -19,7 +19,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   frexp_3c4f48();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

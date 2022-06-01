@@ -1,5 +1,5 @@
 void select_8fa62c() {
-  int3 res = (false ? int3(0, 0, 0) : int3(0, 0, 0));
+  int3 res = (false ? (0).xxx : (0).xxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   select_8fa62c();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

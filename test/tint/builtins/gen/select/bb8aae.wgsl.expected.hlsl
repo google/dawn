@@ -1,5 +1,5 @@
 void select_bb8aae() {
-  float4 res = (bool4(false, false, false, false) ? float4(0.0f, 0.0f, 0.0f, 0.0f) : float4(0.0f, 0.0f, 0.0f, 0.0f));
+  float4 res = ((false).xxxx ? (0.0f).xxxx : (0.0f).xxxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   select_bb8aae();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

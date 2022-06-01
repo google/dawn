@@ -1,20 +1,20 @@
 int3 tint_count_leading_zeros(int3 v) {
   uint3 x = uint3(v);
-  const uint3 b16 = ((x <= uint3((65535u).xxx)) ? uint3((16u).xxx) : uint3((0u).xxx));
+  const uint3 b16 = ((x <= (65535u).xxx) ? (16u).xxx : (0u).xxx);
   x = (x << b16);
-  const uint3 b8 = ((x <= uint3((16777215u).xxx)) ? uint3((8u).xxx) : uint3((0u).xxx));
+  const uint3 b8 = ((x <= (16777215u).xxx) ? (8u).xxx : (0u).xxx);
   x = (x << b8);
-  const uint3 b4 = ((x <= uint3((268435455u).xxx)) ? uint3((4u).xxx) : uint3((0u).xxx));
+  const uint3 b4 = ((x <= (268435455u).xxx) ? (4u).xxx : (0u).xxx);
   x = (x << b4);
-  const uint3 b2 = ((x <= uint3((1073741823u).xxx)) ? uint3((2u).xxx) : uint3((0u).xxx));
+  const uint3 b2 = ((x <= (1073741823u).xxx) ? (2u).xxx : (0u).xxx);
   x = (x << b2);
-  const uint3 b1 = ((x <= uint3((2147483647u).xxx)) ? uint3((1u).xxx) : uint3((0u).xxx));
-  const uint3 is_zero = ((x == uint3((0u).xxx)) ? uint3((1u).xxx) : uint3((0u).xxx));
+  const uint3 b1 = ((x <= (2147483647u).xxx) ? (1u).xxx : (0u).xxx);
+  const uint3 is_zero = ((x == (0u).xxx) ? (1u).xxx : (0u).xxx);
   return int3((((((b16 | b8) | b4) | b2) | b1) + is_zero));
 }
 
 void countLeadingZeros_7c38a6() {
-  int3 res = tint_count_leading_zeros(int3(0, 0, 0));
+  int3 res = tint_count_leading_zeros((0).xxx);
 }
 
 struct tint_symbol {
@@ -23,7 +23,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   countLeadingZeros_7c38a6();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

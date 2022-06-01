@@ -2,7 +2,7 @@ Texture2D arg_0 : register(t0, space1);
 SamplerComparisonState arg_1 : register(s1, space1);
 
 void textureGatherCompare_6d9352() {
-  float4 res = arg_0.GatherCmp(arg_1, float2(0.0f, 0.0f), 1.0f);
+  float4 res = arg_0.GatherCmp(arg_1, (0.0f).xx, 1.0f);
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   textureGatherCompare_6d9352();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

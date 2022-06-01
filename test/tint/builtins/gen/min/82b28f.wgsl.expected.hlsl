@@ -1,5 +1,5 @@
 void min_82b28f() {
-  uint2 res = min(uint2(0u, 0u), uint2(0u, 0u));
+  uint2 res = min((0u).xx, (0u).xx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   min_82b28f();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

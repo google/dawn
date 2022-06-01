@@ -15,7 +15,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   insertBits_e3e3a2();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

@@ -2,7 +2,7 @@ Texture3D<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 
 void textureSampleLevel_abfcc0() {
-  float4 res = arg_0.SampleLevel(arg_1, float3(0.0f, 0.0f, 0.0f), 1.0f);
+  float4 res = arg_0.SampleLevel(arg_1, (0.0f).xxx, 1.0f);
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   textureSampleLevel_abfcc0();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

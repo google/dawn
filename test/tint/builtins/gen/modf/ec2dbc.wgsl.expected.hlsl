@@ -10,7 +10,7 @@ modf_result_vec4 tint_modf(float4 param_0) {
 }
 
 void modf_ec2dbc() {
-  modf_result_vec4 res = tint_modf(float4(0.0f, 0.0f, 0.0f, 0.0f));
+  modf_result_vec4 res = tint_modf((0.0f).xxxx);
 }
 
 struct tint_symbol {
@@ -19,7 +19,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   modf_ec2dbc();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

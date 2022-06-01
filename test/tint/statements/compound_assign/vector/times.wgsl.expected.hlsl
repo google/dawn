@@ -6,5 +6,5 @@ void unused_entry_point() {
 RWByteAddressBuffer v : register(u0, space0);
 
 void foo() {
-  v.Store4(0u, asuint((asint(v.Load4(0u)) * int4((2).xxxx))));
+  v.Store4(0u, asuint((asint(v.Load4(0u)) * (2).xxxx)));
 }

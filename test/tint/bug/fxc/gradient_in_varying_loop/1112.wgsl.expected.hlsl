@@ -49,7 +49,7 @@ float4 main_inner(float2 vUV) {
     const float sampleDepth = depthTexture.Sample(tint_symbol, offset.xy).r;
     i = (i + 1);
   }
-  return float4((1.0f).xxxx);
+  return (1.0f).xxxx;
 }
 
 tint_symbol_3 main(tint_symbol_2 tint_symbol_1) {

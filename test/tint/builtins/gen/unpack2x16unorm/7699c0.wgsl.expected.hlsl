@@ -14,7 +14,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   unpack2x16unorm_7699c0();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

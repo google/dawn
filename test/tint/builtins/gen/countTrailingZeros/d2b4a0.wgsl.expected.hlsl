@@ -1,20 +1,20 @@
 uint4 tint_count_trailing_zeros(uint4 v) {
   uint4 x = uint4(v);
-  const uint4 b16 = (bool4((x & uint4((65535u).xxxx))) ? uint4((0u).xxxx) : uint4((16u).xxxx));
+  const uint4 b16 = (bool4((x & (65535u).xxxx)) ? (0u).xxxx : (16u).xxxx);
   x = (x >> b16);
-  const uint4 b8 = (bool4((x & uint4((255u).xxxx))) ? uint4((0u).xxxx) : uint4((8u).xxxx));
+  const uint4 b8 = (bool4((x & (255u).xxxx)) ? (0u).xxxx : (8u).xxxx);
   x = (x >> b8);
-  const uint4 b4 = (bool4((x & uint4((15u).xxxx))) ? uint4((0u).xxxx) : uint4((4u).xxxx));
+  const uint4 b4 = (bool4((x & (15u).xxxx)) ? (0u).xxxx : (4u).xxxx);
   x = (x >> b4);
-  const uint4 b2 = (bool4((x & uint4((3u).xxxx))) ? uint4((0u).xxxx) : uint4((2u).xxxx));
+  const uint4 b2 = (bool4((x & (3u).xxxx)) ? (0u).xxxx : (2u).xxxx);
   x = (x >> b2);
-  const uint4 b1 = (bool4((x & uint4((1u).xxxx))) ? uint4((0u).xxxx) : uint4((1u).xxxx));
-  const uint4 is_zero = ((x == uint4((0u).xxxx)) ? uint4((1u).xxxx) : uint4((0u).xxxx));
+  const uint4 b1 = (bool4((x & (1u).xxxx)) ? (0u).xxxx : (1u).xxxx);
+  const uint4 is_zero = ((x == (0u).xxxx) ? (1u).xxxx : (0u).xxxx);
   return uint4((((((b16 | b8) | b4) | b2) | b1) + is_zero));
 }
 
 void countTrailingZeros_d2b4a0() {
-  uint4 res = tint_count_trailing_zeros(uint4(0u, 0u, 0u, 0u));
+  uint4 res = tint_count_trailing_zeros((0u).xxxx);
 }
 
 struct tint_symbol {
@@ -23,7 +23,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   countTrailingZeros_d2b4a0();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

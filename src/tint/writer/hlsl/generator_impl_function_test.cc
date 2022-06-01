@@ -219,7 +219,7 @@ struct tint_symbol {
 };
 
 Interface vert_main_inner() {
-  const Interface tint_symbol_3 = {float4(0.0f, 0.0f, 0.0f, 0.0f), 0.5f, 0.25f};
+  const Interface tint_symbol_3 = {(0.0f).xxxx, 0.5f, 0.25f};
   return tint_symbol_3;
 }
 
@@ -689,9 +689,9 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_Compute_WithWor
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_EQ(gen.result(), R"(static const int width = int(2);
-static const int height = int(3);
-static const int depth = int(4);
+    EXPECT_EQ(gen.result(), R"(static const int width = 2;
+static const int height = 3;
+static const int depth = 4;
 
 [numthreads(2, 3, 4)]
 void main() {
@@ -715,15 +715,15 @@ TEST_F(HlslGeneratorImplTest_Function,
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#ifndef WGSL_SPEC_CONSTANT_7
-#define WGSL_SPEC_CONSTANT_7 int(2)
+#define WGSL_SPEC_CONSTANT_7 2
 #endif
 static const int width = WGSL_SPEC_CONSTANT_7;
 #ifndef WGSL_SPEC_CONSTANT_8
-#define WGSL_SPEC_CONSTANT_8 int(3)
+#define WGSL_SPEC_CONSTANT_8 3
 #endif
 static const int height = WGSL_SPEC_CONSTANT_8;
 #ifndef WGSL_SPEC_CONSTANT_9
-#define WGSL_SPEC_CONSTANT_9 int(4)
+#define WGSL_SPEC_CONSTANT_9 4
 #endif
 static const int depth = WGSL_SPEC_CONSTANT_9;
 

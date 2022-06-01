@@ -1,7 +1,7 @@
 Texture2DMS<uint4> arg_0 : register(t0, space1);
 
 void textureLoad_c378ee() {
-  uint4 res = arg_0.Load(int2(0, 0), 1);
+  uint4 res = arg_0.Load((0).xx, 1);
 }
 
 struct tint_symbol {
@@ -10,7 +10,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   textureLoad_c378ee();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

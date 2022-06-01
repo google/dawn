@@ -43,6 +43,7 @@
 // Forward declarations
 namespace tint::sem {
 class Call;
+class Constant;
 class Builtin;
 class TypeConstructor;
 class TypeConversion;
@@ -334,6 +335,11 @@ class GeneratorImpl : public TextGenerator {
     /// @param stmt the statement to emit
     /// @returns true if the statement was successfully emitted
     bool EmitIf(const ast::IfStatement* stmt);
+    /// Handles a constant value
+    /// @param out the output stream
+    /// @param constant the constant value to emit
+    /// @returns true if the constant value was successfully emitted
+    bool EmitConstant(std::ostream& out, const sem::Constant& constant);
     /// Handles a literal
     /// @param out the output stream
     /// @param lit the literal to emit

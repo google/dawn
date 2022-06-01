@@ -4,5 +4,5 @@ void unused_entry_point() {
 }
 
 void f() {
-  float2 v = float2(0.0f, 0.0f);
+  float2 v = (0.0f).xx;
 }

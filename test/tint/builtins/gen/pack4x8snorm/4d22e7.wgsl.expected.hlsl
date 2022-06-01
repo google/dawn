@@ -4,7 +4,7 @@ uint tint_pack4x8snorm(float4 param_0) {
 }
 
 void pack4x8snorm_4d22e7() {
-  uint res = tint_pack4x8snorm(float4(0.0f, 0.0f, 0.0f, 0.0f));
+  uint res = tint_pack4x8snorm((0.0f).xxxx);
 }
 
 struct tint_symbol {
@@ -13,7 +13,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   pack4x8snorm_4d22e7();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

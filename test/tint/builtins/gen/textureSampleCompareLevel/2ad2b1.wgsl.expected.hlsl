@@ -2,7 +2,7 @@ Texture2D arg_0 : register(t0, space1);
 SamplerComparisonState arg_1 : register(s1, space1);
 
 void textureSampleCompareLevel_2ad2b1() {
-  float res = arg_0.SampleCmpLevelZero(arg_1, float2(0.0f, 0.0f), 1.0f);
+  float res = arg_0.SampleCmpLevelZero(arg_1, (0.0f).xx, 1.0f);
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   textureSampleCompareLevel_2ad2b1();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

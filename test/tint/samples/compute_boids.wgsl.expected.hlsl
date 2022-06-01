@@ -25,7 +25,7 @@ struct tint_symbol_3 {
 };
 
 float4 frag_main_inner() {
-  return float4(1.0f, 1.0f, 1.0f, 1.0f);
+  return (1.0f).xxxx;
 }
 
 tint_symbol_3 frag_main() {
@@ -52,9 +52,9 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
   }
   float2 vPos = asfloat(particlesA.Load2((16u * index)));
   float2 vVel = asfloat(particlesA.Load2(((16u * index) + 8u)));
-  float2 cMass = float2(0.0f, 0.0f);
-  float2 cVel = float2(0.0f, 0.0f);
-  float2 colVel = float2(0.0f, 0.0f);
+  float2 cMass = (0.0f).xx;
+  float2 cVel = (0.0f).xx;
+  float2 colVel = (0.0f).xx;
   int cMassCount = 0;
   int cVelCount = 0;
   float2 pos = float2(0.0f, 0.0f);

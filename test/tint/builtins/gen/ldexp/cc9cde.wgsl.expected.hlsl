@@ -1,5 +1,5 @@
 void ldexp_cc9cde() {
-  float4 res = ldexp(float4(0.0f, 0.0f, 0.0f, 0.0f), int4(0, 0, 0, 0));
+  float4 res = ldexp((0.0f).xxxx, (0).xxxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   ldexp_cc9cde();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

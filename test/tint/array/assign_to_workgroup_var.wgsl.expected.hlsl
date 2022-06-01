@@ -52,7 +52,7 @@ tint_symbol_4_ret tint_symbol_4(RWByteAddressBuffer buffer, uint offset) {
 
 void foo(int4 src_param[4]) {
   int4 src_function[4] = (int4[4])0;
-  const int4 tint_symbol_8[4] = {int4((1).xxxx), int4((2).xxxx), int4((3).xxxx), int4((3).xxxx)};
+  const int4 tint_symbol_8[4] = {(1).xxxx, (2).xxxx, (3).xxxx, (3).xxxx};
   tint_symbol = tint_symbol_8;
   tint_symbol = src_param;
   tint_symbol = ret_arr();

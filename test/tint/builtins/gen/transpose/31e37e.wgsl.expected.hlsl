@@ -1,5 +1,5 @@
 void transpose_31e37e() {
-  float2x4 res = transpose(float4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  float2x4 res = transpose(float4x2((0.0f).xx, (0.0f).xx, (0.0f).xx, (0.0f).xx));
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   transpose_31e37e();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

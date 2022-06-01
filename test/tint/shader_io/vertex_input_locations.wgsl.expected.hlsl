@@ -13,7 +13,7 @@ float4 main_inner(int loc0, uint loc1, float loc2, float4 loc3) {
   const uint u = loc1;
   const float f = loc2;
   const float4 v = loc3;
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {

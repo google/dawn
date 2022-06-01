@@ -1,5 +1,5 @@
 void smoothstep_aad1db() {
-  float3 res = smoothstep(float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f));
+  float3 res = smoothstep((0.0f).xxx, (0.0f).xxx, (0.0f).xxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   smoothstep_aad1db();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

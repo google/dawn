@@ -1,5 +1,5 @@
 void dpdyCoarse_3e1ab4() {
-  float2 res = ddy_coarse(float2(0.0f, 0.0f));
+  float2 res = ddy_coarse((0.0f).xx);
 }
 
 void fragment_main() {

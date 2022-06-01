@@ -1,5 +1,5 @@
 void ceil_b74c16() {
-  float4 res = ceil(float4(0.0f, 0.0f, 0.0f, 0.0f));
+  float4 res = ceil((0.0f).xxxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   ceil_b74c16();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

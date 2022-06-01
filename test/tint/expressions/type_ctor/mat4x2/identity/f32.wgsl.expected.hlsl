@@ -3,4 +3,4 @@ void unused_entry_point() {
   return;
 }
 
-static const float4x2 m = float4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+static const float4x2 m = float4x2((0.0f).xx, (0.0f).xx, (0.0f).xx, (0.0f).xx);

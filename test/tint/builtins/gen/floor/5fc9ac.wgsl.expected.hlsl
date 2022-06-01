@@ -1,5 +1,5 @@
 void floor_5fc9ac() {
-  float2 res = floor(float2(0.0f, 0.0f));
+  float2 res = floor((0.0f).xx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   floor_5fc9ac();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

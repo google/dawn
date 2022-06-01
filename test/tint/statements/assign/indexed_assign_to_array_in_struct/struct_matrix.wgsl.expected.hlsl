@@ -27,7 +27,7 @@ cbuffer cbuffer_uniforms : register(b4, space1) {
 [numthreads(1, 1, 1)]
 void main() {
   OuterS s1 = (OuterS)0;
-  set_vector_float2x4(s1.m1, uniforms[0].x, float4((1.0f).xxxx));
+  set_vector_float2x4(s1.m1, uniforms[0].x, (1.0f).xxxx);
   set_scalar_float2x4(s1.m1, uniforms[0].x, uniforms[0].x, 1.0f);
   return;
 }

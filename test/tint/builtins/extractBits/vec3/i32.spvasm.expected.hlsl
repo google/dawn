@@ -7,7 +7,7 @@ int3 tint_extract_bits(int3 v, uint offset, uint count) {
 }
 
 void f_1() {
-  int3 v = int3(0, 0, 0);
+  int3 v = (0).xxx;
   uint offset_1 = 0u;
   uint count = 0u;
   const int3 x_15 = tint_extract_bits(v, offset_1, count);

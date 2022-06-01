@@ -1,5 +1,5 @@
 void round_52c84d() {
-  float2 res = round(float2(0.0f, 0.0f));
+  float2 res = round((0.0f).xx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   round_52c84d();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

@@ -17,5 +17,5 @@ float4x4 tint_symbol_2(RWByteAddressBuffer buffer, uint offset) {
 }
 
 void foo() {
-  tint_symbol(v, 0u, (tint_symbol_2(v, 0u) + float4x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)));
+  tint_symbol(v, 0u, (tint_symbol_2(v, 0u) + float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx)));
 }

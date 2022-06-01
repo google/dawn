@@ -4,5 +4,5 @@ void unused_entry_point() {
 }
 
 void f() {
-  uint4 v = uint4(0u, 0u, 0u, 0u);
+  uint4 v = (0u).xxxx;
 }

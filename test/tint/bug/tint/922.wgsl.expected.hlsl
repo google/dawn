@@ -199,7 +199,7 @@ void main1() {
   if ((x_e52.x == 2.0f)) {
     {
       const float3 x_e59 = a_Normal1;
-      const Mat4x2_ x_e64 = tint_symbol_8(global1, (32u * uint(0)));
+      const Mat4x2_ x_e64 = tint_symbol_8(global1, (32u * 0u));
       const float2 x_e68 = Mul2(x_e64, float4(a_Normal1, 1.0f));
       v_TexCoord = x_e68.xy;
       return;
@@ -207,7 +207,7 @@ void main1() {
   } else {
     {
       const float2 x_e73 = a_UV1;
-      const Mat4x2_ x_e79 = tint_symbol_8(global1, (32u * uint(0)));
+      const Mat4x2_ x_e79 = tint_symbol_8(global1, (32u * 0u));
       const float2 x_e84 = Mul2(x_e79, float4(a_UV1, 1.0f, 1.0f));
       v_TexCoord = x_e84.xy;
       return;

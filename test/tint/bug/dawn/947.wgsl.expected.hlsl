@@ -29,7 +29,7 @@ struct tint_symbol_2 {
 VertexOutputs vs_main_inner(uint VertexIndex) {
   float2 texcoord[3] = {float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)};
   VertexOutputs output = (VertexOutputs)0;
-  output.position = float4(((texcoord[VertexIndex] * 2.0f) - float2(1.0f, 1.0f)), 0.0f, 1.0f);
+  output.position = float4(((texcoord[VertexIndex] * 2.0f) - (1.0f).xx), 0.0f, 1.0f);
   bool flipY = (asfloat(uniforms[0].y) < 0.0f);
   if (flipY) {
     output.texcoords = ((((texcoord[VertexIndex] * asfloat(uniforms[0].xy)) + asfloat(uniforms[0].zw)) * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f));
@@ -60,10 +60,10 @@ struct tint_symbol_5 {
 static bool tint_discard = false;
 
 float4 fs_main_inner(float2 texcoord) {
-  float2 clampedTexcoord = clamp(texcoord, float2(0.0f, 0.0f), float2(1.0f, 1.0f));
+  float2 clampedTexcoord = clamp(texcoord, (0.0f).xx, (1.0f).xx);
   if (!(all((clampedTexcoord == texcoord)))) {
     tint_discard = true;
-    return float4(0.0f, 0.0f, 0.0f, 0.0f);
+    return (0.0f).xxxx;
   }
   float4 srcColor = myTexture.Sample(mySampler, texcoord);
   return srcColor;

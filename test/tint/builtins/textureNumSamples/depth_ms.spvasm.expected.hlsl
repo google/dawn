@@ -1,5 +1,5 @@
 Texture2DMS<float4> arg_0 : register(t0, space1);
-static float4 tint_symbol_1 = float4(0.0f, 0.0f, 0.0f, 0.0f);
+static float4 tint_symbol_1 = (0.0f).xxxx;
 
 void textureNumSamples_a3c8a0() {
   int res = 0;
@@ -17,7 +17,7 @@ void tint_symbol_2(float4 tint_symbol) {
 
 void vertex_main_1() {
   textureNumSamples_a3c8a0();
-  tint_symbol_2(float4(0.0f, 0.0f, 0.0f, 0.0f));
+  tint_symbol_2((0.0f).xxxx);
   return;
 }
 

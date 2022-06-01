@@ -76,7 +76,7 @@ ExternalTextureParams tint_symbol_1(uint4 buffer[11], uint offset) {
 }
 
 void textureLoad_8acf41() {
-  float4 res = textureLoadExternal(arg_0, ext_tex_plane_1, int2(0, 0), tint_symbol_1(ext_tex_params, 0u));
+  float4 res = textureLoadExternal(arg_0, ext_tex_plane_1, (0).xx, tint_symbol_1(ext_tex_params, 0u));
 }
 
 struct tint_symbol {
@@ -85,7 +85,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   textureLoad_8acf41();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

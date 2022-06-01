@@ -1,5 +1,5 @@
 void sinh_b9860e() {
-  float2 res = sinh(float2(0.0f, 0.0f));
+  float2 res = sinh((0.0f).xx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   sinh_b9860e();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

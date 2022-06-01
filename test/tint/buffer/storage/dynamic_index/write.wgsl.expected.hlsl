@@ -25,14 +25,14 @@ void tint_symbol_11(RWByteAddressBuffer buffer, uint offset, int4 value[4]) {
 }
 
 void main_inner(uint idx) {
-  s.Store3((176u * idx), asuint(int3(0, 0, 0)));
+  s.Store3((176u * idx), asuint((0).xxx));
   s.Store(((176u * idx) + 12u), asuint(0));
-  s.Store3(((176u * idx) + 16u), asuint(uint3(0u, 0u, 0u)));
+  s.Store3(((176u * idx) + 16u), asuint((0u).xxx));
   s.Store(((176u * idx) + 28u), asuint(0u));
-  s.Store3(((176u * idx) + 32u), asuint(float3(0.0f, 0.0f, 0.0f)));
+  s.Store3(((176u * idx) + 32u), asuint((0.0f).xxx));
   s.Store(((176u * idx) + 44u), asuint(0.0f));
-  tint_symbol_8(s, ((176u * idx) + 48u), float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
-  tint_symbol_9(s, ((176u * idx) + 80u), float3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  tint_symbol_8(s, ((176u * idx) + 48u), float2x3((0.0f).xxx, (0.0f).xxx));
+  tint_symbol_9(s, ((176u * idx) + 80u), float3x2((0.0f).xx, (0.0f).xx, (0.0f).xx));
   const int4 tint_symbol_13[4] = (int4[4])0;
   tint_symbol_11(s, ((176u * idx) + 112u), tint_symbol_13);
 }

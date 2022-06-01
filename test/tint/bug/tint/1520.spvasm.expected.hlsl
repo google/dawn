@@ -25,20 +25,20 @@ bool test_int_S1_c0_b() {
   ok = true;
   x_41_phi = false;
   if (true) {
-    x_40 = all(((int4(0, 0, 0, 0) / value_or_one_if_zero_int4(int4(x_27, x_27, x_27, x_27))) == int4(0, 0, 0, 0)));
+    x_40 = all((((0).xxxx / value_or_one_if_zero_int4(int4(x_27, x_27, x_27, x_27))) == (0).xxxx));
     x_41_phi = x_40;
   }
   const bool x_41 = x_41_phi;
   ok = x_41;
   const int4 x_44 = int4(x_27, x_27, x_27, x_27);
   val = x_44;
-  const int4 x_47 = (x_44 + int4(1, 1, 1, 1));
+  const int4 x_47 = (x_44 + (1).xxxx);
   val = x_47;
-  const int4 x_48 = (x_47 - int4(1, 1, 1, 1));
+  const int4 x_48 = (x_47 - (1).xxxx);
   val = x_48;
-  const int4 x_49 = (x_48 + int4(1, 1, 1, 1));
+  const int4 x_49 = (x_48 + (1).xxxx);
   val = x_49;
-  const int4 x_50 = (x_49 - int4(1, 1, 1, 1));
+  const int4 x_50 = (x_49 - (1).xxxx);
   val = x_50;
   x_55_phi = false;
   if (x_41) {
@@ -47,13 +47,13 @@ bool test_int_S1_c0_b() {
   }
   const bool x_55 = x_55_phi;
   ok = x_55;
-  const int4 x_58 = (x_50 * int4(2, 2, 2, 2));
+  const int4 x_58 = (x_50 * (2).xxxx);
   val = x_58;
-  const int4 x_59 = (x_58 / int4(2, 2, 2, 2));
+  const int4 x_59 = (x_58 / (2).xxxx);
   val = x_59;
-  const int4 x_60 = (x_59 * int4(2, 2, 2, 2));
+  const int4 x_60 = (x_59 * (2).xxxx);
   val = x_60;
-  const int4 x_61 = (x_60 / int4(2, 2, 2, 2));
+  const int4 x_61 = (x_60 / (2).xxxx);
   val = x_61;
   x_66_phi = false;
   if (x_55) {
@@ -86,20 +86,20 @@ void main_1() {
   x_9_ok = true;
   x_87_phi = false;
   if (true) {
-    x_86 = all(((float4(0.0f, 0.0f, 0.0f, 0.0f) / float4(x_77, x_77, x_77, x_77)) == float4(0.0f, 0.0f, 0.0f, 0.0f)));
+    x_86 = all((((0.0f).xxxx / float4(x_77, x_77, x_77, x_77)) == (0.0f).xxxx));
     x_87_phi = x_86;
   }
   const bool x_87 = x_87_phi;
   x_9_ok = x_87;
   const float4 x_89 = float4(x_77, x_77, x_77, x_77);
   x_10_val = x_89;
-  const float4 x_92 = (x_89 + float4(1.0f, 1.0f, 1.0f, 1.0f));
+  const float4 x_92 = (x_89 + (1.0f).xxxx);
   x_10_val = x_92;
-  const float4 x_93 = (x_92 - float4(1.0f, 1.0f, 1.0f, 1.0f));
+  const float4 x_93 = (x_92 - (1.0f).xxxx);
   x_10_val = x_93;
-  const float4 x_94 = (x_93 + float4(1.0f, 1.0f, 1.0f, 1.0f));
+  const float4 x_94 = (x_93 + (1.0f).xxxx);
   x_10_val = x_94;
-  const float4 x_95 = (x_94 - float4(1.0f, 1.0f, 1.0f, 1.0f));
+  const float4 x_95 = (x_94 - (1.0f).xxxx);
   x_10_val = x_95;
   x_100_phi = false;
   if (x_87) {
@@ -108,13 +108,13 @@ void main_1() {
   }
   const bool x_100 = x_100_phi;
   x_9_ok = x_100;
-  const float4 x_103 = (x_95 * float4(2.0f, 2.0f, 2.0f, 2.0f));
+  const float4 x_103 = (x_95 * (2.0f).xxxx);
   x_10_val = x_103;
-  const float4 x_104 = (x_103 / float4(2.0f, 2.0f, 2.0f, 2.0f));
+  const float4 x_104 = (x_103 / (2.0f).xxxx);
   x_10_val = x_104;
-  const float4 x_105 = (x_104 * float4(2.0f, 2.0f, 2.0f, 2.0f));
+  const float4 x_105 = (x_104 * (2.0f).xxxx);
   x_10_val = x_105;
-  const float4 x_106 = (x_105 / float4(2.0f, 2.0f, 2.0f, 2.0f));
+  const float4 x_106 = (x_105 / (2.0f).xxxx);
   x_10_val = x_106;
   x_111_phi = false;
   if (x_100) {

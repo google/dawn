@@ -1,5 +1,5 @@
 void exp_0f70eb() {
-  float4 res = exp(float4(0.0f, 0.0f, 0.0f, 0.0f));
+  float4 res = exp((0.0f).xxxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   exp_0f70eb();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

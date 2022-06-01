@@ -1,5 +1,5 @@
 void select_80a9a9() {
-  bool3 res = (bool3(false, false, false) ? bool3(false, false, false) : bool3(false, false, false));
+  bool3 res = ((false).xxx ? (false).xxx : (false).xxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   select_80a9a9();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

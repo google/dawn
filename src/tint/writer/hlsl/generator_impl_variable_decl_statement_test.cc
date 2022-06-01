@@ -97,7 +97,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Initialize
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-    EXPECT_EQ(gen.result(), R"(float3 a = float3(0.0f, 0.0f, 0.0f);
+    EXPECT_EQ(gen.result(), R"(float3 a = (0.0f).xxx;
 )");
 }
 
@@ -111,7 +111,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Initialize
 
     ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
     EXPECT_EQ(gen.result(),
-              R"(float2x3 a = float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+              R"(float2x3 a = float2x3((0.0f).xxx, (0.0f).xxx);
 )");
 }
 

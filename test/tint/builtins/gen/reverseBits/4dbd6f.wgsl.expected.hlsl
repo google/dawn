@@ -1,5 +1,5 @@
 void reverseBits_4dbd6f() {
-  int4 res = asint(reversebits(asuint(int4(0, 0, 0, 0))));
+  int4 res = asint(reversebits(asuint((0).xxxx)));
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   reverseBits_4dbd6f();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

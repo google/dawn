@@ -1,5 +1,5 @@
 void countOneBits_690cfc() {
-  uint3 res = countbits(uint3(0u, 0u, 0u));
+  uint3 res = countbits((0u).xxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   countOneBits_690cfc();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

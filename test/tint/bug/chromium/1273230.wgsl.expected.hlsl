@@ -60,10 +60,10 @@ int tint_atomicLoad_1(RWByteAddressBuffer buffer, uint offset) {
 void doIgnore() {
   uint g43 = uniforms[0].x;
   uint kj6 = dbg.Load(20u);
-  uint b53 = tint_atomicLoad(counters, (4u * uint(0)));
-  uint rwg = indices.Load((4u * uint(0)));
-  float rb5 = asfloat(positions.Load((4u * uint(0))));
-  int g55 = tint_atomicLoad_1(LUT, (4u * uint(0)));
+  uint b53 = tint_atomicLoad(counters, (4u * 0u));
+  uint rwg = indices.Load((4u * 0u));
+  float rb5 = asfloat(positions.Load((4u * 0u)));
+  int g55 = tint_atomicLoad_1(LUT, (4u * 0u));
 }
 
 struct tint_symbol_1 {

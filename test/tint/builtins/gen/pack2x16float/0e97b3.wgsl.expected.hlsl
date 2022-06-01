@@ -4,7 +4,7 @@ uint tint_pack2x16float(float2 param_0) {
 }
 
 void pack2x16float_0e97b3() {
-  uint res = tint_pack2x16float(float2(0.0f, 0.0f));
+  uint res = tint_pack2x16float((0.0f).xx);
 }
 
 struct tint_symbol {
@@ -13,7 +13,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   pack2x16float_0e97b3();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

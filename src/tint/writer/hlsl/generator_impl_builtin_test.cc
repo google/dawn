@@ -324,7 +324,7 @@ modf_result_vec3 tint_modf(float3 param_0) {
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_modf(float3(0.0f, 0.0f, 0.0f));
+  tint_modf((0.0f).xxx);
   return;
 }
 )");
@@ -376,7 +376,7 @@ frexp_result_vec3 tint_frexp(float3 param_0) {
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  tint_frexp(float3(0.0f, 0.0f, 0.0f));
+  tint_frexp((0.0f).xxx);
   return;
 }
 )");

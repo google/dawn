@@ -1,5 +1,5 @@
 void tan_244e2a() {
-  float4 res = tan(float4(0.0f, 0.0f, 0.0f, 0.0f));
+  float4 res = tan((0.0f).xxxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   tan_244e2a();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

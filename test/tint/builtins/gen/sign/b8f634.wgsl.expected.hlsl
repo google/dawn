@@ -1,5 +1,5 @@
 void sign_b8f634() {
-  float4 res = sign(float4(0.0f, 0.0f, 0.0f, 0.0f));
+  float4 res = sign((0.0f).xxxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   sign_b8f634();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

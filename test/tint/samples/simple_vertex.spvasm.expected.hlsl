@@ -1,7 +1,7 @@
 static float4 gl_Position = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 void main_1() {
-  gl_Position = float4(0.0f, 0.0f, 0.0f, 0.0f);
+  gl_Position = (0.0f).xxxx;
   return;
 }
 

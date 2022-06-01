@@ -29,10 +29,10 @@ void let_decls() {
   const int v1 = 1;
   const uint v2 = 1u;
   const float v3 = 1.0f;
-  const int3 v4 = int3(1, 1, 1);
-  const uint3 v5 = uint3(1u, 1u, 1u);
-  const float3 v6 = float3(1.0f, 1.0f, 1.0f);
-  const float3x3 v7 = float3x3(v6, v6, v6);
+  const int3 v4 = (1).xxx;
+  const uint3 v5 = (1u).xxx;
+  const float3 v6 = (1.0f).xxx;
+  const float3x3 v7 = float3x3((1.0f).xxx, (1.0f).xxx, (1.0f).xxx);
   const MyStruct v8 = {1.0f};
   const float v9[10] = (float[10])0;
   const int v10 = ret_i32();
@@ -48,7 +48,7 @@ struct tint_symbol {
 };
 
 float4 main_inner() {
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol main() {

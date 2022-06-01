@@ -14,7 +14,7 @@ struct tint_symbol {
 };
 
 VertexOutputs main_inner() {
-  const VertexOutputs tint_symbol_1 = {1, 1u, 1.0f, float4(1.0f, 2.0f, 3.0f, 4.0f), float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  const VertexOutputs tint_symbol_1 = {1, 1u, 1.0f, float4(1.0f, 2.0f, 3.0f, 4.0f), (0.0f).xxxx};
   return tint_symbol_1;
 }
 

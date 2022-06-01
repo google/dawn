@@ -2,6 +2,6 @@
 void f() {
   const float a = 4.0f;
   const float3 b = float3(1.0f, 2.0f, 3.0f);
-  const float3 r = (a - b);
+  const float3 r = (4.0f - float3(1.0f, 2.0f, 3.0f));
   return;
 }

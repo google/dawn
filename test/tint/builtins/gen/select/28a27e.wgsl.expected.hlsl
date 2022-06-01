@@ -1,5 +1,5 @@
 void select_28a27e() {
-  uint3 res = (bool3(false, false, false) ? uint3(0u, 0u, 0u) : uint3(0u, 0u, 0u));
+  uint3 res = ((false).xxx ? (0u).xxx : (0u).xxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   select_28a27e();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

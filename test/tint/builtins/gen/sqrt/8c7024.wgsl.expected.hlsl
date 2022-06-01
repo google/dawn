@@ -1,5 +1,5 @@
 void sqrt_8c7024() {
-  float2 res = sqrt(float2(0.0f, 0.0f));
+  float2 res = sqrt((0.0f).xx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   sqrt_8c7024();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

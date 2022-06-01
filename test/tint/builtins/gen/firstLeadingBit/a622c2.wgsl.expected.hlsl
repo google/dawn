@@ -1,20 +1,20 @@
 int2 tint_first_leading_bit(int2 v) {
-  uint2 x = ((v < int2((0).xx)) ? uint2(~(v)) : uint2(v));
-  const uint2 b16 = (bool2((x & uint2((4294901760u).xx))) ? uint2((16u).xx) : uint2((0u).xx));
+  uint2 x = ((v < (0).xx) ? uint2(~(v)) : uint2(v));
+  const uint2 b16 = (bool2((x & (4294901760u).xx)) ? (16u).xx : (0u).xx);
   x = (x >> b16);
-  const uint2 b8 = (bool2((x & uint2((65280u).xx))) ? uint2((8u).xx) : uint2((0u).xx));
+  const uint2 b8 = (bool2((x & (65280u).xx)) ? (8u).xx : (0u).xx);
   x = (x >> b8);
-  const uint2 b4 = (bool2((x & uint2((240u).xx))) ? uint2((4u).xx) : uint2((0u).xx));
+  const uint2 b4 = (bool2((x & (240u).xx)) ? (4u).xx : (0u).xx);
   x = (x >> b4);
-  const uint2 b2 = (bool2((x & uint2((12u).xx))) ? uint2((2u).xx) : uint2((0u).xx));
+  const uint2 b2 = (bool2((x & (12u).xx)) ? (2u).xx : (0u).xx);
   x = (x >> b2);
-  const uint2 b1 = (bool2((x & uint2((2u).xx))) ? uint2((1u).xx) : uint2((0u).xx));
-  const uint2 is_zero = ((x == uint2((0u).xx)) ? uint2((4294967295u).xx) : uint2((0u).xx));
+  const uint2 b1 = (bool2((x & (2u).xx)) ? (1u).xx : (0u).xx);
+  const uint2 is_zero = ((x == (0u).xx) ? (4294967295u).xx : (0u).xx);
   return int2((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
 void firstLeadingBit_a622c2() {
-  int2 res = tint_first_leading_bit(int2(0, 0));
+  int2 res = tint_first_leading_bit((0).xx);
 }
 
 struct tint_symbol {
@@ -23,7 +23,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   firstLeadingBit_a622c2();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

@@ -152,9 +152,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar) {
 
     std::stringstream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(),
-              "(float3(1.0f, 1.0f, 1.0f) * "
-              "1.0f)");
+    EXPECT_EQ(out.str(), "((1.0f).xxx * 1.0f)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
@@ -169,9 +167,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
 
     std::stringstream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(),
-              "(1.0f * float3(1.0f, 1.0f, "
-              "1.0f))");
+    EXPECT_EQ(out.str(), "(1.0f * (1.0f).xxx)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
@@ -216,7 +212,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
 
     std::stringstream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(), "mul(float3(1.0f, 1.0f, 1.0f), mat)");
+    EXPECT_EQ(out.str(), "mul((1.0f).xxx, mat)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
@@ -231,7 +227,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
 
     std::stringstream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(), "mul(mat, float3(1.0f, 1.0f, 1.0f))");
+    EXPECT_EQ(out.str(), "mul(mat, (1.0f).xxx)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix) {
@@ -576,7 +572,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_vec_by_vec_i32) {
 
     ASSERT_TRUE(gen.Generate());
     EXPECT_EQ(gen.result(), R"(void fn() {
-  int4 a = int4(100, 100, 100, 100);
+  int4 a = (100).xxxx;
   const int4 r = (a )" + Token() +
                                 R"( int4(50, 1, 25, 1));
 }
@@ -594,7 +590,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_vec_by_scalar_i32) {
 
     ASSERT_TRUE(gen.Generate());
     EXPECT_EQ(gen.result(), R"(void fn() {
-  int4 a = int4(100, 100, 100, 100);
+  int4 a = (100).xxxx;
   const int4 r = (a )" + Token() +
                                 R"( 1);
 }
@@ -755,7 +751,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByExpression_vec_by_vec_i32) {
 }
 
 int3 zero() {
-  return int3(0, 0, 0);
+  return (0).xxx;
 }
 
 void fn() {

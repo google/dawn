@@ -7,7 +7,7 @@ int2 tint_extract_bits(int2 v, uint offset, uint count) {
 }
 
 void extractBits_a99a8d() {
-  int2 res = tint_extract_bits(int2(0, 0), 1u, 1u);
+  int2 res = tint_extract_bits((0).xx, 1u, 1u);
 }
 
 struct tint_symbol {
@@ -16,7 +16,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   extractBits_a99a8d();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

@@ -1,5 +1,5 @@
 void refract_cbc1d2() {
-  float3 res = refract(float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), 1.0f);
+  float3 res = refract((0.0f).xxx, (0.0f).xxx, 1.0f);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   refract_cbc1d2();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

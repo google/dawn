@@ -77,7 +77,7 @@ ExternalTextureParams tint_symbol_1(uint4 buffer[11], uint offset) {
 }
 
 void textureSampleLevel_979816() {
-  float4 res = textureSampleExternal(arg_0, ext_tex_plane_1, arg_1, float2(0.0f, 0.0f), tint_symbol_1(ext_tex_params, 0u));
+  float4 res = textureSampleExternal(arg_0, ext_tex_plane_1, arg_1, (0.0f).xx, tint_symbol_1(ext_tex_params, 0u));
 }
 
 struct tint_symbol {
@@ -86,7 +86,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   textureSampleLevel_979816();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

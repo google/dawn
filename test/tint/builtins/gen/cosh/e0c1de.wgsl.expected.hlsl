@@ -1,5 +1,5 @@
 void cosh_e0c1de() {
-  float4 res = cosh(float4(0.0f, 0.0f, 0.0f, 0.0f));
+  float4 res = cosh((0.0f).xxxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   cosh_e0c1de();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

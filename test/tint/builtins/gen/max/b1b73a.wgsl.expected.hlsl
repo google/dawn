@@ -1,5 +1,5 @@
 void max_b1b73a() {
-  uint3 res = max(uint3(0u, 0u, 0u), uint3(0u, 0u, 0u));
+  uint3 res = max((0u).xxx, (0u).xxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   max_b1b73a();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

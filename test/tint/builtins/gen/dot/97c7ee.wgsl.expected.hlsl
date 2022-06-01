@@ -1,5 +1,5 @@
 void dot_97c7ee() {
-  uint res = dot(uint2(0u, 0u), uint2(0u, 0u));
+  uint res = dot((0u).xx, (0u).xx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   dot_97c7ee();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

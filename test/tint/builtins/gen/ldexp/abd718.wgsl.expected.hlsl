@@ -1,5 +1,5 @@
 void ldexp_abd718() {
-  float2 res = ldexp(float2(0.0f, 0.0f), int2(0, 0));
+  float2 res = ldexp((0.0f).xx, (0).xx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   ldexp_abd718();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

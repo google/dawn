@@ -28,7 +28,7 @@ Particle tint_symbol_2(ByteAddressBuffer buffer, uint offset) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  Particle particle = tint_symbol_2(particles, (176u * uint(0)));
+  Particle particle = tint_symbol_2(particles, (176u * 0u));
   {
     float3 tint_symbol_1[8] = particle.position;
     tint_symbol_1[sim[0].x] = particle.position[sim[0].x];

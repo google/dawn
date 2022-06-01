@@ -6,7 +6,7 @@ uint4 tint_insert_bits(uint4 v, uint4 n, uint offset, uint count) {
 }
 
 void insertBits_51ede1() {
-  uint4 res = tint_insert_bits(uint4(0u, 0u, 0u, 0u), uint4(0u, 0u, 0u, 0u), 1u, 1u);
+  uint4 res = tint_insert_bits((0u).xxxx, (0u).xxxx, 1u, 1u);
 }
 
 struct tint_symbol {
@@ -15,7 +15,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   insertBits_51ede1();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

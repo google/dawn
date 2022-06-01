@@ -1,5 +1,5 @@
 void select_087ea4() {
-  uint4 res = (false ? uint4(0u, 0u, 0u, 0u) : uint4(0u, 0u, 0u, 0u));
+  uint4 res = (false ? (0u).xxxx : (0u).xxxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   select_087ea4();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

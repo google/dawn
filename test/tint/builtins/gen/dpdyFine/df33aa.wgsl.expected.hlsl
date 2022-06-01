@@ -1,5 +1,5 @@
 void dpdyFine_df33aa() {
-  float2 res = ddy_fine(float2(0.0f, 0.0f));
+  float2 res = ddy_fine((0.0f).xx);
 }
 
 void fragment_main() {

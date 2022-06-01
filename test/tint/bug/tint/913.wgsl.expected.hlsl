@@ -38,7 +38,7 @@ void main_inner(uint3 GlobalInvocationID) {
   if ((tint_tmp_2)) {
     bool tint_tmp_5 = success;
     if (tint_tmp_5) {
-      tint_tmp_5 = all((tint_symbol.Load(int3(int2(dstTexCoord), 0)) == nonCoveredColor));
+      tint_tmp_5 = all((tint_symbol.Load(int3(int2(dstTexCoord), 0)) == float4(0.0f, 1.0f, 0.0f, 1.0f)));
     }
     success = (tint_tmp_5);
   } else {

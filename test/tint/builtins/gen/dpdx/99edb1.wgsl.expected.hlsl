@@ -1,5 +1,5 @@
 void dpdx_99edb1() {
-  float2 res = ddx(float2(0.0f, 0.0f));
+  float2 res = ddx((0.0f).xx);
 }
 
 void fragment_main() {

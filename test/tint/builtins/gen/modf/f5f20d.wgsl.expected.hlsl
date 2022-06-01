@@ -10,7 +10,7 @@ modf_result_vec2 tint_modf(float2 param_0) {
 }
 
 void modf_f5f20d() {
-  modf_result_vec2 res = tint_modf(float2(0.0f, 0.0f));
+  modf_result_vec2 res = tint_modf((0.0f).xx);
 }
 
 struct tint_symbol {
@@ -19,7 +19,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   modf_f5f20d();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

@@ -1,5 +1,5 @@
 void clamp_7706d7() {
-  uint2 res = clamp(uint2(0u, 0u), uint2(0u, 0u), uint2(0u, 0u));
+  uint2 res = clamp((0u).xx, (0u).xx, (0u).xx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   clamp_7706d7();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

@@ -1,5 +1,5 @@
 void sin_fc8bc4() {
-  float2 res = sin(float2(0.0f, 0.0f));
+  float2 res = sin((0.0f).xx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   sin_fc8bc4();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

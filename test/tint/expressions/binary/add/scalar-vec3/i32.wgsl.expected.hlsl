@@ -2,6 +2,6 @@
 void f() {
   const int a = 4;
   const int3 b = int3(1, 2, 3);
-  const int3 r = (a + b);
+  const int3 r = (4 + int3(1, 2, 3));
   return;
 }

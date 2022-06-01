@@ -23,7 +23,7 @@ void main_1() {
   const float4 x_21 = q;
   p = float3(x_21.x, x_21.y, x_21.z);
   const float x_27 = p.x;
-  const uint scalar_offset_4 = ((208u + (16u * uint(0)))) / 4;
+  const uint scalar_offset_4 = ((208u + (16u * 0u))) / 4;
   const float x_41 = asfloat(x_14[scalar_offset_4 / 4][scalar_offset_4 % 4]);
   const float x_45 = position.y;
   const float x_49 = asfloat(x_14[4].x);

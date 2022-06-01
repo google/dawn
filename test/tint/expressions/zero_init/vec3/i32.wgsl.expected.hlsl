@@ -4,5 +4,5 @@ void unused_entry_point() {
 }
 
 void f() {
-  int3 v = int3(0, 0, 0);
+  int3 v = (0).xxx;
 }

@@ -1,5 +1,5 @@
 void fwidthCoarse_1e59d9() {
-  float3 res = fwidth(float3(0.0f, 0.0f, 0.0f));
+  float3 res = fwidth((0.0f).xxx);
 }
 
 void fragment_main() {

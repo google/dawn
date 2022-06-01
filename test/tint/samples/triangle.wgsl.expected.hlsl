@@ -1,4 +1,4 @@
-static const float2 pos[3] = {float2(0.0f, 0.5f), float2(-0.5f, -0.5f), float2(0.5f, -0.5f)};
+static const float2 pos[3] = {float2(0.0f, 0.5f), (-0.5f).xx, float2(0.5f, -0.5f)};
 
 struct tint_symbol_1 {
   uint VertexIndex : SV_VertexID;

@@ -337,7 +337,7 @@ void tint_symbol(RWByteAddressBuffer buffer, uint offset, float2x3 value) {
 }
 
 void main() {
-  tint_symbol(data, 16u, float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  tint_symbol(data, 16u, float2x3((0.0f).xxx, (0.0f).xxx));
   return;
 }
 )";

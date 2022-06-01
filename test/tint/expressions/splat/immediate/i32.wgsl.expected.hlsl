@@ -4,7 +4,7 @@ void unused_entry_point() {
 }
 
 void f() {
-  int2 v2 = int2((1).xx);
-  int3 v3 = int3((1).xxx);
-  int4 v4 = int4((1).xxxx);
+  int2 v2 = (1).xx;
+  int3 v3 = (1).xxx;
+  int4 v4 = (1).xxxx;
 }

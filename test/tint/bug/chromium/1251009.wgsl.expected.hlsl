@@ -20,7 +20,7 @@ struct tint_symbol_2 {
 
 float4 main_inner(VertexInputs0 inputs0, uint loc1, uint instance_index, VertexInputs1 inputs1) {
   const uint foo = (inputs0.vertex_index + instance_index);
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {

@@ -2,7 +2,7 @@ Texture2DArray<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 
 void textureSampleLevel_a4af26() {
-  float4 res = arg_0.SampleLevel(arg_1, float3(0.0f, 0.0f, float(1)), 1.0f, int2(0, 0));
+  float4 res = arg_0.SampleLevel(arg_1, float3(0.0f, 0.0f, float(1)), 1.0f, (0).xx);
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   textureSampleLevel_a4af26();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

@@ -8,7 +8,7 @@ struct tint_symbol_2 {
 
 float4 main_inner(uint vertex_index, uint instance_index) {
   const uint foo = (vertex_index + instance_index);
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {

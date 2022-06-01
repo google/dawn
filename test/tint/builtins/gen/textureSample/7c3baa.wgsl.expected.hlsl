@@ -2,7 +2,7 @@ Texture2D<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 
 void textureSample_7c3baa() {
-  float4 res = arg_0.Sample(arg_1, float2(0.0f, 0.0f), int2(0, 0));
+  float4 res = arg_0.Sample(arg_1, (0.0f).xx, (0).xx);
 }
 
 void fragment_main() {

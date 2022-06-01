@@ -4,5 +4,5 @@ void unused_entry_point() {
 }
 
 void f() {
-  bool4 v = bool4(false, false, false, false);
+  bool4 v = (false).xxxx;
 }

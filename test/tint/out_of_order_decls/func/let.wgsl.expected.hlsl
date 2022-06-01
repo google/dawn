@@ -1,6 +1,6 @@
 static const int a = 1;
 
 void f() {
-  const int b = a;
+  const int b = 1;
   return;
 }

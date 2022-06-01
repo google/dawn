@@ -7,6 +7,6 @@ static const int a = 1;
 static const int a__ = 2;
 
 void f() {
-  const int b = a;
-  const int b__ = a__;
+  const int b = 1;
+  const int b__ = 2;
 }

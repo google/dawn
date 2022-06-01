@@ -1,5 +1,5 @@
 void select_cb9301() {
-  bool2 res = (bool2(false, false) ? bool2(false, false) : bool2(false, false));
+  bool2 res = ((false).xx ? (false).xx : (false).xx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   select_cb9301();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

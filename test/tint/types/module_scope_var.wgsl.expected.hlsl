@@ -19,10 +19,10 @@ void main() {
   i32_var = 0;
   u32_var = 0u;
   f32_var = 0.0f;
-  v2i32_var = int2(0, 0);
-  v3u32_var = uint3(0u, 0u, 0u);
-  v4f32_var = float4(0.0f, 0.0f, 0.0f, 0.0f);
-  m2x3_var = float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+  v2i32_var = (0).xx;
+  v3u32_var = (0u).xxx;
+  v4f32_var = (0.0f).xxxx;
+  m2x3_var = float2x3((0.0f).xxx, (0.0f).xxx);
   const float tint_symbol[4] = (float[4])0;
   arr_var = tint_symbol;
   const S tint_symbol_1 = (S)0;

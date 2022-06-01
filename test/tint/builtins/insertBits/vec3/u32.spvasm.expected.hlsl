@@ -6,8 +6,8 @@ uint3 tint_insert_bits(uint3 v, uint3 n, uint offset, uint count) {
 }
 
 void f_1() {
-  uint3 v = uint3(0u, 0u, 0u);
-  uint3 n = uint3(0u, 0u, 0u);
+  uint3 v = (0u).xxx;
+  uint3 n = (0u).xxx;
   uint offset_1 = 0u;
   uint count = 0u;
   const uint3 x_15 = tint_insert_bits(v, n, offset_1, count);

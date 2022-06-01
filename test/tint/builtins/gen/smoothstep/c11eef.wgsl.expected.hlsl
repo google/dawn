@@ -3,7 +3,7 @@ builtins/gen/smoothstep/c11eef.wgsl:28:24 warning: use of deprecated builtin
                        ^^^^^^^^^^
 
 void smoothStep_c11eef() {
-  float2 res = smoothstep(float2(0.0f, 0.0f), float2(0.0f, 0.0f), float2(0.0f, 0.0f));
+  float2 res = smoothstep((0.0f).xx, (0.0f).xx, (0.0f).xx);
 }
 
 struct tint_symbol {
@@ -12,7 +12,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   smoothStep_c11eef();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

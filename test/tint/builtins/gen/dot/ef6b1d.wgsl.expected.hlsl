@@ -1,5 +1,5 @@
 void dot_ef6b1d() {
-  int res = dot(int4(0, 0, 0, 0), int4(0, 0, 0, 0));
+  int res = dot((0).xxxx, (0).xxxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   dot_ef6b1d();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

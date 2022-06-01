@@ -1,5 +1,5 @@
 void tanh_5724b3() {
-  float2 res = tanh(float2(0.0f, 0.0f));
+  float2 res = tanh((0.0f).xx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   tanh_5724b3();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

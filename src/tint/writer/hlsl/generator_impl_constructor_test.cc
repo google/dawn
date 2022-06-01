@@ -67,7 +67,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Float) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("float(-0.000012f)"));
+    EXPECT_THAT(gen.result(), HasSubstr("-0.000012f"));
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Bool) {
@@ -76,7 +76,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Bool) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("bool(true)"));
+    EXPECT_THAT(gen.result(), HasSubstr("true"));
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Int) {
@@ -85,7 +85,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Int) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("int(-12345)"));
+    EXPECT_THAT(gen.result(), HasSubstr("-12345"));
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Uint) {
@@ -94,7 +94,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Uint) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("uint(12345u)"));
+    EXPECT_THAT(gen.result(), HasSubstr("12345u"));
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec) {
@@ -112,7 +112,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_Empty) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("float3(0.0f, 0.0f, 0.0f)"));
+    EXPECT_THAT(gen.result(), HasSubstr("0.0f).xxx"));
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_SingleScalar_Float_Literal) {
@@ -121,7 +121,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_SingleScalar_
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("float3((2.0f).xxx)"));
+    EXPECT_THAT(gen.result(), HasSubstr("2.0f).xxx"));
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_SingleScalar_Float_Var) {
@@ -142,7 +142,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_SingleScalar_
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("bool3((true).xxx)"));
+    EXPECT_THAT(gen.result(), HasSubstr("(true).xxx"));
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_SingleScalar_Bool_Var) {
@@ -163,7 +163,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_SingleScalar_
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("int3((2).xxx)"));
+    EXPECT_THAT(gen.result(), HasSubstr("2).xxx"));
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_SingleScalar_UInt) {
@@ -172,7 +172,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_SingleScalar_
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("uint3((2u).xxx)"));
+    EXPECT_THAT(gen.result(), HasSubstr("2u).xxx"));
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat) {
@@ -193,7 +193,7 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat_Empty) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
 
-    EXPECT_THAT(gen.result(), HasSubstr("float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)"));
+    EXPECT_THAT(gen.result(), HasSubstr("float2x3 tint_symbol = float2x3((0.0f).xxx, (0.0f).xxx)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array) {

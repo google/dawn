@@ -1,5 +1,5 @@
 void step_19accd() {
-  float2 res = step(float2(0.0f, 0.0f), float2(0.0f, 0.0f));
+  float2 res = step((0.0f).xx, (0.0f).xx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   step_19accd();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

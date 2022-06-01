@@ -1,5 +1,5 @@
 void select_bb447f() {
-  int2 res = (false ? int2(0, 0) : int2(0, 0));
+  int2 res = (false ? (0).xx : (0).xx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   select_bb447f();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

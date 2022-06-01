@@ -1,5 +1,5 @@
 void reverseBits_a6ccd4() {
-  uint3 res = reversebits(uint3(0u, 0u, 0u));
+  uint3 res = reversebits((0u).xxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   reverseBits_a6ccd4();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

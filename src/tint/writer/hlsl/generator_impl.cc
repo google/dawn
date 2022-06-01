@@ -33,10 +33,10 @@
 #include "src/tint/sem/atomic.h"
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/call.h"
+#include "src/tint/sem/constant.h"
 #include "src/tint/sem/depth_multisampled_texture.h"
 #include "src/tint/sem/depth_texture.h"
 #include "src/tint/sem/function.h"
-#include "src/tint/sem/materialize.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/module.h"
 #include "src/tint/sem/multisampled_texture.h"
@@ -107,6 +107,18 @@ const char* image_format_to_rwtexture_type(ast::TexelFormat image_format) {
             return "int4";
         default:
             return nullptr;
+    }
+}
+
+void PrintF32(std::ostream& out, float value) {
+    // Note: Currently inf and nan should not be constructable, but this is implemented for the day
+    // we support them.
+    if (std::isinf(value)) {
+        out << (value >= 0 ? "asfloat(0x7f800000u)" : "asfloat(0xff800000u)");
+    } else if (std::isnan(value)) {
+        out << "asfloat(0x7fc00000u)";
+    } else {
+        out << FloatToString(value) << "f";
     }
 }
 
@@ -802,8 +814,7 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
         return true;
     }
 
-    out << "(";
-    TINT_DEFER(out << ")");
+    ScopedParen sp(out);
 
     if (!EmitExpression(out, expr->lhs)) {
         return false;
@@ -924,12 +935,7 @@ bool GeneratorImpl::EmitBreak(const ast::BreakStatement*) {
 }
 
 bool GeneratorImpl::EmitCall(std::ostream& out, const ast::CallExpression* expr) {
-    auto* sem = builder_.Sem().Get(expr);
-    if (auto* m = sem->As<sem::Materialize>()) {
-        // TODO(crbug.com/tint/1504): Just emit the constant value.
-        sem = m->Expr();
-    }
-    auto* call = sem->As<sem::Call>();
+    auto* call = builder_.Sem().Get<sem::Call>(expr);
     auto* target = call->Target();
     return Switch(
         target, [&](const sem::Function* func) { return EmitFunctionCall(out, call, func); },
@@ -2644,6 +2650,11 @@ bool GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
 }
 
 bool GeneratorImpl::EmitExpression(std::ostream& out, const ast::Expression* expr) {
+    if (auto* sem = builder_.Sem().Get(expr)) {
+        if (auto constant = sem->ConstantValue()) {
+            return EmitConstant(out, constant);
+        }
+    }
     return Switch(
         expr,
         [&](const ast::IndexAccessorExpression* a) {  //
@@ -3119,6 +3130,111 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     return true;
 }
 
+bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant& constant) {
+    auto emit_bool = [&](size_t element_idx) {
+        out << (constant.Element<AInt>(element_idx) ? "true" : "false");
+        return true;
+    };
+    auto emit_f32 = [&](size_t element_idx) {
+        PrintF32(out, static_cast<float>(constant.Element<AFloat>(element_idx)));
+        return true;
+    };
+    auto emit_i32 = [&](size_t element_idx) {
+        out << constant.Element<AInt>(element_idx).value;
+        return true;
+    };
+    auto emit_u32 = [&](size_t element_idx) {
+        out << constant.Element<AInt>(element_idx).value << "u";
+        return true;
+    };
+    auto emit_vector = [&](const sem::Vector* vec_ty, size_t start, size_t end) {
+        if (constant.AllEqual(start, end)) {
+            {
+                ScopedParen sp(out);
+                bool ok = Switch(
+                    vec_ty->type(),                                  //
+                    [&](const sem::Bool*) { return emit_bool(0); },  //
+                    [&](const sem::F32*) { return emit_f32(0); },    //
+                    [&](const sem::I32*) { return emit_i32(0); },    //
+                    [&](const sem::U32*) { return emit_u32(0); }     //
+                );
+                if (!ok) {
+                    return false;
+                }
+            }
+            out << ".";
+            for (size_t i = start; i < end; i++) {
+                out << "x";
+            }
+            return true;
+        }
+
+        if (!EmitType(out, vec_ty, ast::StorageClass::kNone, ast::Access::kUndefined, "")) {
+            return false;
+        }
+
+        ScopedParen sp(out);
+
+        auto emit_els = [&](auto emit_el) {
+            for (size_t i = start; i < end; i++) {
+                if (i > start) {
+                    out << ", ";
+                }
+                if (!emit_el(i)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+        return Switch(
+            vec_ty->type(),                                         //
+            [&](const sem::Bool*) { return emit_els(emit_bool); },  //
+            [&](const sem::F32*) { return emit_els(emit_f32); },    //
+            [&](const sem::I32*) { return emit_els(emit_i32); },    //
+            [&](const sem::U32*) { return emit_els(emit_u32); },    //
+            [&](Default) {
+                diagnostics_.add_error(diag::System::Writer,
+                                       "unhandled constant vector element type: " +
+                                           builder_.FriendlyName(vec_ty->type()));
+                return false;
+            });
+    };
+    auto emit_matrix = [&](const sem::Matrix* m) {
+        if (!EmitType(out, constant.Type(), ast::StorageClass::kNone, ast::Access::kUndefined,
+                      "")) {
+            return false;
+        }
+
+        ScopedParen sp(out);
+
+        for (size_t column_idx = 0; column_idx < m->columns(); column_idx++) {
+            if (column_idx > 0) {
+                out << ", ";
+            }
+            size_t start = m->rows() * column_idx;
+            size_t end = m->rows() * (column_idx + 1);
+            if (!emit_vector(m->ColumnType(), start, end)) {
+                return false;
+            }
+        }
+        return true;
+    };
+    return Switch(
+        constant.Type(),                                                                   //
+        [&](const sem::Bool*) { return emit_bool(0); },                                    //
+        [&](const sem::F32*) { return emit_f32(0); },                                      //
+        [&](const sem::I32*) { return emit_i32(0); },                                      //
+        [&](const sem::U32*) { return emit_u32(0); },                                      //
+        [&](const sem::Vector* v) { return emit_vector(v, 0, constant.ElementCount()); },  //
+        [&](const sem::Matrix* m) { return emit_matrix(m); },
+        [&](Default) {
+            diagnostics_.add_error(
+                diag::System::Writer,
+                "unhandled constant type: " + builder_.FriendlyName(constant.Type()));
+            return false;
+        });
+}
+
 bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression* lit) {
     return Switch(
         lit,
@@ -3127,14 +3243,7 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
             return true;
         },
         [&](const ast::FloatLiteralExpression* l) {
-            auto f32 = static_cast<float>(l->value);
-            if (std::isinf(f32)) {
-                out << (f32 >= 0 ? "asfloat(0x7f800000u)" : "asfloat(0xff800000u)");
-            } else if (std::isnan(f32)) {
-                out << "asfloat(0x7fc00000u)";
-            } else {
-                out << FloatToString(f32) << "f";
-            }
+            PrintF32(out, static_cast<float>(l->value));
             return true;
         },
         [&](const ast::IntLiteralExpression* i) {

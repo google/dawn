@@ -33,7 +33,7 @@ float4 main_inner(uint gl_VertexIndex) {
   const float2x2 x_23 = tint_symbol_3(x_20, 0u);
   const float2x2 x_28 = tint_symbol_5(x_26, 0u);
   const uint x_46 = gl_VertexIndex;
-  const float2 tint_symbol_7[3] = {float2(-1.0f, 1.0f), float2(1.0f, 1.0f), float2(-1.0f, -1.0f)};
+  const float2 tint_symbol_7[3] = {float2(-1.0f, 1.0f), (1.0f).xx, (-1.0f).xx};
   indexable = tint_symbol_7;
   const float2 x_51 = indexable[x_46];
   const float2 x_52 = mul(x_51, float2x2((x_23[0u] + x_28[0u]), (x_23[1u] + x_28[1u])));

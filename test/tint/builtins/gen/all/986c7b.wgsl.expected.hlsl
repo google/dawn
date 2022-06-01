@@ -1,5 +1,5 @@
 void all_986c7b() {
-  bool res = all(bool4(false, false, false, false));
+  bool res = all((false).xxxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   all_986c7b();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

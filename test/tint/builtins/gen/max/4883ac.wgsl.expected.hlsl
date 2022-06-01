@@ -1,5 +1,5 @@
 void max_4883ac() {
-  float3 res = max(float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f));
+  float3 res = max((0.0f).xxx, (0.0f).xxx);
 }
 
 struct tint_symbol {
@@ -8,7 +8,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   max_4883ac();
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return (0.0f).xxxx;
 }
 
 tint_symbol vertex_main() {

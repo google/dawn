@@ -1,5 +1,5 @@
 void main_1() {
-  float3 v = float3(0.0f, 0.0f, 0.0f);
+  float3 v = (0.0f).xxx;
   const float x_14 = v.y;
   const float3 x_16 = v;
   const float2 x_17 = float2(x_16.x, x_16.z);

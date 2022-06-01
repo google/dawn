@@ -1,5 +1,5 @@
 void dpdy_feb40f() {
-  float3 res = ddy(float3(0.0f, 0.0f, 0.0f));
+  float3 res = ddy((0.0f).xxx);
 }
 
 void fragment_main() {
