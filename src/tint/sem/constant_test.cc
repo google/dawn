@@ -29,16 +29,19 @@ using ConstantTest = TestHelper;
 
 TEST_F(ConstantTest, ConstructorInitializerList) {
     {
-        Constant c(create<AbstractInt>(), {1_a});
-        c.WithElements([&](auto&& vec) { EXPECT_THAT(vec, testing::ElementsAre(1_a)); });
+        auto i = AInt(AInt::kHighest);
+        Constant c(create<AbstractInt>(), {i});
+        c.WithElements([&](auto&& vec) { EXPECT_THAT(vec, testing::ElementsAre(i)); });
     }
     {
-        Constant c(create<I32>(), {1_i});
-        c.WithElements([&](auto&& vec) { EXPECT_THAT(vec, testing::ElementsAre(1_a)); });
+        auto i = i32(i32::kHighest);
+        Constant c(create<I32>(), {i});
+        c.WithElements([&](auto&& vec) { EXPECT_THAT(vec, testing::ElementsAre(i)); });
     }
     {
-        Constant c(create<U32>(), {1_u});
-        c.WithElements([&](auto&& vec) { EXPECT_THAT(vec, testing::ElementsAre(1_a)); });
+        auto i = u32(u32::kHighest);
+        Constant c(create<U32>(), {i});
+        c.WithElements([&](auto&& vec) { EXPECT_THAT(vec, testing::ElementsAre(i)); });
     }
     {
         Constant c(create<Bool>(), {false});
@@ -49,16 +52,19 @@ TEST_F(ConstantTest, ConstructorInitializerList) {
         c.WithElements([&](auto&& vec) { EXPECT_THAT(vec, testing::ElementsAre(1_a)); });
     }
     {
-        Constant c(create<AbstractFloat>(), {1.0_a});
-        c.WithElements([&](auto&& vec) { EXPECT_THAT(vec, testing::ElementsAre(1.0_a)); });
+        auto f = AFloat(AFloat::kHighest);
+        Constant c(create<AbstractFloat>(), {f});
+        c.WithElements([&](auto&& vec) { EXPECT_THAT(vec, testing::ElementsAre(f)); });
     }
     {
-        Constant c(create<F32>(), {1.0_f});
-        c.WithElements([&](auto&& vec) { EXPECT_THAT(vec, testing::ElementsAre(1.0_a)); });
+        auto f = f32(f32::kHighest);
+        Constant c(create<F32>(), {f});
+        c.WithElements([&](auto&& vec) { EXPECT_THAT(vec, testing::ElementsAre(f)); });
     }
     {
-        Constant c(create<F16>(), {1.0_h});
-        c.WithElements([&](auto&& vec) { EXPECT_THAT(vec, testing::ElementsAre(1.0_a)); });
+        auto f = f16(f16::kHighest);
+        Constant c(create<F16>(), {f});
+        c.WithElements([&](auto&& vec) { EXPECT_THAT(vec, testing::ElementsAre(f)); });
     }
 }
 

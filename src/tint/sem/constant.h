@@ -48,6 +48,10 @@ class Constant {
     /// Elements is either a vector of AInts or AFloats
     using Elements = std::variant<AInts, AFloats>;
 
+    /// Helper that resolves to either AInt or AFloat based on the element type T.
+    template <typename T>
+    using ElementFor = std::conditional_t<IsFloatingPoint<UnwrapNumber<T>>, AFloat, AInt>;
+
     /// Helper that resolves to either AInts or AFloats based on the element type T.
     template <typename T>
     using ElementVectorFor = std::conditional_t<IsFloatingPoint<UnwrapNumber<T>>, AFloats, AInts>;
@@ -164,7 +168,7 @@ Constant::Constant(const sem::Type* ty, std::initializer_list<T> els)
     ElementVectorFor<T> elements;
     elements.reserve(els.size());
     for (auto el : els) {
-        elements.emplace_back(AFloat(el));
+        elements.emplace_back(ElementFor<T>(el));
     }
     elems_ = Elements{std::move(elements)};
 }
