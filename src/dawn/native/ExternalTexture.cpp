@@ -66,10 +66,6 @@ MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
     DAWN_INVALID_IF(!descriptor->dstTransferFunctionParameters,
                     "The destination transfer function parameters must be non-null.");
 
-    DAWN_INVALID_IF(descriptor->colorSpace != wgpu::PredefinedColorSpace::Srgb,
-                    "The specified color space (%s) is not %s.", descriptor->colorSpace,
-                    wgpu::PredefinedColorSpace::Srgb);
-
     if (descriptor->plane1) {
         DAWN_INVALID_IF(
             !descriptor->yuvToRgbConversionMatrix,

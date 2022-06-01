@@ -270,22 +270,6 @@ TEST_F(ExternalTextureTest, CreateMultiplanarExternalTextureValidation) {
 
         ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
     }
-
-    // Creating a multiplanar external texture with a non-sRGB color space should fail.
-    {
-        wgpu::TextureDescriptor plane0TextureDescriptor =
-            CreateTextureDescriptor(kBiplanarPlane0Format);
-        wgpu::TextureDescriptor plane1TextureDescriptor =
-            CreateTextureDescriptor(kBiplanarPlane1Format);
-        wgpu::Texture texture0 = device.CreateTexture(&plane0TextureDescriptor);
-        wgpu::Texture texture1 = device.CreateTexture(&plane1TextureDescriptor);
-
-        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
-        externalDesc.plane0 = texture0.CreateView();
-        externalDesc.plane1 = texture1.CreateView();
-        externalDesc.colorSpace = wgpu::PredefinedColorSpace::Undefined;
-        ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
-    }
 }
 
 // Test that submitting a render pass that contains a destroyed external texture results in
