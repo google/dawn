@@ -85,15 +85,15 @@ func (e EnumDecl) Format(w fmt.State, verb rune) {
 
 // EnumEntry describes an entry in a enumerator
 type EnumEntry struct {
-	Source      tok.Source
-	Name        string
-	Decorations Decorations
+	Source     tok.Source
+	Name       string
+	Attributes Attributes
 }
 
 // Format implements the fmt.Formatter interface
 func (e EnumEntry) Format(w fmt.State, verb rune) {
-	if len(e.Decorations) > 0 {
-		fmt.Fprintf(w, "%v %v", e.Decorations, e.Name)
+	if len(e.Attributes) > 0 {
+		fmt.Fprintf(w, "%v %v", e.Attributes, e.Name)
 	} else {
 		fmt.Fprint(w, e.Name)
 	}
@@ -136,7 +136,7 @@ type IntrinsicDecl struct {
 	Source         tok.Source
 	Kind           IntrinsicKind
 	Name           string
-	Decorations    Decorations
+	Attributes     Attributes
 	TemplateParams TemplateParams
 	Parameters     Parameters
 	ReturnType     *TemplatedName
@@ -243,15 +243,15 @@ func (t TemplatedName) Format(w fmt.State, verb rune) {
 // TypeDecl describes a type declaration
 type TypeDecl struct {
 	Source         tok.Source
-	Decorations    Decorations
+	Attributes     Attributes
 	Name           string
 	TemplateParams TemplateParams
 }
 
 // Format implements the fmt.Formatter interface
 func (p TypeDecl) Format(w fmt.State, verb rune) {
-	if len(p.Decorations) > 0 {
-		p.Decorations.Format(w, verb)
+	if len(p.Attributes) > 0 {
+		p.Attributes.Format(w, verb)
 		fmt.Fprintf(w, " type %v", p.Name)
 	}
 	fmt.Fprintf(w, "type %v", p.Name)
@@ -296,13 +296,13 @@ func (t TemplateParam) Format(w fmt.State, verb rune) {
 	}
 }
 
-// Decorations is a list of Decoration
+// Attributes is a list of Attribute
 // Example:
 //   [[a(x), b(y)]]
-type Decorations []Decoration
+type Attributes []Attribute
 
 // Format implements the fmt.Formatter interface
-func (l Decorations) Format(w fmt.State, verb rune) {
+func (l Attributes) Format(w fmt.State, verb rune) {
 	fmt.Fprint(w, "[[")
 	for i, d := range l {
 		if i > 0 {
@@ -313,30 +313,30 @@ func (l Decorations) Format(w fmt.State, verb rune) {
 	fmt.Fprint(w, "]]")
 }
 
-// Take looks up the decoration with the given name. If the decoration is found
-// it is removed from the Decorations list and returned, otherwise nil is
-// returned and the Decorations are not altered.
-func (l *Decorations) Take(name string) *Decoration {
-	for i, d := range *l {
-		if d.Name == name {
+// Take looks up the attribute with the given name. If the attribute is found
+// it is removed from the Attributes list and returned, otherwise nil is
+// returned and the Attributes are not altered.
+func (l *Attributes) Take(name string) *Attribute {
+	for i, a := range *l {
+		if a.Name == name {
 			*l = append((*l)[:i], (*l)[i+1:]...)
-			return &d
+			return &a
 		}
 	}
 	return nil
 }
 
-// Decoration describes a single decoration
+// Attribute describes a single attribute
 // Example:
-//   a(x)
-type Decoration struct {
+//   @a(x)
+type Attribute struct {
 	Source tok.Source
 	Name   string
 	Values []string
 }
 
 // Format implements the fmt.Formatter interface
-func (d Decoration) Format(w fmt.State, verb rune) {
+func (d Attribute) Format(w fmt.State, verb rune) {
 	fmt.Fprintf(w, "%v", d.Name)
 	if len(d.Values) > 0 {
 		fmt.Fprintf(w, "(")

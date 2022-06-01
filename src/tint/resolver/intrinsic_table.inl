@@ -52,7 +52,7 @@ std::string Bool::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type af'
-/// @see src/tint/intrinsics.def:74:51
+/// @see src/tint/intrinsics.def:74:48
 class Af : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -81,7 +81,7 @@ std::string Af::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type ai'
-/// @see src/tint/intrinsics.def:75:51
+/// @see src/tint/intrinsics.def:75:48
 class Ai : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -110,7 +110,7 @@ std::string Ai::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type i32'
-/// @see src/tint/intrinsics.def:76:24
+/// @see src/tint/intrinsics.def:76:21
 class I32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -137,7 +137,7 @@ std::string I32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type u32'
-/// @see src/tint/intrinsics.def:77:24
+/// @see src/tint/intrinsics.def:77:21
 class U32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -164,7 +164,7 @@ std::string U32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type f32'
-/// @see src/tint/intrinsics.def:78:24
+/// @see src/tint/intrinsics.def:78:21
 class F32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -587,7 +587,7 @@ std::string Mat4X4::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type vec'
-/// @see src/tint/intrinsics.def:91:37
+/// @see src/tint/intrinsics.def:91:34
 class Vec : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -628,7 +628,7 @@ std::string Vec::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type mat'
-/// @see src/tint/intrinsics.def:92:37
+/// @see src/tint/intrinsics.def:92:34
 class Mat : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1416,7 +1416,7 @@ std::string ModfResult::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type __modf_result_vec'
-/// @see src/tint/intrinsics.def:117:42
+/// @see src/tint/intrinsics.def:117:39
 class ModfResultVec : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1478,7 +1478,7 @@ std::string FrexpResult::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type __frexp_result_vec'
-/// @see src/tint/intrinsics.def:119:43
+/// @see src/tint/intrinsics.def:119:40
 class FrexpResultVec : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.

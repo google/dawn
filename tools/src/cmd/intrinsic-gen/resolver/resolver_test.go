@@ -44,7 +44,7 @@ func TestResolver(t *testing.T) {
 			`type X`,
 			success,
 		}, {
-			`[[display("Y")]] type X`,
+			`@display("Y") type X`,
 			success,
 		}, {
 			`
@@ -188,14 +188,14 @@ First declared here: file.txt:1:6
 file.txt:1:13 'X' already declared
 First declared here: file.txt:1:6`,
 		}, {
-			`[[meow]] type X`,
+			`@meow type X`,
 			`
-file.txt:1:3 unknown decoration
+file.txt:1:2 unknown attribute
 `,
 		}, {
-			`[[display("Y", "Z")]] type X`,
+			`@display("Y", "Z") type X`,
 			`
-file.txt:1:3 expected a single value for 'display' decoration`,
+file.txt:1:2 expected a single value for 'display' attribute`,
 		}, {
 			`
 enum e { a }

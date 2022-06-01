@@ -130,14 +130,14 @@ func (r *resolver) enum(e ast.EnumDecl) error {
 			Name: ast.Name,
 			Enum: s,
 		}
-		if internal := ast.Decorations.Take("internal"); internal != nil {
+		if internal := ast.Attributes.Take("internal"); internal != nil {
 			entry.IsInternal = true
 			if len(internal.Values) != 0 {
-				return fmt.Errorf("%v unexpected value for internal decoration", ast.Source)
+				return fmt.Errorf("%v unexpected value for internal attribute", ast.Source)
 			}
 		}
-		if len(ast.Decorations) != 0 {
-			return fmt.Errorf("%v unknown decoration", ast.Decorations[0].Source)
+		if len(ast.Attributes) != 0 {
+			return fmt.Errorf("%v unknown attribute", ast.Attributes[0].Source)
 		}
 		if err := r.globals.declare(entry, e.Source); err != nil {
 			return err
@@ -173,16 +173,16 @@ func (r *resolver) ty(a ast.TypeDecl) error {
 	}
 	t.TemplateParams = templateParams
 
-	// Scan for decorations
-	if d := a.Decorations.Take("display"); d != nil {
+	// Scan for attributes
+	if d := a.Attributes.Take("display"); d != nil {
 		if len(d.Values) != 1 {
-			return fmt.Errorf("%v expected a single value for 'display' decoration", d.Source)
+			return fmt.Errorf("%v expected a single value for 'display' attribute", d.Source)
 		}
 		t.DisplayName = d.Values[0]
 	}
-	if d := a.Decorations.Take("precedence"); d != nil {
+	if d := a.Attributes.Take("precedence"); d != nil {
 		if len(d.Values) != 1 {
-			return fmt.Errorf("%v expected a single integer value for 'precedence' decoration", d.Source)
+			return fmt.Errorf("%v expected a single integer value for 'precedence' attribute", d.Source)
 		}
 		n, err := strconv.Atoi(d.Values[0])
 		if err != nil {
@@ -191,8 +191,8 @@ func (r *resolver) ty(a ast.TypeDecl) error {
 		t.Precedence = n
 	}
 
-	if len(a.Decorations) != 0 {
-		return fmt.Errorf("%v unknown decoration", a.Decorations[0].Source)
+	if len(a.Attributes) != 0 {
+		return fmt.Errorf("%v unknown attribute", a.Attributes[0].Source)
 	}
 
 	return nil
@@ -302,8 +302,8 @@ func (r *resolver) intrinsic(
 		TemplateParams: templateParams,
 	}
 
-	// Process overload decorations
-	if stageDeco := a.Decorations.Take("stage"); stageDeco != nil {
+	// Process overload attributes
+	if stageDeco := a.Attributes.Take("stage"); stageDeco != nil {
 		for stageDeco != nil {
 			for _, stage := range stageDeco.Values {
 				switch stage {
@@ -317,7 +317,7 @@ func (r *resolver) intrinsic(
 					return fmt.Errorf("%v unknown stage '%v'", stageDeco.Source, stage)
 				}
 			}
-			stageDeco = a.Decorations.Take("stage")
+			stageDeco = a.Attributes.Take("stage")
 		}
 	} else {
 		overload.CanBeUsedInStage = sem.StageUses{
@@ -326,14 +326,14 @@ func (r *resolver) intrinsic(
 			Compute:  true,
 		}
 	}
-	if deprecated := a.Decorations.Take("deprecated"); deprecated != nil {
+	if deprecated := a.Attributes.Take("deprecated"); deprecated != nil {
 		overload.IsDeprecated = true
 		if len(deprecated.Values) != 0 {
-			return fmt.Errorf("%v unexpected value for deprecated decoration", deprecated.Source)
+			return fmt.Errorf("%v unexpected value for deprecated attribute", deprecated.Source)
 		}
 	}
-	if len(a.Decorations) != 0 {
-		return fmt.Errorf("%v unknown decoration", a.Decorations[0].Source)
+	if len(a.Attributes) != 0 {
+		return fmt.Errorf("%v unknown attribute", a.Attributes[0].Source)
 	}
 
 	// Append the overload to the intrinsic

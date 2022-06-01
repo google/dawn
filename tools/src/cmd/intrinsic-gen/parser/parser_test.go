@@ -43,15 +43,15 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			"enum E { A [[deco]] B C }",
+			"enum E { A @attr B C }",
 			ast.AST{
 				Enums: []ast.EnumDecl{{
 					Name: "E",
 					Entries: []ast.EnumEntry{
 						{Name: "A"},
 						{
-							Decorations: ast.Decorations{{
-								Name:   "deco",
+							Attributes: ast.Attributes{{
+								Name:   "attr",
 								Values: []string{},
 							}},
 							Name: "B",
@@ -81,43 +81,43 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			"[[deco]] type T",
+			"@attr type T",
 			ast.AST{
 				Types: []ast.TypeDecl{{
-					Decorations: ast.Decorations{
-						{Name: "deco", Values: []string{}},
+					Attributes: ast.Attributes{
+						{Name: "attr", Values: []string{}},
 					},
 					Name: "T",
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			"[[deco_a, deco_b]] type T",
+			"@attr_a @attr_b type T",
 			ast.AST{
 				Types: []ast.TypeDecl{{
-					Decorations: ast.Decorations{
-						{Name: "deco_a", Values: []string{}},
-						{Name: "deco_b", Values: []string{}},
+					Attributes: ast.Attributes{
+						{Name: "attr_a", Values: []string{}},
+						{Name: "attr_b", Values: []string{}},
 					},
 					Name: "T",
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			`[[deco("a", "b")]] type T`, ast.AST{
+			`@attr("a", "b") type T`, ast.AST{
 				Types: []ast.TypeDecl{{
-					Decorations: ast.Decorations{
-						{Name: "deco", Values: []string{"a", "b"}},
+					Attributes: ast.Attributes{
+						{Name: "attr", Values: []string{"a", "b"}},
 					},
 					Name: "T",
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			`[[deco(1, "x")]] type T`, ast.AST{
+			`@attr(1, "x") type T`, ast.AST{
 				Types: []ast.TypeDecl{{
-					Decorations: ast.Decorations{
-						{Name: "deco", Values: []string{"1", "x"}},
+					Attributes: ast.Attributes{
+						{Name: "attr", Values: []string{"1", "x"}},
 					},
 					Name: "T",
 				}},
@@ -157,13 +157,13 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			"[[deco]] fn F()",
+			"@attr fn F()",
 			ast.AST{
 				Builtins: []ast.IntrinsicDecl{{
 					Kind: ast.Builtin,
 					Name: "F",
-					Decorations: ast.Decorations{
-						{Name: "deco", Values: []string{}},
+					Attributes: ast.Attributes{
+						{Name: "attr", Values: []string{}},
 					},
 					Parameters: ast.Parameters{},
 				}},
@@ -281,13 +281,13 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			"[[deco]] op F()",
+			"@attr op F()",
 			ast.AST{
 				Operators: []ast.IntrinsicDecl{{
 					Kind: ast.Operator,
 					Name: "F",
-					Decorations: ast.Decorations{
-						{Name: "deco", Values: []string{}},
+					Attributes: ast.Attributes{
+						{Name: "attr", Values: []string{}},
 					},
 					Parameters: ast.Parameters{},
 				}},
@@ -405,13 +405,13 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			"[[deco]] ctor F()",
+			"@attr ctor F()",
 			ast.AST{
 				Constructors: []ast.IntrinsicDecl{{
 					Kind: ast.Constructor,
 					Name: "F",
-					Decorations: ast.Decorations{
-						{Name: "deco", Values: []string{}},
+					Attributes: ast.Attributes{
+						{Name: "attr", Values: []string{}},
 					},
 					Parameters: ast.Parameters{},
 				}},
@@ -529,13 +529,13 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			"[[deco]] conv F()",
+			"@attr conv F()",
 			ast.AST{
 				Converters: []ast.IntrinsicDecl{{
 					Kind: ast.Converter,
 					Name: "F",
-					Decorations: ast.Decorations{
-						{Name: "deco", Values: []string{}},
+					Attributes: ast.Attributes{
+						{Name: "attr", Values: []string{}},
 					},
 					Parameters: ast.Parameters{},
 				}},
@@ -672,16 +672,16 @@ func TestErrors(t *testing.T) {
 			"test.txt:1:1 unexpected token 'integer'",
 		},
 		{
-			"[[123]]",
-			"test.txt:1:3 expected 'ident' for decoration name, got 'integer'",
-		},
-		{
-			"[[abc",
-			"expected ']]' for decoration list, but reached end of file",
+			"@123",
+			"test.txt:1:2 expected 'ident' for attribute name, got 'integer'",
 		},
 	} {
 		got, err := parser.Parse(test.src, "test.txt")
-		if gotErr := err.Error(); test.expect != gotErr {
+		gotErr := ""
+		if err != nil {
+			gotErr = err.Error()
+		}
+		if test.expect != gotErr {
 			t.Errorf(`Parse() returned error "%+v", expected error "%+v"`, gotErr, test.expect)
 		}
 		if got != nil {

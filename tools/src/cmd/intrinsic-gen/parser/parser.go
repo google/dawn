@@ -43,40 +43,40 @@ type parser struct {
 
 func (p *parser) parse() (*ast.AST, error) {
 	out := ast.AST{}
-	var decorations ast.Decorations
+	var attributes ast.Attributes
 	for p.err == nil {
 		t := p.peek(0)
 		if t == nil {
 			break
 		}
 		switch t.Kind {
-		case tok.Ldeco:
-			decorations = append(decorations, p.decorations()...)
+		case tok.Attr:
+			attributes = append(attributes, p.attributes()...)
 		case tok.Enum:
-			if len(decorations) > 0 {
-				p.err = fmt.Errorf("%v unexpected decoration", decorations[0].Source)
+			if len(attributes) > 0 {
+				p.err = fmt.Errorf("%v unexpected attribute", attributes[0].Source)
 			}
 			out.Enums = append(out.Enums, p.enumDecl())
 		case tok.Match:
-			if len(decorations) > 0 {
-				p.err = fmt.Errorf("%v unexpected decoration", decorations[0].Source)
+			if len(attributes) > 0 {
+				p.err = fmt.Errorf("%v unexpected attribute", attributes[0].Source)
 			}
 			out.Matchers = append(out.Matchers, p.matcherDecl())
 		case tok.Type:
-			out.Types = append(out.Types, p.typeDecl(decorations))
-			decorations = nil
+			out.Types = append(out.Types, p.typeDecl(attributes))
+			attributes = nil
 		case tok.Function:
-			out.Builtins = append(out.Builtins, p.builtinDecl(decorations))
-			decorations = nil
+			out.Builtins = append(out.Builtins, p.builtinDecl(attributes))
+			attributes = nil
 		case tok.Operator:
-			out.Operators = append(out.Operators, p.operatorDecl(decorations))
-			decorations = nil
+			out.Operators = append(out.Operators, p.operatorDecl(attributes))
+			attributes = nil
 		case tok.Constructor:
-			out.Constructors = append(out.Constructors, p.constructorDecl(decorations))
-			decorations = nil
+			out.Constructors = append(out.Constructors, p.constructorDecl(attributes))
+			attributes = nil
 		case tok.Converter:
-			out.Converters = append(out.Converters, p.converterDecl(decorations))
-			decorations = nil
+			out.Converters = append(out.Converters, p.converterDecl(attributes))
+			attributes = nil
 		default:
 			p.err = fmt.Errorf("%v unexpected token '%v'", t.Source, t.Kind)
 		}
@@ -99,9 +99,9 @@ func (p *parser) enumDecl() ast.EnumDecl {
 }
 
 func (p *parser) enumEntry() ast.EnumEntry {
-	decos := p.decorations()
+	decos := p.attributes()
 	name := p.expect(tok.Identifier, "enum entry")
-	return ast.EnumEntry{Source: name.Source, Decorations: decos, Name: string(name.Runes)}
+	return ast.EnumEntry{Source: name.Source, Attributes: decos, Name: string(name.Runes)}
 }
 
 func (p *parser) matcherDecl() ast.MatcherDecl {
@@ -118,13 +118,13 @@ func (p *parser) matcherDecl() ast.MatcherDecl {
 	return m
 }
 
-func (p *parser) typeDecl(decos ast.Decorations) ast.TypeDecl {
+func (p *parser) typeDecl(decos ast.Attributes) ast.TypeDecl {
 	p.expect(tok.Type, "type declaration")
 	name := p.expect(tok.Identifier, "type name")
 	m := ast.TypeDecl{
-		Source:      name.Source,
-		Decorations: decos,
-		Name:        string(name.Runes),
+		Source:     name.Source,
+		Attributes: decos,
+		Name:       string(name.Runes),
 	}
 	if p.peekIs(0, tok.Lt) {
 		m.TemplateParams = p.templateParams()
@@ -132,13 +132,10 @@ func (p *parser) typeDecl(decos ast.Decorations) ast.TypeDecl {
 	return m
 }
 
-func (p *parser) decorations() ast.Decorations {
-	if p.match(tok.Ldeco) == nil {
-		return nil
-	}
-	out := ast.Decorations{}
-	for p.err == nil {
-		name := p.expect(tok.Identifier, "decoration name")
+func (p *parser) attributes() ast.Attributes {
+	var out ast.Attributes
+	for p.match(tok.Attr) != nil && p.err == nil {
+		name := p.expect(tok.Identifier, "attribute name")
 		values := []string{}
 		if p.match(tok.Lparen) != nil {
 			for p.err == nil {
@@ -147,29 +144,25 @@ func (p *parser) decorations() ast.Decorations {
 					break
 				}
 			}
-			p.expect(tok.Rparen, "decoration values")
+			p.expect(tok.Rparen, "attribute values")
 		}
-		out = append(out, ast.Decoration{
+		out = append(out, ast.Attribute{
 			Source: name.Source,
 			Name:   string(name.Runes),
 			Values: values,
 		})
-		if p.match(tok.Comma) == nil {
-			break
-		}
 	}
-	p.expect(tok.Rdeco, "decoration list")
 	return out
 }
 
-func (p *parser) builtinDecl(decos ast.Decorations) ast.IntrinsicDecl {
+func (p *parser) builtinDecl(decos ast.Attributes) ast.IntrinsicDecl {
 	p.expect(tok.Function, "function declaration")
 	name := p.expect(tok.Identifier, "function name")
 	f := ast.IntrinsicDecl{
-		Source:      name.Source,
-		Kind:        ast.Builtin,
-		Decorations: decos,
-		Name:        string(name.Runes),
+		Source:     name.Source,
+		Kind:       ast.Builtin,
+		Attributes: decos,
+		Name:       string(name.Runes),
 	}
 	if p.peekIs(0, tok.Lt) {
 		f.TemplateParams = p.templateParams()
@@ -182,14 +175,14 @@ func (p *parser) builtinDecl(decos ast.Decorations) ast.IntrinsicDecl {
 	return f
 }
 
-func (p *parser) operatorDecl(decos ast.Decorations) ast.IntrinsicDecl {
+func (p *parser) operatorDecl(decos ast.Attributes) ast.IntrinsicDecl {
 	p.expect(tok.Operator, "operator declaration")
 	name := p.next()
 	f := ast.IntrinsicDecl{
-		Source:      name.Source,
-		Kind:        ast.Operator,
-		Decorations: decos,
-		Name:        string(name.Runes),
+		Source:     name.Source,
+		Kind:       ast.Operator,
+		Attributes: decos,
+		Name:       string(name.Runes),
 	}
 	if p.peekIs(0, tok.Lt) {
 		f.TemplateParams = p.templateParams()
@@ -202,14 +195,14 @@ func (p *parser) operatorDecl(decos ast.Decorations) ast.IntrinsicDecl {
 	return f
 }
 
-func (p *parser) constructorDecl(decos ast.Decorations) ast.IntrinsicDecl {
+func (p *parser) constructorDecl(decos ast.Attributes) ast.IntrinsicDecl {
 	p.expect(tok.Constructor, "constructor declaration")
 	name := p.next()
 	f := ast.IntrinsicDecl{
-		Source:      name.Source,
-		Kind:        ast.Constructor,
-		Decorations: decos,
-		Name:        string(name.Runes),
+		Source:     name.Source,
+		Kind:       ast.Constructor,
+		Attributes: decos,
+		Name:       string(name.Runes),
 	}
 	if p.peekIs(0, tok.Lt) {
 		f.TemplateParams = p.templateParams()
@@ -222,14 +215,14 @@ func (p *parser) constructorDecl(decos ast.Decorations) ast.IntrinsicDecl {
 	return f
 }
 
-func (p *parser) converterDecl(decos ast.Decorations) ast.IntrinsicDecl {
+func (p *parser) converterDecl(decos ast.Attributes) ast.IntrinsicDecl {
 	p.expect(tok.Converter, "converter declaration")
 	name := p.next()
 	f := ast.IntrinsicDecl{
-		Source:      name.Source,
-		Kind:        ast.Converter,
-		Decorations: decos,
-		Name:        string(name.Runes),
+		Source:     name.Source,
+		Kind:       ast.Converter,
+		Attributes: decos,
+		Name:       string(name.Runes),
 	}
 	if p.peekIs(0, tok.Lt) {
 		f.TemplateParams = p.templateParams()

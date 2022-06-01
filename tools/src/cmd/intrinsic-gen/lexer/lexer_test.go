@@ -127,11 +127,8 @@ func TestLexTokens(t *testing.T) {
 		{">", tok.Token{Kind: tok.Gt, Runes: []rune(">"), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 2, 1),
 		}}},
-		{"[[", tok.Token{Kind: tok.Ldeco, Runes: []rune("[["), Source: tok.Source{
-			S: loc(1, 1, 0), E: loc(1, 3, 2),
-		}}},
-		{"]]", tok.Token{Kind: tok.Rdeco, Runes: []rune("]]"), Source: tok.Source{
-			S: loc(1, 1, 0), E: loc(1, 3, 2),
+		{"@", tok.Token{Kind: tok.Attr, Runes: []rune("@"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 2, 1),
 		}}},
 		{"(", tok.Token{Kind: tok.Lparen, Runes: []rune("("), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 2, 1),

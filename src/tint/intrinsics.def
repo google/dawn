@@ -30,7 +30,7 @@ enum storage_class {
   workgroup
   uniform
   storage
-  [[internal]] handle
+  @internal handle
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#memory-access-mode
@@ -62,7 +62,7 @@ enum texel_format {
 
 ////////////////////////////////////////////////////////////////////////////////
 // WGSL primitive types                                                       //
-// Types may be decorated with [[precedence(N)]] to prioritize which type     //
+// Types may be decorated with @precedence(N) to prioritize which type        //
 // will be picked when multiple types of a matcher match.                     //
 // This is used to ensure that abstract numerical types materialize to the    //
 // concrete type with the lowest conversion rank.                             //
@@ -71,11 +71,11 @@ enum texel_format {
 
 // https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
 type bool
-[[precedence(4), display("abstract-float")]] type af
-[[precedence(3), display("abstract-int")]]   type ai
-[[precedence(2)]] type i32
-[[precedence(1)]] type u32
-[[precedence(0)]] type f32
+@precedence(4) @display("abstract-float") type af
+@precedence(3) @display("abstract-int")   type ai
+@precedence(2) type i32
+@precedence(1) type u32
+@precedence(0) type f32
 type vec2<T>
 type vec3<T>
 type vec4<T>
@@ -88,8 +88,8 @@ type mat3x4<T>
 type mat4x2<T>
 type mat4x3<T>
 type mat4x4<T>
-[[display("vec{N}<{T}>")]]     type vec<N: num, T>
-[[display("mat{N}x{M}<{T}>")]] type mat<N: num, M: num, T>
+@display("vec{N}<{T}>")     type vec<N: num, T>
+@display("mat{N}x{M}<{T}>") type mat<N: num, M: num, T>
 type ptr<S: storage_class, T, A: access>
 type atomic<T>
 type array<T>
@@ -114,9 +114,9 @@ type texture_storage_3d<F: texel_format, A: access>
 type texture_external
 
 type __modf_result
-[[display("__modf_result_vec{N}")]] type __modf_result_vec<N: num>
+@display("__modf_result_vec{N}") type __modf_result_vec<N: num>
 type __frexp_result
-[[display("__frexp_result_vec{N}")]] type __frexp_result_vec<N: num>
+@display("__frexp_result_vec{N}") type __frexp_result_vec<N: num>
 
 type __atomic_compare_exchange_result<T>
 
@@ -363,18 +363,18 @@ fn distance<N: num>(vec<N, f32>, vec<N, f32>) -> f32
 fn dot<N: num, T: fiu32>(vec<N, T>, vec<N, T>) -> T
 fn dot4I8Packed(u32, u32) -> i32
 fn dot4U8Packed(u32, u32) -> u32
-[[stage("fragment")]] fn dpdx(f32) -> f32
-[[stage("fragment")]] fn dpdx<N: num>(vec<N, f32>) -> vec<N, f32>
-[[stage("fragment")]] fn dpdxCoarse(f32) -> f32
-[[stage("fragment")]] fn dpdxCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
-[[stage("fragment")]] fn dpdxFine(f32) -> f32
-[[stage("fragment")]] fn dpdxFine<N: num>(vec<N, f32>) -> vec<N, f32>
-[[stage("fragment")]] fn dpdy(f32) -> f32
-[[stage("fragment")]] fn dpdy<N: num>(vec<N, f32>) -> vec<N, f32>
-[[stage("fragment")]] fn dpdyCoarse(f32) -> f32
-[[stage("fragment")]] fn dpdyCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
-[[stage("fragment")]] fn dpdyFine(f32) -> f32
-[[stage("fragment")]] fn dpdyFine<N: num>(vec<N, f32>) -> vec<N, f32>
+@stage("fragment") fn dpdx(f32) -> f32
+@stage("fragment") fn dpdx<N: num>(vec<N, f32>) -> vec<N, f32>
+@stage("fragment") fn dpdxCoarse(f32) -> f32
+@stage("fragment") fn dpdxCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
+@stage("fragment") fn dpdxFine(f32) -> f32
+@stage("fragment") fn dpdxFine<N: num>(vec<N, f32>) -> vec<N, f32>
+@stage("fragment") fn dpdy(f32) -> f32
+@stage("fragment") fn dpdy<N: num>(vec<N, f32>) -> vec<N, f32>
+@stage("fragment") fn dpdyCoarse(f32) -> f32
+@stage("fragment") fn dpdyCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
+@stage("fragment") fn dpdyFine(f32) -> f32
+@stage("fragment") fn dpdyFine<N: num>(vec<N, f32>) -> vec<N, f32>
 fn exp(f32) -> f32
 fn exp<N: num>(vec<N, f32>) -> vec<N, f32>
 fn exp2(f32) -> f32
@@ -394,12 +394,12 @@ fn fract(f32) -> f32
 fn fract<N: num>(vec<N, f32>) -> vec<N, f32>
 fn frexp(f32) -> __frexp_result
 fn frexp<N: num>(vec<N, f32>) -> __frexp_result_vec<N>
-[[stage("fragment")]] fn fwidth(f32) -> f32
-[[stage("fragment")]] fn fwidth<N: num>(vec<N, f32>) -> vec<N, f32>
-[[stage("fragment")]] fn fwidthCoarse(f32) -> f32
-[[stage("fragment")]] fn fwidthCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
-[[stage("fragment")]] fn fwidthFine(f32) -> f32
-[[stage("fragment")]] fn fwidthFine<N: num>(vec<N, f32>) -> vec<N, f32>
+@stage("fragment") fn fwidth(f32) -> f32
+@stage("fragment") fn fwidth<N: num>(vec<N, f32>) -> vec<N, f32>
+@stage("fragment") fn fwidthCoarse(f32) -> f32
+@stage("fragment") fn fwidthCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
+@stage("fragment") fn fwidthFine(f32) -> f32
+@stage("fragment") fn fwidthFine<N: num>(vec<N, f32>) -> vec<N, f32>
 fn insertBits<T: iu32>(T, T, u32, u32) -> T
 fn insertBits<N: num, T: iu32>(vec<N, T>, vec<N, T>, u32, u32) -> vec<N, T>
 fn inverseSqrt(f32) -> f32
@@ -448,13 +448,13 @@ fn sinh(f32) -> f32
 fn sinh<N: num>(vec<N, f32>) -> vec<N, f32>
 fn smoothstep(f32, f32, f32) -> f32
 fn smoothstep<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
-[[deprecated]] fn smoothStep(f32, f32, f32) -> f32
-[[deprecated]] fn smoothStep<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
+@deprecated fn smoothStep(f32, f32, f32) -> f32
+@deprecated fn smoothStep<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
 fn sqrt(f32) -> f32
 fn sqrt<N: num>(vec<N, f32>) -> vec<N, f32>
 fn step(f32, f32) -> f32
 fn step<N: num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32>
-[[stage("compute")]] fn storageBarrier()
+@stage("compute") fn storageBarrier()
 fn tan(f32) -> f32
 fn tan<N: num>(vec<N, f32>) -> vec<N, f32>
 fn tanh(f32) -> f32
@@ -467,7 +467,7 @@ fn unpack2x16snorm(u32) -> vec2<f32>
 fn unpack2x16unorm(u32) -> vec2<f32>
 fn unpack4x8snorm(u32) -> vec4<f32>
 fn unpack4x8unorm(u32) -> vec4<f32>
-[[stage("compute")]] fn workgroupBarrier()
+@stage("compute") fn workgroupBarrier()
 
 fn textureDimensions<T: fiu32>(texture: texture_1d<T>) -> i32
 fn textureDimensions<T: fiu32>(texture: texture_1d<T>, level: i32) -> i32
@@ -531,35 +531,35 @@ fn textureNumLevels(texture: texture_depth_cube) -> i32
 fn textureNumLevels(texture: texture_depth_cube_array) -> i32
 fn textureNumSamples<T: fiu32>(texture: texture_multisampled_2d<T>) -> i32
 fn textureNumSamples(texture: texture_depth_multisampled_2d) -> i32
-[[stage("fragment")]] fn textureSample(texture: texture_1d<f32>, sampler: sampler, coords: f32) -> vec4<f32>
-[[stage("fragment")]] fn textureSample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
-[[stage("fragment")]] fn textureSample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, offset: vec2<i32>) -> vec4<f32>
-[[stage("fragment")]] fn textureSample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32) -> vec4<f32>
-[[stage("fragment")]] fn textureSample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, offset: vec2<i32>) -> vec4<f32>
-[[stage("fragment")]] fn textureSample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
-[[stage("fragment")]] fn textureSample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, offset: vec3<i32>) -> vec4<f32>
-[[stage("fragment")]] fn textureSample(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
-[[stage("fragment")]] fn textureSample(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: i32) -> vec4<f32>
-[[stage("fragment")]] fn textureSample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>) -> f32
-[[stage("fragment")]] fn textureSample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, offset: vec2<i32>) -> f32
-[[stage("fragment")]] fn textureSample(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32) -> f32
-[[stage("fragment")]] fn textureSample(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32, offset: vec2<i32>) -> f32
-[[stage("fragment")]] fn textureSample(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>) -> f32
-[[stage("fragment")]] fn textureSample(texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: i32) -> f32
-[[stage("fragment")]] fn textureSampleBias(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, bias: f32) -> vec4<f32>
-[[stage("fragment")]] fn textureSampleBias(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, bias: f32, offset: vec2<i32>) -> vec4<f32>
-[[stage("fragment")]] fn textureSampleBias(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, bias: f32) -> vec4<f32>
-[[stage("fragment")]] fn textureSampleBias(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, bias: f32, offset: vec2<i32>) -> vec4<f32>
-[[stage("fragment")]] fn textureSampleBias(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, bias: f32) -> vec4<f32>
-[[stage("fragment")]] fn textureSampleBias(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, bias: f32, offset: vec3<i32>) -> vec4<f32>
-[[stage("fragment")]] fn textureSampleBias(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>, bias: f32) -> vec4<f32>
-[[stage("fragment")]] fn textureSampleBias(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: i32, bias: f32) -> vec4<f32>
-[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32) -> f32
-[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, offset: vec2<i32>) -> f32
-[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32) -> f32
-[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32, offset: vec2<i32>) -> f32
-[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> f32
-[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: i32, depth_ref: f32) -> f32
+@stage("fragment") fn textureSample(texture: texture_1d<f32>, sampler: sampler, coords: f32) -> vec4<f32>
+@stage("fragment") fn textureSample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
+@stage("fragment") fn textureSample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, offset: vec2<i32>) -> vec4<f32>
+@stage("fragment") fn textureSample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32) -> vec4<f32>
+@stage("fragment") fn textureSample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, offset: vec2<i32>) -> vec4<f32>
+@stage("fragment") fn textureSample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
+@stage("fragment") fn textureSample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, offset: vec3<i32>) -> vec4<f32>
+@stage("fragment") fn textureSample(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
+@stage("fragment") fn textureSample(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: i32) -> vec4<f32>
+@stage("fragment") fn textureSample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>) -> f32
+@stage("fragment") fn textureSample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, offset: vec2<i32>) -> f32
+@stage("fragment") fn textureSample(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32) -> f32
+@stage("fragment") fn textureSample(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32, offset: vec2<i32>) -> f32
+@stage("fragment") fn textureSample(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>) -> f32
+@stage("fragment") fn textureSample(texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: i32) -> f32
+@stage("fragment") fn textureSampleBias(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, bias: f32) -> vec4<f32>
+@stage("fragment") fn textureSampleBias(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, bias: f32, offset: vec2<i32>) -> vec4<f32>
+@stage("fragment") fn textureSampleBias(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, bias: f32) -> vec4<f32>
+@stage("fragment") fn textureSampleBias(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, bias: f32, offset: vec2<i32>) -> vec4<f32>
+@stage("fragment") fn textureSampleBias(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, bias: f32) -> vec4<f32>
+@stage("fragment") fn textureSampleBias(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, bias: f32, offset: vec3<i32>) -> vec4<f32>
+@stage("fragment") fn textureSampleBias(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>, bias: f32) -> vec4<f32>
+@stage("fragment") fn textureSampleBias(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: i32, bias: f32) -> vec4<f32>
+@stage("fragment") fn textureSampleCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32) -> f32
+@stage("fragment") fn textureSampleCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, offset: vec2<i32>) -> f32
+@stage("fragment") fn textureSampleCompare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32) -> f32
+@stage("fragment") fn textureSampleCompare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32, offset: vec2<i32>) -> f32
+@stage("fragment") fn textureSampleCompare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> f32
+@stage("fragment") fn textureSampleCompare(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: i32, depth_ref: f32) -> f32
 fn textureSampleCompareLevel(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32) -> f32
 fn textureSampleCompareLevel(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, offset: vec2<i32>) -> f32
 fn textureSampleCompareLevel(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32) -> f32
@@ -611,17 +611,17 @@ fn textureLoad(texture: texture_depth_2d_array, coords: vec2<i32>, array_index: 
 fn textureLoad(texture: texture_depth_multisampled_2d, coords: vec2<i32>, sample_index: i32) -> f32
 fn textureLoad(texture: texture_external, coords: vec2<i32>) -> vec4<f32>
 
-[[stage("fragment", "compute")]] fn atomicLoad<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>) -> T
-[[stage("fragment", "compute")]] fn atomicStore<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T)
-[[stage("fragment", "compute")]] fn atomicAdd<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
-[[stage("fragment", "compute")]] fn atomicSub<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
-[[stage("fragment", "compute")]] fn atomicMax<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
-[[stage("fragment", "compute")]] fn atomicMin<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
-[[stage("fragment", "compute")]] fn atomicAnd<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
-[[stage("fragment", "compute")]] fn atomicOr<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
-[[stage("fragment", "compute")]] fn atomicXor<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
-[[stage("fragment", "compute")]] fn atomicExchange<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
-[[stage("fragment", "compute")]] fn atomicCompareExchangeWeak<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T, T) -> __atomic_compare_exchange_result<T>
+@stage("fragment", "compute") fn atomicLoad<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>) -> T
+@stage("fragment", "compute") fn atomicStore<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T)
+@stage("fragment", "compute") fn atomicAdd<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+@stage("fragment", "compute") fn atomicSub<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+@stage("fragment", "compute") fn atomicMax<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+@stage("fragment", "compute") fn atomicMin<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+@stage("fragment", "compute") fn atomicAnd<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+@stage("fragment", "compute") fn atomicOr<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+@stage("fragment", "compute") fn atomicXor<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+@stage("fragment", "compute") fn atomicExchange<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+@stage("fragment", "compute") fn atomicCompareExchangeWeak<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T, T) -> __atomic_compare_exchange_result<T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Type constructors                                                          //
