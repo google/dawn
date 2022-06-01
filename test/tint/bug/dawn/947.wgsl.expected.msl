@@ -35,7 +35,7 @@ struct tint_array_wrapper {
 VertexOutputs vs_main_inner(uint VertexIndex, const constant Uniforms* const tint_symbol_5) {
   tint_array_wrapper texcoord = {.arr={float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)}};
   VertexOutputs output = {};
-  output.position = float4(((texcoord.arr[VertexIndex] * 2.0f) - float2(1.0f, 1.0f)), 0.0f, 1.0f);
+  output.position = float4(((texcoord.arr[VertexIndex] * 2.0f) - float2(1.0f)), 0.0f, 1.0f);
   bool flipY = ((*(tint_symbol_5)).u_scale[1] < 0.0f);
   if (flipY) {
     output.texcoords = ((((texcoord.arr[VertexIndex] * (*(tint_symbol_5)).u_scale) + (*(tint_symbol_5)).u_offset) * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f));
@@ -62,10 +62,10 @@ struct tint_symbol_3 {
 };
 
 float4 fs_main_inner(float2 texcoord, thread bool* const tint_symbol_7, texture2d<float, access::sample> tint_symbol_8, sampler tint_symbol_9) {
-  float2 clampedTexcoord = clamp(texcoord, float2(0.0f, 0.0f), float2(1.0f, 1.0f));
+  float2 clampedTexcoord = clamp(texcoord, float2(0.0f), float2(1.0f));
   if (!(all((clampedTexcoord == texcoord)))) {
     *(tint_symbol_7) = true;
-    return float4();
+    return float4(0.0f);
   }
   float4 srcColor = tint_symbol_8.sample(tint_symbol_9, texcoord);
   return srcColor;

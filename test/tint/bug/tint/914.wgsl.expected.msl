@@ -64,60 +64,60 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint local_invocation_in
   for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 256u)) {
     uint const i = (idx / 64u);
     uint const i_1 = (idx % 64u);
-    (*(tint_symbol_9)).arr[i].arr[i_1] = float();
-    (*(tint_symbol_10)).arr[i].arr[i_1] = float();
+    (*(tint_symbol_9)).arr[i].arr[i_1] = 0.0f;
+    (*(tint_symbol_10)).arr[i].arr[i_1] = 0.0f;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  uint const tileRow = (local_id[1] * RowPerThread);
-  uint const tileCol = (local_id[0] * ColPerThread);
-  uint const globalRow = (global_id[1] * RowPerThread);
-  uint const globalCol = (global_id[0] * ColPerThread);
-  uint const numTiles = ((((*(tint_symbol_11)).dimInner - 1u) / TileInner) + 1u);
+  uint const tileRow = (local_id[1] * 4u);
+  uint const tileCol = (local_id[0] * 4u);
+  uint const globalRow = (global_id[1] * 4u);
+  uint const globalCol = (global_id[0] * 4u);
+  uint const numTiles = ((((*(tint_symbol_11)).dimInner - 1u) / 64u) + 1u);
   tint_array_wrapper_2 acc = {};
   float ACached = 0.0f;
   tint_array_wrapper_3 BCached = {};
-  for(uint index = 0u; (index < (RowPerThread * ColPerThread)); index = (index + 1u)) {
+  for(uint index = 0u; (index < (4u * 4u)); index = (index + 1u)) {
     acc.arr[index] = 0.0f;
   }
-  uint const ColPerThreadA = (TileInner / 16u);
+  uint const ColPerThreadA = (64u / 16u);
   uint const tileColA = (local_id[0] * ColPerThreadA);
-  uint const RowPerThreadB = (TileInner / 16u);
+  uint const RowPerThreadB = (64u / 16u);
   uint const tileRowB = (local_id[1] * RowPerThreadB);
   for(uint t = 0u; (t < numTiles); t = (t + 1u)) {
-    for(uint innerRow = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
+    for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
       for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
         uint const inputRow = (tileRow + innerRow);
         uint const inputCol = (tileColA + innerCol);
-        float const tint_symbol_1 = mm_readA((globalRow + innerRow), ((t * TileInner) + inputCol), tint_symbol_11, tint_symbol_12);
+        float const tint_symbol_1 = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol), tint_symbol_11, tint_symbol_12);
         (*(tint_symbol_9)).arr[inputRow].arr[inputCol] = tint_symbol_1;
       }
     }
     for(uint innerRow = 0u; (innerRow < RowPerThreadB); innerRow = (innerRow + 1u)) {
-      for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
+      for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
         uint const inputRow = (tileRowB + innerRow);
         uint const inputCol = (tileCol + innerCol);
-        float const tint_symbol_2 = mm_readB(((t * TileInner) + inputRow), (globalCol + innerCol), tint_symbol_11, tint_symbol_13);
+        float const tint_symbol_2 = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol), tint_symbol_11, tint_symbol_13);
         (*(tint_symbol_10)).arr[innerCol].arr[inputCol] = tint_symbol_2;
       }
     }
     threadgroup_barrier(mem_flags::mem_threadgroup);
-    for(uint k = 0u; (k < TileInner); k = (k + 1u)) {
-      for(uint inner = 0u; (inner < ColPerThread); inner = (inner + 1u)) {
+    for(uint k = 0u; (k < 64u); k = (k + 1u)) {
+      for(uint inner = 0u; (inner < 4u); inner = (inner + 1u)) {
         BCached.arr[inner] = (*(tint_symbol_10)).arr[k].arr[(tileCol + inner)];
       }
-      for(uint innerRow = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
+      for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
         ACached = (*(tint_symbol_9)).arr[(tileRow + innerRow)].arr[k];
-        for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
-          uint const index = ((innerRow * ColPerThread) + innerCol);
+        for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
+          uint const index = ((innerRow * 4u) + innerCol);
           acc.arr[index] = (acc.arr[index] + (ACached * BCached.arr[innerCol]));
         }
       }
     }
     threadgroup_barrier(mem_flags::mem_threadgroup);
   }
-  for(uint innerRow = 0u; (innerRow < RowPerThread); innerRow = (innerRow + 1u)) {
-    for(uint innerCol = 0u; (innerCol < ColPerThread); innerCol = (innerCol + 1u)) {
-      uint const index = ((innerRow * ColPerThread) + innerCol);
+  for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
+    for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
+      uint const index = ((innerRow * 4u) + innerCol);
       mm_write((globalRow + innerRow), (globalCol + innerCol), acc.arr[index], tint_symbol_11, tint_symbol_14);
     }
   }

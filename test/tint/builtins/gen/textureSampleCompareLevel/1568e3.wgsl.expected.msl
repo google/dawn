@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureSampleCompareLevel_1568e3(depthcube<float, access::sample> tint_symbol_1, sampler tint_symbol_2) {
-  float res = tint_symbol_1.sample_compare(tint_symbol_2, float3(), 1.0f, level(0));
+  float res = tint_symbol_1.sample_compare(tint_symbol_2, float3(0.0f), 1.0f, level(0));
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner(depthcube<float, access::sample> tint_symbol_3, sampler tint_symbol_4) {
   textureSampleCompareLevel_1568e3(tint_symbol_3, tint_symbol_4);
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main(depthcube<float, access::sample> tint_symbol_5 [[texture(0)]], sampler tint_symbol_6 [[sampler(0)]]) {

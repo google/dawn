@@ -35,9 +35,9 @@ void tint_symbol_inner(uint3 GlobalInvocationID, texture2d<float, access::sample
   }
   uint outputIndex = ((GlobalInvocationID[1] * uint(size[0])) + GlobalInvocationID[0]);
   if (success) {
-    (*(tint_symbol_5)).result[outputIndex] = uint(1);
+    (*(tint_symbol_5)).result[outputIndex] = 1u;
   } else {
-    (*(tint_symbol_5)).result[outputIndex] = uint(0);
+    (*(tint_symbol_5)).result[outputIndex] = 0u;
   }
 }
 

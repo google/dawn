@@ -7,6 +7,6 @@ void a() {
     int b = a_1;
   }
   int const a_2 = 1;
-  int const b = a_2;
+  int const b = 1;
 }
 

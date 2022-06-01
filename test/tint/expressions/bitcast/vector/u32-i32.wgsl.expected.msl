@@ -3,7 +3,7 @@
 using namespace metal;
 kernel void f() {
   uint3 const a = uint3(1u, 2u, 3u);
-  int3 const b = as_type<int3>(a);
+  int3 const b = as_type<int3>(uint3(1u, 2u, 3u));
   return;
 }
 

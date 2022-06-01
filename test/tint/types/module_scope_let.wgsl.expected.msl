@@ -5,21 +5,21 @@ struct S {
   float a;
 };
 
-constant bool bool_let = bool();
+constant bool bool_let = false;
 
-constant int i32_let = int();
+constant int i32_let = 0;
 
-constant uint u32_let = uint();
+constant uint u32_let = 0u;
 
-constant float f32_let = float();
+constant float f32_let = 0.0f;
 
-constant int2 v2i32_let = int2();
+constant int2 v2i32_let = int2(0);
 
-constant uint3 v3u32_let = uint3();
+constant uint3 v3u32_let = uint3(0u);
 
-constant float4 v4f32_let = float4();
+constant float4 v4f32_let = float4(0.0f);
 
-constant float3x4 m3x4_let = float3x4();
+constant float3x4 m3x4_let = float3x4(float4(0.0f), float4(0.0f), float4(0.0f));
 
 struct tint_array_wrapper {
   float arr[4];

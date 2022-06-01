@@ -184,7 +184,7 @@ std::string expected_texture_overload(ast::builtin::test::ValidTextureOverload o
         case ValidTextureOverload::kSampleGrad2dF32:
             return R"(texture.sample(sampler, float2(1.0f, 2.0f), gradient2d(float2(3.0f, 4.0f), float2(5.0f, 6.0f))))";
         case ValidTextureOverload::kSampleGrad2dOffsetF32:
-            return R"(texture.sample(sampler, float2(1.0f, 2.0f), gradient2d(float2(3.0f, 4.0f), float2(5.0f, 6.0f)), int2(7, 7)))";
+            return R"(texture.sample(sampler, float2(1.0f, 2.0f), gradient2d(float2(3.0f, 4.0f), float2(5.0f, 6.0f)), int2(7)))";
         case ValidTextureOverload::kSampleGrad2dArrayF32:
             return R"(texture.sample(sampler, float2(1.0f, 2.0f), 3, gradient2d(float2(4.0f, 5.0f), float2(6.0f, 7.0f))))";
         case ValidTextureOverload::kSampleGrad2dArrayOffsetF32:

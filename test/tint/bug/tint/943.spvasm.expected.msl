@@ -48,7 +48,7 @@ bool coordsInBounds_vi2_vi2_(thread int2* const coord, thread int2* const shape)
   bool x_87 = false;
   bool x_88_phi = false;
   int2 const x_76 = *(coord);
-  bool const x_81 = all((x_76 >= int2(0, 0)));
+  bool const x_81 = all((x_76 >= int2(0)));
   x_88_phi = x_81;
   if (x_81) {
     int2 const x_84 = *(coord);
@@ -497,12 +497,12 @@ void tint_symbol_1_inner(uint3 gl_LocalInvocationID_param, uint3 gl_GlobalInvoca
   {
     uint const i_1 = local_invocation_index;
     uint const i_2 = (local_invocation_index % 1u);
-    (*(tint_symbol_43)).arr[i_1].arr[i_2] = float();
+    (*(tint_symbol_43)).arr[i_1].arr[i_2] = 0.0f;
   }
   for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 64u)) {
     uint const i = (idx / 64u);
     uint const i_1 = (idx % 64u);
-    (*(tint_symbol_44)).arr[i].arr[i_1] = float();
+    (*(tint_symbol_44)).arr[i].arr[i_1] = 0.0f;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
   *(tint_symbol_45) = gl_LocalInvocationID_param;

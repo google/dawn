@@ -6,7 +6,7 @@ constant int a = 1;
 constant int a__ = 2;
 
 void f() {
-  int const b = a;
-  int const b__ = a__;
+  int const b = 1;
+  int const b__ = 2;
 }
 

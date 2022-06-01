@@ -3,10 +3,10 @@
 using namespace metal;
 void f() {
   {
-    int const a_1 = int();
-    int const b = a_1;
+    int const a_1 = 0;
+    int const b = 0;
   }
-  int const a_2 = int();
-  int const b = a_2;
+  int const a_2 = 0;
+  int const b = 0;
 }
 

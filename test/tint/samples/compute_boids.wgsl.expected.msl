@@ -29,7 +29,7 @@ struct tint_symbol_3 {
 };
 
 float4 frag_main_inner() {
-  return float4(1.0f, 1.0f, 1.0f, 1.0f);
+  return float4(1.0f);
 }
 
 fragment tint_symbol_3 frag_main() {
@@ -69,9 +69,9 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, device Particles* const tint_s
   }
   float2 vPos = (*(tint_symbol_4)).particles.arr[index].pos;
   float2 vVel = (*(tint_symbol_4)).particles.arr[index].vel;
-  float2 cMass = float2(0.0f, 0.0f);
-  float2 cVel = float2(0.0f, 0.0f);
-  float2 colVel = float2(0.0f, 0.0f);
+  float2 cMass = float2(0.0f);
+  float2 cVel = float2(0.0f);
+  float2 colVel = float2(0.0f);
   int cMassCount = 0;
   int cVelCount = 0;
   float2 pos = 0.0f;

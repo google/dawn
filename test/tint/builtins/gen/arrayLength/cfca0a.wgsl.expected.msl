@@ -19,7 +19,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner(const constant tint_symbol_1* const tint_symbol_4) {
   arrayLength_cfca0a(tint_symbol_4);
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main(const constant tint_symbol_1* tint_symbol_5 [[buffer(30)]]) {

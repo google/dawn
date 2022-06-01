@@ -4,7 +4,7 @@ using namespace metal;
 kernel void f() {
   bool const a = true;
   bool const b = false;
-  bool const r = bool(a & b);
+  bool const r = bool(true & false);
   return;
 }
 

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void any_e755c1() {
-  bool res = any(bool3());
+  bool res = any(bool3(false));
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   any_e755c1();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {

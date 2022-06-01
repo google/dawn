@@ -2,7 +2,7 @@
 
 using namespace metal;
 void cross_041cb0() {
-  float3 res = cross(float3(), float3());
+  float3 res = cross(float3(0.0f), float3(0.0f));
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   cross_041cb0();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {

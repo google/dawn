@@ -5,7 +5,7 @@ struct tint_array_wrapper {
   float2 arr[3];
 };
 
-constant tint_array_wrapper pos = {.arr={float2(0.0f, 0.5f), float2(-0.5f, -0.5f), float2(0.5f, -0.5f)}};
+constant tint_array_wrapper pos = {.arr={float2(0.0f, 0.5f), float2(-0.5f), float2(0.5f, -0.5f)}};
 
 struct tint_symbol {
   float4 value [[position]];

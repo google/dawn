@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner(texture2d<int, access::write> tint_symbol_2) {
   textureDimensions_3c5ad8(tint_symbol_2);
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main(texture2d<int, access::write> tint_symbol_3 [[texture(0)]]) {

@@ -6,7 +6,7 @@ void foo() {
   float4 b = 0.0f;
   float2x2 c = float2x2(0.0f);
   a = (a / 2);
-  b = (b * float4x4());
+  b = (b * float4x4(float4(0.0f), float4(0.0f), float4(0.0f), float4(0.0f)));
   c = (c * 2.0f);
 }
 

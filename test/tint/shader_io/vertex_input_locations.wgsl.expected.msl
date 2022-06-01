@@ -17,7 +17,7 @@ float4 tint_symbol_inner(int loc0, uint loc1, float loc2, float4 loc3) {
   uint const u = loc1;
   float const f = loc2;
   float4 const v = loc3;
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {

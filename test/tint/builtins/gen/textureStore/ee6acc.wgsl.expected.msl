@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureStore_ee6acc(texture3d<float, access::write> tint_symbol_1) {
-  tint_symbol_1.write(float4(), uint3(int3()));
+  tint_symbol_1.write(float4(0.0f), uint3(int3(0)));
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner(texture3d<float, access::write> tint_symbol_2) {
   textureStore_ee6acc(tint_symbol_2);
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main(texture3d<float, access::write> tint_symbol_3 [[texture(0)]]) {

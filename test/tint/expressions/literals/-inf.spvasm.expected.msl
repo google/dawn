@@ -2,7 +2,7 @@
 
 using namespace metal;
 void main_1(thread float4* const tint_symbol_3) {
-  *(tint_symbol_3) = float4(-INFINITY, -INFINITY, -INFINITY, -INFINITY);
+  *(tint_symbol_3) = float4(-INFINITY);
   return;
 }
 

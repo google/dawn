@@ -2,7 +2,7 @@
 
 using namespace metal;
 void refract_7e02e6() {
-  float4 res = refract(float4(), float4(), 1.0f);
+  float4 res = refract(float4(0.0f), float4(0.0f), 1.0f);
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   refract_7e02e6();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {

@@ -3,10 +3,10 @@
 using namespace metal;
 void f() {
   {
-    int a_1 = int();
+    int a_1 = 0;
     int b = a_1;
   }
-  int a_2 = int();
+  int a_2 = 0;
   int b = a_2;
 }
 

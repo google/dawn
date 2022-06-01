@@ -2,7 +2,7 @@
 
 using namespace metal;
 void atan_331e6d() {
-  float3 res = atan(float3());
+  float3 res = atan(float3(0.0f));
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   atan_331e6d();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {

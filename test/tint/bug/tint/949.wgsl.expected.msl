@@ -149,7 +149,7 @@ float3 perturbNormal_mf33_vf3_f1_(thread float3x3* const cotangentFrame_1, threa
   float3 const x_119 = *(textureSample);
   float3x3 const x_125 = *(cotangentFrame_1);
   param = x_125;
-  param_1 = ((x_119 * 2.0f) - float3(1.0f, 1.0f, 1.0f));
+  param_1 = ((x_119 * 2.0f) - float3(1.0f));
   float const x_128 = *(scale_1);
   param_2 = x_128;
   float3 const x_129 = perturbNormalBase_mf33_vf3_f1_(&(param), &(param_1), &(param_2));
@@ -239,7 +239,7 @@ void main_1(thread float* const tint_symbol_5, thread float3* const tint_symbol_
   float3 specularOutput = 0.0f;
   float3 output3 = 0.0f;
   *(tint_symbol_5) = 100.0f;
-  *(tint_symbol_6) = float3(0.5f, 0.5f, 0.5f);
+  *(tint_symbol_6) = float3(0.5f);
   float2 const x_261 = *(tint_symbol_7);
   float4 const x_262 = tint_symbol_8.sample(tint_symbol_9, x_261);
   tempTextureRead = x_262;
@@ -249,8 +249,8 @@ void main_1(thread float* const tint_symbol_5, thread float3* const tint_symbol_
   float3 const x_279 = (*(tint_symbol_10)).u_cameraPosition;
   float4 const x_282 = *(tint_symbol_11);
   output5 = normalize((x_279 - float3(x_282[0], x_282[1], x_282[2])));
-  output4 = float4(0.0f, 0.0f, 0.0f, 0.0f);
-  uvOffset = float2(0.0f, 0.0f);
+  output4 = float4(0.0f);
+  uvOffset = float2(0.0f);
   float const x_292 = (*(tint_symbol_10)).u_bumpStrength;
   normalScale = (1.0f / x_292);
   bool const x_298 = *(tint_symbol_12);
@@ -302,8 +302,8 @@ void main_1(thread float* const tint_symbol_5, thread float3* const tint_symbol_
   float const x_374 = numSamples;
   stepSize = (1.0f / x_374);
   currRayHeight = 1.0f;
-  vCurrOffset = float2(0.0f, 0.0f);
-  vLastOffset = float2(0.0f, 0.0f);
+  vCurrOffset = float2(0.0f);
+  vLastOffset = float2(0.0f);
   lastSampledHeight = 1.0f;
   currSampledHeight = 1.0f;
   i = 0;
@@ -384,8 +384,8 @@ void main_1(thread float* const tint_symbol_5, thread float3* const tint_symbol_
   shadow = 1.0f;
   float const x_488 = *(tint_symbol_5);
   glossiness_1 = (1.0f * x_488);
-  diffuseBase = float3(0.0f, 0.0f, 0.0f);
-  specularBase = float3(0.0f, 0.0f, 0.0f);
+  diffuseBase = float3(0.0f);
+  specularBase = float3(0.0f);
   float4 const x_494 = output4;
   normalW = float3(x_494[0], x_494[1], x_494[2]);
   float3 const x_501 = viewDirectionW_1;

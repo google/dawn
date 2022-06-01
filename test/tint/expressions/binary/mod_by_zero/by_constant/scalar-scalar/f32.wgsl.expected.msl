@@ -4,7 +4,7 @@ using namespace metal;
 kernel void f() {
   float const a = 1.0f;
   float const b = 0.0f;
-  float const r = fmod(a, b);
+  float const r = fmod(1.0f, 0.0f);
   return;
 }
 

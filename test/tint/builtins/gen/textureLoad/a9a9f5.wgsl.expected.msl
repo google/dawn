@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureLoad_a9a9f5(texture3d<uint, access::sample> tint_symbol_1) {
-  uint4 res = tint_symbol_1.read(uint3(int3()), 0);
+  uint4 res = tint_symbol_1.read(uint3(int3(0)), 0);
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner(texture3d<uint, access::sample> tint_symbol_2) {
   textureLoad_a9a9f5(tint_symbol_2);
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main(texture3d<uint, access::sample> tint_symbol_3 [[texture(0)]]) {

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void mix_315264() {
-  float3 res = mix(float3(), float3(), 1.0f);
+  float3 res = mix(float3(0.0f), float3(0.0f), 1.0f);
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   mix_315264();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {

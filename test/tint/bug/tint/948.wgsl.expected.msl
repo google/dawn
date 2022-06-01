@@ -49,7 +49,7 @@ float4x4 getFrameData_f1_(thread float* const frameID, const constant LeftOver* 
   float4 const x_47 = tint_symbol_6.sample(tint_symbol_7, float2(x_44, 0.25f), bias(0.0f));
   float const x_51 = fX;
   float4 const x_54 = tint_symbol_6.sample(tint_symbol_7, float2(x_51, 0.5f), bias(0.0f));
-  return float4x4(float4(x_40[0], x_40[1], x_40[2], x_40[3]), float4(x_47[0], x_47[1], x_47[2], x_47[3]), float4(x_54[0], x_54[1], x_54[2], x_54[3]), float4(float4(0.0f, 0.0f, 0.0f, 0.0f)[0], float4(0.0f, 0.0f, 0.0f, 0.0f)[1], float4(0.0f, 0.0f, 0.0f, 0.0f)[2], float4(0.0f, 0.0f, 0.0f, 0.0f)[3]));
+  return float4x4(float4(x_40[0], x_40[1], x_40[2], x_40[3]), float4(x_47[0], x_47[1], x_47[2], x_47[3]), float4(x_54[0], x_54[1], x_54[2], x_54[3]), float4(float4(0.0f)[0], float4(0.0f)[1], float4(0.0f)[2], float4(0.0f)[3]));
 }
 
 void main_1(thread float2* const tint_symbol_8, const constant LeftOver* const tint_symbol_9, texture2d<float, access::sample> tint_symbol_10, sampler tint_symbol_11, texture2d<float, access::sample> tint_symbol_12, texture2d<float, access::sample> tint_symbol_13, sampler tint_symbol_14, thread float* const tint_symbol_15, texture2d<float, access::sample> tint_symbol_16, sampler tint_symbol_17, texture2d<float, access::sample> tint_symbol_18, sampler tint_symbol_19, thread float4* const tint_symbol_20) {
@@ -71,7 +71,7 @@ void main_1(thread float2* const tint_symbol_8, const constant LeftOver* const t
   float4 nc = 0.0f;
   float alpha = 0.0f;
   float3 mixed = 0.0f;
-  color = float4(0.0f, 0.0f, 0.0f, 0.0f);
+  color = float4(0.0f);
   float2 const x_86 = *(tint_symbol_8);
   tileUV = fract(x_86);
   float const x_91 = tileUV[1];
@@ -79,11 +79,11 @@ void main_1(thread float2* const tint_symbol_8, const constant LeftOver* const t
   float2 const x_95 = *(tint_symbol_8);
   tileID = floor(x_95);
   float2 const x_101 = (*(tint_symbol_9)).spriteMapSize;
-  sheetUnits = (float2(1.0f, 1.0f) / x_101);
+  sheetUnits = (float2(1.0f) / x_101);
   float const x_106 = (*(tint_symbol_9)).spriteCount;
   spriteUnits = (1.0f / x_106);
   float2 const x_111 = (*(tint_symbol_9)).stageSize;
-  stageUnits = (float2(1.0f, 1.0f) / x_111);
+  stageUnits = (float2(1.0f) / x_111);
   i = 0;
   while (true) {
     int const x_122 = i;
@@ -96,14 +96,14 @@ void main_1(thread float2* const tint_symbol_8, const constant LeftOver* const t
       case 1: {
         float2 const x_150 = tileID;
         float2 const x_154 = (*(tint_symbol_9)).stageSize;
-        float4 const x_156 = tint_symbol_10.sample(tint_symbol_11, ((x_150 + float2(0.5f, 0.5f)) / x_154), bias(0.0f));
+        float4 const x_156 = tint_symbol_10.sample(tint_symbol_11, ((x_150 + float2(0.5f)) / x_154), bias(0.0f));
         frameID_1 = x_156[0];
         break;
       }
       case 0: {
         float2 const x_136 = tileID;
         float2 const x_140 = (*(tint_symbol_9)).stageSize;
-        float4 const x_142 = tint_symbol_12.sample(tint_symbol_11, ((x_136 + float2(0.5f, 0.5f)) / x_140), bias(0.0f));
+        float4 const x_142 = tint_symbol_12.sample(tint_symbol_11, ((x_136 + float2(0.5f)) / x_140), bias(0.0f));
         frameID_1 = x_142[0];
         break;
       }

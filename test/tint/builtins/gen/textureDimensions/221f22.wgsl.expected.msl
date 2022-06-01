@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner(texturecube_array<int, access::sample> tint_symbol_2) {
   textureDimensions_221f22(tint_symbol_2);
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main(texturecube_array<int, access::sample> tint_symbol_3 [[texture(0)]]) {

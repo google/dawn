@@ -29,7 +29,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Scalar) {
 
     std::stringstream out;
     ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
-    EXPECT_EQ(out.str(), "float(1)");
+    EXPECT_EQ(out.str(), "1.0f");
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Vector) {
@@ -40,7 +40,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Cast_Vector) {
 
     std::stringstream out;
     ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
-    EXPECT_EQ(out.str(), "float3(int3(1, 2, 3))");
+    EXPECT_EQ(out.str(), "float3(1.0f, 2.0f, 3.0f)");
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Cast_IntMin) {
@@ -51,7 +51,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Cast_IntMin) {
 
     std::stringstream out;
     ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
-    EXPECT_EQ(out.str(), "uint((-2147483647 - 1))");
+    EXPECT_EQ(out.str(), "0u");
 }
 
 }  // namespace

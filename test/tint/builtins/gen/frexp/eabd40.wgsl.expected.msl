@@ -22,7 +22,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   frexp_eabd40();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {

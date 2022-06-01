@@ -2,7 +2,7 @@
 
 using namespace metal;
 void fma_26a7a9() {
-  float2 res = fma(float2(), float2(), float2());
+  float2 res = fma(float2(0.0f), float2(0.0f), float2(0.0f));
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   fma_26a7a9();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {

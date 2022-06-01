@@ -2,7 +2,7 @@
 
 using namespace metal;
 void countOneBits_690cfc() {
-  uint3 res = popcount(uint3());
+  uint3 res = popcount(uint3(0u));
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   countOneBits_690cfc();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {

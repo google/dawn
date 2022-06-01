@@ -2,7 +2,7 @@
 
 using namespace metal;
 void pack4x8unorm_95c456() {
-  uint res = pack_float_to_unorm4x8(float4());
+  uint res = pack_float_to_unorm4x8(float4(0.0f));
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   pack4x8unorm_95c456();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {

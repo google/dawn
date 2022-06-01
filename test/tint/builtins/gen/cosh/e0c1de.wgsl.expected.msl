@@ -2,7 +2,7 @@
 
 using namespace metal;
 void cosh_e0c1de() {
-  float4 res = cosh(float4());
+  float4 res = cosh(float4(0.0f));
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   cosh_e0c1de();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void min_82b28f() {
-  uint2 res = min(uint2(), uint2());
+  uint2 res = min(uint2(0u), uint2(0u));
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   min_82b28f();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {

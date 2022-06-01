@@ -2,7 +2,7 @@
 
 using namespace metal;
 void select_99f883() {
-  uint res = select(1u, 1u, bool());
+  uint res = select(1u, 1u, false);
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   select_99f883();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {

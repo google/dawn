@@ -22,7 +22,7 @@ void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_in
   for(uint idx = local_invocation_index; (idx < 1024u); idx = (idx + 64u)) {
     uint const i_1 = (idx / 256u);
     uint const i_2 = (idx % 256u);
-    (*(tint_symbol_1)).arr[i_1].arr[i_2] = float3();
+    (*(tint_symbol_1)).arr[i_1].arr[i_2] = float3(0.0f);
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
   uint const filterOffset = (((*(tint_symbol_2)).filterDim - 1u) / 2u);
@@ -34,7 +34,7 @@ void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_in
       if (((*(tint_symbol_4)).value != 0u)) {
         loadIndex = int2(loadIndex).yx;
       }
-      (*(tint_symbol_1)).arr[r].arr[((4u * LocalInvocationID[0]) + c)] = float4(tint_symbol_3.sample(tint_symbol_5, ((float2(loadIndex) + float2(0.25f, 0.25f)) / float2(dims)), level(0.0f))).rgb;
+      (*(tint_symbol_1)).arr[r].arr[((4u * LocalInvocationID[0]) + c)] = float4(tint_symbol_3.sample(tint_symbol_5, ((float2(loadIndex) + float2(0.25f)) / float2(dims)), level(0.0f))).rgb;
     }
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
@@ -46,7 +46,7 @@ void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_in
       }
       uint const center = ((4u * LocalInvocationID[0]) + c);
       if ((((center >= filterOffset) && (center < (256u - filterOffset))) && all((writeIndex < dims)))) {
-        float3 acc = float3(0.0f, 0.0f, 0.0f);
+        float3 acc = float3(0.0f);
         for(uint f = 0u; (f < (*(tint_symbol_2)).filterDim); f = (f + 1u)) {
           uint i = ((center + f) - filterOffset);
           acc = (acc + ((1.0f / float((*(tint_symbol_2)).filterDim)) * (*(tint_symbol_1)).arr[r].arr[i]));

@@ -6,7 +6,7 @@ builtins/gen/smoothstep/5f615b.wgsl:28:24 warning: use of deprecated builtin
 
 using namespace metal;
 void smoothStep_5f615b() {
-  float4 res = smoothstep(float4(), float4(), float4());
+  float4 res = smoothstep(float4(0.0f), float4(0.0f), float4(0.0f));
 }
 
 struct tint_symbol {
@@ -15,7 +15,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   smoothStep_5f615b();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {

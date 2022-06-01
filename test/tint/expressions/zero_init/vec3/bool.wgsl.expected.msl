@@ -2,6 +2,6 @@
 
 using namespace metal;
 void f() {
-  bool3 v = bool3();
+  bool3 v = bool3(false);
 }
 

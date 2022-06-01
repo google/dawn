@@ -8,8 +8,8 @@ uint3 tint_insert_bits(uint3 v, uint3 n, uint offset, uint count) {
 }
 
 void f_1() {
-  uint3 v = uint3();
-  uint3 n = uint3();
+  uint3 v = uint3(0u);
+  uint3 n = uint3(0u);
   uint offset_1 = 0u;
   uint count = 0u;
   uint3 const x_17 = v;

@@ -8,7 +8,7 @@ struct tint_symbol_1 {
 float4 tint_symbol_inner() {
   float3 light = float3(1.200000048f, 1.0f, 2.0f);
   float3 negative_light = -(light);
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol_1 tint_symbol() {

@@ -2,6 +2,6 @@
 
 using namespace metal;
 void f() {
-  int3 v = int3();
+  int3 v = int3(0);
 }
 

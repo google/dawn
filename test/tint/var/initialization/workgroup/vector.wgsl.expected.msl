@@ -3,7 +3,7 @@
 using namespace metal;
 void tint_symbol_inner(uint local_invocation_index, threadgroup int3* const tint_symbol_1) {
   {
-    *(tint_symbol_1) = int3();
+    *(tint_symbol_1) = int3(0);
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
 }

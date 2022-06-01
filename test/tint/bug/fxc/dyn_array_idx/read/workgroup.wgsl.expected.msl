@@ -20,7 +20,7 @@ struct Result {
 void f_inner(uint local_invocation_index, threadgroup S* const tint_symbol, device Result* const tint_symbol_1, const constant UBO* const tint_symbol_2) {
   for(uint idx = local_invocation_index; (idx < 64u); idx = (idx + 1u)) {
     uint const i = idx;
-    (*(tint_symbol)).data.arr[i] = int();
+    (*(tint_symbol)).data.arr[i] = 0;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
   (*(tint_symbol_1)).out = (*(tint_symbol)).data.arr[(*(tint_symbol_2)).dynamic_idx];

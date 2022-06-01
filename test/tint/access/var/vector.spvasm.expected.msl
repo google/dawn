@@ -2,7 +2,7 @@
 
 using namespace metal;
 void main_1() {
-  float3 v = float3();
+  float3 v = float3(0.0f);
   float const x_14 = v[1];
   float3 const x_16 = v;
   float2 const x_17 = float2(x_16[0], x_16[2]);

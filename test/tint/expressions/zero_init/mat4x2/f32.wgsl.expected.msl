@@ -2,6 +2,6 @@
 
 using namespace metal;
 void f() {
-  float4x2 v = float4x2();
+  float4x2 v = float4x2(float2(0.0f), float2(0.0f), float2(0.0f), float2(0.0f));
 }
 

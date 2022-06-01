@@ -17,7 +17,7 @@ int3 tint_first_trailing_bit(int3 v) {
 }
 
 void firstTrailingBit_7496d6() {
-  int3 res = tint_first_trailing_bit(int3());
+  int3 res = tint_first_trailing_bit(int3(0));
 }
 
 struct tint_symbol {
@@ -26,7 +26,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   firstTrailingBit_7496d6();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {

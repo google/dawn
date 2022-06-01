@@ -2,7 +2,7 @@
 
 using namespace metal;
 void determinant_2b62ba() {
-  float res = determinant(float3x3());
+  float res = determinant(float3x3(float3(0.0f), float3(0.0f), float3(0.0f)));
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   determinant_2b62ba();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {

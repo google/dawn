@@ -11,7 +11,7 @@ bug/tint/1369.wgsl:9:9 warning: code is unreachable
 using namespace metal;
 bool call_discard(thread bool* const tint_symbol) {
   *(tint_symbol) = true;
-  return bool();
+  return false;
   return true;
 }
 

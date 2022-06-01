@@ -4,7 +4,7 @@ using namespace metal;
 int f(int x, thread bool* const tint_symbol_5) {
   if ((x == 10)) {
     *(tint_symbol_5) = true;
-    return int();
+    return 0;
   }
   return x;
 }
@@ -22,7 +22,7 @@ int tint_symbol_inner(int3 x, thread bool* const tint_symbol_6) {
   while (true) {
     int const r = f(y, tint_symbol_6);
     if (*(tint_symbol_6)) {
-      return int();
+      return 0;
     }
     if ((r == 0)) {
       break;

@@ -15,13 +15,13 @@ constant uint v2 = 1u;
 
 constant float v3 = 1.0f;
 
-constant int3 v4 = int3(1, 1, 1);
+constant int3 v4 = int3(1);
 
-constant uint3 v5 = uint3(1u, 1u, 1u);
+constant uint3 v5 = uint3(1u);
 
-constant float3 v6 = float3(1.0f, 1.0f, 1.0f);
+constant float3 v6 = float3(1.0f);
 
-constant float3x3 v7 = float3x3(float3(1.0f, 1.0f, 1.0f), float3(1.0f, 1.0f, 1.0f), float3(1.0f, 1.0f, 1.0f));
+constant float3x3 v7 = float3x3(float3(1.0f), float3(1.0f), float3(1.0f));
 
 constant MyStruct v8 = {};
 
@@ -32,7 +32,7 @@ struct tint_symbol_1 {
 };
 
 float4 tint_symbol_inner() {
-  return float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return float4(0.0f);
 }
 
 fragment tint_symbol_1 tint_symbol() {

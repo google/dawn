@@ -13,7 +13,7 @@ struct tint_symbol_1 {
 };
 
 float4 tint_symbol_inner() {
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol_1 tint_symbol() {

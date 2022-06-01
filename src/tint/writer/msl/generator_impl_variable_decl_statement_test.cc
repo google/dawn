@@ -48,7 +48,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
     gen.increment_indent();
 
     ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-    EXPECT_EQ(gen.result(), "  float const a = float();\n");
+    EXPECT_EQ(gen.result(), "  float const a = 0.0f;\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
@@ -132,7 +132,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("thread float tint_symbol_1 = initializer;\n"));
+    EXPECT_THAT(gen.result(), HasSubstr("thread float tint_symbol_1 = 0.0f;\n  float const tint_symbol = tint_symbol_1;\n  return;\n"));
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Workgroup) {
@@ -158,7 +158,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-    EXPECT_EQ(gen.result(), R"(float3 a = float3();
+    EXPECT_EQ(gen.result(), R"(float3 a = float3(0.0f);
 )");
 }
 

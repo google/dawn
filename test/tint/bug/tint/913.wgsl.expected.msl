@@ -24,7 +24,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, texture2d<float, access::sample
   float4 const nonCoveredColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
   bool success = true;
   if (((((dstTexCoord[0] < (*(tint_symbol_9)).dstCopyOrigin[0]) || (dstTexCoord[1] < (*(tint_symbol_9)).dstCopyOrigin[1])) || (dstTexCoord[0] >= ((*(tint_symbol_9)).dstCopyOrigin[0] + (*(tint_symbol_9)).copySize[0]))) || (dstTexCoord[1] >= ((*(tint_symbol_9)).dstCopyOrigin[1] + (*(tint_symbol_9)).copySize[1])))) {
-    success = (success && all((tint_symbol_8.read(uint2(int2(dstTexCoord)), 0) == nonCoveredColor)));
+    success = (success && all((tint_symbol_8.read(uint2(int2(dstTexCoord)), 0) == float4(0.0f, 1.0f, 0.0f, 1.0f))));
   } else {
     uint2 srcTexCoord = ((dstTexCoord - (*(tint_symbol_9)).dstCopyOrigin) + (*(tint_symbol_9)).srcCopyOrigin);
     if (((*(tint_symbol_9)).dstTextureFlipY == 1u)) {

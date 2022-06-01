@@ -2,7 +2,7 @@
 
 using namespace metal;
 void min_c76fa6() {
-  float4 res = fmin(float4(), float4());
+  float4 res = fmin(float4(0.0f), float4(0.0f));
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   min_c76fa6();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {

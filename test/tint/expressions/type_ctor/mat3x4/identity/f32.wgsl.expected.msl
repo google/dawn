@@ -1,5 +1,5 @@
 #include <metal_stdlib>
 
 using namespace metal;
-constant float3x4 m = float3x4();
+constant float3x4 m = float3x4(float4(0.0f), float4(0.0f), float4(0.0f));
 

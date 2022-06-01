@@ -35,14 +35,14 @@ struct S {
 };
 
 kernel void tint_symbol(device S* tint_symbol_3 [[buffer(0)]]) {
-  (*(tint_symbol_3)).a = int3();
-  (*(tint_symbol_3)).b = int();
-  (*(tint_symbol_3)).c = uint3();
-  (*(tint_symbol_3)).d = uint();
-  (*(tint_symbol_3)).e = float3();
-  (*(tint_symbol_3)).f = float();
-  (*(tint_symbol_3)).g = float2x3();
-  (*(tint_symbol_3)).h = float3x2();
+  (*(tint_symbol_3)).a = int3(0);
+  (*(tint_symbol_3)).b = 0;
+  (*(tint_symbol_3)).c = uint3(0u);
+  (*(tint_symbol_3)).d = 0u;
+  (*(tint_symbol_3)).e = float3(0.0f);
+  (*(tint_symbol_3)).f = 0.0f;
+  (*(tint_symbol_3)).g = float2x3(float3(0.0f), float3(0.0f));
+  (*(tint_symbol_3)).h = float3x2(float2(0.0f), float2(0.0f), float2(0.0f));
   Inner const tint_symbol_1 = {};
   (*(tint_symbol_3)).i = tint_symbol_1;
   tint_array_wrapper const tint_symbol_2 = {.arr={}};

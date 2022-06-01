@@ -2,7 +2,7 @@
 
 using namespace metal;
 void ldexp_a31cdc() {
-  float3 res = ldexp(float3(), int3());
+  float3 res = ldexp(float3(0.0f), int3(0));
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   ldexp_a31cdc();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {

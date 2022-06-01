@@ -3,7 +3,7 @@
 using namespace metal;
 kernel void f() {
   float const a = 1.0f;
-  float const b = as_type<float>(a);
+  float const b = as_type<float>(1.0f);
   return;
 }
 

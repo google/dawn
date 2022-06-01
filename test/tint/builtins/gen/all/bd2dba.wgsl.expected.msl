@@ -2,7 +2,7 @@
 
 using namespace metal;
 void all_bd2dba() {
-  bool res = all(bool3());
+  bool res = all(bool3(false));
 }
 
 struct tint_symbol {
@@ -11,7 +11,7 @@ struct tint_symbol {
 
 float4 vertex_main_inner() {
   all_bd2dba();
-  return float4();
+  return float4(0.0f);
 }
 
 vertex tint_symbol vertex_main() {
