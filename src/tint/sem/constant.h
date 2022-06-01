@@ -129,13 +129,13 @@ class Constant {
     /// @returns the elements as a vector of AFloat
     inline const AFloats& FElements() const { return std::get<AFloats>(elems_); }
 
-    /// @returns true if any element is zero
+    /// @returns true if any element is positive zero
     bool AnyZero() const;
 
-    /// @returns true if all elements are zero
+    /// @returns true if all elements are positive zero
     bool AllZero() const;
 
-    /// @returns true if all elements are the same value
+    /// @returns true if all elements are the same value, with the same sign-bit.
     bool AllEqual() const { return AllEqual(0, ElementCount()); }
 
     /// @param start the first element index

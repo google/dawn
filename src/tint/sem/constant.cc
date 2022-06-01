@@ -14,6 +14,7 @@
 
 #include "src/tint/sem/constant.h"
 
+#include <cmath>
 #include <utility>
 
 #include "src/tint/debug.h"
@@ -26,6 +27,17 @@ namespace {
 size_t CountElements(const Constant::Elements& elements) {
     return std::visit([](auto&& vec) { return vec.size(); }, elements);
 }
+
+template <typename T>
+bool IsNegativeFloat(T value) {
+    (void)value;
+    if constexpr (IsFloatingPoint<T>) {
+        return std::signbit(value);
+    } else {
+        return false;
+    }
+}
+
 }  // namespace
 
 Constant::Constant() {}
@@ -47,7 +59,7 @@ bool Constant::AnyZero() const {
     return WithElements([&](auto&& vec) {
         using T = typename std::decay_t<decltype(vec)>::value_type;
         for (auto el : vec) {
-            if (el == T(0)) {
+            if (el == T(0) && !IsNegativeFloat(el.value)) {
                 return true;
             }
         }
@@ -59,7 +71,7 @@ bool Constant::AllZero() const {
     return WithElements([&](auto&& vec) {
         using T = typename std::decay_t<decltype(vec)>::value_type;
         for (auto el : vec) {
-            if (el != T(0)) {
+            if (el != T(0) || IsNegativeFloat(el.value)) {
                 return false;
             }
         }
@@ -71,8 +83,9 @@ bool Constant::AllEqual(size_t start, size_t end) const {
     return WithElements([&](auto&& vec) {
         if (!vec.empty()) {
             auto value = vec[start];
+            bool float_sign = IsNegativeFloat(vec[start].value);
             for (size_t i = start + 1; i < end; i++) {
-                if (vec[i] != value) {
+                if (vec[i] != value || float_sign != IsNegativeFloat(vec[i].value)) {
                     return false;
                 }
             }
