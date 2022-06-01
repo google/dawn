@@ -645,8 +645,8 @@ ResultOrError<std::string> TranslateToHLSL(dawn::platform::Platform* platform,
     tint::writer::hlsl::Options options;
     options.disable_workgroup_init = request.disableWorkgroupInit;
     if (request.usesNumWorkgroups) {
-        options.root_constant_binding_point.group = request.numWorkgroupsRegisterSpace;
-        options.root_constant_binding_point.binding = request.numWorkgroupsShaderRegister;
+        options.root_constant_binding_point = tint::sem::BindingPoint{
+            request.numWorkgroupsRegisterSpace, request.numWorkgroupsShaderRegister};
     }
     // TODO(dawn:549): HLSL generation outputs the indices into the
     // array_length_from_uniform buffer that were actually used. When the blob cache can

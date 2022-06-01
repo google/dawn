@@ -15,7 +15,9 @@
 #include <cstdio>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <memory>
+#include <optional>  // NOLINT(build/include_order)
 #include <sstream>
 #include <string>
 #include <vector>
@@ -86,6 +88,7 @@ struct Options {
     std::string dxc_path;
     std::string xcrun_path;
     std::vector<std::string> overrides;
+    std::optional<tint::sem::BindingPoint> hlsl_root_constant_binding_point;
 };
 
 const char kUsage[] = R"(Usage: tint [options] <input-file>
@@ -112,6 +115,11 @@ ${transforms}
                                Affects AST dumping, and text-based output languages.
   --dump-inspector-bindings -- Dump reflection data about bindins to stdout.
   -h                        -- This help text
+  --hlsl-root-constant-binding-point <group>,<binding>  -- Binding point for root constant.
+                               Specify the binding point for generated uniform buffer
+                               used for num_workgroups in HLSL. If not specified, then
+                               default to binding 0 of the largest used group plus 1,
+                               or group 0 if no resource bound.
   --validate                -- Validates the generated shader
   --fxc                     -- Ask to validate HLSL output using FXC instead of DXC.
                                When specified, automatically enables --validate
@@ -218,6 +226,27 @@ std::vector<std::string> split_on_comma(std::string list) {
         res.push_back(substr);
     }
     return res;
+}
+
+std::optional<uint64_t> parse_unsigned_number(std::string number) {
+    for (char c : number) {
+        if (!std::isdigit(c)) {
+            // Found a non-digital char, return nullopt
+            return std::nullopt;
+        }
+    }
+
+    errno = 0;
+    char* p_end;
+    uint64_t result;
+    // std::strtoull will not throw exception.
+    result = std::strtoull(number.c_str(), &p_end, 10);
+    if ((errno != 0) || (static_cast<size_t>(p_end - number.c_str()) != number.length())) {
+        // Unexpected conversion result
+        return std::nullopt;
+    }
+
+    return result;
 }
 
 std::string TextureDimensionToString(tint::inspector::ResourceBinding::TextureDimension dim) {
@@ -402,6 +431,31 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
                 return false;
             }
             opts->overrides = split_on_comma(args[i]);
+        } else if (arg == "--hlsl-root-constant-binding-point") {
+            ++i;
+            if (i >= args.size()) {
+                std::cerr << "Missing value for " << arg << std::endl;
+                return false;
+            }
+            auto binding_points = split_on_comma(args[i]);
+            if (binding_points.size() != 2) {
+                std::cerr << "Invalid binding point for " << arg << ": " << args[i] << std::endl;
+                return false;
+            }
+            auto group = parse_unsigned_number(binding_points[0]);
+            if ((!group.has_value()) || (group.value() > std::numeric_limits<uint32_t>::max())) {
+                std::cerr << "Invalid group for " << arg << ": " << binding_points[0] << std::endl;
+                return false;
+            }
+            auto binding = parse_unsigned_number(binding_points[1]);
+            if ((!binding.has_value()) ||
+                (binding.value() > std::numeric_limits<uint32_t>::max())) {
+                std::cerr << "Invalid binding for " << arg << ": " << binding_points[1]
+                          << std::endl;
+                return false;
+            }
+            opts->hlsl_root_constant_binding_point = tint::sem::BindingPoint{
+                static_cast<uint32_t>(group.value()), static_cast<uint32_t>(binding.value())};
         } else if (!arg.empty()) {
             if (arg[0] == '-') {
                 std::cerr << "Unrecognized option: " << arg << std::endl;
@@ -723,6 +777,7 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
     tint::writer::hlsl::Options gen_options;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.generate_external_texture_bindings = true;
+    gen_options.root_constant_binding_point = options.hlsl_root_constant_binding_point;
     auto result = tint::writer::hlsl::Generate(program, gen_options);
     if (!result.success) {
         PrintWGSL(std::cerr, *program);

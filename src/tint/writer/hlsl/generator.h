@@ -16,6 +16,7 @@
 #define SRC_TINT_WRITER_HLSL_GENERATOR_H_
 
 #include <memory>
+#include <optional>  // NOLINT(build/include_order)
 #include <string>
 #include <unordered_set>
 #include <utility>
@@ -46,7 +47,7 @@ struct Options {
     Options& operator=(const Options&);
 
     /// The binding point to use for information passed via root constants.
-    sem::BindingPoint root_constant_binding_point;
+    std::optional<sem::BindingPoint> root_constant_binding_point;
     /// Set to `true` to disable workgroup memory zero initialization
     bool disable_workgroup_init = false;
     /// Set to 'true' to generates binding mappings for external textures
