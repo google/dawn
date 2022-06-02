@@ -1354,8 +1354,7 @@
             {"name": "dst transfer function parameters", "type": "float", "annotation": "const*",
                 "length": 7},
             {"name": "gamut conversion matrix", "type": "float", "annotation": "const*",
-                "length": 9},
-            {"name": "color space", "type": "predefined color space", "default": "srgb"}
+                "length": 9}
         ]
     },
     "feature name": {
@@ -1564,13 +1563,6 @@
             {"value": 0, "name": "undefined", "jsrepr": "undefined"},
             {"value": 1, "name": "low power"},
             {"value": 2, "name": "high performance"}
-        ]
-    },
-    "predefined color space": {
-        "category": "enum",
-        "values": [
-            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
-            {"value": 1, "name": "srgb"}
         ]
     },
     "present mode": {
