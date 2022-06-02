@@ -186,7 +186,6 @@ TEST(Ref, MoveConstructor) {
     original->Release();
     EXPECT_EQ(original->GetRefCountForTesting(), 1u);
 
-    EXPECT_EQ(source.Get(), nullptr);
     EXPECT_EQ(destination.Get(), original);
     EXPECT_FALSE(deleted);
 
@@ -209,7 +208,6 @@ TEST(Ref, MoveAssignment) {
     destination = std::move(source);
     EXPECT_EQ(original->GetRefCountForTesting(), 1u);
 
-    EXPECT_EQ(source.Get(), nullptr);
     EXPECT_EQ(destination.Get(), original);
     EXPECT_FALSE(deleted);
 
@@ -234,7 +232,6 @@ TEST(Ref, MoveAssignmentSameObject) {
 
     referenceToSource = std::move(source);
 
-    EXPECT_EQ(source.Get(), original);
     EXPECT_EQ(original->GetRefCountForTesting(), 1u);
     EXPECT_FALSE(deleted);
 
@@ -356,7 +353,6 @@ TEST(Ref, MoveConstructorDerived) {
     original->Release();
     EXPECT_EQ(original->GetRefCountForTesting(), 1u);
 
-    EXPECT_EQ(source.Get(), nullptr);
     EXPECT_EQ(destination.Get(), original);
     EXPECT_FALSE(deleted);
 
@@ -380,7 +376,6 @@ TEST(Ref, MoveAssignmentDerived) {
 
     EXPECT_EQ(original->GetRefCountForTesting(), 1u);
 
-    EXPECT_EQ(source.Get(), nullptr);
     EXPECT_EQ(destination.Get(), original);
     EXPECT_FALSE(deleted);
 

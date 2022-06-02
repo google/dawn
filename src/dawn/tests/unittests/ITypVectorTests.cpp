@@ -110,8 +110,6 @@ TEST_F(ITypVectorTest, MoveConstructAssign) {
         ASSERT_EQ(vec[Key(0)], Val(2));
         ASSERT_EQ(vec[Key(1)], Val(8));
         ASSERT_EQ(vec[Key(2)], Val(1));
-
-        ASSERT_EQ(rhs.size(), Key(0));
     }
 
     // Test the move assignment
@@ -123,8 +121,6 @@ TEST_F(ITypVectorTest, MoveConstructAssign) {
         ASSERT_EQ(vec[Key(0)], Val(2));
         ASSERT_EQ(vec[Key(1)], Val(8));
         ASSERT_EQ(vec[Key(2)], Val(1));
-
-        ASSERT_EQ(rhs.size(), Key(0));
     }
 }
 

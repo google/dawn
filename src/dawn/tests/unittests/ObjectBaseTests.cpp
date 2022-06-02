@@ -159,7 +159,6 @@ TEST(ObjectBase, MoveConstructor) {
     Object source(&refcount);
     Object destination(std::move(source));
 
-    ASSERT_EQ(source.Get(), nullptr);
     ASSERT_EQ(destination.Get(), &refcount);
     ASSERT_EQ(2, refcount);
 
@@ -175,7 +174,6 @@ TEST(ObjectBase, MoveAssignment) {
     Object destination;
     destination = std::move(source);
 
-    ASSERT_EQ(source.Get(), nullptr);
     ASSERT_EQ(destination.Get(), &refcount);
     ASSERT_EQ(2, refcount);
 
