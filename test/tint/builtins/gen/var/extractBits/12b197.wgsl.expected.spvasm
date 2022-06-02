@@ -1,0 +1,101 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 55
+; Schema: 0
+               OpCapability Shader
+         %18 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %vertex_main "vertex_main" %value %vertex_point_size
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpName %value "value"
+               OpName %vertex_point_size "vertex_point_size"
+               OpName %tint_extract_bits "tint_extract_bits"
+               OpName %v "v"
+               OpName %offset "offset"
+               OpName %count "count"
+               OpName %extractBits_12b197 "extractBits_12b197"
+               OpName %arg_0 "arg_0"
+               OpName %arg_1 "arg_1"
+               OpName %arg_2 "arg_2"
+               OpName %res "res"
+               OpName %vertex_main_inner "vertex_main_inner"
+               OpName %vertex_main "vertex_main"
+               OpName %fragment_main "fragment_main"
+               OpName %compute_main "compute_main"
+               OpDecorate %value BuiltIn Position
+               OpDecorate %vertex_point_size BuiltIn PointSize
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+      %value = OpVariable %_ptr_Output_v4float Output %5
+%_ptr_Output_float = OpTypePointer Output %float
+          %8 = OpConstantNull %float
+%vertex_point_size = OpVariable %_ptr_Output_float Output %8
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+          %9 = OpTypeFunction %v3uint %v3uint %uint %uint
+    %uint_32 = OpConstant %uint 32
+       %void = OpTypeVoid
+         %24 = OpTypeFunction %void
+         %28 = OpConstantNull %v3uint
+%_ptr_Function_v3uint = OpTypePointer Function %v3uint
+     %uint_1 = OpConstant %uint 1
+%_ptr_Function_uint = OpTypePointer Function %uint
+         %34 = OpConstantNull %uint
+         %41 = OpTypeFunction %v4float
+    %float_1 = OpConstant %float 1
+%tint_extract_bits = OpFunction %v3uint None %9
+          %v = OpFunctionParameter %v3uint
+     %offset = OpFunctionParameter %uint
+      %count = OpFunctionParameter %uint
+         %16 = OpLabel
+         %17 = OpExtInst %uint %18 UMin %offset %uint_32
+         %21 = OpIAdd %uint %17 %count
+         %20 = OpExtInst %uint %18 UMin %uint_32 %21
+         %23 = OpISub %uint %20 %17
+         %22 = OpBitFieldUExtract %v3uint %v %17 %23
+               OpReturnValue %22
+               OpFunctionEnd
+%extractBits_12b197 = OpFunction %void None %24
+         %27 = OpLabel
+      %arg_0 = OpVariable %_ptr_Function_v3uint Function %28
+      %arg_1 = OpVariable %_ptr_Function_uint Function %34
+      %arg_2 = OpVariable %_ptr_Function_uint Function %34
+        %res = OpVariable %_ptr_Function_v3uint Function %28
+               OpStore %arg_0 %28
+               OpStore %arg_1 %uint_1
+               OpStore %arg_2 %uint_1
+         %37 = OpLoad %v3uint %arg_0
+         %38 = OpLoad %uint %arg_1
+         %39 = OpLoad %uint %arg_2
+         %36 = OpFunctionCall %v3uint %tint_extract_bits %37 %38 %39
+               OpStore %res %36
+               OpReturn
+               OpFunctionEnd
+%vertex_main_inner = OpFunction %v4float None %41
+         %43 = OpLabel
+         %44 = OpFunctionCall %void %extractBits_12b197
+               OpReturnValue %5
+               OpFunctionEnd
+%vertex_main = OpFunction %void None %24
+         %46 = OpLabel
+         %47 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %47
+               OpStore %vertex_point_size %float_1
+               OpReturn
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %24
+         %50 = OpLabel
+         %51 = OpFunctionCall %void %extractBits_12b197
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %24
+         %53 = OpLabel
+         %54 = OpFunctionCall %void %extractBits_12b197
+               OpReturn
+               OpFunctionEnd

@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void dpdy_a8b56e() {
+  float2 arg_0 = float2(0.0f);
+  float2 res = dfdy(arg_0);
+}
+
+fragment void fragment_main() {
+  dpdy_a8b56e();
+  return;
+}
+

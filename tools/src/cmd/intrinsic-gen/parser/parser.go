@@ -251,21 +251,24 @@ func (p *parser) parameters() ast.Parameters {
 }
 
 func (p *parser) parameter() ast.Parameter {
+	attributes := p.attributes()
 	if p.peekIs(1, tok.Colon) {
 		// name type
 		name := p.expect(tok.Identifier, "parameter name")
 		p.expect(tok.Colon, "parameter type")
 		return ast.Parameter{
-			Source: name.Source,
-			Name:   string(name.Runes),
-			Type:   p.templatedName(),
+			Source:     name.Source,
+			Name:       string(name.Runes),
+			Attributes: attributes,
+			Type:       p.templatedName(),
 		}
 	}
 	// type
 	ty := p.templatedName()
 	return ast.Parameter{
-		Source: ty.Source,
-		Type:   ty,
+		Source:     ty.Source,
+		Attributes: attributes,
+		Type:       ty,
 	}
 }
 

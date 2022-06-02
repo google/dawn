@@ -1,0 +1,34 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void unpack2x16float_32a5cf() {
+  uint arg_0 = 1u;
+  float2 res = float2(as_type<half2>(arg_0));
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  unpack2x16float_32a5cf();
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  unpack2x16float_32a5cf();
+  return;
+}
+
+kernel void compute_main() {
+  unpack2x16float_32a5cf();
+  return;
+}
+

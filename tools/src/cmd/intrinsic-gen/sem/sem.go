@@ -211,12 +211,16 @@ func (o Overload) Format(w fmt.State, verb rune) {
 
 // Parameter describes a single parameter of a function overload
 type Parameter struct {
-	Name string
-	Type FullyQualifiedName
+	Name    string
+	Type    FullyQualifiedName
+	IsConst bool // Did this parameter have a @const attribute?
 }
 
 // Format implements the fmt.Formatter interface
 func (p Parameter) Format(w fmt.State, verb rune) {
+	if p.IsConst {
+		fmt.Fprint(w, "@const ")
+	}
 	if p.Name != "" {
 		fmt.Fprintf(w, "%v: ", p.Name)
 	}

@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void fwidthCoarse_4e4fc4() {
+  float4 arg_0 = float4(0.0f);
+  float4 res = fwidth(arg_0);
+}
+
+fragment void fragment_main() {
+  fwidthCoarse_4e4fc4();
+  return;
+}
+

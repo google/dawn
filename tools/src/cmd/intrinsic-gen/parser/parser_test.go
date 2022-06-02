@@ -306,6 +306,20 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
+			"op F(@blah a)",
+			ast.AST{
+				Operators: []ast.IntrinsicDecl{{
+					Kind: ast.Operator,
+					Name: "F",
+					Parameters: ast.Parameters{
+						{
+							Attributes: ast.Attributes{{Name: "blah", Values: []string{}}},
+							Type:       ast.TemplatedName{Name: "a"}},
+					},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
 			"op F(a: T)",
 			ast.AST{
 				Operators: []ast.IntrinsicDecl{{

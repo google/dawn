@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct SB_RW {
+  /* 0x0000 */ atomic_int arg_0;
+};
+
+void atomicStore_d1e9a6(device SB_RW* const tint_symbol) {
+  int arg_1 = 1;
+  atomic_store_explicit(&((*(tint_symbol)).arg_0), arg_1, memory_order_relaxed);
+}
+
+fragment void fragment_main(device SB_RW* tint_symbol_1 [[buffer(0)]]) {
+  atomicStore_d1e9a6(tint_symbol_1);
+  return;
+}
+
+kernel void compute_main(device SB_RW* tint_symbol_2 [[buffer(0)]]) {
+  atomicStore_d1e9a6(tint_symbol_2);
+  return;
+}
+

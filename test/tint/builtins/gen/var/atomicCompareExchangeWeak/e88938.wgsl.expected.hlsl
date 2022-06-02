@@ -1,0 +1,17 @@
+SKIP: FAILED
+
+
+var<workgroup> arg_0 : atomic<i32>;
+
+fn atomicCompareExchangeWeak_e88938() {
+  var arg_1 = 1;
+  var arg_2 = 1;
+  var res = atomicCompareExchangeWeak(&(arg_0), arg_1, arg_2);
+}
+
+@stage(compute) @workgroup_size(1)
+fn compute_main() {
+  atomicCompareExchangeWeak_e88938();
+}
+
+Failed to generate: error: unknown type in EmitType

@@ -1,7 +1,7 @@
 {{- /*
 --------------------------------------------------------------------------------
 Template file for use with tools/builtin-gen to generate the wgsl files in the
-./literal/... subdirectories
+./literal/...  and ./var/... subdirectories
 
 See:
 * tools/cmd/intrinsic-gen/gen for structures used by this template
@@ -19,24 +19,30 @@ See:
 {{- /*    Generate a ./literal/<function>/<permuataion-hash>.wgsl file using
           the Permutation macro defined below                             */ -}}
 {{-       $file := printf "./literal/%v/%v.wgsl" .Intrinsic.Name .Hash -}}
-{{-       $content := Eval "Permutation" . -}}
+{{-       $content := Eval "Permutation" "Overload" . "Mode" "literal" -}}
+{{-       WriteFile $file $content -}}
+{{- /*    Generate a ./var/<function>/<permuataion-hash>.wgsl file using
+          the Permutation macro defined below                             */ -}}
+{{-       $file := printf "./var/%v/%v.wgsl" .Intrinsic.Name .Hash -}}
+{{-       $content := Eval "Permutation" "Overload" . "Mode" "var" -}}
 {{-       WriteFile $file $content -}}
 {{-     end  }}
 {{-   end  }}
 {{- end  }}
 {{- end  }}
 
-
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                          define "Permutation"                            -}}
 {{- /* Emits the body of the intrinsic permuation .wgsl file              */ -}}
 {{- /* ------------------------------------------------------------------ */ -}}
-{{-   $builtin     := .Intrinsic.Name -}}
-{{-   $permutation := printf "%v_%v" $builtin .Hash -}}
+{{-   $overload    := .Overload -}}
+{{-   $mode        := .Mode -}}
+{{-   $builtin     := $overload.Intrinsic.Name -}}
+{{-   $permutation := printf "%v_%v" $builtin $overload.Hash -}}
 {{-   $args        := Map -}}
 
 {{- /* Generate RW storage buffer parameters */ -}}
-{{-   $sb_rw_fields := Eval "EmitBufferFields" "overload"    .
+{{-   $sb_rw_fields := Eval "EmitBufferFields" "overload"    $overload
                                                "var_name"    "sb_rw"
                                                "storage"     "storage"
                                                "access"      "read_write"
@@ -49,7 +55,7 @@ struct SB_RW {
 {{    end -}}
 
 {{- /* Generate RO storage buffer parameters */ -}}
-{{-   $sb_ro_fields := Eval "EmitBufferFields" "overload"    .
+{{-   $sb_ro_fields := Eval "EmitBufferFields" "overload"    $overload
                                                "var_name"    "sb_ro"
                                                "storage"     "storage"
                                                "access"      "read"
@@ -62,7 +68,7 @@ struct SB_RO {
 {{    end -}}
 
 {{- /* Generate uniform buffer parameters */ -}}
-{{-   $ub_fields := Eval "EmitBufferFields" "overload"    .
+{{-   $ub_fields := Eval "EmitBufferFields" "overload"    $overload
                                             "var_name"    "ub"
                                             "storage"     "uniform"
                                             "access"      "read"
@@ -75,7 +81,7 @@ struct UB {
 {{    end -}}
 
 {{- /* Generate module-scoped handle variables */ -}}
-{{-   range $i, $p := .Parameters  }}
+{{-   range $i, $p := $overload.Parameters  }}
 {{-     $class := Eval "StorageClass" $p.Type -}}
 {{-     if eq "ptr" $p.Type.Target.Name -}}
 {{-       $el_type := Eval "Type" (index $p.Type.TemplateArguments 1)}}
@@ -109,12 +115,15 @@ struct UB {
 // {{$.Overload}}
 fn {{$permutation}}() {
 {{/* Build the parameters either as 'var' or inline values */ -}}
-{{-   range $i, $p := .Parameters -}}
+{{-   range $i, $p := $overload.Parameters -}}
 {{-     $class := Eval "StorageClass" $p.Type -}}
 {{-     if eq "function" $class -}}
 {{-       if eq "ptr" $p.Type.Target.Name -}}
 {{- /*indent*/}}  var arg_{{$i}}: {{template "Type" index $p.Type.TemplateArguments 1}};
 {{          $args.Put $i (printf "&arg_%v" $i) -}}
+{{-       else if and (not $p.IsConst) (eq "var" $mode) -}}
+{{- /*indent*/}}  var arg_{{$i}} = {{Eval "ArgumentValue" $p}};
+{{          $args.Put $i (printf "arg_%v" $i) -}}
 {{-       else -}}
 {{-         $args.Put $i (Eval "ArgumentValue" $p) -}}
 {{-       end -}}
@@ -123,18 +132,18 @@ fn {{$permutation}}() {
 
 {{- /* Make the call to the intrinsic */ -}}
 {{- /*indent*/}}  {{/*indent*/ -}}
-{{-   if .ReturnType -}}
-  var res{{if IsDeclarable .ReturnType}}: {{template "Type" .ReturnType}}{{end}} = {{/* preserve space after = */ -}}
+{{-   if $overload.ReturnType -}}
+  var res{{if IsDeclarable $overload.ReturnType}}: {{template "Type" $overload.ReturnType}}{{end}} = {{/* preserve space after = */ -}}
 {{-   end -}}
   {{$builtin}}(
-{{-   range $i, $p := .Parameters -}}
+{{-   range $i, $p := $overload.Parameters -}}
 {{-     if $i -}}, {{end}}{{$args.Get $i -}}
 {{-   end -}}
   );
 }
 {{/*new line*/ -}}
 
-{{- if .CanBeUsedInStage.Vertex }}
+{{- if $overload.CanBeUsedInStage.Vertex }}
 @stage(vertex)
 fn vertex_main() -> @builtin(position) vec4<f32> {
   {{$permutation}}();
@@ -142,14 +151,14 @@ fn vertex_main() -> @builtin(position) vec4<f32> {
 }
 {{ end -}}
 
-{{- if .CanBeUsedInStage.Fragment }}
+{{- if $overload.CanBeUsedInStage.Fragment }}
 @stage(fragment)
 fn fragment_main() {
   {{$permutation}}();
 }
 {{ end -}}
 
-{{- if .CanBeUsedInStage.Compute }}
+{{- if $overload.CanBeUsedInStage.Compute }}
 @stage(compute) @workgroup_size(1)
 fn compute_main() {
   {{$permutation}}();

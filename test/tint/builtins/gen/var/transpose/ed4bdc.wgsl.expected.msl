@@ -1,0 +1,34 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void transpose_ed4bdc() {
+  float3x2 arg_0 = float3x2(float2(0.0f), float2(0.0f), float2(0.0f));
+  float2x3 res = transpose(arg_0);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  transpose_ed4bdc();
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  transpose_ed4bdc();
+  return;
+}
+
+kernel void compute_main() {
+  transpose_ed4bdc();
+  return;
+}
+

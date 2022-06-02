@@ -1,0 +1,9 @@
+fn dpdy_7f8d84() {
+  var arg_0 = 1.0;
+  var res : f32 = dpdy(arg_0);
+}
+
+@stage(fragment)
+fn fragment_main() {
+  dpdy_7f8d84();
+}

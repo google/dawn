@@ -173,6 +173,7 @@ func (l Parameters) Format(w fmt.State, verb rune) {
 		if i > 0 {
 			fmt.Fprintf(w, ", ")
 		}
+		p.Attributes.Format(w, verb)
 		p.Format(w, verb)
 	}
 	fmt.Fprintf(w, ")")
@@ -180,9 +181,10 @@ func (l Parameters) Format(w fmt.State, verb rune) {
 
 // Parameter describes a single parameter of a function
 type Parameter struct {
-	Source tok.Source
-	Name   string // Optional
-	Type   TemplatedName
+	Source     tok.Source
+	Attributes Attributes
+	Name       string // Optional
+	Type       TemplatedName
 }
 
 // Format implements the fmt.Formatter interface
@@ -303,14 +305,11 @@ type Attributes []Attribute
 
 // Format implements the fmt.Formatter interface
 func (l Attributes) Format(w fmt.State, verb rune) {
-	fmt.Fprint(w, "[[")
-	for i, d := range l {
-		if i > 0 {
-			fmt.Fprintf(w, ", ")
-		}
+	for _, d := range l {
+		fmt.Fprint(w, "@")
 		d.Format(w, verb)
+		fmt.Fprint(w, " ")
 	}
-	fmt.Fprint(w, "]]")
 }
 
 // Take looks up the attribute with the given name. If the attribute is found

@@ -374,9 +374,17 @@ func (r *resolver) intrinsic(
 		if err != nil {
 			return err
 		}
+		isConst := false
+		if attribute := p.Attributes.Take("const"); attribute != nil {
+			isConst = true
+		}
+		if len(p.Attributes) != 0 {
+			return fmt.Errorf("%v unknown attribute", p.Attributes[0].Source)
+		}
 		overload.Parameters[i] = sem.Parameter{
-			Name: p.Name,
-			Type: usage,
+			Name:    p.Name,
+			Type:    usage,
+			IsConst: isConst,
 		}
 	}
 
