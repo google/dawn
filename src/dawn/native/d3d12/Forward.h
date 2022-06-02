@@ -27,6 +27,7 @@ class CommandBuffer;
 class ComputePipeline;
 class Device;
 class Heap;
+class PipelineCache;
 class PipelineLayout;
 class QuerySet;
 class Queue;
@@ -46,6 +47,7 @@ struct D3D12BackendTraits {
     using CommandBufferType = CommandBuffer;
     using ComputePipelineType = ComputePipeline;
     using DeviceType = Device;
+    using PipelineCacheType = PipelineCache;
     using PipelineLayoutType = PipelineLayout;
     using QuerySetType = QuerySet;
     using QueueType = Queue;

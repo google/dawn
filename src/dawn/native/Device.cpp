@@ -628,6 +628,23 @@ BlobCache* DeviceBase::GetBlobCache() {
     return nullptr;
 }
 
+CachedBlob DeviceBase::LoadCachedBlob(const CacheKey& key) {
+    BlobCache* blobCache = GetBlobCache();
+    if (!blobCache) {
+        return CachedBlob();
+    }
+    return blobCache->Load(key);
+}
+
+void DeviceBase::StoreCachedBlob(const CacheKey& key, const CachedBlob& blob) {
+    if (!blob.Empty()) {
+        BlobCache* blobCache = GetBlobCache();
+        if (blobCache) {
+            blobCache->Store(key, blob);
+        }
+    }
+}
+
 MaybeError DeviceBase::ValidateObject(const ApiObjectBase* object) const {
     ASSERT(object != nullptr);
     DAWN_INVALID_IF(object->GetDevice() != this,

@@ -15,8 +15,15 @@
 #ifndef SRC_DAWN_NATIVE_BLOBCACHE_H_
 #define SRC_DAWN_NATIVE_BLOBCACHE_H_
 
+#include <functional>
 #include <memory>
 #include <mutex>
+
+#include "dawn/common/Platform.h"
+
+#if defined(DAWN_PLATFORM_WINDOWS)
+#include "dawn/native/d3d12/d3d12_platform.h"
+#endif  // DAWN_PLATFORM_WINDOWS
 
 namespace dawn::platform {
 class CachingInterface;
@@ -30,11 +37,19 @@ class InstanceBase;
 
 class CachedBlob {
   public:
-    explicit CachedBlob(size_t size = 0);
-    CachedBlob(CachedBlob&&);
-    ~CachedBlob();
+    static CachedBlob Create(size_t size);
 
+#if defined(DAWN_PLATFORM_WINDOWS)
+    static CachedBlob Create(Microsoft::WRL::ComPtr<ID3DBlob> blob);
+#endif  // DAWN_PLATFORM_WINDOWS
+
+    CachedBlob(const CachedBlob&) = delete;
+    CachedBlob& operator=(const CachedBlob&) = delete;
+
+    CachedBlob(CachedBlob&&);
     CachedBlob& operator=(CachedBlob&&);
+
+    ~CachedBlob();
 
     bool Empty() const;
     const uint8_t* Data() const;
@@ -42,9 +57,14 @@ class CachedBlob {
     size_t Size() const;
     void Reset(size_t size);
 
+    CachedBlob();
+
   private:
-    std::unique_ptr<uint8_t[]> mData = nullptr;
-    size_t mSize = 0;
+    explicit CachedBlob(uint8_t* data, size_t size, std::function<void()> deleter);
+
+    uint8_t* mData;
+    size_t mSize;
+    std::function<void()> mDeleter;
 };
 
 // This class should always be thread-safe because it may be called asynchronously. Its purpose

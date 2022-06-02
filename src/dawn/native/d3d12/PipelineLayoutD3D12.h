@@ -52,6 +52,8 @@ class PipelineLayout final : public PipelineLayoutBase {
 
     ID3D12RootSignature* GetRootSignature() const;
 
+    ID3DBlob* GetRootSignatureBlob() const;
+
     ID3D12CommandSignature* GetDispatchIndirectCommandSignatureWithNumWorkgroups();
 
     ID3D12CommandSignature* GetDrawIndirectCommandSignatureWithInstanceVertexOffsets();
@@ -98,6 +100,8 @@ class PipelineLayout final : public PipelineLayoutBase {
     uint32_t mNumWorkgroupsParameterIndex;
     uint32_t mDynamicStorageBufferLengthsParameterIndex;
     ComPtr<ID3D12RootSignature> mRootSignature;
+    // Store the root signature blob to put in pipeline cachekey
+    ComPtr<ID3DBlob> mRootSignatureBlob;
     ComPtr<ID3D12CommandSignature> mDispatchIndirectCommandSignatureWithNumWorkgroups;
     ComPtr<ID3D12CommandSignature> mDrawIndirectCommandSignatureWithInstanceVertexOffsets;
     ComPtr<ID3D12CommandSignature> mDrawIndexedIndirectCommandSignatureWithInstanceVertexOffsets;

@@ -45,9 +45,10 @@ class PipelineCacheBase : public RefCounted {
     CachedBlob Initialize();
 
   private:
-    // Backend implementation of serialization of the cache into a blob. Note that an empty
-    // blob may be returned.
-    virtual ResultOrError<CachedBlob> SerializeToBlobImpl() = 0;
+    // Backend implementation of serialization of the cache into a blob.
+    // Note: given that no local cached blob should be destructed and copy elision has strict
+    // requirement cached blob is passed in as a pointer to be assigned.
+    virtual MaybeError SerializeToBlobImpl(CachedBlob* blob) = 0;
 
     // The blob cache is owned by the Adapter and pipeline caches are owned/created by devices
     // or adapters. Since the device owns a reference to the Instance which owns the Adapter,

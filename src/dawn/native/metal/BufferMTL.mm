@@ -53,6 +53,8 @@ uint64_t Buffer::QueryMaxBufferLength(id<MTLDevice> mtlDevice) {
     if (@available(macOS 10.11, *)) {
         return 256 * 1024 * 1024;
     }
+    // 256Mb for other platform if any. (Need to have a return for all branches).
+    return 256 * 1024 * 1024;
 #else
     // macOS / tvOS: 256Mb limit in versions without [MTLDevice maxBufferLength]
     return 256 * 1024 * 1024;

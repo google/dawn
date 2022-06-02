@@ -38,7 +38,7 @@ MaybeError PipelineCacheBase::Flush() {
     }
     // Try to write the data out to the persistent cache.
     CachedBlob blob;
-    DAWN_TRY_ASSIGN(blob, SerializeToBlobImpl());
+    DAWN_TRY(SerializeToBlobImpl(&blob));
     if (blob.Size() > 0) {
         // Using a simple heuristic to decide whether to write out the blob right now. May need
         // smarter tracking when we are dealing with monolithic caches.

@@ -21,37 +21,45 @@
 
 namespace dawn::native {
 
-CachedBlob::CachedBlob(size_t size) {
-    if (size != 0) {
-        Reset(size);
+// static
+CachedBlob CachedBlob::Create(size_t size) {
+    if (size > 0) {
+        uint8_t* data = new uint8_t[size];
+        return CachedBlob(data, size, [=]() { delete[] data; });
+    } else {
+        return CachedBlob();
     }
 }
 
+CachedBlob::CachedBlob() : mData(nullptr), mSize(0), mDeleter({}) {}
+
+CachedBlob::CachedBlob(uint8_t* data, size_t size, std::function<void()> deleter)
+    : mData(data), mSize(size), mDeleter(deleter) {}
+
 CachedBlob::CachedBlob(CachedBlob&&) = default;
 
-CachedBlob::~CachedBlob() = default;
-
 CachedBlob& CachedBlob::operator=(CachedBlob&&) = default;
+
+CachedBlob::~CachedBlob() {
+    if (mDeleter) {
+        mDeleter();
+    }
+}
 
 bool CachedBlob::Empty() const {
     return mSize == 0;
 }
 
 const uint8_t* CachedBlob::Data() const {
-    return mData.get();
+    return mData;
 }
 
 uint8_t* CachedBlob::Data() {
-    return mData.get();
+    return mData;
 }
 
 size_t CachedBlob::Size() const {
     return mSize;
-}
-
-void CachedBlob::Reset(size_t size) {
-    mSize = size;
-    mData = std::make_unique<uint8_t[]>(size);
 }
 
 BlobCache::BlobCache(dawn::platform::CachingInterface* cachingInterface)
@@ -72,18 +80,19 @@ void BlobCache::Store(const CacheKey& key, const CachedBlob& value) {
 }
 
 CachedBlob BlobCache::LoadInternal(const CacheKey& key) {
-    CachedBlob result;
     if (mCache == nullptr) {
-        return result;
+        return CachedBlob();
     }
     const size_t expectedSize = mCache->LoadData(key.data(), key.size(), nullptr, 0);
     if (expectedSize > 0) {
-        result.Reset(expectedSize);
+        // Need to put this inside to trigger copy elision.
+        CachedBlob result = CachedBlob::Create(expectedSize);
         const size_t actualSize =
             mCache->LoadData(key.data(), key.size(), result.Data(), expectedSize);
         ASSERT(expectedSize == actualSize);
+        return result;
     }
-    return result;
+    return CachedBlob();
 }
 
 void BlobCache::StoreInternal(const CacheKey& key, size_t valueSize, const void* value) {
