@@ -73,7 +73,7 @@ CommandIterator* CommandBufferBase::GetCommandIteratorForTesting() {
 bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
                                    const Extent3D copySize,
                                    const uint32_t mipLevel) {
-    Extent3D extent = texture->GetMipLevelPhysicalSize(mipLevel);
+    Extent3D extent = texture->GetMipLevelSingleSubresourcePhysicalSize(mipLevel);
 
     switch (texture->GetDimension()) {
         case wgpu::TextureDimension::e1D:

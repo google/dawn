@@ -695,7 +695,7 @@ bool TextureBase::IsMultisampledTexture() const {
     return mSampleCount > 1;
 }
 
-Extent3D TextureBase::GetMipLevelVirtualSize(uint32_t level) const {
+Extent3D TextureBase::GetMipLevelSingleSubresourceVirtualSize(uint32_t level) const {
     Extent3D extent = {std::max(mSize.width >> level, 1u), 1u, 1u};
     if (mDimension == wgpu::TextureDimension::e1D) {
         return extent;
@@ -710,8 +710,8 @@ Extent3D TextureBase::GetMipLevelVirtualSize(uint32_t level) const {
     return extent;
 }
 
-Extent3D TextureBase::GetMipLevelPhysicalSize(uint32_t level) const {
-    Extent3D extent = GetMipLevelVirtualSize(level);
+Extent3D TextureBase::GetMipLevelSingleSubresourcePhysicalSize(uint32_t level) const {
+    Extent3D extent = GetMipLevelSingleSubresourceVirtualSize(level);
 
     // Compressed Textures will have paddings if their width or height is not a multiple of
     // 4 at non-zero mipmap levels.
@@ -731,7 +731,7 @@ Extent3D TextureBase::GetMipLevelPhysicalSize(uint32_t level) const {
 Extent3D TextureBase::ClampToMipLevelVirtualSize(uint32_t level,
                                                  const Origin3D& origin,
                                                  const Extent3D& extent) const {
-    const Extent3D virtualSizeAtLevel = GetMipLevelVirtualSize(level);
+    const Extent3D virtualSizeAtLevel = GetMipLevelSingleSubresourceVirtualSize(level);
     ASSERT(origin.x <= virtualSizeAtLevel.width);
     ASSERT(origin.y <= virtualSizeAtLevel.height);
     uint32_t clampedCopyExtentWidth = (extent.width > virtualSizeAtLevel.width - origin.x)

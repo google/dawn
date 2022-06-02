@@ -87,8 +87,8 @@ class TextureBase : public ApiObjectBase {
     // size is the one with paddings if necessary, which is always a multiple of the block size
     // and used in texture copying. The virtual size is the one without paddings, which is not
     // required to be a multiple of the block size and used in texture sampling.
-    Extent3D GetMipLevelPhysicalSize(uint32_t level) const;
-    Extent3D GetMipLevelVirtualSize(uint32_t level) const;
+    Extent3D GetMipLevelSingleSubresourcePhysicalSize(uint32_t level) const;
+    Extent3D GetMipLevelSingleSubresourceVirtualSize(uint32_t level) const;
     Extent3D ClampToMipLevelVirtualSize(uint32_t level,
                                         const Origin3D& origin,
                                         const Extent3D& extent) const;

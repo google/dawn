@@ -1195,7 +1195,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
         ASSERT(range.aspects == Aspect::Color);
         const TexelBlockInfo& blockInfo = GetFormat().GetAspectInfo(range.aspects).block;
 
-        Extent3D largestMipSize = GetMipLevelPhysicalSize(range.baseMipLevel);
+        Extent3D largestMipSize = GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel);
 
         uint32_t bytesPerRow = Align((largestMipSize.width / blockInfo.width) * blockInfo.byteSize,
                                      device->GetOptimalBytesPerRowAlignment());
@@ -1211,7 +1211,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
         std::vector<VkBufferImageCopy> regions;
         for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
              ++level) {
-            Extent3D copySize = GetMipLevelPhysicalSize(level);
+            Extent3D copySize = GetMipLevelSingleSubresourcePhysicalSize(level);
             imageRange.baseMipLevel = level;
             for (uint32_t layer = range.baseArrayLayer;
                  layer < range.baseArrayLayer + range.layerCount; ++layer) {

@@ -330,10 +330,10 @@ ResultOrError<Ref<TextureViewBase>> NewSwapChainBase::GetCurrentTextureView() {
     ASSERT(mCurrentTextureView->GetLayerCount() == 1);
     ASSERT(mCurrentTextureView->GetDimension() == wgpu::TextureViewDimension::e2D);
     ASSERT(mCurrentTextureView->GetTexture()
-               ->GetMipLevelVirtualSize(mCurrentTextureView->GetBaseMipLevel())
+               ->GetMipLevelSingleSubresourceVirtualSize(mCurrentTextureView->GetBaseMipLevel())
                .width == mWidth);
     ASSERT(mCurrentTextureView->GetTexture()
-               ->GetMipLevelVirtualSize(mCurrentTextureView->GetBaseMipLevel())
+               ->GetMipLevelSingleSubresourceVirtualSize(mCurrentTextureView->GetBaseMipLevel())
                .height == mHeight);
 
     return mCurrentTextureView;

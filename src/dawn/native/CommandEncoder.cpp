@@ -126,7 +126,8 @@ MaybeError ValidateOrSetAttachmentSize(const TextureViewBase* attachment,
                                        uint32_t* width,
                                        uint32_t* height) {
     const Extent3D& attachmentSize =
-        attachment->GetTexture()->GetMipLevelVirtualSize(attachment->GetBaseMipLevel());
+        attachment->GetTexture()->GetMipLevelSingleSubresourceVirtualSize(
+            attachment->GetBaseMipLevel());
 
     if (*width == 0) {
         DAWN_ASSERT(*height == 0);
@@ -190,9 +191,11 @@ MaybeError ValidateResolveTarget(const DeviceBase* device,
                     resolveTarget->GetLevelCount());
 
     const Extent3D& colorTextureSize =
-        attachment->GetTexture()->GetMipLevelVirtualSize(attachment->GetBaseMipLevel());
+        attachment->GetTexture()->GetMipLevelSingleSubresourceVirtualSize(
+            attachment->GetBaseMipLevel());
     const Extent3D& resolveTextureSize =
-        resolveTarget->GetTexture()->GetMipLevelVirtualSize(resolveTarget->GetBaseMipLevel());
+        resolveTarget->GetTexture()->GetMipLevelSingleSubresourceVirtualSize(
+            resolveTarget->GetBaseMipLevel());
     DAWN_INVALID_IF(colorTextureSize.width != resolveTextureSize.width ||
                         colorTextureSize.height != resolveTextureSize.height,
                     "The Resolve target %s size (width: %u, height: %u) does not match the color "

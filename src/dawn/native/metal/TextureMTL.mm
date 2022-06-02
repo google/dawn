@@ -869,8 +869,9 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                         }
                     }
 
-                    DAWN_TRY(EncodeEmptyMetalRenderPass(device, commandContext, descriptor,
-                                                        GetMipLevelVirtualSize(level)));
+                    DAWN_TRY(
+                        EncodeEmptyMetalRenderPass(device, commandContext, descriptor,
+                                                   GetMipLevelSingleSubresourceVirtualSize(level)));
                 }
             }
         } else {
@@ -883,7 +884,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                 NSRef<MTLRenderPassDescriptor> descriptor;
                 uint32_t attachment = 0;
 
-                uint32_t numZSlices = GetMipLevelVirtualSize(level).depthOrArrayLayers;
+                uint32_t depth = GetMipLevelSingleSubresourceVirtualSize(level).depthOrArrayLayers;
 
                 for (uint32_t arrayLayer = range.baseArrayLayer;
                      arrayLayer < range.baseArrayLayer + range.layerCount; arrayLayer++) {
@@ -894,7 +895,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                         continue;
                     }
 
-                    for (uint32_t z = 0; z < numZSlices; ++z) {
+                    for (uint32_t z = 0; z < depth; ++z) {
                         if (descriptor == nullptr) {
                             // Note that this creates a descriptor that's autoreleased so we
                             // don't use AcquireNSRef
@@ -915,17 +916,18 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
 
                         if (attachment == kMaxColorAttachments) {
                             attachment = 0;
-                            DAWN_TRY(EncodeEmptyMetalRenderPass(device, commandContext,
-                                                                descriptor.Get(),
-                                                                GetMipLevelVirtualSize(level)));
+                            DAWN_TRY(EncodeEmptyMetalRenderPass(
+                                device, commandContext, descriptor.Get(),
+                                GetMipLevelSingleSubresourceVirtualSize(level)));
                             descriptor = nullptr;
                         }
                     }
                 }
 
                 if (descriptor != nullptr) {
-                    DAWN_TRY(EncodeEmptyMetalRenderPass(device, commandContext, descriptor.Get(),
-                                                        GetMipLevelVirtualSize(level)));
+                    DAWN_TRY(
+                        EncodeEmptyMetalRenderPass(device, commandContext, descriptor.Get(),
+                                                   GetMipLevelSingleSubresourceVirtualSize(level)));
                 }
             }
         }
@@ -937,7 +939,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
 
             // Computations for the bytes per row / image height are done using the physical size
             // so that enough data is reserved for compressed textures.
-            Extent3D largestMipSize = GetMipLevelPhysicalSize(range.baseMipLevel);
+            Extent3D largestMipSize = GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel);
             uint32_t largestMipBytesPerRow =
                 (largestMipSize.width / blockInfo.width) * blockInfo.byteSize;
             uint64_t largestMipBytesPerImage = static_cast<uint64_t>(largestMipBytesPerRow) *
@@ -959,7 +961,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
 
             for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
                  ++level) {
-                Extent3D virtualSize = GetMipLevelVirtualSize(level);
+                Extent3D virtualSize = GetMipLevelSingleSubresourceVirtualSize(level);
 
                 for (uint32_t arrayLayer = range.baseArrayLayer;
                      arrayLayer < range.baseArrayLayer + range.layerCount; ++arrayLayer) {

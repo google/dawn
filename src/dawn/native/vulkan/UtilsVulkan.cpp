@@ -114,7 +114,8 @@ VkImageAspectFlags VulkanAspectMask(const Aspect& aspects) {
 Extent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy, const Extent3D& copySize) {
     Extent3D validTextureCopyExtent = copySize;
     const TextureBase* texture = textureCopy.texture.Get();
-    Extent3D virtualSizeAtLevel = texture->GetMipLevelVirtualSize(textureCopy.mipLevel);
+    Extent3D virtualSizeAtLevel =
+        texture->GetMipLevelSingleSubresourceVirtualSize(textureCopy.mipLevel);
     ASSERT(textureCopy.origin.x <= virtualSizeAtLevel.width);
     ASSERT(textureCopy.origin.y <= virtualSizeAtLevel.height);
     if (copySize.width > virtualSizeAtLevel.width - textureCopy.origin.x) {

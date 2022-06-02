@@ -262,7 +262,7 @@ TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,
                                                  origin.z + copyExtent.depthOrArrayLayers - 1};
 
         ASSERT(copyExtent.height - blockInfo.height <
-               texture->GetMipLevelVirtualSize(mipLevel).height);
+               texture->GetMipLevelSingleSubresourceVirtualSize(mipLevel).height);
         copy.copies[copy.count].copyExtent = {clampedCopyExtent.width,
                                               copyExtent.height - blockInfo.height, 1};
 

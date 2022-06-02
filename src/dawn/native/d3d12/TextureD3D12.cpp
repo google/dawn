@@ -1086,7 +1086,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
         for (Aspect aspect : IterateEnumMask(range.aspects)) {
             const TexelBlockInfo& blockInfo = GetFormat().GetAspectInfo(aspect).block;
 
-            Extent3D largestMipSize = GetMipLevelPhysicalSize(range.baseMipLevel);
+            Extent3D largestMipSize = GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel);
 
             uint32_t bytesPerRow =
                 Align((largestMipSize.width / blockInfo.width) * blockInfo.byteSize,
@@ -1103,7 +1103,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
             for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
                  ++level) {
                 // compute d3d12 texture copy locations for texture and buffer
-                Extent3D copySize = GetMipLevelPhysicalSize(level);
+                Extent3D copySize = GetMipLevelSingleSubresourcePhysicalSize(level);
 
                 for (uint32_t layer = range.baseArrayLayer;
                      layer < range.baseArrayLayer + range.layerCount; ++layer) {

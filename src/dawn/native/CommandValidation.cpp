@@ -275,7 +275,8 @@ MaybeError ValidateImageCopyTexture(DeviceBase const* device,
                     texture->GetFormat().format, textureCopy.aspect);
 
     if (texture->GetSampleCount() > 1 || texture->GetFormat().HasDepthOrStencil()) {
-        Extent3D subresourceSize = texture->GetMipLevelPhysicalSize(textureCopy.mipLevel);
+        Extent3D subresourceSize =
+            texture->GetMipLevelSingleSubresourcePhysicalSize(textureCopy.mipLevel);
         ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
         DAWN_INVALID_IF(
             textureCopy.origin.x != 0 || textureCopy.origin.y != 0 ||
@@ -297,7 +298,7 @@ MaybeError ValidateTextureCopyRange(DeviceBase const* device,
     const TextureBase* texture = textureCopy.texture;
 
     // Validation for the copy being in-bounds:
-    Extent3D mipSize = texture->GetMipLevelPhysicalSize(textureCopy.mipLevel);
+    Extent3D mipSize = texture->GetMipLevelSingleSubresourcePhysicalSize(textureCopy.mipLevel);
     // For 1D/2D textures, include the array layer as depth so it can be checked with other
     // dimensions.
     if (texture->GetDimension() != wgpu::TextureDimension::e3D) {

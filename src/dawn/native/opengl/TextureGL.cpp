@@ -378,7 +378,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
             const GLFormat& glFormat = GetGLFormat();
             for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
                  ++level) {
-                Extent3D mipSize = GetMipLevelPhysicalSize(level);
+                Extent3D mipSize = GetMipLevelSingleSubresourcePhysicalSize(level);
                 for (uint32_t layer = range.baseArrayLayer;
                      layer < range.baseArrayLayer + range.layerCount; ++layer) {
                     if (clearValue == TextureBase::ClearValue::Zero &&
@@ -448,7 +448,8 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
                                 DoClear();
                                 break;
                             case wgpu::TextureDimension::e3D:
-                                uint32_t depth = GetMipLevelVirtualSize(level).depthOrArrayLayers;
+                                uint32_t depth = GetMipLevelSingleSubresourceVirtualSize(level)
+                                                     .depthOrArrayLayers;
                                 for (GLint z = 0; z < static_cast<GLint>(depth); ++z) {
                                     gl.FramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, attachment,
                                                                GetHandle(), level, z);
@@ -477,7 +478,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
         const TexelBlockInfo& blockInfo = GetFormat().GetAspectInfo(Aspect::Color).block;
         ASSERT(kTextureBytesPerRowAlignment % blockInfo.byteSize == 0);
 
-        Extent3D largestMipSize = GetMipLevelPhysicalSize(range.baseMipLevel);
+        Extent3D largestMipSize = GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel);
         uint32_t bytesPerRow =
             Align((largestMipSize.width / blockInfo.width) * blockInfo.byteSize, 4);
 
@@ -521,7 +522,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
             dataLayout.bytesPerRow = bytesPerRow;
             dataLayout.rowsPerImage = largestMipSize.height;
 
-            Extent3D mipSize = GetMipLevelPhysicalSize(level);
+            Extent3D mipSize = GetMipLevelSingleSubresourcePhysicalSize(level);
 
             for (uint32_t layer = range.baseArrayLayer;
                  layer < range.baseArrayLayer + range.layerCount; ++layer) {
