@@ -320,16 +320,6 @@ ResultOrError<VkImage> Service::CreateImage(const ExternalImageDescriptor* descr
         planeLayouts[plane].depthPitch = 0;  // Not a depth texture
     }
 
-    // For single plane formats.
-    // To be Removed after chromium's switch to planeLayouts.
-    if (dmaBufDescriptor->stride != 0) {
-        planeLayouts[0].offset = 0;
-        planeLayouts[0].size = 0;  // VK_EXT_image_drm_format_modifier mandates size = 0.
-        planeLayouts[0].rowPitch = dmaBufDescriptor->stride;
-        planeLayouts[0].arrayPitch = 0;  // Not an array texture
-        planeLayouts[0].depthPitch = 0;  // Not a depth texture
-    }
-
     VkImageDrmFormatModifierExplicitCreateInfoEXT explicitCreateInfo = {};
     explicitCreateInfo.drmFormatModifier = dmaBufDescriptor->drmModifier;
     explicitCreateInfo.drmFormatModifierPlaneCount = planeCount;

@@ -102,8 +102,6 @@ struct DAWN_NATIVE_EXPORT PlaneLayout {
 // Descriptor for dma-buf file descriptor image import
 struct DAWN_NATIVE_EXPORT ExternalImageDescriptorDmaBuf : ExternalImageDescriptorFD {
     ExternalImageDescriptorDmaBuf();
-    // To be removed after chromium's switch to planeLayouts.
-    uint32_t stride = 0u;  // Stride of the buffer in bytes
 
     static constexpr uint32_t kMaxPlanes = 3;
     std::array<PlaneLayout, kMaxPlanes> planeLayouts;
