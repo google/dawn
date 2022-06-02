@@ -50,7 +50,7 @@ uint64_t Buffer::QueryMaxBufferLength(id<MTLDevice> mtlDevice) {
         return 1024 * 1024 * 1024;
     }
     // 10.11 has a 256Mb limit
-    if (@available(maxOS 10.11, *)) {
+    if (@available(macOS 10.11, *)) {
         return 256 * 1024 * 1024;
     }
 #else
