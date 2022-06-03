@@ -18,8 +18,34 @@
 namespace tint::reader::wgsl {
 namespace {
 
-TEST_F(ParserImplTest, AttributeList_Parses) {
+TEST_F(ParserImplTest, AttributeList_Parses_Stage) {
     auto p = parser("@workgroup_size(2) @stage(compute)");
+    auto attrs = p->attribute_list();
+    EXPECT_FALSE(p->has_error()) << p->error();
+    EXPECT_FALSE(attrs.errored);
+    EXPECT_TRUE(attrs.matched);
+    ASSERT_EQ(attrs.value.size(), 2u);
+
+    auto* attr_0 = attrs.value[0]->As<ast::Attribute>();
+    auto* attr_1 = attrs.value[1]->As<ast::Attribute>();
+    ASSERT_NE(attr_0, nullptr);
+    ASSERT_NE(attr_1, nullptr);
+
+    ASSERT_TRUE(attr_0->Is<ast::WorkgroupAttribute>());
+    const ast::Expression* x = attr_0->As<ast::WorkgroupAttribute>()->x;
+    ASSERT_NE(x, nullptr);
+    auto* x_literal = x->As<ast::LiteralExpression>();
+    ASSERT_NE(x_literal, nullptr);
+    ASSERT_TRUE(x_literal->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(x_literal->As<ast::IntLiteralExpression>()->value, 2);
+    EXPECT_EQ(x_literal->As<ast::IntLiteralExpression>()->suffix,
+              ast::IntLiteralExpression::Suffix::kNone);
+    ASSERT_TRUE(attr_1->Is<ast::StageAttribute>());
+    EXPECT_EQ(attr_1->As<ast::StageAttribute>()->stage, ast::PipelineStage::kCompute);
+}
+
+TEST_F(ParserImplTest, AttributeList_Parses) {
+    auto p = parser("@workgroup_size(2) @compute");
     auto attrs = p->attribute_list();
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(attrs.errored);

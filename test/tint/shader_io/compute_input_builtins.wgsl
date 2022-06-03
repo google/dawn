@@ -1,4 +1,4 @@
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main(
   @builtin(local_invocation_id) local_invocation_id : vec3<u32>,
   @builtin(local_invocation_index) local_invocation_index : u32,

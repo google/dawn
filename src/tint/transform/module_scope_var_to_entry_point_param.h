@@ -43,7 +43,7 @@ namespace tint::transform {
 ///   p = p + f;
 /// }
 ///
-/// @stage(compute) @workgroup_size(1)
+/// @compute @workgroup_size(1)
 /// fn main() {
 ///   foo();
 /// }
@@ -55,7 +55,7 @@ namespace tint::transform {
 ///   *p = *p + (*sptr).f;
 /// }
 ///
-/// @stage(compute) @workgroup_size(1)
+/// @compute @workgroup_size(1)
 /// fn main(sptr : ptr<storage, S, read>) {
 ///   var<private> p : f32 = 2.0;
 ///   foo(&p, sptr);

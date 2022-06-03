@@ -34,7 +34,7 @@ namespace tint::transform {
 ///   @location(2) loc2 : vec4<u32>;
 /// };
 ///
-/// @stage(fragment)
+/// @fragment
 /// fn frag_main(@builtin(position) coord : vec4<f32>,
 ///              locations : Locations) -> @location(0) f32 {
 ///   if (coord.w > 1.0) {
@@ -71,7 +71,7 @@ namespace tint::transform {
 ///   return col;
 /// }
 ///
-/// @stage(fragment)
+/// @fragment
 /// fn frag_main(in : frag_main_in) -> frag_main_out {
 ///   let inner_retval = frag_main_inner(in.coord, Locations(in.loc1, in.loc2));
 ///   var wrapper_result : frag_main_out;
