@@ -411,6 +411,12 @@ class GeneratorImpl : public TextGenerator {
     /// @param ty the struct to generate
     /// @returns true if the struct is emitted
     bool EmitStructType(TextBuffer* buffer, const sem::Struct* ty);
+    /// Handles generating a structure declaration only the first time called. Subsequent calls are
+    /// a no-op and return true.
+    /// @param buffer the text buffer that the type declaration will be written to
+    /// @param ty the struct to generate
+    /// @returns true if the struct is emitted
+    bool EmitStructTypeOnce(TextBuffer* buffer, const sem::Struct* ty);
     /// Handles a unary op expression
     /// @param out the output of the expression stream
     /// @param expr the expression to emit
@@ -530,6 +536,7 @@ class GeneratorImpl : public TextGenerator {
     std::unordered_map<const sem::Matrix*, std::string> dynamic_matrix_vector_write_;
     std::unordered_map<const sem::Matrix*, std::string> dynamic_matrix_scalar_write_;
     std::unordered_map<const sem::Type*, std::string> value_or_one_if_zero_;
+    std::unordered_set<const sem::Struct*> emitted_structs_;
 };
 
 }  // namespace tint::writer::hlsl

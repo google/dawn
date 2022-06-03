@@ -826,46 +826,66 @@ bool GeneratorImpl::EmitAtomicCall(std::ostream& out,
             return call("atomic_exchange_explicit", true);
 
         case sem::BuiltinType::kAtomicCompareExchangeWeak: {
-            // Emit the builtin return type unique to this overload. This does not
-            // exist in the AST, so it will not be generated in Generate().
-            if (!EmitStructType(&helpers_, builtin->ReturnType()->As<sem::Struct>())) {
-                return false;
-            }
-
             auto* ptr_ty = TypeOf(expr->args[0])->UnwrapRef()->As<sem::Pointer>();
             auto sc = ptr_ty->StorageClass();
+            auto* str = builtin->ReturnType()->As<sem::Struct>();
 
-            auto func = utils::GetOrCreate(atomicCompareExchangeWeak_, sc, [&]() -> std::string {
-                auto name = UniqueIdentifier("atomicCompareExchangeWeak");
-                auto& buf = helpers_;
-
-                line(&buf) << "template <typename A, typename T>";
-                {
-                    auto f = line(&buf);
-                    auto str_name = StructName(builtin->ReturnType()->As<sem::Struct>());
-                    f << str_name << " " << name << "(";
-                    if (!EmitStorageClass(f, sc)) {
+            auto func = utils::GetOrCreate(
+                atomicCompareExchangeWeak_, ACEWKeyType{{sc, str}}, [&]() -> std::string {
+                    // Emit the builtin return type unique to this overload. This does not
+                    // exist in the AST, so it will not be generated in Generate().
+                    if (!EmitStructTypeOnce(&helpers_, builtin->ReturnType()->As<sem::Struct>())) {
                         return "";
                     }
-                    f << " A* atomic, T compare, T value) {";
-                }
 
-                buf.IncrementIndent();
-                TINT_DEFER({
-                    buf.DecrementIndent();
-                    line(&buf) << "}";
-                    line(&buf);
+                    auto name = UniqueIdentifier("atomicCompareExchangeWeak");
+                    auto& buf = helpers_;
+                    auto* atomic_ty = builtin->Parameters()[0]->Type();
+                    auto* arg_ty = builtin->Parameters()[1]->Type();
+
+                    {
+                        auto f = line(&buf);
+                        auto str_name = StructName(builtin->ReturnType()->As<sem::Struct>());
+                        f << str_name << " " << name << "(";
+                        if (!EmitTypeAndName(f, atomic_ty, "atomic")) {
+                            return "";
+                        }
+                        f << ", ";
+                        if (!EmitTypeAndName(f, arg_ty, "compare")) {
+                            return "";
+                        }
+                        f << ", ";
+                        if (!EmitTypeAndName(f, arg_ty, "value")) {
+                            return "";
+                        }
+                        f << ") {";
+                    }
+
+                    buf.IncrementIndent();
+                    TINT_DEFER({
+                        buf.DecrementIndent();
+                        line(&buf) << "}";
+                        line(&buf);
+                    });
+
+                    {
+                        auto f = line(&buf);
+                        if (!EmitTypeAndName(f, arg_ty, "old_value")) {
+                            return "";
+                        }
+                        f << " = compare;";
+                    }
+                    line(&buf) << "bool exchanged = "
+                                  "atomic_compare_exchange_weak_explicit(atomic, "
+                                  "&old_value, value, memory_order_relaxed, "
+                                  "memory_order_relaxed);";
+                    line(&buf) << "return {old_value, exchanged};";
+                    return name;
                 });
 
-                line(&buf) << "T old_value = compare;";
-                line(&buf) << "bool exchanged = "
-                              "atomic_compare_exchange_weak_explicit(atomic, "
-                              "&old_value, value, memory_order_relaxed, "
-                              "memory_order_relaxed);";
-                line(&buf) << "return {old_value, exchanged};";
-                return name;
-            });
-
+            if (func.empty()) {
+                return false;
+            }
             return call(func, false);
         }
 
@@ -2763,6 +2783,14 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
 
     line(b) << "};";
     return true;
+}
+
+bool GeneratorImpl::EmitStructTypeOnce(TextBuffer* buffer, const sem::Struct* str) {
+    auto it = emitted_structs_.emplace(str);
+    if (!it.second) {
+        return true;
+    }
+    return EmitStructType(buffer, str);
 }
 
 bool GeneratorImpl::EmitUnaryOp(std::ostream& out, const ast::UnaryOpExpression* expr) {

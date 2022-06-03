@@ -6,9 +6,8 @@ struct atomic_compare_exchange_resulti32 {
   int old_value;
   bool exchanged;
 };
-template <typename A, typename T>
-atomic_compare_exchange_resulti32 atomicCompareExchangeWeak_1(threadgroup A* atomic, T compare, T value) {
-  T old_value = compare;
+atomic_compare_exchange_resulti32 atomicCompareExchangeWeak_1(threadgroup atomic_int* atomic, int compare, int value) {
+  int old_value = compare;
   bool exchanged = atomic_compare_exchange_weak_explicit(atomic, &old_value, value, memory_order_relaxed, memory_order_relaxed);
   return {old_value, exchanged};
 }

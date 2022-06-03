@@ -411,6 +411,12 @@ class GeneratorImpl : public TextGenerator {
     /// @param ty the struct to generate
     /// @returns true if the struct is emitted
     bool EmitStructType(TextBuffer* buffer, const sem::Struct* ty);
+    /// Handles generating a structure declaration only the first time called. Subsequent calls are
+    /// a no-op and return true.
+    /// @param buffer the text buffer that the type declaration will be written to
+    /// @param ty the struct to generate
+    /// @returns true if the struct is emitted
+    bool EmitStructTypeOnce(TextBuffer* buffer, const sem::Struct* ty);
     /// Handles generating the members of a structure
     /// @param buffer the text buffer that the struct members will be written to
     /// @param ty the struct to generate
@@ -503,6 +509,7 @@ class GeneratorImpl : public TextGenerator {
     std::unordered_map<const sem::Vector*, std::string> dynamic_vector_write_;
     std::unordered_map<const sem::Vector*, std::string> int_dot_funcs_;
     std::unordered_map<const sem::Type*, std::string> float_modulo_funcs_;
+    std::unordered_set<const sem::Struct*> emitted_structs_;
     bool requires_oes_sample_variables_ = false;
     bool requires_default_precision_qualifier_ = false;
     Version version_;
