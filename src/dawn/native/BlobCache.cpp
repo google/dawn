@@ -21,51 +21,10 @@
 
 namespace dawn::native {
 
-// static
-CachedBlob CachedBlob::Create(size_t size) {
-    if (size > 0) {
-        uint8_t* data = new uint8_t[size];
-        return CachedBlob(data, size, [=]() { delete[] data; });
-    } else {
-        return CachedBlob();
-    }
-}
-
-CachedBlob::CachedBlob() : mData(nullptr), mSize(0), mDeleter({}) {}
-
-CachedBlob::CachedBlob(uint8_t* data, size_t size, std::function<void()> deleter)
-    : mData(data), mSize(size), mDeleter(deleter) {}
-
-CachedBlob::CachedBlob(CachedBlob&&) = default;
-
-CachedBlob& CachedBlob::operator=(CachedBlob&&) = default;
-
-CachedBlob::~CachedBlob() {
-    if (mDeleter) {
-        mDeleter();
-    }
-}
-
-bool CachedBlob::Empty() const {
-    return mSize == 0;
-}
-
-const uint8_t* CachedBlob::Data() const {
-    return mData;
-}
-
-uint8_t* CachedBlob::Data() {
-    return mData;
-}
-
-size_t CachedBlob::Size() const {
-    return mSize;
-}
-
 BlobCache::BlobCache(dawn::platform::CachingInterface* cachingInterface)
     : mCache(cachingInterface) {}
 
-CachedBlob BlobCache::Load(const CacheKey& key) {
+Blob BlobCache::Load(const CacheKey& key) {
     std::lock_guard<std::mutex> lock(mMutex);
     return LoadInternal(key);
 }
@@ -75,24 +34,24 @@ void BlobCache::Store(const CacheKey& key, size_t valueSize, const void* value) 
     StoreInternal(key, valueSize, value);
 }
 
-void BlobCache::Store(const CacheKey& key, const CachedBlob& value) {
+void BlobCache::Store(const CacheKey& key, const Blob& value) {
     Store(key, value.Size(), value.Data());
 }
 
-CachedBlob BlobCache::LoadInternal(const CacheKey& key) {
+Blob BlobCache::LoadInternal(const CacheKey& key) {
     if (mCache == nullptr) {
-        return CachedBlob();
+        return Blob();
     }
     const size_t expectedSize = mCache->LoadData(key.data(), key.size(), nullptr, 0);
     if (expectedSize > 0) {
         // Need to put this inside to trigger copy elision.
-        CachedBlob result = CachedBlob::Create(expectedSize);
+        Blob result = Blob::Create(expectedSize);
         const size_t actualSize =
             mCache->LoadData(key.data(), key.size(), result.Data(), expectedSize);
         ASSERT(expectedSize == actualSize);
         return result;
     }
-    return CachedBlob();
+    return Blob();
 }
 
 void BlobCache::StoreInternal(const CacheKey& key, size_t valueSize, const void* value) {

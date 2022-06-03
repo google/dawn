@@ -42,13 +42,13 @@ class PipelineCacheBase : public RefCounted {
 
     // Initializes and returns the cached blob given the cache and keys. Used by backend
     // implementations to get the cache and set the cache hit state. Should only be called once.
-    CachedBlob Initialize();
+    Blob Initialize();
 
   private:
     // Backend implementation of serialization of the cache into a blob.
     // Note: given that no local cached blob should be destructed and copy elision has strict
     // requirement cached blob is passed in as a pointer to be assigned.
-    virtual MaybeError SerializeToBlobImpl(CachedBlob* blob) = 0;
+    virtual MaybeError SerializeToBlobImpl(Blob* blob) = 0;
 
     // The blob cache is owned by the Adapter and pipeline caches are owned/created by devices
     // or adapters. Since the device owns a reference to the Instance which owns the Adapter,

@@ -432,7 +432,7 @@ MaybeError RenderPipeline::Initialize() {
     mCacheKey.Record(descriptorD3D12, *layout->GetRootSignatureBlob());
 
     // Try to see if we have anything in the blob cache.
-    CachedBlob blob = device->LoadCachedBlob(GetCacheKey());
+    Blob blob = device->LoadCachedBlob(GetCacheKey());
     const bool cacheHit = !blob.Empty();
     if (cacheHit) {
         // Cache hits, attach cached blob to descriptor.
@@ -449,7 +449,7 @@ MaybeError RenderPipeline::Initialize() {
         ComPtr<ID3DBlob> d3dBlob;
         DAWN_TRY(CheckHRESULT(GetPipelineState()->GetCachedBlob(&d3dBlob),
                               "D3D12 render pipeline state get cached blob"));
-        device->StoreCachedBlob(GetCacheKey(), CachedBlob::Create(std::move(d3dBlob)));
+        device->StoreCachedBlob(GetCacheKey(), Blob::Create(std::move(d3dBlob)));
     }
 
     SetLabelImpl();

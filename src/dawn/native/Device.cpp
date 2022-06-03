@@ -628,15 +628,15 @@ BlobCache* DeviceBase::GetBlobCache() {
     return nullptr;
 }
 
-CachedBlob DeviceBase::LoadCachedBlob(const CacheKey& key) {
+Blob DeviceBase::LoadCachedBlob(const CacheKey& key) {
     BlobCache* blobCache = GetBlobCache();
     if (!blobCache) {
-        return CachedBlob();
+        return Blob();
     }
     return blobCache->Load(key);
 }
 
-void DeviceBase::StoreCachedBlob(const CacheKey& key, const CachedBlob& blob) {
+void DeviceBase::StoreCachedBlob(const CacheKey& key, const Blob& blob) {
     if (!blob.Empty()) {
         BlobCache* blobCache = GetBlobCache();
         if (blobCache) {

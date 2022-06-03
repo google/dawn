@@ -284,8 +284,8 @@ class DeviceBase : public RefCountedWithExternalCount {
     MaybeError ValidateIsAlive() const;
 
     BlobCache* GetBlobCache();
-    CachedBlob LoadCachedBlob(const CacheKey& key);
-    void StoreCachedBlob(const CacheKey& key, const CachedBlob& blob);
+    Blob LoadCachedBlob(const CacheKey& key);
+    void StoreCachedBlob(const CacheKey& key, const Blob& blob);
 
     virtual ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) = 0;
     virtual MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,

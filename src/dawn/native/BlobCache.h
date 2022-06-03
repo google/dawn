@@ -15,15 +15,10 @@
 #ifndef SRC_DAWN_NATIVE_BLOBCACHE_H_
 #define SRC_DAWN_NATIVE_BLOBCACHE_H_
 
-#include <functional>
-#include <memory>
 #include <mutex>
 
 #include "dawn/common/Platform.h"
-
-#if defined(DAWN_PLATFORM_WINDOWS)
-#include "dawn/native/d3d12/d3d12_platform.h"
-#endif  // DAWN_PLATFORM_WINDOWS
+#include "dawn/native/Blob.h"
 
 namespace dawn::platform {
 class CachingInterface;
@@ -31,41 +26,8 @@ class CachingInterface;
 
 namespace dawn::native {
 
-class BlobCache;
 class CacheKey;
 class InstanceBase;
-
-class CachedBlob {
-  public:
-    static CachedBlob Create(size_t size);
-
-#if defined(DAWN_PLATFORM_WINDOWS)
-    static CachedBlob Create(Microsoft::WRL::ComPtr<ID3DBlob> blob);
-#endif  // DAWN_PLATFORM_WINDOWS
-
-    CachedBlob(const CachedBlob&) = delete;
-    CachedBlob& operator=(const CachedBlob&) = delete;
-
-    CachedBlob(CachedBlob&&);
-    CachedBlob& operator=(CachedBlob&&);
-
-    ~CachedBlob();
-
-    bool Empty() const;
-    const uint8_t* Data() const;
-    uint8_t* Data();
-    size_t Size() const;
-    void Reset(size_t size);
-
-    CachedBlob();
-
-  private:
-    explicit CachedBlob(uint8_t* data, size_t size, std::function<void()> deleter);
-
-    uint8_t* mData;
-    size_t mSize;
-    std::function<void()> mDeleter;
-};
 
 // This class should always be thread-safe because it may be called asynchronously. Its purpose
 // is to wrap the CachingInterface provided via a platform.
@@ -74,16 +36,16 @@ class BlobCache {
     explicit BlobCache(dawn::platform::CachingInterface* cachingInterface = nullptr);
 
     // Returns empty blob if the key is not found in the cache.
-    CachedBlob Load(const CacheKey& key);
+    Blob Load(const CacheKey& key);
 
     // Value to store must be non-empty/non-null.
     void Store(const CacheKey& key, size_t valueSize, const void* value);
-    void Store(const CacheKey& key, const CachedBlob& value);
+    void Store(const CacheKey& key, const Blob& value);
 
   private:
     // Non-thread safe internal implementations of load and store. Exposed callers that use
     // these helpers need to make sure that these are entered with `mMutex` held.
-    CachedBlob LoadInternal(const CacheKey& key);
+    Blob LoadInternal(const CacheKey& key);
     void StoreInternal(const CacheKey& key, size_t valueSize, const void* value);
 
     // Protects thread safety of access to mCache.
