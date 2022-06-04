@@ -244,11 +244,7 @@ TEST(RefBase, RefMoveAssignmentSelf) {
     Ref& self = ref;
 
     events.clear();
-    {
-        ref = std::move(self);
-        ref = std::move(self);
-        ref = std::move(self);
-    }
+    { ref = std::move(self); }
     EXPECT_THAT(events, testing::ElementsAre());
 }
 
