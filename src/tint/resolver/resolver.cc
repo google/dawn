@@ -2302,9 +2302,15 @@ sem::Statement* Resolver::ReturnStatement(const ast::ReturnStatement* stmt) {
 
         const sem::Type* value_ty = nullptr;
         if (auto* value = stmt->value) {
-            const auto* expr = Materialize(Expression(value), current_function_->ReturnType());
+            const auto* expr = Expression(value);
             if (!expr) {
                 return false;
+            }
+            if (auto* ret_ty = current_function_->ReturnType(); !ret_ty->Is<sem::Void>()) {
+                expr = Materialize(expr, ret_ty);
+                if (!expr) {
+                    return false;
+                }
             }
             behaviors.Add(expr->Behaviors() - sem::Behavior::kNext);
             value_ty = expr->Type()->UnwrapRef();
