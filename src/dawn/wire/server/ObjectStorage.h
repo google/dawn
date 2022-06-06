@@ -73,9 +73,6 @@ struct ObjectData<WGPUDevice> : public ObjectDataBase<WGPUDevice> {
     std::unique_ptr<DeviceInfo> info = std::make_unique<DeviceInfo>();
 };
 
-template <>
-struct ObjectData<WGPUQueue> : public ObjectDataBase<WGPUQueue> {};
-
 // Keeps track of the mapping between client IDs and backend objects.
 template <typename T>
 class KnownObjectsBase {
