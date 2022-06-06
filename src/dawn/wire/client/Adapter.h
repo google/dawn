@@ -27,8 +27,6 @@ namespace dawn::wire::client {
 
 class Adapter final : public ObjectBase {
   public:
-    using ObjectBase::ObjectBase;
-
     Adapter(Client* client, uint32_t refcount, uint32_t id);
     ~Adapter();
 

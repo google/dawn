@@ -26,8 +26,6 @@ namespace dawn::wire::client {
 
 class Instance final : public ObjectBase {
   public:
-    using ObjectBase::ObjectBase;
-
     Instance(Client* client, uint32_t refcount, uint32_t id);
     ~Instance();
 
