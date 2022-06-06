@@ -506,4 +506,7 @@ float Device::GetTimestampPeriodInNS() const {
     return 1.0f;
 }
 
+Texture::Texture(DeviceBase* device, const TextureDescriptor* descriptor, TextureState state)
+    : TextureBase(device, descriptor, state) {}
+
 }  // namespace dawn::native::null

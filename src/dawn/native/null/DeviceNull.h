@@ -55,7 +55,7 @@ class RenderPipeline;
 using Sampler = SamplerBase;
 class ShaderModule;
 class SwapChain;
-using Texture = TextureBase;
+class Texture;
 using TextureView = TextureViewBase;
 
 struct NullBackendTraits {
@@ -333,6 +333,11 @@ class StagingBuffer : public StagingBufferBase {
   private:
     Device* mDevice;
     std::unique_ptr<uint8_t[]> mBuffer;
+};
+
+class Texture : public TextureBase {
+  public:
+    Texture(DeviceBase* device, const TextureDescriptor* descriptor, TextureState state);
 };
 
 }  // namespace dawn::native::null

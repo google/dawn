@@ -47,9 +47,6 @@ class TextureBase : public ApiObjectBase {
     enum class TextureState { OwnedInternal, OwnedExternal, Destroyed };
     enum class ClearValue { Zero, NonZero };
 
-    TextureBase(DeviceBase* device, const TextureDescriptor* descriptor, TextureState state);
-    ~TextureBase() override;
-
     static TextureBase* MakeError(DeviceBase* device);
 
     ObjectType GetType() const override;
@@ -101,8 +98,11 @@ class TextureBase : public ApiObjectBase {
     void APIDestroy();
 
   protected:
+    TextureBase(DeviceBase* device, const TextureDescriptor* descriptor, TextureState state);
     // Constructor used only for mocking and testing.
     TextureBase(DeviceBase* device, TextureState state);
+    ~TextureBase() override;
+
     void DestroyImpl() override;
 
   private:
