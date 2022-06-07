@@ -15,9 +15,11 @@
 #ifndef COMMON_VERISON_AUTOGEN_H_
 #define COMMON_VERISON_AUTOGEN_H_
 
+#include <string_view>
+
 namespace dawn {
 
-static constexpr char kGitHash[] = "{{get_gitHash()}}";
+static constexpr std::string_view kGitHash("{{get_gitHash()}}");
 
 } // namespace dawn
 

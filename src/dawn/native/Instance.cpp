@@ -20,6 +20,7 @@
 #include "dawn/common/GPUInfo.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/SystemUtils.h"
+#include "dawn/common/Version_autogen.h"
 #include "dawn/native/ChainUtils_autogen.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/Surface.h"
@@ -94,9 +95,8 @@ BackendsBitset GetEnabledBackends() {
 }
 
 dawn::platform::CachingInterface* GetCachingInterface(dawn::platform::Platform* platform) {
-    if (platform != nullptr) {
-        return platform->GetCachingInterface(/*fingerprint*/ nullptr,
-                                             /*fingerprintSize*/ 0);
+    if (platform != nullptr && dawn::kGitHash.size() > 0) {
+        return platform->GetCachingInterface(dawn::kGitHash.data(), dawn::kGitHash.size());
     }
     return nullptr;
 }
