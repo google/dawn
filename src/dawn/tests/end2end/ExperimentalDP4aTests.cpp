@@ -56,7 +56,7 @@ TEST_P(ExperimentalDP4aTests, BasicDP4aFeaturesTest) {
         }
         @group(0) @binding(0) var<storage, read_write> buf : Buf;
 
-        @stage(compute) @workgroup_size(1)
+        @compute @workgroup_size(1)
         fn main() {
             var a = 0xFFFFFFFFu;
             var b = 0xFFFFFFFEu;

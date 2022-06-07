@@ -33,7 +33,7 @@ class RenderBundleValidationTest : public ValidationTest {
                 }
                 @group(0) @binding(0) var<uniform> uniforms : S;
 
-                @stage(vertex) fn main(@location(0) pos : vec2<f32>) -> @builtin(position) vec4<f32> {
+                @vertex fn main(@location(0) pos : vec2<f32>) -> @builtin(position) vec4<f32> {
                     return vec4<f32>();
                 })");
 
@@ -48,7 +48,7 @@ class RenderBundleValidationTest : public ValidationTest {
                 }
                 @group(1) @binding(1) var<storage, read_write> ssbo : Storage;
 
-                @stage(fragment) fn main() {
+                @fragment fn main() {
                 })");
 
         wgpu::BindGroupLayout bgls[] = {

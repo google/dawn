@@ -130,7 +130,7 @@ TEST_P(OpArrayLengthTest, Compute) {
         }
         @group(1) @binding(0) var<storage, read_write> result : ResultBuffer;
         )" + mShaderInterface + R"(
-        @stage(compute) @workgroup_size(1) fn main() {
+        @compute @workgroup_size(1) fn main() {
             result.data[0] = arrayLength(&buffer1.data);
             result.data[1] = arrayLength(&buffer2.data);
             result.data[2] = arrayLength(&buffer3.data);
@@ -168,12 +168,12 @@ TEST_P(OpArrayLengthTest, Fragment) {
     // Create the pipeline that computes the length of the buffers and writes it to the only render
     // pass pixel.
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, (mShaderInterface + R"(
-        @stage(fragment) fn main() -> @location(0) vec4<f32> {
+        @fragment fn main() -> @location(0) vec4<f32> {
             var fragColor : vec4<f32>;
             fragColor.r = f32(arrayLength(&buffer1.data)) / 255.0;
             fragColor.g = f32(arrayLength(&buffer2.data)) / 255.0;
@@ -229,7 +229,7 @@ TEST_P(OpArrayLengthTest, Vertex) {
             @builtin(position) position : vec4<f32>,
         }
 
-        @stage(vertex) fn main() -> VertexOut {
+        @vertex fn main() -> VertexOut {
             var output : VertexOut;
             output.color.r = f32(arrayLength(&buffer1.data)) / 255.0;
             output.color.g = f32(arrayLength(&buffer2.data)) / 255.0;
@@ -242,7 +242,7 @@ TEST_P(OpArrayLengthTest, Vertex) {
                                                                         .c_str());
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        @stage(fragment)
+        @fragment
         fn main(@location(0) color : vec4<f32>) -> @location(0) vec4<f32> {
             return color;
         })");

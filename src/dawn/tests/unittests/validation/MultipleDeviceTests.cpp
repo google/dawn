@@ -38,7 +38,7 @@ TEST_F(MultipleDeviceTest, ValidatesSameDevice) {
 TEST_F(MultipleDeviceTest, ValidatesSameDeviceCreatePipelineAsync) {
     wgpu::ShaderModuleWGSLDescriptor wgslDesc = {};
     wgslDesc.source = R"(
-         @stage(compute) @workgroup_size(1, 1, 1) fn main() {
+         @compute @workgroup_size(1, 1, 1) fn main() {
         }
     )";
 

@@ -155,13 +155,13 @@ class PrimitiveTopologyTest : public DawnTest {
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
         vsModule = utils::CreateShaderModule(device, R"(
-            @stage(vertex)
+            @vertex
             fn main(@location(0) pos : vec4<f32>) -> @builtin(position) vec4<f32> {
                 return pos;
             })");
 
         fsModule = utils::CreateShaderModule(device, R"(
-            @stage(fragment) fn main() -> @location(0) vec4<f32> {
+            @fragment fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
 

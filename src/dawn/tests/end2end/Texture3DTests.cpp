@@ -30,7 +30,7 @@ TEST_P(Texture3DTests, Sampling) {
     // Set up pipeline. Two triangles will be drawn via the pipeline. They will fill the entire
     // color attachment with data sampled from 3D texture.
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        @stage(vertex)
+        @vertex
         fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
             var pos = array<vec2<f32>, 6>(
                 vec2<f32>(-1.0, 1.0),
@@ -47,7 +47,7 @@ TEST_P(Texture3DTests, Sampling) {
         @group(0) @binding(0) var samp : sampler;
         @group(0) @binding(1) var tex : texture_3d<f32>;
 
-        @stage(fragment)
+        @fragment
         fn main(@builtin(position) FragCoord : vec4<f32>) -> @location(0) vec4<f32> {
             return textureSample(tex, samp, vec3<f32>(FragCoord.xy / 4.0, 1.5 / 4.0));
         })");

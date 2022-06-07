@@ -34,7 +34,7 @@ class ComputeDispatchTests : public DawnTest {
 
             @group(0) @binding(0) var<storage, read_write> output : OutputBuf;
 
-            @stage(compute) @workgroup_size(1, 1, 1)
+            @compute @workgroup_size(1, 1, 1)
             fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>,
                     @builtin(num_workgroups) dispatch : vec3<u32>) {
                 if (dispatch.x == 0u || dispatch.y == 0u || dispatch.z == 0u) {
@@ -64,7 +64,7 @@ class ComputeDispatchTests : public DawnTest {
             @group(0) @binding(0) var<uniform> input : InputBuf;
             @group(0) @binding(1) var<storage, read_write> output : OutputBuf;
 
-            @stage(compute) @workgroup_size(1, 1, 1)
+            @compute @workgroup_size(1, 1, 1)
             fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
                 let dispatch : vec3<u32> = input.expectedDispatch;
 

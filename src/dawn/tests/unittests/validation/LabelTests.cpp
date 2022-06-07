@@ -533,12 +533,12 @@ TEST_F(LabelTest, RenderPipeline) {
     std::string label = "test";
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-            @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+            @vertex fn main() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            @stage(fragment) fn main() -> @location(0) vec4<f32> {
+            @fragment fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
 
@@ -574,7 +574,7 @@ TEST_F(LabelTest, ComputePipeline) {
     std::string label = "test";
 
     wgpu::ShaderModule computeModule = utils::CreateShaderModule(device, R"(
-    @stage(compute) @workgroup_size(1) fn main() {
+    @compute @workgroup_size(1) fn main() {
     })");
     wgpu::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, nullptr);
     wgpu::ComputePipelineDescriptor descriptor;
@@ -610,7 +610,7 @@ TEST_F(LabelTest, ShaderModule) {
     std::string label = "test";
 
     const char* source = R"(
-    @stage(compute) @workgroup_size(1) fn main() {
+    @compute @workgroup_size(1) fn main() {
     })";
 
     wgpu::ShaderModuleWGSLDescriptor wgslDesc;

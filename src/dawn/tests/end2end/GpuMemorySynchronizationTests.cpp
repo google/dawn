@@ -43,7 +43,7 @@ class GpuMemorySyncTests : public DawnTest {
                 a : i32
             }
             @group(0) @binding(0) var<storage, read_write> data : Data;
-            @stage(compute) @workgroup_size(1) fn main() {
+            @compute @workgroup_size(1) fn main() {
                 data.a = data.a + 1;
             })");
 
@@ -61,7 +61,7 @@ class GpuMemorySyncTests : public DawnTest {
         const wgpu::Buffer& buffer,
         wgpu::TextureFormat colorFormat) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-            @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+            @vertex fn main() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
@@ -70,7 +70,7 @@ class GpuMemorySyncTests : public DawnTest {
                 i : i32
             }
             @group(0) @binding(0) var<storage, read_write> data : Data;
-            @stage(fragment) fn main() -> @location(0) vec4<f32> {
+            @fragment fn main() -> @location(0) vec4<f32> {
                 data.i = data.i + 1;
                 return vec4<f32>(f32(data.i) / 255.0, 0.0, 0.0, 1.0);
             })");
@@ -235,7 +235,7 @@ class StorageToUniformSyncTests : public DawnTest {
                 a : f32
             }
             @group(0) @binding(0) var<storage, read_write> data : Data;
-            @stage(compute) @workgroup_size(1) fn main() {
+            @compute @workgroup_size(1) fn main() {
                 data.a = 1.0;
             })");
 
@@ -252,7 +252,7 @@ class StorageToUniformSyncTests : public DawnTest {
     std::tuple<wgpu::RenderPipeline, wgpu::BindGroup> CreatePipelineAndBindGroupForRender(
         wgpu::TextureFormat colorFormat) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-            @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+            @vertex fn main() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
@@ -262,7 +262,7 @@ class StorageToUniformSyncTests : public DawnTest {
             }
             @group(0) @binding(0) var<uniform> contents : Contents;
 
-            @stage(fragment) fn main() -> @location(0) vec4<f32> {
+            @fragment fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(contents.color, 0.0, 0.0, 1.0);
             })");
 
@@ -432,7 +432,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
         @group(0) @binding(2) var<storage, read_write> uniformContents : ColorContents;
         @group(0) @binding(3) var<storage, read_write> storageContents : ColorContents;
 
-        @stage(compute) @workgroup_size(1) fn main() {
+        @compute @workgroup_size(1) fn main() {
             vbContents.pos[0] = vec4<f32>(-1.0, 1.0, 0.0, 1.0);
             vbContents.pos[1] = vec4<f32>(1.0, 1.0, 0.0, 1.0);
             vbContents.pos[2] = vec4<f32>(1.0, -1.0, 0.0, 1.0);
@@ -473,7 +473,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
 
     // Create pipeline, bind group, and reuse buffers in render pass.
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        @stage(vertex)
+        @vertex
         fn main(@location(0) pos : vec4<f32>) -> @builtin(position) vec4<f32> {
             return pos;
         })");
@@ -486,7 +486,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
         @group(0) @binding(0) var<uniform> uniformBuffer : Buf;
         @group(0) @binding(1) var<storage, read> storageBuffer : Buf;
 
-        @stage(fragment) fn main() -> @location(0) vec4<f32> {
+        @fragment fn main() -> @location(0) vec4<f32> {
             return vec4<f32>(uniformBuffer.color, storageBuffer.color, 0.0, 1.0);
         })");
 
@@ -547,7 +547,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
 
         @group(0) @binding(0) var<storage, read_write> contents : Contents;
 
-        @stage(compute) @workgroup_size(1) fn main() {
+        @compute @workgroup_size(1) fn main() {
             contents.pos[0] = vec4<f32>(-1.0, 1.0, 0.0, 1.0);
             contents.pos[1] = vec4<f32>(1.0, 1.0, 0.0, 1.0);
             contents.pos[2] = vec4<f32>(1.0, -1.0, 0.0, 1.0);
@@ -590,7 +590,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
 
     // Create pipeline, bind group, and reuse the buffer in render pass.
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        @stage(vertex)
+        @vertex
         fn main(@location(0) pos : vec4<f32>) -> @builtin(position) vec4<f32> {
             return pos;
         })");
@@ -602,7 +602,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
         @group(0) @binding(0) var<uniform> uniformBuffer : Buf;
         @group(0) @binding(1) var<storage, read> storageBuffer : Buf;
 
-        @stage(fragment) fn main() -> @location(0) vec4<f32> {
+        @fragment fn main() -> @location(0) vec4<f32> {
             return vec4<f32>(uniformBuffer.color, storageBuffer.color, 0.0, 1.0);
         })");
 

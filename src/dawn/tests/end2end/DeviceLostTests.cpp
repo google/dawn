@@ -93,7 +93,7 @@ TEST_P(DeviceLostTest, GetBindGroupLayoutFails) {
             pos : vec4<f32>
         }
         @group(0) @binding(0) var<uniform> ubo : UniformBuffer;
-        @stage(compute) @workgroup_size(1) fn main() {
+        @compute @workgroup_size(1) fn main() {
         })");
 
     wgpu::ComputePipelineDescriptor descriptor;
@@ -176,7 +176,7 @@ TEST_P(DeviceLostTest, CreateShaderModuleFails) {
     LoseDeviceForTesting();
 
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
-        @stage(fragment)
+        @fragment
         fn main(@location(0) color : vec4<f32>) -> @location(0) vec4<f32> {
             return color;
         })"));
@@ -423,7 +423,7 @@ TEST_P(DeviceLostTest, DeviceLostDoesntCallUncapturedError) {
 // before the callback of Create*PipelineAsync() is called.
 TEST_P(DeviceLostTest, DeviceLostBeforeCreatePipelineAsyncCallback) {
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
-        @stage(compute) @workgroup_size(1) fn main() {
+        @compute @workgroup_size(1) fn main() {
         })");
 
     wgpu::ComputePipelineDescriptor descriptor;

@@ -26,11 +26,11 @@ class StorageTextureValidationTests : public ValidationTest {
         ValidationTest::SetUp();
 
         mDefaultVSModule = utils::CreateShaderModule(device, R"(
-            @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+            @vertex fn main() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
         mDefaultFSModule = utils::CreateShaderModule(device, R"(
-            @stage(fragment) fn main() -> @location(0) vec4<f32> {
+            @fragment fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(1.0, 0.0, 0.0, 1.0);
             })");
     }
@@ -84,7 +84,7 @@ class StorageTextureValidationTests : public ValidationTest {
         ostream << "@group(0) @binding(0) var image0 : " << imageTypeDeclaration << "<"
                 << imageFormatQualifier << ", " << access
                 << ">;\n"
-                   "@stage(compute) @workgroup_size(1) fn main() {\n"
+                   "@compute @workgroup_size(1) fn main() {\n"
                    "    textureDimensions(image0);\n"
                    "}\n";
 
@@ -120,7 +120,7 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
     {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             @group(0) @binding(0) var image0 : texture_storage_2d<rgba8unorm, write>;
-            @stage(vertex)
+            @vertex
             fn main(@builtin(vertex_index) vertex_index : u32) -> @builtin(position) vec4<f32> {
                 textureStore(image0, vec2<i32>(i32(vertex_index), 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
                 return vec4<f32>(0.0);
@@ -137,7 +137,7 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
     {
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             @group(0) @binding(0) var image0 : texture_storage_2d<rgba8unorm, write>;
-            @stage(fragment) fn main(@builtin(position) position : vec4<f32>) {
+            @fragment fn main(@builtin(position) position : vec4<f32>) {
                 textureStore(image0, vec2<i32>(position.xy), vec4<f32>(1.0, 0.0, 0.0, 1.0));
             })");
 
@@ -158,7 +158,7 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
             @group(0) @binding(0) var image0 : texture_storage_2d<rgba8unorm, write>;
 
-            @stage(compute) @workgroup_size(1) fn main(@builtin(local_invocation_id) LocalInvocationID : vec3<u32>) {
+            @compute @workgroup_size(1) fn main(@builtin(local_invocation_id) LocalInvocationID : vec3<u32>) {
                 textureStore(image0, vec2<i32>(LocalInvocationID.xy), vec4<f32>(0.0, 0.0, 0.0, 0.0));
             })");
 
@@ -177,7 +177,7 @@ TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
     {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
             @group(0) @binding(0) var image0 : texture_storage_2d<rgba8unorm, read_write>;
-            @stage(vertex) fn main() {
+            @vertex fn main() {
                 textureDimensions(image0);
             })"));
     }
@@ -186,7 +186,7 @@ TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
     {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
             @group(0) @binding(0) var image0 : texture_storage_2d<rgba8unorm, read_write>;
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 textureDimensions(image0);
             })"));
     }
@@ -195,7 +195,7 @@ TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
     {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
             @group(0) @binding(0) var image0 : texture_storage_2d<rgba8unorm, read_write>;
-            @stage(compute) @workgroup_size(1) fn main() {
+            @compute @workgroup_size(1) fn main() {
                 textureDimensions(image0);
             })"));
     }

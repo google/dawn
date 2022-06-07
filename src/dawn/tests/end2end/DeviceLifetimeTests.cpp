@@ -286,7 +286,7 @@ TEST_P(DeviceLifetimeTests, DroppedWhileWriteBufferAndSubmit) {
 TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsync) {
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
-    @stage(compute) @workgroup_size(1) fn main() {
+    @compute @workgroup_size(1) fn main() {
     })");
     desc.compute.entryPoint = "main";
 
@@ -306,7 +306,7 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsync) {
 TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsync) {
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
-    @stage(compute) @workgroup_size(1) fn main() {
+    @compute @workgroup_size(1) fn main() {
     })");
     desc.compute.entryPoint = "main";
 
@@ -343,7 +343,7 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsync) {
 TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncAlreadyCached) {
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
-    @stage(compute) @workgroup_size(1) fn main() {
+    @compute @workgroup_size(1) fn main() {
     })");
     desc.compute.entryPoint = "main";
 
@@ -372,7 +372,7 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncAlreadyCached) {
 TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncAlreadyCached) {
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
-    @stage(compute) @workgroup_size(1) fn main() {
+    @compute @workgroup_size(1) fn main() {
     })");
     desc.compute.entryPoint = "main";
 
@@ -413,7 +413,7 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncAlreadyCached) {
 TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncRaceCache) {
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
-    @stage(compute) @workgroup_size(1) fn main() {
+    @compute @workgroup_size(1) fn main() {
     })");
     desc.compute.entryPoint = "main";
 
@@ -437,7 +437,7 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncRaceCache) {
 TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncRaceCache) {
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
-    @stage(compute) @workgroup_size(1) fn main() {
+    @compute @workgroup_size(1) fn main() {
     })");
     desc.compute.entryPoint = "main";
 

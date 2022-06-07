@@ -190,7 +190,7 @@ struct Status {
 @group(0) @binding(1) var<storage, read_write> output : Output;
 @group(0) @binding(2) var<storage, read_write> status : Status;
 
-@stage(compute) @workgroup_size(1,1,1)
+@compute @workgroup_size(1,1,1)
 fn main() {
     if (input.header != {input_header_code}u) {
         status.code = {status_bad_input_header}u;

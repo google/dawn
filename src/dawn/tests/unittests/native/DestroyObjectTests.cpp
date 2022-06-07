@@ -73,7 +73,7 @@ class DestroyObjectTests : public Test {
         }
         DAWN_TRY_ASSIGN_WITH_CLEANUP(
             mVsModule, ShaderModuleMock::Create(&mDevice, R"(
-            @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+            @vertex fn main() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })"),
             { ASSERT(false); }, mVsModule);
@@ -87,7 +87,7 @@ class DestroyObjectTests : public Test {
         }
         DAWN_TRY_ASSIGN_WITH_CLEANUP(
             mCsModule, ShaderModuleMock::Create(&mDevice, R"(
-            @stage(compute) @workgroup_size(1) fn main() {
+            @compute @workgroup_size(1) fn main() {
             })"),
             { ASSERT(false); }, mCsModule);
         EXPECT_CALL(*mCsModule.Get(), DestroyImpl).Times(1);
@@ -428,7 +428,7 @@ TEST_F(DestroyObjectTests, ShaderModuleImplicit) {
     {
         ShaderModuleWGSLDescriptor wgslDesc;
         wgslDesc.source = R"(
-                @stage(compute) @workgroup_size(1) fn main() {
+                @compute @workgroup_size(1) fn main() {
                 }
             )";
         ShaderModuleDescriptor desc = {};
@@ -698,7 +698,7 @@ TEST_F(DestroyObjectTests, DestroyObjects) {
     {
         ShaderModuleWGSLDescriptor wgslDesc;
         wgslDesc.source = R"(
-                @stage(compute) @workgroup_size(1) fn main() {
+                @compute @workgroup_size(1) fn main() {
                 }
             )";
         ShaderModuleDescriptor desc = {};
@@ -755,17 +755,17 @@ TEST_F(DestroyObjectTests, DestroyObjects) {
 }
 
 static constexpr std::string_view kComputeShader = R"(
-        @stage(compute) @workgroup_size(1) fn main() {}
+        @compute @workgroup_size(1) fn main() {}
     )";
 
 static constexpr std::string_view kVertexShader = R"(
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 0.0);
         }
     )";
 
 static constexpr std::string_view kFragmentShader = R"(
-        @stage(fragment) fn main() {}
+        @fragment fn main() {}
     )";
 
 class DestroyObjectRegressionTests : public DawnNativeTest {};

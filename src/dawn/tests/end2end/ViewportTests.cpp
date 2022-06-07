@@ -24,7 +24,7 @@ class ViewportTest : public DawnTest {
         DawnTest::SetUp();
 
         mQuadVS = utils::CreateShaderModule(device, R"(
-            @stage(vertex)
+            @vertex
             fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
                 var pos = array<vec2<f32>, 6>(
                     vec2<f32>(-1.0,  1.0),
@@ -37,7 +37,7 @@ class ViewportTest : public DawnTest {
             })");
 
         mQuadFS = utils::CreateShaderModule(device, R"(
-            @stage(fragment) fn main() -> @location(0) vec4<f32> {
+            @fragment fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(1.0, 1.0, 1.0, 1.0);
             })");
     }
@@ -93,7 +93,7 @@ class ViewportTest : public DawnTest {
         // Create a pipeline drawing 3 points at depth 1.0, 0.5 and 0.0.
         utils::ComboRenderPipelineDescriptor pipelineDesc;
         pipelineDesc.vertex.module = utils::CreateShaderModule(device, R"(
-            @stage(vertex)
+            @vertex
             fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
                 var points : array<vec3<f32>, 3> = array<vec3<f32>, 3>(
                     vec3<f32>(-0.9, 0.0, 1.0),

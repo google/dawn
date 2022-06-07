@@ -48,7 +48,7 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
 
         // Draw a square in the bottom left quarter of the screen.
         mVertexModule = utils::CreateShaderModule(device, R"(
-            @stage(vertex)
+            @vertex
             fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
                 var pos = array<vec2<f32>, 6>(
                     vec2<f32>(-1.0, -1.0),
@@ -148,12 +148,12 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
         if (utils::IsStencilOnlyFormat(format)) {
             depthStencil->depthCompare = wgpu::CompareFunction::Always;
             renderPipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
-                @stage(fragment) fn main() {}
+                @fragment fn main() {}
             )");
         } else {
             depthStencil->depthWriteEnabled = true;
             renderPipelineDesc.cFragment.module = utils::CreateShaderModule(device, std::string(R"(
-                @stage(fragment) fn main() -> @builtin(frag_depth) f32 {
+                @fragment fn main() -> @builtin(frag_depth) f32 {
                     return )" + std::to_string(regionDepth) + R"(;
                 })")
                                                                                         .c_str());
@@ -704,7 +704,7 @@ TEST_P(StencilCopyTests, ToStencilAspect) {
         utils::ComboRenderPipelineDescriptor renderPipelineDesc;
         renderPipelineDesc.vertex.module = mVertexModule;
         renderPipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
-            @stage(fragment) fn main() {
+            @fragment fn main() {
             })");
         renderPipelineDesc.cFragment.targetCount = 0;
         wgpu::DepthStencilState* depthStencil =

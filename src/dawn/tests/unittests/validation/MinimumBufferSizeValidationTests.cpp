@@ -118,21 +118,21 @@ static const std::string kStructs = "struct ThreeFloats {f1 : f32, f2 : f32, f3 
 // Creates a compute shader with given bindings
 std::string CreateComputeShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
     return kStructs + GenerateBindingString(bindings) +
-           "@stage(compute) @workgroup_size(1,1,1) fn main() {\n" +
+           "@compute @workgroup_size(1,1,1) fn main() {\n" +
            GenerateReferenceString(bindings, wgpu::ShaderStage::Compute) + "}";
 }
 
 // Creates a vertex shader with given bindings
 std::string CreateVertexShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
     return kStructs + GenerateBindingString(bindings) +
-           "@stage(vertex) fn main() -> @builtin(position) vec4<f32> {\n" +
+           "@vertex fn main() -> @builtin(position) vec4<f32> {\n" +
            GenerateReferenceString(bindings, wgpu::ShaderStage::Vertex) +
            "\n   return vec4<f32>(); " + "}";
 }
 
 // Creates a fragment shader with given bindings
 std::string CreateFragmentShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
-    return kStructs + GenerateBindingString(bindings) + "@stage(fragment) fn main() {\n" +
+    return kStructs + GenerateBindingString(bindings) + "@fragment fn main() {\n" +
            GenerateReferenceString(bindings, wgpu::ShaderStage::Fragment) + "}";
 }
 

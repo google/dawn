@@ -45,11 +45,11 @@ TEST_P(D3D12CachingTests, SameShaderNoCache) {
     mMockCache.Disable();
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        @stage(vertex) fn vertex_main() -> @builtin(position) vec4<f32> {
+        @vertex fn vertex_main() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         }
 
-        @stage(fragment) fn fragment_main() -> @location(0) vec4<f32> {
+        @fragment fn fragment_main() -> @location(0) vec4<f32> {
           return vec4<f32>(1.0, 0.0, 0.0, 1.0);
         }
     )");
@@ -82,11 +82,11 @@ TEST_P(D3D12CachingTests, SameShaderNoCache) {
 // entrypoints)
 TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPointsPerStage) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        @stage(vertex) fn vertex_main() -> @builtin(position) vec4<f32> {
+        @vertex fn vertex_main() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         }
 
-        @stage(fragment) fn fragment_main() -> @location(0) vec4<f32> {
+        @fragment fn fragment_main() -> @location(0) vec4<f32> {
           return vec4<f32>(1.0, 0.0, 0.0, 1.0);
         }
     )");
@@ -115,11 +115,11 @@ TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPointsPerStage) {
 
     // Modify the WGSL shader functions and make sure it doesn't hit.
     wgpu::ShaderModule newModule = utils::CreateShaderModule(device, R"(
-      @stage(vertex) fn vertex_main() -> @builtin(position) vec4<f32> {
+      @vertex fn vertex_main() -> @builtin(position) vec4<f32> {
           return vec4<f32>(1.0, 1.0, 1.0, 1.0);
       }
 
-      @stage(fragment) fn fragment_main() -> @location(0) vec4<f32> {
+      @fragment fn fragment_main() -> @location(0) vec4<f32> {
         return vec4<f32>(1.0, 1.0, 1.0, 1.0);
       }
   )");
@@ -144,11 +144,11 @@ TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPoints) {
         }
         @binding(0) @group(0) var<storage, read_write> data : Data;
 
-        @stage(compute) @workgroup_size(1) fn write1() {
+        @compute @workgroup_size(1) fn write1() {
             data.data = 1u;
         }
 
-        @stage(compute) @workgroup_size(1) fn write42() {
+        @compute @workgroup_size(1) fn write42() {
             data.data = 42u;
         }
     )");

@@ -60,7 +60,7 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
     // Create a simple pipeline
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
-        @stage(compute) @workgroup_size(1, 1, 1)
+        @compute @workgroup_size(1, 1, 1)
         fn main() {
         })");
     csDesc.compute.entryPoint = "main";
@@ -290,7 +290,7 @@ TEST_F(CommandBufferEncodingTests, StateNotLeakedAfterRestore) {
     // Create a simple pipeline
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, R"(
-        @stage(compute) @workgroup_size(1, 1, 1)
+        @compute @workgroup_size(1, 1, 1)
         fn main() {
         })");
     csDesc.compute.entryPoint = "main";

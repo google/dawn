@@ -135,7 +135,7 @@ struct VertexInputs {
 struct VertexOutputs {
 )" + vertexOutputs.str() + R"(
 }
-@stage(vertex) fn main(input : VertexInputs) -> VertexOutputs {
+@vertex fn main(input : VertexInputs) -> VertexOutputs {
   var output : VertexOutputs;
 )" + vertexBody.str() + R"(
   output.position = input.position;
@@ -152,7 +152,7 @@ struct IndexVals {
 struct FragInputs {
 )" + fragmentInputs.str() + R"(
 }
-@stage(fragment) fn main(input : FragInputs) {
+@fragment fn main(input : FragInputs) {
 )" + fragmentBody.str() + R"(
 })";
 

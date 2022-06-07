@@ -39,7 +39,7 @@ class IndexFormatTest : public DawnTest {
                 @builtin(vertex_index) idx : u32,
             }
 
-            @stage(vertex) fn main(input : VertexIn) -> @builtin(position) vec4<f32> {
+            @vertex fn main(input : VertexIn) -> @builtin(position) vec4<f32> {
                 // 0xFFFFFFFE is a designated invalid index used by some tests.
                 if (input.idx == 0xFFFFFFFEu) {
                     return vec4<f32>(0.0, 0.0, 0.0, 1.0);
@@ -48,7 +48,7 @@ class IndexFormatTest : public DawnTest {
             })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            @stage(fragment) fn main() -> @location(0) vec4<f32> {
+            @fragment fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
 

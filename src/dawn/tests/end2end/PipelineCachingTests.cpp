@@ -27,32 +27,32 @@ using ::testing::NiceMock;
 // TODO(dawn:549) Add some sort of pipeline descriptor repository to test more caching.
 
 static constexpr std::string_view kComputeShaderDefault = R"(
-        @stage(compute) @workgroup_size(1) fn main() {}
+        @compute @workgroup_size(1) fn main() {}
     )";
 
 static constexpr std::string_view kComputeShaderMultipleEntryPoints = R"(
-        @stage(compute) @workgroup_size(16) fn main() {}
-        @stage(compute) @workgroup_size(64) fn main2() {}
+        @compute @workgroup_size(16) fn main() {}
+        @compute @workgroup_size(64) fn main2() {}
     )";
 
 static constexpr std::string_view kVertexShaderDefault = R"(
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 0.0);
         }
     )";
 
 static constexpr std::string_view kVertexShaderMultipleEntryPoints = R"(
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             return vec4<f32>(1.0, 0.0, 0.0, 1.0);
         }
 
-        @stage(vertex) fn main2() -> @builtin(position) vec4<f32> {
+        @vertex fn main2() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.5, 0.5, 0.5, 1.0);
         }
     )";
 
 static constexpr std::string_view kFragmentShaderDefault = R"(
-        @stage(fragment) fn main() -> @location(0) vec4<f32> {
+        @fragment fn main() -> @location(0) vec4<f32> {
             return vec4<f32>(0.1, 0.2, 0.3, 0.4);
         }
     )";
@@ -63,7 +63,7 @@ static constexpr std::string_view kFragmentShaderMultipleOutput = R"(
             @location(1) fragColor1 : vec4<f32>,
         }
 
-        @stage(fragment) fn main() -> FragmentOut {
+        @fragment fn main() -> FragmentOut {
             var output : FragmentOut;
             output.fragColor0 = vec4<f32>(0.1, 0.2, 0.3, 0.4);
             output.fragColor1 = vec4<f32>(0.5, 0.6, 0.7, 0.8);

@@ -1285,7 +1285,7 @@ std::ostringstream& DawnTestBase::ExpectSampledFloatDataImpl(wgpu::TextureView t
         }
     }
     shaderSource << R"(
-        @stage(compute) @workgroup_size(1) fn main(
+        @compute @workgroup_size(1) fn main(
             @builtin(global_invocation_id) GlobalInvocationId : vec3<u32>
         ) {
             let baseOutIndex = GlobalInvocationId.y * width + GlobalInvocationId.x;
@@ -1429,7 +1429,7 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
     utils::ComboRenderPipelineDescriptor pipelineDescriptor;
 
     pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
-        @stage(vertex)
+        @vertex
         fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
             var pos = array<vec2<f32>, 3>(
                 vec2<f32>(-1.0, -1.0),
@@ -1449,7 +1449,7 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
                 @builtin(frag_depth) fragDepth : f32,
             }
 
-            @stage(fragment)
+            @fragment
             fn main(@builtin(position) FragCoord : vec4<f32>) -> FragmentOut {
                 var output : FragmentOut;
                 output.result = 1u;
@@ -1458,7 +1458,7 @@ std::ostringstream& DawnTestBase::ExpectAttachmentDepthStencilTestData(
             })");
     } else {
         pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            @stage(fragment)
+            @fragment
             fn main() -> @location(0) u32 {
                 return 1u;
             })");

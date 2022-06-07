@@ -75,7 +75,7 @@ const std::string& kMatMulFloatSharedArray2D = R"(
         var<workgroup> mm_Asub : array<array<f32, 32>, 32>;
         var<workgroup> mm_Bsub : array<array<f32, 32>, 32>;)";
 const std::string& kMatMulFloatBodyPart1 = R"(
-        @stage(compute) @workgroup_size(8, 8, 1)
+        @compute @workgroup_size(8, 8, 1)
         fn main(@builtin(local_invocation_id) local_id : vec3<u32>,
                 @builtin(global_invocation_id) global_id  : vec3<u32>) {
             let tileRow : u32 = local_id.y * RowPerThread;
@@ -240,7 +240,7 @@ const std::string& kMatMulVec4SharedArray2D = R"(
         var<workgroup> mm_Asub : array<array<vec4<f32>, 8>, 32>;
         var<workgroup> mm_Bsub : array<array<vec4<f32>, 8>, 32>;)";
 const std::string& kMatMulVec4BodyPart1 = R"(
-        @stage(compute) @workgroup_size(8, 8, 1)
+        @compute @workgroup_size(8, 8, 1)
         fn main(@builtin(local_invocation_id) local_id : vec3<u32>,
                 @builtin(global_invocation_id) global_id  : vec3<u32>) {
             let tileRow : u32 = local_id.y * RowPerThread;

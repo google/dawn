@@ -52,7 +52,7 @@ TEST_P(MaxLimitTests, MaxComputeWorkgroupStorageSize) {
         }
         var<workgroup> wg_data : WGData;
 
-        @stage(compute) @workgroup_size(2,1,1)
+        @compute @workgroup_size(2,1,1)
         fn main(@builtin(local_invocation_index) LocalInvocationIndex : u32) {
             if (LocalInvocationIndex == 0u) {
                 // Put data into the first and last byte of workgroup memory.
@@ -144,7 +144,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                   @group(0) @binding(0) var<storage, read> buf : Buf;
                   @group(0) @binding(1) var<storage, write> result : Result;
 
-                  @stage(compute) @workgroup_size(1,1,1)
+                  @compute @workgroup_size(1,1,1)
                   fn main() {
                       result.value0 = buf.values[0];
                       result.value1 = buf.values[arrayLength(&buf.values) - 1u];
@@ -175,7 +175,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                   @group(0) @binding(0) var<uniform> buf : Buf;
                   @group(0) @binding(1) var<storage, write> result : Result;
 
-                  @stage(compute) @workgroup_size(1,1,1)
+                  @compute @workgroup_size(1,1,1)
                   fn main() {
                       result.value0 = buf.value0;
                       result.value1 = buf.value1;

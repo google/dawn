@@ -175,12 +175,12 @@ TEST_F(QueueSubmitValidationTest, SubmitInCreateRenderPipelineAsyncCallback) {
     };
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-            @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+            @vertex fn main() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            @stage(fragment) fn main() -> @location(0) vec4<f32> {
+            @fragment fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
 
@@ -211,7 +211,7 @@ TEST_F(QueueSubmitValidationTest, SubmitInCreateComputePipelineAsyncCallback) {
 
     wgpu::ComputePipelineDescriptor descriptor;
     descriptor.compute.module = utils::CreateShaderModule(device, R"(
-            @stage(compute) @workgroup_size(1) fn main() {
+            @compute @workgroup_size(1) fn main() {
             })");
     descriptor.compute.entryPoint = "main";
     device.CreateComputePipelineAsync(&descriptor, callback, &callbackData);
@@ -236,7 +236,7 @@ TEST_F(QueueSubmitValidationTest, SubmitWithUnusedComputeBuffer) {
     cpDesc.layout = utils::MakePipelineLayout(device, {emptyBGL, testBGL});
     cpDesc.compute.entryPoint = "main";
     cpDesc.compute.module =
-        utils::CreateShaderModule(device, "@stage(compute) @workgroup_size(1) fn main() {}");
+        utils::CreateShaderModule(device, "@compute @workgroup_size(1) fn main() {}");
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cpDesc);
 
     wgpu::BufferDescriptor bufDesc;
@@ -304,7 +304,7 @@ TEST_F(QueueSubmitValidationTest, SubmitWithUnusedComputeTextures) {
     cpDesc.layout = utils::MakePipelineLayout(device, {emptyBGL, emptyBGL, testBGL});
     cpDesc.compute.entryPoint = "main";
     cpDesc.compute.module =
-        utils::CreateShaderModule(device, "@stage(compute) @workgroup_size(1) fn main() {}");
+        utils::CreateShaderModule(device, "@compute @workgroup_size(1) fn main() {}");
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cpDesc);
 
     wgpu::TextureDescriptor texDesc;

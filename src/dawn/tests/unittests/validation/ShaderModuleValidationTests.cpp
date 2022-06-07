@@ -59,7 +59,7 @@ TEST_F(ShaderModuleValidationTest, CreationSuccess) {
 // be compiled.
 TEST_F(ShaderModuleValidationTest, FragmentOutputLocationExceedsMaxColorAttachments) {
     std::ostringstream stream;
-    stream << "@stage(fragment) fn main() -> @location(" << kMaxColorAttachments << R"() vec4<f32> {
+    stream << "@fragment fn main() -> @location(" << kMaxColorAttachments << R"() vec4<f32> {
             return vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })";
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, stream.str().c_str()));
@@ -161,7 +161,7 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
     DAWN_SKIP_TEST_IF(UsesWire());
 
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, R"(
-        @stage(fragment) fn main() -> @location(0) vec4<f32> {
+        @fragment fn main() -> @location(0) vec4<f32> {
             return vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })");
 
@@ -241,7 +241,7 @@ TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
                 errorMatcher = "failingVertex";
                 pDesc.vertex.entryPoint = "failingVertex";
                 pDesc.vertex.module = utils::CreateShaderModule(device, (ioStruct + R"(
-                    @stage(vertex) fn failingVertex() -> ShaderIO {
+                    @vertex fn failingVertex() -> ShaderIO {
                         var shaderIO : ShaderIO;
                         shaderIO.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
                         return shaderIO;
@@ -249,7 +249,7 @@ TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
                 )")
                                                                             .c_str());
                 pDesc.cFragment.module = utils::CreateShaderModule(device, R"(
-                    @stage(fragment) fn main() -> @location(0) vec4<f32> {
+                    @fragment fn main() -> @location(0) vec4<f32> {
                         return vec4<f32>(0.0);
                     }
                 )");
@@ -260,13 +260,13 @@ TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
                 errorMatcher = "failingFragment";
                 pDesc.cFragment.entryPoint = "failingFragment";
                 pDesc.cFragment.module = utils::CreateShaderModule(device, (ioStruct + R"(
-                    @stage(fragment) fn failingFragment(io : ShaderIO) -> @location(0) vec4<f32> {
+                    @fragment fn failingFragment(io : ShaderIO) -> @location(0) vec4<f32> {
                         return vec4<f32>(0.0);
                      }
                 )")
                                                                                .c_str());
                 pDesc.vertex.module = utils::CreateShaderModule(device, R"(
-                    @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+                    @vertex fn main() -> @builtin(position) vec4<f32> {
                         return vec4<f32>(0.0);
                     }
                 )");
@@ -354,7 +354,7 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
                 errorMatcher = "failingVertex";
                 pDesc.vertex.entryPoint = "failingVertex";
                 pDesc.vertex.module = utils::CreateShaderModule(device, (ioStruct + R"(
-                    @stage(vertex) fn failingVertex() -> ShaderIO {
+                    @vertex fn failingVertex() -> ShaderIO {
                         var shaderIO : ShaderIO;
                         shaderIO.pos = vec4<f32>(0.0, 0.0, 0.0, 1.0);
                         return shaderIO;
@@ -362,7 +362,7 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
                 )")
                                                                             .c_str());
                 pDesc.cFragment.module = utils::CreateShaderModule(device, R"(
-                    @stage(fragment) fn main() -> @location(0) vec4<f32> {
+                    @fragment fn main() -> @location(0) vec4<f32> {
                         return vec4<f32>(0.0);
                     }
                 )");
@@ -373,13 +373,13 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
                 errorMatcher = "failingFragment";
                 pDesc.cFragment.entryPoint = "failingFragment";
                 pDesc.cFragment.module = utils::CreateShaderModule(device, (ioStruct + R"(
-                    @stage(fragment) fn failingFragment(io : ShaderIO) -> @location(0) vec4<f32> {
+                    @fragment fn failingFragment(io : ShaderIO) -> @location(0) vec4<f32> {
                         return vec4<f32>(0.0);
                      }
                 )")
                                                                                .c_str());
                 pDesc.vertex.module = utils::CreateShaderModule(device, R"(
-                    @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+                    @vertex fn main() -> @builtin(position) vec4<f32> {
                         return vec4<f32>(0.0);
                     }
                 )");
@@ -454,7 +454,7 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
 TEST_F(ShaderModuleValidationTest, ComputeWorkgroupSizeLimits) {
     auto CheckShaderWithWorkgroupSize = [this](bool success, uint32_t x, uint32_t y, uint32_t z) {
         std::ostringstream ss;
-        ss << "@stage(compute) @workgroup_size(" << x << "," << y << "," << z << ") fn main() {}";
+        ss << "@compute @workgroup_size(" << x << "," << y << "," << z << ") fn main() {}";
 
         wgpu::ComputePipelineDescriptor desc;
         desc.compute.entryPoint = "main";
@@ -506,7 +506,7 @@ TEST_F(ShaderModuleValidationTest, ComputeWorkgroupStorageSizeLimits) {
             ss << "var<workgroup> mat4_data: array<mat4x4<f32>, " << mat4_count << ">;";
             body << "_ = mat4_data;";
         }
-        ss << "@stage(compute) @workgroup_size(1) fn main() { " << body.str() << " }";
+        ss << "@compute @workgroup_size(1) fn main() { " << body.str() << " }";
 
         wgpu::ComputePipelineDescriptor desc;
         desc.compute.entryPoint = "main";
@@ -543,7 +543,7 @@ struct Buf {
 
 @group(0) @binding(0) var<storage, read_write> buf : Buf;
 
-@stage(compute) @workgroup_size(1) fn main() {
+@compute @workgroup_size(1) fn main() {
     // make sure the overridable constants are not optimized out
     buf.data[0] = c0;
     buf.data[1] = c1;
@@ -560,7 +560,7 @@ TEST_F(ShaderModuleValidationTest, MaxBindingNumber) {
     // kMaxBindingNumber is valid.
     desc.compute.module = utils::CreateShaderModule(device, R"(
         @group(0) @binding(65535) var s : sampler;
-        @stage(compute) @workgroup_size(1) fn main() {
+        @compute @workgroup_size(1) fn main() {
             _ = s;
         }
     )");
@@ -569,7 +569,7 @@ TEST_F(ShaderModuleValidationTest, MaxBindingNumber) {
     // kMaxBindingNumber + 1 is an error
     desc.compute.module = utils::CreateShaderModule(device, R"(
         @group(0) @binding(65536) var s : sampler;
-        @stage(compute) @workgroup_size(1) fn main() {
+        @compute @workgroup_size(1) fn main() {
             _ = s;
         }
     )");
@@ -580,12 +580,12 @@ TEST_F(ShaderModuleValidationTest, MaxBindingNumber) {
 TEST_F(ShaderModuleValidationTest, MissingDecorations) {
     // Vertex input.
     utils::CreateShaderModule(device, R"(
-        @stage(vertex) fn main(@location(0) a : vec4<f32>) -> @builtin(position) vec4<f32> {
+        @vertex fn main(@location(0) a : vec4<f32>) -> @builtin(position) vec4<f32> {
             return vec4(1.0);
         }
     )");
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
-        @stage(vertex) fn main(a : vec4<f32>) -> @builtin(position) vec4<f32> {
+        @vertex fn main(a : vec4<f32>) -> @builtin(position) vec4<f32> {
             return vec4(1.0);
         }
     )"));
@@ -596,7 +596,7 @@ TEST_F(ShaderModuleValidationTest, MissingDecorations) {
             @builtin(position) pos : vec4<f32>,
             @location(0) a : f32,
         }
-        @stage(vertex) fn main() -> Output {
+        @vertex fn main() -> Output {
             var output : Output;
             return output;
         }
@@ -606,7 +606,7 @@ TEST_F(ShaderModuleValidationTest, MissingDecorations) {
             @builtin(position) pos : vec4<f32>,
             a : f32,
         }
-        @stage(vertex) fn main() -> Output {
+        @vertex fn main() -> Output {
             var output : Output;
             return output;
         }
@@ -614,24 +614,24 @@ TEST_F(ShaderModuleValidationTest, MissingDecorations) {
 
     // Fragment input
     utils::CreateShaderModule(device, R"(
-        @stage(fragment) fn main(@location(0) a : vec4<f32>) -> @location(0) f32 {
+        @fragment fn main(@location(0) a : vec4<f32>) -> @location(0) f32 {
             return 1.0;
         }
     )");
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
-        @stage(fragment) fn main(a : vec4<f32>) -> @location(0) f32 {
+        @fragment fn main(a : vec4<f32>) -> @location(0) f32 {
             return 1.0;
         }
     )"));
 
     // Fragment input
     utils::CreateShaderModule(device, R"(
-        @stage(fragment) fn main() -> @location(0) f32 {
+        @fragment fn main() -> @location(0) f32 {
             return 1.0;
         }
     )");
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
-        @stage(fragment) fn main() -> f32 {
+        @fragment fn main() -> f32 {
             return 1.0;
         }
     )"));
@@ -639,21 +639,21 @@ TEST_F(ShaderModuleValidationTest, MissingDecorations) {
     // Binding decorations
     utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var s : sampler;
-        @stage(fragment) fn main() -> @location(0) f32 {
+        @fragment fn main() -> @location(0) f32 {
             _ = s;
             return 1.0;
         }
     )");
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
         @binding(0) var s : sampler;
-        @stage(fragment) fn main() -> @location(0) f32 {
+        @fragment fn main() -> @location(0) f32 {
             _ = s;
             return 1.0;
         }
     )"));
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
         @group(0) var s : sampler;
-        @stage(fragment) fn main() -> @location(0) f32 {
+        @fragment fn main() -> @location(0) f32 {
             _ = s;
             return 1.0;
         }
@@ -665,5 +665,5 @@ TEST_F(ShaderModuleValidationTest, ExtensionMustBeAllowed) {
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
 enable f16;
 
-@stage(compute) @workgroup_size(1) fn main() {})"));
+@compute @workgroup_size(1) fn main() {})"));
 }

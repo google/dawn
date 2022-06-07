@@ -83,7 +83,7 @@ class DrawVertexAndIndexBufferOOBValidationTests : public ValidationTest {
         renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
         fsModule = utils::CreateShaderModule(device, R"(
-            @stage(fragment) fn main() -> @location(0) vec4<f32> {
+            @fragment fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
     }
@@ -117,7 +117,7 @@ class DrawVertexAndIndexBufferOOBValidationTests : public ValidationTest {
         std::stringstream shaderStringStream;
 
         shaderStringStream << R"(
-            @stage(vertex)
+            @vertex
             fn main()" << inputStringStream.str()
                            << R"() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);

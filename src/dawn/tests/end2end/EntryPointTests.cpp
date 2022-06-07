@@ -24,11 +24,11 @@ TEST_P(EntryPointTests, FragAndVertexSameModule) {
     // TODO(crbug.com/dawn/658): Crashes on bots
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        @stage(vertex) fn vertex_main() -> @builtin(position) vec4<f32> {
+        @vertex fn vertex_main() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         }
 
-        @stage(fragment) fn fragment_main() -> @location(0) vec4<f32> {
+        @fragment fn fragment_main() -> @location(0) vec4<f32> {
           return vec4<f32>(1.0, 0.0, 0.0, 1.0);
         }
     )");
@@ -83,12 +83,12 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
         }
         @binding(0) @group(0) var<storage, read_write> data : Data;
 
-        @stage(compute) @workgroup_size(1) fn write1() {
+        @compute @workgroup_size(1) fn write1() {
             data.data = 1u;
             return;
         }
 
-        @stage(compute) @workgroup_size(1) fn write42() {
+        @compute @workgroup_size(1) fn write42() {
             data.data = 42u;
             return;
         }

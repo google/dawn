@@ -21,7 +21,7 @@ class GetBindGroupLayoutTests : public ValidationTest {
   protected:
     wgpu::RenderPipeline RenderPipelineFromFragmentShader(const char* shader) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-                @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+                @vertex fn main() -> @builtin(position) vec4<f32> {
                     return vec4<f32>();
                 })");
 
@@ -52,7 +52,7 @@ TEST_F(GetBindGroupLayoutTests, SameObject) {
         @group(0) @binding(0) var<uniform> uniform0 : S;
         @group(1) @binding(0) var<uniform> uniform1 : S;
 
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             var pos : vec4<f32> = uniform0.pos;
             pos = uniform1.pos;
             return vec4<f32>();
@@ -69,7 +69,7 @@ TEST_F(GetBindGroupLayoutTests, SameObject) {
         }
         @group(3) @binding(0) var<storage, read_write> storage3 : S3;
 
-        @stage(fragment) fn main() {
+        @fragment fn main() {
             var pos_u : vec4<f32> = uniform2.pos;
             var pos_s : mat4x4<f32> = storage3.pos;
         })");
@@ -103,7 +103,7 @@ TEST_F(GetBindGroupLayoutTests, DefaultBindGroupLayoutPipelineCompatibility) {
         }
         @group(0) @binding(0) var<uniform> uniforms : S;
 
-        @stage(fragment) fn main() {
+        @fragment fn main() {
             var pos : vec4<f32> = uniforms.pos;
         })");
 
@@ -125,7 +125,7 @@ TEST_F(GetBindGroupLayoutTests, DefaultShaderStageAndDynamicOffsets) {
         }
         @group(0) @binding(0) var<uniform> uniforms : S;
 
-        @stage(fragment) fn main() {
+        @fragment fn main() {
             var pos : vec4<f32> = uniforms.pos;
         })");
 
@@ -178,7 +178,7 @@ TEST_F(GetBindGroupLayoutTests, DefaultTextureSampleType) {
     wgpu::ShaderModule emptyVertexModule = utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var myTexture : texture_2d<f32>;
         @group(0) @binding(1) var mySampler : sampler;
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             _ = myTexture;
             _ = mySampler;
             return vec4<f32>();
@@ -187,7 +187,7 @@ TEST_F(GetBindGroupLayoutTests, DefaultTextureSampleType) {
     wgpu::ShaderModule textureLoadVertexModule = utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var myTexture : texture_2d<f32>;
         @group(0) @binding(1) var mySampler : sampler;
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             textureLoad(myTexture, vec2<i32>(), 0);
             _ = mySampler;
             return vec4<f32>();
@@ -196,7 +196,7 @@ TEST_F(GetBindGroupLayoutTests, DefaultTextureSampleType) {
     wgpu::ShaderModule textureSampleVertexModule = utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var myTexture : texture_2d<f32>;
         @group(0) @binding(1) var mySampler : sampler;
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             textureSampleLevel(myTexture, mySampler, vec2<f32>(), 0.0);
             return vec4<f32>();
         })");
@@ -204,7 +204,7 @@ TEST_F(GetBindGroupLayoutTests, DefaultTextureSampleType) {
     wgpu::ShaderModule unusedTextureFragmentModule = utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var myTexture : texture_2d<f32>;
         @group(0) @binding(1) var mySampler : sampler;
-        @stage(fragment) fn main() {
+        @fragment fn main() {
             _ = myTexture;
             _ = mySampler;
         })");
@@ -212,7 +212,7 @@ TEST_F(GetBindGroupLayoutTests, DefaultTextureSampleType) {
     wgpu::ShaderModule textureLoadFragmentModule = utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var myTexture : texture_2d<f32>;
         @group(0) @binding(1) var mySampler : sampler;
-        @stage(fragment) fn main() {
+        @fragment fn main() {
             textureLoad(myTexture, vec2<i32>(), 0);
             _ = mySampler;
         })");
@@ -220,7 +220,7 @@ TEST_F(GetBindGroupLayoutTests, DefaultTextureSampleType) {
     wgpu::ShaderModule textureSampleFragmentModule = utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var myTexture : texture_2d<f32>;
         @group(0) @binding(1) var mySampler : sampler;
-        @stage(fragment) fn main() {
+        @fragment fn main() {
             textureSample(myTexture, mySampler, vec2<f32>());
         })");
 
@@ -295,7 +295,7 @@ TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
         }
         @group(0) @binding(0) var<uniform> uniforms : S;
 
-        @stage(compute) @workgroup_size(1) fn main() {
+        @compute @workgroup_size(1) fn main() {
             var pos : vec4<f32> = uniforms.pos;
         })");
 
@@ -348,7 +348,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             }
             @group(0) @binding(0) var<storage, read_write> ssbo : S;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 var pos : vec4<f32> = ssbo.pos;
             })");
         EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -362,7 +362,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             }
             @group(0) @binding(0) var<uniform> uniforms : S;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 var pos : vec4<f32> = uniforms.pos;
             })");
         EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -377,7 +377,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             }
             @group(0) @binding(0) var<storage, read> ssbo : S;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 var pos : vec4<f32> = ssbo.pos;
             })");
         EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -391,7 +391,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             @group(0) @binding(0) var myTexture : texture_2d<f32>;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -403,7 +403,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             @group(0) @binding(0) var myTexture : texture_multisampled_2d<f32>;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -416,7 +416,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             @group(0) @binding(0) var mySampler: sampler;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 _ = mySampler;
             })");
         EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -444,7 +444,7 @@ TEST_F(GetBindGroupLayoutTests, ExternalTextureBindingType) {
     wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             @group(0) @binding(0) var myExternalTexture: texture_external;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                _ = myExternalTexture;
             })");
     EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -472,7 +472,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             @group(0) @binding(0) var myTexture : texture_1d<f32>;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -484,7 +484,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             @group(0) @binding(0) var myTexture : texture_2d<f32>;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -496,7 +496,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             @group(0) @binding(0) var myTexture : texture_2d_array<f32>;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -508,7 +508,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             @group(0) @binding(0) var myTexture : texture_3d<f32>;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -520,7 +520,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             @group(0) @binding(0) var myTexture : texture_cube<f32>;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -532,7 +532,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             @group(0) @binding(0) var myTexture : texture_cube_array<f32>;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -560,7 +560,7 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             @group(0) @binding(0) var myTexture : texture_2d<f32>;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -572,7 +572,7 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             @group(0) @binding(0) var myTexture : texture_2d<i32>;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -584,7 +584,7 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             @group(0) @binding(0) var myTexture : texture_2d<u32>;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 textureDimensions(myTexture);
             })");
         EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -617,7 +617,7 @@ TEST_F(GetBindGroupLayoutTests, BindingIndices) {
             }
             @group(0) @binding(0) var<uniform> uniforms : S;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 var pos : vec4<f32> = uniforms.pos;
             })");
         EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -632,7 +632,7 @@ TEST_F(GetBindGroupLayoutTests, BindingIndices) {
             }
             @group(0) @binding(1) var<uniform> uniforms : S;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 var pos : vec4<f32> = uniforms.pos;
             })");
         EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -647,7 +647,7 @@ TEST_F(GetBindGroupLayoutTests, BindingIndices) {
             }
             @group(0) @binding(1) var<uniform> uniforms : S;
 
-            @stage(fragment) fn main() {
+            @fragment fn main() {
                 var pos : vec4<f32> = uniforms.pos;
             })");
         EXPECT_FALSE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
@@ -664,7 +664,7 @@ TEST_F(GetBindGroupLayoutTests, DuplicateBinding) {
         @group(0) @binding(0) var<uniform> uniform0 : S;
         @group(1) @binding(0) var<uniform> uniform1 : S;
 
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             var pos : vec4<f32> = uniform0.pos;
             pos = uniform1.pos;
             return vec4<f32>();
@@ -676,7 +676,7 @@ TEST_F(GetBindGroupLayoutTests, DuplicateBinding) {
         }
         @group(1) @binding(0) var<uniform> uniforms : S;
 
-        @stage(fragment) fn main() {
+        @fragment fn main() {
             var pos : vec4<f32> = uniforms.pos;
         })");
 
@@ -702,7 +702,7 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
         }
         @group(0) @binding(0) var<uniform> uniforms : S;
 
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             var pos : f32 = uniforms.pos;
             return vec4<f32>();
         })");
@@ -713,7 +713,7 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
         }
         @group(0) @binding(0) var<uniform> uniforms : S;
 
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             var pos : mat4x4<f32> = uniforms.pos;
             return vec4<f32>();
         })");
@@ -724,7 +724,7 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
         }
         @group(0) @binding(0) var<uniform> uniforms : S;
 
-        @stage(fragment) fn main() {
+        @fragment fn main() {
             var pos : f32 = uniforms.pos;
         })");
 
@@ -734,7 +734,7 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
         }
         @group(0) @binding(0) var<uniform> uniforms : S;
 
-        @stage(fragment) fn main() {
+        @fragment fn main() {
             var pos : mat4x4<f32> = uniforms.pos;
         })");
 
@@ -793,24 +793,24 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
     DAWN_SKIP_TEST_IF(UsesWire());
 
     wgpu::ShaderModule vsModuleNoSampler = utils::CreateShaderModule(device, R"(
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             return vec4<f32>();
         })");
 
     wgpu::ShaderModule vsModuleSampler = utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var mySampler: sampler;
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             _ = mySampler;
             return vec4<f32>();
         })");
 
     wgpu::ShaderModule fsModuleNoSampler = utils::CreateShaderModule(device, R"(
-        @stage(fragment) fn main() {
+        @fragment fn main() {
         })");
 
     wgpu::ShaderModule fsModuleSampler = utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var mySampler: sampler;
-        @stage(fragment) fn main() {
+        @fragment fn main() {
             _ = mySampler;
         })");
 
@@ -869,7 +869,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
         }
         @group(0) @binding(0) var<uniform> ubo : S;
 
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             var pos : vec4<f32> = ubo.pos;
             return vec4<f32>();
         })");
@@ -880,7 +880,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
         }
         @group(0) @binding(0) var<storage, read_write> ssbo : S;
 
-        @stage(fragment) fn main() {
+        @fragment fn main() {
             var pos : vec4<f32> = ssbo.pos;
         })");
 
@@ -897,7 +897,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureMultisampling) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var myTexture : texture_2d<f32>;
 
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             textureDimensions(myTexture);
             return vec4<f32>();
         })");
@@ -905,7 +905,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureMultisampling) {
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var myTexture : texture_multisampled_2d<f32>;
 
-        @stage(fragment) fn main() {
+        @fragment fn main() {
             textureDimensions(myTexture);
         })");
 
@@ -922,7 +922,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingViewDimension) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var myTexture : texture_2d<f32>;
 
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             textureDimensions(myTexture);
             return vec4<f32>();
         })");
@@ -930,7 +930,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingViewDimension) {
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var myTexture : texture_3d<f32>;
 
-        @stage(fragment) fn main() {
+        @fragment fn main() {
             textureDimensions(myTexture);
         })");
 
@@ -947,7 +947,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureComponentType) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var myTexture : texture_2d<f32>;
 
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             textureDimensions(myTexture);
             return vec4<f32>();
         })");
@@ -955,7 +955,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureComponentType) {
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var myTexture : texture_2d<i32>;
 
-        @stage(fragment) fn main() {
+        @fragment fn main() {
             textureDimensions(myTexture);
         })");
 
@@ -970,12 +970,12 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureComponentType) {
 // Test it is an error to query an out of range bind group layout.
 TEST_F(GetBindGroupLayoutTests, OutOfRangeIndex) {
     ASSERT_DEVICE_ERROR(RenderPipelineFromFragmentShader(R"(
-        @stage(fragment) fn main() {
+        @fragment fn main() {
         })")
                             .GetBindGroupLayout(kMaxBindGroups));
 
     ASSERT_DEVICE_ERROR(RenderPipelineFromFragmentShader(R"(
-        @stage(fragment) fn main() {
+        @fragment fn main() {
         })")
                             .GetBindGroupLayout(kMaxBindGroups + 1));
 }
@@ -994,7 +994,7 @@ TEST_F(GetBindGroupLayoutTests, UnusedIndex) {
         @group(0) @binding(0) var<uniform> uniforms0 : S;
         @group(2) @binding(0) var<uniform> uniforms2 : S;
 
-        @stage(fragment) fn main() {
+        @fragment fn main() {
             var pos : vec4<f32> = uniforms0.pos;
             pos = uniforms2.pos;
         })");
@@ -1046,13 +1046,13 @@ TEST_F(GetBindGroupLayoutTests, Reflection) {
         }
         @group(0) @binding(0) var<uniform> uniforms : S;
 
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             var pos : vec4<f32> = uniforms.pos;
             return vec4<f32>();
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        @stage(fragment) fn main() {
+        @fragment fn main() {
         })");
 
     utils::ComboRenderPipelineDescriptor pipelineDesc;
@@ -1088,11 +1088,11 @@ TEST_F(GetBindGroupLayoutTests, FromCorrectEntryPoint) {
         @group(0) @binding(0) var<storage, read_write> data0 : Data;
         @group(0) @binding(1) var<storage, read_write> data1 : Data;
 
-        @stage(compute) @workgroup_size(1) fn compute0() {
+        @compute @workgroup_size(1) fn compute0() {
             data0.data = 0.0;
         }
 
-        @stage(compute) @workgroup_size(1) fn compute1() {
+        @compute @workgroup_size(1) fn compute1() {
             data1.data = 0.0;
         }
     )");

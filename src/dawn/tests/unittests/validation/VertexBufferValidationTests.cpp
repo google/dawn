@@ -27,11 +27,11 @@ class VertexBufferValidationTest : public ValidationTest {
 
         // Placeholder vertex shader module
         vsModule = utils::CreateShaderModule(device, R"(
-            @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+            @vertex fn main() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, 0.0, 0.0);
             })");
         fsModule = utils::CreateShaderModule(device, R"(
-            @stage(fragment) fn main() -> @location(0) vec4<f32> {
+            @fragment fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
     }
@@ -46,7 +46,7 @@ class VertexBufferValidationTest : public ValidationTest {
 
     wgpu::ShaderModule MakeVertexShader(unsigned int bufferCount) {
         std::ostringstream vs;
-        vs << "@stage(vertex) fn main(\n";
+        vs << "@vertex fn main(\n";
         for (unsigned int i = 0; i < bufferCount; ++i) {
             // TODO(cwallez@chromium.org): remove this special handling of 0 once Tint supports
             // trailing commas in argument lists.

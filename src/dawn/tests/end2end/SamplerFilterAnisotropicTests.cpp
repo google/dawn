@@ -54,7 +54,7 @@ class SamplerFilterAnisotropicTest : public DawnTest {
                 @builtin(position) position : vec4<f32>,
             }
 
-            @stage(vertex)
+            @vertex
             fn main(input : VertexIn) -> VertexOut {
                 var output : VertexOut;
                 output.uv = input.uv;
@@ -71,7 +71,7 @@ class SamplerFilterAnisotropicTest : public DawnTest {
                 @builtin(position) fragCoord : vec4<f32>,
             }
 
-            @stage(fragment)
+            @fragment
             fn main(input : FragmentIn) -> @location(0) vec4<f32> {
                 return textureSample(texture0, sampler0, input.uv);
             })");

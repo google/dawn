@@ -648,7 +648,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
 
     const char* kSimpleVertexShader = R"(
 ;
-@stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+@vertex fn main() -> @builtin(position) vec4<f32> {
   return vec4<f32>(0.0, 0.0, 0.0, 1.0);
 })";
 
@@ -799,7 +799,7 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
 @group(0) @binding(0) var Src : texture_2d<u32>;
 @group(0) @binding(1) var Dst : texture_storage_2d<r32uint, write>;
-@stage(compute) @workgroup_size(1) fn main() {
+@compute @workgroup_size(1) fn main() {
   var srcValue : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0), 0);
   srcValue.x = srcValue.x + 1u;
   textureStore(Dst, vec2<i32>(0, 0), srcValue);
@@ -898,14 +898,14 @@ fn doTest() -> bool {
     const char* kCommonWriteOnlyZeroInitTestCodeFragment = R"(
 @group(0) @binding(0) var dstImage : texture_storage_2d<r32uint, write>;
 
-@stage(fragment) fn main() -> @location(0) vec4<f32> {
+@fragment fn main() -> @location(0) vec4<f32> {
   textureStore(dstImage, vec2<i32>(0, 0), vec4<u32>(1u, 0u, 0u, 1u));
   return vec4<f32>();
 })";
     const char* kCommonWriteOnlyZeroInitTestCodeCompute = R"(
 @group(0) @binding(0) var dstImage : texture_storage_2d<r32uint, write>;
 
-@stage(compute) @workgroup_size(1) fn main() {
+@compute @workgroup_size(1) fn main() {
   textureStore(dstImage, vec2<i32>(0, 0), vec4<u32>(1u, 0u, 0u, 1u));
 })";
 };

@@ -267,7 +267,7 @@ class CopyTextureForBrowserTests : public Parent {
                 // The value diff should be smaller than the hard coded tolerance.
                 return abs(value - expect) < 0.01;
             }
-            @stage(compute) @workgroup_size(1, 1, 1)
+            @compute @workgroup_size(1, 1, 1)
             fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
                 let srcSize = textureDimensions(src);
                 let dstSize = textureDimensions(dst);

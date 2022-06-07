@@ -52,7 +52,7 @@ class DepthClampingTest : public DawnTest {
             }
             @group(0) @binding(0) var<uniform> ubo : UBO;
 
-            @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+            @vertex fn main() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, ubo.depth, 1.0);
             })");
 
@@ -63,7 +63,7 @@ class DepthClampingTest : public DawnTest {
             }
             @group(0) @binding(0) var<uniform> ubo : UBO;
 
-            @stage(fragment) fn main() -> @location(0) vec4<f32> {
+            @fragment fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(ubo.color, 1.0);
             })");
     }

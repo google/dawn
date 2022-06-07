@@ -55,7 +55,7 @@ class MultisampledSamplingTest : public DawnTest {
             utils::ComboRenderPipelineDescriptor desc;
 
             desc.vertex.module = utils::CreateShaderModule(device, R"(
-                @stage(vertex)
+                @vertex
                 fn main(@location(0) pos : vec2<f32>) -> @builtin(position) vec4<f32> {
                     return vec4<f32>(pos, 0.0, 1.0);
                 })");
@@ -66,7 +66,7 @@ class MultisampledSamplingTest : public DawnTest {
                     @builtin(frag_depth) depth : f32,
                 }
 
-                @stage(fragment) fn main() -> FragmentOut {
+                @fragment fn main() -> FragmentOut {
                     var output : FragmentOut;
                     output.color = 1.0;
                     output.depth = 0.7;
@@ -103,7 +103,7 @@ class MultisampledSamplingTest : public DawnTest {
                 }
                 @group(0) @binding(2) var<storage, read_write> results : Results;
 
-                @stage(compute) @workgroup_size(1) fn main() {
+                @compute @workgroup_size(1) fn main() {
                     for (var i : i32 = 0; i < 4; i = i + 1) {
                         results.colorSamples[i] = textureLoad(texture0, vec2<i32>(0, 0), i).x;
                         results.depthSamples[i] = textureLoad(texture1, vec2<i32>(0, 0), i);

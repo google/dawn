@@ -33,11 +33,11 @@ class RenderPipelineAndPassCompatibilityTests : public ValidationTest {
         // Create a NoOp pipeline
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
-                @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+                @vertex fn main() -> @builtin(position) vec4<f32> {
                     return vec4<f32>();
                 })");
         pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-                @stage(fragment) fn main() {
+                @fragment fn main() {
                 })");
         pipelineDescriptor.cFragment.targets = nullptr;
         pipelineDescriptor.cFragment.targetCount = 0;

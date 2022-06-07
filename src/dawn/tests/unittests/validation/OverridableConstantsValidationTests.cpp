@@ -34,7 +34,7 @@ override c8: u32 = 0u;          // type: uint32
 override c9: u32 = 0u;          // default override
 @id(1000) override c10: u32 = 10u;  // default
 
-@stage(compute) @workgroup_size(1) fn main() {
+@compute @workgroup_size(1) fn main() {
     // make sure the overridable constants are not optimized out
     _ = u32(c0);
     _ = u32(c1);
@@ -64,7 +64,7 @@ override c8: u32;               // type: uint32
 override c9: u32 = 0u;          // default override
 @id(1000) override c10: u32 = 10u;  // default
 
-@stage(compute) @workgroup_size(1) fn main() {
+@compute @workgroup_size(1) fn main() {
     // make sure the overridable constants are not optimized out
     _ = u32(c0);
     _ = u32(c1);

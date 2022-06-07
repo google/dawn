@@ -25,7 +25,7 @@ class ComputeValidationTest : public ValidationTest {
         ValidationTest::SetUp();
 
         wgpu::ShaderModule computeModule = utils::CreateShaderModule(device, R"(
-            @stage(compute) @workgroup_size(1) fn main() {
+            @compute @workgroup_size(1) fn main() {
             })");
 
         // Set up compute pipeline

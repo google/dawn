@@ -71,7 +71,7 @@ class ReadOnlyDepthStencilAttachmentTests
         // and pass the depth test, and sample from the depth buffer in fragment shader in the same
         // pipeline.
         pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
-            @stage(vertex)
+            @vertex
             fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4<f32> {
                 var pos = array<vec3<f32>, 6>(
                     vec3<f32>(-1.0,  1.0, 0.4),
@@ -86,7 +86,7 @@ class ReadOnlyDepthStencilAttachmentTests
         if (!sampleFromAttachment) {
             // Draw a solid blue into color buffer if not sample from depth/stencil attachment.
             pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            @stage(fragment) fn main() -> @location(0) vec4<f32> {
+            @fragment fn main() -> @location(0) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, 1.0, 0.0);
             })");
         } else {
@@ -96,7 +96,7 @@ class ReadOnlyDepthStencilAttachmentTests
                 @group(0) @binding(0) var samp : sampler;
                 @group(0) @binding(1) var tex : texture_depth_2d;
 
-                @stage(fragment)
+                @fragment
                 fn main(@builtin(position) FragCoord : vec4<f32>) -> @location(0) vec4<f32> {
                     return vec4<f32>(textureSample(tex, samp, FragCoord.xy), 0.0, 0.0, 0.0);
                 })");
@@ -105,7 +105,7 @@ class ReadOnlyDepthStencilAttachmentTests
                 pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
                 @group(0) @binding(0) var tex : texture_2d<u32>;
 
-                @stage(fragment)
+                @fragment
                 fn main(@builtin(position) FragCoord : vec4<f32>) -> @location(0) vec4<f32> {
                     var texel = textureLoad(tex, vec2<i32>(FragCoord.xy), 0);
                     return vec4<f32>(f32(texel[0]) / 255.0, 0.0, 0.0, 0.0);

@@ -91,7 +91,7 @@ class VertexStateTest : public DawnTest {
                 @builtin(position) position : vec4<f32>,
             }
 
-            @stage(vertex) fn main(input : VertexIn) -> VertexOut {
+            @vertex fn main(input : VertexIn) -> VertexOut {
                 var output : VertexOut;
         )";
 
@@ -139,7 +139,7 @@ class VertexStateTest : public DawnTest {
 
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vs.str().c_str());
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            @stage(fragment)
+            @fragment
             fn main(@location(0) color : vec4<f32>) -> @location(0) vec4<f32> {
                 return color;
             }
@@ -602,7 +602,7 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
             @builtin(position) position : vec4<f32>,
         }
 
-        @stage(vertex) fn main(input : VertexIn) -> VertexOut {
+        @vertex fn main(input : VertexIn) -> VertexOut {
             var output : VertexOut;
             output.position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
 
@@ -622,7 +622,7 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
             return output;
         })");
     pipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
-        @stage(fragment)
+        @fragment
         fn main(@location(0) color : vec4<f32>) -> @location(0) vec4<f32> {
             return color;
         })");
@@ -659,12 +659,12 @@ TEST_P(OptionalVertexStateTest, Basic) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 3, 3);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        @stage(vertex) fn main() -> @builtin(position) vec4<f32> {
+        @vertex fn main() -> @builtin(position) vec4<f32> {
             return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        @stage(fragment) fn main() -> @location(0) vec4<f32> {
+        @fragment fn main() -> @location(0) vec4<f32> {
             return vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })");
 
