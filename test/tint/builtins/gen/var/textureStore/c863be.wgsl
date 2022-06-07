@@ -32,18 +32,18 @@ fn textureStore_c863be() {
   textureStore(arg_0, arg_1, arg_2, arg_3);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureStore_c863be();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureStore_c863be();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   textureStore_c863be();
 }

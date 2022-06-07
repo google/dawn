@@ -10,7 +10,7 @@ struct Result {
 };
 @group(0) @binding(1) var<storage, read_write> result: Result;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   var s : S;
   result.out = s.data[ubo.dynamic_idx];

@@ -156,7 +156,7 @@ struct main_out {
   sk_FragColor_1 : vec4<f32>,
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(front_facing) sk_Clockwise_param : bool, @location(0) vcolor_S0_param : vec4<f32>) -> main_out {
   sk_Clockwise = sk_Clockwise_param;
   vcolor_S0 = vcolor_S0_param;

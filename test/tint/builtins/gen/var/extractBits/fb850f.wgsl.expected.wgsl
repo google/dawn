@@ -5,18 +5,18 @@ fn extractBits_fb850f() {
   var res : vec4<i32> = extractBits(arg_0, arg_1, arg_2);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   extractBits_fb850f();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   extractBits_fb850f();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   extractBits_fb850f();
 }

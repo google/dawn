@@ -4,7 +4,7 @@
 
 @group(0) @binding(2) var t_u : texture_1d<u32>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   _ = t_f;
   _ = t_i;

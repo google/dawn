@@ -10,7 +10,7 @@ fn f3(a : array<array<array<f32, 4>, 3>, 2>) -> f32 {
   return a[1][2][3];
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   let a1 : array<f32, 4> = array<f32, 4>();
   let a2 : array<array<f32, 4>, 3> = array<array<f32, 4>, 3>();

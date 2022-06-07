@@ -12,7 +12,7 @@ fn foo() {
   }
 }
 
-@stage(compute) @workgroup_size(1, 1, 1)
+@compute @workgroup_size(1, 1, 1)
 fn main() {
 
   for (var i : i32 = 0; i < 2; i = i + 1) {

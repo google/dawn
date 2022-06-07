@@ -16,7 +16,7 @@ struct S {
 
 var<private> s : S;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   s.data[constants.zero] = 0u;
 }

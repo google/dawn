@@ -30,7 +30,7 @@ fn textureSampleBias_9dbb51() {
   var res: vec4<f32> = textureSampleBias(arg_0, arg_1, vec2<f32>(), 1, 1.0, vec2<i32>());
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureSampleBias_9dbb51();
 }

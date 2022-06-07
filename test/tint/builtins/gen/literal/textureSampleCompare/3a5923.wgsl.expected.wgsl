@@ -6,7 +6,7 @@ fn textureSampleCompare_3a5923() {
   var res : f32 = textureSampleCompare(arg_0, arg_1, vec2<f32>(), 1.0);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureSampleCompare_3a5923();
 }

@@ -29,7 +29,7 @@ fn dpdx_99edb1() {
   var res: vec2<f32> = dpdx(arg_0);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   dpdx_99edb1();
 }

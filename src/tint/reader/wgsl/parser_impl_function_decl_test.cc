@@ -137,7 +137,7 @@ TEST_F(ParserImplTest, FunctionDecl_AttributeList) {
 
 TEST_F(ParserImplTest, FunctionDecl_AttributeList_MultipleEntries) {
     auto p = parser(R"(
-@workgroup_size(2, 3, 4) @stage(compute)
+@workgroup_size(2, 3, 4) @compute
 fn main() { return; })");
     auto attrs = p->attribute_list();
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -186,7 +186,7 @@ fn main() { return; })");
 TEST_F(ParserImplTest, FunctionDecl_AttributeList_MultipleLists) {
     auto p = parser(R"(
 @workgroup_size(2, 3, 4)
-@stage(compute)
+@compute
 fn main() { return; })");
     auto attributes = p->attribute_list();
     EXPECT_FALSE(p->has_error()) << p->error();

@@ -30,18 +30,18 @@ fn textureSampleLevel_979816() {
   var res: vec4<f32> = textureSampleLevel(arg_0, arg_1, vec2<f32>());
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureSampleLevel_979816();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureSampleLevel_979816();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   textureSampleLevel_979816();
 }

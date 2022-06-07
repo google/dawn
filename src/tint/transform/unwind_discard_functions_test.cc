@@ -102,7 +102,7 @@ fn f() {
   let marker1 = 0;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   f();
   let marker1 = 0;
@@ -122,7 +122,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   f();
   if (tint_discard) {
@@ -156,7 +156,7 @@ fn f() -> S {
   return s;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   let marker1 = 0;
   f();
@@ -186,7 +186,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   let marker1 = 0;
   f();
@@ -230,7 +230,7 @@ fn h() -> i32{
   return 0;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   let marker1 = 0;
   h();
@@ -275,7 +275,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   let marker1 = 0;
   h();
@@ -311,7 +311,7 @@ fn h() {
   let marker1 = 0;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   let marker1 = 0;
   f();
@@ -348,7 +348,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   let marker1 = 0;
   f();
@@ -381,7 +381,7 @@ fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
 
 TEST_F(UnwindDiscardFunctionsTest, Call_DiscardFuncDeclaredBelow) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   f();
   let marker1 = 0;
@@ -400,7 +400,7 @@ fn tint_discard_func() {
 
 var<private> tint_discard : bool = false;
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   f();
   if (tint_discard) {
@@ -433,7 +433,7 @@ fn f() -> i32 {
   return 42;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   if (f() == 42) {
     let marker1 = 0;
@@ -456,7 +456,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   let tint_symbol = f();
   if (tint_discard) {
@@ -485,7 +485,7 @@ fn f() -> i32 {
   return 42;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   if (true) {
     let marker1 = 0;
@@ -512,7 +512,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   if (true) {
     let marker1 = 0;
@@ -547,7 +547,7 @@ fn f() -> i32 {
   return 42;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   let marker1 = 0;
   var a = 0;
@@ -573,7 +573,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   let marker1 = 0;
   var a = 0;
@@ -605,7 +605,7 @@ fn f() -> i32 {
   return 42;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   let marker1 = 0;
   for (f(); ; ) {
@@ -630,7 +630,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   let marker1 = 0;
   var tint_symbol = f();
@@ -661,7 +661,7 @@ fn f() -> i32 {
   return 42;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   let marker1 = 0;
   for (let i = f(); ; ) {
@@ -686,7 +686,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   let marker1 = 0;
   var tint_symbol = f();
@@ -717,7 +717,7 @@ fn f() -> i32 {
   return 42;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   let marker1 = 0;
   for (; f() == 42; ) {
@@ -742,7 +742,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   let marker1 = 0;
   loop {
@@ -778,7 +778,7 @@ fn f() -> i32 {
   return 42;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   let marker1 = 0;
   for (; ; f()) {
@@ -809,7 +809,7 @@ fn f() -> i32 {
   return 42;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   switch (f()) {
     case 0: {
@@ -843,7 +843,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   var tint_symbol = f();
   if (tint_discard) {
@@ -893,7 +893,7 @@ fn g() -> S {
   return f();
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   let marker1 = 0;
   g();
@@ -929,7 +929,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   let marker1 = 0;
   g();
@@ -956,7 +956,7 @@ fn f() -> i32 {
   return 42;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   var a = f();
   let marker1 = 0;
@@ -978,7 +978,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   var a = f();
   if (tint_discard) {
@@ -1005,7 +1005,7 @@ fn f() -> i32 {
   return 42;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   var a : i32;
   a = f();
@@ -1028,7 +1028,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   var a : i32;
   a = f();
@@ -1056,7 +1056,7 @@ fn f() -> i32 {
   return 0;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   var b = array<i32, 10>();
   b[f()] = 10;
@@ -1079,7 +1079,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   var b = array<i32, 10>();
   let tint_symbol = f();
@@ -1115,7 +1115,7 @@ fn g() -> i32 {
   return 0;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   var b = array<i32, 10>();
   b[f()] = g();
@@ -1146,7 +1146,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   var b = array<i32, 10>();
   let tint_symbol = g();
@@ -1194,7 +1194,7 @@ fn h() -> i32{
   return 0;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   if ((f() + g() + h()) == 0) {
     let marker1 = 0;
@@ -1233,7 +1233,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   let tint_symbol = f();
   if (tint_discard) {
@@ -1286,7 +1286,7 @@ fn h() -> i32{
   return 0;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   if (f() == 1 && g() == 2 && h() == 3) {
     let marker1 = 0;
@@ -1325,7 +1325,7 @@ fn tint_discard_func() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   let tint_symbol_2 = f();
   if (tint_discard) {
@@ -1373,7 +1373,7 @@ fn f() {
   let marker1 = 0;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
   f();
   let marker1 = 0;
@@ -1397,7 +1397,7 @@ fn tint_discard_func_1() {
   discard;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
   f();
   if (tint_discard_1) {

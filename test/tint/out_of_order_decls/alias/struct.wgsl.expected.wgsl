@@ -4,7 +4,7 @@ struct S {
   m : i32,
 }
 
-@stage(fragment)
+@fragment
 fn f() {
   var v : T;
 }

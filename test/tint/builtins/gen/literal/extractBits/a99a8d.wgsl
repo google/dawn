@@ -28,18 +28,18 @@ fn extractBits_a99a8d() {
   var res: vec2<i32> = extractBits(vec2<i32>(), 1u, 1u);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   extractBits_a99a8d();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   extractBits_a99a8d();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   extractBits_a99a8d();
 }

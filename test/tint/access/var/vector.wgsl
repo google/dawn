@@ -1,4 +1,4 @@
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : vec3<f32>;
   let scalar : f32 = v.y;

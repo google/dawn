@@ -236,7 +236,7 @@ fn foo() -> i32 {
   return 1;
 }
 
-@stage(fragment)
+@fragment
 fn main() {
   var arr = array<f32, 4>();
   for (let a = &arr[foo()]; ;) {
@@ -251,7 +251,7 @@ fn foo() -> i32 {
   return 1;
 }
 
-@stage(fragment)
+@fragment
 fn main() {
   var arr = array<f32, 4>();
   let a_save = foo();
@@ -337,7 +337,7 @@ TEST_F(SimplifyPointersTest, ShadowPointer) {
     auto* src = R"(
 var<private> a : array<i32, 2>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   let x = &a;
   var a : i32 = (*x)[0];
@@ -350,7 +350,7 @@ fn main() {
     auto* expect = R"(
 var<private> a : array<i32, 2>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var a_1 : i32 = a[0];
   {

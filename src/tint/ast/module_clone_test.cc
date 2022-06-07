@@ -99,7 +99,7 @@ fn f1(p0 : f32, p1 : i32) -> f32 {
   return 1.0;
 }
 
-@stage(fragment)
+@fragment
 fn main() {
   f1(1.0, 2);
 }

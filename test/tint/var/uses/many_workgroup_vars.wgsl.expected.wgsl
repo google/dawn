@@ -198,7 +198,7 @@ var<workgroup> m98 : mat2x2<f32>;
 
 var<workgroup> m99 : mat2x2<f32>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn tint_symbol(@builtin(local_invocation_index) idx : u32) {
   m00[0][0] = 1.0;
   m01[0][0] = 1.0;

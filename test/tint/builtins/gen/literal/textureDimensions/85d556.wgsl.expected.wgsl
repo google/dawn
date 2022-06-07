@@ -4,18 +4,18 @@ fn textureDimensions_85d556() {
   var res : vec2<i32> = textureDimensions(arg_0, 0);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureDimensions_85d556();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureDimensions_85d556();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   textureDimensions_85d556();
 }

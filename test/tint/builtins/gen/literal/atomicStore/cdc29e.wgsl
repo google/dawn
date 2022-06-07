@@ -32,12 +32,12 @@ fn atomicStore_cdc29e() {
   atomicStore(&sb_rw.arg_0, 1u);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   atomicStore_cdc29e();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   atomicStore_cdc29e();
 }

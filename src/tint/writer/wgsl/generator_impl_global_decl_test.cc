@@ -35,7 +35,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
     gen.increment_indent();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_EQ(gen.result(), R"(  @stage(compute) @workgroup_size(1i, 1i, 1i)
+    EXPECT_EQ(gen.result(), R"(  @compute @workgroup_size(1i, 1i, 1i)
   fn test_function() {
     var a : f32;
   }
@@ -91,7 +91,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
     a : i32,
   }
 
-  @stage(compute) @workgroup_size(1i)
+  @compute @workgroup_size(1i)
   fn main() {
     var s0 : S0;
     var s1 : S1;

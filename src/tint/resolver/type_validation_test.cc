@@ -369,7 +369,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_InvalidExpr) {
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayInFunction_Fail) {
-    /// @stage(vertex)
+    /// @vertex
     // fn func() { var a : array<i32>; }
 
     auto* var = Var(Source{{12, 34}}, "a", ty.array<i32>(), ast::StorageClass::kNone);
@@ -552,7 +552,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsLocalVariable) {
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
     // fn func(a : array<u32>) {}
-    // @stage(vertex) fn main() {}
+    // @vertex fn main() {}
 
     auto* param = Param(Source{{12, 34}}, "a", ty.array<i32>());
 

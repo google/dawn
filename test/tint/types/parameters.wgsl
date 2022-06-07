@@ -18,6 +18,6 @@ fn foo(
   param_ptr_arr : ptr<function, array<f32, 4>>,
 ) {}
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
 }

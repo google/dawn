@@ -101,7 +101,7 @@ fn doIgnore()  {
   var g55 = atomicLoad(&(LUT.values[0]));
 }
 
-@stage(compute) @workgroup_size(128)
+@compute @workgroup_size(128)
 fn main_count(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
   var triangleIndex = GlobalInvocationID.x;
   if ((triangleIndex >= uniforms.numTriangles)) {

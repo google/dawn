@@ -55,7 +55,7 @@ fn getColor(fragment : FragmentInput) -> vec4<f32> {
   return color;
 }
 
-@stage(fragment)
+@fragment
 fn main(fragment : FragmentInput) -> FragmentOutput {
   var output : FragmentOutput;
   output.color = vec4<f32>(1.0, 0.0, 0.0, 1.0);

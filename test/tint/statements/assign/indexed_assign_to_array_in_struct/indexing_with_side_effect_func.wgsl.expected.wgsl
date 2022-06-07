@@ -24,7 +24,7 @@ fn getNextIndex() -> u32 {
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s : OuterS;

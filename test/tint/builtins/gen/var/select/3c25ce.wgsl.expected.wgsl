@@ -5,18 +5,18 @@ fn select_3c25ce() {
   var res : vec3<bool> = select(arg_0, arg_1, arg_2);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   select_3c25ce();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   select_3c25ce();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   select_3c25ce();
 }

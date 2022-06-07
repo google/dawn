@@ -306,6 +306,7 @@ fn f() { for (var i : i32 = 0; i < 8; i=i+1) {
 )");
 }
 
+// TODO(crbug.com/tint/1503): Remove this when @stage is removed
 TEST_F(ParserImplErrorTest, FunctionDeclStageMissingLParen) {
     EXPECT("@stage vertex) fn f() {}",
            R"(test.wgsl:1:8 error: expected '(' for stage attribute
@@ -566,10 +567,10 @@ let i : vec2<i32> = vec2<i32>(1, 2;
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclInvalidAttribute) {
-    EXPECT("@stage(vertex) x;",
-           R"(test.wgsl:1:16 error: expected declaration after attributes
-@stage(vertex) x;
-               ^
+    EXPECT("@vertex x;",
+           R"(test.wgsl:1:9 error: expected declaration after attributes
+@vertex x;
+        ^
 )");
 }
 

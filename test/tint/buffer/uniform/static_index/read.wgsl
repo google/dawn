@@ -19,7 +19,7 @@ struct S {
 
 @binding(0) @group(0) var<uniform> s : S;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
     let a = s.a;
     let b = s.b;

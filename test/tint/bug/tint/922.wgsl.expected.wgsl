@@ -279,7 +279,7 @@ fn main1() {
   }
 }
 
-@stage(vertex)
+@vertex
 fn main(@location(0) a_Position : vec3<f32>, @location(1) a_UV : vec2<f32>, @location(2) a_Color : vec4<f32>, @location(3) a_Normal : vec3<f32>, @location(4) a_PosMtxIdx : f32) -> VertexOutput {
   a_Position1 = a_Position;
   a_UV1 = a_UV;

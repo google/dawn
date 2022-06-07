@@ -6,18 +6,18 @@ fn textureSampleLevel_dcbecb() {
   var res : vec4<f32> = textureSampleLevel(arg_0, arg_1, vec3<f32>(), 1.0, vec3<i32>());
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureSampleLevel_dcbecb();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureSampleLevel_dcbecb();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   textureSampleLevel_dcbecb();
 }

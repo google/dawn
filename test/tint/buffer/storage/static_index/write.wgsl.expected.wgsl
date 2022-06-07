@@ -17,7 +17,7 @@ struct S {
 
 @binding(0) @group(0) var<storage, write> s : S;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   s.a = vec3<i32>();
   s.b = i32();

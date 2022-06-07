@@ -7,7 +7,7 @@ struct VertexInputs1 {
   @location(3) loc3 : vec4<f32>,
 };
 
-@stage(vertex)
+@vertex
 fn main(
   inputs0 : VertexInputs0,
   @location(1) loc1 : u32,

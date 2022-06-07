@@ -6,7 +6,7 @@ fn textureSample_7e9ffd() {
   var res : f32 = textureSample(arg_0, arg_1, vec2<f32>(), 1);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureSample_7e9ffd();
 }

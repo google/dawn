@@ -30,7 +30,7 @@ fn atomicMin_69d383() {
   var res: u32 = atomicMin(&arg_0, arg_1);
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   atomicMin_69d383();
 }

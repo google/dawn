@@ -108,7 +108,7 @@ struct main_out {
   glFragColor_1 : vec4<f32>,
 };
 
-@stage(fragment)
+@fragment
 fn main(@location(2) fClipDistance3_param : f32, @location(3) fClipDistance4_param : f32) -> main_out {
   fClipDistance3 = fClipDistance3_param;
   fClipDistance4 = fClipDistance4_param;

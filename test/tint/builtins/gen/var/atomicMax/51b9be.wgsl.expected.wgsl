@@ -9,12 +9,12 @@ fn atomicMax_51b9be() {
   var res : u32 = atomicMax(&(sb_rw.arg_0), arg_1);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   atomicMax_51b9be();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   atomicMax_51b9be();
 }

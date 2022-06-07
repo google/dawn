@@ -877,13 +877,13 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Multiple_EntryPoint_With_Same_Module
     // };
     // @binding(0) @group(0) var<storage> data : Data;
     //
-    // @stage(compute) @workgroup_size(1)
+    // @compute @workgroup_size(1)
     // fn a() {
     //   var v = data.d;
     //   return;
     // }
     //
-    // @stage(compute) @workgroup_size(1)
+    // @compute @workgroup_size(1)
     // fn b() {
     //   var v = data.d;
     //   return;

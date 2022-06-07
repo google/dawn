@@ -2,7 +2,7 @@
 
 @group(1) @binding(1) var s : sampler;
 
-@stage(fragment)
+@fragment
 fn main() {
   var res : vec4<i32> = textureGather(2, t, s, vec2<f32>());
 }

@@ -54,7 +54,7 @@ TEST_F(DisableUniformityAnalysisTest, NonEmptyModule) {
     auto* src = R"(
 @group(0) @binding(0) var<storage, read> global : i32;
 
-@stage(compute) @workgroup_size(64)
+@compute @workgroup_size(64)
 fn main() {
   if ((global == 42)) {
     workgroupBarrier();

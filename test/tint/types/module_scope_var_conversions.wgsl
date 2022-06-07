@@ -25,7 +25,7 @@ var<private> v3u32_var3 : vec3<u32> = vec3<u32>(vec3<bool>(true));
 var<private> v3bool_var4 : vec3<bool> = vec3<bool>(vec2<bool>(vec2<f32>(123.0)), true);
 var<private> v4bool_var5 : vec4<bool> = vec4<bool>(vec2<bool>(vec2<f32>(123.0, 0.0)), vec2<bool>(true, bool(f32(0.0))));
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   // Reference the module-scope variables to stop them from being removed.
   bool_var1 = bool();

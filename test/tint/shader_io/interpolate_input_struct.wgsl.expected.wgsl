@@ -17,6 +17,6 @@ struct In {
   linear_sample : f32,
 }
 
-@stage(fragment)
+@fragment
 fn main(in : In) {
 }

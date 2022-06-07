@@ -126,7 +126,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverBuiltinsValidationTest,
                          testing::ValuesIn(cases));
 
 TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInput_Fail) {
-    // @stage(fragment)
+    // @fragment
     // fn fs_main(
     //   @builtin(frag_depth) fd: f32,
     // ) -> @location(0) f32 { return 1.0; }
@@ -144,7 +144,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInputStruct_Fail) {
     // struct MyInputs {
     //   @builtin(frag_depth) ff: f32;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn fragShader(arg: MyInputs) -> @location(0) f32 { return 1.0; }
 
     auto* s = Structure(
@@ -165,7 +165,7 @@ TEST_F(ResolverBuiltinsValidationTest, StructBuiltinInsideEntryPoint_Ignored) {
     // struct S {
     //   @builtin(vertex_index) idx: u32;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn fragShader() { var s : S; }
 
     Structure("S", {Member("idx", ty.u32(), {Builtin(ast::Builtin::kVertexIndex)})});
@@ -181,7 +181,7 @@ TEST_F(ResolverBuiltinsValidationTest, PositionNotF32_Struct_Fail) {
     // struct MyInputs {
     //   @builtin(kPosition) p: vec4<u32>;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn fragShader(is_front: MyInputs) -> @location(0) f32 { return 1.0; }
 
     auto* m = Member("position", ty.vec4<u32>(),
@@ -195,7 +195,7 @@ TEST_F(ResolverBuiltinsValidationTest, PositionNotF32_Struct_Fail) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, PositionNotF32_ReturnType_Fail) {
-    // @stage(vertex)
+    // @vertex
     // fn main() -> @builtin(position) f32 { return 1.0; }
     Func("main", {}, ty.f32(), {Return(1_f)}, {Stage(ast::PipelineStage::kVertex)},
          {Builtin(Source{{12, 34}}, ast::Builtin::kPosition)});
@@ -208,7 +208,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthNotF32_Struct_Fail) {
     // struct MyInputs {
     //   @builtin(kFragDepth) p: i32;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn fragShader(is_front: MyInputs) -> @location(0) f32 { return 1.0; }
 
     auto* m = Member("frag_depth", ty.i32(),
@@ -225,7 +225,7 @@ TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_Struct_Fail) {
     // struct MyInputs {
     //   @builtin(sample_mask) m: f32;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn fragShader(is_front: MyInputs) -> @location(0) f32 { return 1.0; }
 
     auto* s = Structure(
@@ -240,7 +240,7 @@ TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_Struct_Fail) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_ReturnType_Fail) {
-    // @stage(fragment)
+    // @fragment
     // fn main() -> @builtin(sample_mask) i32 { return 1; }
     Func("main", {}, ty.i32(), {Return(1_i)}, {Stage(ast::PipelineStage::kFragment)},
          {Builtin(Source{{12, 34}}, ast::Builtin::kSampleMask)});
@@ -250,7 +250,7 @@ TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_ReturnType_Fail) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, SampleMaskIsNotU32_Fail) {
-    // @stage(fragment)
+    // @fragment
     // fn fs_main(
     //   @builtin(sample_mask) arg: bool
     // ) -> @location(0) f32 { return 1.0; }
@@ -266,7 +266,7 @@ TEST_F(ResolverBuiltinsValidationTest, SampleIndexIsNotU32_Struct_Fail) {
     // struct MyInputs {
     //   @builtin(sample_index) m: f32;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn fragShader(is_front: MyInputs) -> @location(0) f32 { return 1.0; }
 
     auto* s = Structure(
@@ -281,7 +281,7 @@ TEST_F(ResolverBuiltinsValidationTest, SampleIndexIsNotU32_Struct_Fail) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, SampleIndexIsNotU32_Fail) {
-    // @stage(fragment)
+    // @fragment
     // fn fs_main(
     //   @builtin(sample_index) arg: bool
     // ) -> @location(0) f32 { return 1.0; }
@@ -294,7 +294,7 @@ TEST_F(ResolverBuiltinsValidationTest, SampleIndexIsNotU32_Fail) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, PositionIsNotF32_Fail) {
-    // @stage(fragment)
+    // @fragment
     // fn fs_main(
     //   @builtin(kPosition) p: vec3<f32>,
     // ) -> @location(0) f32 { return 1.0; }
@@ -307,7 +307,7 @@ TEST_F(ResolverBuiltinsValidationTest, PositionIsNotF32_Fail) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, FragDepthIsNotF32_Fail) {
-    // @stage(fragment)
+    // @fragment
     // fn fs_main() -> @builtin(kFragDepth) f32 { var fd: i32; return fd; }
     auto* fd = Var("fd", ty.i32());
     Func("fs_main", {}, ty.i32(), {Decl(fd), Return(fd)},
@@ -318,7 +318,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsNotF32_Fail) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, VertexIndexIsNotU32_Fail) {
-    // @stage(vertex)
+    // @vertex
     // fn main(
     //   @builtin(kVertexIndex) vi : f32,
     //   @builtin(kPosition) p :vec4<f32>
@@ -334,7 +334,7 @@ TEST_F(ResolverBuiltinsValidationTest, VertexIndexIsNotU32_Fail) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, InstanceIndexIsNotU32) {
-    // @stage(vertex)
+    // @vertex
     // fn main(
     //   @builtin(kInstanceIndex) ii : f32,
     //   @builtin(kPosition) p :vec4<f32>
@@ -350,7 +350,7 @@ TEST_F(ResolverBuiltinsValidationTest, InstanceIndexIsNotU32) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, FragmentBuiltin_Pass) {
-    // @stage(fragment)
+    // @fragment
     // fn fs_main(
     //   @builtin(kPosition) p: vec4<f32>,
     //   @builtin(front_facing) ff: bool,
@@ -369,7 +369,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragmentBuiltin_Pass) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, VertexBuiltin_Pass) {
-    // @stage(vertex)
+    // @vertex
     // fn main(
     //   @builtin(vertex_index) vi : u32,
     //   @builtin(instance_index) ii : u32,
@@ -392,7 +392,7 @@ TEST_F(ResolverBuiltinsValidationTest, VertexBuiltin_Pass) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_Pass) {
-    // @stage(compute) @workgroup_size(1)
+    // @compute @workgroup_size(1)
     // fn main(
     //   @builtin(local_invocationId) li_id: vec3<u32>,
     //   @builtin(local_invocationIndex) li_index: u32,
@@ -493,7 +493,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragmentBuiltinStruct_Pass) {
     //   @builtin(sample_index) si: u32;
     //   @builtin(sample_mask) sm : u32;;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn fragShader(arg: MyInputs) -> @location(0) f32 { return 1.0; }
 
     auto* s = Structure(
@@ -509,7 +509,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragmentBuiltinStruct_Pass) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, FrontFacingParamIsNotBool_Fail) {
-    // @stage(fragment)
+    // @fragment
     // fn fs_main(
     //   @builtin(front_facing) is_front: i32;
     // ) -> @location(0) f32 { return 1.0; }
@@ -528,7 +528,7 @@ TEST_F(ResolverBuiltinsValidationTest, FrontFacingMemberIsNotBool_Fail) {
     // struct MyInputs {
     //   @builtin(front_facing) pos: f32;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn fragShader(is_front: MyInputs) -> @location(0) f32 { return 1.0; }
 
     auto* s = Structure(

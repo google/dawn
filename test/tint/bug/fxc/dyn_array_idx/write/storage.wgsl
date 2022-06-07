@@ -12,7 +12,7 @@ struct SSBO {
 };
 @group(0) @binding(1) var<storage, read_write> ssbo: SSBO;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   ssbo.data[ubo.dynamic_idx] = 1;
   result.out = ssbo.data[3];

@@ -31,18 +31,18 @@ fn clamp_0acf8f() {
   var res: vec2<f32> = clamp(arg_0, arg_1, arg_2);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   clamp_0acf8f();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   clamp_0acf8f();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   clamp_0acf8f();
 }

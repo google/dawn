@@ -32,18 +32,18 @@ fn textureLoad_7c90e5() {
   var res: vec4<u32> = textureLoad(arg_0, arg_1, arg_2, arg_3);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureLoad_7c90e5();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureLoad_7c90e5();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   textureLoad_7c90e5();
 }

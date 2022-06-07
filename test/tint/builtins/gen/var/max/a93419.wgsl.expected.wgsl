@@ -4,18 +4,18 @@ fn max_a93419() {
   var res : vec4<f32> = max(arg_0, arg_1);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   max_a93419();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   max_a93419();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   max_a93419();
 }

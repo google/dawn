@@ -50,7 +50,7 @@ fn test(vert_idx : u32) -> u32 {
   return vert_idx;
 }
 
-@stage(vertex)
+@vertex
 fn entry(@builtin(vertex_index) vert_idx : u32
         ) -> @builtin(position) vec4<f32>  {
   _ = test(vert_idx);
@@ -63,7 +63,7 @@ fn tint_symbol(tint_symbol_1 : u32) -> u32 {
   return tint_symbol_1;
 }
 
-@stage(vertex)
+@vertex
 fn tint_symbol_2(@builtin(vertex_index) tint_symbol_1 : u32) -> @builtin(position) vec4<f32> {
   _ = tint_symbol(tint_symbol_1);
   return vec4<f32>();
@@ -87,7 +87,7 @@ fn tint_symbol_2(@builtin(vertex_index) tint_symbol_1 : u32) -> @builtin(positio
 
 TEST_F(RenamerTest, PreserveSwizzles) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn entry() -> @builtin(position) vec4<f32> {
   var v : vec4<f32>;
   var rgba : f32;
@@ -97,7 +97,7 @@ fn entry() -> @builtin(position) vec4<f32> {
 )";
 
     auto* expect = R"(
-@stage(vertex)
+@vertex
 fn tint_symbol() -> @builtin(position) vec4<f32> {
   var tint_symbol_1 : vec4<f32>;
   var tint_symbol_2 : f32;
@@ -124,7 +124,7 @@ fn tint_symbol() -> @builtin(position) vec4<f32> {
 
 TEST_F(RenamerTest, PreserveBuiltins) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn entry() -> @builtin(position) vec4<f32> {
   var blah : vec4<f32>;
   return abs(blah);
@@ -132,7 +132,7 @@ fn entry() -> @builtin(position) vec4<f32> {
 )";
 
     auto* expect = R"(
-@stage(vertex)
+@vertex
 fn tint_symbol() -> @builtin(position) vec4<f32> {
   var tint_symbol_1 : vec4<f32>;
   return abs(tint_symbol_1);
@@ -155,7 +155,7 @@ fn tint_symbol() -> @builtin(position) vec4<f32> {
 
 TEST_F(RenamerTest, PreserveBuiltinTypes) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn entry() {
   var a = modf(1.0).whole;
   var b = modf(1.0).fract;
@@ -165,7 +165,7 @@ fn entry() {
 )";
 
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn tint_symbol() {
   var tint_symbol_1 = modf(1.0).whole;
   var tint_symbol_2 = modf(1.0).fract;
@@ -190,7 +190,7 @@ fn tint_symbol() {
 
 TEST_F(RenamerTest, PreserveUnicode) {
     auto src = R"(
-@stage(fragment)
+@fragment
 fn frag_main() {
   var )" + std::string(kUnicodeIdentifier) +
                R"( : i32;
@@ -209,7 +209,7 @@ fn frag_main() {
 
 TEST_F(RenamerTest, AttemptSymbolCollision) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn entry() -> @builtin(position) vec4<f32> {
   var tint_symbol : vec4<f32>;
   var tint_symbol_2 : vec4<f32>;
@@ -219,7 +219,7 @@ fn entry() -> @builtin(position) vec4<f32> {
 )";
 
     auto* expect = R"(
-@stage(vertex)
+@vertex
 fn tint_symbol() -> @builtin(position) vec4<f32> {
   var tint_symbol_1 : vec4<f32>;
   var tint_symbol_2 : vec4<f32>;
@@ -252,7 +252,7 @@ TEST_P(RenamerTestGlsl, Keywords) {
     auto keyword = GetParam();
 
     auto src = R"(
-@stage(fragment)
+@fragment
 fn frag_main() {
   var )" + keyword +
                R"( : i32;
@@ -260,7 +260,7 @@ fn frag_main() {
 )";
 
     auto* expect = R"(
-@stage(fragment)
+@fragment
 fn frag_main() {
   var tint_symbol : i32;
 }
@@ -278,7 +278,7 @@ TEST_P(RenamerTestHlsl, Keywords) {
     auto keyword = GetParam();
 
     auto src = R"(
-@stage(fragment)
+@fragment
 fn frag_main() {
   var )" + keyword +
                R"( : i32;
@@ -286,7 +286,7 @@ fn frag_main() {
 )";
 
     auto* expect = R"(
-@stage(fragment)
+@fragment
 fn frag_main() {
   var tint_symbol : i32;
 }
@@ -304,7 +304,7 @@ TEST_P(RenamerTestMsl, Keywords) {
     auto keyword = GetParam();
 
     auto src = R"(
-@stage(fragment)
+@fragment
 fn frag_main() {
   var )" + keyword +
                R"( : i32;
@@ -312,7 +312,7 @@ fn frag_main() {
 )";
 
     auto* expect = R"(
-@stage(fragment)
+@fragment
 fn frag_main() {
   var tint_symbol : i32;
 }

@@ -2,7 +2,7 @@
 
 @group(0) @binding(1) var<storage, read_write> out : mat3x2<f32>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   out = in;
 }

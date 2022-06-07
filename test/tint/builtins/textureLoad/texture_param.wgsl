@@ -8,18 +8,18 @@ fn doTextureLoad() {
   var res: vec4<i32> = textureLoad2d(arg_0, vec2<i32>(), 0);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   doTextureLoad();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   doTextureLoad();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   doTextureLoad();
 }

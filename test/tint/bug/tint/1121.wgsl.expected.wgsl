@@ -42,7 +42,7 @@ struct Uniforms {
 
 @group(3) @binding(0) var<uniform> uniforms : Uniforms;
 
-@stage(compute) @workgroup_size(64, 1, 1)
+@compute @workgroup_size(64, 1, 1)
 fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
   var index = GlobalInvocationID.x;
   if ((index >= config.numLights)) {

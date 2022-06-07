@@ -143,7 +143,7 @@ enum class Method {
     kSwitchCaseWithAbstractCase,
 
     // @workgroup_size(target_expr, abstract_expr, 123)
-    // @stage(compute)
+    // @compute
     // fn f() {}
     kWorkgroupSize
 };
@@ -608,7 +608,7 @@ enum class Method {
     kSwitch,
 
     // @workgroup_size(abstract_expr)
-    // @stage(compute)
+    // @compute
     // fn f() {}
     kWorkgroupSize,
 

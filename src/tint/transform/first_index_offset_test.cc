@@ -33,7 +33,7 @@ TEST_F(FirstIndexOffsetTest, ShouldRunEmptyModule) {
 
 TEST_F(FirstIndexOffsetTest, ShouldRunFragmentStage) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn entry() {
   return;
 }
@@ -44,7 +44,7 @@ fn entry() {
 
 TEST_F(FirstIndexOffsetTest, ShouldRunVertexStage) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn entry() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
@@ -70,7 +70,7 @@ TEST_F(FirstIndexOffsetTest, EmptyModule) {
 
 TEST_F(FirstIndexOffsetTest, BasicVertexShader) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn entry() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
@@ -95,7 +95,7 @@ fn test(vert_idx : u32) -> u32 {
   return vert_idx;
 }
 
-@stage(vertex)
+@vertex
 fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   test(vert_idx);
   return vec4<f32>();
@@ -114,7 +114,7 @@ fn test(vert_idx : u32) -> u32 {
   return vert_idx;
 }
 
-@stage(vertex)
+@vertex
 fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   test((vert_idx + tint_symbol_1.first_vertex_index));
   return vec4<f32>();
@@ -135,7 +135,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> 
 
 TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex_OutOfOrder) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   test(vert_idx);
   return vec4<f32>();
@@ -154,7 +154,7 @@ struct tint_symbol {
 
 @binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
 
-@stage(vertex)
+@vertex
 fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   test((vert_idx + tint_symbol_1.first_vertex_index));
   return vec4<f32>();
@@ -183,7 +183,7 @@ fn test(inst_idx : u32) -> u32 {
   return inst_idx;
 }
 
-@stage(vertex)
+@vertex
 fn entry(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   test(inst_idx);
   return vec4<f32>();
@@ -202,7 +202,7 @@ fn test(inst_idx : u32) -> u32 {
   return inst_idx;
 }
 
-@stage(vertex)
+@vertex
 fn entry(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   test((inst_idx + tint_symbol_1.first_instance_index));
   return vec4<f32>();
@@ -223,7 +223,7 @@ fn entry(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32
 
 TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex_OutOfOrder) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn entry(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   test(inst_idx);
   return vec4<f32>();
@@ -242,7 +242,7 @@ struct tint_symbol {
 
 @binding(1) @group(7) var<uniform> tint_symbol_1 : tint_symbol;
 
-@stage(vertex)
+@vertex
 fn entry(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   test((inst_idx + tint_symbol_1.first_instance_index));
   return vec4<f32>();
@@ -276,7 +276,7 @@ struct Inputs {
   @builtin(vertex_index) vert_idx : u32,
 };
 
-@stage(vertex)
+@vertex
 fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
   test(inputs.instance_idx, inputs.vert_idx);
   return vec4<f32>();
@@ -302,7 +302,7 @@ struct Inputs {
   vert_idx : u32,
 }
 
-@stage(vertex)
+@vertex
 fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
   test((inputs.instance_idx + tint_symbol_1.first_instance_index), (inputs.vert_idx + tint_symbol_1.first_vertex_index));
   return vec4<f32>();
@@ -323,7 +323,7 @@ fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
 
 TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex_OutOfOrder) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
   test(inputs.instance_idx, inputs.vert_idx);
   return vec4<f32>();
@@ -347,7 +347,7 @@ struct tint_symbol {
 
 @binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
 
-@stage(vertex)
+@vertex
 fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
   test((inputs.instance_idx + tint_symbol_1.first_instance_index), (inputs.vert_idx + tint_symbol_1.first_vertex_index));
   return vec4<f32>();
@@ -387,7 +387,7 @@ fn func2(vert_idx : u32) -> u32 {
   return func1(vert_idx);
 }
 
-@stage(vertex)
+@vertex
 fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   func2(vert_idx);
   return vec4<f32>();
@@ -410,7 +410,7 @@ fn func2(vert_idx : u32) -> u32 {
   return func1(vert_idx);
 }
 
-@stage(vertex)
+@vertex
 fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   func2((vert_idx + tint_symbol_1.first_vertex_index));
   return vec4<f32>();
@@ -431,7 +431,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> 
 
 TEST_F(FirstIndexOffsetTest, NestedCalls_OutOfOrder) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   func2(vert_idx);
   return vec4<f32>();
@@ -454,7 +454,7 @@ struct tint_symbol {
 
 @binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
 
-@stage(vertex)
+@vertex
 fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   func2((vert_idx + tint_symbol_1.first_vertex_index));
   return vec4<f32>();
@@ -487,19 +487,19 @@ fn func(i : u32) -> u32 {
   return i;
 }
 
-@stage(vertex)
+@vertex
 fn entry_a(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   func(vert_idx);
   return vec4<f32>();
 }
 
-@stage(vertex)
+@vertex
 fn entry_b(@builtin(vertex_index) vert_idx : u32, @builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   func(vert_idx + inst_idx);
   return vec4<f32>();
 }
 
-@stage(vertex)
+@vertex
 fn entry_c(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   func(inst_idx);
   return vec4<f32>();
@@ -518,19 +518,19 @@ fn func(i : u32) -> u32 {
   return i;
 }
 
-@stage(vertex)
+@vertex
 fn entry_a(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   func((vert_idx + tint_symbol_1.first_vertex_index));
   return vec4<f32>();
 }
 
-@stage(vertex)
+@vertex
 fn entry_b(@builtin(vertex_index) vert_idx : u32, @builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   func(((vert_idx + tint_symbol_1.first_vertex_index) + (inst_idx + tint_symbol_1.first_instance_index)));
   return vec4<f32>();
 }
 
-@stage(vertex)
+@vertex
 fn entry_c(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   func((inst_idx + tint_symbol_1.first_instance_index));
   return vec4<f32>();
@@ -551,19 +551,19 @@ fn entry_c(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f
 
 TEST_F(FirstIndexOffsetTest, MultipleEntryPoints_OutOfOrder) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn entry_a(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   func(vert_idx);
   return vec4<f32>();
 }
 
-@stage(vertex)
+@vertex
 fn entry_b(@builtin(vertex_index) vert_idx : u32, @builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   func(vert_idx + inst_idx);
   return vec4<f32>();
 }
 
-@stage(vertex)
+@vertex
 fn entry_c(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   func(inst_idx);
   return vec4<f32>();
@@ -582,19 +582,19 @@ struct tint_symbol {
 
 @binding(1) @group(2) var<uniform> tint_symbol_1 : tint_symbol;
 
-@stage(vertex)
+@vertex
 fn entry_a(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> {
   func((vert_idx + tint_symbol_1.first_vertex_index));
   return vec4<f32>();
 }
 
-@stage(vertex)
+@vertex
 fn entry_b(@builtin(vertex_index) vert_idx : u32, @builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   func(((vert_idx + tint_symbol_1.first_vertex_index) + (inst_idx + tint_symbol_1.first_instance_index)));
   return vec4<f32>();
 }
 
-@stage(vertex)
+@vertex
 fn entry_c(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32> {
   func((inst_idx + tint_symbol_1.first_instance_index));
   return vec4<f32>();

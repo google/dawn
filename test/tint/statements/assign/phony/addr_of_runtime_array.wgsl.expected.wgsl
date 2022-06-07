@@ -4,7 +4,7 @@ struct S {
 
 @binding(0) @group(0) var<storage, read_write> s : S;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   _ = &(s.arr);
 }

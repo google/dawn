@@ -2,7 +2,7 @@ type T1 = T2;
 
 type T2 = i32;
 
-@stage(fragment)
+@fragment
 fn f() {
   var v : T1;
 }

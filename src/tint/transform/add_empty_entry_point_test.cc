@@ -31,7 +31,7 @@ TEST_F(AddEmptyEntryPointTest, ShouldRunEmptyModule) {
 
 TEST_F(AddEmptyEntryPointTest, ShouldRunExistingEntryPoint) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn existing() {}
 )";
 
@@ -42,7 +42,7 @@ TEST_F(AddEmptyEntryPointTest, EmptyModule) {
     auto* src = R"()";
 
     auto* expect = R"(
-@stage(compute) @workgroup_size(1i)
+@compute @workgroup_size(1i)
 fn unused_entry_point() {
 }
 )";
@@ -54,7 +54,7 @@ fn unused_entry_point() {
 
 TEST_F(AddEmptyEntryPointTest, ExistingEntryPoint) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn main() {
 }
 )";
@@ -70,7 +70,7 @@ TEST_F(AddEmptyEntryPointTest, NameClash) {
     auto* src = R"(var<private> unused_entry_point : f32;)";
 
     auto* expect = R"(
-@stage(compute) @workgroup_size(1i)
+@compute @workgroup_size(1i)
 fn unused_entry_point_1() {
 }
 

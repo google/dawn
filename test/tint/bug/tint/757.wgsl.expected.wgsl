@@ -12,7 +12,7 @@ struct Result {
 
 @group(0) @binding(3) var<storage, read_write> result : Result;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
   var flatIndex : u32 = ((((2u * 2u) * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
   flatIndex = (flatIndex * 1u);

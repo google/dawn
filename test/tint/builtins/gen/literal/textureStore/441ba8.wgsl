@@ -29,18 +29,18 @@ fn textureStore_441ba8() {
   textureStore(arg_0, vec3<i32>(), vec4<u32>());
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureStore_441ba8();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureStore_441ba8();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   textureStore_441ba8();
 }

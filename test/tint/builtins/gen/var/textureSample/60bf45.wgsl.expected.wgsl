@@ -8,7 +8,7 @@ fn textureSample_60bf45() {
   var res : f32 = textureSample(arg_0, arg_1, arg_2, arg_3, vec2<i32>());
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureSample_60bf45();
 }

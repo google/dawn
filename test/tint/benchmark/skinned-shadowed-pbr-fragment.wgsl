@@ -330,7 +330,7 @@ struct FragmentOutput {
   emissive : vec4<f32>,
 }
 
-@stage(fragment)
+@fragment
 fn fragmentMain(input : VertexOutput) -> FragmentOutput {
   let surface = GetSurfaceInfo(input);
   var Lo = vec3(0.0, 0.0, 0.0);

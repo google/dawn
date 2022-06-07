@@ -215,7 +215,7 @@ struct main_out {
   glFragColor_1 : vec4<f32>,
 };
 
-@stage(fragment)
+@fragment
 fn main(@location(2) tUV_param : vec2<f32>, @location(5) tileID_1_param : vec2<f32>, @location(4) levelUnits_param : vec2<f32>, @location(3) stageUnits_1_param : vec2<f32>, @location(0) vPosition_param : vec3<f32>, @location(1) vUV_param : vec2<f32>) -> main_out {
   tUV = tUV_param;
   tileID_1 = tileID_1_param;

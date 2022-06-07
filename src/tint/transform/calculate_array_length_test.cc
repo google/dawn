@@ -38,7 +38,7 @@ struct SB {
 
 @group(0) @binding(0) var<storage, read> sb : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
 }
 )";
@@ -55,7 +55,7 @@ struct SB {
 
 @group(0) @binding(0) var<storage, read> sb : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var len : u32 = arrayLength(&sb.arr);
 }
@@ -68,7 +68,7 @@ TEST_F(CalculateArrayLengthTest, BasicArray) {
     auto* src = R"(
 @group(0) @binding(0) var<storage, read> sb : array<i32>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var len : u32 = arrayLength(&sb);
 }
@@ -80,7 +80,7 @@ fn tint_symbol(@internal(disable_validation__ignore_constructible_function_param
 
 @group(0) @binding(0) var<storage, read> sb : array<i32>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var tint_symbol_1 : u32 = 0u;
   tint_symbol(sb, &(tint_symbol_1));
@@ -103,7 +103,7 @@ struct SB {
 
 @group(0) @binding(0) var<storage, read> sb : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var len : u32 = arrayLength(&sb.arr);
 }
@@ -120,7 +120,7 @@ struct SB {
 
 @group(0) @binding(0) var<storage, read> sb : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var tint_symbol_1 : u32 = 0u;
   tint_symbol(sb, &(tint_symbol_1));
@@ -142,7 +142,7 @@ struct S {
 
 @group(0) @binding(0) var<storage, read> arr : array<S>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   let len = arrayLength(&arr);
 }
@@ -157,7 +157,7 @@ struct S {
 
 @group(0) @binding(0) var<storage, read> arr : array<S>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var tint_symbol_1 : u32 = 0u;
   tint_symbol(arr, &(tint_symbol_1));
@@ -179,7 +179,7 @@ struct S {
 
 @group(0) @binding(0) var<storage, read> arr : array<array<S, 4>>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   let len = arrayLength(&arr);
 }
@@ -194,7 +194,7 @@ struct S {
 
 @group(0) @binding(0) var<storage, read> arr : array<array<S, 4>>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var tint_symbol_1 : u32 = 0u;
   tint_symbol(arr, &(tint_symbol_1));
@@ -212,7 +212,7 @@ TEST_F(CalculateArrayLengthTest, InSameBlock) {
     auto* src = R"(
 @group(0) @binding(0) var<storage, read> sb : array<i32>;;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var a : u32 = arrayLength(&sb);
   var b : u32 = arrayLength(&sb);
@@ -226,7 +226,7 @@ fn tint_symbol(@internal(disable_validation__ignore_constructible_function_param
 
 @group(0) @binding(0) var<storage, read> sb : array<i32>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var tint_symbol_1 : u32 = 0u;
   tint_symbol(sb, &(tint_symbol_1));
@@ -251,7 +251,7 @@ struct SB {
 
 @group(0) @binding(0) var<storage, read> sb : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var a : u32 = arrayLength(&sb.arr);
   var b : u32 = arrayLength(&sb.arr);
@@ -270,7 +270,7 @@ struct SB {
 
 @group(0) @binding(0) var<storage, read> sb : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var tint_symbol_1 : u32 = 0u;
   tint_symbol(sb, &(tint_symbol_1));
@@ -295,7 +295,7 @@ struct SB {
 
 @group(0) @binding(0) var<storage, read> sb : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   if (true) {
     var len : u32 = arrayLength(&sb.arr);
@@ -318,7 +318,7 @@ struct SB {
 
 @group(0) @binding(0) var<storage, read> sb : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   if (true) {
     var tint_symbol_1 : u32 = 0u;
@@ -359,7 +359,7 @@ struct SB2 {
 
 @group(0) @binding(2) var<storage, read> sb3 : array<i32>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var len1 : u32 = arrayLength(&(sb1.arr1));
   var len2 : u32 = arrayLength(&(sb2.arr2));
@@ -394,7 +394,7 @@ struct SB2 {
 
 @group(0) @binding(2) var<storage, read> sb3 : array<i32>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var tint_symbol_1 : u32 = 0u;
   tint_symbol(sb1, &(tint_symbol_1));
@@ -427,7 +427,7 @@ struct SB {
 @group(0) @binding(0) var<storage, read> a : SB;
 @group(0) @binding(1) var<storage, read> b : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   let x = &a;
   var a : u32 = arrayLength(&a.arr);
@@ -451,7 +451,7 @@ struct SB {
 
 @group(0) @binding(1) var<storage, read> b : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var tint_symbol_1 : u32 = 0u;
   tint_symbol(a, &(tint_symbol_1));
@@ -473,7 +473,7 @@ fn main() {
 
 TEST_F(CalculateArrayLengthTest, OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var len1 : u32 = arrayLength(&(sb1.arr1));
   var len2 : u32 = arrayLength(&(sb2.arr2));
@@ -508,7 +508,7 @@ fn tint_symbol_3(@internal(disable_validation__ignore_constructible_function_par
 @internal(intrinsic_buffer_size)
 fn tint_symbol_6(@internal(disable_validation__ignore_constructible_function_parameter) buffer : array<i32>, result : ptr<function, u32>)
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var tint_symbol_1 : u32 = 0u;
   tint_symbol(sb1, &(tint_symbol_1));

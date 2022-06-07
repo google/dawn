@@ -31,7 +31,7 @@ fn textureSample_85c4ba() {
   var res: vec4<f32> = textureSample(arg_0, arg_1, arg_2, vec2<i32>());
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureSample_85c4ba();
 }

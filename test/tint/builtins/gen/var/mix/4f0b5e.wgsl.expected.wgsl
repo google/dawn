@@ -5,18 +5,18 @@ fn mix_4f0b5e() {
   var res : f32 = mix(arg_0, arg_1, arg_2);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   mix_4f0b5e();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   mix_4f0b5e();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   mix_4f0b5e();
 }

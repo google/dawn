@@ -46,7 +46,7 @@ struct OuterS {
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -69,7 +69,7 @@ struct OuterS {
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -88,7 +88,7 @@ fn main() {
 
 TEST_F(LocalizeStructArrayAssignmentTest, StructArray_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -111,7 +111,7 @@ struct Uniforms {
 )";
 
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -162,7 +162,7 @@ struct OuterS {
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -189,7 +189,7 @@ struct OuterS {
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -208,7 +208,7 @@ fn main() {
 
 TEST_F(LocalizeStructArrayAssignmentTest, StructStructArray_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -235,7 +235,7 @@ struct Uniforms {
 )";
 
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -287,7 +287,7 @@ struct OuterS {
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -311,7 +311,7 @@ struct OuterS {
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -348,7 +348,7 @@ struct OuterS {
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -375,7 +375,7 @@ struct OuterS {
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -413,7 +413,7 @@ struct OuterS {
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s : OuterS;
@@ -441,7 +441,7 @@ struct OuterS {
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s : OuterS;
@@ -488,7 +488,7 @@ fn getNextIndex() -> u32 {
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s : OuterS;
@@ -523,7 +523,7 @@ fn getNextIndex() -> u32 {
 
 @group(1) @binding(4) var<uniform> uniforms : Uniforms;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s : OuterS;
@@ -545,7 +545,7 @@ fn main() {
 
 TEST_F(LocalizeStructArrayAssignmentTest, IndexingWithSideEffectFunc_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s : OuterS;
@@ -579,7 +579,7 @@ struct InnerS {
 )";
 
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s : OuterS;
@@ -643,7 +643,7 @@ fn f(p : ptr<function, OuterS>) {
   (*p).a1[uniforms.i] = v;
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var s1 : OuterS;
   f(&s1);
@@ -675,7 +675,7 @@ fn f(p : ptr<function, OuterS>) {
   }
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var s1 : OuterS;
   f(&(s1));
@@ -688,7 +688,7 @@ fn main() {
 
 TEST_F(LocalizeStructArrayAssignmentTest, ViaPointerArg_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var s1 : OuterS;
   f(&s1);
@@ -714,7 +714,7 @@ struct Uniforms {
 )";
 
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var s1 : OuterS;
   f(&(s1));
@@ -769,7 +769,7 @@ fn f(p : ptr<function, InnerS>, v : InnerS) {
   *(p) = v;
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -797,7 +797,7 @@ fn f(p : ptr<function, InnerS>, v : InnerS) {
   *(p) = v;
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   var s1 : OuterS;
@@ -831,7 +831,7 @@ fn f(i : u32) -> u32 {
   return (i + 1u);
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var s1 : OuterS;
   var v : vec3<f32>;

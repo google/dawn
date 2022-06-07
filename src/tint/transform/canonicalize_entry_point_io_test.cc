@@ -38,11 +38,11 @@ TEST_F(CanonicalizeEntryPointIOTest, NoShaderIO) {
     // Test that we do not introduce wrapper functions when there is no shader IO
     // to process.
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main() {
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn comp_main() {
 }
 )";
@@ -58,7 +58,7 @@ fn comp_main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, Parameters_Spirv) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main(@location(1) loc1 : f32,
              @location(2) @interpolate(flat) loc2 : vec4<u32>,
              @builtin(position) coord : vec4<f32>) {
@@ -77,7 +77,7 @@ fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
   var col : f32 = (coord.x * loc1);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() {
   frag_main_inner(loc1_1, loc2_1, coord_1);
 }
@@ -92,7 +92,7 @@ fn frag_main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, Parameters_Msl) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main(@location(1) loc1 : f32,
              @location(2) @interpolate(flat) loc2 : vec4<u32>,
              @builtin(position) coord : vec4<f32>) {
@@ -112,7 +112,7 @@ fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
   var col : f32 = (coord.x * loc1);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(@builtin(position) coord : vec4<f32>, tint_symbol : tint_symbol_1) {
   frag_main_inner(tint_symbol.loc1, tint_symbol.loc2, coord);
 }
@@ -127,7 +127,7 @@ fn frag_main(@builtin(position) coord : vec4<f32>, tint_symbol : tint_symbol_1) 
 
 TEST_F(CanonicalizeEntryPointIOTest, Parameters_Hlsl) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main(@location(1) loc1 : f32,
              @location(2) @interpolate(flat) loc2 : vec4<u32>,
              @builtin(position) coord : vec4<f32>) {
@@ -149,7 +149,7 @@ fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
   var col : f32 = (coord.x * loc1);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(tint_symbol : tint_symbol_1) {
   frag_main_inner(tint_symbol.loc1, tint_symbol.loc2, tint_symbol.coord);
 }
@@ -166,7 +166,7 @@ TEST_F(CanonicalizeEntryPointIOTest, Parameter_TypeAlias) {
     auto* src = R"(
 type myf32 = f32;
 
-@stage(fragment)
+@fragment
 fn frag_main(@location(1) loc1 : myf32) {
   var x : myf32 = loc1;
 }
@@ -184,7 +184,7 @@ fn frag_main_inner(loc1 : myf32) {
   var x : myf32 = loc1;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(tint_symbol : tint_symbol_1) {
   frag_main_inner(tint_symbol.loc1);
 }
@@ -199,7 +199,7 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 
 TEST_F(CanonicalizeEntryPointIOTest, Parameter_TypeAlias_OutOfOrder) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main(@location(1) loc1 : myf32) {
   var x : myf32 = loc1;
 }
@@ -217,7 +217,7 @@ fn frag_main_inner(loc1 : myf32) {
   var x : myf32 = loc1;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(tint_symbol : tint_symbol_1) {
   frag_main_inner(tint_symbol.loc1);
 }
@@ -242,7 +242,7 @@ struct FragLocations {
   @location(2) @interpolate(flat) loc2 : vec4<u32>,
 };
 
-@stage(fragment)
+@fragment
 fn frag_main(@location(0) loc0 : f32,
              locations : FragLocations,
              builtins : FragBuiltins) {
@@ -272,7 +272,7 @@ fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltin
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() {
   frag_main_inner(loc0_1, FragLocations(loc1_1, loc2_1), FragBuiltins(coord_1));
 }
@@ -287,7 +287,7 @@ fn frag_main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_Spirv_OutOfOrder) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main(@location(0) loc0 : f32,
              locations : FragLocations,
              builtins : FragBuiltins) {
@@ -316,7 +316,7 @@ fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltin
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() {
   frag_main_inner(loc0_1, FragLocations(loc1_1, loc2_1), FragBuiltins(coord_1));
 }
@@ -348,7 +348,7 @@ struct FragLocations {
   @location(2) @interpolate(flat) loc2 : vec4<u32>,
 };
 
-@stage(fragment)
+@fragment
 fn frag_main(@location(0) loc0 : f32,
              locations : FragLocations,
              builtins : FragBuiltins) {
@@ -379,7 +379,7 @@ fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltin
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(@builtin(position) coord : vec4<f32>, tint_symbol : tint_symbol_1) {
   frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(coord));
 }
@@ -394,7 +394,7 @@ fn frag_main(@builtin(position) coord : vec4<f32>, tint_symbol : tint_symbol_1) 
 
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_kMsl_OutOfOrder) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main(@location(0) loc0 : f32,
              locations : FragLocations,
              builtins : FragBuiltins) {
@@ -424,7 +424,7 @@ fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltin
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(@builtin(position) coord : vec4<f32>, tint_symbol : tint_symbol_1) {
   frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(coord));
 }
@@ -456,7 +456,7 @@ struct FragLocations {
   @location(2) @interpolate(flat) loc2 : vec4<u32>,
 };
 
-@stage(fragment)
+@fragment
 fn frag_main(@location(0) loc0 : f32,
              locations : FragLocations,
              builtins : FragBuiltins) {
@@ -489,7 +489,7 @@ fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltin
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(tint_symbol : tint_symbol_1) {
   frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(tint_symbol.coord));
 }
@@ -504,7 +504,7 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_Hlsl_OutOfOrder) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main(@location(0) loc0 : f32,
              locations : FragLocations,
              builtins : FragBuiltins) {
@@ -536,7 +536,7 @@ fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltin
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(tint_symbol : tint_symbol_1) {
   frag_main_inner(tint_symbol.loc0, FragLocations(tint_symbol.loc1, tint_symbol.loc2), FragBuiltins(tint_symbol.coord));
 }
@@ -560,7 +560,7 @@ struct FragLocations {
 
 TEST_F(CanonicalizeEntryPointIOTest, Return_NonStruct_Spirv) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main() -> @builtin(frag_depth) f32 {
   return 1.0;
 }
@@ -573,7 +573,7 @@ fn frag_main_inner() -> f32 {
   return 1.0;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() {
   let inner_result = frag_main_inner();
   value = inner_result;
@@ -589,7 +589,7 @@ fn frag_main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, Return_NonStruct_Msl) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main() -> @builtin(frag_depth) f32 {
   return 1.0;
 }
@@ -605,7 +605,7 @@ fn frag_main_inner() -> f32 {
   return 1.0;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -623,7 +623,7 @@ fn frag_main() -> tint_symbol {
 
 TEST_F(CanonicalizeEntryPointIOTest, Return_NonStruct_Hlsl) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main() -> @builtin(frag_depth) f32 {
   return 1.0;
 }
@@ -639,7 +639,7 @@ fn frag_main_inner() -> f32 {
   return 1.0;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -663,7 +663,7 @@ struct FragOutput {
   @builtin(sample_mask) mask : u32,
 };
 
-@stage(fragment)
+@fragment
 fn frag_main() -> FragOutput {
   var output : FragOutput;
   output.depth = 1.0;
@@ -694,7 +694,7 @@ fn frag_main_inner() -> FragOutput {
   return output;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() {
   let inner_result = frag_main_inner();
   color_1 = inner_result.color;
@@ -712,7 +712,7 @@ fn frag_main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Spirv_OutOfOrder) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main() -> FragOutput {
   var output : FragOutput;
   output.depth = 1.0;
@@ -743,7 +743,7 @@ fn frag_main_inner() -> FragOutput {
   return output;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() {
   let inner_result = frag_main_inner();
   color_1 = inner_result.color;
@@ -773,7 +773,7 @@ struct FragOutput {
   @builtin(sample_mask) mask : u32,
 };
 
-@stage(fragment)
+@fragment
 fn frag_main() -> FragOutput {
   var output : FragOutput;
   output.depth = 1.0;
@@ -807,7 +807,7 @@ fn frag_main_inner() -> FragOutput {
   return output;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -827,7 +827,7 @@ fn frag_main() -> tint_symbol {
 
 TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Msl_OutOfOrder) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main() -> FragOutput {
   var output : FragOutput;
   output.depth = 1.0;
@@ -861,7 +861,7 @@ fn frag_main_inner() -> FragOutput {
   return output;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -893,7 +893,7 @@ struct FragOutput {
   @builtin(sample_mask) mask : u32,
 };
 
-@stage(fragment)
+@fragment
 fn frag_main() -> FragOutput {
   var output : FragOutput;
   output.depth = 1.0;
@@ -927,7 +927,7 @@ fn frag_main_inner() -> FragOutput {
   return output;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -947,7 +947,7 @@ fn frag_main() -> tint_symbol {
 
 TEST_F(CanonicalizeEntryPointIOTest, Return_Struct_Hlsl_OutOfOrder) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main() -> FragOutput {
   var output : FragOutput;
   output.depth = 1.0;
@@ -981,7 +981,7 @@ fn frag_main_inner() -> FragOutput {
   return output;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -1016,12 +1016,12 @@ fn foo(x : FragmentInput) -> f32 {
   return x.value * x.mul;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main1(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main2(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
@@ -1049,7 +1049,7 @@ fn frag_main1_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main1() {
   frag_main1_inner(FragmentInput(value_1, mul_1));
 }
@@ -1058,7 +1058,7 @@ fn frag_main2_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main2() {
   frag_main2_inner(FragmentInput(value_2, mul_2));
 }
@@ -1073,12 +1073,12 @@ fn frag_main2() {
 
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_SharedDeviceFunction_Spirv_OutOfOrder) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main1(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main2(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
@@ -1106,7 +1106,7 @@ fn frag_main1_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main1() {
   frag_main1_inner(FragmentInput(value_1, mul_1));
 }
@@ -1115,7 +1115,7 @@ fn frag_main2_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main2() {
   frag_main2_inner(FragmentInput(value_2, mul_2));
 }
@@ -1148,12 +1148,12 @@ fn foo(x : FragmentInput) -> f32 {
   return x.value * x.mul;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main1(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main2(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
@@ -1180,7 +1180,7 @@ fn frag_main1_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main1(tint_symbol : tint_symbol_1) {
   frag_main1_inner(FragmentInput(tint_symbol.value, tint_symbol.mul));
 }
@@ -1196,7 +1196,7 @@ fn frag_main2_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main2(tint_symbol_2 : tint_symbol_3) {
   frag_main2_inner(FragmentInput(tint_symbol_2.value, tint_symbol_2.mul));
 }
@@ -1211,12 +1211,12 @@ fn frag_main2(tint_symbol_2 : tint_symbol_3) {
 
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_SharedDeviceFunction_Msl_OutOfOrder) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main1(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main2(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
@@ -1243,7 +1243,7 @@ fn frag_main1_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main1(tint_symbol : tint_symbol_1) {
   frag_main1_inner(FragmentInput(tint_symbol.value, tint_symbol.mul));
 }
@@ -1259,7 +1259,7 @@ fn frag_main2_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main2(tint_symbol_2 : tint_symbol_3) {
   frag_main2_inner(FragmentInput(tint_symbol_2.value, tint_symbol_2.mul));
 }
@@ -1292,12 +1292,12 @@ fn foo(x : FragmentInput) -> f32 {
   return x.value * x.mul;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main1(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main2(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
@@ -1324,7 +1324,7 @@ fn frag_main1_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main1(tint_symbol : tint_symbol_1) {
   frag_main1_inner(FragmentInput(tint_symbol.value, tint_symbol.mul));
 }
@@ -1340,7 +1340,7 @@ fn frag_main2_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main2(tint_symbol_2 : tint_symbol_3) {
   frag_main2_inner(FragmentInput(tint_symbol_2.value, tint_symbol_2.mul));
 }
@@ -1355,12 +1355,12 @@ fn frag_main2(tint_symbol_2 : tint_symbol_3) {
 
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters_SharedDeviceFunction_Hlsl_OutOfOrder) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main1(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main2(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
@@ -1387,7 +1387,7 @@ fn frag_main1_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main1(tint_symbol : tint_symbol_1) {
   frag_main1_inner(FragmentInput(tint_symbol.value, tint_symbol.mul));
 }
@@ -1403,7 +1403,7 @@ fn frag_main2_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main2(tint_symbol_2 : tint_symbol_3) {
   frag_main2_inner(FragmentInput(tint_symbol_2.value, tint_symbol_2.mul));
 }
@@ -1442,7 +1442,7 @@ fn bar() -> f32 {
   return global_inputs.col2 * 2.0;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main1(inputs : FragmentInput) {
  global_inputs = inputs;
  var r : f32 = foo();
@@ -1479,7 +1479,7 @@ fn frag_main1_inner(inputs : FragmentInput) {
   var g : f32 = bar();
 }
 
-@stage(fragment)
+@fragment
 fn frag_main1(tint_symbol : tint_symbol_1) {
   frag_main1_inner(FragmentInput(tint_symbol.col1, tint_symbol.col2));
 }
@@ -1494,7 +1494,7 @@ fn frag_main1(tint_symbol : tint_symbol_1) {
 
 TEST_F(CanonicalizeEntryPointIOTest, Struct_ModuleScopeVariable_OutOfOrder) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main1(inputs : FragmentInput) {
  global_inputs = inputs;
  var r : f32 = foo();
@@ -1531,7 +1531,7 @@ fn frag_main1_inner(inputs : FragmentInput) {
   var g : f32 = bar();
 }
 
-@stage(fragment)
+@fragment
 fn frag_main1(tint_symbol : tint_symbol_1) {
   frag_main1_inner(FragmentInput(tint_symbol.col1, tint_symbol.col2));
 }
@@ -1581,7 +1581,7 @@ fn foo(x : MyFragmentInput) -> myf32 {
   return x.col1;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(inputs : MyFragmentInput) -> MyFragmentOutput {
   var x : myf32 = foo(inputs);
   return MyFragmentOutput(x, inputs.col2);
@@ -1628,7 +1628,7 @@ fn frag_main_inner(inputs : MyFragmentInput) -> MyFragmentOutput {
   return MyFragmentOutput(x, inputs.col2);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   let inner_result = frag_main_inner(MyFragmentInput(tint_symbol.col1, tint_symbol.col2));
   var wrapper_result : tint_symbol_2;
@@ -1647,7 +1647,7 @@ fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 
 TEST_F(CanonicalizeEntryPointIOTest, Struct_TypeAliases_OutOfOrder) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main(inputs : MyFragmentInput) -> MyFragmentOutput {
   var x : myf32 = foo(inputs);
   return MyFragmentOutput(x, inputs.col2);
@@ -1694,7 +1694,7 @@ fn frag_main_inner(inputs : MyFragmentInput) -> MyFragmentOutput {
   return MyFragmentOutput(x, inputs.col2);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   let inner_result = frag_main_inner(MyFragmentInput(tint_symbol.col1, tint_symbol.col2));
   var wrapper_result : tint_symbol_2;
@@ -1745,12 +1745,12 @@ struct FragmentIn {
   @location(2) @interpolate(linear, sample) loc2 : f32,
 };
 
-@stage(vertex)
+@vertex
 fn vert_main() -> VertexOut {
   return VertexOut();
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(inputs : FragmentIn,
              @location(3) @interpolate(perspective, centroid) loc3 : f32) {
   let x = inputs.loc1 + inputs.loc2 + loc3;
@@ -1785,7 +1785,7 @@ fn vert_main_inner() -> VertexOut {
   return VertexOut();
 }
 
-@stage(vertex)
+@vertex
 fn vert_main() -> tint_symbol {
   let inner_result = vert_main_inner();
   var wrapper_result : tint_symbol;
@@ -1809,7 +1809,7 @@ fn frag_main_inner(inputs : FragmentIn, loc3 : f32) {
   let x = ((inputs.loc1 + inputs.loc2) + loc3);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(tint_symbol_1 : tint_symbol_2) {
   frag_main_inner(FragmentIn(tint_symbol_1.loc1, tint_symbol_1.loc2), tint_symbol_1.loc3);
 }
@@ -1824,13 +1824,13 @@ fn frag_main(tint_symbol_1 : tint_symbol_2) {
 
 TEST_F(CanonicalizeEntryPointIOTest, InterpolateAttributes_OutOfOrder) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main(inputs : FragmentIn,
              @location(3) @interpolate(perspective, centroid) loc3 : f32) {
   let x = inputs.loc1 + inputs.loc2 + loc3;
 }
 
-@stage(vertex)
+@vertex
 fn vert_main() -> VertexOut {
   return VertexOut();
 }
@@ -1862,7 +1862,7 @@ fn frag_main_inner(inputs : FragmentIn, loc3 : f32) {
   let x = ((inputs.loc1 + inputs.loc2) + loc3);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(tint_symbol : tint_symbol_1) {
   frag_main_inner(FragmentIn(tint_symbol.loc1, tint_symbol.loc2), tint_symbol.loc3);
 }
@@ -1882,7 +1882,7 @@ fn vert_main_inner() -> VertexOut {
   return VertexOut();
 }
 
-@stage(vertex)
+@vertex
 fn vert_main() -> tint_symbol_2 {
   let inner_result = vert_main_inner();
   var wrapper_result : tint_symbol_2;
@@ -1939,12 +1939,12 @@ struct FragmentInterface {
   @location(3) @interpolate(flat) vu : vec4<u32>,
 };
 
-@stage(vertex)
+@vertex
 fn vert_main(in : VertexIn) -> VertexOut {
   return VertexOut(in.i, in.u, in.vi, in.vu, vec4<f32>());
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(inputs : FragmentInterface) -> FragmentInterface {
   return inputs;
 }
@@ -2012,7 +2012,7 @@ fn vert_main_inner(in : VertexIn) -> VertexOut {
   return VertexOut(in.i, in.u, in.vi, in.vu, vec4<f32>());
 }
 
-@stage(vertex)
+@vertex
 fn vert_main() {
   let inner_result = vert_main_inner(VertexIn(i_1, u_1, vi_1, vu_1));
   i_2 = inner_result.i;
@@ -2026,7 +2026,7 @@ fn frag_main_inner(inputs : FragmentInterface) -> FragmentInterface {
   return inputs;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() {
   let inner_result_1 = frag_main_inner(FragmentInterface(i_3, u_3, vi_3, vu_3));
   i_4 = inner_result_1.i;
@@ -2047,12 +2047,12 @@ TEST_F(CanonicalizeEntryPointIOTest, InterpolateAttributes_Integers_Spirv_OutOfO
     // Test that we add a Flat attribute to integers that are vertex outputs and
     // fragment inputs, but not vertex inputs or fragment outputs.
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn vert_main(in : VertexIn) -> VertexOut {
   return VertexOut(in.i, in.u, in.vi, in.vu, vec4<f32>());
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(inputs : FragmentInterface) -> FragmentInterface {
   return inputs;
 }
@@ -2120,7 +2120,7 @@ fn vert_main_inner(in : VertexIn) -> VertexOut {
   return VertexOut(in.i, in.u, in.vi, in.vu, vec4<f32>());
 }
 
-@stage(vertex)
+@vertex
 fn vert_main() {
   let inner_result = vert_main_inner(VertexIn(i_1, u_1, vi_1, vu_1));
   i_2 = inner_result.i;
@@ -2134,7 +2134,7 @@ fn frag_main_inner(inputs : FragmentInterface) -> FragmentInterface {
   return inputs;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() {
   let inner_result_1 = frag_main_inner(FragmentInterface(i_3, u_3, vi_3, vu_3));
   i_4 = inner_result_1.i;
@@ -2179,12 +2179,12 @@ struct VertexOut {
   @builtin(position) @invariant pos : vec4<f32>,
 };
 
-@stage(vertex)
+@vertex
 fn main1() -> VertexOut {
   return VertexOut();
 }
 
-@stage(vertex)
+@vertex
 fn main2() -> @builtin(position) @invariant vec4<f32> {
   return vec4<f32>();
 }
@@ -2204,7 +2204,7 @@ fn main1_inner() -> VertexOut {
   return VertexOut();
 }
 
-@stage(vertex)
+@vertex
 fn main1() -> tint_symbol {
   let inner_result = main1_inner();
   var wrapper_result : tint_symbol;
@@ -2221,7 +2221,7 @@ fn main2_inner() -> vec4<f32> {
   return vec4<f32>();
 }
 
-@stage(vertex)
+@vertex
 fn main2() -> tint_symbol_1 {
   let inner_result_1 = main2_inner();
   var wrapper_result_1 : tint_symbol_1;
@@ -2239,12 +2239,12 @@ fn main2() -> tint_symbol_1 {
 
 TEST_F(CanonicalizeEntryPointIOTest, InvariantAttributes_OutOfOrder) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn main1() -> VertexOut {
   return VertexOut();
 }
 
-@stage(vertex)
+@vertex
 fn main2() -> @builtin(position) @invariant vec4<f32> {
   return vec4<f32>();
 }
@@ -2264,7 +2264,7 @@ fn main1_inner() -> VertexOut {
   return VertexOut();
 }
 
-@stage(vertex)
+@vertex
 fn main1() -> tint_symbol {
   let inner_result = main1_inner();
   var wrapper_result : tint_symbol;
@@ -2281,7 +2281,7 @@ fn main2_inner() -> vec4<f32> {
   return vec4<f32>();
 }
 
-@stage(vertex)
+@vertex
 fn main2() -> tint_symbol_1 {
   let inner_result_1 = main2_inner();
   var wrapper_result_1 : tint_symbol_1;
@@ -2313,7 +2313,7 @@ struct FragmentOutput {
   @size(16) @location(1) @interpolate(flat) value : f32,
 };
 
-@stage(fragment)
+@fragment
 fn frag_main(inputs : FragmentInput) -> FragmentOutput {
   return FragmentOutput(inputs.coord.x * inputs.value + inputs.loc0);
 }
@@ -2352,7 +2352,7 @@ fn frag_main_inner(inputs : FragmentInput) -> FragmentOutput {
   return FragmentOutput(((inputs.coord.x * inputs.value) + inputs.loc0));
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   let inner_result = frag_main_inner(FragmentInput(tint_symbol.value, tint_symbol.coord, tint_symbol.loc0));
   var wrapper_result : tint_symbol_2;
@@ -2370,7 +2370,7 @@ fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 
 TEST_F(CanonicalizeEntryPointIOTest, Struct_LayoutAttributes_OutOfOrder) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main(inputs : FragmentInput) -> FragmentOutput {
   return FragmentOutput(inputs.coord.x * inputs.value + inputs.loc0);
 }
@@ -2405,7 +2405,7 @@ fn frag_main_inner(inputs : FragmentInput) -> FragmentOutput {
   return FragmentOutput(((inputs.coord.x * inputs.value) + inputs.loc0));
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   let inner_result = frag_main_inner(FragmentInput(tint_symbol.value, tint_symbol.coord, tint_symbol.loc0));
   var wrapper_result : tint_symbol_2;
@@ -2451,12 +2451,12 @@ struct FragmentInputExtra {
   @location(0) a : f32,
 };
 
-@stage(vertex)
+@vertex
 fn vert_main() -> VertexOutput {
   return VertexOutput();
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(@builtin(front_facing) ff : bool,
              @location(2) @interpolate(flat) c : i32,
              inputs : FragmentInputExtra,
@@ -2496,7 +2496,7 @@ fn vert_main_inner() -> VertexOutput {
   return VertexOutput();
 }
 
-@stage(vertex)
+@vertex
 fn vert_main() -> tint_symbol {
   let inner_result = vert_main_inner();
   var wrapper_result : tint_symbol;
@@ -2526,7 +2526,7 @@ struct tint_symbol_2 {
 fn frag_main_inner(ff : bool, c : i32, inputs : FragmentInputExtra, b : u32) {
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(tint_symbol_1 : tint_symbol_2) {
   frag_main_inner(tint_symbol_1.ff, tint_symbol_1.c, FragmentInputExtra(tint_symbol_1.d, tint_symbol_1.pos, tint_symbol_1.a), tint_symbol_1.b);
 }
@@ -2541,12 +2541,12 @@ fn frag_main(tint_symbol_1 : tint_symbol_2) {
 
 TEST_F(CanonicalizeEntryPointIOTest, SortedMembers_OutOfOrder) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn vert_main() -> VertexOutput {
   return VertexOutput();
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(@builtin(front_facing) ff : bool,
              @location(2) @interpolate(flat) c : i32,
              inputs : FragmentInputExtra,
@@ -2586,7 +2586,7 @@ fn vert_main_inner() -> VertexOutput {
   return VertexOutput();
 }
 
-@stage(vertex)
+@vertex
 fn vert_main() -> tint_symbol {
   let inner_result = vert_main_inner();
   var wrapper_result : tint_symbol;
@@ -2616,7 +2616,7 @@ struct tint_symbol_2 {
 fn frag_main_inner(ff : bool, c : i32, inputs : FragmentInputExtra, b : u32) {
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(tint_symbol_1 : tint_symbol_2) {
   frag_main_inner(tint_symbol_1.ff, tint_symbol_1.c, FragmentInputExtra(tint_symbol_1.d, tint_symbol_1.pos, tint_symbol_1.a), tint_symbol_1.b);
 }
@@ -2645,7 +2645,7 @@ struct FragmentInputExtra {
 
 TEST_F(CanonicalizeEntryPointIOTest, DontRenameSymbols) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn tint_symbol_1(@location(0) col : f32) {
 }
 )";
@@ -2659,7 +2659,7 @@ struct tint_symbol_2 {
 fn tint_symbol_1_inner(col : f32) {
 }
 
-@stage(fragment)
+@fragment
 fn tint_symbol_1(tint_symbol : tint_symbol_2) {
   tint_symbol_1_inner(tint_symbol.col);
 }
@@ -2674,7 +2674,7 @@ fn tint_symbol_1(tint_symbol : tint_symbol_2) {
 
 TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_VoidNoReturn) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main() {
 }
 )";
@@ -2688,7 +2688,7 @@ struct tint_symbol {
 fn frag_main_inner() {
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() -> tint_symbol {
   frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -2706,7 +2706,7 @@ fn frag_main() -> tint_symbol {
 
 TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_VoidWithReturn) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main() {
   return;
 }
@@ -2722,7 +2722,7 @@ fn frag_main_inner() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() -> tint_symbol {
   frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -2740,7 +2740,7 @@ fn frag_main() -> tint_symbol {
 
 TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_WithAuthoredMask) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main() -> @builtin(sample_mask) u32 {
   return 7u;
 }
@@ -2756,7 +2756,7 @@ fn frag_main_inner() -> u32 {
   return 7u;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -2774,7 +2774,7 @@ fn frag_main() -> tint_symbol {
 
 TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_WithoutAuthoredMask) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main() -> @location(0) f32 {
   return 1.0;
 }
@@ -2792,7 +2792,7 @@ fn frag_main_inner() -> f32 {
   return 1.0;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -2817,7 +2817,7 @@ struct Output {
   @location(0) value : f32,
 };
 
-@stage(fragment)
+@fragment
 fn frag_main() -> Output {
   return Output(0.5, 7u, 1.0);
 }
@@ -2843,7 +2843,7 @@ fn frag_main_inner() -> Output {
   return Output(0.5, 7u, 1.0);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -2863,7 +2863,7 @@ fn frag_main() -> tint_symbol {
 
 TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_StructWithAuthoredMask_OutOfOrder) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main() -> Output {
   return Output(0.5, 7u, 1.0);
 }
@@ -2889,7 +2889,7 @@ fn frag_main_inner() -> Output {
   return Output(0.5, 7u, 1.0);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -2920,7 +2920,7 @@ struct Output {
   @location(0) value : f32,
 };
 
-@stage(fragment)
+@fragment
 fn frag_main() -> Output {
   return Output(0.5, 1.0);
 }
@@ -2945,7 +2945,7 @@ fn frag_main_inner() -> Output {
   return Output(0.5, 1.0);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -2965,7 +2965,7 @@ fn frag_main() -> tint_symbol {
 
 TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_StructWithoutAuthoredMask_OutOfOrder) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main() -> Output {
   return Output(0.5, 1.0);
 }
@@ -2990,7 +2990,7 @@ fn frag_main_inner() -> Output {
   return Output(0.5, 1.0);
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -3015,22 +3015,22 @@ struct Output {
 
 TEST_F(CanonicalizeEntryPointIOTest, FixedSampleMask_MultipleShaders) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn frag_main1() -> @builtin(sample_mask) u32 {
   return 7u;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main2() -> @location(0) f32 {
   return 1.0;
 }
 
-@stage(vertex)
+@vertex
 fn vert_main1() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn comp_main1() {
 }
 )";
@@ -3045,7 +3045,7 @@ fn frag_main1_inner() -> u32 {
   return 7u;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main1() -> tint_symbol {
   let inner_result = frag_main1_inner();
   var wrapper_result : tint_symbol;
@@ -3064,7 +3064,7 @@ fn frag_main2_inner() -> f32 {
   return 1.0;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main2() -> tint_symbol_1 {
   let inner_result_1 = frag_main2_inner();
   var wrapper_result_1 : tint_symbol_1;
@@ -3082,7 +3082,7 @@ fn vert_main1_inner() -> vec4<f32> {
   return vec4<f32>();
 }
 
-@stage(vertex)
+@vertex
 fn vert_main1() -> tint_symbol_2 {
   let inner_result_2 = vert_main1_inner();
   var wrapper_result_2 : tint_symbol_2;
@@ -3090,7 +3090,7 @@ fn vert_main1() -> tint_symbol_2 {
   return wrapper_result_2;
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn comp_main1() {
 }
 )";
@@ -3109,7 +3109,7 @@ struct FragOut {
   @location(1) fixed_sample_mask_1 : vec4<f32>,
 };
 
-@stage(fragment)
+@fragment
 fn frag_main() -> FragOut {
   return FragOut();
 }
@@ -3134,7 +3134,7 @@ fn frag_main_inner() -> FragOut {
   return FragOut();
 }
 
-@stage(fragment)
+@fragment
 fn frag_main() -> tint_symbol {
   let inner_result = frag_main_inner();
   var wrapper_result : tint_symbol;
@@ -3154,7 +3154,7 @@ fn frag_main() -> tint_symbol {
 
 TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_ReturnNonStruct_Spirv) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn vert_main() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
@@ -3169,7 +3169,7 @@ fn vert_main_inner() -> vec4<f32> {
   return vec4<f32>();
 }
 
-@stage(vertex)
+@vertex
 fn vert_main() {
   let inner_result = vert_main_inner();
   value = inner_result;
@@ -3187,7 +3187,7 @@ fn vert_main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_ReturnNonStruct_Msl) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn vert_main() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
@@ -3205,7 +3205,7 @@ fn vert_main_inner() -> vec4<f32> {
   return vec4<f32>();
 }
 
-@stage(vertex)
+@vertex
 fn vert_main() -> tint_symbol {
   let inner_result = vert_main_inner();
   var wrapper_result : tint_symbol;
@@ -3229,7 +3229,7 @@ struct VertOut {
   @builtin(position) pos : vec4<f32>,
 };
 
-@stage(vertex)
+@vertex
 fn vert_main() -> VertOut {
   return VertOut();
 }
@@ -3248,7 +3248,7 @@ fn vert_main_inner() -> VertOut {
   return VertOut();
 }
 
-@stage(vertex)
+@vertex
 fn vert_main() {
   let inner_result = vert_main_inner();
   pos_1 = inner_result.pos;
@@ -3266,7 +3266,7 @@ fn vert_main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_ReturnStruct_Spirv_OutOfOrder) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn vert_main() -> VertOut {
   return VertOut();
 }
@@ -3285,7 +3285,7 @@ fn vert_main_inner() -> VertOut {
   return VertOut();
 }
 
-@stage(vertex)
+@vertex
 fn vert_main() {
   let inner_result = vert_main_inner();
   pos_1 = inner_result.pos;
@@ -3311,7 +3311,7 @@ struct VertOut {
   @builtin(position) pos : vec4<f32>,
 };
 
-@stage(vertex)
+@vertex
 fn vert_main() -> VertOut {
   return VertOut();
 }
@@ -3333,7 +3333,7 @@ fn vert_main_inner() -> VertOut {
   return VertOut();
 }
 
-@stage(vertex)
+@vertex
 fn vert_main() -> tint_symbol {
   let inner_result = vert_main_inner();
   var wrapper_result : tint_symbol;
@@ -3353,7 +3353,7 @@ fn vert_main() -> tint_symbol {
 
 TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_ReturnStruct_Msl_OutOfOrder) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn vert_main() -> VertOut {
   return VertOut();
 }
@@ -3375,7 +3375,7 @@ fn vert_main_inner() -> VertOut {
   return VertOut();
 }
 
-@stage(vertex)
+@vertex
 fn vert_main() -> tint_symbol {
   let inner_result = vert_main_inner();
   var wrapper_result : tint_symbol;
@@ -3416,7 +3416,7 @@ struct VertOut {
   @builtin(position) vertex_point_size_1 : vec4<f32>,
 };
 
-@stage(vertex)
+@vertex
 fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   let x = collide.collide + collide_1.collide;
   return VertOut();
@@ -3458,7 +3458,7 @@ fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   return VertOut();
 }
 
-@stage(vertex)
+@vertex
 fn vert_main() {
   let inner_result = vert_main_inner(VertIn1(collide_2), VertIn2(collide_3));
   vertex_point_size_3 = inner_result.vertex_point_size;
@@ -3477,7 +3477,7 @@ fn vert_main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_AvoidNameClash_Spirv_OutOfOrder) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   let x = collide.collide + collide_1.collide;
   return VertOut();
@@ -3517,7 +3517,7 @@ fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   return VertOut();
 }
 
-@stage(vertex)
+@vertex
 fn vert_main() {
   let inner_result = vert_main_inner(VertIn1(collide_2), VertIn2(collide_3));
   vertex_point_size_3 = inner_result.vertex_point_size;
@@ -3568,7 +3568,7 @@ struct VertOut {
   @builtin(position) vertex_point_size_1 : vec4<f32>,
 };
 
-@stage(vertex)
+@vertex
 fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   let x = collide.collide + collide_1.collide;
   return VertOut();
@@ -3610,7 +3610,7 @@ fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   return VertOut();
 }
 
-@stage(vertex)
+@vertex
 fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   let inner_result = vert_main_inner(VertIn1(tint_symbol.collide), VertIn2(tint_symbol.collide_2));
   var wrapper_result : tint_symbol_2;
@@ -3631,7 +3631,7 @@ fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 
 TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_AvoidNameClash_Msl_OutOfOrder) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   let x = collide.collide + collide_1.collide;
   return VertOut();
@@ -3673,7 +3673,7 @@ fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   return VertOut();
 }
 
-@stage(vertex)
+@vertex
 fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   let inner_result = vert_main_inner(VertIn1(tint_symbol.collide), VertIn2(tint_symbol.collide_2));
   var wrapper_result : tint_symbol_2;
@@ -3720,7 +3720,7 @@ struct VertOut {
   @builtin(position) vertex_point_size_1 : vec4<f32>,
 };
 
-@stage(vertex)
+@vertex
 fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   let x = collide.collide + collide_1.collide;
   return VertOut();
@@ -3762,7 +3762,7 @@ fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   return VertOut();
 }
 
-@stage(vertex)
+@vertex
 fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   let inner_result = vert_main_inner(VertIn1(tint_symbol.collide), VertIn2(tint_symbol.collide_2));
   var wrapper_result : tint_symbol_2;
@@ -3783,7 +3783,7 @@ fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
 
 TEST_F(CanonicalizeEntryPointIOTest, EmitVertexPointSize_AvoidNameClash_Hlsl_OutOfOrder) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   let x = collide.collide + collide_1.collide;
   return VertOut();
@@ -3825,7 +3825,7 @@ fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   return VertOut();
 }
 
-@stage(vertex)
+@vertex
 fn vert_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   let inner_result = vert_main_inner(VertIn1(tint_symbol.collide), VertIn2(tint_symbol.collide_2));
   var wrapper_result : tint_symbol_2;
@@ -3859,7 +3859,7 @@ struct VertOut {
 
 TEST_F(CanonicalizeEntryPointIOTest, SpirvSampleMaskBuiltins) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn main(@builtin(sample_index) sample_index : u32,
         @builtin(sample_mask) mask_in : u32
         ) -> @builtin(sample_mask) u32 {
@@ -3878,7 +3878,7 @@ fn main_inner(sample_index : u32, mask_in : u32) -> u32 {
   return mask_in;
 }
 
-@stage(fragment)
+@fragment
 fn main() {
   let inner_result = main_inner(sample_index_1, mask_in_1[0i]);
   value[0i] = inner_result;
@@ -3894,7 +3894,7 @@ fn main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, GLSLSampleMaskBuiltins) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn fragment_main(@builtin(sample_index) sample_index : u32,
                  @builtin(sample_mask) mask_in : u32
                  ) -> @builtin(sample_mask) u32 {
@@ -3913,7 +3913,7 @@ fn fragment_main(sample_index : u32, mask_in : u32) -> u32 {
   return mask_in;
 }
 
-@stage(fragment)
+@fragment
 fn main() {
   let inner_result = fragment_main(bitcast<u32>(gl_SampleID), bitcast<u32>(gl_SampleMaskIn[0i]));
   gl_SampleMask[0i] = bitcast<i32>(inner_result);
@@ -3929,7 +3929,7 @@ fn main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, GLSLVertexInstanceIndexBuiltins) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn vertex_main(@builtin(vertex_index) vertexID : u32,
                @builtin(instance_index) instanceID : u32
                ) -> @builtin(position) vec4<f32> {
@@ -3948,7 +3948,7 @@ fn vertex_main(vertexID : u32, instanceID : u32) -> vec4<f32> {
   return vec4<f32>((f32(vertexID) + f32(instanceID)));
 }
 
-@stage(vertex)
+@vertex
 fn main() {
   let inner_result = vertex_main(bitcast<u32>(gl_VertexID), bitcast<u32>(gl_InstanceID));
   gl_Position = inner_result;

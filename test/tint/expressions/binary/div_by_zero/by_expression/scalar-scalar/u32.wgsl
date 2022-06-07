@@ -1,4 +1,4 @@
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
     var a = 1u;
     var b = 0u;

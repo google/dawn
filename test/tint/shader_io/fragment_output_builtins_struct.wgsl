@@ -3,7 +3,7 @@ struct FragmentOutputs {
   @builtin(sample_mask) sample_mask : u32,
 };
 
-@stage(fragment)
+@fragment
 fn main() -> FragmentOutputs {
   return FragmentOutputs(1.0, 1u);
 }

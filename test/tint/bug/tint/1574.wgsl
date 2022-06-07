@@ -9,7 +9,7 @@ var<workgroup> b_u32 : atomic<u32>;
 var<workgroup> b_i32 : atomic<i32>;
 
 
-@stage(compute) @workgroup_size(16)
+@compute @workgroup_size(16)
 fn main() {
   {
     var value = 42u;

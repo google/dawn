@@ -29,18 +29,18 @@ fn textureNumSamples_2c6f14() {
   var res: i32 = textureNumSamples(arg_0);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureNumSamples_2c6f14();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureNumSamples_2c6f14();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   textureNumSamples_2c6f14();
 }

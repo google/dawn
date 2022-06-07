@@ -3,18 +3,18 @@ fn any_2ab91a() {
   var res : bool = any(arg_0);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   any_2ab91a();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   any_2ab91a();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   any_2ab91a();
 }

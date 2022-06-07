@@ -32,12 +32,12 @@ fn atomicAdd_8a199a() {
   var res: u32 = atomicAdd(&sb_rw.arg_0, 1u);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   atomicAdd_8a199a();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   atomicAdd_8a199a();
 }

@@ -15,7 +15,7 @@ struct main_out {
   gl_FragDepth_1 : f32,
 }
 
-@stage(fragment)
+@fragment
 fn main() -> main_out {
   main_1();
   return main_out(outColor, gl_FragDepth);

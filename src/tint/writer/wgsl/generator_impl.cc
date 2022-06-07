@@ -710,7 +710,7 @@ bool GeneratorImpl::EmitAttributes(std::ostream& out, const ast::AttributeList& 
                 return true;
             },
             [&](const ast::StageAttribute* stage) {
-                out << "stage(" << stage->stage << ")";
+                out << stage->stage;
                 return true;
             },
             [&](const ast::BindingAttribute* binding) {

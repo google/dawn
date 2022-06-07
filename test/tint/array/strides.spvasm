@@ -5,7 +5,7 @@
 ; };
 ; @group(0) @binding(0) var<storage, read_write> s : S;
 ;
-; @stage(compute) @workgroup_size(1)
+; @compute @workgroup_size(1)
 ; fn f() {
 ;   let a : ARR_B = s.a;
 ;   let b : array<@stride(8) array<f32, 2>, 3> = s.a[3];

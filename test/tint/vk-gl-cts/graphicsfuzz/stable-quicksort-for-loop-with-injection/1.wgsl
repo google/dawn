@@ -13,7 +13,7 @@ struct main_out {
   x_GLF_color_1 : vec4<f32>,
 }
 
-@stage(fragment)
+@fragment
 fn main(@location(0) frag_color_param : vec4<f32>) -> main_out {
   frag_color = frag_color_param;
   main_1();

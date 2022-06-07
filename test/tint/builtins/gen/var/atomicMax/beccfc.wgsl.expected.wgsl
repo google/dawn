@@ -5,7 +5,7 @@ fn atomicMax_beccfc() {
   var res : u32 = atomicMax(&(arg_0), arg_1);
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   atomicMax_beccfc();
 }

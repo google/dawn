@@ -14,7 +14,7 @@ struct OuterS {
 
 @binding(0) @group(0) var<storage, read_write> s1 : OuterS;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var v : InnerS;
   s1.a1[uniforms.i] = v;

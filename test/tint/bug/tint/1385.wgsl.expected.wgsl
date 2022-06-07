@@ -4,7 +4,7 @@ fn foo() -> i32 {
   return data[0];
 }
 
-@stage(compute) @workgroup_size(16, 16, 1)
+@compute @workgroup_size(16, 16, 1)
 fn main() {
   foo();
 }

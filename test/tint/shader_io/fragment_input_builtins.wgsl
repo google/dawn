@@ -1,4 +1,4 @@
-@stage(fragment)
+@fragment
 fn main(
   @builtin(position) position : vec4<f32>,
   @builtin(front_facing) front_facing : bool,

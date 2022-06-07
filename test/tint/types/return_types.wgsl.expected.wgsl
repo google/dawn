@@ -42,6 +42,6 @@ fn ret_struct() -> S {
   return S();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
 }

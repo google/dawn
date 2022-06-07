@@ -1,4 +1,4 @@
-@stage(fragment)
+@fragment
 fn f() {
   var b : T;
 }

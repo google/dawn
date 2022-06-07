@@ -41,7 +41,7 @@ struct S {
 
 var<private> p : S;
 
-@stage(fragment)
+@fragment
 fn main() {
   p.f = 1.0;
 }
@@ -60,7 +60,7 @@ struct S {
   f : f32,
 }
 
-@stage(fragment)
+@fragment
 fn main() -> S {
   return S();
 }
@@ -77,7 +77,7 @@ TEST_F(AddSpirvBlockAttributeTest, BasicScalar) {
 @group(0) @binding(0)
 var<uniform> u : f32;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f = u;
 }
@@ -90,7 +90,7 @@ struct u_block {
 
 @group(0) @binding(0) var<uniform> u : u_block;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f = u.inner;
 }
@@ -106,7 +106,7 @@ TEST_F(AddSpirvBlockAttributeTest, BasicArray) {
 @group(0) @binding(0)
 var<uniform> u : array<vec4<f32>, 4u>;
 
-@stage(fragment)
+@fragment
 fn main() {
   let a = u;
 }
@@ -119,7 +119,7 @@ struct u_block {
 
 @group(0) @binding(0) var<uniform> u : u_block;
 
-@stage(fragment)
+@fragment
 fn main() {
   let a = u.inner;
 }
@@ -137,7 +137,7 @@ type Numbers = array<vec4<f32>, 4u>;
 @group(0) @binding(0)
 var<uniform> u : Numbers;
 
-@stage(fragment)
+@fragment
 fn main() {
   let a = u;
 }
@@ -152,7 +152,7 @@ struct u_block {
 
 @group(0) @binding(0) var<uniform> u : u_block;
 
-@stage(fragment)
+@fragment
 fn main() {
   let a = u.inner;
 }
@@ -172,7 +172,7 @@ struct S {
 @group(0) @binding(0)
 var<uniform> u : S;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f = u.f;
 }
@@ -185,7 +185,7 @@ struct S {
 
 @group(0) @binding(0) var<uniform> u : S;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f = u.f;
 }
@@ -209,7 +209,7 @@ struct Outer {
 @group(0) @binding(0)
 var<uniform> u : Outer;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f = u.i.f;
 }
@@ -226,7 +226,7 @@ struct Outer {
 
 @group(0) @binding(0) var<uniform> u : Outer;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f = u.i.f;
 }
@@ -253,7 +253,7 @@ var<uniform> u0 : Outer;
 @group(0) @binding(1)
 var<uniform> u1 : Inner;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f0 = u0.i.f;
   let f1 = u1.f;
@@ -278,7 +278,7 @@ struct u1_block {
 
 @group(0) @binding(1) var<uniform> u1 : u1_block;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f0 = u0.i.f;
   let f1 = u1.inner.f;
@@ -305,7 +305,7 @@ var<private> p : Outer;
 @group(0) @binding(1)
 var<uniform> u : Inner;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f0 = p.i.f;
   let f1 = u.f;
@@ -329,7 +329,7 @@ struct u_block {
 
 @group(0) @binding(1) var<uniform> u : u_block;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f0 = p.i.f;
   let f1 = u.inner.f;
@@ -360,7 +360,7 @@ var<uniform> u1 : Inner;
 @group(0) @binding(2)
 var<uniform> u2 : Inner;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f0 = u0.i.f;
   let f1 = u1.f;
@@ -388,7 +388,7 @@ struct u1_block {
 
 @group(0) @binding(2) var<uniform> u2 : u1_block;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f0 = u0.i.f;
   let f1 = u1.inner.f;
@@ -410,7 +410,7 @@ struct S {
 @group(0) @binding(0)
 var<uniform> u : S;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f = u.f;
   let a = array<S, 4>();
@@ -428,7 +428,7 @@ struct u_block {
 
 @group(0) @binding(0) var<uniform> u : u_block;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f = u.inner.f;
   let a = array<S, 4>();
@@ -452,7 +452,7 @@ var<uniform> u0 : S;
 @group(0) @binding(1)
 var<uniform> u1 : S;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f0 = u0.f;
   let f1 = u1.f;
@@ -473,7 +473,7 @@ struct u0_block {
 
 @group(0) @binding(1) var<uniform> u1 : u0_block;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f0 = u0.inner.f;
   let f1 = u1.inner.f;
@@ -506,7 +506,7 @@ var<uniform> u0 : MyOuter;
 @group(0) @binding(1)
 var<uniform> u1 : MyInner;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f0 = u0.i.f;
   let f1 = u1.f;
@@ -535,7 +535,7 @@ struct u1_block {
 
 @group(0) @binding(1) var<uniform> u1 : u1_block;
 
-@stage(fragment)
+@fragment
 fn main() {
   let f0 = u0.i.f;
   let f1 = u1.inner.f;
@@ -549,7 +549,7 @@ fn main() {
 
 TEST_F(AddSpirvBlockAttributeTest, Aliases_Nested_OuterBuffer_InnerBuffer_OutOfOrder) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn main() {
   let f0 = u0.i.f;
   let f1 = u1.f;
@@ -574,7 +574,7 @@ struct Inner {
 };
 )";
     auto* expect = R"(
-@stage(fragment)
+@fragment
 fn main() {
   let f0 = u0.i.f;
   let f1 = u1.inner.f;

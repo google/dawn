@@ -30,18 +30,18 @@ fn textureSampleCompareLevel_7f2b9a() {
   var res: f32 = textureSampleCompareLevel(arg_0, arg_1, vec2<f32>(), 1.0, vec2<i32>());
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureSampleCompareLevel_7f2b9a();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureSampleCompareLevel_7f2b9a();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   textureSampleCompareLevel_7f2b9a();
 }

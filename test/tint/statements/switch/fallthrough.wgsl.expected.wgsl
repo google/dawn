@@ -1,4 +1,4 @@
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   var i : i32;
   switch(i) {

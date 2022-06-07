@@ -29,7 +29,7 @@ fn dpdxCoarse_f64d7b() {
   var res: vec3<f32> = dpdxCoarse(arg_0);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   dpdxCoarse_f64d7b();
 }

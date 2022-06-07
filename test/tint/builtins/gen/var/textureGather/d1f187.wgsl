@@ -32,18 +32,18 @@ fn textureGather_d1f187() {
   var res: vec4<u32> = textureGather(1, arg_1, arg_2, arg_3, arg_4, vec2<i32>());
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureGather_d1f187();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureGather_d1f187();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   textureGather_d1f187();
 }

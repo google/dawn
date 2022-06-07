@@ -1,3 +1,3 @@
-@stage(fragment)
+@fragment
 fn main() {
 }

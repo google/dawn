@@ -23,7 +23,7 @@ struct main_out {
   x_4_1 : i32,
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) x_2_param : vec4<f32>, @location(0) @interpolate(flat) x_3_param : i32) -> main_out {
   x_2 = x_2_param;
   x_3 = x_3_param;

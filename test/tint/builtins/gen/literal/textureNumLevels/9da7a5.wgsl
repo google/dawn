@@ -29,18 +29,18 @@ fn textureNumLevels_9da7a5() {
   var res: i32 = textureNumLevels(arg_0);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureNumLevels_9da7a5();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureNumLevels_9da7a5();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   textureNumLevels_9da7a5();
 }

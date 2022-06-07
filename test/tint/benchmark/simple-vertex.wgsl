@@ -6,7 +6,7 @@ struct Output {
   @builtin(position) position : vec4<f32>,
 };
 
-@stage(vertex)
+@vertex
 fn main(in : Input) -> Output {
   return Output(in.position);
 }

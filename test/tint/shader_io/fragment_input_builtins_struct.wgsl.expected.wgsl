@@ -9,7 +9,7 @@ struct FragmentInputs {
   sample_mask : u32,
 }
 
-@stage(fragment)
+@fragment
 fn main(inputs : FragmentInputs) {
   if (inputs.front_facing) {
     let foo : vec4<f32> = inputs.position;

@@ -13,6 +13,6 @@ fn ret_m2x3() -> mat2x3<f32> { return mat2x3<f32>(); }
 fn ret_arr() -> array<f32, 4> { return array<f32, 4>(); }
 fn ret_struct() -> S { return S(); }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
 }

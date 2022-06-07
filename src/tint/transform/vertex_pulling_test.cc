@@ -37,7 +37,7 @@ TEST_F(VertexPullingTest, Error_NoEntryPoint) {
 
 TEST_F(VertexPullingTest, Error_InvalidEntryPoint) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn main() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
@@ -57,7 +57,7 @@ fn main() -> @builtin(position) vec4<f32> {
 
 TEST_F(VertexPullingTest, Error_EntryPointWrongStage) {
     auto* src = R"(
-@stage(fragment)
+@fragment
 fn main() {}
 )";
 
@@ -75,7 +75,7 @@ fn main() {}
 
 TEST_F(VertexPullingTest, Error_BadStride) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn main(@location(0) var_a : f32) -> @builtin(position) vec4<f32> {
   return vec4<f32>(var_a, 0.0, 0.0, 1.0);
 }
@@ -98,7 +98,7 @@ fn main(@location(0) var_a : f32) -> @builtin(position) vec4<f32> {
 
 TEST_F(VertexPullingTest, BasicModule) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn main() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
@@ -109,7 +109,7 @@ struct TintVertexData {
   tint_vertex_data : array<u32>,
 }
 
-@stage(vertex)
+@vertex
 fn main() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
@@ -127,7 +127,7 @@ fn main() -> @builtin(position) vec4<f32> {
 
 TEST_F(VertexPullingTest, OneAttribute) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn main(@location(0) var_a : f32) -> @builtin(position) vec4<f32> {
   return vec4<f32>(var_a, 0.0, 0.0, 1.0);
 }
@@ -140,7 +140,7 @@ struct TintVertexData {
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
-@stage(vertex)
+@vertex
 fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(position) vec4<f32> {
   var var_a : f32;
   {
@@ -164,7 +164,7 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
 
 TEST_F(VertexPullingTest, OneInstancedAttribute) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn main(@location(0) var_a : f32) -> @builtin(position) vec4<f32> {
   return vec4<f32>(var_a, 0.0, 0.0, 1.0);
 }
@@ -177,7 +177,7 @@ struct TintVertexData {
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
-@stage(vertex)
+@vertex
 fn main(@builtin(instance_index) tint_pulling_instance_index : u32) -> @builtin(position) vec4<f32> {
   var var_a : f32;
   {
@@ -201,7 +201,7 @@ fn main(@builtin(instance_index) tint_pulling_instance_index : u32) -> @builtin(
 
 TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn main(@location(0) var_a : f32) -> @builtin(position) vec4<f32> {
   return vec4<f32>(var_a, 0.0, 0.0, 1.0);
 }
@@ -214,7 +214,7 @@ struct TintVertexData {
 
 @binding(0) @group(5) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
-@stage(vertex)
+@vertex
 fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(position) vec4<f32> {
   var var_a : f32;
   {
@@ -243,7 +243,7 @@ struct Inputs {
   @location(0) var_a : f32,
 };
 
-@stage(vertex)
+@vertex
 fn main(inputs : Inputs) -> @builtin(position) vec4<f32> {
   return vec4<f32>(inputs.var_a, 0.0, 0.0, 1.0);
 }
@@ -261,7 +261,7 @@ struct Inputs {
   var_a : f32,
 }
 
-@stage(vertex)
+@vertex
 fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(position) vec4<f32> {
   var inputs : Inputs;
   {
@@ -286,7 +286,7 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
 // We expect the transform to use an existing builtin variables if it finds them
 TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn main(@location(0) var_a : f32,
         @location(1) var_b : f32,
         @builtin(vertex_index) custom_vertex_index : u32,
@@ -305,7 +305,7 @@ struct TintVertexData {
 
 @binding(1) @group(4) var<storage, read> tint_pulling_vertex_buffer_1 : TintVertexData;
 
-@stage(vertex)
+@vertex
 fn main(@builtin(vertex_index) custom_vertex_index : u32, @builtin(instance_index) custom_instance_index : u32) -> @builtin(position) vec4<f32> {
   var var_a : f32;
   var var_b : f32;
@@ -350,7 +350,7 @@ struct Inputs {
   @builtin(instance_index) custom_instance_index : u32,
 };
 
-@stage(vertex)
+@vertex
 fn main(inputs : Inputs) -> @builtin(position) vec4<f32> {
   return vec4<f32>(inputs.var_a, inputs.var_b, 0.0, 1.0);
 }
@@ -383,7 +383,7 @@ struct Inputs {
   custom_instance_index : u32,
 }
 
-@stage(vertex)
+@vertex
 fn main(tint_symbol_1 : tint_symbol) -> @builtin(position) vec4<f32> {
   var inputs : Inputs;
   inputs.custom_vertex_index = tint_symbol_1.custom_vertex_index;
@@ -422,7 +422,7 @@ fn main(tint_symbol_1 : tint_symbol) -> @builtin(position) vec4<f32> {
 
 TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex_Struct_OutOfOrder) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn main(inputs : Inputs) -> @builtin(position) vec4<f32> {
   return vec4<f32>(inputs.var_a, inputs.var_b, 0.0, 1.0);
 }
@@ -451,7 +451,7 @@ struct tint_symbol {
   custom_instance_index : u32,
 }
 
-@stage(vertex)
+@vertex
 fn main(tint_symbol_1 : tint_symbol) -> @builtin(position) vec4<f32> {
   var inputs : Inputs;
   inputs.custom_vertex_index = tint_symbol_1.custom_vertex_index;
@@ -511,7 +511,7 @@ struct Indices {
   @builtin(instance_index) custom_instance_index : u32,
 };
 
-@stage(vertex)
+@vertex
 fn main(inputs : Inputs, indices : Indices) -> @builtin(position) vec4<f32> {
   return vec4<f32>(inputs.var_a, inputs.var_b, 0.0, 1.0);
 }
@@ -540,7 +540,7 @@ struct Indices {
   custom_instance_index : u32,
 }
 
-@stage(vertex)
+@vertex
 fn main(indices : Indices) -> @builtin(position) vec4<f32> {
   var inputs : Inputs;
   {
@@ -577,7 +577,7 @@ fn main(indices : Indices) -> @builtin(position) vec4<f32> {
 
 TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex_SeparateStruct_OutOfOrder) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn main(inputs : Inputs, indices : Indices) -> @builtin(position) vec4<f32> {
   return vec4<f32>(inputs.var_a, inputs.var_b, 0.0, 1.0);
 }
@@ -602,7 +602,7 @@ struct TintVertexData {
 
 @binding(1) @group(4) var<storage, read> tint_pulling_vertex_buffer_1 : TintVertexData;
 
-@stage(vertex)
+@vertex
 fn main(indices : Indices) -> @builtin(position) vec4<f32> {
   var inputs : Inputs;
   {
@@ -653,7 +653,7 @@ struct Indices {
 
 TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn main(@location(0) var_a : f32,
         @location(1) var_b : vec4<f32>) -> @builtin(position) vec4<f32> {
   return vec4<f32>();
@@ -667,7 +667,7 @@ struct TintVertexData {
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
-@stage(vertex)
+@vertex
 fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(position) vec4<f32> {
   var var_a : f32;
   var var_b : vec4<f32>;
@@ -695,7 +695,7 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
 
 TEST_F(VertexPullingTest, FloatVectorAttributes) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn main(@location(0) var_a : vec2<f32>,
         @location(1) var_b : vec3<f32>,
         @location(2) var_c : vec4<f32>
@@ -715,7 +715,7 @@ struct TintVertexData {
 
 @binding(2) @group(4) var<storage, read> tint_pulling_vertex_buffer_2 : TintVertexData;
 
-@stage(vertex)
+@vertex
 fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(position) vec4<f32> {
   var var_a : vec2<f32>;
   var var_b : vec3<f32>;
@@ -749,7 +749,7 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
 
 TEST_F(VertexPullingTest, AttemptSymbolCollision) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn main(@location(0) var_a : f32,
         @location(1) var_b : vec4<f32>) -> @builtin(position) vec4<f32> {
   var tint_pulling_vertex_index : i32;
@@ -767,7 +767,7 @@ struct TintVertexData {
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0_1 : TintVertexData;
 
-@stage(vertex)
+@vertex
 fn main(@builtin(vertex_index) tint_pulling_vertex_index_1 : u32) -> @builtin(position) vec4<f32> {
   var var_a : f32;
   var var_b : vec4<f32>;
@@ -799,7 +799,7 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index_1 : u32) -> @builtin(po
 
 TEST_F(VertexPullingTest, FormatsAligned) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn main(
     @location(0) uint8x2 : vec2<u32>,
     @location(1) uint8x4 : vec4<u32>,
@@ -843,7 +843,7 @@ struct TintVertexData {
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
-@stage(vertex)
+@vertex
 fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(position) vec4<f32> {
   var uint8x2 : vec2<u32>;
   var uint8x4 : vec4<u32>;
@@ -944,7 +944,7 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
 
 TEST_F(VertexPullingTest, FormatsStrideUnaligned) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn main(
     @location(0) uint8x2 : vec2<u32>,
     @location(1) uint8x4 : vec4<u32>,
@@ -989,7 +989,7 @@ struct TintVertexData {
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
-@stage(vertex)
+@vertex
 fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(position) vec4<f32> {
   var uint8x2 : vec2<u32>;
   var uint8x4 : vec4<u32>;
@@ -1090,7 +1090,7 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
 
 TEST_F(VertexPullingTest, FormatsWithVectorsResized) {
     auto* src = R"(
-@stage(vertex)
+@vertex
 fn main(
     @location(0) uint8x2 : vec3<u32>,
     @location(1) uint8x4 : vec2<u32>,
@@ -1134,7 +1134,7 @@ struct TintVertexData {
 
 @binding(0) @group(4) var<storage, read> tint_pulling_vertex_buffer_0 : TintVertexData;
 
-@stage(vertex)
+@vertex
 fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(position) vec4<f32> {
   var uint8x2 : vec3<u32>;
   var uint8x4 : vec2<u32>;

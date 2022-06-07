@@ -20,7 +20,7 @@ struct main_out {
   gl_Position : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@location(0) x_2_param : vec3<f32>, @location(1) @interpolate(flat) x_3_param : i32) -> main_out {
   x_2 = x_2_param;
   x_3 = x_3_param;

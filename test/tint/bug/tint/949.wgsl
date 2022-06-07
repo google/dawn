@@ -441,7 +441,7 @@ struct main_out {
   glFragColor_1 : vec4<f32>,
 };
 
-@stage(fragment)
+@fragment
 fn main(@location(1) vMainuv_param : vec2<f32>, @location(0) v_output1_param : vec4<f32>, @builtin(front_facing) gl_FrontFacing_param : bool, @location(3) v_uv_param : vec2<f32>, @location(2) v_output2_param : vec4<f32>) -> main_out {
   vMainuv = vMainuv_param;
   v_output1 = v_output1_param;

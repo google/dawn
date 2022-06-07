@@ -29,7 +29,7 @@ fn dpdyCoarse_445d24() {
   var res: vec4<f32> = dpdyCoarse(arg_0);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   dpdyCoarse_445d24();
 }

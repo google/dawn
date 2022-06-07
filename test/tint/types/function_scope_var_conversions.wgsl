@@ -3,7 +3,7 @@ fn constant_with_non_constant() {
   var b : vec2<f32> = vec2<f32>(f32(i32(1)), a);
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var bool_var1 : bool = bool(123u);
   var bool_var2 : bool = bool(123);

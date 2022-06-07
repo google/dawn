@@ -33,7 +33,7 @@ fn textureSampleBias_eed7c4() {
   var res: vec4<f32> = textureSampleBias(arg_0, arg_1, arg_2, arg_3, arg_4);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureSampleBias_eed7c4();
 }

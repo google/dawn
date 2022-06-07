@@ -34,7 +34,7 @@ TEST_F(ResolverBuiltinValidationTest, FunctionTypeMustMatchReturnStatementType_v
 }
 
 TEST_F(ResolverBuiltinValidationTest, InvalidPipelineStageDirect) {
-    // @stage(compute) @workgroup_size(1) fn func { return dpdx(1.0); }
+    // @compute @workgroup_size(1) fn func { return dpdx(1.0); }
 
     auto* dpdx =
         create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"), ast::ExpressionList{Expr(1_f)});
@@ -49,7 +49,7 @@ TEST_F(ResolverBuiltinValidationTest, InvalidPipelineStageIndirect) {
     // fn f0 { return dpdx(1.0); }
     // fn f1 { f0(); }
     // fn f2 { f1(); }
-    // @stage(compute) @workgroup_size(1) fn main { return f2(); }
+    // @compute @workgroup_size(1) fn main { return f2(); }
 
     auto* dpdx =
         create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"), ast::ExpressionList{Expr(1_f)});

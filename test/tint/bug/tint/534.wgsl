@@ -18,7 +18,7 @@ fn ConvertToFp16FloatValue(fp32 : f32) -> u32 {
     return 1u;
 }
 
-@stage(compute) @workgroup_size(1, 1, 1)
+@compute @workgroup_size(1, 1, 1)
 fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
     var size : vec2<i32> = textureDimensions(src);
     var dstTexCoord : vec2<i32> = vec2<i32>(GlobalInvocationID.xy);

@@ -3,7 +3,7 @@ fn dpdy_7f8d84() {
   var res : f32 = dpdy(arg_0);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   dpdy_7f8d84();
 }

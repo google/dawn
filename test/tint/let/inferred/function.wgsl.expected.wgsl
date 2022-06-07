@@ -42,7 +42,7 @@ fn let_decls() {
   let v15 = ret_MyArray();
 }
 
-@stage(fragment)
+@fragment
 fn main() -> @location(0) vec4<f32> {
   return vec4<f32>(0.0, 0.0, 0.0, 0.0);
 }

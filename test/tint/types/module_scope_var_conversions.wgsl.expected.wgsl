@@ -38,7 +38,7 @@ var<private> v3bool_var4 : vec3<bool> = vec3<bool>(vec2<bool>(vec2<f32>(123.0)),
 
 var<private> v4bool_var5 : vec4<bool> = vec4<bool>(vec2<bool>(vec2<f32>(123.0, 0.0)), vec2<bool>(true, bool(f32(0.0))));
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   bool_var1 = bool();
   bool_var2 = bool();

@@ -80,7 +80,7 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInFragmentStage) {
     // var<workgroup> dst : vec4<f32>;
     // fn f2(){ dst = wg; }
     // fn f1() { f2(); }
-    // @stage(fragment)
+    // @fragment
     // fn f0() {
     //  f1();
     //}

@@ -29,18 +29,18 @@ fn transpose_ed4bdc() {
   var res: mat2x3<f32> = transpose(arg_0);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   transpose_ed4bdc();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   transpose_ed4bdc();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   transpose_ed4bdc();
 }

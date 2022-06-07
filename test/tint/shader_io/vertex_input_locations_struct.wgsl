@@ -5,7 +5,7 @@ struct VertexInputs {
   @location(3) loc3 : vec4<f32>,
 };
 
-@stage(vertex)
+@vertex
 fn main(inputs : VertexInputs) -> @builtin(position) vec4<f32> {
   let i : i32 = inputs.loc0;
   let u : u32 = inputs.loc1;

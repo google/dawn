@@ -29,7 +29,7 @@ fn fwidth_d2ab9a() {
   var res: vec4<f32> = fwidth(arg_0);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   fwidth_d2ab9a();
 }

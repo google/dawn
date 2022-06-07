@@ -3,7 +3,7 @@ struct S {
   m : i32,
 };
 
-@stage(fragment)
+@fragment
 fn f() {
   A[0] = S(1);
 }

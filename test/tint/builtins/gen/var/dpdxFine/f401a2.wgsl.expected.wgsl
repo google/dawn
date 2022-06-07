@@ -3,7 +3,7 @@ fn dpdxFine_f401a2() {
   var res : f32 = dpdxFine(arg_0);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   dpdxFine_f401a2();
 }

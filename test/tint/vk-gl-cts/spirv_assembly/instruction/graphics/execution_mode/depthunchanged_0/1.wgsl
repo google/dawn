@@ -18,7 +18,7 @@ struct main_out {
   gl_FragDepth_1 : f32,
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(position) gl_FragCoord_param : vec4<f32>) -> main_out {
   gl_FragCoord = gl_FragCoord_param;
   main_1();

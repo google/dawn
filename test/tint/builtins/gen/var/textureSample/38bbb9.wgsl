@@ -31,7 +31,7 @@ fn textureSample_38bbb9() {
   var res: f32 = textureSample(arg_0, arg_1, arg_2);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureSample_38bbb9();
 }

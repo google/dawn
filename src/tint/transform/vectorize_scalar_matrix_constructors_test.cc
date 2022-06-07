@@ -53,7 +53,7 @@ TEST_P(VectorizeScalarMatrixConstructorsTest, SingleScalars) {
     }
 
     std::string src = R"(
-@stage(fragment)
+@fragment
 fn main() {
   let m = ${matrix}(42.0);
 }
@@ -64,7 +64,7 @@ fn build_${matrix_no_type}(value : f32) -> ${matrix} {
   return ${matrix}(${values});
 }
 
-@stage(fragment)
+@fragment
 fn main() {
   let m = build_${matrix_no_type}(42.0);
 }
@@ -107,7 +107,7 @@ TEST_P(VectorizeScalarMatrixConstructorsTest, MultipleScalars) {
     }
 
     std::string tmpl = R"(
-@stage(fragment)
+@fragment
 fn main() {
   let m = ${matrix}(${values});
 }
@@ -137,7 +137,7 @@ TEST_P(VectorizeScalarMatrixConstructorsTest, NonScalarConstructors) {
     }
 
     std::string tmpl = R"(
-@stage(fragment)
+@fragment
 fn main() {
   let m = ${matrix}(${columns});
 }

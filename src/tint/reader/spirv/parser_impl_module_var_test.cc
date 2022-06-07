@@ -460,7 +460,7 @@ struct main_out {
   gl_Position : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main() -> main_out {
   main_1();
   return main_out(gl_Position);
@@ -519,7 +519,7 @@ struct main_out {
   gl_Position : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main() -> main_out {
   main_1();
   return main_out(gl_Position);
@@ -575,7 +575,7 @@ struct main_out {
   gl_Position : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main() -> main_out {
   main_1();
   return main_out(gl_Position);
@@ -634,7 +634,7 @@ struct main_out {
   x_2_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main() -> main_out {
   main_1();
   return main_out(x_2);
@@ -690,7 +690,7 @@ struct main_out {
   x_2_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main() -> main_out {
   main_1();
   return main_out(x_2);
@@ -746,7 +746,7 @@ struct main_out {
   x_2_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main() -> main_out {
   main_1();
   return main_out(x_2);
@@ -782,7 +782,7 @@ struct main_out {
   x_2_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main() -> main_out {
   main_1();
   return main_out(x_2);
@@ -1650,7 +1650,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(sample_index) x_1_param : u32) {
   x_1 = bitcast<i32>(x_1_param);
   main_1();
@@ -1763,7 +1763,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(sample_index) x_1_param : u32) {
   x_1 = bitcast<i32>(x_1_param);
   main_1();
@@ -1816,7 +1816,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(sample_index) x_1_param : u32) {
   x_1 = x_1_param;
   main_1();
@@ -1846,7 +1846,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(sample_index) x_1_param : u32) {
   x_1 = x_1_param;
   main_1();
@@ -1875,7 +1875,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(sample_index) x_1_param : u32) {
   x_1 = x_1_param;
   main_1();
@@ -1989,7 +1989,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(sample_mask) x_1_param : u32) {
   x_1[0i] = x_1_param;
   main_1();
@@ -2021,7 +2021,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(sample_mask) x_1_param : u32) {
   x_1[0i] = x_1_param;
   main_1();
@@ -2053,7 +2053,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(sample_mask) x_1_param : u32) {
   x_1[0i] = x_1_param;
   main_1();
@@ -2084,7 +2084,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(sample_mask) x_1_param : u32) {
   x_1[0i] = bitcast<i32>(x_1_param);
   main_1();
@@ -2116,7 +2116,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(sample_mask) x_1_param : u32) {
   x_1[0i] = bitcast<i32>(x_1_param);
   main_1();
@@ -2148,7 +2148,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(sample_mask) x_1_param : u32) {
   x_1[0i] = bitcast<i32>(x_1_param);
   main_1();
@@ -2202,7 +2202,7 @@ struct main_out {
   x_1_1 : u32,
 }
 
-@stage(fragment)
+@fragment
 fn main() -> main_out {
   main_1();
   return main_out(x_1[0i]);
@@ -2239,7 +2239,7 @@ struct main_out {
   x_1_1 : u32,
 }
 
-@stage(fragment)
+@fragment
 fn main() -> main_out {
   main_1();
   return main_out(x_1[0i]);
@@ -2276,7 +2276,7 @@ struct main_out {
   x_1_1 : u32,
 }
 
-@stage(fragment)
+@fragment
 fn main() -> main_out {
   main_1();
   return main_out(x_1[0i]);
@@ -2312,7 +2312,7 @@ struct main_out {
   x_1_1 : u32,
 }
 
-@stage(fragment)
+@fragment
 fn main() -> main_out {
   main_1();
   return main_out(bitcast<u32>(x_1[0i]));
@@ -2349,7 +2349,7 @@ struct main_out {
   x_1_1 : u32,
 }
 
-@stage(fragment)
+@fragment
 fn main() -> main_out {
   main_1();
   return main_out(bitcast<u32>(x_1[0i]));
@@ -2386,7 +2386,7 @@ struct main_out {
   x_1_1 : u32,
 }
 
-@stage(fragment)
+@fragment
 fn main() -> main_out {
   main_1();
   return main_out(bitcast<u32>(x_1[0i]));
@@ -2425,7 +2425,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(sample_mask) x_1_param : u32) {
   x_1[0i] = x_1_param;
   main_1();
@@ -2469,7 +2469,7 @@ struct main_out {
   x_1_1 : u32,
 }
 
-@stage(fragment)
+@fragment
 fn main() -> main_out {
   main_1();
   return main_out(x_1[0i]);
@@ -2527,7 +2527,7 @@ struct main_out {
   x_4_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@builtin(vertex_index) x_1_param : u32) -> main_out {
   x_1 = bitcast<i32>(x_1_param);
   main_1();
@@ -2565,7 +2565,7 @@ struct main_out {
   x_4_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@builtin(vertex_index) x_1_param : u32) -> main_out {
   x_1 = bitcast<i32>(x_1_param);
   main_1();
@@ -2602,7 +2602,7 @@ struct main_out {
   x_4_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@builtin(vertex_index) x_1_param : u32) -> main_out {
   x_1 = bitcast<i32>(x_1_param);
   main_1();
@@ -2638,7 +2638,7 @@ struct main_out {
   x_4_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@builtin(vertex_index) x_1_param : u32) -> main_out {
   x_1 = x_1_param;
   main_1();
@@ -2676,7 +2676,7 @@ struct main_out {
   x_4_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@builtin(vertex_index) x_1_param : u32) -> main_out {
   x_1 = x_1_param;
   main_1();
@@ -2713,7 +2713,7 @@ struct main_out {
   x_4_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@builtin(vertex_index) x_1_param : u32) -> main_out {
   x_1 = x_1_param;
   main_1();
@@ -2797,7 +2797,7 @@ struct main_out {
   position_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   x_1 = bitcast<i32>(x_1_param);
   main_1();
@@ -2835,7 +2835,7 @@ struct main_out {
   position_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   x_1 = bitcast<i32>(x_1_param);
   main_1();
@@ -2872,7 +2872,7 @@ struct main_out {
   position_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   x_1 = bitcast<i32>(x_1_param);
   main_1();
@@ -2931,7 +2931,7 @@ struct main_out {
   position_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   x_1 = x_1_param;
   main_1();
@@ -2969,7 +2969,7 @@ struct main_out {
   position_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   x_1 = x_1_param;
   main_1();
@@ -3006,7 +3006,7 @@ struct main_out {
   position_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   x_1 = x_1_param;
   main_1();
@@ -3149,7 +3149,7 @@ fn main_1() {
   return;
 }
 
-@stage(compute) @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1i, 1i, 1i)
 fn main(@builtin(${wgsl_builtin}) x_1_param : ${unsigned_wgsl_type}) {
   x_1 = ${assignment_value};
   main_1();
@@ -3195,7 +3195,7 @@ fn main_1() {
   return;
 }
 
-@stage(compute) @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1i, 1i, 1i)
 fn main(@builtin(${wgsl_builtin}) x_1_param : ${unsigned_wgsl_type}) {
   x_1 = ${assignment_value};
   main_1();
@@ -3240,7 +3240,7 @@ fn main_1() {
   return;
 }
 
-@stage(compute) @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1i, 1i, 1i)
 fn main(@builtin(${wgsl_builtin}) x_1_param : ${unsigned_wgsl_type}) {
   x_1 = ${assignment_value};
   main_1();
@@ -3552,7 +3552,7 @@ struct main_out {
   x_4_1 : u32,
 }
 
-@stage(fragment)
+@fragment
 fn main(@location(0) @interpolate(flat) x_1_param : u32, @location(30) @interpolate(flat) x_3_param : u32) -> main_out {
   x_1 = x_1_param;
   x_3 = x_3_param;
@@ -3603,7 +3603,7 @@ struct main_out {
   x_4_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   x_1 = x_1_param;
   main_1();
@@ -3652,7 +3652,7 @@ struct main_out {
   x_4_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@builtin(instance_index) x_1_param : u32) -> main_out {
   x_1 = bitcast<i32>(x_1_param);
   main_1();
@@ -3692,7 +3692,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(sample_mask) x_1_param : u32) {
   x_1[0i] = x_1_param;
   main_1();
@@ -3730,7 +3730,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@builtin(sample_mask) x_1_param : u32) {
   x_1[0i] = bitcast<i32>(x_1_param);
   main_1();
@@ -3776,7 +3776,7 @@ struct main_out {
   x_1_1 : u32,
 }
 
-@stage(fragment)
+@fragment
 fn main() -> main_out {
   main_1();
   return main_out(x_1[0i]);
@@ -3822,7 +3822,7 @@ struct main_out {
   x_1_1 : u32,
 }
 
-@stage(fragment)
+@fragment
 fn main() -> main_out {
   main_1();
   return main_out(bitcast<u32>(x_1[0i]));
@@ -3865,7 +3865,7 @@ struct main_out {
   x_1_1 : f32,
 }
 
-@stage(fragment)
+@fragment
 fn main() -> main_out {
   main_1();
   return main_out(x_1);
@@ -3899,7 +3899,7 @@ struct main_out {
   gl_Position : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main() -> main_out {
   main_1();
   return main_out(gl_Position);
@@ -3968,7 +3968,7 @@ struct main_out {
   gl_Position : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main() -> main_out {
   main_1();
   return main_out(gl_Position);
@@ -4025,7 +4025,7 @@ struct main_out {
   x_2_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@location(4) x_1_param : f32, @location(5) x_1_param_1 : f32, @location(6) x_1_param_2 : f32) -> main_out {
   x_1[0i] = x_1_param;
   x_1[1i] = x_1_param_1;
@@ -4083,7 +4083,7 @@ struct main_out {
   x_2_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@location(9) x_1_param : vec4<f32>, @location(10) x_1_param_1 : vec4<f32>) -> main_out {
   x_1[0i] = x_1_param;
   x_1[1i] = x_1_param_1;
@@ -4150,7 +4150,7 @@ struct main_out {
   x_2_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@location(9) x_1_param : f32, @location(10) x_1_param_1 : vec4<f32>) -> main_out {
   x_1.alice = x_1_param;
   x_1.bob = x_1_param_1;
@@ -4209,7 +4209,7 @@ struct main_out {
   x_2_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@location(7) x_1_param : vec4<f32>, @location(8) x_1_param_1 : vec4<f32>, @location(9) x_1_param_2 : vec4<f32>, @location(10) x_1_param_3 : vec4<f32>) -> main_out {
   x_1[0i][0i] = x_1_param;
   x_1[0i][1i] = x_1_param_1;
@@ -4276,7 +4276,7 @@ struct main_out {
   x_2_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main() -> main_out {
   main_1();
   return main_out(x_1[0i], x_1[1i], x_1[2i], x_2);
@@ -4335,7 +4335,7 @@ struct main_out {
   x_2_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main() -> main_out {
   main_1();
   return main_out(x_1[0i], x_1[1i], x_2);
@@ -4404,7 +4404,7 @@ struct main_out {
   x_2_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main() -> main_out {
   main_1();
   return main_out(x_1.alice, x_1.bob, x_2);
@@ -4479,7 +4479,7 @@ struct main_out {
   x_3_2 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@location(9) x_1_param : f32, @location(11) x_1_param_1 : vec4<f32>) -> main_out {
   x_1.alice = x_1_param;
   x_1.bob = x_1_param_1;
@@ -4558,7 +4558,7 @@ struct main_out {
   x_10_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@location(1) @interpolate(flat) x_1_param : u32, @location(2) @interpolate(flat) x_2_param : vec2<u32>, @location(3) @interpolate(flat) x_3_param : i32, @location(4) @interpolate(flat) x_4_param : vec2<i32>, @location(5) @interpolate(flat) x_5_param : f32, @location(6) @interpolate(flat) x_6_param : vec2<f32>) -> main_out {
   x_1 = x_1_param;
   x_2 = x_2_param;
@@ -4653,7 +4653,7 @@ struct main_out {
   x_10_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main() -> main_out {
   main_1();
   return main_out(x_1, x_2, x_3, x_4, x_5, x_6, x_10);
@@ -4703,7 +4703,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@location(1) @interpolate(flat) x_1_param : f32, @location(2) @interpolate(flat) x_1_param_1 : f32, @location(5) @interpolate(flat) x_2_param : f32, @location(6) @interpolate(flat) x_2_param_1 : f32) {
   x_1[0i] = x_1_param;
   x_1[1i] = x_1_param_1;
@@ -4777,7 +4777,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@location(1) x_1_param : f32, @location(2) @interpolate(perspective, centroid) x_2_param : f32, @location(3) @interpolate(perspective, sample) x_3_param : f32, @location(4) @interpolate(linear) x_4_param : f32, @location(5) @interpolate(linear, centroid) x_5_param : f32, @location(6) @interpolate(linear, sample) x_6_param : f32) {
   x_1 = x_1_param;
   x_2 = x_2_param;
@@ -4844,7 +4844,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@location(1) x_1_param : f32, @location(2) @interpolate(perspective, centroid) x_1_param_1 : f32, @location(3) @interpolate(perspective, sample) x_1_param_2 : f32, @location(4) @interpolate(linear) x_1_param_3 : f32, @location(5) @interpolate(linear, centroid) x_1_param_4 : f32, @location(6) @interpolate(linear, sample) x_1_param_5 : f32) {
   x_1.field0 = x_1_param;
   x_1.field1 = x_1_param_1;
@@ -4935,7 +4935,7 @@ struct main_out {
   x_6_1 : f32,
 }
 
-@stage(fragment)
+@fragment
 fn main() -> main_out {
   main_1();
   return main_out(x_1, x_2, x_3, x_4, x_5, x_6);
@@ -5014,7 +5014,7 @@ struct main_out {
   x_1_6 : f32,
 }
 
-@stage(fragment)
+@fragment
 fn main() -> main_out {
   main_1();
   return main_out(x_1.field0, x_1.field1, x_1.field2, x_1.field3, x_1.field4, x_1.field5);
@@ -5100,7 +5100,7 @@ struct main_out {
   x_10_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main() -> main_out {
   main_1();
   return main_out(x_1, x_2, x_3, x_4, x_5, x_6, x_10);
@@ -5163,7 +5163,7 @@ fn main_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn main(@location(1) @interpolate(flat) x_1_param : u32, @location(2) @interpolate(flat) x_2_param : vec2<u32>, @location(3) @interpolate(flat) x_3_param : i32, @location(4) @interpolate(flat) x_4_param : vec2<i32>, @location(5) x_5_param : f32, @location(6) x_6_param : vec2<f32>) {
   x_1 = x_1_param;
   x_2 = x_2_param;

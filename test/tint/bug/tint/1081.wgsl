@@ -5,7 +5,7 @@ fn f(x : i32) -> i32 {
   return x;
 }
 
-@stage(fragment)
+@fragment
 fn main(@location(1) @interpolate(flat) x: vec3<i32>) -> @location(2) i32 {
   var y = x.x;
   loop {

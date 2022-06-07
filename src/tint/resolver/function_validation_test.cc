@@ -342,7 +342,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionTypeMustMatchReturnStatementTypeF
 }
 
 TEST_F(ResolverFunctionValidationTest, CannotCallEntryPoint) {
-    // @stage(compute) @workgroup_size(1) fn entrypoint() {}
+    // @compute @workgroup_size(1) fn entrypoint() {}
     // fn func() { return entrypoint(); }
     Func("entrypoint", {}, ty.void_(), {},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
@@ -359,8 +359,8 @@ TEST_F(ResolverFunctionValidationTest, CannotCallEntryPoint) {
 }
 
 TEST_F(ResolverFunctionValidationTest, PipelineStage_MustBeUnique_Fail) {
-    // @stage(fragment)
-    // @stage(vertex)
+    // @fragment
+    // @vertex
     // fn main() { return; }
     Func(Source{{12, 34}}, "main", {}, ty.void_(),
          {
@@ -425,7 +425,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionParamsConst) {
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_ConstU32) {
     // let x = 4u;
     // let x = 8u;
-    // @stage(compute) @workgroup_size(x, y, 16u)
+    // @compute @workgroup_size(x, y, 16u)
     // fn main() {}
     auto* x = GlobalConst("x", ty.u32(), Expr(4_u));
     auto* y = GlobalConst("y", ty.u32(), Expr(8_u));
@@ -447,7 +447,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_ConstU32) {
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_I32) {
-    // @stage(compute) @workgroup_size(1i, 2i, 3i)
+    // @compute @workgroup_size(1i, 2i, 3i)
     // fn main() {}
 
     Func("main", {}, ty.void_(), {},
@@ -457,7 +457,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_I32) {
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_U32) {
-    // @stage(compute) @workgroup_size(1u, 2u, 3u)
+    // @compute @workgroup_size(1u, 2u, 3u)
     // fn main() {}
 
     Func("main", {}, ty.void_(), {},
@@ -467,7 +467,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_U32) {
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_I32_AInt) {
-    // @stage(compute) @workgroup_size(1, 2i, 3)
+    // @compute @workgroup_size(1, 2i, 3)
     // fn main() {}
 
     Func("main", {}, ty.void_(), {},
@@ -477,7 +477,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_I32_AInt) {
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_U32_AInt) {
-    // @stage(compute) @workgroup_size(1u, 2, 3u)
+    // @compute @workgroup_size(1u, 2, 3u)
     // fn main() {}
 
     Func("main", {}, ty.void_(), {},
@@ -487,7 +487,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_U32_AInt) {
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_MismatchType_U32) {
-    // @stage(compute) @workgroup_size(1u, 2, 3_i)
+    // @compute @workgroup_size(1u, 2, 3_i)
     // fn main() {}
 
     Func("main", {}, ty.void_(), {},
@@ -499,7 +499,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_MismatchType_U32) {
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_MismatchType_I32) {
-    // @stage(compute) @workgroup_size(1_i, 2u, 3)
+    // @compute @workgroup_size(1_i, 2u, 3)
     // fn main() {}
 
     Func("main", {}, ty.void_(), {},
@@ -512,7 +512,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_MismatchType_I32) {
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_TypeMismatch) {
     // let x = 64u;
-    // @stage(compute) @workgroup_size(1i, x)
+    // @compute @workgroup_size(1i, x)
     // fn main() {}
     GlobalConst("x", ty.u32(), Expr(64_u));
     Func("main", {}, ty.void_(), {},
@@ -526,7 +526,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_TypeMismatch) {
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_TypeMismatch2) {
     // let x = 64u;
     // let y = 32i;
-    // @stage(compute) @workgroup_size(x, y)
+    // @compute @workgroup_size(x, y)
     // fn main() {}
     GlobalConst("x", ty.u32(), Expr(64_u));
     GlobalConst("y", ty.i32(), Expr(32_i));
@@ -540,7 +540,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_TypeMismatch2) {
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Mismatch_ConstU32) {
     // let x = 4u;
     // let x = 8u;
-    // @stage(compute) @workgroup_size(x, y, 16i)
+    // @compute @workgroup_size(x, y, 16i)
     // fn main() {}
     GlobalConst("x", ty.u32(), Expr(4_u));
     GlobalConst("y", ty.u32(), Expr(8_u));
@@ -553,7 +553,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Mismatch_ConstU32) {
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_BadType) {
-    // @stage(compute) @workgroup_size(64.0)
+    // @compute @workgroup_size(64.0)
     // fn main() {}
 
     Func("main", {}, ty.void_(), {},
@@ -566,7 +566,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_BadType) {
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_Negative) {
-    // @stage(compute) @workgroup_size(-2i)
+    // @compute @workgroup_size(-2i)
     // fn main() {}
 
     Func("main", {}, ty.void_(), {},
@@ -577,7 +577,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_Negative) {
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_Zero) {
-    // @stage(compute) @workgroup_size(0i)
+    // @compute @workgroup_size(0i)
     // fn main() {}
 
     Func("main", {}, ty.void_(), {},
@@ -589,7 +589,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_Zero) {
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_BadType) {
     // let x = 64.0;
-    // @stage(compute) @workgroup_size(x)
+    // @compute @workgroup_size(x)
     // fn main() {}
     GlobalConst("x", ty.f32(), Expr(64_f));
     Func("main", {}, ty.void_(), {},
@@ -603,7 +603,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_BadType) {
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_Negative) {
     // let x = -2i;
-    // @stage(compute) @workgroup_size(x)
+    // @compute @workgroup_size(x)
     // fn main() {}
     GlobalConst("x", ty.i32(), Expr(-2_i));
     Func("main", {}, ty.void_(), {},
@@ -615,7 +615,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_Negative) {
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_Zero) {
     // let x = 0i;
-    // @stage(compute) @workgroup_size(x)
+    // @compute @workgroup_size(x)
     // fn main() {}
     GlobalConst("x", ty.i32(), Expr(0_i));
     Func("main", {}, ty.void_(), {},
@@ -627,7 +627,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_Zero) {
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_NestedZeroValueConstructor) {
     // let x = i32(i32(i32()));
-    // @stage(compute) @workgroup_size(x)
+    // @compute @workgroup_size(x)
     // fn main() {}
     GlobalConst("x", ty.i32(), Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32()))));
     Func("main", {}, ty.void_(), {},
@@ -639,7 +639,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_NestedZeroValueConstr
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_NonConst) {
     // var<private> x = 64i;
-    // @stage(compute) @workgroup_size(x)
+    // @compute @workgroup_size(x)
     // fn main() {}
     Global("x", ty.i32(), ast::StorageClass::kPrivate, Expr(64_i));
     Func("main", {}, ty.void_(), {},
@@ -652,7 +652,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_NonConst) {
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr) {
-    // @stage(compute) @workgroup_size(i32(1))
+    // @compute @workgroup_size(i32(1))
     // fn main() {}
     Func("main", {}, ty.void_(), {},
          {Stage(ast::PipelineStage::kCompute),

@@ -18,7 +18,7 @@ fn x(p : ptr<function, S>) {
   (*(p)).data[ubo.dynamic_idx] = 1;
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   var s : S;
   x(&(s));

@@ -55,7 +55,7 @@ fn main_1() {
   return;
 }
 
-@stage(compute) @workgroup_size(16, 1, 1)
+@compute @workgroup_size(16, 1, 1)
 fn main(@builtin(local_invocation_id) gl_LocalInvocationID_param : vec3<u32>) {
   gl_LocalInvocationID = gl_LocalInvocationID_param;
   main_1();

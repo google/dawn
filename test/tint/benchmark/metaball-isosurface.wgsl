@@ -102,7 +102,7 @@ fn interpZ(index : u32, i : vec3<u32>, va : f32, vb : f32) {
   cubeVerts = (cubeVerts + 1u);
 }
 
-@stage(compute) @workgroup_size(4, 4, 4)
+@compute @workgroup_size(4, 4, 4)
 fn computeMain(@builtin(global_invocation_id) global_id : vec3<u32>) {
   let i0 = global_id;
   let i1 = (global_id + vec3<u32>(1u, 0u, 0u));

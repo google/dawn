@@ -29,7 +29,7 @@ fn dpdxFine_9631de() {
   var res: vec2<f32> = dpdxFine(arg_0);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   dpdxFine_9631de();
 }

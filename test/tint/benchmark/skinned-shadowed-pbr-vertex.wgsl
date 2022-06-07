@@ -80,7 +80,7 @@ fn getSkinMatrix(input : VertexInput) -> mat4x4<f32> {
   return skinMatrix;
 }
 
-@stage(vertex)
+@vertex
 fn vertexMain(input : VertexInput) -> VertexOutput {
   var output : VertexOutput;
   let modelMatrix = getSkinMatrix(input);

@@ -47,7 +47,7 @@ using alias = builder::alias<T>;
 class ResolverEntryPointValidationTest : public TestHelper, public testing::Test {};
 
 TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Location) {
-    // @stage(fragment)
+    // @fragment
     // fn main() -> @location(0) f32 { return 1.0; }
     Func(Source{{12, 34}}, "main", {}, ty.f32(), {Return(1_f)},
          {Stage(ast::PipelineStage::kFragment)}, {Location(0)});
@@ -56,7 +56,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Location) {
 }
 
 TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Builtin) {
-    // @stage(vertex)
+    // @vertex
     // fn main() -> @builtin(position) vec4<f32> { return vec4<f32>(); }
     Func(Source{{12, 34}}, "main", {}, ty.vec4<f32>(), {Return(Construct(ty.vec4<f32>()))},
          {Stage(ast::PipelineStage::kVertex)}, {Builtin(ast::Builtin::kPosition)});
@@ -65,7 +65,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Builtin) {
 }
 
 TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Missing) {
-    // @stage(vertex)
+    // @vertex
     // fn main() -> f32 {
     //   return 1.0;
     // }
@@ -77,7 +77,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Missing) {
 }
 
 TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Multiple) {
-    // @stage(vertex)
+    // @vertex
     // fn main() -> @location(0) @builtin(position) vec4<f32> {
     //   return vec4<f32>();
     // }
@@ -95,7 +95,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_Valid) {
     //   @location(0) a : f32;
     //   @builtin(frag_depth) b : f32;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn main() -> Output {
     //   return Output();
     // }
@@ -112,7 +112,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_MemberMultipleAttribu
     // struct Output {
     //   @location(0) @builtin(frag_depth) a : f32;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn main() -> Output {
     //   return Output();
     // }
@@ -134,7 +134,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_MemberMissingAttribut
     //   @location(0) a : f32;
     //   b : f32;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn main() -> Output {
     //   return Output();
     // }
@@ -154,7 +154,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateBuiltins) {
     //   @builtin(frag_depth) a : f32;
     //   @builtin(frag_depth) b : f32;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn main() -> Output {
     //   return Output();
     // }
@@ -172,7 +172,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateBuiltins) {
 }
 
 TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Location) {
-    // @stage(fragment)
+    // @fragment
     // fn main(@location(0) param : f32) {}
     auto* param = Param("param", ty.f32(), {Location(0)});
     Func(Source{{12, 34}}, "main", {param}, ty.void_(), {}, {Stage(ast::PipelineStage::kFragment)});
@@ -181,7 +181,7 @@ TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Location) {
 }
 
 TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Missing) {
-    // @stage(fragment)
+    // @fragment
     // fn main(param : f32) {}
     auto* param = Param(Source{{13, 43}}, "param", ty.vec4<f32>());
     Func(Source{{12, 34}}, "main", {param}, ty.void_(), {}, {Stage(ast::PipelineStage::kFragment)});
@@ -191,7 +191,7 @@ TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Missing) {
 }
 
 TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Multiple) {
-    // @stage(fragment)
+    // @fragment
     // fn main(@location(0) @builtin(sample_index) param : u32) {}
     auto* param = Param(
         "param", ty.u32(),
@@ -208,7 +208,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_Valid) {
     //   @location(0) a : f32;
     //   @builtin(sample_index) b : u32;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn main(param : Input) {}
     auto* input =
         Structure("Input", {Member("a", ty.f32(), {Location(0)}),
@@ -223,7 +223,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_MemberMultipleAttribut
     // struct Input {
     //   @location(0) @builtin(sample_index) a : u32;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn main(param : Input) {}
     auto* input =
         Structure("Input", {Member("a", ty.u32(),
@@ -243,7 +243,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_MemberMissingAttribute
     //   @location(0) a : f32;
     //   b : f32;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn main(param : Input) {}
     auto* input = Structure("Input", {Member(Source{{13, 43}}, "a", ty.f32(), {Location(0)}),
                                       Member(Source{{14, 52}}, "b", ty.f32(), {})});
@@ -256,7 +256,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_MemberMissingAttribute
 }
 
 TEST_F(ResolverEntryPointValidationTest, Parameter_DuplicateBuiltins) {
-    // @stage(fragment)
+    // @fragment
     // fn main(@builtin(sample_index) param_a : u32,
     //         @builtin(sample_index) param_b : u32) {}
     auto* param_a = Param("param_a", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)});
@@ -277,7 +277,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateBuiltins) {
     // struct InputB {
     //   @builtin(sample_index) a : u32;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn main(param_a : InputA, param_b : InputB) {}
     auto* input_a =
         Structure("InputA", {Member("a", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)})});
@@ -296,7 +296,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateBuiltins) {
 }
 
 TEST_F(ResolverEntryPointValidationTest, VertexShaderMustReturnPosition) {
-    // @stage(vertex)
+    // @vertex
     // fn main() {}
     Func(Source{{12, 34}}, "main", {}, ty.void_(), {}, {Stage(ast::PipelineStage::kVertex)});
 
@@ -337,7 +337,7 @@ static constexpr Params cases[] = {
 };
 
 TEST_P(TypeValidationTest, BareInputs) {
-    // @stage(fragment)
+    // @fragment
     // fn main(@location(0) @interpolate(flat) a : *) {}
     auto params = GetParam();
     auto* a = Param("a", params.create_ast_type(*this), {Location(0), Flat()});
@@ -354,7 +354,7 @@ TEST_P(TypeValidationTest, StructInputs) {
     // struct Input {
     //   @location(0) @interpolate(flat) a : *;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn main(a : Input) {}
     auto params = GetParam();
     auto* input =
@@ -370,7 +370,7 @@ TEST_P(TypeValidationTest, StructInputs) {
 }
 
 TEST_P(TypeValidationTest, BareOutputs) {
-    // @stage(fragment)
+    // @fragment
     // fn main() -> @location(0) * {
     //   return *();
     // }
@@ -390,7 +390,7 @@ TEST_P(TypeValidationTest, StructOutputs) {
     // struct Output {
     //   @location(0) a : *;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn main() -> Output {
     //   return Output();
     // }
@@ -416,7 +416,7 @@ namespace {
 using LocationAttributeTests = ResolverTest;
 
 TEST_F(LocationAttributeTests, Pass) {
-    // @stage(fragment)
+    // @fragment
     // fn frag_main(@location(0) @interpolate(flat) a: i32) {}
 
     auto* p = Param(Source{{12, 34}}, "a", ty.i32(), {Location(0), Flat()});
@@ -426,7 +426,7 @@ TEST_F(LocationAttributeTests, Pass) {
 }
 
 TEST_F(LocationAttributeTests, BadType_Input_bool) {
-    // @stage(fragment)
+    // @fragment
     // fn frag_main(@location(0) a: bool) {}
 
     auto* p = Param(Source{{12, 34}}, "a", ty.bool_(), {Location(Source{{34, 56}}, 0)});
@@ -441,7 +441,7 @@ TEST_F(LocationAttributeTests, BadType_Input_bool) {
 }
 
 TEST_F(LocationAttributeTests, BadType_Output_Array) {
-    // @stage(fragment)
+    // @fragment
     // fn frag_main()->@location(0) array<f32, 2> { return array<f32, 2>(); }
 
     Func(Source{{12, 34}}, "frag_main", {}, ty.array<f32, 2>(),
@@ -460,7 +460,7 @@ TEST_F(LocationAttributeTests, BadType_Input_Struct) {
     // struct Input {
     //   a : f32;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn main(@location(0) param : Input) {}
     auto* input = Structure("Input", {Member("a", ty.f32())});
     auto* param = Param(Source{{12, 34}}, "param", ty.Of(input), {Location(Source{{13, 43}}, 0)});
@@ -481,7 +481,7 @@ TEST_F(LocationAttributeTests, BadType_Input_Struct_NestedStruct) {
     // struct Input {
     //   a : Inner;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn main(param : Input) {}
     auto* inner = Structure("Inner", {Member(Source{{13, 43}}, "a", ty.f32(), {Location(0)})});
     auto* input = Structure("Input", {Member(Source{{14, 52}}, "a", ty.Of(inner))});
@@ -498,7 +498,7 @@ TEST_F(LocationAttributeTests, BadType_Input_Struct_RuntimeArray) {
     // struct Input {
     //   @location(0) a : array<f32>;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn main(param : Input) {}
     auto* input =
         Structure("Input", {Member(Source{{13, 43}}, "a", ty.array<f32>(), {Location(0)})});
@@ -515,7 +515,7 @@ TEST_F(LocationAttributeTests, BadType_Input_Struct_RuntimeArray) {
 
 TEST_F(LocationAttributeTests, BadMemberType_Input) {
     // struct S { @location(0) m: array<i32>; };
-    // @stage(fragment)
+    // @fragment
     // fn frag_main( a: S) {}
 
     auto* m = Member(Source{{34, 56}}, "m", ty.array<i32>(),
@@ -535,7 +535,7 @@ TEST_F(LocationAttributeTests, BadMemberType_Input) {
 
 TEST_F(LocationAttributeTests, BadMemberType_Output) {
     // struct S { @location(0) m: atomic<i32>; };
-    // @stage(fragment)
+    // @fragment
     // fn frag_main() -> S {}
     auto* m = Member(Source{{34, 56}}, "m", ty.atomic<i32>(),
                      ast::AttributeList{Location(Source{{12, 34}}, 0u)});
@@ -572,7 +572,7 @@ TEST_F(LocationAttributeTests, ReturnType_Struct_Valid) {
     //   @location(0) a : f32;
     //   @builtin(frag_depth) b : f32;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn main() -> Output {
     //   return Output();
     // }
@@ -589,7 +589,7 @@ TEST_F(LocationAttributeTests, ReturnType_Struct) {
     // struct Output {
     //   a : f32;
     // };
-    // @stage(vertex)
+    // @vertex
     // fn main() -> @location(0) Output {
     //   return Output();
     // }
@@ -612,7 +612,7 @@ TEST_F(LocationAttributeTests, ReturnType_Struct_NestedStruct) {
     // struct Output {
     //   a : Inner;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn main() -> Output { return Output(); }
     auto* inner = Structure("Inner", {Member(Source{{13, 43}}, "a", ty.f32(), {Location(0)})});
     auto* output = Structure("Output", {Member(Source{{14, 52}}, "a", ty.Of(inner))});
@@ -629,7 +629,7 @@ TEST_F(LocationAttributeTests, ReturnType_Struct_RuntimeArray) {
     // struct Output {
     //   @location(0) a : array<f32>;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn main() -> Output {
     //   return Output();
     // }
@@ -695,7 +695,7 @@ TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Input) {
 }
 
 TEST_F(LocationAttributeTests, Duplicate_input) {
-    // @stage(fragment)
+    // @fragment
     // fn main(@location(1) param_a : f32,
     //         @location(1) param_b : f32) {}
     auto* param_a = Param("param_a", ty.f32(), {Location(1)});
@@ -714,7 +714,7 @@ TEST_F(LocationAttributeTests, Duplicate_struct) {
     // struct InputB {
     //   @location(1) a : f32;
     // };
-    // @stage(fragment)
+    // @fragment
     // fn main(param_a : InputA, param_b : InputB) {}
     auto* input_a = Structure("InputA", {Member("a", ty.f32(), {Location(1)})});
     auto* input_b = Structure("InputB", {Member("a", ty.f32(), {Location(Source{{34, 56}}, 1)})});

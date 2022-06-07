@@ -25,25 +25,25 @@ fn outer() {
   no_uses();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main1() {
   a = 42;
   uses_a();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main2() {
   b = 7;
   uses_b();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main3() {
   outer();
   no_uses();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main4() {
   no_uses();
 }

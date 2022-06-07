@@ -16,7 +16,7 @@ struct Particles {
 @group(1) @binding(3) var<storage, read> particles : Particles;
 @group(1) @binding(4) var<uniform> sim : Simulation;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var particle = particles.p[0];
   particle.position[sim.i] = particle.position[sim.i];

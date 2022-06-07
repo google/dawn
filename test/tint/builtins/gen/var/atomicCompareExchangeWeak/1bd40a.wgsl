@@ -34,12 +34,12 @@ fn atomicCompareExchangeWeak_1bd40a() {
   var res = atomicCompareExchangeWeak(&sb_rw.arg_0, arg_1, arg_2);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   atomicCompareExchangeWeak_1bd40a();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   atomicCompareExchangeWeak_1bd40a();
 }

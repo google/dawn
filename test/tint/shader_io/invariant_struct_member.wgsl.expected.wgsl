@@ -3,7 +3,7 @@ struct Out {
   pos : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main() -> Out {
   return Out();
 }

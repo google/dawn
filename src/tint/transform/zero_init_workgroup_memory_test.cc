@@ -81,7 +81,7 @@ fn unreferenced() {
   b = c;
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
 }
 )";
@@ -94,7 +94,7 @@ fn f() {
 
 TEST_F(ZeroInitWorkgroupMemoryTest, UnreferencedWorkgroupVars_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
 }
 
@@ -119,7 +119,7 @@ TEST_F(ZeroInitWorkgroupMemoryTest, SingleWorkgroupVar_ExistingLocalIndex) {
     auto* src = R"(
 var<workgroup> v : i32;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   _ = v; // Initialization should be inserted above this statement
 }
@@ -127,7 +127,7 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
     auto* expect = R"(
 var<workgroup> v : i32;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   {
     v = i32();
@@ -144,7 +144,7 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 
 TEST_F(ZeroInitWorkgroupMemoryTest, SingleWorkgroupVar_ExistingLocalIndex_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   _ = v; // Initialization should be inserted above this statement
 }
@@ -152,7 +152,7 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 var<workgroup> v : i32;
 )";
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   {
     v = i32();
@@ -177,7 +177,7 @@ struct Params {
   @builtin(local_invocation_index) local_idx : u32,
 };
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(params : Params) {
   _ = v; // Initialization should be inserted above this statement
 }
@@ -190,7 +190,7 @@ struct Params {
   local_idx : u32,
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(params : Params) {
   {
     v = i32();
@@ -207,7 +207,7 @@ fn f(params : Params) {
 
 TEST_F(ZeroInitWorkgroupMemoryTest, SingleWorkgroupVar_ExistingLocalIndexInStruct_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(params : Params) {
   _ = v; // Initialization should be inserted above this statement
 }
@@ -219,7 +219,7 @@ struct Params {
 var<workgroup> v : i32;
 )";
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(params : Params) {
   {
     v = i32();
@@ -245,7 +245,7 @@ TEST_F(ZeroInitWorkgroupMemoryTest, SingleWorkgroupVar_InjectedLocalIndex) {
     auto* src = R"(
 var<workgroup> v : i32;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   _ = v; // Initialization should be inserted above this statement
 }
@@ -253,7 +253,7 @@ fn f() {
     auto* expect = R"(
 var<workgroup> v : i32;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
   {
     v = i32();
@@ -270,7 +270,7 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
 
 TEST_F(ZeroInitWorkgroupMemoryTest, SingleWorkgroupVar_InjectedLocalIndex_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   _ = v; // Initialization should be inserted above this statement
 }
@@ -278,7 +278,7 @@ fn f() {
 var<workgroup> v : i32;
 )";
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
   {
     v = i32();
@@ -308,7 +308,7 @@ var<workgroup> b : S;
 
 var<workgroup> c : array<S, 32>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   _ = a; // Initialization should be inserted above this statement
   _ = b;
@@ -327,7 +327,7 @@ var<workgroup> b : S;
 
 var<workgroup> c : array<S, 32>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   {
     a = i32();
@@ -360,7 +360,7 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 
 TEST_F(ZeroInitWorkgroupMemoryTest, MultipleWorkgroupVar_ExistingLocalIndex_Size1_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   _ = a; // Initialization should be inserted above this statement
   _ = b;
@@ -379,7 +379,7 @@ struct S {
 };
 )";
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   {
     a = i32();
@@ -434,7 +434,7 @@ var<workgroup> b : S;
 
 var<workgroup> c : array<S, 32>;
 
-@stage(compute) @workgroup_size(2, 3)
+@compute @workgroup_size(2, 3)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   _ = a; // Initialization should be inserted above this statement
   _ = b;
@@ -453,7 +453,7 @@ var<workgroup> b : S;
 
 var<workgroup> c : array<S, 32>;
 
-@stage(compute) @workgroup_size(2, 3)
+@compute @workgroup_size(2, 3)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   if ((local_idx < 1u)) {
     a = i32();
@@ -499,7 +499,7 @@ var<workgroup> c : array<S, 32>;
 
 @id(1) override X : i32;
 
-@stage(compute) @workgroup_size(2, 3, X)
+@compute @workgroup_size(2, 3, X)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   _ = a; // Initialization should be inserted above this statement
   _ = b;
@@ -521,7 +521,7 @@ var<workgroup> c : array<S, 32>;
 
 @id(1) override X : i32;
 
-@stage(compute) @workgroup_size(2, 3, X)
+@compute @workgroup_size(2, 3, X)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   for(var idx : u32 = local_idx; (idx < 1u); idx = (idx + (u32(X) * 6u))) {
     a = i32();
@@ -568,7 +568,7 @@ var<workgroup> c : array<S, 32>;
 
 @id(1) override X : u32;
 
-@stage(compute) @workgroup_size(5u, X, 10u)
+@compute @workgroup_size(5u, X, 10u)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   _ = a; // Initialization should be inserted above this statement
   _ = b;
@@ -591,7 +591,7 @@ var<workgroup> c : array<S, 32>;
 
 @id(1) override X : u32;
 
-@stage(compute) @workgroup_size(5u, X, 10u)
+@compute @workgroup_size(5u, X, 10u)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   for(var idx : u32 = local_idx; (idx < 1u); idx = (idx + (X * 50u))) {
     a = i32();
@@ -654,7 +654,7 @@ var<workgroup> b : S;
 
 var<workgroup> c : array<S, 32>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_id) local_invocation_id : vec3<u32>) {
   _ = a; // Initialization should be inserted above this statement
   _ = b;
@@ -673,7 +673,7 @@ var<workgroup> b : S;
 
 var<workgroup> c : array<S, 32>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_id) local_invocation_id : vec3<u32>, @builtin(local_invocation_index) local_invocation_index : u32) {
   {
     a = i32();
@@ -706,7 +706,7 @@ fn f(@builtin(local_invocation_id) local_invocation_id : vec3<u32>, @builtin(loc
 
 TEST_F(ZeroInitWorkgroupMemoryTest, MultipleWorkgroupVar_InjectedLocalIndex_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_id) local_invocation_id : vec3<u32>) {
   _ = a; // Initialization should be inserted above this statement
   _ = b;
@@ -725,7 +725,7 @@ struct S {
 };
 )";
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_id) local_invocation_id : vec3<u32>, @builtin(local_invocation_index) local_invocation_index : u32) {
   {
     a = i32();
@@ -780,18 +780,18 @@ var<workgroup> b : S;
 
 var<workgroup> c : array<S, 32>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f1() {
   _ = a; // Initialization should be inserted above this statement
   _ = c;
 }
 
-@stage(compute) @workgroup_size(1, 2, 3)
+@compute @workgroup_size(1, 2, 3)
 fn f2(@builtin(local_invocation_id) local_invocation_id : vec3<u32>) {
   _ = b; // Initialization should be inserted above this statement
 }
 
-@stage(compute) @workgroup_size(4, 5, 6)
+@compute @workgroup_size(4, 5, 6)
 fn f3() {
   _ = c; // Initialization should be inserted above this statement
   _ = a;
@@ -809,7 +809,7 @@ var<workgroup> b : S;
 
 var<workgroup> c : array<S, 32>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f1(@builtin(local_invocation_index) local_invocation_index : u32) {
   {
     a = i32();
@@ -828,7 +828,7 @@ fn f1(@builtin(local_invocation_index) local_invocation_index : u32) {
   _ = c;
 }
 
-@stage(compute) @workgroup_size(1, 2, 3)
+@compute @workgroup_size(1, 2, 3)
 fn f2(@builtin(local_invocation_id) local_invocation_id : vec3<u32>, @builtin(local_invocation_index) local_invocation_index_1 : u32) {
   if ((local_invocation_index_1 < 1u)) {
     b.x = i32();
@@ -841,7 +841,7 @@ fn f2(@builtin(local_invocation_id) local_invocation_id : vec3<u32>, @builtin(lo
   _ = b;
 }
 
-@stage(compute) @workgroup_size(4, 5, 6)
+@compute @workgroup_size(4, 5, 6)
 fn f3(@builtin(local_invocation_index) local_invocation_index_2 : u32) {
   if ((local_invocation_index_2 < 1u)) {
     a = i32();
@@ -868,18 +868,18 @@ fn f3(@builtin(local_invocation_index) local_invocation_index_2 : u32) {
 
 TEST_F(ZeroInitWorkgroupMemoryTest, MultipleWorkgroupVar_MultipleEntryPoints_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f1() {
   _ = a; // Initialization should be inserted above this statement
   _ = c;
 }
 
-@stage(compute) @workgroup_size(1, 2, 3)
+@compute @workgroup_size(1, 2, 3)
 fn f2(@builtin(local_invocation_id) local_invocation_id : vec3<u32>) {
   _ = b; // Initialization should be inserted above this statement
 }
 
-@stage(compute) @workgroup_size(4, 5, 6)
+@compute @workgroup_size(4, 5, 6)
 fn f3() {
   _ = c; // Initialization should be inserted above this statement
   _ = a;
@@ -897,7 +897,7 @@ struct S {
 };
 )";
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f1(@builtin(local_invocation_index) local_invocation_index : u32) {
   {
     a = i32();
@@ -916,7 +916,7 @@ fn f1(@builtin(local_invocation_index) local_invocation_index : u32) {
   _ = c;
 }
 
-@stage(compute) @workgroup_size(1, 2, 3)
+@compute @workgroup_size(1, 2, 3)
 fn f2(@builtin(local_invocation_id) local_invocation_id : vec3<u32>, @builtin(local_invocation_index) local_invocation_index_1 : u32) {
   if ((local_invocation_index_1 < 1u)) {
     b.x = i32();
@@ -929,7 +929,7 @@ fn f2(@builtin(local_invocation_id) local_invocation_id : vec3<u32>, @builtin(lo
   _ = b;
 }
 
-@stage(compute) @workgroup_size(4, 5, 6)
+@compute @workgroup_size(4, 5, 6)
 fn f3(@builtin(local_invocation_index) local_invocation_index_2 : u32) {
   if ((local_invocation_index_2 < 1u)) {
     a = i32();
@@ -977,7 +977,7 @@ fn call_use_v() {
   use_v();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   call_use_v(); // Initialization should be inserted above this statement
 }
@@ -993,7 +993,7 @@ fn call_use_v() {
   use_v();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   {
     v = i32();
@@ -1010,7 +1010,7 @@ fn f(@builtin(local_invocation_index) local_idx : u32) {
 
 TEST_F(ZeroInitWorkgroupMemoryTest, TransitiveUsage_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   call_use_v(); // Initialization should be inserted above this statement
 }
@@ -1026,7 +1026,7 @@ fn use_v() {
 var<workgroup> v : i32;
 )";
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_idx : u32) {
   {
     v = i32();
@@ -1056,7 +1056,7 @@ TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupAtomics) {
 var<workgroup> i : atomic<i32>;
 var<workgroup> u : atomic<u32>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   atomicLoad(&(i)); // Initialization should be inserted above this statement
   atomicLoad(&(u));
@@ -1067,7 +1067,7 @@ var<workgroup> i : atomic<i32>;
 
 var<workgroup> u : atomic<u32>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
   {
     atomicStore(&(i), i32());
@@ -1086,7 +1086,7 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
 
 TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupAtomics_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   atomicLoad(&(i)); // Initialization should be inserted above this statement
   atomicLoad(&(u));
@@ -1096,7 +1096,7 @@ var<workgroup> i : atomic<i32>;
 var<workgroup> u : atomic<u32>;
 )";
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
   {
     atomicStore(&(i), i32());
@@ -1129,7 +1129,7 @@ struct S {
 
 var<workgroup> w : S;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   _ = w.a; // Initialization should be inserted above this statement
 }
@@ -1145,7 +1145,7 @@ struct S {
 
 var<workgroup> w : S;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
   {
     w.a = i32();
@@ -1166,7 +1166,7 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
 
 TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupStructOfAtomics_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   _ = w.a; // Initialization should be inserted above this statement
 }
@@ -1182,7 +1182,7 @@ struct S {
 };
 )";
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
   {
     w.a = i32();
@@ -1215,7 +1215,7 @@ TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupArrayOfAtomics) {
     auto* src = R"(
 var<workgroup> w : array<atomic<u32>, 4>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   atomicLoad(&w[0]); // Initialization should be inserted above this statement
 }
@@ -1223,7 +1223,7 @@ fn f() {
     auto* expect = R"(
 var<workgroup> w : array<atomic<u32>, 4>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
   for(var idx : u32 = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
     let i : u32 = idx;
@@ -1241,7 +1241,7 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
 
 TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupArrayOfAtomics_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   atomicLoad(&w[0]); // Initialization should be inserted above this statement
 }
@@ -1249,7 +1249,7 @@ fn f() {
 var<workgroup> w : array<atomic<u32>, 4>;
 )";
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
   for(var idx : u32 = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
     let i : u32 = idx;
@@ -1279,7 +1279,7 @@ struct S {
 
 var<workgroup> w : array<S, 4>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   _ = w[0].a; // Initialization should be inserted above this statement
 }
@@ -1295,7 +1295,7 @@ struct S {
 
 var<workgroup> w : array<S, 4>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
   for(var idx : u32 = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
     let i_1 : u32 = idx;
@@ -1317,7 +1317,7 @@ fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
 
 TEST_F(ZeroInitWorkgroupMemoryTest, WorkgroupArrayOfStructOfAtomics_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   _ = w[0].a; // Initialization should be inserted above this statement
 }
@@ -1333,7 +1333,7 @@ struct S {
 };
 )";
     auto* expect = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f(@builtin(local_invocation_index) local_invocation_index : u32) {
   for(var idx : u32 = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
     let i_1 : u32 = idx;

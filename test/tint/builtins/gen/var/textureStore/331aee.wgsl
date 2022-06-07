@@ -31,18 +31,18 @@ fn textureStore_331aee() {
   textureStore(arg_0, arg_1, arg_2);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureStore_331aee();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureStore_331aee();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   textureStore_331aee();
 }

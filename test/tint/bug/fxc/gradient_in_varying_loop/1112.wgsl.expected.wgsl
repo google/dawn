@@ -16,7 +16,7 @@ bug/fxc/gradient_in_varying_loop/1112.wgsl:8:29 note: return value of 'textureSa
 
 @group(0) @binding(2) var depthTexture : texture_2d<f32>;
 
-@stage(fragment)
+@fragment
 fn main(@location(0) vUV : vec2<f32>) -> @location(0) vec4<f32> {
   let random : vec3<f32> = textureSample(randomTexture, Sampler, vUV).rgb;
   var i = 0;

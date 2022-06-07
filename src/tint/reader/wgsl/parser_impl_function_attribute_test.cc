@@ -212,6 +212,7 @@ TEST_F(ParserImplTest, Attribute_Workgroup_Missing_Z_Value) {
     EXPECT_EQ(p->error(), "1:22: expected workgroup_size z parameter");
 }
 
+// TODO(crbug.com/tint/1503): Remove when @stage is removed
 TEST_F(ParserImplTest, Attribute_Stage) {
     auto p = parser("stage(compute)");
     auto attr = p->attribute();

@@ -20,7 +20,7 @@ fn x(p : ptr<private, S>) {
   (*(p)).data[ubo.dynamic_idx] = 1;
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   x(&(s));
   result.out = s.data[3];

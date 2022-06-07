@@ -30,7 +30,7 @@
 
 @group(0) @binding(15) var t_rgba32float : texture_storage_3d<rgba32float, write>;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   _ = t_rgba8unorm;
   _ = t_rgba8snorm;

@@ -8,12 +8,12 @@ fn atomicXor_c1b78c() {
   var res : i32 = atomicXor(&(sb_rw.arg_0), 1);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   atomicXor_c1b78c();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   atomicXor_c1b78c();
 }

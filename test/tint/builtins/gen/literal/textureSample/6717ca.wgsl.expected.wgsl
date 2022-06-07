@@ -6,7 +6,7 @@ fn textureSample_6717ca() {
   var res : vec4<f32> = textureSample(arg_0, arg_1, vec2<f32>(), 1);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureSample_6717ca();
 }

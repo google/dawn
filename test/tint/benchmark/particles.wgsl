@@ -31,7 +31,7 @@ struct VertexOutput {
   @location(1)       quad_pos : vec2<f32>, // -1..+1
 };
 
-@stage(vertex)
+@vertex
 fn vs_main(in : VertexInput) -> VertexOutput {
   var quad_pos = mat2x3<f32>(render_params.right, render_params.up) * in.quad_pos;
   var position = in.position + quad_pos * 0.01;
@@ -45,7 +45,7 @@ fn vs_main(in : VertexInput) -> VertexOutput {
 ////////////////////////////////////////////////////////////////////////////////
 // Fragment shader
 ////////////////////////////////////////////////////////////////////////////////
-@stage(fragment)
+@fragment
 fn fs_main(in : VertexOutput) -> @location(0) vec4<f32> {
   var color = in.color;
   // Apply a circular particle alpha mask
@@ -76,7 +76,7 @@ struct Particles {
 @binding(1) @group(0) var<storage, read_write> data : Particles;
 @binding(2) @group(0) var texture : texture_2d<f32>;
 
-@stage(compute) @workgroup_size(64)
+@compute @workgroup_size(64)
 fn simulate(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
   rand_seed = (sim_params.seed.xy + vec2<f32>(GlobalInvocationID.xy)) * sim_params.seed.zw;
 
@@ -148,7 +148,7 @@ struct Buffer {
 // Loads the alpha channel from a texel of the source image, and writes it to
 // the buf_out.weights.
 ////////////////////////////////////////////////////////////////////////////////
-@stage(compute) @workgroup_size(64)
+@compute @workgroup_size(64)
 fn import_level(@builtin(global_invocation_id) coord : vec3<u32>) {
   _ = &buf_in;
   let offset = coord.x + coord.y * ubo.width;
@@ -163,7 +163,7 @@ fn import_level(@builtin(global_invocation_id) coord : vec3<u32>) {
 // mip level of tex_out. See simulate() in particle.wgsl to understand the
 // probability logic.
 ////////////////////////////////////////////////////////////////////////////////
-@stage(compute) @workgroup_size(64)
+@compute @workgroup_size(64)
 fn export_level(@builtin(global_invocation_id) coord : vec3<u32>) {
   if (all(coord.xy < vec2<u32>(textureDimensions(tex_out)))) {
     let dst_offset = coord.x    + coord.y    * ubo.width;

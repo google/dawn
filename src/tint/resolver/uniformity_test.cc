@@ -683,7 +683,7 @@ class ComputeBuiltin : public UniformityAnalysisTestBase,
                        public ::testing::TestWithParam<BuiltinEntry> {};
 TEST_P(ComputeBuiltin, AsParam) {
     std::string src = R"(
-@stage(compute) @workgroup_size(64)
+@compute @workgroup_size(64)
 fn main(@builtin()" + GetParam().name +
                       R"() b : )" + GetParam().type + R"() {
   if (all(vec3(b) == vec3(0u))) {
@@ -719,7 +719,7 @@ struct S {
                       R"() b : )" + GetParam().type + R"(
 }
 
-@stage(compute) @workgroup_size(64)
+@compute @workgroup_size(64)
 fn main(s : S) {
   if (all(vec3(s.b) == vec3(0u))) {
     workgroupBarrier();
@@ -767,7 +767,7 @@ struct S {
   @builtin(local_invocation_index) idx : u32,
 }
 
-@stage(compute) @workgroup_size(64)
+@compute @workgroup_size(64)
 fn main(s : S) {
   if (s.num_groups.x == 0u) {
     workgroupBarrier();
@@ -795,7 +795,7 @@ class FragmentBuiltin : public UniformityAnalysisTestBase,
                         public ::testing::TestWithParam<BuiltinEntry> {};
 TEST_P(FragmentBuiltin, AsParam) {
     std::string src = R"(
-@stage(fragment)
+@fragment
 fn main(@builtin()" + GetParam().name +
                       R"() b : )" + GetParam().type + R"() {
   if (u32(vec4(b).x) == 0u) {
@@ -830,7 +830,7 @@ struct S {
                       R"() b : )" + GetParam().type + R"(
 }
 
-@stage(fragment)
+@fragment
 fn main(s : S) {
   if (u32(vec4(s.b).x) == 0u) {
     dpdx(0.5);
@@ -869,7 +869,7 @@ INSTANTIATE_TEST_SUITE_P(UniformityAnalysisTest,
 
 TEST_F(UniformityAnalysisTest, FragmentLocation) {
     std::string src = R"(
-@stage(fragment)
+@fragment
 fn main(@location(0) l : f32) {
   if (l == 0.0) {
     dpdx(0.5);
@@ -899,7 +899,7 @@ struct S {
   @location(0) l : f32
 }
 
-@stage(fragment)
+@fragment
 fn main(s : S) {
   if (s.l == 0.0) {
     dpdx(0.5);
@@ -5598,7 +5598,7 @@ fn foo() {
   }
 }
 
-@stage(fragment)
+@fragment
 fn main() {
   foo();
 }

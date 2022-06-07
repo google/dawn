@@ -20,7 +20,7 @@ fn runTest() -> i32 {
   return atomicLoad(&(s.data[(0u + u32(constants.zero))]));
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   result.value = u32(runTest());
 }

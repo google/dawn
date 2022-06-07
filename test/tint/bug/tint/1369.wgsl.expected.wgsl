@@ -11,7 +11,7 @@ fn call_discard() -> bool {
   return true;
 }
 
-@stage(fragment)
+@fragment
 fn f() {
   var v = call_discard();
   var also_unreachable : bool;

@@ -7,7 +7,7 @@ struct FragmentOutputs {
   @location(3) loc3 : vec4<f32>,
 };
 
-@stage(fragment)
+@fragment
 fn main() -> FragmentOutputs {
   return FragmentOutputs(1, 2.0, 1u, 1.0, 2u, vec4<f32>(1.0, 2.0, 3.0, 4.0));
 }

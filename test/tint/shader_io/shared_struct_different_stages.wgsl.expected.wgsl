@@ -7,12 +7,12 @@ struct Interface {
   pos : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn vert_main() -> Interface {
   return Interface(0.400000006, 0.600000024, vec4<f32>());
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(colors : Interface) {
   let r : f32 = colors.col1;
   let g : f32 = colors.col2;

@@ -98,7 +98,7 @@ struct S {
 
 @group(15) @binding(300) var s15 : sampler_comparison;
 
-@stage(fragment)
+@fragment
 fn main() {
   _ = b0;
   _ = b1;

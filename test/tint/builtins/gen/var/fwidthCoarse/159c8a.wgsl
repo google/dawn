@@ -29,7 +29,7 @@ fn fwidthCoarse_159c8a() {
   var res: f32 = fwidthCoarse(arg_0);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   fwidthCoarse_159c8a();
 }

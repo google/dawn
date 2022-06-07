@@ -1,7 +1,7 @@
 fn bar() {
 }
 
-@stage(fragment)
+@fragment
 fn main() -> @location(0) vec4<f32> {
   var a : vec2<f32> = vec2<f32>();
   bar();

@@ -1,4 +1,4 @@
-@stage(fragment)
+@fragment
 fn main(
   @location(0) none : f32,
   @location(1) @interpolate(flat) flat : f32,

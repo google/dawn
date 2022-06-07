@@ -32,18 +32,18 @@ fn arrayLength_61b1c7() {
   var res: u32 = arrayLength(&sb_rw.arg_0);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   arrayLength_61b1c7();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   arrayLength_61b1c7();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   arrayLength_61b1c7();
 }

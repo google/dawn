@@ -8,18 +8,18 @@ fn arrayLength_cdd123() {
   var res : u32 = arrayLength(&(sb_rw.arg_0));
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   arrayLength_cdd123();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   arrayLength_cdd123();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   arrayLength_cdd123();
 }

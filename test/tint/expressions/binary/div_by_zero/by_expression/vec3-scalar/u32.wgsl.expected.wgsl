@@ -1,4 +1,4 @@
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   var a = vec3<u32>(1u, 2u, 3u);
   var b = 0u;

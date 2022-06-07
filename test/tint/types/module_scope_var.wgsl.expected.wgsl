@@ -22,7 +22,7 @@ var<private> arr_var : array<f32, 4>;
 
 var<private> struct_var : S;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   bool_var = bool();
   i32_var = i32();

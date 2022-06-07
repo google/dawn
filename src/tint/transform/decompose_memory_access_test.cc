@@ -78,7 +78,7 @@ struct SB {
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var a : i32 = sb.a;
   var b : u32 = sb.b;
@@ -213,7 +213,7 @@ fn tint_symbol_21(@internal(disable_validation__ignore_constructible_function_pa
   return arr;
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var a : i32 = tint_symbol(sb, 0u);
   var b : u32 = tint_symbol_1(sb, 4u);
@@ -247,7 +247,7 @@ fn main() {
 
 TEST_F(DecomposeMemoryAccessTest, SB_BasicLoad_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var a : i32 = sb.a;
   var b : u32 = sb.b;
@@ -382,7 +382,7 @@ fn tint_symbol_21(@internal(disable_validation__ignore_constructible_function_pa
   return arr;
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var a : i32 = tint_symbol(sb, 0u);
   var b : u32 = tint_symbol_1(sb, 4u);
@@ -470,7 +470,7 @@ struct UB {
 
 @group(0) @binding(0) var<uniform> ub : UB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var a : i32 = ub.a;
   var b : u32 = ub.b;
@@ -605,7 +605,7 @@ fn tint_symbol_21(@internal(disable_validation__ignore_constructible_function_pa
   return arr;
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var a : i32 = tint_symbol(ub, 0u);
   var b : u32 = tint_symbol_1(ub, 4u);
@@ -639,7 +639,7 @@ fn main() {
 
 TEST_F(DecomposeMemoryAccessTest, UB_BasicLoad_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var a : i32 = ub.a;
   var b : u32 = ub.b;
@@ -774,7 +774,7 @@ fn tint_symbol_21(@internal(disable_validation__ignore_constructible_function_pa
   return arr;
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var a : i32 = tint_symbol(ub, 0u);
   var b : u32 = tint_symbol_1(ub, 4u);
@@ -862,7 +862,7 @@ struct SB {
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   sb.a = i32();
   sb.b = u32();
@@ -1014,7 +1014,7 @@ fn tint_symbol_21(@internal(disable_validation__ignore_constructible_function_pa
   }
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   tint_symbol(sb, 0u, i32());
   tint_symbol_1(sb, 4u, u32());
@@ -1048,7 +1048,7 @@ fn main() {
 
 TEST_F(DecomposeMemoryAccessTest, SB_BasicStore_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   sb.a = i32();
   sb.b = u32();
@@ -1200,7 +1200,7 @@ fn tint_symbol_21(@internal(disable_validation__ignore_constructible_function_pa
   }
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   tint_symbol(sb, 0u, i32());
   tint_symbol_1(sb, 4u, u32());
@@ -1288,7 +1288,7 @@ struct SB {
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var x : SB = sb;
 }
@@ -1406,7 +1406,7 @@ fn tint_symbol(@internal(disable_validation__ignore_constructible_function_param
   return SB(tint_symbol_1(buffer, (offset + 0u)), tint_symbol_2(buffer, (offset + 4u)), tint_symbol_3(buffer, (offset + 8u)), tint_symbol_4(buffer, (offset + 16u)), tint_symbol_5(buffer, (offset + 24u)), tint_symbol_6(buffer, (offset + 32u)), tint_symbol_7(buffer, (offset + 48u)), tint_symbol_8(buffer, (offset + 64u)), tint_symbol_9(buffer, (offset + 80u)), tint_symbol_10(buffer, (offset + 96u)), tint_symbol_11(buffer, (offset + 112u)), tint_symbol_12(buffer, (offset + 128u)), tint_symbol_13(buffer, (offset + 144u)), tint_symbol_14(buffer, (offset + 160u)), tint_symbol_15(buffer, (offset + 192u)), tint_symbol_16(buffer, (offset + 224u)), tint_symbol_17(buffer, (offset + 256u)), tint_symbol_18(buffer, (offset + 304u)), tint_symbol_19(buffer, (offset + 352u)), tint_symbol_20(buffer, (offset + 384u)), tint_symbol_21(buffer, (offset + 448u)), tint_symbol_22(buffer, (offset + 512u)));
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var x : SB = tint_symbol(sb, 0u);
 }
@@ -1419,7 +1419,7 @@ fn main() {
 
 TEST_F(DecomposeMemoryAccessTest, LoadStructure_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var x : SB = sb;
 }
@@ -1537,7 +1537,7 @@ fn tint_symbol(@internal(disable_validation__ignore_constructible_function_param
   return SB(tint_symbol_1(buffer, (offset + 0u)), tint_symbol_2(buffer, (offset + 4u)), tint_symbol_3(buffer, (offset + 8u)), tint_symbol_4(buffer, (offset + 16u)), tint_symbol_5(buffer, (offset + 24u)), tint_symbol_6(buffer, (offset + 32u)), tint_symbol_7(buffer, (offset + 48u)), tint_symbol_8(buffer, (offset + 64u)), tint_symbol_9(buffer, (offset + 80u)), tint_symbol_10(buffer, (offset + 96u)), tint_symbol_11(buffer, (offset + 112u)), tint_symbol_12(buffer, (offset + 128u)), tint_symbol_13(buffer, (offset + 144u)), tint_symbol_14(buffer, (offset + 160u)), tint_symbol_15(buffer, (offset + 192u)), tint_symbol_16(buffer, (offset + 224u)), tint_symbol_17(buffer, (offset + 256u)), tint_symbol_18(buffer, (offset + 304u)), tint_symbol_19(buffer, (offset + 352u)), tint_symbol_20(buffer, (offset + 384u)), tint_symbol_21(buffer, (offset + 448u)), tint_symbol_22(buffer, (offset + 512u)));
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var x : SB = tint_symbol(sb, 0u);
 }
@@ -1604,7 +1604,7 @@ struct SB {
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   sb = SB();
 }
@@ -1760,7 +1760,7 @@ fn tint_symbol(@internal(disable_validation__ignore_constructible_function_param
   tint_symbol_22(buffer, (offset + 512u), value.v);
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   tint_symbol(sb, 0u, SB());
 }
@@ -1773,7 +1773,7 @@ fn main() {
 
 TEST_F(DecomposeMemoryAccessTest, StoreStructure_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   sb = SB();
 }
@@ -1929,7 +1929,7 @@ fn tint_symbol(@internal(disable_validation__ignore_constructible_function_param
   tint_symbol_22(buffer, (offset + 512u), value.v);
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   tint_symbol(sb, 0u, SB());
 }
@@ -1993,7 +1993,7 @@ struct SB {
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var x : f32 = sb.b[4].b[1].b.z;
 }
@@ -2030,7 +2030,7 @@ struct SB {
 @internal(intrinsic_load_storage_f32) @internal(disable_validation__function_has_no_body)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> f32
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var x : f32 = tint_symbol(sb, 712u);
 }
@@ -2043,7 +2043,7 @@ fn main() {
 
 TEST_F(DecomposeMemoryAccessTest, ComplexStaticAccessChain_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var x : f32 = sb.b[4].b[1].b.z;
 }
@@ -2080,7 +2080,7 @@ struct S1 {
 @internal(intrinsic_load_storage_f32) @internal(disable_validation__function_has_no_body)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> f32
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var x : f32 = tint_symbol(sb, 712u);
 }
@@ -2133,7 +2133,7 @@ struct SB {
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var i : i32 = 4;
   var j : u32 = 1u;
@@ -2166,7 +2166,7 @@ struct SB {
 @internal(intrinsic_load_storage_f32) @internal(disable_validation__function_has_no_body)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> f32
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var i : i32 = 4;
   var j : u32 = 1u;
@@ -2182,7 +2182,7 @@ fn main() {
 
 TEST_F(DecomposeMemoryAccessTest, ComplexDynamicAccessChain_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var i : i32 = 4;
   var j : u32 = 1u;
@@ -2215,7 +2215,7 @@ struct S1 {
 @internal(intrinsic_load_storage_f32) @internal(disable_validation__function_has_no_body)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> f32
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var i : i32 = 4;
   var j : u32 = 1u;
@@ -2279,7 +2279,7 @@ struct SB {
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var i : i32 = 4;
   var j : u32 = 1u;
@@ -2320,7 +2320,7 @@ struct SB {
 @internal(intrinsic_load_storage_f32) @internal(disable_validation__function_has_no_body)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> f32
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var i : i32 = 4;
   var j : u32 = 1u;
@@ -2336,7 +2336,7 @@ fn main() {
 
 TEST_F(DecomposeMemoryAccessTest, ComplexDynamicAccessChainWithAliases_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var i : i32 = 4;
   var j : u32 = 1u;
@@ -2377,7 +2377,7 @@ struct S1 {
 @internal(intrinsic_load_storage_f32) @internal(disable_validation__function_has_no_body)
 fn tint_symbol(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32) -> f32
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var i : i32 = 4;
   var j : u32 = 1u;
@@ -2429,7 +2429,7 @@ struct SB {
 
 @group(0) @binding(0) var<storage, read_write> sb : SB;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   atomicStore(&sb.a, 123);
   atomicLoad(&sb.a);
@@ -2542,7 +2542,7 @@ struct atomic_compare_exchange_weak_ret_type_1 {
 @internal(intrinsic_atomic_compare_exchange_weak_storage_u32) @internal(disable_validation__function_has_no_body)
 fn tint_atomicCompareExchangeWeak_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32, param_2 : u32) -> atomic_compare_exchange_weak_ret_type_1
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   tint_atomicStore(sb, 16u, 123);
   tint_atomicLoad(sb, 16u);
@@ -2576,7 +2576,7 @@ fn main() {
 
 TEST_F(DecomposeMemoryAccessTest, StorageBufferAtomics_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   atomicStore(&sb.a, 123);
   atomicLoad(&sb.a);
@@ -2689,7 +2689,7 @@ struct atomic_compare_exchange_weak_ret_type_1 {
 @internal(intrinsic_atomic_compare_exchange_weak_storage_u32) @internal(disable_validation__function_has_no_body)
 fn tint_atomicCompareExchangeWeak_1(@internal(disable_validation__ignore_constructible_function_parameter) buffer : SB, offset : u32, param_1 : u32, param_2 : u32) -> atomic_compare_exchange_weak_ret_type_1
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   tint_atomicStore(sb, 16u, 123);
   tint_atomicLoad(sb, 16u);
@@ -2739,7 +2739,7 @@ struct S {
 
 var<workgroup> w : S;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   atomicStore(&(w.a), 123);
   atomicLoad(&(w.a));
@@ -2775,7 +2775,7 @@ fn main() {
 
 TEST_F(DecomposeMemoryAccessTest, WorkgroupBufferAtomics_OutOfOrder) {
     auto* src = R"(
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   atomicStore(&(w.a), 123);
   atomicLoad(&(w.a));

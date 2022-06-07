@@ -16,7 +16,7 @@ struct Result {
 
 var<workgroup> s : S;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   result.out = s.data[ubo.dynamic_idx];
 }

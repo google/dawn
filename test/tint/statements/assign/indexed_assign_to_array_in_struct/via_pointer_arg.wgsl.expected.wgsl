@@ -17,7 +17,7 @@ fn f(p : ptr<function, OuterS>) {
   (*(p)).a1[uniforms.i] = v;
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var s1 : OuterS;
   f(&(s1));

@@ -30,7 +30,7 @@ fn atomicExchange_0a5dca() {
   var res: u32 = atomicExchange(&arg_0, arg_1);
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   atomicExchange_0a5dca();
 }

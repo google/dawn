@@ -30,18 +30,18 @@ fn textureGatherCompare_60d2d1() {
   var res: vec4<f32> = textureGatherCompare(arg_0, arg_1, vec3<f32>(), 1, 1.0);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureGatherCompare_60d2d1();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureGatherCompare_60d2d1();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   textureGatherCompare_60d2d1();
 }

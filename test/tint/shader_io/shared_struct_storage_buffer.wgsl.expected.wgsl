@@ -9,7 +9,7 @@ struct S {
 
 @group(0) @binding(0) var<storage, write> output : S;
 
-@stage(fragment)
+@fragment
 fn frag_main(input : S) {
   let f : f32 = input.f;
   let u : u32 = input.u;

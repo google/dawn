@@ -85,7 +85,7 @@ fn sqDistPointAABB(point : vec3<f32>, minAABB : vec3<f32>, maxAABB : vec3<f32>) 
   return sqDist;
 }
 
-@stage(compute) @workgroup_size(4, 2, 4)
+@compute @workgroup_size(4, 2, 4)
 fn computeMain(@builtin(global_invocation_id) global_id : vec3<u32>) {
   let tileIndex = ((global_id.x + (global_id.y * tileCount.x)) + ((global_id.z * tileCount.x) * tileCount.y));
   var clusterLightCount = 0u;

@@ -33,12 +33,12 @@ fn atomicSub_15bfc9() {
   var res: u32 = atomicSub(&sb_rw.arg_0, arg_1);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   atomicSub_15bfc9();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   atomicSub_15bfc9();
 }

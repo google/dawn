@@ -109,7 +109,7 @@ fn main_1() {
   return;
 }
 
-@stage(compute) @workgroup_size(4, 1, 1)
+@compute @workgroup_size(4, 1, 1)
 fn main(@builtin(workgroup_id) gl_WorkGroupID_param : vec3<u32>) {
   gl_WorkGroupID = gl_WorkGroupID_param;
   main_1();

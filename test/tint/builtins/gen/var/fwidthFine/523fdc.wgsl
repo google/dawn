@@ -29,7 +29,7 @@ fn fwidthFine_523fdc() {
   var res: vec3<f32> = fwidthFine(arg_0);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   fwidthFine_523fdc();
 }

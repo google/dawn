@@ -12,7 +12,7 @@ struct FragmentOutput {
 
 @binding(3) @group(1) var texSampler : sampler;
 
-@stage(fragment)
+@fragment
 fn main(fIn : FragmentInput) -> FragmentOutput {
   let sample : f32 = textureSample(depthMap, texSampler, fIn.vUv);
   let color : vec3<f32> = vec3<f32>(sample, sample, sample);

@@ -9,7 +9,7 @@ struct FragmentInputs {
   loc3 : vec4<f32>,
 }
 
-@stage(fragment)
+@fragment
 fn main(inputs : FragmentInputs) {
   let i : i32 = inputs.loc0;
   let u : u32 = inputs.loc1;

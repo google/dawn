@@ -2,7 +2,7 @@ struct S {
     e: bool,
 }
 
-@stage(compute)
+@compute
 @workgroup_size(1)
 fn main() {
     var b : bool;

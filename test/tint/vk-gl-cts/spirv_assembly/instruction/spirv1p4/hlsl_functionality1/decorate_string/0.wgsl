@@ -18,7 +18,7 @@ struct main_out {
   pos_1 : u32,
 }
 
-@stage(vertex)
+@vertex
 fn main(@location(0) position_param : vec4<f32>) -> main_out {
   position = position_param;
   main_1();

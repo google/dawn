@@ -10,7 +10,7 @@ struct Out {
   @location(7) @interpolate(linear, sample) linear_sample : f32,
 };
 
-@stage(vertex)
+@vertex
 fn main() -> Out {
   return Out();
 }

@@ -29,7 +29,7 @@ fn atomicCompareExchangeWeak_e88938() {
   var res = atomicCompareExchangeWeak(&arg_0, 1, 1);
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   atomicCompareExchangeWeak_e88938();
 }

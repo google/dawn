@@ -16,7 +16,7 @@ fn aboutEqual(value : f32, expect : f32) -> bool {
     // The value diff should be smaller than the hard coded tolerance.
     return abs(value - expect) < 0.001;
 }
-@stage(compute) @workgroup_size(1, 1, 1)
+@compute @workgroup_size(1, 1, 1)
 fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
     let srcSize : vec2<i32> = textureDimensions(src);
     let dstSize : vec2<i32> = textureDimensions(dst);

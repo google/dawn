@@ -19,7 +19,7 @@ struct main_out {
   frag_color_1 : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@location(0) position_param : vec4<f32>) -> main_out {
   position = position_param;
   main_1();

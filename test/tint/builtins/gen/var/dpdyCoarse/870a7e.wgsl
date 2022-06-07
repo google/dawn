@@ -29,7 +29,7 @@ fn dpdyCoarse_870a7e() {
   var res: f32 = dpdyCoarse(arg_0);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   dpdyCoarse_870a7e();
 }

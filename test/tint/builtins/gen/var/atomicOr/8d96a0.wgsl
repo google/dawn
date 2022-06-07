@@ -33,12 +33,12 @@ fn atomicOr_8d96a0() {
   var res: i32 = atomicOr(&sb_rw.arg_0, arg_1);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   atomicOr_8d96a0();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   atomicOr_8d96a0();
 }

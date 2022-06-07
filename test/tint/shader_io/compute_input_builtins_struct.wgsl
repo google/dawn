@@ -6,7 +6,7 @@ struct ComputeInputs {
   @builtin(num_workgroups) num_workgroups : vec3<u32>,
 };
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main(inputs : ComputeInputs) {
   let foo : u32 =
     inputs.local_invocation_id.x +

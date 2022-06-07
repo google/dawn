@@ -20,7 +20,7 @@ struct S {
 
 @binding(0) @group(0) var<uniform> s : S;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main(@builtin(local_invocation_index) idx : u32) {
   let a = s.arr[idx].a;
   let b = s.arr[idx].b;

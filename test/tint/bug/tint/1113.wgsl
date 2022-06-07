@@ -95,7 +95,7 @@ fn doIgnore(){
 
 }
 
-@stage(compute) @workgroup_size(128)
+@compute @workgroup_size(128)
 fn main_count(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
 
     var triangleIndex = GlobalInvocationID.x;
@@ -132,7 +132,7 @@ fn main_count(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
 
 }
 
-@stage(compute) @workgroup_size(128)
+@compute @workgroup_size(128)
 fn main_create_lut(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
 
     var voxelIndex = GlobalInvocationID.x;
@@ -155,7 +155,7 @@ fn main_create_lut(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>
 
 }
 
-@stage(compute) @workgroup_size(128)
+@compute @workgroup_size(128)
 fn main_sort_triangles(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
 
     var triangleIndex = GlobalInvocationID.x;

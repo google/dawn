@@ -29,7 +29,7 @@ fn dpdyCoarse_ae1873() {
   var res: vec3<f32> = dpdyCoarse(arg_0);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   dpdyCoarse_ae1873();
 }

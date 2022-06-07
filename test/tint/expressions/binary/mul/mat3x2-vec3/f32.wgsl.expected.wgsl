@@ -5,7 +5,7 @@ struct S {
 
 @group(0) @binding(0) var<uniform> data : S;
 
-@stage(fragment)
+@fragment
 fn main() {
   let x = (data.matrix * data.vector);
 }

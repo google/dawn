@@ -615,12 +615,12 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_ModuleV
     // };
     // @binding(0) @group(0) var<storage> data : Data;
     //
-    // @stage(compute) @workgroup_size(1)
+    // @compute @workgroup_size(1)
     // fn a() {
     //   return;
     // }
     //
-    // @stage(compute) @workgroup_size(1)
+    // @compute @workgroup_size(1)
     // fn b() {
     //   return;
     // }

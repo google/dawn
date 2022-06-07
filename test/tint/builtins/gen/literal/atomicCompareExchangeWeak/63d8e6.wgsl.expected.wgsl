@@ -8,12 +8,12 @@ fn atomicCompareExchangeWeak_63d8e6() {
   var res = atomicCompareExchangeWeak(&(sb_rw.arg_0), 1u, 1u);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   atomicCompareExchangeWeak_63d8e6();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   atomicCompareExchangeWeak_63d8e6();
 }

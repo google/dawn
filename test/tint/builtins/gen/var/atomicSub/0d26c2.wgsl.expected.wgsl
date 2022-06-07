@@ -5,7 +5,7 @@ fn atomicSub_0d26c2() {
   var res : u32 = atomicSub(&(arg_0), arg_1);
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   atomicSub_0d26c2();
 }

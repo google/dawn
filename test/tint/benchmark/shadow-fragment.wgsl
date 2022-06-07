@@ -25,7 +25,7 @@ let albedo : vec3<f32> = vec3<f32>(0.899999976, 0.899999976, 0.899999976);
 
 let ambientFactor : f32 = 0.200000003;
 
-@stage(fragment)
+@fragment
 fn main(input : FragmentInput) -> @location(0) vec4<f32> {
   var visibility : f32 = 0.0;
   let oneOverShadowDepthTextureSize = (1.0 / shadowDepthTextureSize);

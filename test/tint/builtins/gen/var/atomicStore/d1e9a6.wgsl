@@ -33,12 +33,12 @@ fn atomicStore_d1e9a6() {
   atomicStore(&sb_rw.arg_0, arg_1);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   atomicStore_d1e9a6();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   atomicStore_d1e9a6();
 }

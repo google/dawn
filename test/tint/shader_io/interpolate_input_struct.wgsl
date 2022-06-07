@@ -9,6 +9,6 @@ struct In {
   @location(7) @interpolate(linear, sample) linear_sample : f32,
 };
 
-@stage(fragment)
+@fragment
 fn main(in : In) {
 }

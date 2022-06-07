@@ -29,7 +29,7 @@ fn fwidthFine_f1742d() {
   var res: f32 = fwidthFine(arg_0);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   fwidthFine_f1742d();
 }

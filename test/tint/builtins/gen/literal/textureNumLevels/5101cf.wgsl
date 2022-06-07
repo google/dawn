@@ -29,18 +29,18 @@ fn textureNumLevels_5101cf() {
   var res: i32 = textureNumLevels(arg_0);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   textureNumLevels_5101cf();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   textureNumLevels_5101cf();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   textureNumLevels_5101cf();
 }

@@ -126,7 +126,7 @@ struct main_out {
 )")) << program_ast;
 
     EXPECT_THAT(program_ast, HasSubstr(R"(
-@stage(vertex)
+@vertex
 fn main() -> main_out {
 )"));
 }
@@ -144,7 +144,7 @@ TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_Fragment) {
     Program program = p->program();
     const auto program_ast = test::ToString(program);
     EXPECT_THAT(program_ast, HasSubstr(R"(
-@stage(fragment)
+@fragment
 fn main() {
 )"));
 }
@@ -162,7 +162,7 @@ TEST_F(SpvParserTest, EmitFunctions_Function_EntryPoint_GLCompute) {
     Program program = p->program();
     const auto program_ast = test::ToString(program);
     EXPECT_THAT(program_ast, HasSubstr(R"(
-@stage(compute) @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1i, 1i, 1i)
 fn main() {
 )"));
 }
@@ -182,11 +182,11 @@ OpExecutionMode %main OriginUpperLeft
     Program program = p->program();
     const auto program_ast = test::ToString(program);
     EXPECT_THAT(program_ast, HasSubstr(R"(
-@stage(fragment)
+@fragment
 fn first_shader() {
 )"));
     EXPECT_THAT(program_ast, HasSubstr(R"(
-@stage(fragment)
+@fragment
 fn second_shader() {
 )"));
 }
@@ -208,7 +208,7 @@ OpFunctionEnd)";
     Program program = p->program();
     const auto program_ast = test::ToString(program);
     EXPECT_THAT(program_ast, HasSubstr(R"(
-@stage(compute) @workgroup_size(2i, 4i, 8i)
+@compute @workgroup_size(2i, 4i, 8i)
 fn comp_main() {
 )")) << program_ast;
 }
@@ -233,7 +233,7 @@ OpFunctionEnd)";
     Program program = p->program();
     const auto program_ast = test::ToString(program);
     EXPECT_THAT(program_ast, HasSubstr(R"(
-@stage(compute) @workgroup_size(3i, 5i, 7i)
+@compute @workgroup_size(3i, 5i, 7i)
 fn comp_main() {
 )")) << program_ast;
 }
@@ -262,7 +262,7 @@ OpFunctionEnd)";
     Program program = p->program();
     const auto program_ast = test::ToString(program);
     EXPECT_THAT(program_ast, HasSubstr(R"(
-@stage(compute) @workgroup_size(3i, 5i, 7i)
+@compute @workgroup_size(3i, 5i, 7i)
 fn comp_main() {
 )")) << program_ast;
 }
@@ -290,7 +290,7 @@ OpFunctionEnd)";
     Program program = p->program();
     const auto program_ast = test::ToString(program);
     EXPECT_THAT(program_ast, HasSubstr(R"(
-@stage(compute) @workgroup_size(3i, 5i, 7i)
+@compute @workgroup_size(3i, 5i, 7i)
 fn comp_main() {
 )")) << program_ast;
 }
@@ -323,7 +323,7 @@ OpFunctionEnd)";
     Program program = p->program();
     const auto program_ast = test::ToString(program);
     EXPECT_THAT(program_ast, HasSubstr(R"(
-@stage(compute) @workgroup_size(3i, 5i, 7i)
+@compute @workgroup_size(3i, 5i, 7i)
 fn comp_main() {
 )")) << program_ast;
 }
@@ -409,7 +409,7 @@ fn x_100_1() {
   return;
 }
 
-@stage(fragment)
+@fragment
 fn x_100() {
   x_100_1();
 }

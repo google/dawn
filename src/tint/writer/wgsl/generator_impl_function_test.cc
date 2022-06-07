@@ -73,7 +73,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize) {
     gen.increment_indent();
 
     ASSERT_TRUE(gen.EmitFunction(func));
-    EXPECT_EQ(gen.result(), R"(  @stage(compute) @workgroup_size(2i, 4i, 6i)
+    EXPECT_EQ(gen.result(), R"(  @compute @workgroup_size(2i, 4i, 6i)
   fn my_func() {
     return;
   }
@@ -93,7 +93,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize_WithIden
     gen.increment_indent();
 
     ASSERT_TRUE(gen.EmitFunction(func));
-    EXPECT_EQ(gen.result(), R"(  @stage(compute) @workgroup_size(2i, height)
+    EXPECT_EQ(gen.result(), R"(  @compute @workgroup_size(2i, height)
   fn my_func() {
     return;
   }
@@ -114,7 +114,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
     gen.increment_indent();
 
     ASSERT_TRUE(gen.EmitFunction(func));
-    EXPECT_EQ(gen.result(), R"(  @stage(fragment)
+    EXPECT_EQ(gen.result(), R"(  @fragment
   fn frag_main(@builtin(position) coord : vec4<f32>, @location(1) loc1 : f32) {
   }
 )");
@@ -137,7 +137,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_ReturnValue) {
     gen.increment_indent();
 
     ASSERT_TRUE(gen.EmitFunction(func));
-    EXPECT_EQ(gen.result(), R"(  @stage(fragment)
+    EXPECT_EQ(gen.result(), R"(  @fragment
   fn frag_main() -> @location(1) f32 {
     return 1.0f;
   }
@@ -151,12 +151,12 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_Module
     // };
     // @binding(0) @group(0) var<storage> data : Data;
     //
-    // @stage(compute) @workgroup_size(1)
+    // @compute @workgroup_size(1)
     // fn a() {
     //   return;
     // }
     //
-    // @stage(compute) @workgroup_size(1)
+    // @compute @workgroup_size(1)
     // fn b() {
     //   return;
     // }
@@ -206,13 +206,13 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_Module
 
 @binding(0) @group(0) var<storage, read_write> data : Data;
 
-@stage(compute) @workgroup_size(1i)
+@compute @workgroup_size(1i)
 fn a() {
   var v : f32 = data.d;
   return;
 }
 
-@stage(compute) @workgroup_size(1i)
+@compute @workgroup_size(1i)
 fn b() {
   var v : f32 = data.d;
   return;

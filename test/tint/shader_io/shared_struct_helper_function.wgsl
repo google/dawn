@@ -7,12 +7,12 @@ fn foo(x : f32) -> VertexOutput {
   return VertexOutput(vec4<f32>(x, x, x, 1.0), 42);
 }
 
-@stage(vertex)
+@vertex
 fn vert_main1() -> VertexOutput {
   return foo(0.5);
 }
 
-@stage(vertex)
+@vertex
 fn vert_main2() -> VertexOutput {
   return foo(0.25);
 }

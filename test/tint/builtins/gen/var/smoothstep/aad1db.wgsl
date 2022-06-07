@@ -31,18 +31,18 @@ fn smoothstep_aad1db() {
   var res: vec3<f32> = smoothstep(arg_0, arg_1, arg_2);
 }
 
-@stage(vertex)
+@vertex
 fn vertex_main() -> @builtin(position) vec4<f32> {
   smoothstep_aad1db();
   return vec4<f32>();
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   smoothstep_aad1db();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   smoothstep_aad1db();
 }

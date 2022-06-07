@@ -7,7 +7,7 @@ struct FragmentInputs1 {
   @builtin(sample_mask) sample_mask : u32,
 };
 
-@stage(fragment)
+@fragment
 fn main(
   inputs0 : FragmentInputs0,
   @builtin(front_facing) front_facing : bool,

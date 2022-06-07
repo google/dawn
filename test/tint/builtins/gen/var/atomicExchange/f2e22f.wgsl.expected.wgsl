@@ -9,12 +9,12 @@ fn atomicExchange_f2e22f() {
   var res : i32 = atomicExchange(&(sb_rw.arg_0), arg_1);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   atomicExchange_f2e22f();
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn compute_main() {
   atomicExchange_f2e22f();
 }

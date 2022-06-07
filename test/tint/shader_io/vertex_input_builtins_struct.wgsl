@@ -3,7 +3,7 @@ struct VertexInputs {
   @builtin(instance_index) instance_index : u32,
 };
 
-@stage(vertex)
+@vertex
 fn main(inputs : VertexInputs) -> @builtin(position) vec4<f32> {
   let foo : u32 = inputs.vertex_index + inputs.instance_index;
   return vec4<f32>();

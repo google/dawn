@@ -19,7 +19,7 @@ struct Out {
   linear_sample : f32,
 }
 
-@stage(vertex)
+@vertex
 fn main() -> Out {
   return Out();
 }

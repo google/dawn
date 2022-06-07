@@ -18,6 +18,7 @@
 namespace tint::reader::wgsl {
 namespace {
 
+// TODO(crbug.com/tint/1503): Remove this when @stage is removed
 TEST_F(ParserImplTest, AttributeList_Parses_Stage) {
     auto p = parser("@workgroup_size(2) @stage(compute)");
     auto attrs = p->attribute_list();

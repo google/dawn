@@ -91,7 +91,7 @@ fn main_1() {
   return;
 }
 
-@stage(compute) @workgroup_size(1, 18, 6)
+@compute @workgroup_size(1, 18, 6)
 fn main() {
   main_1();
 }

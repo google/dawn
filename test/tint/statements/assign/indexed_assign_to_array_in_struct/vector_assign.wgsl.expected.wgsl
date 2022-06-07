@@ -12,7 +12,7 @@ fn f(i : u32) -> u32 {
   return (i + 1u);
 }
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn main() {
   var s1 : OuterS;
   var v : vec3<f32>;

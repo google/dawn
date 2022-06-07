@@ -1,4 +1,4 @@
-@stage(vertex)
+@vertex
 fn main(
   @location(0) loc0 : i32,
   @location(1) loc1 : u32,

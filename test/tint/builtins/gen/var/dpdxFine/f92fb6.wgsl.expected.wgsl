@@ -3,7 +3,7 @@ fn dpdxFine_f92fb6() {
   var res : vec3<f32> = dpdxFine(arg_0);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   dpdxFine_f92fb6();
 }

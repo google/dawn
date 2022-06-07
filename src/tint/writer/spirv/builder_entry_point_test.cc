@@ -37,7 +37,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, EntryPoint_Parameters) {
-    // @stage(fragment)
+    // @fragment
     // fn frag_main(@builtin(position) coord : vec4<f32>,
     //              @location(1) loc1 : f32) {
     //   var col : f32 = (coord.x * loc1);
@@ -105,7 +105,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, EntryPoint_ReturnValue) {
-    // @stage(fragment)
+    // @fragment
     // fn frag_main(@location(0) @interpolate(flat) loc_in : u32)
     //     -> @location(0) f32 {
     //   if (loc_in > 10) {
@@ -187,12 +187,12 @@ TEST_F(BuilderTest, EntryPoint_SharedStruct) {
     //   @builtin(position) pos : vec4<f32>;
     // };
     //
-    // @stage(vertex)
+    // @vertex
     // fn vert_main() -> Interface {
     //   return Interface(42.0, vec4<f32>());
     // }
     //
-    // @stage(fragment)
+    // @fragment
     // fn frag_main(inputs : Interface) -> @builtin(frag_depth) f32 {
     //   return inputs.value;
     // }

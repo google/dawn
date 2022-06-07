@@ -2,7 +2,7 @@ fn foo() -> i32 {
   return 1;
 }
 
-@stage(fragment)
+@fragment
 fn main() {
   var arr = array<f32, 4>();
   for (let a = &arr[foo()]; ;) {

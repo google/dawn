@@ -60,7 +60,7 @@ struct main_out {
   vUV_1 : vec2<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn main(@location(0) position_param : vec3<f32>, @location(2) uv_param : vec2<f32>, @location(1) normal_param : vec3<f32>) -> main_out {
   position = position_param;
   uv = uv_param;

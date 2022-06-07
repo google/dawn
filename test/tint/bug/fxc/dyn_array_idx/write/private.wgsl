@@ -12,7 +12,7 @@ struct Result {
 
 var<private> s : S;
 
-@stage(compute) @workgroup_size(1)
+@compute @workgroup_size(1)
 fn f() {
   s.data[ubo.dynamic_idx] = 1;
   result.out = s.data[3];

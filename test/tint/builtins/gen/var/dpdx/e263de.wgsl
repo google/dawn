@@ -29,7 +29,7 @@ fn dpdx_e263de() {
   var res: f32 = dpdx(arg_0);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   dpdx_e263de();
 }

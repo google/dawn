@@ -29,7 +29,7 @@ fn dpdxFine_8c5069() {
   var res: vec4<f32> = dpdxFine(arg_0);
 }
 
-@stage(fragment)
+@fragment
 fn fragment_main() {
   dpdxFine_8c5069();
 }

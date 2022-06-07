@@ -6,12 +6,12 @@ struct Interface {
   @builtin(position) pos : vec4<f32>,
 };
 
-@stage(vertex)
+@vertex
 fn vert_main() -> Interface {
   return Interface();
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(inputs : Interface) -> @location(0) i32 {
   return inputs.i;
 }

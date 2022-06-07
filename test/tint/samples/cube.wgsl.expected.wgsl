@@ -18,7 +18,7 @@ struct VertexOutput {
   Position : vec4<f32>,
 }
 
-@stage(vertex)
+@vertex
 fn vtx_main(input : VertexInput) -> VertexOutput {
   var output : VertexOutput;
   output.Position = (uniforms.modelViewProjectionMatrix * input.cur_position);
@@ -26,7 +26,7 @@ fn vtx_main(input : VertexInput) -> VertexOutput {
   return output;
 }
 
-@stage(fragment)
+@fragment
 fn frag_main(@location(0) fragColor : vec4<f32>) -> @location(0) vec4<f32> {
   return fragColor;
 }
