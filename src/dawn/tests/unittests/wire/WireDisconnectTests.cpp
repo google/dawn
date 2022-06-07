@@ -160,11 +160,10 @@ TEST_F(WireDisconnectTests, DeleteClientDestroysObjects) {
 
     DeleteClient();
 
-    // Expect release on all objects created by the client.
+    // Expect release on all objects created by the client. Note: the device
+    // should be deleted first because it may free its reference to the default queue
+    // on deletion.
     Sequence s1, s2, s3;
-    EXPECT_CALL(api, QueueRelease(apiQueue)).Times(1).InSequence(s1);
-    EXPECT_CALL(api, CommandEncoderRelease(apiCommandEncoder)).Times(1).InSequence(s2);
-    EXPECT_CALL(api, SamplerRelease(apiSampler)).Times(1).InSequence(s3);
     EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr))
         .Times(1)
         .InSequence(s1, s2);
@@ -175,6 +174,9 @@ TEST_F(WireDisconnectTests, DeleteClientDestroysObjects) {
         .Times(1)
         .InSequence(s1, s2);
     EXPECT_CALL(api, DeviceRelease(apiDevice)).Times(1).InSequence(s1, s2, s3);
+    EXPECT_CALL(api, QueueRelease(apiQueue)).Times(1).InSequence(s1);
+    EXPECT_CALL(api, CommandEncoderRelease(apiCommandEncoder)).Times(1).InSequence(s2);
+    EXPECT_CALL(api, SamplerRelease(apiSampler)).Times(1).InSequence(s3);
     FlushClient();
 
     // Signal that we already released and cleared callbacks for |apiDevice|

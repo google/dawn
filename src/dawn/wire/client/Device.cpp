@@ -67,6 +67,10 @@ Device::~Device() {
                 "Device destroyed before callback", request->userdata);
         }
     });
+
+    if (mQueue != nullptr) {
+        GetProcs().queueRelease(ToAPI(mQueue));
+    }
 }
 
 bool Device::GetLimits(WGPUSupportedLimits* limits) const {

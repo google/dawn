@@ -139,6 +139,60 @@ TEST_F(WireQueueTests, OnSubmittedWorkDoneInsideCallbackBeforeDisconnect) {
     GetWireClient()->Disconnect();
 }
 
+// Test releasing the default queue, then its device. Both should be
+// released when the device is released since the device holds a reference
+// to the queue. Regresssion test for crbug.com/1332926.
+TEST_F(WireQueueTests, DefaultQueueThenDeviceReleased) {
+    // Note: The test fixture gets the default queue.
+
+    // Release the queue which is the last external client reference.
+    // The device still holds a reference.
+    wgpuQueueRelease(queue);
+    FlushClient();
+
+    // Release the device which holds an internal reference to the queue.
+    // Now, the queue and device should be released on the server.
+    wgpuDeviceRelease(device);
+
+    EXPECT_CALL(api, QueueRelease(apiQueue));
+    EXPECT_CALL(api, DeviceRelease(apiDevice));
+    // These set X callback methods are called before the device is released.
+    EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr)).Times(1);
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(1);
+    EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, nullptr, nullptr)).Times(1);
+    FlushClient();
+
+    // Indicate to the fixture that the device was already released.
+    DefaultApiDeviceWasReleased();
+}
+
+// Test the device, then its default queue. The default queue should be
+// released when its external reference is dropped since releasing the device
+// drops the internal reference. Regresssion test for crbug.com/1332926.
+TEST_F(WireQueueTests, DeviceThenDefaultQueueReleased) {
+    // Note: The test fixture gets the default queue.
+
+    // Release the device which holds an internal reference to the queue.
+    // Now, the should be released on the server, but not the queue since
+    // the default queue still has one external reference.
+    wgpuDeviceRelease(device);
+
+    EXPECT_CALL(api, DeviceRelease(apiDevice));
+    // These set X callback methods are called before the device is released.
+    EXPECT_CALL(api, OnDeviceSetUncapturedErrorCallback(apiDevice, nullptr, nullptr)).Times(1);
+    EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(1);
+    EXPECT_CALL(api, OnDeviceSetDeviceLostCallback(apiDevice, nullptr, nullptr)).Times(1);
+    FlushClient();
+
+    // Release the external queue reference. The queue should be released.
+    wgpuQueueRelease(queue);
+    EXPECT_CALL(api, QueueRelease(apiQueue));
+    FlushClient();
+
+    // Indicate to the fixture that the device was already released.
+    DefaultApiDeviceWasReleased();
+}
+
 // Only one default queue is supported now so we cannot test ~Queue triggering ClearAllCallbacks
 // since it is always destructed after the test TearDown, and we cannot create a new queue obj
 // with wgpuDeviceGetQueue

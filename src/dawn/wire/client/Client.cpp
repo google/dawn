@@ -51,6 +51,19 @@ Client::~Client() {
 }
 
 void Client::DestroyAllObjects() {
+    // Free all devices first since they may hold references to other objects
+    // like the default queue. The Device destructor releases the default queue,
+    // which would be invalid if the queue was already freed.
+    while (!mObjects[ObjectType::Device].empty()) {
+        ObjectBase* object = mObjects[ObjectType::Device].head()->value();
+
+        DestroyObjectCmd cmd;
+        cmd.objectType = ObjectType::Device;
+        cmd.objectId = object->id;
+        SerializeCommand(cmd);
+        FreeObject(ObjectType::Device, object);
+    }
+
     for (auto& objectList : mObjects) {
         ObjectType objectType = static_cast<ObjectType>(&objectList - mObjects.data());
         if (objectType == ObjectType::Device) {
@@ -65,16 +78,6 @@ void Client::DestroyAllObjects() {
             SerializeCommand(cmd);
             FreeObject(objectType, object);
         }
-    }
-
-    while (!mObjects[ObjectType::Device].empty()) {
-        ObjectBase* object = mObjects[ObjectType::Device].head()->value();
-
-        DestroyObjectCmd cmd;
-        cmd.objectType = ObjectType::Device;
-        cmd.objectId = object->id;
-        SerializeCommand(cmd);
-        FreeObject(ObjectType::Device, object);
     }
 }
 
