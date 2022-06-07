@@ -18,12 +18,6 @@
 #include <functional>
 #include <memory>
 
-#include "dawn/common/Platform.h"
-
-#if defined(DAWN_PLATFORM_WINDOWS)
-#include "dawn/native/d3d12/d3d12_platform.h"
-#endif  // DAWN_PLATFORM_WINDOWS
-
 namespace dawn::native {
 
 // Blob represents a block of bytes. It may be constructed from
@@ -31,11 +25,9 @@ namespace dawn::native {
 // ownership of the container and release its memory on destruction.
 class Blob {
   public:
-    static Blob Create(size_t size);
-
-#if defined(DAWN_PLATFORM_WINDOWS)
-    static Blob Create(Microsoft::WRL::ComPtr<ID3DBlob> blob);
-#endif  // DAWN_PLATFORM_WINDOWS
+    // This function is used to create Blob with actual data.
+    // Make sure the creation and deleter handles the data ownership and lifetime correctly.
+    static Blob UnsafeCreateWithDeleter(uint8_t* data, size_t size, std::function<void()> deleter);
 
     Blob();
     ~Blob();
@@ -52,12 +44,16 @@ class Blob {
     size_t Size() const;
 
   private:
+    // The constructor should be responsible to take ownership of |data| and releases ownership by
+    // calling |deleter|. The deleter function is called at ~Blob() and during std::move.
     explicit Blob(uint8_t* data, size_t size, std::function<void()> deleter);
 
     uint8_t* mData;
     size_t mSize;
     std::function<void()> mDeleter;
 };
+
+Blob CreateBlob(size_t size);
 
 }  // namespace dawn::native
 

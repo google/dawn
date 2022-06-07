@@ -441,9 +441,6 @@ ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
     const TextureViewDescriptor* descriptor) {
     return TextureView::Create(texture, descriptor);
 }
-Ref<PipelineCacheBase> Device::GetOrCreatePipelineCacheImpl(const CacheKey& key) {
-    UNREACHABLE();
-}
 void Device::InitializeComputePipelineAsyncImpl(Ref<ComputePipelineBase> computePipeline,
                                                 WGPUCreateComputePipelineAsyncCallback callback,
                                                 void* userdata) {

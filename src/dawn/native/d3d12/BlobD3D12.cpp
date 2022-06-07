@@ -12,21 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/Blob.h"
-#include "dawn/native/d3d12/d3d12_platform.h"
+#include "dawn/native/d3d12/BlobD3D12.h"
 
 namespace dawn::native {
 
-// static
-Blob Blob::Create(ComPtr<ID3DBlob> blob) {
+Blob CreateBlob(ComPtr<ID3DBlob> blob) {
     // Detach so the deleter callback can "own" the reference
     ID3DBlob* ptr = blob.Detach();
-    return Blob(reinterpret_cast<uint8_t*>(ptr->GetBufferPointer()), ptr->GetBufferSize(), [=]() {
-        // Reattach and drop to delete it.
-        ComPtr<ID3DBlob> b;
-        b.Attach(ptr);
-        b = nullptr;
-    });
+    return Blob::UnsafeCreateWithDeleter(reinterpret_cast<uint8_t*>(ptr->GetBufferPointer()),
+                                         ptr->GetBufferSize(), [=]() {
+                                             // Reattach and drop to delete it.
+                                             ComPtr<ID3DBlob> b;
+                                             b.Attach(ptr);
+                                             b = nullptr;
+                                         });
 }
 
 }  // namespace dawn::native

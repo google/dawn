@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "dawn/native/CreatePipelineAsyncTask.h"
+#include "dawn/native/d3d12/BlobD3D12.h"
 #include "dawn/native/d3d12/D3D12Error.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
 #include "dawn/native/d3d12/PipelineLayoutD3D12.h"
@@ -82,7 +83,7 @@ MaybeError ComputePipeline::Initialize() {
         ComPtr<ID3DBlob> d3dBlob;
         DAWN_TRY(CheckHRESULT(GetPipelineState()->GetCachedBlob(&d3dBlob),
                               "D3D12 compute pipeline state get cached blob"));
-        device->StoreCachedBlob(GetCacheKey(), Blob::Create(std::move(d3dBlob)));
+        device->StoreCachedBlob(GetCacheKey(), CreateBlob(std::move(d3dBlob)));
     }
 
     SetLabelImpl();

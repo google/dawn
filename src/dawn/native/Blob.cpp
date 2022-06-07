@@ -18,14 +18,18 @@
 
 namespace dawn::native {
 
-// static
-Blob Blob::Create(size_t size) {
+Blob CreateBlob(size_t size) {
     if (size > 0) {
         uint8_t* data = new uint8_t[size];
-        return Blob(data, size, [=]() { delete[] data; });
+        return Blob::UnsafeCreateWithDeleter(data, size, [=]() { delete[] data; });
     } else {
         return Blob();
     }
+}
+
+// static
+Blob Blob::UnsafeCreateWithDeleter(uint8_t* data, size_t size, std::function<void()> deleter) {
+    return Blob(data, size, deleter);
 }
 
 Blob::Blob() : mData(nullptr), mSize(0), mDeleter({}) {}

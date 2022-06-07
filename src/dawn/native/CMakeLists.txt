@@ -244,6 +244,7 @@ if (DAWN_ENABLE_D3D12)
         "d3d12/BindGroupLayoutD3D12.cpp"
         "d3d12/BindGroupLayoutD3D12.h"
         "d3d12/BlobD3D12.cpp"
+        "d3d12/BlobD3D12.h"
         "d3d12/BufferD3D12.cpp"
         "d3d12/BufferD3D12.h"
         "d3d12/CPUDescriptorHeapAllocationD3D12.cpp"

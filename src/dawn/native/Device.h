@@ -22,7 +22,6 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/native/BlobCache.h"
 #include "dawn/native/CacheKey.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/ComputePipeline.h"
@@ -48,6 +47,8 @@ namespace dawn::native {
 class AsyncTaskManager;
 class AttachmentState;
 class AttachmentStateBlueprint;
+class Blob;
+class BlobCache;
 class CallbackTaskManager;
 class DynamicUploader;
 class ErrorScopeStack;

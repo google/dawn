@@ -45,7 +45,7 @@ Blob BlobCache::LoadInternal(const CacheKey& key) {
     const size_t expectedSize = mCache->LoadData(key.data(), key.size(), nullptr, 0);
     if (expectedSize > 0) {
         // Need to put this inside to trigger copy elision.
-        Blob result = Blob::Create(expectedSize);
+        Blob result = CreateBlob(expectedSize);
         const size_t actualSize =
             mCache->LoadData(key.data(), key.size(), result.Data(), expectedSize);
         ASSERT(expectedSize == actualSize);
