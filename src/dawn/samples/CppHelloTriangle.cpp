@@ -95,7 +95,7 @@ void init() {
     initTextures();
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        @stage(vertex) fn main(@location(0) pos : vec4<f32>)
+        @vertex fn main(@location(0) pos : vec4<f32>)
                             -> @builtin(position) vec4<f32> {
             return pos;
         })");
@@ -104,7 +104,7 @@ void init() {
         @group(0) @binding(0) var mySampler: sampler;
         @group(0) @binding(1) var myTexture : texture_2d<f32>;
 
-        @stage(fragment) fn main(@builtin(position) FragCoord : vec4<f32>)
+        @fragment fn main(@builtin(position) FragCoord : vec4<f32>)
                               -> @location(0) vec4<f32> {
             return textureSample(myTexture, mySampler, FragCoord.xy / vec2<f32>(640.0, 480.0));
         })");

@@ -102,7 +102,7 @@ void initRender() {
             @location(2) a_pos : vec2<f32>;
         };
 
-        @stage(vertex)
+        @vertex
         fn main(input : VertexIn) -> @builtin(position) vec4<f32> {
             var angle : f32 = -atan2(input.a_particleVel.x, input.a_particleVel.y);
             var pos : vec2<f32> = vec2<f32>(
@@ -113,7 +113,7 @@ void initRender() {
     )");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        @stage(fragment)
+        @fragment
         fn main() -> @location(0) vec4<f32> {
             return vec4<f32>(1.0, 1.0, 1.0, 1.0);
         }
@@ -170,7 +170,7 @@ void initSim() {
         @binding(2) @group(0) var<storage, read_write> particlesB : Particles;
 
         // https://github.com/austinEng/Project6-Vulkan-Flocking/blob/master/data/shaders/computeparticles/particle.comp
-        @stage(compute) @workgroup_size(1)
+        @compute @workgroup_size(1)
         fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
             var index : u32 = GlobalInvocationID.x;
             if (index >= params.particleCount) {

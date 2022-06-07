@@ -203,7 +203,7 @@ type example struct {
 func tryCompile(compiler, wd string, e example) error {
 	code := e.code
 	if e.functionScope {
-		code = "\n@stage(vertex) fn main() -> @builtin(position) vec4<f32> {\n" + code + " return vec4<f32>();}\n"
+		code = "\n@vertex fn main() -> @builtin(position) vec4<f32> {\n" + code + " return vec4<f32>();}\n"
 	}
 
 	addedStubFunction := false
@@ -214,7 +214,7 @@ func tryCompile(compiler, wd string, e example) error {
 		}
 
 		if !addedStubFunction {
-			code += "\n@stage(vertex) fn main() {}\n"
+			code += "\n@vertex fn main() {}\n"
 			addedStubFunction = true
 			continue
 		}

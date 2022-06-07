@@ -64,7 +64,7 @@ ResultOrError<ComputePipelineBase*> GetOrCreateIndirectDispatchValidationPipelin
                 @group(0) @binding(1) var<storage, read_write> clientParams: IndirectParams;
                 @group(0) @binding(2) var<storage, write> validatedParams: ValidatedParams;
 
-                @stage(compute) @workgroup_size(1, 1, 1)
+                @compute @workgroup_size(1, 1, 1)
                 fn main() {
                     for (var i = 0u; i < 3u; i = i + 1u) {
                         var numWorkgroups = clientParams.data[uniformParams.clientOffsetInU32 + i];

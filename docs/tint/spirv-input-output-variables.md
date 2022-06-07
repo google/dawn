@@ -94,7 +94,7 @@ Current translation, through SPIR-V, SPIR-V reader, WGSL writer:
       return;
     }
 
-    @stage(fragment)
+    @fragment
     fn main() -> void {
       bar_();
       return;
@@ -126,7 +126,7 @@ Proposed translation, through SPIR-V, SPIR-V reader, WGSL writer:
       @location(0) frag_color : vec4<f32>;
     };
 
-    @stage(fragment)
+    @fragment
     fn main(
 
       // 'in' variables are entry point parameters

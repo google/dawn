@@ -66,7 +66,7 @@ static const char sConvertTimestampsToNanoseconds[] = R"(
 
             let sizeofTimestamp : u32 = 8u;
 
-            @stage(compute) @workgroup_size(8, 1, 1)
+            @compute @workgroup_size(8, 1, 1)
             fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
                 if (GlobalInvocationID.x >= params.count) { return; }
 

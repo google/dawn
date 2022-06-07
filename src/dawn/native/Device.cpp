@@ -274,7 +274,7 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
     if (IsToggleEnabled(Toggle::UsePlaceholderFragmentInVertexOnlyPipeline)) {
         // The empty fragment shader, used as a work around for vertex-only render pipeline
         constexpr char kEmptyFragmentShader[] = R"(
-                @stage(fragment) fn fs_empty_main() {}
+                @fragment fn fs_empty_main() {}
             )";
         ShaderModuleDescriptor descriptor;
         ShaderModuleWGSLDescriptor wgslDesc;

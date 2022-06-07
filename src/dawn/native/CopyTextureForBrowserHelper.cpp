@@ -85,7 +85,7 @@ static const char sCopyTextureForBrowserShader[] = R"(
                 return sign(v) * (pow(params.A * abs(v) + params.B, params.G) + params.E);
             }
 
-            @stage(vertex)
+            @vertex
             fn vs_main(
                 @builtin(vertex_index) VertexIndex : u32
             ) -> VertexOutputs {
@@ -123,7 +123,7 @@ static const char sCopyTextureForBrowserShader[] = R"(
             @binding(1) @group(0) var mySampler: sampler;
             @binding(2) @group(0) var myTexture: texture_2d<f32>;
 
-            @stage(fragment)
+            @fragment
             fn fs_main(
                 @location(0) texcoord : vec2<f32>
             ) -> @location(0) vec4<f32> {

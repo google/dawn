@@ -337,7 +337,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
 
         std::ostringstream ostream;
         ostream << GetImageDeclaration(format, "write", dimension, 0) << "\n";
-        ostream << "@stage(" << stage << ")" << workgroupSize << "\n";
+        ostream << "@" << stage << workgroupSize << "\n";
         ostream << "fn main() ";
         if (isFragment) {
             ostream << "-> @location(0) vec4<f32> ";

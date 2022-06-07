@@ -72,7 +72,7 @@ void init() {
             @builtin(position) Position : vec4<f32>;
         };
 
-        @stage(vertex) fn main(@builtin(vertex_index) VertexIndex : u32) -> VertexOut {
+        @vertex fn main(@builtin(vertex_index) VertexIndex : u32) -> VertexOut {
             var positions : array<vec4<f32>, 3> = array<vec4<f32>, 3>(
                 vec4<f32>( 0.0,  0.1, 0.0, 1.0),
                 vec4<f32>(-0.1, -0.1, 0.0, 1.0),
@@ -112,7 +112,7 @@ void init() {
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        @stage(fragment) fn main(@location(0) v_color : vec4<f32>) -> @location(0) vec4<f32> {
+        @fragment fn main(@location(0) v_color : vec4<f32>) -> @location(0) vec4<f32> {
             return v_color;
         })");
 
