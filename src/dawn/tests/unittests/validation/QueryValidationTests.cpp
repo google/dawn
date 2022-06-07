@@ -352,13 +352,23 @@ TEST_F(TimestampQueryValidationTest, TimestampWritesOnComputePass) {
         encoder.Finish();
     }
 
-    // Success to write timestamps at same location of compute pass
+    // Success to write timestamps at same location of different compute pass
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeComputePassWithTimestampWrites(
+            encoder, {{querySet, 0, wgpu::ComputePassTimestampLocation::Beginning}});
+        EncodeComputePassWithTimestampWrites(
+            encoder, {{querySet, 0, wgpu::ComputePassTimestampLocation::Beginning}});
+        encoder.Finish();
+    }
+
+    // Fail to write timestamps at same location of a compute pass
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         EncodeComputePassWithTimestampWrites(
             encoder, {{querySet, 0, wgpu::ComputePassTimestampLocation::Beginning},
                       {querySet, 1, wgpu::ComputePassTimestampLocation::Beginning}});
-        encoder.Finish();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
     // Fail to write timestamps at invalid location of compute pass
@@ -427,7 +437,8 @@ TEST_F(TimestampQueryValidationTest, TimestampWritesOnRenderPass) {
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
-    // Success to write timestamps to the same query index twice on different render pass
+    // Success to write timestamps to the same query index and location twice on different render
+    // pass
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         EncodeRenderPassWithTimestampWrites(
@@ -449,13 +460,13 @@ TEST_F(TimestampQueryValidationTest, TimestampWritesOnRenderPass) {
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
-    // Success to write timestamps at same location of render pass
+    // Fail to write timestamps at same location of a render pass
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         EncodeRenderPassWithTimestampWrites(
             encoder, {{querySet, 0, wgpu::RenderPassTimestampLocation::Beginning},
                       {querySet, 1, wgpu::RenderPassTimestampLocation::Beginning}});
-        encoder.Finish();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
     // Fail to write timestamps at invalid location of render pass
