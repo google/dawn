@@ -104,6 +104,11 @@ uint32_t GPUSupportedLimits::getMaxInterStageShaderComponents(Napi::Env) {
     return limits_.limits.maxInterStageShaderComponents;
 }
 
+uint32_t GPUSupportedLimits::getMaxInterStageShaderVariables(Napi::Env) {
+    UNIMPLEMENTED();
+    // return limits_.limits.maxInterStageShaderVariables;
+}
+
 uint32_t GPUSupportedLimits::getMaxComputeWorkgroupStorageSize(Napi::Env) {
     return limits_.limits.maxComputeWorkgroupStorageSize;
 }

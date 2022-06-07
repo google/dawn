@@ -165,4 +165,8 @@ interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::re
     return promise;
 }
 
+interop::GPUTextureFormat GPU::getPreferredCanvasFormat(Napi::Env) {
+    UNIMPLEMENTED();
+}
+
 }  // namespace wgpu::binding

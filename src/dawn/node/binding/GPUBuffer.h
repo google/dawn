@@ -51,6 +51,8 @@ class GPUBuffer final : public interop::GPUBuffer {
                                         std::optional<interop::GPUSize64> size) override;
     void unmap(Napi::Env) override;
     void destroy(Napi::Env) override;
+    interop::GPUSize64 getSize(Napi::Env) override;
+    interop::GPUBufferUsageFlags getUsage(Napi::Env) override;
     std::string getLabel(Napi::Env) override;
     void setLabel(Napi::Env, std::string value) override;
 

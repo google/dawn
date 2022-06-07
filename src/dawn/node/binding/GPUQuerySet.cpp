@@ -29,6 +29,14 @@ void GPUQuerySet::destroy(Napi::Env) {
     query_set_.Destroy();
 }
 
+interop::GPUQueryType GPUQuerySet::getType(Napi::Env) {
+    UNIMPLEMENTED();
+}
+
+interop::GPUSize32 GPUQuerySet::getCount(Napi::Env) {
+    UNIMPLEMENTED();
+}
+
 std::string GPUQuerySet::getLabel(Napi::Env) {
     UNIMPLEMENTED();
 }

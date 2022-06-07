@@ -162,6 +162,14 @@ void GPUBuffer::destroy(Napi::Env) {
     state_ = State::Destroyed;
 }
 
+interop::GPUSize64 GPUBuffer::getSize(Napi::Env) {
+    UNIMPLEMENTED();
+}
+
+interop::GPUBufferUsageFlags GPUBuffer::getUsage(Napi::Env) {
+    UNIMPLEMENTED();
+}
+
 void GPUBuffer::DetachMappings() {
     for (auto& mapping : mapped_) {
         mapping.buffer.Value().Detach();

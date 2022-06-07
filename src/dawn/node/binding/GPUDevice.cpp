@@ -56,7 +56,16 @@ class DeviceLostInfo : public interop::GPUDeviceLostInfo {
     std::string message_;
 };
 
-class OOMError : public interop::GPUOutOfMemoryError {};
+class OOMError : public interop::GPUOutOfMemoryError {
+  public:
+    explicit OOMError(std::string message) : message_(std::move(message)) {}
+
+    std::string getMessage(Napi::Env) override { return message_; };
+
+  private:
+    std::string message_;
+};
+
 class ValidationError : public interop::GPUValidationError {
   public:
     explicit ValidationError(std::string message) : message_(std::move(message)) {}
@@ -436,8 +445,9 @@ void GPUDevice::pushErrorScope(Napi::Env env, interop::GPUErrorFilter filter) {
     device_.PushErrorScope(f);
 }
 
-interop::Promise<std::optional<interop::GPUError>> GPUDevice::popErrorScope(Napi::Env env) {
-    using Promise = interop::Promise<std::optional<interop::GPUError>>;
+interop::Promise<std::optional<interop::Interface<interop::GPUError>>> GPUDevice::popErrorScope(
+    Napi::Env env) {
+    using Promise = interop::Promise<std::optional<interop::Interface<interop::GPUError>>>;
     struct Context {
         Napi::Env env;
         Promise promise;
@@ -454,13 +464,18 @@ interop::Promise<std::optional<interop::GPUError>> GPUDevice::popErrorScope(Napi
                 case WGPUErrorType::WGPUErrorType_NoError:
                     c->promise.Resolve({});
                     break;
-                case WGPUErrorType::WGPUErrorType_OutOfMemory:
-                    c->promise.Resolve(interop::GPUOutOfMemoryError::Create<OOMError>(env));
+                case WGPUErrorType::WGPUErrorType_OutOfMemory: {
+                    interop::Interface<interop::GPUError> err{
+                        interop::GPUOutOfMemoryError::Create<OOMError>(env, message)};
+                    c->promise.Resolve(err);
                     break;
-                case WGPUErrorType::WGPUErrorType_Validation:
-                    c->promise.Resolve(
-                        interop::GPUValidationError::Create<ValidationError>(env, message));
+                }
+                case WGPUErrorType::WGPUErrorType_Validation: {
+                    interop::Interface<interop::GPUError> err{
+                        interop::GPUValidationError::Create<ValidationError>(env, message)};
+                    c->promise.Resolve(err);
                     break;
+                }
                 case WGPUErrorType::WGPUErrorType_Unknown:
                 case WGPUErrorType::WGPUErrorType_DeviceLost:
                     c->promise.Reject(Errors::OperationError(env, message));

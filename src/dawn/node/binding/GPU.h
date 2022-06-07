@@ -32,6 +32,7 @@ class GPU final : public interop::GPU {
     interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> requestAdapter(
         Napi::Env env,
         interop::GPURequestAdapterOptions options) override;
+    interop::GPUTextureFormat getPreferredCanvasFormat(Napi::Env) override;
 
   private:
     const Flags flags_;

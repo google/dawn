@@ -49,6 +49,7 @@ class GPUSupportedLimits final : public interop::GPUSupportedLimits {
     uint32_t getMaxVertexAttributes(Napi::Env) override;
     uint32_t getMaxVertexBufferArrayStride(Napi::Env) override;
     uint32_t getMaxInterStageShaderComponents(Napi::Env) override;
+    uint32_t getMaxInterStageShaderVariables(Napi::Env) override;
     uint32_t getMaxComputeWorkgroupStorageSize(Napi::Env) override;
     uint32_t getMaxComputeInvocationsPerWorkgroup(Napi::Env) override;
     uint32_t getMaxComputeWorkgroupSizeX(Napi::Env) override;

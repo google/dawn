@@ -243,6 +243,8 @@ class Converter {
     [[nodiscard]] bool Convert(wgpu::RenderPipelineDescriptor& out,
                                const interop::GPURenderPipelineDescriptor& in);
 
+    [[nodiscard]] bool Convert(wgpu::PipelineLayout& out, const interop::GPUAutoLayoutMode& in);
+
     // std::string to C string
     inline bool Convert(const char*& out, const std::string& in) {
         out = in.c_str();
