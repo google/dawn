@@ -137,9 +137,20 @@ func GetOrStartBuildsAndWait(
 		}
 	}
 
+	// Returns true if the build should be re-kicked
+	shouldKick := func(build buildbucket.Build) bool {
+		switch build.Status {
+		case buildbucket.StatusUnknown,
+			buildbucket.StatusInfraFailure,
+			buildbucket.StatusCanceled:
+			return true
+		}
+		return false
+	}
+
 	// Kick any missing builds
 	for name, builder := range cfg.Builders {
-		if _, existing := builds[name]; !existing {
+		if build, found := builds[name]; !found || shouldKick(build) {
 			build, err := bb.StartBuild(ctx, ps, builder, retest)
 			if err != nil {
 				return nil, err
