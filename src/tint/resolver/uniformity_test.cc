@@ -5786,32 +5786,187 @@ test:5:7 note: reading from read_write storage buffer 'nonuniform_var' may resul
 )");
 }
 
-TEST_F(UniformityAnalysisTest, ShortCircuiting_CausesNonUniformControlFlow) {
+TEST_F(UniformityAnalysisTest, ShortCircuiting_NoReconvergeLHS) {
     std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
 
 var<private> p : i32;
 
+fn non_uniform_discard_func() -> bool {
+  if (non_uniform_global == 42) {
+    discard;
+  }
+  return false;
+}
+
 fn main() {
-  let b = (non_uniform_global == 42) && false;
+  let b = non_uniform_discard_func() && false;
   workgroupBarrier();
 }
 )";
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:8:3 warning: 'workgroupBarrier' must only be called from uniform control flow
+              R"(test:15:3 warning: 'workgroupBarrier' must only be called from uniform control flow
   workgroupBarrier();
   ^^^^^^^^^^^^^^^^
 
-test:7:38 note: control flow depends on non-uniform value
-  let b = (non_uniform_global == 42) && false;
-                                     ^^
+test:14:11 note: calling 'non_uniform_discard_func' may cause subsequent control flow to be non-uniform
+  let b = non_uniform_discard_func() && false;
+          ^^^^^^^^^^^^^^^^^^^^^^^^
 
-test:7:12 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
-  let b = (non_uniform_global == 42) && false;
-           ^^^^^^^^^^^^^^^^^^
+test:7:3 note: control flow depends on non-uniform value
+  if (non_uniform_global == 42) {
+  ^^
+
+test:7:7 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
+  if (non_uniform_global == 42) {
+      ^^^^^^^^^^^^^^^^^^
 )");
+}
+
+TEST_F(UniformityAnalysisTest, ShortCircuiting_NoReconvergeRHS) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
+
+var<private> p : i32;
+
+fn non_uniform_discard_func() -> bool {
+  if (non_uniform_global == 42) {
+    discard;
+  }
+  return false;
+}
+
+fn main() {
+  let b = false && non_uniform_discard_func();
+  workgroupBarrier();
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:15:3 warning: 'workgroupBarrier' must only be called from uniform control flow
+  workgroupBarrier();
+  ^^^^^^^^^^^^^^^^
+
+test:14:20 note: calling 'non_uniform_discard_func' may cause subsequent control flow to be non-uniform
+  let b = false && non_uniform_discard_func();
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on non-uniform value
+  if (non_uniform_global == 42) {
+  ^^
+
+test:7:7 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
+  if (non_uniform_global == 42) {
+      ^^^^^^^^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, ShortCircuiting_NoReconvergeBoth) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
+
+var<private> p : i32;
+
+fn non_uniform_discard_func() -> bool {
+  if (non_uniform_global == 42) {
+    discard;
+  }
+  return false;
+}
+
+fn main() {
+  let b = non_uniform_discard_func() && non_uniform_discard_func();
+  workgroupBarrier();
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:15:3 warning: 'workgroupBarrier' must only be called from uniform control flow
+  workgroupBarrier();
+  ^^^^^^^^^^^^^^^^
+
+test:14:41 note: calling 'non_uniform_discard_func' may cause subsequent control flow to be non-uniform
+  let b = non_uniform_discard_func() && non_uniform_discard_func();
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^
+
+test:7:3 note: control flow depends on non-uniform value
+  if (non_uniform_global == 42) {
+  ^^
+
+test:7:7 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
+  if (non_uniform_global == 42) {
+      ^^^^^^^^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, ShortCircuiting_ReconvergeLHS) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
+
+var<private> p : i32;
+
+fn uniform_discard_func() -> bool {
+  if (true) {
+    discard;
+  }
+  return false;
+}
+
+fn main() {
+  let b = uniform_discard_func() && false;
+  workgroupBarrier();
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, ShortCircuiting_ReconvergeRHS) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
+
+var<private> p : i32;
+
+fn uniform_discard_func() -> bool {
+  if (true) {
+    discard;
+  }
+  return false;
+}
+
+fn main() {
+  let b = false && uniform_discard_func();
+  workgroupBarrier();
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, ShortCircuiting_ReconvergeBoth) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
+
+var<private> p : i32;
+
+fn uniform_discard_func() -> bool {
+  if (true) {
+    discard;
+  }
+  return false;
+}
+
+fn main() {
+  let b = uniform_discard_func() && uniform_discard_func();
+  workgroupBarrier();
+}
+)";
+
+    RunTest(src, true);
 }
 
 TEST_F(UniformityAnalysisTest, DeadCode_AfterReturn) {
@@ -6228,8 +6383,15 @@ TEST_F(UniformityAnalysisTest, Error_ShortCircuitingExprCausesNonUniformControlF
 @group(0) @binding(0) var<uniform> uniform_value : i32;
 @group(0) @binding(1) var<storage, read_write> non_uniform_value : i32;
 
+fn non_uniform_discard_func() -> bool {
+  if (non_uniform_value == 42) {
+    discard;
+  }
+  return false;
+}
+
 fn main() {
-  let b = (non_uniform_value == 0) && true;
+  let b = non_uniform_discard_func() && true;
   if (uniform_value == 42) {
     workgroupBarrier();
   }
@@ -6238,17 +6400,21 @@ fn main() {
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:8:5 warning: 'workgroupBarrier' must only be called from uniform control flow
+              R"(test:15:5 warning: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:6:36 note: control flow depends on non-uniform value
-  let b = (non_uniform_value == 0) && true;
-                                   ^^
+test:13:11 note: calling 'non_uniform_discard_func' may cause subsequent control flow to be non-uniform
+  let b = non_uniform_discard_func() && true;
+          ^^^^^^^^^^^^^^^^^^^^^^^^
 
-test:6:12 note: reading from read_write storage buffer 'non_uniform_value' may result in a non-uniform value
-  let b = (non_uniform_value == 0) && true;
-           ^^^^^^^^^^^^^^^^^
+test:6:3 note: control flow depends on non-uniform value
+  if (non_uniform_value == 42) {
+  ^^
+
+test:6:7 note: reading from read_write storage buffer 'non_uniform_value' may result in a non-uniform value
+  if (non_uniform_value == 42) {
+      ^^^^^^^^^^^^^^^^^
 )");
 }
 
