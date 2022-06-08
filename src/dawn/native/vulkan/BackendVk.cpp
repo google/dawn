@@ -89,7 +89,12 @@ namespace dawn::native::vulkan {
 namespace {
 
 static constexpr ICD kICDs[] = {
+// Other drivers should not be loaded with MSAN because they don't have MSAN instrumentation.
+// MSAN will produce false positives since it cannot detect changes to memory that the driver
+// has made.
+#if !defined(MEMORY_SANITIZER)
     ICD::None,
+#endif
 #if defined(DAWN_ENABLE_SWIFTSHADER)
     ICD::SwiftShader,
 #endif  // defined(DAWN_ENABLE_SWIFTSHADER)

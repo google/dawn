@@ -20,9 +20,9 @@
 
 template <typename T>
 T* AllocNoThrow(size_t count) {
-#if defined(ADDRESS_SANITIZER)
+#if defined(ADDRESS_SANITIZER) || defined(MEMORY_SANITIZER)
     if (count * sizeof(T) >= 0x70000000) {
-        // std::nothrow isn't implemented on ASAN and it has a 2GB allocation limit.
+        // std::nothrow isn't implemented in sanitizers and they often have a 2GB allocation limit.
         // Catch large allocations and error out so fuzzers make progress.
         return nullptr;
     }
