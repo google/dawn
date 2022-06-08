@@ -34,7 +34,6 @@
 #include "src/tint/utils/io/command.h"
 #include "src/tint/utils/string.h"
 #include "src/tint/val/val.h"
-#include "src/tint/writer/flatten_bindings.h"
 #include "tint/tint.h"
 
 namespace {
