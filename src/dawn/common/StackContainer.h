@@ -51,7 +51,7 @@ class StackAllocator : public std::allocator<T> {
         // constructors and destructors to be automatically called. Define a POD
         // buffer of the right size instead.
         alignas(T) char stack_buffer_[sizeof(T[stack_capacity])];
-#if defined(DAWN_COMPILER_GCC) && !defined(__x86_64__) && !defined(__i386__)
+#if DAWN_COMPILER_IS(GCC) && !defined(__x86_64__) && !defined(__i386__)
         static_assert(alignof(T) <= 16, "http://crbug.com/115612");
 #endif
 

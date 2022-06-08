@@ -30,28 +30,28 @@
 
 // TODO(crbug.com/dawn/283): Link against the Vulkan Loader and remove this.
 #if defined(DAWN_ENABLE_SWIFTSHADER)
-#if defined(DAWN_PLATFORM_LINUX) || defined(DAWN_PLATFORM_FUSCHIA)
+#if DAWN_PLATFORM_IS(LINUX) || DAWN_PLATFORM_IS(FUSCHIA)
 constexpr char kSwiftshaderLibName[] = "libvk_swiftshader.so";
-#elif defined(DAWN_PLATFORM_WINDOWS)
+#elif DAWN_PLATFORM_IS(WINDOWS)
 constexpr char kSwiftshaderLibName[] = "vk_swiftshader.dll";
-#elif defined(DAWN_PLATFORM_MACOS)
+#elif DAWN_PLATFORM_IS(MACOS)
 constexpr char kSwiftshaderLibName[] = "libvk_swiftshader.dylib";
 #else
 #error "Unimplemented Swiftshader Vulkan backend platform"
 #endif
 #endif
 
-#if defined(DAWN_PLATFORM_LINUX)
-#if defined(DAWN_PLATFORM_ANDROID)
+#if DAWN_PLATFORM_IS(LINUX)
+#if DAWN_PLATFORM_IS(ANDROID)
 constexpr char kVulkanLibName[] = "libvulkan.so";
 #else
 constexpr char kVulkanLibName[] = "libvulkan.so.1";
 #endif
-#elif defined(DAWN_PLATFORM_WINDOWS)
+#elif DAWN_PLATFORM_IS(WINDOWS)
 constexpr char kVulkanLibName[] = "vulkan-1.dll";
-#elif defined(DAWN_PLATFORM_MACOS)
+#elif DAWN_PLATFORM_IS(MACOS)
 constexpr char kVulkanLibName[] = "libvulkan.dylib";
-#elif defined(DAWN_PLATFORM_FUCHSIA)
+#elif DAWN_PLATFORM_IS(FUCHSIA)
 constexpr char kVulkanLibName[] = "libvulkan.so";
 #else
 #error "Unimplemented Vulkan backend platform"
@@ -445,12 +445,12 @@ ResultOrError<std::vector<Ref<AdapterBase>>> Backend::DiscoverAdapters(
 
     InstanceBase* instance = GetInstance();
     for (ICD icd : kICDs) {
-#if defined(DAWN_PLATFORM_MACOS)
+#if DAWN_PLATFORM_IS(MACOS)
         // On Mac, we don't expect non-Swiftshader Vulkan to be available.
         if (icd == ICD::None) {
             continue;
         }
-#endif  // defined(DAWN_PLATFORM_MACOS)
+#endif  // DAWN_PLATFORM_IS(MACOS)
         if (options->forceSwiftShader && icd != ICD::SwiftShader) {
             continue;
         }

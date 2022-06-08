@@ -123,7 +123,7 @@ TEST(StackContainer, BufferAlignment) {
     aligned16->push_back(AlignedData<16>());
     EXPECT_ALIGNED(&aligned16[0], 16);
 
-#if !defined(DAWN_COMPILER_GCC) || defined(__x86_64__) || defined(__i386__)
+#if !DAWN_COMPILER_IS(GCC) || defined(__x86_64__) || defined(__i386__)
     // It seems that non-X86 gcc doesn't respect greater than 16 byte alignment.
     // See http://gcc.gnu.org/bugzilla/show_bug.cgi?id=33721 for details.
     // TODO(sbc): Re-enable this if GCC starts respecting higher alignments.

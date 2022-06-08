@@ -111,7 +111,7 @@ MaybeError PlatformFunctions::LoadFunctions() {
 }
 
 MaybeError PlatformFunctions::LoadD3D12() {
-#if DAWN_PLATFORM_WINUWP
+#if DAWN_PLATFORM_IS(WINUWP)
     d3d12CreateDevice = &D3D12CreateDevice;
     d3d12GetDebugInterface = &D3D12GetDebugInterface;
     d3d12SerializeRootSignature = &D3D12SerializeRootSignature;
@@ -138,7 +138,7 @@ MaybeError PlatformFunctions::LoadD3D12() {
 }
 
 MaybeError PlatformFunctions::LoadD3D11() {
-#if DAWN_PLATFORM_WINUWP
+#if DAWN_PLATFORM_IS(WINUWP)
     d3d11on12CreateDevice = &D3D11On12CreateDevice;
 #else
     std::string error;
@@ -152,7 +152,7 @@ MaybeError PlatformFunctions::LoadD3D11() {
 }
 
 MaybeError PlatformFunctions::LoadDXGI() {
-#if DAWN_PLATFORM_WINUWP
+#if DAWN_PLATFORM_IS(WINUWP)
 #if defined(_DEBUG)
     // DXGIGetDebugInterface1 is tagged as a development-only capability
     // which implies that linking to this function will cause
@@ -226,7 +226,7 @@ void PlatformFunctions::LoadDXCompiler(const std::string& baseWindowsSDKPath) {
 }
 
 MaybeError PlatformFunctions::LoadFXCompiler() {
-#if DAWN_PLATFORM_WINUWP
+#if DAWN_PLATFORM_IS(WINUWP)
     d3dCompile = &D3DCompile;
     d3dDisassemble = &D3DDisassemble;
 #else

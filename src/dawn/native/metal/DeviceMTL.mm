@@ -158,26 +158,26 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
 void Device::InitTogglesFromDriver() {
     {
         bool haveStoreAndMSAAResolve = false;
-#if defined(DAWN_PLATFORM_MACOS)
+#if DAWN_PLATFORM_IS(MACOS)
         if (@available(macOS 10.12, *)) {
             haveStoreAndMSAAResolve =
                 [*mMtlDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v2];
         }
-#elif defined(DAWN_PLATFORM_IOS)
+#elif DAWN_PLATFORM_IS(IOS)
         haveStoreAndMSAAResolve = [*mMtlDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v2];
 #endif
         // On tvOS, we would need MTLFeatureSet_tvOS_GPUFamily2_v1.
         SetToggle(Toggle::EmulateStoreAndMSAAResolve, !haveStoreAndMSAAResolve);
 
         bool haveSamplerCompare = true;
-#if defined(DAWN_PLATFORM_IOS)
+#if DAWN_PLATFORM_IS(IOS)
         haveSamplerCompare = [*mMtlDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v1];
 #endif
         // TODO(crbug.com/dawn/342): Investigate emulation -- possibly expensive.
         SetToggle(Toggle::MetalDisableSamplerCompare, !haveSamplerCompare);
 
         bool haveBaseVertexBaseInstance = true;
-#if defined(DAWN_PLATFORM_IOS)
+#if DAWN_PLATFORM_IS(IOS)
         haveBaseVertexBaseInstance =
             [*mMtlDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v1];
 #endif

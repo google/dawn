@@ -29,7 +29,7 @@
 #include "dawn/native/opengl/OpenGLFunctions.h"
 
 // Remove windows.h macros after glad's include of windows.h
-#if defined(DAWN_PLATFORM_WINDOWS)
+#if DAWN_PLATFORM_IS(WINDOWS)
 #include "dawn/common/windows_with_undefs.h"
 #endif
 

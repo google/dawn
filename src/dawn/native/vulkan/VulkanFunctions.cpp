@@ -195,18 +195,18 @@ MaybeError VulkanFunctions::LoadInstanceProcs(VkInstance instance,
     }
 #endif  // defined(DAWN_USE_WAYLAND)
 
-#if defined(DAWN_PLATFORM_WINDOWS)
+#if DAWN_PLATFORM_IS(WINDOWS)
     if (globalInfo.HasExt(InstanceExt::Win32Surface)) {
         GET_INSTANCE_PROC(CreateWin32SurfaceKHR);
         GET_INSTANCE_PROC(GetPhysicalDeviceWin32PresentationSupportKHR);
     }
-#endif  // defined(DAWN_PLATFORM_WINDOWS)
+#endif  // DAWN_PLATFORM_IS(WINDOWS)
 
-#if defined(DAWN_PLATFORM_ANDROID)
+#if DAWN_PLATFORM_IS(ANDROID)
     if (globalInfo.HasExt(InstanceExt::AndroidSurface)) {
         GET_INSTANCE_PROC(CreateAndroidSurfaceKHR);
     }
-#endif  // defined(DAWN_PLATFORM_ANDROID)
+#endif  // DAWN_PLATFORM_IS(ANDROID)
 
 #if defined(DAWN_USE_X11)
     if (globalInfo.HasExt(InstanceExt::XlibSurface)) {

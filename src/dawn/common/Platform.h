@@ -17,41 +17,41 @@
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <winapifamily.h>
-#define DAWN_PLATFORM_WINDOWS 1
+#define DAWN_PLATFORM_IS_WINDOWS 1
 #if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP
-#define DAWN_PLATFORM_WIN32 1
+#define DAWN_PLATFORM_IS_WIN32 1
 #elif WINAPI_FAMILY == WINAPI_FAMILY_PC_APP
-#define DAWN_PLATFORM_WINUWP 1
+#define DAWN_PLATFORM_IS_WINUWP 1
 #else
 #error "Unsupported Windows platform."
 #endif
 
 #elif defined(__linux__)
-#define DAWN_PLATFORM_LINUX 1
-#define DAWN_PLATFORM_POSIX 1
+#define DAWN_PLATFORM_IS_LINUX 1
+#define DAWN_PLATFORM_IS_POSIX 1
 #if defined(__ANDROID__)
-#define DAWN_PLATFORM_ANDROID 1
+#define DAWN_PLATFORM_IS_ANDROID 1
 #endif
 
 #elif defined(__APPLE__)
-#define DAWN_PLATFORM_APPLE 1
-#define DAWN_PLATFORM_POSIX 1
+#define DAWN_PLATFORM_IS_APPLE 1
+#define DAWN_PLATFORM_IS_POSIX 1
 #include <TargetConditionals.h>
 #if TARGET_OS_IPHONE
-#define DAWN_PLATFORM_IOS
+#define DAWN_PLATFORM_IS_IOS 1
 #elif TARGET_OS_MAC
-#define DAWN_PLATFORM_MACOS
+#define DAWN_PLATFORM_IS_MACOS 1
 #else
 #error "Unsupported Apple platform."
 #endif
 
 #elif defined(__Fuchsia__)
-#define DAWN_PLATFORM_FUCHSIA 1
-#define DAWN_PLATFORM_POSIX 1
+#define DAWN_PLATFORM_IS_FUCHSIA 1
+#define DAWN_PLATFORM_IS_POSIX 1
 
 #elif defined(__EMSCRIPTEN__)
-#define DAWN_PLATFORM_EMSCRIPTEN 1
-#define DAWN_PLATFORM_POSIX 1
+#define DAWN_PLATFORM_IS_EMSCRIPTEN 1
+#define DAWN_PLATFORM_IS_POSIX 1
 
 #else
 #error "Unsupported platform."
@@ -69,14 +69,66 @@
 
 #if defined(_WIN64) || defined(__aarch64__) || defined(__x86_64__) || defined(__mips64__) || \
     defined(__s390x__) || defined(__PPC64__)
-#define DAWN_PLATFORM_64_BIT 1
+#define DAWN_PLATFORM_IS_64_BIT 1
 static_assert(sizeof(sizeof(char)) == 8, "Expect sizeof(size_t) == 8");
 #elif defined(_WIN32) || defined(__arm__) || defined(__i386__) || defined(__mips32__) || \
     defined(__s390__) || defined(__EMSCRIPTEN__)
-#define DAWN_PLATFORM_32_BIT 1
+#define DAWN_PLATFORM_IS_32_BIT 1
 static_assert(sizeof(sizeof(char)) == 4, "Expect sizeof(size_t) == 4");
 #else
 #error "Unsupported platform"
 #endif
+
+// This section define other platform macros to 0 to avoid undefined macro usage error.
+#if !defined(DAWN_PLATFORM_IS_WINDOWS)
+#define DAWN_PLATFORM_IS_WINDOWS 0
+#endif
+#if !defined(DAWN_PLATFORM_IS_WIN32)
+#define DAWN_PLATFORM_IS_WIN32 0
+#endif
+#if !defined(DAWN_PLATFORM_IS_WINUWP)
+#define DAWN_PLATFORM_IS_WINUWP 0
+#endif
+
+#if !defined(DAWN_PLATFORM_IS_POSIX)
+#define DAWN_PLATFORM_IS_POSIX 0
+#endif
+
+#if !defined(DAWN_PLATFORM_IS_LINUX)
+#define DAWN_PLATFORM_IS_LINUX 0
+#endif
+#if !defined(DAWN_PLATFORM_IS_ANDROID)
+#define DAWN_PLATFORM_IS_ANDROID 0
+#endif
+
+#if !defined(DAWN_PLATFORM_IS_APPLE)
+#define DAWN_PLATFORM_IS_APPLE 0
+#endif
+#if !defined(DAWN_PLATFORM_IS_IOS)
+#define DAWN_PLATFORM_IS_IOS 0
+#endif
+#if !defined(DAWN_PLATFORM_IS_MACOS)
+#define DAWN_PLATFORM_IS_MACOS 0
+#endif
+
+#if !defined(DAWN_PLATFORM_IS_FUCHSIA)
+#define DAWN_PLATFORM_IS_FUCHSIA 0
+#endif
+#if !defined(DAWN_PLATFORM_IS_EMSCRIPTEN)
+#define DAWN_PLATFORM_IS_EMSCRIPTEN 0
+#endif
+
+#if !defined(DAWN_PLATFORM_IS_64_BIT)
+#define DAWN_PLATFORM_IS_64_BIT 0
+#endif
+#if !defined(DAWN_PLATFORM_IS_32_BIT)
+#define DAWN_PLATFORM_IS_32_BIT 0
+#endif
+
+// Use #if DAWN_PLATFORM_IS(XXX) for platform specific code.
+// Do not use #ifdef or the naked macro DAWN_PLATFORM_IS_XXX.
+// This can help avoid common mistakes like not including "Platform.h" and falling into unwanted
+// code block as usage of undefined macro "function" will be blocked by the compiler.
+#define DAWN_PLATFORM_IS(X) (1 == DAWN_PLATFORM_IS_##X)
 
 #endif  // SRC_DAWN_COMMON_PLATFORM_H_

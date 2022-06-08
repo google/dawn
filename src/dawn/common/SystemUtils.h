@@ -33,7 +33,7 @@ bool SetEnvironmentVar(const char* variableName, const char* value);
 std::optional<std::string> GetExecutableDirectory();
 std::optional<std::string> GetModuleDirectory();
 
-#ifdef DAWN_PLATFORM_MACOS
+#if DAWN_PLATFORM_IS(MACOS)
 void GetMacOSVersion(int32_t* majorVersion, int32_t* minorVersion = nullptr);
 bool IsMacOSVersionAtLeast(uint32_t majorVersion, uint32_t minorVersion = 0);
 #endif

@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_VULKANFUNCTIONS_H_
 #define SRC_DAWN_NATIVE_VULKAN_VULKANFUNCTIONS_H_
 
+#include "dawn/common/Compiler.h"
 #include "dawn/common/vulkan_platform.h"
 
 #include "dawn/native/Error.h"
@@ -26,7 +27,7 @@ namespace dawn::native::vulkan {
 struct VulkanGlobalInfo;
 struct VulkanDeviceInfo;
 
-#if defined(UNDEFINED_SANITIZER) && defined(DAWN_COMPILER_CLANG)
+#if defined(UNDEFINED_SANITIZER) && DAWN_COMPILER_IS(CLANG)
 #define DAWN_NO_SANITIZE_VK_FN 1
 #else
 #define DAWN_NO_SANITIZE_VK_FN 0
@@ -156,16 +157,16 @@ struct VulkanFunctions {
         GetPhysicalDeviceWaylandPresentationSupportKHR = nullptr;
 #endif  // defined(DAWN_USE_WAYLAND)
 
-#if defined(DAWN_PLATFORM_WINDOWS)
+#if DAWN_PLATFORM_IS(WINDOWS)
     // KHR_win32_surface
     VkFn<PFN_vkCreateWin32SurfaceKHR> CreateWin32SurfaceKHR = nullptr;
     VkFn<PFN_vkGetPhysicalDeviceWin32PresentationSupportKHR>
         GetPhysicalDeviceWin32PresentationSupportKHR = nullptr;
-#endif  // defined(DAWN_PLATFORM_WINDOWS)
+#endif  // DAWN_PLATFORM_IS(WINDOWS)
 
-#if defined(DAWN_PLATFORM_ANDROID)
+#if DAWN_PLATFORM_IS(ANDROID)
     VkFn<PFN_vkCreateAndroidSurfaceKHR> CreateAndroidSurfaceKHR = nullptr;
-#endif  // defined(DAWN_PLATFORM_ANDROID)
+#endif  // DAWN_PLATFORM_IS(ANDROID)
 
 #if defined(DAWN_USE_X11)
     // KHR_xlib_surface

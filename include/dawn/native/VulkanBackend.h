@@ -69,7 +69,7 @@ struct ExternalImageExportInfoVk : ExternalImageExportInfo {
     using ExternalImageExportInfo::ExternalImageExportInfo;
 };
 
-// Can't use DAWN_PLATFORM_LINUX since header included in both Dawn and Chrome
+// Can't use DAWN_PLATFORM_IS(LINUX) since header included in both Dawn and Chrome
 #ifdef __linux__
 
 // Common properties of external images represented by FDs. On successful import the file

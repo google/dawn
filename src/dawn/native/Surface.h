@@ -23,9 +23,9 @@
 
 #include "dawn/common/Platform.h"
 
-#if defined(DAWN_PLATFORM_WINDOWS)
+#if DAWN_PLATFORM_IS(WINDOWS)
 #include "dawn/native/d3d12/d3d12_platform.h"
-#endif  // defined(DAWN_PLATFORM_WINDOWS)
+#endif  // DAWN_PLATFORM_IS(WINDOWS)
 
 // Forward declare IUnknown
 // GetCoreWindow needs to return an IUnknown pointer
@@ -112,13 +112,13 @@ class Surface final : public ErrorMonad {
     void* mHInstance = nullptr;
     void* mHWND = nullptr;
 
-#if defined(DAWN_PLATFORM_WINDOWS)
+#if DAWN_PLATFORM_IS(WINDOWS)
     // WindowsCoreWindow
     ComPtr<IUnknown> mCoreWindow;
 
     // WindowsSwapChainPanel
     ComPtr<IUnknown> mSwapChainPanel;
-#endif  // defined(DAWN_PLATFORM_WINDOWS)
+#endif  // DAWN_PLATFORM_IS(WINDOWS)
 
     // Xlib
     void* mXDisplay = nullptr;

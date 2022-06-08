@@ -19,7 +19,7 @@
 #include "dawn/common/Platform.h"
 #include "dawn/utils/GLFWUtils.h"
 
-#if defined(DAWN_PLATFORM_WINDOWS)
+#if DAWN_PLATFORM_IS(WINDOWS)
 #define GLFW_EXPOSE_NATIVE_WIN32
 #endif
 #if defined(DAWN_USE_X11)
@@ -68,7 +68,7 @@ std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptorCocoa(GLF
 
 std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptor(GLFWwindow* window) {
     switch (glfwGetPlatform()) {
-#if defined(DAWN_PLATFORM_WINDOWS)
+#if DAWN_PLATFORM_IS(WINDOWS)
         case GLFW_PLATFORM_WIN32: {
             std::unique_ptr<wgpu::SurfaceDescriptorFromWindowsHWND> desc =
                 std::make_unique<wgpu::SurfaceDescriptorFromWindowsHWND>();

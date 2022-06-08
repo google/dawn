@@ -156,7 +156,7 @@ bool AllowFormatReinterpretationWithoutFlag(MTLPixelFormat origin,
         case MTLPixelFormatBGRA8Unorm_sRGB:
             return reinterpretation == MTLPixelFormatRGBA8Unorm_sRGB ||
                    reinterpretation == MTLPixelFormatBGRA8Unorm;
-#if defined(DAWN_PLATFORM_MACOS)
+#if DAWN_PLATFORM_IS(MACOS)
         case MTLPixelFormatBC1_RGBA:
             return reinterpretation == MTLPixelFormatBC1_RGBA_sRGB;
         case MTLPixelFormatBC1_RGBA_sRGB:
@@ -216,9 +216,9 @@ uint32_t GetIOSurfacePlane(wgpu::TextureAspect aspect) {
     }
 }
 
-#if defined(DAWN_PLATFORM_MACOS)
+#if DAWN_PLATFORM_IS(MACOS)
 MTLStorageMode kIOSurfaceStorageMode = MTLStorageModeManaged;
-#elif defined(DAWN_PLATFORM_IOS)
+#elif DAWN_PLATFORM_IS(IOS)
 MTLStorageMode kIOSurfaceStorageMode = MTLStorageModePrivate;
 #else
 #error "Unsupported Apple platform."
@@ -321,7 +321,7 @@ MTLPixelFormat MetalPixelFormat(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::Stencil8:
             return MTLPixelFormatStencil8;
 
-#if defined(DAWN_PLATFORM_MACOS)
+#if DAWN_PLATFORM_IS(MACOS)
         case wgpu::TextureFormat::Depth24UnormStencil8:
             return MTLPixelFormatDepth24Unorm_Stencil8;
 
@@ -1069,7 +1069,7 @@ MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
                 if (textureFormat == MTLPixelFormatDepth32Float_Stencil8) {
                     viewFormat = MTLPixelFormatX32_Stencil8;
                 }
-#if defined(DAWN_PLATFORM_MACOS)
+#if DAWN_PLATFORM_IS(MACOS)
                 else if (textureFormat == MTLPixelFormatDepth24Unorm_Stencil8) {
                     viewFormat = MTLPixelFormatX24_Stencil8;
                 }

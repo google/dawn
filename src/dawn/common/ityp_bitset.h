@@ -16,6 +16,7 @@
 #define SRC_DAWN_COMMON_ITYP_BITSET_H_
 
 #include "dawn/common/BitSetIterator.h"
+#include "dawn/common/Platform.h"
 #include "dawn/common/TypedInteger.h"
 #include "dawn/common/UnderlyingType.h"
 
@@ -124,9 +125,9 @@ class bitset : private std::bitset<N> {
 template <typename Index, size_t N>
 Index GetHighestBitIndexPlusOne(const ityp::bitset<Index, N>& bitset) {
     using I = UnderlyingType<Index>;
-#if defined(DAWN_COMPILER_MSVC)
+#if DAWN_COMPILER_IS(MSVC)
     if constexpr (N > 32) {
-#if defined(DAWN_PLATFORM_64_BIT)
+#if DAWN_PLATFORM_IS(64_BIT)
         // NOLINTNEXTLINE(runtime/int)
         unsigned long firstBitIndex = 0ul;
         unsigned char ret = _BitScanReverse64(&firstBitIndex, bitset.to_ullong());
@@ -134,7 +135,7 @@ Index GetHighestBitIndexPlusOne(const ityp::bitset<Index, N>& bitset) {
             return Index(static_cast<I>(0));
         }
         return Index(static_cast<I>(firstBitIndex + 1));
-#else   // defined(DAWN_PLATFORM_64_BIT)
+#else   // DAWN_PLATFORM_IS(64_BIT)
         if (bitset.none()) {
             return Index(static_cast<I>(0));
         }
@@ -144,7 +145,7 @@ Index GetHighestBitIndexPlusOne(const ityp::bitset<Index, N>& bitset) {
             }
         }
         UNREACHABLE();
-#endif  // defined(DAWN_PLATFORM_64_BIT)
+#endif  // DAWN_PLATFORM_IS(64_BIT)
     } else {
         // NOLINTNEXTLINE(runtime/int)
         unsigned long firstBitIndex = 0ul;
@@ -154,7 +155,7 @@ Index GetHighestBitIndexPlusOne(const ityp::bitset<Index, N>& bitset) {
         }
         return Index(static_cast<I>(firstBitIndex + 1));
     }
-#else   // defined(DAWN_COMPILER_MSVC)
+#else   // DAWN_COMPILER_IS(MSVC)
     if (bitset.none()) {
         return Index(static_cast<I>(0));
     }
@@ -164,7 +165,7 @@ Index GetHighestBitIndexPlusOne(const ityp::bitset<Index, N>& bitset) {
     } else {
         return Index(static_cast<I>(32 - static_cast<uint32_t>(__builtin_clz(bitset.to_ulong()))));
     }
-#endif  // defined(DAWN_COMPILER_MSVC)
+#endif  // DAWN_COMPILER_IS(MSVC)
 }
 
 #endif  // SRC_DAWN_COMMON_ITYP_BITSET_H_

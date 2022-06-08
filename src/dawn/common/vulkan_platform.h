@@ -35,7 +35,7 @@
 // redefined to be nullptr). This keeps the type-safety of having the handles be different types
 // (like vulkan.h on 64 bit) but makes sure the types are different on 32 bit architectures.
 
-#if defined(DAWN_PLATFORM_64_BIT)
+#if DAWN_PLATFORM_IS(64_BIT)
 #define DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(object) using object = struct object##_T*;
 // This function is needed because MSVC doesn't accept reinterpret_cast from uint64_t from uint64_t
 // TODO(cwallez@chromium.org): Remove this once we rework vulkan_platform.h
@@ -43,7 +43,7 @@ template <typename T>
 T NativeNonDispatachableHandleFromU64(uint64_t u64) {
     return reinterpret_cast<T>(u64);
 }
-#elif defined(DAWN_PLATFORM_32_BIT)
+#elif DAWN_PLATFORM_IS(32_BIT)
 #define DAWN_DEFINE_NATIVE_NON_DISPATCHABLE_HANDLE(object) using object = uint64_t;
 template <typename T>
 T NativeNonDispatachableHandleFromU64(uint64_t u64) {
@@ -138,12 +138,12 @@ HandleType* AsVkArray(detail::VkHandle<Tag, HandleType>* handle) {
 // headers that vulkan.h includes that we have "undefs" for. Note that some of the VK_USE_PLATFORM_*
 // defines are defined already in the Vulkan-Header BUILD.gn, but are needed when building with
 // CMake, hence they cannot be removed at the moment.
-#if defined(DAWN_PLATFORM_WINDOWS)
+#if DAWN_PLATFORM_IS(WINDOWS)
 #ifndef VK_USE_PLATFORM_WIN32_KHR
 #define VK_USE_PLATFORM_WIN32_KHR
 #endif
 #include "dawn/common/windows_with_undefs.h"
-#endif  // DAWN_PLATFORM_WINDOWS
+#endif  // DAWN_PLATFORM_IS(WINDOWS)
 
 #if defined(DAWN_USE_X11)
 #define VK_USE_PLATFORM_XLIB_KHR
@@ -165,17 +165,17 @@ HandleType* AsVkArray(detail::VkHandle<Tag, HandleType>* handle) {
 #endif
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
-#if defined(DAWN_PLATFORM_ANDROID)
+#if DAWN_PLATFORM_IS(ANDROID)
 #ifndef VK_USE_PLATFORM_ANDROID_KHR
 #define VK_USE_PLATFORM_ANDROID_KHR
 #endif
-#endif  // defined(DAWN_PLATFORM_ANDROID)
+#endif  // DAWN_PLATFORM_IS(ANDROID)
 
-#if defined(DAWN_PLATFORM_FUCHSIA)
+#if DAWN_PLATFORM_IS(FUCHSIA)
 #ifndef VK_USE_PLATFORM_FUCHSIA
 #define VK_USE_PLATFORM_FUCHSIA
 #endif
-#endif  // defined(DAWN_PLATFORM_FUCHSIA)
+#endif  // DAWN_PLATFORM_IS(FUCHSIA)
 
 // The actual inclusion of vulkan.h!
 #define VK_NO_PROTOTYPES

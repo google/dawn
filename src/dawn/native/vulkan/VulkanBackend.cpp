@@ -60,7 +60,7 @@ WGPUTextureFormat GetNativeSwapChainPreferredFormat(const DawnSwapChainImplement
 AdapterDiscoveryOptions::AdapterDiscoveryOptions()
     : AdapterDiscoveryOptionsBase(WGPUBackendType_Vulkan) {}
 
-#if defined(DAWN_PLATFORM_LINUX)
+#if DAWN_PLATFORM_IS(LINUX)
 ExternalImageDescriptorOpaqueFD::ExternalImageDescriptorOpaqueFD()
     : ExternalImageDescriptorFD(ExternalImageType::OpaqueFD) {}
 
@@ -72,10 +72,10 @@ ExternalImageExportInfoOpaqueFD::ExternalImageExportInfoOpaqueFD()
 
 ExternalImageExportInfoDmaBuf::ExternalImageExportInfoDmaBuf()
     : ExternalImageExportInfoFD(ExternalImageType::DmaBuf) {}
-#endif  // DAWN_PLATFORM_LINUX
+#endif  // DAWN_PLATFORM_IS(LINUX)
 
 WGPUTexture WrapVulkanImage(WGPUDevice device, const ExternalImageDescriptorVk* descriptor) {
-#if defined(DAWN_PLATFORM_LINUX)
+#if DAWN_PLATFORM_IS(LINUX)
     switch (descriptor->GetType()) {
         case ExternalImageType::OpaqueFD:
         case ExternalImageType::DmaBuf: {
@@ -91,7 +91,7 @@ WGPUTexture WrapVulkanImage(WGPUDevice device, const ExternalImageDescriptorVk* 
     }
 #else
     return nullptr;
-#endif  // DAWN_PLATFORM_LINUX
+#endif  // DAWN_PLATFORM_IS(LINUX)
 }
 
 bool ExportVulkanImage(WGPUTexture texture,
@@ -100,7 +100,7 @@ bool ExportVulkanImage(WGPUTexture texture,
     if (texture == nullptr) {
         return false;
     }
-#if defined(DAWN_PLATFORM_LINUX)
+#if DAWN_PLATFORM_IS(LINUX)
     switch (info->GetType()) {
         case ExternalImageType::OpaqueFD:
         case ExternalImageType::DmaBuf: {
@@ -116,7 +116,7 @@ bool ExportVulkanImage(WGPUTexture texture,
     }
 #else
     return false;
-#endif  // DAWN_PLATFORM_LINUX
+#endif  // DAWN_PLATFORM_IS(LINUX)
 }
 
 }  // namespace dawn::native::vulkan

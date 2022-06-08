@@ -17,7 +17,7 @@
 
 #include "dawn/common/Platform.h"
 
-#if !defined(DAWN_PLATFORM_WINDOWS)
+#if !DAWN_PLATFORM_IS(WINDOWS)
 #error "windows_with_undefs.h included on non-Windows"
 #endif
 

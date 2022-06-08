@@ -15,6 +15,7 @@
 #include "dawn/native/metal/BufferMTL.h"
 
 #include "dawn/common/Math.h"
+#include "dawn/common/Platform.h"
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/metal/CommandRecordingContext.h"
 #include "dawn/native/metal/DeviceMTL.h"
@@ -41,7 +42,7 @@ uint64_t Buffer::QueryMaxBufferLength(id<MTLDevice> mtlDevice) {
 
     // Earlier versions of Metal had maximums defined in the Metal feature set tables
     // https://metalbyexample.com/wp-content/uploads/Metal-Feature-Set-Tables-2018.pdf
-#if defined(DAWN_PLATFORM_MACOS)
+#if DAWN_PLATFORM_IS(MACOS)
     // 10.12 and 10.13 have a 1Gb limit.
     if (@available(macOS 10.12, *)) {
         // |maxBufferLength| isn't always available on older systems. If available, use
@@ -72,7 +73,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     }
 
     uint32_t alignment = 1;
-#ifdef DAWN_PLATFORM_MACOS
+#if DAWN_PLATFORM_IS(MACOS)
     // [MTLBlitCommandEncoder fillBuffer] requires the size to be a multiple of 4 on MacOS.
     alignment = 4;
 #endif

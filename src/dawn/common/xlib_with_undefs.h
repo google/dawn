@@ -17,7 +17,7 @@
 
 #include "dawn/common/Platform.h"
 
-#if !defined(DAWN_PLATFORM_LINUX)
+#if !DAWN_PLATFORM_IS(LINUX)
 #error "xlib_with_undefs.h included on non-Linux"
 #endif
 

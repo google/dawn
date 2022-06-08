@@ -184,7 +184,7 @@ DawnSwapChainError NativeSwapChainImpl::GetNextTexture(DawnSwapChainNextTexture*
     }
 
     nextTexture->texture.u64 =
-#if defined(DAWN_PLATFORM_64_BIT)
+#if DAWN_PLATFORM_IS(64_BIT)
         reinterpret_cast<uint64_t>
 #endif
         (*mSwapChainImages[mLastImageIndex]);

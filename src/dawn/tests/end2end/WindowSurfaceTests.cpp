@@ -24,9 +24,9 @@
 #include "gtest/gtest.h"
 
 // Include windows.h before GLFW so GLFW's APIENTRY macro doesn't conflict with windows.h's.
-#if defined(DAWN_PLATFORM_WINDOWS)
+#if DAWN_PLATFORM_IS(WINDOWS)
 #include "dawn/common/windows_with_undefs.h"
-#endif  // defined(DAWN_PLATFORM_WINDOWS)
+#endif  // DAWN_PLATFORM_IS(WINDOWS)
 
 #include "GLFW/glfw3.h"
 
@@ -139,7 +139,7 @@ TEST_F(WindowSurfaceInstanceTests, TwoChainedDescriptors) {
     AssertSurfaceCreation(&descriptor, false);
 }
 
-#if defined(DAWN_PLATFORM_WINDOWS)
+#if DAWN_PLATFORM_IS(WINDOWS)
 
 // Tests that GLFWUtils returns a descriptor of HWND type
 TEST_F(WindowSurfaceInstanceTests, CorrectSTypeHWND) {
@@ -160,7 +160,7 @@ TEST_F(WindowSurfaceInstanceTests, InvalidHWND) {
     AssertSurfaceCreation(&descriptor, false);
 }
 
-#else  // defined(DAWN_PLATFORM_WINDOWS)
+#else  // DAWN_PLATFORM_IS(WINDOWS)
 
 // Test using HWND when it is not supported
 TEST_F(WindowSurfaceInstanceTests, HWNDSurfacesAreInvalid) {
@@ -173,7 +173,7 @@ TEST_F(WindowSurfaceInstanceTests, HWNDSurfacesAreInvalid) {
     AssertSurfaceCreation(&descriptor, false);
 }
 
-#endif  // defined(DAWN_PLATFORM_WINDOWS)
+#endif  // DAWN_PLATFORM_IS(WINDOWS)
 
 #if defined(DAWN_USE_X11)
 

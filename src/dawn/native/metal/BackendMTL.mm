@@ -25,7 +25,7 @@
 #include "dawn/native/metal/BufferMTL.h"
 #include "dawn/native/metal/DeviceMTL.h"
 
-#if defined(DAWN_PLATFORM_MACOS)
+#if DAWN_PLATFORM_IS(MACOS)
 #import <IOKit/IOKitLib.h>
 #include "dawn/common/IOKitRef.h"
 #endif
@@ -46,7 +46,7 @@ struct Vendor {
     uint32_t vendorId;
 };
 
-#if defined(DAWN_PLATFORM_MACOS)
+#if DAWN_PLATFORM_IS(MACOS)
 const Vendor kVendors[] = {{"AMD", gpu_info::kVendorID_AMD},
                            {"Radeon", gpu_info::kVendorID_AMD},
                            {"Intel", gpu_info::kVendorID_Intel},
@@ -159,7 +159,7 @@ bool IsMetalSupported() {
     // TODO(dawn:1181): Dawn native should allow non-conformant WebGPU on macOS 10.11
     return IsMacOSVersionAtLeast(10, 12);
 }
-#elif defined(DAWN_PLATFORM_IOS)
+#elif DAWN_PLATFORM_IS(IOS)
 MaybeError GetDevicePCIInfo(id<MTLDevice> device, PCIIDs* ids) {
     DAWN_UNUSED(device);
     *ids = PCIIDs{0, 0};
@@ -277,10 +277,10 @@ class Adapter : public AdapterBase {
             mDeviceId = ids.deviceId;
         }
 
-#if defined(DAWN_PLATFORM_IOS)
+#if DAWN_PLATFORM_IS(IOS)
         mAdapterType = wgpu::AdapterType::IntegratedGPU;
         const char* systemName = "iOS ";
-#elif defined(DAWN_PLATFORM_MACOS)
+#elif DAWN_PLATFORM_IS(MACOS)
         if ([device isLowPower]) {
             mAdapterType = wgpu::AdapterType::IntegratedGPU;
         } else {
@@ -310,12 +310,12 @@ class Adapter : public AdapterBase {
 
     MaybeError InitializeSupportedFeaturesImpl() override {
         // Check compressed texture format with deprecated MTLFeatureSet way.
-#if defined(DAWN_PLATFORM_MACOS)
+#if DAWN_PLATFORM_IS(MACOS)
         if ([*mDevice supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1]) {
             mSupportedFeatures.EnableFeature(Feature::TextureCompressionBC);
         }
 #endif
-#if defined(DAWN_PLATFORM_IOS)
+#if DAWN_PLATFORM_IS(IOS)
         if ([*mDevice supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily1_v1]) {
             mSupportedFeatures.EnableFeature(Feature::TextureCompressionETC2);
         }
@@ -350,7 +350,7 @@ class Adapter : public AdapterBase {
                                       {MTLCommonCounterTimestamp})) {
                 bool enableTimestampQuery = true;
 
-#if defined(DAWN_PLATFORM_MACOS)
+#if DAWN_PLATFORM_IS(MACOS)
                 // Disable timestamp query on < macOS 11.0 on AMD GPU because WriteTimestamp
                 // fails to call without any copy commands on MTLBlitCommandEncoder. This issue
                 // has been fixed on macOS 11.0. See crbug.com/dawn/545.
@@ -379,7 +379,7 @@ class Adapter : public AdapterBase {
             mSupportedFeatures.EnableFeature(Feature::MultiPlanarFormats);
         }
 
-#if defined(DAWN_PLATFORM_MACOS)
+#if DAWN_PLATFORM_IS(MACOS)
         // MTLPixelFormatDepth24Unorm_Stencil8 is only available on macOS 10.11+
         if ([*mDevice isDepth24Stencil8PixelFormatSupported]) {
             mSupportedFeatures.EnableFeature(Feature::Depth24UnormStencil8);
@@ -628,7 +628,7 @@ ResultOrError<std::vector<Ref<AdapterBase>>> Backend::DiscoverAdapters(
 
     std::vector<Ref<AdapterBase>> adapters;
     BOOL supportedVersion = NO;
-#if defined(DAWN_PLATFORM_MACOS)
+#if DAWN_PLATFORM_IS(MACOS)
     if (@available(macOS 10.11, *)) {
         supportedVersion = YES;
 
@@ -643,7 +643,7 @@ ResultOrError<std::vector<Ref<AdapterBase>>> Backend::DiscoverAdapters(
     }
 #endif
 
-#if defined(DAWN_PLATFORM_IOS)
+#if DAWN_PLATFORM_IS(IOS)
     if (@available(iOS 8.0, *)) {
         supportedVersion = YES;
         // iOS only has a single device so MTLCopyAllDevices doesn't exist there.

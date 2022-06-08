@@ -73,11 +73,11 @@ MaybeError ValidateSwapChainDescriptor(const DeviceBase* device,
 // TODO(crbug.com/dawn/160): Lift this restriction once wgpu::Instance::GetPreferredSurfaceFormat is
 // implemented.
 // TODO(dawn:286):
-#if defined(DAWN_PLATFORM_ANDROID)
+#if DAWN_PLATFORM_IS(ANDROID)
         constexpr wgpu::TextureFormat kRequireSwapChainFormat = wgpu::TextureFormat::RGBA8Unorm;
 #else
         constexpr wgpu::TextureFormat kRequireSwapChainFormat = wgpu::TextureFormat::BGRA8Unorm;
-#endif  // !defined(DAWN_PLATFORM_ANDROID)
+#endif  // !DAWN_PLATFORM_IS(ANDROID)
         DAWN_INVALID_IF(descriptor->format != kRequireSwapChainFormat,
                         "Format (%s) is not %s, which is (currently) the only accepted format.",
                         descriptor->format, kRequireSwapChainFormat);

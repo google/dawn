@@ -45,9 +45,9 @@ size_t Hash(const TypedInteger<Tag, T>& value) {
 //    return hash;
 template <typename T>
 void HashCombine(size_t* hash, const T& value) {
-#if defined(DAWN_PLATFORM_64_BIT)
+#if DAWN_PLATFORM_IS(64_BIT)
     const size_t offset = 0x9e3779b97f4a7c16;
-#elif defined(DAWN_PLATFORM_32_BIT)
+#elif DAWN_PLATFORM_IS(32_BIT)
     const size_t offset = 0x9e3779b9;
 #else
 #error "Unsupported platform"

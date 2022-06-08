@@ -452,7 +452,7 @@ std::unique_ptr<dawn::native::Instance> DawnTestEnvironment::CreateInstanceAndDi
         if (!mANGLEBackend.empty()) {
             platform = mANGLEBackend.c_str();
         } else {
-#if defined(DAWN_PLATFORM_WINDOWS)
+#if DAWN_PLATFORM_IS(WINDOWS)
             platform = "d3d11";
 #else
             platform = "swiftshader";
@@ -851,7 +851,7 @@ bool DawnTestBase::IsWARP() const {
 }
 
 bool DawnTestBase::IsWindows() const {
-#ifdef DAWN_PLATFORM_WINDOWS
+#if DAWN_PLATFORM_IS(WINDOWS)
     return true;
 #else
     return false;
@@ -859,7 +859,7 @@ bool DawnTestBase::IsWindows() const {
 }
 
 bool DawnTestBase::IsLinux() const {
-#ifdef DAWN_PLATFORM_LINUX
+#if DAWN_PLATFORM_IS(LINUX)
     return true;
 #else
     return false;
@@ -867,7 +867,7 @@ bool DawnTestBase::IsLinux() const {
 }
 
 bool DawnTestBase::IsMacOS(int32_t majorVersion, int32_t minorVersion) const {
-#ifdef DAWN_PLATFORM_MACOS
+#if DAWN_PLATFORM_IS(MACOS)
     if (majorVersion == -1 && minorVersion == -1) {
         return true;
     }

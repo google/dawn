@@ -122,7 +122,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                 maxBufferBindingSize =
                     std::min(maxBufferBindingSize, uint64_t(2) * 1024 * 1024 * 1024);
                 // With WARP or on 32-bit platforms, such large buffer allocations often fail.
-#ifdef DAWN_PLATFORM_32_BIT
+#if DAWN_PLATFORM_IS(32_BIT)
                 if (IsWindows()) {
                     continue;
                 }
