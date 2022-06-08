@@ -28,10 +28,8 @@ class Device;
 
 class Buffer final : public ObjectBase {
   public:
-    using ObjectBase::ObjectBase;
-
     static WGPUBuffer Create(Device* device, const WGPUBufferDescriptor* descriptor);
-    static WGPUBuffer CreateError(Device* device);
+    static WGPUBuffer CreateError(Device* device, const WGPUBufferDescriptor* descriptor);
 
     Buffer(Client* client, uint32_t refcount, uint32_t id);
     ~Buffer();
@@ -50,6 +48,10 @@ class Buffer final : public ObjectBase {
     void Unmap();
 
     void Destroy();
+
+    // Note that these values can be arbitrary since they aren't validated in the wire client.
+    WGPUBufferUsage GetUsage() const;
+    uint64_t GetSize() const;
 
   private:
     void CancelCallbacksForDisconnect() override;
@@ -90,6 +92,7 @@ class Buffer final : public ObjectBase {
     };
     RequestTracker<MapRequestData> mRequests;
     uint64_t mSize = 0;
+    WGPUBufferUsage mUsage;
 
     // Only one mapped pointer can be active at a time because Unmap clears all the in-flight
     // requests.

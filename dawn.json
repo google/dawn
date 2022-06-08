@@ -434,6 +434,14 @@
                 ]
             },
             {
+                "name": "get usage",
+                "returns": "buffer usage"
+            },
+            {
+                "name": "get size",
+                "returns": "uint64_t"
+            },
+            {
                 "name": "unmap"
             },
             {

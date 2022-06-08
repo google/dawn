@@ -77,6 +77,16 @@ namespace {{native_namespace}} {
             static constexpr uint32_t value = {{len(e.values)}};
         };
     {% endfor %}
+
+    {% for type in by_category["enum"] + by_category["bitmask"] %}
+        inline {{as_cType(type.name)}} ToAPI({{namespace}}::{{as_cppType(type.name)}} rhs) {
+            return static_cast<{{as_cType(type.name)}}>(rhs);
+        }
+
+        inline {{namespace}}::{{as_cppType(type.name)}} FromAPI({{as_cType(type.name)}} rhs) {
+            return static_cast<{{namespace}}::{{as_cppType(type.name)}}>(rhs);
+        }
+    {% endfor %}
 }
 
 #endif  // {{NATIVE_DIR}}_{{PREFIX}}_PLATFORM_AUTOGEN_H_

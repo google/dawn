@@ -940,3 +940,74 @@ TEST_F(BufferValidationTest, GetMappedRange_OffsetSizeOOB) {
         EXPECT_EQ(buffer.GetMappedRange(0, 0), nullptr);
     }
 }
+
+// Test that the buffer creation parameters are correctly reflected for succesfully created buffers.
+TEST_F(BufferValidationTest, CreationParameterReflectionForValidBuffer) {
+    // Test reflection on two succesfully created but different buffers. The reflected data should
+    // be different!
+    {
+        wgpu::BufferDescriptor desc;
+        desc.size = 16;
+        desc.usage = wgpu::BufferUsage::Uniform;
+        wgpu::Buffer buf = device.CreateBuffer(&desc);
+
+        EXPECT_EQ(wgpu::BufferUsage::Uniform, buf.GetUsage());
+        EXPECT_EQ(16u, buf.GetSize());
+    }
+    {
+        wgpu::BufferDescriptor desc;
+        desc.size = 32;
+        desc.usage = wgpu::BufferUsage::Storage;
+        wgpu::Buffer buf = device.CreateBuffer(&desc);
+
+        EXPECT_EQ(wgpu::BufferUsage::Storage, buf.GetUsage());
+        EXPECT_EQ(32u, buf.GetSize());
+    }
+}
+
+// Test that the buffer creation parameters are correctly reflected for buffers invalid because of
+// validation errors.
+TEST_F(BufferValidationTest, CreationParameterReflectionForErrorBuffer) {
+    wgpu::BufferDescriptor desc;
+    desc.usage = wgpu::BufferUsage::Uniform;
+    desc.size = 19;
+    desc.mappedAtCreation = true;
+
+    // Error! MappedAtCreation requires size % 4 == 0.
+    wgpu::Buffer buf;
+    ASSERT_DEVICE_ERROR(buf = device.CreateBuffer(&desc));
+
+    // Reflection data is still exactly what was in the descriptor.
+    EXPECT_EQ(wgpu::BufferUsage::Uniform, buf.GetUsage());
+    EXPECT_EQ(19u, buf.GetSize());
+}
+
+// Test that the buffer creation parameters are correctly reflected for buffers invalid because of
+// OOM.
+TEST_F(BufferValidationTest, CreationParameterReflectionForOOMBuffer) {
+    constexpr uint64_t kAmazinglyLargeSize = 0x1234'5678'90AB'CDEF;
+    wgpu::BufferDescriptor desc;
+    desc.usage = wgpu::BufferUsage::Storage;
+    desc.size = kAmazinglyLargeSize;
+
+    // OOM!
+    wgpu::Buffer buf;
+    ASSERT_DEVICE_ERROR(buf = device.CreateBuffer(&desc));
+
+    // Reflection data is still exactly what was in the descriptor.
+    EXPECT_EQ(wgpu::BufferUsage::Storage, buf.GetUsage());
+    EXPECT_EQ(kAmazinglyLargeSize, buf.GetSize());
+}
+
+// Test that buffer reflection doesn't show internal usages
+TEST_F(BufferValidationTest, CreationParameterReflectionNoInternalUsage) {
+    wgpu::BufferDescriptor desc;
+    desc.size = 16;
+    // QueryResolve also adds kInternalStorageBuffer for processing of queries.
+    desc.usage = wgpu::BufferUsage::QueryResolve;
+    wgpu::Buffer buf = device.CreateBuffer(&desc);
+
+    // The reflection shouldn't show kInternalStorageBuffer
+    EXPECT_EQ(wgpu::BufferUsage::QueryResolve, buf.GetUsage());
+    EXPECT_EQ(16u, buf.GetSize());
+}

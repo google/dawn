@@ -48,8 +48,6 @@ class BufferBase : public ApiObjectBase {
         MappedAtCreation,
         Destroyed,
     };
-    BufferBase(DeviceBase* device, const BufferDescriptor* descriptor);
-
     static BufferBase* MakeError(DeviceBase* device, const BufferDescriptor* descriptor);
 
     ObjectType GetType() const override;
@@ -86,12 +84,15 @@ class BufferBase : public ApiObjectBase {
     const void* APIGetConstMappedRange(size_t offset, size_t size);
     void APIUnmap();
     void APIDestroy();
+    wgpu::BufferUsage APIGetUsage() const;
+    uint64_t APIGetSize() const;
 
   protected:
+    BufferBase(DeviceBase* device, const BufferDescriptor* descriptor);
     BufferBase(DeviceBase* device, const BufferDescriptor* descriptor, ObjectBase::ErrorTag tag);
-
     // Constructor used only for mocking and testing.
     BufferBase(DeviceBase* device, BufferState state);
+
     void DestroyImpl() override;
 
     ~BufferBase() override;

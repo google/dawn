@@ -158,7 +158,10 @@ BufferBase::BufferBase(DeviceBase* device, const BufferDescriptor* descriptor)
 BufferBase::BufferBase(DeviceBase* device,
                        const BufferDescriptor* descriptor,
                        ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag), mSize(descriptor->size), mState(BufferState::Unmapped) {
+    : ApiObjectBase(device, tag),
+      mSize(descriptor->size),
+      mUsage(descriptor->usage),
+      mState(BufferState::Unmapped) {
     if (descriptor->mappedAtCreation) {
         mState = BufferState::MappedAtCreation;
         mMapOffset = 0;
@@ -215,7 +218,12 @@ wgpu::BufferUsage BufferBase::GetUsage() const {
 }
 
 wgpu::BufferUsage BufferBase::GetUsageExternalOnly() const {
+    ASSERT(!IsError());
     return GetUsage() & ~kAllInternalBufferUsages;
+}
+
+wgpu::BufferUsage BufferBase::APIGetUsage() const {
+    return mUsage & ~kAllInternalBufferUsages;
 }
 
 MaybeError BufferBase::MapAtCreation() {
@@ -376,6 +384,10 @@ void* BufferBase::GetMappedRange(size_t offset, size_t size, bool writable) {
 
 void BufferBase::APIDestroy() {
     Destroy();
+}
+
+uint64_t BufferBase::APIGetSize() const {
+    return mSize;
 }
 
 MaybeError BufferBase::CopyFromStagingBuffer() {

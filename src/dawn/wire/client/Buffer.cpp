@@ -54,7 +54,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
                 wireClient->GetMemoryTransferService()->CreateReadHandle(descriptor->size));
             if (readHandle == nullptr) {
                 device->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
-                return device->CreateErrorBuffer();
+                return CreateError(device, descriptor);
             }
             cmd.readHandleCreateInfoLength = readHandle->SerializeCreateSize();
         }
@@ -65,7 +65,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
                 wireClient->GetMemoryTransferService()->CreateWriteHandle(descriptor->size));
             if (writeHandle == nullptr) {
                 device->InjectError(WGPUErrorType_OutOfMemory, "Failed to create buffer mapping");
-                return device->CreateErrorBuffer();
+                return CreateError(device, descriptor);
             }
             cmd.writeHandleCreateInfoLength = writeHandle->SerializeCreateSize();
         }
@@ -79,6 +79,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     buffer->mDevice = device;
     buffer->mDeviceIsAlive = device->GetAliveWeakPtr();
     buffer->mSize = descriptor->size;
+    buffer->mUsage = static_cast<WGPUBufferUsage>(descriptor->usage);
     buffer->mDestructWriteHandleOnUnmap = false;
 
     if (descriptor->mappedAtCreation) {
@@ -124,10 +125,12 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
 }
 
 // static
-WGPUBuffer Buffer::CreateError(Device* device) {
+WGPUBuffer Buffer::CreateError(Device* device, const WGPUBufferDescriptor* descriptor) {
     auto* allocation = device->client->BufferAllocator().New(device->client);
     allocation->object->mDevice = device;
     allocation->object->mDeviceIsAlive = device->GetAliveWeakPtr();
+    allocation->object->mSize = descriptor->size;
+    allocation->object->mUsage = static_cast<WGPUBufferUsage>(descriptor->usage);
 
     DeviceCreateErrorBufferCmd cmd;
     cmd.self = ToAPI(device);
@@ -363,6 +366,14 @@ void Buffer::Destroy() {
     BufferDestroyCmd cmd;
     cmd.self = ToAPI(this);
     client->SerializeCommand(cmd);
+}
+
+WGPUBufferUsage Buffer::GetUsage() const {
+    return mUsage;
+}
+
+uint64_t Buffer::GetSize() const {
+    return mSize;
 }
 
 bool Buffer::IsMappedForReading() const {

@@ -66,7 +66,7 @@ namespace {{native_namespace}} {
                     {%- endfor -%}
                 );
                 {% if method.return_type.name.canonical_case() != "void" %}
-                    {% if method.return_type.category == "object" %}
+                    {% if method.return_type.category in ["object", "enum", "bitmask"] %}
                         return ToAPI(result);
                     {% else %}
                         return result;
@@ -104,7 +104,7 @@ namespace {{native_namespace}} {
                 {%- endfor -%}
             );
             {% if function.return_type.name.canonical_case() != "void" %}
-                {% if function.return_type.category == "object" %}
+                {% if function.return_type.category in ["object", "enum", "bitmask"] %}
                     return ToAPI(result);
                 {% else %}
                     return result;
