@@ -47,7 +47,7 @@ class TextureBase : public ApiObjectBase {
     enum class TextureState { OwnedInternal, OwnedExternal, Destroyed };
     enum class ClearValue { Zero, NonZero };
 
-    static TextureBase* MakeError(DeviceBase* device);
+    static TextureBase* MakeError(DeviceBase* device, const TextureDescriptor* descriptor);
 
     ObjectType GetType() const override;
 
@@ -96,6 +96,14 @@ class TextureBase : public ApiObjectBase {
     // Dawn API
     TextureViewBase* APICreateView(const TextureViewDescriptor* descriptor = nullptr);
     void APIDestroy();
+    uint32_t APIGetWidth() const;
+    uint32_t APIGetHeight() const;
+    uint32_t APIGetDepthOrArrayLayers() const;
+    uint32_t APIGetMipLevelCount() const;
+    uint32_t APIGetSampleCount() const;
+    wgpu::TextureDimension APIGetDimension() const;
+    wgpu::TextureFormat APIGetFormat() const;
+    wgpu::TextureUsage APIGetUsage() const;
 
   protected:
     TextureBase(DeviceBase* device, const TextureDescriptor* descriptor, TextureState state);
@@ -106,7 +114,7 @@ class TextureBase : public ApiObjectBase {
     void DestroyImpl() override;
 
   private:
-    TextureBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+    TextureBase(DeviceBase* device, const TextureDescriptor* descriptor, ObjectBase::ErrorTag tag);
 
     MaybeError ValidateDestroy() const;
     wgpu::TextureDimension mDimension;
@@ -118,6 +126,7 @@ class TextureBase : public ApiObjectBase {
     wgpu::TextureUsage mUsage = wgpu::TextureUsage::None;
     wgpu::TextureUsage mInternalUsage = wgpu::TextureUsage::None;
     TextureState mState;
+    wgpu::TextureFormat mFormatEnumForReflection;
 
     // TODO(crbug.com/dawn/845): Use a more optimized data structure to save space
     std::vector<bool> mIsSubresourceContentInitializedAtIndex;

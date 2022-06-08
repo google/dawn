@@ -529,7 +529,8 @@ TextureBase::TextureBase(DeviceBase* device,
       mSampleCount(descriptor->sampleCount),
       mUsage(descriptor->usage),
       mInternalUsage(mUsage),
-      mState(state) {
+      mState(state),
+      mFormatEnumForReflection(descriptor->format) {
     uint32_t subresourceCount = mMipLevelCount * GetArrayLayers() * GetAspectCount(mFormat.aspects);
     mIsSubresourceContentInitializedAtIndex = std::vector<bool>(subresourceCount, false);
 
@@ -559,16 +560,25 @@ TextureBase::TextureBase(DeviceBase* device, TextureState state)
     TrackInDevice();
 }
 
-TextureBase::TextureBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag), mFormat(kUnusedFormat) {}
+TextureBase::TextureBase(DeviceBase* device,
+                         const TextureDescriptor* descriptor,
+                         ObjectBase::ErrorTag tag)
+    : ApiObjectBase(device, tag),
+      mDimension(descriptor->dimension),
+      mFormat(kUnusedFormat),
+      mSize(descriptor->size),
+      mMipLevelCount(descriptor->mipLevelCount),
+      mSampleCount(descriptor->sampleCount),
+      mUsage(descriptor->usage),
+      mFormatEnumForReflection(descriptor->format) {}
 
 void TextureBase::DestroyImpl() {
     mState = TextureState::Destroyed;
 }
 
 // static
-TextureBase* TextureBase::MakeError(DeviceBase* device) {
-    return new TextureBase(device, ObjectBase::kError);
+TextureBase* TextureBase::MakeError(DeviceBase* device, const TextureDescriptor* descriptor) {
+    return new TextureBase(device, descriptor, ObjectBase::kError);
 }
 
 ObjectType TextureBase::GetType() const {
@@ -765,6 +775,37 @@ void TextureBase::APIDestroy() {
     }
     ASSERT(!IsError());
     Destroy();
+}
+
+uint32_t TextureBase::APIGetWidth() const {
+    return mSize.width;
+}
+
+uint32_t TextureBase::APIGetHeight() const {
+    return mSize.height;
+}
+uint32_t TextureBase::APIGetDepthOrArrayLayers() const {
+    return mSize.depthOrArrayLayers;
+}
+
+uint32_t TextureBase::APIGetMipLevelCount() const {
+    return mMipLevelCount;
+}
+
+uint32_t TextureBase::APIGetSampleCount() const {
+    return mSampleCount;
+}
+
+wgpu::TextureDimension TextureBase::APIGetDimension() const {
+    return mDimension;
+}
+
+wgpu::TextureFormat TextureBase::APIGetFormat() const {
+    return mFormatEnumForReflection;
+}
+
+wgpu::TextureUsage TextureBase::APIGetUsage() const {
+    return mUsage;
 }
 
 MaybeError TextureBase::ValidateDestroy() const {

@@ -2520,6 +2520,38 @@
                 ]
             },
             {
+                "name": "get width",
+                "returns": "uint32_t"
+            },
+            {
+                "name": "get height",
+                "returns": "uint32_t"
+            },
+            {
+                "name": "get depth or array layers",
+                "returns": "uint32_t"
+            },
+            {
+                "name": "get mip level count",
+                "returns": "uint32_t"
+            },
+            {
+                "name": "get sample count",
+                "returns": "uint32_t"
+            },
+            {
+                "name": "get dimension",
+                "returns": "texture dimension"
+            },
+            {
+                "name": "get format",
+                "returns": "texture format"
+            },
+            {
+                "name": "get usage",
+                "returns": "texture usage"
+            },
+            {
                 "name": "destroy"
             }
         ]

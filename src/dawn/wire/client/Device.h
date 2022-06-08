@@ -50,6 +50,7 @@ class Device final : public ObjectBase {
     void CreateRenderPipelineAsync(WGPURenderPipelineDescriptor const* descriptor,
                                    WGPUCreateRenderPipelineAsyncCallback callback,
                                    void* userdata);
+    WGPUTexture CreateTexture(const WGPUTextureDescriptor* descriptor);
 
     void HandleError(WGPUErrorType errorType, const char* message);
     void HandleLogging(WGPULoggingType loggingType, const char* message);

@@ -204,6 +204,10 @@ WGPUBuffer Device::CreateErrorBuffer() {
     return Buffer::CreateError(this, &fakeDescriptor);
 }
 
+WGPUTexture Device::CreateTexture(const WGPUTextureDescriptor* descriptor) {
+    return Texture::Create(this, descriptor);
+}
+
 WGPUQueue Device::GetQueue() {
     // The queue is lazily created because if a Device is created by
     // Reserve/Inject, we cannot send the GetQueue message until

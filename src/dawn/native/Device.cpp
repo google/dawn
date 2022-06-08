@@ -1209,7 +1209,7 @@ TextureBase* DeviceBase::APICreateTexture(const TextureDescriptor* descriptor) {
     Ref<TextureBase> result;
     if (ConsumedError(CreateTexture(descriptor), &result, "calling %s.CreateTexture(%s).", this,
                       descriptor)) {
-        return TextureBase::MakeError(this);
+        return TextureBase::MakeError(this, descriptor);
     }
     return result.Detach();
 }

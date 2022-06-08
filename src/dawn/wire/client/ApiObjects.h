@@ -23,6 +23,7 @@
 #include "dawn/wire/client/Instance.h"
 #include "dawn/wire/client/Queue.h"
 #include "dawn/wire/client/ShaderModule.h"
+#include "dawn/wire/client/Texture.h"
 
 #include "dawn/wire/client/ApiObjects_autogen.h"
 
