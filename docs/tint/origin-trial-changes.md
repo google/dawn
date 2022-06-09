@@ -1,5 +1,16 @@
 # Tint changes during Origin Trial
 
+## Changes for M105
+
+### Deprecated Features
+
+* The `@stage` attribute has been deprecated. The short forms should be used
+  instead (`@vertex`, `@fragment`, or `@compute`). [tint:1503](crbug.com/tint/1503)
+
+## Changes for M104
+
+* Parsing of `@compute`, `@fragment` and `@vertex` added.
+
 ## Changes for M103
 
 ### New features

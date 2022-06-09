@@ -316,8 +316,13 @@ TEST_F(ParserImplErrorTest, FunctionDeclStageMissingLParen) {
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclStageMissingRParen) {
-    EXPECT("@stage(vertex fn f() {}",
-           R"(test.wgsl:1:15 error: expected ')' for stage attribute
+    EXPECT(
+        "@stage(vertex fn f() {}",
+        R"(test.wgsl:1:2 warning: use of deprecated language feature: remove stage and use @vertex
+@stage(vertex fn f() {}
+ ^^^^^
+
+test.wgsl:1:15 error: expected ')' for stage attribute
 @stage(vertex fn f() {}
               ^^
 )");

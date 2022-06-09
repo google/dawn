@@ -263,7 +263,8 @@ TEST_F(ParserImplTest, Attribute_Stage_MissingRightParen) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:14: expected ')' for stage attribute");
+    EXPECT_EQ(p->error(), R"(1:1: use of deprecated language feature: remove stage and use @compute
+1:14: expected ')' for stage attribute)");
 }
 
 TEST_F(ParserImplTest, Attribute_Compute) {
