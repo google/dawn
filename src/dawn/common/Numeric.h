@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_COMMON_NUMERIC_H_
 #define SRC_DAWN_COMMON_NUMERIC_H_
 
+#include <cstdint>
 #include <limits>
 #include <type_traits>
 

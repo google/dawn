@@ -21,6 +21,8 @@
 
 #include "dawn/webgpu_cpp.h"
 
+struct DawnProcTable;
+
 namespace utils {
 
 class WireHelper {
