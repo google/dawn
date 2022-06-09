@@ -257,7 +257,7 @@ TEST_P(DepthStencilLoadOpTests, ClearBothMip1Then0) {
 
 namespace {
 
-auto GenerateParams() {
+auto GenerateParam() {
     auto params1 = MakeParamGenerator<DepthStencilLoadOpTestParams>(
         {D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
          OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
@@ -280,8 +280,50 @@ auto GenerateParams() {
 
 INSTANTIATE_TEST_SUITE_P(,
                          DepthStencilLoadOpTests,
-                         ::testing::ValuesIn(GenerateParams()),
+                         ::testing::ValuesIn(GenerateParam()),
                          DawnTestBase::PrintToStringParamName("DepthStencilLoadOpTests"));
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(DepthStencilLoadOpTests);
+
+class StencilClearValueOverflowTest : public DepthStencilLoadOpTests {};
+
+// Test when stencilClearValue overflows uint8_t (>255), only the last 8 bits will be applied as the
+// stencil clear value in encoder.BeginRenderPass() (currently Dawn only supports 8-bit stencil
+// format).
+TEST_P(StencilClearValueOverflowTest, StencilClearValueOverFlowUint8) {
+    constexpr uint32_t kOverflowedStencilValue = kStencilValues[0] + 0x100;
+    renderPassDescriptors[0].cDepthStencilAttachmentInfo.stencilClearValue =
+        kOverflowedStencilValue;
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.BeginRenderPass(&renderPassDescriptors[0]).End();
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    CheckMipLevel(0u);
+}
+
+// Test when stencilClearValue overflows uint16_t(>65535), only the last 8 bits will be applied as
+// the stencil clear value in encoder.BeginRenderPass() (currently Dawn only supports 8-bit stencil
+// format).
+TEST_P(StencilClearValueOverflowTest, StencilClearValueOverFlowUint16) {
+    constexpr uint32_t kOverflowedStencilValue = kStencilValues[0] + 0x10000;
+    renderPassDescriptors[0].cDepthStencilAttachmentInfo.stencilClearValue =
+        kOverflowedStencilValue;
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.BeginRenderPass(&renderPassDescriptors[0]).End();
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    CheckMipLevel(0u);
+}
+
+DAWN_INSTANTIATE_TEST_P(StencilClearValueOverflowTest,
+                        {D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}),
+                         MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+                        {wgpu::TextureFormat::Depth24PlusStencil8,
+                         wgpu::TextureFormat::Depth24UnormStencil8,
+                         wgpu::TextureFormat::Depth32FloatStencil8, wgpu::TextureFormat::Stencil8},
+                        {Check::CopyStencil, Check::StencilTest});
 
 }  // namespace
