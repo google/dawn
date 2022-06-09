@@ -447,6 +447,7 @@ TEST_F(BindGroupValidationTest, StorageTextureUsage) {
     // Multisampled texture is invalid with storage buffer binding
     // Regression case for crbug.com/dawn/614 where this hit an ASSERT.
     descriptor.sampleCount = 4;
+    descriptor.usage |= wgpu::TextureUsage::RenderAttachment;
     view = device.CreateTexture(&descriptor).CreateView();
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, view}}));
 }
@@ -727,7 +728,7 @@ TEST_F(BindGroupValidationTest, MultisampledTexture) {
     // Control case: setting a multisampled 2D texture works
     wgpu::TextureDescriptor textureDesc;
     textureDesc.sampleCount = 4;
-    textureDesc.usage = wgpu::TextureUsage::TextureBinding;
+    textureDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
     textureDesc.dimension = wgpu::TextureDimension::e2D;
     textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
     textureDesc.size = {1, 1, 1};

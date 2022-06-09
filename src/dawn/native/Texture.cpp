@@ -169,6 +169,10 @@ MaybeError ValidateSampleCount(const TextureDescriptor* descriptor,
         DAWN_INVALID_IF(usage & wgpu::TextureUsage::StorageBinding,
                         "The sample count (%u) of a storage textures is not 1.",
                         descriptor->sampleCount);
+
+        DAWN_INVALID_IF((usage & wgpu::TextureUsage::RenderAttachment) == 0,
+                        "The usage (%s) of a multisampled texture doesn't include (%s).",
+                        descriptor->usage, wgpu::TextureUsage::RenderAttachment);
     }
 
     return {};

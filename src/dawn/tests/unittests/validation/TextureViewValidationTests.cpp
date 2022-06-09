@@ -41,7 +41,7 @@ wgpu::Texture Create2DArrayTexture(wgpu::Device& device,
     descriptor.sampleCount = sampleCount;
     descriptor.format = kDefaultTextureFormat;
     descriptor.mipLevelCount = mipLevelCount;
-    descriptor.usage = wgpu::TextureUsage::TextureBinding;
+    descriptor.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
     return device.CreateTexture(&descriptor);
 }
 

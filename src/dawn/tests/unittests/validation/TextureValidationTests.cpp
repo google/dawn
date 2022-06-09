@@ -143,9 +143,12 @@ TEST_F(TextureValidationTest, SampleCount) {
     {
         wgpu::TextureDescriptor descriptor = defaultDescriptor;
         descriptor.sampleCount = 4;
-        descriptor.usage = wgpu::TextureUsage::TextureBinding;
 
         for (wgpu::TextureFormat format : utils::kFormatsInCoreSpec) {
+            if (!utils::TextureFormatSupportsRendering(format)) {
+                continue;
+            }
+
             descriptor.format = format;
             if (utils::TextureFormatSupportsMultisampling(format)) {
                 device.CreateTexture(&descriptor);
@@ -169,6 +172,16 @@ TEST_F(TextureValidationTest, SampleCount) {
         wgpu::TextureDescriptor descriptor = defaultDescriptor;
         descriptor.sampleCount = 4;
         descriptor.usage |= wgpu::TextureUsage::StorageBinding;
+
+        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    }
+
+    // It is an error to create a texture without TextureUsage::RenderAttachment usage when
+    // sampleCount > 1.
+    {
+        wgpu::TextureDescriptor descriptor = defaultDescriptor;
+        descriptor.sampleCount = 4;
+        descriptor.usage = wgpu::TextureUsage::TextureBinding;
 
         ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
     }

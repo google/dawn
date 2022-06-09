@@ -115,7 +115,7 @@ TEST_F(TextureInternalUsageValidationTest, UsageValidation) {
     {
         wgpu::TextureDescriptor textureDesc = {};
         textureDesc.size = {1, 1};
-        textureDesc.usage = wgpu::TextureUsage::CopySrc;
+        textureDesc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
         textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
         textureDesc.sampleCount = 4;
 

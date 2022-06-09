@@ -29,9 +29,7 @@ namespace dawn::native::metal {
 
 namespace {
 
-MTLTextureUsage MetalTextureUsage(const Format& format,
-                                  wgpu::TextureUsage usage,
-                                  uint32_t sampleCount) {
+MTLTextureUsage MetalTextureUsage(const Format& format, wgpu::TextureUsage usage) {
     MTLTextureUsage result = MTLTextureUsageUnknown;  // This is 0
 
     if (usage & (wgpu::TextureUsage::StorageBinding)) {
@@ -52,8 +50,7 @@ MTLTextureUsage MetalTextureUsage(const Format& format,
         }
     }
 
-    // MTLTextureUsageRenderTarget is needed to clear multisample textures.
-    if (usage & (wgpu::TextureUsage::RenderAttachment) || sampleCount > 1) {
+    if (usage & wgpu::TextureUsage::RenderAttachment) {
         result |= MTLTextureUsageRenderTarget;
     }
 
@@ -120,8 +117,7 @@ bool RequiresCreatingNewTextureView(const TextureBase* texture,
 
     // If the texture is created with MTLTextureUsagePixelFormatView, we need
     // a new view to perform format reinterpretation.
-    if ((MetalTextureUsage(texture->GetFormat(), texture->GetInternalUsage(),
-                           texture->GetSampleCount()) &
+    if ((MetalTextureUsage(texture->GetFormat(), texture->GetInternalUsage()) &
          MTLTextureUsagePixelFormatView) != 0) {
         return true;
     }
@@ -652,7 +648,7 @@ NSRef<MTLTextureDescriptor> Texture::CreateMetalTextureDescriptor() const {
     // Metal only allows format reinterpretation to happen on swizzle pattern or conversion
     // between linear space and sRGB. For example, creating bgra8Unorm texture view on
     // rgba8Unorm texture or creating rgba8Unorm_srgb texture view on rgab8Unorm texture.
-    mtlDesc.usage = MetalTextureUsage(GetFormat(), GetInternalUsage(), GetSampleCount());
+    mtlDesc.usage = MetalTextureUsage(GetFormat(), GetInternalUsage());
     mtlDesc.pixelFormat = MetalPixelFormat(GetFormat().format);
     mtlDesc.mipmapLevelCount = GetNumMipLevels();
     mtlDesc.storageMode = MTLStorageModePrivate;
@@ -932,6 +928,8 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
             }
         }
     } else {
+        ASSERT(!IsMultisampledTexture());
+
         // Encode a buffer to texture copy to clear each subresource.
         for (Aspect aspect : IterateEnumMask(range.aspects)) {
             // Compute the buffer size big enough to fill the largest mip.
@@ -1035,8 +1033,7 @@ MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
         MTLTextureDescriptor* mtlDesc = mtlDescRef.Get();
 
         mtlDesc.sampleCount = texture->GetSampleCount();
-        mtlDesc.usage = MetalTextureUsage(texture->GetFormat(), texture->GetInternalUsage(),
-                                          texture->GetSampleCount());
+        mtlDesc.usage = MetalTextureUsage(texture->GetFormat(), texture->GetInternalUsage());
         mtlDesc.pixelFormat = MetalPixelFormat(descriptor->format);
         mtlDesc.mipmapLevelCount = texture->GetNumMipLevels();
         mtlDesc.storageMode = kIOSurfaceStorageMode;

@@ -297,7 +297,9 @@ TEST_F(CopyTextureForBrowserTest, InvalidSampleCount) {
                         wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment, 1);
     wgpu::Texture sourceMultiSampled4x =
         Create2DTexture(16, 16, 1, 1, wgpu::TextureFormat::RGBA8Unorm,
-                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding, 4);
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding |
+                            wgpu::TextureUsage::RenderAttachment,
+                        4);
     wgpu::Texture destinationMultiSampled4x =
         Create2DTexture(16, 16, 1, 1, wgpu::TextureFormat::RGBA8Unorm,
                         wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment, 4);
