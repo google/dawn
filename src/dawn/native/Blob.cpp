@@ -14,6 +14,7 @@
 
 #include <utility>
 
+#include "dawn/common/Assert.h"
 #include "dawn/native/Blob.h"
 
 namespace dawn::native {
@@ -35,11 +36,24 @@ Blob Blob::UnsafeCreateWithDeleter(uint8_t* data, size_t size, std::function<voi
 Blob::Blob() : mData(nullptr), mSize(0), mDeleter({}) {}
 
 Blob::Blob(uint8_t* data, size_t size, std::function<void()> deleter)
-    : mData(data), mSize(size), mDeleter(std::move(deleter)) {}
+    : mData(data), mSize(size), mDeleter(std::move(deleter)) {
+    // It is invalid to make a blob that has null data unless its size is also zero.
+    ASSERT(data != nullptr || size == 0);
+}
 
-Blob::Blob(Blob&&) = default;
+Blob::Blob(Blob&& rhs) : mData(rhs.mData), mSize(rhs.mSize) {
+    mDeleter = std::move(rhs.mDeleter);
+}
 
-Blob& Blob::operator=(Blob&&) = default;
+Blob& Blob::operator=(Blob&& rhs) {
+    mData = rhs.mData;
+    mSize = rhs.mSize;
+    if (mDeleter) {
+        mDeleter();
+    }
+    mDeleter = std::move(rhs.mDeleter);
+    return *this;
+}
 
 Blob::~Blob() {
     if (mDeleter) {
