@@ -29,9 +29,7 @@ MaybeError ValidateQuerySetDescriptor(DeviceBase* device, const QuerySetDescript
 
 class QuerySetBase : public ApiObjectBase {
   public:
-    QuerySetBase(DeviceBase* device, const QuerySetDescriptor* descriptor);
-
-    static QuerySetBase* MakeError(DeviceBase* device);
+    static QuerySetBase* MakeError(DeviceBase* device, const QuerySetDescriptor* descriptor);
 
     ObjectType GetType() const override;
 
@@ -45,9 +43,14 @@ class QuerySetBase : public ApiObjectBase {
     MaybeError ValidateCanUseInSubmitNow() const;
 
     void APIDestroy();
+    wgpu::QueryType APIGetType() const;
+    uint32_t APIGetCount() const;
 
   protected:
-    QuerySetBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+    QuerySetBase(DeviceBase* device, const QuerySetDescriptor* descriptor);
+    QuerySetBase(DeviceBase* device,
+                 const QuerySetDescriptor* descriptor,
+                 ObjectBase::ErrorTag tag);
 
     // Constructor used only for mocking and testing.
     explicit QuerySetBase(DeviceBase* device);

@@ -1126,7 +1126,7 @@ QuerySetBase* DeviceBase::APICreateQuerySet(const QuerySetDescriptor* descriptor
     Ref<QuerySetBase> result;
     if (ConsumedError(CreateQuerySet(descriptor), &result, "calling %s.CreateQuerySet(%s).", this,
                       descriptor)) {
-        return QuerySetBase::MakeError(this);
+        return QuerySetBase::MakeError(this, descriptor);
     }
     return result.Detach();
 }

@@ -64,6 +64,8 @@ target_sources(dawn_wire PRIVATE
     "client/ObjectAllocator.h"
     "client/ObjectBase.cpp"
     "client/ObjectBase.h"
+    "client/QuerySet.cpp"
+    "client/QuerySet.h"
     "client/Queue.cpp"
     "client/Queue.h"
     "client/RequestTracker.h"

@@ -27,7 +27,8 @@ namespace {
 
 class ErrorQuerySet final : public QuerySetBase {
   public:
-    explicit ErrorQuerySet(DeviceBase* device) : QuerySetBase(device, ObjectBase::kError) {}
+    explicit ErrorQuerySet(DeviceBase* device, const QuerySetDescriptor* descriptor)
+        : QuerySetBase(device, descriptor, ObjectBase::kError) {}
 
   private:
     void DestroyImpl() override { UNREACHABLE(); }
@@ -113,8 +114,10 @@ QuerySetBase::QuerySetBase(DeviceBase* device) : ApiObjectBase(device, kLabelNot
     TrackInDevice();
 }
 
-QuerySetBase::QuerySetBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag) {}
+QuerySetBase::QuerySetBase(DeviceBase* device,
+                           const QuerySetDescriptor* descriptor,
+                           ObjectBase::ErrorTag tag)
+    : ApiObjectBase(device, tag), mQueryType(descriptor->type), mQueryCount(descriptor->count) {}
 
 QuerySetBase::~QuerySetBase() {
     // Uninitialized or already destroyed
@@ -126,8 +129,8 @@ void QuerySetBase::DestroyImpl() {
 }
 
 // static
-QuerySetBase* QuerySetBase::MakeError(DeviceBase* device) {
-    return new ErrorQuerySet(device);
+QuerySetBase* QuerySetBase::MakeError(DeviceBase* device, const QuerySetDescriptor* descriptor) {
+    return new ErrorQuerySet(device, descriptor);
 }
 
 ObjectType QuerySetBase::GetType() const {
@@ -165,6 +168,14 @@ void QuerySetBase::APIDestroy() {
         return;
     }
     Destroy();
+}
+
+wgpu::QueryType QuerySetBase::APIGetType() const {
+    return mQueryType;
+}
+
+uint32_t QuerySetBase::APIGetCount() const {
+    return mQueryCount;
 }
 
 MaybeError QuerySetBase::ValidateDestroy() const {

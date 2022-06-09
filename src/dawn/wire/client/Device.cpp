@@ -204,6 +204,10 @@ WGPUBuffer Device::CreateErrorBuffer() {
     return Buffer::CreateError(this, &fakeDescriptor);
 }
 
+WGPUQuerySet Device::CreateQuerySet(const WGPUQuerySetDescriptor* descriptor) {
+    return QuerySet::Create(this, descriptor);
+}
+
 WGPUTexture Device::CreateTexture(const WGPUTextureDescriptor* descriptor) {
     return Texture::Create(this, descriptor);
 }

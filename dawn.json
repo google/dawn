@@ -1613,6 +1613,14 @@
                 ]
             },
             {
+                "name": "get type",
+                "returns": "query type"
+            },
+            {
+                "name": "get count",
+                "returns": "uint32_t"
+            },
+            {
                 "name": "destroy"
             }
         ]

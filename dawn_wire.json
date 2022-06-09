@@ -203,6 +203,8 @@
             "DeviceSetLoggingCallback",
             "InstanceRequestAdapter",
             "ShaderModuleGetCompilationInfo",
+            "QuerySetGetType",
+            "QuerySetGetCount",
             "QueueOnSubmittedWorkDone",
             "QueueWriteBuffer",
             "QueueWriteTexture",
@@ -219,6 +221,7 @@
             "BufferDestroy",
             "BufferUnmap",
             "DeviceCreateErrorBuffer",
+            "DeviceCreateQuerySet",
             "DeviceCreateTexture",
             "DeviceGetQueue",
             "DeviceInjectError"
@@ -228,6 +231,7 @@
             "Buffer",
             "Device",
             "Instance",
+            "QuerySet",
             "Queue",
             "ShaderModule",
             "Texture"
