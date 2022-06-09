@@ -103,6 +103,8 @@ src/unittests/async_expectations.spec.ts
 src/unittests/basic.spec.ts
 src/unittests/check_contents.spec.ts
 src/unittests/conversion.spec.ts
+src/webgpu/util/f32_interval.ts
+src/unittests/f32_interval.spec.ts
 src/unittests/getStackTrace.spec.ts
 src/unittests/listing.ts
 src/unittests/loaders_and_trees.spec.ts
@@ -248,6 +250,7 @@ src/webgpu/api/validation/queue/destroyed/query_set.spec.ts
 src/webgpu/api/validation/render_pass/resolve.spec.ts
 src/webgpu/api/validation/render_pass/storeOp.spec.ts
 src/webgpu/api/validation/resource_usages/buffer/in_pass_encoder.spec.ts
+src/webgpu/api/validation/resource_usages/buffer/in_pass_misc.spec.ts
 src/webgpu/api/validation/resource_usages/texture/in_pass_encoder.spec.ts
 src/webgpu/api/validation/resource_usages/texture/in_render_common.spec.ts
 src/webgpu/api/validation/resource_usages/texture/in_render_misc.spec.ts
