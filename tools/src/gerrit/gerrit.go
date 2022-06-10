@@ -168,10 +168,10 @@ func (g *Gerrit) CreateChange(project, branch, subject string, wip bool) (*Chang
 	return change, nil
 }
 
-// EditFiles replaces the content of the files in the given change.
+// EditFiles replaces the content of the files in the given change. It deletes deletedFiles.
 // If newCommitMsg is not an empty string, then the commit message is replaced
 // with the string value.
-func (g *Gerrit) EditFiles(changeID, newCommitMsg string, files map[string]string) (Patchset, error) {
+func (g *Gerrit) EditFiles(changeID, newCommitMsg string, files map[string]string, deletedFiles []string) (Patchset, error) {
 	if newCommitMsg != "" {
 		resp, err := g.client.Changes.ChangeCommitMessageInChangeEdit(changeID, &gerrit.ChangeEditMessageInput{
 			Message: newCommitMsg,
@@ -182,6 +182,12 @@ func (g *Gerrit) EditFiles(changeID, newCommitMsg string, files map[string]strin
 	}
 	for path, content := range files {
 		resp, err := g.client.Changes.ChangeFileContentInChangeEdit(changeID, path, content)
+		if err != nil && resp.StatusCode != 409 { // 409 no changes were made
+			return Patchset{}, g.maybeWrapError(err)
+		}
+	}
+	for _, path := range deletedFiles {
+		resp, err := g.client.Changes.DeleteFileInChangeEdit(changeID, path)
 		if err != nil && resp.StatusCode != 409 { // 409 no changes were made
 			return Patchset{}, g.maybeWrapError(err)
 		}

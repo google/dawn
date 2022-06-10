@@ -70,3 +70,21 @@ func (g *Gitiles) DownloadFile(ctx context.Context, ref, path string) (string, e
 	}
 	return res.GetContents(), nil
 }
+
+// ListFiles lists the file paths in a project-relative path at the given reference.
+func (g *Gitiles) ListFiles(ctx context.Context, ref, path string) ([]string, error) {
+	res, err := g.client.ListFiles(ctx, &gpb.ListFilesRequest{
+		Project:    g.project,
+		Committish: ref,
+		Path:       path,
+	})
+	if err != nil {
+		return []string{}, err
+	}
+	files := res.GetFiles()
+	paths := make([]string, len(files))
+	for i, f := range files {
+		paths[i] = f.GetPath()
+	}
+	return paths, nil
+}
