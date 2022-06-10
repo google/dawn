@@ -71,7 +71,7 @@ MaybeError CommandRecordingContext::ExecuteCommandList(Device* device) {
         // common state right before command list submission. TransitionUsageNow itself ensures
         // no unnecessary transitions happen if the resources is already in the common state.
         for (Texture* texture : mSharedTextures) {
-            DAWN_TRY(texture->AcquireKeyedMutex());
+            DAWN_TRY(texture->SynchronizeImportedTextureBeforeUse());
             texture->TrackAllUsageAndTransitionNow(this, D3D12_RESOURCE_STATE_COMMON);
         }
 
@@ -124,7 +124,7 @@ MaybeError CommandRecordingContext::ExecuteCommandList(Device* device) {
         device->GetCommandQueue()->ExecuteCommandLists(1, &d3d12CommandList);
 
         for (Texture* texture : mSharedTextures) {
-            texture->ReleaseKeyedMutex();
+            texture->SynchronizeImportedTextureAfterUse();
         }
 
         mIsOpen = false;

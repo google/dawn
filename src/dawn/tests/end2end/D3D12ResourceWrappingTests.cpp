@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <d3d11.h>
+#include <d3d11_4.h>
 #include <d3d12.h>
 #include <dxgi1_4.h>
 #include <wrl/client.h>
@@ -30,9 +31,28 @@ using Microsoft::WRL::ComPtr;
 
 namespace {
 
+enum class SyncMode {
+    kKeyedMutex,
+    kFence,
+};
+
+std::ostream& operator<<(std::ostream& o, const SyncMode& m) {
+    switch (m) {
+        case SyncMode::kKeyedMutex:
+            o << "KeyedMutex";
+            break;
+        case SyncMode::kFence:
+            o << "Fence";
+            break;
+    }
+    return o;
+}
+
+DAWN_TEST_PARAM_STRUCT(D3D12ResourceTestParams, SyncMode);
+
 using dawn::native::d3d12::kDXGIKeyedMutexAcquireReleaseKey;
 
-class D3D12ResourceTestBase : public DawnTest {
+class D3D12ResourceTestBase : public DawnTestWithParams<D3D12ResourceTestParams> {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         return {wgpu::FeatureName::DawnInternalUsages};
@@ -40,7 +60,7 @@ class D3D12ResourceTestBase : public DawnTest {
 
   public:
     void SetUp() override {
-        DawnTest::SetUp();
+        DawnTestWithParams<D3D12ResourceTestParams>::SetUp();
         if (UsesWire()) {
             return;
         }
@@ -88,8 +108,12 @@ class D3D12ResourceTestBase : public DawnTest {
         baseD3dDescriptor.Usage = D3D11_USAGE_DEFAULT;
         baseD3dDescriptor.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
         baseD3dDescriptor.CPUAccessFlags = 0;
-        baseD3dDescriptor.MiscFlags =
-            D3D11_RESOURCE_MISC_SHARED_NTHANDLE | D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX;
+        baseD3dDescriptor.MiscFlags = D3D11_RESOURCE_MISC_SHARED_NTHANDLE;
+        if (GetParam().mSyncMode == SyncMode::kKeyedMutex) {
+            baseD3dDescriptor.MiscFlags |= D3D11_RESOURCE_MISC_SHARED_KEYEDMUTEX;
+        } else {
+            baseD3dDescriptor.MiscFlags |= D3D11_RESOURCE_MISC_SHARED;
+        }
     }
 
   protected:
@@ -98,7 +122,8 @@ class D3D12ResourceTestBase : public DawnTest {
         const D3D11_TEXTURE2D_DESC* baseD3dDescriptor,
         wgpu::Texture* dawnTexture,
         ID3D11Texture2D** d3d11TextureOut,
-        std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI>* externalImageOut = nullptr) const {
+        std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI>* externalImageOut = nullptr,
+        uint64_t fenceSignalValue = 1) const {
         ComPtr<ID3D11Texture2D> d3d11Texture;
         HRESULT hr = mD3d11Device->CreateTexture2D(baseD3dDescriptor, nullptr, &d3d11Texture);
         ASSERT_EQ(hr, S_OK);
@@ -107,31 +132,54 @@ class D3D12ResourceTestBase : public DawnTest {
         hr = d3d11Texture.As(&dxgiResource);
         ASSERT_EQ(hr, S_OK);
 
-        HANDLE sharedHandle;
+        HANDLE textureSharedHandle;
         hr = dxgiResource->CreateSharedHandle(
             nullptr, DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE, nullptr,
-            &sharedHandle);
+            &textureSharedHandle);
         ASSERT_EQ(hr, S_OK);
+
+        HANDLE fenceSharedHandle = nullptr;
+        ComPtr<ID3D11Fence> d3d11Fence;
+
+        if (GetParam().mSyncMode == SyncMode::kFence) {
+            ComPtr<ID3D11Device5> d3d11Device5;
+            hr = mD3d11Device.As(&d3d11Device5);
+            ASSERT_EQ(hr, S_OK);
+
+            hr = d3d11Device5->CreateFence(0, D3D11_FENCE_FLAG_SHARED, IID_PPV_ARGS(&d3d11Fence));
+            ASSERT_EQ(hr, S_OK);
+
+            hr = d3d11Fence->CreateSharedHandle(nullptr, GENERIC_ALL, nullptr, &fenceSharedHandle);
+            ASSERT_EQ(hr, S_OK);
+        }
 
         dawn::native::d3d12::ExternalImageDescriptorDXGISharedHandle externalImageDesc;
         externalImageDesc.cTextureDescriptor =
             reinterpret_cast<const WGPUTextureDescriptor*>(dawnDesc);
-        externalImageDesc.sharedHandle = sharedHandle;
+        externalImageDesc.textureSharedHandle = textureSharedHandle;
+        externalImageDesc.fenceSharedHandle = fenceSharedHandle;
 
         std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage =
             dawn::native::d3d12::ExternalImageDXGI::Create(device.Get(), &externalImageDesc);
 
         // Now that we've created all of our resources, we can close the handle
         // since we no longer need it.
-        ::CloseHandle(sharedHandle);
+        ::CloseHandle(textureSharedHandle);
+        if (fenceSharedHandle != nullptr) {
+            ::CloseHandle(fenceSharedHandle);
+        }
 
         // Cannot access a non-existent external image (ex. validation error).
         if (externalImage == nullptr) {
             return;
         }
 
-        dawn::native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
+        dawn::native::d3d12::ExternalImageAccessDescriptorDXGISharedHandle externalAccessDesc;
         externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(dawnDesc->usage);
+        if (d3d11Fence != nullptr) {
+            externalAccessDesc.fenceWaitValue = 0;
+            externalAccessDesc.fenceSignalValue = fenceSignalValue;
+        }
 
         *dawnTexture = wgpu::Texture::Acquire(
             externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
@@ -340,36 +388,56 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
         queue.Submit(1, &commands);
     }
 
-    void WrapAndClearD3D11Texture(const wgpu::TextureDescriptor* dawnDescriptor,
-                                  const D3D11_TEXTURE2D_DESC* d3dDescriptor,
-                                  wgpu::Texture* dawnTextureOut,
+    void WrapAndClearD3D11Texture(const wgpu::TextureDescriptor& dawnDescriptor,
+                                  const D3D11_TEXTURE2D_DESC& d3dDescriptor,
                                   const wgpu::Color& clearColor,
+                                  wgpu::Texture* dawnTextureOut,
                                   ID3D11Texture2D** d3d11TextureOut,
-                                  IDXGIKeyedMutex** dxgiKeyedMutexOut,
-                                  bool isInitialized = true) const {
+                                  bool isInitialized = true,
+                                  IDXGIKeyedMutex** dxgiKeyedMutexOut = nullptr,
+                                  ID3D11Fence** d3d11FenceOut = nullptr,
+                                  uint64_t* nextFenceWaitValue = nullptr) const {
         ComPtr<ID3D11Texture2D> d3d11Texture;
-        HRESULT hr = mD3d11Device->CreateTexture2D(d3dDescriptor, nullptr, &d3d11Texture);
+        HRESULT hr = mD3d11Device->CreateTexture2D(&d3dDescriptor, nullptr, &d3d11Texture);
         ASSERT_EQ(hr, S_OK);
 
         ComPtr<IDXGIResource1> dxgiResource;
         hr = d3d11Texture.As(&dxgiResource);
         ASSERT_EQ(hr, S_OK);
 
-        HANDLE sharedHandle;
+        HANDLE textureSharedHandle;
         hr = dxgiResource->CreateSharedHandle(
             nullptr, DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE, nullptr,
-            &sharedHandle);
+            &textureSharedHandle);
         ASSERT_EQ(hr, S_OK);
 
         ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
-        hr = d3d11Texture.As(&dxgiKeyedMutex);
-        ASSERT_EQ(hr, S_OK);
+
+        HANDLE fenceSharedHandle = nullptr;
+        ComPtr<ID3D11Fence> d3d11Fence;
+
+        ComPtr<ID3D11DeviceContext4> d3d11DeviceContext4;
+
+        if (GetParam().mSyncMode == SyncMode::kKeyedMutex) {
+            hr = d3d11Texture.As(&dxgiKeyedMutex);
+            ASSERT_EQ(hr, S_OK);
+
+            hr = dxgiKeyedMutex->AcquireSync(kDXGIKeyedMutexAcquireReleaseKey, INFINITE);
+            ASSERT_EQ(hr, S_OK);
+        } else {
+            ComPtr<ID3D11Device5> d3d11Device5;
+            hr = mD3d11Device.As(&d3d11Device5);
+            ASSERT_EQ(hr, S_OK);
+
+            hr = d3d11Device5->CreateFence(0, D3D11_FENCE_FLAG_SHARED, IID_PPV_ARGS(&d3d11Fence));
+            ASSERT_EQ(hr, S_OK);
+
+            hr = d3d11Fence->CreateSharedHandle(nullptr, GENERIC_ALL, nullptr, &fenceSharedHandle);
+            ASSERT_EQ(hr, S_OK);
+        }
 
         ComPtr<ID3D11RenderTargetView> d3d11RTV;
         hr = mD3d11Device->CreateRenderTargetView(d3d11Texture.Get(), nullptr, &d3d11RTV);
-        ASSERT_EQ(hr, S_OK);
-
-        hr = dxgiKeyedMutex->AcquireSync(kDXGIKeyedMutexAcquireReleaseKey, INFINITE);
         ASSERT_EQ(hr, S_OK);
 
         const float colorRGBA[] = {
@@ -377,33 +445,56 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
             static_cast<float>(clearColor.b), static_cast<float>(clearColor.a)};
         mD3d11DeviceContext->ClearRenderTargetView(d3d11RTV.Get(), colorRGBA);
 
-        hr = dxgiKeyedMutex->ReleaseSync(kDXGIKeyedMutexAcquireReleaseKey);
-        ASSERT_EQ(hr, S_OK);
-
         dawn::native::d3d12::ExternalImageDescriptorDXGISharedHandle externalImageDesc = {};
-        externalImageDesc.sharedHandle = sharedHandle;
+        externalImageDesc.textureSharedHandle = textureSharedHandle;
+        externalImageDesc.fenceSharedHandle = fenceSharedHandle;
         externalImageDesc.cTextureDescriptor =
-            reinterpret_cast<const WGPUTextureDescriptor*>(dawnDescriptor);
+            reinterpret_cast<const WGPUTextureDescriptor*>(&dawnDescriptor);
+
+        dawn::native::d3d12::ExternalImageAccessDescriptorDXGISharedHandle externalAccessDesc;
+        externalAccessDesc.isInitialized = isInitialized;
+        externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(dawnDescriptor.usage);
+
+        if (dxgiKeyedMutex) {
+            hr = dxgiKeyedMutex->ReleaseSync(kDXGIKeyedMutexAcquireReleaseKey);
+            ASSERT_EQ(hr, S_OK);
+        } else {
+            hr = mD3d11DeviceContext.As(&d3d11DeviceContext4);
+            ASSERT_EQ(hr, S_OK);
+
+            // The fence starts with 0 signaled, but that won't capture the render target view clear
+            // above, so signal explicitly with 1 and make the next Dawn access wait on 1.
+            d3d11DeviceContext4->Signal(d3d11Fence.Get(), 1);
+
+            externalAccessDesc.fenceWaitValue = 1;
+            externalAccessDesc.fenceSignalValue = 2;
+        }
 
         std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage =
             dawn::native::d3d12::ExternalImageDXGI::Create(device.Get(), &externalImageDesc);
 
-        dawn::native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
-        externalAccessDesc.isInitialized = isInitialized;
-        externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(dawnDescriptor->usage);
-
         *dawnTextureOut = wgpu::Texture::Acquire(
             externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
         *d3d11TextureOut = d3d11Texture.Detach();
-        *dxgiKeyedMutexOut = dxgiKeyedMutex.Detach();
+
+        if (dxgiKeyedMutexOut != nullptr) {
+            *dxgiKeyedMutexOut = dxgiKeyedMutex.Detach();
+        }
+
+        if (d3d11FenceOut != nullptr) {
+            *d3d11FenceOut = d3d11Fence.Detach();
+        }
+
+        if (nextFenceWaitValue != nullptr) {
+            *nextFenceWaitValue = externalAccessDesc.fenceSignalValue;
+        }
     }
 
     void ExpectPixelRGBA8EQ(ID3D11Texture2D* d3d11Texture,
                             IDXGIKeyedMutex* dxgiKeyedMutex,
+                            ID3D11Fence* d3d11Fence,
+                            uint64_t fenceWaitValue,
                             const wgpu::Color& color) {
-        HRESULT hr = dxgiKeyedMutex->AcquireSync(kDXGIKeyedMutexAcquireReleaseKey, INFINITE);
-        ASSERT_EQ(hr, S_OK);
-
         D3D11_TEXTURE2D_DESC texture2DDesc;
         d3d11Texture->GetDesc(&texture2DDesc);
 
@@ -418,7 +509,8 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
             D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE);  // CPUAccessFlags
 
         ComPtr<ID3D11Texture2D> spD3DTextureStaging;
-        hr = mD3d11Device->CreateTexture2D(&texture2DStagingDesc, nullptr, &spD3DTextureStaging);
+        HRESULT hr =
+            mD3d11Device->CreateTexture2D(&texture2DStagingDesc, nullptr, &spD3DTextureStaging);
         ASSERT_EQ(hr, S_OK);
 
         D3D11_BOX d3dRc;
@@ -428,6 +520,19 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
         d3dRc.left = 0;
         d3dRc.bottom = texture2DDesc.Height;
         d3dRc.right = texture2DDesc.Width;
+
+        if (dxgiKeyedMutex != nullptr) {
+            hr = dxgiKeyedMutex->AcquireSync(kDXGIKeyedMutexAcquireReleaseKey, INFINITE);
+            ASSERT_EQ(hr, S_OK);
+        }
+        if (d3d11Fence != nullptr) {
+            ComPtr<ID3D11DeviceContext4> d3d11DeviceContext4;
+            hr = mD3d11DeviceContext.As(&d3d11DeviceContext4);
+            ASSERT_EQ(hr, S_OK);
+
+            hr = d3d11DeviceContext4->Wait(d3d11Fence, fenceWaitValue);
+            ASSERT_EQ(hr, S_OK);
+        }
 
         mD3d11DeviceContext->CopySubresourceRegion(spD3DTextureStaging.Get(),  // pDstResource
                                                    0,                          // DstSubresource
@@ -451,8 +556,10 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
 
         mD3d11DeviceContext->Unmap(spD3DTextureStaging.Get(), 0);
 
-        hr = dxgiKeyedMutex->ReleaseSync(kDXGIKeyedMutexAcquireReleaseKey);
-        ASSERT_EQ(hr, S_OK);
+        if (dxgiKeyedMutex != nullptr) {
+            hr = dxgiKeyedMutex->ReleaseSync(kDXGIKeyedMutexAcquireReleaseKey);
+            ASSERT_EQ(hr, S_OK);
+        }
     }
 };
 
@@ -465,9 +572,8 @@ TEST_P(D3D12SharedHandleUsageTests, ClearInD3D11CopyAndReadbackInD3D12) {
     const wgpu::Color clearColor{1.0f, 1.0f, 0.0f, 1.0f};
     wgpu::Texture dawnSrcTexture;
     ComPtr<ID3D11Texture2D> d3d11Texture;
-    ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
-    WrapAndClearD3D11Texture(&baseDawnDescriptor, &baseD3dDescriptor, &dawnSrcTexture, clearColor,
-                             &d3d11Texture, &dxgiKeyedMutex);
+    WrapAndClearD3D11Texture(baseDawnDescriptor, baseD3dDescriptor, clearColor, &dawnSrcTexture,
+                             &d3d11Texture);
     ASSERT_NE(dawnSrcTexture.Get(), nullptr);
 
     // Create a texture on the device and copy the source texture to it.
@@ -489,9 +595,8 @@ TEST_P(D3D12SharedHandleUsageTests, ClearInD3D11ReadbackInD3D12) {
     const wgpu::Color clearColor{1.0f, 1.0f, 0.0f, 1.0f};
     wgpu::Texture dawnTexture;
     ComPtr<ID3D11Texture2D> d3d11Texture;
-    ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
-    WrapAndClearD3D11Texture(&baseDawnDescriptor, &baseD3dDescriptor, &dawnTexture, clearColor,
-                             &d3d11Texture, &dxgiKeyedMutex);
+    WrapAndClearD3D11Texture(baseDawnDescriptor, baseD3dDescriptor, clearColor, &dawnTexture,
+                             &d3d11Texture);
     ASSERT_NE(dawnTexture.Get(), nullptr);
 
     // Readback the destination texture and ensure it contains the colors we used
@@ -515,8 +620,11 @@ TEST_P(D3D12SharedHandleUsageTests, ClearInD3D12ReadbackInD3D11) {
     wgpu::Texture dawnTexture;
     ComPtr<ID3D11Texture2D> d3d11Texture;
     ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
-    WrapAndClearD3D11Texture(&baseDawnDescriptor, &baseD3dDescriptor, &dawnTexture, d3d11ClearColor,
-                             &d3d11Texture, &dxgiKeyedMutex);
+    ComPtr<ID3D11Fence> d3d11Fence;
+    uint64_t nextFenceWaitValue;
+    WrapAndClearD3D11Texture(baseDawnDescriptor, baseD3dDescriptor, d3d11ClearColor, &dawnTexture,
+                             &d3d11Texture, /*isInitialized=*/true, &dxgiKeyedMutex, &d3d11Fence,
+                             &nextFenceWaitValue);
     ASSERT_NE(dawnTexture.Get(), nullptr);
 
     const wgpu::Color d3d12ClearColor{0.0f, 0.0f, 1.0f, 1.0f};
@@ -527,7 +635,8 @@ TEST_P(D3D12SharedHandleUsageTests, ClearInD3D12ReadbackInD3D11) {
     // Now that Dawn (via D3D12) has finished writing to the texture, we should be
     // able to read it back by copying it to a staging texture and verifying the
     // color matches the D3D12 clear color.
-    ExpectPixelRGBA8EQ(d3d11Texture.Get(), dxgiKeyedMutex.Get(), d3d12ClearColor);
+    ExpectPixelRGBA8EQ(d3d11Texture.Get(), dxgiKeyedMutex.Get(), d3d11Fence.Get(),
+                       nextFenceWaitValue, d3d12ClearColor);
 }
 
 // 1. Create and clear a D3D11 texture
@@ -545,8 +654,11 @@ TEST_P(D3D12SharedHandleUsageTests, ClearTwiceInD3D12ReadbackInD3D11) {
     wgpu::Texture dawnTexture;
     ComPtr<ID3D11Texture2D> d3d11Texture;
     ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
-    WrapAndClearD3D11Texture(&baseDawnDescriptor, &baseD3dDescriptor, &dawnTexture, d3d11ClearColor,
-                             &d3d11Texture, &dxgiKeyedMutex);
+    ComPtr<ID3D11Fence> d3d11Fence;
+    uint64_t nextFenceWaitValue;
+    WrapAndClearD3D11Texture(baseDawnDescriptor, baseD3dDescriptor, d3d11ClearColor, &dawnTexture,
+                             &d3d11Texture, /*isInitialized=*/true, &dxgiKeyedMutex, &d3d11Fence,
+                             &nextFenceWaitValue);
     ASSERT_NE(dawnTexture.Get(), nullptr);
 
     const wgpu::Color d3d12ClearColor1{0.0f, 0.0f, 1.0f, 1.0f};
@@ -560,7 +672,8 @@ TEST_P(D3D12SharedHandleUsageTests, ClearTwiceInD3D12ReadbackInD3D11) {
     // Now that Dawn (via D3D12) has finished writing to the texture, we should be
     // able to read it back by copying it to a staging texture and verifying the
     // color matches the last D3D12 clear color.
-    ExpectPixelRGBA8EQ(d3d11Texture.Get(), dxgiKeyedMutex.Get(), d3d12ClearColor2);
+    ExpectPixelRGBA8EQ(d3d11Texture.Get(), dxgiKeyedMutex.Get(), d3d11Fence.Get(),
+                       nextFenceWaitValue, d3d12ClearColor2);
 }
 
 // 1. Create and clear a D3D11 texture with clearColor
@@ -572,9 +685,8 @@ TEST_P(D3D12SharedHandleUsageTests, UninitializedTextureIsCleared) {
     const wgpu::Color clearColor{1.0f, 0.0f, 0.0f, 1.0f};
     wgpu::Texture dawnTexture;
     ComPtr<ID3D11Texture2D> d3d11Texture;
-    ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
-    WrapAndClearD3D11Texture(&baseDawnDescriptor, &baseD3dDescriptor, &dawnTexture, clearColor,
-                             &d3d11Texture, &dxgiKeyedMutex, false);
+    WrapAndClearD3D11Texture(baseDawnDescriptor, baseD3dDescriptor, clearColor, &dawnTexture,
+                             &d3d11Texture, /*isInitialized=*/false);
     ASSERT_NE(dawnTexture.Get(), nullptr);
 
     // Readback the destination texture and ensure it contains the colors we used
@@ -593,7 +705,7 @@ TEST_P(D3D12SharedHandleUsageTests, ReuseExternalImage) {
     ComPtr<ID3D11Texture2D> d3d11Texture;
     std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage;
     WrapSharedHandle(&baseDawnDescriptor, &baseD3dDescriptor, &texture, &d3d11Texture,
-                     &externalImage);
+                     &externalImage, /*fenceSignalValue=*/1);
     {
         const wgpu::Color solidRed{1.0f, 0.0f, 0.0f, 1.0f};
         ASSERT_NE(texture.Get(), nullptr);
@@ -607,9 +719,11 @@ TEST_P(D3D12SharedHandleUsageTests, ReuseExternalImage) {
     texture.Destroy();
 
     // Create another Dawn texture then clear it with another color.
-    dawn::native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
+    dawn::native::d3d12::ExternalImageAccessDescriptorDXGISharedHandle externalAccessDesc;
     externalAccessDesc.isInitialized = true;
     externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(baseDawnDescriptor.usage);
+    externalAccessDesc.fenceWaitValue = 1;
+    externalAccessDesc.fenceSignalValue = 2;
 
     texture =
         wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
@@ -625,48 +739,45 @@ TEST_P(D3D12SharedHandleUsageTests, ReuseExternalImage) {
 
         EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0xFF, 0xFF), texture.Get(), 0, 0);
     }
+
+    texture.Destroy();
 }
 
-TEST_P(D3D12SharedHandleUsageTests, RecursiveExternalImageAccess) {
+TEST_P(D3D12SharedHandleUsageTests, ConcurrentExternalImageReadAccess) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
-    // Create the first Dawn texture then clear it to red.
-    wgpu::Texture texture1;
+    // Create Dawn texture with write access, then clear it to red.
+    wgpu::Texture texture;
     ComPtr<ID3D11Texture2D> d3d11Texture;
     std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage;
-    WrapSharedHandle(&baseDawnDescriptor, &baseD3dDescriptor, &texture1, &d3d11Texture,
-                     &externalImage);
+    WrapSharedHandle(&baseDawnDescriptor, &baseD3dDescriptor, &texture, &d3d11Texture,
+                     &externalImage, /*fenceSignalValue=*/1);
     {
         const wgpu::Color solidRed{1.0f, 0.0f, 0.0f, 1.0f};
-        ASSERT_NE(texture1.Get(), nullptr);
-        ClearImage(texture1.Get(), solidRed, device);
+        ASSERT_NE(texture.Get(), nullptr);
+        ClearImage(texture.Get(), solidRed, device);
 
-        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0xFF, 0, 0, 0xFF), texture1.Get(), 0, 0);
+        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0xFF, 0, 0, 0xFF), texture.Get(), 0, 0);
     }
 
-    // Create another Dawn texture then clear it with another color.
-    dawn::native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
-    externalAccessDesc.isInitialized = true;
-    externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(baseDawnDescriptor.usage);
+    texture.Destroy();
 
-    // Acquire the ExternalImageDXGI again without destroying the original texture.
+    // Create two Dawn textures for concurrent read.
+    dawn::native::d3d12::ExternalImageAccessDescriptorDXGISharedHandle externalAccessDesc;
+    externalAccessDesc.isInitialized = true;
+    externalAccessDesc.usage = WGPUTextureUsage_CopySrc;
+    externalAccessDesc.fenceWaitValue = 1;
+    externalAccessDesc.fenceSignalValue = 2;
+
+    wgpu::Texture texture1 =
+        wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
+
     wgpu::Texture texture2 =
         wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
 
-    // Check again that the new texture is still red
+    // Check again that the new textures are also red.
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0xFF, 0, 0, 0xFF), texture1.Get(), 0, 0);
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0xFF, 0, 0, 0xFF), texture2.Get(), 0, 0);
-
-    // Clear the new texture to blue
-    {
-        const wgpu::Color solidBlue{0.0f, 0.0f, 1.0f, 1.0f};
-        ASSERT_NE(texture2.Get(), nullptr);
-        ClearImage(texture2.Get(), solidBlue, device);
-
-        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0xFF, 0xFF), texture2.Get(), 0, 0);
-    }
-
-    // Check that the original texture is also blue
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0xFF, 0xFF), texture1.Get(), 0, 0);
 
     texture1.Destroy();
     texture2.Destroy();
@@ -676,17 +787,18 @@ TEST_P(D3D12SharedHandleUsageTests, RecursiveExternalImageAccess) {
 TEST_P(D3D12SharedHandleUsageTests, ExternalImageUsage) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
-    dawn::native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
-    externalAccessDesc.isInitialized = true;
-
     wgpu::Texture texture;
     ComPtr<ID3D11Texture2D> d3d11Texture;
     std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage;
     WrapSharedHandle(&baseDawnDescriptor, &baseD3dDescriptor, &texture, &d3d11Texture,
-                     &externalImage);
+                     &externalImage, /*fenceSignalValue=*/1);
     ASSERT_NE(texture.Get(), nullptr);
 
+    dawn::native::d3d12::ExternalImageAccessDescriptorDXGISharedHandle externalAccessDesc;
+    externalAccessDesc.isInitialized = true;
     externalAccessDesc.usage = WGPUTextureUsage_StorageBinding;
+    externalAccessDesc.fenceWaitValue = 1;
+    externalAccessDesc.fenceSignalValue = 0;  // No need to signal
     texture =
         wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
     ASSERT_EQ(texture.Get(), nullptr);
@@ -707,7 +819,7 @@ TEST_P(D3D12SharedHandleUsageTests, ReuseExternalImageWithMultipleDevices) {
 
     // Create the Dawn texture then clear it to red using the first (default) device.
     WrapSharedHandle(&baseDawnDescriptor, &baseD3dDescriptor, &texture, &d3d11Texture,
-                     &externalImage);
+                     &externalImage, /*fenceSignalValue=*/1);
     const wgpu::Color solidRed{1.0f, 0.0f, 0.0f, 1.0f};
     ASSERT_NE(texture.Get(), nullptr);
     ClearImage(texture.Get(), solidRed, device);
@@ -718,8 +830,10 @@ TEST_P(D3D12SharedHandleUsageTests, ReuseExternalImageWithMultipleDevices) {
     texture.Destroy();
 
     // Create the Dawn texture then clear it to blue using the second device.
-    dawn::native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
+    dawn::native::d3d12::ExternalImageAccessDescriptorDXGISharedHandle externalAccessDesc;
     externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(baseDawnDescriptor.usage);
+    externalAccessDesc.fenceWaitValue = 1;
+    externalAccessDesc.fenceSignalValue = 2;
 
     wgpu::Device otherDevice = wgpu::Device::Acquire(GetAdapter().CreateDevice());
 
@@ -734,6 +848,8 @@ TEST_P(D3D12SharedHandleUsageTests, ReuseExternalImageWithMultipleDevices) {
 
     // Re-create the Dawn texture using the first (default) device.
     externalAccessDesc.isInitialized = true;
+    externalAccessDesc.fenceWaitValue = 2;
+    externalAccessDesc.fenceSignalValue = 3;
     texture =
         wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
     ASSERT_NE(texture.Get(), nullptr);
@@ -743,5 +859,9 @@ TEST_P(D3D12SharedHandleUsageTests, ReuseExternalImageWithMultipleDevices) {
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0xFF, 0xFF), texture.Get(), 0, 0);
 }
 
-DAWN_INSTANTIATE_TEST(D3D12SharedHandleValidation, D3D12Backend());
-DAWN_INSTANTIATE_TEST(D3D12SharedHandleUsageTests, D3D12Backend());
+DAWN_INSTANTIATE_TEST_P(D3D12SharedHandleValidation,
+                        {D3D12Backend()},
+                        {SyncMode::kKeyedMutex, SyncMode::kFence});
+DAWN_INSTANTIATE_TEST_P(D3D12SharedHandleUsageTests,
+                        {D3D12Backend()},
+                        {SyncMode::kKeyedMutex, SyncMode::kFence});

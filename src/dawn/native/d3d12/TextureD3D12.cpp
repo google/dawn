@@ -511,13 +511,17 @@ ResultOrError<Ref<Texture>> Texture::CreateExternalImage(
     Device* device,
     const TextureDescriptor* descriptor,
     ComPtr<ID3D12Resource> d3d12Texture,
+    ComPtr<ID3D12Fence> d3d12Fence,
     Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
+    uint64_t fenceWaitValue,
+    uint64_t fenceSignalValue,
     bool isSwapChainTexture,
     bool isInitialized) {
     Ref<Texture> dawnTexture =
         AcquireRef(new Texture(device, descriptor, TextureState::OwnedExternal));
     DAWN_TRY(dawnTexture->InitializeAsExternalTexture(
-        descriptor, std::move(d3d12Texture), std::move(d3d11on12Resource), isSwapChainTexture));
+        std::move(d3d12Texture), std::move(d3d12Fence), std::move(d3d11on12Resource),
+        fenceWaitValue, fenceSignalValue, isSwapChainTexture));
 
     // Importing a multi-planar format must be initialized. This is required because
     // a shared multi-planar format cannot be initialized by Dawn.
@@ -541,13 +545,12 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device,
     return std::move(dawnTexture);
 }
 
-MaybeError Texture::InitializeAsExternalTexture(const TextureDescriptor* descriptor,
-                                                ComPtr<ID3D12Resource> d3d12Texture,
+MaybeError Texture::InitializeAsExternalTexture(ComPtr<ID3D12Resource> d3d12Texture,
+                                                ComPtr<ID3D12Fence> d3d12Fence,
                                                 Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
+                                                uint64_t fenceWaitValue,
+                                                uint64_t fenceSignalValue,
                                                 bool isSwapChainTexture) {
-    mD3D11on12Resource = std::move(d3d11on12Resource);
-    mSwapChainTexture = isSwapChainTexture;
-
     D3D12_RESOURCE_DESC desc = d3d12Texture->GetDesc();
     mD3D12ResourceFlags = desc.Flags;
 
@@ -557,6 +560,12 @@ MaybeError Texture::InitializeAsExternalTexture(const TextureDescriptor* descrip
     // texture is owned externally. The texture's owning entity must remain responsible for
     // memory management.
     mResourceAllocation = {info, 0, std::move(d3d12Texture), nullptr};
+
+    mD3D12Fence = std::move(d3d12Fence);
+    mD3D11on12Resource = std::move(d3d11on12Resource);
+    mFenceWaitValue = fenceWaitValue;
+    mFenceSignalValue = fenceSignalValue;
+    mSwapChainTexture = isSwapChainTexture;
 
     SetLabelHelper("Dawn_ExternalTexture");
 
@@ -657,9 +666,15 @@ void Texture::DestroyImpl() {
     // ID3D12SharingContract::Present.
     mSwapChainTexture = false;
 
-    // Now that the texture has been destroyed. It should release the refptr
-    // of the d3d11on12 resource.
+    // Signal the fence on destroy after all uses of the texture.
+    if (mD3D12Fence != nullptr && mFenceSignalValue != 0) {
+        device->GetCommandQueue()->Signal(mD3D12Fence.Get(), mFenceSignalValue);
+    }
+
+    // Now that the texture has been destroyed. It should release the refptr of the d3d11on12
+    // resource and the fence.
     mD3D11on12Resource = nullptr;
+    mD3D12Fence = nullptr;
 }
 
 DXGI_FORMAT Texture::GetD3D12Format() const {
@@ -692,14 +707,27 @@ DXGI_FORMAT Texture::GetD3D12CopyableSubresourceFormat(Aspect aspect) const {
     }
 }
 
-MaybeError Texture::AcquireKeyedMutex() {
-    ASSERT(mD3D11on12Resource != nullptr);
-    return mD3D11on12Resource->AcquireKeyedMutex();
+MaybeError Texture::SynchronizeImportedTextureBeforeUse() {
+    if (mD3D11on12Resource != nullptr) {
+        DAWN_TRY(mD3D11on12Resource->AcquireKeyedMutex());
+    }
+    // Perform the wait only on the first call. We can use UINT64_MAX as a sentinel value since it's
+    // also used by the D3D runtime to indicate device removed according to:
+    // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12fence-getcompletedvalue#return-value
+    if (mD3D12Fence != nullptr && mFenceWaitValue != UINT64_MAX) {
+        DAWN_TRY(CheckHRESULT(
+            ToBackend(GetDevice())->GetCommandQueue()->Wait(mD3D12Fence.Get(), mFenceWaitValue),
+            "D3D12 fence wait"));
+        mFenceWaitValue = UINT64_MAX;
+    }
+    return {};
 }
 
-void Texture::ReleaseKeyedMutex() {
-    ASSERT(mD3D11on12Resource != nullptr);
-    mD3D11on12Resource->ReleaseKeyedMutex();
+void Texture::SynchronizeImportedTextureAfterUse() {
+    if (mD3D11on12Resource != nullptr) {
+        mD3D11on12Resource->ReleaseKeyedMutex();
+    }
+    // Defer signaling the fence until destroy after all uses of the fence.
 }
 
 void Texture::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,
@@ -850,10 +878,10 @@ void Texture::TransitionSubresourceRange(std::vector<D3D12_RESOURCE_BARRIER>* ba
 }
 
 void Texture::HandleTransitionSpecialCases(CommandRecordingContext* commandContext) {
-    // Textures with keyed mutexes can be written from other graphics queues. Hence, they
-    // must be acquired before command list submission to ensure work from the other queues
-    // has finished. See Device::ExecuteCommandContext.
-    if (mD3D11on12Resource != nullptr) {
+    // Externally allocated textures can be written from other graphics queues. Hence, they must be
+    // acquired before command list submission to ensure work from the other queues has finished.
+    // See CommandRecordingContext::ExecuteCommandList.
+    if (mResourceAllocation.GetInfo().mMethod == AllocationMethod::kExternal) {
         commandContext->AddToSharedTextureList(this);
     }
 }

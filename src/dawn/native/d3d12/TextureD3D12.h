@@ -45,7 +45,10 @@ class Texture final : public TextureBase {
         Device* device,
         const TextureDescriptor* descriptor,
         ComPtr<ID3D12Resource> d3d12Texture,
+        ComPtr<ID3D12Fence> d3d12Fence,
         Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
+        uint64_t fenceWaitValue,
+        uint64_t fenceSignalValue,
         bool isSwapChainTexture,
         bool isInitialized);
     static ResultOrError<Ref<Texture>> Create(Device* device,
@@ -70,8 +73,8 @@ class Texture final : public TextureBase {
     void EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
                                              const SubresourceRange& range);
 
-    MaybeError AcquireKeyedMutex();
-    void ReleaseKeyedMutex();
+    MaybeError SynchronizeImportedTextureBeforeUse();
+    void SynchronizeImportedTextureAfterUse();
 
     void TrackUsageAndGetResourceBarrierForPass(CommandRecordingContext* commandContext,
                                                 std::vector<D3D12_RESOURCE_BARRIER>* barrier,
@@ -97,9 +100,11 @@ class Texture final : public TextureBase {
     using TextureBase::TextureBase;
 
     MaybeError InitializeAsInternalTexture();
-    MaybeError InitializeAsExternalTexture(const TextureDescriptor* descriptor,
-                                           ComPtr<ID3D12Resource> d3d12Texture,
+    MaybeError InitializeAsExternalTexture(ComPtr<ID3D12Resource> d3d12Texture,
+                                           ComPtr<ID3D12Fence> d3d12Fence,
                                            Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
+                                           uint64_t fenceWaitValue,
+                                           uint64_t fenceSignalValue,
                                            bool isSwapChainTexture);
     MaybeError InitializeAsSwapChainTexture(ComPtr<ID3D12Resource> d3d12Texture);
 
@@ -132,13 +137,17 @@ class Texture final : public TextureBase {
                                     ExecutionSerial pendingCommandSerial) const;
     void HandleTransitionSpecialCases(CommandRecordingContext* commandContext);
 
-    SubresourceStorage<StateAndDecay> mSubresourceStateAndDecay;
-
-    ResourceHeapAllocation mResourceAllocation;
-    bool mSwapChainTexture = false;
     D3D12_RESOURCE_FLAGS mD3D12ResourceFlags;
+    ResourceHeapAllocation mResourceAllocation;
 
+    // TODO(dawn:1460): Encapsulate imported image fields e.g. std::unique_ptr<ExternalImportInfo>.
+    ComPtr<ID3D12Fence> mD3D12Fence;
     Ref<D3D11on12ResourceCacheEntry> mD3D11on12Resource;
+    uint64_t mFenceWaitValue = 0;
+    uint64_t mFenceSignalValue = 0;
+    bool mSwapChainTexture = false;
+
+    SubresourceStorage<StateAndDecay> mSubresourceStateAndDecay;
 };
 
 class TextureView final : public TextureViewBase {
