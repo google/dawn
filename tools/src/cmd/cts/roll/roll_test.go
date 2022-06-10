@@ -58,7 +58,12 @@ func TestRollCommitMessage(t *testing.T) {
 	)
 	expect := `Roll third_party/webgpu-cts/ d5e605a55..29275672e (2 commits)
 
-Update expectations and ts_sources
+Update:
+ - expectations.txt
+ - ts_sources.txt
+ - resource_files.txt
+ - webtest .html files
+
 
 https://chromium.googlesource.com/external/github.com/gpuweb/cts/+log/d5e605a55640..29275672eefe
  - d5e605 Added thing A
