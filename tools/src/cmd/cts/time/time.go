@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
+	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
 	"dawn.googlesource.com/dawn/tools/src/subcmd"
 	"go.chromium.org/luci/auth/client/authcli"
@@ -37,6 +38,7 @@ type cmd struct {
 		source    common.ResultSource
 		auth      authcli.Flags
 		tags      string
+		aggregate bool
 		topN      int
 		histogram bool
 	}
@@ -56,6 +58,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.IntVar(&c.flags.topN, "top", 0, "print the top N slowest tests")
 	flag.BoolVar(&c.flags.histogram, "histogram", false, "print a histogram of test timings")
 	flag.StringVar(&c.flags.tags, "tags", "", "comma-separated list of tags to filter results")
+	flag.BoolVar(&c.flags.aggregate, "aggregate", false, "aggregate times by test")
 	return nil, nil
 }
 
@@ -81,6 +84,44 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		results = results.FilterByTags(result.StringToTags(c.flags.tags))
 		if len(results) == 0 {
 			return fmt.Errorf("no results after filtering by tags")
+		}
+	}
+
+	if c.flags.aggregate {
+		type Key struct {
+			Query  query.Query
+			Status result.Status
+			Tags   string
+		}
+		merged := map[Key]result.Result{}
+		for _, r := range results {
+			k := Key{
+				Query: query.Query{
+					Suite: r.Query.Suite,
+					Files: r.Query.Files,
+					Tests: r.Query.Tests,
+					Cases: "*",
+				},
+				Status: r.Status,
+				Tags:   result.TagsToString(r.Tags),
+			}
+			entry, exists := merged[k]
+			if exists {
+				entry.Duration += r.Duration
+			} else {
+				entry = result.Result{
+					Query:    k.Query,
+					Duration: r.Duration,
+					Status:   r.Status,
+					Tags:     r.Tags,
+				}
+			}
+			merged[k] = entry
+		}
+
+		results = result.List{}
+		for _, r := range merged {
+			results = append(results, r)
 		}
 	}
 
