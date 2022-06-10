@@ -305,7 +305,7 @@ class UniformityGraph {
     /// @param ast the optional AST node that this node corresponds to
     /// @returns the new node
     Node* CreateNode(std::string tag, const ast::Node* ast = nullptr) {
-        return current_function_->CreateNode(tag, ast);
+        return current_function_->CreateNode(std::move(tag), ast);
     }
 
     /// Process a function.
@@ -1248,6 +1248,10 @@ class UniformityGraph {
                     if (func_info->parameters[i].pointer_may_become_non_uniform) {
                         ptr_result->AddEdge(current_function_->may_be_non_uniform);
                     } else {
+                        // Add edge to the call to catch when it's called in non-uniform control
+                        // flow.
+                        ptr_result->AddEdge(call_node);
+
                         // Add edges from the resulting pointer value to any other arguments that
                         // feed it.
                         for (auto* source : func_info->parameters[i].pointer_param_output_sources) {
