@@ -300,6 +300,14 @@ crbug.com/tint/1502 webgpu:shader,validation,parse,literal:abstract_float:val="2
 crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="-2147483648" [ Failure ]
 
 ################################################################################
+# Failures from upgrading Intel Mac Minis to 12.4
+# KEEP
+################################################################################
+crbug.com/dawn/1461 [ monterey intel ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth16unorm" [ Failure ]
+crbug.com/dawn/1461 [ monterey intel ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth24plus" [ Failure ]
+crbug.com/dawn/1461 [ monterey intel ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth24plus-stencil8" [ Failure ]
+
+################################################################################
 # untriaged failures
 # KEEP
 ################################################################################
