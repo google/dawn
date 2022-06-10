@@ -38,6 +38,7 @@ type cmd struct {
 		source    common.ResultSource
 		auth      authcli.Flags
 		tags      string
+		query     string
 		aggregate bool
 		topN      int
 		histogram bool
@@ -57,6 +58,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	c.flags.auth.Register(flag.CommandLine, common.DefaultAuthOptions())
 	flag.IntVar(&c.flags.topN, "top", 0, "print the top N slowest tests")
 	flag.BoolVar(&c.flags.histogram, "histogram", false, "print a histogram of test timings")
+	flag.StringVar(&c.flags.query, "query", "", "test query to filter results")
 	flag.StringVar(&c.flags.tags, "tags", "", "comma-separated list of tags to filter results")
 	flag.BoolVar(&c.flags.aggregate, "aggregate", false, "aggregate times by test")
 	return nil, nil
@@ -84,6 +86,13 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		results = results.FilterByTags(result.StringToTags(c.flags.tags))
 		if len(results) == 0 {
 			return fmt.Errorf("no results after filtering by tags")
+		}
+	}
+
+	if c.flags.query != "" {
+		results = results.FilterByQuery(query.Parse(c.flags.query))
+		if len(results) == 0 {
+			return fmt.Errorf("no results after filtering by test query")
 		}
 	}
 

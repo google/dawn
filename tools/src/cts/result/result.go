@@ -270,6 +270,13 @@ func (l List) FilterByVariant(tags Tags) List {
 	})
 }
 
+/// FilterByQuery returns the results that match the given query
+func (l List) FilterByQuery(q query.Query) List {
+	return l.Filter(func(r Result) bool {
+		return q.Contains(r.Query)
+	})
+}
+
 // Statuses is a set of Status
 type Statuses = container.Set[Status]
 
