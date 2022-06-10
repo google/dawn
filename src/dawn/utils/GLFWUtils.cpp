@@ -67,41 +67,38 @@ wgpu::Surface CreateSurfaceForWindow(const wgpu::Instance& instance, GLFWwindow*
 std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptorCocoa(GLFWwindow* window);
 
 std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptor(GLFWwindow* window) {
-    switch (glfwGetPlatform()) {
 #if DAWN_PLATFORM_IS(WINDOWS)
-        case GLFW_PLATFORM_WIN32: {
-            std::unique_ptr<wgpu::SurfaceDescriptorFromWindowsHWND> desc =
-                std::make_unique<wgpu::SurfaceDescriptorFromWindowsHWND>();
-            desc->hwnd = glfwGetWin32Window(window);
-            desc->hinstance = GetModuleHandle(nullptr);
-            return std::move(desc);
-        }
-#endif
-#if defined(DAWN_ENABLE_BACKEND_METAL)
-        case GLFW_PLATFORM_COCOA:
-            return SetupWindowAndGetSurfaceDescriptorCocoa(window);
-#endif
-#if defined(DAWN_USE_WAYLAND)
-        case GLFW_PLATFORM_WAYLAND: {
-            std::unique_ptr<wgpu::SurfaceDescriptorFromWaylandSurface> desc =
-                std::make_unique<wgpu::SurfaceDescriptorFromWaylandSurface>();
-            desc->display = glfwGetWaylandDisplay();
-            desc->surface = glfwGetWaylandWindow(window);
-            return std::move(desc);
-        }
+    std::unique_ptr<wgpu::SurfaceDescriptorFromWindowsHWND> desc =
+        std::make_unique<wgpu::SurfaceDescriptorFromWindowsHWND>();
+    desc->hwnd = glfwGetWin32Window(window);
+    desc->hinstance = GetModuleHandle(nullptr);
+    return std::move(desc);
+#elif defined(DAWN_ENABLE_BACKEND_METAL)
+    return SetupWindowAndGetSurfaceDescriptorCocoa(window);
+#elif defined(DAWN_USE_WAYLAND) || defined(DAWN_USE_X11)
+#if defined(GLFW_PLATFORM_WAYLAND) && defined(DAWN_USE_WAYLAND)
+    if (glfwGetPlatform() == GLFW_PLATFORM_WAYLAND) {
+        std::unique_ptr<wgpu::SurfaceDescriptorFromWaylandSurface> desc =
+            std::make_unique<wgpu::SurfaceDescriptorFromWaylandSurface>();
+        desc->display = glfwGetWaylandDisplay();
+        desc->surface = glfwGetWaylandWindow(window);
+        return std::move(desc);
+    } else  // NOLINT(readability/braces)
 #endif
 #if defined(DAWN_USE_X11)
-        case GLFW_PLATFORM_X11: {
-            std::unique_ptr<wgpu::SurfaceDescriptorFromXlibWindow> desc =
-                std::make_unique<wgpu::SurfaceDescriptorFromXlibWindow>();
-            desc->display = glfwGetX11Display();
-            desc->window = glfwGetX11Window(window);
-            return std::move(desc);
-        }
-#endif
-        default:
-            return nullptr;
+    {
+        std::unique_ptr<wgpu::SurfaceDescriptorFromXlibWindow> desc =
+            std::make_unique<wgpu::SurfaceDescriptorFromXlibWindow>();
+        desc->display = glfwGetX11Display();
+        desc->window = glfwGetX11Window(window);
+        return std::move(desc);
     }
+#else
+    { return nullptr; }
+#endif
+#else
+    return nullptr;
+#endif
 }
 
 }  // namespace utils
