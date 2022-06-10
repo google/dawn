@@ -29,6 +29,8 @@ std::string_view Token::TypeToName(Type type) {
             return "abstract float literal";
         case Token::Type::kFloatLiteral_F:
             return "'f'-suffixed float literal";
+        case Token::Type::kFloatLiteral_H:
+            return "'h'-suffixed float literal";
         case Token::Type::kIntLiteral:
             return "abstract integer literal";
         case Token::Type::kIntLiteral_I:
@@ -311,6 +313,8 @@ std::string Token::to_str() const {
             return std::to_string(std::get<double>(value_));
         case Type::kFloatLiteral_F:
             return std::to_string(std::get<double>(value_)) + "f";
+        case Type::kFloatLiteral_H:
+            return std::to_string(std::get<double>(value_)) + "h";
         case Type::kIntLiteral:
             return std::to_string(std::get<int64_t>(value_));
         case Type::kIntLiteral_I:

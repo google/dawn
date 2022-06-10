@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "src/tint/number.h"
 
 namespace tint::reader::wgsl {
 namespace {
@@ -320,6 +321,8 @@ TEST_P(FloatTest, Parse) {
     auto t = l.next();
     if (std::string(params.input).back() == 'f') {
         EXPECT_TRUE(t.Is(Token::Type::kFloatLiteral_F));
+    } else if (std::string(params.input).back() == 'h') {
+        EXPECT_TRUE(t.Is(Token::Type::kFloatLiteral_H));
     } else {
         EXPECT_TRUE(t.Is(Token::Type::kFloatLiteral));
     }
@@ -340,6 +343,11 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                              FloatData{"1f", 1.0},
                              FloatData{"-0f", 0.0},
                              FloatData{"-1f", -1.0},
+                             // No decimal, with 'h' suffix
+                             FloatData{"0h", 0.0},
+                             FloatData{"1h", 1.0},
+                             FloatData{"-0h", 0.0},
+                             FloatData{"-1h", -1.0},
 
                              // Zero, with decimal.
                              FloatData{"0.0", 0.0},
@@ -354,7 +362,14 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                              FloatData{".0f", 0.0},
                              FloatData{"-0.0f", 0.0},
                              FloatData{"-0.f", 0.0},
-                             FloatData{"-.0", 0.0},
+                             FloatData{"-.0f", 0.0},
+                             // Zero, with decimal and 'h' suffix
+                             FloatData{"0.0h", 0.0},
+                             FloatData{"0.h", 0.0},
+                             FloatData{".0h", 0.0},
+                             FloatData{"-0.0h", 0.0},
+                             FloatData{"-0.h", 0.0},
+                             FloatData{"-.0h", 0.0},
 
                              // Non-zero with decimal
                              FloatData{"5.7", 5.7},
@@ -370,6 +385,13 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                              FloatData{"-5.7f", static_cast<double>(-5.7f)},
                              FloatData{"-5.f", static_cast<double>(-5.f)},
                              FloatData{"-.7f", static_cast<double>(-.7f)},
+                             // Non-zero with decimal and 'h' suffix
+                             FloatData{"5.7h", static_cast<double>(f16::Quantize(5.7f))},
+                             FloatData{"5.h", static_cast<double>(f16::Quantize(5.f))},
+                             FloatData{".7h", static_cast<double>(f16::Quantize(.7f))},
+                             FloatData{"-5.7h", static_cast<double>(f16::Quantize(-5.7f))},
+                             FloatData{"-5.h", static_cast<double>(f16::Quantize(-5.f))},
+                             FloatData{"-.7h", static_cast<double>(f16::Quantize(-.7f))},
 
                              // No decimal, with exponent
                              FloatData{"1e5", 1e5},
@@ -381,6 +403,11 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                              FloatData{"1E5f", static_cast<double>(1e5f)},
                              FloatData{"1e-5f", static_cast<double>(1e-5f)},
                              FloatData{"1E-5f", static_cast<double>(1e-5f)},
+                             // No decimal, with exponent and 'h' suffix
+                             FloatData{"6e4h", static_cast<double>(f16::Quantize(6e4f))},
+                             FloatData{"6E4h", static_cast<double>(f16::Quantize(6e4f))},
+                             FloatData{"1e-5h", static_cast<double>(f16::Quantize(1e-5f))},
+                             FloatData{"1E-5h", static_cast<double>(f16::Quantize(1e-5f))},
                              // With decimal and exponents
                              FloatData{"0.2e+12", 0.2e12},
                              FloatData{"1.2e-5", 1.2e-5},
@@ -393,9 +420,16 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                              FloatData{"2.57e23f", static_cast<double>(2.57e23f)},
                              FloatData{"2.5e+0f", static_cast<double>(2.5f)},
                              FloatData{"2.5e-0f", static_cast<double>(2.5f)},
+                             // With decimal and exponents and 'h' suffix
+                             FloatData{"0.2e+5h", static_cast<double>(f16::Quantize(0.2e5f))},
+                             FloatData{"1.2e-5h", static_cast<double>(f16::Quantize(1.2e-5f))},
+                             FloatData{"6.55e4h", static_cast<double>(f16::Quantize(6.55e4f))},
+                             FloatData{"2.5e+0h", static_cast<double>(f16::Quantize(2.5f))},
+                             FloatData{"2.5e-0h", static_cast<double>(f16::Quantize(2.5f))},
                              // Quantization
-                             FloatData{"3.141592653589793", 3.141592653589793},   // no quantization
-                             FloatData{"3.141592653589793f", 3.1415927410125732}  // f32 quantized
+                             FloatData{"3.141592653589793", 3.141592653589793},  // no quantization
+                             FloatData{"3.141592653589793f", 3.1415927410125732},  // f32 quantized
+                             FloatData{"3.141592653589793h", 3.140625}             // f16 quantized
                              ));
 
 using FloatTest_Invalid = testing::TestWithParam<const char*>;
@@ -404,7 +438,8 @@ TEST_P(FloatTest_Invalid, Handles) {
     Lexer l(&file);
 
     auto t = l.next();
-    EXPECT_FALSE(t.Is(Token::Type::kFloatLiteral));
+    EXPECT_FALSE(t.Is(Token::Type::kFloatLiteral) || t.Is(Token::Type::kFloatLiteral_F) ||
+                 t.Is(Token::Type::kFloatLiteral_H));
 }
 INSTANTIATE_TEST_SUITE_P(LexerTest,
                          FloatTest_Invalid,
@@ -423,9 +458,8 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          // Overflow
                                          "2.5e+256f",
                                          "-2.5e+127f",
-                                         // Magnitude smaller than smallest positive f32.
-                                         "2.5e-300f",
-                                         "-2.5e-300f",
+                                         "6.5520e+4h",
+                                         "-6.5e+12h",
                                          // Decimal exponent must immediately
                                          // follow the 'e'.
                                          "2.5e 12",

@@ -3018,6 +3018,10 @@ Maybe<const ast::LiteralExpression*> ParserImpl::const_literal() {
         return create<ast::FloatLiteralExpression>(t.source(), t.to_f64(),
                                                    ast::FloatLiteralExpression::Suffix::kF);
     }
+    if (match(Token::Type::kFloatLiteral_H)) {
+        return create<ast::FloatLiteralExpression>(t.source(), t.to_f64(),
+                                                   ast::FloatLiteralExpression::Suffix::kH);
+    }
     if (match(Token::Type::kTrue)) {
         return create<ast::BoolLiteralExpression>(t.source(), true);
     }

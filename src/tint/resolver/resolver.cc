@@ -1658,10 +1658,15 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
             return nullptr;
         },
         [&](const ast::FloatLiteralExpression* f) -> sem::Type* {
-            if (f->suffix == ast::FloatLiteralExpression::Suffix::kNone) {
-                return builder_->create<sem::AbstractFloat>();
+            switch (f->suffix) {
+                case ast::FloatLiteralExpression::Suffix::kNone:
+                    return builder_->create<sem::AbstractFloat>();
+                case ast::FloatLiteralExpression::Suffix::kF:
+                    return builder_->create<sem::F32>();
+                case ast::FloatLiteralExpression::Suffix::kH:
+                    return builder_->create<sem::F16>();
             }
-            return builder_->create<sem::F32>();
+            return nullptr;
         },
         [&](const ast::BoolLiteralExpression*) { return builder_->create<sem::Bool>(); },
         [&](Default) { return nullptr; });
@@ -1669,6 +1674,11 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
     if (ty == nullptr) {
         TINT_UNREACHABLE(Resolver, builder_->Diagnostics())
             << "Unhandled literal type: " << literal->TypeInfo().name;
+        return nullptr;
+    }
+
+    if ((ty->Is<sem::F16>()) && (!enabled_extensions_.contains(tint::ast::Extension::kF16))) {
+        AddError("f16 literal used without 'f16' extension enabled", literal->source);
         return nullptr;
     }
 

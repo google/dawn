@@ -42,6 +42,8 @@ class Token {
         kFloatLiteral,
         /// A float literal with an 'f' suffix
         kFloatLiteral_F,
+        /// A float literal with an 'h' suffix
+        kFloatLiteral_H,
         /// An integer literal with no suffix
         kIntLiteral,
         /// An integer literal with an 'i' suffix

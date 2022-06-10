@@ -86,6 +86,10 @@ struct Number {
     static constexpr type kSmallest =
         std::is_integral_v<type> ? 0 : std::numeric_limits<type>::min();
 
+    /// Smallest positive subnormal value of this type, 0 for integral type.
+    static constexpr type kSmallestSubnormal =
+        std::is_integral_v<type> ? 0 : std::numeric_limits<type>::denorm_min();
+
     /// Constructor. The value is zero-initialized.
     Number() = default;
 
@@ -201,7 +205,12 @@ struct Number<detail::NumberKindF16> {
     static constexpr type kLowest = -65504.0f;
 
     /// Smallest positive normal value of this type.
-    static constexpr type kSmallest = 0.00006103515625f;  // 2⁻¹⁴
+    /// binary16 0_00001_0000000000, value is 2⁻¹⁴.
+    static constexpr type kSmallest = 0x1p-14f;
+
+    /// Smallest positive subnormal value of this type.
+    /// binary16 0_00000_0000000001, value is 2⁻¹⁴ * 2⁻¹⁰ = 2⁻²⁴.
+    static constexpr type kSmallestSubnormal = 0x1p-24f;
 
     /// Constructor. The value is zero-initialized.
     Number() = default;

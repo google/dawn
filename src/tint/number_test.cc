@@ -52,7 +52,7 @@ constexpr double kHighestF16NextULP = 0x1.ffc0000000001p+15;
 // Smallest positive normal float16 value.
 constexpr double kSmallestF16 = 0x1p-14;
 
-// Highest subnormal value for a float32.
+// Highest subnormal value for a float16.
 constexpr double kHighestF16Subnormal = 0x0.ffcp-14;
 
 constexpr double kLowestF32 = -kHighestF32;
@@ -141,6 +141,67 @@ TEST(NumberTest, QuantizeF16) {
     EXPECT_EQ(f16(inf), inf);
     EXPECT_EQ(f16(-inf), -inf);
     EXPECT_TRUE(std::isnan(f16(nan)));
+
+    // Test for subnormal quantization.
+    // The ULP is based on float rather than double or f16, since F16::Quantize take float as input.
+    constexpr float lowestPositiveNormalF16 = 0x1p-14;
+    constexpr float lowestPositiveNormalF16PlusULP = 0x1.000002p-14;
+    constexpr float lowestPositiveNormalF16MinusULP = 0x1.fffffep-15;
+    constexpr float highestPositiveSubnormalF16 = 0x0.ffcp-14;
+    constexpr float highestPositiveSubnormalF16PlusULP = 0x1.ff8002p-15;
+    constexpr float highestPositiveSubnormalF16MinusULP = 0x1.ff7ffep-15;
+    constexpr float lowestPositiveSubnormalF16 = 0x1.p-24;
+    constexpr float lowestPositiveSubnormalF16PlusULP = 0x1.000002p-24;
+    constexpr float lowestPositiveSubnormalF16MinusULP = 0x1.fffffep-25;
+
+    constexpr float highestNegativeNormalF16 = -lowestPositiveNormalF16;
+    constexpr float highestNegativeNormalF16PlusULP = -lowestPositiveNormalF16MinusULP;
+    constexpr float highestNegativeNormalF16MinusULP = -lowestPositiveNormalF16PlusULP;
+    constexpr float lowestNegativeSubnormalF16 = -highestPositiveSubnormalF16;
+    constexpr float lowestNegativeSubnormalF16PlusULP = -highestPositiveSubnormalF16MinusULP;
+    constexpr float lowestNegativeSubnormalF16MinusULP = -highestPositiveSubnormalF16PlusULP;
+    constexpr float highestNegativeSubnormalF16 = -lowestPositiveSubnormalF16;
+    constexpr float highestNegativeSubnormalF16PlusULP = -lowestPositiveSubnormalF16MinusULP;
+    constexpr float highestNegativeSubnormalF16MinusULP = -lowestPositiveSubnormalF16PlusULP;
+
+    // Value larger than or equal to lowest positive normal f16 will be quantized to normal f16.
+    EXPECT_EQ(f16(lowestPositiveNormalF16PlusULP), lowestPositiveNormalF16);
+    EXPECT_EQ(f16(lowestPositiveNormalF16), lowestPositiveNormalF16);
+    // Positive value smaller than lowest positive normal f16 but not smaller than lowest positive
+    // subnormal f16 will be quantized to subnormal f16 or zero.
+    EXPECT_EQ(f16(lowestPositiveNormalF16MinusULP), highestPositiveSubnormalF16);
+    EXPECT_EQ(f16(highestPositiveSubnormalF16PlusULP), highestPositiveSubnormalF16);
+    EXPECT_EQ(f16(highestPositiveSubnormalF16), highestPositiveSubnormalF16);
+    EXPECT_EQ(f16(highestPositiveSubnormalF16MinusULP), 0x0.ff8p-14);
+    EXPECT_EQ(f16(lowestPositiveSubnormalF16PlusULP), lowestPositiveSubnormalF16);
+    EXPECT_EQ(f16(lowestPositiveSubnormalF16), lowestPositiveSubnormalF16);
+    // Positive value smaller than lowest positive subnormal f16 will be quantized to zero.
+    EXPECT_EQ(f16(lowestPositiveSubnormalF16MinusULP), 0.0);
+    // Test the mantissa discarding, the least significant mantissa bit is 0x1p-24 = 0x0.004p-14.
+    EXPECT_EQ(f16(0x0.064p-14), 0x0.064p-14);
+    EXPECT_EQ(f16(0x0.067fecp-14), 0x0.064p-14);
+    EXPECT_EQ(f16(0x0.063ffep-14), 0x0.060p-14);
+    EXPECT_EQ(f16(0x0.008p-14), 0x0.008p-14);
+    EXPECT_EQ(f16(0x0.00bffep-14), 0x0.008p-14);
+    EXPECT_EQ(f16(0x0.007ffep-14), 0x0.004p-14);
+
+    // Vice versa for negative cases.
+    EXPECT_EQ(f16(highestNegativeNormalF16MinusULP), highestNegativeNormalF16);
+    EXPECT_EQ(f16(highestNegativeNormalF16), highestNegativeNormalF16);
+    EXPECT_EQ(f16(highestNegativeNormalF16PlusULP), lowestNegativeSubnormalF16);
+    EXPECT_EQ(f16(lowestNegativeSubnormalF16MinusULP), lowestNegativeSubnormalF16);
+    EXPECT_EQ(f16(lowestNegativeSubnormalF16), lowestNegativeSubnormalF16);
+    EXPECT_EQ(f16(lowestNegativeSubnormalF16PlusULP), -0x0.ff8p-14);
+    EXPECT_EQ(f16(highestNegativeSubnormalF16MinusULP), highestNegativeSubnormalF16);
+    EXPECT_EQ(f16(highestNegativeSubnormalF16), highestNegativeSubnormalF16);
+    EXPECT_EQ(f16(highestNegativeSubnormalF16PlusULP), 0.0);
+    // Test the mantissa discarding.
+    EXPECT_EQ(f16(-0x0.064p-14), -0x0.064p-14);
+    EXPECT_EQ(f16(-0x0.067fecp-14), -0x0.064p-14);
+    EXPECT_EQ(f16(-0x0.063ffep-14), -0x0.060p-14);
+    EXPECT_EQ(f16(-0x0.008p-14), -0x0.008p-14);
+    EXPECT_EQ(f16(-0x0.00bffep-14), -0x0.008p-14);
+    EXPECT_EQ(f16(-0x0.007ffep-14), -0x0.004p-14);
 }
 
 using BinaryCheckedCase = std::tuple<std::optional<AInt>, AInt, AInt>;
