@@ -192,7 +192,7 @@ dawn_generator("dawn_gpu_info_gen") {
   script = "${dawn_root}/generator/dawn_gpu_info_generator.py"
   args = [
     "--gpu-info-json",
-    rebase_path("${dawn_root}/gpu_info.json", root_build_dir),
+    rebase_path("${dawn_root}/src/dawn/gpu_info.json", root_build_dir),
   ]
   outputs = [
     "src/dawn/common/GPUInfo_autogen.h",

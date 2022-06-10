@@ -33,6 +33,8 @@ AdapterBase::AdapterBase(InstanceBase* instance, wgpu::BackendType backend)
 
 MaybeError AdapterBase::Initialize() {
     DAWN_TRY_CONTEXT(InitializeImpl(), "initializing adapter (backend=%s)", mBackend);
+    InitializeVendorArchitectureImpl();
+
     DAWN_TRY_CONTEXT(
         InitializeSupportedFeaturesImpl(),
         "gathering supported features for \"%s\" - \"%s\" (vendorId=%#06x deviceId=%#06x "
@@ -43,9 +45,6 @@ MaybeError AdapterBase::Initialize() {
         "gathering supported limits for \"%s\" - \"%s\" (vendorId=%#06x deviceId=%#06x "
         "backend=%s type=%s)",
         mName, mDriverDescription, mVendorId, mDeviceId, mBackend, mAdapterType);
-
-    mVendorName = gpu_info::GetVendorName(mVendorId);
-    mArchitectureName = gpu_info::GetArchitectureName(mVendorId, mDeviceId);
 
     // Enforce internal Dawn constants.
     mLimits.v1.maxVertexBufferArrayStride =
@@ -136,6 +135,11 @@ void AdapterBase::APIRequestDevice(const DeviceDescriptor* descriptor,
         device == nullptr ? WGPURequestDeviceStatus_Unknown : WGPURequestDeviceStatus_Success;
     // TODO(crbug.com/dawn/1122): Call callbacks only on wgpuInstanceProcessEvents
     callback(status, ToAPI(device.Detach()), nullptr, userdata);
+}
+
+void AdapterBase::InitializeVendorArchitectureImpl() {
+    mVendorName = gpu_info::GetVendorName(mVendorId);
+    mArchitectureName = gpu_info::GetArchitectureName(mVendorId, mDeviceId);
 }
 
 uint32_t AdapterBase::GetVendorId() const {

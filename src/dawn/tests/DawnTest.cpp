@@ -649,6 +649,11 @@ void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo(
             << ", backend: " << ParamName(properties.backendType) << "\n"
             << "   vendorId: 0x" << vendorId.str() << ", deviceId: 0x" << deviceId.str()
             << (properties.selected ? " [Selected]" : "") << "\n";
+
+        if (strlen(properties.vendorName) || strlen(properties.architecture)) {
+            log << "   vendorName: " << properties.vendorName
+                << ", architecture: " << properties.architecture << "\n";
+        }
     }
 }
 

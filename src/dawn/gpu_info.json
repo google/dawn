@@ -33,7 +33,15 @@
     },
 
     "Apple": {
-      "id": "0x106b"
+      "id": "0x106b",
+
+      "_comment": [
+        "Apple GPUs do not report a DeviceID via the Metal API, and as such the typical device",
+        "pattern matching does not work for them. The recommended approach is to find the highest",
+        "supported 'common' family supported and report it as the architecture.",
+        "Examples: 'common-1', 'common-3'",
+        "https://developer.apple.com/documentation/metal/gpu_devices_and_work_submission/detecting_gpu_features_and_metal_software_versions"
+      ]
     },
 
     "ARM": {

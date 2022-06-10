@@ -86,6 +86,8 @@ class AdapterBase : public RefCounted {
     // Check base WebGPU limits and populate supported limits.
     virtual MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) = 0;
 
+    virtual void InitializeVendorArchitectureImpl();
+
     ResultOrError<Ref<DeviceBase>> CreateDeviceInternal(const DeviceDescriptor* descriptor);
 
     virtual MaybeError ResetInternalDeviceForTestingImpl();

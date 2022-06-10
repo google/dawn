@@ -47,11 +47,10 @@ struct Vendor {
 };
 
 #if DAWN_PLATFORM_IS(MACOS)
-const Vendor kVendors[] = {{"AMD", gpu_info::kVendorID_AMD},
-                           {"Radeon", gpu_info::kVendorID_AMD},
-                           {"Intel", gpu_info::kVendorID_Intel},
-                           {"Geforce", gpu_info::kVendorID_Nvidia},
-                           {"Quadro", gpu_info::kVendorID_Nvidia}};
+const Vendor kVendors[] = {
+    {"AMD", gpu_info::kVendorID_AMD},        {"Apple", gpu_info::kVendorID_Apple},
+    {"Radeon", gpu_info::kVendorID_AMD},     {"Intel", gpu_info::kVendorID_Intel},
+    {"Geforce", gpu_info::kVendorID_Nvidia}, {"Quadro", gpu_info::kVendorID_Nvidia}};
 
 // Find vendor ID from MTLDevice name.
 MaybeError GetVendorIdFromVendors(id<MTLDevice> device, PCIIDs* ids) {
@@ -147,10 +146,16 @@ MaybeError GetDevicePCIInfo(id<MTLDevice> device, PCIIDs* ids) {
     // [device registryID] is introduced on macOS 10.13+, otherwise workaround to get vendor
     // id by vendor name on old macOS
     if (@available(macos 10.13, *)) {
-        return GetDeviceIORegistryPCIInfo(device, ids);
-    } else {
-        return GetVendorIdFromVendors(device, ids);
+        auto result = GetDeviceIORegistryPCIInfo(device, ids);
+        if (result.IsError()) {
+            dawn::WarningLog() << "GetDeviceIORegistryPCIInfo failed: "
+                               << result.AcquireError()->GetFormattedMessage();
+        } else if (ids->vendorId != 0) {
+            return result;
+        }
     }
+
+    return GetVendorIdFromVendors(device, ids);
 }
 
 bool IsMetalSupported() {
@@ -390,6 +395,33 @@ class Adapter : public AdapterBase {
 
         return {};
     }
+
+    void InitializeVendorArchitectureImpl() override {
+        if (@available(macOS 10.15, iOS 13.0, *)) {
+            // According to Apple's documentation:
+            // https://developer.apple.com/documentation/metal/gpu_devices_and_work_submission/detecting_gpu_features_and_metal_software_versions
+            // - "Use the Common family to create apps that target a range of GPUs on multiple
+            //   platforms.""
+            // - "A GPU can be a member of more than one family; in most cases, a GPU supports one
+            //   of the Common families and then one or more families specific to the build target."
+            // So we'll use the highest supported common family as the reported "architecture" on
+            // devices where a deviceID isn't available.
+            if (mDeviceId == 0) {
+                if ([*mDevice supportsFamily:MTLGPUFamilyCommon3]) {
+                    mArchitectureName = "common-3";
+                } else if ([*mDevice supportsFamily:MTLGPUFamilyCommon2]) {
+                    mArchitectureName = "common-2";
+                } else if ([*mDevice supportsFamily:MTLGPUFamilyCommon1]) {
+                    mArchitectureName = "common-1";
+                }
+            }
+        }
+
+        mVendorName = gpu_info::GetVendorName(mVendorId);
+        if (mDeviceId != 0) {
+            mArchitectureName = gpu_info::GetArchitectureName(mVendorId, mDeviceId);
+        }
+    };
 
     enum class MTLGPUFamily {
         Apple1,

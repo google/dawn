@@ -24,7 +24,7 @@ DawnGenerator(
     SCRIPT "${Dawn_SOURCE_DIR}/generator/dawn_gpu_info_generator.py"
     PRINT_NAME "Dawn GPU info utilities"
     ARGS "--gpu-info-json"
-         "${Dawn_SOURCE_DIR}/gpu_info.json"
+         "${Dawn_SOURCE_DIR}/src/dawn/gpu_info.json"
     RESULT_VARIABLE "DAWN_GPU_INFO_AUTOGEN_SOURCES"
 )
 
