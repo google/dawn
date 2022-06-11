@@ -18,8 +18,10 @@
 #include <bitset>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "dawn/common/TypedInteger.h"
@@ -47,6 +49,19 @@ class CacheKey : public std::vector<uint8_t> {
     using std::vector<uint8_t>::vector;
 
     enum class Type { ComputePipeline, RenderPipeline, Shader };
+
+    template <typename T>
+    class UnsafeUnkeyedValue {
+      public:
+        UnsafeUnkeyedValue() = default;
+        // NOLINTNEXTLINE(runtime/explicit) allow implicit construction to decrease verbosity
+        UnsafeUnkeyedValue(T&& value) : mValue(std::forward<T>(value)) {}
+
+        const T& UnsafeGetValue() const { return mValue; }
+
+      private:
+        T mValue;
+    };
 
     template <typename T>
     CacheKey& Record(const T& t) {
@@ -87,6 +102,18 @@ class CacheKey : public std::vector<uint8_t> {
         }
         return *this;
     }
+};
+
+template <typename T>
+CacheKey::UnsafeUnkeyedValue<T> UnsafeUnkeyedValue(T&& value) {
+    return CacheKey::UnsafeUnkeyedValue<T>(std::forward<T>(value));
+}
+
+// Specialized overload for CacheKey::UnsafeIgnoredValue which does nothing.
+template <typename T>
+class CacheKeySerializer<CacheKey::UnsafeUnkeyedValue<T>> {
+  public:
+    constexpr static void Serialize(CacheKey* key, const CacheKey::UnsafeUnkeyedValue<T>&) {}
 };
 
 // Specialized overload for fundamental types.
@@ -195,6 +222,13 @@ template <typename T>
 class CacheKeySerializer<T, std::enable_if_t<std::is_base_of_v<CachedObject, T>>> {
   public:
     static void Serialize(CacheKey* key, const T& t) { key->Record(t.GetCacheKey()); }
+};
+
+// Specialized overload for std::vector.
+template <typename T>
+class CacheKeySerializer<std::vector<T>> {
+  public:
+    static void Serialize(CacheKey* key, const std::vector<T>& t) { key->RecordIterable(t); }
 };
 
 }  // namespace dawn::native

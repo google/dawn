@@ -38,12 +38,13 @@ class DawnNativeTest : public ::testing::Test {
     ~DawnNativeTest() override;
 
     void SetUp() override;
-    void TearDown() override;
 
+    virtual std::unique_ptr<dawn::platform::Platform> CreateTestPlatform();
     virtual WGPUDevice CreateTestDevice();
 
   protected:
     std::unique_ptr<dawn::native::Instance> instance;
+    std::unique_ptr<dawn::platform::Platform> platform;
     dawn::native::Adapter adapter;
     wgpu::Device device;
 

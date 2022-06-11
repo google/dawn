@@ -192,6 +192,7 @@ dawn_test("dawn_unittests") {
     ":gmock_and_gtest",
     ":mock_webgpu_gen",
     ":native_mocks_sources",
+    ":platform_mocks_sources",
     "${dawn_root}/src/dawn:cpp",
     "${dawn_root}/src/dawn:proc",
     "${dawn_root}/src/dawn/common",
@@ -254,6 +255,7 @@ dawn_test("dawn_unittests") {
     "unittests/VersionTests.cpp",
     "unittests/native/BlobTests.cpp",
     "unittests/native/CacheKeyTests.cpp",
+    "unittests/native/CacheRequestTests.cpp",
     "unittests/native/CommandBufferEncodingTests.cpp",
     "unittests/native/CreatePipelineAsyncTaskTests.cpp",
     "unittests/native/DestroyObjectTests.cpp",
@@ -380,9 +382,9 @@ source_set("test_infra_sources") {
 # Dawn end2end tests targets
 ###############################################################################
 
-# Source code for mocks used for end2end testing are separated from the rest of
+# Source code for mocks used for platform testing are separated from the rest of
 # sources so that they aren't included in non-test builds.
-source_set("end2end_mocks_sources") {
+source_set("platform_mocks_sources") {
   configs += [ "${dawn_root}/src/dawn/native:internal" ]
   testonly = true
 
@@ -392,8 +394,8 @@ source_set("end2end_mocks_sources") {
   ]
 
   sources = [
-    "end2end/mocks/CachingInterfaceMock.cpp",
-    "end2end/mocks/CachingInterfaceMock.h",
+    "mocks/platform/CachingInterfaceMock.cpp",
+    "mocks/platform/CachingInterfaceMock.h",
   ]
 }
 
@@ -401,7 +403,7 @@ source_set("end2end_tests_sources") {
   testonly = true
 
   deps = [
-    ":end2end_mocks_sources",
+    ":platform_mocks_sources",
     ":test_infra_sources",
     "${dawn_root}/src/dawn:cpp",
     "${dawn_root}/src/dawn:proc",

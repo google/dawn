@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/tests/end2end/mocks/CachingInterfaceMock.h"
+#include "dawn/tests/mocks/platform/CachingInterfaceMock.h"
 
 using ::testing::Invoke;
 

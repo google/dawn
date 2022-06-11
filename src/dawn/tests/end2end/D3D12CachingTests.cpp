@@ -17,7 +17,7 @@
 #include <utility>
 
 #include "dawn/tests/DawnTest.h"
-#include "dawn/tests/end2end/mocks/CachingInterfaceMock.h"
+#include "dawn/tests/mocks/platform/CachingInterfaceMock.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_TESTS_END2END_MOCKS_CACHINGINTERFACEMOCK_H_
-#define SRC_DAWN_TESTS_END2END_MOCKS_CACHINGINTERFACEMOCK_H_
+#ifndef SRC_DAWN_TESTS_MOCKS_PLATFORM_CACHINGINTERFACEMOCK_H_
+#define SRC_DAWN_TESTS_MOCKS_PLATFORM_CACHINGINTERFACEMOCK_H_
 
 #include <dawn/platform/DawnPlatform.h>
 #include <gmock/gmock.h>
@@ -70,4 +70,4 @@ class DawnCachingMockPlatform : public dawn::platform::Platform {
     dawn::platform::CachingInterface* mCachingInterface = nullptr;
 };
 
-#endif  // SRC_DAWN_TESTS_END2END_MOCKS_CACHINGINTERFACEMOCK_H_
+#endif  // SRC_DAWN_TESTS_MOCKS_PLATFORM_CACHINGINTERFACEMOCK_H_

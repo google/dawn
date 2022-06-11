@@ -20,6 +20,9 @@
 #include "dawn/common/Assert.h"
 #include "dawn/dawn_proc.h"
 #include "dawn/native/ErrorData.h"
+#include "dawn/native/Instance.h"
+#include "dawn/native/dawn_platform.h"
+#include "dawn/platform/DawnPlatform.h"
 
 namespace dawn::native {
 
@@ -43,6 +46,9 @@ DawnNativeTest::~DawnNativeTest() {
 
 void DawnNativeTest::SetUp() {
     instance = std::make_unique<dawn::native::Instance>();
+    platform = CreateTestPlatform();
+    dawn::native::FromAPI(instance->Get())->SetPlatformForTesting(platform.get());
+
     instance->DiscoverDefaultAdapters();
 
     std::vector<dawn::native::Adapter> adapters = instance->GetAdapters();
@@ -66,7 +72,9 @@ void DawnNativeTest::SetUp() {
     device.SetUncapturedErrorCallback(DawnNativeTest::OnDeviceError, nullptr);
 }
 
-void DawnNativeTest::TearDown() {}
+std::unique_ptr<dawn::platform::Platform> DawnNativeTest::CreateTestPlatform() {
+    return nullptr;
+}
 
 WGPUDevice DawnNativeTest::CreateTestDevice() {
     // Disabled disallowing unsafe APIs so we can test them.
