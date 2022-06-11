@@ -711,8 +711,12 @@ Token Lexer::try_hex_float() {
             // ...
             // 2^-147 > v >= 2^-148, binary32 s_00000000_0000000000000000000001x, 1 arbitrary bit.
             // 2^-148 > v >= 2^-149, binary32 s_00000000_00000000000000000000001, 0 arbitrary bit.
-            int unbiased_exponent = signed_exponent - kExponentBias;
-            TINT_ASSERT(Reader, (unbiased_exponent <= -127) && (unbiased_exponent >= -149));
+
+            // signed_exponent must be in range -149 + 1023 = 874 to -127 + 1023 = 896, inclusive
+            TINT_ASSERT(Reader, (874 <= signed_exponent) && (signed_exponent <= 896));
+            int unbiased_exponent =
+                static_cast<int>(signed_exponent) - static_cast<int>(kExponentBias);
+            TINT_ASSERT(Reader, (-149 <= unbiased_exponent) && (unbiased_exponent <= -127));
             valid_mantissa_bits = unbiased_exponent + 149;  // 0 for -149, and 22 for -127
         } else if (abs_result_f64 != 0.0) {
             // The result is smaller than the smallest subnormal f32 value, but not equal to zero.
@@ -758,8 +762,12 @@ Token Lexer::try_hex_float() {
             // ...
             // 2^-22 > v >= 2^-23, binary16 s_00000_000000001x, 1 arbitrary bits.
             // 2^-23 > v >= 2^-24, binary16 s_00000_0000000001, 0 arbitrary bits.
-            int unbiased_exponent = signed_exponent - kExponentBias;
-            TINT_ASSERT(Reader, (unbiased_exponent <= -15) && (unbiased_exponent >= -24));
+
+            // signed_exponent must be in range -24 + 1023 = 999 to -15 + 1023 = 1008, inclusive
+            TINT_ASSERT(Reader, (999 <= signed_exponent) && (signed_exponent <= 1008));
+            int unbiased_exponent =
+                static_cast<int>(signed_exponent) - static_cast<int>(kExponentBias);
+            TINT_ASSERT(Reader, (-24 <= unbiased_exponent) && (unbiased_exponent <= -15));
             valid_mantissa_bits = unbiased_exponent + 24;  // 0 for -24, and 9 for -15
         } else if (abs_result_f64 != 0.0) {
             // The result is smaller than the smallest subnormal f16 value, but not equal to zero.
