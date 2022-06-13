@@ -33,6 +33,7 @@ enum class Feature {
     ShaderFloat16,
     PipelineStatisticsQuery,
     TimestampQuery,
+    DepthClipControl,
     DepthClamping,
     Depth24UnormStencil8,
     Depth32FloatStencil8,

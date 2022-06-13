@@ -32,6 +32,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_TextureCompressionETC2:
         case WGPUFeatureName_TextureCompressionASTC:
         case WGPUFeatureName_IndirectFirstInstance:
+        case WGPUFeatureName_DepthClipControl:
         case WGPUFeatureName_DepthClamping:
         case WGPUFeatureName_DawnShaderFloat16:
         case WGPUFeatureName_DawnInternalUsages:

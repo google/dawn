@@ -1344,7 +1344,7 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "undefined", "jsrepr": "undefined"},
-            {"value": 1, "name": "depth clip control", "tags": ["upstream", "emscripten"]},
+            {"value": 1, "name": "depth clip control"},
             {"value": 2, "name": "depth24 unorm stencil8"},
             {"value": 3, "name": "depth32 float stencil8"},
             {"value": 4, "name": "timestamp query"},
@@ -2141,7 +2141,6 @@
     "primitive depth clip control": {
         "category": "structure",
         "chained": "in",
-        "tags": ["upstream", "emscripten"],
         "members": [
             {"name": "unclipped depth", "type": "bool", "default": "false"}
         ]
@@ -2469,7 +2468,7 @@
             {"value": 4, "name": "surface descriptor from canvas HTML selector"},
             {"value": 5, "name": "shader module SPIRV descriptor"},
             {"value": 6, "name": "shader module WGSL descriptor"},
-            {"value": 7, "name": "primitive depth clip control", "tags": ["upstream", "emscripten"]},
+            {"value": 7, "name": "primitive depth clip control"},
             {"value": 8, "name": "surface descriptor from wayland surface", "tags": ["native"]},
             {"value": 9, "name": "surface descriptor from android native window", "tags": ["native"]},
             {"value": 10, "name": "surface descriptor from xcb window", "tags": ["upstream"]},

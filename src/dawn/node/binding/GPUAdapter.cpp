@@ -113,12 +113,14 @@ class Features : public interop::GPUSupportedFeatures {
                 case wgpu::FeatureName::IndirectFirstInstance:
                     enabled_.emplace(interop::GPUFeatureName::kIndirectFirstInstance);
                     break;
+                case wgpu::FeatureName::DepthClipControl:
+                    enabled_.emplace(interop::GPUFeatureName::kDepthClipControl);
+                    break;
                 default:
                     break;
             }
         }
         // TODO(dawn:1123) add support for these extensions when possible.
-        // wgpu::interop::GPUFeatureName::kDepthClipControl
         // wgpu::interop::GPUFeatureName::kShaderF16
         // wgpu::interop::GPUFeatureName::kBgra8UnormStorage
     }

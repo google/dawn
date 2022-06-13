@@ -55,6 +55,9 @@ static constexpr FeatureEnumAndInfoList kFeatureNameAndInfoList = {{
     {Feature::TimestampQuery,
      {"timestamp-query", "Support Timestamp Query",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=434"}},
+    {Feature::DepthClipControl,
+     {"depth-clip-control", "Disable depth clipping of primitives to the clip volume",
+      "https://bugs.chromium.org/p/dawn/issues/detail?id=1178"}},
     {Feature::DepthClamping,
      {"depth-clamping", "Clamp depth to [0, 1] in NDC space instead of clipping",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=716"}},
@@ -100,6 +103,8 @@ Feature FromAPIFeature(wgpu::FeatureName feature) {
             return Feature::TextureCompressionETC2;
         case wgpu::FeatureName::TextureCompressionASTC:
             return Feature::TextureCompressionASTC;
+        case wgpu::FeatureName::DepthClipControl:
+            return Feature::DepthClipControl;
         case wgpu::FeatureName::DepthClamping:
             return Feature::DepthClamping;
         case wgpu::FeatureName::Depth24UnormStencil8:
@@ -134,6 +139,8 @@ wgpu::FeatureName ToAPIFeature(Feature feature) {
             return wgpu::FeatureName::PipelineStatisticsQuery;
         case Feature::TimestampQuery:
             return wgpu::FeatureName::TimestampQuery;
+        case Feature::DepthClipControl:
+            return wgpu::FeatureName::DepthClipControl;
         case Feature::DepthClamping:
             return wgpu::FeatureName::DepthClamping;
         case Feature::Depth24UnormStencil8:
