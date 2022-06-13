@@ -174,22 +174,6 @@ bool AdapterBase::SupportsAllRequiredFeatures(
     return true;
 }
 
-WGPUDeviceProperties AdapterBase::GetAdapterProperties() const {
-    WGPUDeviceProperties adapterProperties = {};
-    adapterProperties.deviceID = mDeviceId;
-    adapterProperties.vendorID = mVendorId;
-    adapterProperties.adapterType = static_cast<WGPUAdapterType>(mAdapterType);
-
-    mSupportedFeatures.InitializeDeviceProperties(&adapterProperties);
-    // This is OK for now because there are no limit feature structs.
-    // If we add additional structs, the caller will need to provide memory
-    // to store them (ex. by calling GetLimits directly instead). Currently,
-    // we keep this function as it's only used internally in Chromium to
-    // send the adapter properties across the wire.
-    GetLimits(FromAPI(&adapterProperties.limits));
-    return adapterProperties;
-}
-
 bool AdapterBase::GetLimits(SupportedLimits* limits) const {
     ASSERT(limits != nullptr);
     if (limits->nextInChain != nullptr) {

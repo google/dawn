@@ -86,7 +86,6 @@ class DAWN_NATIVE_EXPORT Adapter {
 
     std::vector<const char*> GetSupportedExtensions() const;
     std::vector<const char*> GetSupportedFeatures() const;
-    WGPUDeviceProperties GetAdapterProperties() const;
     bool GetLimits(WGPUSupportedLimits* limits) const;
 
     void SetUseTieredLimits(bool useTieredLimits);

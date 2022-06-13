@@ -1203,32 +1203,6 @@
             {"value": 1, "name": "destroyed"}
         ]
     },
-    "device properties": {
-        "category": "structure",
-        "extensible": false,
-        "tags": ["dawn"],
-        "members": [
-            {"name": "device ID", "type": "uint32_t"},
-            {"name": "vendor ID", "type": "uint32_t"},
-            {"name": "adapter type", "type": "adapter type"},
-            {"name": "texture compression BC", "type": "bool", "default": "false"},
-            {"name": "texture compression ETC2", "type": "bool", "default": "false"},
-            {"name": "texture compression ASTC", "type": "bool", "default": "false"},
-            {"name": "shader float16", "type": "bool", "default": "false"},
-            {"name": "pipeline statistics query", "type": "bool", "default": "false"},
-            {"name": "timestamp query", "type": "bool", "default": "false"},
-            {"name": "multi planar formats", "type": "bool", "default": "false"},
-            {"name": "depth clamping", "type": "bool", "default": "false"},
-            {"name": "depth24 unorm stencil8", "type": "bool", "default": "false"},
-            {"name": "depth32 float stencil8", "type": "bool", "default": "false"},
-            {"name": "chromium experimental dp4a", "type": "bool", "default": "false"},
-            {"name": "indirect first instance", "type": "bool", "default": "false"},
-            {"name": "invalid feature", "type": "bool", "default": "false"},
-            {"name": "dawn internal usages", "type": "bool", "default": "false"},
-            {"name": "dawn native", "type": "bool", "default": "false"},
-            {"name": "limits", "type": "supported limits"}
-        ]
-    },
     "double": {
         "category": "native"
     },

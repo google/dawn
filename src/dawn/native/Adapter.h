@@ -57,7 +57,6 @@ class AdapterBase : public RefCounted {
     FeaturesSet GetSupportedFeatures() const;
     bool SupportsAllRequiredFeatures(
         const ityp::span<size_t, const wgpu::FeatureName>& features) const;
-    WGPUDeviceProperties GetAdapterProperties() const;
 
     bool GetLimits(SupportedLimits* limits) const;
 

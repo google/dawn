@@ -15,6 +15,7 @@
 #include "src/dawn/node/binding/GPUAdapter.h"
 
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "src/dawn/node/binding/Errors.h"
@@ -91,29 +92,33 @@ namespace {
 ////////////////////////////////////////////////////////////////////////////////
 class Features : public interop::GPUSupportedFeatures {
   public:
-    explicit Features(WGPUDeviceProperties properties) {
-        if (properties.depth32FloatStencil8) {
-            enabled_.emplace(interop::GPUFeatureName::kDepth32FloatStencil8);
+    explicit Features(std::vector<wgpu::FeatureName> features) {
+        for (wgpu::FeatureName feature : features) {
+            switch (feature) {
+                case wgpu::FeatureName::Depth32FloatStencil8:
+                    enabled_.emplace(interop::GPUFeatureName::kDepth32FloatStencil8);
+                    break;
+                case wgpu::FeatureName::TimestampQuery:
+                    enabled_.emplace(interop::GPUFeatureName::kTimestampQuery);
+                    break;
+                case wgpu::FeatureName::TextureCompressionBC:
+                    enabled_.emplace(interop::GPUFeatureName::kTextureCompressionBc);
+                    break;
+                case wgpu::FeatureName::TextureCompressionETC2:
+                    enabled_.emplace(interop::GPUFeatureName::kTextureCompressionEtc2);
+                    break;
+                case wgpu::FeatureName::TextureCompressionASTC:
+                    enabled_.emplace(interop::GPUFeatureName::kTextureCompressionAstc);
+                    break;
+                case wgpu::FeatureName::IndirectFirstInstance:
+                    enabled_.emplace(interop::GPUFeatureName::kIndirectFirstInstance);
+                    break;
+                default:
+                    break;
+            }
         }
-        if (properties.timestampQuery) {
-            enabled_.emplace(interop::GPUFeatureName::kTimestampQuery);
-        }
-        if (properties.textureCompressionBC) {
-            enabled_.emplace(interop::GPUFeatureName::kTextureCompressionBc);
-        }
-        if (properties.textureCompressionETC2) {
-            enabled_.emplace(interop::GPUFeatureName::kTextureCompressionEtc2);
-        }
-        if (properties.textureCompressionASTC) {
-            enabled_.emplace(interop::GPUFeatureName::kTextureCompressionAstc);
-        }
-        if (properties.timestampQuery) {
-            enabled_.emplace(interop::GPUFeatureName::kTimestampQuery);
-        }
-
         // TODO(dawn:1123) add support for these extensions when possible.
         // wgpu::interop::GPUFeatureName::kDepthClipControl
-        // wgpu::interop::GPUFeatureName::kIndirectFirstInstance
         // wgpu::interop::GPUFeatureName::kShaderF16
         // wgpu::interop::GPUFeatureName::kBgra8UnormStorage
     }
@@ -152,7 +157,11 @@ GPUAdapter::GPUAdapter(dawn::native::Adapter a, const Flags& flags) : adapter_(a
 // TODO(dawn:1133): Avoid the extra copy by making the generator make a virtual method with const
 // std::string&
 interop::Interface<interop::GPUSupportedFeatures> GPUAdapter::getFeatures(Napi::Env env) {
-    return interop::GPUSupportedFeatures::Create<Features>(env, adapter_.GetAdapterProperties());
+    wgpu::Adapter adapter(adapter_.Get());
+    size_t count = adapter.EnumerateFeatures(nullptr);
+    std::vector<wgpu::FeatureName> features(count);
+    adapter.EnumerateFeatures(&features[0]);
+    return interop::GPUSupportedFeatures::Create<Features>(env, std::move(features));
 }
 
 interop::Interface<interop::GPUSupportedLimits> GPUAdapter::getLimits(Napi::Env env) {
