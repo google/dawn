@@ -55,35 +55,62 @@ void GPUTexture::destroy(Napi::Env) {
 }
 
 interop::GPUIntegerCoordinate GPUTexture::getWidth(Napi::Env) {
-    UNIMPLEMENTED();
+    return texture_.GetWidth();
 }
 
 interop::GPUIntegerCoordinate GPUTexture::getHeight(Napi::Env) {
-    UNIMPLEMENTED();
+    return texture_.GetHeight();
 }
 
 interop::GPUIntegerCoordinate GPUTexture::getDepthOrArrayLayers(Napi::Env) {
-    UNIMPLEMENTED();
+    return texture_.GetDepthOrArrayLayers();
 }
 
 interop::GPUIntegerCoordinate GPUTexture::getMipLevelCount(Napi::Env) {
-    UNIMPLEMENTED();
+    return texture_.GetMipLevelCount();
 }
 
 interop::GPUSize32 GPUTexture::getSampleCount(Napi::Env) {
-    UNIMPLEMENTED();
+    return texture_.GetSampleCount();
 }
 
-interop::GPUTextureDimension GPUTexture::getDimension(Napi::Env) {
-    UNIMPLEMENTED();
+interop::GPUTextureDimension GPUTexture::getDimension(Napi::Env env) {
+    interop::GPUTextureDimension result;
+
+    Converter conv(env);
+    if (!conv(result, texture_.GetDimension())) {
+        Napi::Error::New(env, "Couldn't convert dimension to a JavaScript value.")
+            .ThrowAsJavaScriptException();
+        return interop::GPUTextureDimension::k1D;  // Doesn't get used.
+    }
+
+    return result;
 }
 
-interop::GPUTextureFormat GPUTexture::getFormat(Napi::Env) {
-    UNIMPLEMENTED();
+interop::GPUTextureFormat GPUTexture::getFormat(Napi::Env env) {
+    interop::GPUTextureFormat result;
+
+    Converter conv(env);
+    if (!conv(result, texture_.GetFormat())) {
+        Napi::Error::New(env, "Couldn't convert format to a JavaScript value.")
+            .ThrowAsJavaScriptException();
+        return interop::GPUTextureFormat::kR32Float;  // Doesn't get used.
+    }
+
+    return result;
 }
 
-interop::GPUTextureUsageFlags GPUTexture::getUsage(Napi::Env) {
-    UNIMPLEMENTED();
+interop::GPUTextureUsageFlags GPUTexture::getUsage(Napi::Env env) {
+    interop::GPUTextureUsageFlags result;
+
+    Converter conv(env);
+    if (!conv(result, texture_.GetUsage())) {
+        Napi::Error::New(env, "Couldn't convert usage to a JavaScript value.")
+            .ThrowAsJavaScriptException();
+        return {0u};  // Doesn't get used.
+    }
+
+    return result;
 }
 
 std::string GPUTexture::getLabel(Napi::Env) {

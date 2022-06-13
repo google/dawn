@@ -459,8 +459,307 @@ bool Converter::Convert(wgpu::TextureFormat& out, const interop::GPUTextureForma
     return false;
 }
 
+bool Converter::Convert(interop::GPUTextureFormat& out, wgpu::TextureFormat in) {
+    switch (in) {
+        case wgpu::TextureFormat::R8Unorm:
+            out = interop::GPUTextureFormat::kR8Unorm;
+            return true;
+        case wgpu::TextureFormat::R8Snorm:
+            out = interop::GPUTextureFormat::kR8Snorm;
+            return true;
+        case wgpu::TextureFormat::R8Uint:
+            out = interop::GPUTextureFormat::kR8Uint;
+            return true;
+        case wgpu::TextureFormat::R8Sint:
+            out = interop::GPUTextureFormat::kR8Sint;
+            return true;
+        case wgpu::TextureFormat::R16Uint:
+            out = interop::GPUTextureFormat::kR16Uint;
+            return true;
+        case wgpu::TextureFormat::R16Sint:
+            out = interop::GPUTextureFormat::kR16Sint;
+            return true;
+        case wgpu::TextureFormat::R16Float:
+            out = interop::GPUTextureFormat::kR16Float;
+            return true;
+        case wgpu::TextureFormat::RG8Unorm:
+            out = interop::GPUTextureFormat::kRg8Unorm;
+            return true;
+        case wgpu::TextureFormat::RG8Snorm:
+            out = interop::GPUTextureFormat::kRg8Snorm;
+            return true;
+        case wgpu::TextureFormat::RG8Uint:
+            out = interop::GPUTextureFormat::kRg8Uint;
+            return true;
+        case wgpu::TextureFormat::RG8Sint:
+            out = interop::GPUTextureFormat::kRg8Sint;
+            return true;
+        case wgpu::TextureFormat::R32Uint:
+            out = interop::GPUTextureFormat::kR32Uint;
+            return true;
+        case wgpu::TextureFormat::R32Sint:
+            out = interop::GPUTextureFormat::kR32Sint;
+            return true;
+        case wgpu::TextureFormat::R32Float:
+            out = interop::GPUTextureFormat::kR32Float;
+            return true;
+        case wgpu::TextureFormat::RG16Uint:
+            out = interop::GPUTextureFormat::kRg16Uint;
+            return true;
+        case wgpu::TextureFormat::RG16Sint:
+            out = interop::GPUTextureFormat::kRg16Sint;
+            return true;
+        case wgpu::TextureFormat::RG16Float:
+            out = interop::GPUTextureFormat::kRg16Float;
+            return true;
+        case wgpu::TextureFormat::RGBA8Unorm:
+            out = interop::GPUTextureFormat::kRgba8Unorm;
+            return true;
+        case wgpu::TextureFormat::RGBA8UnormSrgb:
+            out = interop::GPUTextureFormat::kRgba8UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::RGBA8Snorm:
+            out = interop::GPUTextureFormat::kRgba8Snorm;
+            return true;
+        case wgpu::TextureFormat::RGBA8Uint:
+            out = interop::GPUTextureFormat::kRgba8Uint;
+            return true;
+        case wgpu::TextureFormat::RGBA8Sint:
+            out = interop::GPUTextureFormat::kRgba8Sint;
+            return true;
+        case wgpu::TextureFormat::BGRA8Unorm:
+            out = interop::GPUTextureFormat::kBgra8Unorm;
+            return true;
+        case wgpu::TextureFormat::BGRA8UnormSrgb:
+            out = interop::GPUTextureFormat::kBgra8UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::RGB9E5Ufloat:
+            out = interop::GPUTextureFormat::kRgb9E5Ufloat;
+            return true;
+        case wgpu::TextureFormat::RGB10A2Unorm:
+            out = interop::GPUTextureFormat::kRgb10A2Unorm;
+            return true;
+        case wgpu::TextureFormat::RG11B10Ufloat:
+            out = interop::GPUTextureFormat::kRg11B10Ufloat;
+            return true;
+        case wgpu::TextureFormat::RG32Uint:
+            out = interop::GPUTextureFormat::kRg32Uint;
+            return true;
+        case wgpu::TextureFormat::RG32Sint:
+            out = interop::GPUTextureFormat::kRg32Sint;
+            return true;
+        case wgpu::TextureFormat::RG32Float:
+            out = interop::GPUTextureFormat::kRg32Float;
+            return true;
+        case wgpu::TextureFormat::RGBA16Uint:
+            out = interop::GPUTextureFormat::kRgba16Uint;
+            return true;
+        case wgpu::TextureFormat::RGBA16Sint:
+            out = interop::GPUTextureFormat::kRgba16Sint;
+            return true;
+        case wgpu::TextureFormat::RGBA16Float:
+            out = interop::GPUTextureFormat::kRgba16Float;
+            return true;
+        case wgpu::TextureFormat::RGBA32Uint:
+            out = interop::GPUTextureFormat::kRgba32Uint;
+            return true;
+        case wgpu::TextureFormat::RGBA32Sint:
+            out = interop::GPUTextureFormat::kRgba32Sint;
+            return true;
+        case wgpu::TextureFormat::RGBA32Float:
+            out = interop::GPUTextureFormat::kRgba32Float;
+            return true;
+        case wgpu::TextureFormat::Stencil8:
+            out = interop::GPUTextureFormat::kStencil8;
+            return true;
+        case wgpu::TextureFormat::Depth16Unorm:
+            out = interop::GPUTextureFormat::kDepth16Unorm;
+            return true;
+        case wgpu::TextureFormat::Depth24Plus:
+            out = interop::GPUTextureFormat::kDepth24Plus;
+            return true;
+        case wgpu::TextureFormat::Depth24PlusStencil8:
+            out = interop::GPUTextureFormat::kDepth24PlusStencil8;
+            return true;
+        case wgpu::TextureFormat::Depth32Float:
+            out = interop::GPUTextureFormat::kDepth32Float;
+            return true;
+        case wgpu::TextureFormat::Depth32FloatStencil8:
+            out = interop::GPUTextureFormat::kDepth32FloatStencil8;
+            return true;
+        case wgpu::TextureFormat::BC1RGBAUnorm:
+            out = interop::GPUTextureFormat::kBc1RgbaUnorm;
+            return true;
+        case wgpu::TextureFormat::BC1RGBAUnormSrgb:
+            out = interop::GPUTextureFormat::kBc1RgbaUnormSrgb;
+            return true;
+        case wgpu::TextureFormat::BC2RGBAUnorm:
+            out = interop::GPUTextureFormat::kBc2RgbaUnorm;
+            return true;
+        case wgpu::TextureFormat::BC2RGBAUnormSrgb:
+            out = interop::GPUTextureFormat::kBc2RgbaUnormSrgb;
+            return true;
+        case wgpu::TextureFormat::BC3RGBAUnorm:
+            out = interop::GPUTextureFormat::kBc3RgbaUnorm;
+            return true;
+        case wgpu::TextureFormat::BC3RGBAUnormSrgb:
+            out = interop::GPUTextureFormat::kBc3RgbaUnormSrgb;
+            return true;
+        case wgpu::TextureFormat::BC4RUnorm:
+            out = interop::GPUTextureFormat::kBc4RUnorm;
+            return true;
+        case wgpu::TextureFormat::BC4RSnorm:
+            out = interop::GPUTextureFormat::kBc4RSnorm;
+            return true;
+        case wgpu::TextureFormat::BC5RGUnorm:
+            out = interop::GPUTextureFormat::kBc5RgUnorm;
+            return true;
+        case wgpu::TextureFormat::BC5RGSnorm:
+            out = interop::GPUTextureFormat::kBc5RgSnorm;
+            return true;
+        case wgpu::TextureFormat::BC6HRGBUfloat:
+            out = interop::GPUTextureFormat::kBc6HRgbUfloat;
+            return true;
+        case wgpu::TextureFormat::BC6HRGBFloat:
+            out = interop::GPUTextureFormat::kBc6HRgbFloat;
+            return true;
+        case wgpu::TextureFormat::BC7RGBAUnorm:
+            out = interop::GPUTextureFormat::kBc7RgbaUnorm;
+            return true;
+        case wgpu::TextureFormat::BC7RGBAUnormSrgb:
+            out = interop::GPUTextureFormat::kBc7RgbaUnormSrgb;
+            return true;
+        case wgpu::TextureFormat::ETC2RGB8Unorm:
+            out = interop::GPUTextureFormat::kEtc2Rgb8Unorm;
+            return true;
+        case wgpu::TextureFormat::ETC2RGB8UnormSrgb:
+            out = interop::GPUTextureFormat::kEtc2Rgb8UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::ETC2RGB8A1Unorm:
+            out = interop::GPUTextureFormat::kEtc2Rgb8A1Unorm;
+            return true;
+        case wgpu::TextureFormat::ETC2RGB8A1UnormSrgb:
+            out = interop::GPUTextureFormat::kEtc2Rgb8A1UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::ETC2RGBA8Unorm:
+            out = interop::GPUTextureFormat::kEtc2Rgba8Unorm;
+            return true;
+        case wgpu::TextureFormat::ETC2RGBA8UnormSrgb:
+            out = interop::GPUTextureFormat::kEtc2Rgba8UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::EACR11Unorm:
+            out = interop::GPUTextureFormat::kEacR11Unorm;
+            return true;
+        case wgpu::TextureFormat::EACR11Snorm:
+            out = interop::GPUTextureFormat::kEacR11Snorm;
+            return true;
+        case wgpu::TextureFormat::EACRG11Unorm:
+            out = interop::GPUTextureFormat::kEacRg11Unorm;
+            return true;
+        case wgpu::TextureFormat::EACRG11Snorm:
+            out = interop::GPUTextureFormat::kEacRg11Snorm;
+            return true;
+        case wgpu::TextureFormat::ASTC4x4Unorm:
+            out = interop::GPUTextureFormat::kAstc4X4Unorm;
+            return true;
+        case wgpu::TextureFormat::ASTC4x4UnormSrgb:
+            out = interop::GPUTextureFormat::kAstc4X4UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::ASTC5x4Unorm:
+            out = interop::GPUTextureFormat::kAstc5X4Unorm;
+            return true;
+        case wgpu::TextureFormat::ASTC5x4UnormSrgb:
+            out = interop::GPUTextureFormat::kAstc5X4UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::ASTC5x5Unorm:
+            out = interop::GPUTextureFormat::kAstc5X5Unorm;
+            return true;
+        case wgpu::TextureFormat::ASTC5x5UnormSrgb:
+            out = interop::GPUTextureFormat::kAstc5X5UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::ASTC6x5Unorm:
+            out = interop::GPUTextureFormat::kAstc6X5Unorm;
+            return true;
+        case wgpu::TextureFormat::ASTC6x5UnormSrgb:
+            out = interop::GPUTextureFormat::kAstc6X5UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::ASTC6x6Unorm:
+            out = interop::GPUTextureFormat::kAstc6X6Unorm;
+            return true;
+        case wgpu::TextureFormat::ASTC6x6UnormSrgb:
+            out = interop::GPUTextureFormat::kAstc6X6UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::ASTC8x5Unorm:
+            out = interop::GPUTextureFormat::kAstc8X5Unorm;
+            return true;
+        case wgpu::TextureFormat::ASTC8x5UnormSrgb:
+            out = interop::GPUTextureFormat::kAstc8X5UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::ASTC8x6Unorm:
+            out = interop::GPUTextureFormat::kAstc8X6Unorm;
+            return true;
+        case wgpu::TextureFormat::ASTC8x6UnormSrgb:
+            out = interop::GPUTextureFormat::kAstc8X6UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::ASTC8x8Unorm:
+            out = interop::GPUTextureFormat::kAstc8X8Unorm;
+            return true;
+        case wgpu::TextureFormat::ASTC8x8UnormSrgb:
+            out = interop::GPUTextureFormat::kAstc8X8UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::ASTC10x5Unorm:
+            out = interop::GPUTextureFormat::kAstc10X5Unorm;
+            return true;
+        case wgpu::TextureFormat::ASTC10x5UnormSrgb:
+            out = interop::GPUTextureFormat::kAstc10X5UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::ASTC10x6Unorm:
+            out = interop::GPUTextureFormat::kAstc10X6Unorm;
+            return true;
+        case wgpu::TextureFormat::ASTC10x6UnormSrgb:
+            out = interop::GPUTextureFormat::kAstc10X6UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::ASTC10x8Unorm:
+            out = interop::GPUTextureFormat::kAstc10X8Unorm;
+            return true;
+        case wgpu::TextureFormat::ASTC10x8UnormSrgb:
+            out = interop::GPUTextureFormat::kAstc10X8UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::ASTC10x10Unorm:
+            out = interop::GPUTextureFormat::kAstc10X10Unorm;
+            return true;
+        case wgpu::TextureFormat::ASTC10x10UnormSrgb:
+            out = interop::GPUTextureFormat::kAstc10X10UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::ASTC12x10Unorm:
+            out = interop::GPUTextureFormat::kAstc12X10Unorm;
+            return true;
+        case wgpu::TextureFormat::ASTC12x10UnormSrgb:
+            out = interop::GPUTextureFormat::kAstc12X10UnormSrgb;
+            return true;
+        case wgpu::TextureFormat::ASTC12x12Unorm:
+            out = interop::GPUTextureFormat::kAstc12X12Unorm;
+            return true;
+        case wgpu::TextureFormat::ASTC12x12UnormSrgb:
+            out = interop::GPUTextureFormat::kAstc12X12UnormSrgb;
+            return true;
+
+        case wgpu::TextureFormat::Undefined:
+        case wgpu::TextureFormat::Depth24UnormStencil8:
+        case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
+            return false;
+    }
+
+    return false;
+}
+
 bool Converter::Convert(wgpu::TextureUsage& out, const interop::GPUTextureUsageFlags& in) {
     out = static_cast<wgpu::TextureUsage>(in.value);
+    return true;
+}
+
+bool Converter::Convert(interop::GPUTextureUsageFlags& out, wgpu::TextureUsage in) {
+    out = interop::GPUTextureUsageFlags(static_cast<uint32_t>(out));
     return true;
 }
 
@@ -471,6 +770,11 @@ bool Converter::Convert(wgpu::ColorWriteMask& out, const interop::GPUColorWriteF
 
 bool Converter::Convert(wgpu::BufferUsage& out, const interop::GPUBufferUsageFlags& in) {
     out = static_cast<wgpu::BufferUsage>(in.value);
+    return true;
+}
+
+bool Converter::Convert(interop::GPUBufferUsageFlags& out, wgpu::BufferUsage in) {
+    out = interop::GPUBufferUsageFlags(static_cast<uint32_t>(out));
     return true;
 }
 
@@ -498,6 +802,21 @@ bool Converter::Convert(wgpu::TextureDimension& out, const interop::GPUTextureDi
             return true;
     }
     Napi::Error::New(env, "invalid value for GPUTextureDimension").ThrowAsJavaScriptException();
+    return false;
+}
+
+bool Converter::Convert(interop::GPUTextureDimension& out, wgpu::TextureDimension in) {
+    switch (in) {
+        case wgpu::TextureDimension::e1D:
+            out = interop::GPUTextureDimension::k1D;
+            return true;
+        case wgpu::TextureDimension::e2D:
+            out = interop::GPUTextureDimension::k2D;
+            return true;
+        case wgpu::TextureDimension::e3D:
+            out = interop::GPUTextureDimension::k3D;
+            return true;
+    }
     return false;
 }
 
@@ -1147,6 +1466,21 @@ bool Converter::Convert(wgpu::QueryType& out, const interop::GPUQueryType& in) {
             return true;
     }
     Napi::Error::New(env, "invalid value for GPUQueryType").ThrowAsJavaScriptException();
+    return false;
+}
+
+bool Converter::Convert(interop::GPUQueryType& out, wgpu::QueryType in) {
+    switch (in) {
+        case wgpu::QueryType::Occlusion:
+            out = interop::GPUQueryType::kOcclusion;
+            return true;
+        case wgpu::QueryType::Timestamp:
+            out = interop::GPUQueryType::kTimestamp;
+            return true;
+        case wgpu::QueryType::PipelineStatistics:
+            // TODO(dawn:1123): Add support for pipeline statistics if they are in WebGPU one day.
+            return false;
+    }
     return false;
 }
 
