@@ -445,10 +445,11 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
                                         uint32_t* height,
                                         uint32_t* sampleCount,
                                         UsageValidationMode usageValidationMode) {
+    uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
     DAWN_INVALID_IF(
-        descriptor->colorAttachmentCount > kMaxColorAttachments,
+        descriptor->colorAttachmentCount > maxColorAttachments,
         "Color attachment count (%u) exceeds the maximum number of color attachments (%u).",
-        descriptor->colorAttachmentCount, kMaxColorAttachments);
+        descriptor->colorAttachmentCount, maxColorAttachments);
 
     bool isAllColorAttachmentNull = true;
     for (uint32_t i = 0; i < descriptor->colorAttachmentCount; ++i) {

@@ -281,9 +281,7 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
         vkLimits.maxComputeWorkGroupCount[2],
     });
 
-    if (vkLimits.maxColorAttachments < kMaxColorAttachments) {
-        return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for maxColorAttachments");
-    }
+    CHECK_AND_SET_V1_MAX_LIMIT(maxColorAttachments, maxColorAttachments);
     if (!IsSubset(VkSampleCountFlags(VK_SAMPLE_COUNT_1_BIT | VK_SAMPLE_COUNT_4_BIT),
                   vkLimits.framebufferColorSampleCounts)) {
         return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for framebufferColorSampleCounts");

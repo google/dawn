@@ -62,9 +62,10 @@ MaybeError ValidateRenderBundleEncoderDescriptor(const DeviceBase* device,
     DAWN_INVALID_IF(!IsValidSampleCount(descriptor->sampleCount),
                     "Sample count (%u) is not supported.", descriptor->sampleCount);
 
-    DAWN_INVALID_IF(descriptor->colorFormatsCount > kMaxColorAttachments,
+    uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
+    DAWN_INVALID_IF(descriptor->colorFormatsCount > maxColorAttachments,
                     "Color formats count (%u) exceeds maximum number of color attachements (%u).",
-                    descriptor->colorFormatsCount, kMaxColorAttachments);
+                    descriptor->colorFormatsCount, maxColorAttachments);
 
     bool allColorFormatsUndefined = true;
     for (uint32_t i = 0; i < descriptor->colorFormatsCount; ++i) {

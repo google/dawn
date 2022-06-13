@@ -330,9 +330,10 @@ MaybeError ValidateFragmentState(DeviceBase* device,
                      "validating fragment stage (module: %s, entryPoint: %s).", descriptor->module,
                      descriptor->entryPoint);
 
-    DAWN_INVALID_IF(descriptor->targetCount > kMaxColorAttachments,
+    uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
+    DAWN_INVALID_IF(descriptor->targetCount > maxColorAttachments,
                     "Number of targets (%u) exceeds the maximum (%u).", descriptor->targetCount,
-                    kMaxColorAttachments);
+                    maxColorAttachments);
 
     const EntryPointMetadata& fragmentMetadata =
         descriptor->module->GetEntryPoint(descriptor->entryPoint);

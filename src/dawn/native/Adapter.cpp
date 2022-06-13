@@ -49,6 +49,8 @@ MaybeError AdapterBase::Initialize() {
     // Enforce internal Dawn constants.
     mLimits.v1.maxVertexBufferArrayStride =
         std::min(mLimits.v1.maxVertexBufferArrayStride, kMaxVertexBufferArrayStride);
+    mLimits.v1.maxColorAttachments =
+        std::min(mLimits.v1.maxColorAttachments, uint32_t(kMaxColorAttachments));
     mLimits.v1.maxBindGroups = std::min(mLimits.v1.maxBindGroups, kMaxBindGroups);
     mLimits.v1.maxVertexAttributes =
         std::min(mLimits.v1.maxVertexAttributes, uint32_t(kMaxVertexAttributes));

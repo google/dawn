@@ -51,6 +51,7 @@
     X(Maximum,                         maxVertexAttributes,    16,    16) \
     X(Maximum,                  maxVertexBufferArrayStride,  2048,  2048) \
     X(Maximum,               maxInterStageShaderComponents,    60,    60) \
+    X(Maximum,                         maxColorAttachments,     8,     8) \
     X(Maximum,           maxComputeInvocationsPerWorkgroup,   256,   256) \
     X(Maximum,                    maxComputeWorkgroupSizeX,   256,   256) \
     X(Maximum,                    maxComputeWorkgroupSizeY,   256,   256) \

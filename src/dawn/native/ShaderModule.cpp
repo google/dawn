@@ -784,6 +784,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                          "Total fragment input components count (%u) exceeds the maximum (%u).",
                          totalInterStageShaderComponents, kMaxInterStageShaderComponents);
 
+        uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
         for (const auto& outputVar : entryPoint.output_variables) {
             EntryPointMetadata::FragmentOutputVariableInfo variable;
             DAWN_TRY_ASSIGN(variable.baseType,
@@ -793,10 +794,10 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
             ASSERT(variable.componentCount <= 4);
 
             uint32_t unsanitizedAttachment = outputVar.location_decoration;
-            if (DelayedInvalidIf(unsanitizedAttachment >= kMaxColorAttachments,
+            if (DelayedInvalidIf(unsanitizedAttachment >= maxColorAttachments,
                                  "Fragment output variable \"%s\" has a location (%u) that "
                                  "exceeds the maximum (%u).",
-                                 outputVar.name, unsanitizedAttachment, kMaxColorAttachments)) {
+                                 outputVar.name, unsanitizedAttachment, maxColorAttachments)) {
                 continue;
             }
 
