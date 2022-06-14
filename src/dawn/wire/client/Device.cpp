@@ -24,8 +24,8 @@
 
 namespace dawn::wire::client {
 
-Device::Device(Client* clientIn, uint32_t initialRefcount, uint32_t initialId)
-    : ObjectBase(clientIn, initialRefcount, initialId), mIsAlive(std::make_shared<bool>()) {
+Device::Device(const ObjectBaseParams& params)
+    : ObjectBase(params), mIsAlive(std::make_shared<bool>()) {
 #if defined(DAWN_ENABLE_ASSERTS)
     mErrorCallback = [](WGPUErrorType, char const*, void*) {
         static bool calledOnce = false;

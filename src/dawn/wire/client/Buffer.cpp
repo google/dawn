@@ -140,8 +140,6 @@ WGPUBuffer Buffer::CreateError(Device* device, const WGPUBufferDescriptor* descr
     return ToAPI(allocation->object.get());
 }
 
-Buffer::Buffer(Client* c, uint32_t r, uint32_t i) : ObjectBase(c, r, i) {}
-
 Buffer::~Buffer() {
     ClearAllCallbacks(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
     FreeMappedData();

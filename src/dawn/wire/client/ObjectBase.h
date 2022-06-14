@@ -24,13 +24,18 @@ namespace dawn::wire::client {
 
 class Client;
 
+struct ObjectBaseParams {
+    Client* client;
+    uint32_t id;
+};
+
 // All objects on the client side have:
 //  - A pointer to the Client to get where to serialize commands
-//  - The external reference count
+//  - The external reference count, starting at 1.
 //  - An ID that is used to refer to this object when talking with the server side
 //  - A next/prev pointer. They are part of a linked list of objects of the same type.
 struct ObjectBase : public LinkNode<ObjectBase> {
-    ObjectBase(Client* client, uint32_t refcount, uint32_t id);
+    explicit ObjectBase(const ObjectBaseParams& params);
     ~ObjectBase();
 
     virtual void CancelCallbacksForDisconnect() {}

@@ -32,7 +32,7 @@ class Queue;
 
 class Device final : public ObjectBase {
   public:
-    Device(Client* client, uint32_t refcount, uint32_t id);
+    explicit Device(const ObjectBaseParams& params);
     ~Device();
 
     void SetUncapturedErrorCallback(WGPUErrorCallback errorCallback, void* errorUserdata);

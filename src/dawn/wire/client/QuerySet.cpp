@@ -40,7 +40,6 @@ WGPUQuerySet QuerySet::Create(Device* device, const WGPUQuerySetDescriptor* desc
     return ToAPI(querySet);
 }
 
-QuerySet::QuerySet(Client* c, uint32_t r, uint32_t i) : ObjectBase(c, r, i) {}
 QuerySet::~QuerySet() = default;
 
 WGPUQueryType QuerySet::GetType() const {

@@ -16,8 +16,8 @@
 
 namespace dawn::wire::client {
 
-ObjectBase::ObjectBase(Client* client, uint32_t refcount, uint32_t id)
-    : client(client), refcount(refcount), id(id) {}
+ObjectBase::ObjectBase(const ObjectBaseParams& params)
+    : client(params.client), refcount(1), id(params.id) {}
 
 ObjectBase::~ObjectBase() {
     RemoveFromList();

@@ -44,7 +44,8 @@ class ObjectAllocator {
     template <typename Client>
     ObjectAndSerial* New(Client* client) {
         uint32_t id = GetNewId();
-        auto object = std::make_unique<T>(client, 1, id);
+        ObjectBaseParams params = {client, id};
+        auto object = std::make_unique<T>(params);
         client->TrackObject(object.get());
 
         if (id >= mObjects.size()) {
