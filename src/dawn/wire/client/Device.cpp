@@ -158,7 +158,7 @@ bool Device::PopErrorScope(WGPUErrorCallback callback, void* userdata) {
 
     uint64_t serial = mErrorScopes.Add({callback, userdata});
     DevicePopErrorScopeCmd cmd;
-    cmd.deviceId = this->id;
+    cmd.deviceId = GetWireId();
     cmd.requestSerial = serial;
     client->SerializeCommand(cmd);
     return true;
@@ -219,12 +219,11 @@ WGPUQueue Device::GetQueue() {
     // on construction.
     if (mQueue == nullptr) {
         // Get the primary queue for this device.
-        auto* allocation = client->QueueAllocator().New(client);
-        mQueue = allocation->object.get();
+        mQueue = client->QueueAllocator().New(client);
 
         DeviceGetQueueCmd cmd;
         cmd.self = ToAPI(this);
-        cmd.result = ObjectHandle{allocation->object->id, allocation->generation};
+        cmd.result = mQueue->GetWireHandle();
 
         client->SerializeCommand(cmd);
     }
@@ -241,20 +240,20 @@ void Device::CreateComputePipelineAsync(WGPUComputePipelineDescriptor const* des
                         "GPU device disconnected", userdata);
     }
 
-    auto* allocation = client->ComputePipelineAllocator().New(client);
+    ComputePipeline* pipeline = client->ComputePipelineAllocator().New(client);
 
     CreatePipelineAsyncRequest request = {};
     request.createComputePipelineAsyncCallback = callback;
     request.userdata = userdata;
-    request.pipelineObjectID = allocation->object->id;
+    request.pipelineObjectID = pipeline->GetWireId();
 
     uint64_t serial = mCreatePipelineAsyncRequests.Add(std::move(request));
 
     DeviceCreateComputePipelineAsyncCmd cmd;
-    cmd.deviceId = this->id;
+    cmd.deviceId = GetWireId();
     cmd.descriptor = descriptor;
     cmd.requestSerial = serial;
-    cmd.pipelineObjectHandle = ObjectHandle{allocation->object->id, allocation->generation};
+    cmd.pipelineObjectHandle = pipeline->GetWireHandle();
 
     client->SerializeCommand(cmd);
 }
@@ -292,20 +291,20 @@ void Device::CreateRenderPipelineAsync(WGPURenderPipelineDescriptor const* descr
                         "GPU device disconnected", userdata);
     }
 
-    auto* allocation = client->RenderPipelineAllocator().New(client);
+    RenderPipeline* pipeline = client->RenderPipelineAllocator().New(client);
 
     CreatePipelineAsyncRequest request = {};
     request.createRenderPipelineAsyncCallback = callback;
     request.userdata = userdata;
-    request.pipelineObjectID = allocation->object->id;
+    request.pipelineObjectID = pipeline->GetWireId();
 
     uint64_t serial = mCreatePipelineAsyncRequests.Add(std::move(request));
 
     DeviceCreateRenderPipelineAsyncCmd cmd;
-    cmd.deviceId = this->id;
+    cmd.deviceId = GetWireId();
     cmd.descriptor = descriptor;
     cmd.requestSerial = serial;
-    cmd.pipelineObjectHandle = ObjectHandle(allocation->object->id, allocation->generation);
+    cmd.pipelineObjectHandle = pipeline->GetWireHandle();
 
     client->SerializeCommand(cmd);
 }

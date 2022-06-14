@@ -23,86 +23,72 @@
 #include "dawn/common/Assert.h"
 #include "dawn/common/Compiler.h"
 #include "dawn/wire/WireCmd_autogen.h"
+#include "dawn/wire/client/ObjectBase.h"
 
 namespace dawn::wire::client {
 
 template <typename T>
 class ObjectAllocator {
   public:
-    struct ObjectAndSerial {
-        ObjectAndSerial(std::unique_ptr<T> object, uint32_t generation)
-            : object(std::move(object)), generation(generation) {}
-        std::unique_ptr<T> object;
-        uint32_t generation;
-    };
-
     ObjectAllocator() {
         // ID 0 is nullptr
-        mObjects.emplace_back(nullptr, 0);
+        mObjects.emplace_back(nullptr);
     }
 
     template <typename Client>
-    ObjectAndSerial* New(Client* client) {
-        uint32_t id = GetNewId();
-        ObjectBaseParams params = {client, id};
+    T* New(Client* client) {
+        ObjectHandle handle = GetFreeHandle();
+        ObjectBaseParams params = {client, handle};
         auto object = std::make_unique<T>(params);
         client->TrackObject(object.get());
 
-        if (id >= mObjects.size()) {
-            ASSERT(id == mObjects.size());
-            mObjects.emplace_back(std::move(object), 0);
+        if (handle.id >= mObjects.size()) {
+            ASSERT(handle.id == mObjects.size());
+            mObjects.emplace_back(std::move(object));
         } else {
-            ASSERT(mObjects[id].object == nullptr);
-
-            mObjects[id].generation++;
             // The generation should never overflow. We don't recycle ObjectIds that would
             // overflow their next generation.
-            ASSERT(mObjects[id].generation != 0);
-
-            mObjects[id].object = std::move(object);
+            ASSERT(handle.generation != 0);
+            ASSERT(mObjects[handle.id] == nullptr);
+            mObjects[handle.id] = std::move(object);
         }
 
-        return &mObjects[id];
+        return mObjects[handle.id].get();
     }
     void Free(T* obj) {
         ASSERT(obj->IsInList());
-        if (DAWN_LIKELY(mObjects[obj->id].generation != std::numeric_limits<uint32_t>::max())) {
-            // Only recycle this ObjectId if the generation won't overflow on the next
-            // allocation.
-            FreeId(obj->id);
+        // The wire reuses ID for objects to keep them in a packed array starting from 0.
+        // To avoid issues with asynchronous server->client communication referring to an ID that's
+        // already reused, each handle also has a generation that's increment by one on each reuse.
+        // Avoid overflows by only reusing the ID if the increment of the generation won't overflow.
+        ObjectHandle currentHandle = obj->GetWireHandle();
+        if (DAWN_LIKELY(currentHandle.generation != std::numeric_limits<ObjectGeneration>::max())) {
+            mFreeHandles.push_back({currentHandle.id, currentHandle.generation + 1});
         }
-        mObjects[obj->id].object = nullptr;
+        mObjects[currentHandle.id] = nullptr;
     }
 
     T* GetObject(uint32_t id) {
         if (id >= mObjects.size()) {
             return nullptr;
         }
-        return mObjects[id].object.get();
-    }
-
-    uint32_t GetGeneration(uint32_t id) {
-        if (id >= mObjects.size()) {
-            return 0;
-        }
-        return mObjects[id].generation;
+        return mObjects[id].get();
     }
 
   private:
-    uint32_t GetNewId() {
-        if (mFreeIds.empty()) {
-            return mCurrentId++;
+    ObjectHandle GetFreeHandle() {
+        if (mFreeHandles.empty()) {
+            return {mCurrentId++, 0};
         }
-        uint32_t id = mFreeIds.back();
-        mFreeIds.pop_back();
-        return id;
+        ObjectHandle handle = mFreeHandles.back();
+        mFreeHandles.pop_back();
+        return handle;
     }
-    void FreeId(uint32_t id) { mFreeIds.push_back(id); }
 
     // 0 is an ID reserved to represent nullptr
     uint32_t mCurrentId = 1;
-    std::vector<uint32_t> mFreeIds;
-    std::vector<ObjectAndSerial> mObjects;
+    std::vector<ObjectHandle> mFreeHandles;
+    std::vector<std::unique_ptr<T>> mObjects;
 };
 }  // namespace dawn::wire::client
 

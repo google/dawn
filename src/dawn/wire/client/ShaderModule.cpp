@@ -31,7 +31,7 @@ void ShaderModule::GetCompilationInfo(WGPUCompilationInfoCallback callback, void
     uint64_t serial = mCompilationInfoRequests.Add({callback, userdata});
 
     ShaderModuleGetCompilationInfoCmd cmd;
-    cmd.shaderModuleId = this->id;
+    cmd.shaderModuleId = GetWireId();
     cmd.requestSerial = serial;
 
     client->SerializeCommand(cmd);

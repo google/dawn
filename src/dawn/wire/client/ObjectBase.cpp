@@ -17,10 +17,22 @@
 namespace dawn::wire::client {
 
 ObjectBase::ObjectBase(const ObjectBaseParams& params)
-    : client(params.client), refcount(1), id(params.id) {}
+    : client(params.client), refcount(1), mHandle(params.handle) {}
 
 ObjectBase::~ObjectBase() {
     RemoveFromList();
+}
+
+const ObjectHandle& ObjectBase::GetWireHandle() const {
+    return mHandle;
+}
+
+ObjectId ObjectBase::GetWireId() const {
+    return mHandle.id;
+}
+
+ObjectGeneration ObjectBase::GetWireGeneration() const {
+    return mHandle.generation;
 }
 
 }  // namespace dawn::wire::client

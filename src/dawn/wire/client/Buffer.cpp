@@ -40,7 +40,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle = nullptr;
 
     DeviceCreateBufferCmd cmd;
-    cmd.deviceId = device->id;
+    cmd.deviceId = device->GetWireId();
     cmd.descriptor = descriptor;
     cmd.readHandleCreateInfoLength = 0;
     cmd.readHandleCreateInfo = nullptr;
@@ -74,8 +74,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     // Create the buffer and send the creation command.
     // This must happen after any potential device->CreateErrorBuffer()
     // as server expects allocating ids to be monotonically increasing
-    auto* bufferObjectAndSerial = wireClient->BufferAllocator().New(wireClient);
-    Buffer* buffer = bufferObjectAndSerial->object.get();
+    Buffer* buffer = wireClient->BufferAllocator().New(wireClient);
     buffer->mDevice = device;
     buffer->mDeviceIsAlive = device->GetAliveWeakPtr();
     buffer->mSize = descriptor->size;
@@ -98,7 +97,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
         buffer->mMappedData = writeHandle->GetData();
     }
 
-    cmd.result = ObjectHandle{buffer->id, bufferObjectAndSerial->generation};
+    cmd.result = buffer->GetWireHandle();
 
     wireClient->SerializeCommand(
         cmd, cmd.readHandleCreateInfoLength + cmd.writeHandleCreateInfoLength,
@@ -126,18 +125,18 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
 
 // static
 WGPUBuffer Buffer::CreateError(Device* device, const WGPUBufferDescriptor* descriptor) {
-    auto* allocation = device->client->BufferAllocator().New(device->client);
-    allocation->object->mDevice = device;
-    allocation->object->mDeviceIsAlive = device->GetAliveWeakPtr();
-    allocation->object->mSize = descriptor->size;
-    allocation->object->mUsage = static_cast<WGPUBufferUsage>(descriptor->usage);
+    Buffer* buffer = device->client->BufferAllocator().New(device->client);
+    buffer->mDevice = device;
+    buffer->mDeviceIsAlive = device->GetAliveWeakPtr();
+    buffer->mSize = descriptor->size;
+    buffer->mUsage = static_cast<WGPUBufferUsage>(descriptor->usage);
 
     DeviceCreateErrorBufferCmd cmd;
     cmd.self = ToAPI(device);
-    cmd.result = ObjectHandle{allocation->object->id, allocation->generation};
+    cmd.result = buffer->GetWireHandle();
     device->client->SerializeCommand(cmd);
 
-    return ToAPI(allocation->object.get());
+    return ToAPI(buffer);
 }
 
 Buffer::~Buffer() {
@@ -188,7 +187,7 @@ void Buffer::MapAsync(WGPUMapModeFlags mode,
 
     // Serialize the command to send to the server.
     BufferMapAsyncCmd cmd;
-    cmd.bufferId = this->id;
+    cmd.bufferId = GetWireId();
     cmd.requestSerial = serial;
     cmd.mode = mode;
     cmd.offset = offset;
@@ -301,7 +300,7 @@ void Buffer::Unmap() {
             mWriteHandle->SizeOfSerializeDataUpdate(mMapOffset, mMapSize);
 
         BufferUpdateMappedDataCmd cmd;
-        cmd.bufferId = id;
+        cmd.bufferId = GetWireId();
         cmd.writeDataUpdateInfoLength = writeDataUpdateInfoLength;
         cmd.writeDataUpdateInfo = nullptr;
         cmd.offset = mMapOffset;

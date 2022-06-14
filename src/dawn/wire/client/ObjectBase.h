@@ -18,7 +18,6 @@
 #include "dawn/webgpu.h"
 
 #include "dawn/common/LinkedList.h"
-#include "dawn/wire/ObjectType_autogen.h"
 #include "dawn/wire/ObjectHandle.h"
 
 namespace dawn::wire::client {
@@ -27,7 +26,7 @@ class Client;
 
 struct ObjectBaseParams {
     Client* client;
-    ObjectId id;
+    ObjectHandle handle;
 };
 
 // All objects on the client side have:
@@ -35,15 +34,23 @@ struct ObjectBaseParams {
 //  - The external reference count, starting at 1.
 //  - An ID that is used to refer to this object when talking with the server side
 //  - A next/prev pointer. They are part of a linked list of objects of the same type.
-struct ObjectBase : public LinkNode<ObjectBase> {
+class ObjectBase : public LinkNode<ObjectBase> {
+  public:
     explicit ObjectBase(const ObjectBaseParams& params);
     ~ObjectBase();
 
     virtual void CancelCallbacksForDisconnect() {}
 
+    const ObjectHandle& GetWireHandle() const;
+    ObjectId GetWireId() const;
+    ObjectGeneration GetWireGeneration() const;
+
+    // TODO(dawn:1451): Make these members private.
     Client* const client;
     uint32_t refcount;
-    const ObjectId id;
+
+  private:
+    const ObjectHandle mHandle;
 };
 
 }  // namespace dawn::wire::client

@@ -59,7 +59,7 @@ void Client::DestroyAllObjects() {
 
         DestroyObjectCmd cmd;
         cmd.objectType = ObjectType::Device;
-        cmd.objectId = object->id;
+        cmd.objectId = object->GetWireId();
         SerializeCommand(cmd);
         FreeObject(ObjectType::Device, object);
     }
@@ -74,7 +74,7 @@ void Client::DestroyAllObjects() {
 
             DestroyObjectCmd cmd;
             cmd.objectType = objectType;
-            cmd.objectId = object->id;
+            cmd.objectId = object->GetWireId();
             SerializeCommand(cmd);
             FreeObject(objectType, object);
         }
@@ -82,46 +82,46 @@ void Client::DestroyAllObjects() {
 }
 
 ReservedTexture Client::ReserveTexture(WGPUDevice device) {
-    auto* allocation = TextureAllocator().New(this);
+    Texture* texture = TextureAllocator().New(this);
 
     ReservedTexture result;
-    result.texture = ToAPI(allocation->object.get());
-    result.id = allocation->object->id;
-    result.generation = allocation->generation;
-    result.deviceId = FromAPI(device)->id;
-    result.deviceGeneration = DeviceAllocator().GetGeneration(FromAPI(device)->id);
+    result.texture = ToAPI(texture);
+    result.id = texture->GetWireId();
+    result.generation = texture->GetWireGeneration();
+    result.deviceId = FromAPI(device)->GetWireId();
+    result.deviceGeneration = FromAPI(device)->GetWireGeneration();
     return result;
 }
 
 ReservedSwapChain Client::ReserveSwapChain(WGPUDevice device) {
-    auto* allocation = SwapChainAllocator().New(this);
+    SwapChain* swapChain = SwapChainAllocator().New(this);
 
     ReservedSwapChain result;
-    result.swapchain = ToAPI(allocation->object.get());
-    result.id = allocation->object->id;
-    result.generation = allocation->generation;
-    result.deviceId = FromAPI(device)->id;
-    result.deviceGeneration = DeviceAllocator().GetGeneration(FromAPI(device)->id);
+    result.swapchain = ToAPI(swapChain);
+    result.id = swapChain->GetWireId();
+    result.generation = swapChain->GetWireGeneration();
+    result.deviceId = FromAPI(device)->GetWireId();
+    result.deviceGeneration = FromAPI(device)->GetWireGeneration();
     return result;
 }
 
 ReservedDevice Client::ReserveDevice() {
-    auto* allocation = DeviceAllocator().New(this);
+    Device* device = DeviceAllocator().New(this);
 
     ReservedDevice result;
-    result.device = ToAPI(allocation->object.get());
-    result.id = allocation->object->id;
-    result.generation = allocation->generation;
+    result.device = ToAPI(device);
+    result.id = device->GetWireId();
+    result.generation = device->GetWireGeneration();
     return result;
 }
 
 ReservedInstance Client::ReserveInstance() {
-    auto* allocation = InstanceAllocator().New(this);
+    Instance* instance = InstanceAllocator().New(this);
 
     ReservedInstance result;
-    result.instance = ToAPI(allocation->object.get());
-    result.id = allocation->object->id;
-    result.generation = allocation->generation;
+    result.instance = ToAPI(instance);
+    result.id = instance->GetWireId();
+    result.generation = instance->GetWireGeneration();
     return result;
 }
 

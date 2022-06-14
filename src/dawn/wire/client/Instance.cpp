@@ -40,13 +40,13 @@ void Instance::RequestAdapter(const WGPURequestAdapterOptions* options,
         return;
     }
 
-    auto* allocation = client->AdapterAllocator().New(client);
-    uint64_t serial = mRequestAdapterRequests.Add({callback, allocation->object->id, userdata});
+    Adapter* adapter = client->AdapterAllocator().New(client);
+    uint64_t serial = mRequestAdapterRequests.Add({callback, adapter->GetWireId(), userdata});
 
     InstanceRequestAdapterCmd cmd;
-    cmd.instanceId = this->id;
+    cmd.instanceId = GetWireId();
     cmd.requestSerial = serial;
-    cmd.adapterObjectHandle = ObjectHandle(allocation->object->id, allocation->generation);
+    cmd.adapterObjectHandle = adapter->GetWireHandle();
     cmd.options = options;
 
     client->SerializeCommand(cmd);

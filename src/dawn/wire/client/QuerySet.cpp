@@ -22,19 +22,18 @@ namespace dawn::wire::client {
 // static
 WGPUQuerySet QuerySet::Create(Device* device, const WGPUQuerySetDescriptor* descriptor) {
     Client* wireClient = device->client;
-    auto* objectAndSerial = wireClient->QuerySetAllocator().New(wireClient);
+    QuerySet* querySet = wireClient->QuerySetAllocator().New(wireClient);
 
     // Copy over descriptor data for reflection.
-    QuerySet* querySet = objectAndSerial->object.get();
     querySet->mType = descriptor->type;
     querySet->mCount = descriptor->count;
 
     // Send the Device::CreateQuerySet command without modifications.
     DeviceCreateQuerySetCmd cmd;
     cmd.self = ToAPI(device);
-    cmd.selfId = device->id;
+    cmd.selfId = device->GetWireId();
     cmd.descriptor = descriptor;
-    cmd.result = ObjectHandle{querySet->id, objectAndSerial->generation};
+    cmd.result = querySet->GetWireHandle();
     wireClient->SerializeCommand(cmd);
 
     return ToAPI(querySet);

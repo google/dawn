@@ -28,7 +28,6 @@ ObjectHandle& ObjectHandle::operator=(const volatile ObjectHandle& rhs) {
     return *this;
 }
 
-
 ObjectHandle::ObjectHandle(const ObjectHandle& rhs) = default;
 ObjectHandle& ObjectHandle::operator=(const ObjectHandle& rhs) = default;
 

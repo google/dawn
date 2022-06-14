@@ -44,7 +44,7 @@ void Queue::OnSubmittedWorkDone(uint64_t signalValue,
     uint64_t serial = mOnWorkDoneRequests.Add({callback, userdata});
 
     QueueOnSubmittedWorkDoneCmd cmd;
-    cmd.queueId = this->id;
+    cmd.queueId = GetWireId();
     cmd.signalValue = signalValue;
     cmd.requestSerial = serial;
 
@@ -55,8 +55,8 @@ void Queue::WriteBuffer(WGPUBuffer cBuffer, uint64_t bufferOffset, const void* d
     Buffer* buffer = FromAPI(cBuffer);
 
     QueueWriteBufferCmd cmd;
-    cmd.queueId = id;
-    cmd.bufferId = buffer->id;
+    cmd.queueId = GetWireId();
+    cmd.bufferId = buffer->GetWireId();
     cmd.bufferOffset = bufferOffset;
     cmd.data = static_cast<const uint8_t*>(data);
     cmd.size = size;
@@ -70,7 +70,7 @@ void Queue::WriteTexture(const WGPUImageCopyTexture* destination,
                          const WGPUTextureDataLayout* dataLayout,
                          const WGPUExtent3D* writeSize) {
     QueueWriteTextureCmd cmd;
-    cmd.queueId = id;
+    cmd.queueId = GetWireId();
     cmd.destination = destination;
     cmd.data = static_cast<const uint8_t*>(data);
     cmd.dataSize = dataSize;

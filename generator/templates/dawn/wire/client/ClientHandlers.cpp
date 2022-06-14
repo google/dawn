@@ -33,8 +33,7 @@ namespace dawn::wire::client {
 
                 {% if member.type.dict_name == "ObjectHandle" %}
                     {{Type}}* {{name}} = {{Type}}Allocator().GetObject(cmd.{{name}}.id);
-                    uint32_t {{name}}Generation = {{Type}}Allocator().GetGeneration(cmd.{{name}}.id);
-                    if ({{name}}Generation != cmd.{{name}}.generation) {
+                    if ({{name}} != nullptr && {{name}}->GetWireGeneration() != cmd.{{name}}.generation) {
                         {{name}} = nullptr;
                     }
                 {% endif %}

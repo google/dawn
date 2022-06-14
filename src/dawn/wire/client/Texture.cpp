@@ -22,10 +22,9 @@ namespace dawn::wire::client {
 // static
 WGPUTexture Texture::Create(Device* device, const WGPUTextureDescriptor* descriptor) {
     Client* wireClient = device->client;
-    auto* textureObjectAndSerial = wireClient->TextureAllocator().New(wireClient);
+    Texture* texture = wireClient->TextureAllocator().New(wireClient);
 
     // Copy over descriptor data for reflection.
-    Texture* texture = textureObjectAndSerial->object.get();
     texture->mSize = descriptor->size;
     texture->mMipLevelCount = descriptor->mipLevelCount;
     texture->mSampleCount = descriptor->sampleCount;
@@ -36,9 +35,9 @@ WGPUTexture Texture::Create(Device* device, const WGPUTextureDescriptor* descrip
     // Send the Device::CreateTexture command without modifications.
     DeviceCreateTextureCmd cmd;
     cmd.self = ToAPI(device);
-    cmd.selfId = device->id;
+    cmd.selfId = device->GetWireId();
     cmd.descriptor = descriptor;
-    cmd.result = ObjectHandle{texture->id, textureObjectAndSerial->generation};
+    cmd.result = texture->GetWireHandle();
     wireClient->SerializeCommand(cmd);
 
     return ToAPI(texture);

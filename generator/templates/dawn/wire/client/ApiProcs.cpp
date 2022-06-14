@@ -58,8 +58,8 @@ namespace dawn::wire::client {
 
                     //* For object creation, store the object ID the client will use for the result.
                     {% if method.return_type.category == "object" %}
-                        auto* allocation = self->client->{{method.return_type.name.CamelCase()}}Allocator().New(self->client);
-                        cmd.result = ObjectHandle{allocation->object->id, allocation->generation};
+                        auto* returnObject = self->client->{{method.return_type.name.CamelCase()}}Allocator().New(self->client);
+                        cmd.result = returnObject->GetWireHandle();
                     {% endif %}
 
                     {% for arg in method.arguments %}
@@ -72,7 +72,7 @@ namespace dawn::wire::client {
                     self->client->SerializeCommand(cmd);
 
                     {% if method.return_type.category == "object" %}
-                        return reinterpret_cast<{{as_cType(method.return_type.name)}}>(allocation->object.get());
+                        return ToAPI(returnObject);
                     {% endif %}
                 {% else %}
                     return self->{{method.name.CamelCase()}}(
@@ -94,7 +94,7 @@ namespace dawn::wire::client {
 
             DestroyObjectCmd cmd;
             cmd.objectType = ObjectType::{{type.name.CamelCase()}};
-            cmd.objectId = obj->id;
+            cmd.objectId = obj->GetWireId();
 
             obj->client->SerializeCommand(cmd);
             obj->client->{{type.name.CamelCase()}}Allocator().Free(obj);

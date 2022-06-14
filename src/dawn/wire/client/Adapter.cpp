@@ -70,13 +70,13 @@ void Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
         return;
     }
 
-    auto* allocation = client->DeviceAllocator().New(client);
-    uint64_t serial = mRequestDeviceRequests.Add({callback, allocation->object->id, userdata});
+    Device* device = client->DeviceAllocator().New(client);
+    uint64_t serial = mRequestDeviceRequests.Add({callback, device->GetWireId(), userdata});
 
     AdapterRequestDeviceCmd cmd;
-    cmd.adapterId = this->id;
+    cmd.adapterId = GetWireId();
     cmd.requestSerial = serial;
-    cmd.deviceObjectHandle = ObjectHandle(allocation->object->id, allocation->generation);
+    cmd.deviceObjectHandle = device->GetWireHandle();
     cmd.descriptor = descriptor;
 
     client->SerializeCommand(cmd);
