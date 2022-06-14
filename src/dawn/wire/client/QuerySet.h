@@ -28,7 +28,7 @@ class QuerySet final : public ObjectBase {
     static WGPUQuerySet Create(Device* device, const WGPUQuerySetDescriptor* descriptor);
 
     using ObjectBase::ObjectBase;
-    ~QuerySet();
+    ~QuerySet() override;
 
     // Note that these values can be arbitrary since they aren't validated in the wire client.
     WGPUQueryType GetType() const;

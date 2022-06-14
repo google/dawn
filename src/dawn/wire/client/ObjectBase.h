@@ -37,7 +37,7 @@ struct ObjectBaseParams {
 class ObjectBase : public LinkNode<ObjectBase> {
   public:
     explicit ObjectBase(const ObjectBaseParams& params);
-    ~ObjectBase();
+    virtual ~ObjectBase();
 
     virtual void CancelCallbacksForDisconnect() {}
 

@@ -28,7 +28,7 @@ namespace dawn::wire::client {
 class Adapter final : public ObjectBase {
   public:
     using ObjectBase::ObjectBase;
-    ~Adapter();
+    ~Adapter() override;
 
     void CancelCallbacksForDisconnect() override;
 

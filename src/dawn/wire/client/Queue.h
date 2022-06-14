@@ -26,7 +26,7 @@ namespace dawn::wire::client {
 class Queue final : public ObjectBase {
   public:
     using ObjectBase::ObjectBase;
-    ~Queue();
+    ~Queue() override;
 
     bool OnWorkDoneCallback(uint64_t requestSerial, WGPUQueueWorkDoneStatus status);
 

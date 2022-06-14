@@ -28,7 +28,7 @@ class Texture final : public ObjectBase {
     static WGPUTexture Create(Device* device, const WGPUTextureDescriptor* descriptor);
 
     using ObjectBase::ObjectBase;
-    ~Texture();
+    ~Texture() override;
 
     // Note that these values can be arbitrary since they aren't validated in the wire client.
     uint32_t GetWidth() const;
