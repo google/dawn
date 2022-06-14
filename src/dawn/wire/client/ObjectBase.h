@@ -44,13 +44,17 @@ class ObjectBase : public LinkNode<ObjectBase> {
     const ObjectHandle& GetWireHandle() const;
     ObjectId GetWireId() const;
     ObjectGeneration GetWireGeneration() const;
+    Client* GetClient() const;
 
-    // TODO(dawn:1451): Make these members private.
-    Client* const client;
-    uint32_t refcount;
+    void Reference();
+    // Returns true if it was the last reference, indicating that the caller must destroy the
+    // object.
+    [[nodiscard]] bool Release();
 
   private:
+    Client* const mClient;
     const ObjectHandle mHandle;
+    uint32_t mRefcount;
 };
 
 }  // namespace dawn::wire::client

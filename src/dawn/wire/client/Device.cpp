@@ -151,6 +151,7 @@ void Device::SetDeviceLostCallback(WGPUDeviceLostCallback callback, void* userda
 
 bool Device::PopErrorScope(WGPUErrorCallback callback, void* userdata) {
     // TODO(crbug.com/dawn/1324) Replace bool return with void when users are updated.
+    Client* client = GetClient();
     if (client->IsDisconnected()) {
         callback(WGPUErrorType_DeviceLost, "GPU device disconnected", userdata);
         return true;
@@ -192,7 +193,7 @@ void Device::InjectError(WGPUErrorType type, const char* message) {
     cmd.self = ToAPI(this);
     cmd.type = type;
     cmd.message = message;
-    client->SerializeCommand(cmd);
+    GetClient()->SerializeCommand(cmd);
 }
 
 WGPUBuffer Device::CreateBuffer(const WGPUBufferDescriptor* descriptor) {
@@ -219,6 +220,7 @@ WGPUQueue Device::GetQueue() {
     // on construction.
     if (mQueue == nullptr) {
         // Get the primary queue for this device.
+        Client* client = GetClient();
         mQueue = client->QueueAllocator().New(client);
 
         DeviceGetQueueCmd cmd;
@@ -228,13 +230,14 @@ WGPUQueue Device::GetQueue() {
         client->SerializeCommand(cmd);
     }
 
-    mQueue->refcount++;
+    mQueue->Reference();
     return ToAPI(mQueue);
 }
 
 void Device::CreateComputePipelineAsync(WGPUComputePipelineDescriptor const* descriptor,
                                         WGPUCreateComputePipelineAsyncCallback callback,
                                         void* userdata) {
+    Client* client = GetClient();
     if (client->IsDisconnected()) {
         return callback(WGPUCreatePipelineAsyncStatus_DeviceLost, nullptr,
                         "GPU device disconnected", userdata);
@@ -266,6 +269,7 @@ bool Device::OnCreateComputePipelineAsyncCallback(uint64_t requestSerial,
         return false;
     }
 
+    Client* client = GetClient();
     auto* pipelineAllocation =
         client->ComputePipelineAllocator().GetObject(request.pipelineObjectID);
 
@@ -286,6 +290,7 @@ bool Device::OnCreateComputePipelineAsyncCallback(uint64_t requestSerial,
 void Device::CreateRenderPipelineAsync(WGPURenderPipelineDescriptor const* descriptor,
                                        WGPUCreateRenderPipelineAsyncCallback callback,
                                        void* userdata) {
+    Client* client = GetClient();
     if (client->IsDisconnected()) {
         return callback(WGPUCreatePipelineAsyncStatus_DeviceLost, nullptr,
                         "GPU device disconnected", userdata);
@@ -317,6 +322,7 @@ bool Device::OnCreateRenderPipelineAsyncCallback(uint64_t requestSerial,
         return false;
     }
 
+    Client* client = GetClient();
     auto* pipelineAllocation =
         client->RenderPipelineAllocator().GetObject(request.pipelineObjectID);
 

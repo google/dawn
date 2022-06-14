@@ -58,7 +58,7 @@ namespace dawn::wire::client {
 
                     //* For object creation, store the object ID the client will use for the result.
                     {% if method.return_type.category == "object" %}
-                        auto* returnObject = self->client->{{method.return_type.name.CamelCase()}}Allocator().New(self->client);
+                        auto* returnObject = self->GetClient()->{{method.return_type.name.CamelCase()}}Allocator().New(self->GetClient());
                         cmd.result = returnObject->GetWireHandle();
                     {% endif %}
 
@@ -69,7 +69,7 @@ namespace dawn::wire::client {
                     {% endfor %}
 
                     //* Allocate space to send the command and copy the value args over.
-                    self->client->SerializeCommand(cmd);
+                    self->GetClient()->SerializeCommand(cmd);
 
                     {% if method.return_type.category == "object" %}
                         return ToAPI(returnObject);
@@ -86,9 +86,8 @@ namespace dawn::wire::client {
         //* When an object's refcount reaches 0, notify the server side of it and delete it.
         void Client{{as_MethodSuffix(type.name, Name("release"))}}({{cType}} cObj) {
             {{Type}}* obj = reinterpret_cast<{{Type}}*>(cObj);
-            obj->refcount --;
 
-            if (obj->refcount > 0) {
+            if (!obj->Release()) {
                 return;
             }
 
@@ -96,13 +95,13 @@ namespace dawn::wire::client {
             cmd.objectType = ObjectType::{{type.name.CamelCase()}};
             cmd.objectId = obj->GetWireId();
 
-            obj->client->SerializeCommand(cmd);
-            obj->client->{{type.name.CamelCase()}}Allocator().Free(obj);
+            Client* client = obj->GetClient();
+            client->SerializeCommand(cmd);
+            client->{{type.name.CamelCase()}}Allocator().Free(obj);
         }
 
         void Client{{as_MethodSuffix(type.name, Name("reference"))}}({{cType}} cObj) {
-            {{Type}}* obj = reinterpret_cast<{{Type}}*>(cObj);
-            obj->refcount ++;
+            reinterpret_cast<{{Type}}*>(cObj)->Reference();
         }
     {% endfor %}
 

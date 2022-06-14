@@ -65,6 +65,7 @@ void Adapter::GetProperties(WGPUAdapterProperties* properties) const {
 void Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
                             WGPURequestDeviceCallback callback,
                             void* userdata) {
+    Client* client = GetClient();
     if (client->IsDisconnected()) {
         callback(WGPURequestDeviceStatus_Error, nullptr, "GPU connection lost", userdata);
         return;
@@ -108,6 +109,7 @@ bool Adapter::OnRequestDeviceCallback(uint64_t requestSerial,
         return false;
     }
 
+    Client* client = GetClient();
     Device* device = client->DeviceAllocator().GetObject(request.deviceObjectId);
 
     // If the return status is a failure we should give a null device to the callback and

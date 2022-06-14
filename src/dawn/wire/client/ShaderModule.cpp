@@ -23,6 +23,7 @@ ShaderModule::~ShaderModule() {
 }
 
 void ShaderModule::GetCompilationInfo(WGPUCompilationInfoCallback callback, void* userdata) {
+    Client* client = GetClient();
     if (client->IsDisconnected()) {
         callback(WGPUCompilationInfoRequestStatus_DeviceLost, nullptr, userdata);
         return;

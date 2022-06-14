@@ -36,6 +36,7 @@ bool Queue::OnWorkDoneCallback(uint64_t requestSerial, WGPUQueueWorkDoneStatus s
 void Queue::OnSubmittedWorkDone(uint64_t signalValue,
                                 WGPUQueueWorkDoneCallback callback,
                                 void* userdata) {
+    Client* client = GetClient();
     if (client->IsDisconnected()) {
         callback(WGPUQueueWorkDoneStatus_DeviceLost, userdata);
         return;
@@ -61,7 +62,7 @@ void Queue::WriteBuffer(WGPUBuffer cBuffer, uint64_t bufferOffset, const void* d
     cmd.data = static_cast<const uint8_t*>(data);
     cmd.size = size;
 
-    client->SerializeCommand(cmd);
+    GetClient()->SerializeCommand(cmd);
 }
 
 void Queue::WriteTexture(const WGPUImageCopyTexture* destination,
@@ -77,7 +78,7 @@ void Queue::WriteTexture(const WGPUImageCopyTexture* destination,
     cmd.dataLayout = dataLayout;
     cmd.writeSize = writeSize;
 
-    client->SerializeCommand(cmd);
+    GetClient()->SerializeCommand(cmd);
 }
 
 void Queue::CancelCallbacksForDisconnect() {

@@ -26,7 +26,7 @@ namespace dawn::wire::client {
 
 // static
 WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor) {
-    Client* wireClient = device->client;
+    Client* wireClient = device->GetClient();
 
     bool mappable =
         (descriptor->usage & (WGPUBufferUsage_MapRead | WGPUBufferUsage_MapWrite)) != 0 ||
@@ -125,7 +125,9 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
 
 // static
 WGPUBuffer Buffer::CreateError(Device* device, const WGPUBufferDescriptor* descriptor) {
-    Buffer* buffer = device->client->BufferAllocator().New(device->client);
+    Client* client = device->GetClient();
+
+    Buffer* buffer = client->BufferAllocator().New(client);
     buffer->mDevice = device;
     buffer->mDeviceIsAlive = device->GetAliveWeakPtr();
     buffer->mSize = descriptor->size;
@@ -134,7 +136,7 @@ WGPUBuffer Buffer::CreateError(Device* device, const WGPUBufferDescriptor* descr
     DeviceCreateErrorBufferCmd cmd;
     cmd.self = ToAPI(device);
     cmd.result = buffer->GetWireHandle();
-    device->client->SerializeCommand(cmd);
+    client->SerializeCommand(cmd);
 
     return ToAPI(buffer);
 }
@@ -161,6 +163,7 @@ void Buffer::MapAsync(WGPUMapModeFlags mode,
                       size_t size,
                       WGPUBufferMapCallback callback,
                       void* userdata) {
+    Client* client = GetClient();
     if (client->IsDisconnected()) {
         return callback(WGPUBufferMapAsyncStatus_DeviceLost, userdata);
     }
@@ -288,6 +291,7 @@ void Buffer::Unmap() {
     //   - Server -> Client: Result of MapRequest1
     //   - Unmap locally on the client
     //   - Server -> Client: Result of MapRequest2
+    Client* client = GetClient();
 
     // mWriteHandle can still be nullptr if buffer has been destroyed before unmap
     if ((mMapState == MapState::MappedForWrite || mMapState == MapState::MappedAtCreation) &&
@@ -350,6 +354,8 @@ void Buffer::Unmap() {
 }
 
 void Buffer::Destroy() {
+    Client* client = GetClient();
+
     // Remove the current mapping and destroy Read/WriteHandles.
     FreeMappedData();
 

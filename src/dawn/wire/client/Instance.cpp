@@ -35,6 +35,7 @@ void Instance::CancelCallbacksForDisconnect() {
 void Instance::RequestAdapter(const WGPURequestAdapterOptions* options,
                               WGPURequestAdapterCallback callback,
                               void* userdata) {
+    Client* client = GetClient();
     if (client->IsDisconnected()) {
         callback(WGPURequestAdapterStatus_Error, nullptr, "GPU connection lost", userdata);
         return;
@@ -80,6 +81,7 @@ bool Instance::OnRequestAdapterCallback(uint64_t requestSerial,
         return false;
     }
 
+    Client* client = GetClient();
     Adapter* adapter = client->AdapterAllocator().GetObject(request.adapterObjectId);
 
     // If the return status is a failure we should give a null adapter to the callback and
