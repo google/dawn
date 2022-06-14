@@ -65,6 +65,8 @@ dawn_component("wire") {
     "ChunkedCommandHandler.h",
     "ChunkedCommandSerializer.cpp",
     "ChunkedCommandSerializer.h",
+    "ObjectHandle.cpp",
+    "ObjectHandle.h",
     "SupportedFeatures.cpp",
     "SupportedFeatures.h",
     "Wire.cpp",

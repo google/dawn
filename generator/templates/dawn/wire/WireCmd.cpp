@@ -651,31 +651,6 @@
 
 namespace dawn::wire {
 
-    ObjectHandle::ObjectHandle() = default;
-    ObjectHandle::ObjectHandle(ObjectId id, ObjectGeneration generation)
-        : id(id), generation(generation) {
-    }
-
-    ObjectHandle::ObjectHandle(const volatile ObjectHandle& rhs)
-        : id(rhs.id), generation(rhs.generation) {
-    }
-    ObjectHandle& ObjectHandle::operator=(const volatile ObjectHandle& rhs) {
-        id = rhs.id;
-        generation = rhs.generation;
-        return *this;
-    }
-
-    ObjectHandle& ObjectHandle::AssignFrom(const ObjectHandle& rhs) {
-        id = rhs.id;
-        generation = rhs.generation;
-        return *this;
-    }
-    ObjectHandle& ObjectHandle::AssignFrom(const volatile ObjectHandle& rhs) {
-        id = rhs.id;
-        generation = rhs.generation;
-        return *this;
-    }
-
     namespace {
         // Allocates enough space from allocator to countain T[count] and return it in out.
         // Return FatalError if the allocator couldn't allocate the memory.

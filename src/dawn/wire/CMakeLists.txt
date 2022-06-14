@@ -38,6 +38,8 @@ target_sources(dawn_wire PRIVATE
     "ChunkedCommandHandler.h"
     "ChunkedCommandSerializer.cpp"
     "ChunkedCommandSerializer.h"
+    "ObjectHandle.cpp"
+    "ObjectHandle.h"
     "SupportedFeatures.cpp"
     "SupportedFeatures.h"
     "Wire.cpp"

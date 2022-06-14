@@ -19,31 +19,10 @@
 
 #include "dawn/wire/BufferConsumer.h"
 #include "dawn/wire/ObjectType_autogen.h"
+#include "dawn/wire/ObjectHandle.h"
 #include "dawn/wire/WireResult.h"
 
 namespace dawn::wire {
-
-    using ObjectId = uint32_t;
-    using ObjectGeneration = uint32_t;
-    struct ObjectHandle {
-      ObjectId id;
-      ObjectGeneration generation;
-
-      ObjectHandle();
-      ObjectHandle(ObjectId id, ObjectGeneration generation);
-
-      ObjectHandle(const volatile ObjectHandle& rhs);
-      ObjectHandle& operator=(const volatile ObjectHandle& rhs);
-
-      // MSVC has a bug where it thinks the volatile copy assignment is a duplicate.
-      // Workaround this by forwarding to a different function AssignFrom.
-      template <typename T>
-      ObjectHandle& operator=(const T& rhs) {
-          return AssignFrom(rhs);
-      }
-      ObjectHandle& AssignFrom(const ObjectHandle& rhs);
-      ObjectHandle& AssignFrom(const volatile ObjectHandle& rhs);
-    };
 
     // Interface to allocate more space to deserialize pointed-to data.
     // nullptr is treated as an error.

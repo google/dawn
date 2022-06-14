@@ -19,6 +19,7 @@
 
 #include "dawn/common/LinkedList.h"
 #include "dawn/wire/ObjectType_autogen.h"
+#include "dawn/wire/ObjectHandle.h"
 
 namespace dawn::wire::client {
 
@@ -26,7 +27,7 @@ class Client;
 
 struct ObjectBaseParams {
     Client* client;
-    uint32_t id;
+    ObjectId id;
 };
 
 // All objects on the client side have:
@@ -42,7 +43,7 @@ struct ObjectBase : public LinkNode<ObjectBase> {
 
     Client* const client;
     uint32_t refcount;
-    const uint32_t id;
+    const ObjectId id;
 };
 
 }  // namespace dawn::wire::client
