@@ -198,7 +198,7 @@ TEST_F(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
     instance.RequestAdapter(&options, cb.Callback(), userdata);
 
     std::initializer_list<wgpu::FeatureName> fakeFeatures = {
-        wgpu::FeatureName::Depth24UnormStencil8,
+        wgpu::FeatureName::Depth32FloatStencil8,
         // Some value that is not a valid feature
         static_cast<wgpu::FeatureName>(-2),
     };
@@ -246,7 +246,7 @@ TEST_F(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
             ASSERT_EQ(adapter.EnumerateFeatures(nullptr), 1u);
             adapter.EnumerateFeatures(&feature);
 
-            EXPECT_EQ(feature, wgpu::FeatureName::Depth24UnormStencil8);
+            EXPECT_EQ(feature, wgpu::FeatureName::Depth32FloatStencil8);
         })));
     FlushServer();
 }

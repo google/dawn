@@ -63,12 +63,6 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         switch (GetParam().mTextureFormat) {
-            case wgpu::TextureFormat::Depth24UnormStencil8:
-                if (SupportsFeatures({wgpu::FeatureName::Depth24UnormStencil8})) {
-                    mIsFormatSupported = true;
-                    return {wgpu::FeatureName::Depth24UnormStencil8};
-                }
-                return {};
             case wgpu::TextureFormat::Depth32FloatStencil8:
                 if (SupportsFeatures({wgpu::FeatureName::Depth32FloatStencil8})) {
                     mIsFormatSupported = true;

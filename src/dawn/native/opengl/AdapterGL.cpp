@@ -231,7 +231,6 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
             supportsBPTC) {
             mSupportedFeatures.EnableFeature(dawn::native::Feature::TextureCompressionBC);
         }
-        mSupportedFeatures.EnableFeature(Feature::Depth24UnormStencil8);
     }
 
     // Non-zero baseInstance requires at least desktop OpenGL 4.2, and it is not supported in

@@ -155,10 +155,6 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
         mSupportedFeatures.EnableFeature(Feature::TimestampQuery);
     }
 
-    if (IsDepthStencilFormatSupported(VK_FORMAT_D24_UNORM_S8_UINT)) {
-        mSupportedFeatures.EnableFeature(Feature::Depth24UnormStencil8);
-    }
-
     if (IsDepthStencilFormatSupported(VK_FORMAT_D32_SFLOAT_S8_UINT)) {
         mSupportedFeatures.EnableFeature(Feature::Depth32FloatStencil8);
     }

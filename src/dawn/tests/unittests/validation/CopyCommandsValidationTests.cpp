@@ -422,10 +422,9 @@ class CopyCommandTest_B2T : public CopyCommandTest {
   protected:
     WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
         wgpu::DeviceDescriptor descriptor;
-        wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::Depth24UnormStencil8,
-                                                 wgpu::FeatureName::Depth32FloatStencil8};
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth32FloatStencil8};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 2;
+        descriptor.requiredFeaturesCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 };
@@ -718,12 +717,10 @@ TEST_F(CopyCommandTest_B2T, IncorrectBufferOffsetForColorTexture) {
 TEST_F(CopyCommandTest_B2T, IncorrectBufferOffsetForDepthStencilTexture) {
     // TODO(dawn:570, dawn:666): List other valid parameters after missing texture formats
     // are implemented, e.g. Stencil8.
-    std::array<std::tuple<wgpu::TextureFormat, wgpu::TextureAspect>, 5> params = {
+    std::array<std::tuple<wgpu::TextureFormat, wgpu::TextureAspect>, 4> params = {
         std::make_tuple(wgpu::TextureFormat::Depth16Unorm, wgpu::TextureAspect::DepthOnly),
         std::make_tuple(wgpu::TextureFormat::Depth16Unorm, wgpu::TextureAspect::All),
         std::make_tuple(wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureAspect::StencilOnly),
-        std::make_tuple(wgpu::TextureFormat::Depth24UnormStencil8,
-                        wgpu::TextureAspect::StencilOnly),
         std::make_tuple(wgpu::TextureFormat::Depth32FloatStencil8,
                         wgpu::TextureAspect::StencilOnly),
     };
@@ -893,9 +890,10 @@ TEST_F(CopyCommandTest_B2T, CopyToDepthAspect) {
         }
     }
 
-    constexpr std::array<wgpu::TextureFormat, 5> kDisallowBufferToDepthCopyFormats = {
-        wgpu::TextureFormat::Depth32Float,         wgpu::TextureFormat::Depth24Plus,
-        wgpu::TextureFormat::Depth24PlusStencil8,  wgpu::TextureFormat::Depth24UnormStencil8,
+    constexpr std::array<wgpu::TextureFormat, 4> kDisallowBufferToDepthCopyFormats = {
+        wgpu::TextureFormat::Depth32Float,
+        wgpu::TextureFormat::Depth24Plus,
+        wgpu::TextureFormat::Depth24PlusStencil8,
         wgpu::TextureFormat::Depth32FloatStencil8,
     };
 
@@ -1032,10 +1030,9 @@ class CopyCommandTest_T2B : public CopyCommandTest {
   protected:
     WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
         wgpu::DeviceDescriptor descriptor;
-        wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::Depth24UnormStencil8,
-                                                 wgpu::FeatureName::Depth32FloatStencil8};
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth32FloatStencil8};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 2;
+        descriptor.requiredFeaturesCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 };
@@ -1354,14 +1351,12 @@ TEST_F(CopyCommandTest_T2B, IncorrectBufferOffsetForColorTexture) {
 TEST_F(CopyCommandTest_T2B, IncorrectBufferOffsetForDepthStencilTexture) {
     // TODO(dawn:570, dawn:666): List other valid parameters after missing texture formats
     // are implemented, e.g. Stencil8.
-    std::array<std::tuple<wgpu::TextureFormat, wgpu::TextureAspect>, 8> params = {
+    std::array<std::tuple<wgpu::TextureFormat, wgpu::TextureAspect>, 7> params = {
         std::make_tuple(wgpu::TextureFormat::Depth16Unorm, wgpu::TextureAspect::DepthOnly),
         std::make_tuple(wgpu::TextureFormat::Depth16Unorm, wgpu::TextureAspect::All),
         std::make_tuple(wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureAspect::StencilOnly),
         std::make_tuple(wgpu::TextureFormat::Depth32Float, wgpu::TextureAspect::DepthOnly),
         std::make_tuple(wgpu::TextureFormat::Depth32Float, wgpu::TextureAspect::All),
-        std::make_tuple(wgpu::TextureFormat::Depth24UnormStencil8,
-                        wgpu::TextureAspect::StencilOnly),
         std::make_tuple(wgpu::TextureFormat::Depth32FloatStencil8, wgpu::TextureAspect::DepthOnly),
         std::make_tuple(wgpu::TextureFormat::Depth32FloatStencil8,
                         wgpu::TextureAspect::StencilOnly),
@@ -1538,9 +1533,10 @@ TEST_F(CopyCommandTest_T2B, CopyFromDepthAspect) {
         }
     }
 
-    constexpr std::array<wgpu::TextureFormat, 3> kDisallowDepthCopyFormats = {
-        wgpu::TextureFormat::Depth24Plus, wgpu::TextureFormat::Depth24PlusStencil8,
-        wgpu::TextureFormat::Depth24UnormStencil8};
+    constexpr std::array<wgpu::TextureFormat, 2> kDisallowDepthCopyFormats = {
+        wgpu::TextureFormat::Depth24Plus,
+        wgpu::TextureFormat::Depth24PlusStencil8,
+    };
     for (wgpu::TextureFormat format : kDisallowDepthCopyFormats) {
         {
             wgpu::Texture source =
@@ -1671,10 +1667,9 @@ class CopyCommandTest_T2T : public CopyCommandTest {
   protected:
     WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
         wgpu::DeviceDescriptor descriptor;
-        wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::Depth24UnormStencil8,
-                                                 wgpu::FeatureName::Depth32FloatStencil8};
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth32FloatStencil8};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 2;
+        descriptor.requiredFeaturesCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 

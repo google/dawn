@@ -79,7 +79,7 @@ struct AspectInfo {
 
 // The number of formats Dawn knows about. Asserts in BuildFormatTable ensure that this is the
 // exact number of known format.
-static constexpr uint32_t kKnownFormatCount = 96;
+static constexpr uint32_t kKnownFormatCount = 95;
 
 using FormatIndex = TypedInteger<struct FormatIndexT, uint32_t>;
 

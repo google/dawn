@@ -176,9 +176,9 @@ DXGI_FORMAT D3D12TypelessTextureFormat(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::Depth24Plus:
             return DXGI_FORMAT_R32_TYPELESS;
 
-        // Depth24UnormStencil8 is the smallest format supported on D3D12 that has stencil.
+        // DXGI_FORMAT_D24_UNORM_S8_UINT is the smallest format supported on D3D12 that has stencil,
+        // for which the typeless equivalent is DXGI_FORMAT_R24G8_TYPELESS.
         case wgpu::TextureFormat::Stencil8:
-        case wgpu::TextureFormat::Depth24UnormStencil8:
             return DXGI_FORMAT_R24G8_TYPELESS;
         case wgpu::TextureFormat::Depth24PlusStencil8:
         case wgpu::TextureFormat::Depth32FloatStencil8:
@@ -344,9 +344,8 @@ DXGI_FORMAT D3D12TextureFormat(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::Depth32Float:
         case wgpu::TextureFormat::Depth24Plus:
             return DXGI_FORMAT_D32_FLOAT;
-        // Depth24UnormStencil8 is the smallest format supported on D3D12 that has stencil.
+        // DXGI_FORMAT_D24_UNORM_S8_UINT is the smallest format supported on D3D12 that has stencil.
         case wgpu::TextureFormat::Stencil8:
-        case wgpu::TextureFormat::Depth24UnormStencil8:
             return DXGI_FORMAT_D24_UNORM_S8_UINT;
         case wgpu::TextureFormat::Depth24PlusStencil8:
         case wgpu::TextureFormat::Depth32FloatStencil8:
@@ -689,7 +688,6 @@ DXGI_FORMAT Texture::GetD3D12CopyableSubresourceFormat(Aspect aspect) const {
     ASSERT(GetFormat().aspects & aspect);
 
     switch (GetFormat().format) {
-        case wgpu::TextureFormat::Depth24UnormStencil8:
         case wgpu::TextureFormat::Depth24PlusStencil8:
         case wgpu::TextureFormat::Depth32FloatStencil8:
         case wgpu::TextureFormat::Stencil8:
@@ -1210,8 +1208,7 @@ TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* desc
             case wgpu::TextureFormat::Depth16Unorm:
                 mSrvDesc.Format = DXGI_FORMAT_R16_UNORM;
                 break;
-            case wgpu::TextureFormat::Stencil8:
-            case wgpu::TextureFormat::Depth24UnormStencil8: {
+            case wgpu::TextureFormat::Stencil8: {
                 Aspect aspects = SelectFormatAspects(textureFormat, descriptor->aspect);
                 ASSERT(aspects != Aspect::None);
                 if (!HasZeroOrOneBits(aspects)) {

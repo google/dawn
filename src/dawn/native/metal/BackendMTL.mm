@@ -384,13 +384,6 @@ class Adapter : public AdapterBase {
             mSupportedFeatures.EnableFeature(Feature::MultiPlanarFormats);
         }
 
-#if DAWN_PLATFORM_IS(MACOS)
-        // MTLPixelFormatDepth24Unorm_Stencil8 is only available on macOS 10.11+
-        if ([*mDevice isDepth24Stencil8PixelFormatSupported]) {
-            mSupportedFeatures.EnableFeature(Feature::Depth24UnormStencil8);
-        }
-#endif
-
         mSupportedFeatures.EnableFeature(Feature::IndirectFirstInstance);
 
         return {};

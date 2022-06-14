@@ -403,9 +403,6 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
         AddDepthFormat(wgpu::TextureFormat::Depth24Plus, 4, true);
         AddMultiAspectFormat(wgpu::TextureFormat::Depth24PlusStencil8,
                               Aspect::Depth | Aspect::Stencil, wgpu::TextureFormat::Depth24Plus, wgpu::TextureFormat::Stencil8, true, true, true, 2);
-        bool isD24S8Supported = device->IsFeatureEnabled(Feature::Depth24UnormStencil8);
-        AddMultiAspectFormat(wgpu::TextureFormat::Depth24UnormStencil8,
-                              Aspect::Depth | Aspect::Stencil, wgpu::TextureFormat::Depth24Plus, wgpu::TextureFormat::Stencil8, true, isD24S8Supported, true, 2);
         AddDepthFormat(wgpu::TextureFormat::Depth32Float, 4, true);
         bool isD32S8Supported = device->IsFeatureEnabled(Feature::Depth32FloatStencil8);
         AddMultiAspectFormat(wgpu::TextureFormat::Depth32FloatStencil8,
@@ -480,7 +477,8 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
     // clang-format on
 
     // This checks that each format is set at least once, the second part of checking that all
-    // formats are checked exactly once.
+    // formats are checked exactly once. If this assertion is failing and texture formats have been
+    // added or removed recently, check that kKnownFormatCount has been updated.
     ASSERT(formatsSet.all());
 
     return table;

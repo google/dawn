@@ -48,7 +48,6 @@ GLuint ToOpenGLCompareFunction(wgpu::CompareFunction compareFunction) {
 GLint GetStencilMaskFromStencilFormat(wgpu::TextureFormat depthStencilFormat) {
     switch (depthStencilFormat) {
         case wgpu::TextureFormat::Depth24PlusStencil8:
-        case wgpu::TextureFormat::Depth24UnormStencil8:
         case wgpu::TextureFormat::Depth32FloatStencil8:
         case wgpu::TextureFormat::Stencil8:
             return 0xFF;

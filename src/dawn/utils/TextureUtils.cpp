@@ -272,7 +272,6 @@ uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat) {
             return 2u;
 
         case wgpu::TextureFormat::Depth24Plus:
-        case wgpu::TextureFormat::Depth24UnormStencil8:
         case wgpu::TextureFormat::Depth32Float:
             return 4u;
 
@@ -392,7 +391,6 @@ uint32_t GetTextureFormatBlockWidth(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::Depth24Plus:
         case wgpu::TextureFormat::Depth24PlusStencil8:
         case wgpu::TextureFormat::Depth16Unorm:
-        case wgpu::TextureFormat::Depth24UnormStencil8:
         case wgpu::TextureFormat::Depth32FloatStencil8:
         case wgpu::TextureFormat::Stencil8:
             return 1u;
@@ -509,7 +507,6 @@ uint32_t GetTextureFormatBlockHeight(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::Depth24Plus:
         case wgpu::TextureFormat::Depth24PlusStencil8:
         case wgpu::TextureFormat::Depth16Unorm:
-        case wgpu::TextureFormat::Depth24UnormStencil8:
         case wgpu::TextureFormat::Depth32FloatStencil8:
         case wgpu::TextureFormat::Stencil8:
             return 1u;

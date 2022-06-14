@@ -35,7 +35,6 @@ enum class Feature {
     TimestampQuery,
     DepthClipControl,
     DepthClamping,
-    Depth24UnormStencil8,
     Depth32FloatStencil8,
     ChromiumExperimentalDp4a,
     IndirectFirstInstance,

@@ -92,7 +92,6 @@ MaybeError ValidateTextureDepthStencilToBufferCopyRestrictions(const ImageCopyTe
         switch (src.texture->GetFormat().format) {
             case wgpu::TextureFormat::Depth24Plus:
             case wgpu::TextureFormat::Depth24PlusStencil8:
-            case wgpu::TextureFormat::Depth24UnormStencil8:
                 return DAWN_FORMAT_VALIDATION_ERROR(
                     "The depth aspect of %s format %s cannot be selected in a texture to "
                     "buffer copy.",

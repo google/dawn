@@ -663,14 +663,6 @@ TEST_F(TextureValidationTest, TextureFormatUndefined) {
     ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
 }
 
-// Test that the creation of a texture with depth24unorm-stencil8 will fail when the feature
-// Depth24UnormStencil8 is not enabled.
-TEST_F(TextureValidationTest, UseD24S8FormatWithoutEnablingFeature) {
-    wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
-    descriptor.format = wgpu::TextureFormat::Depth24UnormStencil8;
-    ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
-}
-
 // Test that the creation of a texture with depth32float-stencil8 will fail when the feature
 // Depth32FloatStencil8 is not enabled.
 TEST_F(TextureValidationTest, UseD32S8FormatWithoutEnablingFeature) {
@@ -705,28 +697,6 @@ TEST_F(TextureValidationTest, UseASTCFormatWithoutEnablingFeature) {
     for (wgpu::TextureFormat format : utils::kASTCFormats) {
         wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
         descriptor.format = format;
-        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
-    }
-}
-
-class D24S8TextureFormatsValidationTests : public TextureValidationTest {
-  protected:
-    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
-        wgpu::DeviceDescriptor descriptor;
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth24UnormStencil8};
-        descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 1;
-        return dawnAdapter.CreateDevice(&descriptor);
-    }
-};
-
-// Test that depth24unorm-stencil8 format is invalid for 3D texture
-TEST_F(D24S8TextureFormatsValidationTests, DepthStencilFormatsFor3D) {
-    wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
-
-    for (wgpu::TextureDimension dimension : kDimensions) {
-        descriptor.format = wgpu::TextureFormat::Depth24UnormStencil8;
-        descriptor.dimension = dimension;
         ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
     }
 }

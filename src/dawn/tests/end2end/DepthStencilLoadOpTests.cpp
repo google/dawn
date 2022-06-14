@@ -98,12 +98,6 @@ class DepthStencilLoadOpTests : public DawnTestWithParams<DepthStencilLoadOpTest
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         switch (GetParam().mFormat) {
-            case wgpu::TextureFormat::Depth24UnormStencil8:
-                if (SupportsFeatures({wgpu::FeatureName::Depth24UnormStencil8})) {
-                    mIsFormatSupported = true;
-                    return {wgpu::FeatureName::Depth24UnormStencil8};
-                }
-                return {};
             case wgpu::TextureFormat::Depth32FloatStencil8:
                 if (SupportsFeatures({wgpu::FeatureName::Depth32FloatStencil8})) {
                     mIsFormatSupported = true;
@@ -267,8 +261,7 @@ auto GenerateParam() {
     auto params2 = MakeParamGenerator<DepthStencilLoadOpTestParams>(
         {D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}), MetalBackend(),
          OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
-        {wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureFormat::Depth24UnormStencil8,
-         wgpu::TextureFormat::Depth32FloatStencil8},
+        {wgpu::TextureFormat::Depth24PlusStencil8, wgpu::TextureFormat::Depth32FloatStencil8},
         {Check::CopyStencil, Check::StencilTest, Check::DepthTest, Check::SampleDepth});
 
     std::vector<DepthStencilLoadOpTestParams> allParams;
@@ -322,7 +315,6 @@ DAWN_INSTANTIATE_TEST_P(StencilClearValueOverflowTest,
                         {D3D12Backend(), D3D12Backend({}, {"use_d3d12_render_pass"}),
                          MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
                         {wgpu::TextureFormat::Depth24PlusStencil8,
-                         wgpu::TextureFormat::Depth24UnormStencil8,
                          wgpu::TextureFormat::Depth32FloatStencil8, wgpu::TextureFormat::Stencil8},
                         {Check::CopyStencil, Check::StencilTest});
 

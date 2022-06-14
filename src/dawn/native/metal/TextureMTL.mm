@@ -318,9 +318,6 @@ MTLPixelFormat MetalPixelFormat(wgpu::TextureFormat format) {
             return MTLPixelFormatStencil8;
 
 #if DAWN_PLATFORM_IS(MACOS)
-        case wgpu::TextureFormat::Depth24UnormStencil8:
-            return MTLPixelFormatDepth24Unorm_Stencil8;
-
         case wgpu::TextureFormat::BC1RGBAUnorm:
             return MTLPixelFormatBC1_RGBA;
         case wgpu::TextureFormat::BC1RGBAUnormSrgb:
@@ -350,8 +347,6 @@ MTLPixelFormat MetalPixelFormat(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::BC7RGBAUnormSrgb:
             return MTLPixelFormatBC7_RGBAUnorm_sRGB;
 #else
-        case wgpu::TextureFormat::Depth24UnormStencil8:
-
         case wgpu::TextureFormat::BC1RGBAUnorm:
         case wgpu::TextureFormat::BC1RGBAUnormSrgb:
         case wgpu::TextureFormat::BC2RGBAUnorm:
@@ -1066,11 +1061,6 @@ MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
                 if (textureFormat == MTLPixelFormatDepth32Float_Stencil8) {
                     viewFormat = MTLPixelFormatX32_Stencil8;
                 }
-#if DAWN_PLATFORM_IS(MACOS)
-                else if (textureFormat == MTLPixelFormatDepth24Unorm_Stencil8) {
-                    viewFormat = MTLPixelFormatX24_Stencil8;
-                }
-#endif
                 else {
                     UNREACHABLE();
                 }

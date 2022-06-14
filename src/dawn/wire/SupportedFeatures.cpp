@@ -24,7 +24,6 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_Force32:
         case WGPUFeatureName_DawnNative:
             return false;
-        case WGPUFeatureName_Depth24UnormStencil8:
         case WGPUFeatureName_Depth32FloatStencil8:
         case WGPUFeatureName_TimestampQuery:
         case WGPUFeatureName_PipelineStatisticsQuery:
