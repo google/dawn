@@ -720,7 +720,7 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest,
 TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetFormat) {
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsMultisampling(format) ||
-            !utils::TextureFormatSupportsRendering(format)) {
+            utils::IsDepthOrStencilFormat(format)) {
             continue;
         }
 

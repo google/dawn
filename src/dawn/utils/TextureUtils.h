@@ -228,10 +228,10 @@ bool IsASTCTextureFormat(wgpu::TextureFormat textureFormat);
 
 bool IsDepthOnlyFormat(wgpu::TextureFormat textureFormat);
 bool IsStencilOnlyFormat(wgpu::TextureFormat textureFormat);
+bool IsDepthOrStencilFormat(wgpu::TextureFormat textureFormat);
 
 bool TextureFormatSupportsMultisampling(wgpu::TextureFormat textureFormat);
 bool TextureFormatSupportsResolveTarget(wgpu::TextureFormat textureFormat);
-bool TextureFormatSupportsRendering(wgpu::TextureFormat textureFormat);
 
 uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat);
 uint32_t GetTextureFormatBlockWidth(wgpu::TextureFormat textureFormat);

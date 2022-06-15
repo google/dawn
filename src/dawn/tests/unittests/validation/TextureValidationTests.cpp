@@ -145,10 +145,6 @@ TEST_F(TextureValidationTest, SampleCount) {
         descriptor.sampleCount = 4;
 
         for (wgpu::TextureFormat format : utils::kFormatsInCoreSpec) {
-            if (!utils::TextureFormatSupportsRendering(format)) {
-                continue;
-            }
-
             descriptor.format = format;
             if (utils::TextureFormatSupportsMultisampling(format)) {
                 device.CreateTexture(&descriptor);
