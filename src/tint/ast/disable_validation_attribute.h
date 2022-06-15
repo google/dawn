@@ -24,27 +24,23 @@ namespace tint::ast {
 /// Enumerator of validation features that can be disabled with a
 /// DisableValidationAttribute attribute.
 enum class DisabledValidation {
-    /// When applied to a function, the validator will not complain there is no
-    /// body to a function.
+    /// When applied to a function, the validator will not complain there is no body to a function.
     kFunctionHasNoBody,
-    /// When applied to a module-scoped variable, the validator will not complain
-    /// if two resource variables have the same binding points.
+    /// When applied to a module-scoped variable, the validator will not complain if two resource
+    /// variables have the same binding points.
     kBindingPointCollision,
-    /// When applied to a variable, the validator will not complain about the
-    /// declared storage class.
+    /// When applied to a variable, the validator will not complain about the declared storage
+    /// class.
     kIgnoreStorageClass,
-    /// When applied to an entry-point function parameter, the validator will not
-    /// check for entry IO attributes.
+    /// When applied to an entry-point function parameter, the validator will not check for entry IO
+    /// attributes.
     kEntryPointParameter,
-    /// When applied to a function parameter, the validator will not
-    /// check if parameter type is constructible
-    kIgnoreConstructibleFunctionParameter,
-    /// When applied to a member attribute, a stride attribute may be applied to
-    /// non-array types.
+    /// When applied to a function parameter, the parameter will not be validated.
+    kFunctionParameter,
+    /// When applied to a member attribute, a stride attribute may be applied to non-array types.
     kIgnoreStrideAttribute,
-    /// When applied to a pointer function parameter, the validator will not
-    /// require a function call argument passed for that parameter to have a
-    /// certain form.
+    /// When applied to a pointer function parameter, the validator will not require a function call
+    /// argument passed for that parameter to have a certain form.
     kIgnoreInvalidPointerArgument,
 };
 

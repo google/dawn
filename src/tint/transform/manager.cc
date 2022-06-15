@@ -49,7 +49,8 @@ Output Manager::Run(const Program* program, const DataMap& data) const {
     Output out;
     for (const auto& transform : transforms_) {
         if (!transform->ShouldRun(in, data)) {
-            TINT_IF_PRINT_PROGRAM(std::cout << "Skipping " << transform->TypeInfo().name << std::endl);
+            TINT_IF_PRINT_PROGRAM(std::cout << "Skipping " << transform->TypeInfo().name
+                                            << std::endl);
             continue;
         }
         TINT_IF_PRINT_PROGRAM(print_program("Input to", transform.get()));

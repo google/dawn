@@ -35,8 +35,8 @@ std::string DisableValidationAttribute::InternalName() const {
             return "disable_validation__ignore_storage_class";
         case DisabledValidation::kEntryPointParameter:
             return "disable_validation__entry_point_parameter";
-        case DisabledValidation::kIgnoreConstructibleFunctionParameter:
-            return "disable_validation__ignore_constructible_function_parameter";
+        case DisabledValidation::kFunctionParameter:
+            return "disable_validation__function_parameter";
         case DisabledValidation::kIgnoreStrideAttribute:
             return "disable_validation__ignore_stride";
         case DisabledValidation::kIgnoreInvalidPointerArgument:

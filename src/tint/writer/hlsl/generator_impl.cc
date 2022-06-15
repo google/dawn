@@ -2776,14 +2776,25 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
             first = false;
 
             auto const* type = v->Type();
+            auto storage_class = ast::StorageClass::kNone;
+            auto access = ast::Access::kUndefined;
 
             if (auto* ptr = type->As<sem::Pointer>()) {
-                // Transform pointer parameters in to `inout` parameters.
-                // The WGSL spec is highly restrictive in what can be passed in pointer
-                // parameters, which allows for this transformation. See:
-                // https://gpuweb.github.io/gpuweb/wgsl/#function-restriction
-                out << "inout ";
                 type = ptr->StoreType();
+                switch (ptr->StorageClass()) {
+                    case ast::StorageClass::kStorage:
+                    case ast::StorageClass::kUniform:
+                        // Not allowed by WGSL, but is used by certain transforms (e.g. DMA) to pass
+                        // storage buffers and uniform buffers down into transform-generated
+                        // functions. In this situation we want to generate the parameter without an
+                        // 'inout', using the storage class and access from the pointer.
+                        storage_class = ptr->StorageClass();
+                        access = ptr->Access();
+                        break;
+                    default:
+                        // Transform regular WGSL pointer parameters in to `inout` parameters.
+                        out << "inout ";
+                }
             }
 
             // Note: WGSL only allows for StorageClass::kNone on parameters, however
@@ -2792,7 +2803,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
             // StorageClass::kStorage or StorageClass::kUniform. This is required to
             // correctly translate the parameter to a [RW]ByteAddressBuffer for
             // storage buffers and a uint4[N] for uniform buffers.
-            if (!EmitTypeAndName(out, type, v->StorageClass(), v->Access(),
+            if (!EmitTypeAndName(out, type, storage_class, access,
                                  builder_.Symbols().NameFor(v->Declaration()->symbol))) {
                 return false;
             }

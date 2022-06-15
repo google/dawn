@@ -23,6 +23,7 @@
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"
+#include "src/tint/sem/reference.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/variable.h"
@@ -89,22 +90,20 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) cons
     // get_buffer_size_intrinsic() emits the function decorated with
     // BufferSizeIntrinsic that is transformed by the HLSL writer into a call to
     // [RW]ByteAddressBuffer.GetDimensions().
-    std::unordered_map<const sem::Type*, Symbol> buffer_size_intrinsics;
-    auto get_buffer_size_intrinsic = [&](const sem::Type* buffer_type) {
+    std::unordered_map<const sem::Reference*, Symbol> buffer_size_intrinsics;
+    auto get_buffer_size_intrinsic = [&](const sem::Reference* buffer_type) {
         return utils::GetOrCreate(buffer_size_intrinsics, buffer_type, [&] {
             auto name = ctx.dst->Sym();
             auto* type = CreateASTTypeFor(ctx, buffer_type);
             auto* disable_validation =
-                ctx.dst->Disable(ast::DisabledValidation::kIgnoreConstructibleFunctionParameter);
+                ctx.dst->Disable(ast::DisabledValidation::kFunctionParameter);
             ctx.dst->AST().AddFunction(ctx.dst->create<ast::Function>(
                 name,
                 ast::ParameterList{
-                    // Note: The buffer parameter requires the kStorage StorageClass
-                    // in order for HLSL to emit this as a ByteAddressBuffer.
-                    ctx.dst->create<ast::Variable>(ctx.dst->Sym("buffer"),
-                                                   ast::StorageClass::kStorage,
-                                                   ast::Access::kUndefined, type, true, false,
-                                                   nullptr, ast::AttributeList{disable_validation}),
+                    ctx.dst->Param("buffer",
+                                   ctx.dst->ty.pointer(type, buffer_type->StorageClass(),
+                                                       buffer_type->Access()),
+                                   {disable_validation}),
                     ctx.dst->Param("result", ctx.dst->ty.pointer(ctx.dst->ty.u32(),
                                                                  ast::StorageClass::kFunction)),
                 },
@@ -128,10 +127,10 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) cons
                 if (builtin->Type() == sem::BuiltinType::kArrayLength) {
                     // We're dealing with an arrayLength() call
 
-                    // A runtime-sized array can only appear as the store type of a
-                    // variable, or the last element of a structure (which cannot itself
-                    // be nested). Given that we require SimplifyPointers, we can assume
-                    // that the arrayLength() call has one of two forms:
+                    // A runtime-sized array can only appear as the store type of a variable, or the
+                    // last element of a structure (which cannot itself be nested). Given that we
+                    // require SimplifyPointers, we can assume that the arrayLength() call has one
+                    // of two forms:
                     //   arrayLength(&struct_var.array_member)
                     //   arrayLength(&array_var)
                     auto* arg = call_expr->args[0];
@@ -152,10 +151,9 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) cons
                         break;
                     }
                     auto* storage_buffer_var = storage_buffer_sem->Variable();
-                    auto* storage_buffer_type = storage_buffer_sem->Type()->UnwrapRef();
+                    auto* storage_buffer_type = storage_buffer_sem->Type()->As<sem::Reference>();
 
-                    // Generate BufferSizeIntrinsic for this storage type if we haven't
-                    // already
+                    // Generate BufferSizeIntrinsic for this storage type if we haven't already
                     auto buffer_size = get_buffer_size_intrinsic(storage_buffer_type);
 
                     // Find the current statement block
@@ -177,7 +175,7 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) cons
                                 // BufferSizeIntrinsic(X, ARGS...) is
                                 // translated to:
                                 //  X.GetDimensions(ARGS..) by the writer
-                                buffer_size, ctx.Clone(storage_buffer_expr),
+                                buffer_size, ctx.dst->AddressOf(ctx.Clone(storage_buffer_expr)),
                                 ctx.dst->AddressOf(
                                     ctx.dst->Expr(buffer_size_result->variable->symbol))));
 
@@ -188,22 +186,26 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) cons
                             auto name = ctx.dst->Sym();
                             const ast::Expression* total_size =
                                 ctx.dst->Expr(buffer_size_result->variable);
-                            const sem::Array* array_type = nullptr;
-                            if (auto* str = storage_buffer_type->As<sem::Struct>()) {
-                                // The variable is a struct, so subtract the byte offset of
-                                // the array member.
-                                auto* array_member_sem = str->Members().back();
-                                array_type = array_member_sem->Type()->As<sem::Array>();
-                                total_size =
-                                    ctx.dst->Sub(total_size, u32(array_member_sem->Offset()));
-                            } else if (auto* arr = storage_buffer_type->As<sem::Array>()) {
-                                array_type = arr;
-                            } else {
+
+                            const sem::Array* array_type = Switch(
+                                storage_buffer_type->StoreType(),
+                                [&](const sem::Struct* str) {
+                                    // The variable is a struct, so subtract the byte offset of
+                                    // the array member.
+                                    auto* array_member_sem = str->Members().back();
+                                    total_size =
+                                        ctx.dst->Sub(total_size, u32(array_member_sem->Offset()));
+                                    return array_member_sem->Type()->As<sem::Array>();
+                                },
+                                [&](const sem::Array* arr) { return arr; });
+
+                            if (!array_type) {
                                 TINT_ICE(Transform, ctx.dst->Diagnostics())
                                     << "expected form of arrayLength argument to be "
                                        "&array_var or &struct_var.array_member";
                                 return name;
                             }
+
                             uint32_t array_stride = array_type->Size();
                             auto* array_length_var = ctx.dst->Decl(
                                 ctx.dst->Let(name, ctx.dst->ty.u32(),

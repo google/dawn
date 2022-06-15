@@ -722,19 +722,20 @@ bool Validator::FunctionParameter(const ast::Function* func, const sem::Variable
 
     auto* decl = var->Declaration();
 
+    if (IsValidationDisabled(decl->attributes, ast::DisabledValidation::kFunctionParameter)) {
+        return true;
+    }
+
     for (auto* attr : decl->attributes) {
         if (!func->IsEntryPoint() && !attr->Is<ast::InternalAttribute>()) {
             AddError("attribute is not valid for non-entry point function parameters",
                      attr->source);
             return false;
-        } else if (!attr->IsAnyOf<ast::BuiltinAttribute, ast::InvariantAttribute,
-                                  ast::LocationAttribute, ast::InterpolateAttribute,
-                                  ast::InternalAttribute>() &&
-                   (IsValidationEnabled(decl->attributes,
-                                        ast::DisabledValidation::kEntryPointParameter) &&
-                    IsValidationEnabled(
-                        decl->attributes,
-                        ast::DisabledValidation::kIgnoreConstructibleFunctionParameter))) {
+        }
+        if (!attr->IsAnyOf<ast::BuiltinAttribute, ast::InvariantAttribute, ast::LocationAttribute,
+                           ast::InterpolateAttribute, ast::InternalAttribute>() &&
+            (IsValidationEnabled(decl->attributes,
+                                 ast::DisabledValidation::kEntryPointParameter))) {
             AddError("attribute is not valid for function parameters", attr->source);
             return false;
         }
@@ -753,9 +754,7 @@ bool Validator::FunctionParameter(const ast::Function* func, const sem::Variable
     }
 
     if (IsPlain(var->Type())) {
-        if (!var->Type()->IsConstructible() &&
-            IsValidationEnabled(decl->attributes,
-                                ast::DisabledValidation::kIgnoreConstructibleFunctionParameter)) {
+        if (!var->Type()->IsConstructible()) {
             AddError("store type of function parameter must be a constructible type", decl->source);
             return false;
         }
@@ -964,9 +963,8 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
                                ast::InvariantAttribute>() &&
                 (IsValidationEnabled(decl->attributes,
                                      ast::DisabledValidation::kEntryPointParameter) &&
-                 IsValidationEnabled(
-                     decl->attributes,
-                     ast::DisabledValidation::kIgnoreConstructibleFunctionParameter))) {
+                 IsValidationEnabled(decl->attributes,
+                                     ast::DisabledValidation::kFunctionParameter))) {
                 AddError("attribute is not valid for entry point return types", attr->source);
                 return false;
             }
