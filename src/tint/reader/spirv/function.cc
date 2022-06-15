@@ -725,9 +725,13 @@ BlockInfo::BlockInfo(const spvtools::opt::BasicBlock& bb) : basic_block(&bb), id
 BlockInfo::~BlockInfo() = default;
 
 DefInfo::DefInfo(const spvtools::opt::Instruction& def_inst,
+                 bool the_locally_defined,
                  uint32_t the_block_pos,
                  size_t the_index)
-    : inst(def_inst), block_pos(the_block_pos), index(the_index) {}
+    : inst(def_inst),
+      locally_defined(the_locally_defined),
+      block_pos(the_block_pos),
+      index(the_index) {}
 
 DefInfo::~DefInfo() = default;
 
@@ -4479,9 +4483,10 @@ bool FunctionEmitter::RegisterSpecialBuiltInVariables() {
         const auto id = special_var.first;
         const auto builtin = special_var.second;
         const auto* var = def_use_mgr_->GetDef(id);
-        def_info_[id] = std::make_unique<DefInfo>(*var, 0, index);
+        def_info_[id] = std::make_unique<DefInfo>(*var, false, 0, index);
         ++index;
         auto& def = def_info_[id];
+        // Builtins are always defined outside the function.
         switch (builtin) {
             case SpvBuiltInPointSize:
                 def->skip = SkipReason::kPointSizeBuiltinPointer;
@@ -4526,7 +4531,7 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
             if ((result_id == 0) || inst.opcode() == SpvOpLabel) {
                 continue;
             }
-            def_info_[result_id] = std::make_unique<DefInfo>(inst, block_pos, index);
+            def_info_[result_id] = std::make_unique<DefInfo>(inst, true, block_pos, index);
             ++index;
             auto& info = def_info_[result_id];
 
@@ -4722,6 +4727,13 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
             // There is no need to adjust the location of the declaration.
             continue;
         }
+        if (!def_info->locally_defined) {
+            // Never hoist a variable declared at module scope.
+            // This occurs for builtin variables, which are mapped to module-scope
+            // private variables.
+            continue;
+        }
+
         // The first use must be the at the SSA definition, because block order
         // respects dominance.
         const auto first_pos = def_info->block_pos;

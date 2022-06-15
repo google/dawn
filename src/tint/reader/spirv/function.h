@@ -241,14 +241,22 @@ enum class SkipReason {
 struct DefInfo {
     /// Constructor.
     /// @param def_inst the SPIR-V instruction defining the ID
+    /// @param locally_defined the SPIR-V instruction defining the ID
     /// @param block_pos the position of the basic block where the ID is defined.
     /// @param index an ordering index for this local definition
-    DefInfo(const spvtools::opt::Instruction& def_inst, uint32_t block_pos, size_t index);
+    DefInfo(const spvtools::opt::Instruction& def_inst,
+            bool locally_defined,
+            uint32_t block_pos,
+            size_t index);
     /// Destructor.
     ~DefInfo();
 
     /// The SPIR-V instruction that defines the ID.
     const spvtools::opt::Instruction& inst;
+
+    /// True if the definition of this ID is inside the function.
+    const bool locally_defined = true;
+
     /// The position of the first block in which this ID is visible, in function
     /// block order.  For IDs defined outside of the function, it is 0.
     /// For IDs defined in the function, it is the position of the block
@@ -320,8 +328,11 @@ struct DefInfo {
 /// @returns the ostream so calls can be chained
 inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
     o << "DefInfo{"
-      << " inst.result_id: " << di.inst.result_id() << " block_pos: " << di.block_pos
-      << " num_uses: " << di.num_uses << " last_use_pos: " << di.last_use_pos
+      << " inst.result_id: " << di.inst.result_id()
+      << " locally_defined: " << (di.locally_defined ? "true" : "false")
+      << " block_pos: " << di.block_pos << " num_uses: " << di.num_uses
+      << " last_use_pos: " << di.last_use_pos
+      << " used_in_another_construct: " << (di.used_in_another_construct ? "true" : "false")
       << " requires_named_const_def: " << (di.requires_named_const_def ? "true" : "false")
       << " requires_hoisted_def: " << (di.requires_hoisted_def ? "true" : "false") << " phi_var: '"
       << di.phi_var << "'";
@@ -840,7 +851,7 @@ class FunctionEmitter {
         return info && info->pos != kInvalidBlockPos;
     }
 
-    /// Gets the local definition info for a result ID.
+    /// Gets the definition info for a result ID.
     /// @param id the SPIR-V ID of local definition.
     /// @returns the definition info for the given ID, if it exists, or nullptr
     DefInfo* GetDefInfo(uint32_t id) const {
@@ -1274,7 +1285,9 @@ class FunctionEmitter {
     // Mapping from block ID to its bookkeeping info.
     std::unordered_map<uint32_t, std::unique_ptr<BlockInfo>> block_info_;
 
-    // Mapping from a locally-defined result ID to its bookkeeping info.
+    // Mapping from a result ID to its bookkeeping info.  This may be
+    // either a result ID defined in the function body, or the ID of a
+    // module-scope variable.
     std::unordered_map<uint32_t, std::unique_ptr<DefInfo>> def_info_;
 
     // Structured constructs, where enclosing constructs precede their children.

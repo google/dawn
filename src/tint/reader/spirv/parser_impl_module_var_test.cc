@@ -2537,6 +2537,68 @@ fn main(@builtin(vertex_index) x_1_param : u32) -> main_out {
     EXPECT_EQ(module_str, expected) << module_str;
 }
 
+TEST_F(SpvModuleScopeVarParserTest, VertexIndex_UsedTwice_DifferentConstructs) {
+    // Test crbug.com/tint/1577
+    // Builtin variables must not be hoisted. Before the fix, the reader
+    // would see two uses of the variable in different constructs and try
+    // to hoist it.  Only function-local definitions should be hoisted.
+    const std::string assembly = VertexIndexPreamble("%uint") + R"(
+    %bool = OpTypeBool
+    %900 = OpConstantTrue %bool
+    %main = OpFunction %void None %voidfn
+    %entry = OpLabel
+    %2 = OpLoad %uint %1   ; used in outer selection
+    OpSelectionMerge %99 None
+    OpBranchConditional %900 %30 %99
+
+    %30 = OpLabel
+    %3 = OpLoad %uint %1 ; used in inner selection
+    OpSelectionMerge %40 None
+    OpBranchConditional %900 %35 %40
+
+    %35 = OpLabel
+    OpBranch %40
+
+    %40 = OpLabel
+    OpBranch %99
+
+    %99 = OpLabel
+    OpReturn
+    OpFunctionEnd
+ )";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    const std::string expected = R"(var<private> x_1 : u32;
+
+var<private> x_5 : vec4<f32>;
+
+fn main_1() {
+  let x_2 : u32 = x_1;
+  if (true) {
+    let x_3 : u32 = x_1;
+    if (true) {
+    }
+  }
+  return;
+}
+
+struct main_out {
+  @builtin(position)
+  x_5_1 : vec4<f32>,
+}
+
+@vertex
+fn main(@builtin(vertex_index) x_1_param : u32) -> main_out {
+  x_1 = x_1_param;
+  main_1();
+  return main_out(x_5);
+}
+)";
+    EXPECT_EQ(module_str, expected) << module_str;
+}
+
 TEST_F(SpvModuleScopeVarParserTest, VertexIndex_I32_Load_CopyObject) {
     const std::string assembly = VertexIndexPreamble("%int") + R"(
     %main = OpFunction %void None %voidfn
