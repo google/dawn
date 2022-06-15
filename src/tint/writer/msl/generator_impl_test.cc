@@ -32,8 +32,8 @@ TEST_F(MslGeneratorImplTest, InvalidProgram) {
 }
 
 TEST_F(MslGeneratorImplTest, Generate) {
-    Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
-         ast::AttributeList{
+    Func("my_func", {}, ty.void_(), {},
+         {
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
@@ -88,7 +88,7 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(MslGeneratorImplTest, HasInvariantAttribute_True) {
     auto* out = Structure(
         "Out", {Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition), Invariant()})});
-    Func("vert_main", ast::VariableList{}, ty.Of(out), {Return(Construct(ty.Of(out)))},
+    Func("vert_main", {}, ty.Of(out), {Return(Construct(ty.Of(out)))},
          {Stage(ast::PipelineStage::kVertex)});
 
     GeneratorImpl& gen = Build();
@@ -119,7 +119,7 @@ vertex Out vert_main() {
 TEST_F(MslGeneratorImplTest, HasInvariantAttribute_False) {
     auto* out =
         Structure("Out", {Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)})});
-    Func("vert_main", ast::VariableList{}, ty.Of(out), {Return(Construct(ty.Of(out)))},
+    Func("vert_main", {}, ty.Of(out), {Return(Construct(ty.Of(out)))},
          {Stage(ast::PipelineStage::kVertex)});
 
     GeneratorImpl& gen = Build();
@@ -142,7 +142,7 @@ vertex Out vert_main() {
 
 TEST_F(MslGeneratorImplTest, WorkgroupMatrix) {
     Global("m", ty.mat2x2<f32>(), ast::StorageClass::kWorkgroup);
-    Func("comp_main", ast::VariableList{}, ty.void_(), {Decl(Let("x", nullptr, Expr("m")))},
+    Func("comp_main", {}, ty.void_(), {Decl(Let("x", nullptr, Expr("m")))},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     GeneratorImpl& gen = SanitizeAndBuild();
@@ -179,7 +179,7 @@ kernel void comp_main(threadgroup tint_symbol_3* tint_symbol_2 [[threadgroup(0)]
 
 TEST_F(MslGeneratorImplTest, WorkgroupMatrixInArray) {
     Global("m", ty.array(ty.mat2x2<f32>(), 4_i), ast::StorageClass::kWorkgroup);
-    Func("comp_main", ast::VariableList{}, ty.void_(), {Decl(Let("x", nullptr, Expr("m")))},
+    Func("comp_main", {}, ty.void_(), {Decl(Let("x", nullptr, Expr("m")))},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     GeneratorImpl& gen = SanitizeAndBuild();
@@ -228,7 +228,7 @@ TEST_F(MslGeneratorImplTest, WorkgroupMatrixInStruct) {
                         Member("s", ty.type_name("S1")),
                     });
     Global("s", ty.type_name("S2"), ast::StorageClass::kWorkgroup);
-    Func("comp_main", ast::VariableList{}, ty.void_(), {Decl(Let("x", nullptr, Expr("s")))},
+    Func("comp_main", {}, ty.void_(), {Decl(Let("x", nullptr, Expr("s")))},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     GeneratorImpl& gen = SanitizeAndBuild();
@@ -283,28 +283,28 @@ TEST_F(MslGeneratorImplTest, WorkgroupMatrix_Multiples) {
     Global("m7", ty.mat4x2<f32>(), ast::StorageClass::kWorkgroup);
     Global("m8", ty.mat4x3<f32>(), ast::StorageClass::kWorkgroup);
     Global("m9", ty.mat4x4<f32>(), ast::StorageClass::kWorkgroup);
-    Func("main1", ast::VariableList{}, ty.void_(),
+    Func("main1", {}, ty.void_(),
          {
              Decl(Let("a1", nullptr, Expr("m1"))),
              Decl(Let("a2", nullptr, Expr("m2"))),
              Decl(Let("a3", nullptr, Expr("m3"))),
          },
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
-    Func("main2", ast::VariableList{}, ty.void_(),
+    Func("main2", {}, ty.void_(),
          {
              Decl(Let("a1", nullptr, Expr("m4"))),
              Decl(Let("a2", nullptr, Expr("m5"))),
              Decl(Let("a3", nullptr, Expr("m6"))),
          },
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
-    Func("main3", ast::VariableList{}, ty.void_(),
+    Func("main3", {}, ty.void_(),
          {
              Decl(Let("a1", nullptr, Expr("m7"))),
              Decl(Let("a2", nullptr, Expr("m8"))),
              Decl(Let("a3", nullptr, Expr("m9"))),
          },
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
-    Func("main4_no_usages", ast::VariableList{}, ty.void_(), {},
+    Func("main4_no_usages", {}, ty.void_(), {},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     GeneratorImpl& gen = SanitizeAndBuild();

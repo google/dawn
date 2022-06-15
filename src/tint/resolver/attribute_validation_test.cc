@@ -128,7 +128,9 @@ TEST_P(FunctionParameterAttributeTest, IsValid) {
     auto& params = GetParam();
 
     Func("main",
-         ast::VariableList{Param("a", ty.vec4<f32>(), createAttributes({}, *this, params.kind))},
+         {
+             Param("a", ty.vec4<f32>(), createAttributes({}, *this, params.kind)),
+         },
          ty.void_(), {});
 
     if (params.should_pass) {
@@ -161,8 +163,11 @@ using FunctionReturnTypeAttributeTest = TestWithParams;
 TEST_P(FunctionReturnTypeAttributeTest, IsValid) {
     auto& params = GetParam();
 
-    Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1_f)}, {},
-         createAttributes({}, *this, params.kind));
+    Func("main", {}, ty.f32(),
+         {
+             Return(1_f),
+         },
+         {}, createAttributes({}, *this, params.kind));
 
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -195,9 +200,15 @@ namespace EntryPointInputAndOutputTests {
 using ComputeShaderParameterAttributeTest = TestWithParams;
 TEST_P(ComputeShaderParameterAttributeTest, IsValid) {
     auto& params = GetParam();
-    auto* p = Param("a", ty.vec4<f32>(), createAttributes(Source{{12, 34}}, *this, params.kind));
-    Func("main", ast::VariableList{p}, ty.void_(), {},
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
+    Func("main",
+         {
+             Param("a", ty.vec4<f32>(), createAttributes(Source{{12, 34}}, *this, params.kind)),
+         },
+         ty.void_(), {},
+         {
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+         });
 
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -242,7 +253,10 @@ TEST_P(FragmentShaderParameterAttributeTest, IsValid) {
         attrs.push_back(Builtin(Source{{34, 56}}, ast::Builtin::kPosition));
     }
     auto* p = Param("a", ty.vec4<f32>(), attrs);
-    Func("frag_main", {p}, ty.void_(), {}, {Stage(ast::PipelineStage::kFragment)});
+    Func("frag_main", {p}, ty.void_(), {},
+         {
+             Stage(ast::PipelineStage::kFragment),
+         });
 
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -276,8 +290,16 @@ TEST_P(VertexShaderParameterAttributeTest, IsValid) {
         attrs.push_back(Location(Source{{34, 56}}, 2));
     }
     auto* p = Param("a", ty.vec4<f32>(), attrs);
-    Func("vertex_main", ast::VariableList{p}, ty.vec4<f32>(), {Return(Construct(ty.vec4<f32>()))},
-         {Stage(ast::PipelineStage::kVertex)}, {Builtin(ast::Builtin::kPosition)});
+    Func("vertex_main", {p}, ty.vec4<f32>(),
+         {
+             Return(Construct(ty.vec4<f32>())),
+         },
+         {
+             Stage(ast::PipelineStage::kVertex),
+         },
+         {
+             Builtin(ast::Builtin::kPosition),
+         });
 
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -316,8 +338,14 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
 using ComputeShaderReturnTypeAttributeTest = TestWithParams;
 TEST_P(ComputeShaderReturnTypeAttributeTest, IsValid) {
     auto& params = GetParam();
-    Func("main", ast::VariableList{}, ty.vec4<f32>(), {Return(Construct(ty.vec4<f32>(), 1_f))},
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)},
+    Func("main", {}, ty.vec4<f32>(),
+         {
+             Return(Construct(ty.vec4<f32>(), 1_f)),
+         },
+         {
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+         },
          createAttributes(Source{{12, 34}}, *this, params.kind));
 
     if (params.should_pass) {
@@ -363,7 +391,10 @@ TEST_P(FragmentShaderReturnTypeAttributeTest, IsValid) {
     auto attrs = createAttributes(Source{{12, 34}}, *this, params.kind);
     attrs.push_back(Location(Source{{34, 56}}, 2));
     Func("frag_main", {}, ty.vec4<f32>(), {Return(Construct(ty.vec4<f32>()))},
-         {Stage(ast::PipelineStage::kFragment)}, attrs);
+         {
+             Stage(ast::PipelineStage::kFragment),
+         },
+         attrs);
 
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -413,8 +444,14 @@ TEST_P(VertexShaderReturnTypeAttributeTest, IsValid) {
     if (params.kind != AttributeKind::kBuiltin) {
         attrs.push_back(Builtin(Source{{34, 56}}, ast::Builtin::kPosition));
     }
-    Func("vertex_main", ast::VariableList{}, ty.vec4<f32>(), {Return(Construct(ty.vec4<f32>()))},
-         {Stage(ast::PipelineStage::kVertex)}, attrs);
+    Func("vertex_main", {}, ty.vec4<f32>(),
+         {
+             Return(Construct(ty.vec4<f32>())),
+         },
+         {
+             Stage(ast::PipelineStage::kVertex),
+         },
+         attrs);
 
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -450,8 +487,13 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
 
 using EntryPointParameterAttributeTest = TestWithParams;
 TEST_F(EntryPointParameterAttributeTest, DuplicateAttribute) {
-    Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1_f)},
-         {Stage(ast::PipelineStage::kFragment)},
+    Func("main", {}, ty.f32(),
+         {
+             Return(1_f),
+         },
+         {
+             Stage(ast::PipelineStage::kFragment),
+         },
          {
              Location(Source{{12, 34}}, 2),
              Location(Source{{56, 78}}, 3),
@@ -471,15 +513,23 @@ TEST_F(EntryPointParameterAttributeTest, DuplicateInternalAttribute) {
                         Disable(ast::DisabledValidation::kBindingPointCollision),
                         Disable(ast::DisabledValidation::kEntryPointParameter),
                     });
-    Func("f", {s}, ty.void_(), {}, {Stage(ast::PipelineStage::kFragment)});
+    Func("f", {s}, ty.void_(), {},
+         {
+             Stage(ast::PipelineStage::kFragment),
+         });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 using EntryPointReturnTypeAttributeTest = ResolverTest;
 TEST_F(EntryPointReturnTypeAttributeTest, DuplicateAttribute) {
-    Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1_f)},
-         ast::AttributeList{Stage(ast::PipelineStage::kFragment)},
+    Func("main", {}, ty.f32(),
+         {
+             Return(1_f),
+         },
+         {
+             Stage(ast::PipelineStage::kFragment),
+         },
          ast::AttributeList{
              Location(Source{{12, 34}}, 2),
              Location(Source{{56, 78}}, 3),
@@ -492,7 +542,10 @@ TEST_F(EntryPointReturnTypeAttributeTest, DuplicateAttribute) {
 }
 
 TEST_F(EntryPointReturnTypeAttributeTest, DuplicateInternalAttribute) {
-    Func("f", {}, ty.i32(), {Return(1_i)}, {Stage(ast::PipelineStage::kFragment)},
+    Func("f", {}, ty.i32(), {Return(1_i)},
+         {
+             Stage(ast::PipelineStage::kFragment),
+         },
          ast::AttributeList{
              Disable(ast::DisabledValidation::kBindingPointCollision),
              Disable(ast::DisabledValidation::kEntryPointParameter),
@@ -972,7 +1025,9 @@ TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByEntryPoint) {
              Decl(Var("b", ty.vec4<f32>(), ast::StorageClass::kNone,
                       Call("textureLoad", "B", vec2<i32>(1_i, 2_i), 0_i))),
          },
-         {Stage(ast::PipelineStage::kFragment)});
+         {
+             Stage(ast::PipelineStage::kFragment),
+         });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -1000,13 +1055,17 @@ TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByDifferentEntryPoints) {
              Decl(Var("a", ty.vec4<f32>(), ast::StorageClass::kNone,
                       Call("textureLoad", "A", vec2<i32>(1_i, 2_i), 0_i))),
          },
-         {Stage(ast::PipelineStage::kFragment)});
+         {
+             Stage(ast::PipelineStage::kFragment),
+         });
     Func("F_B", {}, ty.void_(),
          {
              Decl(Var("b", ty.vec4<f32>(), ast::StorageClass::kNone,
                       Call("textureLoad", "B", vec2<i32>(1_i, 2_i), 0_i))),
          },
-         {Stage(ast::PipelineStage::kFragment)});
+         {
+             Stage(ast::PipelineStage::kFragment),
+         });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -1033,10 +1092,14 @@ TEST_F(InvariantAttributeTests, InvariantWithPosition) {
     auto* param =
         Param("p", ty.vec4<f32>(),
               {Invariant(Source{{12, 34}}), Builtin(Source{{56, 78}}, ast::Builtin::kPosition)});
-    Func("main", ast::VariableList{param}, ty.vec4<f32>(),
-         ast::StatementList{Return(Construct(ty.vec4<f32>()))},
-         ast::AttributeList{Stage(ast::PipelineStage::kFragment)},
-         ast::AttributeList{
+    Func("main", {param}, ty.vec4<f32>(),
+         {
+             Return(Construct(ty.vec4<f32>())),
+         },
+         {
+             Stage(ast::PipelineStage::kFragment),
+         },
+         {
              Location(0),
          });
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1044,10 +1107,14 @@ TEST_F(InvariantAttributeTests, InvariantWithPosition) {
 
 TEST_F(InvariantAttributeTests, InvariantWithoutPosition) {
     auto* param = Param("p", ty.vec4<f32>(), {Invariant(Source{{12, 34}}), Location(0)});
-    Func("main", ast::VariableList{param}, ty.vec4<f32>(),
-         ast::StatementList{Return(Construct(ty.vec4<f32>()))},
-         ast::AttributeList{Stage(ast::PipelineStage::kFragment)},
-         ast::AttributeList{
+    Func("main", {param}, ty.vec4<f32>(),
+         {
+             Return(Construct(ty.vec4<f32>())),
+         },
+         {
+             Stage(ast::PipelineStage::kFragment),
+         },
+         {
              Location(0),
          });
     EXPECT_FALSE(r()->Resolve());
@@ -1135,10 +1202,17 @@ TEST_P(InterpolateParameterTest, All) {
     auto& params = GetParam();
 
     Func("main",
-         ast::VariableList{
+         {
              Param("a", ty.f32(),
-                   {Location(0), Interpolate(Source{{12, 34}}, params.type, params.sampling)})},
-         ty.void_(), {}, ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
+                   {
+                       Location(0),
+                       Interpolate(Source{{12, 34}}, params.type, params.sampling),
+                   }),
+         },
+         ty.void_(), {},
+         {
+             Stage(ast::PipelineStage::kFragment),
+         });
 
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1154,10 +1228,17 @@ TEST_P(InterpolateParameterTest, IntegerScalar) {
     auto& params = GetParam();
 
     Func("main",
-         ast::VariableList{
+         {
              Param("a", ty.i32(),
-                   {Location(0), Interpolate(Source{{12, 34}}, params.type, params.sampling)})},
-         ty.void_(), {}, ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
+                   {
+                       Location(0),
+                       Interpolate(Source{{12, 34}}, params.type, params.sampling),
+                   }),
+         },
+         ty.void_(), {},
+         {
+             Stage(ast::PipelineStage::kFragment),
+         });
 
     if (params.type != ast::InterpolationType::kFlat) {
         EXPECT_FALSE(r()->Resolve());
@@ -1178,10 +1259,17 @@ TEST_P(InterpolateParameterTest, IntegerVector) {
     auto& params = GetParam();
 
     Func("main",
-         ast::VariableList{
+         {
              Param("a", ty.vec4<u32>(),
-                   {Location(0), Interpolate(Source{{12, 34}}, params.type, params.sampling)})},
-         ty.void_(), {}, ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
+                   {
+                       Location(0),
+                       Interpolate(Source{{12, 34}}, params.type, params.sampling),
+                   }),
+         },
+         ty.void_(), {},
+         {
+             Stage(ast::PipelineStage::kFragment),
+         });
 
     if (params.type != ast::InterpolationType::kFlat) {
         EXPECT_FALSE(r()->Resolve());
@@ -1217,8 +1305,10 @@ INSTANTIATE_TEST_SUITE_P(
         Params{ast::InterpolationType::kFlat, ast::InterpolationSampling::kSample, false}));
 
 TEST_F(InterpolateTest, FragmentInput_Integer_MissingFlatInterpolation) {
-    Func("main", ast::VariableList{Param(Source{{12, 34}}, "a", ty.i32(), {Location(0)})},
-         ty.void_(), {}, ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
+    Func("main", {Param(Source{{12, 34}}, "a", ty.i32(), {Location(0)})}, ty.void_(), {},
+         {
+             Stage(ast::PipelineStage::kFragment),
+         });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -1231,8 +1321,13 @@ TEST_F(InterpolateTest, VertexOutput_Integer_MissingFlatInterpolation) {
                                  Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)}),
                                  Member(Source{{12, 34}}, "u", ty.u32(), {Location(0)}),
                              });
-    Func("main", {}, ty.Of(s), {Return(Construct(ty.Of(s)))},
-         ast::AttributeList{Stage(ast::PipelineStage::kVertex)});
+    Func("main", {}, ty.Of(s),
+         {
+             Return(Construct(ty.Of(s))),
+         },
+         {
+             Stage(ast::PipelineStage::kVertex),
+         });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -1243,11 +1338,18 @@ note: while analysing entry point 'main')");
 
 TEST_F(InterpolateTest, MissingLocationAttribute_Parameter) {
     Func("main",
-         ast::VariableList{Param("a", ty.vec4<f32>(),
-                                 {Builtin(ast::Builtin::kPosition),
-                                  Interpolate(Source{{12, 34}}, ast::InterpolationType::kFlat,
-                                              ast::InterpolationSampling::kNone)})},
-         ty.void_(), {}, ast::AttributeList{Stage(ast::PipelineStage::kFragment)});
+         {
+             Param("a", ty.vec4<f32>(),
+                   {
+                       Builtin(ast::Builtin::kPosition),
+                       Interpolate(Source{{12, 34}}, ast::InterpolationType::kFlat,
+                                   ast::InterpolationSampling::kNone),
+                   }),
+         },
+         ty.void_(), {},
+         {
+             Stage(ast::PipelineStage::kFragment),
+         });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1255,11 +1357,18 @@ TEST_F(InterpolateTest, MissingLocationAttribute_Parameter) {
 }
 
 TEST_F(InterpolateTest, MissingLocationAttribute_ReturnType) {
-    Func("main", {}, ty.vec4<f32>(), {Return(Construct(ty.vec4<f32>()))},
-         ast::AttributeList{Stage(ast::PipelineStage::kVertex)},
-         {Builtin(ast::Builtin::kPosition),
-          Interpolate(Source{{12, 34}}, ast::InterpolationType::kFlat,
-                      ast::InterpolationSampling::kNone)});
+    Func("main", {}, ty.vec4<f32>(),
+         {
+             Return(Construct(ty.vec4<f32>())),
+         },
+         {
+             Stage(ast::PipelineStage::kVertex),
+         },
+         {
+             Builtin(ast::Builtin::kPosition),
+             Interpolate(Source{{12, 34}}, ast::InterpolationType::kFlat,
+                         ast::InterpolationSampling::kNone),
+         });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

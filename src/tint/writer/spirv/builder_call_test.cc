@@ -25,11 +25,12 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Expression_Call) {
-    ast::VariableList func_params;
-    func_params.push_back(Param("a", ty.f32()));
-    func_params.push_back(Param("b", ty.f32()));
-
-    auto* a_func = Func("a_func", func_params, ty.f32(), {Return(Add("a", "b"))});
+    auto* a_func = Func("a_func",
+                        {
+                            Param("a", ty.f32()),
+                            Param("b", ty.f32()),
+                        },
+                        ty.f32(), {Return(Add("a", "b"))});
     auto* func = Func("main", {}, ty.void_(), {Assign(Phony(), Call("a_func", 1_f, 1_f))});
 
     spirv::Builder& b = Build();
@@ -62,11 +63,12 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Statement_Call) {
-    ast::VariableList func_params;
-    func_params.push_back(Param("a", ty.f32()));
-    func_params.push_back(Param("b", ty.f32()));
-
-    auto* a_func = Func("a_func", func_params, ty.f32(), {Return(Add("a", "b"))});
+    auto* a_func = Func("a_func",
+                        {
+                            Param("a", ty.f32()),
+                            Param("b", ty.f32()),
+                        },
+                        ty.f32(), {Return(Add("a", "b"))});
 
     auto* func = Func("main", {}, ty.void_(), {CallStmt(Call("a_func", 1_f, 1_f))});
 

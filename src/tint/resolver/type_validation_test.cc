@@ -121,9 +121,10 @@ TEST_F(ResolverTypeValidationTest, GlobalVariableFunctionVariableNotUnique_Pass)
     // }
     // var a: f32 = 2.1;
 
-    auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2_f));
-
-    Func("my_func", ast::VariableList{}, ty.void_(), {Decl(var)});
+    Func("my_func", {}, ty.void_(),
+         {
+             Decl(Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2_f))),
+         });
 
     Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1_f));
 
@@ -172,15 +173,14 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierDifferentFunctions_Pass) 
 
     auto* var1 = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(1_f));
 
-    Func("func0", ast::VariableList{}, ty.void_(),
-         ast::StatementList{
+    Func("func0", {}, ty.void_(),
+         {
              Decl(Source{{12, 34}}, var0),
              Return(),
-         },
-         ast::AttributeList{});
+         });
 
-    Func("func1", ast::VariableList{}, ty.void_(),
-         ast::StatementList{
+    Func("func1", {}, ty.void_(),
+         {
              Decl(Source{{13, 34}}, var1),
              Return(),
          });
@@ -374,11 +374,11 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInFunction_Fail) {
 
     auto* var = Var(Source{{12, 34}}, "a", ty.array<i32>(), ast::StorageClass::kNone);
 
-    Func("func", ast::VariableList{}, ty.void_(),
-         ast::StatementList{
+    Func("func", {}, ty.void_(),
+         {
              Decl(var),
          },
-         ast::AttributeList{
+         {
              Stage(ast::PipelineStage::kVertex),
          });
 
@@ -556,17 +556,16 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
 
     auto* param = Param(Source{{12, 34}}, "a", ty.array<i32>());
 
-    Func("func", ast::VariableList{param}, ty.void_(),
-         ast::StatementList{
+    Func("func", {param}, ty.void_(),
+         {
              Return(),
-         },
-         ast::AttributeList{});
+         });
 
-    Func("main", ast::VariableList{}, ty.void_(),
-         ast::StatementList{
+    Func("main", {}, ty.void_(),
+         {
              Return(),
          },
-         ast::AttributeList{
+         {
              Stage(ast::PipelineStage::kVertex),
          });
 
@@ -582,11 +581,10 @@ TEST_F(ResolverTypeValidationTest, PtrToRuntimeArrayAsParameter_Fail) {
     auto* param =
         Param(Source{{12, 34}}, "a", ty.pointer(ty.array<i32>(), ast::StorageClass::kWorkgroup));
 
-    Func("func", ast::VariableList{param}, ty.void_(),
-         ast::StatementList{
+    Func("func", {param}, ty.void_(),
+         {
              Return(),
-         },
-         ast::AttributeList{});
+         });
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),

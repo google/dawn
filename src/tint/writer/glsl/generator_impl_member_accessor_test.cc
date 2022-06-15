@@ -100,8 +100,8 @@ class GlslGeneratorImplTest_MemberAccessorBase : public BASE {
 
     void SetupFunction(ast::StatementList statements) {
         ProgramBuilder& b = *this;
-        b.Func("main", ast::VariableList{}, b.ty.void_(), statements,
-               ast::AttributeList{
+        b.Func("main", {}, b.ty.void_(), statements,
+               {
                    b.Stage(ast::PipelineStage::kFragment),
                });
     }

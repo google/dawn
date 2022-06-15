@@ -270,8 +270,10 @@ TEST_F(ResolverTest, Stmt_Switch) {
 }
 
 TEST_F(ResolverTest, Stmt_Call) {
-    ast::VariableList params;
-    Func("my_func", params, ty.void_(), {Return()}, ast::AttributeList{});
+    Func("my_func", {}, ty.void_(),
+         {
+             Return(),
+         });
 
     auto* expr = Call("my_func");
 
@@ -333,8 +335,6 @@ TEST_F(ResolverTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
     //   var bar : f32 = foo;
     // }
 
-    ast::VariableList params;
-
     // Declare i32 "foo" inside a block
     auto* foo_i32 = Var("foo", ty.i32(), ast::StorageClass::kNone, Expr(2_i));
     auto* foo_i32_init = foo_i32->constructor;
@@ -357,7 +357,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
     auto* bar_f32_init = bar_f32->constructor;
     auto* bar_f32_decl = Decl(bar_f32);
 
-    Func("func", params, ty.void_(), {inner, foo_f32_decl, bar_f32_decl}, ast::AttributeList{});
+    Func("func", {}, ty.void_(), {inner, foo_f32_decl, bar_f32_decl});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     ASSERT_NE(TypeOf(foo_i32_init), nullptr);
@@ -389,13 +389,11 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
     //   var bar : f32 = foo;
     // }
 
-    ast::VariableList params;
-
     // Declare i32 "foo" inside a function
     auto* fn_i32 = Var("foo", ty.i32(), ast::StorageClass::kNone, Expr(2_i));
     auto* fn_i32_init = fn_i32->constructor;
     auto* fn_i32_decl = Decl(fn_i32);
-    Func("func_i32", params, ty.void_(), {fn_i32_decl}, ast::AttributeList{});
+    Func("func_i32", {}, ty.void_(), {fn_i32_decl});
 
     // Declare f32 "foo" at module scope
     auto* mod_f32 = Var("foo", ty.f32(), ast::StorageClass::kPrivate, Expr(2_f));
@@ -406,7 +404,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
     auto* fn_f32 = Var("bar", ty.f32(), ast::StorageClass::kNone, Expr("foo"));
     auto* fn_f32_init = fn_f32->constructor;
     auto* fn_f32_decl = Decl(fn_f32);
-    Func("func_f32", params, ty.void_(), {fn_f32_decl}, ast::AttributeList{});
+    Func("func_f32", {}, ty.void_(), {fn_f32_decl});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     ASSERT_NE(TypeOf(mod_init), nullptr);
@@ -493,8 +491,7 @@ TEST_F(ResolverTest, Expr_Bitcast) {
 }
 
 TEST_F(ResolverTest, Expr_Call) {
-    ast::VariableList params;
-    Func("my_func", params, ty.f32(), {Return(0_f)}, ast::AttributeList{});
+    Func("my_func", {}, ty.f32(), {Return(0_f)});
 
     auto* call = Call("my_func");
     WrapInFunction(call);
@@ -506,8 +503,7 @@ TEST_F(ResolverTest, Expr_Call) {
 }
 
 TEST_F(ResolverTest, Expr_Call_InBinaryOp) {
-    ast::VariableList params;
-    Func("func", params, ty.f32(), {Return(0_f)}, ast::AttributeList{});
+    Func("func", {}, ty.f32(), {Return(0_f)});
 
     auto* expr = Add(Call("func"), Call("func"));
     WrapInFunction(expr);
@@ -639,12 +635,11 @@ TEST_F(ResolverTest, Expr_Identifier_FunctionVariable_Const) {
     auto* var = Let("my_var", ty.f32(), Construct(ty.f32()));
     auto* decl = Decl(Var("b", ty.f32(), ast::StorageClass::kNone, my_var_a));
 
-    Func("my_func", ast::VariableList{}, ty.void_(),
+    Func("my_func", {}, ty.void_(),
          {
              Decl(var),
              decl,
-         },
-         ast::AttributeList{});
+         });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -663,13 +658,12 @@ TEST_F(ResolverTest, IndexAccessor_Dynamic_Ref_F32) {
     auto* a = Var("a", ty.array<bool, 10>(), array<bool, 10>());
     auto* idx = Var("idx", ty.f32(), Construct(ty.f32()));
     auto* f = Var("f", ty.f32(), IndexAccessor("a", Expr(Source{{12, 34}}, idx)));
-    Func("my_func", ast::VariableList{}, ty.void_(),
+    Func("my_func", {}, ty.void_(),
          {
              Decl(a),
              Decl(idx),
              Decl(f),
-         },
-         ast::AttributeList{});
+         });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: index must be of type 'i32' or 'u32', found: 'f32'");
@@ -682,12 +676,11 @@ TEST_F(ResolverTest, Expr_Identifier_FunctionVariable) {
 
     auto* var = Var("my_var", ty.f32());
 
-    Func("my_func", ast::VariableList{}, ty.void_(),
+    Func("my_func", {}, ty.void_(),
          {
              Decl(var),
              assign,
-         },
-         ast::AttributeList{});
+         });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -712,13 +705,12 @@ TEST_F(ResolverTest, Expr_Identifier_Function_Ptr) {
     auto* v_decl = Decl(Var("v", ty.f32()));
     auto* p_decl = Decl(Let("p", ty.pointer<f32>(ast::StorageClass::kFunction), AddressOf(v)));
     auto* assign = Assign(Deref(p), 1.23_f);
-    Func("my_func", ast::VariableList{}, ty.void_(),
+    Func("my_func", {}, ty.void_(),
          {
              v_decl,
              p_decl,
              assign,
-         },
-         ast::AttributeList{});
+         });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -733,7 +725,10 @@ TEST_F(ResolverTest, Expr_Identifier_Function_Ptr) {
 }
 
 TEST_F(ResolverTest, Expr_Call_Function) {
-    Func("my_func", ast::VariableList{}, ty.f32(), {Return(0_f)}, ast::AttributeList{});
+    Func("my_func", {}, ty.f32(),
+         {
+             Return(0_f),
+         });
 
     auto* call = Call("my_func");
     WrapInFunction(call);
@@ -757,7 +752,7 @@ TEST_F(ResolverTest, Function_Parameters) {
     auto* param_c = Param("c", ty.u32());
 
     auto* func = Func("my_func",
-                      ast::VariableList{
+                      {
                           param_a,
                           param_b,
                           param_c,
@@ -789,7 +784,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
     auto* wg_var = Global("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
     auto* priv_var = Global("priv_var", ty.f32(), ast::StorageClass::kPrivate);
 
-    auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
+    auto* func = Func("my_func", {}, ty.void_(),
                       {
                           Assign("wg_var", "wg_var"),
                           Assign("sb_var", "sb_var"),
@@ -821,12 +816,11 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
     auto* wg_var = Global("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
     auto* priv_var = Global("priv_var", ty.f32(), ast::StorageClass::kPrivate);
 
-    Func("my_func", ast::VariableList{}, ty.f32(),
+    Func("my_func", {}, ty.f32(),
          {Assign("wg_var", "wg_var"), Assign("sb_var", "sb_var"), Assign("priv_var", "priv_var"),
-          Return(0_f)},
-         ast::AttributeList{});
+          Return(0_f)});
 
-    auto* func2 = Func("func", ast::VariableList{}, ty.void_(),
+    auto* func2 = Func("func", {}, ty.void_(),
                        {
                            WrapInStatement(Call("my_func")),
                        },
@@ -846,7 +840,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
 }
 
 TEST_F(ResolverTest, Function_NotRegisterFunctionVariable) {
-    auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
+    auto* func = Func("my_func", {}, ty.void_(),
                       {
                           Decl(Var("var", ty.f32())),
                           Assign("var", 1_f),
@@ -862,7 +856,7 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionVariable) {
 }
 
 TEST_F(ResolverTest, Function_NotRegisterFunctionConstant) {
-    auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
+    auto* func = Func("my_func", {}, ty.void_(),
                       {
                           Decl(Let("var", ty.f32(), Construct(ty.f32()))),
                       });
@@ -877,7 +871,7 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionConstant) {
 }
 
 TEST_F(ResolverTest, Function_NotRegisterFunctionParams) {
-    auto* func = Func("my_func", {Let("var", ty.f32(), Construct(ty.f32()))}, ty.void_(), {});
+    auto* func = Func("my_func", {Param("var", ty.f32())}, ty.void_(), {});
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* func_sem = Sem().Get(func);
@@ -888,11 +882,11 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionParams) {
 }
 
 TEST_F(ResolverTest, Function_CallSites) {
-    auto* foo = Func("foo", ast::VariableList{}, ty.void_(), {});
+    auto* foo = Func("foo", {}, ty.void_(), {});
 
     auto* call_1 = Call("foo");
     auto* call_2 = Call("foo");
-    auto* bar = Func("bar", ast::VariableList{}, ty.void_(),
+    auto* bar = Func("bar", {}, ty.void_(),
                      {
                          CallStmt(call_1),
                          CallStmt(call_2),
@@ -914,7 +908,7 @@ TEST_F(ResolverTest, Function_CallSites) {
 TEST_F(ResolverTest, Function_WorkgroupSize_NotSet) {
     // @compute @workgroup_size(1)
     // fn main() {}
-    auto* func = Func("main", ast::VariableList{}, ty.void_(), {}, {});
+    auto* func = Func("main", {}, ty.void_(), {});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -932,8 +926,11 @@ TEST_F(ResolverTest, Function_WorkgroupSize_NotSet) {
 TEST_F(ResolverTest, Function_WorkgroupSize_Literals) {
     // @compute @workgroup_size(8, 2, 3)
     // fn main() {}
-    auto* func = Func("main", ast::VariableList{}, ty.void_(), {},
-                      {Stage(ast::PipelineStage::kCompute), WorkgroupSize(8_i, 2_i, 3_i)});
+    auto* func = Func("main", {}, ty.void_(), {},
+                      {
+                          Stage(ast::PipelineStage::kCompute),
+                          WorkgroupSize(8_i, 2_i, 3_i),
+                      });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -957,9 +954,11 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Consts) {
     GlobalConst("width", ty.i32(), Expr(16_i));
     GlobalConst("height", ty.i32(), Expr(8_i));
     GlobalConst("depth", ty.i32(), Expr(2_i));
-    auto* func =
-        Func("main", ast::VariableList{}, ty.void_(), {},
-             {Stage(ast::PipelineStage::kCompute), WorkgroupSize("width", "height", "depth")});
+    auto* func = Func("main", {}, ty.void_(), {},
+                      {
+                          Stage(ast::PipelineStage::kCompute),
+                          WorkgroupSize("width", "height", "depth"),
+                      });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -983,8 +982,11 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Consts_NestedInitializer) {
                 Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32(), 8_i))));
     GlobalConst("height", ty.i32(),
                 Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32(), 4_i))));
-    auto* func = Func("main", ast::VariableList{}, ty.void_(), {},
-                      {Stage(ast::PipelineStage::kCompute), WorkgroupSize("width", "height")});
+    auto* func = Func("main", {}, ty.void_(), {},
+                      {
+                          Stage(ast::PipelineStage::kCompute),
+                          WorkgroupSize("width", "height"),
+                      });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1008,9 +1010,11 @@ TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts) {
     auto* width = Override("width", ty.i32(), Expr(16_i), {Id(0)});
     auto* height = Override("height", ty.i32(), Expr(8_i), {Id(1)});
     auto* depth = Override("depth", ty.i32(), Expr(2_i), {Id(2)});
-    auto* func =
-        Func("main", ast::VariableList{}, ty.void_(), {},
-             {Stage(ast::PipelineStage::kCompute), WorkgroupSize("width", "height", "depth")});
+    auto* func = Func("main", {}, ty.void_(), {},
+                      {
+                          Stage(ast::PipelineStage::kCompute),
+                          WorkgroupSize("width", "height", "depth"),
+                      });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1034,9 +1038,11 @@ TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts_NoInit) {
     auto* width = Override("width", ty.i32(), nullptr, {Id(0)});
     auto* height = Override("height", ty.i32(), nullptr, {Id(1)});
     auto* depth = Override("depth", ty.i32(), nullptr, {Id(2)});
-    auto* func =
-        Func("main", ast::VariableList{}, ty.void_(), {},
-             {Stage(ast::PipelineStage::kCompute), WorkgroupSize("width", "height", "depth")});
+    auto* func = Func("main", {}, ty.void_(), {},
+                      {
+                          Stage(ast::PipelineStage::kCompute),
+                          WorkgroupSize("width", "height", "depth"),
+                      });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1058,8 +1064,11 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Mixed) {
     // fn main() {}
     auto* height = Override("height", ty.i32(), Expr(2_i), {Id(0)});
     GlobalConst("depth", ty.i32(), Expr(3_i));
-    auto* func = Func("main", ast::VariableList{}, ty.void_(), {},
-                      {Stage(ast::PipelineStage::kCompute), WorkgroupSize(8_i, "height", "depth")});
+    auto* func = Func("main", {}, ty.void_(), {},
+                      {
+                          Stage(ast::PipelineStage::kCompute),
+                          WorkgroupSize(8_i, "height", "depth"),
+                      });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1709,7 +1718,7 @@ TEST_F(ResolverTest, StorageClass_SetsIfMissing) {
     auto* var = Var("var", ty.i32());
 
     auto* stmt = Decl(var);
-    Func("func", ast::VariableList{}, ty.void_(), {stmt}, ast::AttributeList{});
+    Func("func", {}, ty.void_(), {stmt});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1745,7 +1754,7 @@ TEST_F(ResolverTest, StorageClass_SetForTexture) {
 TEST_F(ResolverTest, StorageClass_DoesNotSetOnConst) {
     auto* var = Let("var", ty.i32(), Construct(ty.i32()));
     auto* stmt = Decl(var);
-    Func("func", ast::VariableList{}, ty.void_(), {stmt}, ast::AttributeList{});
+    Func("func", {}, ty.void_(), {stmt});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1802,26 +1811,40 @@ TEST_F(ResolverTest, Function_EntryPoints_StageAttribute) {
     Global("call_b", ty.f32(), ast::StorageClass::kPrivate);
     Global("call_c", ty.f32(), ast::StorageClass::kPrivate);
 
-    ast::VariableList params;
-    auto* func_b = Func("b", params, ty.f32(), {Return(0_f)}, ast::AttributeList{});
-    auto* func_c = Func("c", params, ty.f32(), {Assign("second", Call("b")), Return(0_f)},
-                        ast::AttributeList{});
+    auto* func_b = Func("b", {}, ty.f32(),
+                        {
+                            Return(0_f),
+                        });
+    auto* func_c = Func("c", {}, ty.f32(),
+                        {
+                            Assign("second", Call("b")),
+                            Return(0_f),
+                        });
 
-    auto* func_a = Func("a", params, ty.f32(), {Assign("first", Call("c")), Return(0_f)},
-                        ast::AttributeList{});
+    auto* func_a = Func("a", {}, ty.f32(),
+                        {
+                            Assign("first", Call("c")),
+                            Return(0_f),
+                        });
 
-    auto* ep_1 = Func("ep_1", params, ty.void_(),
+    auto* ep_1 = Func("ep_1", {}, ty.void_(),
                       {
                           Assign("call_a", Call("a")),
                           Assign("call_b", Call("b")),
                       },
-                      ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
+                      {
+                          Stage(ast::PipelineStage::kCompute),
+                          WorkgroupSize(1_i),
+                      });
 
-    auto* ep_2 = Func("ep_2", params, ty.void_(),
+    auto* ep_2 = Func("ep_2", {}, ty.void_(),
                       {
                           Assign("call_c", Call("c")),
                       },
-                      ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
+                      {
+                          Stage(ast::PipelineStage::kCompute),
+                          WorkgroupSize(1_i),
+                      });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1875,8 +1898,8 @@ TEST_F(ResolverTest, Function_EntryPoints_LinearTime) {
     auto fn_a = [](int level) { return "l" + std::to_string(level + 1) + "a"; };
     auto fn_b = [](int level) { return "l" + std::to_string(level + 1) + "b"; };
 
-    Func(fn_a(levels), {}, ty.void_(), {}, {});
-    Func(fn_b(levels), {}, ty.void_(), {}, {});
+    Func(fn_a(levels), {}, ty.void_(), {});
+    Func(fn_b(levels), {}, ty.void_(), {});
 
     for (int i = levels - 1; i >= 0; i--) {
         Func(fn_a(i), {}, ty.void_(),

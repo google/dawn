@@ -21,7 +21,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Generate) {
-    Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{}, ast::AttributeList{});
+    Func("my_func", {}, ty.void_(), {}, {});
 
     GeneratorImpl& gen = Build();
 

@@ -126,9 +126,11 @@ const ast::Statement* ProgramBuilder::WrapInStatement(const ast::Statement* stmt
 }
 
 const ast::Function* ProgramBuilder::WrapInFunction(const ast::StatementList stmts) {
-    return Func(
-        "test_function", {}, ty.void_(), std::move(stmts),
-        {create<ast::StageAttribute>(ast::PipelineStage::kCompute), WorkgroupSize(1_i, 1_i, 1_i)});
+    return Func("test_function", {}, ty.void_(), std::move(stmts),
+                {
+                    create<ast::StageAttribute>(ast::PipelineStage::kCompute),
+                    WorkgroupSize(1_i, 1_i, 1_i),
+                });
 }
 
 }  // namespace tint

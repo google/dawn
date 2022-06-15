@@ -28,7 +28,7 @@ namespace {
 using GlslGeneratorImplTest_Function = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_Function, Emit_Function) {
-    Func("my_func", ast::VariableList{}, ty.void_(),
+    Func("my_func", {}, ty.void_(),
          {
              Return(),
          });
@@ -48,7 +48,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Function) {
 }
 
 TEST_F(GlslGeneratorImplTest_Function, Emit_Function_Name_Collision) {
-    Func("centroid", ast::VariableList{}, ty.void_(),
+    Func("centroid", {}, ty.void_(),
          {
              Return(),
          });
@@ -64,7 +64,12 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Function_Name_Collision) {
 }
 
 TEST_F(GlslGeneratorImplTest_Function, Emit_Function_WithParams) {
-    Func("my_func", ast::VariableList{Param("a", ty.f32()), Param("b", ty.i32())}, ty.void_(),
+    Func("my_func",
+         {
+             Param("a", ty.f32()),
+             Param("b", ty.i32()),
+         },
+         ty.void_(),
          {
              Return(),
          });
@@ -84,7 +89,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Function_WithParams) {
 }
 
 TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_NoReturn_Void) {
-    Func("func", ast::VariableList{}, ty.void_(), {/* no explicit return */},
+    Func("func", {}, ty.void_(), {/* no explicit return */},
          {
              Stage(ast::PipelineStage::kFragment),
          });
@@ -121,9 +126,20 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_WithInOutVars) 
     // fn frag_main(@location(0) foo : f32) -> @location(1) f32 {
     //   return foo;
     // }
-    auto* foo_in = Param("foo", ty.f32(), {Location(0)});
-    Func("frag_main", ast::VariableList{foo_in}, ty.f32(), {Return("foo")},
-         {Stage(ast::PipelineStage::kFragment)}, {Location(1)});
+    Func("frag_main",
+         {
+             Param("foo", ty.f32(), {Location(0)}),
+         },
+         ty.f32(),
+         {
+             Return("foo"),
+         },
+         {
+             Stage(ast::PipelineStage::kFragment),
+         },
+         {
+             Location(1),
+         });
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -150,8 +166,20 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_WithInOut_Built
     //   return coord.x;
     // }
     auto* coord_in = Param("coord", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)});
-    Func("frag_main", ast::VariableList{coord_in}, ty.f32(), {Return(MemberAccessor("coord", "x"))},
-         {Stage(ast::PipelineStage::kFragment)}, {Builtin(ast::Builtin::kFragDepth)});
+    Func("frag_main",
+         {
+             coord_in,
+         },
+         ty.f32(),
+         {
+             Return(MemberAccessor("coord", "x")),
+         },
+         {
+             Stage(ast::PipelineStage::kFragment),
+         },
+         {
+             Builtin(ast::Builtin::kFragDepth),
+         });
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -384,7 +412,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_UniformStr
     auto* var = Var("v", ty.f32(), ast::StorageClass::kNone,
                     MemberAccessor(MemberAccessor("uniforms", "coord"), "x"));
 
-    Func("frag_main", ast::VariableList{}, ty.void_(),
+    Func("frag_main", {}, ty.void_(),
          {
              Decl(var),
              Return(),
@@ -428,7 +456,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_RW_Storage
 
     auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("coord", "b"));
 
-    Func("frag_main", ast::VariableList{}, ty.void_(),
+    Func("frag_main", {}, ty.void_(),
          {
              Decl(var),
              Return(),
@@ -478,7 +506,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_RO_Storage
 
     auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("coord", "b"));
 
-    Func("frag_main", ast::VariableList{}, ty.void_(),
+    Func("frag_main", {}, ty.void_(),
          {
              Decl(var),
              Return(),
@@ -527,7 +555,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_WO_Storage
                create<ast::GroupAttribute>(1),
            });
 
-    Func("frag_main", ast::VariableList{}, ty.void_(),
+    Func("frag_main", {}, ty.void_(),
          {
              Assign(MemberAccessor("coord", "b"), Expr(2_f)),
              Return(),
@@ -575,7 +603,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_StorageBuf
                create<ast::GroupAttribute>(1),
            });
 
-    Func("frag_main", ast::VariableList{}, ty.void_(),
+    Func("frag_main", {}, ty.void_(),
          {
              Assign(MemberAccessor("coord", "b"), Expr(2_f)),
              Return(),
@@ -619,14 +647,14 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_Called_By_EntryPoint_With_
                create<ast::GroupAttribute>(1),
            });
 
-    Func("sub_func", ast::VariableList{Param("param", ty.f32())}, ty.f32(),
+    Func("sub_func", {Param("param", ty.f32())}, ty.f32(),
          {
              Return(MemberAccessor("coord", "x")),
          });
 
     auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, Call("sub_func", 1_f));
 
-    Func("frag_main", ast::VariableList{}, ty.void_(),
+    Func("frag_main", {}, ty.void_(),
          {
              Decl(var),
              Return(),
@@ -668,14 +696,14 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_Called_By_EntryPoint_With_
                create<ast::GroupAttribute>(1),
            });
 
-    Func("sub_func", ast::VariableList{Param("param", ty.f32())}, ty.f32(),
+    Func("sub_func", {Param("param", ty.f32())}, ty.f32(),
          {
              Return(MemberAccessor("coord", "x")),
          });
 
     auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, Call("sub_func", 1_f));
 
-    Func("frag_main", ast::VariableList{}, ty.void_(),
+    Func("frag_main", {}, ty.void_(),
          {
              Decl(var),
              Return(),
@@ -715,7 +743,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_WithNameCollision) {
-    Func("centroid", ast::VariableList{}, ty.void_(), {},
+    Func("centroid", {}, ty.void_(), {},
          {
              Stage(ast::PipelineStage::kFragment),
          });
@@ -737,11 +765,14 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_Compute) {
-    Func("main", ast::VariableList{}, ty.void_(),
+    Func("main", {}, ty.void_(),
          {
              Return(),
          },
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
+         {
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+         });
 
     GeneratorImpl& gen = Build();
 
@@ -756,7 +787,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_Compute_WithWorkgroup_Literal) {
-    Func("main", ast::VariableList{}, ty.void_(), {},
+    Func("main", {}, ty.void_(), {},
          {
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(2_i, 4_i, 6_i),
@@ -778,7 +809,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_Compute_WithWor
     GlobalConst("width", ty.i32(), Construct(ty.i32(), 2_i));
     GlobalConst("height", ty.i32(), Construct(ty.i32(), 3_i));
     GlobalConst("depth", ty.i32(), Construct(ty.i32(), 4_i));
-    Func("main", ast::VariableList{}, ty.void_(), {},
+    Func("main", {}, ty.void_(), {},
          {
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize("width", "height", "depth"),
@@ -804,7 +835,7 @@ TEST_F(GlslGeneratorImplTest_Function,
     Override("width", ty.i32(), Construct(ty.i32(), 2_i), {Id(7u)});
     Override("height", ty.i32(), Construct(ty.i32(), 3_i), {Id(8u)});
     Override("depth", ty.i32(), Construct(ty.i32(), 4_i), {Id(9u)});
-    Func("main", ast::VariableList{}, ty.void_(), {},
+    Func("main", {}, ty.void_(), {},
          {
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize("width", "height", "depth"),
@@ -835,7 +866,7 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
-    Func("my_func", ast::VariableList{Param("a", ty.array<f32, 5>())}, ty.void_(),
+    Func("my_func", {Param("a", ty.array<f32, 5>())}, ty.void_(),
          {
              Return(),
          });
@@ -900,23 +931,29 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Multiple_EntryPoint_With_Same_Module
     {
         auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("data", "d"));
 
-        Func("a", ast::VariableList{}, ty.void_(),
+        Func("a", {}, ty.void_(),
              {
                  Decl(var),
                  Return(),
              },
-             {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
+             {
+                 Stage(ast::PipelineStage::kCompute),
+                 WorkgroupSize(1_i),
+             });
     }
 
     {
         auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("data", "d"));
 
-        Func("b", ast::VariableList{}, ty.void_(),
+        Func("b", {}, ty.void_(),
              {
                  Decl(var),
                  Return(),
              },
-             {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
+             {
+                 Stage(ast::PipelineStage::kCompute),
+                 WorkgroupSize(1_i),
+             });
     }
 
     GeneratorImpl& gen = SanitizeAndBuild();

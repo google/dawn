@@ -49,23 +49,23 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
 
     auto* s0 = Structure("S0", {Member("a", ty.i32())});
 
-    Func("func", ast::VariableList{}, ty.f32(),
-         ast::StatementList{
+    Func("func", {}, ty.f32(),
+         {
              Return("a0"),
          },
-         ast::AttributeList{});
+         {});
 
     Global("a1", ty.f32(), ast::StorageClass::kPrivate);
 
     auto* s1 = Structure("S1", {Member("a", ty.i32())});
 
-    Func("main", ast::VariableList{}, ty.void_(),
-         ast::StatementList{
+    Func("main", {}, ty.void_(),
+         {
              Decl(Var("s0", ty.Of(s0))),
              Decl(Var("s1", ty.Of(s1))),
              Assign("a1", Call("func")),
          },
-         ast::AttributeList{
+         {
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });

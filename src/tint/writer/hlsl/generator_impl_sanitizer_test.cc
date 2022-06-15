@@ -32,12 +32,12 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength) {
                create<ast::GroupAttribute>(2),
            });
 
-    Func("a_func", ast::VariableList{}, ty.void_(),
-         ast::StatementList{
+    Func("a_func", {}, ty.void_(),
+         {
              Decl(Var("len", ty.u32(), ast::StorageClass::kNone,
                       Call("arrayLength", AddressOf(MemberAccessor("b", "a"))))),
          },
-         ast::AttributeList{
+         {
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -70,12 +70,12 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
                create<ast::GroupAttribute>(2),
            });
 
-    Func("a_func", ast::VariableList{}, ty.void_(),
-         ast::StatementList{
+    Func("a_func", {}, ty.void_(),
+         {
              Decl(Var("len", ty.u32(), ast::StorageClass::kNone,
                       Call("arrayLength", AddressOf(MemberAccessor("b", "a"))))),
          },
-         ast::AttributeList{
+         {
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -109,13 +109,13 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_ViaLets) {
     auto* p = Let("p", nullptr, AddressOf("b"));
     auto* p2 = Let("p2", nullptr, AddressOf(MemberAccessor(Deref(p), "a")));
 
-    Func("a_func", ast::VariableList{}, ty.void_(),
-         ast::StatementList{
+    Func("a_func", {}, ty.void_(),
+         {
              Decl(p),
              Decl(p2),
              Decl(Var("len", ty.u32(), ast::StorageClass::kNone, Call("arrayLength", p2))),
          },
-         ast::AttributeList{
+         {
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -151,13 +151,13 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
                create<ast::GroupAttribute>(2),
            });
 
-    Func("a_func", ast::VariableList{}, ty.void_(),
-         ast::StatementList{
+    Func("a_func", {}, ty.void_(),
+         {
              Decl(Var("len", ty.u32(), ast::StorageClass::kNone,
                       Add(Call("arrayLength", AddressOf(MemberAccessor("b", "a"))),
                           Call("arrayLength", AddressOf(MemberAccessor("c", "a")))))),
          },
-         ast::AttributeList{
+         {
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -191,7 +191,7 @@ TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
     auto* array_index = IndexAccessor(array_init, 3_i);
     auto* pos = Var("pos", ty.i32(), ast::StorageClass::kNone, array_index);
 
-    Func("main", ast::VariableList{}, ty.void_(),
+    Func("main", {}, ty.void_(),
          {
              Decl(pos),
          },
@@ -223,7 +223,7 @@ TEST_F(HlslSanitizerTest, PromoteStructInitializerToConstVar) {
     auto* struct_access = MemberAccessor(struct_init, "b");
     auto* pos = Var("pos", ty.vec3<f32>(), ast::StorageClass::kNone, struct_access);
 
-    Func("main", ast::VariableList{}, ty.void_(),
+    Func("main", {}, ty.void_(),
          {
              Decl(pos),
          },
@@ -259,7 +259,7 @@ TEST_F(HlslSanitizerTest, InlinePtrLetsBasic) {
     auto* p = Let("p", ty.pointer<i32>(ast::StorageClass::kFunction), AddressOf(v));
     auto* x = Var("x", ty.i32(), ast::StorageClass::kNone, Deref(p));
 
-    Func("main", ast::VariableList{}, ty.void_(),
+    Func("main", {}, ty.void_(),
          {
              Decl(v),
              Decl(p),
@@ -298,7 +298,7 @@ TEST_F(HlslSanitizerTest, InlinePtrLetsComplexChain) {
                    AddressOf(IndexAccessor(Deref(mp), 2_i)));
     auto* v = Var("v", ty.vec4<f32>(), ast::StorageClass::kNone, Deref(vp));
 
-    Func("main", ast::VariableList{}, ty.void_(),
+    Func("main", {}, ty.void_(),
          {
              Decl(a),
              Decl(ap),

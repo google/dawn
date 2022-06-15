@@ -29,7 +29,7 @@ TEST_F(HlslGeneratorImplTest, InvalidProgram) {
 }
 
 TEST_F(HlslGeneratorImplTest, Generate) {
-    Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{}, ast::AttributeList{});
+    Func("my_func", {}, ty.void_(), {});
 
     GeneratorImpl& gen = Build();
 

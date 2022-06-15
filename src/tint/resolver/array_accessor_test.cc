@@ -225,13 +225,12 @@ TEST_F(ResolverIndexAccessorTest, Array_Dynamic_I32) {
     auto* a = Let("a", ty.array<f32, 3>(), array<f32, 3>());
     auto* idx = Var("idx", ty.i32(), Construct(ty.i32()));
     auto* f = Var("f", ty.f32(), IndexAccessor("a", Expr(Source{{12, 34}}, idx)));
-    Func("my_func", ast::VariableList{}, ty.void_(),
+    Func("my_func", {}, ty.void_(),
          {
              Decl(a),
              Decl(idx),
              Decl(f),
-         },
-         ast::AttributeList{});
+         });
 
     EXPECT_TRUE(r()->Resolve());
     EXPECT_EQ(r()->error(), "");
@@ -242,12 +241,11 @@ TEST_F(ResolverIndexAccessorTest, Array_Literal_F32) {
     // var f : f32 = a[2.0f];
     auto* a = Let("a", ty.array<f32, 3>(), array<f32, 3>());
     auto* f = Var("a_2", ty.f32(), IndexAccessor("a", Expr(Source{{12, 34}}, 2_f)));
-    Func("my_func", ast::VariableList{}, ty.void_(),
+    Func("my_func", {}, ty.void_(),
          {
              Decl(a),
              Decl(f),
-         },
-         ast::AttributeList{});
+         });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: index must be of type 'i32' or 'u32', found: 'f32'");
 }
@@ -257,12 +255,11 @@ TEST_F(ResolverIndexAccessorTest, Array_Literal_I32) {
     // var f : f32 = a[2i];
     auto* a = Let("a", ty.array<f32, 3>(), array<f32, 3>());
     auto* f = Var("a_2", ty.f32(), IndexAccessor("a", 2_i));
-    Func("my_func", ast::VariableList{}, ty.void_(),
+    Func("my_func", {}, ty.void_(),
          {
              Decl(a),
              Decl(f),
-         },
-         ast::AttributeList{});
+         });
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 

@@ -28,7 +28,7 @@ InspectorBuilder::InspectorBuilder() = default;
 InspectorBuilder::~InspectorBuilder() = default;
 
 void InspectorBuilder::MakeEmptyBodyFunction(std::string name, ast::AttributeList attributes) {
-    Func(name, ast::VariableList(), ty.void_(), ast::StatementList{Return()}, attributes);
+    Func(name, {}, ty.void_(), {Return()}, attributes);
 }
 
 void InspectorBuilder::MakeCallerBodyFunction(std::string caller,
@@ -41,7 +41,7 @@ void InspectorBuilder::MakeCallerBodyFunction(std::string caller,
     }
     body.push_back(Return());
 
-    Func(caller, ast::VariableList(), ty.void_(), body, attributes);
+    Func(caller, {}, ty.void_(), body, attributes);
 }
 
 const ast::Struct* InspectorBuilder::MakeInOutStruct(
@@ -67,7 +67,7 @@ const ast::Function* InspectorBuilder::MakePlainGlobalReferenceBodyFunction(
     stmts.emplace_back(Assign("local_" + var, var));
     stmts.emplace_back(Return());
 
-    return Func(func, ast::VariableList(), ty.void_(), stmts, attributes);
+    return Func(func, {}, ty.void_(), stmts, attributes);
 }
 
 bool InspectorBuilder::ContainsName(const std::vector<StageVariable>& vec,
@@ -169,7 +169,7 @@ void InspectorBuilder::MakeStructVariableReferenceBodyFunction(
 
     stmts.emplace_back(Return());
 
-    Func(func_name, ast::VariableList(), ty.void_(), stmts, ast::AttributeList{});
+    Func(func_name, {}, ty.void_(), stmts);
 }
 
 void InspectorBuilder::AddSampler(const std::string& name, uint32_t group, uint32_t binding) {
@@ -221,7 +221,7 @@ const ast::Function* InspectorBuilder::MakeSamplerReferenceBodyFunction(
         Assign(result_name, Call("textureSample", texture_name, sampler_name, coords_name)));
     stmts.emplace_back(Return());
 
-    return Func(func_name, ast::VariableList(), ty.void_(), stmts, attributes);
+    return Func(func_name, {}, ty.void_(), stmts, attributes);
 }
 
 const ast::Function* InspectorBuilder::MakeSamplerReferenceBodyFunction(
@@ -242,7 +242,7 @@ const ast::Function* InspectorBuilder::MakeSamplerReferenceBodyFunction(
                                                      coords_name, array_index)));
     stmts.emplace_back(Return());
 
-    return Func(func_name, ast::VariableList(), ty.void_(), stmts, attributes);
+    return Func(func_name, {}, ty.void_(), stmts, attributes);
 }
 
 const ast::Function* InspectorBuilder::MakeComparisonSamplerReferenceBodyFunction(
@@ -262,7 +262,7 @@ const ast::Function* InspectorBuilder::MakeComparisonSamplerReferenceBodyFunctio
                                                      sampler_name, coords_name, depth_name)));
     stmts.emplace_back(Return());
 
-    return Func(func_name, ast::VariableList(), ty.void_(), stmts, attributes);
+    return Func(func_name, {}, ty.void_(), stmts, attributes);
 }
 
 const ast::Type* InspectorBuilder::GetBaseType(ResourceBinding::SampledKind sampled_kind) {
@@ -323,7 +323,7 @@ const ast::Function* InspectorBuilder::MakeStorageTextureBodyFunction(
     stmts.emplace_back(Assign("dim", Call("textureDimensions", st_name)));
     stmts.emplace_back(Return());
 
-    return Func(func_name, ast::VariableList(), ty.void_(), stmts, attributes);
+    return Func(func_name, {}, ty.void_(), stmts, attributes);
 }
 
 std::function<const ast::Type*()> InspectorBuilder::GetTypeFunction(ComponentType component,

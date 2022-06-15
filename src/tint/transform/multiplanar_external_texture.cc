@@ -264,35 +264,38 @@ struct MultiplanarExternalTexture::State {
     /// Creates the gammaCorrection function if needed and returns a call
     /// expression to it.
     void createGammaCorrectionFn() {
-        ast::VariableList varList = {b.Param("v", b.ty.vec3<f32>()),
-                                     b.Param("params", b.ty.type_name(gamma_transfer_struct_sym))};
-
-        ast::StatementList statementList = {
-            // let cond = abs(v) < vec3(params.D);
-            b.Decl(b.Let(
-                "cond", nullptr,
-                b.LessThan(b.Call("abs", "v"), b.vec3<f32>(b.MemberAccessor("params", "D"))))),
-            // let t = sign(v) * ((params.C * abs(v)) + params.F);
-            b.Decl(b.Let("t", nullptr,
-                         b.Mul(b.Call("sign", "v"),
-                               b.Add(b.Mul(b.MemberAccessor("params", "C"), b.Call("abs", "v")),
-                                     b.MemberAccessor("params", "F"))))),
-            // let f = (sign(v) * pow(((params.A * abs(v)) + params.B),
-            // vec3(params.G))) + params.E;
-            b.Decl(b.Let(
-                "f", nullptr,
-                b.Mul(b.Call("sign", "v"),
-                      b.Add(b.Call("pow",
-                                   b.Add(b.Mul(b.MemberAccessor("params", "A"), b.Call("abs", "v")),
-                                         b.MemberAccessor("params", "B")),
-                                   b.vec3<f32>(b.MemberAccessor("params", "G"))),
-                            b.MemberAccessor("params", "E"))))),
-            // return select(f, t, cond);
-            b.Return(b.Call("select", "f", "t", "cond"))};
-
         gamma_correction_sym = b.Symbols().New("gammaCorrection");
 
-        b.Func(gamma_correction_sym, varList, b.ty.vec3<f32>(), statementList, {});
+        b.Func(
+            gamma_correction_sym,
+            {
+                b.Param("v", b.ty.vec3<f32>()),
+                b.Param("params", b.ty.type_name(gamma_transfer_struct_sym)),
+            },
+            b.ty.vec3<f32>(),
+            {
+                // let cond = abs(v) < vec3(params.D);
+                b.Decl(b.Let(
+                    "cond", nullptr,
+                    b.LessThan(b.Call("abs", "v"), b.vec3<f32>(b.MemberAccessor("params", "D"))))),
+                // let t = sign(v) * ((params.C * abs(v)) + params.F);
+                b.Decl(b.Let("t", nullptr,
+                             b.Mul(b.Call("sign", "v"),
+                                   b.Add(b.Mul(b.MemberAccessor("params", "C"), b.Call("abs", "v")),
+                                         b.MemberAccessor("params", "F"))))),
+                // let f = (sign(v) * pow(((params.A * abs(v)) + params.B),
+                // vec3(params.G))) + params.E;
+                b.Decl(b.Let("f", nullptr,
+                             b.Mul(b.Call("sign", "v"),
+                                   b.Add(b.Call("pow",
+                                                b.Add(b.Mul(b.MemberAccessor("params", "A"),
+                                                            b.Call("abs", "v")),
+                                                      b.MemberAccessor("params", "B")),
+                                                b.vec3<f32>(b.MemberAccessor("params", "G"))),
+                                         b.MemberAccessor("params", "E"))))),
+                // return select(f, t, cond);
+                b.Return(b.Call("select", "f", "t", "cond")),
+            });
     }
 
     /// Constructs a StatementList containing all the statements making up the
@@ -375,17 +378,19 @@ struct MultiplanarExternalTexture::State {
             texture_sample_external_sym = b.Symbols().New("textureSampleExternal");
 
             // Emit the textureSampleExternal function.
-            ast::VariableList varList = {
-                b.Param("plane0", b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32())),
-                b.Param("plane1", b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32())),
-                b.Param("smp", b.ty.sampler(ast::SamplerKind::kSampler)),
-                b.Param("coord", b.ty.vec2(b.ty.f32())),
-                b.Param("params", b.ty.type_name(params_struct_sym))};
-
-            ast::StatementList statementList =
-                createTexFnExtStatementList(sem::BuiltinType::kTextureSampleLevel);
-
-            b.Func(texture_sample_external_sym, varList, b.ty.vec4(b.ty.f32()), statementList, {});
+            b.Func(
+                texture_sample_external_sym,
+                {
+                    b.Param("plane0", b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32())),
+                    b.Param("plane1", b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32())),
+                    b.Param("smp", b.ty.sampler(ast::SamplerKind::kSampler)),
+                    b.Param("coord", b.ty.vec2(b.ty.f32())),
+                    b.Param("params", b.ty.type_name(params_struct_sym)),
+                },
+                b.ty.vec4(b.ty.f32()),
+                {
+                    createTexFnExtStatementList(sem::BuiltinType::kTextureSampleLevel),
+                });
         }
 
         const ast::IdentifierExpression* exp = b.Expr(texture_sample_external_sym);
@@ -421,22 +426,22 @@ struct MultiplanarExternalTexture::State {
             texture_load_external_sym = b.Symbols().New("textureLoadExternal");
 
             // Emit the textureLoadExternal function.
-            ast::VariableList var_list = {
-                b.Param("plane0", b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32())),
-                b.Param("plane1", b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32())),
-                b.Param("coord", b.ty.vec2(b.ty.i32())),
-                b.Param("params", b.ty.type_name(params_struct_sym))};
-
-            ast::StatementList statement_list =
-                createTexFnExtStatementList(sem::BuiltinType::kTextureLoad);
-
-            b.Func(texture_load_external_sym, var_list, b.ty.vec4(b.ty.f32()), statement_list, {});
+            b.Func(
+                texture_load_external_sym,
+                {
+                    b.Param("plane0", b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32())),
+                    b.Param("plane1", b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32())),
+                    b.Param("coord", b.ty.vec2(b.ty.i32())),
+                    b.Param("params", b.ty.type_name(params_struct_sym)),
+                },
+                b.ty.vec4(b.ty.f32()),
+                {
+                    createTexFnExtStatementList(sem::BuiltinType::kTextureLoad),
+                });
         }
 
-        const ast::IdentifierExpression* exp = b.Expr(texture_load_external_sym);
-        params = {plane_0_binding_param, b.Expr(syms.plane_1), ctx.Clone(expr->args[1]),
-                  b.Expr(syms.params)};
-        return b.Call(exp, params);
+        return b.Call(texture_load_external_sym, plane_0_binding_param, syms.plane_1,
+                      ctx.Clone(expr->args[1]), syms.params);
     }
 };
 

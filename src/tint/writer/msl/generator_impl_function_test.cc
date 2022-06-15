@@ -24,11 +24,10 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Function) {
-    Func("my_func", ast::VariableList{}, ty.void_(),
-         ast::StatementList{
+    Func("my_func", {}, ty.void_(),
+         {
              Return(),
-         },
-         {});
+         });
 
     GeneratorImpl& gen = Build();
 
@@ -46,15 +45,15 @@ TEST_F(MslGeneratorImplTest, Emit_Function) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
-    ast::VariableList params;
-    params.push_back(Param("a", ty.f32()));
-    params.push_back(Param("b", ty.i32()));
-
-    Func("my_func", params, ty.void_(),
-         ast::StatementList{
-             Return(),
+    Func("my_func",
+         {
+             Param("a", ty.f32()),
+             Param("b", ty.i32()),
          },
-         {});
+         ty.void_(),
+         {
+             Return(),
+         });
 
     GeneratorImpl& gen = Build();
 
@@ -72,7 +71,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Attribute_EntryPoint_NoReturn_Void) {
-    Func("main", ast::VariableList{}, ty.void_(), ast::StatementList{/* no explicit return */},
+    Func("main", {}, ty.void_(), {/* no explicit return */},
          {Stage(ast::PipelineStage::kFragment)});
 
     GeneratorImpl& gen = Build();
@@ -93,8 +92,16 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_EntryPoint_WithInOutVars) {
     //   return foo;
     // }
     auto* foo_in = Param("foo", ty.f32(), {Location(0)});
-    Func("frag_main", ast::VariableList{foo_in}, ty.f32(), {Return("foo")},
-         {Stage(ast::PipelineStage::kFragment)}, {Location(1)});
+    Func("frag_main", {foo_in}, ty.f32(),
+         {
+             Return("foo"),
+         },
+         {
+             Stage(ast::PipelineStage::kFragment),
+         },
+         {
+             Location(1),
+         });
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -129,8 +136,16 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_EntryPoint_WithInOut_Builtins) {
     //   return coord.x;
     // }
     auto* coord_in = Param("coord", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)});
-    Func("frag_main", ast::VariableList{coord_in}, ty.f32(), {Return(MemberAccessor("coord", "x"))},
-         {Stage(ast::PipelineStage::kFragment)}, {Builtin(ast::Builtin::kFragDepth)});
+    Func("frag_main", {coord_in}, ty.f32(),
+         {
+             Return(MemberAccessor("coord", "x")),
+         },
+         {
+             Stage(ast::PipelineStage::kFragment),
+         },
+         {
+             Builtin(ast::Builtin::kFragDepth),
+         });
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -256,10 +271,10 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_EntryPoint_SharedStruct_HelperFuncti
         "VertexOutput", {Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)})});
 
     Func("foo", {Param("x", ty.f32())}, ty.Of(vertex_output_struct),
-         {Return(Construct(ty.Of(vertex_output_struct),
-                           Construct(ty.vec4<f32>(), "x", "x", "x", Expr(1_f))))},
-         {});
-
+         {
+             Return(Construct(ty.Of(vertex_output_struct),
+                              Construct(ty.vec4<f32>(), "x", "x", "x", Expr(1_f)))),
+         });
     Func("vert_main1", {}, ty.Of(vertex_output_struct), {Return(Expr(Call("foo", Expr(0.5_f))))},
          {Stage(ast::PipelineStage::kVertex)});
 
@@ -328,8 +343,8 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_EntryPoint_With_RW_StorageBu
 
     auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("coord", "b"));
 
-    Func("frag_main", ast::VariableList{}, ty.void_(),
-         ast::StatementList{
+    Func("frag_main", {}, ty.void_(),
+         {
              Decl(var),
              Return(),
          },
@@ -370,8 +385,8 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_EntryPoint_With_RO_StorageBu
 
     auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("coord", "b"));
 
-    Func("frag_main", ast::VariableList{}, ty.void_(),
-         ast::StatementList{
+    Func("frag_main", {}, ty.void_(),
+         {
              Decl(var),
              Return(),
          },
@@ -460,17 +475,19 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_Called_By_EntryPoint_With_RW
                create<ast::GroupAttribute>(0),
            });
 
-    ast::VariableList params;
-    params.push_back(Param("param", ty.f32()));
-
-    auto body = ast::StatementList{Return(MemberAccessor("coord", "b"))};
-
-    Func("sub_func", params, ty.f32(), body, {});
+    Func("sub_func",
+         {
+             Param("param", ty.f32()),
+         },
+         ty.f32(),
+         {
+             Return(MemberAccessor("coord", "b")),
+         });
 
     auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, Call("sub_func", 1_f));
 
-    Func("frag_main", ast::VariableList{}, ty.void_(),
-         ast::StatementList{
+    Func("frag_main", {}, ty.void_(),
+         {
              Decl(var),
              Return(),
          },
@@ -513,17 +530,19 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_Called_By_EntryPoint_With_RO
                create<ast::GroupAttribute>(0),
            });
 
-    ast::VariableList params;
-    params.push_back(Param("param", ty.f32()));
-
-    auto body = ast::StatementList{Return(MemberAccessor("coord", "b"))};
-
-    Func("sub_func", params, ty.f32(), body, {});
+    Func("sub_func",
+         {
+             Param("param", ty.f32()),
+         },
+         ty.f32(),
+         {
+             Return(MemberAccessor("coord", "b")),
+         });
 
     auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, Call("sub_func", 1_f));
 
-    Func("frag_main", ast::VariableList{}, ty.void_(),
-         ast::StatementList{
+    Func("frag_main", {}, ty.void_(),
+         {
              Decl(var),
              Return(),
          },
@@ -555,10 +574,11 @@ fragment void frag_main(const device Data* tint_symbol_1 [[buffer(0)]]) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
-    ast::VariableList params;
-    params.push_back(Param("a", ty.array<f32, 5>()));
-
-    Func("my_func", params, ty.void_(),
+    Func("my_func",
+         {
+             Param("a", ty.array<f32, 5>()),
+         },
+         ty.void_(),
          {
              Return(),
          });
@@ -636,8 +656,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_ModuleV
     {
         auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("data", "d"));
 
-        Func("a", ast::VariableList{}, ty.void_(),
-             ast::StatementList{
+        Func("a", {}, ty.void_(),
+             {
                  Decl(var),
                  Return(),
              },
@@ -650,7 +670,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_ModuleV
     {
         auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("data", "d"));
 
-        Func("b", ast::VariableList{}, ty.void_(), ast::StatementList{Decl(var), Return()},
+        Func("b", {}, ty.void_(), {Decl(var), Return()},
              {
                  Stage(ast::PipelineStage::kCompute),
                  WorkgroupSize(1_i),

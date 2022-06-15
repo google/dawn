@@ -24,7 +24,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Function_Empty) {
-    Func("a_func", {}, ty.void_(), ast::StatementList{}, ast::AttributeList{});
+    Func("a_func", {}, ty.void_(), {});
 
     spirv::Builder& b = Build();
 
@@ -42,10 +42,9 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, Function_Terminator_Return) {
     Func("a_func", {}, ty.void_(),
-         ast::StatementList{
+         {
              Return(),
-         },
-         ast::AttributeList{});
+         });
 
     spirv::Builder& b = Build();
 
@@ -64,7 +63,7 @@ OpFunctionEnd
 TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
     Global("a", ty.f32(), ast::StorageClass::kPrivate);
 
-    Func("a_func", {}, ty.f32(), ast::StatementList{Return("a")}, ast::AttributeList{});
+    Func("a_func", {}, ty.f32(), {Return("a")}, {});
 
     spirv::Builder& b = Build();
 
@@ -90,10 +89,9 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, Function_Terminator_Discard) {
     Func("a_func", {}, ty.void_(),
-         ast::StatementList{
+         {
              create<ast::DiscardStatement>(),
-         },
-         ast::AttributeList{});
+         });
 
     spirv::Builder& b = Build();
 
@@ -110,9 +108,12 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_WithParams) {
-    ast::VariableList params = {Param("a", ty.f32()), Param("b", ty.i32())};
-
-    Func("a_func", params, ty.f32(), ast::StatementList{Return("a")}, ast::AttributeList{});
+    Func("a_func",
+         {
+             Param("a", ty.f32()),
+             Param("b", ty.i32()),
+         },
+         ty.f32(), {Return("a")}, {});
 
     spirv::Builder& b = Build();
 
@@ -135,10 +136,9 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, Function_WithBody) {
     Func("a_func", {}, ty.void_(),
-         ast::StatementList{
+         {
              Return(),
-         },
-         ast::AttributeList{});
+         });
 
     spirv::Builder& b = Build();
 
@@ -155,7 +155,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, FunctionType) {
-    Func("a_func", {}, ty.void_(), ast::StatementList{}, ast::AttributeList{});
+    Func("a_func", {}, ty.void_(), {}, {});
 
     spirv::Builder& b = Build();
 
@@ -167,8 +167,8 @@ TEST_F(BuilderTest, FunctionType) {
 }
 
 TEST_F(BuilderTest, FunctionType_DeDuplicate) {
-    auto* func1 = Func("a_func", {}, ty.void_(), ast::StatementList{}, ast::AttributeList{});
-    auto* func2 = Func("b_func", {}, ty.void_(), ast::StatementList{}, ast::AttributeList{});
+    auto* func1 = Func("a_func", {}, ty.void_(), {}, {});
+    auto* func2 = Func("b_func", {}, ty.void_(), {}, {});
 
     spirv::Builder& b = Build();
 
@@ -207,23 +207,23 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
     {
         auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("data", "d"));
 
-        Func("a", ast::VariableList{}, ty.void_(),
-             ast::StatementList{
+        Func("a", {}, ty.void_(),
+             {
                  Decl(var),
                  Return(),
              },
-             ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
+             {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
     }
 
     {
         auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("data", "d"));
 
-        Func("b", ast::VariableList{}, ty.void_(),
-             ast::StatementList{
+        Func("b", {}, ty.void_(),
+             {
                  Decl(var),
                  Return(),
              },
-             ast::AttributeList{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
+             {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
     }
 
     spirv::Builder& b = SanitizeAndBuild();

@@ -26,7 +26,7 @@ TEST_F(ModuleTest, Creation) {
 }
 
 TEST_F(ModuleTest, LookupFunction) {
-    auto* func = Func("main", VariableList{}, ty.f32(), StatementList{}, ast::AttributeList{});
+    auto* func = Func("main", {}, ty.f32(), {});
 
     Program program(std::move(*this));
     EXPECT_EQ(func, program.AST().Functions().Find(program.Symbols().Get("main")));

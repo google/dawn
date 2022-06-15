@@ -171,7 +171,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_FunctionParamWithMain) {
     Func("foo", {Param("p", ty.pointer<i32>(ast::StorageClass::kFunction))}, ty.void_(), {});
     Func("bar", {Param("p", ty.pointer<i32>(ast::StorageClass::kFunction))}, ty.void_(),
          ast::StatementList{CallStmt(Call("foo", Expr("p")))});
-    Func("main", ast::VariableList{}, ty.void_(),
+    Func("main", {}, ty.void_(),
          {
              Decl(Var("v", ty.i32(), Expr(1_i))),
              CallStmt(Call("foo", AddressOf(Expr("v")))),
@@ -195,7 +195,7 @@ TEST_F(ResolverCallValidationTest, LetPointer) {
     auto* v = Var("v", ty.i32());
     auto* p = Let("p", ty.pointer(ty.i32(), ast::StorageClass::kFunction), AddressOf(v));
     auto* c = Var("c", ty.i32(), ast::StorageClass::kNone, Call("x", Expr(Source{{12, 34}}, p)));
-    Func("main", ast::VariableList{}, ty.void_(),
+    Func("main", {}, ty.void_(),
          {
              Decl(v),
              Decl(p),
@@ -222,7 +222,7 @@ TEST_F(ResolverCallValidationTest, LetPointerPrivate) {
     auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
     auto* p = Let("p", ty.pointer(ty.i32(), ast::StorageClass::kPrivate), AddressOf(v));
     auto* c = Var("c", ty.i32(), ast::StorageClass::kNone, Call("foo", Expr(Source{{12, 34}}, p)));
-    Func("main", ast::VariableList{}, ty.void_(),
+    Func("main", {}, ty.void_(),
          {
              Decl(p),
              Decl(c),

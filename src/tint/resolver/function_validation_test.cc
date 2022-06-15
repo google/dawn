@@ -394,7 +394,10 @@ TEST_F(ResolverFunctionValidationTest, FunctionVarInitWithParam) {
     auto* bar = Param("bar", ty.f32());
     auto* baz = Var("baz", ty.f32(), Expr("bar"));
 
-    Func("foo", ast::VariableList{bar}, ty.void_(), {Decl(baz)});
+    Func("foo", {bar}, ty.void_(),
+         {
+             Decl(baz),
+         });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -407,7 +410,10 @@ TEST_F(ResolverFunctionValidationTest, FunctionConstInitWithParam) {
     auto* bar = Param("bar", ty.f32());
     auto* baz = Let("baz", ty.f32(), Expr("bar"));
 
-    Func("foo", ast::VariableList{bar}, ty.void_(), {Decl(baz)});
+    Func("foo", {bar}, ty.void_(),
+         {
+             Decl(baz),
+         });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -709,7 +715,7 @@ TEST_F(ResolverFunctionValidationTest, ParameterStoreType_NonAtomicFree) {
     Structure("S", {Member("m", ty.atomic(ty.i32()))});
     auto* ret_type = ty.type_name(Source{{12, 34}}, "S");
     auto* bar = Param(Source{{12, 34}}, "bar", ret_type);
-    Func("f", ast::VariableList{bar}, ty.void_(), {});
+    Func("f", {bar}, ty.void_(), {});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -721,7 +727,7 @@ TEST_F(ResolverFunctionValidationTest, ParameterSotreType_AtomicFree) {
     Structure("S", {Member("m", ty.i32())});
     auto* ret_type = ty.type_name(Source{{12, 34}}, "S");
     auto* bar = Param(Source{{12, 34}}, "bar", ret_type);
-    Func("f", ast::VariableList{bar}, ty.void_(), {});
+    Func("f", {bar}, ty.void_(), {});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -779,7 +785,7 @@ TEST_P(ResolverFunctionParameterValidationTest, StorageClass) {
     auto& param = GetParam();
     auto* ptr_type = ty.pointer(Source{{12, 34}}, ty.i32(), param.storage_class);
     auto* arg = Param(Source{{12, 34}}, "p", ptr_type);
-    Func("f", ast::VariableList{arg}, ty.void_(), {});
+    Func("f", {arg}, ty.void_(), {});
 
     if (param.should_pass) {
         ASSERT_TRUE(r()->Resolve()) << r()->error();
