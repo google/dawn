@@ -22,7 +22,7 @@
 #include "dawn/common/Assert.h"
 
 namespace utils {
-static constexpr std::array<wgpu::TextureFormat, 95> kAllTextureFormats = {
+static constexpr std::array<wgpu::TextureFormat, 94> kAllTextureFormats = {
     wgpu::TextureFormat::R8Unorm,
     wgpu::TextureFormat::R8Snorm,
     wgpu::TextureFormat::R8Uint,
