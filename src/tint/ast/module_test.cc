@@ -61,7 +61,7 @@ TEST_F(ModuleTest, Assert_DifferentProgramID_Function) {
             ProgramBuilder b1;
             ProgramBuilder b2;
             b1.AST().AddFunction(b2.create<ast::Function>(b2.Symbols().Register("func"),
-                                                          VariableList{}, b2.ty.f32(), b2.Block(),
+                                                          ParameterList{}, b2.ty.f32(), b2.Block(),
                                                           AttributeList{}, AttributeList{}));
         },
         "internal compiler error");

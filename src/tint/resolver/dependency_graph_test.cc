@@ -384,11 +384,11 @@ struct SymbolTestHelper {
     /// The program builder
     ProgramBuilder* const builder;
     /// Parameters to a function that may need to be built
-    std::vector<const ast::Variable*> parameters;
+    ast::ParameterList parameters;
     /// Shallow function var / let declaration statements
-    std::vector<const ast::Statement*> statements;
+    ast::StatementList statements;
     /// Nested function local var / let declaration statements
-    std::vector<const ast::Statement*> nested_statements;
+    ast::StatementList nested_statements;
     /// Function attributes
     ast::AttributeList func_attrs;
 
@@ -717,8 +717,10 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, VarUsed) {
     // }
     // var G: f32 = 2.1;
 
-    Func("F", ast::VariableList{}, ty.void_(),
-         {Block(Assign(Expr(Source{{12, 34}}, "G"), 3.14_f))});
+    Func("F", {}, ty.void_(),
+         {
+             Block(Assign(Expr(Source{{12, 34}}, "G"), 3.14_f)),
+         });
 
     Global(Source{{56, 78}}, "G", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1_f));
 

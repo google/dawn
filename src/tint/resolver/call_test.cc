@@ -81,7 +81,7 @@ static constexpr Params all_param_types[] = {
 };
 
 TEST_F(ResolverCallTest, Valid) {
-    ast::VariableList params;
+    ast::ParameterList params;
     ast::ExpressionList args;
     for (auto& p : all_param_types) {
         params.push_back(Param(Sym(), p.create_type(*this)));

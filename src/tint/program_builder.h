@@ -1941,7 +1941,7 @@ class ProgramBuilder {
     template <typename NAME>
     const ast::Function* Func(const Source& source,
                               NAME&& name,
-                              ast::VariableList params,
+                              ast::ParameterList params,
                               const ast::Type* type,
                               ast::StatementList body,
                               ast::AttributeList attributes = {},
@@ -1964,7 +1964,7 @@ class ProgramBuilder {
     /// @returns the function pointer
     template <typename NAME>
     const ast::Function* Func(NAME&& name,
-                              ast::VariableList params,
+                              ast::ParameterList params,
                               const ast::Type* type,
                               ast::StatementList body,
                               ast::AttributeList attributes = {},

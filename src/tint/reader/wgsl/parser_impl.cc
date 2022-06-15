@@ -210,7 +210,7 @@ ParserImpl::FunctionHeader::FunctionHeader(const FunctionHeader&) = default;
 
 ParserImpl::FunctionHeader::FunctionHeader(Source src,
                                            std::string n,
-                                           ast::VariableList p,
+                                           ast::ParameterList p,
                                            const ast::Type* ret_ty,
                                            ast::AttributeList ret_attrs)
     : source(src), name(n), params(p), return_type(ret_ty), return_type_attributes(ret_attrs) {}
@@ -1443,8 +1443,8 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
 // param_list
 //   :
 //   | (param COMMA)* param COMMA?
-Expect<ast::VariableList> ParserImpl::expect_param_list() {
-    ast::VariableList ret;
+Expect<ast::ParameterList> ParserImpl::expect_param_list() {
+    ast::ParameterList ret;
     while (continue_parsing()) {
         // Check for the end of the list.
         auto t = peek();

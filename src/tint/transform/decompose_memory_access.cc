@@ -437,7 +437,7 @@ struct DecomposeMemoryAccess::State {
             auto* disable_validation =
                 b.Disable(ast::DisabledValidation::kIgnoreConstructibleFunctionParameter);
 
-            ast::VariableList params = {
+            ast::ParameterList params = {
                 // Note: The buffer parameter requires the StorageClass in
                 // order for HLSL to emit this as a ByteAddressBuffer or cbuffer
                 // array.
@@ -528,7 +528,7 @@ struct DecomposeMemoryAccess::State {
             auto* el_ast_ty = CreateASTTypeFor(ctx, el_ty);
             auto* disable_validation =
                 b.Disable(ast::DisabledValidation::kIgnoreConstructibleFunctionParameter);
-            ast::VariableList params{
+            ast::ParameterList params{
                 // Note: The buffer parameter requires the StorageClass in
                 // order for HLSL to emit this as a ByteAddressBuffer.
 
@@ -621,7 +621,7 @@ struct DecomposeMemoryAccess::State {
             // The first parameter to all WGSL atomics is the expression to the
             // atomic. This is replaced with two parameters: the buffer and offset.
 
-            ast::VariableList params = {
+            ast::ParameterList params = {
                 // Note: The buffer parameter requires the kStorage StorageClass in
                 // order for HLSL to emit this as a ByteAddressBuffer.
                 b.create<ast::Variable>(b.Sym("buffer"), ast::StorageClass::kStorage,

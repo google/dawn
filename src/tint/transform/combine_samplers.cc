@@ -169,7 +169,7 @@ struct CombineSamplers::State {
                 if (pairs.empty()) {
                     return nullptr;
                 }
-                ast::VariableList params;
+                ast::ParameterList params;
                 for (auto pair : func->TextureSamplerPairs()) {
                     const sem::Variable* texture_var = pair.first;
                     const sem::Variable* sampler_var = pair.second;

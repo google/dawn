@@ -232,7 +232,7 @@ class ParserImpl {
         /// @param ret_attrs return type attributes
         FunctionHeader(Source src,
                        std::string n,
-                       ast::VariableList p,
+                       ast::ParameterList p,
                        const ast::Type* ret_ty,
                        ast::AttributeList ret_attrs);
         /// Destructor
@@ -247,7 +247,7 @@ class ParserImpl {
         /// Function name
         std::string name;
         /// Function parameters
-        ast::VariableList params;
+        ast::ParameterList params;
         /// Function return type
         const ast::Type* return_type = nullptr;
         /// Function return type attributes
@@ -459,7 +459,7 @@ class ParserImpl {
     Maybe<FunctionHeader> function_header();
     /// Parses a `param_list` grammar element, erroring on parse failure.
     /// @returns the parsed variables
-    Expect<ast::VariableList> expect_param_list();
+    Expect<ast::ParameterList> expect_param_list();
     /// Parses a `param` grammar element, erroring on parse failure.
     /// @returns the parsed variable
     Expect<ast::Variable*> expect_param();

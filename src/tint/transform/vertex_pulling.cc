@@ -228,7 +228,7 @@ struct State {
     Symbol pulling_position_name;
     Symbol struct_buffer_name;
     std::unordered_map<uint32_t, Symbol> vertex_buffer_names;
-    ast::VariableList new_function_parameters;
+    ast::ParameterList new_function_parameters;
 
     /// Generate the vertex buffer binding name
     /// @param index index to append to buffer name

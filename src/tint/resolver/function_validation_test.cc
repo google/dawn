@@ -733,7 +733,7 @@ TEST_F(ResolverFunctionValidationTest, ParameterSotreType_AtomicFree) {
 }
 
 TEST_F(ResolverFunctionValidationTest, ParametersAtLimit) {
-    ast::VariableList params;
+    ast::ParameterList params;
     for (int i = 0; i < 255; i++) {
         params.emplace_back(Param("param_" + std::to_string(i), ty.i32()));
     }
@@ -743,7 +743,7 @@ TEST_F(ResolverFunctionValidationTest, ParametersAtLimit) {
 }
 
 TEST_F(ResolverFunctionValidationTest, ParametersOverLimit) {
-    ast::VariableList params;
+    ast::ParameterList params;
     for (int i = 0; i < 256; i++) {
         params.emplace_back(Param("param_" + std::to_string(i), ty.i32()));
     }

@@ -132,7 +132,7 @@ void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
                     }
                     auto sink = utils::GetOrCreate(sinks, sig, [&] {
                         auto name = ctx.dst->Symbols().New("phony_sink");
-                        ast::VariableList params;
+                        ast::ParameterList params;
                         for (auto* ty : sig.types) {
                             auto* ast_ty = CreateASTTypeFor(ctx, ty);
                             params.push_back(

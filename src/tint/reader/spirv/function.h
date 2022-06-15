@@ -459,7 +459,7 @@ class FunctionEmitter {
                            std::vector<int> index_prefix,
                            const Type* tip_type,
                            const Type* forced_param_type,
-                           ast::VariableList* params,
+                           ast::ParameterList* params,
                            ast::StatementList* statements);
 
     /// Creates one or more struct members from an output variable, and the
@@ -951,7 +951,7 @@ class FunctionEmitter {
         /// Function name
         std::string name;
         /// Function parameters
-        ast::VariableList params;
+        ast::ParameterList params;
         /// Function return type
         const Type* return_type;
         /// Function attributes

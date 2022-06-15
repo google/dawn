@@ -25,7 +25,7 @@ namespace tint::ast {
 Function::Function(ProgramID pid,
                    const Source& src,
                    Symbol sym,
-                   VariableList parameters,
+                   ParameterList parameters,
                    const Type* return_ty,
                    const BlockStatement* b,
                    AttributeList attrs,

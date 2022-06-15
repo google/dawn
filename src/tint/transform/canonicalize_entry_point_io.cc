@@ -100,7 +100,7 @@ struct CanonicalizeEntryPointIO::State {
     const sem::Function* func_sem;
 
     /// The new entry point wrapper function's parameters.
-    ast::VariableList wrapper_ep_parameters;
+    ast::ParameterList wrapper_ep_parameters;
     /// The members of the wrapper function's struct parameter.
     ast::StructMemberList wrapper_struct_param_members;
     /// The name of the wrapper function's struct parameter.
