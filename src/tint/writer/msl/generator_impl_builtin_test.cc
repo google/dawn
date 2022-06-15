@@ -110,7 +110,6 @@ const ast::CallExpression* GenerateCall(BuiltinType builtin,
         case BuiltinType::kMix:
         case BuiltinType::kFaceForward:
         case BuiltinType::kSmoothstep:
-        case BuiltinType::kSmoothStep:
             return builder->Call(str.str(), "f2", "f2", "f2");
         case BuiltinType::kAll:
         case BuiltinType::kAny:
@@ -262,7 +261,6 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{BuiltinType::kSin, ParamType::kF32, "sin"},
         BuiltinData{BuiltinType::kSinh, ParamType::kF32, "sinh"},
         BuiltinData{BuiltinType::kSmoothstep, ParamType::kF32, "smoothstep"},
-        BuiltinData{BuiltinType::kSmoothStep, ParamType::kF32, "smoothstep"},
         BuiltinData{BuiltinType::kSqrt, ParamType::kF32, "sqrt"},
         BuiltinData{BuiltinType::kStep, ParamType::kF32, "step"},
         BuiltinData{BuiltinType::kTan, ParamType::kF32, "tan"},

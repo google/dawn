@@ -1701,7 +1701,6 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
         case sem::BuiltinType::kReverseBits:
             return "bitfieldReverse";
         case sem::BuiltinType::kSmoothstep:
-        case sem::BuiltinType::kSmoothStep:
             return "smoothstep";
         case sem::BuiltinType::kUnpack2x16float:
             return "unpackHalf2x16";

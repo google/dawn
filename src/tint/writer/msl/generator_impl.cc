@@ -1452,7 +1452,6 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
             out += "rint";
             break;
         case sem::BuiltinType::kSmoothstep:
-        case sem::BuiltinType::kSmoothStep:
             out += "smoothstep";
             break;
         case sem::BuiltinType::kInverseSqrt:

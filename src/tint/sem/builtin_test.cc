@@ -93,7 +93,6 @@ INSTANTIATE_TEST_SUITE_P(
                     BuiltinData{"sin", BuiltinType::kSin},
                     BuiltinData{"sinh", BuiltinType::kSinh},
                     BuiltinData{"smoothstep", BuiltinType::kSmoothstep},
-                    BuiltinData{"smoothStep", BuiltinType::kSmoothStep},
                     BuiltinData{"sqrt", BuiltinType::kSqrt},
                     BuiltinData{"step", BuiltinType::kStep},
                     BuiltinData{"storageBarrier", BuiltinType::kStorageBarrier},

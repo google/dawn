@@ -2,6 +2,10 @@
 
 ## Changes for M105
 
+### Breaking changes
+
+* The `smoothStep()` builtin has been removed (use `smoothstep` instead). [tint:1483](crbug.com/tint/1483)
+
 ### Deprecated Features
 
 * The `@stage` attribute has been deprecated. The short forms should be used

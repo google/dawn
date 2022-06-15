@@ -101,7 +101,6 @@ enum class BuiltinType {
     kSin,
     kSinh,
     kSmoothstep,
-    kSmoothStep,
     kSqrt,
     kStep,
     kStorageBarrier,

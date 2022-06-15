@@ -2577,7 +2577,6 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
         case sem::BuiltinType::kReverseBits:  // uint
             return "reversebits";
         case sem::BuiltinType::kSmoothstep:
-        case sem::BuiltinType::kSmoothStep:
             return "smoothstep";
         default:
             diagnostics_.add_error(diag::System::Writer,

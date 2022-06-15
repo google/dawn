@@ -448,8 +448,6 @@ fn sinh(f32) -> f32
 fn sinh<N: num>(vec<N, f32>) -> vec<N, f32>
 fn smoothstep(f32, f32, f32) -> f32
 fn smoothstep<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
-@deprecated fn smoothStep(f32, f32, f32) -> f32
-@deprecated fn smoothStep<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
 fn sqrt(f32) -> f32
 fn sqrt<N: num>(vec<N, f32>) -> vec<N, f32>
 fn step(f32, f32) -> f32
