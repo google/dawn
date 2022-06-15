@@ -156,8 +156,8 @@ class CloneContext {
     ///
     /// @param v the vector to clone
     /// @return the cloned vector
-    template <typename T>
-    std::vector<T> Clone(const std::vector<T>& v) {
+    template <typename T, typename A>
+    std::vector<T> Clone(const std::vector<T, A>& v) {
         std::vector<T> out;
         out.reserve(v.size());
         for (auto& el : v) {
@@ -174,9 +174,9 @@ class CloneContext {
     ///
     /// @param v the vector to clone
     /// @return the cloned vector
-    template <typename T>
-    std::vector<T*> Clone(const std::vector<T*>& v) {
-        std::vector<T*> out;
+    template <typename T, typename A>
+    std::vector<T*, A> Clone(const std::vector<T*, A>& v) {
+        std::vector<T*, A> out;
         Clone(out, v);
         return out;
     }
@@ -189,8 +189,8 @@ class CloneContext {
     ///
     /// @param from the vector to clone
     /// @param to the cloned result
-    template <typename T>
-    void Clone(std::vector<T*>& to, const std::vector<T*>& from) {
+    template <typename T, typename A>
+    void Clone(std::vector<T*, A>& to, const std::vector<T*, A>& from) {
         to.reserve(from.size());
 
         auto list_transform_it = list_transforms_.find(&from);
@@ -379,8 +379,8 @@ class CloneContext {
     /// @param object a pointer to the object in #src that will be omitted from
     /// the cloned vector.
     /// @returns this CloneContext so calls can be chained
-    template <typename T, typename OBJECT>
-    CloneContext& Remove(const std::vector<T>& vector, OBJECT* object) {
+    template <typename T, typename A, typename OBJECT>
+    CloneContext& Remove(const std::vector<T, A>& vector, OBJECT* object) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, object);
         if (std::find(vector.begin(), vector.end(), object) == vector.end()) {
             TINT_ICE(Clone, Diagnostics())
@@ -397,8 +397,8 @@ class CloneContext {
     /// @param object a pointer to the object in #dst that will be inserted at the
     /// front of the vector
     /// @returns this CloneContext so calls can be chained
-    template <typename T, typename OBJECT>
-    CloneContext& InsertFront(const std::vector<T>& vector, OBJECT* object) {
+    template <typename T, typename A, typename OBJECT>
+    CloneContext& InsertFront(const std::vector<T, A>& vector, OBJECT* object) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, object);
         auto& transforms = list_transforms_[&vector];
         auto& list = transforms.insert_front_;
@@ -411,8 +411,8 @@ class CloneContext {
     /// @param object a pointer to the object in #dst that will be inserted at the
     /// end of the vector
     /// @returns this CloneContext so calls can be chained
-    template <typename T, typename OBJECT>
-    CloneContext& InsertBack(const std::vector<T>& vector, OBJECT* object) {
+    template <typename T, typename A, typename OBJECT>
+    CloneContext& InsertBack(const std::vector<T, A>& vector, OBJECT* object) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, object);
         auto& transforms = list_transforms_[&vector];
         auto& list = transforms.insert_back_;
@@ -426,8 +426,8 @@ class CloneContext {
     /// @param object a pointer to the object in #dst that will be inserted before
     /// any occurrence of the clone of `before`
     /// @returns this CloneContext so calls can be chained
-    template <typename T, typename BEFORE, typename OBJECT>
-    CloneContext& InsertBefore(const std::vector<T>& vector,
+    template <typename T, typename A, typename BEFORE, typename OBJECT>
+    CloneContext& InsertBefore(const std::vector<T, A>& vector,
                                const BEFORE* before,
                                const OBJECT* object) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, before);
@@ -450,8 +450,8 @@ class CloneContext {
     /// @param object a pointer to the object in #dst that will be inserted after
     /// any occurrence of the clone of `after`
     /// @returns this CloneContext so calls can be chained
-    template <typename T, typename AFTER, typename OBJECT>
-    CloneContext& InsertAfter(const std::vector<T>& vector,
+    template <typename T, typename A, typename AFTER, typename OBJECT>
+    CloneContext& InsertAfter(const std::vector<T, A>& vector,
                               const AFTER* after,
                               const OBJECT* object) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, after);
