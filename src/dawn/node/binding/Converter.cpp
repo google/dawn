@@ -745,7 +745,6 @@ bool Converter::Convert(interop::GPUTextureFormat& out, wgpu::TextureFormat in) 
             return true;
 
         case wgpu::TextureFormat::Undefined:
-        case wgpu::TextureFormat::Depth24UnormStencil8:
         case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
             return false;
     }
