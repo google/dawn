@@ -241,8 +241,8 @@ enum class SkipReason {
 struct DefInfo {
     /// Constructor.
     /// @param def_inst the SPIR-V instruction defining the ID
-    /// @param locally_defined the SPIR-V instruction defining the ID
-    /// @param block_pos the position of the basic block where the ID is defined.
+    /// @param locally_defined true if the defining instruction is in the function
+    /// @param block_pos the position of the basic block where the ID is defined
     /// @param index an ordering index for this local definition
     DefInfo(const spvtools::opt::Instruction& def_inst,
             bool locally_defined,
