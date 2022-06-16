@@ -326,7 +326,8 @@ MaybeError ValidateColorTargetState(
 
 MaybeError ValidateFragmentState(DeviceBase* device,
                                  const FragmentState* descriptor,
-                                 const PipelineLayoutBase* layout) {
+                                 const PipelineLayoutBase* layout,
+                                 bool alphaToCoverageEnabled) {
     DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr.");
 
     DAWN_TRY_CONTEXT(ValidateProgrammableStage(device, descriptor->module, descriptor->entryPoint,
@@ -356,6 +357,11 @@ MaybeError ValidateFragmentState(DeviceBase* device,
                             static_cast<uint8_t>(i));
         }
     }
+
+    DAWN_INVALID_IF(fragmentMetadata.usesSampleMaskOutput && alphaToCoverageEnabled,
+                    "alphaToCoverageEnabled is true when the sample_mask builtin is a "
+                    "pipeline output of fragment stage of %s.",
+                    descriptor->module);
 
     return {};
 }
@@ -447,7 +453,8 @@ MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
                      "validating multisample state.");
 
     if (descriptor->fragment != nullptr) {
-        DAWN_TRY_CONTEXT(ValidateFragmentState(device, descriptor->fragment, descriptor->layout),
+        DAWN_TRY_CONTEXT(ValidateFragmentState(device, descriptor->fragment, descriptor->layout,
+                                               descriptor->multisample.alphaToCoverageEnabled),
                          "validating fragment state.");
 
         DAWN_INVALID_IF(descriptor->fragment->targetCount == 0 && !descriptor->depthStencil,

@@ -768,6 +768,56 @@ TEST_F(RenderPipelineValidationTest, AlphaToCoverageAndSampleCount) {
     }
 }
 
+// Tests if the sample_mask builtin is a pipeline output of fragment shader,
+// then alphaToCoverageEnabled must be false
+TEST_F(RenderPipelineValidationTest, AlphaToCoverageAndSampleMaskOutput) {
+    wgpu::ShaderModule fsModuleSampleMaskOutput = utils::CreateShaderModule(device, R"(
+        struct Output {
+            @builtin(sample_mask) mask_out: u32,
+            @location(0) color : vec4<f32>,
+        }
+        @fragment fn main() -> Output {
+            var o: Output;
+            // We need to make sure this sample_mask isn't optimized out even its value equals "no op".
+            o.mask_out = 0xFFFFFFFFu;
+            o.color = vec4<f32>(1.0, 1.0, 1.0, 1.0);
+            return o;
+        }
+    )");
+
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModuleSampleMaskOutput;
+        descriptor.multisample.count = 4;
+        descriptor.multisample.alphaToCoverageEnabled = false;
+
+        device.CreateRenderPipeline(&descriptor);
+    }
+
+    {
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModuleSampleMaskOutput;
+        descriptor.multisample.count = 4;
+        descriptor.multisample.alphaToCoverageEnabled = true;
+
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    }
+
+    {
+        // Control cases: when fragment has no sample_mask output, it's good to have
+        // alphaToCoverageEnabled enabled
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.multisample.count = 4;
+        descriptor.multisample.alphaToCoverageEnabled = true;
+
+        device.CreateRenderPipeline(&descriptor);
+    }
+}
+
 // Tests that the texture component type in shader must match the bind group layout.
 TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
     constexpr uint32_t kNumTextureComponentType = 3u;

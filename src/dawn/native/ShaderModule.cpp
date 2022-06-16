@@ -773,6 +773,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         if (entryPoint.input_sample_mask_used) {
             totalInterStageShaderComponents += 1;
         }
+        metadata->usesSampleMaskOutput = entryPoint.output_sample_mask_used;
         if (entryPoint.sample_index_used) {
             totalInterStageShaderComponents += 1;
         }
