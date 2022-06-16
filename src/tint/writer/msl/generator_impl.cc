@@ -2124,6 +2124,53 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
     return true;
 }
 
+bool GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
+    TextBuffer cond_pre;
+    std::stringstream cond_buf;
+
+    {
+        auto* cond = stmt->condition;
+        TINT_SCOPED_ASSIGNMENT(current_buffer_, &cond_pre);
+        if (!EmitExpression(cond_buf, cond)) {
+            return false;
+        }
+    }
+
+    // If the while has a multi-statement conditional, then we cannot emit this
+    // as a regular while in MSL. Instead we need to generate a `while(true)` loop.
+    bool emit_as_loop = cond_pre.lines.size() > 0;
+    if (emit_as_loop) {
+        line() << "while (true) {";
+        increment_indent();
+        TINT_DEFER({
+            decrement_indent();
+            line() << "}";
+        });
+
+        current_buffer_->Append(cond_pre);
+        line() << "if (!(" << cond_buf.str() << ")) { break; }";
+        if (!EmitStatements(stmt->body->statements)) {
+            return false;
+        }
+    } else {
+        // While can be generated.
+        {
+            auto out = line();
+            out << "while";
+            {
+                ScopedParen sp(out);
+                out << cond_buf.str();
+            }
+            out << " {";
+        }
+        if (!EmitStatementsWithIndent(stmt->body->statements)) {
+            return false;
+        }
+        line() << "}";
+    }
+    return true;
+}
+
 bool GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
     // TODO(dsinclair): Verify this is correct when the discard semantics are
     // defined for WGSL (https://github.com/gpuweb/gpuweb/issues/361)
@@ -2279,6 +2326,9 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
         },
         [&](const ast::ForLoopStatement* l) {  //
             return EmitForLoop(l);
+        },
+        [&](const ast::WhileStatement* l) {  //
+            return EmitWhile(l);
         },
         [&](const ast::ReturnStatement* r) {  //
             return EmitReturn(r);

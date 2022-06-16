@@ -175,6 +175,47 @@ fn f() {
     EXPECT_EQ(expect, str(cloned));
 }
 
+TEST_F(HoistToDeclBeforeTest, WhileCond) {
+    // fn f() {
+    //     var a : bool;
+    //     while(a) {
+    //     }
+    // }
+    ProgramBuilder b;
+    auto* var = b.Decl(b.Var("a", b.ty.bool_()));
+    auto* expr = b.Expr("a");
+    auto* s = b.While(expr, b.Block());
+    b.Func("f", {}, b.ty.void_(), {var, s});
+
+    Program original(std::move(b));
+    ProgramBuilder cloned_b;
+    CloneContext ctx(&cloned_b, &original);
+
+    HoistToDeclBefore hoistToDeclBefore(ctx);
+    auto* sem_expr = ctx.src->Sem().Get(expr);
+    hoistToDeclBefore.Add(sem_expr, expr, true);
+    hoistToDeclBefore.Apply();
+
+    ctx.Clone();
+    Program cloned(std::move(cloned_b));
+
+    auto* expect = R"(
+fn f() {
+  var a : bool;
+  loop {
+    let tint_symbol = a;
+    if (!(tint_symbol)) {
+      break;
+    }
+    {
+    }
+  }
+}
+)";
+
+    EXPECT_EQ(expect, str(cloned));
+}
+
 TEST_F(HoistToDeclBeforeTest, ElseIf) {
     // fn f() {
     //     var a : bool;

@@ -274,6 +274,8 @@ class Token {
         kVec3,
         /// A 'vec4'
         kVec4,
+        /// A 'while'
+        kWhile,
         /// A 'workgroup'
         kWorkgroup,
     };

@@ -76,6 +76,7 @@
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/vector.h"
 #include "src/tint/ast/void.h"
+#include "src/tint/ast/while_statement.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/number.h"
 #include "src/tint/program.h"
@@ -2337,6 +2338,27 @@ class ProgramBuilder {
                                      const ast::Statement* cont,
                                      const ast::BlockStatement* body) {
         return create<ast::ForLoopStatement>(init, Expr(std::forward<COND>(cond)), cont, body);
+    }
+
+    /// Creates a ast::WhileStatement with input body and condition.
+    /// @param source the source information
+    /// @param cond the loop condition
+    /// @param body the loop body
+    /// @returns the while statement pointer
+    template <typename COND>
+    const ast::WhileStatement* While(const Source& source,
+                                     COND&& cond,
+                                     const ast::BlockStatement* body) {
+        return create<ast::WhileStatement>(source, Expr(std::forward<COND>(cond)), body);
+    }
+
+    /// Creates a ast::WhileStatement with given condition and body.
+    /// @param cond the condition
+    /// @param body the loop body
+    /// @returns the while loop statement pointer
+    template <typename COND>
+    const ast::WhileStatement* While(COND&& cond, const ast::BlockStatement* body) {
+        return create<ast::WhileStatement>(Expr(std::forward<COND>(cond)), body);
     }
 
     /// Creates a ast::VariableDeclStatement for the input variable

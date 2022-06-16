@@ -211,6 +211,7 @@ tint_unittests_source_set("tint_unittests_ast_src") {
     "../../src/tint/ast/variable_decl_statement_test.cc",
     "../../src/tint/ast/variable_test.cc",
     "../../src/tint/ast/vector_test.cc",
+    "../../src/tint/ast/while_statement_test.cc",
     "../../src/tint/ast/workgroup_attribute_test.cc",
   ]
 }
@@ -307,8 +308,8 @@ tint_unittests_source_set("tint_unittests_sem_src") {
     "../../src/tint/sem/sem_struct_test.cc",
     "../../src/tint/sem/storage_texture_test.cc",
     "../../src/tint/sem/texture_test.cc",
-    "../../src/tint/sem/type_test.cc",
     "../../src/tint/sem/type_manager_test.cc",
+    "../../src/tint/sem/type_test.cc",
     "../../src/tint/sem/u32_test.cc",
     "../../src/tint/sem/vector_test.cc",
   ]
@@ -359,6 +360,7 @@ tint_unittests_source_set("tint_unittests_transform_src") {
     "../../src/tint/transform/var_for_dynamic_index_test.cc",
     "../../src/tint/transform/vectorize_scalar_matrix_constructors_test.cc",
     "../../src/tint/transform/vertex_pulling_test.cc",
+    "../../src/tint/transform/while_to_loop_test.cc",
     "../../src/tint/transform/wrap_arrays_in_structs_test.cc",
     "../../src/tint/transform/zero_init_workgroup_memory_test.cc",
   ]
@@ -552,6 +554,7 @@ tint_unittests_source_set("tint_unittests_wgsl_reader_src") {
     "../../src/tint/reader/wgsl/parser_impl_variable_ident_decl_test.cc",
     "../../src/tint/reader/wgsl/parser_impl_variable_qualifier_test.cc",
     "../../src/tint/reader/wgsl/parser_impl_variable_stmt_test.cc",
+    "../../src/tint/reader/wgsl/parser_impl_while_stmt_test.cc",
     "../../src/tint/reader/wgsl/parser_test.cc",
     "../../src/tint/reader/wgsl/token_test.cc",
   ]

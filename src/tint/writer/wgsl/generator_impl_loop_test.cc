@@ -198,5 +198,45 @@ TEST_F(WgslGeneratorImplTest, Emit_ForLoopWithMultiStmtInitCondCont) {
 )");
 }
 
+TEST_F(WgslGeneratorImplTest, Emit_While) {
+    // while(true) {
+    //   return;
+    // }
+
+    auto* f = While(Expr(true), Block(Return()));
+    WrapInFunction(f);
+
+    GeneratorImpl& gen = Build();
+
+    gen.increment_indent();
+
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  while(true) {
+    return;
+  }
+)");
+}
+
+TEST_F(WgslGeneratorImplTest, Emit_WhileMultiCond) {
+    // while(true && false) {
+    //   return;
+    // }
+
+    auto* multi_stmt =
+        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(true), Expr(false));
+    auto* f = While(multi_stmt, Block(Return()));
+    WrapInFunction(f);
+
+    GeneratorImpl& gen = Build();
+
+    gen.increment_indent();
+
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  while((true && false)) {
+    return;
+  }
+)");
+}
+
 }  // namespace
 }  // namespace tint::writer::wgsl

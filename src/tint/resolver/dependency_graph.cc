@@ -263,6 +263,12 @@ class DependencyScanner {
                 TraverseExpression(v->variable->constructor);
                 Declare(v->variable->symbol, v->variable);
             },
+            [&](const ast::WhileStatement* w) {
+                scope_stack_.Push();
+                TINT_DEFER(scope_stack_.Pop());
+                TraverseExpression(w->condition);
+                TraverseStatement(w->body);
+            },
             [&](Default) {
                 if (!stmt->IsAnyOf<ast::BreakStatement, ast::ContinueStatement,
                                    ast::DiscardStatement, ast::FallthroughStatement>()) {

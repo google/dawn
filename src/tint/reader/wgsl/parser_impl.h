@@ -527,6 +527,9 @@ class ParserImpl {
     /// Parses a `for_stmt` grammar element
     /// @returns the parsed for loop or nullptr
     Maybe<const ast::ForLoopStatement*> for_stmt();
+    /// Parses a `while_stmt` grammar element
+    /// @returns the parsed while loop or nullptr
+    Maybe<const ast::WhileStatement*> while_stmt();
     /// Parses a `continuing_stmt` grammar element
     /// @returns the parsed statements
     Maybe<const ast::BlockStatement*> continuing_stmt();

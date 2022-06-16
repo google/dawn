@@ -21,6 +21,7 @@
 #include "src/tint/sem/if_statement.h"
 #include "src/tint/sem/loop_statement.h"
 #include "src/tint/sem/switch_statement.h"
+#include "src/tint/sem/while_statement.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -231,6 +232,55 @@ TEST_F(ResolverCompoundStatementTest, ForLoop) {
         EXPECT_EQ(s->Block(), s->FindFirstParent<sem::LoopBlockStatement>());
         EXPECT_TRUE(Is<sem::ForLoopStatement>(s->Parent()->Parent()));
         EXPECT_EQ(s->Block()->Parent(), s->FindFirstParent<sem::ForLoopStatement>());
+        ASSERT_TRUE(Is<sem::FunctionBlockStatement>(s->Block()->Parent()->Parent()));
+        EXPECT_EQ(s->Block()->Parent()->Parent(),
+                  s->FindFirstParent<sem::FunctionBlockStatement>());
+        EXPECT_EQ(s->Function()->Declaration(), f);
+        EXPECT_EQ(s->Block()->Parent()->Parent()->Parent(), nullptr);
+    }
+}
+
+TEST_F(ResolverCompoundStatementTest, While) {
+    // fn F() {
+    //   while (true) {
+    //     return;
+    //   }
+    // }
+    auto* cond = Expr(true);
+    auto* stmt = Return();
+    auto* body = Block(stmt);
+    auto* while_ = While(cond, body);
+    auto* f = Func("W", {}, ty.void_(), {while_});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    {
+        auto* s = Sem().Get(while_);
+        ASSERT_NE(s, nullptr);
+        EXPECT_EQ(Sem().Get(body)->Parent(), s);
+        EXPECT_TRUE(s->Is<sem::WhileStatement>());
+        EXPECT_EQ(s->Parent(), s->FindFirstParent<sem::FunctionBlockStatement>());
+        EXPECT_EQ(s->Parent(), s->Block());
+    }
+    {  // Condition expression's statement is the while itself
+        auto* e = Sem().Get(cond);
+        ASSERT_NE(e, nullptr);
+        auto* s = e->Stmt();
+        ASSERT_NE(s, nullptr);
+        ASSERT_TRUE(Is<sem::WhileStatement>(s));
+        ASSERT_NE(s->Parent(), nullptr);
+        EXPECT_EQ(s->Parent(), s->Block());
+        EXPECT_EQ(s->Parent(), s->FindFirstParent<sem::FunctionBlockStatement>());
+        EXPECT_TRUE(Is<sem::FunctionBlockStatement>(s->Block()));
+    }
+    {
+        auto* s = Sem().Get(stmt);
+        ASSERT_NE(s, nullptr);
+        ASSERT_NE(s->Block(), nullptr);
+        EXPECT_EQ(s->Parent(), s->Block());
+        EXPECT_EQ(s->Block(), s->FindFirstParent<sem::LoopBlockStatement>());
+        EXPECT_TRUE(Is<sem::WhileStatement>(s->Parent()->Parent()));
+        EXPECT_EQ(s->Block()->Parent(), s->FindFirstParent<sem::WhileStatement>());
         ASSERT_TRUE(Is<sem::FunctionBlockStatement>(s->Block()->Parent()->Parent()));
         EXPECT_EQ(s->Block()->Parent()->Parent(),
                   s->FindFirstParent<sem::FunctionBlockStatement>());

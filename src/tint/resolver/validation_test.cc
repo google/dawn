@@ -986,6 +986,26 @@ TEST_F(ResolverTest, Stmt_ForLoop_CondIsNotBool) {
     EXPECT_EQ(r()->error(), "12:34 error: for-loop condition must be bool, got f32");
 }
 
+TEST_F(ResolverTest, Stmt_While_CondIsBoolRef) {
+    // var cond : bool = false;
+    // while (cond) {
+    // }
+
+    auto* cond = Var("cond", ty.bool_(), Expr(false));
+    WrapInFunction(Decl(cond), While("cond", Block()));
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverTest, Stmt_While_CondIsNotBool) {
+    // while (1.0f) {
+    // }
+
+    WrapInFunction(While(Expr(Source{{12, 34}}, 1_f), Block()));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: while condition must be bool, got f32");
+}
+
 TEST_F(ResolverValidationTest, Stmt_ContinueInLoop) {
     WrapInFunction(Loop(Block(If(false, Block(Break())),  //
                               Continue(Source{{12, 34}}))));

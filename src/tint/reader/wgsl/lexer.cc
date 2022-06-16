@@ -1271,6 +1271,9 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     if (str == "vec4") {
         return {Token::Type::kVec4, source, "vec4"};
     }
+    if (str == "while") {
+        return {Token::Type::kWhile, source, "while"};
+    }
     if (str == "workgroup") {
         return {Token::Type::kWorkgroup, source, "workgroup"};
     }

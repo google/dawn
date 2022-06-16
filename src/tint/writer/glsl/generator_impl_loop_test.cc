@@ -381,5 +381,52 @@ TEST_F(GlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtInitCondCont) {
 )");
 }
 
+TEST_F(GlslGeneratorImplTest_Loop, Emit_While) {
+    // while(true) {
+    //   return;
+    // }
+
+    auto* f = While(Expr(true), Block(Return()));
+    WrapInFunction(f);
+
+    GeneratorImpl& gen = Build();
+
+    gen.increment_indent();
+
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  while(true) {
+    return;
+  }
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_Loop, Emit_WhileWithMultiStmtCond) {
+    // while(true && false) {
+    //   return;
+    // }
+
+    Func("a_statement", {}, ty.void_(), {});
+
+    auto* multi_stmt =
+        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(true), Expr(false));
+    auto* f = While(multi_stmt, Block(CallStmt(Call("a_statement"))));
+    WrapInFunction(f);
+
+    GeneratorImpl& gen = Build();
+
+    gen.increment_indent();
+
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  while (true) {
+    bool tint_tmp = true;
+    if (tint_tmp) {
+      tint_tmp = false;
+    }
+    if (!((tint_tmp))) { break; }
+    a_statement();
+  }
+)");
+}
+
 }  // namespace
 }  // namespace tint::writer::glsl

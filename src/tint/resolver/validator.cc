@@ -72,6 +72,7 @@
 #include "src/tint/sem/type_constructor.h"
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/sem/while_statement.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/math.h"
@@ -233,6 +234,11 @@ const ast::Statement* Validator::ClosestContinuing(bool stop_at_loop,
             if (f->Declaration()->continuing == s->Declaration()) {
                 return s->Declaration();
             }
+            if (stop_at_loop) {
+                break;
+            }
+        }
+        if (Is<sem::WhileStatement>(s->Parent())) {
             if (stop_at_loop) {
                 break;
             }
@@ -1453,6 +1459,22 @@ bool Validator::ForLoopStatement(const sem::ForLoopStatement* stmt) const {
         auto* cond_ty = cond->Type()->UnwrapRef();
         if (!cond_ty->Is<sem::Bool>()) {
             AddError("for-loop condition must be bool, got " + sem_.TypeNameOf(cond_ty),
+                     stmt->Condition()->Declaration()->source);
+            return false;
+        }
+    }
+    return true;
+}
+
+bool Validator::WhileStatement(const sem::WhileStatement* stmt) const {
+    if (stmt->Behaviors().Empty()) {
+        AddError("while does not exit", stmt->Declaration()->source.Begin());
+        return false;
+    }
+    if (auto* cond = stmt->Condition()) {
+        auto* cond_ty = cond->Type()->UnwrapRef();
+        if (!cond_ty->Is<sem::Bool>()) {
+            AddError("while condition must be bool, got " + sem_.TypeNameOf(cond_ty),
                      stmt->Condition()->Declaration()->source);
             return false;
         }

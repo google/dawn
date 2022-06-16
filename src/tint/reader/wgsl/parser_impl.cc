@@ -1597,6 +1597,7 @@ Expect<ast::StatementList> ParserImpl::expect_statements() {
 //   | switch_stmt
 //   | loop_stmt
 //   | for_stmt
+//   | while_stmt
 //   | non_block_statement
 //      : return_stmt SEMICOLON
 //      | func_call_stmt SEMICOLON
@@ -1652,6 +1653,14 @@ Maybe<const ast::Statement*> ParserImpl::statement() {
     }
     if (stmt_for.matched) {
         return stmt_for.value;
+    }
+
+    auto stmt_while = while_stmt();
+    if (stmt_while.errored) {
+        return Failure::kErrored;
+    }
+    if (stmt_while.matched) {
+        return stmt_while.value;
     }
 
     if (peek_is(Token::Type::kBraceLeft)) {
@@ -2189,6 +2198,30 @@ Maybe<const ast::ForLoopStatement*> ParserImpl::for_stmt() {
     return create<ast::ForLoopStatement>(source, header->initializer, header->condition,
                                          header->continuing,
                                          create<ast::BlockStatement>(stmts.value));
+}
+
+// while_statement
+//   :  WHILE expression compound_statement
+Maybe<const ast::WhileStatement*> ParserImpl::while_stmt() {
+    Source source;
+    if (!match(Token::Type::kWhile, &source)) {
+        return Failure::kNoMatch;
+    }
+
+    auto condition = logical_or_expression();
+    if (condition.errored) {
+        return Failure::kErrored;
+    }
+    if (!condition.matched) {
+        return add_error(peek(), "unable to parse while condition expression");
+    }
+
+    auto body = expect_body_stmt();
+    if (body.errored) {
+        return Failure::kErrored;
+    }
+
+    return create<ast::WhileStatement>(source, condition.value, body.value);
 }
 
 // func_call_stmt

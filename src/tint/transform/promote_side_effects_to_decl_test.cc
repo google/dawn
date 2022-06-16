@@ -999,6 +999,45 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(PromoteSideEffectsToDeclTest, Binary_Arith_InWhileCond) {
+    auto* src = R"(
+fn a(i : i32) -> i32 {
+  return i;
+}
+
+fn f() {
+  var b = 1;
+  while(a(0) + b > 0) {
+    var marker = 0;
+  }
+}
+)";
+
+    auto* expect = R"(
+fn a(i : i32) -> i32 {
+  return i;
+}
+
+fn f() {
+  var b = 1;
+  loop {
+    let tint_symbol = a(0);
+    if (!(((tint_symbol + b) > 0))) {
+      break;
+    }
+    {
+      var marker = 0;
+    }
+  }
+}
+)";
+
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(PromoteSideEffectsToDeclTest, Binary_Arith_InElseIf) {
     auto* src = R"(
 fn a(i : i32) -> i32 {
@@ -2288,6 +2327,48 @@ fn f() {
         }
         r = tint_symbol_2;
       }
+    }
+  }
+}
+)";
+
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(PromoteSideEffectsToDeclTest, Binary_Logical_InWhileCond) {
+    auto* src = R"(
+fn a(i : i32) -> bool {
+  return true;
+}
+
+fn f() {
+  var b = true;
+  while(a(0) && b) {
+    var marker = 0;
+  }
+}
+)";
+
+    auto* expect = R"(
+fn a(i : i32) -> bool {
+  return true;
+}
+
+fn f() {
+  var b = true;
+  loop {
+    var tint_symbol = a(0);
+    if (tint_symbol) {
+      tint_symbol = b;
+    }
+    if (!(tint_symbol)) {
+      break;
+    }
+    {
+      var marker = 0;
     }
   }
 }

@@ -919,6 +919,7 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
         [&](const ast::IncrementDecrementStatement* l) { return EmitIncrementDecrement(l); },
         [&](const ast::LoopStatement* l) { return EmitLoop(l); },
         [&](const ast::ForLoopStatement* l) { return EmitForLoop(l); },
+        [&](const ast::WhileStatement* l) { return EmitWhile(l); },
         [&](const ast::ReturnStatement* r) { return EmitReturn(r); },
         [&](const ast::SwitchStatement* s) { return EmitSwitch(s); },
         [&](const ast::VariableDeclStatement* v) { return EmitVariable(line(), v->variable); },
@@ -1167,6 +1168,30 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
                     }
                     out << TrimSuffix(cont_buf.String(), "\n");
                     break;
+            }
+        }
+        out << " {";
+    }
+
+    if (!EmitStatementsWithIndent(stmt->body->statements)) {
+        return false;
+    }
+
+    line() << "}";
+
+    return true;
+}
+
+bool GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
+    {
+        auto out = line();
+        out << "while";
+        {
+            ScopedParen sp(out);
+
+            auto* cond = stmt->condition;
+            if (!EmitExpression(out, cond)) {
+                return false;
             }
         }
         out << " {";

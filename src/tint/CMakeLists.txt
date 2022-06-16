@@ -223,6 +223,8 @@ set(TINT_LIB_SRCS
   ast/vector.h
   ast/void.cc
   ast/void.h
+  ast/while_statement.cc
+  ast/while_statement.h
   ast/workgroup_attribute.cc
   ast/workgroup_attribute.h
   castable.cc
@@ -365,6 +367,8 @@ set(TINT_LIB_SRCS
   sem/vector.h
   sem/void.cc
   sem/void.h
+  sem/while_statement.cc
+  sem/while_statement.h
   symbol_table.cc
   symbol_table.h
   symbol.cc
@@ -450,6 +454,8 @@ set(TINT_LIB_SRCS
   transform/vectorize_scalar_matrix_constructors.h
   transform/vertex_pulling.cc
   transform/vertex_pulling.h
+  transform/while_to_loop.cc
+  transform/while_to_loop.h
   transform/wrap_arrays_in_structs.cc
   transform/wrap_arrays_in_structs.h
   transform/zero_init_workgroup_memory.cc
@@ -743,6 +749,7 @@ if(TINT_BUILD_TESTS)
     ast/variable_decl_statement_test.cc
     ast/variable_test.cc
     ast/vector_test.cc
+    ast/while_statement_test.cc
     ast/workgroup_attribute_test.cc
     castable_test.cc
     clone_context_test.cc
@@ -987,6 +994,7 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/parser_impl_variable_ident_decl_test.cc
       reader/wgsl/parser_impl_variable_stmt_test.cc
       reader/wgsl/parser_impl_variable_qualifier_test.cc
+      reader/wgsl/parser_impl_while_stmt_test.cc
       reader/wgsl/token_test.cc
     )
   endif()
@@ -1102,6 +1110,7 @@ if(TINT_BUILD_TESTS)
       transform/var_for_dynamic_index_test.cc
       transform/vectorize_scalar_matrix_constructors_test.cc
       transform/vertex_pulling_test.cc
+      transform/while_to_loop_test.cc
       transform/wrap_arrays_in_structs_test.cc
       transform/zero_init_workgroup_memory_test.cc
       transform/utils/get_insertion_point_test.cc

@@ -373,5 +373,50 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtInitCondCont) {
 )");
 }
 
+TEST_F(HlslGeneratorImplTest_Loop, Emit_While) {
+    // while(true) {
+    //   return;
+    // }
+
+    auto* f = While(Expr(true), Block(Return()));
+    WrapInFunction(f);
+
+    GeneratorImpl& gen = Build();
+
+    gen.increment_indent();
+
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  [loop] while(true) {
+    return;
+  }
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Loop, Emit_WhileWithMultiStmtCond) {
+    // while(true && false) {
+    //   return;
+    // }
+
+    auto* multi_stmt =
+        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(true), Expr(false));
+    auto* f = While(multi_stmt, Block(Return()));
+    WrapInFunction(f);
+
+    GeneratorImpl& gen = Build();
+
+    gen.increment_indent();
+
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  [loop] while (true) {
+    bool tint_tmp = true;
+    if (tint_tmp) {
+      tint_tmp = false;
+    }
+    if (!((tint_tmp))) { break; }
+    return;
+  }
+)");
+}
+
 }  // namespace
 }  // namespace tint::writer::hlsl

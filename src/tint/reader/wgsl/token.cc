@@ -263,6 +263,8 @@ std::string_view Token::TypeToName(Type type) {
             return "vec3";
         case Token::Type::kVec4:
             return "vec4";
+        case Token::Type::kWhile:
+            return "while";
         case Token::Type::kWorkgroup:
             return "workgroup";
     }

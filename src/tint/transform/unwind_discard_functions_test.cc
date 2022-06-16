@@ -800,6 +800,67 @@ fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(UnwindDiscardFunctionsTest, While_Cond) {
+    auto* src = R"(
+fn f() -> i32 {
+  if (true) {
+    discard;
+  }
+  return 42;
+}
+
+@fragment
+fn main(@builtin(position) coord_in: vec4<f32>) -> @location(0) vec4<f32> {
+  let marker1 = 0;
+  while (f() == 42) {
+    let marker2 = 0;
+    break;
+  }
+  return vec4<f32>();
+}
+)";
+    auto* expect = R"(
+var<private> tint_discard : bool = false;
+
+fn f() -> i32 {
+  if (true) {
+    tint_discard = true;
+    return i32();
+  }
+  return 42;
+}
+
+fn tint_discard_func() {
+  discard;
+}
+
+@fragment
+fn main(@builtin(position) coord_in : vec4<f32>) -> @location(0) vec4<f32> {
+  let marker1 = 0;
+  loop {
+    let tint_symbol = f();
+    if (tint_discard) {
+      tint_discard_func();
+      return vec4<f32>();
+    }
+    if (!((tint_symbol == 42))) {
+      break;
+    }
+    {
+      let marker2 = 0;
+      break;
+    }
+  }
+  return vec4<f32>();
+}
+)";
+
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl, UnwindDiscardFunctions>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(UnwindDiscardFunctionsTest, Switch) {
     auto* src = R"(
 fn f() -> i32 {

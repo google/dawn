@@ -262,6 +262,15 @@ class State {
                 }
                 return nullptr;
             },
+            [&](const ast::WhileStatement* s) -> const ast::Statement* {
+                if (MayDiscard(sem.Get(s->condition))) {
+                    TINT_ICE(Transform, b.Diagnostics())
+                        << "Unexpected WhileStatement condition that may discard. "
+                           "Make sure transform::PromoteSideEffectsToDecl was run "
+                           "first.";
+                }
+                return nullptr;
+            },
             [&](const ast::IfStatement* s) -> const ast::Statement* {
                 auto* sem_expr = sem.Get(s->condition);
                 if (!MayDiscard(sem_expr)) {

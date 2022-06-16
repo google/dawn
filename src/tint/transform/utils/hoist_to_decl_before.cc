@@ -22,6 +22,7 @@
 #include "src/tint/sem/if_statement.h"
 #include "src/tint/sem/reference.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/sem/while_statement.h"
 #include "src/tint/utils/reverse.h"
 
 namespace tint::transform {
@@ -46,7 +47,10 @@ class HoistToDeclBefore::State {
     };
 
     /// For-loops that need to be decomposed to loops.
-    std::unordered_map<const sem::ForLoopStatement*, LoopInfo> loops;
+    std::unordered_map<const sem::ForLoopStatement*, LoopInfo> for_loops;
+
+    /// Whiles that need to be decomposed to loops.
+    std::unordered_map<const sem::WhileStatement*, LoopInfo> while_loops;
 
     /// 'else if' statements that need to be decomposed to 'else {if}'
     std::unordered_map<const ast::IfStatement*, ElseIfInfo> else_ifs;
@@ -55,7 +59,7 @@ class HoistToDeclBefore::State {
     // registered declaration statements before the condition or continuing
     // statement.
     void ForLoopsToLoops() {
-        if (loops.empty()) {
+        if (for_loops.empty()) {
             return;
         }
 
@@ -64,7 +68,7 @@ class HoistToDeclBefore::State {
             auto& sem = ctx.src->Sem();
 
             if (auto* fl = sem.Get(stmt)) {
-                if (auto it = loops.find(fl); it != loops.end()) {
+                if (auto it = for_loops.find(fl); it != for_loops.end()) {
                     auto& info = it->second;
                     auto* for_loop = fl->Declaration();
                     // For-loop needs to be decomposed to a loop.
@@ -101,6 +105,51 @@ class HoistToDeclBefore::State {
                     if (auto* init = for_loop->initializer) {
                         return b.Block(ctx.Clone(init), loop);
                     }
+                    return loop;
+                }
+            }
+            return nullptr;
+        });
+    }
+
+    // Converts any while-loops marked for conversion to loops, inserting
+    // registered declaration statements before the condition.
+    void WhilesToLoops() {
+        if (while_loops.empty()) {
+            return;
+        }
+
+        // At least one while needs to be transformed into a loop.
+        ctx.ReplaceAll([&](const ast::WhileStatement* stmt) -> const ast::Statement* {
+            auto& sem = ctx.src->Sem();
+
+            if (auto* w = sem.Get(stmt)) {
+                if (auto it = while_loops.find(w); it != while_loops.end()) {
+                    auto& info = it->second;
+                    auto* while_loop = w->Declaration();
+                    // While needs to be decomposed to a loop.
+                    // Build the loop body's statements.
+                    // Start with any let declarations for the conditional
+                    // expression.
+                    auto body_stmts = info.cond_decls;
+                    // Emit the condition as:
+                    //   if (!cond) { break; }
+                    auto* cond = while_loop->condition;
+                    // !condition
+                    auto* not_cond =
+                        b.create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, ctx.Clone(cond));
+                    // { break; }
+                    auto* break_body = b.Block(b.create<ast::BreakStatement>());
+                    // if (!condition) { break; }
+                    body_stmts.emplace_back(b.If(not_cond, break_body));
+
+                    // Next emit the body
+                    body_stmts.emplace_back(ctx.Clone(while_loop->body));
+
+                    const ast::BlockStatement* continuing = nullptr;
+
+                    auto* body = b.Block(body_stmts);
+                    auto* loop = b.Loop(body, continuing);
                     return loop;
                 }
             }
@@ -192,7 +241,19 @@ class HoistToDeclBefore::State {
             // For-loop needs to be decomposed to a loop.
 
             // Index the map to convert this for-loop, even if `stmt` is nullptr.
-            auto& decls = loops[fl].cond_decls;
+            auto& decls = for_loops[fl].cond_decls;
+            if (stmt) {
+                decls.emplace_back(stmt);
+            }
+            return true;
+        }
+
+        if (auto* w = before_stmt->As<sem::WhileStatement>()) {
+            // Insertion point is a while condition.
+            // While needs to be decomposed to a loop.
+
+            // Index the map to convert this while, even if `stmt` is nullptr.
+            auto& decls = while_loops[w].cond_decls;
             if (stmt) {
                 decls.emplace_back(stmt);
             }
@@ -227,7 +288,7 @@ class HoistToDeclBefore::State {
                 // For-loop needs to be decomposed to a loop.
 
                 // Index the map to convert this for-loop, even if `stmt` is nullptr.
-                auto& decls = loops[fl].cont_decls;
+                auto& decls = for_loops[fl].cont_decls;
                 if (stmt) {
                     decls.emplace_back(stmt);
                 }
@@ -257,6 +318,7 @@ class HoistToDeclBefore::State {
     /// @return true on success
     bool Apply() {
         ForLoopsToLoops();
+        WhilesToLoops();
         ElseIfsToElseWithNestedIfs();
         return true;
     }

@@ -58,6 +58,26 @@ sem::ForLoopStatement {
 }
 ```
 
+## while
+
+WGSL:
+```
+while (condition) {
+    statement;
+}
+```
+
+Semantic tree:
+```
+sem::WhileStatement {
+    sem::Expression condition
+
+    sem::LoopBlockStatement {
+        sem::Statement statement
+    }
+}
+```
+
 ## loop
 
 WGSL:

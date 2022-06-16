@@ -54,6 +54,7 @@ class ReturnStatement;
 class SwitchStatement;
 class UnaryOpExpression;
 class Variable;
+class WhileStatement;
 }  // namespace tint::ast
 namespace tint::sem {
 class Array;
@@ -67,6 +68,7 @@ class LoopStatement;
 class Statement;
 class SwitchStatement;
 class TypeConstructor;
+class WhileStatement;
 }  // namespace tint::sem
 
 namespace tint::resolver {
@@ -233,6 +235,7 @@ class Resolver {
     sem::Statement* DiscardStatement(const ast::DiscardStatement*);
     sem::Statement* FallthroughStatement(const ast::FallthroughStatement*);
     sem::ForLoopStatement* ForLoopStatement(const ast::ForLoopStatement*);
+    sem::WhileStatement* WhileStatement(const ast::WhileStatement*);
     sem::GlobalVariable* GlobalVariable(const ast::Variable*);
     sem::Statement* Parameter(const ast::Variable*);
     sem::IfStatement* IfStatement(const ast::IfStatement*);

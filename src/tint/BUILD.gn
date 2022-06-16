@@ -336,6 +336,8 @@ libtint_source_set("libtint_core_all_src") {
     "ast/vector.h",
     "ast/void.cc",
     "ast/void.h",
+    "ast/while_statement.cc",
+    "ast/while_statement.h",
     "ast/workgroup_attribute.cc",
     "ast/workgroup_attribute.h",
     "castable.cc",
@@ -436,6 +438,7 @@ libtint_source_set("libtint_core_all_src") {
     "sem/u32.h",
     "sem/vector.h",
     "sem/void.h",
+    "sem/while_statement.h",
     "source.cc",
     "source.h",
     "symbol.cc",
@@ -523,6 +526,8 @@ libtint_source_set("libtint_core_all_src") {
     "transform/vectorize_scalar_matrix_constructors.h",
     "transform/vertex_pulling.cc",
     "transform/vertex_pulling.h",
+    "transform/while_to_loop.cc",
+    "transform/while_to_loop.h",
     "transform/wrap_arrays_in_structs.cc",
     "transform/wrap_arrays_in_structs.h",
     "transform/zero_init_workgroup_memory.cc",
@@ -666,6 +671,8 @@ libtint_source_set("libtint_sem_src") {
     "sem/vector.h",
     "sem/void.cc",
     "sem/void.h",
+    "sem/while_statement.cc",
+    "sem/while_statement.h",
   ]
 
   public_deps = [ ":libtint_core_all_src" ]

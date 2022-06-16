@@ -353,6 +353,10 @@ class GeneratorImpl : public TextGenerator {
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted
     bool EmitForLoop(const ast::ForLoopStatement* stmt);
+    /// Handles a while statement
+    /// @param stmt the statement to emit
+    /// @returns true if the statement was emitted
+    bool EmitWhile(const ast::WhileStatement* stmt);
     /// Handles generating an identifier expression
     /// @param out the output of the expression stream
     /// @param expr the identifier expression

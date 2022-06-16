@@ -25,6 +25,7 @@
 #include "src/tint/sem/for_loop_statement.h"
 #include "src/tint/sem/loop_statement.h"
 #include "src/tint/sem/switch_statement.h"
+#include "src/tint/sem/while_statement.h"
 #include "src/tint/transform/utils/get_insertion_point.h"
 #include "src/tint/utils/map.h"
 
@@ -49,7 +50,7 @@ class State {
         // Find whether first parent is a switch or a loop
         auto* sem_stmt = sem.Get(cont);
         auto* sem_parent = sem_stmt->FindFirstParent<sem::SwitchStatement, sem::LoopBlockStatement,
-                                                     sem::ForLoopStatement>();
+                                                     sem::ForLoopStatement, sem::WhileStatement>();
         if (!sem_parent) {
             return nullptr;
         }

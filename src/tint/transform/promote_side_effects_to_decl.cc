@@ -27,6 +27,7 @@
 #include "src/tint/sem/if_statement.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/sem/while_statement.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/transform/utils/get_insertion_point.h"
 #include "src/tint/transform/utils/hoist_to_decl_before.h"
@@ -383,6 +384,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
                     ProcessStatement(s->expr);
                 },
                 [&](const ast::ForLoopStatement* s) { ProcessStatement(s->condition); },
+                [&](const ast::WhileStatement* s) { ProcessStatement(s->condition); },
                 [&](const ast::IfStatement* s) {  //
                     ProcessStatement(s->condition);
                 },
@@ -571,6 +573,15 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
             },
             [&](const ast::ForLoopStatement* s) -> const ast::Statement* {
                 if (!s->condition || !sem.Get(s->condition)->HasSideEffects()) {
+                    return nullptr;
+                }
+                ast::StatementList stmts;
+                ctx.Replace(s->condition, Decompose(s->condition, &stmts));
+                InsertBefore(stmts, s);
+                return ctx.CloneWithoutTransform(s);
+            },
+            [&](const ast::WhileStatement* s) -> const ast::Statement* {
+                if (!sem.Get(s->condition)->HasSideEffects()) {
                     return nullptr;
                 }
                 ast::StatementList stmts;

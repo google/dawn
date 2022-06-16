@@ -35,6 +35,7 @@
 #include "src/tint/sem/type_constructor.h"
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/sem/while_statement.h"
 #include "src/tint/utils/block_allocator.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/unique_vector.h"
@@ -491,7 +492,7 @@ class UniformityGraph {
                 // Find the loop or switch statement that we are in.
                 auto* parent = sem_.Get(b)
                                    ->FindFirstParent<sem::SwitchStatement, sem::LoopStatement,
-                                                     sem::ForLoopStatement>();
+                                                     sem::ForLoopStatement, sem::WhileStatement>();
                 TINT_ASSERT(Resolver, current_function_->loop_switch_infos.count(parent));
                 auto& info = current_function_->loop_switch_infos.at(parent);
 
@@ -535,8 +536,9 @@ class UniformityGraph {
 
             [&](const ast::ContinueStatement* c) {
                 // Find the loop statement that we are in.
-                auto* parent =
-                    sem_.Get(c)->FindFirstParent<sem::LoopStatement, sem::ForLoopStatement>();
+                auto* parent = sem_.Get(c)
+                                   ->FindFirstParent<sem::LoopStatement, sem::ForLoopStatement,
+                                                     sem::WhileStatement>();
                 TINT_ASSERT(Resolver, current_function_->loop_switch_infos.count(parent));
                 auto& info = current_function_->loop_switch_infos.at(parent);
 
@@ -613,6 +615,68 @@ class UniformityGraph {
                 } else {
                     cfx->AddEdge(cf1);
                 }
+                cfx->AddEdge(cf);
+
+                // Add edges from variable loop input nodes to their values at the end of the loop.
+                for (auto v : info.var_in_nodes) {
+                    auto* in_node = v.second;
+                    auto* out_node = current_function_->variables.Get(v.first);
+                    if (out_node != in_node) {
+                        in_node->AddEdge(out_node);
+                    }
+                }
+
+                // Set each variable's exit node as its value in the outer scope.
+                for (auto v : info.var_exit_nodes) {
+                    current_function_->variables.Set(v.first, v.second);
+                }
+
+                current_function_->loop_switch_infos.erase(sem_loop);
+
+                if (sem_loop->Behaviors() == sem::Behaviors{sem::Behavior::kNext}) {
+                    return cf;
+                } else {
+                    return cfx;
+                }
+            },
+
+            [&](const ast::WhileStatement* w) {
+                auto* sem_loop = sem_.Get(w);
+                auto* cfx = CreateNode("loop_start");
+
+                auto* cf_start = cf;
+
+                auto& info = current_function_->loop_switch_infos[sem_loop];
+                info.type = "whileloop";
+
+                // Create input nodes for any variables declared before this loop.
+                for (auto* v : current_function_->local_var_decls) {
+                    auto name = builder_->Symbols().NameFor(v->Declaration()->symbol);
+                    auto* in_node = CreateNode(name + "_value_forloop_in");
+                    in_node->AddEdge(current_function_->variables.Get(v));
+                    info.var_in_nodes[v] = in_node;
+                    current_function_->variables.Set(v, in_node);
+                }
+
+                // Insert the condition at the start of the loop body.
+                {
+                    auto [cf_cond, v] = ProcessExpression(cfx, w->condition);
+                    auto* cf_condition_end = CreateNode("while_condition_CFend", w);
+                    cf_condition_end->affects_control_flow = true;
+                    cf_condition_end->AddEdge(v);
+                    cf_start = cf_condition_end;
+                }
+
+                // Propagate assignments to the loop exit nodes.
+                for (auto* var : current_function_->local_var_decls) {
+                    auto* exit_node = utils::GetOrCreate(info.var_exit_nodes, var, [&]() {
+                        auto name = builder_->Symbols().NameFor(var->Declaration()->symbol);
+                        return CreateNode(name + "_value_" + info.type + "_exit");
+                    });
+                    exit_node->AddEdge(current_function_->variables.Get(var));
+                }
+                auto* cf1 = ProcessStatement(cf_start, w->body);
+                cfx->AddEdge(cf1);
                 cfx->AddEdge(cf);
 
                 // Add edges from variable loop input nodes to their values at the end of the loop.

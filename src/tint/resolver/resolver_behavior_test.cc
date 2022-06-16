@@ -20,6 +20,7 @@
 #include "src/tint/sem/for_loop_statement.h"
 #include "src/tint/sem/if_statement.h"
 #include "src/tint/sem/switch_statement.h"
+#include "src/tint/sem/while_statement.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -306,6 +307,56 @@ TEST_F(ResolverBehaviorTest, StmtForLoopEmpty_CondTrue) {
 
 TEST_F(ResolverBehaviorTest, StmtForLoopEmpty_CondCallFuncMayDiscard) {
     auto* stmt = For(nullptr, Equal(Call("DiscardOrNext"), 1_i), nullptr, Block());
+    WrapInFunction(stmt);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(stmt);
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+}
+
+TEST_F(ResolverBehaviorTest, StmtWhileBreak) {
+    auto* stmt = While(Expr(true), Block(Break()));
+    WrapInFunction(stmt);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(stmt);
+    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kNext);
+}
+
+TEST_F(ResolverBehaviorTest, StmtWhileDiscard) {
+    auto* stmt = While(Expr(true), Block(Discard()));
+    WrapInFunction(stmt);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(stmt);
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+}
+
+TEST_F(ResolverBehaviorTest, StmtWhileReturn) {
+    auto* stmt = While(Expr(true), Block(Return()));
+    WrapInFunction(stmt);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(stmt);
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kReturn, sem::Behavior::kNext));
+}
+
+TEST_F(ResolverBehaviorTest, StmtWhileEmpty_CondTrue) {
+    auto* stmt = While(Expr(true), Block());
+    WrapInFunction(stmt);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(stmt);
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
+}
+
+TEST_F(ResolverBehaviorTest, StmtWhileEmpty_CondCallFuncMayDiscard) {
+    auto* stmt = While(Equal(Call("DiscardOrNext"), 1_i), Block());
     WrapInFunction(stmt);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();

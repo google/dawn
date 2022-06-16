@@ -103,8 +103,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplReservedKeywordTest,
                                          "unless",
                                          "using",
                                          "vec",
-                                         "void",
-                                         "while"));
+                                         "void"));
 
 }  // namespace
 }  // namespace tint::reader::wgsl

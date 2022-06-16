@@ -559,5 +559,59 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(RemoveContinueInSwitchTest, While) {
+    auto* src = R"(
+fn f() {
+  var i = 0;
+  while (i < 4) {
+    let marker1 = 0;
+    switch(i) {
+      case 0: {
+        continue;
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+    let marker2 = 0;
+    break;
+  }
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  var i = 0;
+  while((i < 4)) {
+    let marker1 = 0;
+    var tint_continue : bool = false;
+    switch(i) {
+      case 0: {
+        {
+          tint_continue = true;
+          break;
+        }
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+    if (tint_continue) {
+      continue;
+    }
+    let marker2 = 0;
+    break;
+  }
+}
+)";
+
+    DataMap data;
+    auto got = Run<RemoveContinueInSwitch>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::transform

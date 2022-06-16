@@ -44,6 +44,7 @@ class ReturnStatement;
 class SwitchStatement;
 class UnaryOpExpression;
 class Variable;
+class WhileStatement;
 }  // namespace tint::ast
 namespace tint::sem {
 class Array;
@@ -58,6 +59,7 @@ class Materialize;
 class Statement;
 class SwitchStatement;
 class TypeConstructor;
+class WhileStatement;
 }  // namespace tint::sem
 
 namespace tint::resolver {
@@ -206,6 +208,11 @@ class Validator {
     /// @param stmt the for loop statement to validate
     /// @returns true on success, false otherwise
     bool ForLoopStatement(const sem::ForLoopStatement* stmt) const;
+
+    /// Validates a while loop
+    /// @param stmt the while statement to validate
+    /// @returns true on success, false otherwise
+    bool WhileStatement(const sem::WhileStatement* stmt) const;
 
     /// Validates a fallthrough statement
     /// @param stmt the fallthrough to validate
