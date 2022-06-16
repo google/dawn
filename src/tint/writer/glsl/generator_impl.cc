@@ -1753,7 +1753,7 @@ bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitContinue(const ast::ContinueStatement*) {
-    if (!emit_continuing_()) {
+    if (!emit_continuing_ || !emit_continuing_()) {
         return false;
     }
     line() << "continue;";
@@ -2533,6 +2533,9 @@ bool GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
             return false;
         }
     }
+
+    auto emit_continuing = [&]() { return true; };
+    TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
 
     // If the whilehas a multi-statement conditional, then we cannot emit this
     // as a regular while in GLSL. Instead we need to generate a `while(true)` loop.

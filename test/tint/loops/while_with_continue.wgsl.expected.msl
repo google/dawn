@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+
+using namespace metal;
+int f() {
+  int i = 0;
+  while((i < 4)) {
+    i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+    continue;
+  }
+  return i;
+}
+

@@ -392,6 +392,25 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_While) {
 )");
 }
 
+TEST_F(HlslGeneratorImplTest_Loop, Emit_While_WithContinue) {
+    // while(true) {
+    //   continue;
+    // }
+
+    auto* f = While(Expr(true), Block(Continue()));
+    WrapInFunction(f);
+
+    GeneratorImpl& gen = Build();
+
+    gen.increment_indent();
+
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  [loop] while(true) {
+    continue;
+  }
+)");
+}
+
 TEST_F(HlslGeneratorImplTest_Loop, Emit_WhileWithMultiStmtCond) {
     // while(true && false) {
     //   return;
