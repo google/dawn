@@ -140,7 +140,7 @@ TEST_F(WhileStmtErrorTest, InvalidBreakConditionMatch) {
 // Test a while loop with an invalid body.
 TEST_F(WhileStmtErrorTest, InvalidBody) {
     std::string while_str = "while (true) { let x: i32; }";
-    std::string error_str = "1:26: expected '=' for let declaration";
+    std::string error_str = "1:26: expected '=' for 'let' declaration";
 
     TestForWithError(while_str, error_str);
 }
