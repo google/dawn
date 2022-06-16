@@ -44,6 +44,8 @@ bool ExpandCompoundAssignment::ShouldRun(const Program* program, const DataMap&)
     return false;
 }
 
+namespace {
+
 /// Internal class used to collect statement expansions during the transform.
 class State {
   private:
@@ -162,6 +164,8 @@ class State {
         ctx.Clone();
     }
 };
+
+}  // namespace
 
 void ExpandCompoundAssignment::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
     State state(ctx);
