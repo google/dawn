@@ -1080,6 +1080,20 @@ INSTANTIATE_TEST_SUITE_P(Functions,
                          ResolverDependencyGraphOrderedGlobalsTest,
                          testing::Combine(testing::ValuesIn(kFuncDeclKinds),
                                           testing::ValuesIn(kFuncUseKinds)));
+
+TEST_F(ResolverDependencyGraphOrderedGlobalsTest, EnableFirst) {
+    // Test that enable nodes always go before any other global declaration.
+    // Although all enable directives in a valid WGSL program must go before any other global
+    // declaration, a transform may produce such a AST tree that has some declarations before enable
+    // nodes. DependencyGraph should deal with these cases.
+    auto* var_1 = Global("SYMBOL1", ty.i32(), nullptr);
+    auto* enable_1 = Enable(ast::Extension::kF16);
+    auto* var_2 = Global("SYMBOL2", ty.f32(), nullptr);
+    auto* enable_2 = Enable(ast::Extension::kF16);
+
+    EXPECT_THAT(AST().GlobalDeclarations(), ElementsAre(var_1, enable_1, var_2, enable_2));
+    EXPECT_THAT(Build().ordered_globals, ElementsAre(enable_1, enable_2, var_1, var_2));
+}
 }  // namespace ordered_globals
 
 ////////////////////////////////////////////////////////////////////////////////
