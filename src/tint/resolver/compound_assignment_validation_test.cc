@@ -249,7 +249,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, LhsConstant) {
     WrapInFunction(a, CompoundAssign(Expr(Source{{56, 78}}, "a"), 1_i, ast::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(56:78 error: cannot assign to const
+    EXPECT_EQ(r()->error(), R"(56:78 error: cannot assign to 'let'
 12:34 note: 'a' is declared here:)");
 }
 

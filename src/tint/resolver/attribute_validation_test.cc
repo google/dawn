@@ -721,7 +721,7 @@ TEST_P(VariableAttributeTest, IsValid) {
     } else {
         EXPECT_FALSE(r()->Resolve());
         if (!IsBindingAttribute(params.kind)) {
-            EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for variables");
+            EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for module-scope 'var'");
         }
     }
 }
@@ -783,11 +783,59 @@ TEST_P(ConstantAttributeTest, IsValid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for constants");
+        EXPECT_EQ(r()->error(),
+                  "12:34 error: attribute is not valid for module-scope 'let' declaration");
     }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                          ConstantAttributeTest,
+                         testing::Values(TestParams{AttributeKind::kAlign, false},
+                                         TestParams{AttributeKind::kBinding, false},
+                                         TestParams{AttributeKind::kBuiltin, false},
+                                         TestParams{AttributeKind::kGroup, false},
+                                         TestParams{AttributeKind::kId, false},
+                                         TestParams{AttributeKind::kInterpolate, false},
+                                         TestParams{AttributeKind::kInvariant, false},
+                                         TestParams{AttributeKind::kLocation, false},
+                                         TestParams{AttributeKind::kOffset, false},
+                                         TestParams{AttributeKind::kSize, false},
+                                         TestParams{AttributeKind::kStage, false},
+                                         TestParams{AttributeKind::kStride, false},
+                                         TestParams{AttributeKind::kWorkgroup, false},
+                                         TestParams{AttributeKind::kBindingAndGroup, false}));
+
+TEST_F(ConstantAttributeTest, DuplicateAttribute) {
+    GlobalConst("a", ty.f32(), Expr(1.23_f),
+                ast::AttributeList{
+                    create<ast::IdAttribute>(Source{{12, 34}}, 0),
+                    create<ast::IdAttribute>(Source{{56, 78}}, 1),
+                });
+
+    WrapInFunction();
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(56:78 error: duplicate id attribute
+12:34 note: first attribute declared here)");
+}
+
+using OverrideAttributeTest = TestWithParams;
+TEST_P(OverrideAttributeTest, IsValid) {
+    auto& params = GetParam();
+
+    Override("a", ty.f32(), Expr(1.23_f), createAttributes(Source{{12, 34}}, *this, params.kind));
+
+    WrapInFunction();
+
+    if (params.should_pass) {
+        EXPECT_TRUE(r()->Resolve()) << r()->error();
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for 'override' declaration");
+    }
+}
+INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
+                         OverrideAttributeTest,
                          testing::Values(TestParams{AttributeKind::kAlign, false},
                                          TestParams{AttributeKind::kBinding, false},
                                          TestParams{AttributeKind::kBuiltin, false},
@@ -803,7 +851,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                                          TestParams{AttributeKind::kWorkgroup, false},
                                          TestParams{AttributeKind::kBindingAndGroup, false}));
 
-TEST_F(ConstantAttributeTest, DuplicateAttribute) {
+TEST_F(OverrideAttributeTest, DuplicateAttribute) {
     GlobalConst("a", ty.f32(), Expr(1.23_f),
                 ast::AttributeList{
                     create<ast::IdAttribute>(Source{{12, 34}}, 0),

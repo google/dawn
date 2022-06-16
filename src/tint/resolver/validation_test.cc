@@ -304,7 +304,8 @@ TEST_F(ResolverValidationTest, StorageClass_FunctionVariableWorkgroupClass) {
 
     EXPECT_FALSE(r()->Resolve());
 
-    EXPECT_EQ(r()->error(), "error: function variable has a non-function storage class");
+    EXPECT_EQ(r()->error(),
+              "error: function-scope 'var' declaration must use 'function' storage class");
 }
 
 TEST_F(ResolverValidationTest, StorageClass_FunctionVariableI32) {
@@ -317,7 +318,8 @@ TEST_F(ResolverValidationTest, StorageClass_FunctionVariableI32) {
 
     EXPECT_FALSE(r()->Resolve());
 
-    EXPECT_EQ(r()->error(), "error: function variable has a non-function storage class");
+    EXPECT_EQ(r()->error(),
+              "error: function-scope 'var' declaration must use 'function' storage class");
 }
 
 TEST_F(ResolverValidationTest, StorageClass_SamplerExplicitStorageClass) {

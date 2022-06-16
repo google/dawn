@@ -222,7 +222,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToLet_Fail) {
     WrapInFunction(var, Assign(Expr(Source{{12, 34}}, "a"), 2_i));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: cannot assign to const\nnote: 'a' is declared here:");
+    EXPECT_EQ(r()->error(), "12:34 error: cannot assign to 'let'\nnote: 'a' is declared here:");
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Handle) {

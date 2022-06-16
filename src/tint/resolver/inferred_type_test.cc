@@ -98,7 +98,7 @@ TEST_P(ResolverInferredTypeParamTest, GlobalVar_Fail) {
     WrapInFunction();
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: global var declaration must specify a type");
+    EXPECT_EQ(r()->error(), "12:34 error: module-scope 'var' declaration must specify a type");
 }
 
 TEST_P(ResolverInferredTypeParamTest, LocalLet_Pass) {

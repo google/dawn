@@ -151,7 +151,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, Constant) {
     WrapInFunction(a, Increment(Expr(Source{{56, 78}}, "a")));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(56:78 error: cannot modify constant value
+    EXPECT_EQ(r()->error(), R"(56:78 error: cannot modify 'let'
 12:34 note: 'a' is declared here:)");
 }
 

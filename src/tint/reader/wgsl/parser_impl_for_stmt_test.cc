@@ -253,7 +253,7 @@ TEST_F(ForStmtErrorTest, MissingRightBrace) {
 // Test a for loop with an invalid initializer statement.
 TEST_F(ForStmtErrorTest, InvalidInitializerAsConstDecl) {
     std::string for_str = "for (let x: i32;;) { }";
-    std::string error_str = "1:16: expected '=' for let declaration";
+    std::string error_str = "1:16: expected '=' for 'let' declaration";
 
     TestForWithError(for_str, error_str);
 }
@@ -304,7 +304,7 @@ TEST_F(ForStmtErrorTest, InvalidContinuingMatch) {
 // Test a for loop with an invalid body.
 TEST_F(ForStmtErrorTest, InvalidBody) {
     std::string for_str = "for (;;) { let x: i32; }";
-    std::string error_str = "1:22: expected '=' for let declaration";
+    std::string error_str = "1:22: expected '=' for 'let' declaration";
 
     TestForWithError(for_str, error_str);
 }

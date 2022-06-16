@@ -204,7 +204,7 @@ fn f() { x = vec2<u32>(1,2; }
 
 TEST_F(ParserImplErrorTest, ConstVarStmtInvalid) {
     EXPECT("fn f() { let >; }",
-           R"(test.wgsl:1:14 error: expected identifier for let declaration
+           R"(test.wgsl:1:14 error: expected identifier for 'let' declaration
 fn f() { let >; }
              ^
 )");
@@ -212,7 +212,7 @@ fn f() { let >; }
 
 TEST_F(ParserImplErrorTest, ConstVarStmtMissingAssignment) {
     EXPECT("fn f() { let a : i32; }",
-           R"(test.wgsl:1:21 error: expected '=' for let declaration
+           R"(test.wgsl:1:21 error: expected '=' for 'let' declaration
 fn f() { let a : i32; }
                     ^
 )");
@@ -220,7 +220,7 @@ fn f() { let a : i32; }
 
 TEST_F(ParserImplErrorTest, ConstVarStmtMissingConstructor) {
     EXPECT("fn f() { let a : i32 = >; }",
-           R"(test.wgsl:1:24 error: missing constructor for let declaration
+           R"(test.wgsl:1:24 error: missing constructor for 'let' declaration
 fn f() { let a : i32 = >; }
                        ^
 )");
@@ -472,7 +472,7 @@ test.wgsl:3:3 error: statement found outside of function body
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstInvalidIdentifier) {
     EXPECT("let ^ : i32 = 1;",
-           R"(test.wgsl:1:5 error: expected identifier for let declaration
+           R"(test.wgsl:1:5 error: expected identifier for 'let' declaration
 let ^ : i32 = 1;
     ^
 )");
@@ -480,7 +480,7 @@ let ^ : i32 = 1;
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstMissingSemicolon) {
     EXPECT("let i : i32 = 1",
-           R"(test.wgsl:1:16 error: expected ';' for let declaration
+           R"(test.wgsl:1:16 error: expected ';' for 'let' declaration
 let i : i32 = 1
                ^
 )");
@@ -512,7 +512,7 @@ let i : vec2<i32> = vec2<i32>(!);
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstBadConstLiteralSpaceLessThan) {
     EXPECT("let i = 1 < 2;",
-           R"(test.wgsl:1:11 error: expected ';' for let declaration
+           R"(test.wgsl:1:11 error: expected ';' for 'let' declaration
 let i = 1 < 2;
           ^
 )");
@@ -1215,7 +1215,7 @@ fn f() { var a : u32 }
 
 TEST_F(ParserImplErrorTest, VarStmtInvalidAssignment) {
     EXPECT("fn f() { var a : u32 = >; }",
-           R"(test.wgsl:1:24 error: missing constructor for variable declaration
+           R"(test.wgsl:1:24 error: missing constructor for 'var' declaration
 fn f() { var a : u32 = >; }
                        ^
 )");

@@ -433,7 +433,7 @@ Maybe<bool> ParserImpl::global_decl() {
         }
 
         if (gc.matched) {
-            if (!expect("let declaration", Token::Type::kSemicolon)) {
+            if (!expect("'let' declaration", Token::Type::kSemicolon)) {
                 return Failure::kErrored;
             }
 
@@ -562,7 +562,7 @@ Maybe<const ast::Variable*> ParserImpl::global_constant_decl(ast::AttributeList&
     bool is_overridable = false;
     const char* use = nullptr;
     if (match(Token::Type::kLet)) {
-        use = "let declaration";
+        use = "'let' declaration";
     } else if (match(Token::Type::kOverride)) {
         use = "override declaration";
         is_overridable = true;
@@ -575,8 +575,18 @@ Maybe<const ast::Variable*> ParserImpl::global_constant_decl(ast::AttributeList&
         return Failure::kErrored;
     }
 
+    bool has_initializer = false;
+    if (is_overridable) {
+        has_initializer = match(Token::Type::kEqual);
+    } else {
+        if (!expect(use, Token::Type::kEqual)) {
+            return Failure::kErrored;
+        }
+        has_initializer = true;
+    }
+
     const ast::Expression* initializer = nullptr;
-    if (match(Token::Type::kEqual)) {
+    if (has_initializer) {
         auto init = expect_const_expr();
         if (init.errored) {
             return Failure::kErrored;
@@ -1757,13 +1767,13 @@ Maybe<const ast::ReturnStatement*> ParserImpl::return_stmt() {
 //   | CONST variable_ident_decl EQUAL logical_or_expression
 Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
     if (match(Token::Type::kLet)) {
-        auto decl = expect_variable_ident_decl("let declaration",
+        auto decl = expect_variable_ident_decl("'let' declaration",
                                                /*allow_inferred = */ true);
         if (decl.errored) {
             return Failure::kErrored;
         }
 
-        if (!expect("let declaration", Token::Type::kEqual)) {
+        if (!expect("'let' declaration", Token::Type::kEqual)) {
             return Failure::kErrored;
         }
 
@@ -1772,7 +1782,7 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
             return Failure::kErrored;
         }
         if (!constructor.matched) {
-            return add_error(peek(), "missing constructor for let declaration");
+            return add_error(peek(), "missing constructor for 'let' declaration");
         }
 
         auto* var = create<ast::Variable>(decl->source,                             // source
@@ -1803,7 +1813,7 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
             return Failure::kErrored;
         }
         if (!constructor_expr.matched) {
-            return add_error(peek(), "missing constructor for variable declaration");
+            return add_error(peek(), "missing constructor for 'var' declaration");
         }
 
         constructor = constructor_expr.value;

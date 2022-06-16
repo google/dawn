@@ -114,7 +114,7 @@ TEST_F(ParserImplTest, Statement_Variable_Invalid) {
     EXPECT_TRUE(e.errored);
     EXPECT_FALSE(e.matched);
     EXPECT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:14: missing constructor for variable declaration");
+    EXPECT_EQ(p->error(), "1:14: missing constructor for 'var' declaration");
 }
 
 TEST_F(ParserImplTest, Statement_Variable_MissingSemicolon) {

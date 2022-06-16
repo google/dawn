@@ -326,19 +326,19 @@ sem::Variable* Resolver::Variable(const ast::Variable* var,
         // If the variable has no declared type, infer it from the RHS
         if (!storage_ty) {
             if (!var->is_const && kind == VariableKind::kGlobal) {
-                AddError("global var declaration must specify a type", var->source);
+                AddError("module-scope 'var' declaration must specify a type", var->source);
                 return nullptr;
             }
 
             storage_ty = rhs->Type()->UnwrapRef();  // Implicit load of RHS
         }
     } else if (var->is_const && !var->is_overridable && kind != VariableKind::kParameter) {
-        AddError("let declaration must have an initializer", var->source);
+        AddError("'let' declaration must have an initializer", var->source);
         return nullptr;
     } else if (!var->type) {
         AddError((kind == VariableKind::kGlobal)
-                     ? "module scope var declaration requires a type and initializer"
-                     : "function scope var declaration requires a type or initializer",
+                     ? "module-scope 'var' declaration requires a type or initializer"
+                     : "function-scope 'var' declaration requires a type or initializer",
                  var->source);
         return nullptr;
     }
@@ -368,7 +368,7 @@ sem::Variable* Resolver::Variable(const ast::Variable* var,
         storage_class != ast::StorageClass::kFunction &&
         validator_.IsValidationEnabled(var->attributes,
                                        ast::DisabledValidation::kIgnoreStorageClass)) {
-        AddError("function variable has a non-function storage class", var->source);
+        AddError("function-scope 'var' declaration must use 'function' storage class", var->source);
         return nullptr;
     }
 
@@ -519,11 +519,13 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* var) {
 
     auto storage_class = sem->StorageClass();
     if (!var->is_const && storage_class == ast::StorageClass::kNone) {
-        AddError("global variables must have a storage class", var->source);
+        AddError("module-scope 'var' declaration must have a storage class", var->source);
         return nullptr;
     }
     if (var->is_const && storage_class != ast::StorageClass::kNone) {
-        AddError("global constants shouldn't have a storage class", var->source);
+        AddError(var->is_overridable ? "'override' declaration must not have a storage class"
+                                     : "'let' declaration must not have a storage class",
+                 var->source);
         return nullptr;
     }
 
@@ -2069,21 +2071,16 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
         if (auto* ident = count_expr->As<ast::IdentifierExpression>()) {
             // Make sure the identifier is a non-overridable module-scope constant.
             auto* var = sem_.ResolvedSymbol<sem::GlobalVariable>(ident);
-            if (!var || !var->Declaration()->is_const) {
-                AddError("array size identifier must be a module-scope constant", size_source);
-                return nullptr;
-            }
-            if (var->IsOverridable()) {
-                AddError("array size expression must not be pipeline-overridable", size_source);
+            if (!var || !var->Declaration()->is_const || var->IsOverridable()) {
+                AddError("array size identifier must be a literal or a module-scope 'let'",
+                         size_source);
                 return nullptr;
             }
 
             count_expr = var->Declaration()->constructor;
         } else if (!count_expr->Is<ast::LiteralExpression>()) {
-            AddError(
-                "array size expression must be either a literal or a module-scope "
-                "constant",
-                size_source);
+            AddError("array size identifier must be a literal or a module-scope 'let'",
+                     size_source);
             return nullptr;
         }
 

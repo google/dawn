@@ -506,25 +506,29 @@ bool Validator::GlobalVariable(
 
     for (auto* attr : decl->attributes) {
         if (decl->is_const) {
-            if (auto* id_attr = attr->As<ast::IdAttribute>()) {
-                uint32_t id = id_attr->value;
-                auto it = constant_ids.find(id);
-                if (it != constant_ids.end() && it->second != var) {
-                    AddError("pipeline constant IDs must be unique", attr->source);
-                    AddNote(
-                        "a pipeline constant with an ID of " + std::to_string(id) +
-                            " was previously declared "
-                            "here:",
-                        ast::GetAttribute<ast::IdAttribute>(it->second->Declaration()->attributes)
-                            ->source);
-                    return false;
-                }
-                if (id > 65535) {
-                    AddError("pipeline constant IDs must be between 0 and 65535", attr->source);
+            if (decl->is_overridable) {
+                if (auto* id_attr = attr->As<ast::IdAttribute>()) {
+                    uint32_t id = id_attr->value;
+                    auto it = constant_ids.find(id);
+                    if (it != constant_ids.end() && it->second != var) {
+                        AddError("pipeline constant IDs must be unique", attr->source);
+                        AddNote("a pipeline constant with an ID of " + std::to_string(id) +
+                                    " was previously declared here:",
+                                ast::GetAttribute<ast::IdAttribute>(
+                                    it->second->Declaration()->attributes)
+                                    ->source);
+                        return false;
+                    }
+                    if (id > 65535) {
+                        AddError("pipeline constant IDs must be between 0 and 65535", attr->source);
+                        return false;
+                    }
+                } else {
+                    AddError("attribute is not valid for 'override' declaration", attr->source);
                     return false;
                 }
             } else {
-                AddError("attribute is not valid for constants", attr->source);
+                AddError("attribute is not valid for module-scope 'let' declaration", attr->source);
                 return false;
             }
         } else {
@@ -536,17 +540,14 @@ bool Validator::GlobalVariable(
             if (!(attr->IsAnyOf<ast::BindingAttribute, ast::GroupAttribute,
                                 ast::InternalAttribute>()) &&
                 (!is_shader_io_attribute || !has_io_storage_class)) {
-                AddError("attribute is not valid for variables", attr->source);
+                AddError("attribute is not valid for module-scope 'var'", attr->source);
                 return false;
             }
         }
     }
 
     if (var->StorageClass() == ast::StorageClass::kFunction) {
-        AddError(
-            "variables declared at module scope must not be in the function "
-            "storage class",
-            decl->source);
+        AddError("module-scope 'var' must not use storage class 'function'", decl->source);
         return false;
     }
 
@@ -559,10 +560,7 @@ bool Validator::GlobalVariable(
             // Each resource variable must be declared with both group and binding
             // attributes.
             if (!binding_point) {
-                AddError(
-                    "resource variables require @group and @binding "
-                    "attributes",
-                    decl->source);
+                AddError("resource variables require @group and @binding attributes", decl->source);
                 return false;
             }
             break;
@@ -571,10 +569,8 @@ bool Validator::GlobalVariable(
             if (binding_point.binding || binding_point.group) {
                 // https://gpuweb.github.io/gpuweb/wgsl/#attribute-binding
                 // Must only be applied to a resource variable
-                AddError(
-                    "non-resource variables must not have @group or @binding "
-                    "attributes",
-                    decl->source);
+                AddError("non-resource variables must not have @group or @binding attributes",
+                         decl->source);
                 return false;
             }
     }
@@ -2162,7 +2158,9 @@ bool Validator::Assignment(const ast::Statement* a, const sem::Type* rhs_ty) con
             return false;
         }
         if (decl->is_const) {
-            AddError("cannot assign to const", lhs->source);
+            AddError(
+                decl->is_overridable ? "cannot assign to 'override'" : "cannot assign to 'let'",
+                lhs->source);
             AddNote("'" + symbols_.NameFor(decl->symbol) + "' is declared here:", decl->source);
             return false;
         }
@@ -2210,7 +2208,8 @@ bool Validator::IncrementDecrementStatement(const ast::IncrementDecrementStateme
             return false;
         }
         if (decl->is_const) {
-            AddError("cannot modify constant value", lhs->source);
+            AddError(decl->is_overridable ? "cannot modify 'override'" : "cannot modify 'let'",
+                     lhs->source);
             AddNote("'" + symbols_.NameFor(decl->symbol) + "' is declared here:", decl->source);
             return false;
         }
